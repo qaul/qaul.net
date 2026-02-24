@@ -143,16 +143,15 @@ impl BleCryptoModule {
         let prologue: Vec<u8> = Vec::new();
         let e = <X25519 as DH>::Key::from_slice(&state.e);
 
-        let mut handshake: HandshakeState<X25519, ChaCha20Poly1305, Sha256> =
-            HandshakeState::new(
-                pattern,
-                true,
-                prologue.as_slice(),
-                Some(U8Array::from_slice(&state.s)),
-                Some(e),
-                Some(U8Array::from_slice(&state.rs)),
-                None,
-            );
+        let mut handshake: HandshakeState<X25519, ChaCha20Poly1305, Sha256> = HandshakeState::new(
+            pattern,
+            true,
+            prologue.as_slice(),
+            Some(U8Array::from_slice(&state.s)),
+            Some(e),
+            Some(U8Array::from_slice(&state.rs)),
+            None,
+        );
 
         // Create handshake message 1 (empty payload for BLE to save bandwidth)
         let payload = match handshake.write_message_vec(&[]) {
@@ -166,7 +165,10 @@ impl BleCryptoModule {
         // Save session state
         self.sessions.insert(small_id.to_vec(), state);
 
-        log::info!("BLE crypto: handshake 1 created, session_id: {}", session_id);
+        log::info!(
+            "BLE crypto: handshake 1 created, session_id: {}",
+            session_id
+        );
 
         Some(proto_net::NoiseHandshake {
             session_id,
@@ -386,10 +388,7 @@ impl BleCryptoModule {
             return Err("Session not established".to_string());
         }
 
-        let cipher_key = state
-            .cipher_out
-            .as_ref()
-            .ok_or("No cipher key available")?;
+        let cipher_key = state.cipher_out.as_ref().ok_or("No cipher key available")?;
 
         let nonce = state.nonce_out;
 
@@ -443,10 +442,7 @@ impl BleCryptoModule {
             ));
         }
 
-        let cipher_key = state
-            .cipher_in
-            .as_ref()
-            .ok_or("No cipher key available")?;
+        let cipher_key = state.cipher_in.as_ref().ok_or("No cipher key available")?;
 
         // Create cipher with the received nonce
         let mut cipher: CipherState<ChaCha20Poly1305> =
@@ -474,7 +470,10 @@ impl BleCryptoModule {
     /// Clean up session when a node becomes unavailable
     pub fn on_node_unavailable(&mut self, small_id: &[u8]) {
         if self.sessions.remove(small_id).is_some() {
-            log::info!("BLE crypto: session removed for unavailable node {:?}", small_id);
+            log::info!(
+                "BLE crypto: session removed for unavailable node {:?}",
+                small_id
+            );
         }
     }
 
@@ -564,7 +563,10 @@ impl BleCrypto {
     }
 
     /// Initiate a handshake with a remote node
-    pub fn initiate_handshake(small_id: &[u8], remote_id: PeerId) -> Option<proto_net::NoiseHandshake> {
+    pub fn initiate_handshake(
+        small_id: &[u8],
+        remote_id: PeerId,
+    ) -> Option<proto_net::NoiseHandshake> {
         let mut crypto = BLE_CRYPTO.get().write().unwrap();
         crypto.initiate_handshake(small_id, remote_id)
     }
@@ -619,9 +621,15 @@ mod tests {
 
     #[test]
     fn test_session_state_equality() {
-        assert_eq!(BleSessionState::HandshakePending, BleSessionState::HandshakePending);
+        assert_eq!(
+            BleSessionState::HandshakePending,
+            BleSessionState::HandshakePending
+        );
         assert_eq!(BleSessionState::Established, BleSessionState::Established);
-        assert_ne!(BleSessionState::HandshakePending, BleSessionState::Established);
+        assert_ne!(
+            BleSessionState::HandshakePending,
+            BleSessionState::Established
+        );
     }
 
     #[test]

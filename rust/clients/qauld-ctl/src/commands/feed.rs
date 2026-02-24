@@ -1,9 +1,11 @@
-use crate::{
-    cli::FeedSubcmd,
-    commands::RpcCommand,
-    proto::{feed, Feed, FeedMessageRequest, Modules, SendMessage},
-};
+use crate::{cli::FeedSubcmd, commands::RpcCommand, proto::Modules};
 use prost::Message;
+
+mod proto {
+    include!("../../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.feed.rs");
+}
+
+use proto::{feed, Feed, FeedMessageRequest, SendMessage};
 
 /// request feed list via rpc
 fn request_feed_list(last_index: u64) -> Result<(Vec<u8>, Modules), Box<dyn std::error::Error>> {

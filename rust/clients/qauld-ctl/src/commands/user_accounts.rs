@@ -1,10 +1,38 @@
 use prost::Message;
 
-use crate::{
-    cli::AccountSubcmd,
-    commands::RpcCommand,
-    proto::{user_accounts, CreateUserAccount, Modules, SetPasswordRequest, UserAccounts},
-};
+use crate::{cli::AccountSubcmd, commands::RpcCommand, proto::Modules};
+
+mod proto {
+    include!("../../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.user_accounts.rs");
+}
+
+use proto::{user_accounts, CreateUserAccount, SetPasswordRequest, UserAccounts};
+
+/// Decodes a `GetDefaultUserAccount` response payload and returns the user's raw id bytes.
+/// Returns an empty Vec if the account doesn't exist or decoding fails.
+pub fn decode_default_user(data: &[u8]) -> Vec<u8> {
+    match UserAccounts::decode(data) {
+        Ok(ua) => match ua.message {
+            Some(proto::user_accounts::Message::DefaultUserAccount(default_useraccount)) => {
+                if default_useraccount.user_account_exists {
+                    if let Some(acct) = default_useraccount.my_user_account {
+                        return acct.id;
+                    }
+                }
+                log::warn!("preflight: no default user account found");
+                Vec::new()
+            }
+            _ => {
+                log::warn!("preflight: unexpected user_accounts message type");
+                Vec::new()
+            }
+        },
+        Err(e) => {
+            log::warn!("preflight: failed to decode user_accounts response: {e}");
+            Vec::new()
+        }
+    }
+}
 
 pub fn default_user_proto_message() -> (Vec<u8>, Modules) {
     let proto_message = UserAccounts {
