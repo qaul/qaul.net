@@ -18,6 +18,7 @@ pub mod dtn;
 pub mod feed;
 pub mod group;
 pub mod messaging;
+pub mod radio_streamer;
 
 #[cfg(feature = "rtc")]
 pub mod rtc;
