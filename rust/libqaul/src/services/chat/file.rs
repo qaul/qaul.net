@@ -456,7 +456,7 @@ impl ChatFile {
                         match direct_group.is_direct(user_account.id.clone()) {
                             Some(remote_q8id) => {
                                 // get remote user
-                                match Users::get_user_id_by_q8id(remote_q8id) {
+                                match Users::get_user_id_by_q8id(&remote_q8id) {
                                     Some(remote_id) => {
                                         // create group
                                         group = GroupManage::create_new_direct_chat_group(

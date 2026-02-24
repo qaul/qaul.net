@@ -203,7 +203,7 @@ impl Feed {
                             );
                             log::error!("  sender id:  {}", user_id_decoded);
                             let (key_type, key_base58) =
-                                crate::router::users::Users::get_protobuf_public_key(key);
+                                crate::router::users::Users::get_protobuf_public_key(&key);
                             log::error!("  sender key [{}]: {}", key_type, key_base58);
                             return;
                         }

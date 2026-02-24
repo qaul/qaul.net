@@ -68,7 +68,7 @@ impl ChatMessage {
                     // get user id from q8id
                     Some(user_q8id) => {
                         // create direct chat
-                        match crate::router::users::Users::get_user_id_by_q8id(user_q8id) {
+                        match crate::router::users::Users::get_user_id_by_q8id(&user_q8id) {
                             Some(user_id) => {
                                 group =
                                     GroupManage::create_new_direct_chat_group(account_id, &user_id)
