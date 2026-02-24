@@ -55,8 +55,10 @@ class _UsersState extends _BaseTabState<_Users> {
 
     _isLoadingMore.value = true;
     try {
-      final worker = ref.read(qaulWorkerProvider);
-      await worker.getUsers(offset: _currentOffset, limit: _pageSize);
+      await ref.read(usersStoreProvider.notifier).getMoreUsers(
+            _currentOffset,
+            limit: _pageSize,
+          );
       _updatePaginationState();
     } finally {
       _isLoadingMore.value = false;
@@ -66,8 +68,7 @@ class _UsersState extends _BaseTabState<_Users> {
   Future<void> _refreshUsers() async {
     _currentOffset = 0;
     _hasMore.value = true;
-    final worker = ref.read(qaulWorkerProvider);
-    await worker.getUsers(offset: 0, limit: _pageSize);
+    await ref.read(usersStoreProvider.notifier).getMoreUsers(0, limit: _pageSize);
     _updatePaginationState();
   }
 

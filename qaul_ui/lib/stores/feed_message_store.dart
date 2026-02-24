@@ -23,14 +23,15 @@ class FeedMessage extends PublicPost {
 class FeedMessageStore extends Notifier<List<FeedMessage>> {
   @override
   build() {
+    ref.listen(publicMessagesProvider, (_, _) => _asyncInit());
+    ref.listen(usersStoreProvider, (_, _) => _asyncInit());
     _asyncInit();
     return [];
   }
 
   void _asyncInit() async {
-    // TODO verify if should be .listen() instead of .watch()
-    final messages = ref.watch(publicMessagesProvider);
-    final users = ref.watch(usersStoreProvider);
+    final messages = ref.read(publicMessagesProvider);
+    final users = ref.read(usersStoreProvider);
     final messagesWithUsers = messages.where(
       (m) => users.map((u) => u.idBase58).contains(m.senderIdBase58 ?? ''),
     );
