@@ -65,7 +65,7 @@ impl Users {
                 // decode user bytes
                 let user: UserData = bincode::deserialize(&user_bytes).unwrap();
                 // encode values from bytes
-                let q8id = QaulId::bytes_to_q8id(user.id.clone());
+                let q8id = user.id[6..14].to_vec();
                 let id = PeerId::from_bytes(&user.id).unwrap();
                 let key = PublicKey::try_decode_protobuf(&user.key).unwrap();
                 // fill result into user table
@@ -87,9 +87,12 @@ impl Users {
     ///
     /// This user will be added to the users list in memory and to the data base
     pub fn add(id: PeerId, key: PublicKey, name: String, verified: bool, blocked: bool) {
+        let id_bytes = id.to_bytes();
+        let q8id = id_bytes[6..14].to_vec();
+
         // save user to the data base
         DbUsers::add_user(UserData {
-            id: id.to_bytes(),
+            id: id_bytes,
             key: key.clone().encode_protobuf(),
             name: name.clone(),
             verified,
@@ -97,7 +100,6 @@ impl Users {
         });
 
         // add user to the users table
-        let q8id = QaulId::to_q8id(id.clone());
         let mut users = USERS.get().write().unwrap();
         users.users.insert(
             q8id,
@@ -151,11 +153,8 @@ impl Users {
 
     /// get the public key of a known user
     pub fn get_pub_key(user_id: &PeerId) -> Option<PublicKey> {
-        // get q8id
-        let q8id = QaulId::to_q8id(user_id.to_owned());
-
-        // get public key
-        Self::get_pub_key_by_q8id(&q8id)
+        let user_id_bytes = user_id.to_bytes();
+        Self::get_pub_key_by_q8id(&user_id_bytes[6..14])
     }
 
     /// get the public key of a known user by it's q8id
@@ -235,7 +234,8 @@ impl Users {
     /// get security number
     fn get_security_number(my_user: &PeerId, user_id: &[u8]) -> Result<Vec<u8>, String> {
         let q8id = &user_id[6..14];
-        let q8id_my = QaulId::to_q8id(my_user.clone());
+        let my_user_bytes = my_user.to_bytes();
+        let q8id_my = &my_user_bytes[6..14];
 
         // find user from users
         let users = USERS.get().read().unwrap();
@@ -243,10 +243,10 @@ impl Users {
             return Err("user no exists".to_string());
         }
 
-        if !users.users.contains_key(&q8id_my) {
+        if !users.users.contains_key(q8id_my) {
             return Err("my user is not existed".to_string());
         }
-        let key1 = users.users.get(&q8id_my).unwrap().key.encode_protobuf();
+        let key1 = users.users.get(q8id_my).unwrap().key.encode_protobuf();
         let key2 = users.users.get(q8id).unwrap().key.encode_protobuf();
 
         // merge two keys
@@ -312,10 +312,11 @@ impl Users {
                     }
                     Some(proto::users::Message::SecurityNumberRequest(secure_req)) => {
                         match Self::get_security_number(&account_id, &secure_req.user_id) {
-                            Ok(x) => {
-                                let mut security_number_blocks: Vec<u32> = vec![];
-                                for i in 0..x.len() / 2 {
-                                    let number = x[i * 2] as u32 + (x[i * 2 + 1] as u32 * 256);
+                            Ok(security_hash) => {
+                                let mut security_number_blocks =
+                                    Vec::with_capacity(security_hash.len() / 2);
+                                for chunk in security_hash.chunks_exact(2) {
+                                    let number = chunk[0] as u32 + (chunk[1] as u32 * 256);
                                     security_number_blocks.push(number);
                                 }
 
@@ -323,7 +324,7 @@ impl Users {
                                     proto::users::Message::SecurityNumberResponse(
                                         proto::SecurityNumberResponse {
                                             user_id: secure_req.user_id.clone(),
-                                            security_hash: x.clone(),
+                                            security_hash,
                                             security_number_blocks,
                                         },
                                     ),
@@ -537,11 +538,7 @@ fn build_user_list_from(
         pagination: None,
     };
 
-    let mut total = if online_only {
-        online_users.len() as u32
-    } else {
-        users.len() as u32
-    };
+    let mut total = estimated_total as u32;
 
     let mut skipped: u32 = 0;
 
