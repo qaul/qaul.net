@@ -1,12 +1,14 @@
-use crate::{
-    cli::UsersSubcmd,
-    commands::RpcCommand,
-    proto::{
-        users, ConnectionModule, Connectivity, GetUserByIdRequest, Modules, SecurityNumberRequest,
-        UserEntry, UserOnlineRequest, UserRequest, Users,
-    },
-};
+use crate::{cli::UsersSubcmd, commands::RpcCommand, proto::Modules};
+
+mod proto {
+    include!("../../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.users.rs");
+}
+
 use prost::Message;
+use proto::{
+    users, ConnectionModule, Connectivity, GetUserByIdRequest, SecurityNumberRequest, UserEntry,
+    UserOnlineRequest, UserRequest, Users,
+};
 use uuid::Uuid;
 
 fn send_user_update(

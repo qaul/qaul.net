@@ -1,10 +1,12 @@
 use prost::Message;
 
-use crate::{
-    cli::NodeSubcmd,
-    commands::RpcCommand,
-    proto::{node, Modules, Node},
-};
+use crate::{cli::NodeSubcmd, commands::RpcCommand, proto::Modules};
+
+mod proto {
+    include!("../../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.node.rs");
+}
+
+use proto::{node, Node};
 
 impl RpcCommand for NodeSubcmd {
     fn encode_request(&self) -> Result<(Vec<u8>, Modules), Box<dyn std::error::Error>> {
@@ -16,7 +18,7 @@ impl RpcCommand for NodeSubcmd {
         proto_message
             .encode(&mut buf)
             .expect("Vec<u8> provides capacity as needed");
-        Ok((buf, crate::proto::Modules::Node))
+        Ok((buf, Modules::Node))
     }
 
     fn decode_response(&self, data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
