@@ -1,43 +1,21 @@
-use crate::{
-    cli::GroupSubcmd,
-    commands::RpcCommand,
-    proto::{
-        chat_content_message, group, ChatContentMessage, Group, GroupCreateRequest, GroupEventType,
-        GroupInfoRequest, GroupInviteMemberRequest, GroupInvitedRequest, GroupListRequest,
-        GroupMemberRole, GroupMemberState, GroupRemoveMemberRequest, GroupRenameRequest,
-        GroupReplyInviteRequest, GroupStatus, Modules,
-    },
-};
+use super::{id_string_to_bin, uuid_string_to_bin};
+use crate::{cli::GroupSubcmd, commands::RpcCommand, proto::Modules};
+
+mod proto {
+    include!("../../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.group.rs");
+    include!("../../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.chat.rs");
+}
+
 use prost::Message;
-use std::fmt;
+use proto::{
+    chat_content_message, group, ChatContentMessage, Group, GroupCreateRequest, GroupEventType,
+    GroupInfoRequest, GroupInviteMemberRequest, GroupInvitedRequest, GroupListRequest,
+    GroupMemberRole, GroupMemberState, GroupRemoveMemberRequest, GroupRenameRequest,
+    GroupReplyInviteRequest, GroupStatus,
+};
 use uuid::Uuid;
 
 impl GroupSubcmd {
-    /// Convert Group ID from String to Binary
-    fn uuid_string_to_bin(&self, id_str: String) -> Result<Vec<u8>, String> {
-        match Uuid::parse_str(id_str.as_str()) {
-            Ok(id) => Ok(id.as_bytes().to_vec()),
-            _ => Err("invalid group id".to_string()),
-        }
-    }
-
-    /// Convert Group ID from String to Binary
-    fn id_string_to_bin(&self, id: String) -> Result<Vec<u8>, String> {
-        // check length
-        if id.len() < 52 {
-            return Err("Group ID not long enough".to_string());
-        }
-
-        // convert input
-        match bs58::decode(id).into_vec() {
-            Ok(id_bin) => Ok(id_bin),
-            Err(e) => {
-                let err = fmt::format(format_args!("{}", e));
-                Err(err)
-            }
-        }
-    }
-
     /// reply invite
     fn reply_to_invite(
         &self,
@@ -120,7 +98,7 @@ impl RpcCommand for GroupSubcmd {
                 Ok((proto_message.encode_to_vec(), Modules::Group))
             }
             GroupSubcmd::Rename { group_id, name } => {
-                let group_id = self.uuid_string_to_bin(group_id.to_string())?;
+                let group_id = uuid_string_to_bin(group_id.to_string())?;
                 let proto_message = Group {
                     message: Some(group::Message::GroupRenameRequest(GroupRenameRequest {
                         group_name: name.clone(),
@@ -131,7 +109,7 @@ impl RpcCommand for GroupSubcmd {
                 Ok((proto_message.encode_to_vec(), Modules::Group))
             }
             GroupSubcmd::Info { id } => {
-                let group_id = self.uuid_string_to_bin(id.to_string())?;
+                let group_id = uuid_string_to_bin(id.to_string())?;
 
                 let proto_message = Group {
                     message: Some(group::Message::GroupInfoRequest(GroupInfoRequest {
@@ -162,8 +140,8 @@ impl RpcCommand for GroupSubcmd {
                 Ok((proto_message.encode_to_vec(), Modules::Group))
             }
             GroupSubcmd::Invite { group_id, user_id } => {
-                let group_id = self.uuid_string_to_bin(group_id.to_string())?;
-                let user_id = self.id_string_to_bin(user_id.to_string())?;
+                let group_id = uuid_string_to_bin(group_id.to_string())?;
+                let user_id = id_string_to_bin(user_id.to_string())?;
 
                 let proto_message = Group {
                     message: Some(group::Message::GroupInviteMemberRequest(
@@ -177,16 +155,16 @@ impl RpcCommand for GroupSubcmd {
                 Ok((proto_message.encode_to_vec(), Modules::Group))
             }
             GroupSubcmd::Accept { group_id } => {
-                let group_id = self.uuid_string_to_bin(group_id.to_string())?;
+                let group_id = uuid_string_to_bin(group_id.to_string())?;
                 self.reply_to_invite(group_id, true)
             }
             GroupSubcmd::Decline { group_id } => {
-                let group_id = self.uuid_string_to_bin(group_id.to_string())?;
+                let group_id = uuid_string_to_bin(group_id.to_string())?;
                 self.reply_to_invite(group_id, false)
             }
             GroupSubcmd::Remove { group_id, user_id } => {
-                let group_id = self.uuid_string_to_bin(group_id.to_string())?;
-                let user_id = self.id_string_to_bin(user_id.to_string())?;
+                let group_id = uuid_string_to_bin(group_id.to_string())?;
+                let user_id = id_string_to_bin(user_id.to_string())?;
 
                 let proto_message = Group {
                     message: Some(group::Message::GroupRemoveMemberRequest(

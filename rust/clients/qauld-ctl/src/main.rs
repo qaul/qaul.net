@@ -18,12 +18,6 @@ use crate::commands::RpcCommand;
 /// include generated protobuf RPC rust definition file
 pub mod proto {
     include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.rs");
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.node.rs");
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.user_accounts.rs");
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.users.rs");
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.feed.rs");
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.group.rs");
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.chat.rs");
 }
 
 mod cli;
@@ -50,42 +44,20 @@ async fn preflight_request(
         .expect("Vec<u8> provides capacity as needed");
     client.send(rpc_msg.into()).await?;
 
-    let (user_id_bytes, id) = if let Some(Ok(data)) = client.next().await {
+    let user_id_bytes = if let Some(Ok(data)) = client.next().await {
         match proto::QaulRpc::decode(&data[..]) {
-            Ok(msg) => {
-                let user_accounts = proto::UserAccounts::decode(&msg.data[..])?;
-                match user_accounts.message {
-                    Some(proto::user_accounts::Message::DefaultUserAccount(
-                        default_useraccount,
-                    )) => {
-                        if default_useraccount.user_account_exists {
-                            if let Some(my_user_account) = default_useraccount.my_user_account {
-                                (my_user_account.id, my_user_account.id_base58)
-                            } else {
-                                log::warn!("user account not found");
-                                (Vec::new(), "".to_string())
-                            }
-                        } else {
-                            log::warn!("default account not found");
-                            (Vec::new(), "".to_string())
-                        }
-                    }
-                    _ => {
-                        log::error!("failed to parse RPC message");
-                        (Vec::new(), "".to_string())
-                    }
-                }
-            }
+            Ok(msg) => commands::decode_default_user(&msg.data),
             _ => {
-                log::error!("failed to decode RPC");
-                (Vec::new(), "".to_string())
+                log::warn!("preflight: failed to decode RPC envelope");
+                Vec::new()
             }
         }
     } else {
-        (Vec::new(), "".to_string())
+        log::warn!("preflight: no response received");
+        Vec::new()
     };
 
-    log::info!("preflight request succedded for user_id: {id}");
+    log::info!("preflight request completed");
     Ok(user_id_bytes)
 }
 
@@ -123,6 +95,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Commands::Users(u) => Box::new(u.command) as Box<dyn RpcCommand>,
         Commands::Feed(f) => Box::new(f.command) as Box<dyn RpcCommand>,
         Commands::Group(g) => Box::new(g.command) as Box<dyn RpcCommand>,
+        Commands::Chat(c) => Box::new(c.command) as Box<dyn RpcCommand>,
+        Commands::File(f) => Box::new(f.command) as Box<dyn RpcCommand>,
     };
 
     let (data, module) = rpc_command.encode_request()?;

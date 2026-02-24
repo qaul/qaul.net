@@ -31,6 +31,10 @@ pub enum Commands {
     Feed(FeedArgs),
     /// Group
     Group(GroupArgs),
+    /// Chat
+    Chat(ChatArgs),
+    /// chat files
+    File(ChatFileArgs),
 }
 
 #[derive(Args, Debug)]
@@ -208,5 +212,67 @@ pub enum GroupSubcmd {
         /// the new name for the group
         #[arg(short, long)]
         name: String,
+    },
+}
+
+#[derive(Args, Debug)]
+pub struct ChatArgs {
+    #[command(subcommand)]
+    pub command: ChatSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum ChatSubcmd {
+    /// sends the {Chat Message} to the user with the ID {Group ID}
+    Send {
+        /// message to send
+        #[arg(short, long)]
+        message: String,
+        /// the group id to send the message to
+        #[arg(short, long)]
+        group_id: String,
+    },
+    /// displays all messages of the conversation with the ID {Group ID}
+    Conversation {
+        /// the group id to get the conversations
+        #[arg(short, long)]
+        group_id: String,
+        /// the index of the chat to get the messages from
+        #[arg(short, long, default_value = "0")]
+        index: u64,
+    },
+}
+
+#[derive(Args, Debug)]
+pub struct ChatFileArgs {
+    #[command(subcommand)]
+    pub command: ChatFileSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum ChatFileSubcmd {
+    /// sends a file to the user with the ID {Group ID} and a {File Description} text.
+    Send {
+        /// the group id to send the file to
+        #[arg(short, long)]
+        group_id: String,
+
+        /// the file path
+        #[arg(short, long)]
+        file: String,
+
+        /// a description for the file to be sent
+        #[arg(short, long)]
+        description: String,
+    },
+    /// displays a paginated file history.
+    /// The page {offset} and {limit} values are optional. The default values are an offset of 0 and 10 results.
+    History {
+        /// page offset
+        #[arg(short, long, default_value = "0")]
+        offset: u64,
+        /// page offset
+        #[arg(short, long, default_value = "10")]
+        limit: u64,
     },
 }
