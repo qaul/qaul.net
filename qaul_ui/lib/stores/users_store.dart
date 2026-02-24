@@ -5,16 +5,14 @@ final usersStoreProvider = NotifierProvider<UsersStore, List<User>>(
 );
 
 class UsersStore extends Notifier<List<User>> {
+  static const int _firstPageLimit = 50;
+
   @override
   List<User> build() {
-    // TODO should only get first users page
-    // TODO (refactor out of users tab, i.e. anything that calls qaulWorker directly on qaul_ui/lib/screens/home/tabs/users_tab.dart)
-    final users = ref
-        .watch(usersProvider)
-        .data
-        .where((u) => !(u.isBlocked ?? false))
-        .toList();
-    return users;
+    final paginated = ref.watch(usersProvider);
+    final limit = paginated.pagination?.limit ?? _firstPageLimit;
+    final firstPage = paginated.data.take(limit).toList();
+    return firstPage.where((u) => !(u.isBlocked ?? false)).toList();
   }
 
   Future<User?> getByUserID(String idBase58) async {
@@ -29,8 +27,8 @@ class UsersStore extends Notifier<List<User>> {
     }
   }
 
-  Future<List<User>> getMoreUsers(int offset) async {
-    // TODO: needs to be refactored from qaul_ui/lib/screens/home/tabs/users_tab.dart
-    throw UnimplementedError("TODO must call libqaul worker with pagination controls");
+  Future<void> getMoreUsers(int offset, {int limit = 50}) async {
+    final worker = ref.read(qaulWorkerProvider);
+    await worker.getUsers(offset: offset, limit: limit);
   }
 }
