@@ -136,7 +136,6 @@ class _UsersState extends _BaseTabState<_Users> {
             }),
           ),
         ),
-      ),
     );
   }
 }
