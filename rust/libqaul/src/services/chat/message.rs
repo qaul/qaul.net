@@ -59,7 +59,7 @@ impl ChatMessage {
             }
         }
 
-        match GroupStorage::get_group(account_id.to_owned(), group_id.to_vec()) {
+        match GroupStorage::get_group(account_id.to_owned(), group_id) {
             Some(v) => group = v,
             None => {
                 let error_string = "Group not found".to_string();
