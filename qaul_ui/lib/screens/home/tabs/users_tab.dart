@@ -10,8 +10,8 @@ class _Users extends BaseTab {
 class _UsersState extends _BaseTabState<_Users> {
   static const _pageSize = 50;
   late final ScrollController _scrollController;
-  final _isLoadingMore = ValueNotifier<bool>(false);
-  final _hasMore = ValueNotifier<bool>(true);
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
   int _currentOffset = 0;
 
   @override
@@ -28,8 +28,6 @@ class _UsersState extends _BaseTabState<_Users> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
-    _isLoadingMore.dispose();
-    _hasMore.dispose();
     super.dispose();
   }
 
@@ -43,7 +41,7 @@ class _UsersState extends _BaseTabState<_Users> {
   void _updatePaginationState() {
     final paginationState = ref.read(usersProvider).pagination;
     if (paginationState != null) {
-      _hasMore.value = paginationState.hasMore;
+      setState(() => _hasMore = paginationState.hasMore);
       _currentOffset = paginationState.offset + paginationState.limit;
       return;
     }
@@ -51,21 +49,21 @@ class _UsersState extends _BaseTabState<_Users> {
   }
 
   Future<void> _loadMoreUsers() async {
-    if (_isLoadingMore.value || !_hasMore.value) return;
+    if (_isLoadingMore || !_hasMore) return;
 
-    _isLoadingMore.value = true;
+    setState(() => _isLoadingMore = true);
     try {
       final worker = ref.read(qaulWorkerProvider);
       await worker.getUsers(offset: _currentOffset, limit: _pageSize);
       _updatePaginationState();
     } finally {
-      _isLoadingMore.value = false;
+      if (mounted) setState(() => _isLoadingMore = false);
     }
   }
 
   Future<void> _refreshUsers() async {
     _currentOffset = 0;
-    _hasMore.value = true;
+    setState(() => _hasMore = true);
     final worker = ref.read(qaulWorkerProvider);
     await worker.getUsers(offset: 0, limit: _pageSize);
     _updatePaginationState();
@@ -77,17 +75,15 @@ class _UsersState extends _BaseTabState<_Users> {
 
     ref.listen(usersProvider, (previous, next) {
       if (next.pagination != null && !next.pagination!.hasMore) {
-        _hasMore.value = false;
+        setState(() => _hasMore = false);
       }
     });
 
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      body: ListenableBuilder(
-        listenable: _isLoadingMore,
-        builder: (context, _) => LoadingDecorator(
-          isLoading: _isLoadingMore.value,
-          child: RefreshIndicator(
+      body: LoadingDecorator(
+        isLoading: _isLoadingMore,
+        child: RefreshIndicator(
             onRefresh: () async => await _refreshUsers(),
             child: SearchUserDecorator(builder: (_, users) {
               return EmptyStateTextDecorator(
