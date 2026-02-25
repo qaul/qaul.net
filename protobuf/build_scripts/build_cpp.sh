@@ -6,8 +6,8 @@
 PROTO_FILES=$(tr '\n' ' ' < files.txt)
 
 protoc \
-    --cpp_out=../protobuf_generated/cpp \
+    --cpp_out=../generated/cpp \
     \
-    --proto_path=../../rust/qaul-proto/proto \
+    --proto_path=../../protobuf/proto_definitions \
     \
     $PROTO_FILES

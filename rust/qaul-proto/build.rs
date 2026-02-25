@@ -4,7 +4,7 @@
 //! # Build Rust Protobuf Files
 //!
 //! Compiles all .proto files and copies the generated Rust code
-//! to the shared protobuf_generated/rust/ folder.
+//! to the shared generated/rust/ folder.
 
 use std::env;
 use std::fs;
@@ -91,7 +91,7 @@ fn main() {
         Ok(_) => {
             // copy generated protobuf files to the shared folder
             let out_dir = env::var_os("OUT_DIR").unwrap();
-            let to = Path::new("../../protobuf/protobuf_generated/rust");
+            let to = Path::new("../../protobuf/generated/rust");
 
             let files = [
                 "qaul.rpc.rs",

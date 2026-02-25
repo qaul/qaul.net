@@ -1960,14 +1960,14 @@ public struct Google_Protobuf_SourceCodeInfo {
 /// Describes the relationship between generated code and its original source
 /// file. A GeneratedCodeInfo message is associated with only one generated
 /// source file, but may contain references to different source .proto files.
-public struct Google_Protobuf_GeneratedCodeInfo {
+public struct Google_generatedCodeInfo {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
   /// An Annotation connects some span of text in generated code to an element
   /// of its generating .proto file.
-  public var annotation: [Google_Protobuf_GeneratedCodeInfo.Annotation] = []
+  public var annotation: [Google_generatedCodeInfo.Annotation] = []
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -3837,7 +3837,7 @@ extension Google_Protobuf_SourceCodeInfo.Location: SwiftProtobuf.Message, SwiftP
   }
 }
 
-extension Google_Protobuf_GeneratedCodeInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Google_generatedCodeInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".GeneratedCodeInfo"
   public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "annotation"),
@@ -3862,15 +3862,15 @@ extension Google_Protobuf_GeneratedCodeInfo: SwiftProtobuf.Message, SwiftProtobu
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  public static func ==(lhs: Google_Protobuf_GeneratedCodeInfo, rhs: Google_Protobuf_GeneratedCodeInfo) -> Bool {
+  public static func ==(lhs: Google_generatedCodeInfo, rhs: Google_generatedCodeInfo) -> Bool {
     if lhs.annotation != rhs.annotation {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Google_Protobuf_GeneratedCodeInfo.Annotation: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = Google_Protobuf_GeneratedCodeInfo.protoMessageName + ".Annotation"
+extension Google_generatedCodeInfo.Annotation: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = Google_generatedCodeInfo.protoMessageName + ".Annotation"
   public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "path"),
     2: .standard(proto: "source_file"),
@@ -3913,7 +3913,7 @@ extension Google_Protobuf_GeneratedCodeInfo.Annotation: SwiftProtobuf.Message, S
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  public static func ==(lhs: Google_Protobuf_GeneratedCodeInfo.Annotation, rhs: Google_Protobuf_GeneratedCodeInfo.Annotation) -> Bool {
+  public static func ==(lhs: Google_generatedCodeInfo.Annotation, rhs: Google_generatedCodeInfo.Annotation) -> Bool {
     if lhs.path != rhs.path {return false}
     if lhs._sourceFile != rhs._sourceFile {return false}
     if lhs._begin != rhs._begin {return false}
