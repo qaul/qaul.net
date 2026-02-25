@@ -86,7 +86,7 @@ fn main() {
             "services/dtn/dtn_rpc.proto",
             "services/crypto/crypto_net.proto",
         ],
-        &["proto"],
+        &["../../protobuf/proto_definitions"],
     ) {
         Ok(_) => {
             // copy generated protobuf files to the shared folder
