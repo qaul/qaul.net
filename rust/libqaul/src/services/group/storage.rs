@@ -228,7 +228,7 @@ impl GroupStorage {
     }
 
     /// Remove a group invite from the data base
-    pub fn remove_invite(account_id: PeerId, group_id: &Vec<u8>) {
+    pub fn remove_invite(account_id: PeerId, group_id: &[u8]) {
         // get DB ref
         let db_ref = Self::get_db_ref(account_id);
 
