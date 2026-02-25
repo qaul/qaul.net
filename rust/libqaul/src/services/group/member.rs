@@ -27,7 +27,7 @@ impl Member {
     ) -> Result<bool, String> {
         // get group
         let mut group;
-        match GroupStorage::get_group(account_id.to_owned(), group_id.to_owned()) {
+        match GroupStorage::get_group(account_id.to_owned(), group_id) {
             Some(my_group) => group = my_group,
             None => return Err("group not found".to_string()),
         }
@@ -112,7 +112,7 @@ impl Member {
     ) -> Result<bool, String> {
         // check if there is a group invite
         let invite;
-        match GroupStorage::get_invite(account_id.to_owned(), group_id.to_owned()) {
+        match GroupStorage::get_invite(account_id.to_owned(), group_id) {
             Some(my_invite) => invite = my_invite,
             None => return Err("there is no group invite".to_string()),
         }
@@ -187,7 +187,7 @@ impl Member {
 
         // get group from data base
         let mut group;
-        match GroupStorage::get_group(account_id.to_owned(), group_id.to_owned()) {
+        match GroupStorage::get_group(account_id.to_owned(), group_id) {
             Some(my_group) => group = my_group,
             None => return Err("group not found".to_string()),
         }
@@ -307,7 +307,7 @@ impl Member {
     ) -> Result<bool, String> {
         // get group from data base
         let mut group;
-        match GroupStorage::get_group(account_id.to_owned(), resp.group_id.clone()) {
+        match GroupStorage::get_group(account_id.to_owned(), &resp.group_id) {
             Some(my_group) => group = my_group,
             None => return Err("group not found".to_string()),
         }
@@ -369,7 +369,7 @@ impl Member {
     ) -> Result<bool, String> {
         // get group from data base
         let mut group;
-        match GroupStorage::get_group(account_id.to_owned(), resp.group_id.to_owned()) {
+        match GroupStorage::get_group(account_id.to_owned(), &resp.group_id) {
             Some(my_group) => group = my_group,
             None => return Err("group not found".to_string()),
         }
@@ -418,7 +418,7 @@ impl Member {
     ) -> Result<bool, String> {
         // get group from data base
         let mut group;
-        match GroupStorage::get_group(account_id.to_owned(), message.group_id.clone()) {
+        match GroupStorage::get_group(account_id.to_owned(), &message.group_id) {
             Some(my_group) => group = my_group,
             None => return Err("group not found".to_string()),
         }

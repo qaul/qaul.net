@@ -25,7 +25,7 @@ impl GroupManage {
         remote_id: &PeerId,
     ) -> Option<Group> {
         // try to get group from data base
-        match GroupStorage::get_group(account_id.clone(), group_id.to_bytes()) {
+        match GroupStorage::get_group(account_id.clone(), &group_id.to_bytes()) {
             Some(group) => return Some(group),
             None => {
                 // check if it is the direct chat group for the connection
@@ -50,7 +50,7 @@ impl GroupManage {
         let group_id = GroupId::from_peers(account_id, user_id).to_bytes();
 
         // check if group already exists
-        if let Some(group) = GroupStorage::get_group(account_id.to_owned(), group_id.clone()) {
+        if let Some(group) = GroupStorage::get_group(account_id.to_owned(), &group_id) {
             return group;
         }
 
@@ -138,13 +138,8 @@ impl GroupManage {
     /// rename group from RPC command
     ///
     /// `account_id` the user account ID
-    pub fn rename_group(
-        account_id: &PeerId,
-        group_id: &Vec<u8>,
-        name: String,
-    ) -> Result<(), String> {
-        if let Some(mut group) = GroupStorage::get_group(account_id.to_owned(), group_id.to_owned())
-        {
+    pub fn rename_group(account_id: &PeerId, group_id: &[u8], name: String) -> Result<(), String> {
+        if let Some(mut group) = GroupStorage::get_group(account_id.to_owned(), group_id) {
             // check if administrator
             if let Some(member) = group.get_member(&account_id.to_bytes()) {
                 // check permission
@@ -159,7 +154,7 @@ impl GroupManage {
             group.name = name;
 
             // update revision
-            group.revision = group.revision + 1;
+            group.revision += 1;
 
             // save group
             GroupStorage::save_group(account_id.to_owned(), group);
@@ -171,17 +166,14 @@ impl GroupManage {
     }
 
     /// get a new message ID
-    pub fn get_new_message_id(account_id: &PeerId, group_id: &Vec<u8>) -> Vec<u8> {
-        if let Some(mut group) = GroupStorage::get_group(account_id.to_owned(), group_id.to_owned())
-        {
+    pub fn get_new_message_id(account_id: &PeerId, group_id: &[u8]) -> Vec<u8> {
+        if let Some(mut group) = GroupStorage::get_group(account_id.to_owned(), group_id) {
             // get my member
-            if let Some(member) = group.members.get(&account_id.to_bytes()) {
-                let new_index = member.last_message_index + 1;
+            let account_id_bytes = account_id.to_bytes();
+            if let Some(member) = group.members.get_mut(&account_id_bytes) {
+                member.last_message_index += 1;
+                let new_index = member.last_message_index;
 
-                // update & save last_index in group
-                let mut member_updated = member.to_owned();
-                member_updated.last_message_index = new_index;
-                group.members.insert(account_id.to_bytes(), member_updated);
                 GroupStorage::save_group(account_id.to_owned(), group);
 
                 // create message id
@@ -197,15 +189,15 @@ impl GroupManage {
     /// `account_id` the user account ID
     pub fn group_info(
         account_id: &PeerId,
-        group_id: &Vec<u8>,
+        group_id: &[u8],
     ) -> Result<super::proto_rpc::GroupInfo, String> {
         let group;
-        match GroupStorage::get_group(account_id.to_owned(), group_id.to_owned()) {
+        match GroupStorage::get_group(account_id.to_owned(), group_id) {
             Some(group_result) => group = group_result,
             None => return Err("group not found".to_string()),
         }
 
-        let mut members: Vec<super::proto_rpc::GroupMember> = vec![];
+        let mut members = Vec::with_capacity(group.members.len());
         for m in group.members.values() {
             let member = super::proto_rpc::GroupMember {
                 user_id: m.user_id.clone(),
@@ -239,13 +231,15 @@ impl GroupManage {
     pub fn group_list(account_id: &PeerId) -> super::proto_rpc::GroupListResponse {
         let db_ref = GroupStorage::get_db_ref(account_id.to_owned());
 
-        let mut res = super::proto_rpc::GroupListResponse { groups: vec![] };
+        let mut res = super::proto_rpc::GroupListResponse {
+            groups: Vec::with_capacity(db_ref.groups.len()),
+        };
 
         for entry in db_ref.groups.iter() {
             match entry {
                 Ok((_, group_bytes)) => {
                     let group: Group = bincode::deserialize(&group_bytes).unwrap();
-                    let mut members: Vec<super::proto_rpc::GroupMember> = vec![];
+                    let mut members = Vec::with_capacity(group.members.len());
                     for m in group.members.values() {
                         let member = super::proto_rpc::GroupMember {
                             user_id: m.user_id.clone(),
@@ -282,13 +276,15 @@ impl GroupManage {
     pub fn invited_list(account_id: &PeerId) -> super::proto_rpc::GroupInvitedResponse {
         let db_ref = GroupStorage::get_db_ref(account_id.to_owned());
 
-        let mut res = super::proto_rpc::GroupInvitedResponse { invited: vec![] };
+        let mut res = super::proto_rpc::GroupInvitedResponse {
+            invited: Vec::with_capacity(db_ref.invited.len()),
+        };
 
         for entry in db_ref.invited.iter() {
             match entry {
                 Ok((_, invite_bytes)) => {
-                    let mut members: Vec<super::proto_rpc::GroupMember> = Vec::new();
                     let invite: GroupInvited = bincode::deserialize(&invite_bytes).unwrap();
+                    let mut members = Vec::with_capacity(invite.group.members.len());
                     for (_, member) in invite.group.members {
                         members.push(super::proto_rpc::GroupMember {
                             user_id: member.user_id,
@@ -341,13 +337,15 @@ impl GroupManage {
             }
         }
 
+        let sender_id_bytes = sender_id.to_bytes();
+        let account_id_bytes = account_id.to_bytes();
         let mut first_join = false;
         let mut orign_members: BTreeMap<Vec<u8>, bool> = BTreeMap::new();
-        let mut new_members: Vec<Vec<u8>> = vec![];
+        let mut new_members = Vec::with_capacity(notify.members.len());
 
         // get group
         let mut group: Group;
-        match GroupStorage::get_group(account_id, notify.group_id.clone()) {
+        match GroupStorage::get_group(account_id, &notify.group_id) {
             Some(my_group) => {
                 group = my_group;
 
@@ -363,7 +361,7 @@ impl GroupManage {
                 for (member_id, member) in &group.members {
                     orign_members.insert(member_id.clone(), true);
 
-                    if member.user_id == sender_id.to_bytes() && member.role == 255 {
+                    if member.user_id == sender_id_bytes && member.role == 255 {
                         sender_is_admin = true;
                     }
                 }
@@ -426,7 +424,7 @@ impl GroupManage {
                 message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
                     chat::rpc_proto::GroupEvent {
                         event_type: chat::rpc_proto::GroupEventType::Joined.try_into().unwrap(),
-                        user_id: account_id.to_bytes(),
+                        user_id: account_id_bytes.clone(),
                     },
                 )),
             };
