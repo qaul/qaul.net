@@ -7,7 +7,7 @@
 
 // TODO: remove local import, import instead from libqaul
 pub mod proto_sys {
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.sys.ble.rs");
+    include!("../../../libqaul/src/rpc/generated/rust/qaul.sys.ble.rs");
 }
 pub mod msg_loop;
 pub mod utils;
