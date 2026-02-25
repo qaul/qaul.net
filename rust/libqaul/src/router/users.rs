@@ -65,7 +65,7 @@ impl Users {
                 // decode user bytes
                 let user: UserData = bincode::deserialize(&user_bytes).unwrap();
                 // encode values from bytes
-                let q8id = QaulId::bytes_to_q8id(user.id.clone());
+                let q8id = user.id[6..14].to_vec();
                 let id = PeerId::from_bytes(&user.id).unwrap();
                 let key = PublicKey::try_decode_protobuf(&user.key).unwrap();
                 // fill result into user table
@@ -87,17 +87,19 @@ impl Users {
     ///
     /// This user will be added to the users list in memory and to the data base
     pub fn add(id: PeerId, key: PublicKey, name: String, verified: bool, blocked: bool) {
+        let id_bytes = id.to_bytes();
+        let q8id = id_bytes[6..14].to_vec();
+
         // save user to the data base
         DbUsers::add_user(UserData {
-            id: id.to_bytes(),
-            key: key.clone().encode_protobuf(),
+            id: id_bytes,
+            key: key.encode_protobuf(),
             name: name.clone(),
             verified,
             blocked,
         });
 
         // add user to the users table
-        let q8id = QaulId::to_q8id(id.clone());
         let mut users = USERS.get().write().unwrap();
         users.users.insert(
             q8id,
@@ -116,18 +118,19 @@ impl Users {
     /// and save it to the data base
     pub fn add_with_check(id: PeerId, key: PublicKey, name: String) {
         // check if user is valid
-        if id != key.clone().to_peer_id() {
+        if id != key.to_peer_id() {
             log::error!("user id & key do not match {}", id.to_base58());
             return;
         }
 
         // check if user already exists
         {
-            let q8id = QaulId::to_q8id(id.clone());
+            let id_bytes = id.to_bytes();
+            let q8id = &id_bytes[6..14];
             let users = USERS.get().read().unwrap();
 
             // check if user already exists
-            if users.users.contains_key(&q8id) {
+            if users.users.contains_key(q8id) {
                 return;
             }
         }
@@ -136,45 +139,37 @@ impl Users {
     }
 
     /// check missed users from ids
-    pub fn get_missed_ids(ids: &Vec<Vec<u8>>) -> Vec<Vec<u8>> {
-        let mut res: Vec<Vec<u8>> = vec![];
+    pub fn get_missed_ids(ids: &[Vec<u8>]) -> Vec<Vec<u8>> {
         let users = USERS.get().read().unwrap();
-        for id in ids {
-            if !users.users.contains_key(id) {
-                res.push(id.clone());
-            }
-        }
-        res
+        let mut missed = Vec::with_capacity(ids.len());
+
+        missed.extend(
+            ids.iter()
+                .filter(|id| !users.users.contains_key(id.as_slice()))
+                .cloned(),
+        );
+
+        missed
     }
 
     /// get the public key of a known user
     pub fn get_pub_key(user_id: &PeerId) -> Option<PublicKey> {
-        // get q8id
-        let q8id = QaulId::to_q8id(user_id.to_owned());
-
-        // get public key
-        Self::get_pub_key_by_q8id(&q8id)
+        let user_id_bytes = user_id.to_bytes();
+        Self::get_pub_key_by_q8id(&user_id_bytes[6..14])
     }
 
     /// get the public key of a known user by it's q8id
-    pub fn get_pub_key_by_q8id(q8id: &Vec<u8>) -> Option<PublicKey> {
+    pub fn get_pub_key_by_q8id(q8id: &[u8]) -> Option<PublicKey> {
         let store = USERS.get().read().unwrap();
-        let result = store.users.get(q8id);
-        match result {
-            Some(user) => Some(user.key.clone()),
-            None => None,
-        }
+
+        store.users.get(q8id).map(|user| user.key.clone())
     }
 
     /// get user by q8id
-    pub fn get_user_id_by_q8id(q8id: Vec<u8>) -> Option<PeerId> {
+    pub fn get_user_id_by_q8id(q8id: &[u8]) -> Option<PeerId> {
         let store = USERS.get().read().unwrap();
 
-        if let Some(user) = store.users.get(&q8id) {
-            return Some(user.id);
-        }
-
-        None
+        store.users.get(q8id).map(|user| user.id)
     }
 
     /// create and send the user info table for the
@@ -182,28 +177,28 @@ impl Users {
     ///
     /// This is a wrapper function for the PeerIds for the function
     /// `get_user_info_table_by_q8ids(q8ids)`
-    pub fn _get_user_info_table_by_ids(ids: &Vec<PeerId>) -> router_net_proto::UserInfoTable {
-        let mut q8ids: Vec<Vec<u8>> = Vec::new();
-        for id in ids {
-            // convert qaul ID to q8id
-            let q8id = QaulId::to_q8id(id.to_owned());
-            q8ids.push(q8id);
-        }
+    pub fn _get_user_info_table_by_ids(ids: &[PeerId]) -> router_net_proto::UserInfoTable {
+        let q8ids = ids
+            .iter()
+            .map(|id| QaulId::to_q8id(id.to_owned()))
+            .collect::<Vec<_>>();
 
         Self::get_user_info_table_by_q8ids(&q8ids)
     }
 
     /// create and send the user info table for the
     /// RouterInfo message which is sent regularly to neighbours
-    pub fn get_user_info_table_by_q8ids(q8ids: &Vec<Vec<u8>>) -> router_net_proto::UserInfoTable {
+    pub fn get_user_info_table_by_q8ids(q8ids: &[Vec<u8>]) -> router_net_proto::UserInfoTable {
         let store = USERS.get().read().unwrap();
-        let mut users = router_net_proto::UserInfoTable { info: Vec::new() };
+        let mut users = router_net_proto::UserInfoTable {
+            info: Vec::with_capacity(q8ids.len()),
+        };
 
         for q8id in q8ids {
             if let Some(value) = store.users.get(q8id) {
                 let user_info = router_net_proto::UserInfo {
                     id: value.id.to_bytes(),
-                    key: value.key.clone().encode_protobuf(),
+                    key: value.key.encode_protobuf(),
                     name: value.name.clone(),
                 };
                 users.info.push(user_info);
@@ -213,7 +208,7 @@ impl Users {
     }
 
     /// add new users from the received bytes of a UserInfoTable
-    pub fn add_user_info_table(users: &Vec<router_net_proto::UserInfo>) {
+    pub fn add_user_info_table(users: &[router_net_proto::UserInfo]) {
         // loop through it and add it to the users list
         for value in users {
             let id_result = PeerId::from_bytes(&value.id);
@@ -238,46 +233,41 @@ impl Users {
     }
 
     /// get security number
-    fn get_security_number(my_user: &PeerId, user_id: &Vec<u8>) -> Result<Vec<u8>, String> {
-        let q8id = QaulId::bytes_to_q8id(user_id.clone());
-        let q8id_my = QaulId::to_q8id(my_user.clone());
+    fn get_security_number(my_user: &PeerId, user_id: &[u8]) -> Result<Vec<u8>, String> {
+        let q8id = &user_id[6..14];
+        let my_user_bytes = my_user.to_bytes();
+        let q8id_my = &my_user_bytes[6..14];
 
         // find user from users
         let users = USERS.get().read().unwrap();
-        if !users.users.contains_key(&q8id) {
+        if !users.users.contains_key(q8id) {
             return Err("user no exists".to_string());
         }
 
-        if !users.users.contains_key(&q8id_my) {
+        if !users.users.contains_key(q8id_my) {
             return Err("my user is not existed".to_string());
         }
-        let mut key1 = users.users.get(&q8id_my).unwrap().key.encode_protobuf();
-        let mut key2 = users.users.get(&q8id).unwrap().key.encode_protobuf();
+        let key1 = users.users.get(q8id_my).unwrap().key.encode_protobuf();
+        let key2 = users.users.get(q8id).unwrap().key.encode_protobuf();
 
         // merge two keys
-        let mut data: Vec<u8> = vec![];
-        match Self::compare(&key1, &key2) {
-            Ordering::Less => {
-                data.append(&mut key1);
-                data.append(&mut key2);
-            }
-            _ => {
-                data.append(&mut key2);
-                data.append(&mut key1);
-            }
-        }
+        let (first, second) = match Self::compare(&key1, &key2) {
+            Ordering::Less => (&key1, &key2),
+            _ => (&key2, &key1),
+        };
 
-        let mut key_data = data.clone();
-        data.clear();
+        let mut data = Vec::with_capacity(first.len() + second.len());
+        data.extend_from_slice(first);
+        data.extend_from_slice(second);
 
         for _ in 0..5200 {
-            data.append(&mut key_data);
             let hash = Sha512::digest(&data);
-            let mut hash_vec = hash[..64].to_vec();
             data.clear();
-            data.append(&mut hash_vec);
+            data.extend_from_slice(&hash);
         }
-        Ok(data[..16].to_vec())
+
+        data.truncate(16);
+        Ok(data)
     }
 
     /// Process incoming RPC request messages
@@ -307,21 +297,13 @@ impl Users {
                         Self::with_resolved_user(
                             &updated_user.id,
                             |user_id, _q8id, user_result| {
-                                // update user entity
-                                let user = User {
-                                    id: user_id,
-                                    key: user_result.key.clone(),
-                                    name: user_result.name.clone(),
-                                    verified: updated_user.verified,
-                                    blocked: updated_user.blocked,
-                                };
-
-                                *user_result = user;
+                                user_result.verified = updated_user.verified;
+                                user_result.blocked = updated_user.blocked;
 
                                 // persist the updated entity
                                 DbUsers::add_user(UserData {
                                     id: user_id.to_bytes(),
-                                    key: user_result.key.clone().encode_protobuf(),
+                                    key: user_result.key.encode_protobuf(),
                                     name: user_result.name.clone(),
                                     verified: updated_user.verified,
                                     blocked: updated_user.blocked,
@@ -331,36 +313,22 @@ impl Users {
                     }
                     Some(proto::users::Message::SecurityNumberRequest(secure_req)) => {
                         match Self::get_security_number(&account_id, &secure_req.user_id) {
-                            Ok(x) => {
-                                let mut security_number_blocks: Vec<u32> = vec![];
-                                for i in 0..x.len() / 2 {
-                                    let number = x[i * 2] as u32 + (x[i * 2 + 1] as u32 * 256);
+                            Ok(security_hash) => {
+                                let mut security_number_blocks =
+                                    Vec::with_capacity(security_hash.len() / 2);
+                                for chunk in security_hash.chunks_exact(2) {
+                                    let number = chunk[0] as u32 + (chunk[1] as u32 * 256);
                                     security_number_blocks.push(number);
                                 }
 
-                                // create message
-                                let proto_message = proto::Users {
-                                    message: Some(proto::users::Message::SecurityNumberResponse(
+                                send_users_rpc_message(
+                                    proto::users::Message::SecurityNumberResponse(
                                         proto::SecurityNumberResponse {
                                             user_id: secure_req.user_id.clone(),
-                                            security_hash: x.clone(),
+                                            security_hash,
                                             security_number_blocks,
                                         },
-                                    )),
-                                };
-
-                                // encode message
-                                let mut buf = Vec::with_capacity(proto_message.encoded_len());
-                                proto_message
-                                    .encode(&mut buf)
-                                    .expect("Vec<u8> provides capacity as needed");
-
-                                // send message
-                                Rpc::send_message(
-                                    buf,
-                                    crate::rpc::proto::Modules::Users.into(),
-                                    "".to_string(),
-                                    Vec::new(),
+                                    ),
                                 );
                             }
                             Err(error) => {
@@ -375,24 +343,10 @@ impl Users {
                             let online_users = RoutingTable::get_online_users_info();
                             let entry = build_user_entry(user, &online_users, &account_id, q8id);
 
-                            let proto_message = proto::Users {
-                                message: Some(proto::users::Message::GetUserByIdResponse(
-                                    proto::GetUserByIdResponse { user: Some(entry) },
-                                )),
-                            };
-
-                            let mut buf = Vec::with_capacity(proto_message.encoded_len());
-                            proto_message
-                                .encode(&mut buf)
-                                .expect("Vec<u8> provides capacity as needed");
-
                             // send encoded rpc message containing found user entity
-                            Rpc::send_message(
-                                buf,
-                                crate::rpc::proto::Modules::Users.into(),
-                                "".to_string(),
-                                Vec::new(),
-                            );
+                            send_users_rpc_message(proto::users::Message::GetUserByIdResponse(
+                                proto::GetUserByIdResponse { user: Some(entry) },
+                            ));
                         });
                     }
                     _ => {}
@@ -408,48 +362,37 @@ impl Users {
     ///
     /// Returns a tuple with the key type & the base58 encoded
     /// (key_type: String, key_base58: String)
-    pub fn get_protobuf_public_key(key: PublicKey) -> (String, String) {
-        // extract values
-        let key_type: String;
-        let key_base58: String;
-
+    pub fn get_protobuf_public_key(key: &PublicKey) -> (String, String) {
         #[allow(unreachable_patterns)]
-        match key.try_into_ed25519() {
-            Ok(ed_key) => {
-                key_type = "Ed25519".to_owned();
-                key_base58 = bs58::encode(ed_key.to_bytes()).into_string();
-            }
-            _ => {
-                key_type = "UNDEFINED".to_owned();
-                key_base58 = "UNDEFINED".to_owned();
-            }
+        match key.clone().try_into_ed25519() {
+            Ok(ed_key) => (
+                "Ed25519".to_owned(),
+                bs58::encode(ed_key.to_bytes()).into_string(),
+            ),
+            _ => ("UNDEFINED".to_owned(), "UNDEFINED".to_owned()),
         }
-
-        (key_type, key_base58)
     }
 
     /// helper function that, given a set of user id bytes, will attempt to find that user entity and pass it to a closure
     fn with_resolved_user<F>(user_id_bytes: &[u8], f: F)
     where
-        F: FnOnce(PeerId, &Vec<u8>, &mut User),
+        F: FnOnce(PeerId, &[u8], &mut User),
     {
         // resolve a user id from raw bytes
-        let (user_id, q8id) = match PeerId::from_bytes(user_id_bytes) {
-            Ok(id) => {
-                let q8id = QaulId::to_q8id(id);
-                (id, q8id)
-            }
+        let user_id = match PeerId::from_bytes(user_id_bytes) {
+            Ok(id) => id,
             Err(_) => {
                 log::error!("invalid PeerId");
                 return;
             }
         };
+        let q8id = &user_id_bytes[6..14];
 
         // acquire a lock to lookup the user entry
         let mut store = USERS.get().write().unwrap();
-        match store.users.get_mut(&q8id) {
+        match store.users.get_mut(q8id) {
             // pass found user to f
-            Some(user) => f(user_id, &q8id, user),
+            Some(user) => f(user_id, q8id, user),
             None => log::error!("user not found: {}", user_id.to_base58()),
         }
     }
@@ -478,21 +421,7 @@ impl Users {
             }
         };
 
-        let proto_message = proto::Users {
-            message: Some(proto::users::Message::UserList(user_list)),
-        };
-
-        let mut buf = Vec::with_capacity(proto_message.encoded_len());
-        proto_message
-            .encode(&mut buf)
-            .expect("Vec<u8> provides capacity as needed");
-
-        Rpc::send_message(
-            buf,
-            crate::rpc::proto::Modules::Users.into(),
-            "".to_string(),
-            Vec::new(),
-        );
+        send_users_rpc_message(proto::users::Message::UserList(user_list));
     }
 }
 
@@ -524,17 +453,36 @@ pub struct UserData {
     pub blocked: bool,
 }
 
+fn send_users_rpc_message(message: proto::users::Message) {
+    let proto_message = proto::Users {
+        message: Some(message),
+    };
+
+    let mut buf = Vec::with_capacity(proto_message.encoded_len());
+    proto_message
+        .encode(&mut buf)
+        .expect("Vec<u8> provides capacity as needed");
+
+    Rpc::send_message(
+        buf,
+        crate::rpc::proto::Modules::Users.into(),
+        String::new(),
+        Vec::new(),
+    );
+}
+
 /// Build a single `proto::UserEntry` for the given user.
 fn build_user_entry(
     user: &User,
     online_users: &BTreeMap<Vec<u8>, Vec<super::table::RoutingConnectionEntry>>,
     account_id: &PeerId,
-    q8id: &Vec<u8>,
+    q8id: &[u8],
 ) -> proto::UserEntry {
-    let mut connectivity: i32 = 0;
-    let mut connections: Vec<proto::RoutingTableConnection> = Vec::new();
+    let mut connectivity = 0;
+    let mut connections = Vec::new();
 
     if let Some(entries) = online_users.get(q8id) {
+        connections = Vec::with_capacity(entries.len());
         for entry in entries {
             connections.push(proto::RoutingTableConnection {
                 module: entry.module.as_int(),
@@ -546,7 +494,7 @@ fn build_user_entry(
         connectivity = 1;
     }
 
-    let (_key_type, key_base58) = Users::get_protobuf_public_key(user.key.clone());
+    let (_key_type, key_base58) = Users::get_protobuf_public_key(&user.key);
     let group_id = GroupId::from_peers(account_id, &user.id).to_bytes();
 
     proto::UserEntry {
@@ -571,18 +519,25 @@ fn build_user_list_from(
     offset: u32,
     limit: u32,
 ) -> proto::UserList {
+    let online_only = filter == UserFilter::OnlineOnly;
+    let estimated_total = if online_only {
+        online_users.len()
+    } else {
+        users.len()
+    };
+    let remaining = estimated_total.saturating_sub(offset as usize);
+    let page_capacity = if limit == 0 {
+        remaining
+    } else {
+        remaining.min(limit as usize)
+    };
+
     let mut user_list = proto::UserList {
-        user: Vec::new(),
+        user: Vec::with_capacity(page_capacity),
         pagination: None,
     };
 
-    let online_only = filter == UserFilter::OnlineOnly;
-
-    let mut total = if online_only {
-        online_users.len() as u32
-    } else {
-        users.len() as u32
-    };
+    let mut total = estimated_total as u32;
 
     let mut skipped: u32 = 0;
 

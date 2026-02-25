@@ -43,10 +43,10 @@ impl FeedRequester {
     }
 
     /// Add a message to the ring buffer for sending.
-    pub fn add(neighbour_id: &PeerId, feed_ids: &Vec<Vec<u8>>) {
+    pub fn add(neighbour_id: &PeerId, feed_ids: &[Vec<u8>]) {
         let msg = FeedRequest {
             neighbour_id: neighbour_id.clone(),
-            feed_ids: feed_ids.clone(),
+            feed_ids: feed_ids.to_vec(),
         };
 
         // add it to sending queue
@@ -76,19 +76,11 @@ impl FeedResponser {
     }
 
     /// Add a message to the ring buffer for sending.
-    pub fn add(neighbour_id: &PeerId, feeds: &Vec<(Vec<u8>, Vec<u8>, String, u64)>) {
-        let mut msg = FeedResponse {
+    pub fn add(neighbour_id: &PeerId, feeds: &[(Vec<u8>, Vec<u8>, String, u64)]) {
+        let msg = FeedResponse {
             neighbour_id: neighbour_id.clone(),
-            feeds: vec![],
+            feeds: feeds.to_vec(),
         };
-        for (message_id, sender_id, content, time) in feeds {
-            msg.feeds.push((
-                message_id.clone(),
-                sender_id.clone(),
-                content.clone(),
-                *time,
-            ));
-        }
 
         // add it to sending queue
         let mut feed_responser = FEEDRESPONSER.get().write().unwrap();
