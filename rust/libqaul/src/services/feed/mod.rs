@@ -143,7 +143,7 @@ impl Feed {
             .expect("Vec<u8> provides capacity as needed");
 
         // sign message
-        let signature = Self::sign_message(&buf, user_account.keys.clone());
+        let signature = Self::sign_message(&buf, &user_account.keys);
 
         // create signed container
         let container = proto_net::FeedContainer {
@@ -195,7 +195,7 @@ impl Feed {
 
                     if let Some(key) = result {
                         // validate message
-                        if !Self::validate_message(&feed_container, key.clone()) {
+                        if !Self::validate_message(&feed_container, &key) {
                             log::error!(
                                 "Validation of feed message {:?} failed: {:?}",
                                 feed_container.signature,
@@ -203,7 +203,7 @@ impl Feed {
                             );
                             log::error!("  sender id:  {}", user_id_decoded);
                             let (key_type, key_base58) =
-                                crate::router::users::Users::get_protobuf_public_key(key);
+                                crate::router::users::Users::get_protobuf_public_key(&key);
                             log::error!("  sender key [{}]: {}", key_type, key_base58);
                             return;
                         }
@@ -260,25 +260,20 @@ impl Feed {
     }
 
     //Save message by sync
-    pub fn save_message_by_sync(
-        message_id: &Vec<u8>,
-        sender_id: &Vec<u8>,
-        content: String,
-        time: u64,
-    ) {
+    pub fn save_message_by_sync(message_id: &[u8], sender_id: &[u8], content: String, time: u64) {
         let mut feed = FEED.get().write().unwrap();
         if let Some(_index) = feed.tree_ids.get(&message_id[..]).unwrap() {
             return;
         }
 
         let msg_content = proto_net::FeedMessageContent {
-            sender: sender_id.clone(),
+            sender: sender_id.to_vec(),
             content: content.clone(),
-            time: time,
+            time,
         };
 
         // insert message to in memory BTreeMap
-        feed.messages.insert(message_id.clone(), msg_content);
+        feed.messages.insert(message_id.to_vec(), msg_content);
 
         // create new key
         let last_message = feed.last_message + 1;
@@ -289,11 +284,11 @@ impl Feed {
         //create feed struct for database store
         let message_data = FeedMessageData {
             index: last_message,
-            message_id: message_id.clone(),
-            sender_id: sender_id.clone(),
+            message_id: message_id.to_vec(),
+            sender_id: sender_id.to_vec(),
             timestamp_sent: time,
             timestamp_received,
-            content: content.clone(),
+            content,
         };
 
         // save to data base
@@ -329,8 +324,12 @@ impl Feed {
         // open feed map for writing
         let mut feed = FEED.get().write().unwrap();
 
+        let sender_id = message.sender.clone();
+        let content = message.content.clone();
+        let timestamp_sent = message.time;
+
         // insert message to in memory BTreeMap
-        feed.messages.insert(signature.clone(), message.clone());
+        feed.messages.insert(signature.clone(), message);
 
         // create new key
         let last_message = feed.last_message + 1;
@@ -341,11 +340,11 @@ impl Feed {
         //create feed struct for database store
         let message_data = FeedMessageData {
             index: last_message,
-            message_id: signature.clone(),
-            sender_id: message.sender,
-            timestamp_sent: message.time,
+            message_id: signature,
+            sender_id,
+            timestamp_sent,
             timestamp_received,
-            content: message.content.clone(),
+            content,
         };
 
         // save to data base
@@ -362,7 +361,10 @@ impl Feed {
         }
 
         let last_message_bytes = bincode::serialize(&last_message).unwrap();
-        if let Err(e) = feed.tree_ids.insert(&signature[..], last_message_bytes) {
+        if let Err(e) = feed
+            .tree_ids
+            .insert(&message_data.message_id[..], last_message_bytes)
+        {
             log::error!("Error saving feed id to data base: {}", e);
         } else {
             if let Err(e) = feed.tree_ids.flush() {
@@ -375,14 +377,13 @@ impl Feed {
     }
 
     pub fn get_latest_message_ids(count: usize) -> Vec<Vec<u8>> {
-        let mut ids: Vec<Vec<u8>> = vec![];
-
         // get feed message store
         let feed = FEED.get().read().unwrap();
         let mut msg_count: usize = count;
         if feed.last_message < (count as u64) {
             msg_count = feed.last_message as usize;
         }
+        let mut ids = Vec::with_capacity(msg_count);
 
         let first_message = feed.last_message - (msg_count as u64);
         let first_message_bytes = first_message.to_be_bytes().to_vec();
@@ -401,8 +402,8 @@ impl Feed {
     }
 
     //return missing feed ids to request to the neighbour
-    pub fn process_received_feed_ids(ids: &Vec<Vec<u8>>) -> Vec<Vec<u8>> {
-        let mut missing_ids: Vec<Vec<u8>> = vec![];
+    pub fn process_received_feed_ids(ids: &[Vec<u8>]) -> Vec<Vec<u8>> {
+        let mut missing_ids = Vec::with_capacity(ids.len());
 
         let feed = FEED.get().read().unwrap();
         for id in ids {
@@ -416,8 +417,8 @@ impl Feed {
         missing_ids
     }
 
-    pub fn get_messges_by_ids(ids: &Vec<Vec<u8>>) -> Vec<(Vec<u8>, Vec<u8>, String, u64)> {
-        let mut res: Vec<(Vec<u8>, Vec<u8>, String, u64)> = vec![];
+    pub fn get_messges_by_ids(ids: &[Vec<u8>]) -> Vec<(Vec<u8>, Vec<u8>, String, u64)> {
+        let mut res = Vec::with_capacity(ids.len());
         let feed = FEED.get().read().unwrap();
         for id in ids {
             if let Some(index_bytes) = feed.tree_ids.get(&id[..]).unwrap() {
@@ -441,14 +442,14 @@ impl Feed {
     /// This function get messages from data base
     /// that are newer then the last message.
     fn get_messages(last_message: u64) -> proto::FeedMessageList {
-        // create empty feed list
-        let mut feed_list = proto::FeedMessageList {
-            feed_message: Vec::new(),
-            pagination: None,
-        };
-
         // get feed message store
         let feed = FEED.get().read().unwrap();
+        let mut feed_list = proto::FeedMessageList {
+            feed_message: Vec::with_capacity(
+                feed.last_message.saturating_sub(last_message) as usize
+            ),
+            pagination: None,
+        };
 
         // check if there are any new messages
         if feed.last_message > last_message {
@@ -468,11 +469,11 @@ impl Feed {
                             log::trace!("key find error");
                         }
 
-                        let sender_id_base58 =
-                            bs58::encode(message.sender_id.clone()).into_string();
+                        let sender_id_base58 = bs58::encode(&message.sender_id).into_string();
 
                         //create timestamp
                         let time_sent = timestamp::Timestamp::create_time();
+                        let time_rfc3339 = humantime::format_rfc3339(time_sent).to_string();
 
                         // create message
                         let feed_message = proto::FeedMessage {
@@ -483,10 +484,10 @@ impl Feed {
                             // DEPRECATED
                             message_id_base58: bs58::encode(message.message_id).into_string(),
                             // DEPRECATED
-                            time_sent: humantime::format_rfc3339(time_sent.clone()).to_string(),
+                            time_sent: time_rfc3339.clone(),
                             timestamp_sent: message.timestamp_sent,
                             // DEPRECATED
-                            time_received: humantime::format_rfc3339(time_sent).to_string(),
+                            time_received: time_rfc3339,
                             timestamp_received: message.timestamp_received,
                             content: message.content.clone(),
                             // data base index
@@ -514,12 +515,12 @@ impl Feed {
 
     /// Sign a message with the private key
     /// The signature can be validated with the corresponding public key.
-    pub fn sign_message(buf: &Vec<u8>, keys: Keypair) -> Vec<u8> {
-        keys.sign(&buf).unwrap()
+    pub fn sign_message(buf: &[u8], keys: &Keypair) -> Vec<u8> {
+        keys.sign(buf).unwrap()
     }
 
     /// validate a message via the public key of the sender
-    pub fn validate_message(msg: &proto_net::FeedContainer, key: PublicKey) -> bool {
+    pub fn validate_message(msg: &proto_net::FeedContainer, key: &PublicKey) -> bool {
         key.verify(&msg.message, &msg.signature)
     }
 
@@ -563,7 +564,7 @@ impl Feed {
                     }
                     Some(proto::feed::Message::Send(send_feed)) => {
                         // print message
-                        log::trace!("feed message received: {}", send_feed.content.clone());
+                        log::trace!("feed message received: {}", send_feed.content);
 
                         // get user account from user_id
                         let user_account;
@@ -610,12 +611,18 @@ fn build_feed_list_from(
     offset: u32,
     limit: u32,
 ) -> proto::FeedMessageList {
-    let mut feed_list = proto::FeedMessageList {
-        feed_message: Vec::new(),
-        pagination: None,
+    let total = messages.len() as u32;
+    let remaining = total.saturating_sub(offset) as usize;
+    let page_capacity = if limit == 0 {
+        remaining
+    } else {
+        remaining.min(limit as usize)
     };
 
-    let total = messages.len() as u32;
+    let mut feed_list = proto::FeedMessageList {
+        feed_message: Vec::with_capacity(page_capacity),
+        pagination: None,
+    };
 
     let mut skipped: u32 = 0;
 
@@ -629,18 +636,19 @@ fn build_feed_list_from(
             break;
         }
 
-        let sender_id_base58 = bs58::encode(content.sender.clone()).into_string();
+        let sender_id_base58 = bs58::encode(&content.sender).into_string();
 
         let time_sent = timestamp::Timestamp::create_time();
+        let time_rfc3339 = humantime::format_rfc3339(time_sent).to_string();
 
         let feed_message = proto::FeedMessage {
             sender_id: content.sender.clone(),
             sender_id_base58,
             message_id: signature.clone(),
             message_id_base58: bs58::encode(signature).into_string(),
-            time_sent: humantime::format_rfc3339(time_sent.clone()).to_string(),
+            time_sent: time_rfc3339.clone(),
             timestamp_sent: content.time,
-            time_received: humantime::format_rfc3339(time_sent).to_string(),
+            time_received: time_rfc3339,
             timestamp_received: content.time,
             content: content.content.clone(),
             index: 0,

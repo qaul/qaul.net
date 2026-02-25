@@ -10,7 +10,6 @@ use prost::Message;
 
 use super::UnConfirmedMessage;
 use crate::router;
-use crate::utilities::qaul_id::QaulId;
 use crate::utilities::timestamp::Timestamp;
 
 /// Qaul Messaging Structure
@@ -46,9 +45,9 @@ impl MessagingRetransmit {
                     continue;
                 }
 
-                let qaul_id = QaulId::bytes_to_q8id(unconfirmed_message.receiver_id.clone());
+                let qaul_id = &unconfirmed_message.receiver_id[6..14];
                 //1. check receiver is online
-                if let Some(_hc) = online_users.get(&qaul_id) {
+                if let Some(_hc) = online_users.get(qaul_id) {
                     let mut timeout: u64 = 0;
                     if unconfirmed_message.scheduled {
                         timeout = 20 * 1000;
@@ -65,11 +64,11 @@ impl MessagingRetransmit {
 
                             log::trace!(
                                 "retrans message, signature: {}",
-                                bs58::encode(container.signature.clone()).into_string()
+                                bs58::encode(&container.signature).into_string()
                             );
                             super::Messaging::schedule_message(
-                                receiver.clone(),
-                                container.clone(),
+                                receiver,
+                                container,
                                 true,
                                 false,
                                 unconfirmed_message.scheduled_dtn,
