@@ -447,7 +447,7 @@ impl ChatFile {
     ) -> Result<bool, String> {
         // get group
         let group;
-        match GroupStorage::get_group(user_account.id, group_id.to_owned()) {
+        match GroupStorage::get_group(user_account.id, group_id) {
             Some(v) => group = v,
             None => {
                 match GroupId::from_bytes(group_id) {

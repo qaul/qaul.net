@@ -94,7 +94,7 @@ impl GroupStorage {
     }
 
     /// get a group from data base
-    pub fn get_group(account_id: PeerId, group_id: Vec<u8>) -> Option<Group> {
+    pub fn get_group(account_id: PeerId, group_id: &[u8]) -> Option<Group> {
         // get DB ref
         let db_ref = Self::get_db_ref(account_id);
 
@@ -113,7 +113,7 @@ impl GroupStorage {
 
     /// Check if a group exists in the data base
     #[allow(dead_code)]
-    pub fn group_exists(account_id: PeerId, group_id: Vec<u8>) -> bool {
+    pub fn group_exists(account_id: PeerId, group_id: &[u8]) -> bool {
         // get DB ref
         let db_ref = Self::get_db_ref(account_id);
 
@@ -157,7 +157,7 @@ impl GroupStorage {
     ) {
         log::debug!("group_update_last_chat_message");
 
-        if let Some(mut group) = Self::get_group(account_id, group_id) {
+        if let Some(mut group) = Self::get_group(account_id, &group_id) {
             // update values
             group.last_message_sender_id = sender_id.to_bytes();
             group.last_message_at = received_at;
@@ -179,7 +179,7 @@ impl GroupStorage {
     pub fn group_clear_unread(account_id: PeerId, group_id: Vec<u8>) {
         log::debug!("group_clear_unread");
 
-        if let Some(mut group) = Self::get_group(account_id, group_id) {
+        if let Some(mut group) = Self::get_group(account_id, &group_id) {
             // clear unread value
             group.unread_messages = 0;
 
@@ -191,7 +191,7 @@ impl GroupStorage {
     }
 
     /// get invite
-    pub fn get_invite(account_id: PeerId, group_id: Vec<u8>) -> Option<GroupInvited> {
+    pub fn get_invite(account_id: PeerId, group_id: &[u8]) -> Option<GroupInvited> {
         // get DB ref
         let db_ref = Self::get_db_ref(account_id);
 

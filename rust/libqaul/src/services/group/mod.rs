@@ -154,7 +154,7 @@ impl Group {
 
     /// update group member
     pub fn update_group_member(account_id: &PeerId, group_id: &[u8], member: &GroupMember) {
-        if let Some(mut group) = GroupStorage::get_group(account_id.to_owned(), group_id.to_vec()) {
+        if let Some(mut group) = GroupStorage::get_group(account_id.to_owned(), group_id) {
             // insert member
             group.members.insert(member.user_id.clone(), member.clone());
 
@@ -198,7 +198,7 @@ impl Group {
     ) {
         // get last index
         let group;
-        match GroupStorage::get_group(user_account.id, group_id.clone()) {
+        match GroupStorage::get_group(user_account.id, &group_id) {
             Some(v) => group = v,
             None => return,
         }
@@ -253,7 +253,7 @@ impl Group {
     /// Send group updated to all members
     fn post_group_update(account_id: &PeerId, group_id: &[u8]) {
         let group;
-        match GroupStorage::get_group(account_id.to_owned(), group_id.to_vec()) {
+        match GroupStorage::get_group(account_id.to_owned(), group_id) {
             Some(my_group) => group = my_group,
             None => return,
         }
