@@ -128,44 +128,33 @@ impl Group {
     }
 
     /// get a group member
-    pub fn get_member(&self, user_id: &Vec<u8>) -> Option<&GroupMember> {
-        if self.members.contains_key(user_id) {
-            return self.members.get(user_id);
-        }
-        None
+    pub fn get_member(&self, user_id: &[u8]) -> Option<&GroupMember> {
+        self.members.get(user_id)
     }
 
     /// Verify if a user is the administrator of the group
     #[allow(dead_code)]
-    pub fn is_administrator(&self, user_id: &Vec<u8>) -> bool {
-        if let Some(member) = self.members.get(user_id) {
-            if member.role == GroupMemberRole::Admin as i32 {
-                return true;
-            }
-        }
-        false
+    pub fn is_administrator(&self, user_id: &[u8]) -> bool {
+        self.members
+            .get(user_id)
+            .is_some_and(|member| member.role == GroupMemberRole::Admin as i32)
     }
 
     /// Verify if a user is a member of the group
-    pub fn is_member(&self, user_id: &Vec<u8>) -> bool {
+    pub fn is_member(&self, user_id: &[u8]) -> bool {
         self.members.contains_key(user_id)
     }
 
     /// Verify if both user_id's are members of the group
     ///
     /// This is a convenient function to verify incoming messages.
-    pub fn are_members(&self, user_id_1: &Vec<u8>, user_id_2: &Vec<u8>) -> bool {
-        if self.is_member(user_id_1) {
-            return self.is_member(user_id_2);
-        }
-
-        false
+    pub fn are_members(&self, user_id_1: &[u8], user_id_2: &[u8]) -> bool {
+        self.is_member(user_id_1) && self.is_member(user_id_2)
     }
 
     /// update group member
-    pub fn update_group_member(account_id: &PeerId, group_id: &Vec<u8>, member: &GroupMember) {
-        if let Some(mut group) = GroupStorage::get_group(account_id.to_owned(), group_id.to_owned())
-        {
+    pub fn update_group_member(account_id: &PeerId, group_id: &[u8], member: &GroupMember) {
+        if let Some(mut group) = GroupStorage::get_group(account_id.to_owned(), group_id.to_vec()) {
             // insert member
             group.members.insert(member.user_id.clone(), member.clone());
 
@@ -184,13 +173,12 @@ impl Group {
         };
 
         // send message via messaging
-        let message_id: Vec<u8> = Vec::new();
         match Messaging::pack_and_send_message(
             user_account,
-            &receiver,
+            receiver,
             proto_message.encode_to_vec(),
             MessagingServiceType::Group,
-            &message_id,
+            &[],
             true,
         ) {
             Ok(_) => {}
@@ -206,7 +194,7 @@ impl Group {
         user_account: &UserAccount,
         receiver: &PeerId,
         group_id: Vec<u8>,
-        data: &Vec<u8>,
+        data: &[u8],
     ) {
         // get last index
         let group;
@@ -233,15 +221,13 @@ impl Group {
             sent_at: Timestamp::get_timestamp(),
             payload: Some(proto::common_message::Payload::GroupMessage(
                 proto::GroupMessage {
-                    content: data.clone(),
+                    content: data.to_vec(),
                 },
             )),
         };
 
         let send_message = proto::Messaging {
-            message: Some(proto::messaging::Message::CommonMessage(
-                common_message.clone(),
-            )),
+            message: Some(proto::messaging::Message::CommonMessage(common_message)),
         };
 
         // send message via messaging
@@ -265,15 +251,15 @@ impl Group {
     }
 
     /// Send group updated to all members
-    fn post_group_update(account_id: &PeerId, group_id: &Vec<u8>) {
+    fn post_group_update(account_id: &PeerId, group_id: &[u8]) {
         let group;
-        match GroupStorage::get_group(account_id.to_owned(), group_id.to_owned()) {
+        match GroupStorage::get_group(account_id.to_owned(), group_id.to_vec()) {
             Some(my_group) => group = my_group,
             None => return,
         }
 
         // create group notify message and post to all members
-        let mut members: Vec<proto_net::GroupMember> = vec![];
+        let mut members = Vec::with_capacity(group.members.len());
         for m in group.members.values() {
             if m.state > 0 {
                 members.push(proto_net::GroupMember {
@@ -287,7 +273,7 @@ impl Group {
         }
 
         let notify = proto_net::GroupInfo {
-            group_id: group_id.clone(),
+            group_id: group_id.to_vec(),
             group_name: group.name.clone(),
             created_at: group.created_at,
             revision: group.revision,
@@ -305,19 +291,19 @@ impl Group {
                 },
             )),
         };
+        let send_message_bytes = send_message.encode_to_vec();
 
         // send to all group members
         if let Some(user_account) = UserAccounts::get_by_id(*account_id) {
             for user_id in group.members.keys() {
-                let receiver = PeerId::from_bytes(&user_id.clone()).unwrap();
+                let receiver = PeerId::from_bytes(user_id).unwrap();
                 if receiver != *account_id {
-                    let message_id: Vec<u8> = Vec::new();
                     if let Err(error) = Messaging::pack_and_send_message(
                         &user_account,
                         &receiver,
-                        send_message.encode_to_vec(),
+                        send_message_bytes.clone(),
                         MessagingServiceType::Group,
-                        &message_id,
+                        &[],
                         true,
                     ) {
                         log::error!("send group notify error {}", error);
@@ -328,10 +314,10 @@ impl Group {
     }
 
     /// Process incoming NET messages for group chat module
-    pub fn net(sender_id: &PeerId, receiver_id: &PeerId, data: &Vec<u8>) {
+    pub fn net(sender_id: &PeerId, receiver_id: &PeerId, data: &[u8]) {
         // check receiver id is in users list
         let user;
-        match UserAccounts::get_by_id(receiver_id.clone()) {
+        match UserAccounts::get_by_id(*receiver_id) {
             Some(usr) => {
                 user = usr;
             }
@@ -341,7 +327,7 @@ impl Group {
             }
         }
 
-        match proto_net::GroupContainer::decode(&data[..]) {
+        match proto_net::GroupContainer::decode(data) {
             Ok(messaging) => match messaging.message {
                 Some(proto_net::group_container::Message::InviteMember(invite_member)) => {
                     log::trace!("group::on_receive_invite");
@@ -368,11 +354,7 @@ impl Group {
                 }
                 Some(proto_net::group_container::Message::GroupInfo(group_info)) => {
                     log::trace!("group info arrived");
-                    manage::GroupManage::on_group_notify(
-                        sender_id.to_owned(),
-                        receiver_id.to_owned(),
-                        &group_info,
-                    );
+                    manage::GroupManage::on_group_notify(*sender_id, *receiver_id, &group_info);
                 }
                 None => {
                     log::error!("group message from {} was empty", sender_id.to_base58())
