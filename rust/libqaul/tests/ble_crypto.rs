@@ -63,9 +63,15 @@ fn test_session_state_debug() {
 
 #[test]
 fn test_session_state_equality() {
-    assert_eq!(BleSessionState::HandshakePending, BleSessionState::HandshakePending);
+    assert_eq!(
+        BleSessionState::HandshakePending,
+        BleSessionState::HandshakePending
+    );
     assert_eq!(BleSessionState::Established, BleSessionState::Established);
-    assert_ne!(BleSessionState::HandshakePending, BleSessionState::Established);
+    assert_ne!(
+        BleSessionState::HandshakePending,
+        BleSessionState::Established
+    );
 }
 
 #[test]

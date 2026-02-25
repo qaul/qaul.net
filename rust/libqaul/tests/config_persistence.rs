@@ -64,7 +64,10 @@ fn test_default_config_values() {
         config.node.initialized, 0,
         "Node should not be initialized by default"
     );
-    assert!(config.node.id.is_empty(), "Node ID should be empty by default");
+    assert!(
+        config.node.id.is_empty(),
+        "Node ID should be empty by default"
+    );
     assert!(
         config.node.keys.is_empty(),
         "Node keys should be empty by default"
@@ -78,7 +81,10 @@ fn test_default_config_values() {
     );
 
     // Check Internet defaults
-    assert!(config.internet.active, "Internet should be active by default");
+    assert!(
+        config.internet.active,
+        "Internet should be active by default"
+    );
     assert!(
         !config.internet.peers.is_empty(),
         "Internet peers should have default entries"

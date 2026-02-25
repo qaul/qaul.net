@@ -4,7 +4,7 @@
 use bluer::{Adapter, Address};
 use tokio::sync::mpsc::UnboundedSender;
 
-use super::proto_sys::{self, BleDeviceDiscovered, BleError, BleStartResult, BleDeviceUnavailable};
+use super::proto_sys::{self, BleDeviceDiscovered, BleDeviceUnavailable, BleError, BleStartResult};
 
 #[derive(Clone)]
 pub struct BleResultSender(UnboundedSender<Vec<u8>>);
@@ -53,7 +53,12 @@ impl BleResultSender {
         ))
     }
 
-    pub fn send_device_unavailable(&mut self, qaul_id: Vec<u8>, adapter: Adapter, mac_address: Address) {
+    pub fn send_device_unavailable(
+        &mut self,
+        qaul_id: Vec<u8>,
+        adapter: Adapter,
+        mac_address: Address,
+    ) {
         tokio::task::spawn_local(async move {
             let _ = adapter.remove_device(mac_address).await;
         });

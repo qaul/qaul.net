@@ -62,7 +62,10 @@ impl Users {
     fn request_user_list() {
         // create request message
         let proto_message = proto::Users {
-            message: Some(proto::users::Message::UserRequest(proto::UserRequest { offset: 0, limit: 0 })),
+            message: Some(proto::users::Message::UserRequest(proto::UserRequest {
+                offset: 0,
+                limit: 0,
+            })),
         };
 
         // encode message
@@ -83,7 +86,10 @@ impl Users {
         // create request message
         let proto_message = proto::Users {
             message: Some(proto::users::Message::UserOnlineRequest(
-                proto::UserOnlineRequest { offset: 0, limit: 0 },
+                proto::UserOnlineRequest {
+                    offset: 0,
+                    limit: 0,
+                },
             )),
         };
 
@@ -252,60 +258,61 @@ impl Users {
 
                     println!("");
                 }
-                Some(proto::users::Message::GetUserByIdResponse(resp)) => {
-                    match resp.user {
-                        Some(user) => {
-                            let mut verified = "N";
-                            let mut blocked = "N";
-                            let mut onlined = "Offline";
+                Some(proto::users::Message::GetUserByIdResponse(resp)) => match resp.user {
+                    Some(user) => {
+                        let mut verified = "N";
+                        let mut blocked = "N";
+                        let mut onlined = "Offline";
 
-                            if user.verified {
-                                verified = "Y";
-                            }
-                            if user.blocked {
-                                blocked = "Y";
-                            }
-                            if user.connectivity == 1 {
-                                onlined = "Online";
-                            }
-
-                            println!("");
-                            println!("User Info");
-                            println!("Name: {}", user.name);
-                            println!("ID: {}", bs58::encode(&user.id).into_string());
-                            println!("Verified: {} | Blocked: {} | Connectivity: {}", verified, blocked, onlined);
-
-                            match Uuid::from_slice(&user.group_id) {
-                                Ok(uuid) => {
-                                    println!("Group ID: {}", uuid.hyphenated().to_string());
-                                }
-                                Err(e) => log::error!("{}", e),
-                            }
-
-                            println!("Public Key: {}", user.key_base58);
-
-                            if user.connections.len() > 0 {
-                                println!("Connections: module | hc | rtt | via");
-                                for cnn in user.connections {
-                                    let module = proto::ConnectionModule::try_from(cnn.module)
-                                        .unwrap()
-                                        .as_str_name();
-                                    println!(
-                                        "  {} | {} | {} | {}",
-                                        module,
-                                        cnn.hop_count,
-                                        cnn.rtt,
-                                        bs58::encode(cnn.via.clone()).into_string()
-                                    );
-                                }
-                            }
-                            println!("");
+                        if user.verified {
+                            verified = "Y";
                         }
-                        None => {
-                            println!("User not found.");
+                        if user.blocked {
+                            blocked = "Y";
                         }
+                        if user.connectivity == 1 {
+                            onlined = "Online";
+                        }
+
+                        println!("");
+                        println!("User Info");
+                        println!("Name: {}", user.name);
+                        println!("ID: {}", bs58::encode(&user.id).into_string());
+                        println!(
+                            "Verified: {} | Blocked: {} | Connectivity: {}",
+                            verified, blocked, onlined
+                        );
+
+                        match Uuid::from_slice(&user.group_id) {
+                            Ok(uuid) => {
+                                println!("Group ID: {}", uuid.hyphenated().to_string());
+                            }
+                            Err(e) => log::error!("{}", e),
+                        }
+
+                        println!("Public Key: {}", user.key_base58);
+
+                        if user.connections.len() > 0 {
+                            println!("Connections: module | hc | rtt | via");
+                            for cnn in user.connections {
+                                let module = proto::ConnectionModule::try_from(cnn.module)
+                                    .unwrap()
+                                    .as_str_name();
+                                println!(
+                                    "  {} | {} | {} | {}",
+                                    module,
+                                    cnn.hop_count,
+                                    cnn.rtt,
+                                    bs58::encode(cnn.via.clone()).into_string()
+                                );
+                            }
+                        }
+                        println!("");
                     }
-                }
+                    None => {
+                        println!("User not found.");
+                    }
+                },
                 Some(proto::users::Message::SecurityNumberResponse(resp)) => {
                     println!("Security Number:");
                     let mut counter = 0;
