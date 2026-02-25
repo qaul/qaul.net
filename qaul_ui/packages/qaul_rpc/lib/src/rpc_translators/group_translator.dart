@@ -6,7 +6,7 @@ class GroupTranslator extends RpcModuleTranslator {
 
   @override
   Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Ref ref) async {
-    final users = ref.read(usersProvider);
+    final users = ref.read(usersProvider).data;
     final message = Group.fromBuffer(data);
 
     switch (message.whichMessage()) {
