@@ -25,9 +25,9 @@ pub struct GroupId {
 
 impl GroupId {
     /// creates a group id from a bytes vector
-    pub fn from_bytes(id: &Vec<u8>) -> Result<GroupId, String> {
+    pub fn from_bytes(id: &[u8]) -> Result<GroupId, String> {
         if id.len() == 16 {
-            Ok(GroupId { id: id.clone() })
+            Ok(GroupId { id: id.to_vec() })
         } else {
             Err("invalid length".to_string())
         }
@@ -46,15 +46,15 @@ impl GroupId {
 
     /// creates a group id from two q8id's
     pub fn from_q8ids(q8id_1: Vec<u8>, q8id_2: Vec<u8>) -> GroupId {
-        let mut ids: Vec<Vec<u8>> = Vec::new();
-        ids.push(q8id_1);
-        ids.push(q8id_2);
+        let (first, second) = if q8id_1 <= q8id_2 {
+            (q8id_1, q8id_2)
+        } else {
+            (q8id_2, q8id_1)
+        };
 
-        ids.sort();
-
-        let mut group_id: Vec<u8> = Vec::new();
-        group_id.extend(ids[0].clone());
-        group_id.extend(ids[1].clone());
+        let mut group_id = Vec::with_capacity(first.len() + second.len());
+        group_id.extend_from_slice(&first);
+        group_id.extend_from_slice(&second);
 
         GroupId { id: group_id }
     }
@@ -123,7 +123,7 @@ impl GroupId {
     /// If the bytes are not a valid UUID, it will convert them into
     /// bs58 encoding.
     #[allow(dead_code)]
-    pub fn slice_to_string(bytes: &Vec<u8>) -> String {
+    pub fn slice_to_string(bytes: &[u8]) -> String {
         let string;
         match uuid::Uuid::from_slice(bytes) {
             Ok(uuid) => string = uuid.hyphenated().to_string(),

@@ -29,14 +29,14 @@ impl MessagingProcess {
     pub fn on_decrypted_message(
         sender_id: &PeerId,
         user_account: UserAccount,
-        data: &Vec<u8>,
-        signature: &Vec<u8>,
+        data: &[u8],
+        signature: &[u8],
     ) {
         log::trace!("on_decrypted_message arrived");
 
         // decode messaging
         let messaging;
-        match super::proto::Messaging::decode(&data[..]) {
+        match super::proto::Messaging::decode(data) {
             Ok(v) => {
                 messaging = v;
             }
@@ -62,10 +62,7 @@ impl MessagingProcess {
                 );
             }
             Some(super::proto::messaging::Message::CryptoService(cryptoservice)) => {
-                log::trace!(
-                    "received cryptoservice message from {}",
-                    sender_id.clone().to_string()
-                );
+                log::trace!("received cryptoservice message from {}", sender_id);
                 // process crypto service message
                 CryptoSessionManager::process_cryptoservice_container(
                     sender_id,
