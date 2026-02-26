@@ -111,6 +111,35 @@ impl GroupStorage {
         None
     }
 
+    /// Load, mutate and save a group in one place.
+    ///
+    /// Returns `None` if the group does not exist.
+    pub fn with_group_mut<R>(
+        account_id: &PeerId,
+        group_id: &[u8],
+        mutate: impl FnOnce(&mut Group) -> R,
+    ) -> Option<R> {
+        let mut group = Self::get_group(account_id.to_owned(), group_id)?;
+        let result = mutate(&mut group);
+        Self::save_group(account_id.to_owned(), group);
+        Some(result)
+    }
+
+    /// Like `with_group_mut`, but skips saving when the closure returns an error.
+    pub fn try_with_group_mut<R, E>(
+        account_id: &PeerId,
+        group_id: &[u8],
+        mutate: impl FnOnce(&mut Group) -> Result<R, E>,
+    ) -> Result<Option<R>, E> {
+        let Some(mut group) = Self::get_group(account_id.to_owned(), group_id) else {
+            return Ok(None);
+        };
+
+        let result = mutate(&mut group)?;
+        Self::save_group(account_id.to_owned(), group);
+        Ok(Some(result))
+    }
+
     /// Check if a group exists in the data base
     #[allow(dead_code)]
     pub fn group_exists(account_id: PeerId, group_id: &[u8]) -> bool {
@@ -157,7 +186,7 @@ impl GroupStorage {
     ) {
         log::debug!("group_update_last_chat_message");
 
-        if let Some(mut group) = Self::get_group(account_id, &group_id) {
+        if Self::with_group_mut(&account_id, &group_id, |group| {
             // update values
             group.last_message_sender_id = sender_id.to_bytes();
             group.last_message_at = received_at;
@@ -165,12 +194,11 @@ impl GroupStorage {
 
             // check if it is us who is sending the message
             if sender_id != account_id {
-                group.unread_messages = group.unread_messages + 1;
+                group.unread_messages += 1;
             }
-
-            // save group
-            Self::save_group(account_id, group);
-        } else {
+        })
+        .is_none()
+        {
             log::error!("group_update_last_chat group not found");
         }
     }
@@ -179,13 +207,11 @@ impl GroupStorage {
     pub fn group_clear_unread(account_id: PeerId, group_id: Vec<u8>) {
         log::debug!("group_clear_unread");
 
-        if let Some(mut group) = Self::get_group(account_id, &group_id) {
-            // clear unread value
+        if Self::with_group_mut(&account_id, &group_id, |group| {
             group.unread_messages = 0;
-
-            // save group
-            Self::save_group(account_id, group);
-        } else {
+        })
+        .is_none()
+        {
             log::error!("group_clear_unread group not found");
         }
     }
