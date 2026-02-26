@@ -22,7 +22,7 @@ use std::{
 };
 
 use super::ChatStorage;
-use crate::services::messaging::{self, Messaging, MessagingServiceType};
+use crate::services::messaging::{self, MessagingServiceType};
 use crate::storage::database::DataBase;
 use crate::utilities::timestamp;
 use crate::utilities::timestamp::Timestamp;
@@ -719,24 +719,14 @@ impl ChatFile {
         };
         let message_bytes = message.encode_to_vec();
 
-        // send to all members
-        for user_id in group.members.keys() {
-            let receiver = PeerId::from_bytes(user_id).unwrap();
-            if receiver == user_account.id {
-                continue;
-            }
-
-            if let Err(error) = Messaging::pack_and_send_message(
-                user_account,
-                &receiver,
-                message_bytes.clone(),
-                MessagingServiceType::ChatFile,
-                message_id,
-                true,
-            ) {
-                log::error!("sending file message error {}", error);
-            }
-        }
+        Group::send_to_remote_members(
+            user_account,
+            group,
+            &message_bytes,
+            MessagingServiceType::ChatFile,
+            message_id,
+            "sending file message error",
+        );
     }
 
     /// Generate File id

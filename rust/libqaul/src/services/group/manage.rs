@@ -14,6 +14,16 @@ use crate::utilities::timestamp::Timestamp;
 /// Group Manage Structure
 pub struct GroupManage {}
 impl GroupManage {
+    fn to_rpc_group_member(member: &super::GroupMember) -> super::proto_rpc::GroupMember {
+        super::proto_rpc::GroupMember {
+            user_id: member.user_id.clone(),
+            role: member.role,
+            joined_at: member.joined_at,
+            state: member.state,
+            last_message_index: member.last_message_index,
+        }
+    }
+
     /// Get a group from the data base
     ///
     /// If it is a direct chat group, and does not yet exist
@@ -139,10 +149,9 @@ impl GroupManage {
     ///
     /// `account_id` the user account ID
     pub fn rename_group(account_id: &PeerId, group_id: &[u8], name: String) -> Result<(), String> {
-        if let Some(mut group) = GroupStorage::get_group(account_id.to_owned(), group_id) {
+        match GroupStorage::try_with_group_mut(account_id, group_id, |group| {
             // check if administrator
             if let Some(member) = group.get_member(&account_id.to_bytes()) {
-                // check permission
                 if member.role != 255 {
                     return Err("you don't have the permissions to rename this group".to_string());
                 }
@@ -150,38 +159,27 @@ impl GroupManage {
                 return Err("you are not a member for this group".to_string());
             }
 
-            // rename group
             group.name = name;
-
-            // update revision
             group.revision += 1;
 
-            // save group
-            GroupStorage::save_group(account_id.to_owned(), group);
-
-            return Ok(());
+            Ok(())
+        })? {
+            Some(()) => Ok(()),
+            None => Err("can not find group".to_string()),
         }
-
-        Err("can not find group".to_string())
     }
 
     /// get a new message ID
     pub fn get_new_message_id(account_id: &PeerId, group_id: &[u8]) -> Vec<u8> {
-        if let Some(mut group) = GroupStorage::get_group(account_id.to_owned(), group_id) {
-            // get my member
+        match GroupStorage::try_with_group_mut(account_id, group_id, |group| {
             let account_id_bytes = account_id.to_bytes();
-            if let Some(member) = group.members.get_mut(&account_id_bytes) {
-                member.last_message_index += 1;
-                let new_index = member.last_message_index;
-
-                GroupStorage::save_group(account_id.to_owned(), group);
-
-                // create message id
-                return Chat::generate_message_id(group_id, account_id, new_index);
-            }
+            let member = group.members.get_mut(&account_id_bytes).ok_or(())?;
+            member.last_message_index += 1;
+            Ok(member.last_message_index)
+        }) {
+            Ok(Some(new_index)) => Chat::generate_message_id(group_id, account_id, new_index),
+            Ok(None) | Err(()) => Vec::new(),
         }
-
-        Vec::new()
     }
 
     /// get group information from rpc command
@@ -199,14 +197,7 @@ impl GroupManage {
 
         let mut members = Vec::with_capacity(group.members.len());
         for m in group.members.values() {
-            let member = super::proto_rpc::GroupMember {
-                user_id: m.user_id.clone(),
-                role: m.role,
-                joined_at: m.joined_at,
-                state: m.state,
-                last_message_index: m.last_message_index,
-            };
-            members.push(member);
+            members.push(Self::to_rpc_group_member(m));
         }
 
         let res = super::proto_rpc::GroupInfo {
@@ -241,14 +232,7 @@ impl GroupManage {
                     let group: Group = bincode::deserialize(&group_bytes).unwrap();
                     let mut members = Vec::with_capacity(group.members.len());
                     for m in group.members.values() {
-                        let member = super::proto_rpc::GroupMember {
-                            user_id: m.user_id.clone(),
-                            role: m.role,
-                            joined_at: m.joined_at,
-                            state: m.state,
-                            last_message_index: m.last_message_index,
-                        };
-                        members.push(member);
+                        members.push(Self::to_rpc_group_member(m));
                     }
 
                     let grp = super::proto_rpc::GroupInfo {
@@ -286,13 +270,7 @@ impl GroupManage {
                     let invite: GroupInvited = bincode::deserialize(&invite_bytes).unwrap();
                     let mut members = Vec::with_capacity(invite.group.members.len());
                     for (_, member) in invite.group.members {
-                        members.push(super::proto_rpc::GroupMember {
-                            user_id: member.user_id,
-                            role: member.role,
-                            joined_at: member.joined_at,
-                            state: member.state,
-                            last_message_index: member.last_message_index,
-                        });
+                        members.push(Self::to_rpc_group_member(&member));
                     }
 
                     let invited = super::proto_rpc::GroupInvited {

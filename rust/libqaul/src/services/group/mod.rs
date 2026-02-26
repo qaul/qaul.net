@@ -154,12 +154,36 @@ impl Group {
 
     /// update group member
     pub fn update_group_member(account_id: &PeerId, group_id: &[u8], member: &GroupMember) {
-        if let Some(mut group) = GroupStorage::get_group(account_id.to_owned(), group_id) {
-            // insert member
+        GroupStorage::with_group_mut(account_id, group_id, |group| {
             group.members.insert(member.user_id.clone(), member.clone());
+        });
+    }
 
-            // update DB
-            GroupStorage::save_group(account_id.to_owned(), group);
+    /// Send an already encoded messaging payload to all remote group members.
+    pub fn send_to_remote_members(
+        user_account: &UserAccount,
+        group: &Group,
+        data: &[u8],
+        service_type: MessagingServiceType,
+        message_id: &[u8],
+        error_context: &str,
+    ) {
+        for member in group.members.values() {
+            let receiver = PeerId::from_bytes(&member.user_id).unwrap();
+            if receiver == user_account.id {
+                continue;
+            }
+
+            if let Err(error) = Messaging::pack_and_send_message(
+                user_account,
+                &receiver,
+                data.to_vec(),
+                service_type.clone(),
+                message_id,
+                true,
+            ) {
+                log::error!("{} {}", error_context, error);
+            }
         }
     }
 
@@ -295,21 +319,14 @@ impl Group {
 
         // send to all group members
         if let Some(user_account) = UserAccounts::get_by_id(*account_id) {
-            for user_id in group.members.keys() {
-                let receiver = PeerId::from_bytes(user_id).unwrap();
-                if receiver != *account_id {
-                    if let Err(error) = Messaging::pack_and_send_message(
-                        &user_account,
-                        &receiver,
-                        send_message_bytes.clone(),
-                        MessagingServiceType::Group,
-                        &[],
-                        true,
-                    ) {
-                        log::error!("send group notify error {}", error);
-                    }
-                }
-            }
+            Self::send_to_remote_members(
+                &user_account,
+                &group,
+                &send_message_bytes,
+                MessagingServiceType::Group,
+                &[],
+                "send group notify error",
+            );
         }
     }
 
