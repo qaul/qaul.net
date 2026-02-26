@@ -19,6 +19,58 @@ use crate::{node::user_accounts::UserAccounts, utilities::timestamp};
 pub struct Member {}
 
 impl Member {
+    fn to_proto_net_member(member: &GroupMember) -> super::proto_net::GroupMember {
+        super::proto_net::GroupMember {
+            user_id: member.user_id.clone(),
+            role: member.role,
+            joined_at: member.joined_at,
+            state: member.state,
+            last_message_index: member.last_message_index,
+        }
+    }
+
+    fn from_proto_net_member(member: &super::proto_net::GroupMember) -> GroupMember {
+        GroupMember {
+            user_id: member.user_id.clone(),
+            role: member.role,
+            joined_at: member.joined_at,
+            state: member.state,
+            last_message_index: member.last_message_index,
+        }
+    }
+
+    fn group_event_message(
+        event_type: chat::rpc_proto::GroupEventType,
+        user_id: Vec<u8>,
+    ) -> chat::rpc_proto::ChatContentMessage {
+        chat::rpc_proto::ChatContentMessage {
+            message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
+                chat::rpc_proto::GroupEvent {
+                    event_type: event_type as i32,
+                    user_id,
+                },
+            )),
+        }
+    }
+
+    fn save_group_event_message(
+        account_id: &PeerId,
+        group_id: &GroupId,
+        sender_id: &PeerId,
+        event_type: chat::rpc_proto::GroupEventType,
+        user_id: Vec<u8>,
+    ) {
+        ChatStorage::save_message(
+            account_id,
+            group_id,
+            sender_id,
+            &[],
+            Timestamp::get_timestamp(),
+            Self::group_event_message(event_type, user_id),
+            chat::rpc_proto::MessageStatus::Received,
+        );
+    }
+
     /// invite member from rpc command
     pub fn invite(account_id: &PeerId, group_id: &[u8], user_id: &PeerId) -> Result<bool, String> {
         // get group
@@ -57,13 +109,7 @@ impl Member {
         // send invite.
         let mut members = Vec::with_capacity(group.members.len());
         for member in group.members.values() {
-            members.push(super::proto_net::GroupMember {
-                user_id: member.user_id.clone(),
-                role: member.role,
-                joined_at: member.joined_at,
-                state: member.state,
-                last_message_index: member.last_message_index,
-            });
+            members.push(Self::to_proto_net_member(member));
         }
 
         let proto_message = super::proto_net::GroupContainer {
@@ -137,7 +183,7 @@ impl Member {
             Group::send_notify_message(&user_account, &receiver, proto_message.encode_to_vec());
 
             // remove invited
-            GroupStorage::remove_invite(account_id.to_owned(), group_id);
+            GroupStorage::remove_invite_deferred(account_id.to_owned(), group_id);
         } else {
             return Err("user account problem".to_string());
         }
@@ -145,26 +191,17 @@ impl Member {
         // save group into data base if invite was accepted
         if accept {
             // save group to data base
-            GroupStorage::save_group(account_id.to_owned(), invite.group);
+            GroupStorage::save_group_deferred(account_id.to_owned(), invite.group);
+        }
+        GroupStorage::flush_account(account_id);
 
-            // save group event: invite accepted message into chat
-            let event = chat::rpc_proto::ChatContentMessage {
-                message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
-                    chat::rpc_proto::GroupEvent {
-                        event_type: chat::rpc_proto::GroupEventType::InviteAccepted as i32,
-                        user_id: account_id.to_bytes(),
-                    },
-                )),
-            };
-
-            ChatStorage::save_message(
+        if accept {
+            Self::save_group_event_message(
                 account_id,
                 &GroupId::from_bytes(group_id).unwrap(),
                 account_id,
-                &Vec::new(),
-                Timestamp::get_timestamp(),
-                event,
-                chat::rpc_proto::MessageStatus::Received,
+                chat::rpc_proto::GroupEventType::InviteAccepted,
+                account_id.to_bytes(),
             );
         }
 
@@ -229,23 +266,12 @@ impl Member {
         Group::send_notify_message(&user_account, user_id, proto_message.encode_to_vec());
 
         // save group event
-        let event = chat::rpc_proto::ChatContentMessage {
-            message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
-                chat::rpc_proto::GroupEvent {
-                    event_type: chat::rpc_proto::GroupEventType::Left.try_into().unwrap(),
-                    user_id: user_id.to_bytes(),
-                },
-            )),
-        };
-
-        ChatStorage::save_message(
+        Self::save_group_event_message(
             account_id,
             &GroupId::from_bytes(group_id).unwrap(),
             user_id,
-            &Vec::new(),
-            Timestamp::get_timestamp(),
-            event,
-            chat::rpc_proto::MessageStatus::Received,
+            chat::rpc_proto::GroupEventType::Left,
+            user_id.to_bytes(),
         );
 
         Ok(true)
@@ -266,16 +292,9 @@ impl Member {
         let mut group = Group::new();
 
         for member in &group_info.members {
-            group.members.insert(
-                member.user_id.clone(),
-                GroupMember {
-                    user_id: member.user_id.clone(),
-                    role: member.role,
-                    joined_at: member.joined_at,
-                    state: member.state,
-                    last_message_index: member.last_message_index,
-                },
-            );
+            group
+                .members
+                .insert(member.user_id.clone(), Self::from_proto_net_member(member));
         }
 
         group.id = group_info.group_id.clone();
@@ -332,23 +351,12 @@ impl Member {
         GroupStorage::save_group(account_id.to_owned(), group);
 
         // save event
-        let event = chat::rpc_proto::ChatContentMessage {
-            message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
-                chat::rpc_proto::GroupEvent {
-                    event_type: chat::rpc_proto::GroupEventType::Joined.try_into().unwrap(),
-                    user_id: sender_id.to_bytes(),
-                },
-            )),
-        };
-
-        ChatStorage::save_message(
+        Self::save_group_event_message(
             account_id,
             &group_id,
             sender_id,
-            &Vec::new(),
-            Timestamp::get_timestamp(),
-            event,
-            chat::rpc_proto::MessageStatus::Received,
+            chat::rpc_proto::GroupEventType::Joined,
+            sender_id.to_bytes(),
         );
 
         Ok(true)
@@ -445,23 +453,12 @@ impl Member {
         GroupStorage::save_group(account_id.to_owned(), group);
 
         // save event
-        let event = chat::rpc_proto::ChatContentMessage {
-            message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
-                chat::rpc_proto::GroupEvent {
-                    event_type: chat::rpc_proto::GroupEventType::Removed as i32,
-                    user_id: account_id_bytes,
-                },
-            )),
-        };
-
-        ChatStorage::save_message(
+        Self::save_group_event_message(
             account_id,
             &group_id,
             sender_id,
-            &Vec::new(),
-            Timestamp::get_timestamp(),
-            event,
-            chat::rpc_proto::MessageStatus::Received,
+            chat::rpc_proto::GroupEventType::Removed,
+            account_id_bytes,
         );
 
         Ok(true)

@@ -24,6 +24,38 @@ impl GroupManage {
         }
     }
 
+    fn group_event_message(
+        event_type: chat::rpc_proto::GroupEventType,
+        user_id: Vec<u8>,
+    ) -> chat::rpc_proto::ChatContentMessage {
+        chat::rpc_proto::ChatContentMessage {
+            message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
+                chat::rpc_proto::GroupEvent {
+                    event_type: event_type as i32,
+                    user_id,
+                },
+            )),
+        }
+    }
+
+    fn save_group_event_deferred(
+        account_id: &PeerId,
+        group_id: &GroupId,
+        sender_id: &PeerId,
+        event_type: chat::rpc_proto::GroupEventType,
+        user_id: Vec<u8>,
+    ) {
+        ChatStorage::save_message_deferred(
+            account_id,
+            group_id,
+            sender_id,
+            &[],
+            Timestamp::get_timestamp(),
+            Self::group_event_message(event_type, user_id),
+            chat::rpc_proto::MessageStatus::Received,
+        );
+    }
+
     /// Get a group from the data base
     ///
     /// If it is a direct chat group, and does not yet exist
@@ -397,67 +429,43 @@ impl GroupManage {
         GroupStorage::save_group(account_id, group);
 
         // save events
+        let mut wrote_group_events = false;
         if first_join {
-            let event = chat::rpc_proto::ChatContentMessage {
-                message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
-                    chat::rpc_proto::GroupEvent {
-                        event_type: chat::rpc_proto::GroupEventType::Joined.try_into().unwrap(),
-                        user_id: account_id_bytes.clone(),
-                    },
-                )),
-            };
-
-            ChatStorage::save_message(
+            Self::save_group_event_deferred(
                 &account_id,
                 &group_id,
                 &sender_id,
-                &Vec::new(),
-                Timestamp::get_timestamp(),
-                event,
-                chat::rpc_proto::MessageStatus::Received,
+                chat::rpc_proto::GroupEventType::Joined,
+                account_id_bytes.clone(),
             );
+            wrote_group_events = true;
         } else {
             for new_member in &new_members {
-                let event = chat::rpc_proto::ChatContentMessage {
-                    message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
-                        chat::rpc_proto::GroupEvent {
-                            event_type: chat::rpc_proto::GroupEventType::Joined.try_into().unwrap(),
-                            user_id: new_member.clone(),
-                        },
-                    )),
-                };
-
-                ChatStorage::save_message(
+                Self::save_group_event_deferred(
                     &account_id,
                     &group_id,
                     &sender_id,
-                    &Vec::new(),
-                    Timestamp::get_timestamp(),
-                    event,
-                    chat::rpc_proto::MessageStatus::Received,
+                    chat::rpc_proto::GroupEventType::Joined,
+                    new_member.clone(),
                 );
+                wrote_group_events = true;
             }
 
             for left_member in orign_members.keys() {
-                let event = chat::rpc_proto::ChatContentMessage {
-                    message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
-                        chat::rpc_proto::GroupEvent {
-                            event_type: chat::rpc_proto::GroupEventType::Left.try_into().unwrap(),
-                            user_id: left_member.clone(),
-                        },
-                    )),
-                };
-
-                ChatStorage::save_message(
+                Self::save_group_event_deferred(
                     &account_id,
                     &group_id,
                     &sender_id,
-                    &Vec::new(),
-                    Timestamp::get_timestamp(),
-                    event,
-                    chat::rpc_proto::MessageStatus::Received,
+                    chat::rpc_proto::GroupEventType::Left,
+                    left_member.clone(),
                 );
+                wrote_group_events = true;
             }
+        }
+
+        if wrote_group_events {
+            ChatStorage::flush_account(&account_id);
+            GroupStorage::flush_account(&account_id);
         }
     }
 }

@@ -77,6 +77,13 @@ impl GroupStorage {
         }
     }
 
+    /// Flush all group-related trees for an account.
+    pub fn flush_account(account_id: &PeerId) {
+        let db_ref = Self::get_db_ref(account_id.to_owned());
+        Self::maybe_flush_tree(&db_ref.groups, FlushMode::Immediate, "Error groups flush");
+        Self::maybe_flush_tree(&db_ref.invited, FlushMode::Immediate, "Error invited flush");
+    }
+
     /// create group account db entry when it does not exist
     fn create_groupaccountdb(account_id: PeerId) -> GroupAccountDb {
         // get user data base
@@ -201,9 +208,45 @@ impl GroupStorage {
         message: Vec<u8>,
         received_at: u64,
     ) {
+        Self::group_update_last_chat_message_with_mode(
+            account_id,
+            group_id,
+            sender_id,
+            message,
+            received_at,
+            FlushMode::Immediate,
+        );
+    }
+
+    /// Update last chat message information without flushing the group tree.
+    pub fn group_update_last_chat_message_deferred(
+        account_id: PeerId,
+        group_id: Vec<u8>,
+        sender_id: PeerId,
+        message: Vec<u8>,
+        received_at: u64,
+    ) {
+        Self::group_update_last_chat_message_with_mode(
+            account_id,
+            group_id,
+            sender_id,
+            message,
+            received_at,
+            FlushMode::Deferred,
+        );
+    }
+
+    fn group_update_last_chat_message_with_mode(
+        account_id: PeerId,
+        group_id: Vec<u8>,
+        sender_id: PeerId,
+        message: Vec<u8>,
+        received_at: u64,
+        flush_mode: FlushMode,
+    ) {
         log::debug!("group_update_last_chat_message");
 
-        if Self::with_group_mut(&account_id, &group_id, |group| {
+        if let Some(mut group) = Self::get_group(account_id, &group_id) {
             // update values
             group.last_message_sender_id = sender_id.to_bytes();
             group.last_message_at = received_at;
@@ -213,9 +256,8 @@ impl GroupStorage {
             if sender_id != account_id {
                 group.unread_messages += 1;
             }
-        })
-        .is_none()
-        {
+            Self::save_group_with_mode(account_id, group, flush_mode);
+        } else {
             log::error!("group_update_last_chat group not found");
         }
     }
@@ -279,6 +321,7 @@ impl GroupStorage {
     }
 
     /// Remove a group invite from the data base
+    #[allow(dead_code)]
     pub fn remove_invite(account_id: PeerId, group_id: &[u8]) {
         Self::remove_invite_with_mode(account_id, group_id, FlushMode::Immediate);
     }
