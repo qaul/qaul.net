@@ -13,7 +13,6 @@ use sled;
 use state::InitCell;
 use std::{
     collections::BTreeMap,
-    convert::TryInto,
     ffi::OsStr,
     fs::{self, File},
     io::{Read, Write},
@@ -401,6 +400,59 @@ impl ChatFile {
         files_storage_path.join(file_name)
     }
 
+    fn file_content_from_history(file_history: &FileHistory) -> super::rpc_proto::FileContent {
+        super::rpc_proto::FileContent {
+            file_id: file_history.file_id,
+            file_name: file_history.file_name.clone(),
+            file_extension: file_history.file_extension.clone(),
+            file_size: file_history.file_size,
+            file_description: file_history.file_description.clone(),
+        }
+    }
+
+    fn rpc_history_entry_from_file_history(entry: &FileHistory) -> proto_rpc::FileHistoryEntry {
+        let group_id = GroupId::from_bytes(&entry.group_id)
+            .map(|id| id.to_string())
+            .unwrap_or_else(|_| GroupId::slice_to_string(&entry.group_id));
+
+        proto_rpc::FileHistoryEntry {
+            file_id: entry.file_id,
+            file_name: entry.file_name.clone(),
+            file_extension: entry.file_extension.clone(),
+            file_size: entry.file_size,
+            file_description: entry.file_description.clone(),
+            time: entry.sent_at,
+            sender_id: bs58::encode(&entry.sender_id).into_string(),
+            group_id,
+        }
+    }
+
+    fn file_history_from_info_message(
+        sender_id: &PeerId,
+        group_id: &[u8],
+        message_id: &[u8],
+        sent_at: u64,
+        file_info: &proto_net::ChatFileInfo,
+    ) -> FileHistory {
+        FileHistory {
+            group_id: group_id.to_vec(),
+            sender_id: sender_id.to_bytes(),
+            file_id: file_info.file_id,
+            message_id: message_id.to_vec(),
+            start_index: file_info.start_index,
+            message_count: file_info.message_count,
+            chunk_size: file_info.data_chunk_size,
+            file_state: FileState::Receiving,
+            reception_tracking: BTreeMap::new(),
+            file_name: file_info.file_name.clone(),
+            file_description: file_info.file_description.clone(),
+            file_extension: file_info.file_extension.clone(),
+            file_size: file_info.file_size,
+            sent_at,
+            received_at: Timestamp::get_timestamp(),
+        }
+    }
+
     /// Getting file histories from table.
     /// This function is called from RPC command (file history [offset limit])
     pub fn file_history(
@@ -669,16 +721,11 @@ impl ChatFile {
         log::trace!("save_filemsg_in_chat");
 
         // create chat file message content
-        let chat_filecontent = super::rpc_proto::FileContent {
-            file_id: file_history.file_id,
-            file_name: file_history.file_name.clone(),
-            file_extension: file_history.file_extension.clone(),
-            file_size: file_history.file_size,
-            file_description: file_history.file_description.clone(),
-        };
         let chat_message = super::rpc_proto::ChatContentMessage {
             message: Some(
-                super::rpc_proto::chat_content_message::Message::FileContent(chat_filecontent),
+                super::rpc_proto::chat_content_message::Message::FileContent(
+                    Self::file_content_from_history(file_history),
+                ),
             ),
         };
 
@@ -882,23 +929,13 @@ impl ChatFile {
 
             // update fields
         } else {
-            file_history = FileHistory {
-                group_id: group_id.clone(),
-                sender_id: sender_id.to_bytes(),
-                file_id: file_info.file_id,
-                message_id: message_id.clone(),
-                start_index: file_info.start_index,
-                message_count: file_info.message_count,
-                chunk_size: file_info.data_chunk_size,
-                file_state: FileState::Receiving,
-                reception_tracking: BTreeMap::new(),
-                file_name: file_info.file_name.clone(),
-                file_description: file_info.file_description.clone(),
-                file_extension: file_info.file_extension.clone(),
-                file_size: file_info.file_size,
+            file_history = Self::file_history_from_info_message(
+                &sender_id,
+                &group_id,
+                &message_id,
                 sent_at,
-                received_at: Timestamp::get_timestamp(),
-            };
+                &file_info,
+            );
         }
 
         // save to file history
@@ -1004,22 +1041,9 @@ impl ChatFile {
 
                         let list = Self::file_history(&user_account, &history_req);
 
-                        let mut histories: Vec<proto_rpc::FileHistoryEntry> = vec![];
-                        for entry in list {
-                            let file_entry = proto_rpc::FileHistoryEntry {
-                                file_id: entry.file_id,
-                                file_name: entry.file_name.clone(),
-                                file_extension: entry.file_extension.clone(),
-                                file_size: entry.file_size,
-                                file_description: entry.file_description.clone(),
-                                time: entry.sent_at,
-                                sender_id: bs58::encode(entry.sender_id).into_string(),
-                                group_id: uuid::Uuid::from_bytes(
-                                    entry.group_id.try_into().unwrap(),
-                                )
-                                .to_string(),
-                            };
-                            histories.push(file_entry);
+                        let mut histories = Vec::with_capacity(list.len());
+                        for entry in &list {
+                            histories.push(Self::rpc_history_entry_from_file_history(entry));
                         }
 
                         // pack message

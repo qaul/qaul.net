@@ -24,13 +24,19 @@ pub struct GroupId {
 }
 
 impl GroupId {
+    pub const BYTE_LEN: usize = 16;
+
     /// creates a group id from a bytes vector
     pub fn from_bytes(id: &[u8]) -> Result<GroupId, String> {
-        if id.len() == 16 {
+        if id.len() == Self::BYTE_LEN {
             Ok(GroupId { id: id.to_vec() })
         } else {
             Err("invalid length".to_string())
         }
+    }
+
+    pub fn as_slice(&self) -> &[u8] {
+        &self.id
     }
 
     /// create group id for a direct chat from two user ids

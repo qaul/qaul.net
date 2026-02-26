@@ -58,6 +58,21 @@ impl ChatStorage {
         CHAT.set(RwLock::new(chat));
     }
 
+    /// Flush all chat-related trees for an account.
+    pub fn flush_account(account_id: &PeerId) {
+        let db_ref = Self::get_db_ref(account_id.to_owned());
+        Self::maybe_flush_tree(
+            &db_ref.messages,
+            FlushMode::Immediate,
+            "Error chat messages flush",
+        );
+        Self::maybe_flush_tree(
+            &db_ref.message_ids,
+            FlushMode::Immediate,
+            "Error chat message_ids flush",
+        );
+    }
+
     fn maybe_flush_tree(tree: &sled::Tree, flush_mode: FlushMode, error_context: &str) {
         if matches!(flush_mode, FlushMode::Deferred) {
             return;
@@ -178,7 +193,7 @@ impl ChatStorage {
         account_id: &PeerId,
         group_id: &GroupId,
         sender_id: &PeerId,
-        message_id: &Vec<u8>,
+        message_id: &[u8],
         sent_at: u64,
         content: super::rpc_proto::ChatContentMessage,
         status: rpc_proto::MessageStatus,
@@ -203,7 +218,7 @@ impl ChatStorage {
         account_id: &PeerId,
         group_id: &GroupId,
         sender_id: &PeerId,
-        message_id: &Vec<u8>,
+        message_id: &[u8],
         sent_at: u64,
         content: super::rpc_proto::ChatContentMessage,
         status: rpc_proto::MessageStatus,
@@ -251,13 +266,22 @@ impl ChatStorage {
         let received_at = Timestamp::get_timestamp();
 
         // update last message
-        GroupStorage::group_update_last_chat_message(
-            account_id.to_owned(),
-            group_id_bytes.clone(),
-            sender_id.to_owned(),
-            content_bytes.clone(),
-            received_at,
-        );
+        match flush_mode {
+            FlushMode::Immediate => GroupStorage::group_update_last_chat_message(
+                account_id.to_owned(),
+                group_id_bytes.clone(),
+                sender_id.to_owned(),
+                content_bytes.clone(),
+                received_at,
+            ),
+            FlushMode::Deferred => GroupStorage::group_update_last_chat_message_deferred(
+                account_id.to_owned(),
+                group_id_bytes.clone(),
+                sender_id.to_owned(),
+                content_bytes.clone(),
+                received_at,
+            ),
+        }
 
         // get next index
         let index = Self::get_next_db_index(db_ref.clone(), &group_id_bytes);
@@ -290,7 +314,7 @@ impl ChatStorage {
     pub fn update_confirmation(
         account_id: PeerId,
         receiver_id: PeerId,
-        message_id: &Vec<u8>,
+        message_id: &[u8],
         received_at: u64,
     ) {
         Self::update_confirmation_with_mode(
@@ -307,7 +331,7 @@ impl ChatStorage {
     pub fn update_confirmation_deferred(
         account_id: PeerId,
         receiver_id: PeerId,
-        message_id: &Vec<u8>,
+        message_id: &[u8],
         received_at: u64,
     ) {
         Self::update_confirmation_with_mode(
@@ -349,7 +373,7 @@ impl ChatStorage {
     /// update message status
     pub fn udate_status(
         account_id: &PeerId,
-        message_id: &Vec<u8>,
+        message_id: &[u8],
         status: super::rpc_proto::MessageStatus,
     ) {
         Self::udate_status_with_mode(account_id, message_id, status, FlushMode::Immediate);
@@ -359,7 +383,7 @@ impl ChatStorage {
     #[allow(dead_code)]
     pub fn udate_status_deferred(
         account_id: &PeerId,
-        message_id: &Vec<u8>,
+        message_id: &[u8],
         status: super::rpc_proto::MessageStatus,
     ) {
         Self::udate_status_with_mode(account_id, message_id, status, FlushMode::Deferred);
@@ -382,12 +406,12 @@ impl ChatStorage {
         // create empty messages list
         let mut message_list: Vec<rpc_proto::ChatMessage> = Vec::new();
 
-        if group_id.len() == 16 {
+        if let Ok(group_id_typed) = GroupId::from_bytes(&group_id) {
             // get database references for this user account
             let db_ref = Self::get_db_ref(account_id);
 
             // create message keys
-            let (first_key, last_key) = Self::get_db_key_range(&group_id.clone());
+            let (first_key, last_key) = Self::get_db_key_range(group_id_typed.as_slice());
 
             // iterate over all values in chat_messages db
             for res in db_ref
@@ -422,29 +446,29 @@ impl ChatStorage {
     /// retrieve all messages for a user ID from the DB:
     ///
     /// (first_key, last_key)
-    fn get_db_key_range(group_id: &Vec<u8>) -> (Vec<u8>, Vec<u8>) {
+    fn get_db_key_range(group_id: &[u8]) -> (Vec<u8>, Vec<u8>) {
         let first_key = Self::get_db_key_from_vec(group_id, 0);
         let last_key = Self::get_db_key_from_vec(group_id, 0xFFFFFFFFFFFFFFFF); // = 4294967295
         (first_key, last_key)
     }
 
     /// create DB key from group id
-    fn get_db_key_from_vec(group_id: &Vec<u8>, index: u64) -> Vec<u8> {
+    fn get_db_key_from_vec(group_id: &[u8], index: u64) -> Vec<u8> {
         let mut index_bytes = index.to_be_bytes().to_vec();
-        let mut key_bytes = group_id.clone();
+        let mut key_bytes = group_id.to_vec();
         key_bytes.append(&mut index_bytes);
         key_bytes
     }
 
     /// get nex db_index key
-    fn get_next_db_index(db_ref: ChatAccountDb, group_id: &Vec<u8>) -> u64 {
+    fn get_next_db_index(db_ref: ChatAccountDb, group_id: &[u8]) -> u64 {
         // get biggest existing index
         let search_key = Self::get_db_key_from_vec(group_id, u64::MAX);
         let result = db_ref.messages.get_lt(search_key);
         if let Ok(Some((_key, value))) = result {
             // check if result is really of the same group
             let chat_message: rpc_proto::ChatMessage = bincode::deserialize(&value).unwrap();
-            if group_id.to_owned() == chat_message.group_id {
+            if group_id == chat_message.group_id.as_slice() {
                 return chat_message.index + 1;
             }
         }
