@@ -22,11 +22,12 @@ String navBarTabIconPath(TabType tab, bool selected) {
 }
 
 (Color, Color, Color) navBarColors(ThemeData theme) {
+  final iconColor = theme.iconTheme.color ?? Colors.white;
   if (theme.brightness == Brightness.dark) {
     return (
       kNavBarSelectedBackgroundDark,
-      theme.iconTheme.color!,
-      theme.navigationBarTheme.surfaceTintColor ?? theme.iconTheme.color!,
+      iconColor,
+      theme.navigationBarTheme.surfaceTintColor ?? iconColor,
     );
   }
   return (

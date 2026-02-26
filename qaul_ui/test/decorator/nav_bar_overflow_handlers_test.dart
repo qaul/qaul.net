@@ -1,25 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:qaul_components/qaul_components.dart';
+import 'package:qaul_ui/decorators/nav_bar_overflow_handlers.dart';
 import 'package:qaul_ui/l10n/app_localizations.dart';
-import 'package:qaul_ui/nav_bar/nav_bar_helper.dart';
 import 'package:qaul_ui/qaul_app.dart';
 
 void main() {
-  group('NavBarOverflowOption', () {
-    test('has six values', () {
-      expect(NavBarOverflowOption.values.length, 6);
-    });
-
-    test('contains all expected options', () {
-      expect(NavBarOverflowOption.values, contains(NavBarOverflowOption.settings));
-      expect(NavBarOverflowOption.values, contains(NavBarOverflowOption.about));
-      expect(NavBarOverflowOption.values, contains(NavBarOverflowOption.license));
-      expect(NavBarOverflowOption.values, contains(NavBarOverflowOption.support));
-      expect(NavBarOverflowOption.values, contains(NavBarOverflowOption.oldNetwork));
-      expect(NavBarOverflowOption.values, contains(NavBarOverflowOption.files));
-    });
-  });
-
   group('navBarOverflowMenuLabels', () {
     testWidgets('returns map with all six options for en locale', (tester) async {
       await tester.pumpWidget(

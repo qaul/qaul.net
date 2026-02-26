@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:qaul_ui/nav_bar/constants.dart';
-import 'package:qaul_ui/providers/providers.dart';
+import 'package:qaul_components/qaul_components.dart';
 
 void main() {
   group('navBarIconPath', () {
@@ -46,8 +45,8 @@ void main() {
       final theme = ThemeData.dark();
       final (selected, icon, active) = navBarColors(theme);
       expect(selected, kNavBarSelectedBackgroundDark);
-      expect(icon, theme.iconTheme.color);
-      expect(active, theme.navigationBarTheme.surfaceTintColor ?? theme.iconTheme.color);
+      expect(icon, theme.iconTheme.color ?? Colors.white);
+      expect(active, theme.navigationBarTheme.surfaceTintColor ?? theme.iconTheme.color ?? Colors.white);
     });
 
     test('returns light theme colors for Brightness.light', () {

@@ -26,19 +26,27 @@ class WidgetbookApp extends StatelessWidget {
       directories: directories,
       addons: [
         ViewportAddon([
-          Viewports.none,
-          ...kDesignerBreakpoints.map(
-            (v) => ViewportData(
-              name: v.name,
-              width: v.width,
-              height: v.height,
-              pixelRatio: 2.0,
-              platform: v.name == kBreakpointIphone16 ||
-                  v.name == kBreakpointIphone16Pro
-              ? TargetPlatform.iOS
-              : TargetPlatform.linux,
-            ),
+          ViewportData(
+            name: kBreakpointIphone16,
+            width: 393,
+            height: 852,
+            pixelRatio: 2.0,
+            platform: TargetPlatform.iOS,
           ),
+          Viewports.none,
+          ...kDesignerBreakpoints
+              .where((v) => v.name != kBreakpointIphone16)
+              .map(
+                (v) => ViewportData(
+                  name: v.name,
+                  width: v.width,
+                  height: v.height,
+                  pixelRatio: 2.0,
+                  platform: v.name == kBreakpointIphone16Pro
+                      ? TargetPlatform.iOS
+                      : TargetPlatform.linux,
+                ),
+              ),
           ...IosViewports.phones,
           ...IosViewports.tablets,
           AndroidViewports.samsungGalaxyS20,

@@ -1,20 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:qaul_components/qaul_components.dart';
 
 import '../helpers/navigation_helper.dart';
 import '../l10n/app_localizations.dart';
 import '../screens/home/tabs/tab.dart';
 import '../widgets/widgets.dart';
-
-import 'constants.dart';
-
-enum NavBarOverflowOption {
-  settings,
-  about,
-  license,
-  support,
-  oldNetwork,
-  files,
-}
 
 Map<NavBarOverflowOption, String> navBarOverflowMenuLabels(BuildContext context) {
   final l10n = AppLocalizations.of(context)!;
@@ -51,7 +41,7 @@ void handleNavBarOverflowSelected(
             title: Row(
               children: [
                 const Icon(Icons.language),
-                const SizedBox(width: kNavBarHorizontalPadding),
+                const SizedBox(width: 8),
                 Text(AppLocalizations.of(context)!.routingDataTable),
               ],
             ),

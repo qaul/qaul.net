@@ -4,15 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
+import 'package:qaul_components/qaul_components.dart';
 import 'package:qaul_ui/decorators/qaul_nav_bar_decorator.dart';
 import 'package:qaul_ui/l10n/app_localizations.dart';
-import 'package:qaul_ui/nav_bar/widgets/qaul_nav_bar.dart';
-import 'package:qaul_ui/nav_bar/nav_bar_helper.dart';
 import 'package:qaul_ui/providers/providers.dart';
 import 'package:qaul_ui/qaul_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../nav_bar_test_stubs.dart';
+import 'nav_bar_test_stubs.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -55,8 +54,7 @@ void main() {
       await tester.binding.setSurfaceSize(const Size(400, 800));
       await tester.pumpWidget(buildDecorator());
 
-      expect(find.byType(QaulNavBar), findsOneWidget);
-      expect(find.byType(QaulNavBarItem), findsNWidgets(5));
+      expect(find.byType(QaulNavBarWidget), findsOneWidget);
       expect(find.byType(Expanded), findsWidgets);
     });
 
