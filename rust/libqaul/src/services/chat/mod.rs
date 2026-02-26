@@ -47,16 +47,15 @@ impl Chat {
     /// * the group_id (group_id)
     /// * the sender id
     /// * the message index of the sender
-    pub fn generate_message_id(group_id: &Vec<u8>, sender_id: &PeerId, index: u32) -> Vec<u8> {
+    pub fn generate_message_id(group_id: &[u8], sender_id: &PeerId, index: u32) -> Vec<u8> {
         let group_crc = crc::Crc::<u64>::new(&crc::CRC_64_GO_ISO).checksum(group_id);
         let sender_crc = crc::Crc::<u64>::new(&crc::CRC_64_GO_ISO).checksum(&sender_id.to_bytes());
-        let mut buff0 = group_crc.to_be_bytes().to_vec();
-        let mut buff = sender_crc.to_be_bytes().to_vec();
-        let mut index_bytes = index.to_be_bytes().to_vec();
+        let mut message_id = Vec::with_capacity(8 + 8 + 4);
 
-        buff0.append(&mut buff);
-        buff0.append(&mut index_bytes);
-        buff0
+        message_id.extend_from_slice(&group_crc.to_be_bytes());
+        message_id.extend_from_slice(&sender_crc.to_be_bytes());
+        message_id.extend_from_slice(&index.to_be_bytes());
+        message_id
     }
 
     /// Process incoming RPC request messages for chat module
@@ -98,7 +97,7 @@ impl Chat {
                     }
                     Some(rpc_proto::chat::Message::Send(message)) => {
                         // print message
-                        log::trace!("sending chat message: {}", message.content.clone());
+                        log::trace!("sending chat message: {}", message.content);
 
                         // get user account from user_id
                         let user_account;

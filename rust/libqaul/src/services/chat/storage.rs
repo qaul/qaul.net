@@ -41,6 +41,13 @@ pub struct ChatStorage {
     db_ref: BTreeMap<Vec<u8>, ChatAccountDb>,
 }
 
+#[allow(dead_code)]
+#[derive(Clone, Copy)]
+enum FlushMode {
+    Immediate,
+    Deferred,
+}
+
 impl ChatStorage {
     /// initialize chat storage
     pub fn init() {
@@ -49,6 +56,84 @@ impl ChatStorage {
             db_ref: BTreeMap::new(),
         };
         CHAT.set(RwLock::new(chat));
+    }
+
+    /// Flush all chat-related trees for an account.
+    pub fn flush_account(account_id: &PeerId) {
+        let db_ref = Self::get_db_ref(account_id.to_owned());
+        Self::maybe_flush_tree(
+            &db_ref.messages,
+            FlushMode::Immediate,
+            "Error chat messages flush",
+        );
+        Self::maybe_flush_tree(
+            &db_ref.message_ids,
+            FlushMode::Immediate,
+            "Error chat message_ids flush",
+        );
+    }
+
+    fn maybe_flush_tree(tree: &sled::Tree, flush_mode: FlushMode, error_context: &str) {
+        if matches!(flush_mode, FlushMode::Deferred) {
+            return;
+        }
+
+        if let Err(e) = tree.flush() {
+            log::error!("{}: {}", error_context, e);
+        }
+    }
+
+    fn save_chat_message_record(
+        db_ref: &ChatAccountDb,
+        db_key: &[u8],
+        chat_message: &rpc_proto::ChatMessage,
+        flush_mode: FlushMode,
+    ) {
+        let chat_message_bytes = bincode::serialize(chat_message).unwrap();
+        if let Err(e) = db_ref.messages.insert(db_key, chat_message_bytes) {
+            log::error!("Error saving chat message to data base: {}", e);
+            return;
+        }
+
+        Self::maybe_flush_tree(&db_ref.messages, flush_mode, "Error chat messages flush");
+    }
+
+    fn save_message_id_mapping(
+        db_ref: &ChatAccountDb,
+        message_id: &[u8],
+        db_key: &[u8],
+        flush_mode: FlushMode,
+    ) {
+        if let Err(e) = db_ref.message_ids.insert(message_id, db_key) {
+            log::error!("Error saving chat messageid to data base: {}", e);
+            return;
+        }
+
+        Self::maybe_flush_tree(
+            &db_ref.message_ids,
+            flush_mode,
+            "Error chat message_ids flush",
+        );
+    }
+
+    fn mutate_chat_message_by_id(
+        db_ref: &ChatAccountDb,
+        message_id: &[u8],
+        flush_mode: FlushMode,
+        mutate: impl FnOnce(&mut rpc_proto::ChatMessage),
+    ) {
+        let Some(key) = db_ref.message_ids.get(message_id).unwrap() else {
+            return;
+        };
+        let Some(chat_msg_fromdb) = db_ref.messages.get(&key).unwrap() else {
+            return;
+        };
+
+        let mut chat_message: rpc_proto::ChatMessage =
+            bincode::deserialize(&chat_msg_fromdb).unwrap();
+        mutate(&mut chat_message);
+
+        Self::save_chat_message_record(db_ref, &key, &chat_message, flush_mode);
     }
 
     /// check if messages exists
@@ -84,12 +169,16 @@ impl ChatStorage {
             }
         }
 
-        if let Err(_e) = db_ref.messages.flush() {
-            log::error!("message storing error!");
-        }
-        if let Err(_e) = db_ref.message_ids.flush() {
-            log::error!("message ids storing error!");
-        }
+        Self::maybe_flush_tree(
+            &db_ref.messages,
+            FlushMode::Immediate,
+            "message storing error",
+        );
+        Self::maybe_flush_tree(
+            &db_ref.message_ids,
+            FlushMode::Immediate,
+            "message ids storing error",
+        );
     }
 
     /// Save a Chat Message
@@ -104,10 +193,57 @@ impl ChatStorage {
         account_id: &PeerId,
         group_id: &GroupId,
         sender_id: &PeerId,
-        message_id: &Vec<u8>,
+        message_id: &[u8],
         sent_at: u64,
         content: super::rpc_proto::ChatContentMessage,
         status: rpc_proto::MessageStatus,
+    ) {
+        Self::save_message_with_mode(
+            account_id,
+            group_id,
+            sender_id,
+            message_id,
+            sent_at,
+            content,
+            status,
+            FlushMode::Immediate,
+        );
+    }
+
+    /// Save a chat message without flushing the chat trees.
+    ///
+    /// Useful when multiple writes are performed in sequence.
+    #[allow(dead_code)]
+    pub fn save_message_deferred(
+        account_id: &PeerId,
+        group_id: &GroupId,
+        sender_id: &PeerId,
+        message_id: &[u8],
+        sent_at: u64,
+        content: super::rpc_proto::ChatContentMessage,
+        status: rpc_proto::MessageStatus,
+    ) {
+        Self::save_message_with_mode(
+            account_id,
+            group_id,
+            sender_id,
+            message_id,
+            sent_at,
+            content,
+            status,
+            FlushMode::Deferred,
+        );
+    }
+
+    fn save_message_with_mode(
+        account_id: &PeerId,
+        group_id: &GroupId,
+        sender_id: &PeerId,
+        message_id: &[u8],
+        sent_at: u64,
+        content: super::rpc_proto::ChatContentMessage,
+        status: rpc_proto::MessageStatus,
+        flush_mode: FlushMode,
     ) {
         log::trace!("chat save_message");
 
@@ -116,66 +252,61 @@ impl ChatStorage {
 
         // check if message_id already exists
         // this protects the double saving of incoming messages
-        if message_id.len() > 0 {
+        if !message_id.is_empty() {
             if db_ref.message_ids.contains_key(message_id).unwrap() {
                 log::warn!("chat message already exists");
                 return;
             }
         }
 
+        let group_id_bytes = group_id.to_bytes();
+        let content_bytes = content.encode_to_vec();
+
         // create received at timestamp
         let received_at = Timestamp::get_timestamp();
 
         // update last message
-        GroupStorage::group_update_last_chat_message(
-            account_id.to_owned(),
-            group_id.to_bytes(),
-            sender_id.to_owned(),
-            content.encode_to_vec(),
-            received_at,
-        );
+        match flush_mode {
+            FlushMode::Immediate => GroupStorage::group_update_last_chat_message(
+                account_id.to_owned(),
+                group_id_bytes.clone(),
+                sender_id.to_owned(),
+                content_bytes.clone(),
+                received_at,
+            ),
+            FlushMode::Deferred => GroupStorage::group_update_last_chat_message_deferred(
+                account_id.to_owned(),
+                group_id_bytes.clone(),
+                sender_id.to_owned(),
+                content_bytes.clone(),
+                received_at,
+            ),
+        }
 
         // get next index
-        let index = Self::get_next_db_index(db_ref.clone(), &group_id.to_bytes());
+        let index = Self::get_next_db_index(db_ref.clone(), &group_id_bytes);
 
         // create data base key
-        let db_key = Self::get_db_key_from_vec(&group_id.to_bytes(), index);
+        let db_key = Self::get_db_key_from_vec(&group_id_bytes, index);
 
         // create chat message
         let chat_message = rpc_proto::ChatMessage {
             index,
             sender_id: sender_id.to_bytes(),
-            message_id: message_id.clone(),
+            message_id: message_id.to_vec(),
             status: status as i32,
             message_reception_confirmed: Vec::new(),
-            group_id: group_id.to_bytes(),
+            group_id: group_id_bytes,
             sent_at,
             received_at,
-            content: content.encode_to_vec(),
+            content: content_bytes,
         };
 
-        // save message in data base
-        let chat_message_bytes = bincode::serialize(&chat_message).unwrap();
-        if let Err(e) = db_ref.messages.insert(db_key.clone(), chat_message_bytes) {
-            log::error!("Error saving chat message to data base: {}", e);
-        }
-        // flush trees to disk
-        if let Err(e) = db_ref.messages.flush() {
-            log::error!("Error chat messages flush: {}", e);
-        }
+        Self::save_chat_message_record(&db_ref, &db_key, &chat_message, flush_mode);
 
         // save message id in data base
-        if message_id.len() > 0 {
-            if let Err(e) = db_ref
-                .message_ids
-                .insert(message_id.clone(), db_key.clone())
-            {
-                log::error!("Error saving chat messageid to data base: {}", e);
-            }
-            // flush trees to disk
-            if let Err(e) = db_ref.message_ids.flush() {
-                log::error!("Error chat message_ids flush: {}", e);
-            }
+        if !message_id.is_empty() {
+            Self::save_message_id_mapping(&db_ref, message_id, &db_key, flush_mode);
         }
     }
 
@@ -183,68 +314,91 @@ impl ChatStorage {
     pub fn update_confirmation(
         account_id: PeerId,
         receiver_id: PeerId,
-        message_id: &Vec<u8>,
+        message_id: &[u8],
         received_at: u64,
     ) {
-        // get data base of user account
-        let db_ref = Self::get_db_ref(account_id.clone());
-        if let Some(key) = db_ref.message_ids.get(message_id).unwrap() {
-            if let Some(chat_msg_bytes) = db_ref.messages.get(&key).unwrap() {
-                let mut chat_msg: rpc_proto::ChatMessage =
-                    bincode::deserialize(&chat_msg_bytes).unwrap();
-                chat_msg.status = rpc_proto::MessageStatus::Confirmed as i32;
-                chat_msg.received_at = received_at;
+        Self::update_confirmation_with_mode(
+            account_id,
+            receiver_id,
+            message_id,
+            received_at,
+            FlushMode::Immediate,
+        );
+    }
 
-                // TODO: check if receiver already exists
+    /// Update confirmation without flushing the messages tree.
+    #[allow(dead_code)]
+    pub fn update_confirmation_deferred(
+        account_id: PeerId,
+        receiver_id: PeerId,
+        message_id: &[u8],
+        received_at: u64,
+    ) {
+        Self::update_confirmation_with_mode(
+            account_id,
+            receiver_id,
+            message_id,
+            received_at,
+            FlushMode::Deferred,
+        );
+    }
 
-                // receiving user
-                let confirmation = rpc_proto::MessageReceptionConfirmed {
-                    user_id: receiver_id.to_bytes(),
+    fn update_confirmation_with_mode(
+        account_id: PeerId,
+        receiver_id: PeerId,
+        message_id: &[u8],
+        received_at: u64,
+        flush_mode: FlushMode,
+    ) {
+        let db_ref = Self::get_db_ref(account_id);
+        let receiver_id_bytes = receiver_id.to_bytes();
+
+        Self::mutate_chat_message_by_id(&db_ref, message_id, flush_mode, |chat_msg| {
+            chat_msg.status = rpc_proto::MessageStatus::Confirmed as i32;
+            chat_msg.received_at = received_at;
+
+            // TODO: check if receiver already exists
+            chat_msg
+                .message_reception_confirmed
+                .push(rpc_proto::MessageReceptionConfirmed {
+                    user_id: receiver_id_bytes,
                     confirmed_at: received_at,
-                };
-                chat_msg.message_reception_confirmed.push(confirmation);
+                });
 
-                // TODO: check if it was received by everyone
-                //       set received_by_all flag if yes
-
-                // save message in data base
-                let chat_msg_bytes = bincode::serialize(&chat_msg).unwrap();
-                if let Err(e) = db_ref.messages.insert(key.clone(), chat_msg_bytes) {
-                    log::error!("Error saving chat message to data base: {}", e);
-                }
-                // flush trees to disk
-                if let Err(e) = db_ref.messages.flush() {
-                    log::error!("Error chat messages flush: {}", e);
-                }
-            }
-        }
+            // TODO: check if it was received by everyone
+            //       set received_by_all flag if yes
+        });
     }
 
     /// update message status
     pub fn udate_status(
         account_id: &PeerId,
-        message_id: &Vec<u8>,
+        message_id: &[u8],
         status: super::rpc_proto::MessageStatus,
     ) {
-        // get data base of user account
-        let db_ref = Self::get_db_ref(account_id.to_owned());
-        if let Some(key) = db_ref.message_ids.get(message_id).unwrap() {
-            if let Some(chat_msg_fromdb) = db_ref.messages.get(&key).unwrap() {
-                let mut chat_msg: rpc_proto::ChatMessage =
-                    bincode::deserialize(&chat_msg_fromdb).unwrap();
-                chat_msg.status = status as i32;
+        Self::udate_status_with_mode(account_id, message_id, status, FlushMode::Immediate);
+    }
 
-                // save message in data base
-                let chat_msg_todb = bincode::serialize(&chat_msg).unwrap();
-                if let Err(e) = db_ref.messages.insert(key.clone(), chat_msg_todb) {
-                    log::error!("Error saving chat message to data base: {}", e);
-                }
-                // flush trees to disk
-                if let Err(e) = db_ref.messages.flush() {
-                    log::error!("Error chat messages flush: {}", e);
-                }
-            }
-        }
+    /// Update message status without flushing the messages tree.
+    #[allow(dead_code)]
+    pub fn udate_status_deferred(
+        account_id: &PeerId,
+        message_id: &[u8],
+        status: super::rpc_proto::MessageStatus,
+    ) {
+        Self::udate_status_with_mode(account_id, message_id, status, FlushMode::Deferred);
+    }
+
+    fn udate_status_with_mode(
+        account_id: &PeerId,
+        message_id: &[u8],
+        status: super::rpc_proto::MessageStatus,
+        flush_mode: FlushMode,
+    ) {
+        let db_ref = Self::get_db_ref(account_id.to_owned());
+        Self::mutate_chat_message_by_id(&db_ref, message_id, flush_mode, |chat_msg| {
+            chat_msg.status = status as i32;
+        });
     }
 
     /// Get chat messages of a specific conversation from data base
@@ -252,12 +406,12 @@ impl ChatStorage {
         // create empty messages list
         let mut message_list: Vec<rpc_proto::ChatMessage> = Vec::new();
 
-        if group_id.len() == 16 {
+        if let Ok(group_id_typed) = GroupId::from_bytes(&group_id) {
             // get database references for this user account
             let db_ref = Self::get_db_ref(account_id);
 
             // create message keys
-            let (first_key, last_key) = Self::get_db_key_range(&group_id.clone());
+            let (first_key, last_key) = Self::get_db_key_range(group_id_typed.as_slice());
 
             // iterate over all values in chat_messages db
             for res in db_ref
@@ -292,29 +446,29 @@ impl ChatStorage {
     /// retrieve all messages for a user ID from the DB:
     ///
     /// (first_key, last_key)
-    fn get_db_key_range(group_id: &Vec<u8>) -> (Vec<u8>, Vec<u8>) {
+    fn get_db_key_range(group_id: &[u8]) -> (Vec<u8>, Vec<u8>) {
         let first_key = Self::get_db_key_from_vec(group_id, 0);
         let last_key = Self::get_db_key_from_vec(group_id, 0xFFFFFFFFFFFFFFFF); // = 4294967295
         (first_key, last_key)
     }
 
     /// create DB key from group id
-    fn get_db_key_from_vec(group_id: &Vec<u8>, index: u64) -> Vec<u8> {
+    fn get_db_key_from_vec(group_id: &[u8], index: u64) -> Vec<u8> {
         let mut index_bytes = index.to_be_bytes().to_vec();
-        let mut key_bytes = group_id.clone();
+        let mut key_bytes = group_id.to_vec();
         key_bytes.append(&mut index_bytes);
         key_bytes
     }
 
     /// get nex db_index key
-    fn get_next_db_index(db_ref: ChatAccountDb, group_id: &Vec<u8>) -> u64 {
+    fn get_next_db_index(db_ref: ChatAccountDb, group_id: &[u8]) -> u64 {
         // get biggest existing index
         let search_key = Self::get_db_key_from_vec(group_id, u64::MAX);
         let result = db_ref.messages.get_lt(search_key);
         if let Ok(Some((_key, value))) = result {
             // check if result is really of the same group
             let chat_message: rpc_proto::ChatMessage = bincode::deserialize(&value).unwrap();
-            if group_id.to_owned() == chat_message.group_id {
+            if group_id == chat_message.group_id.as_slice() {
                 return chat_message.index + 1;
             }
         }

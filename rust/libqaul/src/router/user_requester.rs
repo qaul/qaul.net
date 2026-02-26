@@ -43,10 +43,10 @@ impl UserRequester {
     }
 
     /// Add a message to the ring buffer for sending.
-    pub fn add(neighbour_id: &PeerId, user_ids: &Vec<Vec<u8>>) {
+    pub fn add(neighbour_id: &PeerId, user_ids: &[Vec<u8>]) {
         let msg = UserRequest {
             neighbour_id: neighbour_id.clone(),
-            user_ids: user_ids.clone(),
+            user_ids: user_ids.to_vec(),
         };
 
         // add it to sending queue

@@ -190,7 +190,7 @@ impl RouterInfo {
         // if it does not exist add it to scheduler
         if !exists {
             let mut scheduler = SCHEDULER.get().write().unwrap();
-            let interval = scheduler.interval.clone();
+            let interval = scheduler.interval;
             scheduler.neighbours.insert(
                 node_id,
                 SchedulerEntry {
@@ -210,14 +210,13 @@ impl RouterInfo {
         let routes = RoutingTable::create_routing_info(neighbour, last_sent);
 
         // create latest Feed ids table
-        let mut feeds = router_net_proto::FeedIdsTable { ids: Vec::new() };
-
-        if is_first == true {
-            let ids = Feed::get_latest_message_ids(5);
-            for id in ids {
-                feeds.ids.push(id.clone());
-            }
-        }
+        let feeds = router_net_proto::FeedIdsTable {
+            ids: if is_first {
+                Feed::get_latest_message_ids(5)
+            } else {
+                Vec::new()
+            },
+        };
 
         // create router info protobuf message
         let timestamp = Timestamp::get_timestamp();
@@ -269,11 +268,11 @@ impl RouterInfo {
     }
 
     /// creating feed request message
-    pub fn create_feed_request(ids: &Vec<Vec<u8>>) -> Vec<u8> {
+    pub fn create_feed_request(ids: &[Vec<u8>]) -> Vec<u8> {
         let node_id = Node::get_id();
 
         //create latest Feed ids table
-        let feeds = router_net_proto::FeedIdsTable { ids: ids.clone() };
+        let feeds = router_net_proto::FeedIdsTable { ids: ids.to_vec() };
 
         let timestamp = Timestamp::get_timestamp();
         let router_info = router_net_proto::FeedRequestMessage { feeds: Some(feeds) };
@@ -316,11 +315,13 @@ impl RouterInfo {
     }
 
     /// create_feed_response
-    pub fn create_feed_response(messages: &Vec<(Vec<u8>, Vec<u8>, String, u64)>) -> Vec<u8> {
+    pub fn create_feed_response(messages: &[(Vec<u8>, Vec<u8>, String, u64)]) -> Vec<u8> {
         let node_id = Node::get_id();
 
         // create latest Feed ids table
-        let mut feeds = router_net_proto::FeedResponseTable { messages: vec![] };
+        let mut feeds = router_net_proto::FeedResponseTable {
+            messages: Vec::with_capacity(messages.len()),
+        };
         for (message_id, sender_id, content, time) in messages {
             let feed = router_net_proto::FeedMessage {
                 message_id: message_id.clone(),
@@ -372,11 +373,11 @@ impl RouterInfo {
     }
 
     /// creating user request message
-    pub fn create_user_request(ids: &Vec<Vec<u8>>) -> Vec<u8> {
+    pub fn create_user_request(ids: &[Vec<u8>]) -> Vec<u8> {
         let node_id = Node::get_id();
 
         //create latest Feed ids table
-        let users = router_net_proto::UserIdTable { ids: ids.clone() };
+        let users = router_net_proto::UserIdTable { ids: ids.to_vec() };
 
         let timestamp = Timestamp::get_timestamp();
         let mut buf = Vec::with_capacity(users.encoded_len());
@@ -483,20 +484,19 @@ impl RouterInfo {
                                 );
                                 if let Ok(message) = message_info {
                                     // collect users and routes
-                                    let messages = message;
-                                    //let users = messages.users;
-                                    let routes = messages.routes;
-                                    let feeds = messages.feeds;
+                                    //let users = message.users;
+                                    let routes = message.routes;
+                                    let feeds = message.feeds;
 
                                     match routes {
                                         Some(router_net_proto::RoutingInfoTable { entry }) => {
                                             //check missed user ids
-                                            let mut user_ids: Vec<Vec<u8>> = vec![];
-                                            for e in &entry {
-                                                user_ids.push(e.user.clone());
-                                            }
+                                            let user_ids = entry
+                                                .iter()
+                                                .map(|e| e.user.clone())
+                                                .collect::<Vec<_>>();
                                             let missed_users = Users::get_missed_ids(&user_ids);
-                                            if missed_users.len() > 0 {
+                                            if !missed_users.is_empty() {
                                                 UserRequester::add(
                                                     &received.received_from,
                                                     &missed_users,
@@ -514,7 +514,7 @@ impl RouterInfo {
                                     match feeds {
                                         Some(router_net_proto::FeedIdsTable { ids }) => {
                                             let missing_ids = Feed::process_received_feed_ids(&ids);
-                                            if missing_ids.len() > 0 {
+                                            if !missing_ids.is_empty() {
                                                 FeedRequester::add(
                                                     &received.received_from,
                                                     &missing_ids,
@@ -533,7 +533,7 @@ impl RouterInfo {
                                     match message.feeds {
                                         Some(table) => {
                                             let feeds = Feed::get_messges_by_ids(&table.ids);
-                                            if feeds.len() > 0 {
+                                            if !feeds.is_empty() {
                                                 FeedResponser::add(&received.received_from, &feeds);
                                             }
                                         }
@@ -548,7 +548,8 @@ impl RouterInfo {
                                 if let Ok(message) = message_info {
                                     match message.feeds {
                                         Some(table) => {
-                                            let mut user_ids: Vec<Vec<u8>> = vec![];
+                                            let mut user_ids =
+                                                Vec::with_capacity(table.messages.len());
                                             for feed in table.messages {
                                                 user_ids.push(QaulId::bytes_to_q8id(
                                                     feed.sender_id.clone(),
@@ -562,7 +563,7 @@ impl RouterInfo {
                                             }
                                             // check missed users
                                             let missed_users = Users::get_missed_ids(&user_ids);
-                                            if missed_users.len() > 0 {
+                                            if !missed_users.is_empty() {
                                                 UserRequester::add(
                                                     &received.received_from,
                                                     &missed_users,

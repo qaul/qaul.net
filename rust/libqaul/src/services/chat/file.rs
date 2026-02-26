@@ -13,7 +13,6 @@ use sled;
 use state::InitCell;
 use std::{
     collections::BTreeMap,
-    convert::TryInto,
     ffi::OsStr,
     fs::{self, File},
     io::{Read, Write},
@@ -22,7 +21,7 @@ use std::{
 };
 
 use super::ChatStorage;
-use crate::services::messaging::{self, Messaging, MessagingServiceType};
+use crate::services::messaging::{self, MessagingServiceType};
 use crate::storage::database::DataBase;
 use crate::utilities::timestamp;
 use crate::utilities::timestamp::Timestamp;
@@ -74,7 +73,7 @@ impl UserFiles {
     /// get file history
     pub fn get_filehistory(&self, file_id: u64) -> Option<FileHistory> {
         // get invite
-        match self.histories.get(file_id.to_be_bytes().to_vec()) {
+        match self.histories.get(file_id.to_be_bytes()) {
             Ok(None) => log::warn!("file history empty"),
             Ok(Some(file_history_bytes)) => match bincode::deserialize(&file_history_bytes) {
                 Ok(file_history) => return Some(file_history),
@@ -95,7 +94,7 @@ impl UserFiles {
         // get results from data base
         let result = self
             .histories
-            .range(first_key.to_be_bytes().to_vec()..last_key.to_be_bytes().to_vec());
+            .range(first_key.to_be_bytes()..last_key.to_be_bytes());
 
         result
     }
@@ -106,7 +105,7 @@ impl UserFiles {
         let file_history_bytes = bincode::serialize(&file_history).unwrap();
         if let Err(e) = self
             .histories
-            .insert(file_id.to_be_bytes().to_vec(), file_history_bytes)
+            .insert(file_id.to_be_bytes(), file_history_bytes)
         {
             log::error!("Error saving file history to data base: {}", e);
             return;
@@ -118,10 +117,10 @@ impl UserFiles {
     }
 
     /// create a db chunk key
-    fn get_chunk_key(file_id: &Vec<u8>, index: u32) -> Vec<u8> {
-        let mut index_bytes = index.to_be_bytes().to_vec();
-        let mut key_bytes = file_id.to_owned();
-        key_bytes.append(&mut index_bytes);
+    fn get_chunk_key(file_id: &[u8], index: u32) -> Vec<u8> {
+        let mut key_bytes = Vec::with_capacity(file_id.len() + std::mem::size_of::<u32>());
+        key_bytes.extend_from_slice(file_id);
+        key_bytes.extend_from_slice(&index.to_be_bytes());
         key_bytes
     }
 
@@ -131,7 +130,7 @@ impl UserFiles {
     /// retrieve all file chunks for a certain file id from DB
     ///
     /// (first_key, last_key)
-    fn get_chunk_key_range(file_id: &Vec<u8>) -> (Vec<u8>, Vec<u8>) {
+    fn get_chunk_key_range(file_id: &[u8]) -> (Vec<u8>, Vec<u8>) {
         let first_key = Self::get_chunk_key(file_id, 0);
         let last_key = Self::get_chunk_key(file_id, u32::MAX);
         (first_key, last_key)
@@ -140,7 +139,8 @@ impl UserFiles {
     /// save file chunk
     pub fn save_file_chunk(&self, file_id: u64, index: u32, data: Vec<u8>) {
         // get chunk key
-        let key = Self::get_chunk_key(&file_id.to_be_bytes().to_vec(), index);
+        let file_id_bytes = file_id.to_be_bytes();
+        let key = Self::get_chunk_key(&file_id_bytes, index);
 
         log::trace!("save file chunk {} with key: {:?}", index, key);
 
@@ -159,7 +159,7 @@ impl UserFiles {
     /// count file chunks
     ///
     /// Count how many chunks of a file we already have in the data base
-    pub fn count_file_chunks(&self, file_id: &Vec<u8>) -> usize {
+    pub fn count_file_chunks(&self, file_id: &[u8]) -> usize {
         // get key range
         let (first_key, last_key) = Self::get_chunk_key_range(file_id);
 
@@ -170,7 +170,7 @@ impl UserFiles {
     }
 
     /// get all file chunks for a specific id
-    pub fn get_file_chunks(&self, file_id: &Vec<u8>) -> sled::Iter {
+    pub fn get_file_chunks(&self, file_id: &[u8]) -> sled::Iter {
         // get key range
         let (first_key, last_key) = Self::get_chunk_key_range(file_id);
 
@@ -397,7 +397,60 @@ impl ChatFile {
         }
 
         // create file path
-        files_storage_path.join(file_name.clone())
+        files_storage_path.join(file_name)
+    }
+
+    fn file_content_from_history(file_history: &FileHistory) -> super::rpc_proto::FileContent {
+        super::rpc_proto::FileContent {
+            file_id: file_history.file_id,
+            file_name: file_history.file_name.clone(),
+            file_extension: file_history.file_extension.clone(),
+            file_size: file_history.file_size,
+            file_description: file_history.file_description.clone(),
+        }
+    }
+
+    fn rpc_history_entry_from_file_history(entry: &FileHistory) -> proto_rpc::FileHistoryEntry {
+        let group_id = GroupId::from_bytes(&entry.group_id)
+            .map(|id| id.to_string())
+            .unwrap_or_else(|_| GroupId::slice_to_string(&entry.group_id));
+
+        proto_rpc::FileHistoryEntry {
+            file_id: entry.file_id,
+            file_name: entry.file_name.clone(),
+            file_extension: entry.file_extension.clone(),
+            file_size: entry.file_size,
+            file_description: entry.file_description.clone(),
+            time: entry.sent_at,
+            sender_id: bs58::encode(&entry.sender_id).into_string(),
+            group_id,
+        }
+    }
+
+    fn file_history_from_info_message(
+        sender_id: &PeerId,
+        group_id: &[u8],
+        message_id: &[u8],
+        sent_at: u64,
+        file_info: &proto_net::ChatFileInfo,
+    ) -> FileHistory {
+        FileHistory {
+            group_id: group_id.to_vec(),
+            sender_id: sender_id.to_bytes(),
+            file_id: file_info.file_id,
+            message_id: message_id.to_vec(),
+            start_index: file_info.start_index,
+            message_count: file_info.message_count,
+            chunk_size: file_info.data_chunk_size,
+            file_state: FileState::Receiving,
+            reception_tracking: BTreeMap::new(),
+            file_name: file_info.file_name.clone(),
+            file_description: file_info.file_description.clone(),
+            file_extension: file_info.file_extension.clone(),
+            file_size: file_info.file_size,
+            sent_at,
+            received_at: Timestamp::get_timestamp(),
+        }
     }
 
     /// Getting file histories from table.
@@ -441,13 +494,13 @@ impl ChatFile {
     /// send a file from RPC to users
     fn send(
         user_account: &UserAccount,
-        group_id: &Vec<u8>,
+        group_id: &[u8],
         path_name: String,
         description: String,
     ) -> Result<bool, String> {
         // get group
         let group;
-        match GroupStorage::get_group(user_account.id, group_id.to_owned()) {
+        match GroupStorage::get_group(user_account.id, group_id) {
             Some(v) => group = v,
             None => {
                 match GroupId::from_bytes(group_id) {
@@ -456,7 +509,7 @@ impl ChatFile {
                         match direct_group.is_direct(user_account.id.clone()) {
                             Some(remote_q8id) => {
                                 // get remote user
-                                match Users::get_user_id_by_q8id(remote_q8id) {
+                                match Users::get_user_id_by_q8id(&remote_q8id) {
                                     Some(remote_id) => {
                                         // create group
                                         group = GroupManage::create_new_direct_chat_group(
@@ -484,7 +537,7 @@ impl ChatFile {
         let timestamp = Timestamp::get_timestamp();
 
         let mut file: File;
-        match File::open(path_name.clone()) {
+        match File::open(&path_name) {
             Ok(f) => Some(file = f),
             Err(_e) => {
                 return Err("file open error".to_string());
@@ -509,12 +562,8 @@ impl ChatFile {
         let file_name = path.file_name().unwrap().to_str().unwrap().to_string();
 
         // create file id
-        let file_id = Self::generate_file_id(
-            group_id,
-            &user_account.id.to_bytes(),
-            file_name.clone(),
-            size,
-        );
+        let user_id_bytes = user_account.id.to_bytes();
+        let file_id = Self::generate_file_id(group_id, &user_id_bytes, &file_name, size);
 
         // get file path
         let file_path = Self::create_file_path(user_account.id, file_id, extension.as_str());
@@ -522,14 +571,14 @@ impl ChatFile {
         // TODO: start in new async thread here
 
         // copy file
-        if let Err(e) = fs::copy(path_name.clone(), file_path) {
-            log::error!("copy file error {}", e.to_string());
+        if let Err(e) = fs::copy(&path_name, file_path) {
+            log::error!("copy file error {}", e);
         }
 
         // create messages
         let mut mesage_count = 1 + size / DEF_PACKAGE_SIZE;
         if size % DEF_PACKAGE_SIZE > 0 {
-            mesage_count = mesage_count + 1;
+            mesage_count += 1;
         }
 
         // create message ID
@@ -567,8 +616,8 @@ impl ChatFile {
 
         // save file state to data base
         let file_history = FileHistory {
-            group_id: group_id.to_owned(),
-            sender_id: user_account.id.to_bytes(),
+            group_id: group_id.to_vec(),
+            sender_id: user_id_bytes,
             file_id,
             message_id: message_id.clone(),
             start_index: file_info.start_index,
@@ -619,7 +668,7 @@ impl ChatFile {
             if left_size > DEF_PACKAGE_SIZE {
                 read_size = DEF_PACKAGE_SIZE;
             };
-            left_size = left_size - read_size;
+            left_size -= read_size;
 
             if let Err(e) = file.read(&mut buffer) {
                 return Err(e.to_string());
@@ -632,7 +681,7 @@ impl ChatFile {
                         file_id,
                         start_index: chunk_index,
                         message_count: mesage_count,
-                        data: buffer[0..(read_size as usize)].iter().cloned().collect(),
+                        data: buffer[0..(read_size as usize)].to_vec(),
                     },
                 )),
             };
@@ -646,7 +695,7 @@ impl ChatFile {
                 data.encode_to_vec(),
             );
 
-            chunk_index = chunk_index + 1;
+            chunk_index += 1;
         }
 
         // set file status to sent
@@ -672,16 +721,11 @@ impl ChatFile {
         log::trace!("save_filemsg_in_chat");
 
         // create chat file message content
-        let chat_filecontent = super::rpc_proto::FileContent {
-            file_id: file_history.file_id,
-            file_name: file_history.file_name.clone(),
-            file_extension: file_history.file_extension.clone(),
-            file_size: file_history.file_size,
-            file_description: file_history.file_description.clone(),
-        };
         let chat_message = super::rpc_proto::ChatContentMessage {
             message: Some(
-                super::rpc_proto::chat_content_message::Message::FileContent(chat_filecontent),
+                super::rpc_proto::chat_content_message::Message::FileContent(
+                    Self::file_content_from_history(file_history),
+                ),
             ),
         };
 
@@ -692,7 +736,7 @@ impl ChatFile {
             &sender_id,
             &file_history.message_id,
             file_history.sent_at,
-            chat_message.clone(),
+            chat_message,
             status,
         );
     }
@@ -701,13 +745,13 @@ impl ChatFile {
     fn send_filecontainer_to_group(
         user_account: &UserAccount,
         group: &Group,
-        message_id: &Vec<u8>,
+        message_id: &[u8],
         timestamp: u64,
         data: Vec<u8>,
     ) {
         // pack file container into common message
         let common_message = messaging::proto::CommonMessage {
-            message_id: message_id.clone(),
+            message_id: message_id.to_vec(),
             group_id: group.id.clone(),
             sent_at: timestamp,
             payload: Some(messaging::proto::common_message::Payload::FileMessage(
@@ -717,42 +761,33 @@ impl ChatFile {
 
         let message = messaging::proto::Messaging {
             message: Some(messaging::proto::messaging::Message::CommonMessage(
-                common_message.clone(),
+                common_message,
             )),
         };
+        let message_bytes = message.encode_to_vec();
 
-        // send to all members
-        for user_id in group.members.keys() {
-            let receiver = PeerId::from_bytes(&user_id.clone()).unwrap();
-            if receiver == user_account.id {
-                continue;
-            }
-
-            if let Err(error) = Messaging::pack_and_send_message(
-                user_account,
-                &receiver,
-                message.encode_to_vec(),
-                MessagingServiceType::ChatFile,
-                message_id,
-                true,
-            ) {
-                log::error!("sending file message error {}", error);
-            }
-        }
+        Group::send_to_remote_members(
+            user_account,
+            group,
+            &message_bytes,
+            MessagingServiceType::ChatFile,
+            message_id,
+            "sending file message error",
+        );
     }
 
     /// Generate File id
-    fn generate_file_id(group_id: &Vec<u8>, sender: &Vec<u8>, file_name: String, size: u32) -> u64 {
-        let mut name_bytes = file_name.as_bytes().to_vec();
-        let mut size_bytes = size.to_be_bytes().to_vec();
-        let mut time_bytes = timestamp::Timestamp::get_timestamp().to_be_bytes().to_vec();
-        let mut key_bytes = group_id.clone();
-        let mut sender_bytes = sender.clone();
-
-        key_bytes.append(&mut sender_bytes);
-        key_bytes.append(&mut name_bytes);
-        key_bytes.append(&mut size_bytes);
-        key_bytes.append(&mut time_bytes);
+    fn generate_file_id(group_id: &[u8], sender: &[u8], file_name: &str, size: u32) -> u64 {
+        let size_bytes = size.to_be_bytes();
+        let time_bytes = timestamp::Timestamp::get_timestamp().to_be_bytes();
+        let mut key_bytes = Vec::with_capacity(
+            group_id.len() + sender.len() + file_name.len() + size_bytes.len() + time_bytes.len(),
+        );
+        key_bytes.extend_from_slice(group_id);
+        key_bytes.extend_from_slice(sender);
+        key_bytes.extend_from_slice(file_name.as_bytes());
+        key_bytes.extend_from_slice(&size_bytes);
+        key_bytes.extend_from_slice(&time_bytes);
         crc::Crc::<u64>::new(&crc::CRC_64_GO_ISO).checksum(&key_bytes)
     }
 
@@ -766,7 +801,8 @@ impl ChatFile {
         file_history: FileHistory,
     ) {
         // check how many chunks have been downloaded
-        let count = user_files.count_file_chunks(&file_history.file_id.to_be_bytes().to_vec());
+        let file_id_bytes = file_history.file_id.to_be_bytes();
+        let count = user_files.count_file_chunks(&file_id_bytes);
 
         log::trace!(
             "received {} chunks of {}",
@@ -785,7 +821,8 @@ impl ChatFile {
     /// Store a completely downloaded file
     fn store_file(user_account: &UserAccount, user_files: UserFiles, file_history: FileHistory) {
         // get all chunks from data base
-        let iterator = user_files.get_file_chunks(&file_history.file_id.to_be_bytes().to_vec());
+        let file_id_bytes = file_history.file_id.to_be_bytes();
+        let iterator = user_files.get_file_chunks(&file_id_bytes);
 
         // create file
         let file_path = Self::create_file_path(
@@ -796,7 +833,7 @@ impl ChatFile {
 
         // open a file in write mode
         let mut file: File;
-        match File::create(file_path.clone()) {
+        match File::create(&file_path) {
             Ok(my_file) => file = my_file,
             Err(e) => {
                 log::error!("file path error: {}", e);
@@ -810,7 +847,7 @@ impl ChatFile {
                 Ok((_key, chunk)) => {
                     // write chunk to file
                     if let Err(e) = file.write(&chunk) {
-                        log::error!("file storing failed {}", e.to_string());
+                        log::error!("file storing failed {}", e);
                     }
                 }
                 Err(e) => log::error!("{}", e),
@@ -892,23 +929,13 @@ impl ChatFile {
 
             // update fields
         } else {
-            file_history = FileHistory {
-                group_id: group_id.clone(),
-                sender_id: sender_id.to_bytes(),
-                file_id: file_info.file_id,
-                message_id: message_id.clone(),
-                start_index: file_info.start_index,
-                message_count: file_info.message_count,
-                chunk_size: file_info.data_chunk_size,
-                file_state: FileState::Receiving,
-                reception_tracking: BTreeMap::new(),
-                file_name: file_info.file_name.clone(),
-                file_description: file_info.file_description.clone(),
-                file_extension: file_info.file_extension.clone(),
-                file_size: file_info.file_size,
+            file_history = Self::file_history_from_info_message(
+                &sender_id,
+                &group_id,
+                &message_id,
                 sent_at,
-                received_at: Timestamp::get_timestamp(),
-            };
+                &file_info,
+            );
         }
 
         // save to file history
@@ -944,10 +971,10 @@ impl ChatFile {
         group_id: Vec<u8>,
         message_id: Vec<u8>,
         sent_at: u64,
-        data: &Vec<u8>,
+        data: &[u8],
     ) {
         // decode protobuf file message container
-        match proto_net::ChatFileContainer::decode(&data[..]) {
+        match proto_net::ChatFileContainer::decode(data) {
             Ok(messaging) => match messaging.message {
                 Some(proto_net::chat_file_container::Message::FileInfo(file_info)) => {
                     Self::process_info_message(
@@ -1014,22 +1041,9 @@ impl ChatFile {
 
                         let list = Self::file_history(&user_account, &history_req);
 
-                        let mut histories: Vec<proto_rpc::FileHistoryEntry> = vec![];
-                        for entry in list {
-                            let file_entry = proto_rpc::FileHistoryEntry {
-                                file_id: entry.file_id,
-                                file_name: entry.file_name.clone(),
-                                file_extension: entry.file_extension.clone(),
-                                file_size: entry.file_size,
-                                file_description: entry.file_description.clone(),
-                                time: entry.sent_at,
-                                sender_id: bs58::encode(entry.sender_id).into_string(),
-                                group_id: uuid::Uuid::from_bytes(
-                                    entry.group_id.try_into().unwrap(),
-                                )
-                                .to_string(),
-                            };
-                            histories.push(file_entry);
+                        let mut histories = Vec::with_capacity(list.len());
+                        for entry in &list {
+                            histories.push(Self::rpc_history_entry_from_file_history(entry));
                         }
 
                         // pack message

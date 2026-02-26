@@ -49,12 +49,8 @@ impl Auth {
         let salt = SaltString::generate(&mut OsRng);
 
         match argon2.hash_password(input.as_bytes(), &salt) {
-            Ok(hash) => {
-                hash.to_string()
-            },
-            Err(_) => {
-                bs58::encode(input.as_bytes()).into_string()
-            }
+            Ok(hash) => hash.to_string(),
+            Err(_) => bs58::encode(input.as_bytes()).into_string(),
         }
     }
 

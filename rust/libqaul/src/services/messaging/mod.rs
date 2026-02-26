@@ -137,7 +137,7 @@ impl Messaging {
     /// Save a message to the data base to wait for confirmation
     pub fn save_unconfirmed_message(
         message_type: MessagingServiceType,
-        message_id: &Vec<u8>,
+        message_id: &[u8],
         receiver: &PeerId,
         container: &proto::Container,
         is_dtn: bool,
@@ -147,7 +147,7 @@ impl Messaging {
             container: container.encode_to_vec(),
             last_sent: Timestamp::get_timestamp(),
             message_type,
-            message_id: message_id.to_owned(),
+            message_id: message_id.to_vec(),
             retry: 1,
             scheduled: false,
             scheduled_dtn: false,
@@ -174,7 +174,7 @@ impl Messaging {
     /// Removes the message from the unconfirmed table and notifies
     /// the related service (if needed) that the message was received.
     pub fn on_confirmed_message(
-        signature: &Vec<u8>,
+        signature: &[u8],
         sender_id: PeerId,
         user_account: UserAccount,
         confirmation: proto::Confirmation,
@@ -262,13 +262,12 @@ impl Messaging {
         }
     }
 
-    fn on_scheduled_message(signature: &Vec<u8>) {
+    fn on_scheduled_message(signature: &[u8]) {
         let unconfirmed = UNCONFIRMED.get().write().unwrap();
-        if !unconfirmed.unconfirmed.contains_key(signature).unwrap() {
+        let Some(unconfirmed_message_bytes) = unconfirmed.unconfirmed.get(signature).unwrap()
+        else {
             return;
-        }
-
-        let unconfirmed_message_bytes = unconfirmed.unconfirmed.get(signature).unwrap().unwrap();
+        };
         let mut unconfirmed_message: UnConfirmedMessage =
             bincode::deserialize(&unconfirmed_message_bytes).unwrap();
         if unconfirmed_message.scheduled {
@@ -279,7 +278,7 @@ impl Messaging {
         let unconfirmed_message_todb = bincode::serialize(&unconfirmed_message).unwrap();
         if let Err(_e) = unconfirmed
             .unconfirmed
-            .insert(signature.clone(), unconfirmed_message_todb)
+            .insert(signature.to_vec(), unconfirmed_message_todb)
         {
             log::error!("error updating unconfirmed table");
         } else {
@@ -289,13 +288,12 @@ impl Messaging {
         }
     }
 
-    fn on_scheduled_as_dtn_message(signature: &Vec<u8>) {
+    fn on_scheduled_as_dtn_message(signature: &[u8]) {
         let unconfirmed = UNCONFIRMED.get().write().unwrap();
-        if !unconfirmed.unconfirmed.contains_key(signature).unwrap() {
+        let Some(unconfirmed_message_bytes) = unconfirmed.unconfirmed.get(signature).unwrap()
+        else {
             return;
-        }
-
-        let unconfirmed_message_bytes = unconfirmed.unconfirmed.get(signature).unwrap().unwrap();
+        };
         let mut unconfirmed_message: UnConfirmedMessage =
             bincode::deserialize(&unconfirmed_message_bytes).unwrap();
         if unconfirmed_message.scheduled {
@@ -306,7 +304,7 @@ impl Messaging {
         let unconfirmed_message_todb = bincode::serialize(&unconfirmed_message).unwrap();
         if let Err(_e) = unconfirmed
             .unconfirmed
-            .insert(signature.clone(), unconfirmed_message_todb)
+            .insert(signature.to_vec(), unconfirmed_message_todb)
         {
             log::error!("error updating unconfirmed table");
         } else {
@@ -326,7 +324,7 @@ impl Messaging {
         receiver: &PeerId,
         data: Vec<u8>,
         _message_type: MessagingServiceType,
-        message_id: &Vec<u8>,
+        message_id: &[u8],
         message_needs_confirmation: bool,
     ) -> Result<Vec<u8>, String> {
         log::trace!("pack_and_send_message to {}", receiver.to_base58());
@@ -359,7 +357,7 @@ impl Messaging {
         user_account: &UserAccount,
         receiver: &PeerId,
         encrypted_message: proto::Encrypted,
-        message_id: &Vec<u8>,
+        message_id: &[u8],
         message_needs_confirmation: bool,
     ) -> Result<Vec<u8>, String> {
         log::trace!(
@@ -452,7 +450,7 @@ impl Messaging {
             // in common message case, save into unconfirmed table
             Self::save_unconfirmed_message(
                 MessagingServiceType::Chat,
-                &Vec::new(),
+                &[],
                 &storage_node_id,
                 &container_dtn,
                 true,
@@ -493,7 +491,7 @@ impl Messaging {
         if network_emul::NetworkEmulator::is_lost() {
             log::error!(
                 "drop message, signature: {}",
-                bs58::encode(container.signature.clone()).into_string()
+                bs58::encode(&container.signature).into_string()
             );
             return;
         }
@@ -576,11 +574,11 @@ impl Messaging {
     pub fn send_confirmation(
         user_id: &PeerId,
         receiver_id: &PeerId,
-        signature: &Vec<u8>,
+        signature: &[u8],
     ) -> Result<Vec<u8>, String> {
         log::trace!(
             "send confirmation message to\n\tuser_id: {}\n\tfor signature: {}",
-            user_id.to_string(),
+            user_id,
             bs58::encode(signature).into_string()
         );
 
@@ -592,7 +590,7 @@ impl Messaging {
             let send_message = proto::Messaging {
                 message: Some(proto::messaging::Message::ConfirmationMessage(
                     proto::Confirmation {
-                        signature: signature.clone(),
+                        signature: signature.to_vec(),
                         received_at: timestamp,
                     },
                 )),
@@ -605,13 +603,12 @@ impl Messaging {
                 .expect("Vec<u8> provides capacity as needed");
 
             // send message via messaging
-            let message_id: Vec<u8> = Vec::new();
             Self::pack_and_send_message(
                 &user,
                 receiver_id,
                 message_buf,
                 MessagingServiceType::Unconfirmed,
-                &message_id,
+                &[],
                 false,
             )
         } else {
@@ -624,34 +621,32 @@ impl Messaging {
         // decode message container
         match proto::Container::decode(&received.data[..]) {
             Ok(container) => {
-                if let Some(envelope) = container.envelope.clone() {
-                    match PeerId::from_bytes(&envelope.receiver_id) {
-                        Ok(receiver_id) => {
-                            // check if message is local user account
-                            match UserAccounts::get_by_id(receiver_id) {
-                                // we are the receiving node,
-                                // process and save the message
-                                Some(user_account) => MessagingProcess::process_received_message(
-                                    user_account,
-                                    container,
-                                ),
-
-                                // schedule it for further sending otherwise
-                                None => Self::schedule_message(
-                                    receiver_id,
-                                    container,
-                                    true,
-                                    true,
-                                    false,
-                                    false,
-                                ),
-                            }
+                let receiver_id = match container.envelope.as_ref() {
+                    Some(envelope) => match PeerId::from_bytes(&envelope.receiver_id) {
+                        Ok(receiver_id) => receiver_id,
+                        Err(e) => {
+                            log::error!(
+                                "invalid peer ID of message {}: {}",
+                                bs58::encode(&container.signature).into_string(),
+                                e
+                            );
+                            return;
                         }
-                        Err(e) => log::error!(
-                            "invalid peer ID of message {}: {}",
-                            bs58::encode(container.signature).into_string(),
-                            e
-                        ),
+                    },
+                    None => return,
+                };
+
+                // check if message is local user account
+                match UserAccounts::get_by_id(receiver_id) {
+                    // we are the receiving node,
+                    // process and save the message
+                    Some(user_account) => {
+                        MessagingProcess::process_received_message(user_account, container)
+                    }
+
+                    // schedule it for further sending otherwise
+                    None => {
+                        Self::schedule_message(receiver_id, container, true, true, false, false)
                     }
                 }
             }

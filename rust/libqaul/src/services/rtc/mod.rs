@@ -97,17 +97,18 @@ impl Rtc {
     pub fn send_rtc_message_through_message(
         user_account: &UserAccount,
         receiver: PeerId,
-        data: &Vec<u8>,
+        data: &[u8],
     ) {
         // create direct chat room
         let group_id = GroupId::from_peers(&user_account.id, &receiver);
-        if !group::GroupStorage::group_exists(user_account.id, group_id.to_bytes()) {
+        let group_id_bytes = group_id.to_bytes();
+        if !group::GroupStorage::group_exists(user_account.id, &group_id_bytes) {
             group::GroupManage::create_new_direct_chat_group(&user_account.id, &receiver);
         }
 
         //get last index
         let group;
-        match group::GroupStorage::get_group(user_account.id, group_id.to_bytes()) {
+        match group::GroupStorage::get_group(user_account.id, &group_id_bytes) {
             Some(v) => group = v,
             None => return,
         }
@@ -126,7 +127,7 @@ impl Rtc {
         let message_id = Chat::generate_message_id(&group.id, &user_account.id, last_index);
         let common_message = proto::CommonMessage {
             message_id: message_id.clone(),
-            group_id: group_id.to_bytes(),
+            group_id: group_id_bytes,
             sent_at: timestamp::Timestamp::get_timestamp(),
             payload: Some(proto::common_message::Payload::RtcMessage(
                 proto::RtcMessage {
@@ -149,7 +150,7 @@ impl Rtc {
             &message_id,
             true,
         ) {
-            log::error!("rtc message sending failed {}", e.to_string());
+            log::error!("rtc message sending failed {}", e);
         }
     }
 
