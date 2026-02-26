@@ -6,11 +6,11 @@ import 'package:qaul_ui/providers/providers.dart';
 void main() {
   group('navBarIconPath', () {
     test('returns path for menu icon', () {
-      expect(navBarIconPath('menu'), 'assets/icons/nav_bar/menu.svg');
+      expect(navBarIconPath('menu'), 'assets/icons/menu.svg');
     });
 
     test('returns path for any name', () {
-      expect(navBarIconPath('foo'), 'assets/icons/nav_bar/foo.svg');
+      expect(navBarIconPath('foo'), 'assets/icons/foo.svg');
     });
   });
 
@@ -18,14 +18,14 @@ void main() {
     test('returns outlined path when not selected', () {
       expect(
         navBarTabIconPath(TabType.chat, false),
-        'assets/icons/nav_bar/chat-outlined.svg',
+        'assets/icons/chat-outlined.svg',
       );
     });
 
     test('returns filled path when selected', () {
       expect(
         navBarTabIconPath(TabType.chat, true),
-        'assets/icons/nav_bar/chat-filled.svg',
+        'assets/icons/chat-filled.svg',
       );
     });
 
@@ -35,9 +35,9 @@ void main() {
     });
 
     test('returns correct paths for all tab types with icons', () {
-      expect(navBarTabIconPath(TabType.public, false), 'assets/icons/nav_bar/public-outlined.svg');
-      expect(navBarTabIconPath(TabType.users, false), 'assets/icons/nav_bar/people-outlined.svg');
-      expect(navBarTabIconPath(TabType.network, false), 'assets/icons/nav_bar/network-outlined.svg');
+      expect(navBarTabIconPath(TabType.public, false), 'assets/icons/public-outlined.svg');
+      expect(navBarTabIconPath(TabType.users, false), 'assets/icons/people-outlined.svg');
+      expect(navBarTabIconPath(TabType.network, false), 'assets/icons/network-outlined.svg');
     });
   });
 

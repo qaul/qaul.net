@@ -95,6 +95,5 @@ flutter:
   assets:
     - assets/about/
     - assets/icons/
-    - assets/icons/nav_bar/
     - assets/license/
     - assets/logo/

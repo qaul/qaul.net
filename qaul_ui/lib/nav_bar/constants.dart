@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../providers/providers.dart';
 
-const String _navBarIconsPath = 'assets/icons/nav_bar';
+const String _iconsPath = 'assets/icons';
 
 String navBarIconPath(String name) {
-  return '$_navBarIconsPath/$name.svg';
+  return '$_iconsPath/$name.svg';
 }
 
 String navBarTabIconPath(TabType tab, bool selected) {
@@ -18,7 +18,7 @@ String navBarTabIconPath(TabType tab, bool selected) {
   };
   if (name == null) return '';
   final suffix = selected ? '-filled' : '-outlined';
-  return '$_navBarIconsPath/$name$suffix.svg';
+  return '$_iconsPath/$name$suffix.svg';
 }
 
 (Color, Color, Color) navBarColors(ThemeData theme) {
