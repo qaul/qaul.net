@@ -3,59 +3,13 @@ import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../providers/providers.dart';
-import '../../widgets/widgets.dart';
-
 import '../constants.dart';
 import '../nav_bar_helper.dart';
-
-class QaulNavBarDecorator extends StatefulWidget {
-  const QaulNavBarDecorator({super.key, required this.child});
-
-  /// The [pageViewKey] provided should be used in the tabs view, ensuring state is not
-  /// lost when the window is resized.
-  final Widget Function(GlobalKey pageViewKey) child;
-
-  @override
-  State<QaulNavBarDecorator> createState() => _QaulNavBarDecoratorState();
-}
-
-class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
-  final _pageViewKey = GlobalKey();
-
-  @override
-  Widget build(BuildContext context) {
-    return ResponsiveLayout(
-      mobileBody: Column(
-        children: [
-          Expanded(child: widget.child(_pageViewKey)),
-          QaulNavBar(
-            vertical: false,
-            overflowMenuLabels: navBarOverflowMenuLabels(context),
-            onOverflowSelected: (option) =>
-                handleNavBarOverflowSelected(context, option),
-          ),
-        ],
-      ),
-      tabletBody: Row(
-        children: [
-          QaulNavBar(
-            vertical: true,
-            overflowMenuLabels: navBarOverflowMenuLabels(context),
-            onOverflowSelected: (option) =>
-                handleNavBarOverflowSelected(context, option),
-          ),
-          Expanded(child: widget.child(_pageViewKey)),
-        ],
-      ),
-    );
-  }
-}
 
 class QaulNavBar extends StatelessWidget {
   const QaulNavBar({

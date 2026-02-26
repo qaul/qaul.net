@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../providers/providers.dart';
+import '../helper/qaul_nav_bar_helper.dart';
 
-const String _navBarIconsPath = 'assets/icons';
+const String kNavBarIconsPath = 'assets/icons';
 
 String navBarIconPath(String name) {
-  return '$_navBarIconsPath/$name.svg';
+  return '$kNavBarIconsPath/$name.svg';
 }
 
 String navBarTabIconPath(TabType tab, bool selected) {
@@ -18,16 +18,15 @@ String navBarTabIconPath(TabType tab, bool selected) {
   };
   if (name == null) return '';
   final suffix = selected ? '-filled' : '-outlined';
-  return '$_navBarIconsPath/$name$suffix.svg';
+  return '$kNavBarIconsPath/$name$suffix.svg';
 }
 
 (Color, Color, Color) navBarColors(ThemeData theme) {
-  final iconColor = theme.iconTheme.color ?? Colors.white;
   if (theme.brightness == Brightness.dark) {
     return (
       kNavBarSelectedBackgroundDark,
-      iconColor,
-      theme.navigationBarTheme.surfaceTintColor ?? iconColor,
+      theme.iconTheme.color!,
+      theme.navigationBarTheme.surfaceTintColor ?? theme.iconTheme.color!,
     );
   }
   return (
@@ -55,7 +54,7 @@ const double kNavBarMenuSplashRadius = 20.0;
 const double kNavBarBadgeFontSize = 10.0;
 const double kNavBarBadgePositionOffset = 8.0;
 
-const _navBarTabIconSizes = {
+const Map<TabType, Size> kNavBarTabIconSizes = {
   TabType.chat: Size(34, 21),
   TabType.network: Size(23, 23),
   TabType.users: Size(30, 18.34),
@@ -63,7 +62,7 @@ const _navBarTabIconSizes = {
 };
 
 Size navBarTabIconSize(TabType tab) =>
-    _navBarTabIconSizes[tab] ?? (throw StateError('$tab has no icon size'));
+    kNavBarTabIconSizes[tab] ?? (throw StateError('$tab has no icon size'));
 
 const Size kNavBarMenuIconSize = Size(4.92, 20);
 const double kNavBarAccountSize = 40.0;

@@ -217,7 +217,7 @@ jobs:
             - install-flutter-deps
             - run:
                 command: |
-                    cd widgetbook
+                    cd packages/qaul_components
                     flutter pub get
                 name: Install widgetbook dependencies
             - run: flutter analyze

@@ -1,10 +1,10 @@
-name: widgetbook_workspace
-description: "A new Flutter project."
-publish_to: 'none'
-version: 0.1.0
+name: qaul_components
+description: Shared UI components, breakpoints, and design tokens for qaul.
+version: 0.0.1
+publish_to: none
 
 environment:
-  sdk: '>=3.3.2 <4.0.0'
+  sdk: ">=3.9.0 <4.0.0"
 
 dependencies:
   flutter:
@@ -12,9 +12,12 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
+  badges: ^3.1.2
   flutter_riverpod: ^3.2.0
+  flutter_svg: ^2.2.3
   qaul_ui:
-    path: ../
+    path: ../..
+  shared_preferences: ^2.5.4
   widgetbook: ^3.7.1
   widgetbook_annotation: ^3.1.0
 
@@ -28,3 +31,5 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+  assets:
+    - assets/icons/

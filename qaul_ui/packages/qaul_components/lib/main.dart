@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:qaul_ui/l10n/app_localizations.dart';
 import 'package:qaul_ui/qaul_app.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
 import 'main.directories.g.dart';
+import 'qaul_components.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  // ignore: invalid_use_of_visible_for_testing_member
+  SharedPreferences.setMockInitialValues({});
   runApp(const ProviderScope(child: WidgetbookApp()));
 }
 
@@ -19,12 +23,24 @@ class WidgetbookApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Widgetbook.material(
-      // The [directories] variable does not exist yet,
-      // it will be generated in the next step
       directories: directories,
       addons: [
         ViewportAddon([
           Viewports.none,
+          ...kDesignerBreakpoints.map(
+            (v) => ViewportData(
+              name: v.name,
+              width: v.width,
+              height: v.height,
+              pixelRatio: 2.0,
+              platform: v.name == kBreakpointIphone16 ||
+                  v.name == kBreakpointIphone16Pro
+              ? TargetPlatform.iOS
+              : TargetPlatform.linux,
+            ),
+          ),
+          ...IosViewports.phones,
+          ...IosViewports.tablets,
           AndroidViewports.samsungGalaxyS20,
           AndroidViewports.samsungGalaxyNote20,
           LinuxViewports.desktop,
@@ -45,10 +61,6 @@ class WidgetbookApp extends StatelessWidget {
               data: QaulApp.darkTheme,
             ),
           ],
-          // initialTheme: WidgetbookTheme(
-          //   name: 'Light',
-          //   data: yourMaterialLightTheme,
-          // ),
         ),
       ],
     );
