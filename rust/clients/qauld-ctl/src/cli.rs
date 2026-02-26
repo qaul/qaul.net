@@ -270,9 +270,9 @@ pub enum ChatFileSubcmd {
     History {
         /// page offset
         #[arg(short, long, default_value = "0")]
-        offset: u64,
+        offset: u32,
         /// page offset
         #[arg(short, long, default_value = "10")]
-        limit: u64,
+        limit: u32,
     },
 }
