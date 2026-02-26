@@ -981,7 +981,7 @@ impl ChatFile {
     }
 
     /// Process incoming RPC request messages for file sharing module
-    pub async fn rpc(data: Vec<u8>, user_id: Vec<u8>) {
+    pub async fn rpc(data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
         let account_id = PeerId::from_bytes(&user_id).unwrap();
 
         match proto_rpc::ChatFile::decode(&data[..]) {
@@ -1054,7 +1054,7 @@ impl ChatFile {
                         Rpc::send_message(
                             buf,
                             crate::rpc::proto::Modules::Chatfile.into(),
-                            "".to_string(),
+                            request_id,
                             Vec::new(),
                         );
                     }

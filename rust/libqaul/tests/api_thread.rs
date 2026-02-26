@@ -46,7 +46,10 @@ fn test_is_initialized_becomes_true() {
 
     // The INSTANCE Lazy already waits for initialization,
     // so this should be true
-    assert!(instance.is_initialized(), "is_initialized() should be true after event loop starts");
+    assert!(
+        instance.is_initialized(),
+        "is_initialized() should be true after event loop starts"
+    );
 }
 
 #[test]
@@ -56,8 +59,14 @@ fn test_node_id_accessible() {
     let node_id = instance.node_id();
     let id_string = node_id.to_string();
 
-    assert!(!id_string.is_empty(), "Node ID should be accessible from main thread");
-    assert!(id_string.len() > 10, "Node ID should have reasonable length");
+    assert!(
+        !id_string.is_empty(),
+        "Node ID should be accessible from main thread"
+    );
+    assert!(
+        id_string.len() > 10,
+        "Node ID should have reasonable length"
+    );
 }
 
 #[test]
@@ -67,7 +76,11 @@ fn test_storage_accessible() {
     let storage = instance.storage();
     let path = storage.get_path();
 
-    assert_eq!(path, dir.path().to_str().unwrap(), "Storage path should be accessible");
+    assert_eq!(
+        path,
+        dir.path().to_str().unwrap(),
+        "Storage path should be accessible"
+    );
 }
 
 #[test]
@@ -96,7 +109,11 @@ fn test_node_keypair_accessible() {
 
     // Verify we can derive PeerId from the public key
     let derived_id = libp2p::PeerId::from(public_key);
-    assert_eq!(derived_id, instance.node_id(), "Derived PeerId should match node_id()");
+    assert_eq!(
+        derived_id,
+        instance.node_id(),
+        "Derived PeerId should match node_id()"
+    );
 }
 
 #[test]
@@ -106,10 +123,16 @@ fn test_router_accessible() {
     let router = instance.router();
 
     // The router module should have valid routing options
-    assert!(router.sending_table_period > 0, "Routing table period should be positive");
+    assert!(
+        router.sending_table_period > 0,
+        "Routing table period should be positive"
+    );
 
     let config = router.get_configuration();
-    assert!(config.ping_neighbour_period > 0, "Ping neighbour period should be positive");
+    assert!(
+        config.ping_neighbour_period > 0,
+        "Ping neighbour period should be positive"
+    );
 }
 
 #[test]
