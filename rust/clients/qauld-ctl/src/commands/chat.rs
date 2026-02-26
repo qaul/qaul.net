@@ -95,7 +95,6 @@ impl RpcCommand for ChatSubcmd {
                         content: message.to_string(),
                     })),
                 };
-                println!("chat message sent [{}] {}", group_id, message);
                 Ok((proto_message.encode_to_vec(), Modules::Chat))
             }
             ChatSubcmd::Conversation { group_id, index } => {
