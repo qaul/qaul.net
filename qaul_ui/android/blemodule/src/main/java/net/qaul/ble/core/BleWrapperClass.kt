@@ -642,7 +642,7 @@ open class BleWrapperClass(context: Activity) {
     }
 
     fun onResult(requestCode: Int, status: Boolean) {
-        Log.i(TAG, "onResult()")
+        Log.i(TAG, "onResult() $requestCode $status")
 
         when {
             !status -> {
