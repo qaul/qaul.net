@@ -773,16 +773,28 @@ class BleService : LifecycleService() {
      */
     private var outRangeRunnable: Runnable = Runnable {
         if (ignoreList.isNotEmpty()) {
+            val toRemove = mutableListOf<BLEScanDevice>()
             for (bLEDevice in ignoreList) {
-                if (bLEDevice.lastFoundTime != null && (bLEDevice.lastFoundTime!! < System.currentTimeMillis() - 5000)) {
-                    bleCallback?.deviceOutOfRange(bleDevice = bLEDevice)
-                    AppLog.e(TAG, " outRangeRunnable-  REMOVE HERE  -> ${bLEDevice.macAddress} ")
-                    devicesList.remove(bLEDevice)
-                    ignoreList.remove(bLEDevice)
-//                    AppLog.d(TAG, "${bLEDevice.macAddress} out of range ${ignoreList.size}")
-                } else {
-//                    AppLog.e(TAG, "${bLEDevice.macAddress} Still in range")
+                if (bLEDevice.lastFoundTime != null && (bLEDevice.lastFoundTime!! < System.currentTimeMillis() - 15000)) {
+                    // check if device is not currently connected or connecting
+                    if (!actorMap.containsKey(bLEDevice.macAddress)) {
+                        toRemove.add(bLEDevice)
+                    }
                 }
+            }
+
+            for (bLEDevice in toRemove) {
+                bleCallback?.deviceOutOfRange(bleDevice = bLEDevice)
+                AppLog.e(TAG, " outRangeRunnable-  REMOVE HERE  -> ${bLEDevice.macAddress} ")
+
+                // Disconnect and remove actor
+                actorMap[bLEDevice.macAddress]?.let { actor ->
+                    actor.disConnectedDevice()
+                    actorMap.remove(bLEDevice.macAddress)
+                }
+
+                devicesList.remove(bLEDevice)
+                ignoreList.remove(bLEDevice)
             }
         }
         startOutRangeChecker()
@@ -893,18 +905,12 @@ class BleService : LifecycleService() {
 
         }
 
-        val baseBleActor: BleActor? = when {
-            isFromMessage -> {
-                if (actorMap[device.macAddress] == null) {
-                    BleActor(this, BleConnectionListener())
-                } else {
-                    actorMap[device.macAddress]
-                }
-            }
-
-            else -> {
-                BleActor(this, BleConnectionListener())
-            }
+        val baseBleActor: BleActor? = if (actorMap.containsKey(device.macAddress)) {
+            actorMap[device.macAddress]
+        } else {
+            val actor = BleActor(this, BleConnectionListener())
+            actorMap[device.macAddress] = actor
+            actor
         }
 
         baseBleActor?.setDevice(device = device, isFromMessage = isFromMessage)
@@ -1041,6 +1047,7 @@ class BleService : LifecycleService() {
                             val bleActor = connectDevice(device = bleDevice, isFromMessage = true)
                             bleActor.messageId = messageId
                             bleActor.sendChunkQueue.addAll(chunks)
+                            bleActor.send("")
                         }
                     }
                 }

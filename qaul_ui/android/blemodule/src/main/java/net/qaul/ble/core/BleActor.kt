@@ -74,11 +74,19 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
      * Use to make connection to device
      */
     private fun connectDevice(): Boolean {
+        if (mBluetoothGatt != null) {
+            AppLog.e(TAG, "Already connected to $bluetoothDevice")
+            return true
+        }
+
         AppLog.i(TAG, "connectDevice : $bluetoothDevice")
         if (bluetoothDevice == null) {
             AppLog.e(TAG, "connectDevice : $bluetoothDevice")
             listener!!.onConnectionFailed(bleScanDevice = bleDevice!!)
+            return false
         }
+        
+        cancelTimer()
         failTimer = Timer()
         failedTask = ConnectionFailedTask()
         failTimer!!.schedule(failedTask, 20000)
@@ -88,6 +96,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             )
         } catch (e: Exception) {
             e.printStackTrace()
+            return false
         }
         return true
     }
@@ -139,6 +148,9 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int
         ) {
             super.onCharacteristicRead(gatt, characteristic, status)
+            isOperationInProgress = false
+            processNextOperation()
+
             var data = characteristic.value
             AppLog.e(
                 TAG,
@@ -173,6 +185,9 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int
         ) {
             super.onCharacteristicWrite(gatt, characteristic, status)
+            isOperationInProgress = false
+            processNextOperation()
+
             if (listener != null) {
                 if (messageId.isEmpty() || messageId.isBlank()) {
                     listener!!.onCharacteristicWrite(gatt = gatt, characteristic = characteristic)
@@ -182,7 +197,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
                         listener!!.onMessageSent(
                             gatt = gatt, value = tempData, id = messageId
                         )
-                        disConnectedDevice()
+                        messageId = ""
                         tempData = ByteArray(0)
                     }
                 }
@@ -269,7 +284,7 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
         val tx = sendChunkQueue.poll()
         //AppLog.e(TAG, "_send(): tx: ${BLEUtils.toBinaryString(tx)}")
         isWriting = true // Set the write in progress flag
-        if (!writeServiceData(BleService.SERVICE_UUID, BleService.MSG_CHAR, tx, attempt)) {
+        if (!writeServiceData(BleService.SERVICE_UUID, BleService.MSG_CHAR, tx)) {
             return false;
         }
         return true
@@ -400,6 +415,41 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
 
 
     /**
+     * GATT Operation types for serialization
+     */
+    private enum class GattOpType { READ, WRITE }
+    private data class GattOperation(val type: GattOpType, val characteristic: BluetoothGattCharacteristic, val data: ByteArray? = null)
+
+    private val operationQueue: Queue<GattOperation> = LinkedList()
+    private var isOperationInProgress = false
+
+    private fun processNextOperation() {
+        if (isOperationInProgress || operationQueue.isEmpty()) return
+
+        val op = operationQueue.poll() ?: return
+        isOperationInProgress = true
+
+        val success = when (op.type) {
+            GattOpType.READ -> mBluetoothGatt!!.readCharacteristic(op.characteristic)
+            GattOpType.WRITE -> {
+                if (Build.VERSION.SDK_INT >= 33) {
+                    mBluetoothGatt!!.writeCharacteristic(op.characteristic, op.data!!, BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
+                    true
+                } else {
+                    op.characteristic.value = op.data
+                    mBluetoothGatt!!.writeCharacteristic(op.characteristic)
+                }
+            }
+        }
+
+        if (!success) {
+            AppLog.e(TAG, "GATT operation failed to start: ${op.type}")
+            isOperationInProgress = false
+            processNextOperation()
+        }
+    }
+
+    /**
      * User read data from device
      */
     fun readServiceData(serUUID: String, charUUID: String) {
@@ -409,7 +459,8 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
             if (service != null) {
                 val characteristic = service.getCharacteristic(UUID.fromString(charUUID))
                 if (characteristic != null) {
-                    mBluetoothGatt!!.readCharacteristic(characteristic)
+                    operationQueue.add(GattOperation(GattOpType.READ, characteristic))
+                    processNextOperation()
                 }
             }
         }
@@ -419,57 +470,30 @@ class BleActor(private val mContext: Context, var listener: BleConnectionListene
      * User write data to device
      */
     fun writeServiceData(
-        serUUID: String, charUUID: String, data: ByteArray?, attempt: Int
+        serUUID: String, charUUID: String, data: ByteArray?
     ): Boolean {
-        if (attempt < 3) {
-            if (data != null) {
-                if (mBluetoothGatt != null) {
-                    val service = mBluetoothGatt!!.getService(UUID.fromString(serUUID))
-                    if (service != null) {
-                        val characteristic = service.getCharacteristic(UUID.fromString(charUUID))
-                        if (characteristic != null) {
-                            /**
-                            * This is a workaround for Android_Sdk_version 33 or less devices.
-                            * The latest API is more efficient and reliable for writing data to the device.
-                            */
-                            if (Build.VERSION.SDK_INT >= 33) {
-                                val returnValue = mBluetoothGatt!!.writeCharacteristic(characteristic, data, BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
-                                return true
-                            } else {
-                                characteristic.value = data
-                                return mBluetoothGatt!!.writeCharacteristic(characteristic)
-                            }
-                        }
-                    } else {
-                        bluetoothDevice!!.connectGatt(mContext, false, mGattCallback)
-                        this.attempt = attempt + 1
-                        tempData = data
-                        isReconnect = true
-                    }
-                    return true
-                } else {
-                    try {
-                        mBluetoothGatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            bluetoothDevice!!.connectGatt(
-                                mContext, false, mGattCallback, BluetoothDevice.TRANSPORT_LE
-                            )
-                        } else {
-                            bluetoothDevice!!.connectGatt(mContext, false, mGattCallback)
-                        }
-
-                        this.attempt = attempt + 1
-                        tempData = data
-                        isReconnect = true
+        if (data != null) {
+            if (mBluetoothGatt != null) {
+                val service = mBluetoothGatt!!.getService(UUID.fromString(serUUID))
+                if (service != null) {
+                    val characteristic = service.getCharacteristic(UUID.fromString(charUUID))
+                    if (characteristic != null) {
+                        operationQueue.add(GattOperation(GattOpType.WRITE, characteristic, data))
+                        processNextOperation()
                         return true
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+                    } else {
+                        AppLog.e(TAG, "writeServiceData failed: Characteristic $charUUID not found")
                     }
+                } else {
+                    AppLog.e(TAG, "writeServiceData failed: Service $serUUID not found")
                 }
+            } else {
+                AppLog.e(TAG, "writeServiceData failed: mBluetoothGatt is null")
             }
         }
 
         BleService.bleService!!.bleCallback?.onMessageSent(
-            id = messageId, success = false, data = data!!
+            id = messageId, success = false, data = data ?: ByteArray(0)
         )
         return false
     }
