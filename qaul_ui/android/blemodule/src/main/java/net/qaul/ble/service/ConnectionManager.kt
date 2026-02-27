@@ -134,10 +134,10 @@ class SendQaulIdQueue(qaulId: ByteArray) {
     var acksToSend: MutableMap<Byte, Pair<Boolean, Byte>> = mutableMapOf()
     // List of missing chunks to request
     // they have the second sending priority
-    var missingChunksToRequest: MutableList<Int> = mutableListOf()
+    var missingChunksToRequest: MutableSet<Int> = mutableSetOf()
     // List of missing chunks to send
     // they have the third sending priority
-    var missingChunksToSend: MutableList<Int> = mutableListOf()
+    var missingChunksToSend: MutableSet<Int> = mutableSetOf()
     // ACK's received for sent messages
     var acksReceived: MutableMap<Byte, Pair<Boolean, Byte>> = mutableMapOf()
 
@@ -171,8 +171,8 @@ class SendQaulIdQueue(qaulId: ByteArray) {
      * add missing chunk index to request
      */
     fun addMissingChunkIndexToRequest(missingChunkIndex: Int) {
-        // add missing chunk to the map
-        missingChunksToRequest[missingChunkIndex] = missingChunkIndex
+        // add missing chunk to the set
+        missingChunksToRequest.add(missingChunkIndex)
     }
 
     /**
@@ -197,7 +197,7 @@ class SendQaulIdQueue(qaulId: ByteArray) {
      * add missing chunk index to send
      */
     fun addMissingChunkIndexToSend(missingChunkIndex: Int) {
-        // add missing chunk to the map
-        missingChunksToSend[missingChunkIndex] = missingChunkIndex
+        // add missing chunk to the set
+        missingChunksToSend.add(missingChunkIndex)
     }
 }
