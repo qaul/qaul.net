@@ -42,11 +42,19 @@ class SearchUserDecorator extends HookConsumerWidget {
     final searchKeyNotifier = _searchKeyProvider.notifier;
 
     final l10n = AppLocalizations.of(context)!;
+    final topPadding = MediaQuery.paddingOf(context).top;
     final searchBar = PreferredSize(
-      preferredSize: const Size(double.maxFinite, 40),
-      child: Padding(
-        padding: EdgeInsets.zero,
-        child: TextField(
+      preferredSize: Size(double.maxFinite, 40 + topPadding),
+      child: SafeArea(
+        top: true,
+        bottom: false,
+        left: false,
+        right: false,
+        child: SizedBox(
+          height: 40,
+          child: Padding(
+            padding: EdgeInsets.zero,
+            child: TextField(
           controller: controller,
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.search),
@@ -65,6 +73,8 @@ class SearchUserDecorator extends HookConsumerWidget {
             ),
           ),
           onChanged: (val) => ref.read(searchKeyNotifier).state = val,
+            ),
+          ),
         ),
       ),
     );

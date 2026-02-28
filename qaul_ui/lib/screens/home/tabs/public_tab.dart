@@ -59,7 +59,7 @@ class _PublicTabView extends HookConsumerWidget {
     }, [UniqueKey()]);
 
     final l10n = AppLocalizations.of(context)!;
-    const bullhorn = 'assets/icons/public.svg';
+    const bullhorn = 'assets/icons/public-filled.svg';
 
     final onCreatePublicMessagePressed = useCallback(
       () async {
