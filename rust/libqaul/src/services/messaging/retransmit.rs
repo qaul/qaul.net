@@ -10,6 +10,7 @@ use prost::Message;
 
 use super::UnConfirmedMessage;
 use crate::router;
+use crate::utilities::qaul_id::QaulId;
 use crate::utilities::timestamp::Timestamp;
 
 /// Qaul Messaging Structure
@@ -45,7 +46,7 @@ impl MessagingRetransmit {
                     continue;
                 }
 
-                let qaul_id = &unconfirmed_message.receiver_id[6..14];
+                let qaul_id = QaulId::bytes_as_q8id(&unconfirmed_message.receiver_id);
                 //1. check receiver is online
                 if let Some(_hc) = online_users.get(qaul_id) {
                     let mut timeout: u64 = 0;
