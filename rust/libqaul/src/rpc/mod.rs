@@ -37,11 +37,6 @@ use proto::{Modules, QaulRpc};
 /// Import protobuf message definition
 pub use qaul_proto::qaul_rpc as proto;
 
-// alteratively one could import it directly from the target folder
-// pub mod rpc_proto {
-//     include!(concat!(env!("OUT_DIR"), "/qaul.rpc.rs"));
-// }
-
 /// counter of received messages
 /// this is for bug fixing only
 pub struct MessageCounter {
