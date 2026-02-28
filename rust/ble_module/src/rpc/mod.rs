@@ -5,18 +5,14 @@
 //!
 //! Listens to incoming RPC messages on the `qaul.sys.ble` channel.
 
-// TODO: remove local import, import instead from libqaul
-pub mod proto_sys {
-    include!("../../../libqaul/src/rpc/generated/rust/qaul.sys.ble.rs");
-}
 pub mod msg_loop;
 pub mod utils;
 
 use async_trait::async_trait;
 use prost::Message;
+pub use qaul_proto::qaul_sys_ble as proto_sys;
+pub use qaul_proto::qaul_sys_ble::Ble;
 use state::InitCell;
-
-use proto_sys::Ble;
 
 /// sender of the mpsc channel: libqaul ---> ble_module
 static EXTERN_SEND: InitCell<tokio::sync::mpsc::Sender<Vec<u8>>> = InitCell::new();
