@@ -46,29 +46,29 @@ impl ChatMessage {
     /// send message
     pub fn send_chat_message(
         account_id: &PeerId,
-        group_id: &Vec<u8>,
+        group_id: &[u8],
         message: String,
     ) -> Result<bool, String> {
         let groupid: GroupId;
         let group;
 
-        match GroupId::from_bytes(&group_id) {
+        match GroupId::from_bytes(group_id) {
             Ok(result) => groupid = result,
             Err(e) => {
                 return Err(e);
             }
         }
 
-        match GroupStorage::get_group(account_id.to_owned(), group_id.to_owned()) {
+        match GroupStorage::get_group(account_id.to_owned(), group_id) {
             Some(v) => group = v,
             None => {
                 let error_string = "Group not found".to_string();
                 // check if group is direct message
-                match groupid.is_direct(account_id.to_owned()) {
+                match groupid.is_direct(*account_id) {
                     // get user id from q8id
                     Some(user_q8id) => {
                         // create direct chat
-                        match crate::router::users::Users::get_user_id_by_q8id(user_q8id) {
+                        match crate::router::users::Users::get_user_id_by_q8id(&user_q8id) {
                             Some(user_id) => {
                                 group =
                                     GroupManage::create_new_direct_chat_group(account_id, &user_id)
@@ -122,14 +122,14 @@ impl ChatMessage {
             account_id,
             &message_id,
             timestamp,
-            message_content.clone(),
+            message_content,
             rpc_proto::MessageStatus::Sending,
         );
 
         // send to all group members
-        if let Some(user_account) = UserAccounts::get_by_id(account_id.clone()) {
+        if let Some(user_account) = UserAccounts::get_by_id(*account_id) {
             for user_id in group.members.keys() {
-                let receiver = PeerId::from_bytes(&user_id.clone()).unwrap();
+                let receiver = PeerId::from_bytes(user_id).unwrap();
                 if receiver != *account_id {
                     log::trace!("send message to {}", receiver.to_base58());
                     if let Err(error) = Self::send(&user_account, &receiver, &common_message) {
@@ -141,7 +141,7 @@ impl ChatMessage {
 
         // update member state
         my_member.last_message_index = last_index;
-        Group::update_group_member(account_id, group_id, &my_member);
+        Group::update_group_member(account_id, &groupid.id, &my_member);
 
         Ok(true)
     }

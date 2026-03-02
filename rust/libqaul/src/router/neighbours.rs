@@ -269,13 +269,12 @@ impl Neighbours {
     /// This function is used to decide to which nodes we need to send the
     /// flooding information.
     pub fn get_ble_only_nodes() -> Vec<PeerId> {
-        let mut nodes: Vec<PeerId> = Vec::new();
-
         // get state
         let ble = BLE.get().read().unwrap();
+        let mut nodes = Vec::with_capacity(ble.nodes.len());
 
         // check if we have nodes listed
-        if ble.nodes.len() > 0 {
+        if !ble.nodes.is_empty() {
             let lan = LAN.get().read().unwrap();
             let internet = INTERNET.get().read().unwrap();
 
@@ -292,7 +291,7 @@ impl Neighbours {
                 }
 
                 // if not found, add it to the nodes list
-                nodes.push(id.to_owned());
+                nodes.push(id.clone());
             }
         }
 
@@ -302,46 +301,47 @@ impl Neighbours {
 
     /// send protobuf RPC neighbours list
     pub fn rpc_send_neighbours_list() {
-        // create lists per module
-        let mut lan_neighbours: Vec<proto::NeighboursEntry> = Vec::new();
-        let mut internet_neighbours: Vec<proto::NeighboursEntry> = Vec::new();
-        let mut ble_neighbours: Vec<proto::NeighboursEntry> = Vec::new();
-
         // fill lan connection module neighbours
-        {
+        let lan_neighbours = {
             let lan = LAN.get().read().unwrap();
+            let mut neighbours = Vec::with_capacity(lan.nodes.len());
 
             for (id, value) in &lan.nodes {
-                lan_neighbours.push(proto::NeighboursEntry {
+                neighbours.push(proto::NeighboursEntry {
                     node_id: id.to_bytes(),
                     rtt: value.rtt,
                 });
             }
-        }
+            neighbours
+        };
 
         // fill internet connection module neighbours
-        {
-            let internet = INTERNET.get().write().unwrap();
+        let internet_neighbours = {
+            let internet = INTERNET.get().read().unwrap();
+            let mut neighbours = Vec::with_capacity(internet.nodes.len());
 
             for (id, value) in &internet.nodes {
-                internet_neighbours.push(proto::NeighboursEntry {
+                neighbours.push(proto::NeighboursEntry {
                     node_id: id.to_bytes(),
                     rtt: value.rtt,
                 });
             }
-        }
+            neighbours
+        };
 
         // fill ble connection module neighbours
-        {
-            let ble = BLE.get().write().unwrap();
+        let ble_neighbours = {
+            let ble = BLE.get().read().unwrap();
+            let mut neighbours = Vec::with_capacity(ble.nodes.len());
 
             for (id, value) in &ble.nodes {
-                ble_neighbours.push(proto::NeighboursEntry {
+                neighbours.push(proto::NeighboursEntry {
                     node_id: id.to_bytes(),
                     rtt: value.rtt,
                 });
             }
-        }
+            neighbours
+        };
 
         // create neighbours list message
         let proto_message = proto::Router {

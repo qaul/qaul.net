@@ -19,18 +19,69 @@ use crate::{node::user_accounts::UserAccounts, utilities::timestamp};
 pub struct Member {}
 
 impl Member {
-    /// invite member from rpc command
-    pub fn invite(
+    fn to_proto_net_member(member: &GroupMember) -> super::proto_net::GroupMember {
+        super::proto_net::GroupMember {
+            user_id: member.user_id.clone(),
+            role: member.role,
+            joined_at: member.joined_at,
+            state: member.state,
+            last_message_index: member.last_message_index,
+        }
+    }
+
+    fn from_proto_net_member(member: &super::proto_net::GroupMember) -> GroupMember {
+        GroupMember {
+            user_id: member.user_id.clone(),
+            role: member.role,
+            joined_at: member.joined_at,
+            state: member.state,
+            last_message_index: member.last_message_index,
+        }
+    }
+
+    fn group_event_message(
+        event_type: chat::rpc_proto::GroupEventType,
+        user_id: Vec<u8>,
+    ) -> chat::rpc_proto::ChatContentMessage {
+        chat::rpc_proto::ChatContentMessage {
+            message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
+                chat::rpc_proto::GroupEvent {
+                    event_type: event_type as i32,
+                    user_id,
+                },
+            )),
+        }
+    }
+
+    fn save_group_event_message(
         account_id: &PeerId,
-        group_id: &Vec<u8>,
-        user_id: &PeerId,
-    ) -> Result<bool, String> {
+        group_id: &GroupId,
+        sender_id: &PeerId,
+        event_type: chat::rpc_proto::GroupEventType,
+        user_id: Vec<u8>,
+    ) {
+        ChatStorage::save_message(
+            account_id,
+            group_id,
+            sender_id,
+            &[],
+            Timestamp::get_timestamp(),
+            Self::group_event_message(event_type, user_id),
+            chat::rpc_proto::MessageStatus::Received,
+        );
+    }
+
+    /// invite member from rpc command
+    pub fn invite(account_id: &PeerId, group_id: &[u8], user_id: &PeerId) -> Result<bool, String> {
         // get group
         let mut group;
-        match GroupStorage::get_group(account_id.to_owned(), group_id.to_owned()) {
+        match GroupStorage::get_group(account_id.to_owned(), group_id) {
             Some(my_group) => group = my_group,
             None => return Err("group not found".to_string()),
         }
+
+        let account_id_bytes = account_id.to_bytes();
+        let user_id_bytes = user_id.to_bytes();
 
         // check it's direct chat room
         if group.is_direct_chat {
@@ -38,7 +89,7 @@ impl Member {
         }
 
         // check admin permission
-        if let Some(member) = group.get_member(&account_id.to_bytes()) {
+        if let Some(member) = group.get_member(&account_id_bytes) {
             if member.role != 255 {
                 return Err("you haven't permission for remove member".to_string());
             }
@@ -47,7 +98,7 @@ impl Member {
         }
 
         // check user
-        if let Some(member) = group.get_member(&user_id.to_bytes()) {
+        if let Some(member) = group.get_member(&user_id_bytes) {
             if member.state > 0 {
                 return Err("user is already member in this group".to_string());
             } else {
@@ -56,15 +107,9 @@ impl Member {
         }
 
         // send invite.
-        let mut members: Vec<super::proto_net::GroupMember> = Vec::new();
-        for (_, member) in group.members.clone() {
-            members.push(super::proto_net::GroupMember {
-                user_id: member.user_id.clone(),
-                role: member.role,
-                joined_at: member.joined_at,
-                state: member.state,
-                last_message_index: member.last_message_index,
-            });
+        let mut members = Vec::with_capacity(group.members.len());
+        for member in group.members.values() {
+            members.push(Self::to_proto_net_member(member));
         }
 
         let proto_message = super::proto_net::GroupContainer {
@@ -86,7 +131,7 @@ impl Member {
 
             // save new user
             let member = super::GroupMember {
-                user_id: user_id.to_bytes(),
+                user_id: user_id_bytes.clone(),
                 role: super::proto_rpc::GroupMemberRole::User.try_into().unwrap(),
                 joined_at: timestamp::Timestamp::get_timestamp(),
                 state: super::proto_rpc::GroupMemberState::Invited
@@ -95,7 +140,7 @@ impl Member {
                 last_message_index: 0,
             };
 
-            group.members.insert(user_id.to_bytes(), member);
+            group.members.insert(user_id_bytes, member);
 
             GroupStorage::save_group(user_account.id, group);
         } else {
@@ -107,12 +152,12 @@ impl Member {
     /// reply to invited message from rpc command
     pub fn reply_invite(
         account_id: &PeerId,
-        group_id: &Vec<u8>,
+        group_id: &[u8],
         accept: bool,
     ) -> Result<bool, String> {
         // check if there is a group invite
         let invite;
-        match GroupStorage::get_invite(account_id.to_owned(), group_id.to_owned()) {
+        match GroupStorage::get_invite(account_id.to_owned(), group_id) {
             Some(my_invite) => invite = my_invite,
             None => return Err("there is no group invite".to_string()),
         }
@@ -128,7 +173,7 @@ impl Member {
         let proto_message = super::proto_net::GroupContainer {
             message: Some(super::proto_net::group_container::Message::ReplyInvite(
                 super::proto_net::ReplyInvite {
-                    group_id: group_id.clone(),
+                    group_id: group_id.to_vec(),
                     accept,
                 },
             )),
@@ -138,7 +183,7 @@ impl Member {
             Group::send_notify_message(&user_account, &receiver, proto_message.encode_to_vec());
 
             // remove invited
-            GroupStorage::remove_invite(account_id.to_owned(), group_id);
+            GroupStorage::remove_invite_deferred(account_id.to_owned(), group_id);
         } else {
             return Err("user account problem".to_string());
         }
@@ -146,26 +191,17 @@ impl Member {
         // save group into data base if invite was accepted
         if accept {
             // save group to data base
-            GroupStorage::save_group(account_id.to_owned(), invite.group);
+            GroupStorage::save_group_deferred(account_id.to_owned(), invite.group);
+        }
+        GroupStorage::flush_account(account_id);
 
-            // save group event: invite accepted message into chat
-            let event = chat::rpc_proto::ChatContentMessage {
-                message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
-                    chat::rpc_proto::GroupEvent {
-                        event_type: chat::rpc_proto::GroupEventType::InviteAccepted as i32,
-                        user_id: account_id.to_bytes(),
-                    },
-                )),
-            };
-
-            ChatStorage::save_message(
+        if accept {
+            Self::save_group_event_message(
                 account_id,
-                &GroupId::from_bytes(&group_id).unwrap(),
+                &GroupId::from_bytes(group_id).unwrap(),
                 account_id,
-                &Vec::new(),
-                Timestamp::get_timestamp(),
-                event,
-                chat::rpc_proto::MessageStatus::Received,
+                chat::rpc_proto::GroupEventType::InviteAccepted,
+                account_id.to_bytes(),
             );
         }
 
@@ -173,11 +209,7 @@ impl Member {
     }
 
     /// remove member from rpc command
-    pub fn remove(
-        account_id: &PeerId,
-        group_id: &Vec<u8>,
-        user_id: &PeerId,
-    ) -> Result<bool, String> {
+    pub fn remove(account_id: &PeerId, group_id: &[u8], user_id: &PeerId) -> Result<bool, String> {
         // get user account from node
         let user_account;
         match UserAccounts::get_by_id(*account_id) {
@@ -185,9 +217,12 @@ impl Member {
             None => return Err("user account has problem".to_string()),
         }
 
+        let account_id_bytes = account_id.to_bytes();
+        let user_id_bytes = user_id.to_bytes();
+
         // get group from data base
         let mut group;
-        match GroupStorage::get_group(account_id.to_owned(), group_id.to_owned()) {
+        match GroupStorage::get_group(account_id.to_owned(), group_id) {
             Some(my_group) => group = my_group,
             None => return Err("group not found".to_string()),
         }
@@ -198,7 +233,7 @@ impl Member {
         }
 
         // check permissions
-        if let Some(member) = group.get_member(&account_id.to_bytes()) {
+        if let Some(member) = group.get_member(&account_id_bytes) {
             if member.role != 255 {
                 return Err("you haven't permission for remove member".to_string());
             }
@@ -207,12 +242,12 @@ impl Member {
         }
 
         // update group
-        if let Some(_member) = group.get_member(&user_id.to_bytes()) {
+        if let Some(_member) = group.get_member(&user_id_bytes) {
             // remove member
-            group.members.remove(&user_id.to_bytes());
+            group.members.remove(&user_id_bytes);
 
             // set new revision
-            group.revision = group.revision + 1;
+            group.revision += 1;
 
             // save to data base
             GroupStorage::save_group(account_id.to_owned(), group);
@@ -224,30 +259,19 @@ impl Member {
         let proto_message = super::proto_net::GroupContainer {
             message: Some(super::proto_net::group_container::Message::Removed(
                 super::proto_net::RemovedMember {
-                    group_id: group_id.clone(),
+                    group_id: group_id.to_vec(),
                 },
             )),
         };
         Group::send_notify_message(&user_account, user_id, proto_message.encode_to_vec());
 
         // save group event
-        let event = chat::rpc_proto::ChatContentMessage {
-            message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
-                chat::rpc_proto::GroupEvent {
-                    event_type: chat::rpc_proto::GroupEventType::Left.try_into().unwrap(),
-                    user_id: user_id.to_bytes(),
-                },
-            )),
-        };
-
-        ChatStorage::save_message(
+        Self::save_group_event_message(
             account_id,
             &GroupId::from_bytes(group_id).unwrap(),
             user_id,
-            &Vec::new(),
-            Timestamp::get_timestamp(),
-            event,
-            chat::rpc_proto::MessageStatus::Received,
+            chat::rpc_proto::GroupEventType::Left,
+            user_id.to_bytes(),
         );
 
         Ok(true)
@@ -259,29 +283,18 @@ impl Member {
         account_id: &PeerId,
         invite_message: &super::proto_net::InviteMember,
     ) {
-        let group_info;
-        match invite_message.group.to_owned() {
-            Some(my_group) => group_info = my_group,
-            None => {
-                log::error!("invite message contains no group");
-                return;
-            }
-        }
+        let Some(group_info) = invite_message.group.as_ref() else {
+            log::error!("invite message contains no group");
+            return;
+        };
 
         // create new group
         let mut group = Group::new();
 
-        for member in group_info.members {
-            group.members.insert(
-                member.user_id.clone(),
-                GroupMember {
-                    user_id: member.user_id.clone(),
-                    role: member.role,
-                    joined_at: member.joined_at,
-                    state: member.state,
-                    last_message_index: member.last_message_index,
-                },
-            );
+        for member in &group_info.members {
+            group
+                .members
+                .insert(member.user_id.clone(), Self::from_proto_net_member(member));
         }
 
         group.id = group_info.group_id.clone();
@@ -307,10 +320,11 @@ impl Member {
     ) -> Result<bool, String> {
         // get group from data base
         let mut group;
-        match GroupStorage::get_group(account_id.to_owned(), resp.group_id.clone()) {
+        match GroupStorage::get_group(account_id.to_owned(), &resp.group_id) {
             Some(my_group) => group = my_group,
             None => return Err("group not found".to_string()),
         }
+        let sender_id_bytes = sender_id.to_bytes();
 
         // check it's direct chat room
         if group.is_direct_chat {
@@ -318,44 +332,31 @@ impl Member {
         }
 
         // check if user is invite pending state
-        if !group.members.contains_key(&sender_id.to_bytes()) {
-            return Err("member has no invite pending".to_string());
-        }
-
-        // check if user already joined
-        let mut member = group.members.get(&sender_id.to_bytes()).unwrap().clone();
+        let member = group
+            .members
+            .get_mut(&sender_id_bytes)
+            .ok_or_else(|| "member has no invite pending".to_string())?;
         if member.state > 0 {
             return Err("member has already joined".to_string());
         }
 
         // update group member state
         member.state = super::proto_rpc::GroupMemberState::Activated as i32;
-        group.members.insert(member.user_id.clone(), member);
 
         // update revision
-        group.revision = group.revision + 1;
+        group.revision += 1;
 
         // save group
-        GroupStorage::save_group(account_id.to_owned(), group.clone());
+        let group_id = GroupId::from_bytes(&group.id).unwrap();
+        GroupStorage::save_group(account_id.to_owned(), group);
 
         // save event
-        let event = chat::rpc_proto::ChatContentMessage {
-            message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
-                chat::rpc_proto::GroupEvent {
-                    event_type: chat::rpc_proto::GroupEventType::Joined.try_into().unwrap(),
-                    user_id: sender_id.to_bytes(),
-                },
-            )),
-        };
-
-        ChatStorage::save_message(
+        Self::save_group_event_message(
             account_id,
-            &GroupId::from_bytes(&group.id).unwrap(),
+            &group_id,
             sender_id,
-            &Vec::new(),
-            Timestamp::get_timestamp(),
-            event,
-            chat::rpc_proto::MessageStatus::Received,
+            chat::rpc_proto::GroupEventType::Joined,
+            sender_id.to_bytes(),
         );
 
         Ok(true)
@@ -369,10 +370,11 @@ impl Member {
     ) -> Result<bool, String> {
         // get group from data base
         let mut group;
-        match GroupStorage::get_group(account_id.to_owned(), resp.group_id.to_owned()) {
+        match GroupStorage::get_group(account_id.to_owned(), &resp.group_id) {
             Some(my_group) => group = my_group,
             None => return Err("group not found".to_string()),
         }
+        let sender_id_bytes = sender_id.to_bytes();
 
         // check it's direct chat room
         if group.is_direct_chat {
@@ -380,15 +382,15 @@ impl Member {
         }
 
         // check if user is invite pending state
-        if !group.members.contains_key(&sender_id.to_bytes()) {
+        if !group.members.contains_key(&sender_id_bytes) {
             return Err("member is not invite pending state".to_string());
         }
-        let member = group.members.get(&sender_id.to_bytes()).unwrap();
+        let member = group.members.get(&sender_id_bytes).unwrap();
         if member.state > 0 {
             return Err("member is not invite pending state, it's joined".to_string());
         }
 
-        group.members.remove(&sender_id.to_bytes());
+        group.members.remove(&sender_id_bytes);
         GroupStorage::save_group(account_id.to_owned(), group);
 
         Ok(true)
@@ -418,10 +420,12 @@ impl Member {
     ) -> Result<bool, String> {
         // get group from data base
         let mut group;
-        match GroupStorage::get_group(account_id.to_owned(), message.group_id.clone()) {
+        match GroupStorage::get_group(account_id.to_owned(), &message.group_id) {
             Some(my_group) => group = my_group,
             None => return Err("group not found".to_string()),
         }
+        let sender_id_bytes = sender_id.to_bytes();
+        let account_id_bytes = account_id.to_bytes();
 
         // check it's direct chat room
         if group.is_direct_chat {
@@ -429,7 +433,7 @@ impl Member {
         }
 
         // check if sender is administrator
-        match group.members.get(&sender_id.to_bytes()) {
+        match group.members.get(&sender_id_bytes) {
             Some(admin) => {
                 if admin.role != super::proto_rpc::GroupMemberRole::Admin as i32 {
                     return Err("sender is not administrator".to_string());
@@ -439,32 +443,22 @@ impl Member {
         }
 
         // remove self from group
-        group.members.remove(&account_id.to_bytes());
+        group.members.remove(&account_id_bytes);
 
         // set group deactivation status
         group.status = super::proto_rpc::GroupStatus::Deactivated as i32;
 
         // save group
-        GroupStorage::save_group(account_id.to_owned(), group.clone());
+        let group_id = GroupId::from_bytes(&group.id).unwrap();
+        GroupStorage::save_group(account_id.to_owned(), group);
 
         // save event
-        let event = chat::rpc_proto::ChatContentMessage {
-            message: Some(chat::rpc_proto::chat_content_message::Message::GroupEvent(
-                chat::rpc_proto::GroupEvent {
-                    event_type: chat::rpc_proto::GroupEventType::Removed as i32,
-                    user_id: account_id.to_bytes(),
-                },
-            )),
-        };
-
-        ChatStorage::save_message(
+        Self::save_group_event_message(
             account_id,
-            &GroupId::from_bytes(&group.id).unwrap(),
+            &group_id,
             sender_id,
-            &Vec::new(),
-            Timestamp::get_timestamp(),
-            event,
-            chat::rpc_proto::MessageStatus::Received,
+            chat::rpc_proto::GroupEventType::Removed,
+            account_id_bytes,
         );
 
         Ok(true)

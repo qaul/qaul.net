@@ -82,7 +82,7 @@ pub fn start_instance_in_thread(
     let instance = rx.recv().expect(
         "Failed to receive libqaul instance from thread. \
          This usually means the initialization failed. \
-         Check if another process is using the database."
+         Check if another process is using the database.",
     );
 
     // Store in global for backward compatibility
@@ -101,7 +101,10 @@ pub fn get_instance() -> Option<Arc<Libqaul>> {
 /// start libqaul in an own thread
 ///
 /// Provide the location for storage, all data of qaul will be saved there.
-#[deprecated(since = "2.0.0", note = "Use start_instance_in_thread() instead for access to the instance")]
+#[deprecated(
+    since = "2.0.0",
+    note = "Use start_instance_in_thread() instead for access to the instance"
+)]
 pub fn start(storage_path: String) {
     let _instance = start_instance_in_thread(storage_path, None);
 }
@@ -112,7 +115,10 @@ pub fn start(storage_path: String) {
 /// * Optionally provide some configuration options, to initially configure libqaul to your needs.
 ///   the following options can be provided:
 ///   * Internet module listening port. By default this port is randomly assigned.
-#[deprecated(since = "2.0.0", note = "Use start_instance_in_thread() instead for access to the instance")]
+#[deprecated(
+    since = "2.0.0",
+    note = "Use start_instance_in_thread() instead for access to the instance"
+)]
 pub fn start_with_config(storage_path: String, config: Option<BTreeMap<String, String>>) {
     // Use the new instance-based approach internally
     let _instance = start_instance_in_thread(storage_path, config);
@@ -151,7 +157,10 @@ pub fn start_desktop() -> Option<Arc<Libqaul>> {
         log::trace!("start libqaul");
 
         // start the library with the path
-        Some(start_instance_in_thread(path.to_str().unwrap().to_string(), None))
+        Some(start_instance_in_thread(
+            path.to_str().unwrap().to_string(),
+            None,
+        ))
     } else {
         log::error!("Configuration path couldn't be created.");
         None

@@ -135,7 +135,7 @@ pub struct UserAccount {
     pub keys: String,
     pub password_hash: Option<String>,
     pub password_salt: Option<String>,
-    pub session_token : Option<String>,
+    pub session_token: Option<String>,
     pub storage: StorageOptions,
 }
 

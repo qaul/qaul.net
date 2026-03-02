@@ -16,6 +16,9 @@ use libp2p::PeerId;
 pub struct QaulId {}
 
 impl QaulId {
+    const Q8ID_START: usize = 6;
+    const Q8ID_END: usize = 14;
+
     /// Convert a qaul ID to it's small 16 Byte version
     ///
     /// The small version is used in the BLE module.
@@ -52,10 +55,15 @@ impl QaulId {
         Self::bytes_to_q8id(bytes)
     }
 
+    /// Borrow the q8id bytes from a qaul user ID byte slice.
+    pub fn bytes_as_q8id(bytes: &[u8]) -> &[u8] {
+        &bytes[Self::Q8ID_START..Self::Q8ID_END]
+    }
+
     /// Converts the binary form of the qaul user ID to the 8 Byte ID (q8id)
     pub fn bytes_to_q8id(bytes: Vec<u8>) -> Vec<u8> {
         // only use bytes 7 to 14
-        let q8id = bytes[6..14].to_owned();
+        let q8id = Self::bytes_as_q8id(&bytes).to_owned();
 
         // return small id
         q8id

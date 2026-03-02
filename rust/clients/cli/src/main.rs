@@ -6,14 +6,15 @@
 //! This client uses all the functionality of the qaul
 //! RPC system and
 
-use tokio::io::{self, AsyncBufReadExt, BufReader};
 use futures::prelude::*;
 use futures::{future::FutureExt, pin_mut, select};
 use futures_ticker::Ticker;
 use std::time::Duration;
+use tokio::io::{self, AsyncBufReadExt, BufReader};
 
 use libqaul;
 
+mod authentication;
 mod ble;
 mod chat;
 mod chatfile;
@@ -29,7 +30,6 @@ mod rpc;
 mod rtc;
 mod user_accounts;
 mod users;
-mod authentication;
 
 use cli::Cli;
 use rpc::Rpc;

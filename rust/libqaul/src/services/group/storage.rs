@@ -35,6 +35,13 @@ pub struct GroupStorage {
     db_ref: BTreeMap<Vec<u8>, GroupAccountDb>,
 }
 
+#[allow(dead_code)]
+#[derive(Clone, Copy)]
+enum FlushMode {
+    Immediate,
+    Deferred,
+}
+
 impl GroupStorage {
     /// Initialize Group Storage
     pub fn init() {
@@ -70,6 +77,13 @@ impl GroupStorage {
         }
     }
 
+    /// Flush all group-related trees for an account.
+    pub fn flush_account(account_id: &PeerId) {
+        let db_ref = Self::get_db_ref(account_id.to_owned());
+        Self::maybe_flush_tree(&db_ref.groups, FlushMode::Immediate, "Error groups flush");
+        Self::maybe_flush_tree(&db_ref.invited, FlushMode::Immediate, "Error invited flush");
+    }
+
     /// create group account db entry when it does not exist
     fn create_groupaccountdb(account_id: PeerId) -> GroupAccountDb {
         // get user data base
@@ -94,7 +108,7 @@ impl GroupStorage {
     }
 
     /// get a group from data base
-    pub fn get_group(account_id: PeerId, group_id: Vec<u8>) -> Option<Group> {
+    pub fn get_group(account_id: PeerId, group_id: &[u8]) -> Option<Group> {
         // get DB ref
         let db_ref = Self::get_db_ref(account_id);
 
@@ -111,9 +125,38 @@ impl GroupStorage {
         None
     }
 
+    /// Load, mutate and save a group in one place.
+    ///
+    /// Returns `None` if the group does not exist.
+    pub fn with_group_mut<R>(
+        account_id: &PeerId,
+        group_id: &[u8],
+        mutate: impl FnOnce(&mut Group) -> R,
+    ) -> Option<R> {
+        let mut group = Self::get_group(account_id.to_owned(), group_id)?;
+        let result = mutate(&mut group);
+        Self::save_group(account_id.to_owned(), group);
+        Some(result)
+    }
+
+    /// Like `with_group_mut`, but skips saving when the closure returns an error.
+    pub fn try_with_group_mut<R, E>(
+        account_id: &PeerId,
+        group_id: &[u8],
+        mutate: impl FnOnce(&mut Group) -> Result<R, E>,
+    ) -> Result<Option<R>, E> {
+        let Some(mut group) = Self::get_group(account_id.to_owned(), group_id) else {
+            return Ok(None);
+        };
+
+        let result = mutate(&mut group)?;
+        Self::save_group(account_id.to_owned(), group);
+        Ok(Some(result))
+    }
+
     /// Check if a group exists in the data base
     #[allow(dead_code)]
-    pub fn group_exists(account_id: PeerId, group_id: Vec<u8>) -> bool {
+    pub fn group_exists(account_id: PeerId, group_id: &[u8]) -> bool {
         // get DB ref
         let db_ref = Self::get_db_ref(account_id);
 
@@ -133,6 +176,18 @@ impl GroupStorage {
     /// This function overwrites an already existing group entry or
     /// creates a new one.
     pub fn save_group(account_id: PeerId, group: Group) {
+        Self::save_group_with_mode(account_id, group, FlushMode::Immediate);
+    }
+
+    /// Save a group without flushing.
+    ///
+    /// Useful when batching several writes in one operation.
+    #[allow(dead_code)]
+    pub fn save_group_deferred(account_id: PeerId, group: Group) {
+        Self::save_group_with_mode(account_id, group, FlushMode::Deferred);
+    }
+
+    fn save_group_with_mode(account_id: PeerId, group: Group, flush_mode: FlushMode) {
         // get DB ref
         let db_ref = Self::get_db_ref(account_id);
 
@@ -141,10 +196,8 @@ impl GroupStorage {
         if let Err(e) = db_ref.groups.insert(group.id.clone(), group_bytes) {
             log::error!("Error saving group to data base: {}", e);
         }
-        // flush trees to disk
-        if let Err(e) = db_ref.groups.flush() {
-            log::error!("Error groups flush: {}", e);
-        }
+
+        Self::maybe_flush_tree(&db_ref.groups, flush_mode, "Error groups flush");
     }
 
     /// Update Last Chat Message sent to this Group
@@ -155,9 +208,45 @@ impl GroupStorage {
         message: Vec<u8>,
         received_at: u64,
     ) {
+        Self::group_update_last_chat_message_with_mode(
+            account_id,
+            group_id,
+            sender_id,
+            message,
+            received_at,
+            FlushMode::Immediate,
+        );
+    }
+
+    /// Update last chat message information without flushing the group tree.
+    pub fn group_update_last_chat_message_deferred(
+        account_id: PeerId,
+        group_id: Vec<u8>,
+        sender_id: PeerId,
+        message: Vec<u8>,
+        received_at: u64,
+    ) {
+        Self::group_update_last_chat_message_with_mode(
+            account_id,
+            group_id,
+            sender_id,
+            message,
+            received_at,
+            FlushMode::Deferred,
+        );
+    }
+
+    fn group_update_last_chat_message_with_mode(
+        account_id: PeerId,
+        group_id: Vec<u8>,
+        sender_id: PeerId,
+        message: Vec<u8>,
+        received_at: u64,
+        flush_mode: FlushMode,
+    ) {
         log::debug!("group_update_last_chat_message");
 
-        if let Some(mut group) = Self::get_group(account_id, group_id) {
+        if let Some(mut group) = Self::get_group(account_id, &group_id) {
             // update values
             group.last_message_sender_id = sender_id.to_bytes();
             group.last_message_at = received_at;
@@ -165,11 +254,9 @@ impl GroupStorage {
 
             // check if it is us who is sending the message
             if sender_id != account_id {
-                group.unread_messages = group.unread_messages + 1;
+                group.unread_messages += 1;
             }
-
-            // save group
-            Self::save_group(account_id, group);
+            Self::save_group_with_mode(account_id, group, flush_mode);
         } else {
             log::error!("group_update_last_chat group not found");
         }
@@ -179,19 +266,17 @@ impl GroupStorage {
     pub fn group_clear_unread(account_id: PeerId, group_id: Vec<u8>) {
         log::debug!("group_clear_unread");
 
-        if let Some(mut group) = Self::get_group(account_id, group_id) {
-            // clear unread value
+        if Self::with_group_mut(&account_id, &group_id, |group| {
             group.unread_messages = 0;
-
-            // save group
-            Self::save_group(account_id, group);
-        } else {
+        })
+        .is_none()
+        {
             log::error!("group_clear_unread group not found");
         }
     }
 
     /// get invite
-    pub fn get_invite(account_id: PeerId, group_id: Vec<u8>) -> Option<GroupInvited> {
+    pub fn get_invite(account_id: PeerId, group_id: &[u8]) -> Option<GroupInvited> {
         // get DB ref
         let db_ref = Self::get_db_ref(account_id);
 
@@ -213,6 +298,16 @@ impl GroupStorage {
     /// This function overwrites an already existing invite entry for
     /// the same group or creates a new one.
     pub fn save_invite(account_id: PeerId, invite: GroupInvited) {
+        Self::save_invite_with_mode(account_id, invite, FlushMode::Immediate);
+    }
+
+    /// Save a group invite without flushing.
+    #[allow(dead_code)]
+    pub fn save_invite_deferred(account_id: PeerId, invite: GroupInvited) {
+        Self::save_invite_with_mode(account_id, invite, FlushMode::Deferred);
+    }
+
+    fn save_invite_with_mode(account_id: PeerId, invite: GroupInvited, flush_mode: FlushMode) {
         // get DB ref
         let db_ref = Self::get_db_ref(account_id);
 
@@ -221,14 +316,23 @@ impl GroupStorage {
         if let Err(e) = db_ref.invited.insert(invite.group.id.clone(), invite_bytes) {
             log::error!("Error saving group invite to data base: {}", e);
         }
-        // flush trees to disk
-        if let Err(e) = db_ref.invited.flush() {
-            log::error!("Error invited flush: {}", e);
-        }
+
+        Self::maybe_flush_tree(&db_ref.invited, flush_mode, "Error invited flush");
     }
 
     /// Remove a group invite from the data base
-    pub fn remove_invite(account_id: PeerId, group_id: &Vec<u8>) {
+    #[allow(dead_code)]
+    pub fn remove_invite(account_id: PeerId, group_id: &[u8]) {
+        Self::remove_invite_with_mode(account_id, group_id, FlushMode::Immediate);
+    }
+
+    /// Remove a group invite without flushing.
+    #[allow(dead_code)]
+    pub fn remove_invite_deferred(account_id: PeerId, group_id: &[u8]) {
+        Self::remove_invite_with_mode(account_id, group_id, FlushMode::Deferred);
+    }
+
+    fn remove_invite_with_mode(account_id: PeerId, group_id: &[u8], flush_mode: FlushMode) {
         // get DB ref
         let db_ref = Self::get_db_ref(account_id);
 
@@ -236,9 +340,17 @@ impl GroupStorage {
         if let Err(e) = db_ref.invited.remove(group_id) {
             log::error!("Error removing group invite from data base: {}", e);
         }
-        // flush trees to disk
-        if let Err(e) = db_ref.invited.flush() {
-            log::error!("Error invited flush: {}", e);
+
+        Self::maybe_flush_tree(&db_ref.invited, flush_mode, "Error invited flush");
+    }
+
+    fn maybe_flush_tree(tree: &sled::Tree, flush_mode: FlushMode, error_context: &str) {
+        if matches!(flush_mode, FlushMode::Deferred) {
+            return;
+        }
+
+        if let Err(e) = tree.flush() {
+            log::error!("{}: {}", error_context, e);
         }
     }
 }

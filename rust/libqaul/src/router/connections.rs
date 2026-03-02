@@ -117,7 +117,7 @@ impl ConnectionTable {
         let node_id = node::Node::get_id();
         let mut routing_table = LOCAL.get().write().unwrap();
 
-        let mut connections = Vec::new();
+        let mut connections = Vec::with_capacity(1);
 
         // routing table creating is done every 1 seconds.
         // by considerate neighbour sending is done before creating routing Table.
@@ -149,7 +149,7 @@ impl ConnectionTable {
     /// enter it into all modules where we are connected to
     pub fn process_received_routing_info(
         neighbour_id: PeerId,
-        info: &Vec<router_net_proto::RoutingInfoEntry>,
+        info: &[router_net_proto::RoutingInfoEntry],
     ) {
         // log::trace!("process_received_routing_info count={}", info.len());
         // for inf in &info{
@@ -179,7 +179,7 @@ impl ConnectionTable {
         conn: ConnectionModule,
         neighbour_id: PeerId,
         rtt: u32,
-        info: &Vec<router_net_proto::RoutingInfoEntry>,
+        info: &[router_net_proto::RoutingInfoEntry],
     ) {
         log::trace!("fill_received_routing_info {}", info.len());
         // loop through results and enter them to the table
@@ -193,17 +193,18 @@ impl ConnectionTable {
                 return;
             }
 
+            let total_rtt = entry.rtt + rtt;
             // fill structure
             let neighbour = NeighbourEntry {
                 id: neighbour_id,
-                rtt: entry.rtt + rtt,
+                rtt: total_rtt,
                 hc,
-                lq: Self::calculate_linkquality(entry.rtt + rtt, hc),
+                lq: Self::calculate_linkquality(total_rtt, hc),
                 last_update: Timestamp::get_timestamp(),
             };
 
             // add it to state
-            Self::add_connection(entry.user.clone(), entry.pgid, neighbour, conn.clone());
+            Self::add_connection(entry.user.clone(), entry.pgid, neighbour, conn);
         }
     }
 
@@ -358,27 +359,26 @@ impl ConnectionTable {
         mut table: RoutingTable,
         conn: ConnectionModule,
     ) -> RoutingTable {
-        // create vector for users to remove
-        let mut expired_users: Vec<Vec<u8>> = Vec::new();
-
         // get connections table
         let mut connection_table;
-        match conn.clone() {
+        match conn {
             ConnectionModule::Internet => connection_table = INTERNET.get().write().unwrap(),
             ConnectionModule::Lan => connection_table = LAN.get().write().unwrap(),
             ConnectionModule::Ble => connection_table = BLE.get().write().unwrap(),
             ConnectionModule::Local => return table,
             ConnectionModule::None => return table,
         }
+        // create vector for users to remove
+        let mut expired_users = Vec::with_capacity(connection_table.table.len());
 
         // iterate over connection table
         for (user_id, user) in connection_table.table.iter_mut() {
             let (b_expired_pgid, connection_entry) = Self::find_best_connection(user);
-            if b_expired_pgid == false {
+            if !b_expired_pgid {
                 if let Some(connection) = connection_entry {
                     // fill entry into routing table
                     let routing_connection_entry = RoutingConnectionEntry {
-                        module: conn.clone(),
+                        module: conn,
                         node: connection.id,
                         rtt: connection.rtt,
                         hc: connection.hc,
@@ -392,7 +392,7 @@ impl ConnectionTable {
                             .connections
                             .push(routing_connection_entry);
                     } else {
-                        let mut connections = Vec::new();
+                        let mut connections = Vec::with_capacity(1);
                         connections.push(routing_connection_entry);
 
                         let routing_user_entry = RoutingUserEntry {
@@ -406,7 +406,7 @@ impl ConnectionTable {
                         table.table.insert(user_id.to_owned(), routing_user_entry);
                     }
                 } else {
-                    if let None = table.table.get(&user.id) {
+                    if !table.table.contains_key(&user.id) {
                         let routing_user_entry = RoutingUserEntry {
                             id: user_id.to_owned(),
                             pgid: user.pgid,
@@ -435,7 +435,7 @@ impl ConnectionTable {
     /// and remove all old entries
     fn find_best_connection(user: &mut UserEntry) -> (bool, Option<NeighbourEntry>) {
         // initialize helper variables
-        let mut expired_connections: Vec<PeerId> = Vec::new();
+        let mut expired_connections = Vec::with_capacity(user.connections.len());
         let mut return_entry = None;
         let mut lq = u32::MAX;
 
@@ -449,6 +449,7 @@ impl ConnectionTable {
         // create return value
         {
             let mut entry_found = None;
+            let now = Timestamp::get_timestamp();
 
             // loop through all connections
             for (key, value) in &user.connections {
@@ -456,7 +457,6 @@ impl ConnectionTable {
 
                 // check if entry is expired
                 // entry expires after 20 seconds, unit is mili seconds
-                let now = Timestamp::get_timestamp();
                 //if now - value.last_update < (20 * 1000 * (value.hc as u64)){
                 if now - value.last_update
                     //< (2 * (config.sending_table_period * 1000) * (value.hc as u64))
@@ -487,7 +487,7 @@ impl ConnectionTable {
                     rtt: entry.rtt,
                     hc: entry.hc,
                     lq: entry.lq,
-                    last_update: entry.last_update.clone(),
+                    last_update: entry.last_update,
                 })
             }
         }
@@ -534,25 +534,25 @@ impl ConnectionTable {
     fn rpc_create_connection_module_list(
         conn: ConnectionModule,
     ) -> Vec<proto::ConnectionsUserEntry> {
-        // create entry vector
-        let mut connections_list: Vec<proto::ConnectionsUserEntry> = Vec::new();
-
         // request connection table from state
         let connection_table;
         match conn {
             ConnectionModule::Lan => connection_table = LAN.get().read().unwrap(),
             ConnectionModule::Internet => connection_table = INTERNET.get().read().unwrap(),
             ConnectionModule::Ble => connection_table = BLE.get().read().unwrap(),
-            ConnectionModule::Local => return connections_list,
-            ConnectionModule::None => return connections_list,
+            ConnectionModule::Local => return Vec::new(),
+            ConnectionModule::None => return Vec::new(),
         }
+
+        // create entry vector
+        let mut connections_list = Vec::with_capacity(connection_table.table.len());
 
         // loop through all table entries per user
         for (id, entry) in &connection_table.table {
             // create user entry
             let mut user_entry = proto::ConnectionsUserEntry {
-                user_id: id.to_owned(),
-                connections: Vec::new(),
+                user_id: id.clone(),
+                connections: Vec::with_capacity(entry.connections.len()),
             };
 
             // loop through all neighbour entries of a user entry

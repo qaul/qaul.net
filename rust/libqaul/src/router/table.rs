@@ -97,34 +97,31 @@ impl RoutingTable {
         neighbour: PeerId,
         last_sent: u64,
     ) -> router_net_proto::RoutingInfoTable {
-        let mut table = router_net_proto::RoutingInfoTable { entry: Vec::new() };
-
         // get access to routing table
         let routing_table = ROUTINGTABLE.get().read().unwrap();
+        let mut table = router_net_proto::RoutingInfoTable {
+            entry: Vec::with_capacity(routing_table.table.len()),
+        };
 
         // loop through routing table
         for (user_id, user) in routing_table.table.iter() {
-            if user.connections.len() == 0 {
+            if user.connections.is_empty() {
                 continue;
             }
 
             // choose best link quality
-            let mut min_conn = user.connections[0].clone();
-            for i in 0..user.connections.len() {
-                if user.connections[i].lq < min_conn.lq {
-                    min_conn = user.connections[i].clone();
-                }
-            }
+            let min_conn = user
+                .connections
+                .iter()
+                .min_by_key(|connection| connection.lq)
+                .unwrap();
 
             if neighbour != min_conn.node && (min_conn.last_update >= last_sent || min_conn.hc == 0)
             {
-                let mut hc = Vec::new();
-                hc.push(min_conn.hc);
-
                 let table_entry = router_net_proto::RoutingInfoEntry {
-                    user: user_id.to_owned(),
+                    user: user_id.clone(),
                     rtt: min_conn.rtt,
-                    hc,
+                    hc: vec![min_conn.hc],
                     pgid: user.pgid,
                 };
                 table.entry.push(table_entry);
@@ -143,7 +140,7 @@ impl RoutingTable {
 
         // loop through routing table
         for (user_id, user) in routing_table.table.iter() {
-            if user.connections.len() > 0 {
+            if !user.connections.is_empty() {
                 user_ids.insert(user_id.clone(), user.connections[0].hc);
             }
         }
@@ -159,7 +156,7 @@ impl RoutingTable {
 
         // loop through routing table
         for (user_id, user) in routing_table.table.iter() {
-            if user.connections.len() > 0 {
+            if !user.connections.is_empty() {
                 users.insert(user_id.clone(), user.connections.clone());
             }
         }
@@ -168,17 +165,15 @@ impl RoutingTable {
 
     /// send protobuf RPC neighbours list
     pub fn rpc_send_routing_table() {
-        // create list
-        let mut table_list: Vec<proto::RoutingTableEntry> = Vec::new();
-
         // get routing table state
         let routing_table = ROUTINGTABLE.get().read().unwrap();
+        let mut table_list = Vec::with_capacity(routing_table.table.len());
 
         // loop through all user table entries
         for (id, entry) in &routing_table.table {
             let mut table_entry = proto::RoutingTableEntry {
-                user_id: id.to_owned(),
-                connections: Vec::new(),
+                user_id: id.clone(),
+                connections: Vec::with_capacity(entry.connections.len()),
             };
 
             // loop through all connection entries in a user entry
