@@ -520,7 +520,7 @@ impl ChatFile {
         let file_path = Self::create_file_path(user_account.id, file_id, extension.as_str());
 
         // TODO: start in new async thread here
-
+                
         // copy file
         if let Err(e) = fs::copy(path_name.clone(), file_path) {
             log::error!("copy file error {}", e.to_string());
