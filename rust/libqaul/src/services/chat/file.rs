@@ -32,9 +32,9 @@ use crate::{
 };
 use crate::{rpc::Rpc, services::group::GroupManage};
 
+pub use qaul_proto::qaul_net_chatfile as proto_net;
 /// Import protobuf message definition
 pub use qaul_proto::qaul_rpc_chatfile as proto_rpc;
-pub use qaul_proto::qaul_net_chatfile as proto_net;
 
 /// Size of the biggest file data package
 pub const DEF_PACKAGE_SIZE: u32 = 64000;
@@ -564,7 +564,7 @@ impl ChatFile {
         let file_path = Self::create_file_path(user_account.id, file_id, extension.as_str());
 
         // TODO: start in new async thread here
-                
+
         // copy file
         if let Err(e) = fs::copy(&path_name, file_path) {
             log::error!("copy file error {}", e);
@@ -654,22 +654,58 @@ impl ChatFile {
 
         // 2. file data message
         // read file contents and create and send FileData messages
-        let mut buffer: [u8; DEF_PACKAGE_SIZE as usize] = [0; DEF_PACKAGE_SIZE as usize];
+
+        let user_account_clone = user_account.clone();
+        let message_id_clone = message_id.clone();
+        // let file_id = file_id;
+        //let timestamp = timestamp;
+        //let path_name_clone = path_name.clone();
+
+        tokio::spawn(async move {
+            if let Err(e) = Self::send_file_chunks(
+                user_account_clone,
+                group,
+                message_id_clone,
+                file_id,
+                timestamp,
+                path_name,
+                size,
+            )
+            .await
+            {
+                log::error!("File send failed: {}", e);
+            }
+        });
+
+        Ok(true)
+    }
+
+    async fn send_file_chunks(
+        user_account: UserAccount,
+        group: Group,
+        message_id: Vec<u8>,
+        file_id: u64,
+        timestamp: u64,
+        path_name: String,
+        size: u32,
+    ) -> Result<(), String> {
+        use tokio::fs::File;
+        use tokio::io::AsyncReadExt;
+
+        let mut file = File::open(path_name).await.map_err(|e| e.to_string())?;
+
+        let mut buffer = vec![0u8; DEF_PACKAGE_SIZE as usize];
         let mut left_size = size;
-        let mut chunk_index: u32 = 0;
+        let mut chunk_index = 0;
 
         while left_size > 0 {
-            let mut read_size = left_size;
-            if left_size > DEF_PACKAGE_SIZE {
-                read_size = DEF_PACKAGE_SIZE;
-            };
-            left_size -= read_size;
-
-            if let Err(e) = file.read(&mut buffer) {
-                return Err(e.to_string());
+            let read_size = file.read(&mut buffer).await.map_err(|e| e.to_string())?;
+            if read_size == 0 {
+                break;
             }
 
-            // pack chat file container
+            left_size -= read_size as u32;
+
             let data = proto_net::ChatFileContainer {
                 message: Some(proto_net::chat_file_container::Message::FileData(
                     proto_net::ChatFileData {
@@ -681,9 +717,8 @@ impl ChatFile {
                 )),
             };
 
-            // send message to all group members
             Self::send_filecontainer_to_group(
-                user_account,
+                &user_account,
                 &group,
                 &message_id,
                 timestamp,
@@ -691,6 +726,8 @@ impl ChatFile {
             );
 
             chunk_index += 1;
+
+            tokio::task::yield_now().await;
         }
 
         // set file status to sent
@@ -700,7 +737,7 @@ impl ChatFile {
             super::rpc_proto::MessageStatus::Sent,
         );
 
-        Ok(true)
+        Ok(())
     }
 
     /// Save File Message in Chat Conversation
