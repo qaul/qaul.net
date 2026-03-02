@@ -549,7 +549,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   User _author(Message e) => e.senderId.equals(user.id)
       ? user
-      : ref.read(usersProvider).firstWhere((usr) => usr.id.equals(e.senderId));
+      : ref.read(usersProvider).data.firstWhere((usr) => usr.id.equals(e.senderId));
 
   List<types.Message>? messages(ChatRoom room,
       {required AppLocalizations l10n}) {

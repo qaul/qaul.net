@@ -6,10 +6,8 @@
 use libqaul;
 use prost::Message;
 
-/// include generated protobuf RPC rust definition file
-pub mod proto {
-    include!("../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.rs");
-}
+/// protobuf RPC definition
+pub use qaul_proto::qaul_rpc as proto;
 
 /// RPC message communication between client
 /// and libqaul.

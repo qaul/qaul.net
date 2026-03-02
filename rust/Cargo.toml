@@ -6,6 +6,9 @@ members = [
 
     # ble module
     "ble_module",
+    
+    # protobuf types
+    "qaul-proto",
 
     # binaries
     "clients/cli",

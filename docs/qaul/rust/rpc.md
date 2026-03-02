@@ -37,21 +37,21 @@ The files can be found here:
 
 The `.proto` files can automatically be translated into most programming language.
 All currently used languages by qaul are already pre-created.
-You can find them in the folder `rust/libqaul/src/rpc/protobuf_generated`.
+You can find them in the folder `rust/libqaul/src/rpc/generated`.
 
 * cpp
 * java
 * kotlin
 * rust
 * swift
-* dart (is already copied into the flutter folder `qaul_ui/lib/rpc/protobuf_generated`)
+* dart (is already copied into the flutter folder `qaul_ui/lib/rpc/generated`)
 
 ## Build the Files
 
 In order to build the source files for the programming languages you can use the execute the following
 
 * Rust files are automatically builded when libqaul is built via cargo.
-* Shell scripts to build files for Java, Kotlin & Dart can be found `rust/libqaul/src/rpc/protobuf_build_scripts`.
+* Shell scripts to build files for Java, Kotlin & Dart can be found `rust/libqaul/src/rpc/build_scripts`.
 
 
 ## RPC Protobuf UI Communication

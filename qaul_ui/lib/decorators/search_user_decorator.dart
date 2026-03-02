@@ -20,6 +20,7 @@ final _userSearchProvider = StateProvider.autoDispose<List<User>>((ref) {
   final defaultUser = ref.watch(defaultUserProvider)!;
   final users = ref
       .watch(usersProvider)
+      .data
       .where((u) => !u.id.equals(defaultUser.id) && !(u.isBlocked ?? false))
       .toList()
     ..sort();

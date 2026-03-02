@@ -241,7 +241,7 @@ class _InviteDetailsDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final users = ref.watch(usersProvider);
+    final users = ref.watch(usersProvider).data;
 
     final replyInvite = useCallback(({required bool accepted}) {
       final worker = ref.read(qaulWorkerProvider);

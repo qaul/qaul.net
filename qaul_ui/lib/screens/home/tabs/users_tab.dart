@@ -8,32 +8,94 @@ class _Users extends BaseTab {
 }
 
 class _UsersState extends _BaseTabState<_Users> {
+  static const _pageSize = 50;
+  late final ScrollController _scrollController;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+  int _currentOffset = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshUsers();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent * 0.8) {
+      _loadMoreUsers();
+    }
+  }
+
+  void _updatePaginationState() {
+    final paginationState = ref.read(usersProvider).pagination;
+    if (paginationState != null) {
+      setState(() => _hasMore = paginationState.hasMore);
+      _currentOffset = paginationState.offset + paginationState.limit;
+      return;
+    }
+    _currentOffset += _pageSize;
+  }
+
+  Future<void> _loadMoreUsers() async {
+    if (_isLoadingMore || !_hasMore) return;
+
+    setState(() => _isLoadingMore = true);
+    try {
+      final worker = ref.read(qaulWorkerProvider);
+      await worker.getUsers(offset: _currentOffset, limit: _pageSize);
+      _updatePaginationState();
+    } finally {
+      if (mounted) setState(() => _isLoadingMore = false);
+    }
+  }
+
+  Future<void> _refreshUsers() async {
+    _currentOffset = 0;
+    setState(() => _hasMore = true);
+    final worker = ref.read(qaulWorkerProvider);
+    await worker.getUsers(offset: 0, limit: _pageSize);
+    _updatePaginationState();
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final refreshUsers = useCallback(() async {
-      final worker = ref.read(qaulWorkerProvider);
-      await worker.getUsers();
-    }, [UniqueKey()]);
+
+    ref.listen(usersProvider, (previous, next) {
+      if (next.pagination != null && !next.pagination!.hasMore) {
+        setState(() => _hasMore = false);
+      }
+    });
 
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      body: CronTaskDecorator(
-        schedule: const Duration(milliseconds: 1000),
-        callback: () async => await refreshUsers(),
+      body: LoadingDecorator(
+        isLoading: _isLoadingMore,
         child: RefreshIndicator(
-          onRefresh: () async => await refreshUsers(),
-          child: SearchUserDecorator(builder: (_, users) {
-            return EmptyStateTextDecorator(
-              l10n.emptyUsersList,
-              isEmpty: users.isEmpty,
-              child: ListView.separated(
-                controller: ScrollController(),
-                physics: const AlwaysScrollableScrollPhysics(),
-                itemCount: users.length,
-                separatorBuilder: (_, _) => const Divider(height: 12.0),
-                itemBuilder: (_, i) {
-                  final user = users[i];
+            onRefresh: () async => await _refreshUsers(),
+            child: SearchUserDecorator(builder: (_, users) {
+              return EmptyStateTextDecorator(
+                l10n.emptyUsersList,
+                isEmpty: users.isEmpty,
+                child: ListView.separated(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: users.length,
+                  separatorBuilder: (_, _) => const Divider(height: 12.0),
+                  itemBuilder: (_, i) {
+                    final user = users[i];
                   var theme = Theme.of(context).textTheme;
                   var hasConnections =
                       user.availableTypes != null && user.availableTypes!.isNotEmpty;
@@ -68,12 +130,12 @@ class _UsersState extends _BaseTabState<_Users> {
                       tapRoutesToDetailsScreen: true,
                     ),
                   );
-                },
-              ),
-            );
-          }),
+                  },
+                ),
+              );
+            }),
+          ),
         ),
-      ),
     );
   }
 }
