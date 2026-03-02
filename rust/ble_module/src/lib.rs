@@ -13,6 +13,7 @@ use std::thread;
 use tokio::runtime;
 
 mod ble;
+pub mod gatt_protocol;
 pub mod rpc;
 
 /// initialize and start the ble_module in an own thread
