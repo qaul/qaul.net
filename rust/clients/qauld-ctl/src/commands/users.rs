@@ -1,8 +1,7 @@
 use crate::{cli::UsersSubcmd, commands::RpcCommand, proto::Modules};
 
-mod proto {
-    include!("../../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.users.rs");
-}
+/// protobuf RPC definition
+use qaul_proto::qaul_rpc_users as proto;
 
 use prost::Message;
 use proto::{

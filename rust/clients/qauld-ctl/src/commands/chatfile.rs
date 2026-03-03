@@ -3,9 +3,7 @@ use crate::{cli::ChatFileSubcmd, commands::RpcCommand, proto::Modules};
 use prost::Message;
 
 /// include generated protobuf RPC rust definition file
-mod proto {
-    include!("../../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.chatfile.rs");
-}
+use qaul_proto::qaul_rpc_chatfile as proto;
 
 use proto::{chat_file, ChatFile, FileHistoryRequest, SendFileRequest};
 
