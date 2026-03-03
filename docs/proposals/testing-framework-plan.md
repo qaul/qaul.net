@@ -17,7 +17,13 @@ cd qaul.net/rust
 cargo build --release -p qauld-ctl
 ```
 
-The binary ends up at `rust/target/release/qauld-ctl`. Putting it in `/home/qaul/bin/` is cleaner so the start/stop scripts and test runner don't need to know its location explicitly.
+The binary ends up at `rust/target/release/qauld-ctl`. Rather than copying it, create a symlink from `~/bin/` pointing to the release binary — the same pattern used for qauld:
+
+```sh
+ln -s /home/qaul/qaul.net/rust/target/release/qauld-ctl ~/bin/qauld-ctl
+```
+
+After that, `qauld-ctl` is on PATH everywhere, and rebuilding just requires `cargo build --release -p qauld-ctl` — the symlink doesn't need to be touched again.
 
 ---
 
@@ -64,14 +70,14 @@ if [ ! -f "/tmp/qaul-${id}.pid" ]; then
   mkdir "$DIR"
   cd "$DIR"
 
-  nohup /home/qaul/bin/qauld --name="node-${id}" > /dev/null 2>&1 < /dev/null &
+  nohup qauld --name="node-${id}" > /dev/null 2>&1 < /dev/null &
   echo $! > "/tmp/qaul-${id}.pid"
 else
   echo "qauld already running in ns ${id}"
 fi
 ```
 
-Using the absolute path `/home/qaul/bin/qauld` avoids any PATH issues inside network namespaces, which don't inherit the user's shell environment.
+`qauld` is already on PATH on the server, so no absolute path is needed in the start script.
 
 ---
 
@@ -107,8 +113,6 @@ The node wrapper just shells out to qauld-ctl and parses stdout:
 ```python
 import subprocess
 
-QAULD_CTL = "/home/qaul/bin/qauld-ctl"
-
 class Node:
     def __init__(self, node_id: str):
         self.id = node_id
@@ -116,7 +120,7 @@ class Node:
 
     def _run(self, *args) -> str:
         """Run a qauld-ctl command against this node, return stdout."""
-        cmd = [QAULD_CTL, "--socket", self.socket] + list(args)
+        cmd = ["qauld-ctl", "--socket", self.socket] + list(args)
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
         if result.returncode != 0:
             raise RuntimeError(
@@ -391,8 +395,8 @@ With this you can write tests that specifically check behaviour under degraded l
 
 ## Implementation order
 
-1. Build qauld-ctl from source on the server (`cargo build --release -p qauld-ctl`), copy binary to `/home/qaul/bin/`
-2. Fix `qaul_start.sh` in `/home/qaul/meshnet-lab/protocols/` — update the PID guard and use the absolute path `/home/qaul/bin/qauld`
+1. Build qauld-ctl from source on the server (`cargo build --release -p qauld-ctl`), then create a symlink: `ln -s /home/qaul/qaul.net/rust/target/release/qauld-ctl ~/bin/qauld-ctl`
+2. Fix `qaul_start.sh` in `/home/qaul/meshnet-lab/protocols/` — update the PID guard (the only change needed, qauld is already on PATH)
 3. Manually verify meshnet-lab works: create a 3-node line, start qaul, confirm sockets appear at `/tmp/qaul-*/qauld.sock`
 4. Manually run `qauld-ctl --socket /tmp/qaul-0000/qauld.sock node info` from the host — confirm it works
 5. Create `tests/integration/` in the qaul.net repo, write `lib/node.py`, test each method manually against a live node
