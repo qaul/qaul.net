@@ -2,7 +2,6 @@
 // This software is published under the AGPLv3 license.
 
 //! # qauld-ctl - CLI client for controlling a running qauld daemon instance via Unix socket
-//!
 
 use std::path::PathBuf;
 

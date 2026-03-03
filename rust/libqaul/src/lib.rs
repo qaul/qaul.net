@@ -5,6 +5,7 @@
 //!
 //! Library for qaul
 
+use crate::rpc::authentication::Authentication;
 use crossbeam_channel::Receiver;
 use filetime::FileTime;
 use futures::prelude::*;
