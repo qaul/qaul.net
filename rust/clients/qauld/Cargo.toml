@@ -13,6 +13,7 @@ repository = "https://github.com/qaul/qaul.net"
 
 [dependencies]
 libqaul = { path = "../../libqaul" }
+qaul-proto = { path = "../../qaul-proto" }
 tokio = { version = "1", features = ["full"] }
 futures = "0.3"
 log = "0.4"

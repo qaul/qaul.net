@@ -1,9 +1,8 @@
 use crate::{cli::FeedSubcmd, commands::RpcCommand, proto::Modules};
 use prost::Message;
 
-mod proto {
-    include!("../../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.feed.rs");
-}
+/// protobuf RPC definition
+use qaul_proto::qaul_rpc_feed as proto;
 
 use proto::{feed, Feed, FeedMessageRequest, SendMessage};
 

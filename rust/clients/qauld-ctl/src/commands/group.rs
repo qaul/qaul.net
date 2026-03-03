@@ -1,19 +1,18 @@
 use super::{id_string_to_bin, uuid_string_to_bin};
 use crate::{cli::GroupSubcmd, commands::RpcCommand, proto::Modules};
+use uuid::Uuid;
 
-mod proto {
-    include!("../../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.group.rs");
-    include!("../../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.chat.rs");
-}
+use qaul_proto::qaul_rpc_chat as proto_chat;
+/// protobuf RPC definition
+use qaul_proto::qaul_rpc_group as proto;
 
 use prost::Message;
 use proto::{
-    chat_content_message, group, ChatContentMessage, Group, GroupCreateRequest, GroupEventType,
-    GroupInfoRequest, GroupInviteMemberRequest, GroupInvitedRequest, GroupListRequest,
-    GroupMemberRole, GroupMemberState, GroupRemoveMemberRequest, GroupRenameRequest,
-    GroupReplyInviteRequest, GroupStatus,
+    group, Group, GroupCreateRequest, GroupInfoRequest, GroupInviteMemberRequest,
+    GroupInvitedRequest, GroupListRequest, GroupMemberRole, GroupMemberState,
+    GroupRemoveMemberRequest, GroupRenameRequest, GroupReplyInviteRequest, GroupStatus,
 };
-use uuid::Uuid;
+use proto_chat::{chat_content_message, ChatContentMessage, GroupEventType};
 
 impl GroupSubcmd {
     /// reply invite

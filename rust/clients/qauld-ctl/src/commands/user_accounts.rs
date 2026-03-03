@@ -2,9 +2,8 @@ use prost::Message;
 
 use crate::{cli::AccountSubcmd, commands::RpcCommand, proto::Modules};
 
-mod proto {
-    include!("../../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.user_accounts.rs");
-}
+/// protobuf RPC definition
+use qaul_proto::qaul_rpc_user_accounts as proto;
 
 use proto::{user_accounts, CreateUserAccount, SetPasswordRequest, UserAccounts};
 
