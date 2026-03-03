@@ -2,9 +2,8 @@ use prost::Message;
 
 use crate::{cli::NodeSubcmd, commands::RpcCommand, proto::Modules};
 
-mod proto {
-    include!("../../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.node.rs");
-}
+/// protobuf RPC definition
+use qaul_proto::qaul_rpc_node as proto;
 
 use proto::{node, Node};
 

@@ -6,9 +6,8 @@ use crate::{
 use prost::Message;
 use uuid::Uuid;
 
-mod proto {
-    include!("../../../../libqaul/src/rpc/protobuf_generated/rust/qaul.rpc.chat.rs");
-}
+/// protobuf RPC definition
+use qaul_proto::qaul_rpc_chat as proto;
 
 use proto::{
     chat, chat_content_message, Chat, ChatContentMessage, ChatConversationRequest, ChatMessageSend,
