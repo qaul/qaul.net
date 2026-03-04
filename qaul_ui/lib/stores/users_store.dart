@@ -5,14 +5,10 @@ final usersStoreProvider = NotifierProvider<UsersStore, List<User>>(
 );
 
 class UsersStore extends Notifier<List<User>> {
-  static const int _firstPageLimit = 50;
-
   @override
   List<User> build() {
     final paginated = ref.watch(usersProvider);
-    final limit = paginated.pagination?.limit ?? _firstPageLimit;
-    final firstPage = paginated.data.take(limit).toList();
-    return firstPage.where((u) => !(u.isBlocked ?? false)).toList();
+    return paginated.data.where((u) => !(u.isBlocked ?? false)).toList();
   }
 
   Future<User?> getByUserID(String idBase58) async {
