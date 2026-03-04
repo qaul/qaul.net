@@ -31,20 +31,22 @@ class FeedMessageStore extends Notifier<List<FeedMessage>> {
 
   void _asyncInit() async {
     final messages = ref.read(publicMessagesProvider);
-    final users = ref.read(usersStoreProvider);
-    final messagesWithUsers = messages.where(
-      (m) => users.map((u) => u.idBase58).contains(m.senderIdBase58 ?? ''),
-    );
-
+    final knownUsers = ref.read(usersStoreProvider);
+    final authorById = <String, User>{
+      for (final u in knownUsers) u.idBase58: u,
+    };
+    final usersStore = ref.read(usersStoreProvider.notifier);
     final feedMessages = <FeedMessage>[];
 
-    for (final m in messagesWithUsers) {
+    for (final m in messages) {
       if (m.senderIdBase58 == null) continue;
-      final author = await ref
-          .read(usersStoreProvider.notifier)
-          .getByUserID(m.senderIdBase58!);
+      User? author = authorById[m.senderIdBase58];
+      if (author == null) {
+        author = await usersStore.getByUserID(m.senderIdBase58!);
+        if (author != null) authorById[m.senderIdBase58!] = author;
+      }
       if (author == null) continue;
-      var sentAt = describeFuzzyTimestamp(
+      final sentAt = describeFuzzyTimestamp(
         m.sendTime,
         locale: Locale.parse(Intl.defaultLocale ?? 'en'),
       );
