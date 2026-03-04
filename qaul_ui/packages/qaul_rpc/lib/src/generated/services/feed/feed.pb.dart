@@ -130,10 +130,14 @@ class FeedMessageRequest extends $pb.GeneratedMessage {
   factory FeedMessageRequest({
     $core.List<$core.int>? lastReceived,
     $fixnum.Int64? lastIndex,
+    $core.int? offset,
+    $core.int? limit,
   }) {
     final result = create();
     if (lastReceived != null) result.lastReceived = lastReceived;
     if (lastIndex != null) result.lastIndex = lastIndex;
+    if (offset != null) result.offset = offset;
+    if (limit != null) result.limit = limit;
     return result;
   }
 
@@ -155,6 +159,12 @@ class FeedMessageRequest extends $pb.GeneratedMessage {
     ..a<$fixnum.Int64>(
         2, _omitFieldNames ? '' : 'lastIndex', $pb.PbFieldType.OU6,
         defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$core.int>(
+        10, _omitFieldNames ? '' : 'offset', $pb.PbFieldType.OU3,
+        defaultOrMaker: 0)
+    ..a<$core.int>(
+        20, _omitFieldNames ? '' : 'limit', $pb.PbFieldType.OU3,
+        defaultOrMaker: 0)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -203,15 +213,101 @@ class FeedMessageRequest extends $pb.GeneratedMessage {
   $core.bool hasLastIndex() => $_has(1);
   @$pb.TagNumber(2)
   void clearLastIndex() => $_clearField(2);
+
+  @$pb.TagNumber(10)
+  $core.int get offset => $_getIZ(2);
+  @$pb.TagNumber(10)
+  set offset($core.int value) => $_setUnsignedInt32(2, value);
+  @$pb.TagNumber(10)
+  $core.bool hasOffset() => $_has(2);
+  @$pb.TagNumber(10)
+  void clearOffset() => $_clearField(10);
+
+  @$pb.TagNumber(20)
+  $core.int get limit => $_getIZ(3);
+  @$pb.TagNumber(20)
+  set limit($core.int value) => $_setUnsignedInt32(3, value);
+  @$pb.TagNumber(20)
+  $core.bool hasLimit() => $_has(3);
+  @$pb.TagNumber(20)
+  void clearLimit() => $_clearField(20);
+}
+
+/// Pagination metadata returned with list responses.
+class PaginationMetadata extends $pb.GeneratedMessage {
+  factory PaginationMetadata({
+    $core.bool? hasMore,
+    $core.int? total,
+    $core.int? offset,
+    $core.int? limit,
+  }) {
+    final result = create();
+    if (hasMore != null) result.hasMore = hasMore;
+    if (total != null) result.total = total;
+    if (offset != null) result.offset = offset;
+    if (limit != null) result.limit = limit;
+    return result;
+  }
+
+  PaginationMetadata._();
+
+  factory PaginationMetadata.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory PaginationMetadata.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'PaginationMetadata',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.feed'),
+      createEmptyInstance: create)
+    ..aOB(10, _omitFieldNames ? '' : 'hasMore', defaultOrMaker: false)
+    ..a<$core.int>(20, _omitFieldNames ? '' : 'total', $pb.PbFieldType.OU3,
+        defaultOrMaker: 0)
+    ..a<$core.int>(30, _omitFieldNames ? '' : 'offset', $pb.PbFieldType.OU3,
+        defaultOrMaker: 0)
+    ..a<$core.int>(40, _omitFieldNames ? '' : 'limit', $pb.PbFieldType.OU3,
+        defaultOrMaker: 0)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PaginationMetadata clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PaginationMetadata copyWith(void Function(PaginationMetadata) updates) =>
+      super.copyWith((message) => updates(message as PaginationMetadata))
+          as PaginationMetadata;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$pb.TagNumber(10)
+  $core.bool get hasMore => $_getBF(0);
+  @$pb.TagNumber(10)
+  set hasMore($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(20)
+  $core.int get total => $_getIZ(1);
+  @$pb.TagNumber(20)
+  set total($core.int value) => $_setUnsignedInt32(1, value);
+  @$pb.TagNumber(30)
+  $core.int get offset => $_getIZ(2);
+  @$pb.TagNumber(30)
+  set offset($core.int value) => $_setUnsignedInt32(2, value);
+  @$pb.TagNumber(40)
+  $core.int get limit => $_getIZ(3);
+  @$pb.TagNumber(40)
+  set limit($core.int value) => $_setUnsignedInt32(3, value);
 }
 
 /// List of feed messages
 class FeedMessageList extends $pb.GeneratedMessage {
   factory FeedMessageList({
     $core.Iterable<FeedMessage>? feedMessage,
+    PaginationMetadata? pagination,
   }) {
     final result = create();
     if (feedMessage != null) result.feedMessage.addAll(feedMessage);
+    if (pagination != null) result.pagination = pagination;
     return result;
   }
 
@@ -230,6 +326,8 @@ class FeedMessageList extends $pb.GeneratedMessage {
       createEmptyInstance: create)
     ..pPM<FeedMessage>(1, _omitFieldNames ? '' : 'feedMessage',
         subBuilder: FeedMessage.create)
+    ..aOM<PaginationMetadata>(10, _omitFieldNames ? '' : 'pagination',
+        subBuilder: PaginationMetadata.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -253,6 +351,17 @@ class FeedMessageList extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(1)
   $pb.PbList<FeedMessage> get feedMessage => $_getList(0);
+
+  @$pb.TagNumber(10)
+  PaginationMetadata get pagination => $_getN(1);
+  @$pb.TagNumber(10)
+  set pagination(PaginationMetadata value) => $_setField(10, value);
+  @$pb.TagNumber(10)
+  $core.bool hasPagination() => $_has(1);
+  @$pb.TagNumber(10)
+  void clearPagination() => $_clearField(10);
+  @$pb.TagNumber(10)
+  PaginationMetadata ensurePagination() => $_ensure(1);
 }
 
 /// A single feed message

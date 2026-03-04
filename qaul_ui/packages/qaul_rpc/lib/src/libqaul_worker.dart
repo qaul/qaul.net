@@ -87,10 +87,15 @@ class LibqaulWorker {
     await _sendMessage(Modules.FEED, msg);
   }
 
-  Future<void> requestPublicMessages({int? lastIndex}) async {
-    final msg = Feed(
-      request: FeedMessageRequest(lastIndex: Int64(lastIndex ?? 0)),
-    );
+  Future<void> requestPublicMessages({
+    int? lastIndex,
+    int? offset,
+    int? limit,
+  }) async {
+    final request = FeedMessageRequest(lastIndex: Int64(lastIndex ?? 0));
+    if (offset != null) request.offset = offset;
+    if (limit != null) request.limit = limit;
+    final msg = Feed(request: request);
     _sendMessage(Modules.FEED, msg);
   }
 
