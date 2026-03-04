@@ -144,7 +144,7 @@ void main() {
     expect(state.any((u) => u.idBase58 == blockedUser.idBase58), isFalse);
   });
 
-  test('store state is first page only so feed uses getByUserID for rest', () async {
+  test('store state includes all loaded users so list and feed can use them', () async {
     _testUsersForStore = List<User>.generate(
       60,
       (i) => User(
@@ -171,7 +171,7 @@ void main() {
 
     final state = container.read(usersStoreProvider);
 
-    expect(state.length, 50);
+    expect(state.length, 60);
   });
 
   test('getMoreUsers calls worker with offset and limit so users tab can load more', () async {
