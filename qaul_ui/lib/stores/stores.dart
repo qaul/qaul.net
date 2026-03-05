@@ -1,6 +1,5 @@
 // Barrel file
 
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:fast_base58/fast_base58.dart';
