@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/legacy.dart';
 import 'package:logging/logging.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 
+import '../decorators/loading_decorator.dart';
 import '../helpers/navigation_helper.dart';
 import '../l10n/app_localizations.dart';
 import '../widgets/widgets.dart';
@@ -87,53 +88,42 @@ class CreateAccountScreen extends HookConsumerWidget {
 
     return Scaffold(
         resizeToAvoidBottomInset: false,
-        body: Stack(
-          children: [
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 40, vertical: 120),
-              child: Column(
-                children: [
-                  const SizedBox(width: double.maxFinite),
-                  QaulAvatar.large(),
-                  const SizedBox(height: 28),
-                  LayoutBuilder(builder: (context, constraints) {
-                    return SizedBox(
-                      width: constraints.constrainWidth(400),
-                      child: TextFormField(
-                        key: _fieldKey,
-                        controller: nameCtrl,
-                        validator: (s) => _validateUserName(context, s),
-                        onFieldSubmitted: (_) {
-                          _submitUsername(ref, nameCtrl, loading);
-                        },
-                        decoration: InputDecoration(
-                          hintText: i10n.createAccountHeading,
-                        ),
+        body: LoadingDecorator(
+          isLoading: loading.value,
+          backgroundColor: Colors.black54,
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 40, vertical: 120),
+            child: Column(
+              children: [
+                const SizedBox(width: double.maxFinite),
+                QaulAvatar.large(),
+                const SizedBox(height: 28),
+                LayoutBuilder(builder: (context, constraints) {
+                  return SizedBox(
+                    width: constraints.constrainWidth(400),
+                    child: TextFormField(
+                      key: _fieldKey,
+                      controller: nameCtrl,
+                      validator: (s) => _validateUserName(context, s),
+                      onFieldSubmitted: (_) {
+                        _submitUsername(ref, nameCtrl, loading);
+                      },
+                      decoration: InputDecoration(
+                        hintText: i10n.createAccountHeading,
                       ),
-                    );
-                  }),
-                  const SizedBox(height: 28),
-                  QaulButton(
-                    key: submitButtonKey,
-                    label: i10n.start,
-                    onPressed: () => _submitUsername(ref, nameCtrl, loading),
-                  ),
-                ],
-              ),
-            ),
-            if (loading.value) ...[
-              SizedBox.expand(
-                child: IgnorePointer(
-                  ignoring: true,
-                  child: Container(
-                    color: Colors.black54,
-                    child: const LoadingIndicator(),
-                  ),
+                    ),
+                  );
+                }),
+                const SizedBox(height: 28),
+                QaulButton(
+                  key: submitButtonKey,
+                  label: i10n.start,
+                  onPressed: () => _submitUsername(ref, nameCtrl, loading),
                 ),
-              )
-            ],
-          ],
+              ],
+            ),
+          ),
         ));
   }
 
