@@ -103,7 +103,7 @@ class _ImageMessageWidgetState extends State<ImageMessageWidget> {
         height: 80,
         width: 80,
         padding: const EdgeInsets.all(20),
-        child: const CircularProgressIndicator(),
+        child: const LoadingIndicator(),
       );
     } else if (_size.aspectRatio == 0) {
       image = Container(color: color, height: _size.height, width: _size.width);

@@ -51,7 +51,7 @@ class FileMessageWidget extends StatelessWidget {
                 child: _isReceivingFile()
                     ? const Padding(
                         padding: EdgeInsets.all(8.0),
-                        child: CircularProgressIndicator(),
+                        child: LoadingIndicator(),
                       )
                     : const Icon(Icons.description),
               ),
