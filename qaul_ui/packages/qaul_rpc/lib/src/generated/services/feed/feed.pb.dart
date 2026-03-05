@@ -159,12 +159,8 @@ class FeedMessageRequest extends $pb.GeneratedMessage {
     ..a<$fixnum.Int64>(
         2, _omitFieldNames ? '' : 'lastIndex', $pb.PbFieldType.OU6,
         defaultOrMaker: $fixnum.Int64.ZERO)
-    ..a<$core.int>(
-        10, _omitFieldNames ? '' : 'offset', $pb.PbFieldType.OU3,
-        defaultOrMaker: 0)
-    ..a<$core.int>(
-        20, _omitFieldNames ? '' : 'limit', $pb.PbFieldType.OU3,
-        defaultOrMaker: 0)
+    ..aI(10, _omitFieldNames ? '' : 'offset', fieldType: $pb.PbFieldType.OU3)
+    ..aI(20, _omitFieldNames ? '' : 'limit', fieldType: $pb.PbFieldType.OU3)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -214,6 +210,8 @@ class FeedMessageRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   void clearLastIndex() => $_clearField(2);
 
+  /// Number of items to skip from the beginning of the filtered set.
+  /// Default is 0 (no offset).
   @$pb.TagNumber(10)
   $core.int get offset => $_getIZ(2);
   @$pb.TagNumber(10)
@@ -223,6 +221,8 @@ class FeedMessageRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(10)
   void clearOffset() => $_clearField(10);
 
+  /// Maximum number of items to return.
+  /// Default is 0, which means return all items.
   @$pb.TagNumber(20)
   $core.int get limit => $_getIZ(3);
   @$pb.TagNumber(20)
@@ -262,13 +262,10 @@ class PaginationMetadata extends $pb.GeneratedMessage {
       _omitMessageNames ? '' : 'PaginationMetadata',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.feed'),
       createEmptyInstance: create)
-    ..aOB(10, _omitFieldNames ? '' : 'hasMore', defaultOrMaker: false)
-    ..a<$core.int>(20, _omitFieldNames ? '' : 'total', $pb.PbFieldType.OU3,
-        defaultOrMaker: 0)
-    ..a<$core.int>(30, _omitFieldNames ? '' : 'offset', $pb.PbFieldType.OU3,
-        defaultOrMaker: 0)
-    ..a<$core.int>(40, _omitFieldNames ? '' : 'limit', $pb.PbFieldType.OU3,
-        defaultOrMaker: 0)
+    ..aOB(10, _omitFieldNames ? '' : 'hasMore')
+    ..aI(20, _omitFieldNames ? '' : 'total', fieldType: $pb.PbFieldType.OU3)
+    ..aI(30, _omitFieldNames ? '' : 'offset', fieldType: $pb.PbFieldType.OU3)
+    ..aI(40, _omitFieldNames ? '' : 'limit', fieldType: $pb.PbFieldType.OU3)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -281,22 +278,50 @@ class PaginationMetadata extends $pb.GeneratedMessage {
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
+  @$core.pragma('dart2js:noInline')
+  static PaginationMetadata create() => PaginationMetadata._();
+  @$core.override
+  PaginationMetadata createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static PaginationMetadata getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<PaginationMetadata>(create);
+  static PaginationMetadata? _defaultInstance;
+
   @$pb.TagNumber(10)
   $core.bool get hasMore => $_getBF(0);
   @$pb.TagNumber(10)
   set hasMore($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(10)
+  $core.bool hasHasMore() => $_has(0);
+  @$pb.TagNumber(10)
+  void clearHasMore() => $_clearField(10);
+
   @$pb.TagNumber(20)
   $core.int get total => $_getIZ(1);
   @$pb.TagNumber(20)
   set total($core.int value) => $_setUnsignedInt32(1, value);
+  @$pb.TagNumber(20)
+  $core.bool hasTotal() => $_has(1);
+  @$pb.TagNumber(20)
+  void clearTotal() => $_clearField(20);
+
   @$pb.TagNumber(30)
   $core.int get offset => $_getIZ(2);
   @$pb.TagNumber(30)
   set offset($core.int value) => $_setUnsignedInt32(2, value);
+  @$pb.TagNumber(30)
+  $core.bool hasOffset() => $_has(2);
+  @$pb.TagNumber(30)
+  void clearOffset() => $_clearField(30);
+
   @$pb.TagNumber(40)
   $core.int get limit => $_getIZ(3);
   @$pb.TagNumber(40)
   set limit($core.int value) => $_setUnsignedInt32(3, value);
+  @$pb.TagNumber(40)
+  $core.bool hasLimit() => $_has(3);
+  @$pb.TagNumber(40)
+  void clearLimit() => $_clearField(40);
 }
 
 /// List of feed messages
