@@ -4,7 +4,7 @@ final publicNotificationControllerProvider =
     Provider((ref) => PublicNotificationController(ref));
 
 class PublicNotificationController
-    extends NotificationController<List<PublicPost>>
+    extends NotificationController<PaginatedData<PublicPost>>
     with DataProcessingStrategy<PublicPost> {
   // ignore: use_super_parameters
   PublicNotificationController(Ref ref) : super(ref);
@@ -17,8 +17,16 @@ class PublicNotificationController
   String get cacheKey => 'publicNotificationControllerLastPostIndexDataKey';
 
   @override
-  MapEntry<dynamic, void Function(List<PublicPost>?, List<PublicPost>)>
-      get strategy => MapEntry(publicMessagesProvider, execute);
+  MapEntry<dynamic,
+      void Function(PaginatedData<PublicPost>?, PaginatedData<PublicPost>)>
+      get strategy => MapEntry(publicMessagesProvider, _execute);
+
+  void _execute(
+    PaginatedData<PublicPost>? previous,
+    PaginatedData<PublicPost> current,
+  ) {
+    execute(previous?.data, current.data);
+  }
 
   @override
   Future<void> initialize() async {
@@ -26,7 +34,10 @@ class PublicNotificationController
     if (preferences.containsKey(cacheKey)) {
       _lastIndex = preferences.getInt(cacheKey)!;
     }
-    ref.read(qaulWorkerProvider).requestPublicMessages();
+    ref.read(qaulWorkerProvider).requestPublicMessages(
+          offset: 0,
+          limit: 50,
+        );
     _log.config('Initialized:\n\t· Last Post Index: $_lastIndex');
   }
 

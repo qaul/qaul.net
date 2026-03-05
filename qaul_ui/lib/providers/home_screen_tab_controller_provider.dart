@@ -5,6 +5,8 @@ final homeScreenControllerProvider =
       HomeScreenTabController.new,
     );
 
+final disablePublicPageScrollProvider = StateProvider<bool>((ref) => false);
+
 enum TabType { account, public, users, chat, network }
 
 class HomeScreenTabController extends Notifier<TabType> {

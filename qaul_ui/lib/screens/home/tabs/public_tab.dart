@@ -1,9 +1,7 @@
 part of 'tab.dart';
 
 class _Public extends BaseTab {
-  const _Public({super.key, required this.disablePageViewScroll});
-
-  final ValueNotifier<bool> disablePageViewScroll;
+  const _Public({super.key});
 
   @override
   _PublicState createState() => _PublicState();
@@ -20,8 +18,7 @@ class _PublicState extends _BaseTabState<_Public> {
         WidgetBuilder builder;
         switch (settings.name) {
           case 'public/main':
-            builder = (BuildContext context) =>
-                _PublicTabView(widget.disablePageViewScroll);
+            builder = (BuildContext context) => const _PublicTabView();
             break;
           default:
             throw Exception('Invalid route: ${settings.name}');
@@ -33,9 +30,7 @@ class _PublicState extends _BaseTabState<_Public> {
 }
 
 class _PublicTabView extends HookConsumerWidget {
-  const _PublicTabView(this.disablePageViewScroll);
-
-  final ValueNotifier<bool> disablePageViewScroll;
+  const _PublicTabView();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,7 +45,7 @@ class _PublicTabView extends HookConsumerWidget {
     const bullhorn = 'assets/icons/public.svg';
 
     final onCreatePublicMessagePressed = useCallback(() async {
-      disablePageViewScroll.value = true;
+      ref.read(disablePublicPageScrollProvider.notifier).state = true;
       await showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -62,12 +57,36 @@ class _PublicTabView extends HookConsumerWidget {
           );
         },
       );
-      disablePageViewScroll.value = false;
+      if (context.mounted) {
+        ref.read(disablePublicPageScrollProvider.notifier).state = false;
+      }
     }, []);
 
     final refreshPublic = useCallback(() async {
       await ref.read(feedMessageStoreProvider.notifier).refreshPublic();
     }, []);
+
+    final scrollController = useScrollController();
+    final isLoadingMore = useState(false);
+    final hasMore = ref.watch(publicMessagesProvider).pagination?.hasMore ?? false;
+
+    useEffect(() {
+      void onScroll() {
+        if (isLoadingMore.value || !hasMore) return;
+        final pos = scrollController.position;
+        if (pos.pixels >= pos.maxScrollExtent * 0.8) {
+          isLoadingMore.value = true;
+          ref.read(feedMessageStoreProvider.notifier).loadMorePublic().whenComplete(
+                () {
+                  if (context.mounted) isLoadingMore.value = false;
+                },
+              );
+        }
+      }
+
+      scrollController.addListener(onScroll);
+      return () => scrollController.removeListener(onScroll);
+    }, [scrollController, hasMore]);
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -80,33 +99,36 @@ class _PublicTabView extends HookConsumerWidget {
       body: CronTaskDecorator(
         schedule: const Duration(milliseconds: 2500),
         callback: () async => await refreshPublic(),
-        child: RefreshIndicator(
-          onRefresh: () async => await refreshPublic(),
-          child: EmptyStateTextDecorator(
-            l10n.emptyPublicList,
-            isEmpty: messages.isEmpty,
-            child: ListView.separated(
-              controller: ScrollController(),
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: messages.length,
-              separatorBuilder: (_, _) => const Divider(height: 12.0),
-              itemBuilder: (_, i) {
-                final msg = messages[i];
-                var theme = Theme.of(context).textTheme;
-                return QaulListTile.user(
-                  msg.author,
-                  useUserColorOnName: true,
-                  isContentSelectable: true,
-                  content: Text(msg.content ?? '', style: theme.bodyLarge),
-                  trailingMetadata: Text(
-                    msg.sentTimestamp,
-                    style: theme.bodySmall!.copyWith(
-                      fontStyle: FontStyle.italic,
+        child: LoadingDecorator(
+          isLoading: isLoadingMore.value,
+          child: RefreshIndicator(
+            onRefresh: () async => await refreshPublic(),
+            child: EmptyStateTextDecorator(
+              l10n.emptyPublicList,
+              isEmpty: messages.isEmpty,
+              child: ListView.separated(
+                controller: scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: messages.length,
+                separatorBuilder: (_, _) => const Divider(height: 12.0),
+                itemBuilder: (_, i) {
+                  final msg = messages[i];
+                  var theme = Theme.of(context).textTheme;
+                  return QaulListTile.user(
+                    msg.author,
+                    useUserColorOnName: true,
+                    isContentSelectable: true,
+                    content: Text(msg.content ?? '', style: theme.bodyLarge),
+                    trailingMetadata: Text(
+                      msg.sentTimestamp,
+                      style: theme.bodySmall!.copyWith(
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
-                  ),
-                  nameTapRoutesToDetailsScreen: true,
-                );
-              },
+                    nameTapRoutesToDetailsScreen: true,
+                  );
+                },
+              ),
             ),
           ),
         ),

@@ -4,9 +4,10 @@ import 'package:equatable/equatable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../generated/services/feed/feed.pb.dart';
+import 'user.dart' show PaginatedData, PaginationState;
 
 final publicMessagesProvider =
-    NotifierProvider<PublicPostListNotifier, List<PublicPost>>(
+    NotifierProvider<PublicPostListNotifier, PaginatedData<PublicPost>>(
   PublicPostListNotifier.new,
 );
 
@@ -49,21 +50,46 @@ extension FMExtension on FeedMessage {
       );
 }
 
-class PublicPostListNotifier extends Notifier<List<PublicPost>> {
+class PublicPostListNotifier extends Notifier<PaginatedData<PublicPost>> {
   @override
-  List<PublicPost> build() => [];
+  PaginatedData<PublicPost> build() =>
+      const PaginatedData(data: [], pagination: null);
 
   void add(PublicPost message) {
-    state = [message, ...state];
+    final data = [message, ...state.data];
+    state = PaginatedData(data: data, pagination: state.pagination);
   }
 
   bool contains(PublicPost message) {
-    return !state
-        .indexWhere(
-          (m) =>
-              m.senderIdBase58 == message.senderIdBase58 &&
-              m.messageIdBase58 == message.messageIdBase58,
-        )
-        .isNegative;
+    return state.data.any(
+      (m) =>
+          m.senderIdBase58 == message.senderIdBase58 &&
+          m.messageIdBase58 == message.messageIdBase58,
+    );
+  }
+
+  void replaceAll(List<PublicPost> items, {PaginationState? pagination}) {
+    state = PaginatedData(
+      data: items,
+      pagination: pagination ?? state.pagination,
+    );
+  }
+
+  void appendMany(List<PublicPost> items) {
+    final existingIds = state.data
+        .map((m) => '${m.senderIdBase58 ?? ''}_${m.messageIdBase58 ?? ''}')
+        .toSet();
+    final newItems = items.where(
+      (m) => !existingIds.contains('${m.senderIdBase58 ?? ''}_${m.messageIdBase58 ?? ''}'),
+    ).toList();
+    if (newItems.isEmpty) return;
+    state = PaginatedData(
+      data: [...state.data, ...newItems],
+      pagination: state.pagination,
+    );
+  }
+
+  void setPagination(PaginationState? pagination) {
+    state = PaginatedData(data: state.data, pagination: pagination);
   }
 }

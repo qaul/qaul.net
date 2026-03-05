@@ -40,9 +40,7 @@ abstract class BaseTab extends StatefulHookConsumerWidget {
 
   factory BaseTab.chat({Key? key}) => _Chat(key: key);
 
-  factory BaseTab.public(
-          {Key? key, required ValueNotifier<bool> disablePageViewScroll}) =>
-      _Public(key: key, disablePageViewScroll: disablePageViewScroll);
+  factory BaseTab.public({Key? key}) => _Public(key: key);
 
   factory BaseTab.network({Key? key}) => _Network(key: key);
 
