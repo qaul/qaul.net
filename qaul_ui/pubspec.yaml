@@ -45,6 +45,7 @@ dependencies:
   package_info_plus: ^9.0.0
   path: ^1.9.1
   path_provider: ^2.0.15
+  qaul_components: { "path": "packages/qaul_components" }
   qaul_rpc: { "path": "packages/qaul_rpc" }
   responsive_framework: ^1.1.0
   shared_preferences: ^2.5.4

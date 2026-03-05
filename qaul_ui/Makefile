@@ -16,7 +16,7 @@ integration-test:
 # WidgetBook
 # -----------------------
 run-widgetbook:
-	@cd widgetbook && flutter run -d macos
+	@cd packages/qaul_components && flutter run -d macos
 # -----------------------
 
 .PHONY: sort-dependencies

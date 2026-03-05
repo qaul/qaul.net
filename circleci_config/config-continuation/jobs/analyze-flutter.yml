@@ -5,6 +5,6 @@ steps:
   - run:
       name: Install widgetbook dependencies
       command: |
-        cd widgetbook
+        cd packages/qaul_components
         flutter pub get
   - run: flutter analyze

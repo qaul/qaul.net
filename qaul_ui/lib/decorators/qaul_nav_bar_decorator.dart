@@ -1,21 +1,18 @@
-import 'package:badges/badges.dart';
-import 'package:flutter/material.dart' hide Badge;
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:qaul_components/qaul_components.dart';
+import 'package:qaul_rpc/qaul_rpc.dart';
+import 'package:utils/utils.dart';
 
-import '../helpers/navigation_helper.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/providers.dart';
-import '../screens/home/tabs/tab.dart';
 import '../widgets/widgets.dart';
 
+import 'nav_bar_overflow_handlers.dart';
 
 class QaulNavBarDecorator extends StatefulWidget {
   const QaulNavBarDecorator({super.key, required this.child});
 
-  /// The [pageViewKey] provided should be used in the tabs view, ensuring state is not
-  /// lost when the window is resized.
   final Widget Function(GlobalKey pageViewKey) child;
 
   @override
@@ -25,378 +22,107 @@ class QaulNavBarDecorator extends StatefulWidget {
 class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
   final _pageViewKey = GlobalKey();
 
-  Map<String, String> get _overflowMenuOptions => {
-        'settings': AppLocalizations.of(context)!.settings,
-        'about': AppLocalizations.of(context)!.about,
-        'license': AppLocalizations.of(context)!.agplLicense,
-        'support': AppLocalizations.of(context)!.support,
-        'old-network': AppLocalizations.of(context)!.routingDataTable,
-        'files': AppLocalizations.of(context)!.fileHistory,
-      };
-
-  void _handleClick(String value) {
-    switch (value) {
-      case 'settings':
-        Navigator.pushNamed(context, NavigationHelper.settings);
-        break;
-      case 'about':
-        Navigator.pushNamed(context, NavigationHelper.about);
-        break;
-      case 'license':
-        Navigator.pushNamed(context, NavigationHelper.license);
-        break;
-      case 'support':
-        Navigator.pushNamed(context, NavigationHelper.support);
-        break;
-      case 'old-network':
-        Navigator.push(context, MaterialPageRoute(builder: (_) {
-          return Scaffold(
-            appBar: AppBar(
-              leading: const IconButtonFactory(),
-              title: Row(
-                children: [
-                  const Icon(Icons.language),
-                  const SizedBox(width: 8),
-                  Text(AppLocalizations.of(context)!.routingDataTable),
-                ],
-              ),
-            ),
-            body: BaseTab.network(),
-          );
-        }));
-        break;
-      case 'files':
-        Navigator.pushNamed(context, NavigationHelper.fileHistory);
-        break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return ResponsiveLayout(
       mobileBody: Column(
         children: [
-          _buildHorizontalBar(context),
           Expanded(child: widget.child(_pageViewKey)),
+          const _ConnectedNavBar(vertical: false),
         ],
       ),
       tabletBody: Row(
         children: [
-          _buildVerticalBar(context),
+          const _ConnectedNavBar(vertical: true),
           Expanded(child: widget.child(_pageViewKey)),
         ],
       ),
     );
   }
-
-  List<Widget> _tabBarContent({bool vertical = false}) {
-    return [
-      const QaulNavBarItem(TabType.account),
-      Expanded(
-        child: vertical
-            ? const Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  QaulNavBarItem(TabType.public),
-                  QaulNavBarItem(TabType.users),
-                  QaulNavBarItem(TabType.chat),
-                  QaulNavBarItem(TabType.network),
-                ],
-              )
-            : const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  QaulNavBarItem(TabType.public),
-                  QaulNavBarItem(TabType.users),
-                  QaulNavBarItem(TabType.chat),
-                  QaulNavBarItem(TabType.network),
-                ],
-              ),
-      ),
-      PopupMenuButton<String>(
-        onSelected: _handleClick,
-        splashRadius: 20,
-        iconSize: 32,
-        icon: Icon(vertical ? Icons.more_horiz : Icons.more_vert),
-        itemBuilder: (BuildContext context) {
-          return _overflowMenuOptions.keys.map((String key) {
-            return PopupMenuItem<String>(
-              value: key,
-              child: Text(_overflowMenuOptions[key]!),
-            );
-          }).toList();
-        },
-      ),
-    ];
-  }
-
-  Widget _buildHorizontalBar(BuildContext context) {
-    final safePadding = MediaQuery.of(context).padding.top;
-    final safeFraction = safePadding / MediaQuery.of(context).size.height;
-
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: 600 + safePadding),
-      child: FractionallySizedBox(
-        heightFactor: 0.13 + safeFraction,
-        child: _barBackground(
-          context,
-          Padding(
-            padding: EdgeInsets.only(left: 8, right: 8, top: safePadding),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: _tabBarContent(),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVerticalBar(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 1000),
-      child: FractionallySizedBox(
-        widthFactor: 0.1,
-        child: _barBackground(
-          context,
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              SizedBox(height: MediaQuery.of(context).viewPadding.top),
-              ..._tabBarContent(vertical: true),
-            ],
-          ),
-          vertical: true,
-        ),
-      ),
-    );
-  }
-
-  Widget _barBackground(BuildContext context, Widget child,
-      {bool vertical = false}) {
-    final ltr = Directionality.of(context) == TextDirection.ltr;
-
-    final barTheme = Theme.of(context).appBarTheme;
-    final side = BorderSide(color: barTheme.shadowColor ?? Colors.transparent);
-    return Container(
-      alignment: Alignment.bottomCenter,
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: vertical ? BorderSide.none : side,
-          left: !vertical
-              ? BorderSide.none
-              : !ltr
-                  ? side
-                  : BorderSide.none,
-          right: !vertical
-              ? BorderSide.none
-              : ltr
-                  ? side
-                  : BorderSide.none,
-        ),
-        color: barTheme.backgroundColor,
-      ),
-      child: child,
-    );
-  }
 }
 
-class QaulNavBarItem extends HookConsumerWidget {
-  const QaulNavBarItem(this.tab, {super.key});
-  final TabType tab;
+class _ConnectedNavBar extends ConsumerStatefulWidget {
+  const _ConnectedNavBar({required this.vertical});
 
-  final double _iconSize = 32.0;
+  final bool vertical;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final controller = ref.read(homeScreenControllerProvider.notifier);
-    var selected = useState(false);
-
-    useEffect(() {
-      ref.listenManual(homeScreenControllerProvider, (previous, next) {
-        selected.value = next == tab;
-      });
-      return null;
-    }, []);
-
-    var theme = Theme.of(context);
-    final l18ns = AppLocalizations.of(context);
-
-    String svgPath;
-    String tooltip;
-    double sizeFactor = 1.0;
-    switch (tab) {
-      case TabType.account:
-        return Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Tooltip(
-            message: l18ns!.userAccountNavButtonTooltip,
-            child: InkWell(
-              onTap: () => controller.goToTab(tab),
-              splashColor: Colors.transparent,
-              hoverColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              child: QaulAvatar.small(badgeEnabled: false),
-            ),
-          ),
-        );
-      case TabType.users:
-        svgPath = 'assets/icons/people.svg';
-        tooltip = l18ns!.usersNavButtonTooltip;
-        sizeFactor = 1.45;
-        break;
-      case TabType.public:
-        svgPath = 'assets/icons/public.svg';
-        tooltip = l18ns!.publicNavButtonTooltip;
-        sizeFactor = 1.5;
-        break;
-      case TabType.chat:
-        svgPath = 'assets/icons/chat.svg';
-        tooltip = l18ns!.chatNavButtonTooltip;
-        sizeFactor = 1.45;
-        break;
-      case TabType.network:
-        svgPath = 'assets/icons/network.svg';
-        tooltip = l18ns!.network;
-        sizeFactor = 1.3;
-        break;
-    }
-
-    final activeColor = Theme.of(context).navigationBarTheme.surfaceTintColor!;
-    final button = _SelectedIndicatorDecorator(
-      isSelected: selected,
-      label: tooltip,
-      selectedColor: activeColor,
-      child: SizedBox(
-        width: _iconSize * sizeFactor,
-        height: _iconSize * sizeFactor,
-        child: IconButton(
-          tooltip: tooltip,
-          splashRadius: 0.01,
-          icon: SvgPicture.asset(
-            svgPath,
-            // fit: BoxFit.cover,
-            fit: BoxFit.contain,
-            colorFilter: ColorFilter.mode(
-              selected.value ? activeColor : theme.iconTheme.color!,
-              BlendMode.srcATop,
-            ),
-          ),
-          onPressed: () => controller.goToTab(tab),
-        ),
-      ),
-    );
-
-    if (tab == TabType.public) {
-      return _TabNotificationBadge(
-        notificationCount:
-            ref.read(publicNotificationControllerProvider).newNotificationCount,
-        onPressed: () {
-          controller.goToTab(tab);
-          ref.read(publicNotificationControllerProvider).removeNotifications();
-        },
-        child: button,
-      );
-    } else if (tab == TabType.chat) {
-      return _TabNotificationBadge(
-        notificationCount:
-            ref.read(chatNotificationControllerProvider).newNotificationCount,
-        onPressed: () {
-          controller.goToTab(tab);
-          ref.read(publicNotificationControllerProvider).removeNotifications();
-        },
-        child: button,
-      );
-    }
-    return button;
-  }
+  ConsumerState<_ConnectedNavBar> createState() => _ConnectedNavBarState();
 }
 
-class _SelectedIndicatorDecorator extends StatelessWidget {
-  const _SelectedIndicatorDecorator({
-    required this.isSelected,
-    required this.label,
-    required this.selectedColor,
-    required this.child,
-  });
+class _ConnectedNavBarState extends ConsumerState<_ConnectedNavBar> {
+  PublicNotificationController? _publicController;
+  ChatNotificationController? _chatController;
 
-  final ValueNotifier<bool> isSelected;
-  final Widget child;
-  final String label;
-  final Color selectedColor;
+  @override
+  void dispose() {
+    _publicController?.newNotificationCount.removeListener(_onNotificationChanged);
+    _chatController?.newNotificationCount.removeListener(_onNotificationChanged);
+    super.dispose();
+  }
+
+  void _onNotificationChanged() {
+    if (mounted) setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
-    return OrientationBuilder(builder: (context, orientation) {
-      if (orientation != Orientation.landscape) return child;
+    final publicController = ref.read(publicNotificationControllerProvider);
+    final chatController = ref.read(chatNotificationControllerProvider);
+    if (_publicController != publicController || _chatController != chatController) {
+      _publicController?.newNotificationCount.removeListener(_onNotificationChanged);
+      _chatController?.newNotificationCount.removeListener(_onNotificationChanged);
+      _publicController = publicController;
+      _chatController = chatController;
+      publicController.newNotificationCount.addListener(_onNotificationChanged);
+      chatController.newNotificationCount.addListener(_onNotificationChanged);
+    }
 
-      var indicatorLength = (24.0 + 8.0 + 8.0) * 1.5;
+    final currentTab = ref.watch(homeScreenControllerProvider);
+    final tabController = ref.read(homeScreenControllerProvider.notifier);
+    final user = ref.watch(defaultUserProvider);
+    final l10n = AppLocalizations.of(context)!;
 
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          child,
-          Container(
-              width: indicatorLength,
-              margin: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                label.toUpperCase(),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 8,
-                  color: isSelected.value ? selectedColor : Colors.transparent,
-                  fontWeight: FontWeight.bold,
-                ),
-              )),
-        ],
-      );
-    });
-  }
-}
-
-class _TabNotificationBadge extends StatelessWidget {
-  const _TabNotificationBadge({
-    required this.notificationCount,
-    required this.onPressed,
-    required this.child,
-  });
-  final ValueNotifier<int?> notificationCount;
-  final VoidCallback onPressed;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<int?>(
-      valueListenable: notificationCount,
-      builder: (context, count, _) {
-        return Stack(
-          children: [
-            Badge(
-              showBadge: count != null,
-              badgeStyle: const BadgeStyle(badgeColor: Colors.lightBlue),
-              badgeContent: Text(
-                '${count ?? ''}',
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              position: BadgePosition.bottomEnd(bottom: 8, end: 8),
-              child: child,
+    final avatarChild = user != null
+        ? CircleAvatar(
+            radius: kNavBarAccountSize / 2,
+            backgroundColor: colorGenerationStrategy(user.idBase58),
+            child: Text(
+              initials(user.name),
+              style: kNavBarAvatarTextStyle,
             ),
-            Positioned.fill(
-              child: GestureDetector(
-                onTap: () {
-                  notificationCount.value = null;
-                  onPressed();
-                },
-              ),
-            ),
-          ],
-        );
+          )
+        : null;
+
+    final tabTooltips = {
+      TabType.account: l10n.userAccountNavButtonTooltip,
+      TabType.public: l10n.publicNavButtonTooltip,
+      TabType.users: l10n.usersNavButtonTooltip,
+      TabType.chat: l10n.chatNavButtonTooltip,
+      TabType.network: l10n.network,
+    };
+
+    final publicCount = publicController.newNotificationCount.value;
+    final chatCount = chatController.newNotificationCount.value;
+
+    return QaulNavBarWidget(
+      vertical: widget.vertical,
+      overflowMenuLabels: navBarOverflowMenuLabels(context),
+      onOverflowSelected: (option) =>
+          handleNavBarOverflowSelected(context, option),
+      selectedTab: currentTab,
+      onTabSelected: (tab) {
+        tabController.goToTab(tab);
+        if (tab == TabType.public) {
+          publicController.removeNotifications();
+        } else if (tab == TabType.chat) {
+          chatController.removeNotifications();
+        }
       },
+      avatarChild: avatarChild,
+      publicNotificationCount: publicCount,
+      chatNotificationCount: chatCount,
+      tabTooltips: tabTooltips,
     );
   }
 }
