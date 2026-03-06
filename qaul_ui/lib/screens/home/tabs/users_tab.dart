@@ -53,8 +53,10 @@ class _UsersState extends _BaseTabState<_Users> {
 
     setState(() => _isLoadingMore = true);
     try {
-      final worker = ref.read(qaulWorkerProvider);
-      await worker.getUsers(offset: _currentOffset, limit: _pageSize);
+      await ref.read(usersStoreProvider.notifier).getMoreUsers(
+            _currentOffset,
+            limit: _pageSize,
+          );
       _updatePaginationState();
     } finally {
       if (mounted) setState(() => _isLoadingMore = false);
@@ -84,18 +86,18 @@ class _UsersState extends _BaseTabState<_Users> {
       body: LoadingDecorator(
         isLoading: _isLoadingMore,
         child: RefreshIndicator(
-            onRefresh: () async => await _refreshUsers(),
-            child: SearchUserDecorator(builder: (_, users) {
-              return EmptyStateTextDecorator(
-                l10n.emptyUsersList,
-                isEmpty: users.isEmpty,
-                child: ListView.separated(
-                  controller: _scrollController,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  itemCount: users.length,
-                  separatorBuilder: (_, _) => const Divider(height: 12.0),
-                  itemBuilder: (_, i) {
-                    final user = users[i];
+          onRefresh: () async => await _refreshUsers(),
+          child: SearchUserDecorator(builder: (_, users) {
+            return EmptyStateTextDecorator(
+              l10n.emptyUsersList,
+              isEmpty: users.isEmpty,
+              child: ListView.separated(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: users.length,
+                separatorBuilder: (_, _) => const Divider(height: 12.0),
+                itemBuilder: (_, i) {
+                  final user = users[i];
                   var theme = Theme.of(context).textTheme;
                   var hasConnections =
                       user.availableTypes != null && user.availableTypes!.isNotEmpty;
@@ -130,12 +132,12 @@ class _UsersState extends _BaseTabState<_Users> {
                       tapRoutesToDetailsScreen: true,
                     ),
                   );
-                  },
-                ),
-              );
-            }),
-          ),
+                },
+              ),
+            );
+          }),
         ),
+      ),
     );
   }
 }

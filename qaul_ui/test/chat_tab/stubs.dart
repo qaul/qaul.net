@@ -122,6 +122,9 @@ class StubLibqaulWorker implements LibqaulWorker {
   void getGroupInfo(Uint8List id) => throw UnimplementedError();
 
   @override
+  Future<User?> getUserById(Uint8List userId) => Future.value(null);
+
+  @override
   Future<void> getNodeInfo() => throw UnimplementedError();
 
   @override
