@@ -221,7 +221,7 @@ impl Rpc {
                         #[cfg(feature = "rtc")]
                         {
                             log::trace!("Message Modules::Rtc received");
-                            Rtc::rpc(message.data, message.user_id);
+                            Rtc::rpc(message.data, message.user_id, message.request_id);
                         }
                         #[cfg(not(feature = "rtc"))]
                         {
