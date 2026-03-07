@@ -49,4 +49,5 @@ if [ "$CLEAN" == "true" ]; then
 fi
 
 ## run flutter
-flutter run
+flutter run --verbose
+
