@@ -14,17 +14,25 @@ import android.os.Looper
 import android.os.ParcelUuid
 import android.util.Log
 import androidx.lifecycle.LifecycleService
-import com.google.gson.Gson
 import net.qaul.ble.AppLog
 import net.qaul.ble.BLEUtils
+//import net.qaul.ble.service.GattMessaging
+import net.qaul.ble.service.SendQueue
+import net.qaul.ble.service.ReceiveQueue
 import net.qaul.ble.RemoteLog
 import net.qaul.ble.core.BleActor
 import net.qaul.ble.model.BLEScanDevice
-import net.qaul.ble.model.Message
+//import net.qaul.ble.model.Message
+import net.qaul.ble.model.FlowControlMessageType
+import net.qaul.ble.model.FlowControlQueueMessage
+import net.qaul.ble.model.MissingChunkQueueMessage
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executors
 
+/**
+ * Android Lifecycle Service class of the BLE Service
+ */
 @SuppressLint("MissingPermission")
 class BleService : LifecycleService() {
     var bleCallback: BleScanCallBack? = null
@@ -40,22 +48,39 @@ class BleService : LifecycleService() {
     private lateinit var scanCallback: ScanCallback
     private lateinit var bleScanner: BluetoothLeScanner
     private val outOfRangeChecker = Handler(Looper.getMainLooper())
-    private val devicesList = CopyOnWriteArrayList(arrayListOf<BLEScanDevice>())
-    private val ignoreList = CopyOnWriteArrayList(arrayListOf<BLEScanDevice>())
-    private val receiveList = Collections.synchronizedList(arrayListOf<BLEScanDevice>())
-    private val blackList = Collections.synchronizedList(arrayListOf<BLEScanDevice>())
-    private val uuidList = arrayListOf<ParcelUuid>()
-    private var filters: ArrayList<ScanFilter> = arrayListOf()
-    private var scanSettings: ScanSettings? = null
-    private val msgMap = Collections.synchronizedMap(hashMapOf<String, String>())
-    private val actorMap = Collections.synchronizedMap(hashMapOf<String, BleActor>())
     private val handler = Handler(Looper.getMainLooper())
+    private val sharedPrefFile = "sharedpreference_qaul_ble"
+    private lateinit var sharedPreferences: SharedPreferences
     private var lastWriteTime = System.currentTimeMillis() + 60000
     private var executor = Executors.newSingleThreadExecutor()
 
-    private val hashMap: HashMap<String, Queue<Triple<String, ByteArray, ByteArray>>> = hashMapOf()
-    private val sharedPrefFile = "sharedpreference_qaul_ble"
-    private lateinit var sharedPreferences: SharedPreferences
+    // qaul BLE UUID service list for device scanning
+    private val uuidList = arrayListOf<ParcelUuid>()
+    private var filters: ArrayList<ScanFilter> = arrayListOf()
+    private var scanSettings: ScanSettings? = null
+
+    // detected devices collections
+    private val devicesList = CopyOnWriteArrayList(arrayListOf<BLEScanDevice>())
+    private val ignoreList = CopyOnWriteArrayList(arrayListOf<BLEScanDevice>())
+    private val receiveList = Collections.synchronizedList(arrayListOf<BLEScanDevice>())
+    // ??? is `blackList` even used?
+    private val blackList = Collections.synchronizedList(arrayListOf<BLEScanDevice>())
+
+    // Active GATT client connection collection for outgoing GATT messages
+    private val actorMap = Collections.synchronizedMap(hashMapOf<String, BleActor>())
+
+    // OLD: incoming GATT message collection
+    //private val msgMap = Collections.synchronizedMap(hashMapOf<String, String>())
+    // OLD: GATT message sending queue (identified by BLE MAC address)
+    //private val hashMap: HashMap<String, Queue<Triple<String, ByteArray, ByteArray>>> = hashMapOf()
+
+    // NEW: SendQueue for each qaul device
+    //private val hashMapSendQueue: HashMap<String, SendQueue> = hashMapOf()
+    private val hashMapSendQueue = Collections.synchronizedMap(mutableMapOf<String, SendQueue>())
+    // NEW: ReceiveQueue for each qaul device
+    private val hashMapReceiveQueue = Collections.synchronizedMap(mutableMapOf<String, ReceiveQueue>())
+    // NEW: ConnectionManager to relate receiving and sending queues
+    val connectionManager: ConnectionManager = ConnectionManager()
 
     companion
 
@@ -72,11 +97,11 @@ class BleService : LifecycleService() {
         var bleService: BleService? = null
         var isAdvertisementRunning = false
         var isScanningRunning = false
-        val SERVICE_UUID = "99E91399-80ED-4943-9BCB-39C532A76023"
-        val MSG_SERVICE_UUID = "99E91400-80ED-4943-9BCB-39C532A76023"
-        val READ_CHAR = "99E91401-80ED-4943-9BCB-39C532A76023"
-        val MSG_CHAR = "99E91402-80ED-4943-9BCB-39C532A76023"
-        val GD_CHAR = "99E91403-80ED-4943-9BCB-39C532A76023"
+        val SERVICE_UUID = "4db14399-0bd0-4445-9906-47d9c4791cff"
+        val MSG_SERVICE_UUID = "4db14400-0bd0-4445-9906-47d9c4791cff"
+        val READ_CHAR = "4db14401-0bd0-4445-9906-47d9c4791cff"
+        val MSG_CHAR = "4db14402-0bd0-4445-9906-47d9c4791cff"
+        val GD_CHAR = "4db14403-0bd0-4445-9906-47d9c4791cff"
     }
 
     override fun onCreate() {
@@ -98,7 +123,7 @@ class BleService : LifecycleService() {
     }
 
     /**
-     * This Method Will Set the necessary data and start the advertisement
+     * This Method will set the necessary data and start the advertisement
      */
     fun startAdvertise(
         qaul_id: ByteArray, mode: String, bleCallback: BleAdvertiseCallback,
@@ -125,24 +150,18 @@ class BleService : LifecycleService() {
                     BluetoothGattCharacteristic.PROPERTY_READ,
                     BluetoothGattCharacteristic.PERMISSION_READ
                 )
-                AppLog.e(TAG, "qaulId : " + qaul_id)
+                AppLog.e(TAG, "qaulId : " + BLEUtils.byteToHex(qaul_id))
                 mainChar.value = qaulId
                 mainService.addCharacteristic(mainChar)
-
-                // val msgService = BluetoothGattService(
-                //     UUID.fromString(MSG_SERVICE_UUID), BluetoothGattService.SERVICE_TYPE_PRIMARY
-                // )
 
                 val msgChar = BluetoothGattCharacteristic(
                     UUID.fromString(MSG_CHAR),
                     BluetoothGattCharacteristic.PROPERTY_WRITE,
                     BluetoothGattCharacteristic.PERMISSION_WRITE
                 )
-                // msgService.addCharacteristic(msgChar)
                 mainService.addCharacteristic(msgChar)
                 val serviceList = arrayListOf<BluetoothGattService>()
                 serviceList.add(mainService)
-                // serviceList.add(msgService)
                 startGattServer(services = serviceList)
 
                 val dataBuilder = AdvertiseData.Builder()
@@ -150,9 +169,7 @@ class BleService : LifecycleService() {
                 dataBuilder.setIncludeTxPowerLevel(true)
 
                 val main_uuid = ParcelUuid(UUID.fromString(SERVICE_UUID))
-                // val msg_uuid = ParcelUuid(UUID.fromString(MSG_SERVICE_UUID))
                 dataBuilder.addServiceUuid(main_uuid)
-                // dataBuilder.addServiceUuid(msg_uuid)
                 dataBuilder.setIncludeDeviceName(true)
                 when (advertMode) {
                     "low_power" -> {
@@ -292,11 +309,9 @@ class BleService : LifecycleService() {
      * This Method Will Parse Result of ScanResult according to Device
      */
     private fun parseBLEFrame(device: BluetoothDevice, rssi: Int, result: ScanResult) {
-       AppLog.e(TAG, "device : " + device.address + " Device.name = " + device.name )
         if (blackList.find { it.macAddress == device.address } == null) {
             val selectItem = devicesList.toMutableList().find { it.macAddress == device.address }
             if (selectItem == null) {
-//                AppLog.e(TAG, "device : " + device.address)
                 RemoteLog[this]!!.addDebugLog("$TAG:device : " + device.address + " " + result.scanRecord!!.serviceUuids)
                 val bleDevice: BLEScanDevice = BLEScanDevice.getDevice()
                 bleDevice.bluetoothDevice = device
@@ -396,9 +411,13 @@ class BleService : LifecycleService() {
 
             /**
             * This method receives write request from the client and manages the bytes written.
-            * The android gatt client can write only 20 or less bytes at a time. 
-            * So, here we use delimiters "$$" for every message before breaking into multiple and sending to the server
-            * On server side, it will concatenate the received bytes and check for the delimiters to form the complete message.
+            * The android gatt client has defaults message length per version:
+            * 
+            * - Android 13 and below: 20 bytes
+            * - Android 14 and above: 512 bytes
+            *
+            * Every message is handled by the ReceiveQueue class which manages chunking, reassembly,
+            * and flow control.
             */
             override fun onCharacteristicWriteRequest(
                 device: BluetoothDevice,
@@ -412,68 +431,163 @@ class BleService : LifecycleService() {
                 super.onCharacteristicWriteRequest(
                     device, requestId, characteristic, preparedWrite, responseNeeded, offset, value
                 )
-               AppLog.e(TAG, "Write Request Received: " + String(value) + " :: " + requestId)
-                val s = BLEUtils.byteToHex(value)
-               AppLog.e(TAG, "Data in hex:: $s")
+                val b = BLEUtils.toBinaryString(value)
+
+                // check if the device is in ignoreList or receiveList
                 var bleDevice = ignoreList.find { it.macAddress == device.address }
                 if (bleDevice == null) {
                     bleDevice = receiveList.find { it.macAddress == device.address }
                 }
+                // TODO: is a response really needed?
+                // TODO: test without response and faster message send time
                 gattServer!!.sendResponse(
                     device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value
                 )
-                // Follwing block is for Bytes of same message are coming in packets 
-                if (msgMap.containsKey(device.address)) {
-                    var oldValue = msgMap[device.address]
-                    if (s.endsWith("2424") || (oldValue!!.endsWith("24") && s == "24")) {
-                        //SendResponse of oldValue
-                        oldValue += s
-                        val msgData = String(BLEUtils.hexToByteArray(oldValue)!!).removeSuffix("$$")
-                            .removePrefix("$$")
-                        if (!msgData.contains("$$")) { 
-                            val msgObject = Gson().fromJson(msgData, Message::class.java)
-                            if (bleDevice == null) {
-                                bleDevice = BLEScanDevice.getDevice()
-                                bleDevice.macAddress = device.address
-                                bleDevice.qaulId = msgObject.qaulId
-                                bleDevice.bluetoothDevice = device
-                                receiveList.add(bleDevice)
-                            }
-                        AppLog.e(TAG, " Final Data in hex:: $oldValue")
-                            bleAdvertiseCallback!!.onMessageReceived(
-                                bleDevice = bleDevice, BLEUtils.hexToByteArray(oldValue)!!
-                            )
-                            msgMap.remove(device.address)
-                        } else {
-                            Log.e(TAG, "onCharacteristicWriteRequest:  contain $$")
-                        }
-                    } else {
-                        oldValue += s
-                        msgMap[device.address] = oldValue
-                    }
+
+                // add the 
+                var receiveQueue: ReceiveQueue? = null
+                if (hashMapReceiveQueue.containsKey(device.address)) {
+                    AppLog.e(TAG, "hashMapReceiveQueue found ${device.address}")
+                    receiveQueue = hashMapReceiveQueue[device.address]
                 } else {
-                    // Following block is for single message
-                    if (s.startsWith("2424") && s.endsWith("2424")) {
-                        val msgData = String(BLEUtils.hexToByteArray(s)!!).removeSuffix("$$")
-                            .removePrefix("$$")
-                        // AppLog.e(TAG, "Data in msgData:: $msgData")   
-                        val msgObject = Gson().fromJson(msgData, Message::class.java) 
-                        if (bleDevice == null) {
-                            bleDevice = BLEScanDevice.getDevice()
-                            bleDevice.macAddress = device.address
-                            bleDevice.qaulId = msgObject.qaulId
-                            bleDevice.bluetoothDevice = device
-                            receiveList.add(bleDevice)
+                    AppLog.e(TAG, "hashMapReceiveQueue new queue created for ${device.address}")
+                    receiveQueue = ReceiveQueue()
+                }
+
+                // Process received data with the ReceiveQueue
+                val receiveQueueResult = receiveQueue?.incomingMessage(value, device)
+                hashMapReceiveQueue[device.address] = receiveQueue
+
+                // check if we received an ACK
+                if (receiveQueueResult!!.flcAckReceived != null) {
+                    AppLog.e(TAG, "receiveQueueResult ACK received: Queue: ${receiveQueueResult!!.flcAckReceived!!.messageIndex}, Success: ${receiveQueueResult!!.flcAckReceived!!.success}, ErrorCode: ${receiveQueueResult!!.flcAckReceived!!.errorCode}")
+
+                    // notify libqaul about message sending result
+                    // TODO: I guess we can't do it here, because we haven't the message ID.
+                    //bleCallback?.onMessageSent(
+                    //    id = messageId,
+                    //    success = receiveQueueResult.flcAckReceived!!.success,
+                    //    data = ByteArray(0)
+                    //)
+                }
+
+                // send receiveQueueResult to ConnectionManager to relate it with the SendQueue
+                // check if qaulId received
+                if (receiveQueueResult!!.qaulIdReceived != null) {
+                    val qaulIdReceivedHex = BLEUtils.byteToHex(receiveQueueResult.qaulIdReceived!!)
+                    val qaulIdSavedHex = BLEUtils.byteToHex(bleDevice?.qaulId)
+                    AppLog.e(TAG, "receiveQueueResult QAUL ID received")
+                    AppLog.e(TAG, "receiveQueueResult: $qaulIdReceivedHex , $qaulIdSavedHex , ${receiveQueueResult.qaulIdReceived!!} , ${bleDevice?.qaulId}")
+                    bleDevice?.qaulId = receiveQueueResult.qaulIdReceived!!
+
+                    // Add ReceiveQueueResult handling by the ConnectionManager below
+                    connectionManager.addReceiveQueueResult(receiveQueueResult)
+                } else {
+                    AppLog.e(TAG, "receiveQueueResult QAUL ID not received")
+                }
+
+                // check if we received a message
+                if (receiveQueueResult.receivedMessage != null) {
+                    AppLog.e(TAG, "receiveQueueResult message successfully received")
+                    // Send message to libqaul
+                    bleAdvertiseCallback?.onMessageReceived(
+                        qaulId = receiveQueueResult.receivedMessage!!.qaulId,
+                        message = receiveQueueResult.receivedMessage!!.message
+                    )
+                }
+
+
+
+                /*
+                // check for result tasks
+                // check if qaulId is missing
+                // TODO: the following 3 checks need to be done here properly
+                if (receiveQueueResult!!.qaulIdMissing) {
+                    AppLog.e(TAG, "receiveQueueResult QAUL ID is missing")
+                }
+
+                // check if qaulId request received
+                if (receiveQueueResult!!.qaulIdRequestReceived) {
+                    AppLog.e(TAG, "receiveQueueResult FLC QAUL ID request received")
+
+                    // update the sendQueue
+                    val sendQueue = hashMapSendQueue[device.address]
+                    if (sendQueue != null) {
+                        AppLog.e(TAG, "schedule qaul ID FLC sending")
+                        if (sendQueue.qaulIdSent) {
+                            AppLog.e(TAG, "QAUL ID already sent to device ${device.address}")
+                            sendQueue.addFlcSendQaulId()
                         }
-                        bleAdvertiseCallback!!.onMessageReceived(
-                            bleDevice = bleDevice, BLEUtils.hexToByteArray(s)!!
-                        )
-                    } else if (s.startsWith("2424")) {
-                        msgMap[device.address] = s
+                        else {
+                            AppLog.e(TAG, "QAUL ID not yet sent to device ${device.address}")
+                            sendQueue.addFlcSendQaulId()
+                        }
+                        hashMapSendQueue[device.address] = sendQueue
                     } else {
-                        AppLog.e("onCharacteristicWriteRequest()", "Invalid data received.")
+                        // what if there is no sendQueue yet?
+                        AppLog.e(TAG, "received qaul ID request: No sendQueue for device ${device.address}")
                     }
                 }
+                */
+
+                /*
+                // ONLY HERE FOR REFERENCE, DELETE THE FOLLOWING IN THE FUTURE
+                // check if we need to request chunks
+                if (receiveQueueResult.flcRequestChunks.size > 0) {
+                    AppLog.e(TAG, "receiveQueueResult chunks requested")
+
+                    // add missing chunks to sendQueue
+                    val sendQueue = hashMapSendQueue[device.address]
+                    if (sendQueue != null) {
+                        for (missingChunk in receiveQueueResult.flcRequestChunks) {
+                            sendQueue.addMissingChunkIndexToRequest(missingChunk)
+                        }
+                        hashMapSendQueue[device.address] = sendQueue
+                    }
+                }
+                // check if we need to send an ACK
+                if (receiveQueueResult.flcSendAck != null) {
+                    AppLog.e(TAG, "receiveQueueResult send FLC ACK")
+
+                    // schedule ACK FLC in sendQueue
+                    val sendQueue = hashMapSendQueue[device.address]
+                    if (sendQueue != null) {
+                        sendQueue.addFlcAck(
+                            receiveQueueResult.flcSendAck!!.messageIndex,
+                            receiveQueueResult.flcSendAck!!.success,
+                            receiveQueueResult.flcSendAck!!.errorCode
+                        )
+                        hashMapSendQueue[device.address] = sendQueue
+                        AppLog.e(TAG, "send FLC ACK scheduled: Queue: ${receiveQueueResult.flcSendAck!!.messageIndex}, Success: ${receiveQueueResult.flcSendAck!!.success}, ErrorCode: ${receiveQueueResult.flcSendAck!!.errorCode}")
+                    } else {
+                        AppLog.e(TAG, "send FLC ACK: No sendQueue for device ${device.address}")
+                    }
+                }
+                // check if we need to request an ACK
+                if (receiveQueueResult.flcRequestAck != null) {
+                    AppLog.e(TAG, "receiveQueueResult request ACK")
+                }
+                // check if we received an ACK
+                if (receiveQueueResult.flcAckReceived != null) {
+                    AppLog.e(TAG, "receiveQueueResult ACK received: Queue: ${receiveQueueResult.flcAckReceived!!.messageIndex}, Success: ${receiveQueueResult.flcAckReceived!!.success}, ErrorCode: ${receiveQueueResult.flcAckReceived!!.errorCode}")
+
+                    // update the sendQueue with the ACK received
+                    val sendQueue = hashMapSendQueue[device.address]
+                    if (sendQueue != null) {
+                        val messageId = sendQueue.flcAckReceived(receiveQueueResult.flcAckReceived!!.messageIndex, receiveQueueResult.flcAckReceived!!.success, receiveQueueResult.flcAckReceived!!.errorCode)
+                        hashMapSendQueue[device.address] = sendQueue
+
+                        // notify libqaul about message sending result
+                        bleCallback?.onMessageSent(
+                            id = messageId,
+                            success = receiveQueueResult.flcAckReceived!!.success,
+                            data = ByteArray(0)
+                        )
+                    } else {
+                        AppLog.e(TAG, "ACK received: No sendQueue for device ${device.address}")
+                    }
+                }
+                */
             }
 
             // Descriptor related methods (Useless for current architecture)
@@ -510,7 +624,7 @@ class BleService : LifecycleService() {
                 super.onExecuteWrite(device, requestId, execute)
             }
 
-            // Notif related methods (Useless for current architecture)
+            // Not if related methods (Useless for current architecture)
             override fun onNotificationSent(device: BluetoothDevice, status: Int) {
                 super.onNotificationSent(device, status)
             }
@@ -622,7 +736,6 @@ class BleService : LifecycleService() {
             override fun onScanResult(callbackType: Int, result: ScanResult?) {
                 super.onScanResult(callbackType, result)
 
-                // App.Log.e(TAG, "device : " + result!!.device.name + " Device.address = " + result!!.device.address)
                 RemoteLog[this@BleService]!!.addDebugLog("$TAG:device : " + result!!.device.address)
                 parseBLEFrame(result!!.device, result.rssi, result)
             }
@@ -682,9 +795,10 @@ class BleService : LifecycleService() {
         class BleConnectionListener : BleActor.BleConnectionListener {
             override fun onConnected(macAddress: String?, device: BluetoothDevice?) {
                 AppLog.e(TAG, " onConnected : $macAddress")
-                val editor: SharedPreferences.Editor = sharedPreferences.edit()
-                editor.putString("BLE_GATT", Gson().toJson(device))
-                editor.apply()
+                // TODO: DELETE:
+                //val editor: SharedPreferences.Editor = sharedPreferences.edit()
+                //editor.putString("BLE_GATT", Gson().toJson(device))
+                //editor.apply()
             }
 
             override fun onDisconnected(bleScanDevice: BLEScanDevice) {
@@ -692,25 +806,6 @@ class BleService : LifecycleService() {
                 if (!blackList.contains(bleScanDevice)) {
                     devicesList.remove(bleScanDevice)
 //                    ignoreList.remove(bleScanDevice)
-                }
-                if (System.currentTimeMillis() - 60000 > lastWriteTime) {
-//                    bleCallback?.restartService()
-                    //removeGatt()
-                }
-            }
-
-            private fun removeGatt() {
-                AppLog.e(TAG, "  REMOVE SAVED GATT")
-                val gatt = sharedPreferences.getString("BLE_GATT", "")
-                gatt?.let {
-                    if (it.isNotEmpty()) {
-                        var bleDevice = Gson().fromJson(it, BluetoothDevice::class.java)
-                        var connectGatt: BluetoothGatt? =
-                            bleDevice.connectGatt(this@BleService, false, mGattCallback)
-                        AppLog.e(TAG, "  REMOVE SAVED GATT")
-                        connectGatt?.close()
-                        connectGatt = null
-                    }
                 }
             }
 
@@ -757,20 +852,27 @@ class BleService : LifecycleService() {
                 AppLog.e("zzz lastWriteTime", "$lastWriteTime")
             }
 
+            /**
+             * This method is called when a message is sent successfully.
+             * 
+             * TODO: is this really needed? 
+             * Maybe Better: focus on receive of ACK.
+             */
             override fun onMessageSent(
                 gatt: BluetoothGatt?, value: ByteArray, id: String,
             ) {
-                val queue = hashMap[gatt?.device?.address]
-                if (queue?.isNotEmpty() == true) {
-                    AppLog.e(TAG, "onMessageSent:SIZE ->  queue.isNotEmpty()  ")
-                    queue.poll()
-                    hashMap[gatt?.device?.address!!] = queue
+                AppLog.e(TAG, "onMessageSent:ID -> $id")
+                val sendQueue: SendQueue? = hashMapSendQueue[gatt?.device?.address]
+                if (sendQueue != null) {
+                    sendQueue.messageSent(id)
+                    hashMapSendQueue[gatt?.device?.address!!] = sendQueue
                 }
 
-                AppLog.e(TAG, "onMessageSent:SIZE ->  ${queue?.size} ")
-                bleCallback?.onMessageSent(id = id, success = true, data = value)
-                sendMessageFromQueu(gatt?.device?.address!!)
-
+                // TODO: notify Libqaul once we send an ACK
+                // DON'T notify libqaul about message sent here
+                // It will be notified when the ACK is received
+                //bleCallback?.onMessageSent(id = id, success = true, data = value)
+                sendMessageFromQueue(gatt?.device?.address!!)
             }
 
             override fun onCharacteristicChanged(
@@ -790,6 +892,7 @@ class BleService : LifecycleService() {
             }
 
         }
+
         val baseBleActor: BleActor? = when {
             isFromMessage -> {
                 if (actorMap[device.macAddress] == null) {
@@ -803,94 +906,141 @@ class BleService : LifecycleService() {
                 BleActor(this, BleConnectionListener())
             }
         }
+
         baseBleActor?.setDevice(device = device, isFromMessage = isFromMessage)
         return baseBleActor!!
-
     }
 
+    // -------------------------------------------------------------------------
+    // new sending functions
+    // -------------------------------------------------------------------------
     /**
      * This Method Will Be Used to Send Data to Other Qaul-Device
      */
-    fun sendMessage(id: String, to: ByteArray, message: ByteArray, from: ByteArray) {
-        var bleDevice = ignoreList.find { it.qaulId.contentEquals(to) }
+    fun sendMessage(message_id: String, to_id: ByteArray, message: ByteArray, from_id: ByteArray) {
+        var bleDevice = ignoreList.find { it.qaulId.contentEquals(to_id) }
         if (bleDevice == null) {
-            bleDevice = receiveList.find { it.qaulId.contentEquals(to) }
+            bleDevice = receiveList.find { it.qaulId.contentEquals(to_id) }
         }
 
-        AppLog.e(
-            TAG, "sendMessage   ${BLEUtils.byteToHex(message)}"
-        )
-        var mainQueue: Queue<Triple<String, ByteArray, ByteArray>>? = null
-        bleDevice?.let {
-            if (hashMap.containsKey(it.macAddress)) {
-                var queue = hashMap[it.macAddress!!]
-                if(queue!!.size < 2) {
-                    queue?.add(Triple(id, from, message))
-                } else{
-                    queue = LinkedList()
-                }
-                hashMap[it.macAddress!!] = queue!!
-                mainQueue = queue
-            } else {
-                val queue: Queue<Triple<String, ByteArray, ByteArray>> = LinkedList()
-                queue.add(Triple(id, from, message))
-                hashMap[it.macAddress!!] = queue
-                mainQueue = queue
-            }
-            sendMessageFromQueu(it.macAddress!!, true)
+        // DEBUG
+        //AppLog.e(TAG, "sendMessage ${BLEUtils.byteToHex(message)}")
+        //AppLog.e(TAG, "sendMessage to_id: ${BLEUtils.byteToHex(to_id)}")
+        //AppLog.e(TAG, "sendMessage to_id: ${BLEUtils.toBinaryString(to_id)}")
+        //AppLog.e(TAG, "sendMessage from_id: ${BLEUtils.byteToHex(from_id)}")
+        //AppLog.e(TAG, "sendMessage from_id: ${BLEUtils.toBinaryString(from_id)}")
 
+        bleDevice?.let {
+            if (hashMapSendQueue.containsKey(it.macAddress)) {
+                val sendQueue = hashMapSendQueue[it.macAddress!!]
+                sendQueue!!.addMessage(message, message_id)
+                hashMapSendQueue[it.macAddress!!] = sendQueue
+
+                AppLog.e(TAG, "sendMessage: Used existing Queue for macAddress: ${it.macAddress!!}")
+            } else {
+                // create a new entry
+                val sendQueue = SendQueue(from_id)
+                sendQueue!!.addMessage(message, message_id)
+                hashMapSendQueue[it.macAddress!!] = sendQueue
+
+                AppLog.e(TAG, "sendMessage: New Queue updated for ${it.macAddress!!}")
+            }
+            
+            sendMessageFromQueue(it.macAddress!!, true)
         }
     }
+
     /**
-    * This Method Will Be Used to add delimiters ""$$" and Send Data to Other Qaul-Device
-    */
-    private fun sendMessageFromQueu(macAddress: String, isFromSendMessage: Boolean = false) {
+     * create and schedule chunks to send to other device
+     */
+    private fun sendMessageFromQueue(macAddress: String, isFromSendMessage: Boolean = false) {
         executor.execute {
-            if (hashMap.isNotEmpty()) {
-                val queue = hashMap[macAddress]
-                if (!queue.isNullOrEmpty()) {
+            // check if queue is initialized and contains the macAddress for the connection
+            if (hashMapSendQueue.isNotEmpty() && hashMapSendQueue.containsKey(macAddress)) {
+                // get queue for connection
+                val sendQueue = hashMapSendQueue[macAddress]
+                if (sendQueue != null) {
                     AppLog.e(
                         TAG,
-                        "sendMessageFromQueu ${queue.size} ${isFromSendMessage}"
+                        "sendMessageFromQueue ${isFromSendMessage}"
                     )
-                    if (!isFromSendMessage || queue.size == 1) {
+                    
+                    if (!isFromSendMessage ||
+                        sendQueue.messagesToSend.isNotEmpty() ||
+                        sendQueue.flcToSend.isNotEmpty() ||
+                        sendQueue.missingChunksToRequest.isNotEmpty()
+                        ) {
+
                         var bleDevice = ignoreList.find { it.macAddress.contentEquals(macAddress) }
                         if (bleDevice == null) {
                             bleDevice = receiveList.find { it.macAddress.contentEquals(macAddress) }
                         }
-                        val messageFormQueue = queue.peek()
+                        // check if device is available
+                        if (bleDevice == null) {
+                            // TODO: check and how to proceed with this queue
+                            //       - if device is connectable
+                            //       - if device has changed MAC
+                            AppLog.e(TAG, "bleDevice not found for macAddress: $macAddress")
 
-                        messageFormQueue?.let { mesTrip ->
-                            val msg = Message()
-                            msg.message = mesTrip.third
-                            msg.qaulId = mesTrip.second
-                            if (bleDevice != null) {
-                                AppLog.e(
-                                    TAG,
-                                    "-------------------> HERE FOR CONNECTION   sendMessageFromQueu "
-                                )
-                                val bleActor =
-                                    connectDevice(device = bleDevice, isFromMessage = true)
-                                bleActor.messageId = mesTrip.first
-                                val btArray = Gson().toJson(msg).toByteArray()
-                                val delimiter = ByteArray(2)
-                                delimiter[0] = 36
-                                delimiter[1] = 36
-                                bleActor.tempData = delimiter + btArray + delimiter
-                                AppLog.e(
-                                    TAG,
-                                    "data------------>sendMessage Id: ${bleActor.messageId}  ${BLEUtils.byteToHex(bleActor.tempData)}"
-                                )
-                            } else {
-                                AppLog.e(
-                                    TAG, "data------------>onMessageSent Failed"
-                                )
+                            // mark queue as connection lost
+                            val messageId = sendQueue!!.setConnectionLost()
+                            hashMapSendQueue[macAddress] = sendQueue
+
+                            // notify libqaul that message sending failed
+                            if (messageId != null) {
                                 bleCallback?.onMessageSent(
-                                    id = mesTrip.first, success = false, data = ByteArray(0)
+                                    id = messageId,
+                                    success = false,
+                                    data = ByteArray(0)
                                 )
-                                queue.poll()
-                                hashMap[macAddress] = queue
                             }
+                        } else {
+                            // add info from connection manager to sendQueue
+                            val connectionInfo = connectionManager.getAndRemoveSendQueue(sendQueue!!.qaulId)
+
+                            // add ACKs to send
+                            val acksToSendIterator = connectionInfo.acksToSend.iterator()
+                            while (acksToSendIterator.hasNext()) {
+                                AppLog.e(TAG, "sendMessageFromQueue schedule FLC ACK to send")
+                                val (index, pairValue) = acksToSendIterator.next()
+                                sendQueue.addFlcAck(index, pairValue.first, pairValue.second)
+                            }
+
+                            // add chunks request
+                            for (missingChunk in connectionInfo.missingChunksToRequest) {
+                                AppLog.e(TAG, "sendMessageFromQueue add chunk request")
+                                sendQueue.addMissingChunkIndexToRequest(missingChunk)
+                            }
+
+                            // add received ACKs
+                            val ackReceivedIterator = connectionInfo.acksReceived.iterator()
+                            while (ackReceivedIterator.hasNext()) {
+                                AppLog.e(TAG, "sendMessageFromQueue add received ACK")
+                                
+                                val (index, pairValue) = ackReceivedIterator.next()
+                                val messageId = sendQueue.flcAckReceived(index, pairValue.first, pairValue.second)
+                                // notify libqaul about message sending result
+                                bleCallback?.onMessageSent(
+                                    id = messageId,
+                                    success = pairValue.first,
+                                    data = ByteArray(0)
+                                )
+                            }
+                            
+                            // add chunks to send
+                            for (missingChunk in connectionInfo.missingChunksToSend) {
+                                AppLog.e(TAG, "sendMessageFromQueue add missing chunk to send")
+                                sendQueue.addMissingChunkIndexToSend(missingChunk)
+                            }
+
+                            // prepare message for sending
+                            val (chunks, messageIndex, messageId) = sendQueue!!.getChunks()
+                            hashMapSendQueue[macAddress] = sendQueue
+
+                            // schedule chunks for sending
+                            val bleActor = connectDevice(device = bleDevice, isFromMessage = true)
+                            bleActor.messageId = messageId
+                            bleActor.sendChunkQueue.addAll(chunks)
                         }
                     }
                 }
@@ -898,6 +1048,9 @@ class BleService : LifecycleService() {
         }
     }
 
+    // -------------------------------------------------------------------------
+
+    // TODO: is this of any use? Ever invoked?
     private val mGattCallback: BluetoothGattCallback = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
@@ -946,7 +1099,7 @@ class BleService : LifecycleService() {
 
         override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
             super.onMtuChanged(gatt, mtu, status)
-            AppLog.e("MTU Size: ", "" + mtu)
+            AppLog.e("BleService MTU Size: ", "" + mtu)
         }
     }
 
@@ -956,7 +1109,7 @@ class BleService : LifecycleService() {
     interface BleAdvertiseCallback {
         fun startAdvertiseRes(status: Boolean, errorText: String, unknownError: Boolean)
         fun stopAdvertiseRes(status: Boolean, errorText: String)
-        fun onMessageReceived(bleDevice: BLEScanDevice, message: ByteArray)
+        fun onMessageReceived(qaulId: ByteArray, message: ByteArray)
     }
 
     /**
