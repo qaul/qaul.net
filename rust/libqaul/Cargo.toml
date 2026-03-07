@@ -12,6 +12,7 @@ crate-type = ["cdylib", "staticlib", "rlib"]
 [features]
 default = []
 ble = ["ble_module"]
+ble-encryption = []
 rtc = []
 
 [dependencies]

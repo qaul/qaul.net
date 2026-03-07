@@ -23,7 +23,9 @@ use crate::rpc::{sys::Sys, Rpc};
 use crate::services::{feed, messaging};
 use crate::utilities::{qaul_id::QaulId, timestamp::Timestamp};
 
+#[cfg(feature = "ble-encryption")]
 pub mod crypto;
+#[cfg(feature = "ble-encryption")]
 use crypto::BleCrypto;
 
 /// Protobuf BLE network communication
@@ -130,8 +132,10 @@ impl Ble {
             BLE.set(RwLock::new(ble));
         }
 
-        // Initialize BLE crypto module
+        #[cfg(feature = "ble-encryption")]
         BleCrypto::init();
+        #[cfg(not(feature = "ble-encryption"))]
+        log::info!("BLE transport encryption disabled (feature `ble-encryption`)");
 
         tokio::time::sleep(std::time::Duration::from_secs(2)).await;
 
@@ -446,6 +450,7 @@ impl Ble {
         );
 
         // Clean up crypto session
+        #[cfg(feature = "ble-encryption")]
         BleCrypto::on_node_unavailable(&message.qaul_id);
 
         // get state
@@ -480,14 +485,17 @@ impl Ble {
 
         // add node id
         if let Some(node) = identification.node {
+            #[cfg(feature = "ble-encryption")]
+            let remote_node_bytes = node.id.clone();
+
             // remove node from to_confirm
             {
                 let mut to_confirm = TO_CONFIRM.get().write().unwrap();
                 to_confirm.remove_entry(&q8id);
             }
 
-            // Get the PeerId for the remote node
-            let remote_id = match PeerId::from_bytes(&node.id) {
+            #[cfg(feature = "ble-encryption")]
+            let remote_id = match PeerId::from_bytes(&remote_node_bytes) {
                 Ok(id) => id,
                 Err(e) => {
                     log::error!("BLE identification: invalid node ID: {}", e);
@@ -504,6 +512,7 @@ impl Ble {
             }
 
             // Initiate encrypted handshake after identification
+            #[cfg(feature = "ble-encryption")]
             if let Some(handshake_msg) = BleCrypto::initiate_handshake(&q8id, remote_id) {
                 Self::send_handshake_message(q8id, handshake_msg);
             }
@@ -511,6 +520,7 @@ impl Ble {
     }
 
     /// Send a handshake message to a peer
+    #[cfg(feature = "ble-encryption")]
     fn send_handshake_message(receiver_small_id: Vec<u8>, handshake: proto_net::NoiseHandshake) {
         log::info!(
             "BLE sending handshake message {} to {:?}",
@@ -622,6 +632,7 @@ impl Ble {
     /// Create and send an encrypted message if session is established
     ///
     /// If no encrypted session is established, the message is sent unencrypted.
+    #[cfg(feature = "ble-encryption")]
     fn create_send_message(receiver_q8id: Vec<u8>, message: proto_net::ble_message::Message) {
         // Check if encrypted session is established
         if BleCrypto::is_session_established(&receiver_q8id) {
@@ -650,6 +661,12 @@ impl Ble {
         }
 
         // Fallback: send unencrypted (during handshake or if encryption fails)
+        Self::create_send_message_raw(receiver_q8id, message);
+    }
+
+    /// Send a message without transport encryption.
+    #[cfg(not(feature = "ble-encryption"))]
+    fn create_send_message(receiver_q8id: Vec<u8>, message: proto_net::ble_message::Message) {
         Self::create_send_message_raw(receiver_q8id, message);
     }
 
@@ -704,6 +721,7 @@ impl Ble {
         match proto_net::BleMessage::decode(&message.data[..]) {
             Ok(ble_message) => match ble_message.message {
                 // Handle encrypted messages
+                #[cfg(feature = "ble-encryption")]
                 Some(proto_net::ble_message::Message::Encrypted(encrypted)) => {
                     log::info!("BLE encrypted message received");
                     match BleCrypto::decrypt(&message.from, encrypted) {
@@ -723,10 +741,21 @@ impl Ble {
                         }
                     }
                 }
+                #[cfg(not(feature = "ble-encryption"))]
+                Some(proto_net::ble_message::Message::Encrypted(_)) => {
+                    log::warn!(
+                        "BLE encrypted message dropped: feature `ble-encryption` is disabled"
+                    );
+                }
                 // Handle handshake messages
+                #[cfg(feature = "ble-encryption")]
                 Some(proto_net::ble_message::Message::Handshake(handshake)) => {
                     log::info!("BLE handshake message received");
                     Self::handle_handshake(message.from, node_id, handshake);
+                }
+                #[cfg(not(feature = "ble-encryption"))]
+                Some(proto_net::ble_message::Message::Handshake(_)) => {
+                    log::warn!("BLE handshake message dropped: feature `ble-encryption` is disabled");
                 }
                 Some(proto_net::ble_message::Message::Info(data)) => {
                     log::info!("BLE routing info received");
@@ -770,6 +799,7 @@ impl Ble {
     }
 
     /// Process a decrypted BLE message
+    #[cfg(feature = "ble-encryption")]
     fn process_decrypted_message(
         from: Vec<u8>,
         node_id: PeerId,
@@ -814,6 +844,7 @@ impl Ble {
     }
 
     /// Handle incoming handshake messages
+    #[cfg(feature = "ble-encryption")]
     fn handle_handshake(from: Vec<u8>, remote_id: PeerId, handshake: proto_net::NoiseHandshake) {
         match handshake.message_number {
             1 => {
