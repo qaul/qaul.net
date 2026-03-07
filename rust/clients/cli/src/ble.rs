@@ -78,7 +78,7 @@ impl Ble {
 
     /// Print BLE module information
     fn print_info(info: proto::InfoResponse) {
-        println!("Node small BLE ID: {:?}", info.small_id);
+        println!("Node small BLE ID: {:?}", info.q8id);
         println!("BLE module status: {}", info.status);
 
         // decode device info
