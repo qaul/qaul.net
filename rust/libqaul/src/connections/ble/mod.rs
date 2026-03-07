@@ -26,12 +26,12 @@ use crate::utilities::{qaul_id::QaulId, timestamp::Timestamp};
 pub mod crypto;
 use crypto::BleCrypto;
 
-/// Protobuf BLE system communication with BLE module
-pub use qaul_proto::qaul_sys_ble as proto;
 /// Protobuf BLE network communication
 pub use qaul_proto::qaul_net_ble as proto_net;
 /// Protobuf BLE RPC communication
 pub use qaul_proto::qaul_rpc_ble as proto_rpc;
+/// Protobuf BLE system communication with BLE module
+pub use qaul_proto::qaul_sys_ble as proto;
 
 /// Module State
 static BLE: InitCell<RwLock<Ble>> = InitCell::new();
@@ -48,7 +48,7 @@ static NODES: InitCell<RwLock<BTreeMap<Vec<u8>, BleNode>>> = InitCell::new();
 #[allow(dead_code)]
 pub struct ToConfirm {
     // small id
-    small_id: Vec<u8>,
+    q8id: Vec<u8>,
     // detected at
     detected_at: u64,
     // status of it's detection
@@ -104,8 +104,8 @@ pub struct Ble {
 impl Ble {
     /// initialize the BLE module
     pub async fn init() {
-        // get small BLE ID
-        let ble_id = Node::get_small_id();
+        // get q8id
+        let ble_id = Node::get_q8id();
         #[cfg(all(target_os = "linux", feature = "ble"))]
         tokio::spawn(async move {
             while !ble_module::is_ble_enabled().await {
@@ -179,7 +179,7 @@ impl Ble {
             log::info!("This Devices ID");
             let node_id = Node::get_id();
             log::info!("- Node ID: {}", node_id.to_base58());
-            log::info!("- Small Node ID: {:?}", QaulId::to_small(node_id));
+            log::info!("- Small Node ID: {:?}", QaulId::to_q8id(node_id));
             log::info!("-------------------------");
             log::info!("BLE Supported: {}", device.ble_support);
             log::info!("ID: {}", device.id);
@@ -350,7 +350,7 @@ impl Ble {
     ///
     /// * BLE translation table
     /// * BLE Neighbours list
-    fn node_discovered(small_id: Vec<u8>, node_id: Vec<u8>) {
+    fn node_discovered(q8id: Vec<u8>, node_id: Vec<u8>) {
         log::info!("BLE node discovered");
 
         // create node entry
@@ -365,7 +365,7 @@ impl Ble {
             let mut nodes = NODES.get().write().unwrap();
 
             // add node
-            nodes.insert(small_id, node.clone());
+            nodes.insert(q8id, node.clone());
         }
 
         // add it to neighbours table
@@ -381,16 +381,16 @@ impl Ble {
     }
 
     /// add a node to the available nodes list
-    fn node_to_confirm(small_id: Vec<u8>) {
+    fn node_to_confirm(q8id: Vec<u8>) {
         // check if node confirmation request has already been sent
-        if let true = Self::node_confirmation_in_progress(&small_id) {
+        if let true = Self::node_confirmation_in_progress(&q8id) {
             log::info!("node id confirmation in progress");
             return;
         }
 
         // create node entry
         let confirm = ToConfirm {
-            small_id: small_id.clone(),
+            q8id: q8id.clone(),
             detected_at: Timestamp::get_timestamp(),
             status: 0,
         };
@@ -399,19 +399,19 @@ impl Ble {
         let mut nodes = TO_CONFIRM.get().write().unwrap();
 
         // add node
-        nodes.insert(small_id.clone(), confirm);
+        nodes.insert(q8id.clone(), confirm);
 
         // send identification message
-        Self::identification_send(small_id, true);
+        Self::identification_send(q8id, true);
     }
 
     /// Check if node is already scheduled for confirmation
-    fn node_confirmation_in_progress(small_id: &Vec<u8>) -> bool {
+    fn node_confirmation_in_progress(q8id: &Vec<u8>) -> bool {
         // get state
         let nodes = TO_CONFIRM.get().read().unwrap();
 
         // search node
-        if let Some(to_confirm) = nodes.get(small_id) {
+        if let Some(to_confirm) = nodes.get(q8id) {
             if to_confirm.detected_at > Timestamp::get_timestamp() - (30 * 1000) {
                 return true;
             }
@@ -422,9 +422,9 @@ impl Ble {
 
     /// a new device got discovered via bluetooth
     fn device_discovered(message: proto::BleDeviceDiscovered) {
-        log::info!("BLE device discovered: {:?}", message.qaul_id.clone());
+        log::info!("BLE device discovered: {:x?}", message.qaul_id.clone());
         // check if node is known
-        if let Some(node) = Neighbours::node_from_small_id(message.qaul_id.clone()) {
+        if let Some(node) = Neighbours::node_from_q8id(message.qaul_id.clone()) {
             log::info!(
                 "BLE discovered Node ID: {}",
                 QaulId::bytes_to_log_string(&node.id)
@@ -475,15 +475,15 @@ impl Ble {
     /// Identification Received
     ///
     /// Received identity information from another node
-    fn identification_received(small_id: Vec<u8>, identification: proto_net::Identification) {
-        log::info!("BLE identification received from {:?}", small_id.clone());
+    fn identification_received(q8id: Vec<u8>, identification: proto_net::Identification) {
+        log::info!("BLE identification received from {:?}", q8id.clone());
 
         // add node id
         if let Some(node) = identification.node {
             // remove node from to_confirm
             {
                 let mut to_confirm = TO_CONFIRM.get().write().unwrap();
-                to_confirm.remove_entry(&small_id);
+                to_confirm.remove_entry(&q8id);
             }
 
             // Get the PeerId for the remote node
@@ -496,16 +496,16 @@ impl Ble {
             };
 
             // add node to discovered lists
-            Self::node_discovered(small_id.clone(), node.id);
+            Self::node_discovered(q8id.clone(), node.id);
 
             // check if to send a response
             if identification.request {
-                Self::identification_send(small_id.clone(), false);
+                Self::identification_send(q8id.clone(), false);
             }
 
             // Initiate encrypted handshake after identification
-            if let Some(handshake_msg) = BleCrypto::initiate_handshake(&small_id, remote_id) {
-                Self::send_handshake_message(small_id, handshake_msg);
+            if let Some(handshake_msg) = BleCrypto::initiate_handshake(&q8id, remote_id) {
+                Self::send_handshake_message(q8id, handshake_msg);
             }
         }
     }
@@ -524,7 +524,7 @@ impl Ble {
     /// Send Identification
     ///
     /// Send identity information to another node
-    fn identification_send(receiver_small_id: Vec<u8>, request: bool) {
+    fn identification_send(receiver_q8id: Vec<u8>, request: bool) {
         log::info!("BLE send identity information");
 
         // get node ID
@@ -541,7 +541,7 @@ impl Ble {
         // create unified message
         let message = proto_net::ble_message::Message::Identification(identification);
 
-        Self::create_send_message(receiver_small_id, message);
+        Self::create_send_message(receiver_q8id, message);
     }
 
     /// send message
@@ -550,7 +550,7 @@ impl Ble {
     /// * sender_id: the small qaul id of the sending node (this node)
     /// * data: the binary data of the message to send
     pub fn message_send(receiver_id: Vec<u8>, sender_id: Vec<u8>, data: Vec<u8>) {
-        log::info!("BLE send message to {:?}", receiver_id.clone());
+        log::info!("BLE send message to {:x?}", receiver_id.clone());
         // create a random UUID as message id
         let message_id = Uuid::new_v4().as_bytes().to_vec();
 
@@ -591,7 +591,7 @@ impl Ble {
         log::info!("BLE send routing information");
         let message = proto_net::ble_message::Message::Info(data);
 
-        Self::create_send_message(QaulId::to_small(node_id), message);
+        Self::create_send_message(QaulId::to_q8id(node_id), message);
     }
 
     /// send messaging message
@@ -600,7 +600,7 @@ impl Ble {
 
         let message = proto_net::ble_message::Message::Messaging(data);
 
-        Self::create_send_message(QaulId::to_small(node_id), message);
+        Self::create_send_message(QaulId::to_q8id(node_id), message);
     }
 
     /// send feed message
@@ -615,16 +615,16 @@ impl Ble {
 
         // send it nodes
         for node_id in nodes {
-            Self::create_send_message(QaulId::to_small(node_id), message.clone());
+            Self::create_send_message(QaulId::to_q8id(node_id), message.clone());
         }
     }
 
     /// Create and send an encrypted message if session is established
     ///
     /// If no encrypted session is established, the message is sent unencrypted.
-    fn create_send_message(receiver_small_id: Vec<u8>, message: proto_net::ble_message::Message) {
+    fn create_send_message(receiver_q8id: Vec<u8>, message: proto_net::ble_message::Message) {
         // Check if encrypted session is established
-        if BleCrypto::is_session_established(&receiver_small_id) {
+        if BleCrypto::is_session_established(&receiver_q8id) {
             // Encode inner message
             let proto_message = proto_net::BleMessage {
                 message: Some(message.clone()),
@@ -635,11 +635,11 @@ impl Ble {
                 .expect("encoding failed");
 
             // Encrypt the message
-            match BleCrypto::encrypt(&receiver_small_id, plaintext) {
+            match BleCrypto::encrypt(&receiver_q8id, plaintext) {
                 Ok(encrypted) => {
                     log::trace!("BLE: sending encrypted message");
                     let encrypted_msg = proto_net::ble_message::Message::Encrypted(encrypted);
-                    Self::create_send_message_raw(receiver_small_id, encrypted_msg);
+                    Self::create_send_message_raw(receiver_q8id, encrypted_msg);
                     return;
                 }
                 Err(e) => {
@@ -650,18 +650,15 @@ impl Ble {
         }
 
         // Fallback: send unencrypted (during handshake or if encryption fails)
-        Self::create_send_message_raw(receiver_small_id, message);
+        Self::create_send_message_raw(receiver_q8id, message);
     }
 
     /// Send a message without encryption
     ///
     /// This is used for handshake messages and as fallback when encryption fails.
-    fn create_send_message_raw(
-        receiver_small_id: Vec<u8>,
-        message: proto_net::ble_message::Message,
-    ) {
+    fn create_send_message_raw(receiver_q8id: Vec<u8>, message: proto_net::ble_message::Message) {
         // get small qaul id of this node
-        let sender_id = Node::get_small_id();
+        let sender_id = Node::get_q8id();
 
         // create message
         let proto_message = proto_net::BleMessage {
@@ -675,7 +672,7 @@ impl Ble {
             .expect("Vec<u8> provides capacity as needed");
 
         // send the message
-        Self::message_send(receiver_small_id, sender_id, buf);
+        Self::message_send(receiver_q8id, sender_id, buf);
     }
 
     /// BLE message received
@@ -683,7 +680,7 @@ impl Ble {
         log::info!("BLE message received");
         // get node ID of sender
         let node_id: PeerId;
-        if let Some(node) = Neighbours::node_from_small_id(message.from.clone()) {
+        if let Some(node) = Neighbours::node_from_q8id(message.from.clone()) {
             match PeerId::from_bytes(&node.id) {
                 Ok(id) => node_id = id,
                 Err(e) => {
@@ -825,7 +822,7 @@ impl Ble {
                 // deterministic tiebreaker: the peer with the lexicographically
                 // lower small_id becomes the initiator.
                 if BleCrypto::has_pending_session(&from) {
-                    let local_id = Node::get_small_id();
+                    let local_id = Node::get_q8id();
                     if local_id < from.to_vec() {
                         // We have the lower ID, so we stay as initiator.
                         // Ignore the remote's handshake 1; they will process
@@ -933,7 +930,7 @@ impl Ble {
 
                         // create discovered response message
                         let info = proto_rpc::InfoResponse {
-                            small_id: ble.ble_id.clone(),
+                            q8id: ble.ble_id.clone(),
                             status: ble.status.to_string(),
                             device_info,
                         };

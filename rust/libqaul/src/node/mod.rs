@@ -75,7 +75,7 @@ impl NodeModule {
 
     /// Get the node's small ID
     pub fn small_id(&self) -> Vec<u8> {
-        QaulId::to_small(self.node.id)
+        QaulId::to_q8id(self.node.id)
     }
 
     /// Get the node's topic
@@ -219,9 +219,9 @@ impl Node {
     }
 
     /// get small node ID
-    pub fn get_small_id() -> Vec<u8> {
+    pub fn get_q8id() -> Vec<u8> {
         let node = NODE.get();
-        QaulId::to_small(node.id)
+        QaulId::to_q8id(node.id)
     }
 
     /// get the string of a PeerId

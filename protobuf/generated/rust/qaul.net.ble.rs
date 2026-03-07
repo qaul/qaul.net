@@ -31,7 +31,7 @@ pub mod ble_message {
         Handshake(super::NoiseHandshake),
     }
 }
-/// Identfication Request
+/// Identification Request
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Identification {
     #[prost(bool, tag = "1")]
