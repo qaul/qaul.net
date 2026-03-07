@@ -17,6 +17,8 @@
         "mdns",
         "Merkle",
         "multiaddress",
+        "neighbour",
+        "neighbours",
         "peerid",
         "protobuf",
         "qaul",
