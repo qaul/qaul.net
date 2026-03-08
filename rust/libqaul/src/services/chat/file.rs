@@ -519,12 +519,6 @@ impl ChatFile {
         // get file path
         let file_path = Self::create_file_path(user_account.id, file_id, extension.as_str());
 
-        // TODO: start in new async thread here
-        
-        // copy file
-        if let Err(e) = fs::copy(path_name.clone(), file_path) {
-            log::error!("copy file error {}", e.to_string());
-        }
 
         // create messages
         let mut mesage_count = 1 + size / DEF_PACKAGE_SIZE;
@@ -613,20 +607,22 @@ impl ChatFile {
 
         let user_account_clone = user_account.clone();
         let message_id_clone = message_id.clone();
-        // let file_id = file_id;
-        //let timestamp = timestamp;
-        //let path_name_clone = path_name.clone();
+        let group_clone = group.clone();
+        let mesage_count_clone = mesage_count;
+        let file_path_clone = file_path.clone();
 
-        tokio::spawn(async move {
-            if let Err(e) = Self::send_file_chunks(
+        tokio::task::spawn_blocking(move || {
+            if let Err(e) = Self::send_file_chunks_blocking(
                 user_account_clone,
-                group,
+                group_clone,
                 message_id_clone,
                 file_id,
                 timestamp,
                 path_name,
+                file_path_clone,
                 size,
-            ).await {
+                mesage_count_clone,
+            ) {
                 log::error!("File send failed: {}", e);
             }
         });
@@ -634,43 +630,50 @@ impl ChatFile {
         Ok(true)
     }
 
-    async fn send_file_chunks(
+    fn send_file_chunks_blocking(
         user_account: UserAccount,
         group: Group,
         message_id: Vec<u8>,
         file_id: u64,
         timestamp: u64,
         path_name: String,
+        file_path: PathBuf,
         size: u32,
+        message_count: u32,
     ) -> Result<(), String> {
-        use tokio::fs::File;
-        use tokio::io::AsyncReadExt;
+        // do the initial file copy async as well to avoid blocking the main thread
+        if let Err(e) = fs::copy(&path_name, file_path) {
+            log::error!("copy file error {}", e.to_string());
+        }
 
-        let mut file = File::open(path_name).await.map_err(|e| e.to_string())?;
+        let mut file = File::open(path_name).map_err(|e| e.to_string())?;
 
-        let mut buffer = vec![0u8; DEF_PACKAGE_SIZE as usize];
+        let mut buffer: [u8; DEF_PACKAGE_SIZE as usize] = [0; DEF_PACKAGE_SIZE as usize];
         let mut left_size = size;
-        let mut chunk_index = 0;
+        let mut chunk_index: u32 = 0;
 
+       
         while left_size > 0 {
-            let read_size = file.read(&mut buffer).await.map_err(|e| e.to_string())?;
-            if read_size == 0 {
-                break;
+            let mut read_size = left_size;
+            if left_size > DEF_PACKAGE_SIZE {
+                read_size = DEF_PACKAGE_SIZE;
+            };
+            left_size = left_size - read_size;
+
+            if let Err(e) = file.read(&mut buffer) {
+                return Err(e.to_string());
             }
 
-            left_size -= read_size as u32;
-
+            // pack chat file container
             let data = proto_net::ChatFileContainer {
-                message: Some(
-                    proto_net::chat_file_container::Message::FileData(
-                        proto_net::ChatFileData {
-                            file_id,
-                            start_index: chunk_index,
-                            message_count: 0,
-                            data: buffer[..read_size].to_vec(),
-                        },
-                    ),
-                ),
+                message: Some(proto_net::chat_file_container::Message::FileData(
+                    proto_net::ChatFileData {
+                        file_id,
+                        start_index: chunk_index,
+                        message_count,
+                        data: buffer[0..(read_size as usize)].iter().cloned().collect(),
+                    },
+                )),
             };
 
             Self::send_filecontainer_to_group(
@@ -682,11 +685,9 @@ impl ChatFile {
             );
 
             chunk_index += 1;
-
-            tokio::task::yield_now().await;
         }
 
-             // set file status to sent
+        // set file status to sent
         ChatStorage::udate_status(
             &user_account.id,
             &message_id,
