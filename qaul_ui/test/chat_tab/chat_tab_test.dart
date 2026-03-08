@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:local_notifications/src/local_notifications.dart';
 import 'package:logging/logging.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
+import 'package:qaul_rpc/src/generated/services/chat/chat.pb.dart';
 import 'package:qaul_ui/providers/providers.dart';
 import 'package:qaul_ui/screens/home/tabs/chat/widgets/chat.dart';
 import 'package:qaul_ui/screens/home/tabs/tab.dart';
