@@ -47,6 +47,7 @@ class LibqaulWorker {
   final _initialized = Completer<bool>();
 
   final _heartbeats = Queue<bool>();
+  final _pendingRequests = <String, _PendingRequest>{};
 
   Completer<User?>? _pendingGetUserById;
 
@@ -102,8 +103,8 @@ class LibqaulWorker {
   }
 
   Future<User?> getUserById(Uint8List userId) async {
-    _pendingGetUserById?.completeError(
-        StateError('GetUserById replaced by new request'));
+    _pendingGetUserById
+        ?.completeError(StateError('GetUserById replaced by new request'));
     _pendingGetUserById = Completer<User?>();
     _sendMessage(Modules.USERS,
         Users(getUserByIdRequest: GetUserByIDRequest(userId: userId)));
@@ -300,30 +301,26 @@ class LibqaulWorker {
 
   Future<List<FileHistoryEntity>> getFileHistory(
       {int page = 0, int itemsPerPage = 20}) async {
-    Future<void> sendFileHistoryRequest() async {
-      final msg = ChatFile(
-          fileHistory: FileHistoryRequest(
-        offset: page * itemsPerPage,
-        limit: itemsPerPage,
-      ));
-      await _sendMessage(Modules.CHATFILE, msg);
-    }
+    final msg = ChatFile(
+        fileHistory: FileHistoryRequest(
+      offset: page * itemsPerPage,
+      limit: itemsPerPage,
+    ));
 
-    List<FileHistoryEntity> newItems = [];
-    try {
-      await sendFileHistoryRequest();
+    final result = await _sendRequest<List<FileHistoryEntity>>(
+      module: Modules.CHATFILE,
+      data: msg,
+      adapter: (res) {
+        if (res.data is List<FileHistoryEntity>) {
+          return res.data as List<FileHistoryEntity>;
+        }
+        return null;
+      },
+    );
 
-      for (var i = 0; i < 5; i++) {
-        await Future.delayed(Duration(milliseconds: (i + 1) * 500));
-        newItems = _ref.read(fileHistoryEntitiesProvider);
-        if (newItems.isNotEmpty) break;
-      }
-    } catch (error) {
-      _log.warning('error fetching file history', error, StackTrace.current);
-    } finally {
-      _ref.read(fileHistoryEntitiesProvider.notifier).clear();
-    }
-    return newItems;
+    // Backwards compat: clear the provider as the old implementation did
+    _ref.read(fileHistoryEntitiesProvider.notifier).clear();
+    return result ?? [];
   }
 
   // -------------------
@@ -382,16 +379,44 @@ class LibqaulWorker {
   // *******************************
   // Private (control) methods
   // *******************************
-  Future<void> _sendMessage(Modules module, pb.GeneratedMessage data) async {
+  Future<String> _sendMessage(Modules module, pb.GeneratedMessage data) async {
+    final requestId = const Uuid().v4();
     QaulRpc message = QaulRpc()
       ..module = module
       ..data = data.writeToBuffer()
-      ..requestId = const Uuid().v4();
+      ..requestId = requestId;
 
     final user = _ref.read(defaultUserProvider);
     if (user != null) message.userId = user.id;
 
     await _ref.read(libqaulProvider).sendRpc(message.writeToBuffer());
+    return requestId;
+  }
+
+  Future<T?> _sendRequest<T>({
+    required Modules module,
+    required pb.GeneratedMessage data,
+    required T? Function(RpcTranslatorResponse) adapter,
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
+    final requestId = await _sendMessage(module, data);
+    final completer = Completer<T?>();
+
+    final timer = Timer(timeout, () {
+      if (!completer.isCompleted) {
+        _log.warning('RPC request $requestId timed out after $timeout');
+        completer.complete(null);
+        _pendingRequests.remove(requestId);
+      }
+    });
+
+    _pendingRequests[requestId] = _PendingRequest<T>(
+      completer: completer,
+      adapter: adapter,
+      timer: timer,
+    );
+
+    return completer.future;
   }
 
   Future<void> _receiveResponse() async {
@@ -401,6 +426,22 @@ class LibqaulWorker {
     final m = QaulRpc.fromBuffer(response);
     final translator = RpcModuleTranslator.translatorFactory(m.module);
     final res = await translator.decodeMessageBytes(m.data, _ref);
+
+    // Resolve pending Future-based requests if a matching requestId exists
+    if (m.requestId.isNotEmpty) {
+      final pending = _pendingRequests.remove(m.requestId);
+      if (pending != null && !pending.completer.isCompleted) {
+        pending.timer.cancel();
+        try {
+          final value = res != null ? pending.adapter(res) : null;
+          pending.completer.complete(value);
+        } catch (e, st) {
+          _log.warning('Error in RPC adapter for ${m.requestId}', e, st);
+          pending.completer.completeError(e, st);
+        }
+      }
+    }
+
     if (res == null) return;
 
     if (res.data is GetUserByIdResult) {
@@ -427,4 +468,16 @@ class LibqaulWorker {
       _ref.read(libqaulLogsStoragePath.notifier).state = path;
     }
   }
+}
+
+class _PendingRequest<T> {
+  _PendingRequest({
+    required this.completer,
+    required this.adapter,
+    required this.timer,
+  });
+
+  final Completer<T?> completer;
+  final T? Function(RpcTranslatorResponse) adapter;
+  final Timer timer;
 }
