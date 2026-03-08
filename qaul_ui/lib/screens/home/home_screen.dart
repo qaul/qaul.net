@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:qaul_rpc/qaul_rpc.dart';
 
 import '../../decorators/qaul_nav_bar_decorator.dart';
 import '../../providers/providers.dart';
@@ -24,6 +25,10 @@ class HomeScreen extends HookConsumerWidget {
     final gotoToPubTab = useCallback(() => tabCtrl.goToTab(TabType.public), []);
 
     final disablePageViewScroll = useState(false);
+
+    ref.listen(homeScreenControllerProvider, (_, __) {
+      ref.read(qaulWorkerProvider).getUsers(offset: 0, limit: 50);
+    });
 
     return PopScope(
       onPopInvokedWithResult: (_, _) async {

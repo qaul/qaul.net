@@ -31,6 +31,7 @@ import 'package:utils/utils.dart';
 import '../../../../../../decorators/cron_task_decorator.dart';
 import '../../../../../../l10n/app_localizations.dart';
 import '../../../../../providers/providers.dart';
+import '../../../../../stores/stores.dart';
 import '../../../../../utils.dart';
 import '../../../../../widgets/widgets.dart';
 import '../../tab.dart';
@@ -53,6 +54,31 @@ part 'image_message_widget.dart';
 typedef OnSendPressed = void Function(String rawText);
 
 const _kChatRouteName = '/chat';
+
+final _chatRoomAuthorsProvider = FutureProvider.family<Map<String, User>,
+    (ChatRoom room, User currentUser)>((ref, tuple) async {
+  final room = tuple.$1;
+  final currentUser = tuple.$2;
+  final usersData = ref.read(usersProvider).data;
+  final usersStore = ref.read(usersStoreProvider.notifier);
+  final authorById = <String, User>{currentUser.idBase58: currentUser};
+  for (final u in usersData) {
+    authorById[u.idBase58] = u;
+  }
+  final senderIds = <String>{};
+  for (final m in room.messages ?? []) {
+    if (m.senderIdBase58 != null &&
+        !m.senderId.equals(currentUser.id)) {
+      senderIds.add(m.senderIdBase58!);
+    }
+  }
+  for (final id in senderIds) {
+    if (authorById.containsKey(id)) continue;
+    final u = await usersStore.getByUserID(id);
+    if (u != null) authorById[id] = u;
+  }
+  return authorById;
+});
 
 Future<void> openChat(
   ChatRoom room, {
@@ -250,6 +276,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }, [room]);
 
     final l10n = AppLocalizations.of(context)!;
+    final authorsAsync = ref.watch(_chatRoomAuthorsProvider((room, user)));
+    final lastAuthorMap = useState<Map<String, User>?>(null);
+    if (authorsAsync.value != null) {
+      lastAuthorMap.value = authorsAsync.value;
+    }
+    final authorMap = authorsAsync.value ?? lastAuthorMap.value;
+    final showAuthorsLoading =
+        authorsAsync.isLoading && authorMap == null && (room.messages?.isNotEmpty ?? false);
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -289,16 +323,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
         ],
       ),
-      body: CronTaskDecorator(
-        callback: () => refreshCurrentRoom(),
-        schedule: const Duration(milliseconds: 300),
-        child: SafeArea(
-          bottom: false,
-          child: Chat(
-            showUserAvatars: true,
-            showUserNames: room.isGroupChatRoom,
-            user: user.toInternalUser(),
-            messages: messages(room, l10n: l10n) ?? [],
+      body: showAuthorsLoading
+          ? const Center(child: LoadingIndicator())
+          : CronTaskDecorator(
+              callback: () => refreshCurrentRoom(),
+              schedule: const Duration(milliseconds: 300),
+              child: SafeArea(
+                bottom: false,
+                child: Chat(
+                  showUserAvatars: true,
+                  showUserNames: room.isGroupChatRoom,
+                  user: user.toInternalUser(),
+                  messages: messages(room, authorMap: authorMap, l10n: l10n) ?? [],
             onSendPressed: sendMessage,
             inputOptions: const InputOptions(
               sendButtonVisibilityMode: SendButtonVisibilityMode.always,
@@ -547,16 +583,29 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
-  User _author(Message e) => e.senderId.equals(user.id)
-      ? user
-      : ref.read(usersProvider).data.firstWhere((usr) => usr.id.equals(e.senderId));
+  User _author(Message e, Map<String, User>? authorMap) {
+    if (e.senderId.equals(user.id)) return user;
+    if (authorMap != null) {
+      final author = authorMap[e.senderIdBase58];
+      if (author != null) return author;
+    }
+    final fromList = ref
+        .read(usersProvider)
+        .data
+        .firstWhereOrNull((usr) => usr.id.equals(e.senderId));
+    if (fromList != null) return fromList;
+    return User(name: 'Unknown', id: e.senderId);
+  }
 
-  List<types.Message>? messages(ChatRoom room,
-      {required AppLocalizations l10n}) {
+  List<types.Message>? messages(
+    ChatRoom room, {
+    Map<String, User>? authorMap,
+    required AppLocalizations l10n,
+  }) {
     return room.messages
         ?.sorted()
-        .map(
-            (e) => e.toInternalMessage(_author(e), ref, l10n: l10n, room: room))
+        .map((e) => e.toInternalMessage(
+            _author(e, authorMap), ref, l10n: l10n, room: room))
         .toList();
   }
 

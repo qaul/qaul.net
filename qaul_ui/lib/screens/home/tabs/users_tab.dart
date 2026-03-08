@@ -38,12 +38,15 @@ class _UsersState extends _BaseTabState<_Users> {
     }
   }
 
-  void _updatePaginationState() {
+  void _updatePaginationState({bool isLoadMore = false}) {
     final paginationState = ref.read(usersProvider).pagination;
     if (paginationState != null) {
       setState(() => _hasMore = paginationState.hasMore);
       _currentOffset = paginationState.offset + paginationState.limit;
       return;
+    }
+    if (isLoadMore) {
+      setState(() => _hasMore = false);
     }
     _currentOffset += _pageSize;
   }
@@ -57,7 +60,7 @@ class _UsersState extends _BaseTabState<_Users> {
             _currentOffset,
             limit: _pageSize,
           );
-      _updatePaginationState();
+      _updatePaginationState(isLoadMore: true);
     } finally {
       if (mounted) setState(() => _isLoadingMore = false);
     }
@@ -82,62 +85,65 @@ class _UsersState extends _BaseTabState<_Users> {
     });
 
     final l10n = AppLocalizations.of(context)!;
+    final hasMoreFromProvider =
+        ref.watch(usersProvider).pagination?.hasMore ?? false;
+    final showLoadingFooter = _isLoadingMore && hasMoreFromProvider;
     return Scaffold(
-      body: LoadingDecorator(
-        isLoading: _isLoadingMore,
-        child: RefreshIndicator(
-          onRefresh: () async => await _refreshUsers(),
-          child: SearchUserDecorator(builder: (_, users) {
-            return EmptyStateTextDecorator(
-              l10n.emptyUsersList,
-              isEmpty: users.isEmpty,
-              child: ListView.separated(
-                controller: _scrollController,
-                physics: const AlwaysScrollableScrollPhysics(),
-                itemCount: users.length,
-                separatorBuilder: (_, _) => const Divider(height: 12.0),
-                itemBuilder: (_, i) {
-                  final user = users[i];
-                  var theme = Theme.of(context).textTheme;
-                  var hasConnections =
-                      user.availableTypes != null && user.availableTypes!.isNotEmpty;
-
-                  var userId = Text(
-                    'ID: ${user.idBase58}',
-                    style: theme.bodySmall!.copyWith(fontSize: 10),
+      body: SearchUserDecorator(builder: (_, users) {
+        return EmptyStateTextDecorator(
+            l10n.emptyUsersList,
+            isEmpty: users.isEmpty,
+            child: ListView.separated(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: users.length + (showLoadingFooter ? 1 : 0),
+              separatorBuilder: (_, _) => const Divider(height: 12.0),
+              itemBuilder: (_, i) {
+                if (i >= users.length) {
+                  return const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Center(child: CircularProgressIndicator()),
                   );
-                  var content = !hasConnections
-                      ? userId
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            userId,
-                            if (hasConnections) ...[
-                              const SizedBox(height: 8),
-                              _AvailableConnections(user: user),
-                            ],
+                }
+                final user = users[i];
+                var theme = Theme.of(context).textTheme;
+                var hasConnections =
+                    user.availableTypes != null && user.availableTypes!.isNotEmpty;
+
+                var userId = Text(
+                  'ID: ${user.idBase58}',
+                  style: theme.bodySmall!.copyWith(fontSize: 10),
+                );
+                var content = !hasConnections
+                    ? userId
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          userId,
+                          if (hasConnections) ...[
+                            const SizedBox(height: 8),
+                            _AvailableConnections(user: user),
                           ],
-                        );
+                        ],
+                      );
 
-                  return DisabledStateDecorator(
-                    isDisabled: user.isBlocked ?? false,
-                    ignorePointer: false,
-                    child: QaulListTile.user(
-                      user,
-                      content: content,
-                      isThreeLine: hasConnections,
-                      trailingIcon: (user.isVerified ?? false)
-                          ? const Icon(Icons.verified_user)
-                          : const SizedBox(),
-                      tapRoutesToDetailsScreen: true,
-                    ),
-                  );
-                },
-              ),
-            );
-          }),
-        ),
-      ),
+                return DisabledStateDecorator(
+                  isDisabled: user.isBlocked ?? false,
+                  ignorePointer: false,
+                  child: QaulListTile.user(
+                    user,
+                    content: content,
+                    isThreeLine: hasConnections,
+                    trailingIcon: (user.isVerified ?? false)
+                        ? const Icon(Icons.verified_user)
+                        : const SizedBox(),
+                    tapRoutesToDetailsScreen: true,
+                  ),
+                );
+              },
+            ),
+          );
+        }),
     );
   }
 }
