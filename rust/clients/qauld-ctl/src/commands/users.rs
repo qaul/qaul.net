@@ -134,135 +134,185 @@ impl RpcCommand for UsersSubcmd {
         }
     }
 
-    fn decode_response(&self, data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
+    fn decode_response(&self, data: &[u8], json: bool) -> Result<(), Box<dyn std::error::Error>> {
         let users = Users::decode(data)?;
         match users.message {
             Some(users::Message::UserList(user_list)) => {
-                let mut line = 1;
-                println!("");
-                println!("All known Users");
-                println!("No. | User Name | User Id | Verified | Blocked | Connectivity");
-                println!("    | Group ID | Public Key");
+                if json {
+                    let users_json: Vec<serde_json::Value> = user_list.user.iter().map(|user| {
+                        let group_id = Uuid::from_slice(&user.group_id)
+                            .map(|u| u.hyphenated().to_string())
+                            .unwrap_or_default();
+                        let connections: Vec<serde_json::Value> = user.connections.iter().map(|cnn| {
+                            serde_json::json!({
+                                "module": ConnectionModule::try_from(cnn.module).unwrap_or(ConnectionModule::None).as_str_name(),
+                                "hop_count": cnn.hop_count,
+                                "rtt": cnn.rtt,
+                                "via": bs58::encode(&cnn.via).into_string(),
+                            })
+                        }).collect();
+                        serde_json::json!({
+                            "name": user.name,
+                            "id": bs58::encode(&user.id).into_string(),
+                            "verified": user.verified,
+                            "blocked": user.blocked,
+                            "connectivity": Connectivity::try_from(user.connectivity).unwrap_or(Connectivity::Offline).as_str_name(),
+                            "group_id": group_id,
+                            "public_key": user.key_base58,
+                            "connections": connections,
+                        })
+                    }).collect();
+                    println!("{}", serde_json::to_string_pretty(&users_json)?);
+                } else {
+                    let mut line = 1;
+                    println!("");
+                    println!("All known Users");
+                    println!("No. | User Name | User Id | Verified | Blocked | Connectivity");
+                    println!("    | Group ID | Public Key");
 
-                for user in user_list.user {
-                    let mut verified = "N";
-                    let mut blocked = "N";
-                    let onlined = Connectivity::try_from(user.connectivity)
-                        .unwrap_or(Connectivity::Offline)
-                        .as_str_name();
+                    for user in user_list.user {
+                        let mut verified = "N";
+                        let mut blocked = "N";
+                        let onlined = Connectivity::try_from(user.connectivity)
+                            .unwrap_or(Connectivity::Offline)
+                            .as_str_name();
 
-                    if user.verified {
-                        verified = "Y";
-                    }
-                    if user.blocked {
-                        blocked = "Y";
-                    }
-                    println!(
-                        "{} | {} | {:?} | {} | {} | {}",
-                        line,
-                        user.name,
-                        bs58::encode(user.id).into_string(),
-                        verified,
-                        blocked,
-                        onlined
-                    );
-                    let group_uuid;
-                    match Uuid::from_slice(&user.group_id) {
-                        Ok(uuid) => {
-                            group_uuid = uuid;
-                            println!(
-                                "   | {} | {}",
-                                group_uuid.hyphenated().to_string(),
-                                user.key_base58
-                            );
+                        if user.verified {
+                            verified = "Y";
                         }
-                        Err(e) => log::error!("{}", e),
-                    }
-                    if user.connections.len() > 0 {
-                        println!("  Connections: module | hc | rtt | via");
-                        for cnn in user.connections {
-                            let module = ConnectionModule::try_from(cnn.module)
-                                .unwrap_or(ConnectionModule::None)
-                                .as_str_name();
-                            println!(
-                                "      {} | {} | {} | {}",
-                                module,
-                                cnn.hop_count,
-                                cnn.rtt,
-                                bs58::encode(cnn.via.clone()).into_string()
-                            );
+                        if user.blocked {
+                            blocked = "Y";
                         }
+                        println!(
+                            "{} | {} | {:?} | {} | {} | {}",
+                            line,
+                            user.name,
+                            bs58::encode(user.id).into_string(),
+                            verified,
+                            blocked,
+                            onlined
+                        );
+                        let group_uuid;
+                        match Uuid::from_slice(&user.group_id) {
+                            Ok(uuid) => {
+                                group_uuid = uuid;
+                                println!(
+                                    "   | {} | {}",
+                                    group_uuid.hyphenated().to_string(),
+                                    user.key_base58
+                                );
+                            }
+                            Err(e) => log::error!("{}", e),
+                        }
+                        if user.connections.len() > 0 {
+                            println!("  Connections: module | hc | rtt | via");
+                            for cnn in user.connections {
+                                let module = ConnectionModule::try_from(cnn.module)
+                                    .unwrap_or(ConnectionModule::None)
+                                    .as_str_name();
+                                println!(
+                                    "      {} | {} | {} | {}",
+                                    module,
+                                    cnn.hop_count,
+                                    cnn.rtt,
+                                    bs58::encode(cnn.via.clone()).into_string()
+                                );
+                            }
+                        }
+                        line += 1;
                     }
-                    line += 1;
+
+                    println!("");
                 }
-
-                println!("");
             }
             Some(users::Message::GetUserByIdResponse(resp)) => match resp.user {
                 Some(user) => {
-                    let mut verified = "N";
-                    let mut blocked = "N";
-                    let onlined = Connectivity::try_from(user.connectivity)
+                    let group_id = Uuid::from_slice(&user.group_id)
+                        .map(|u| u.hyphenated().to_string())
+                        .unwrap_or_default();
+                    let connectivity = Connectivity::try_from(user.connectivity)
                         .unwrap_or(Connectivity::Offline)
                         .as_str_name();
 
-                    if user.verified {
-                        verified = "Y";
-                    }
-                    if user.blocked {
-                        blocked = "Y";
-                    }
+                    if json {
+                        let connections: Vec<serde_json::Value> = user.connections.iter().map(|cnn| {
+                            serde_json::json!({
+                                "module": ConnectionModule::try_from(cnn.module).unwrap().as_str_name(),
+                                "hop_count": cnn.hop_count,
+                                "rtt": cnn.rtt,
+                                "via": bs58::encode(&cnn.via).into_string(),
+                            })
+                        }).collect();
+                        println!(
+                            "{}",
+                            serde_json::to_string_pretty(&serde_json::json!({
+                                "name": user.name,
+                                "id": bs58::encode(&user.id).into_string(),
+                                "verified": user.verified,
+                                "blocked": user.blocked,
+                                "connectivity": connectivity,
+                                "group_id": group_id,
+                                "public_key": user.key_base58,
+                                "connections": connections,
+                            }))?
+                        );
+                    } else {
+                        let verified = if user.verified { "Y" } else { "N" };
+                        let blocked = if user.blocked { "Y" } else { "N" };
 
-                    println!("");
-                    println!("User Info");
-                    println!("Name: {}", user.name);
-                    println!("ID: {}", bs58::encode(&user.id).into_string());
-                    println!(
-                        "Verified: {} | Blocked: {} | Connectivity: {}",
-                        verified, blocked, onlined
-                    );
+                        println!("");
+                        println!("User Info");
+                        println!("Name: {}", user.name);
+                        println!("ID: {}", bs58::encode(&user.id).into_string());
+                        println!(
+                            "Verified: {} | Blocked: {} | Connectivity: {}",
+                            verified, blocked, connectivity
+                        );
+                        println!("Group ID: {}", group_id);
+                        println!("Public Key: {}", user.key_base58);
 
-                    match Uuid::from_slice(&user.group_id) {
-                        Ok(uuid) => {
-                            println!("Group ID: {}", uuid.hyphenated().to_string());
+                        if user.connections.len() > 0 {
+                            println!("Connections: module | hc | rtt | via");
+                            for cnn in user.connections {
+                                let module = ConnectionModule::try_from(cnn.module)
+                                    .unwrap_or(ConnectionModule::None)
+                                    .as_str_name();
+                                println!(
+                                    "  {} | {} | {} | {}",
+                                    module,
+                                    cnn.hop_count,
+                                    cnn.rtt,
+                                    bs58::encode(cnn.via.clone()).into_string()
+                                );
+                            }
                         }
-                        Err(e) => log::error!("{}", e),
+                        println!("");
                     }
-
-                    println!("Public Key: {}", user.key_base58);
-
-                    if user.connections.len() > 0 {
-                        println!("Connections: module | hc | rtt | via");
-                        for cnn in user.connections {
-                            let module = ConnectionModule::try_from(cnn.module)
-                                .unwrap_or(ConnectionModule::None)
-                                .as_str_name();
-                            println!(
-                                "  {} | {} | {} | {}",
-                                module,
-                                cnn.hop_count,
-                                cnn.rtt,
-                                bs58::encode(cnn.via.clone()).into_string()
-                            );
-                        }
-                    }
-                    println!("");
                 }
                 None => {
                     println!("User not found.");
                 }
             },
             Some(users::Message::SecurityNumberResponse(resp)) => {
-                println!("Security Number:");
-                let mut counter = 0;
-                for number in resp.security_number_blocks {
-                    print!("{:#05} ", number);
-                    if counter == 3 {
-                        println!("");
+                if json {
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&serde_json::json!({
+                            "security_number_blocks": resp.security_number_blocks,
+                        }))?
+                    );
+                } else {
+                    println!("Security Number:");
+                    let mut counter = 0;
+                    for number in resp.security_number_blocks {
+                        print!("{:#05} ", number);
+                        if counter == 3 {
+                            println!("");
+                        }
+                        counter = counter + 1;
                     }
-                    counter = counter + 1;
+                    println!("");
                 }
-                println!("");
             }
             _ => {
                 log::error!("unprocessable RPC users message");

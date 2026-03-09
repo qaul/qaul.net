@@ -89,7 +89,7 @@ impl RpcCommand for AccountSubcmd {
         }
     }
 
-    fn decode_response(&self, data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
+    fn decode_response(&self, data: &[u8], json: bool) -> Result<(), Box<dyn std::error::Error>> {
         let user_accounts = UserAccounts::decode(data)?;
         match user_accounts.message {
             Some(user_accounts::Message::DefaultUserAccount(default_useraccount)) => {
