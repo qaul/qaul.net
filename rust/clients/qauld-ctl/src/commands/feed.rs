@@ -60,22 +60,40 @@ impl RpcCommand for FeedSubcmd {
         let feed = Feed::decode(data)?;
         match feed.message {
             Some(feed::Message::Received(feed_list)) => {
-                // List header
-                println!("====================================");
-                println!("Received Feed Messages");
-                println!("------------------------------------");
+                if json {
+                    let messages: Vec<serde_json::Value> = feed_list
+                        .feed_message
+                        .iter()
+                        .map(|m| {
+                            serde_json::json!({
+                                "index": m.index,
+                                "message_id": m.message_id_base58,
+                                "sender_id": m.sender_id_base58,
+                                "content": m.content,
+                                "time_sent": m.time_sent,
+                                "timestamp_sent": m.timestamp_sent,
+                                "time_received": m.time_received,
+                                "timestamp_received": m.timestamp_received,
+                            })
+                        })
+                        .collect();
+                    println!("{}", serde_json::to_string_pretty(&messages)?);
+                } else {
+                    println!("====================================");
+                    println!("Received Feed Messages");
+                    println!("------------------------------------");
 
-                // print all messages in the feed list
-                for message in feed_list.feed_message {
-                    print! {"[{}] ", message.index};
-                    println!("Time Sent - {}", message.time_sent);
-                    println!("Timestamp Sent - {}", message.timestamp_sent);
-                    println!("Time Received - {}", message.time_received);
-                    println!("Timestamp Received - {}", message.timestamp_received);
-                    println!("Message ID {}", message.message_id_base58);
-                    println!("From {}", message.sender_id_base58);
-                    println!("\t{}", message.content);
-                    println!("");
+                    for message in feed_list.feed_message {
+                        print! {"[{}] ", message.index};
+                        println!("Time Sent - {}", message.time_sent);
+                        println!("Timestamp Sent - {}", message.timestamp_sent);
+                        println!("Time Received - {}", message.time_received);
+                        println!("Timestamp Received - {}", message.timestamp_received);
+                        println!("Message ID {}", message.message_id_base58);
+                        println!("From {}", message.sender_id_base58);
+                        println!("\t{}", message.content);
+                        println!("");
+                    }
                 }
             }
             _ => {
