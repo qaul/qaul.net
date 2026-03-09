@@ -126,7 +126,7 @@ impl Rtc {
             sent_at: timestamp::Timestamp::get_timestamp(),
             payload: Some(proto::common_message::Payload::RtcMessage(
                 proto::RtcMessage {
-                    content: data.clone(),
+                    content: data.to_vec(),
                 },
             )),
         };

@@ -404,7 +404,7 @@ impl Users {
     ///
     /// Only completes successfully if there is a default user account, otherwise it always returns
     /// an empty list.
-    fn build_user_list(filter: UserFilter, offset: u32, limit: u32, request_id: String) {
+    fn build_user_list(filter: UserFilter, offset: u32, limit: u32, _request_id: String) {
         let users = USERS.get().read().unwrap();
 
         let user_list = if let Some(account) = UserAccounts::get_default_user() {
