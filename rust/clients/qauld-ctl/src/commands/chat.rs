@@ -114,7 +114,7 @@ impl RpcCommand for ChatSubcmd {
         }
     }
 
-    fn decode_response(&self, data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
+    fn decode_response(&self, data: &[u8], json: bool) -> Result<(), Box<dyn std::error::Error>> {
         let chat = Chat::decode(data)?;
         match chat.message {
             Some(chat::Message::ConversationList(proto_conversation)) => {

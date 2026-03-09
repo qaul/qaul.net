@@ -46,7 +46,7 @@ impl RpcCommand for ChatFileSubcmd {
         }
     }
 
-    fn decode_response(&self, data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
+    fn decode_response(&self, data: &[u8], json: bool) -> Result<(), Box<dyn std::error::Error>> {
         let chat_file = ChatFile::decode(data)?;
         match chat_file.message {
             Some(chat_file::Message::FileHistoryResponse(proto_file_history)) => {
