@@ -48,7 +48,7 @@ pub trait RpcCommand {
     /// Encodes a CLI subcommand into a raw protobuf request payload and the target RPC module
     fn encode_request(&self) -> Result<(Vec<u8>, proto::Modules), Box<dyn std::error::Error>>;
     /// Decodes a raw protobuf response payload and prints the result to stdout.
-    fn decode_response(&self, data: &[u8]) -> Result<(), Box<dyn std::error::Error>>;
+    fn decode_response(&self, data: &[u8], json: bool) -> Result<(), Box<dyn std::error::Error>>;
     /// Returns true if this command expects a response from the daemon, false for fire-and-forget commands.
     fn expects_response(&self) -> bool {
         true
