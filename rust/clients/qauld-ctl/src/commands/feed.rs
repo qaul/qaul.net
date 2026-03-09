@@ -56,7 +56,7 @@ impl RpcCommand for FeedSubcmd {
             },
         }
     }
-    fn decode_response(&self, data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
+    fn decode_response(&self, data: &[u8], json: bool) -> Result<(), Box<dyn std::error::Error>> {
         let feed = Feed::decode(data)?;
         match feed.message {
             Some(feed::Message::Received(feed_list)) => {

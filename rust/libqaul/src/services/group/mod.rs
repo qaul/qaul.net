@@ -32,9 +32,9 @@ use member::Member;
 pub use message::GroupMessage;
 pub use storage::GroupStorage;
 
+pub use qaul_proto::qaul_net_group as proto_net;
 /// Import protobuf message definition
 pub use qaul_proto::qaul_rpc_group as proto_rpc;
-pub use qaul_proto::qaul_net_group as proto_net;
 
 /// Structure of group member
 #[derive(Serialize, Deserialize, Clone)]

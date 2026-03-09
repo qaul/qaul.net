@@ -15,6 +15,10 @@ pub struct Cli {
     #[arg(short, long)]
     pub dir: Option<String>,
 
+    /// Specify if the output should be in JSON
+    #[arg(short, long, default_value = "false")]
+    pub json: bool,
+
     #[command(subcommand)]
     pub command: Commands,
 }

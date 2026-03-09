@@ -177,7 +177,7 @@ impl RpcCommand for GroupSubcmd {
             }
         }
     }
-    fn decode_response(&self, data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
+    fn decode_response(&self, data: &[u8], json: bool) -> Result<(), Box<dyn std::error::Error>> {
         let group = Group::decode(data)?;
         match group.message {
             Some(group::Message::GroupCreateResponse(create_group_response)) => {

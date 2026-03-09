@@ -25,9 +25,9 @@ use crate::utilities::timestamp;
 use rtc_managing::RtcManaging;
 use rtc_messaging::RtcMessaging;
 
+pub use qaul_proto::qaul_net_rtc as proto_net;
 /// Import protobuf message definition
 pub use qaul_proto::qaul_rpc_rtc as proto_rpc;
-pub use qaul_proto::qaul_net_rtc as proto_net;
 
 // Structure of rtc session
 #[derive(Clone)]

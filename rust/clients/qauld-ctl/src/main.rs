@@ -114,7 +114,7 @@ where
     if rpc_command.expects_response() {
         if let Some(Ok(data)) = framed_client.next().await {
             match proto::QaulRpc::decode(&data[..]) {
-                Ok(msg) => rpc_command.decode_response(&msg.data[..])?,
+                Ok(msg) => rpc_command.decode_response(&msg.data[..], cli.json)?,
                 _ => {}
             }
         }
