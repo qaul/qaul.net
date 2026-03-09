@@ -50,25 +50,52 @@ impl RpcCommand for ChatFileSubcmd {
         let chat_file = ChatFile::decode(data)?;
         match chat_file.message {
             Some(chat_file::Message::FileHistoryResponse(proto_file_history)) => {
-                // List header
-                println!("====================================");
-                println!("File Sharing Histories");
-                println!("------------------------------------");
-                println!(
-                    "offset={}, limit={}, total={}",
-                    proto_file_history.offset, proto_file_history.limit, proto_file_history.total
-                );
-
-                // print all messages in the feed list
-                for entry in proto_file_history.histories {
-                    println!("[{}] - {}", entry.file_id, entry.file_name);
-                    println!("\t Time: {}, SenderId: {}", entry.time, entry.sender_id);
-                    println!("\t Group Id: {}", entry.group_id);
+                if json {
+                    let histories: Vec<serde_json::Value> = proto_file_history
+                        .histories
+                        .iter()
+                        .map(|entry| {
+                            serde_json::json!({
+                                "file_id": entry.file_id,
+                                "file_name": entry.file_name,
+                                "file_size": entry.file_size,
+                                "file_description": entry.file_description,
+                                "time": entry.time,
+                                "sender_id": entry.sender_id,
+                                "group_id": entry.group_id,
+                            })
+                        })
+                        .collect();
                     println!(
-                        "\t FileSize: {}, Description: {}",
-                        entry.file_size, entry.file_description
+                        "{}",
+                        serde_json::to_string_pretty(&serde_json::json!({
+                            "offset": proto_file_history.offset,
+                            "limit": proto_file_history.limit,
+                            "total": proto_file_history.total,
+                            "histories": histories,
+                        }))?
                     );
-                    println!("");
+                } else {
+                    println!("====================================");
+                    println!("File Sharing Histories");
+                    println!("------------------------------------");
+                    println!(
+                        "offset={}, limit={}, total={}",
+                        proto_file_history.offset,
+                        proto_file_history.limit,
+                        proto_file_history.total
+                    );
+
+                    for entry in proto_file_history.histories {
+                        println!("[{}] - {}", entry.file_id, entry.file_name);
+                        println!("\t Time: {}, SenderId: {}", entry.time, entry.sender_id);
+                        println!("\t Group Id: {}", entry.group_id);
+                        println!(
+                            "\t FileSize: {}, Description: {}",
+                            entry.file_size, entry.file_description
+                        );
+                        println!("");
+                    }
                 }
             }
             _ => {
