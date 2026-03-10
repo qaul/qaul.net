@@ -31,9 +31,9 @@ use crate::rpc::Rpc;
 use crate::storage::database::DataBase;
 use crate::utilities::timestamp;
 
+pub use qaul_proto::qaul_net_feed as proto_net;
 /// Import protobuf message definition
 pub use qaul_proto::qaul_rpc_feed as proto;
-pub use qaul_proto::qaul_net_feed as proto_net;
 
 /// mutable state of feed messages
 static FEED: InitCell<RwLock<Feed>> = InitCell::new();
@@ -505,7 +505,7 @@ impl Feed {
     /// Get messages from database using pagination
     fn get_paginated_messages(offset: u32, limit: u32) -> proto::FeedMessageList {
         let feed = FEED.get().read().unwrap();
-        build_feed_list_from(&feed.messages, offset, limit)
+        build_feed_list_from(&feed.tree, offset, limit)
     }
 
     /// Sign a message with the private key
@@ -598,21 +598,20 @@ impl Feed {
     }
 }
 
-/// Build a paginated feed message list from the in-memory BTreeMap.
+/// Build a paginated feed message list from the sled database tree.
 ///
 /// This is a free function (outside `impl Feed`) so it can be unit-tested
-/// without initialising the Feed module or a sled database.
-fn build_feed_list_from(
-    messages: &BTreeMap<Vec<u8>, proto_net::FeedMessageContent>,
-    offset: u32,
-    limit: u32,
-) -> proto::FeedMessageList {
-    let total = messages.len() as u32;
-    let remaining = total.saturating_sub(offset) as usize;
+/// without initialising the Feed module.
+fn build_feed_list_from(tree: &sled::Tree, offset: u32, limit: u32) -> proto::FeedMessageList {
+    let total_messages = tree.len() as u32;
+    let remaining_messages = total_messages.saturating_sub(offset) as usize;
+
+    // vector cap is determined by either the number of remaining messages, or the limit - whichever is smaller.
+    // if no limit is provided, will iterate over all messages
     let page_capacity = if limit == 0 {
-        remaining
+        remaining_messages
     } else {
-        remaining.min(limit as usize)
+        remaining_messages.min(limit as usize)
     };
 
     let mut feed_list = proto::FeedMessageList {
@@ -620,44 +619,52 @@ fn build_feed_list_from(
         pagination: None,
     };
 
-    let mut skipped: u32 = 0;
+    // we build the iter by taking all messages in the tree **after the offset** up until:
+    //   - the limit, if provided, or;
+    //   - the tree length
+    let take = if limit > 0 {
+        limit as usize
+    } else {
+        usize::MAX
+    };
+    let iter = tree.iter().skip(offset as usize).take(take);
 
-    for (signature, content) in messages {
-        if skipped < offset {
-            skipped += 1;
-            continue;
+    for res in iter {
+        match res {
+            Ok((_key, message_bytes)) => {
+                let message: FeedMessageData = bincode::deserialize(&message_bytes).unwrap();
+
+                let sender_id_base58 = bs58::encode(&message.sender_id).into_string();
+
+                let time_sent = timestamp::Timestamp::create_time();
+                let time_rfc3339 = humantime::format_rfc3339(time_sent).to_string();
+
+                let feed_message = proto::FeedMessage {
+                    sender_id: message.sender_id.clone(),
+                    sender_id_base58,
+                    message_id: message.message_id.clone(),
+                    message_id_base58: bs58::encode(&message.message_id).into_string(),
+                    time_sent: time_rfc3339.clone(),
+                    timestamp_sent: message.timestamp_sent,
+                    time_received: time_rfc3339,
+                    timestamp_received: message.timestamp_received,
+                    content: message.content.clone(),
+                    index: message.index,
+                };
+
+                feed_list.feed_message.push(feed_message);
+            }
+            Err(e) => {
+                log::error!("Error reading feed message from database: {}", e);
+            }
         }
-
-        if limit > 0 && feed_list.feed_message.len() >= limit as usize {
-            break;
-        }
-
-        let sender_id_base58 = bs58::encode(&content.sender).into_string();
-
-        let time_sent = timestamp::Timestamp::create_time();
-        let time_rfc3339 = humantime::format_rfc3339(time_sent).to_string();
-
-        let feed_message = proto::FeedMessage {
-            sender_id: content.sender.clone(),
-            sender_id_base58,
-            message_id: signature.clone(),
-            message_id_base58: bs58::encode(signature).into_string(),
-            time_sent: time_rfc3339.clone(),
-            timestamp_sent: content.time,
-            time_received: time_rfc3339,
-            timestamp_received: content.time,
-            content: content.content.clone(),
-            index: 0,
-        };
-
-        feed_list.feed_message.push(feed_message);
     }
 
-    let has_more = limit > 0 && offset.saturating_add(limit) < total;
+    let has_more = limit > 0 && offset.saturating_add(limit) < total_messages;
 
     feed_list.pagination = Some(proto::PaginationMetadata {
         has_more,
-        total,
+        total: total_messages,
         offset,
         limit,
     });
@@ -669,26 +676,30 @@ fn build_feed_list_from(
 mod tests {
     use super::*;
 
-    /// Helper: build a BTreeMap with `n` FeedMessageContent entries.
-    /// Keys are synthetic signatures (single byte) to keep tests simple.
-    fn make_feed_messages(n: u64) -> BTreeMap<Vec<u8>, proto_net::FeedMessageContent> {
-        (1..=n)
-            .map(|i| {
-                let key = vec![i as u8];
-                let content = proto_net::FeedMessageContent {
-                    sender: vec![0xAA, 0xBB],
-                    content: format!("message {}", i),
-                    time: 1000 + i,
-                };
-                (key, content)
-            })
-            .collect()
+    /// Helper: create a temporary sled tree with `n` FeedMessageData entries.
+    fn make_feed_tree(n: u64) -> (sled::Db, sled::Tree) {
+        let db = sled::Config::new().temporary(true).open().unwrap();
+        let tree = db.open_tree("test_feed").unwrap();
+        for i in 1..=n {
+            let key = i.to_be_bytes();
+            let data = FeedMessageData {
+                index: i,
+                message_id: vec![i as u8],
+                sender_id: vec![0xAA, 0xBB],
+                timestamp_sent: 1000 + i,
+                timestamp_received: 2000 + i,
+                content: format!("message {}", i),
+            };
+            tree.insert(&key, bincode::serialize(&data).unwrap())
+                .unwrap();
+        }
+        (db, tree)
     }
 
     #[test]
     fn empty_messages() {
-        let messages = BTreeMap::new();
-        let list = build_feed_list_from(&messages, 0, 0);
+        let (_db, tree) = make_feed_tree(0);
+        let list = build_feed_list_from(&tree, 0, 0);
 
         assert_eq!(list.feed_message.len(), 0);
         let p = list.pagination.unwrap();
@@ -698,8 +709,8 @@ mod tests {
 
     #[test]
     fn pagination_echoes_offset_and_limit() {
-        let messages = make_feed_messages(5);
-        let list = build_feed_list_from(&messages, 3, 7);
+        let (_db, tree) = make_feed_tree(5);
+        let list = build_feed_list_from(&tree, 3, 7);
 
         let p = list.pagination.unwrap();
         assert_eq!(p.offset, 3);
@@ -708,8 +719,8 @@ mod tests {
 
     #[test]
     fn first_page() {
-        let messages = make_feed_messages(5);
-        let list = build_feed_list_from(&messages, 0, 2);
+        let (_db, tree) = make_feed_tree(5);
+        let list = build_feed_list_from(&tree, 0, 2);
 
         assert_eq!(list.feed_message.len(), 2);
         let p = list.pagination.unwrap();
@@ -719,8 +730,8 @@ mod tests {
 
     #[test]
     fn middle_page() {
-        let messages = make_feed_messages(5);
-        let list = build_feed_list_from(&messages, 2, 2);
+        let (_db, tree) = make_feed_tree(5);
+        let list = build_feed_list_from(&tree, 2, 2);
 
         assert_eq!(list.feed_message.len(), 2);
         let p = list.pagination.unwrap();
@@ -730,8 +741,8 @@ mod tests {
 
     #[test]
     fn last_page_partial() {
-        let messages = make_feed_messages(5);
-        let list = build_feed_list_from(&messages, 4, 2);
+        let (_db, tree) = make_feed_tree(5);
+        let list = build_feed_list_from(&tree, 4, 2);
 
         assert_eq!(list.feed_message.len(), 1);
         let p = list.pagination.unwrap();
@@ -741,8 +752,8 @@ mod tests {
 
     #[test]
     fn offset_beyond_total_returns_no_messages() {
-        let messages = make_feed_messages(5);
-        let list = build_feed_list_from(&messages, 10, 2);
+        let (_db, tree) = make_feed_tree(5);
+        let list = build_feed_list_from(&tree, 10, 2);
 
         assert_eq!(list.feed_message.len(), 0);
         let p = list.pagination.unwrap();
@@ -752,8 +763,8 @@ mod tests {
 
     #[test]
     fn limit_larger_than_total_returns_all_messages() {
-        let messages = make_feed_messages(5);
-        let list = build_feed_list_from(&messages, 0, 100);
+        let (_db, tree) = make_feed_tree(5);
+        let list = build_feed_list_from(&tree, 0, 100);
 
         assert_eq!(list.feed_message.len(), 5);
         let p = list.pagination.unwrap();

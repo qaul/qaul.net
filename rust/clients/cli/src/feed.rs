@@ -39,6 +39,30 @@ impl Feed {
                     }
                 }
             }
+            // request paginated feed list
+            cmd if cmd.starts_with("page") => {
+                match cmd.strip_prefix("page ") {
+                    Some(args) => {
+                        let parts: Vec<&str> = args.split_whitespace().collect();
+                        if parts.len() == 2 {
+                            match (parts[0].parse::<u32>(), parts[1].parse::<u32>()) {
+                                (Ok(offset), Ok(limit)) => {
+                                    Self::request_feed_page(offset, limit);
+                                }
+                                _ => {
+                                    log::error!("feed page offset and limit must be valid numbers");
+                                }
+                            }
+                        } else {
+                            log::error!("usage: feed page <offset> <limit>");
+                        }
+                    }
+                    None => {
+                        // default pagination: offset=0, limit=10
+                        Self::request_feed_page(0, 10);
+                    }
+                }
+            }
             // unknown command
             _ => log::error!("unknown feed command"),
         }
@@ -85,6 +109,25 @@ impl Feed {
         Rpc::send_message(buf, super::rpc::proto::Modules::Feed.into(), "".to_string());
     }
 
+    /// request paginated feed list via rpc
+    fn request_feed_page(offset: u32, limit: u32) {
+        let proto_message = proto::Feed {
+            message: Some(proto::feed::Message::Request(proto::FeedMessageRequest {
+                last_received: Vec::new(),
+                last_index: 0,
+                offset,
+                limit,
+            })),
+        };
+
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
+
+        Rpc::send_message(buf, super::rpc::proto::Modules::Feed.into(), "".to_string());
+    }
+
     /// Process received RPC message
     ///
     /// Decodes received protobuf encoded binary RPC message
@@ -100,7 +143,7 @@ impl Feed {
                         println!("------------------------------------");
 
                         // print all messages in the feed list
-                        for message in proto_feedlist.feed_message {
+                        for message in &proto_feedlist.feed_message {
                             print! {"[{}] ", message.index};
                             println!("Time Sent - {}", message.time_sent);
                             println!("Timestamp Sent - {}", message.timestamp_sent);
@@ -109,7 +152,19 @@ impl Feed {
                             println!("Message ID {}", message.message_id_base58);
                             println!("From {}", message.sender_id_base58);
                             println!("\t{}", message.content);
-                            println!("");
+                            println!();
+                        }
+
+                        if let Some(pagination) = &proto_feedlist.pagination {
+                            println!("------------------------------------");
+                            println!(
+                                "Page: offset={}, limit={}, total={}, has_more={}",
+                                pagination.offset,
+                                pagination.limit,
+                                pagination.total,
+                                pagination.has_more,
+                            );
+                            println!("====================================");
                         }
                     }
                     _ => {
