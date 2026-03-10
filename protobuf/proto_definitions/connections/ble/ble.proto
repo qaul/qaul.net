@@ -42,7 +42,9 @@ message BleInfoRequest {}
 // device information response message
 message BleInfoResponse {
     // fill in a device information of the BLE device
-    BleDeviceInfo device = 1;
+    BleDeviceInfo device = 1 [deprecated = true];
+    // info about all available BLE devices and their capabilities
+    repeated BleDeviceInfo devices = 2;
 }
 
 // BLE device information
@@ -146,6 +148,8 @@ message BleStartRequest {
     bytes qaul_id = 1;
     // power settings
     BlePowerSetting power_setting = 2;
+    // ID of device to start
+    string device_id = 3;
 }
 
 // power settings
@@ -194,6 +198,8 @@ enum BleError {
     RIGHTS_MISSING = 1;
     // there was a module timeout
     TIMEOUT = 2;
+    // the device is unavailable, e.g. because it was turned off
+    DEVICE_UNAVAILABLE = 3;
 }
 
 // Stop Bluetooth Device
