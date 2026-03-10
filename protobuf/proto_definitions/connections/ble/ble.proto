@@ -42,9 +42,9 @@ message BleInfoRequest {}
 // device information response message
 message BleInfoResponse {
     // fill in a device information of the BLE device
-    BleDeviceInfo device = 1 [deprecated = true];
+    BleDeviceInfo device = 1;
     // info about all available BLE devices and their capabilities
-    repeated BleDeviceInfo devices = 2;
+    // repeated BleDeviceInfo devices = 2;
 }
 
 // BLE device information
@@ -149,7 +149,7 @@ message BleStartRequest {
     // power settings
     BlePowerSetting power_setting = 2;
     // ID of device to start
-    string device_id = 3;
+    // string device_id = 3;
 }
 
 // power settings
