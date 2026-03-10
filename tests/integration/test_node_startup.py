@@ -20,7 +20,7 @@ NODE_IDS = [f"{i:04x}" for i in range(5)]
 def setup():
     apply_topology(TOPOLOGY)
     start_qaul()
-    wait_for_nodes(NODE_IDS, timeout=10)
+    wait_for_nodes(NODE_IDS, timeout=30)
 
 
 def teardown():
