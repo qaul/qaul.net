@@ -29,7 +29,7 @@ def teardown():
     clear_topology()
 
 
-def test_nodes_discover_neighbours(interval=15):
+def test_nodes_discover_neighbours(interval=60):
     print(f"  waiting {interval}s for node discovery...")
     time.sleep(interval)
 

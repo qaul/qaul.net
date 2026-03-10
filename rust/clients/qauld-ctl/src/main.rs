@@ -76,8 +76,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let client = UnixStream::connect(&qauld_sock).await?;
-    println!("qauld-ctl connected to qauld daemon at: {qauld_sock}");
-
+    if !cli.json {
+        println!("qauld-ctl connected to qauld daemon at: {qauld_sock}");
+    }
     let mut framed_client = LengthDelimitedCodec::builder()
         .length_field_offset(0)
         .length_field_type::<u16>()
