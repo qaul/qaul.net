@@ -29,14 +29,14 @@ def teardown():
     clear_topology()
 
 
-def test_nodes_discover_neighbours(interval=60):
+def test_nodes_discover_neighbours(interval=15):
     print(f"  waiting {interval}s for node discovery...")
     time.sleep(interval)
 
     node_a = Node("0000")
     node_b = Node("0001")
 
-    id_b = node_b.node_id()
+    id_b = node_b.known_users()[0]["id"]
     known_ids = node_a.known_user_ids()
 
     assert id_b in known_ids, (
@@ -77,3 +77,4 @@ if __name__ == "__main__":
         test_user_fields_are_present()
     finally:
         teardown()
+
