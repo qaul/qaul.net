@@ -57,6 +57,8 @@ The following commands are available:
     * at least one user needs to be created
   * `feed list` - displays all feed messages
     * `feed list {Feed Message ID}` - displays only feed messages newer than {Feed Message ID}
+  * `feed page` - displays feed messages with pagination (default: offset=0, limit=10)
+    * `feed page {offset} {limit}` - displays feed messages starting at {offset}, returning at most {limit} messages
 * group
   * `group create {Group Name}` - creates a new group
   * `group list` - list all available groups
