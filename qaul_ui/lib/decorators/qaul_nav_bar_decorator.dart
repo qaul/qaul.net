@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:qaul_rpc/qaul_rpc.dart';
 
 import '../helpers/navigation_helper.dart';
 import '../l10n/app_localizations.dart';
@@ -11,7 +12,7 @@ import '../screens/home/tabs/tab.dart';
 import '../widgets/widgets.dart';
 
 
-class QaulNavBarDecorator extends StatefulWidget {
+class QaulNavBarDecorator extends ConsumerStatefulWidget {
   const QaulNavBarDecorator({super.key, required this.child});
 
   /// The [pageViewKey] provided should be used in the tabs view, ensuring state is not
@@ -19,10 +20,10 @@ class QaulNavBarDecorator extends StatefulWidget {
   final Widget Function(GlobalKey pageViewKey) child;
 
   @override
-  State<QaulNavBarDecorator> createState() => _QaulNavBarDecoratorState();
+  ConsumerState<QaulNavBarDecorator> createState() => _QaulNavBarDecoratorState();
 }
 
-class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
+class _QaulNavBarDecoratorState extends ConsumerState<QaulNavBarDecorator> {
   final _pageViewKey = GlobalKey();
 
   Map<String, String> get _overflowMenuOptions => {
@@ -37,7 +38,11 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
   void _handleClick(String value) {
     switch (value) {
       case 'settings':
-        Navigator.pushNamed(context, NavigationHelper.settings);
+        Navigator.pushNamed(context, NavigationHelper.settings).then((_) {
+          // Refresh users list when returning from Settings
+          final worker = ref.read(qaulWorkerProvider);
+          worker.getUsers(offset: 0, limit: 50);
+        });
         break;
       case 'about':
         Navigator.pushNamed(context, NavigationHelper.about);

@@ -24,7 +24,6 @@ class FeedMessageStore extends Notifier<List<FeedMessage>> {
   @override
   build() {
     ref.listen(publicMessagesProvider, (_, _) => _asyncInit());
-    ref.listen(usersStoreProvider, (_, _) => _asyncInit());
     _asyncInit();
     return [];
   }
