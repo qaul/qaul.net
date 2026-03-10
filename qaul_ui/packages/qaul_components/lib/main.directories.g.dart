@@ -14,6 +14,8 @@ import 'package:qaul_components/force_update_dialog.dart'
     as _qaul_components_force_update_dialog;
 import 'package:qaul_components/qaul_nav_bar_use_case.dart'
     as _qaul_components_qaul_nav_bar_use_case;
+import 'package:qaul_components/qaul_chat_bubble_use_case.dart'
+    as _qaul_components_qaul_chat_bubble_use_case;
 import 'package:widgetbook/widgetbook.dart' as _widgetbook;
 
 final directories = <_widgetbook.WidgetbookNode>[
@@ -41,6 +43,21 @@ final directories = <_widgetbook.WidgetbookNode>[
             name: 'Vertical (tablet/desktop)',
             builder: _qaul_components_qaul_nav_bar_use_case
                 .buildNavBarVerticalUseCase,
+          ),
+        ],
+      ),
+    ],
+  ),
+  _widgetbook.WidgetbookFolder(
+    name: 'chat',
+    children: [
+      _widgetbook.WidgetbookComponent(
+        name: 'QaulChatBubble',
+        useCases: [
+          _widgetbook.WidgetbookUseCase(
+            name: 'Conversation preview',
+            builder: _qaul_components_qaul_chat_bubble_use_case
+                .buildChatBubbleConversationUseCase,
           ),
         ],
       ),
