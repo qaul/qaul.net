@@ -224,9 +224,11 @@ impl Neighbours {
     ///
     /// Returns node if it exists in the data base,
     /// otherwise it returns None.
+    #[allow(dead_code)]
     #[deprecated(since = "2.0.0-rc.4", note = "Use `node_from_q8id` instead.")]
     pub fn node_from_small_id(small_id: Vec<u8>) -> Option<Node> {
         // create search key
+        #[allow(deprecated)]
         let prefix = QaulId::small_to_search_prefix(small_id);
 
         // get data base tree
@@ -302,7 +304,7 @@ impl Neighbours {
     }
 
     /// send protobuf RPC neighbours list
-    pub fn rpc_send_neighbours_list() {
+    pub fn rpc_send_neighbours_list(request_id: String) {
         // create lists per module
         let mut lan_neighbours: Vec<proto::NeighboursEntry> = Vec::new();
         let mut internet_neighbours: Vec<proto::NeighboursEntry> = Vec::new();
@@ -365,7 +367,7 @@ impl Neighbours {
         Rpc::send_message(
             buf,
             crate::rpc::proto::Modules::Router.into(),
-            "".to_string(),
+            request_id,
             Vec::new(),
         );
     }
