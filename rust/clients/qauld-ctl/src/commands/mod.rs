@@ -12,6 +12,7 @@ mod chatfile;
 mod feed;
 mod group;
 mod node;
+mod router;
 mod user_accounts;
 mod users;
 
