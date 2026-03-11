@@ -36,7 +36,7 @@ def test_nodes_discover_neighbours(interval=60):
     node_a = Node("0000")
     node_b = Node("0001")
 
-    id_b = node_b.known_users()[0]["id"]
+    id_b = local_user_id(node_b) 
     known_ids = node_a.known_user_ids()
 
     assert id_b in known_ids, (
@@ -69,6 +69,12 @@ def test_user_fields_are_present():
 
     print("  PASS: user entries contain all expected fields")
 
+def local_user_id(node: Node) -> str:
+    """"returns the id of the node's own local user account"""
+    for user in node.known_users():
+        if any(c["module"] == "LOCAL" for c in user["connections"]):
+            return user["id"]
+    return ValueError(f"No LOCAL user found on node {node.id}")
 
 if __name__ == "__main__":
     try:
