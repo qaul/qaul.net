@@ -8,6 +8,6 @@ PROTO_FILES=$(tr '\n' ' ' < files.txt)
 protoc \
     --cpp_out=../generated/cpp \
     \
-    --proto_path=../../protobuf/proto_definitions \
+    --proto_path=../proto_definitions \
     \
     $PROTO_FILES
