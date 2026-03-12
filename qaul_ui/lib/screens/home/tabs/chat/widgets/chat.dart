@@ -17,8 +17,8 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart'
         TextMessage;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:mime/mime.dart';
 import 'package:open_filex/open_filex.dart';
