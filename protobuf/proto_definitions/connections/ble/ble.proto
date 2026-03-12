@@ -59,12 +59,15 @@ message BleDeviceInfo {
     //
     // Android: BluetoothAdapter getAddress()
     // https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getAddress()
+    // Android can not get macAddress of device because of permission issue.
     string id = 2;
     // Get Bluetooth Name
     // this is field is purely informative
     //
     // Android: BluetoothAdapter getName()
     // https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getName()
+    // On Android 12+ if user not granted permission we can not get adapter
+    // name.
     string name = 3;
     // Bluetooth is enable / powered on
     //
@@ -105,7 +108,7 @@ message BleDeviceInfo {
     // Android: AndroidAdapter isLeAudioSupported()
     // https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#isLeAudioSupported()
     bool le_audio = 9;
-    // is periodic advertisment supported?
+    // is periodic advertisement supported?
     //
     // Android: BluetoothAdapter isLePeriodicAdvertisingSupported()
     // https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLePeriodicAdvertisingSupported()
@@ -113,7 +116,7 @@ message BleDeviceInfo {
     // Is multi advertisement supported?
     //
     // When multi advertisement is supported one can have different
-    // advertisement types parallely. Each advertisement has a
+    // advertisement types in parallel. Each advertisement has a
     // different device address.
     // For scanning devices it looks, as if multiple devices devices
     // would advertise themselves.
