@@ -6,7 +6,7 @@ node.db/
 12D3KooW*/
 logs/
 version
-.vscode/ 
+.vscode/
 
 # generated SBOM files
 *.cdx.json
@@ -34,3 +34,4 @@ utilities/installers/macos/*.app
 utilities/installers/macos/*.dmg
 utilities/installers/macos/*.jsonsed
 __pycache__/
+.improvements.md
