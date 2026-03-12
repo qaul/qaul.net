@@ -7,4 +7,4 @@ protoc \
     --java_out=../generated/java \
     --kotlin_out=../generated/kotlin \
     \
-    --proto_path="../../protobuf/proto_definitions" $PROTO_FILES
+    --proto_path="../proto_definitions" $PROTO_FILES
