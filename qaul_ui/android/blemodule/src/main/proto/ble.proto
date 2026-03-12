@@ -43,6 +43,8 @@ message BleInfoRequest {}
 message BleInfoResponse {
     // fill in a device information of the BLE device
     BleDeviceInfo device = 1;
+    // info about all available BLE devices and their capabilities
+    // repeated BleDeviceInfo devices = 2;
 }
 
 // BLE device information
@@ -57,15 +59,16 @@ message BleDeviceInfo {
     //
     // Android: BluetoothAdapter getAddress()
     // https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getAddress()
-    // We can not get macAddress of device because of permission issue.
+    // Android can not get macAddress of device because of permission issue.
     string id = 2;
     // Get Bluetooth Name
     // this is field is purely informative
     //
     // Android: BluetoothAdapter getName()
     // https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getName()
-    string name = 3;  // On Android 12+ if user not granted permission we can
-                      // not get adapter name
+    // On Android 12+ if user not granted permission we can not get adapter
+    // name.
+    string name = 3;
     // Bluetooth is enable / powered on
     //
     // Android: BluetoothAdapter isEnabled()
@@ -76,7 +79,7 @@ message BleDeviceInfo {
     // Android: BluetoothAdapter isLeExtendedAdvertisingSupported ()
     // https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLeExtendedAdvertisingSupported()
     bool adv_extended = 5;
-    // what is the maximal amount of bytes send able via advertising?
+    // what is the maximal amount of bytes sendable via advertising?
     //
     // Android: BluetoothAdapter getLeMaximumAdvertisingDataLength()
     // https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#getLeMaximumAdvertisingDataLength()
@@ -113,7 +116,7 @@ message BleDeviceInfo {
     // Is multi advertisement supported?
     //
     // When multi advertisement is supported one can have different
-    // advertisement types parallely. Each advertisement has a
+    // advertisement types in parallel. Each advertisement has a
     // different device address.
     // For scanning devices it looks, as if multiple devices devices
     // would advertise themselves.
@@ -148,6 +151,8 @@ message BleStartRequest {
     bytes qaul_id = 1;
     // power settings
     BlePowerSetting power_setting = 2;
+    // ID of device to start
+    // string device_id = 3;
 }
 
 // power settings
@@ -196,6 +201,8 @@ enum BleError {
     RIGHTS_MISSING = 1;
     // there was a module timeout
     TIMEOUT = 2;
+    // the device is unavailable, e.g. because it was turned off
+    DEVICE_UNAVAILABLE = 3;
 }
 
 // Stop Bluetooth Device

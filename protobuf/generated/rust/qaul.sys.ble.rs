@@ -73,6 +73,7 @@ pub struct BleDeviceInfo {
     ///
     /// Android: BluetoothAdapter getAddress()
     /// <https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getAddress(>)
+    /// Android can not get macAddress of device because of permission issue.
     #[prost(string, tag = "2")]
     pub id: ::prost::alloc::string::String,
     /// Get Bluetooth Name
@@ -80,6 +81,8 @@ pub struct BleDeviceInfo {
     ///
     /// Android: BluetoothAdapter getName()
     /// <https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getName(>)
+    /// On Android 12+ if user not granted permission we can not get adapter
+    /// name.
     #[prost(string, tag = "3")]
     pub name: ::prost::alloc::string::String,
     /// Bluetooth is enable / powered on
@@ -127,7 +130,7 @@ pub struct BleDeviceInfo {
     /// <https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#isLeAudioSupported(>)
     #[prost(bool, tag = "9")]
     pub le_audio: bool,
-    /// is periodic advertisment supported?
+    /// is periodic advertisement supported?
     ///
     /// Android: BluetoothAdapter isLePeriodicAdvertisingSupported()
     /// <https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLePeriodicAdvertisingSupported(>)
@@ -136,7 +139,7 @@ pub struct BleDeviceInfo {
     /// Is multi advertisement supported?
     ///
     /// When multi advertisement is supported one can have different
-    /// advertisement types parallely. Each advertisement has a
+    /// advertisement types in parallel. Each advertisement has a
     /// different device address.
     /// For scanning devices it looks, as if multiple devices devices
     /// would advertise themselves.
