@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../breakpoints.dart';
 
 enum TailEdge { topStart, topEnd, bottomStart, bottomEnd }
 
@@ -7,9 +8,9 @@ enum MessageStatus { notSent, sent, read }
 enum MessageType { primary, secondary }
 
 class ChatBubbleStyle {
-  static const maxBubbleWidth = 272.0;
+  static const maxBubbleWidthMobile = 272.0;
+  static const maxBubbleWidthExtended = 392.0;
   static const minBubbleWidth = 32.0;
-  static const maxTextWidth = 252.0;
 
   static const horizontalPadding = 10.0;
   static const verticalPadding = 6.0;
@@ -118,6 +119,13 @@ class QaulChatBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final isPrimary = message.messageType == MessageType.primary;
 
+    final isMobile = QaulBreakpoints.isMobile(context);
+    final maxBubbleWidth = isMobile
+        ? ChatBubbleStyle.maxBubbleWidthMobile
+        : ChatBubbleStyle.maxBubbleWidthExtended;
+    final maxTextWidth =
+        maxBubbleWidth - ChatBubbleStyle.horizontalPadding * 2;
+
     final backgroundColor = isPrimary
         ? ChatBubbleStyle.primaryColor
         : ChatBubbleStyle.secondaryColor;
@@ -147,9 +155,9 @@ class QaulChatBubble extends StatelessWidget {
     return Align(
       alignment: isPrimary ? Alignment.centerRight : Alignment.centerLeft,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(
+        constraints: BoxConstraints(
           minWidth: ChatBubbleStyle.minBubbleWidth,
-          maxWidth: ChatBubbleStyle.maxBubbleWidth,
+          maxWidth: maxBubbleWidth,
         ),
         child: DecoratedBox(
           decoration: BoxDecoration(
@@ -168,9 +176,7 @@ class QaulChatBubble extends StatelessWidget {
                 Flexible(
                   fit: FlexFit.loose,
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: ChatBubbleStyle.maxTextWidth,
-                    ),
+                    constraints: BoxConstraints(maxWidth: maxTextWidth),
                     child: Text(
                       message.content.trim().replaceAll(RegExp(r'\s+'), ' '),
                       textAlign: TextAlign.left,

@@ -4,31 +4,19 @@ import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 import 'qaul_components.dart';
 import 'widgets/qaul_chat_bubble.dart';
 
-String _labelForDate(DateTime date, int index, List<String> labels) {
-  if (index < labels.length) {
-    return labels[index];
-  }
-  return '${date.day}';
-}
-
 @widgetbook.UseCase(name: 'Conversation preview', type: QaulChatBubble)
 Widget buildChatBubbleConversationUseCase(BuildContext context) {
-  final now = DateTime.now();
-  final yesterday = now.subtract(const Duration(days: 1));
-
-  final friday17 = yesterday.subtract(const Duration(days: 2)).copyWith(
-    hour: 16,
-    minute: 13,
-  );
-  final muchEarlier = yesterday.subtract(const Duration(hours: 3));
-
   const dateLabels = ['Friday, April 17, 2026 ', 'Saturday, April 18, 2026 '];
+
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final yesterday = today.subtract(const Duration(days: 1));
 
   final rawMessages = [
     QaulChatBubbleMessage(
       content: 'Hello in 16px 300 font',
-      sentAt: friday17,
-      receivedAt: friday17,
+      sentAt: yesterday.copyWith(hour: 16, minute: 13),
+      receivedAt: yesterday.copyWith(hour: 16, minute: 13),
       status: MessageStatus.read,
       messageType: MessageType.primary,
       edges: const [],
@@ -36,117 +24,60 @@ Widget buildChatBubbleConversationUseCase(BuildContext context) {
     QaulChatBubbleMessage(
       content:
           'This is a longer message with no own timestamp followed by another message with timestamp',
-      sentAt: friday17,
-      receivedAt: friday17,
+      sentAt: yesterday.copyWith(hour: 16, minute: 13),
+      receivedAt: yesterday.copyWith(hour: 16, minute: 13),
       status: MessageStatus.sent,
       messageType: MessageType.primary,
       edges: const [],
     ),
     QaulChatBubbleMessage(
       content: 'This one is it',
-      sentAt: friday17,
-      receivedAt: friday17,
+      sentAt: yesterday.copyWith(hour: 16, minute: 13),
+      receivedAt: yesterday.copyWith(hour: 16, minute: 13),
       status: MessageStatus.read,
       messageType: MessageType.primary,
       edges: const [],
     ),
     QaulChatBubbleMessage(
       content: 'Chatpartner is answering',
-      sentAt: muchEarlier,
-      receivedAt: muchEarlier,
+      sentAt: yesterday.copyWith(hour: 18, minute: 9),
+      receivedAt: yesterday.copyWith(hour: 18, minute: 9),
       status: MessageStatus.sent,
       messageType: MessageType.secondary,
       edges: const [],
     ),
     QaulChatBubbleMessage(
       content: 'Another answer',
-      sentAt: muchEarlier.add(const Duration(minutes: 20)),
-      receivedAt: muchEarlier.add(const Duration(minutes: 20)),
+      sentAt: yesterday.copyWith(hour: 18, minute: 29),
+      receivedAt: yesterday.copyWith(hour: 18, minute: 29),
       status: MessageStatus.sent,
       messageType: MessageType.secondary,
       edges: const [],
     ),
     QaulChatBubbleMessage(
       content: 'Message',
-      sentAt: DateTime(
-        yesterday.year,
-        yesterday.month,
-        yesterday.day,
-        19,
-        23,
-      ),
-      receivedAt: DateTime(
-        yesterday.year,
-        yesterday.month,
-        yesterday.day,
-        19,
-        23,
-      ),
+      sentAt: yesterday.copyWith(hour: 19, minute: 23),
+      receivedAt: yesterday.copyWith(hour: 19, minute: 23),
       status: MessageStatus.read,
       messageType: MessageType.primary,
       edges: const [],
     ),
     QaulChatBubbleMessage(
-      content: 'Message with delay',
-      sentAt: DateTime(
-        yesterday.year,
-        yesterday.month,
-        yesterday.day,
-        12,
-        14,
-      ),
-      receivedAt: DateTime(
-        yesterday.year,
-        yesterday.month,
-        yesterday.day,
-        12,
-        14,
-      ),
-      status: MessageStatus.sent,
-      messageType: MessageType.primary,
-      edges: const [],
-    ),
-    QaulChatBubbleMessage(
       content: 'Longer message from the chatpartner',
-      sentAt: DateTime(
-        yesterday.year,
-        yesterday.month,
-        yesterday.day,
-        21,
-        19,
-      ),
-      receivedAt: DateTime(
-        yesterday.year,
-        yesterday.month,
-        yesterday.day,
-        21,
-        19,
-      ),
+      sentAt: yesterday.copyWith(hour: 21, minute: 19),
+      receivedAt: yesterday.copyWith(hour: 21, minute: 19),
       status: MessageStatus.sent,
       messageType: MessageType.secondary,
       edges: const [],
     ),
     QaulChatBubbleMessage(
       content: 'followed by one with time',
-      sentAt: DateTime(
-        yesterday.year,
-        yesterday.month,
-        yesterday.day,
-        21,
-        19,
-      ),
-      receivedAt: DateTime(
-        yesterday.year,
-        yesterday.month,
-        yesterday.day,
-        21,
-        19,
-      ),
+      sentAt: yesterday.copyWith(hour: 21, minute: 19),
+      receivedAt: yesterday.copyWith(hour: 21, minute: 19),
       status: MessageStatus.sent,
       messageType: MessageType.secondary,
       edges: const [],
     ),
-    // 3 novas mensagens: 12 min (read), 1 min (sent), Now (notSent)
     QaulChatBubbleMessage(
       content: 'Out and delivered',
       sentAt: now.subtract(const Duration(minutes: 12)),
@@ -175,26 +106,20 @@ Widget buildChatBubbleConversationUseCase(BuildContext context) {
 
   final items = computeChatBubbleDisplayItems(rawMessages);
 
-  DateTime? previousDate;
   var dateLabelIndex = 0;
   final children = <Widget>[
     const SizedBox(height: 16),
   ];
 
   for (final item in items) {
-    final messageDate = DateTime(
-      item.message.sentAt.year,
-      item.message.sentAt.month,
-      item.message.sentAt.day,
-    );
     bool addedSeparator = false;
-    if (previousDate != null && previousDate != messageDate) {
+    if (dateLabelIndex == 0) {
       children.add(
         Padding(
           padding: const EdgeInsets.only(top: 16, bottom: 16.5),
           child: Center(
             child: Text(
-              _labelForDate(messageDate, dateLabelIndex++, dateLabels),
+              dateLabels[dateLabelIndex++],
               style: TextStyle(
                 fontSize: 12,
                 height: 1.2,
@@ -205,13 +130,14 @@ Widget buildChatBubbleConversationUseCase(BuildContext context) {
         ),
       );
       addedSeparator = true;
-    } else if (previousDate == null) {
+    } else if (item.message.content == 'Out and delivered' &&
+        dateLabelIndex == 1) {
       children.add(
         Padding(
-          padding: const EdgeInsets.only(bottom: 16.5),
+          padding: const EdgeInsets.only(top: 16, bottom: 16.5),
           child: Center(
             child: Text(
-              _labelForDate(messageDate, dateLabelIndex++, dateLabels),
+              dateLabels[dateLabelIndex++],
               style: TextStyle(
                 fontSize: 12,
                 height: 1.2,
@@ -223,7 +149,6 @@ Widget buildChatBubbleConversationUseCase(BuildContext context) {
       );
       addedSeparator = true;
     }
-    previousDate = messageDate;
 
     children.add(
       Padding(
@@ -239,9 +164,14 @@ Widget buildChatBubbleConversationUseCase(BuildContext context) {
   return Container(
     color: Colors.black,
     padding: const EdgeInsets.all(16),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: children,
+    child: Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 500),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: children,
+        ),
+      ),
     ),
   );
 }
