@@ -17,6 +17,7 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart'
         TextMessage;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:logging/logging.dart';
 import 'package:mime/mime.dart';
@@ -28,7 +29,6 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:record/record.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:utils/utils.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../../../decorators/cron_task_decorator.dart';
 import '../../../../../../l10n/app_localizations.dart';
@@ -174,8 +174,6 @@ class ChatScreen extends StatefulHookConsumerWidget {
 }
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
-  ChatRoom get room => widget.room;
-
   User get user => widget.user;
 
   User? get otherUser => widget.otherUser;
@@ -187,6 +185,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     switch (value) {
       case 'groupSettings':
         Navigator.push(context, MaterialPageRoute(builder: (_) {
+          final room = ref.read(currentOpenChatRoom) ?? widget.room;
           return _GroupSettingsPage(room);
         }));
         break;
@@ -195,6 +194,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   void _scheduleUpdateCurrentOpenChat() =>
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        final room = ref.read(currentOpenChatRoom) ?? widget.room;
         ref.read(currentOpenChatRoom.notifier).state = room;
         ref.read(qaulWorkerProvider).getChatRoomMessages(room.conversationId);
       });
@@ -202,6 +202,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    final room = ref.read(currentOpenChatRoom) ?? widget.room;
     assert(otherUser != null || room.isGroupChatRoom,
         'Must either be a group chat or contain another user');
     _scheduleUpdateCurrentOpenChat();
@@ -216,7 +217,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void didUpdateWidget(covariant ChatScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.room == room) return;
+    if (oldWidget.room == widget.room) return;
     _updateMenuOptionsBasedOnRoomType();
     _scheduleUpdateCurrentOpenChat();
   }
@@ -644,7 +645,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
 
     if (message is types.TextMessage) {
-      final roomMessages = room.messages;
+      final currentRoom = ref.read(currentOpenChatRoom);
+      final roomMessages = currentRoom?.messages;
       if (roomMessages == null) return child;
 
       final domainMessage = roomMessages
@@ -701,6 +703,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   void _updateMenuOptionsBasedOnRoomType() {
     var l10n = AppLocalizations.of(context)!;
+    final room = ref.read(currentOpenChatRoom) ?? widget.room;
     if (room.isGroupChatRoom && _overflowMenuOptions.isEmpty) {
       _overflowMenuOptions.addAll({'groupSettings': l10n.groupSettings});
     }
