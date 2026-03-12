@@ -6,5 +6,5 @@
 PROTO_FILES=$(tr '\n' ' ' < files.txt)
 
 # create in flutter UI directory
-PROTO_OUT=../../../../../qaul_ui/packages/qaul_rpc/lib/src/generated
+PROTO_OUT=../../qaul_ui/packages/qaul_rpc/lib/src/generated
 protoc --dart_out=$PROTO_OUT --proto_path=../../protobuf/proto_definitions $PROTO_FILES
