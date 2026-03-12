@@ -301,6 +301,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             showUserAvatars: false,
             showUserNames: room.isGroupChatRoom,
             user: user.toInternalUser(),
+            useTopSafeAreaInset: false,
+            dateHeaderThreshold: const Duration(days: 365).inMilliseconds,
+            groupMessagesThreshold: const Duration(days: 365).inMilliseconds,
             messages: messages(room, l10n: l10n) ?? [],
             onSendPressed: sendMessage,
             inputOptions: const InputOptions(
@@ -315,6 +318,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             emptyState: Center(child: Text(l10n.chatEmptyState)),
             bubbleBuilder: _bubbleBuilder,
             customBottomWidget: _CustomInput(
+              
               isDisabled: room.status != ChatRoomStatus.active,
               disabledMessage: room.status != ChatRoomStatus.inviteAccepted
                   ? null
@@ -650,13 +654,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       final display = _bubbleDisplayItems[domainMessage.messageIdBase58];
       if (display == null) return child;
 
-      final topMargin = display.marginTop == kChatBubbleSeparatedGap
-          ? 0.0
-          : display.marginTop;
-
       return Padding(
         padding: EdgeInsets.only(
-          top: topMargin,
+          top: display.marginTop,
           left: 16,
         ),
         child: QaulChatBubble(
