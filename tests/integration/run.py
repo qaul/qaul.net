@@ -4,9 +4,9 @@ import sys
 import traceback
 
 tests = [
-    #("node startup", "test_node_startup"),
+    ("node startup", "test_node_startup"),
     ("user discovery", "test_user_discovery"),
-    #("feed message rout", "test_message_routing")
+    ("feed message router", "test_message_routing")
 ]
 
 passed = 0
