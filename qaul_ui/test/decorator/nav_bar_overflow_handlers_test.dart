@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qaul_components/qaul_components.dart';
-import 'package:qaul_ui/decorators/nav_bar_overflow_handlers.dart';
+import 'package:qaul_ui/decorators/qaul_navbar_decorator.dart';
 import 'package:qaul_ui/l10n/app_localizations.dart';
 import 'package:qaul_ui/qaul_app.dart';
 

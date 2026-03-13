@@ -105,6 +105,7 @@ class _NetworkTypeFilterToolbar extends HookConsumerWidget {
       case NetworkTypeFilter.all:
         return SvgPicture.asset(
           'assets/icons/network-outlined.svg',
+          package: 'qaul_components',
           colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcATop),
         );
     }
