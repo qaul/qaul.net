@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:qaul_ui/l10n/app_localizations.dart';
-import 'package:qaul_ui/qaul_app.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:qaul_components/qaul_components.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
 import 'main.directories.g.dart';
-import 'qaul_components.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   // ignore: invalid_use_of_visible_for_testing_member
   SharedPreferences.setMockInitialValues({});
-  runApp(const ProviderScope(child: WidgetbookApp()));
+  runApp(const WidgetbookApp());
 }
 
 @widgetbook.App()
@@ -26,7 +24,7 @@ class WidgetbookApp extends StatelessWidget {
       directories: directories,
       addons: [
         ViewportAddon([
-          ViewportData(
+          const ViewportData(
             name: kBreakpointIphone16,
             width: 393,
             height: 852,
@@ -54,19 +52,32 @@ class WidgetbookApp extends StatelessWidget {
           LinuxViewports.desktop,
         ]),
         LocalizationAddon(
-          locales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          initialLocale: AppLocalizations.supportedLocales.last,
+          locales: const [Locale('en')],
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          initialLocale: const Locale('en'),
         ),
         MaterialThemeAddon(
           themes: [
             WidgetbookTheme(
               name: 'Light',
-              data: QaulApp.lightTheme,
+              data: ThemeData(
+                useMaterial3: true,
+                brightness: Brightness.light,
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: Colors.lightBlue,
+                ),
+              ),
             ),
             WidgetbookTheme(
               name: 'Dark',
-              data: QaulApp.darkTheme,
+              data: ThemeData(
+                useMaterial3: true,
+                brightness: Brightness.dark,
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: Colors.lightBlue,
+                  brightness: Brightness.dark,
+                ),
+              ),
             ),
           ],
         ),

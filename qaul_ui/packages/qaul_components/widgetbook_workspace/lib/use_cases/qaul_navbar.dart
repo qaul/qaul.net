@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:qaul_components/qaul_components.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
-
-import 'qaul_components.dart';
 
 @widgetbook.UseCase(name: 'Horizontal (mobile)', type: QaulNavBarWidget)
 Widget buildNavBarHorizontalUseCase(BuildContext context) {

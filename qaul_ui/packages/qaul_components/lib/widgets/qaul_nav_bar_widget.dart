@@ -98,6 +98,7 @@ class QaulNavBarWidget extends StatelessWidget {
             height: kNavBarMenuIconSize.height,
             child: SvgPicture.asset(
               navBarIconPath('menu'),
+              package: 'qaul_components',
               width: kNavBarMenuIconSize.width,
               height: kNavBarMenuIconSize.height,
               fit: BoxFit.contain,
@@ -298,6 +299,7 @@ class _NavBarItem extends StatelessWidget {
 
     final iconWidget = SvgPicture.asset(
       svgPath,
+      package: 'qaul_components',
       width: iconSize.width,
       height: iconSize.height,
       fit: BoxFit.contain,
