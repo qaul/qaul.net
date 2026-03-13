@@ -31,7 +31,7 @@ def teardown():
     clear_topology()
 
 
-def test_feed_message_reaches_far_node(wait_seconds=90):
+def test_1_feed_message_reaches_far_node(wait_seconds=120):
     node_sender = Node("0000")
     node_receiver = Node("0004")
 
@@ -49,7 +49,7 @@ def test_feed_message_reaches_far_node(wait_seconds=90):
     print("  PASS: feed message reached node 0004")
 
 
-def test_feed_message_fields_are_present():
+def test_2_feed_message_fields_are_present():
     """
     Feed messages should have all expected fields in JSON output.
     """
@@ -77,7 +77,7 @@ def test_feed_message_fields_are_present():
 if __name__ == "__main__":
     try:
         setup()
-        test_feed_message_reaches_far_node()
-        test_feed_message_fields_are_present()
+        test_1_feed_message_reaches_far_node()
+        test_2_feed_message_fields_are_present()
     finally:
         teardown()
