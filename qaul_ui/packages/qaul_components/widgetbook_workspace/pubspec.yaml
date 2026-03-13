@@ -1,0 +1,26 @@
+name: qaul_components_widgetbook
+description: Widgetbook showcase for qaul_components.
+publish_to: none
+
+environment:
+  sdk: ">=3.9.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  qaul_components:
+    path: ..
+  shared_preferences: ^2.5.4
+  widgetbook: ^3.7.1
+  widgetbook_annotation: ^3.1.0
+
+dev_dependencies:
+  flutter_lints: ^3.0.0
+  widgetbook_generator: ^3.7.0
+  build_runner: ^2.4.9
+
+flutter:
+  uses-material-design: true

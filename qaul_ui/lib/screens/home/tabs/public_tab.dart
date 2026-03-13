@@ -47,7 +47,6 @@ class _PublicTabView extends HookConsumerWidget {
     final messages = ref.watch(feedMessageStoreProvider);
 
     final l10n = AppLocalizations.of(context)!;
-    const bullhorn = 'assets/icons/public.svg';
 
     final onCreatePublicMessagePressed = useCallback(() async {
       disablePageViewScroll.value = true;
@@ -73,7 +72,8 @@ class _PublicTabView extends HookConsumerWidget {
       resizeToAvoidBottomInset: true,
       floatingActionButton: QaulFAB(
         onPressed: onCreatePublicMessagePressed,
-        svgAsset: bullhorn,
+        svgAsset: 'assets/icons/public-filled.svg',
+        package: 'qaul_components',
         heroTag: 'publicTabFAB',
         tooltip: l10n.createPublicPostTooltip,
       ),

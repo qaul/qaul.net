@@ -5,8 +5,6 @@ final homeScreenControllerProvider =
       HomeScreenTabController.new,
     );
 
-enum TabType { account, public, users, chat, network }
-
 class HomeScreenTabController extends Notifier<TabType> {
   @override
   TabType build() {
