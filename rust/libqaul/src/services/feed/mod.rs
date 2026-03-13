@@ -619,7 +619,10 @@ fn build_feed_list_from(tree: &sled::Tree, offset: u32, limit: u32) -> proto::Fe
         pagination: None,
     };
 
-    // we build the iter by taking all messages in the tree **after the offset** up until:
+    // We iterate in reverse (newest-first) so that offset=0 returns the most
+    // recent messages — the natural order for a feed UI.
+    // We build the iter by reversing all messages in the tree, then skipping
+    // past the offset and taking up until:
     //   - the limit, if provided, or;
     //   - the tree length
     let take = if limit > 0 {
@@ -627,7 +630,7 @@ fn build_feed_list_from(tree: &sled::Tree, offset: u32, limit: u32) -> proto::Fe
     } else {
         usize::MAX
     };
-    let iter = tree.iter().skip(offset as usize).take(take);
+    let iter = tree.iter().rev().skip(offset as usize).take(take);
 
     for res in iter {
         match res {
@@ -718,11 +721,14 @@ mod tests {
     }
 
     #[test]
-    fn first_page() {
+    fn first_page_returns_newest_messages() {
         let (_db, tree) = make_feed_tree(5);
         let list = build_feed_list_from(&tree, 0, 2);
 
         assert_eq!(list.feed_message.len(), 2);
+        // offset=0 should return the two most recent messages (index 5, 4)
+        assert_eq!(list.feed_message[0].index, 5);
+        assert_eq!(list.feed_message[1].index, 4);
         let p = list.pagination.unwrap();
         assert!(p.has_more);
         assert_eq!(p.total, 5);
@@ -734,6 +740,9 @@ mod tests {
         let list = build_feed_list_from(&tree, 2, 2);
 
         assert_eq!(list.feed_message.len(), 2);
+        // skipping 2 newest (5, 4), should return (3, 2)
+        assert_eq!(list.feed_message[0].index, 3);
+        assert_eq!(list.feed_message[1].index, 2);
         let p = list.pagination.unwrap();
         assert!(p.has_more);
         assert_eq!(p.total, 5);
@@ -745,6 +754,8 @@ mod tests {
         let list = build_feed_list_from(&tree, 4, 2);
 
         assert_eq!(list.feed_message.len(), 1);
+        // skipping 4 newest (5, 4, 3, 2), only index 1 remains
+        assert_eq!(list.feed_message[0].index, 1);
         let p = list.pagination.unwrap();
         assert!(!p.has_more);
         assert_eq!(p.total, 5);
