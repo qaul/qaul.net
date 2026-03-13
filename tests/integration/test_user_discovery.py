@@ -30,8 +30,8 @@ def teardown():
 
 
 def test_nodes_discover_neighbours(interval=60):
-    print(f"  waiting {interval}s for node discovery...")
-    time.sleep(interval)
+    #print(f"  waiting {interval}s for node discovery...")
+    #time.sleep(interval)
 
     node_a = Node("0000")
     node_b = Node("0001")
@@ -72,6 +72,7 @@ def test_user_fields_are_present():
 def local_user_id(node: Node) -> str:
     """"returns the id of the node's own local user account"""
     for user in node.known_users():
+        print(f"here is user==={user}")
         if any(c["module"] == "LOCAL" for c in user["connections"]):
             return user["id"]
     raise ValueError(f"No LOCAL user found on node {node.id}")
