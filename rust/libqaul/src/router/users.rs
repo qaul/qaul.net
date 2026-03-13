@@ -348,9 +348,12 @@ impl Users {
                             let entry = build_user_entry(user, &online_users, &account_id, q8id);
 
                             // send encoded rpc message containing found user entity
-                            send_users_rpc_message(proto::users::Message::GetUserByIdResponse(
-                                proto::GetUserByIdResponse { user: Some(entry) },
-                            ), request_id);
+                            send_users_rpc_message(
+                                proto::users::Message::GetUserByIdResponse(
+                                    proto::GetUserByIdResponse { user: Some(entry) },
+                                ),
+                                request_id,
+                            );
                         });
                     }
                     _ => {}
