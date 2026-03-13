@@ -219,6 +219,8 @@ jobs:
                 command: |
                     cd packages/qaul_components
                     flutter pub get
+                    cd widgetbook_workspace
+                    flutter pub get
                 name: Install widgetbook dependencies
             - run: flutter analyze
     build-and-deploy-docker-qauld:
