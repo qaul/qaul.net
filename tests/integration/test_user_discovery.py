@@ -74,7 +74,7 @@ def local_user_id(node: Node) -> str:
     for user in node.known_users():
         if any(c["module"] == "LOCAL" for c in user["connections"]):
             return user["id"]
-    return ValueError(f"No LOCAL user found on node {node.id}")
+    raise ValueError(f"No LOCAL user found on node {node.id}")
 
 if __name__ == "__main__":
     try:
