@@ -54,7 +54,7 @@ void main() {
       await tester.binding.setSurfaceSize(const Size(400, 800));
       await tester.pumpWidget(buildDecorator());
 
-      expect(find.byType(QaulNavBarWidget), findsOneWidget);
+      expect(find.byType(QaulNavBar), findsOneWidget);
       expect(find.byType(Expanded), findsWidgets);
     });
 

@@ -19,7 +19,7 @@ final directories = <_widgetbook.WidgetbookNode>[
     name: 'widgets',
     children: [
       _widgetbook.WidgetbookComponent(
-        name: 'QaulNavBarWidget',
+        name: 'QaulNavBar',
         useCases: [
           _widgetbook.WidgetbookUseCase(
             name: 'Horizontal (mobile)',

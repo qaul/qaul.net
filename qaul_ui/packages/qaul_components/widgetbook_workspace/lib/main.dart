@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:qaul_components/qaul_components.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
 import 'main.directories.g.dart';
+
+const String _kIphone16 = 'iPhone 16';
+const String _kIphone16Pro = 'iPhone 16 Pro';
+
+const List<({String name, double width, double height})> _kDesignerViewports = [
+  (name: _kIphone16, width: 393, height: 852),
+  (name: _kIphone16Pro, width: 402, height: 874),
+  (name: 'Laptop', width: 1366, height: 768),
+  (name: 'MacBook', width: 1440, height: 900),
+  (name: 'Full HD', width: 1920, height: 1080),
+];
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,22 +35,22 @@ class WidgetbookApp extends StatelessWidget {
       addons: [
         ViewportAddon([
           const ViewportData(
-            name: kBreakpointIphone16,
+            name: _kIphone16,
             width: 393,
             height: 852,
             pixelRatio: 2.0,
             platform: TargetPlatform.iOS,
           ),
           Viewports.none,
-          ...kDesignerBreakpoints
-              .where((v) => v.name != kBreakpointIphone16)
+          ..._kDesignerViewports
+              .where((v) => v.name != _kIphone16)
               .map(
                 (v) => ViewportData(
                   name: v.name,
                   width: v.width,
                   height: v.height,
                   pixelRatio: 2.0,
-                  platform: v.name == kBreakpointIphone16Pro
+                  platform: v.name == _kIphone16Pro
                       ? TargetPlatform.iOS
                       : TargetPlatform.linux,
                 ),

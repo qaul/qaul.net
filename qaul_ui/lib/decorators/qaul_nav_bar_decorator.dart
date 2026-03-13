@@ -105,7 +105,7 @@ class _ConnectedNavBarState extends ConsumerState<_ConnectedNavBar> {
     final publicCount = publicController.newNotificationCount.value;
     final chatCount = chatController.newNotificationCount.value;
 
-    return QaulNavBarWidget(
+    return QaulNavBar(
       vertical: widget.vertical,
       overflowMenuLabels: navBarOverflowMenuLabels(context),
       onOverflowSelected: (option) =>
