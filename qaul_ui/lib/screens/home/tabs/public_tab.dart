@@ -59,7 +59,6 @@ class _PublicTabView extends HookConsumerWidget {
     }, [UniqueKey()]);
 
     final l10n = AppLocalizations.of(context)!;
-    const bullhorn = 'assets/icons/public-filled.svg';
 
     final onCreatePublicMessagePressed = useCallback(
       () async {
@@ -84,7 +83,8 @@ class _PublicTabView extends HookConsumerWidget {
       resizeToAvoidBottomInset: true,
       floatingActionButton: QaulFAB(
         onPressed: onCreatePublicMessagePressed,
-        svgAsset: bullhorn,
+        svgAsset: 'assets/icons/public-filled.svg',
+        package: 'qaul_components',
         heroTag: 'publicTabFAB',
         tooltip: l10n.createPublicPostTooltip,
       ),

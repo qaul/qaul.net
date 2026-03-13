@@ -187,7 +187,6 @@ class QaulNavBar extends StatelessWidget {
     }
     return SafeArea(
       top: false,
-      bottom: false,
       child: SizedBox(
         height: _kNavBarMobileHeight,
         child: _barBackground(

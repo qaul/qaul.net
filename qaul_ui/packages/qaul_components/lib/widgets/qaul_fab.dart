@@ -9,6 +9,7 @@ class QaulFAB extends StatelessWidget {
     this.heroTag,
     this.tooltip,
     this.size = 52,
+    this.package,
   });
 
   final String svgAsset;
@@ -16,6 +17,12 @@ class QaulFAB extends StatelessWidget {
   final String? heroTag;
   final String? tooltip;
   final int size;
+
+  /// The package to load [svgAsset] from.
+  ///
+  /// Pass `'qaul_components'` when the SVG lives in the component library.
+  /// Omit (or pass `null`) when the asset belongs to the host app.
+  final String? package;
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +35,7 @@ class QaulFAB extends StatelessWidget {
       onPressed: onPressed,
       child: SvgPicture.asset(
         svgAsset,
+        package: package,
         width: 48,
         height: 48,
         colorFilter: ColorFilter.mode(Colors.grey.shade600, BlendMode.srcATop),

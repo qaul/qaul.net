@@ -25,11 +25,14 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
   @override
   Widget build(BuildContext context) {
     return ResponsiveLayout(
-      mobileBody: Column(
-        children: [
-          Expanded(child: widget.child(_pageViewKey)),
-          const _ConnectedNavBar(vertical: false),
-        ],
+      mobileBody: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            Expanded(child: widget.child(_pageViewKey)),
+            const _ConnectedNavBar(vertical: false),
+          ],
+        ),
       ),
       tabletBody: Row(
         children: [
