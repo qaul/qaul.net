@@ -31,19 +31,22 @@ def teardown():
     clear_topology()
 
 
-def test_1_feed_message_reaches_far_node(wait_seconds=120):
+def test_1_feed_message_reaches_far_node(discovery_wait=120, propagation_wait=30):
     node_sender = Node("0000")
     node_receiver = Node("0004")
+ 
+    print(f"  waiting {discovery_wait}s for user discovery...")
+    time.sleep(discovery_wait)
 
     node_sender.send_feed_message(TEST_MESSAGE)
-
-    print(f"  waiting {wait_seconds}s for message propagation...")
-    time.sleep(wait_seconds)
+    
+    print(f"  waiting {propagation_wait}s for message propagation...")
+    time.sleep(propagation_wait)
 
     contents = node_receiver.feed_message_contents()
 
     assert TEST_MESSAGE in contents, (
-        f"message '{TEST_MESSAGE}' not found on node 0004 after {wait_seconds}s\n"
+        f"message '{TEST_MESSAGE}' not found on node 0004 after {propagation_wait}s\n"
         f"  messages seen: {contents}"
     )
     print("  PASS: feed message reached node 0004")
