@@ -18,13 +18,13 @@ for name, mod_name in tests:
         mod = __import__(mod_name)
         mod.setup()
         try:
-            for fn_name in dir(mod):
+            for fn_name in sorted(dir(mod)):
                 if fn_name.startswith("test_"):
                     print(f" running {fn_name}...")
                     getattr(mod, fn_name)()
-            passed += 1
         finally:
             mod.teardown()
+        passed += 1
     except AssertionError as e:
         print(f" FAIL: {e}")
         failed += 1
