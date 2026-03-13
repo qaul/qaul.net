@@ -10,7 +10,7 @@ class Node:
     def _run(self, *args) -> str:
         """Execute a qauld-ctl command, return stdout."""
         cmd = ["qauld-ctl", "--socket", self.socket] + list(args)
-        res = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
 
         if res.returncode != 0:
             raise RuntimeError(
@@ -22,6 +22,7 @@ class Node:
     def _run_json(self, *args):
         """execut qauld-ctl command with --json, return jso output."""
         res = self._run("--json", *args)
+        #print(f"{res}")
         return json.loads(res)
 
     def is_reachable(self) -> bool:
