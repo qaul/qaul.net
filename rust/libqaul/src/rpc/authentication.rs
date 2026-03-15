@@ -30,6 +30,29 @@ pub struct AuthChallenge {
     pub expires_at: u64,
 }
 
+/// Instance-based authentication state.
+/// Replaces the global NONCE_COUNTER, ACTIVE_CHALLENGES, AUTHENTICATED_USERS
+/// statics for multi-instance use.
+pub struct AuthenticationState {
+    /// Counter for generating unique nonces.
+    pub nonce_counter: RwLock<u64>,
+    /// Map of active authentication challenges indexed by user ID.
+    pub active_challenges: RwLock<BTreeMap<Vec<u8>, AuthChallenge>>,
+    /// Map of authenticated users with their session expiration times.
+    pub authenticated_users: RwLock<BTreeMap<Vec<u8>, u64>>,
+}
+
+impl AuthenticationState {
+    /// Create a new AuthenticationState.
+    pub fn new() -> Self {
+        Self {
+            nonce_counter: RwLock::new(1),
+            active_challenges: RwLock::new(BTreeMap::new()),
+            authenticated_users: RwLock::new(BTreeMap::new()),
+        }
+    }
+}
+
 /// Global counter for generating unique nonces
 /// Monotonically increasing to ensure each challenge has a unique identifier
 static NONCE_COUNTER: InitCell<RwLock<u64>> = InitCell::new();

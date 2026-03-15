@@ -273,6 +273,24 @@ impl FileHistory {
     }
 }
 
+/// Instance-based file history state.
+/// Replaces the global ALLFILES static for multi-instance use.
+pub struct ChatFileState {
+    /// File history inner state.
+    pub inner: RwLock<AllFiles>,
+}
+
+impl ChatFileState {
+    /// Create a new empty ChatFileState.
+    pub fn new() -> Self {
+        Self {
+            inner: RwLock::new(AllFiles {
+                db_ref: BTreeMap::new(),
+            }),
+        }
+    }
+}
+
 pub struct ChatFile {}
 /// File sharing module to process transfer, receive and RPC commands
 impl ChatFile {

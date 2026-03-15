@@ -27,6 +27,7 @@ pub use crypto25519::Crypto25519;
 pub use noise::CryptoNoise;
 pub use storage::CryptoAccount;
 pub use storage::CryptoStorage;
+pub use storage::CryptoStorageState;
 
 /// The State Data of the Noise Protocol
 #[derive(Clone, Serialize, Deserialize)]

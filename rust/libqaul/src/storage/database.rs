@@ -12,6 +12,34 @@ use std::{collections::BTreeMap, path::Path, sync::RwLock};
 
 use crate::router::users::UserData;
 
+/// Instance-based database state.
+/// Replaces the global DATABASE static for multi-instance use.
+pub struct DatabaseState {
+    /// Database inner state.
+    pub inner: RwLock<DataBase>,
+}
+
+impl DatabaseState {
+    /// Create a new DatabaseState with a temporary in-memory database (for simulation).
+    pub fn new_temporary() -> Self {
+        let db = sled::Config::new().temporary(true).open().unwrap();
+        Self {
+            inner: RwLock::new(DataBase {
+                path: String::new(),
+                node: db,
+                users: BTreeMap::new(),
+            }),
+        }
+    }
+
+    /// Create from an existing DataBase instance.
+    pub fn from_database(database: DataBase) -> Self {
+        Self {
+            inner: RwLock::new(database),
+        }
+    }
+}
+
 /// make database globally accessible
 static DATABASE: InitCell<RwLock<DataBase>> = InitCell::new();
 
