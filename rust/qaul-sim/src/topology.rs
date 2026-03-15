@@ -3,6 +3,7 @@
 //! Defines graph-based topologies of simulated nodes and links.
 //! Each link has configurable latency, jitter, and packet loss.
 
+use libqaul::connections::ConnectionModule;
 use std::collections::HashMap;
 
 /// A simulated link between two nodes.
@@ -16,17 +17,49 @@ pub struct Link {
     pub loss: f64,
     /// Whether the link is currently active.
     pub active: bool,
+    /// Which connection module this link simulates.
+    pub module: ConnectionModule,
 }
 
 impl Link {
     /// Create a new active link with the given RTT and no jitter/loss.
+    /// Defaults to LAN module.
     pub fn new(base_rtt_us: u32) -> Self {
         Self {
             base_rtt_us,
             jitter_us: 0,
             loss: 0.0,
             active: true,
+            module: ConnectionModule::Lan,
         }
+    }
+
+    /// Create a BLE link (typically higher latency, more loss).
+    pub fn ble(base_rtt_us: u32) -> Self {
+        Self {
+            base_rtt_us,
+            jitter_us: 0,
+            loss: 0.0,
+            active: true,
+            module: ConnectionModule::Ble,
+        }
+    }
+
+    /// Create an Internet link.
+    pub fn internet(base_rtt_us: u32) -> Self {
+        Self {
+            base_rtt_us,
+            jitter_us: 0,
+            loss: 0.0,
+            active: true,
+            module: ConnectionModule::Internet,
+        }
+    }
+
+    /// Set the connection module for this link.
+    pub fn with_module(mut self, module: ConnectionModule) -> Self {
+        self.module = module;
+        self
     }
 
     /// Create a link with jitter.

@@ -12,7 +12,6 @@ use libp2p::PeerId;
 use rand::Rng;
 use std::sync::Arc;
 
-use libqaul::connections::ConnectionModule;
 use libqaul::router::RouterState;
 use libqaul::storage::configuration::RoutingOptions;
 
@@ -88,6 +87,7 @@ impl Simulator {
     }
 
     /// Phase 1: For each active link, update neighbour RTTs on both endpoints.
+    /// Uses each link's connection module (LAN, BLE, Internet) for routing differentiation.
     fn phase_ping(&self, rng: &mut impl Rng) {
         for (&(a, b), link) in &self.topology.links {
             if !link.active {
@@ -97,21 +97,22 @@ impl Simulator {
             if let Some(rtt) = network::sample_rtt(link, rng) {
                 let peer_a = self.nodes[a].peer_id;
                 let peer_b = self.nodes[b].peer_id;
+                let module = link.module;
 
-                // Node A sees Node B as a LAN neighbour
+                // Node A sees Node B via this link's module
                 self.nodes[a]
                     .router
                     .neighbours
-                    .update_node(ConnectionModule::Lan, peer_b, rtt);
+                    .update_node(module, peer_b, rtt);
 
                 // Add B to A's scheduler
                 self.nodes[a].router.scheduler.add_neighbour(peer_b);
 
-                // Node B sees Node A as a LAN neighbour
+                // Node B sees Node A via this link's module
                 self.nodes[b]
                     .router
                     .neighbours
-                    .update_node(ConnectionModule::Lan, peer_a, rtt);
+                    .update_node(module, peer_a, rtt);
 
                 // Add A to B's scheduler
                 self.nodes[b].router.scheduler.add_neighbour(peer_a);
