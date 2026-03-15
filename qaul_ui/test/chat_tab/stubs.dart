@@ -7,7 +7,7 @@ class StubLibqaulWorker implements LibqaulWorker {
   final _logger = Logger('StubLibqaulWorker');
 
   @override
-  void sendMessage(Uint8List chatId, String content) {
+  Future<void> sendMessage(Uint8List chatId, String content) async {
     _logger.info('sending message "$content" to chat id: "$chatId"');
     final room = ref.read(currentOpenChatRoom);
 
@@ -30,25 +30,29 @@ class StubLibqaulWorker implements LibqaulWorker {
   }
 
   @override
-  void getChatRoomMessages(Uint8List chatId, {int lastIndex = 0}) {
+  Future<ChatConversationList?> getChatRoomMessages(Uint8List chatId,
+      {int lastIndex = 0}) async {
     _logger.info('requested messages fetch; ignoring...');
+    return null;
   }
 
   @override
-  void getAllChatRooms() {
+  Future<List<ChatRoom>> getAllChatRooms() async {
     _logger.info('requested all Chat rooms fetch; ignoring...');
+    return [];
   }
 
   @override
-  void getGroupInvitesReceived() {
+  Future<List<GroupInvite>> getGroupInvitesReceived() async {
     _logger.info('requested group invites fetch; ignoring...');
+    return [];
   }
 
   static const int _mockTotalUsers = 125;
   static const int _defaultPageSize = 50;
 
   @override
-  Future<void> getUsers({int? offset, int? limit}) async {
+  Future<PaginatedUsers?> getUsers({int? offset, int? limit}) async {
     final requestedOffset = offset ?? 0;
     final requestedLimit = limit ?? _defaultPageSize;
     _logger.info(
@@ -83,13 +87,14 @@ class StubLibqaulWorker implements LibqaulWorker {
       notifier.appendMany(mockUsers);
       notifier.setPagination(pagination);
     }
+    return PaginatedUsers(users: mockUsers, pagination: pagination);
   }
 
   // -------------------------------------------
   // Unimplemented methods
   // -------------------------------------------
   @override
-  void addDTNUser(Uint8List userId) => throw UnimplementedError();
+  Future<bool> addDTNUser(Uint8List userId) => throw UnimplementedError();
 
   @override
   Future<void> addNode(String address, [String? name]) =>
@@ -99,19 +104,20 @@ class StubLibqaulWorker implements LibqaulWorker {
   Future<void> blockUser(User u) => throw UnimplementedError();
 
   @override
-  void createGroup(String name) => throw UnimplementedError();
+  Future<bool> createGroup(String name) => throw UnimplementedError();
 
   @override
   Future<void> createUserAccount(String name) => throw UnimplementedError();
 
   @override
-  void deleteLogs() => throw UnimplementedError();
+  Future<void> deleteLogs() => throw UnimplementedError();
 
   @override
-  void getDTNConfiguration() => throw UnimplementedError();
+  Future<DTNConfiguration?> getDTNConfiguration() =>
+      throw UnimplementedError();
 
   @override
-  Future<void> getDefaultUserAccount() => throw UnimplementedError();
+  Future<User?> getDefaultUserAccount() => throw UnimplementedError();
 
   @override
   Future<List<FileHistoryEntity>> getFileHistory(
@@ -119,53 +125,56 @@ class StubLibqaulWorker implements LibqaulWorker {
       throw UnimplementedError();
 
   @override
-  void getGroupInfo(Uint8List id) => throw UnimplementedError();
+  Future<ChatRoom?> getGroupInfo(Uint8List id) => throw UnimplementedError();
 
   @override
   Future<User?> getUserById(Uint8List userId) => Future.value(null);
 
   @override
-  Future<void> getNodeInfo() => throw UnimplementedError();
+  Future<NodeInfo?> getNodeInfo() => throw UnimplementedError();
 
   @override
-  void getUserSecurityNumber(User u) => throw UnimplementedError();
+  Future<SecurityNumber?> getUserSecurityNumber(User u) =>
+      throw UnimplementedError();
 
   @override
   Future<bool> get initialized => Future.value(true);
 
   @override
-  void inviteUserToGroup(User user, ChatRoom room) =>
+  Future<bool> inviteUserToGroup(User user, ChatRoom room) =>
       throw UnimplementedError();
 
   @override
-  void removeDTNUser(Uint8List userId) => throw UnimplementedError();
+  Future<bool> removeDTNUser(Uint8List userId) => throw UnimplementedError();
 
   @override
   Future<void> removeNode(String address) => throw UnimplementedError();
 
   @override
-  void removeUserFromGroup(User user, ChatRoom room) =>
+  Future<bool> removeUserFromGroup(User user, ChatRoom room) =>
       throw UnimplementedError();
 
   @override
-  void renameGroup(ChatRoom room, String name) => throw UnimplementedError();
-
-  @override
-  void replyToGroupInvite(Uint8List groupId, {required bool accepted}) =>
+  Future<bool> renameGroup(ChatRoom room, String name) =>
       throw UnimplementedError();
 
   @override
-  Future<void> requestNodes() => throw UnimplementedError();
-
-  @override
-  Future<void> requestPublicMessages({int? lastIndex}) async =>
+  Future<bool> replyToGroupInvite(Uint8List groupId,
+          {required bool accepted}) =>
       throw UnimplementedError();
 
   @override
-  void sendBleInfoRequest() => throw UnimplementedError();
+  Future<List<InternetNode>> requestNodes() => throw UnimplementedError();
 
   @override
-  void sendFile(
+  Future<List<PublicPost>> requestPublicMessages({int? lastIndex}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> sendBleInfoRequest() => throw UnimplementedError();
+
+  @override
+  Future<void> sendFile(
           {required String pathName,
           required Uint8List conversationId,
           required String description}) =>
@@ -175,10 +184,10 @@ class StubLibqaulWorker implements LibqaulWorker {
   Future<void> sendPublicMessage(String content) => throw UnimplementedError();
 
   @override
-  void setLibqaulLogging(bool enabled) => throw UnimplementedError();
+  Future<void> setLibqaulLogging(bool enabled) => throw UnimplementedError();
 
   @override
-  void setNodeState(String address, {bool active = true}) =>
+  Future<void> setNodeState(String address, {bool active = true}) =>
       throw UnimplementedError();
 
   @override
@@ -191,7 +200,7 @@ class StubLibqaulWorker implements LibqaulWorker {
   Future<void> verifyUser(User u) => throw UnimplementedError();
 
   @override
-  void renameNode(String address, {required String name}) {}
+  Future<void> renameNode(String address, {required String name}) async {}
 }
 
 class NullChatNotificationController implements ChatNotificationController {

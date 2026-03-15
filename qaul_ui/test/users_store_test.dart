@@ -29,7 +29,7 @@ class _MockWorkerForGetMoreUsers extends StubLibqaulWorker {
   int? lastOffset;
   int? lastLimit;
   @override
-  Future<void> getUsers({int? offset, int? limit}) async {
+  Future<PaginatedUsers?> getUsers({int? offset, int? limit}) async {
     lastOffset = offset;
     lastLimit = limit;
     return super.getUsers(offset: offset, limit: limit);
