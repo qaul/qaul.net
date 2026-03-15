@@ -160,13 +160,21 @@ impl Neighbours {
         neighbours.nodes.remove(&node_id);
     }
 
-    /// Calculate average rtt
-    fn calculate_rtt(_old_rtt: u32, new_rtt: u32) -> u32 {
-        // DISCUSSION: how to value history and flatten the curve
-        //             between different results.
-        //             Other possibilities: create small ring buffer with last results
-        //(old_rtt * 3 + new_rtt) / 4
-        new_rtt
+    /// Calculate average rtt using Exponentially Weighted Moving Average (EWMA)
+    /// α = 1/8 (standard TCP and libp2p Kademlia smoothing factor)
+    fn calculate_rtt(old_rtt: u32, new_rtt: u32) -> u32 {
+        // If this is the first ping (old_rtt is 0), we just take the new value.
+        if old_rtt == 0 {
+            return new_rtt;
+        }
+
+        // We use an alpha of 1/8 to smooth out fluctuations:
+        // Estimated RTT = (7/8) * old_rtt + (1/8) * new_rtt
+
+        // Prevent overflow by doing the math in u64, then casting back
+        let smoothed_rtt = (old_rtt as u64 * 7 + new_rtt as u64) / 8;
+
+        smoothed_rtt as u32
     }
 
     /// get rtt for a neighbour
@@ -370,5 +378,31 @@ impl Neighbours {
             request_id,
             Vec::new(),
         );
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_calculate_rtt() {
+        // First ping: old_rtt is 0 -> should take the full new_rtt
+        assert_eq!(Neighbours::calculate_rtt(0, 100), 100);
+
+        // Smoothing typical scenario
+        // old: 100, new: 180 -> (700 + 180) / 8 = 110
+        assert_eq!(Neighbours::calculate_rtt(100, 180), 110);
+
+        // Slow latency drop
+        // old: 110, new: 30 -> (770 + 30) / 8 = 100
+        assert_eq!(Neighbours::calculate_rtt(110, 30), 100);
+
+        // Extreme spike resilience
+        // old: 100, new: 1000 -> (700 + 1000) / 8 = 212
+        assert_eq!(Neighbours::calculate_rtt(100, 1000), 212);
+
+        // Steady state
+        assert_eq!(Neighbours::calculate_rtt(100, 100), 100);
     }
 }
