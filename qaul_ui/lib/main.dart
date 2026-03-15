@@ -13,7 +13,7 @@ import 'force_update.dart';
 import 'helpers/user_prefs_helper.dart';
 import 'l10n/app_localizations.dart';
 import 'qaul_app.dart';
-
+import 'stores/stores.dart';
 
 final _container = ProviderContainer();
 
@@ -69,12 +69,30 @@ class _CustomProviderScope extends StatefulWidget {
   _CustomProviderScopeState createState() => _CustomProviderScopeState();
 }
 
-class _CustomProviderScopeState extends State<_CustomProviderScope> {
+class _CustomProviderScopeState extends State<_CustomProviderScope>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _container.read(usersStoreProvider.notifier).startOnlinePolling();
+  }
+
   @override
   void dispose() {
-    super.dispose();
+    _container.read(usersStoreProvider.notifier).stopOnlinePolling();
+    WidgetsBinding.instance.removeObserver(this);
     // disposing the globally self managed container.
     _container.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final store = _container.read(usersStoreProvider.notifier);
+    state == AppLifecycleState.resumed
+        ? store.startOnlinePolling()
+        : store.stopOnlinePolling();
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
@@ -39,6 +40,24 @@ class _MockWorkerWithUsers extends StubLibqaulWorker {
       pagination: PaginationState(
         hasMore: false,
         total: mockUsers.length,
+        offset: offset ?? 0,
+        limit: limit ?? 50,
+      ),
+    );
+  }
+}
+
+class _MockWorkerForOnlineUsers extends StubLibqaulWorker {
+  _MockWorkerForOnlineUsers(super.ref, {required this.onlineUsers});
+  final List<User> onlineUsers;
+
+  @override
+  Future<PaginatedUsers?> getOnlineUsers({int? offset, int? limit}) async {
+    return PaginatedUsers(
+      users: onlineUsers,
+      pagination: PaginationState(
+        hasMore: false,
+        total: onlineUsers.length,
         offset: offset ?? 0,
         limit: limit ?? 50,
       ),
@@ -194,4 +213,328 @@ void main() {
     expect(mockWorker.lastOffset, 23);
     expect(mockWorker.lastLimit, 10);
   });
+
+  group('getOnlineUsers', () {
+    test('merges online users into state without replacing existing', () async {
+      final existingUser = User(
+        name: 'Existing',
+        id: Uint8List.fromList('existing_id'.codeUnits),
+      );
+      final onlineUser = User(
+        name: 'Online',
+        id: Uint8List.fromList('online_id'.codeUnits),
+        status: ConnectionStatus.online,
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith((_) => defaultUser),
+          qaulWorkerProvider.overrideWith((ref) => _CombinedMockWorker(
+                ref,
+                seedUsers: [existingUser],
+                onlineUsers: [onlineUser],
+              )),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final store = container.read(usersStoreProvider.notifier);
+      await store.getUsers();
+      expect(container.read(usersStoreProvider).length, 1);
+
+      await store.getOnlineUsers();
+
+      final state = container.read(usersStoreProvider);
+      expect(state.length, 2);
+      expect(state.any((u) => u.idBase58 == existingUser.idBase58), isTrue);
+      expect(state.any((u) => u.idBase58 == onlineUser.idBase58), isTrue);
+    });
+
+    test('updates existing user via merge when online response contains it',
+        () async {
+      final userId = Uint8List.fromList('user_a'.codeUnits);
+      final existingUser = User(
+        name: 'UserA',
+        id: userId,
+        status: ConnectionStatus.offline,
+      );
+      final onlineVersion = User(
+        name: 'UserA',
+        id: userId,
+        status: ConnectionStatus.online,
+        availableTypes: {ConnectionType.lan: const ConnectionInfo(ping: 10)},
+      );
+
+      late _CombinedMockWorker mockWorker;
+      final container = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith((_) => defaultUser),
+          qaulWorkerProvider.overrideWith((ref) {
+            mockWorker = _CombinedMockWorker(
+              ref,
+              seedUsers: [existingUser],
+              onlineUsers: [onlineVersion],
+            );
+            return mockWorker;
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final store = container.read(usersStoreProvider.notifier);
+      await store.getUsers();
+
+      expect(container.read(usersStoreProvider).first.status,
+          ConnectionStatus.offline);
+
+      await store.getOnlineUsers();
+
+      final updated = container.read(usersStoreProvider).first;
+      expect(updated.status, ConnectionStatus.online);
+      expect(updated.availableTypes?[ConnectionType.lan]?.ping, 10);
+    });
+  });
+
+  group('refreshUser', () {
+    test('always calls worker, bypassing local cache', () async {
+      final userId = Uint8List.fromList('refresh_user'.codeUnits);
+      final user = User(
+        name: 'Refresh',
+        id: userId,
+        status: ConnectionStatus.online,
+      );
+      final refreshedUser = User(
+        name: 'Refresh',
+        id: userId,
+        status: ConnectionStatus.offline,
+      );
+
+      late _CombinedMockWorker mockWorker;
+      final container = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith((_) => defaultUser),
+          qaulWorkerProvider.overrideWith((ref) {
+            mockWorker = _CombinedMockWorker(
+              ref,
+              seedUsers: [user],
+              onlineUsers: [],
+              getUserByIdResults: {user.idBase58: refreshedUser},
+            );
+            return mockWorker;
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final store = container.read(usersStoreProvider.notifier);
+      await store.getUsers();
+
+      // User is already in state, but refreshUser should still call worker
+      final result = await store.refreshUser(user.idBase58);
+      expect(result, isNotNull);
+      expect(mockWorker.getUserByIdCallCount, 1);
+    });
+
+    test('updates existing user in state via merge', () async {
+      final userId = Uint8List.fromList('merge_user'.codeUnits);
+      final original = User(
+        name: 'Original',
+        id: userId,
+        status: ConnectionStatus.online,
+        keyBase58: 'key123',
+      );
+      final refreshed = User(
+        name: 'Original',
+        id: userId,
+        status: ConnectionStatus.offline,
+      );
+
+      late _CombinedMockWorker mockWorker;
+      final container = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith((_) => defaultUser),
+          qaulWorkerProvider.overrideWith((ref) {
+            mockWorker = _CombinedMockWorker(
+              ref,
+              seedUsers: [original],
+              onlineUsers: [],
+              getUserByIdResults: {original.idBase58: refreshed},
+            );
+            return mockWorker;
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final store = container.read(usersStoreProvider.notifier);
+      await store.getUsers();
+      await store.refreshUser(original.idBase58);
+
+      final updated = container.read(usersStoreProvider).first;
+      // _mergeUser keeps current status when incoming is offline
+      expect(updated.status, ConnectionStatus.online);
+      // _mergeUser preserves keyBase58 from incoming (null) ?? current
+      expect(updated.keyBase58, 'key123');
+    });
+  });
+
+  group('_mergeUser', () {
+    test('preserves current name when incoming has undefined name', () async {
+      final userId = Uint8List.fromList('name_test'.codeUnits);
+      final current = User(name: 'RealName', id: userId);
+      final incoming = User(name: 'Name Undefined', id: userId);
+
+      late _CombinedMockWorker mockWorker;
+      final container = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith((_) => defaultUser),
+          qaulWorkerProvider.overrideWith((ref) {
+            mockWorker = _CombinedMockWorker(
+              ref,
+              seedUsers: [current],
+              onlineUsers: [incoming],
+            );
+            return mockWorker;
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(usersStoreProvider.notifier).getUsers();
+      await container.read(usersStoreProvider.notifier).getOnlineUsers();
+
+      final merged = container.read(usersStoreProvider).first;
+      expect(merged.name, 'RealName');
+    });
+
+    test('keeps current status when incoming is offline', () async {
+      final userId = Uint8List.fromList('status_test'.codeUnits);
+      final current = User(
+        name: 'User',
+        id: userId,
+        status: ConnectionStatus.online,
+      );
+      final incoming = User(
+        name: 'User',
+        id: userId,
+        status: ConnectionStatus.offline,
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith((_) => defaultUser),
+          qaulWorkerProvider.overrideWith((ref) => _CombinedMockWorker(
+                ref,
+                seedUsers: [current],
+                onlineUsers: [incoming],
+              )),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(usersStoreProvider.notifier).getUsers();
+      await container.read(usersStoreProvider.notifier).getOnlineUsers();
+
+      expect(
+          container.read(usersStoreProvider).first.status, ConnectionStatus.online);
+    });
+
+    test('takes incoming availableTypes when present', () async {
+      final userId = Uint8List.fromList('types_test'.codeUnits);
+      final current = User(name: 'User', id: userId);
+      final incoming = User(
+        name: 'User',
+        id: userId,
+        availableTypes: {ConnectionType.ble: const ConnectionInfo(ping: 5)},
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith((_) => defaultUser),
+          qaulWorkerProvider.overrideWith((ref) => _CombinedMockWorker(
+                ref,
+                seedUsers: [current],
+                onlineUsers: [incoming],
+              )),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(usersStoreProvider.notifier).getUsers();
+      await container.read(usersStoreProvider.notifier).getOnlineUsers();
+
+      final merged = container.read(usersStoreProvider).first;
+      expect(merged.availableTypes?[ConnectionType.ble]?.ping, 5);
+    });
+  });
+
+  group('polling', () {
+    test('startOnlinePolling and stopOnlinePolling control timer', () async {
+      final container = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith((_) => defaultUser),
+          qaulWorkerProvider.overrideWith(
+              (ref) => _MockWorkerForOnlineUsers(ref, onlineUsers: [])),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final store = container.read(usersStoreProvider.notifier);
+
+      store.startOnlinePolling();
+      // Starting again should not throw (cancels previous timer)
+      store.startOnlinePolling();
+      store.stopOnlinePolling();
+      // Stopping again should not throw
+      store.stopOnlinePolling();
+    });
+  });
+}
+
+/// Combined mock worker that supports both getUsers (for seeding) and
+/// getOnlineUsers (for polling tests).
+class _CombinedMockWorker extends StubLibqaulWorker {
+  _CombinedMockWorker(
+    super.ref, {
+    required this.seedUsers,
+    required this.onlineUsers,
+    this.getUserByIdResults = const {},
+  });
+
+  final List<User> seedUsers;
+  final List<User> onlineUsers;
+  final Map<String, User?> getUserByIdResults;
+  int getUserByIdCallCount = 0;
+
+  @override
+  Future<PaginatedUsers?> getUsers({int? offset, int? limit}) async {
+    return PaginatedUsers(
+      users: seedUsers,
+      pagination: PaginationState(
+        hasMore: false,
+        total: seedUsers.length,
+        offset: offset ?? 0,
+        limit: limit ?? 50,
+      ),
+    );
+  }
+
+  @override
+  Future<PaginatedUsers?> getOnlineUsers({int? offset, int? limit}) async {
+    return PaginatedUsers(
+      users: onlineUsers,
+      pagination: PaginationState(
+        hasMore: false,
+        total: onlineUsers.length,
+        offset: offset ?? 0,
+        limit: limit ?? 50,
+      ),
+    );
+  }
+
+  @override
+  Future<User?> getUserById(Uint8List userId) {
+    getUserByIdCallCount++;
+    return Future.value(getUserByIdResults[Base58Encode(userId)]);
+  }
 }

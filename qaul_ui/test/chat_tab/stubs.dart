@@ -121,6 +121,10 @@ class StubLibqaulWorker implements LibqaulWorker {
   Future<ChatRoom?> getGroupInfo(Uint8List id) => throw UnimplementedError();
 
   @override
+  Future<PaginatedUsers?> getOnlineUsers({int? offset, int? limit}) =>
+      throw UnimplementedError();
+
+  @override
   Future<User?> getUserById(Uint8List userId) => Future.value(null);
 
   @override
