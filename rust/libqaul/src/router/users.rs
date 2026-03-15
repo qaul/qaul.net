@@ -330,6 +330,7 @@ impl Users {
                                             security_number_blocks,
                                         },
                                     ),
+                                    request_id,
                                 );
                             }
                             Err(error) => {
@@ -342,14 +343,14 @@ impl Users {
                         // attempt to find the user with the associated id
                         let account_id = PeerId::from_bytes(&user_id).ok();
 
-                        Self::with_resolved_user(&req.user_id, |_, q8id, user| {
+                        Self::with_resolved_user(&req.user_id, move |_, q8id, user| {
                             let online_users = RoutingTable::get_online_users_info();
                             let entry = build_user_entry(user, &online_users, &account_id, q8id);
 
                             // send encoded rpc message containing found user entity
                             send_users_rpc_message(proto::users::Message::GetUserByIdResponse(
                                 proto::GetUserByIdResponse { user: Some(entry) },
-                            ));
+                            ), request_id);
                         });
                     }
                     _ => {}
@@ -404,7 +405,7 @@ impl Users {
     ///
     /// Only completes successfully if there is a default user account, otherwise it always returns
     /// an empty list.
-    fn build_user_list(filter: UserFilter, offset: u32, limit: u32, _request_id: String) {
+    fn build_user_list(filter: UserFilter, offset: u32, limit: u32, request_id: String) {
         let users = USERS.get().read().unwrap();
 
         let user_list = if let Some(account) = UserAccounts::get_default_user() {
@@ -424,7 +425,7 @@ impl Users {
             }
         };
 
-        send_users_rpc_message(proto::users::Message::UserList(user_list));
+        send_users_rpc_message(proto::users::Message::UserList(user_list), request_id);
     }
 }
 
@@ -456,7 +457,7 @@ pub struct UserData {
     pub blocked: bool,
 }
 
-fn send_users_rpc_message(message: proto::users::Message) {
+fn send_users_rpc_message(message: proto::users::Message, request_id: String) {
     let proto_message = proto::Users {
         message: Some(message),
     };
@@ -469,7 +470,7 @@ fn send_users_rpc_message(message: proto::users::Message) {
     Rpc::send_message(
         buf,
         crate::rpc::proto::Modules::Users.into(),
-        String::new(),
+        request_id,
         Vec::new(),
     );
 }
