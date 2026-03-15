@@ -3,8 +3,8 @@ import 'dart:typed_data';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/Intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:intl/intl.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_ui/stores/stores.dart';
 
@@ -13,11 +13,28 @@ import 'chat_tab/chat_tab_test.dart';
 List<PublicPost> _testPublicMessages = [];
 List<User> _testUsersForStore = [];
 PaginationState? _testPagination;
+PaginationState? _testPublicPagination;
 Map<String, User?> _getUserByIdByBase58 = {};
 
 class _TestPublicPostListNotifier extends PublicPostListNotifier {
   @override
-  List<PublicPost> build() => _testPublicMessages;
+  PaginatedData<PublicPost> build() =>
+      PaginatedData(data: _testPublicMessages, pagination: _testPublicPagination);
+}
+
+class _MockWorkerForFeedPagination extends StubLibqaulWorker {
+  _MockWorkerForFeedPagination(super.ref);
+  int? lastOffset;
+  int? lastLimit;
+  @override
+  Future<void> requestPublicMessages({
+    int? lastIndex,
+    int? offset,
+    int? limit,
+  }) async {
+    lastOffset = offset;
+    lastLimit = limit;
+  }
 }
 
 class _TestPaginatedUsersNotifier extends PaginatedDataNotifier<User> {
@@ -79,6 +96,7 @@ void main() {
     _testPublicMessages = [];
     _testUsersForStore = [];
     _testPagination = null;
+    _testPublicPagination = null;
     _getUserByIdByBase58 = {};
   });
 
@@ -181,6 +199,83 @@ void main() {
       expect(state.length, 1);
       expect(state.single.author.idBase58, u.idBase58);
       expect(state.single.content, 'Only');
+    });
+
+    test('refreshPublic calls worker with offset 0 and limit 50', () async {
+      late _MockWorkerForFeedPagination mockWorker;
+      final container = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith((_) => defaultUser),
+          publicMessagesProvider.overrideWith(() => _TestPublicPostListNotifier()),
+          usersProvider.overrideWith(() => _TestPaginatedUsersNotifier()),
+          qaulWorkerProvider.overrideWith((ref) {
+            mockWorker = _MockWorkerForFeedPagination(ref);
+            return mockWorker;
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(feedMessageStoreProvider.notifier).refreshPublic();
+
+      expect(mockWorker.lastOffset, 0);
+      expect(mockWorker.lastLimit, 50);
+    });
+
+    test('loadMorePublic calls worker with next offset when hasMore is true', () async {
+      _testPublicMessages = [_post(senderIdBase58: 'u1', content: 'M1')];
+      _testPublicPagination = const PaginationState(
+        hasMore: true,
+        total: 100,
+        offset: 50,
+        limit: 50,
+      );
+      late _MockWorkerForFeedPagination mockWorker;
+      final container = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith((_) => defaultUser),
+          publicMessagesProvider.overrideWith(() => _TestPublicPostListNotifier()),
+          usersProvider.overrideWith(() => _TestPaginatedUsersNotifier()),
+          qaulWorkerProvider.overrideWith((ref) {
+            mockWorker = _MockWorkerForFeedPagination(ref);
+            return mockWorker;
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(feedMessageStoreProvider.notifier).loadMorePublic();
+
+      expect(mockWorker.lastOffset, 100);
+      expect(mockWorker.lastLimit, 50);
+    });
+
+    test('loadMorePublic does not call worker when hasMore is false', () async {
+      _testPublicMessages = [_post(senderIdBase58: 'u1', content: 'M1')];
+      _testPublicPagination = const PaginationState(
+        hasMore: false,
+        total: 50,
+        offset: 0,
+        limit: 50,
+      );
+      late _MockWorkerForFeedPagination mockWorker;
+      final container = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith((_) => defaultUser),
+          publicMessagesProvider.overrideWith(() => _TestPublicPostListNotifier()),
+          usersProvider.overrideWith(() => _TestPaginatedUsersNotifier()),
+          qaulWorkerProvider.overrideWith((ref) {
+            mockWorker = _MockWorkerForFeedPagination(ref);
+            return mockWorker;
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(feedMessageStoreProvider.notifier).loadMorePublic();
+
+      expect(mockWorker.lastOffset, isNull);
+      expect(mockWorker.lastLimit, isNull);
     });
   });
 }

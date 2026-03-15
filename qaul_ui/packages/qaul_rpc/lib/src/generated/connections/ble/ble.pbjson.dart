@@ -37,13 +37,14 @@ const BleError$json = {
     {'1': 'UNKNOWN_ERROR', '2': 0},
     {'1': 'RIGHTS_MISSING', '2': 1},
     {'1': 'TIMEOUT', '2': 2},
+    {'1': 'DEVICE_UNAVAILABLE', '2': 3},
   ],
 };
 
 /// Descriptor for `BleError`. Decode as a `google.protobuf.EnumDescriptorProto`.
 final $typed_data.Uint8List bleErrorDescriptor = $convert.base64Decode(
     'CghCbGVFcnJvchIRCg1VTktOT1dOX0VSUk9SEAASEgoOUklHSFRTX01JU1NJTkcQARILCgdUSU'
-    '1FT1VUEAI=');
+    '1FT1VUEAISFgoSREVWSUNFX1VOQVZBSUxBQkxFEAM=');
 
 @$core.Deprecated('Use bleDescriptor instead')
 const Ble$json = {

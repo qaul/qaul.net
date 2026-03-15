@@ -721,7 +721,7 @@ class BleStartRequest extends $pb.GeneratedMessage {
 
   /// qaul ID
   ///
-  /// The small 16 byte qaul id
+  /// The small 8 byte qaul id
   /// to be used to identify this node
   @$pb.TagNumber(1)
   $core.List<$core.int> get qaulId => $_getN(0);

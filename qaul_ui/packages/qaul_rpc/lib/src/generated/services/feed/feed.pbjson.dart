@@ -65,13 +65,33 @@ const FeedMessageRequest$json = {
   '2': [
     {'1': 'last_received', '3': 1, '4': 1, '5': 12, '10': 'lastReceived'},
     {'1': 'last_index', '3': 2, '4': 1, '5': 4, '10': 'lastIndex'},
+    {'1': 'offset', '3': 10, '4': 1, '5': 13, '10': 'offset'},
+    {'1': 'limit', '3': 20, '4': 1, '5': 13, '10': 'limit'},
   ],
 };
 
 /// Descriptor for `FeedMessageRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List feedMessageRequestDescriptor = $convert.base64Decode(
     'ChJGZWVkTWVzc2FnZVJlcXVlc3QSIwoNbGFzdF9yZWNlaXZlZBgBIAEoDFIMbGFzdFJlY2Vpdm'
-    'VkEh0KCmxhc3RfaW5kZXgYAiABKARSCWxhc3RJbmRleA==');
+    'VkEh0KCmxhc3RfaW5kZXgYAiABKARSCWxhc3RJbmRleBIWCgZvZmZzZXQYCiABKA1SBm9mZnNl'
+    'dBIUCgVsaW1pdBgUIAEoDVIFbGltaXQ=');
+
+@$core.Deprecated('Use paginationMetadataDescriptor instead')
+const PaginationMetadata$json = {
+  '1': 'PaginationMetadata',
+  '2': [
+    {'1': 'has_more', '3': 10, '4': 1, '5': 8, '10': 'hasMore'},
+    {'1': 'total', '3': 20, '4': 1, '5': 13, '10': 'total'},
+    {'1': 'offset', '3': 30, '4': 1, '5': 13, '10': 'offset'},
+    {'1': 'limit', '3': 40, '4': 1, '5': 13, '10': 'limit'},
+  ],
+};
+
+/// Descriptor for `PaginationMetadata`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List paginationMetadataDescriptor = $convert.base64Decode(
+    'ChJQYWdpbmF0aW9uTWV0YWRhdGESGQoIaGFzX21vcmUYCiABKAhSB2hhc01vcmUSFAoFdG90YW'
+    'wYFCABKA1SBXRvdGFsEhYKBm9mZnNldBgeIAEoDVIGb2Zmc2V0EhQKBWxpbWl0GCggASgNUgVs'
+    'aW1pdA==');
 
 @$core.Deprecated('Use feedMessageListDescriptor instead')
 const FeedMessageList$json = {
@@ -85,13 +105,22 @@ const FeedMessageList$json = {
       '6': '.qaul.rpc.feed.FeedMessage',
       '10': 'feedMessage'
     },
+    {
+      '1': 'pagination',
+      '3': 10,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.feed.PaginationMetadata',
+      '10': 'pagination'
+    },
   ],
 };
 
 /// Descriptor for `FeedMessageList`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List feedMessageListDescriptor = $convert.base64Decode(
     'Cg9GZWVkTWVzc2FnZUxpc3QSPQoMZmVlZF9tZXNzYWdlGAEgAygLMhoucWF1bC5ycGMuZmVlZC'
-    '5GZWVkTWVzc2FnZVILZmVlZE1lc3NhZ2U=');
+    '5GZWVkTWVzc2FnZVILZmVlZE1lc3NhZ2USQQoKcGFnaW5hdGlvbhgKIAEoCzIhLnFhdWwucnBj'
+    'LmZlZWQuUGFnaW5hdGlvbk1ldGFkYXRhUgpwYWdpbmF0aW9u');
 
 @$core.Deprecated('Use feedMessageDescriptor instead')
 const FeedMessage$json = {

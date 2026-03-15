@@ -13,7 +13,7 @@ class BleTranslator extends RpcModuleTranslator {
       case Ble_Message.infoResponse:
         final msg = message.ensureInfoResponse();
         final status = BleConnectionStatus(
-          bleId: Uint8List.fromList(msg.smallId),
+          bleId: Uint8List.fromList(msg.q8id),
           status: msg.status,
           deviceInfo: Uint8List.fromList(msg.deviceInfo),
         );
