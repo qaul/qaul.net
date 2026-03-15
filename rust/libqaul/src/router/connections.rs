@@ -77,6 +77,311 @@ pub struct ConnectionTable {
     table: HashMap<Vec<u8>, UserEntry>,
 }
 
+/// Instance-based connection table state owning all per-module tables.
+/// Replaces the global LOCAL/INTERNET/LAN/BLE statics for multi-instance use.
+pub struct ConnectionTableState {
+    pub local: RwLock<RoutingTable>,
+    pub internet: RwLock<ConnectionTable>,
+    pub lan: RwLock<ConnectionTable>,
+    pub ble: RwLock<ConnectionTable>,
+}
+
+impl ConnectionTableState {
+    /// Create a new empty ConnectionTableState.
+    pub fn new() -> Self {
+        Self {
+            local: RwLock::new(RoutingTable {
+                table: HashMap::new(),
+            }),
+            internet: RwLock::new(ConnectionTable {
+                table: HashMap::new(),
+            }),
+            lan: RwLock::new(ConnectionTable {
+                table: HashMap::new(),
+            }),
+            ble: RwLock::new(ConnectionTable {
+                table: HashMap::new(),
+            }),
+        }
+    }
+
+    /// Process received routing info and fill into the appropriate module tables.
+    /// This is the instance-based version for simulation use.
+    pub fn process_received_routing_info(
+        &self,
+        neighbour_id: PeerId,
+        info: &[router_net_proto::RoutingInfoEntry],
+        neighbours_state: &super::neighbours::NeighboursState,
+        config: &crate::storage::configuration::RoutingOptions,
+    ) {
+        // try Lan module
+        if let Some(rtt) = neighbours_state.get_rtt(&neighbour_id, &ConnectionModule::Lan) {
+            self.fill_received_routing_info(ConnectionModule::Lan, neighbour_id, rtt, info, config);
+        }
+
+        // try Internet module
+        if let Some(rtt) = neighbours_state.get_rtt(&neighbour_id, &ConnectionModule::Internet) {
+            self.fill_received_routing_info(
+                ConnectionModule::Internet,
+                neighbour_id,
+                rtt,
+                info,
+                config,
+            );
+        }
+
+        // try Bluetooth module
+        if let Some(rtt) = neighbours_state.get_rtt(&neighbour_id, &ConnectionModule::Ble) {
+            self.fill_received_routing_info(ConnectionModule::Ble, neighbour_id, rtt, info, config);
+        }
+    }
+
+    /// Populate connection table with incoming routing information (instance-based).
+    fn fill_received_routing_info(
+        &self,
+        conn: ConnectionModule,
+        neighbour_id: PeerId,
+        rtt: u32,
+        info: &[router_net_proto::RoutingInfoEntry],
+        config: &crate::storage::configuration::RoutingOptions,
+    ) {
+        for entry in info {
+            let hc;
+            if entry.hc[0] < 255 {
+                hc = entry.hc[0] + 1;
+            } else {
+                return;
+            }
+
+            let total_rtt = entry.rtt + rtt;
+            let neighbour = NeighbourEntry {
+                id: neighbour_id,
+                rtt: total_rtt,
+                hc,
+                lq: Self::calculate_linkquality_with_config(total_rtt, hc, config),
+                last_update: Timestamp::get_timestamp(),
+            };
+
+            self.add_connection_instance(entry.user.clone(), entry.pgid, neighbour, conn);
+        }
+    }
+
+    /// calculate link quality with explicit config
+    fn calculate_linkquality_with_config(
+        rtt: u32,
+        hc: u8,
+        config: &crate::storage::configuration::RoutingOptions,
+    ) -> u32 {
+        rtt + (hc as u32 * (config.hop_count_penalty as u32) * 1000_000)
+    }
+
+    /// add connection to instance state
+    fn add_connection_instance(
+        &self,
+        user_q8id: Vec<u8>,
+        pgid: u32,
+        connection: NeighbourEntry,
+        module: ConnectionModule,
+    ) {
+        let connection_table_lock = match module {
+            ConnectionModule::Internet => &self.internet,
+            ConnectionModule::Lan => &self.lan,
+            ConnectionModule::Ble => &self.ble,
+            ConnectionModule::Local | ConnectionModule::None => return,
+        };
+
+        let mut connection_table = connection_table_lock.write().unwrap();
+        let now_ts = Timestamp::get_timestamp();
+
+        if let Some(user) = connection_table.table.get_mut(&user_q8id) {
+            if connection.hc == 1 || pgid > user.pgid {
+                user.pgid = pgid;
+                user.pgid_update = now_ts;
+                user.pgid_update_hc = connection.hc;
+                user.connections.remove(&connection.id);
+                user.connections.insert(connection.id, connection);
+            } else if pgid == user.pgid {
+                if (now_ts - user.pgid_update <= (10 * 1000)) && connection.hc < user.pgid_update_hc
+                {
+                    user.pgid_update = now_ts;
+                    user.pgid_update_hc = connection.hc;
+                    user.connections.remove(&connection.id);
+                    user.connections.insert(connection.id, connection);
+                } else if let Some(conn) = user.connections.get_mut(&connection.id) {
+                    if connection.lq < conn.lq {
+                        conn.lq = connection.lq;
+                        conn.hc = connection.hc;
+                        conn.last_update = now_ts;
+                        user.connections.remove(&connection.id);
+                        user.connections.insert(connection.id, connection);
+                    }
+                }
+            } else if pgid < user.pgid {
+                if user.pgid_update_hc == connection.hc {
+                    if (user.pgid - pgid) > (connection.hc as u32) {
+                        user.pgid = pgid;
+                        user.pgid_update = now_ts;
+                        user.pgid_update_hc = connection.hc;
+                        user.connections.remove(&connection.id);
+                        user.connections.insert(connection.id, connection);
+                    }
+                }
+            }
+        } else {
+            let mut connections_map = BTreeMap::new();
+            let hc = connection.hc;
+            connections_map.insert(connection.id, connection);
+
+            let user = UserEntry {
+                id: user_q8id.clone(),
+                pgid,
+                pgid_update: now_ts,
+                pgid_update_hc: hc,
+                online_time: now_ts,
+                connections: connections_map,
+            };
+
+            connection_table.table.insert(user_q8id, user);
+        }
+    }
+
+    /// Update propagation id for local users (instance-based).
+    pub fn update_propagation_id(&self, propagation_id: u32) {
+        let mut local = self.local.write().unwrap();
+        for (_user_id, user) in local.table.iter_mut() {
+            user.pgid = propagation_id;
+            user.pgid_update = Timestamp::get_timestamp();
+            user.connections.get_mut(0).unwrap().last_update = Timestamp::get_timestamp();
+        }
+    }
+
+    /// Add a local user to the instance state.
+    pub fn add_local_user(&self, user_id: PeerId, node_id: PeerId) {
+        let mut routing_table = self.local.write().unwrap();
+        let mut connections = Vec::with_capacity(1);
+        let now_ts = Timestamp::get_timestamp() + 3000;
+        connections.push(RoutingConnectionEntry {
+            module: ConnectionModule::Local,
+            node: node_id,
+            rtt: 0,
+            hc: 0,
+            lq: 0,
+            last_update: now_ts,
+        });
+
+        let user_q8id = QaulId::to_q8id(user_id);
+        let routing_user_entry = RoutingUserEntry {
+            id: user_q8id.clone(),
+            pgid: 1,
+            pgid_update: now_ts,
+            pgid_update_hc: 1,
+            online_time: now_ts,
+            connections,
+        };
+        routing_table.table.insert(user_q8id, routing_user_entry);
+    }
+
+    /// Create a routing table from the instance state (instance-based version of create_routing_table).
+    pub fn create_routing_table(
+        &self,
+        config: &crate::storage::configuration::RoutingOptions,
+    ) -> RoutingTable {
+        let mut table = RoutingTable {
+            table: HashMap::new(),
+        };
+
+        // set static routes for local users
+        {
+            let local = self.local.read().unwrap();
+            for (user_id, user) in &local.table {
+                table.table.insert(user_id.to_owned(), user.to_owned());
+            }
+        }
+
+        // calculate from each module
+        table = self.calculate_intermediary_table_instance(table, ConnectionModule::Lan, config);
+        table =
+            self.calculate_intermediary_table_instance(table, ConnectionModule::Internet, config);
+        table = self.calculate_intermediary_table_instance(table, ConnectionModule::Ble, config);
+
+        table
+    }
+
+    /// Instance-based version of calculate_intermediary_table.
+    fn calculate_intermediary_table_instance(
+        &self,
+        mut table: RoutingTable,
+        conn: ConnectionModule,
+        config: &crate::storage::configuration::RoutingOptions,
+    ) -> RoutingTable {
+        let connection_table_lock = match conn {
+            ConnectionModule::Internet => &self.internet,
+            ConnectionModule::Lan => &self.lan,
+            ConnectionModule::Ble => &self.ble,
+            ConnectionModule::Local | ConnectionModule::None => return table,
+        };
+
+        let mut connection_table = connection_table_lock.write().unwrap();
+        let mut expired_users = Vec::with_capacity(connection_table.table.len());
+
+        for (user_id, user) in connection_table.table.iter_mut() {
+            let (b_expired_pgid, connection_entry) =
+                ConnectionTable::find_best_connection_with_config(user, config);
+            if !b_expired_pgid {
+                if let Some(connection) = connection_entry {
+                    let routing_connection_entry = RoutingConnectionEntry {
+                        module: conn,
+                        node: connection.id,
+                        rtt: connection.rtt,
+                        hc: connection.hc,
+                        lq: connection.lq,
+                        last_update: connection.last_update,
+                    };
+
+                    if let Some(routing_user_entry) = table.table.get_mut(&user.id) {
+                        routing_user_entry
+                            .connections
+                            .push(routing_connection_entry);
+                    } else {
+                        let mut connections = Vec::with_capacity(1);
+                        connections.push(routing_connection_entry);
+
+                        let routing_user_entry = RoutingUserEntry {
+                            id: user_id.to_owned(),
+                            pgid: user.pgid,
+                            pgid_update: user.pgid_update,
+                            pgid_update_hc: user.pgid_update_hc,
+                            online_time: user.online_time,
+                            connections,
+                        };
+                        table.table.insert(user_id.to_owned(), routing_user_entry);
+                    }
+                } else {
+                    if !table.table.contains_key(&user.id) {
+                        let routing_user_entry = RoutingUserEntry {
+                            id: user_id.to_owned(),
+                            pgid: user.pgid,
+                            pgid_update: user.pgid_update,
+                            pgid_update_hc: user.pgid_update_hc,
+                            online_time: user.online_time,
+                            connections: Vec::new(),
+                        };
+                        table.table.insert(user_id.to_owned(), routing_user_entry);
+                    }
+                }
+            } else {
+                expired_users.push(user_id.clone());
+            }
+        }
+
+        for user_id in expired_users {
+            connection_table.table.remove(&user_id);
+        }
+
+        table
+    }
+}
+
 impl ConnectionTable {
     /// Initialize connection tables
     /// Creates a table for each ConnectionModule
@@ -151,13 +456,6 @@ impl ConnectionTable {
         neighbour_id: PeerId,
         info: &[router_net_proto::RoutingInfoEntry],
     ) {
-        // log::trace!("process_received_routing_info count={}", info.len());
-        // for inf in &info{
-        //     let c: &[u8] = &inf.user;
-        //     let userid = PeerId::from_bytes(c).unwrap();
-        //     log::trace!("receive_routing_info user={}, hc={}, propg_id={}", userid, inf.hc[0], inf.pgid);
-        // }
-
         // try Lan module
         if let Some(rtt) = Neighbours::get_rtt(&neighbour_id, &ConnectionModule::Lan) {
             Self::fill_received_routing_info(ConnectionModule::Lan, neighbour_id, rtt, info);
@@ -437,6 +735,15 @@ impl ConnectionTable {
     /// find best entry
     /// and remove all old entries
     fn find_best_connection(user: &mut UserEntry) -> (bool, Option<NeighbourEntry>) {
+        let config = super::Router::get_configuration();
+        Self::find_best_connection_with_config(user, &config)
+    }
+
+    /// find best entry with explicit config (for instance-based and global use)
+    fn find_best_connection_with_config(
+        user: &mut UserEntry,
+        config: &crate::storage::configuration::RoutingOptions,
+    ) -> (bool, Option<NeighbourEntry>) {
         // initialize helper variables
         let mut expired_connections = Vec::with_capacity(user.connections.len());
         let mut return_entry = None;
@@ -444,7 +751,6 @@ impl ConnectionTable {
 
         //remove user after 5min from last pgid updated
         //config.maintain_period_limit is seconds unit, need to convert into mili seconds
-        let config = super::Router::get_configuration();
         if Timestamp::get_timestamp() - user.pgid_update >= (config.maintain_period_limit * 1000) {
             return (true, None);
         }
@@ -460,9 +766,7 @@ impl ConnectionTable {
 
                 // check if entry is expired
                 // entry expires after 20 seconds, unit is mili seconds
-                //if now - value.last_update < (20 * 1000 * (value.hc as u64)){
                 if now - value.last_update
-                    //< (2 * (config.sending_table_period * 1000) * (value.hc as u64))
                     < (config.sending_table_period * 1000 * (value.hc as u64 + 1))
                 {
                     expired = false;

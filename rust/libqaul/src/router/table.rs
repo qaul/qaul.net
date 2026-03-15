@@ -74,6 +74,106 @@ pub struct RoutingTable {
     pub table: HashMap<Vec<u8>, RoutingUserEntry>,
 }
 
+/// Instance-based routing table state.
+/// Replaces the global ROUTINGTABLE static for multi-instance use.
+pub struct RoutingTableState {
+    pub inner: RwLock<RoutingTable>,
+}
+
+impl RoutingTableState {
+    /// Create a new empty routing table state.
+    pub fn new() -> Self {
+        Self {
+            inner: RwLock::new(RoutingTable {
+                table: HashMap::new(),
+            }),
+        }
+    }
+
+    /// Replace the routing table with a new one.
+    pub fn set(&self, new_table: RoutingTable) {
+        let mut table = self.inner.write().unwrap();
+        table.table = new_table.table;
+    }
+
+    /// Create routing information for a specific neighbour node.
+    pub fn create_routing_info(
+        &self,
+        neighbour: PeerId,
+        last_sent: u64,
+    ) -> router_net_proto::RoutingInfoTable {
+        let routing_table = self.inner.read().unwrap();
+        let mut table = router_net_proto::RoutingInfoTable {
+            entry: Vec::with_capacity(routing_table.table.len()),
+        };
+
+        for (user_id, user) in routing_table.table.iter() {
+            if user.connections.is_empty() {
+                continue;
+            }
+
+            let min_conn = user
+                .connections
+                .iter()
+                .min_by_key(|connection| connection.lq)
+                .unwrap();
+
+            if neighbour != min_conn.node && (min_conn.last_update >= last_sent || min_conn.hc == 0)
+            {
+                let table_entry = router_net_proto::RoutingInfoEntry {
+                    user: user_id.clone(),
+                    rtt: min_conn.rtt,
+                    hc: vec![min_conn.hc],
+                    pgid: user.pgid,
+                };
+                table.entry.push(table_entry);
+            }
+        }
+
+        table
+    }
+
+    /// Get online users and hop count.
+    pub fn get_online_users(&self) -> BTreeMap<Vec<u8>, u8> {
+        let mut user_ids: BTreeMap<Vec<u8>, u8> = BTreeMap::new();
+        let routing_table = self.inner.read().unwrap();
+
+        for (user_id, user) in routing_table.table.iter() {
+            if !user.connections.is_empty() {
+                user_ids.insert(user_id.clone(), user.connections[0].hc);
+            }
+        }
+        user_ids
+    }
+
+    /// Get the routing connection entry for a specific user.
+    pub fn get_route_to_user(&self, user_id: PeerId) -> Option<RoutingConnectionEntry> {
+        let routing_table = self.inner.read().unwrap();
+        let user_q8id = QaulId::to_q8id(user_id);
+
+        if let Some(user_entry) = routing_table.table.get(&user_q8id) {
+            let mut compare: Option<&RoutingConnectionEntry> = None;
+
+            for connection in &user_entry.connections {
+                match compare {
+                    Some(current) => {
+                        if RoutingTable::compare_connections(current, connection) {
+                            compare = Some(connection);
+                        }
+                    }
+                    None => compare = Some(connection),
+                }
+            }
+
+            match compare {
+                None => return None,
+                Some(connection) => return Some(connection.to_owned()),
+            }
+        }
+        None
+    }
+}
+
 impl RoutingTable {
     /// Initialize routing table
     /// Creates global routing table and saves it to state.
@@ -275,7 +375,10 @@ impl RoutingTable {
     /// * returns true, when the new connection is better
     /// * returns false, when the current connection is better
     ///
-    fn compare_connections(current: &RoutingConnectionEntry, new: &RoutingConnectionEntry) -> bool {
+    pub(crate) fn compare_connections(
+        current: &RoutingConnectionEntry,
+        new: &RoutingConnectionEntry,
+    ) -> bool {
         let current_value = Self::rank_routing_connection(current);
         let new_value = Self::rank_routing_connection(new);
 
