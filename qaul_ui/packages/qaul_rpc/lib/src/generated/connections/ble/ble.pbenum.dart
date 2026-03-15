@@ -72,14 +72,19 @@ class BleError extends $pb.ProtobufEnum {
   static const BleError TIMEOUT =
       BleError._(2, _omitEnumNames ? '' : 'TIMEOUT');
 
+  /// the device is unavailable, e.g. because it was turned off
+  static const BleError DEVICE_UNAVAILABLE =
+      BleError._(3, _omitEnumNames ? '' : 'DEVICE_UNAVAILABLE');
+
   static const $core.List<BleError> values = <BleError>[
     UNKNOWN_ERROR,
     RIGHTS_MISSING,
     TIMEOUT,
+    DEVICE_UNAVAILABLE,
   ];
 
   static final $core.List<BleError?> _byValue =
-      $pb.ProtobufEnum.$_initByValueList(values, 2);
+      $pb.ProtobufEnum.$_initByValueList(values, 3);
   static BleError? valueOf($core.int value) =>
       value < 0 || value >= _byValue.length ? null : _byValue[value];
 

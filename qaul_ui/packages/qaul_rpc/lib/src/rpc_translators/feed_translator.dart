@@ -9,12 +9,22 @@ class FeedTranslator extends RpcModuleTranslator {
     final message = Feed.fromBuffer(data);
     switch (message.whichMessage()) {
       case Feed_Message.received:
-        final newMessages = message
-            .ensureReceived()
-            .feedMessage
-            .map((msg) => msg.toModelMessage)
-            .toList();
-        return RpcTranslatorResponse(type, newMessages);
+        final received = message.ensureReceived();
+        final posts = received.feedMessage.map((msg) => msg.toModelMessage).toList();
+        PaginationState? pagination;
+        if (received.hasPagination()) {
+          final p = received.pagination;
+          pagination = PaginationState(
+            hasMore: p.hasMore,
+            total: p.total,
+            offset: p.offset,
+            limit: p.limit,
+          );
+        }
+        return RpcTranslatorResponse(
+          type,
+          PaginatedData<PublicPost>(data: posts, pagination: pagination),
+        );
       default:
         return super.decodeMessageBytes(data, ref);
     }
@@ -22,10 +32,15 @@ class FeedTranslator extends RpcModuleTranslator {
 
   @override
   Future<void> processResponse(RpcTranslatorResponse res, Ref ref) async {
-    if (res.module != type || res.data is! List<PublicPost>) return;
-    final provider = ref.read(publicMessagesProvider.notifier);
-    for (final msg in res.data) {
-      if (!provider.contains(msg)) provider.add(msg);
+    if (res.module != type || res.data is! PaginatedData<PublicPost>) return;
+    final paginated = res.data as PaginatedData<PublicPost>;
+    final notifier = ref.read(publicMessagesProvider.notifier);
+    final isFirstPage = paginated.pagination?.offset == 0;
+    if (isFirstPage) {
+      notifier.replaceAll(paginated.data, pagination: paginated.pagination);
+    } else {
+      notifier.appendMany(paginated.data);
+      notifier.setPagination(paginated.pagination);
     }
   }
 }

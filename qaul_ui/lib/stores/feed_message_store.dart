@@ -30,7 +30,7 @@ class FeedMessageStore extends Notifier<List<FeedMessage>> {
   }
 
   void _asyncInit() async {
-    final messages = ref.read(publicMessagesProvider);
+    final messages = ref.read(publicMessagesProvider).data;
     final knownUsers = ref.read(usersStoreProvider);
     final authorById = <String, User>{
       for (final u in knownUsers) u.idBase58: u,
@@ -60,6 +60,20 @@ class FeedMessageStore extends Notifier<List<FeedMessage>> {
     final indexes = state.map((e) => e.index ?? 1);
     await worker.requestPublicMessages(
       lastIndex: indexes.isEmpty ? null : indexes.reduce(math.max),
+      offset: 0,
+      limit: 50,
+    );
+  }
+
+  Future<void> loadMorePublic() async {
+    final pagination = ref.read(publicMessagesProvider).pagination;
+    if (pagination == null || pagination.hasMore != true) return;
+
+    final worker = ref.read(qaulWorkerProvider);
+    final nextOffset = pagination.offset + pagination.limit;
+    await worker.requestPublicMessages(
+      offset: nextOffset,
+      limit: pagination.limit,
     );
   }
 

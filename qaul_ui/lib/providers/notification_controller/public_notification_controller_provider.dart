@@ -18,7 +18,8 @@ class PublicNotificationController
 
   @override
   MapEntry<dynamic, void Function(List<PublicPost>?, List<PublicPost>)>
-      get strategy => MapEntry(publicMessagesProvider, execute);
+      get strategy =>
+          MapEntry(publicMessagesProvider.select((v) => v.data), execute);
 
   @override
   Future<void> initialize() async {
