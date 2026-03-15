@@ -8,7 +8,7 @@
 
 use prost::Message;
 use state::InitCell;
-use std::sync::RwLock;
+use std::sync::{Arc, RwLock};
 
 pub mod connections;
 pub mod feed_requester;
@@ -30,12 +30,92 @@ use user_requester::{UserRequester, UserResponser};
 use users::Users;
 
 /// Import protobuf message definition
-pub use qaul_proto::qaul_rpc_router as proto;
 pub use qaul_proto::qaul_net_router_net_info as router_net_proto;
+pub use qaul_proto::qaul_rpc_router as proto;
+
+/// Global RouterState instance for backward compatibility.
+/// New code should use instance methods on RouterState directly.
+static GLOBAL_ROUTER_STATE: InitCell<Arc<RouterState>> = InitCell::new();
 
 /// mutable state of router,
 /// used for storing the router configuration (global state - deprecated)
 static ROUTER: InitCell<RwLock<Router>> = InitCell::new();
+
+/// Instance-based router state that owns all routing sub-state.
+///
+/// This replaces the scattered global statics across router submodules.
+/// Each `RouterState` instance is fully independent, enabling multiple
+/// nodes to run in the same process.
+pub struct RouterState {
+    /// Router configuration
+    pub configuration: RoutingOptions,
+
+    /// Neighbour tables per connection module
+    pub neighbours: neighbours::NeighboursState,
+
+    /// Connection tables per connection module
+    pub connections: connections::ConnectionTableState,
+
+    /// Global routing table
+    pub routing_table: table::RoutingTableState,
+
+    /// Routing info scheduler
+    pub scheduler: info::SchedulerState,
+
+    /// Flood message queue
+    pub flooder: flooder::FlooderState,
+
+    /// Feed request queue
+    pub feed_requester: feed_requester::FeedRequesterState,
+
+    /// Feed response queue
+    pub feed_responser: feed_requester::FeedResponserState,
+
+    /// User request queue
+    pub user_requester: user_requester::UserRequesterState,
+
+    /// User response queue
+    pub user_responser: user_requester::UserResponserState,
+
+    /// Users table
+    pub users: users::UsersState,
+}
+
+impl RouterState {
+    /// Create a new RouterState with default empty tables.
+    /// This does NOT touch any global state or databases.
+    /// Suitable for simulation.
+    pub fn new(config: RoutingOptions) -> Self {
+        let interval = config.sending_table_period;
+        Self {
+            configuration: config,
+            neighbours: neighbours::NeighboursState::new(),
+            connections: connections::ConnectionTableState::new(),
+            routing_table: table::RoutingTableState::new(),
+            scheduler: info::SchedulerState::new(interval),
+            flooder: flooder::FlooderState::new(),
+            feed_requester: feed_requester::FeedRequesterState::new(),
+            feed_responser: feed_requester::FeedResponserState::new(),
+            user_requester: user_requester::UserRequesterState::new(),
+            user_responser: user_requester::UserResponserState::new(),
+            users: users::UsersState::new(),
+        }
+    }
+
+    /// Get a reference to the global RouterState instance.
+    /// Panics if the global state has not been initialized.
+    pub fn global() -> &'static Arc<RouterState> {
+        GLOBAL_ROUTER_STATE.get()
+    }
+
+    /// Initialize the global RouterState from the current Configuration.
+    /// Called during Router::init() for backward compatibility.
+    fn init_global() {
+        let config = Configuration::get();
+        let state = Arc::new(RouterState::new(config.routing.clone()));
+        GLOBAL_ROUTER_STATE.set(state);
+    }
+}
 
 /// Router Module - holds all router state for a single instance
 ///
@@ -82,6 +162,9 @@ impl Router {
         };
         // set configuration to state
         ROUTER.set(RwLock::new(router));
+
+        // Initialize the global RouterState instance
+        RouterState::init_global();
 
         // initialize direct neighbours table
         Neighbours::init();

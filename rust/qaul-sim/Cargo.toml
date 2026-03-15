@@ -1,0 +1,20 @@
+[package]
+name = "qaul-sim"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL"
+description = "Full-mesh simulation and benchmarking for qaul routing"
+
+[dependencies]
+libqaul = { path = "../libqaul" }
+libp2p = { version = "0.56.0", features = ["tokio", "macros"] }
+rand = "0.9"
+log = "0.4"
+env_logger = "0.11"
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "bench"
+harness = false

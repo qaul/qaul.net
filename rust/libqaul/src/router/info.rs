@@ -54,31 +54,133 @@ pub struct Scheduler {
     /// routing information.
     /// If a node is interconnected via several connection
     /// modules, the table is only sent on one of them.
-    neighbours: HashMap<PeerId, SchedulerEntry>,
+    pub neighbours: HashMap<PeerId, SchedulerEntry>,
 
     /// interval in which updated routing information
     /// shall be sent to the neighbouring nodes.
-    interval: Duration,
+    pub interval: Duration,
 
     /// propagation ID
     ///
     /// A number that is increased by one
     /// on each propagation cycle
-    propagation_id: u32,
+    pub propagation_id: u32,
 
     /// propagation update time
     ///
     /// timestamp of the last propagation update
-    propagation_timestamp: u64,
+    pub propagation_timestamp: u64,
 }
 
 /// An entry for the scheduler neighbour list
 /// that contains the time stamp
 #[derive(Clone, Debug, Copy)]
-struct SchedulerEntry {
+pub struct SchedulerEntry {
     /// time of the last send
-    timestamp: SystemTime,
-    is_first: bool,
+    pub timestamp: SystemTime,
+    pub is_first: bool,
+}
+
+/// Instance-based scheduler state.
+/// Replaces the global SCHEDULER static for multi-instance use.
+pub struct SchedulerState {
+    pub inner: RwLock<Scheduler>,
+}
+
+impl SchedulerState {
+    /// Create a new scheduler state with the given interval in seconds.
+    pub fn new(interval_seconds: u64) -> Self {
+        Self {
+            inner: RwLock::new(Scheduler {
+                neighbours: HashMap::new(),
+                interval: Duration::from_secs(interval_seconds),
+                propagation_id: 0,
+                propagation_timestamp: Timestamp::get_timestamp(),
+            }),
+        }
+    }
+
+    /// Add a new neighbour entry to the scheduler.
+    pub fn add_neighbour(&self, node_id: PeerId) {
+        let exists;
+        {
+            let scheduler = self.inner.read().unwrap();
+            exists = scheduler.neighbours.contains_key(&node_id);
+        }
+
+        if !exists {
+            let mut scheduler = self.inner.write().unwrap();
+            let interval = scheduler.interval;
+            scheduler.neighbours.insert(
+                node_id,
+                SchedulerEntry {
+                    timestamp: SystemTime::now() - interval,
+                    is_first: true,
+                },
+            );
+        }
+    }
+
+    /// Check the scheduler for expired entries. Returns the next node to send to.
+    /// This is the instance-based version for simulation use.
+    pub fn check_scheduler(
+        &self,
+        neighbours_state: &super::neighbours::NeighboursState,
+        connections_state: &super::connections::ConnectionTableState,
+    ) -> Option<(PeerId, ConnectionModule, u64, bool)> {
+        let mut found_neighbour: Option<PeerId> = None;
+        let mut neighbour_last_sent: u64 = 0;
+        let mut neighbour_is_first: bool = false;
+        let mut propagation_id: u32;
+        let mut propagation_timestamp: u64;
+
+        {
+            let scheduler = self.inner.read().unwrap();
+
+            for (id, ctx) in scheduler.neighbours.iter() {
+                if ctx.timestamp + scheduler.interval < SystemTime::now() {
+                    found_neighbour = Some(*id);
+                    neighbour_last_sent = Timestamp::get_timestamp_by(&ctx.timestamp);
+                    neighbour_is_first = ctx.is_first;
+                    break;
+                }
+            }
+
+            propagation_id = scheduler.propagation_id;
+            propagation_timestamp = scheduler.propagation_timestamp;
+        }
+
+        // check if we have to update the propagation ID
+        if Timestamp::get_timestamp() >= propagation_timestamp + 10 * 1000 {
+            propagation_id += 1;
+            propagation_timestamp = Timestamp::get_timestamp();
+
+            let mut scheduler = self.inner.write().unwrap();
+            scheduler.propagation_id = propagation_id;
+            scheduler.propagation_timestamp = propagation_timestamp;
+
+            connections_state.update_propagation_id(propagation_id);
+        }
+
+        if let Some(node_id) = found_neighbour {
+            let module = neighbours_state.is_neighbour(&node_id);
+
+            let mut scheduler = self.inner.write().unwrap();
+
+            if module == ConnectionModule::None {
+                scheduler.neighbours.remove(&node_id);
+            } else {
+                if let Some(entry) = scheduler.neighbours.get_mut(&node_id) {
+                    entry.timestamp = SystemTime::now();
+                    entry.is_first = false;
+                }
+
+                return Some((node_id, module, neighbour_last_sent, neighbour_is_first));
+            }
+        }
+
+        None
+    }
 }
 
 /// RouterInfo Module
