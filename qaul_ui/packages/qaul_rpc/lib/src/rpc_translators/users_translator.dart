@@ -113,21 +113,6 @@ class UsersTranslator extends RpcModuleTranslator {
   @override
   Future<void> processResponse(RpcTranslatorResponse res, Ref ref) async {
     if (res.module != type) return;
-    
-    if (res.data is PaginatedUsers) {
-      final paginatedUsers = res.data as PaginatedUsers;
-      final usersNotifier = ref.read(usersProvider.notifier);
-      final isFirstPage = paginatedUsers.pagination?.offset == 0;
-      if (isFirstPage) {
-        usersNotifier.replaceAll(
-          paginatedUsers.users,
-          pagination: paginatedUsers.pagination,
-        );
-      } else {
-        usersNotifier.appendMany(paginatedUsers.users);
-        usersNotifier.setPagination(paginatedUsers.pagination);
-      }
-    }
 
     if (res.data is SecurityNumber) {
       ref.read(currentSecurityNoProvider.notifier).state = res.data;

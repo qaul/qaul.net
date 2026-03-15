@@ -13,7 +13,7 @@ class DTNTranslator extends RpcModuleTranslator {
         // TODO
         return super.decodeMessageBytes(data, ref);
       case DTN_Message.dtnConfigResponse:
-        final users = ref.read(usersProvider).data;
+        final users = ref.read(userLookupProvider);
         final dtnConfiguration = DTNConfiguration.fromRpcConfigResponse(
           message.ensureDtnConfigResponse(),
           users,

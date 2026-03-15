@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_ui/screens/home/tabs/tab.dart';
+import 'package:qaul_ui/stores/stores.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'chat_tab/chat_tab_test.dart';
@@ -35,7 +36,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 150));
     await tester.pumpAndSettle();
 
-    final users = container.read(usersProvider).data;
+    final users = container.read(usersStoreProvider);
     expect(users.length, 50);
     expect(users.first.name, 'Mock User 1');
     expect(find.byType(ListView), findsOneWidget);
@@ -61,8 +62,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 150));
     await tester.pumpAndSettle();
 
-    expect(container.read(usersProvider).data.length, 50);
-    expect(container.read(usersProvider).data.first.name, 'Mock User 1');
+    expect(container.read(usersStoreProvider).length, 50);
+    expect(container.read(usersStoreProvider).first.name, 'Mock User 1');
 
     for (int i = 0; i < 6; i++) {
       await tester.drag(find.byType(ListView), const Offset(0, -500));
@@ -71,7 +72,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pumpAndSettle();
 
-    final usersAfterScroll = container.read(usersProvider).data;
+    final usersAfterScroll = container.read(usersStoreProvider);
     expect(usersAfterScroll.length, greaterThan(50));
     expect(
       usersAfterScroll.any((user) => user.name == 'Mock User 51'),
@@ -98,14 +99,14 @@ void main() {
     await tester.pump(const Duration(milliseconds: 150));
     await tester.pumpAndSettle();
 
-    final pagination = container.read(usersProvider).pagination;
+    final pagination = container.read(usersStoreProvider.notifier).pagination;
     expect(pagination, isNotNull);
     expect(pagination!.hasMore, isTrue);
     expect(pagination.total, 125);
     expect(pagination.offset, 0);
     expect(pagination.limit, 50);
 
-    final users = container.read(usersProvider).data;
+    final users = container.read(usersStoreProvider);
     expect(users.length, 50);
   });
 }

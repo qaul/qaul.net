@@ -11,6 +11,7 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 import '../helpers/navigation_helper.dart';
 import '../providers/providers.dart';
 import '../screens/home/tabs/chat/widgets/chat.dart';
+import '../stores/stores.dart';
 
 class DeepLinkWrapper extends StatefulHookConsumerWidget {
   const DeepLinkWrapper({
@@ -85,5 +86,5 @@ class _DeepLinkWrapperState extends ConsumerState<DeepLinkWrapper> {
   ChatRoom? _roomWithId(String id) =>
       ref.read(chatRoomsProvider).firstWhereOrNull((r) => r.idBase58 == id);
 
-  User? _userWithId(String id) => ref.read(usersProvider).data.firstWhereOrNull((u) => u.idBase58 == id);
+  User? _userWithId(String id) => ref.read(usersStoreProvider).firstWhereOrNull((u) => u.idBase58 == id);
 }

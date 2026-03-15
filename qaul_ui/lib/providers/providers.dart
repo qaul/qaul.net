@@ -10,6 +10,7 @@ import 'package:logging/logging.dart';
 import 'package:qaul_components/qaul_components.dart' show TabType;
 import 'package:qaul_rpc/qaul_rpc.dart';
 import '../helpers/user_prefs_helper.dart';
+import '../stores/stores.dart';
 import 'notification_controller/notification_controller.dart';
 
 export 'package:qaul_components/qaul_components.dart' show TabType;

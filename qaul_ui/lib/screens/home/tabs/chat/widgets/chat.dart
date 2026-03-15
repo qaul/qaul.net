@@ -30,6 +30,7 @@ import 'package:utils/utils.dart';
 
 import '../../../../../../decorators/cron_task_decorator.dart';
 import '../../../../../../l10n/app_localizations.dart';
+import '../../../../../../stores/stores.dart';
 import '../../../../../providers/providers.dart';
 import '../../../../../utils.dart';
 import '../../../../../widgets/widgets.dart';
@@ -549,7 +550,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   User _author(Message e) => e.senderId.equals(user.id)
       ? user
-      : ref.read(usersProvider).data.firstWhere((usr) => usr.id.equals(e.senderId));
+      : ref.read(usersStoreProvider).firstWhere((usr) => usr.id.equals(e.senderId));
 
   List<types.Message>? messages(ChatRoom room,
       {required AppLocalizations l10n}) {

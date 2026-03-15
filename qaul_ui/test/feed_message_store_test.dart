@@ -12,7 +12,6 @@ import 'chat_tab/chat_tab_test.dart';
 
 List<PublicPost> _testPublicMessages = [];
 List<User> _testUsersForStore = [];
-PaginationState? _testPagination;
 Map<String, User?> _getUserByIdByBase58 = {};
 
 class _TestPublicPostListNotifier extends PublicPostListNotifier {
@@ -20,10 +19,9 @@ class _TestPublicPostListNotifier extends PublicPostListNotifier {
   List<PublicPost> build() => _testPublicMessages;
 }
 
-class _TestPaginatedUsersNotifier extends PaginatedDataNotifier<User> {
+class _TestUsersStore extends UsersStore {
   @override
-  PaginatedData<User> build() =>
-      PaginatedData(data: _testUsersForStore, pagination: _testPagination);
+  List<User> build() => _testUsersForStore;
 }
 
 class _MockWorkerForGetByUserID extends StubLibqaulWorker {
@@ -37,7 +35,7 @@ ProviderContainer _container() => ProviderContainer(
       overrides: [
         defaultUserProvider.overrideWith((_) => defaultUser),
         publicMessagesProvider.overrideWith(() => _TestPublicPostListNotifier()),
-        usersProvider.overrideWith(() => _TestPaginatedUsersNotifier()),
+        usersStoreProvider.overrideWith(() => _TestUsersStore()),
         qaulWorkerProvider.overrideWith((ref) => _MockWorkerForGetByUserID(ref)),
       ],
     );
@@ -78,7 +76,6 @@ void main() {
     Intl.defaultLocale = 'en';
     _testPublicMessages = [];
     _testUsersForStore = [];
-    _testPagination = null;
     _getUserByIdByBase58 = {};
   });
 

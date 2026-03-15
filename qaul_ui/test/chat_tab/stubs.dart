@@ -80,13 +80,6 @@ class StubLibqaulWorker implements LibqaulWorker {
       offset: requestedOffset,
       limit: requestedLimit,
     );
-    final notifier = ref.read(usersProvider.notifier);
-    if (requestedOffset == 0) {
-      notifier.replaceAll(mockUsers, pagination: pagination);
-    } else {
-      notifier.appendMany(mockUsers);
-      notifier.setPagination(pagination);
-    }
     return PaginatedUsers(users: mockUsers, pagination: pagination);
   }
 

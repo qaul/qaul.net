@@ -19,6 +19,7 @@ import 'package:utils/utils.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/providers.dart';
+import '../../../stores/stores.dart';
 import '../../../widgets/widgets.dart';
 
 part 'models/network_node.dart';

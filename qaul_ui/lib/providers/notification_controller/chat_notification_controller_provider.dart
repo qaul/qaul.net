@@ -46,8 +46,7 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
           ..addAll(values.where(_localCacheContains).where(_hasNewMessage));
     if (UserPrefsHelper.instance.notifyOnlyForVerifiedUsers) {
       final verifiedIds = ref
-          .read(usersProvider)
-          .data
+          .read(usersStoreProvider)
           .where((u) => u.isVerified ?? false)
           .map((e) => e.id);
       newMessages = newMessages

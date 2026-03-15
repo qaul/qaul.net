@@ -38,8 +38,8 @@ class _UsersState extends _BaseTabState<_Users> {
     }
   }
 
-  void _updatePaginationState() {
-    final paginationState = ref.read(usersProvider).pagination;
+  void _updatePaginationFromResult(PaginatedUsers? result) {
+    final paginationState = result?.pagination;
     if (paginationState != null) {
       setState(() => _hasMore = paginationState.hasMore);
       _currentOffset = paginationState.offset + paginationState.limit;
@@ -53,11 +53,11 @@ class _UsersState extends _BaseTabState<_Users> {
 
     setState(() => _isLoadingMore = true);
     try {
-      await ref.read(usersStoreProvider.notifier).getMoreUsers(
+      final result = await ref.read(usersStoreProvider.notifier).getMoreUsers(
             _currentOffset,
             limit: _pageSize,
           );
-      _updatePaginationState();
+      _updatePaginationFromResult(result);
     } finally {
       if (mounted) setState(() => _isLoadingMore = false);
     }
@@ -66,17 +66,18 @@ class _UsersState extends _BaseTabState<_Users> {
   Future<void> _refreshUsers() async {
     _currentOffset = 0;
     setState(() => _hasMore = true);
-    final worker = ref.read(qaulWorkerProvider);
-    await worker.getUsers(offset: 0, limit: _pageSize);
-    _updatePaginationState();
+    final store = ref.read(usersStoreProvider.notifier);
+    final result = await store.getUsers(offset: 0, limit: _pageSize);
+    _updatePaginationFromResult(result);
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
 
-    ref.listen(usersProvider, (previous, next) {
-      if (next.pagination != null && !next.pagination!.hasMore) {
+    ref.listen(usersStoreProvider, (previous, next) {
+      final pagination = ref.read(usersStoreProvider.notifier).pagination;
+      if (pagination != null && !pagination.hasMore) {
         setState(() => _hasMore = false);
       }
     });

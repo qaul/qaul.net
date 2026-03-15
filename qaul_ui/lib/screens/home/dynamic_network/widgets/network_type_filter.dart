@@ -28,8 +28,7 @@ final _filteredNodes = StateProvider<NetworkNode>((ref) {
   final filter = ref.watch(_networkTypeFilter);
   final defaultUser = ref.watch(defaultUserProvider)!;
   final users = ref
-      .watch(usersProvider)
-      .data
+      .watch(usersStoreProvider)
       .where((u) => !(u.isBlocked ?? false))
       .where((u) => u.idBase58 != defaultUser.idBase58)
       .toList();

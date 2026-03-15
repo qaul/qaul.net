@@ -41,8 +41,7 @@ class PublicNotificationController
     var newPosts = values.where((f) => (f.index ?? 1) > _lastIndex).toList();
     if (UserPrefsHelper.instance.notifyOnlyForVerifiedUsers) {
       final verifiedIds = ref
-          .read(usersProvider)
-          .data
+          .read(usersStoreProvider)
           .where((u) => u.isVerified ?? false)
           .map((e) => e.id);
       newPosts = newPosts

@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/legacy.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 
 import '../l10n/app_localizations.dart';
+import '../stores/stores.dart';
 
 import '../widgets/widgets.dart';
 
@@ -19,8 +20,7 @@ final _searchKeyProvider = StateProvider.autoDispose<String>((ref) {
 final _userSearchProvider = StateProvider.autoDispose<List<User>>((ref) {
   final defaultUser = ref.watch(defaultUserProvider)!;
   final users = ref
-      .watch(usersProvider)
-      .data
+      .watch(usersStoreProvider)
       .where((u) => !u.id.equals(defaultUser.id) && !(u.isBlocked ?? false))
       .toList()
     ..sort();
