@@ -28,6 +28,34 @@ pub struct Flooder {
     pub to_send: VecDeque<FloodMessageContainer>,
 }
 
+/// Instance-based flooder state.
+/// Replaces the global FLOODER static for multi-instance use.
+pub struct FlooderState {
+    pub inner: RwLock<Flooder>,
+}
+
+impl FlooderState {
+    /// Create a new empty flooder state.
+    pub fn new() -> Self {
+        Self {
+            inner: RwLock::new(Flooder {
+                to_send: VecDeque::new(),
+            }),
+        }
+    }
+
+    /// Add a message to the flood queue.
+    pub fn add(&self, message: Vec<u8>, topic: Topic, incoming_via: ConnectionModule) {
+        let msg = FloodMessageContainer {
+            message,
+            topic,
+            incoming_via,
+        };
+        let mut flooder = self.inner.write().unwrap();
+        flooder.to_send.push_back(msg);
+    }
+}
+
 impl Flooder {
     /// Initialize the flooder and create the ring buffer.
     pub fn init() {

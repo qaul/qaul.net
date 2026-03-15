@@ -23,7 +23,7 @@ use std::time::Duration;
 pub mod api;
 pub mod connections;
 pub mod node;
-mod router;
+pub mod router;
 mod rpc;
 mod services;
 pub mod storage;

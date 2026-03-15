@@ -1,15 +1,10 @@
 // Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! Feed Requester
+//! User Requester
 //!
-//! As feed messages flooded in the entire network.
-//! In case a user joins the network newly or a feed message
-//! was missed, the latest feed id's are synchronized via the
-//! qaul router info service.
-//!
-//! With each routing information the last feed messages are
-//! advertised and can be requested from the sending node.
+//! When routing information is received and contains unknown users,
+//! the user information is requested from the sending node.
 
 use libp2p::PeerId;
 use state::InitCell;
@@ -31,6 +26,30 @@ pub struct UserRequest {
 /// User Requester Module
 pub struct UserRequester {
     pub to_send: VecDeque<UserRequest>,
+}
+
+/// Instance-based user requester state.
+pub struct UserRequesterState {
+    pub inner: RwLock<UserRequester>,
+}
+
+impl UserRequesterState {
+    pub fn new() -> Self {
+        Self {
+            inner: RwLock::new(UserRequester {
+                to_send: VecDeque::new(),
+            }),
+        }
+    }
+
+    pub fn add(&self, neighbour_id: &PeerId, user_ids: &[Vec<u8>]) {
+        let msg = UserRequest {
+            neighbour_id: neighbour_id.clone(),
+            user_ids: user_ids.to_vec(),
+        };
+        let mut user_requester = self.inner.write().unwrap();
+        user_requester.to_send.push_back(msg);
+    }
 }
 
 impl UserRequester {
@@ -61,9 +80,33 @@ pub struct UserResponse {
     pub users: super::router_net_proto::UserInfoTable,
 }
 
-/// Feed Responder
+/// User Responder
 pub struct UserResponser {
     pub to_send: VecDeque<UserResponse>,
+}
+
+/// Instance-based user responser state.
+pub struct UserResponserState {
+    pub inner: RwLock<UserResponser>,
+}
+
+impl UserResponserState {
+    pub fn new() -> Self {
+        Self {
+            inner: RwLock::new(UserResponser {
+                to_send: VecDeque::new(),
+            }),
+        }
+    }
+
+    pub fn add(&self, neighbour_id: &PeerId, table: &super::router_net_proto::UserInfoTable) {
+        let msg = UserResponse {
+            neighbour_id: neighbour_id.clone(),
+            users: table.clone(),
+        };
+        let mut user_responser = self.inner.write().unwrap();
+        user_responser.to_send.push_back(msg);
+    }
 }
 
 impl UserResponser {

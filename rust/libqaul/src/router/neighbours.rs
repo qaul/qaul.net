@@ -43,6 +43,137 @@ pub struct Node {
     pub connected_at: u64,
 }
 
+/// Instance-based neighbours state owning all per-module tables.
+/// Replaces the global INTERNET/LAN/BLE/NODES statics for multi-instance use.
+pub struct NeighboursState {
+    pub internet: RwLock<Neighbours>,
+    pub lan: RwLock<Neighbours>,
+    pub ble: RwLock<Neighbours>,
+    /// Optional persistent node db tree. None in simulation mode.
+    pub nodes_db: Option<Tree>,
+}
+
+impl NeighboursState {
+    /// Create a new empty NeighboursState without a database backing.
+    pub fn new() -> Self {
+        Self {
+            internet: RwLock::new(Neighbours {
+                nodes: HashMap::new(),
+            }),
+            lan: RwLock::new(Neighbours {
+                nodes: HashMap::new(),
+            }),
+            ble: RwLock::new(Neighbours {
+                nodes: HashMap::new(),
+            }),
+            nodes_db: None,
+        }
+    }
+
+    /// Get the neighbours table for a given module.
+    fn get_table(&self, module: &ConnectionModule) -> Option<&RwLock<Neighbours>> {
+        match module {
+            ConnectionModule::Internet => Some(&self.internet),
+            ConnectionModule::Lan => Some(&self.lan),
+            ConnectionModule::Ble => Some(&self.ble),
+            _ => None,
+        }
+    }
+
+    /// Update a node in the appropriate module table.
+    /// Does NOT persist to DB or trigger RouterInfo (use for simulation).
+    pub fn update_node(&self, module: ConnectionModule, node_id: PeerId, rtt: u32) {
+        let table_lock = match self.get_table(&module) {
+            Some(t) => t,
+            None => return,
+        };
+
+        let mut neighbours = table_lock.write().unwrap();
+        let node_option = neighbours.nodes.get_mut(&node_id);
+        if let Some(node) = node_option {
+            node.rtt = Neighbours::calculate_rtt(node.rtt, rtt);
+            node.updated_at = Timestamp::get_timestamp();
+        } else {
+            neighbours.nodes.insert(
+                node_id,
+                Neighbour {
+                    rtt,
+                    updated_at: Timestamp::get_timestamp(),
+                },
+            );
+        }
+    }
+
+    /// Delete a neighbour from the given module table.
+    pub fn delete(&self, module: ConnectionModule, node_id: PeerId) {
+        if let Some(table_lock) = self.get_table(&module) {
+            let mut neighbours = table_lock.write().unwrap();
+            neighbours.nodes.remove(&node_id);
+        }
+    }
+
+    /// Get RTT for a neighbour in a specific module.
+    pub fn get_rtt(&self, neighbour_id: &PeerId, module: &ConnectionModule) -> Option<u32> {
+        match module {
+            ConnectionModule::Local => return Some(0),
+            ConnectionModule::None => return None,
+            _ => {}
+        }
+
+        if let Some(table_lock) = self.get_table(module) {
+            let neighbours = table_lock.read().unwrap();
+            return neighbours.nodes.get(neighbour_id).map(|n| n.rtt);
+        }
+        None
+    }
+
+    /// Check if this node is a neighbour in any module.
+    pub fn is_neighbour(&self, node_id: &PeerId) -> ConnectionModule {
+        {
+            let lan = self.lan.read().unwrap();
+            if lan.nodes.contains_key(node_id) {
+                return ConnectionModule::Lan;
+            }
+        }
+        {
+            let internet = self.internet.read().unwrap();
+            if internet.nodes.contains_key(node_id) {
+                return ConnectionModule::Internet;
+            }
+        }
+        {
+            let ble = self.ble.read().unwrap();
+            if ble.nodes.contains_key(node_id) {
+                return ConnectionModule::Ble;
+            }
+        }
+        ConnectionModule::None
+    }
+
+    /// Get all BLE-only nodes (nodes reachable only via BLE).
+    pub fn get_ble_only_nodes(&self) -> Vec<PeerId> {
+        let ble = self.ble.read().unwrap();
+        let mut nodes = Vec::with_capacity(ble.nodes.len());
+
+        if !ble.nodes.is_empty() {
+            let lan = self.lan.read().unwrap();
+            let internet = self.internet.read().unwrap();
+
+            for (id, _val) in ble.nodes.iter() {
+                if lan.nodes.contains_key(id) {
+                    continue;
+                }
+                if internet.nodes.contains_key(id) {
+                    continue;
+                }
+                nodes.push(*id);
+            }
+        }
+
+        nodes
+    }
+}
+
 /// Neighbours Module State
 ///
 /// Contains all connected neighbour nodes of a connection module
@@ -168,7 +299,7 @@ impl Neighbours {
 
     /// Calculate average rtt using Exponentially Weighted Moving Average (EWMA)
     /// α = 1/8 (standard TCP and libp2p Kademlia smoothing factor)
-    fn calculate_rtt(old_rtt: u32, new_rtt: u32) -> u32 {
+    pub(crate) fn calculate_rtt(old_rtt: u32, new_rtt: u32) -> u32 {
         // If this is the first ping (old_rtt is 0), we just take the new value.
         if old_rtt == 0 {
             return new_rtt;
