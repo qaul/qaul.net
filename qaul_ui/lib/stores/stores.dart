@@ -1,6 +1,5 @@
 // Barrel file
 
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:fast_base58/fast_base58.dart';
@@ -12,3 +11,12 @@ import 'package:utils/utils.dart';
 
 part 'users_store.dart';
 part 'feed_message_store.dart';
+
+class FeedLoading extends Notifier<bool> {
+  @override
+  bool build() => false;
+}
+
+final feedLoadingProvider = NotifierProvider<FeedLoading, bool>(
+  FeedLoading.new,
+);

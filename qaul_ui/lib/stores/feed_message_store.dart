@@ -21,45 +21,74 @@ class FeedMessage extends PublicPost {
 }
 
 class FeedMessageStore extends Notifier<List<FeedMessage>> {
+  bool _initializedOnce = false;
+
   @override
   build() {
     ref.listen(publicMessagesProvider, (_, _) => _asyncInit());
     ref.listen(usersStoreProvider, (_, _) => _asyncInit());
-    _asyncInit();
+    if (!_initializedOnce) {
+      ref.read(feedLoadingProvider.notifier).state = true;
+      _asyncInit();
+    }
     return [];
   }
 
   void _asyncInit() async {
-    final messages = ref.read(publicMessagesProvider);
-    final knownUsers = ref.read(usersStoreProvider);
-    final authorById = <String, User>{
-      for (final u in knownUsers) u.idBase58: u,
-    };
-    final usersStore = ref.read(usersStoreProvider.notifier);
-    final feedMessages = <FeedMessage>[];
+    final shouldShowLoading = !_initializedOnce;
+    try {
+      final messages = ref.read(publicMessagesProvider).data;
+      final knownUsers = ref.read(usersStoreProvider);
+      final authorById = <String, User>{
+        for (final u in knownUsers) u.idBase58: u,
+      };
+      final usersStore = ref.read(usersStoreProvider.notifier);
+      final feedMessages = <FeedMessage>[];
 
-    for (final m in messages) {
-      if (m.senderIdBase58 == null) continue;
-      User? author = authorById[m.senderIdBase58];
-      if (author == null) {
-        author = await usersStore.getByUserID(m.senderIdBase58!);
-        if (author != null) authorById[m.senderIdBase58!] = author;
+      for (final m in messages) {
+        if (m.senderIdBase58 == null) continue;
+        User? author = authorById[m.senderIdBase58];
+        if (author == null) {
+          author = await usersStore.getByUserID(m.senderIdBase58!);
+          if (author != null) authorById[m.senderIdBase58!] = author;
+        }
+        if (author == null) continue;
+        final sentAt = describeFuzzyTimestamp(
+          m.sendTime,
+          locale: Locale.parse(Intl.defaultLocale ?? 'en'),
+        );
+        feedMessages.add(FeedMessage(m, author, sentAt));
       }
-      if (author == null) continue;
-      final sentAt = describeFuzzyTimestamp(
-        m.sendTime,
-        locale: Locale.parse(Intl.defaultLocale ?? 'en'),
-      );
-      feedMessages.add(FeedMessage(m, author, sentAt));
+      state = feedMessages;
+      _initializedOnce = true;
+    } finally {
+      if (shouldShowLoading) {
+        ref.read(feedLoadingProvider.notifier).state = false;
+      }
     }
-    state = feedMessages;
   }
+
+  static const int _pageSize = 50;
 
   Future<void> refreshPublic() async {
     final worker = ref.read(qaulWorkerProvider);
-    final indexes = state.map((e) => e.index ?? 1);
     await worker.requestPublicMessages(
-      lastIndex: indexes.isEmpty ? null : indexes.reduce(math.max),
+      offset: 0,
+      limit: _pageSize,
+    );
+  }
+
+  Future<void> loadMorePublic() async {
+    final paginated = ref.read(publicMessagesProvider);
+    final pagination = paginated.pagination;
+    if (pagination != null && !pagination.hasMore) return;
+    final offset = pagination != null
+        ? pagination.offset + pagination.limit
+        : paginated.data.length;
+    final worker = ref.read(qaulWorkerProvider);
+    await worker.requestPublicMessages(
+      offset: offset,
+      limit: _pageSize,
     );
   }
 

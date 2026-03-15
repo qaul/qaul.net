@@ -45,6 +45,30 @@ class _PublicTabView extends HookConsumerWidget {
     }, []);
 
     final messages = ref.watch(feedMessageStoreProvider);
+    final rawLoading = ref.watch(feedLoadingProvider);
+
+    final initialLoading = useState(true);
+    if (initialLoading.value && messages.isNotEmpty) {
+      initialLoading.value = false;
+    }
+
+    final isLoading =
+        (rawLoading || initialLoading.value) && messages.isEmpty;
+
+    final scrollController = useScrollController();
+
+    useEffect(() {
+      void onScroll() {
+        if (!scrollController.hasClients) return;
+        final position = scrollController.position;
+        if (position.pixels >= position.maxScrollExtent * 0.8) {
+          ref.read(feedMessageStoreProvider.notifier).loadMorePublic();
+        }
+      }
+
+      scrollController.addListener(onScroll);
+      return () => scrollController.removeListener(onScroll);
+    }, [scrollController, ref]);
 
     final l10n = AppLocalizations.of(context)!;
 
@@ -77,36 +101,39 @@ class _PublicTabView extends HookConsumerWidget {
         heroTag: 'publicTabFAB',
         tooltip: l10n.createPublicPostTooltip,
       ),
-      body: CronTaskDecorator(
-        schedule: const Duration(milliseconds: 2500),
-        callback: () async => await refreshPublic(),
-        child: RefreshIndicator(
-          onRefresh: () async => await refreshPublic(),
-          child: EmptyStateTextDecorator(
-            l10n.emptyPublicList,
-            isEmpty: messages.isEmpty,
-            child: ListView.separated(
-              controller: ScrollController(),
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: messages.length,
-              separatorBuilder: (_, _) => const Divider(height: 12.0),
-              itemBuilder: (_, i) {
-                final msg = messages[i];
-                var theme = Theme.of(context).textTheme;
-                return QaulListTile.user(
-                  msg.author,
-                  useUserColorOnName: true,
-                  isContentSelectable: true,
-                  content: Text(msg.content ?? '', style: theme.bodyLarge),
-                  trailingMetadata: Text(
-                    msg.sentTimestamp,
-                    style: theme.bodySmall!.copyWith(
-                      fontStyle: FontStyle.italic,
+      body: LoadingDecorator(
+        isLoading: isLoading,
+        child: CronTaskDecorator(
+          schedule: const Duration(milliseconds: 2500),
+          callback: () async => await refreshPublic(),
+          child: RefreshIndicator(
+            onRefresh: () async => await refreshPublic(),
+            child: EmptyStateTextDecorator(
+              l10n.emptyPublicList,
+              isEmpty: !isLoading && messages.isEmpty,
+              child: ListView.separated(
+                controller: scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: messages.length,
+                separatorBuilder: (_, _) => const Divider(height: 12.0),
+                itemBuilder: (_, i) {
+                  final msg = messages[i];
+                  var theme = Theme.of(context).textTheme;
+                  return QaulListTile.user(
+                    msg.author,
+                    useUserColorOnName: true,
+                    isContentSelectable: true,
+                    content: Text(msg.content ?? '', style: theme.bodyLarge),
+                    trailingMetadata: Text(
+                      msg.sentTimestamp,
+                      style: theme.bodySmall!.copyWith(
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
-                  ),
-                  nameTapRoutesToDetailsScreen: true,
-                );
-              },
+                    nameTapRoutesToDetailsScreen: true,
+                  );
+                },
+              ),
             ),
           ),
         ),

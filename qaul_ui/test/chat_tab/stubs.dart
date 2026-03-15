@@ -158,7 +158,11 @@ class StubLibqaulWorker implements LibqaulWorker {
   Future<void> requestNodes() => throw UnimplementedError();
 
   @override
-  Future<void> requestPublicMessages({int? lastIndex}) async =>
+  Future<void> requestPublicMessages({
+    int? lastIndex,
+    int? offset,
+    int? limit,
+  }) async =>
       throw UnimplementedError();
 
   @override
