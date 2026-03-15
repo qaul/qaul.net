@@ -13,3 +13,12 @@ import 'package:utils/utils.dart';
 
 part 'users_store.dart';
 part 'feed_message_store.dart';
+
+class FeedLoading extends Notifier<bool> {
+  @override
+  bool build() => false;
+}
+
+final feedLoadingProvider = NotifierProvider<FeedLoading, bool>(
+  FeedLoading.new,
+);
