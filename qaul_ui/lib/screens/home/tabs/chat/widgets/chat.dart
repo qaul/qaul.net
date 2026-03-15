@@ -18,11 +18,13 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart'
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:mime/mime.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' hide context, Context;
 import 'package:path_provider/path_provider.dart';
+import 'package:qaul_components/qaul_components.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:record/record.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -179,6 +181,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   User? get otherUser => widget.otherUser;
 
   final Map<String, String> _overflowMenuOptions = {};
+  Map<String, QaulChatBubbleDisplayItem> _bubbleDisplayItems = {};
 
   void _handleClick(String value) {
     switch (value) {
@@ -295,9 +298,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         child: SafeArea(
           bottom: false,
           child: Chat(
-            showUserAvatars: true,
+            showUserAvatars: false,
             showUserNames: room.isGroupChatRoom,
             user: user.toInternalUser(),
+            useTopSafeAreaInset: false,
+            dateHeaderThreshold: const Duration(days: 365).inMilliseconds,
+            groupMessagesThreshold: const Duration(days: 365).inMilliseconds,
             messages: messages(room, l10n: l10n) ?? [],
             onSendPressed: sendMessage,
             inputOptions: const InputOptions(
@@ -527,11 +533,22 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 isDefaultUser: message.author.id == user.idBase58,
               );
             },
+            customDateHeaderText: (dt) =>
+                DateFormat('EEEE, MMMM d, yyyy', 'en').format(dt.toLocal()),
             theme: DefaultChatTheme(
               userAvatarNameColors: [
                 colorGenerationStrategy(otherUser?.idBase58 ?? room.idBase58),
               ],
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              messageInsetsVertical: 0,
+              messageInsetsHorizontal: 0,
+              dateDividerTextStyle: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w300,
+                height: 1.2,
+                color: Colors.white,
+              ),
+              bubbleMargin: EdgeInsets.zero,
               sentMessageBodyTextStyle: const TextStyle(
                 fontSize: 17,
                 color: Colors.white,
@@ -553,11 +570,59 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   List<types.Message>? messages(ChatRoom room,
       {required AppLocalizations l10n}) {
-    return room.messages
-        ?.sorted()
-        .map(
-            (e) => e.toInternalMessage(_author(e), ref, l10n: l10n, room: room))
-        .toList();
+    final domainMessages = room.messages?.sorted();
+    if (domainMessages == null) return null;
+
+    final internalMessages = <types.Message>[];
+    final textMessages = <Message>[];
+
+    for (final m in domainMessages) {
+      final author = _author(m);
+      final internal =
+          m.toInternalMessage(author, ref, l10n: l10n, room: room);
+
+      if (m.content is TextMessageContent && internal is types.TextMessage) {
+        internalMessages.add(internal.copyWith(status: null));
+        textMessages.add(m);
+      } else {
+        internalMessages.add(internal);
+      }
+    }
+
+    final bubbleSources = [...textMessages]
+      ..sort((a, b) => a.sentAt.compareTo(b.sentAt));
+
+    final bubbleMessages = <QaulChatBubbleMessage>[];
+    final bubbleIds = <String>[];
+
+    for (final m in bubbleSources) {
+      final isMe = m.senderId.equals(user.id);
+      bubbleMessages.add(
+        QaulChatBubbleMessage(
+          content: (m.content as TextMessageContent).content,
+          sentAt: m.sentAt,
+          receivedAt: m.receivedAt,
+          status: m.status == MessageState.sent
+              ? MessageStatus.sent
+              : (m.status == MessageState.confirmed ||
+                      m.status == MessageState.confirmedByAll
+                  ? MessageStatus.read
+                  : MessageStatus.notSent),
+          messageType: isMe ? MessageType.primary : MessageType.secondary,
+          edges: const [],
+        ),
+      );
+      bubbleIds.add(m.messageIdBase58);
+    }
+
+    final displayItems = computeChatBubbleDisplayItems(bubbleMessages);
+    final map = <String, QaulChatBubbleDisplayItem>{};
+    for (var i = 0; i < bubbleIds.length; i++) {
+      map[bubbleIds[i]] = displayItems[i];
+    }
+    _bubbleDisplayItems = map;
+
+    return internalMessages;
   }
 
   Widget _bubbleBuilder(
@@ -574,6 +639,30 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             border: Border.all(color: Colors.grey, width: 0.5),
             borderRadius: const BorderRadius.all(Radius.circular(20))),
         child: child,
+      );
+    }
+
+    if (message is types.TextMessage) {
+      final currentRoom = ref.read(currentOpenChatRoom);
+      final roomMessages = currentRoom?.messages;
+      if (roomMessages == null) return child;
+
+      final domainMessage = roomMessages
+          .firstWhereOrNull((m) => m.messageIdBase58 == message.id);
+      if (domainMessage == null) return child;
+
+      final display = _bubbleDisplayItems[domainMessage.messageIdBase58];
+      if (display == null) return child;
+
+      return Padding(
+        padding: EdgeInsets.only(
+          top: display.marginTop,
+          left: 16,
+        ),
+        child: QaulChatBubble(
+          message: display.message,
+          showTimestamp: display.showTimestamp,
+        ),
       );
     }
 
