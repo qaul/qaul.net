@@ -42,6 +42,24 @@ enum FlushMode {
     Deferred,
 }
 
+/// Instance-based group storage state.
+/// Replaces the global GROUPSTORAGE static for multi-instance use.
+pub struct GroupStorageState {
+    /// Group storage inner state.
+    pub inner: RwLock<GroupStorage>,
+}
+
+impl GroupStorageState {
+    /// Create a new empty GroupStorageState.
+    pub fn new() -> Self {
+        Self {
+            inner: RwLock::new(GroupStorage {
+                db_ref: BTreeMap::new(),
+            }),
+        }
+    }
+}
+
 impl GroupStorage {
     /// Initialize Group Storage
     pub fn init() {

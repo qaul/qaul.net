@@ -24,8 +24,8 @@ pub mod api;
 pub mod connections;
 pub mod node;
 pub mod router;
-mod rpc;
-mod services;
+pub mod rpc;
+pub mod services;
 pub mod storage;
 pub mod utilities;
 

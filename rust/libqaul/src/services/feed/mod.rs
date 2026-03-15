@@ -73,6 +73,33 @@ pub struct Feed {
     pub last_message: u64,
 }
 
+/// Instance-based feed state owning feed messages and database references.
+/// Replaces the global FEED static for multi-instance use.
+pub struct FeedState {
+    /// Feed inner state.
+    pub inner: RwLock<Feed>,
+    /// Temporary sled database backing (kept alive for tree references).
+    _db: sled::Db,
+}
+
+impl FeedState {
+    /// Create a new empty FeedState with a temporary in-memory database.
+    pub fn new() -> Self {
+        let db = sled::Config::new().temporary(true).open().unwrap();
+        let tree = db.open_tree("feed").unwrap();
+        let tree_ids = db.open_tree("feed_id").unwrap();
+        Self {
+            inner: RwLock::new(Feed {
+                messages: BTreeMap::new(),
+                tree,
+                tree_ids,
+                last_message: 0,
+            }),
+            _db: db,
+        }
+    }
+}
+
 impl Feed {
     /// initialize feed module
     pub fn init() {

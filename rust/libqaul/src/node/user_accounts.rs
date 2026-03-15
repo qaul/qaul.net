@@ -45,6 +45,29 @@ pub struct UserAccounts {
     pub users: Vec<UserAccount>,
 }
 
+/// Instance-based user accounts state.
+/// Replaces the global USERACCOUNTS static for multi-instance use.
+pub struct UserAccountsState {
+    /// User accounts inner state.
+    pub inner: RwLock<UserAccounts>,
+}
+
+impl UserAccountsState {
+    /// Create a new empty UserAccountsState.
+    pub fn new() -> Self {
+        Self {
+            inner: RwLock::new(UserAccounts { users: Vec::new() }),
+        }
+    }
+
+    /// Create from an existing UserAccounts.
+    pub fn from_accounts(accounts: UserAccounts) -> Self {
+        Self {
+            inner: RwLock::new(accounts),
+        }
+    }
+}
+
 impl UserAccounts {
     /// Create a new UserAccounts instance from configuration (instance-based)
     ///

@@ -45,6 +45,32 @@ static TO_CONFIRM: InitCell<RwLock<BTreeMap<Vec<u8>, ToConfirm>>> = InitCell::ne
 /// the BLE ID to the BLE ID
 static NODES: InitCell<RwLock<BTreeMap<Vec<u8>, BleNode>>> = InitCell::new();
 
+/// Instance-based BLE module state.
+/// Replaces the global BLE, TO_CONFIRM, and NODES statics for multi-instance use.
+pub struct BleModuleState {
+    /// BLE module inner state.
+    pub inner: RwLock<Ble>,
+    /// Detected BLE nodes pending ID confirmation.
+    pub to_confirm: RwLock<BTreeMap<Vec<u8>, ToConfirm>>,
+    /// Discovered and available BLE nodes.
+    pub nodes: RwLock<BTreeMap<Vec<u8>, BleNode>>,
+}
+
+impl BleModuleState {
+    /// Create a new empty BleModuleState.
+    pub fn new() -> Self {
+        Self {
+            inner: RwLock::new(Ble {
+                ble_id: Vec::new(),
+                status: ModuleStatus::Uninitalized,
+                devices: Vec::new(),
+            }),
+            to_confirm: RwLock::new(BTreeMap::new()),
+            nodes: RwLock::new(BTreeMap::new()),
+        }
+    }
+}
+
 /// Detected BLE node, which is not known yet
 /// and therefore its ID needs to be confirmed.
 #[allow(dead_code)]

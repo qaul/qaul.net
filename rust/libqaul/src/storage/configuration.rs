@@ -21,6 +21,29 @@ use std::{
 /// make configuration globally accessible mutable state
 static CONFIG: InitCell<RwLock<Configuration>> = InitCell::new();
 
+/// Instance-based configuration state.
+/// Replaces the global CONFIG static for multi-instance use.
+pub struct ConfigurationState {
+    /// Configuration inner state.
+    pub inner: RwLock<Configuration>,
+}
+
+impl ConfigurationState {
+    /// Create a new ConfigurationState with default configuration.
+    pub fn new() -> Self {
+        Self {
+            inner: RwLock::new(Configuration::default()),
+        }
+    }
+
+    /// Create from an existing Configuration.
+    pub fn from_config(config: Configuration) -> Self {
+        Self {
+            inner: RwLock::new(config),
+        }
+    }
+}
+
 /// Configuration of the local Node
 ///
 /// Here the keys and identity are stored

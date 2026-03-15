@@ -175,6 +175,28 @@ pub struct InternetReConnections {
 static INTERNETRECONNECTIONS: InitCell<RwLock<InternetReConnections>> = InitCell::new();
 static INTERNETCONNECTIONS: InitCell<RwLock<BTreeMap<String, PeerId>>> = InitCell::new();
 
+/// Instance-based internet connections state.
+/// Replaces the global INTERNETRECONNECTIONS and INTERNETCONNECTIONS statics
+/// for multi-instance use.
+pub struct InternetState {
+    /// Reconnection tracking.
+    pub reconnections: RwLock<InternetReConnections>,
+    /// Active connections mapping (address string → PeerId).
+    pub connections: RwLock<BTreeMap<String, PeerId>>,
+}
+
+impl InternetState {
+    /// Create a new empty InternetState.
+    pub fn new() -> Self {
+        Self {
+            reconnections: RwLock::new(InternetReConnections {
+                peers: HashMap::new(),
+            }),
+            connections: RwLock::new(BTreeMap::new()),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub enum QaulInternetEvent {
     Floodsub(floodsub::Event),
