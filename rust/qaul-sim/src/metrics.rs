@@ -20,14 +20,26 @@ pub struct Metrics {
     pub avg_reachability: f64,
     /// Total number of routing table entries across all nodes.
     pub total_routes: usize,
+    /// Average hop count across all reachable routes (0 = no routes).
+    pub avg_hop_count: f64,
+    /// Maximum hop count across all reachable routes.
+    pub max_hop_count: u32,
+    /// Number of routes per connection module (module name -> count).
+    pub routes_by_module: Vec<(String, usize)>,
 }
 
 impl Metrics {
     /// Collect metrics from the current simulator state.
     pub fn collect(sim: &Simulator) -> Self {
+        use std::collections::HashMap;
+
         let n = sim.nodes.len();
         let mut reachability = Vec::with_capacity(n);
         let mut total_routes = 0;
+        let mut hop_sum: u64 = 0;
+        let mut hop_count_entries: u64 = 0;
+        let mut max_hop_count: u32 = 0;
+        let mut module_counts: HashMap<String, usize> = HashMap::new();
 
         for node in &sim.nodes {
             let table = node.router.routing_table.inner.read().unwrap();
@@ -38,6 +50,21 @@ impl Metrics {
                 .count();
             reachability.push(reachable);
             total_routes += table.table.len();
+
+            // Analyze hop counts and connection modules
+            for entry in table.table.values() {
+                for conn in &entry.connections {
+                    let hops = conn.hc as u32;
+                    hop_sum += hops as u64;
+                    hop_count_entries += 1;
+                    if hops > max_hop_count {
+                        max_hop_count = hops;
+                    }
+
+                    let module_name = conn.module.as_str_name().to_string();
+                    *module_counts.entry(module_name).or_insert(0) += 1;
+                }
+            }
         }
 
         let avg_reachability = if n > 0 {
@@ -46,7 +73,16 @@ impl Metrics {
             0.0
         };
 
+        let avg_hop_count = if hop_count_entries > 0 {
+            hop_sum as f64 / hop_count_entries as f64
+        } else {
+            0.0
+        };
+
         let fully_converged = reachability.iter().all(|&r| r >= n);
+
+        let mut routes_by_module: Vec<(String, usize)> = module_counts.into_iter().collect();
+        routes_by_module.sort_by(|a, b| a.0.cmp(&b.0));
 
         Self {
             tick: sim.tick,
@@ -55,19 +91,35 @@ impl Metrics {
             reachability,
             avg_reachability,
             total_routes,
+            avg_hop_count,
+            max_hop_count,
+            routes_by_module,
         }
     }
 
     /// Print a human-readable summary.
     pub fn summary(&self) -> String {
-        format!(
-            "tick={}, nodes={}, converged={}, avg_reach={:.1}, total_routes={}",
+        let mut s = format!(
+            "tick={}, nodes={}, converged={}, avg_reach={:.1}, total_routes={}, avg_hops={:.2}, max_hops={}",
             self.tick,
             self.node_count,
             self.fully_converged,
             self.avg_reachability,
             self.total_routes,
-        )
+            self.avg_hop_count,
+            self.max_hop_count,
+        );
+        if !self.routes_by_module.is_empty() {
+            s.push_str(", modules={");
+            for (i, (name, count)) in self.routes_by_module.iter().enumerate() {
+                if i > 0 {
+                    s.push_str(", ");
+                }
+                s.push_str(&format!("{}:{}", name, count));
+            }
+            s.push('}');
+        }
+        s
     }
 }
 

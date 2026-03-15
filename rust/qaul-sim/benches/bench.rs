@@ -71,6 +71,36 @@ fn bench_single_tick(c: &mut Criterion) {
     });
 }
 
+fn bench_ble_mesh_convergence(c: &mut Criterion) {
+    c.bench_function("ble_mesh_8_convergence", |b| {
+        b.iter(|| {
+            let mut sim = qaul_sim::scenarios::ble_only_mesh(8);
+            let mut rng = rand::rng();
+            sim.ticks_to_convergence(40, &mut rng)
+        })
+    });
+}
+
+fn bench_mixed_ble_lan_convergence(c: &mut Criterion) {
+    c.bench_function("mixed_ble_lan_10_convergence", |b| {
+        b.iter(|| {
+            let mut sim = qaul_sim::scenarios::mixed_ble_lan(10);
+            let mut rng = rand::rng();
+            sim.ticks_to_convergence(50, &mut rng)
+        })
+    });
+}
+
+fn bench_internet_relay_convergence(c: &mut Criterion) {
+    c.bench_function("internet_relay_8_convergence", |b| {
+        b.iter(|| {
+            let mut sim = qaul_sim::scenarios::internet_relay(8);
+            let mut rng = rand::rng();
+            sim.ticks_to_convergence(20, &mut rng)
+        })
+    });
+}
+
 criterion_group!(
     benches,
     bench_line_convergence,
@@ -78,5 +108,8 @@ criterion_group!(
     bench_grid_convergence,
     bench_full_mesh_convergence,
     bench_single_tick,
+    bench_ble_mesh_convergence,
+    bench_mixed_ble_lan_convergence,
+    bench_internet_relay_convergence,
 );
 criterion_main!(benches);
