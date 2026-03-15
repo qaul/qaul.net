@@ -48,6 +48,24 @@ enum FlushMode {
     Deferred,
 }
 
+/// Instance-based chat storage state.
+/// Replaces the global CHAT static for multi-instance use.
+pub struct ChatState {
+    /// Chat storage inner state.
+    pub inner: RwLock<ChatStorage>,
+}
+
+impl ChatState {
+    /// Create a new empty ChatState.
+    pub fn new() -> Self {
+        Self {
+            inner: RwLock::new(ChatStorage {
+                db_ref: BTreeMap::new(),
+            }),
+        }
+    }
+}
+
 impl ChatStorage {
     /// initialize chat storage
     pub fn init() {

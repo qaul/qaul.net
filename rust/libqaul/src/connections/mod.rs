@@ -70,6 +70,25 @@ impl ConnectionModule {
     }
 }
 
+/// Instance-based connections state owning all connection sub-states.
+/// Replaces the per-module global statics for multi-instance use.
+pub struct ConnectionsState {
+    /// Internet connections state.
+    pub internet: internet::InternetState,
+    /// BLE module state.
+    pub ble: ble::BleModuleState,
+}
+
+impl ConnectionsState {
+    /// Create a new empty ConnectionsState.
+    pub fn new() -> Self {
+        Self {
+            internet: internet::InternetState::new(),
+            ble: ble::BleModuleState::new(),
+        }
+    }
+}
+
 /// Connections Module - wrapper for instance-based connection management
 ///
 /// This struct wraps all connection-related state for a single libqaul instance.

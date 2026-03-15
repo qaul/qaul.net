@@ -171,6 +171,24 @@ pub struct CryptoStorage {
     db_ref: BTreeMap<Vec<u8>, CryptoAccount>,
 }
 
+/// Instance-based crypto storage state.
+/// Replaces the global CRYPTOSTORAGE static for multi-instance use.
+pub struct CryptoStorageState {
+    /// Crypto storage inner state.
+    pub inner: RwLock<CryptoStorage>,
+}
+
+impl CryptoStorageState {
+    /// Create a new empty CryptoStorageState.
+    pub fn new() -> Self {
+        Self {
+            inner: RwLock::new(CryptoStorage {
+                db_ref: BTreeMap::new(),
+            }),
+        }
+    }
+}
+
 impl CryptoStorage {
     /// Initialize the crypto storage
     pub fn init() {

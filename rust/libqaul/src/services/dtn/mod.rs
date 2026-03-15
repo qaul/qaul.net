@@ -51,6 +51,33 @@ pub struct DtnStorageState {
 /// mutable state of storge
 pub static STORAGESTATE: InitCell<RwLock<DtnStorageState>> = InitCell::new();
 
+/// Instance-based DTN state.
+/// Replaces the global STORAGESTATE static for multi-instance use.
+pub struct DtnModuleState {
+    /// DTN storage inner state.
+    pub inner: RwLock<DtnStorageState>,
+    /// Temporary sled database backing (kept alive for tree references).
+    _db: sled::Db,
+}
+
+impl DtnModuleState {
+    /// Create a new empty DtnModuleState with a temporary in-memory database.
+    pub fn new() -> Self {
+        let db = sled::Config::new().temporary(true).open().unwrap();
+        let dtn_messages = db.open_tree("dtn-messages").unwrap();
+        let dtn_ids = db.open_tree("dtn-messages-ids").unwrap();
+        Self {
+            inner: RwLock::new(DtnStorageState {
+                message_counts: 0,
+                used_size: 0,
+                db_ref: dtn_messages,
+                db_ref_id: dtn_ids,
+            }),
+            _db: db,
+        }
+    }
+}
+
 /// qaul Delayed
 ///
 pub struct Dtn {}

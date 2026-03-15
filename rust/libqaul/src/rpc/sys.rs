@@ -20,6 +20,34 @@ use state::InitCell;
 #[cfg(target_os = "android")]
 use crate::api::android::Android;
 
+/// Instance-based SYS RPC state.
+/// Replaces the global EXTERN_RECEIVE, EXTERN_SEND, LIBQAUL_SEND statics
+/// for multi-instance use.
+pub struct SysRpcState {
+    /// Sending end for external → libqaul direction.
+    pub extern_send: Sender<Vec<u8>>,
+    /// Receiving end for libqaul → external direction.
+    pub extern_receive: Receiver<Vec<u8>>,
+    /// Sending end for libqaul → external direction.
+    pub libqaul_send: Sender<Vec<u8>>,
+    /// Receiving end for external → libqaul direction.
+    pub libqaul_receive: Receiver<Vec<u8>>,
+}
+
+impl SysRpcState {
+    /// Create a new SysRpcState with fresh channels.
+    pub fn new() -> Self {
+        let (libqaul_send, extern_receive) = unbounded();
+        let (extern_send, libqaul_receive) = unbounded();
+        Self {
+            extern_send,
+            extern_receive,
+            libqaul_send,
+            libqaul_receive,
+        }
+    }
+}
+
 /// receiving end of the mpsc channel
 static EXTERN_RECEIVE: InitCell<Receiver<Vec<u8>>> = InitCell::new();
 /// sending end of the mpsc channel

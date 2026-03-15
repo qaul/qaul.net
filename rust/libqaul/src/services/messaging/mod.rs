@@ -110,6 +110,35 @@ pub struct Messaging {
     pub to_send: VecDeque<ScheduledMessage>,
 }
 
+/// Instance-based messaging state owning the scheduled message queue
+/// and unconfirmed message tracking.
+/// Replaces the global MESSAGING and UNCONFIRMED statics for multi-instance use.
+pub struct MessagingState {
+    /// Scheduled messages queue.
+    pub messaging: RwLock<Messaging>,
+    /// Unconfirmed messages tracking.
+    pub unconfirmed: RwLock<UnConfirmedMessages>,
+    /// Temporary sled database backing (kept alive for tree references).
+    _db: sled::Db,
+}
+
+impl MessagingState {
+    /// Create a new empty MessagingState with a temporary in-memory database.
+    pub fn new() -> Self {
+        let db = sled::Config::new().temporary(true).open().unwrap();
+        let unconfirmed_tree = db.open_tree("unconfirmed").unwrap();
+        Self {
+            messaging: RwLock::new(Messaging {
+                to_send: VecDeque::new(),
+            }),
+            unconfirmed: RwLock::new(UnConfirmedMessages {
+                unconfirmed: unconfirmed_tree,
+            }),
+            _db: db,
+        }
+    }
+}
+
 impl Messaging {
     /// Initialize messaging and create the ring buffer.
     pub fn init() {

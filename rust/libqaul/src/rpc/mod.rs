@@ -52,6 +52,37 @@ static EXTERN_SEND: InitCell<Sender<Vec<u8>>> = InitCell::new();
 /// sending end of th mpsc channel for libqaul to send (global state - deprecated)
 static LIBQAUL_SEND: InitCell<Sender<Vec<u8>>> = InitCell::new();
 
+/// Instance-based RPC state.
+/// Replaces the global EXTERN_SEND_COUNT, EXTERN_RECEIVE, EXTERN_SEND,
+/// LIBQAUL_SEND statics for multi-instance use.
+pub struct RpcState {
+    /// Message counter (for debugging).
+    pub send_count: RwLock<MessageCounter>,
+    /// Sending end for external → libqaul direction.
+    pub extern_send: Sender<Vec<u8>>,
+    /// Receiving end for external → libqaul direction.
+    pub extern_receive: Receiver<Vec<u8>>,
+    /// Sending end for libqaul → external direction.
+    pub libqaul_send: Sender<Vec<u8>>,
+    /// Receiving end for libqaul → external direction.
+    pub libqaul_receive: Receiver<Vec<u8>>,
+}
+
+impl RpcState {
+    /// Create a new RpcState with fresh channels.
+    pub fn new() -> Self {
+        let (libqaul_send, extern_receive) = unbounded();
+        let (extern_send, libqaul_receive) = unbounded();
+        Self {
+            send_count: RwLock::new(MessageCounter { count: 0 }),
+            extern_send,
+            extern_receive,
+            libqaul_send,
+            libqaul_receive,
+        }
+    }
+}
+
 /// RPC Module - wrapper for instance-based RPC channel management
 ///
 /// This struct provides instance-based access to RPC channels.

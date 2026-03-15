@@ -13,6 +13,29 @@ use std::sync::RwLock;
 
 extern crate log;
 
+/// Instance-based file logger configuration state.
+/// Replaces the global FILELOGGERCONFIG static for multi-instance use.
+pub struct FileLoggerState {
+    /// File logger configuration.
+    pub inner: RwLock<FileLoggerConfig>,
+}
+
+impl FileLoggerState {
+    /// Create a new FileLoggerState (logging disabled by default).
+    pub fn new() -> Self {
+        Self {
+            inner: RwLock::new(FileLoggerConfig { enable: false }),
+        }
+    }
+
+    /// Create from an existing config value.
+    pub fn from_config(enable: bool) -> Self {
+        Self {
+            inner: RwLock::new(FileLoggerConfig { enable }),
+        }
+    }
+}
+
 /// mutable state of file logger configuration
 static FILELOGGERCONFIG: InitCell<RwLock<FileLoggerConfig>> = InitCell::new();
 
