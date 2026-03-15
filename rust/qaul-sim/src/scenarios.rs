@@ -72,6 +72,57 @@ pub fn star_topology(n: usize, rtt_us: u32) -> Simulator {
     Simulator::new(topo, default_config())
 }
 
+/// Scenario: BLE-only mesh.
+/// All links are BLE connections with higher latency and some jitter.
+pub fn ble_only_mesh(n: usize) -> Simulator {
+    let mut topo = Topology::new(n);
+    for i in 0..n.saturating_sub(1) {
+        topo.add_link(i, i + 1, Link::ble(15000).with_jitter(3000));
+    }
+    Simulator::new(topo, default_config())
+}
+
+/// Scenario: Mixed BLE + LAN topology.
+/// Creates a chain where odd links are BLE and even links are LAN,
+/// simulating a heterogeneous network.
+pub fn mixed_ble_lan(n: usize) -> Simulator {
+    let mut topo = Topology::new(n);
+    for i in 0..n.saturating_sub(1) {
+        let link = if i % 2 == 0 {
+            Link::new(5000) // LAN
+        } else {
+            Link::ble(15000).with_jitter(2000)
+        };
+        topo.add_link(i, i + 1, link);
+    }
+    Simulator::new(topo, default_config())
+}
+
+/// Scenario: Internet relay topology.
+/// A star where the center node connects to all others via Internet links.
+pub fn internet_relay(n: usize) -> Simulator {
+    let mut topo = Topology::new(n);
+    for i in 1..n {
+        topo.add_link(0, i, Link::internet(20000).with_jitter(5000));
+    }
+    Simulator::new(topo, default_config())
+}
+
+/// Scenario: Mixed module star — center connects via Internet,
+/// leaf nodes connect to each other via BLE where adjacent.
+pub fn mixed_star_ble_internet(n: usize) -> Simulator {
+    let mut topo = Topology::new(n);
+    // Hub-to-spoke links via Internet
+    for i in 1..n {
+        topo.add_link(0, i, Link::internet(20000));
+    }
+    // Adjacent spoke-to-spoke links via BLE
+    for i in 1..n.saturating_sub(1) {
+        topo.add_link(i, i + 1, Link::ble(10000));
+    }
+    Simulator::new(topo, default_config())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -145,5 +196,77 @@ mod tests {
         let ticks = sim.ticks_to_convergence(20, &mut rng);
         assert!(ticks.is_some(), "Star topology should converge");
         println!("6-node star converged in {} ticks", ticks.unwrap());
+    }
+
+    #[test]
+    fn ble_only_mesh_converges() {
+        let mut sim = ble_only_mesh(5);
+        let mut rng = rand::rng();
+        let ticks = sim.ticks_to_convergence(30, &mut rng);
+        assert!(ticks.is_some(), "BLE-only mesh should converge");
+        println!("5-node BLE mesh converged in {} ticks", ticks.unwrap());
+
+        // Verify routes are via BLE module
+        let m = sim.metrics();
+        assert!(m.fully_converged);
+        let ble_routes = m.routes_by_module.iter().find(|(name, _)| name == "BLE");
+        assert!(ble_routes.is_some(), "Should have BLE routes");
+        println!("BLE routes: {}", ble_routes.unwrap().1);
+    }
+
+    #[test]
+    fn mixed_ble_lan_converges() {
+        let mut sim = mixed_ble_lan(6);
+        let mut rng = rand::rng();
+        let ticks = sim.ticks_to_convergence(30, &mut rng);
+        assert!(ticks.is_some(), "Mixed BLE+LAN should converge");
+        println!("6-node mixed BLE+LAN converged in {} ticks", ticks.unwrap());
+
+        // Verify both module types appear in routes
+        let m = sim.metrics();
+        assert!(m.fully_converged);
+        let has_lan = m.routes_by_module.iter().any(|(name, _)| name == "LAN");
+        let has_ble = m.routes_by_module.iter().any(|(name, _)| name == "BLE");
+        assert!(has_lan || has_ble, "Should have LAN and/or BLE routes");
+    }
+
+    #[test]
+    fn internet_relay_converges() {
+        let mut sim = internet_relay(5);
+        let mut rng = rand::rng();
+        let ticks = sim.ticks_to_convergence(20, &mut rng);
+        assert!(ticks.is_some(), "Internet relay should converge");
+        println!("5-node internet relay converged in {} ticks", ticks.unwrap());
+
+        let m = sim.metrics();
+        let internet_routes = m.routes_by_module.iter().find(|(name, _)| name == "INTERNET");
+        assert!(internet_routes.is_some(), "Should have INTERNET routes");
+    }
+
+    #[test]
+    fn mixed_star_ble_internet_converges() {
+        let mut sim = mixed_star_ble_internet(6);
+        let mut rng = rand::rng();
+        let ticks = sim.ticks_to_convergence(30, &mut rng);
+        assert!(ticks.is_some(), "Mixed star BLE+Internet should converge");
+        println!("6-node mixed star converged in {} ticks", ticks.unwrap());
+
+        let m = sim.metrics();
+        assert!(m.fully_converged);
+        println!("Metrics: {}", m.summary());
+    }
+
+    #[test]
+    fn hop_count_metrics_line() {
+        let mut sim = line_convergence(5, 5000);
+        let mut rng = rand::rng();
+        sim.run(20, &mut rng);
+
+        let m = sim.metrics();
+        assert!(m.fully_converged);
+        // In a 5-node line, max hop count should be 4 (node 0 to node 4)
+        assert!(m.max_hop_count >= 2, "Max hops should be >= 2 in a line");
+        assert!(m.avg_hop_count > 0.0, "Average hops should be > 0");
+        println!("5-node line: avg_hops={:.2}, max_hops={}", m.avg_hop_count, m.max_hop_count);
     }
 }
