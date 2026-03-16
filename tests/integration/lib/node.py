@@ -85,3 +85,15 @@ class Node:
         return self._run_json(
             "chat", "conversation", "--group-id", group_id, "--index", str(index)
         )
+
+    def router_table(self) -> list[dict]:
+        """Return the current routing table: best route per known user."""
+        return self._run_json("router", "table")
+
+    def router_neighbours(self) -> dict:
+        """Return direct neighbours split by module: {lan: [...], internet: [...], ble: [...]}."""
+        return self._run_json("router", "neighbours")
+
+    def router_connections(self) -> dict:
+        """Return all candidate routes per user, pre best-route selection."""
+        return self._run_json("router", "connections")

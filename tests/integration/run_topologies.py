@@ -30,8 +30,8 @@ from lib.network import (
     stop_qaul,
     wait_for_nodes,
 )
-from lib.topology import load_node_ids
 from lib.node import Node
+from lib.topology import load_node_ids
 
 # ---------------------------------------------------------------------------
 # Topology configs
@@ -313,13 +313,6 @@ if __name__ == "__main__":
 
     print(f"\n{'=' * 50}")
     print(f"Topologies: {total_passed} passed, {total_failed} failed")
-    print(f"{'=' * 50}")
-        else:
-            total_failed += 1
-
-    print(f"\n{'='*50}")
-    print(f"Topologies: {total_passed} passed, {total_failed} failed")
-    print(f"{'='*50}")
     for r in all_results:
         status = "PASS" if r["overall_passed"] else "FAIL"
         print(f"  [{status}] {r['topology']} ({r['node_count']} nodes)")
