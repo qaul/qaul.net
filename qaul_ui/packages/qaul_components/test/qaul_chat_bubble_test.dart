@@ -2,6 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qaul_components/qaul_components.dart';
 
+Finder _findTimestampText(WidgetTester tester) {
+  return find.byWidgetPredicate(
+    (w) =>
+        w is Text &&
+        (w.data == null || w.data!.contains('min') || w.data!.contains(':') || w.data!.contains('Now') || w.data!.contains('day')),
+  );
+}
+
 void main() {
   group('computeChatBubbleDisplayItems', () {
     test('links messages from same sender and same minute', () {
@@ -152,11 +160,130 @@ void main() {
         ),
       );
 
-      final timestampFinder = find.byType(Text).at(1);
-      final timestampText = tester.widget<Text>(timestampFinder);
+      final timestampText = tester.widget<Text>(_findTimestampText(tester).first);
       final label = timestampText.data ?? '';
       expect(label.contains('min'), isFalse);
       expect(label.contains(':'), isTrue);
+    });
+
+    testWidgets('sender (primary) read message shows sent time + days when received later',
+        (tester) async {
+      final sentAt = DateTime(2026, 4, 19, 14, 50);
+      final receivedAt = DateTime(2026, 4, 20, 15, 50);
+
+      final message = QaulChatBubbleMessage(
+        content: 'hello',
+        sentAt: sentAt,
+        receivedAt: receivedAt,
+        status: MessageStatus.read,
+        messageType: MessageType.primary,
+        edges: const [],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: QaulChatBubble(
+              message: message,
+              showTimestamp: true,
+            ),
+          ),
+        ),
+      );
+
+      final timestampText = tester.widget<Text>(_findTimestampText(tester).first);
+      final label = timestampText.data ?? '';
+      expect(label.contains('+ 1 day'), isTrue);
+    });
+
+    testWidgets('receiver (secondary) read message shows received time + days ago',
+        (tester) async {
+      final sentAt = DateTime(2026, 4, 19, 14, 50);
+      final receivedAt = DateTime(2026, 4, 20, 15, 50);
+
+      final message = QaulChatBubbleMessage(
+        content: 'hello',
+        sentAt: sentAt,
+        receivedAt: receivedAt,
+        status: MessageStatus.read,
+        messageType: MessageType.secondary,
+        edges: const [],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: QaulChatBubble(
+              message: message,
+              showTimestamp: true,
+            ),
+          ),
+        ),
+      );
+
+      final timestampText = tester.widget<Text>(_findTimestampText(tester).first);
+      final label = timestampText.data ?? '';
+      expect(label.contains('1 day ago'), isTrue);
+    });
+
+    testWidgets('read message same day has no days suffix', (tester) async {
+      final sameDay = DateTime(2026, 4, 19, 14, 50);
+      final receivedSameDay = DateTime(2026, 4, 19, 15, 50);
+
+      final message = QaulChatBubbleMessage(
+        content: 'hello',
+        sentAt: sameDay,
+        receivedAt: receivedSameDay,
+        status: MessageStatus.read,
+        messageType: MessageType.primary,
+        edges: const [],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: QaulChatBubble(
+              message: message,
+              showTimestamp: true,
+            ),
+          ),
+        ),
+      );
+
+      final timestampText = tester.widget<Text>(_findTimestampText(tester).first);
+      final label = timestampText.data ?? '';
+      expect(label.contains('+ '), isFalse);
+      expect(label.contains(' ago'), isFalse);
+    });
+
+    testWidgets('sent (not read) message has no days suffix', (tester) async {
+      final sentAt = DateTime(2026, 4, 19, 14, 50);
+      final receivedAt = DateTime(2026, 4, 20, 15, 50);
+
+      final message = QaulChatBubbleMessage(
+        content: 'hello',
+        sentAt: sentAt,
+        receivedAt: receivedAt,
+        status: MessageStatus.sent,
+        messageType: MessageType.primary,
+        edges: const [],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: QaulChatBubble(
+              message: message,
+              showTimestamp: true,
+            ),
+          ),
+        ),
+      );
+
+      final timestampText = tester.widget<Text>(_findTimestampText(tester).first);
+      final label = timestampText.data ?? '';
+      expect(label.contains('+ 1 day'), isFalse);
+      expect(label.contains(' ago'), isFalse);
     });
   });
 }

@@ -14,7 +14,6 @@ enum MessageType { primary, secondary }
 // Public constants & style
 // ---------------------------------------------------------------------------
 
-/// Width breakpoint: below this value use mobile bubble width, at or above use tablet/desktop.
 const double kChatBubbleWidthBreakpoint = 500.0;
 
 class ChatBubbleStyle {
@@ -26,6 +25,8 @@ class ChatBubbleStyle {
   static const verticalPadding = 6.0;
 
   static const gapBetweenTextAndDate = 4.0;
+
+  static const gapBetweenTimeAndStatusIcon = 3.0;
 
   static const radius = Radius.circular(10);
 
@@ -44,7 +45,7 @@ class ChatBubbleStyle {
     fontSize: 11,
     fontWeight: FontWeight.w400,
     height: 1.2,
-    letterSpacing: 0.1,
+    letterSpacing: 0,
     color: Colors.white70,
   );
 }
@@ -103,13 +104,40 @@ class QaulChatBubble extends StatelessWidget {
   final QaulChatBubbleMessage message;
   final bool showTimestamp;
 
+  static int _daysBetween(DateTime from, DateTime to) {
+    final fromDate = DateTime(from.year, from.month, from.day);
+    final toDate = DateTime(to.year, to.month, to.day);
+    return toDate.difference(fromDate).inDays;
+  }
+
   String _formatTime(BuildContext context) {
-    final diff = DateTime.now().difference(message.sentAt);
+    final isPrimary = message.messageType == MessageType.primary;
+    final baseTime = isPrimary ? message.sentAt : message.receivedAt;
+    final diffFromNow = DateTime.now().difference(baseTime);
 
-    if (diff.inMinutes < 1) return 'Now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes} min';
+    String timeLabel;
+    if (diffFromNow.inMinutes < 1) {
+      timeLabel = 'Now';
+    } else if (diffFromNow.inMinutes < 60) {
+      timeLabel = '${diffFromNow.inMinutes} min';
+    } else {
+      final h = baseTime.hour.toString().padLeft(2, '0');
+      final m = baseTime.minute.toString().padLeft(2, '0');
+      timeLabel = '$h:$m';
+    }
 
-    return TimeOfDay.fromDateTime(message.sentAt).format(context);
+    if (message.status != MessageStatus.read) return timeLabel;
+
+    final days = _daysBetween(message.sentAt, message.receivedAt);
+    if (days < 1) return timeLabel;
+
+    if (isPrimary) {
+      final dayText = days == 1 ? '1 day' : '$days days';
+      return '$timeLabel + $dayText';
+    } else {
+      final dayText = days == 1 ? '1 day ago' : '$days days ago';
+      return '$timeLabel $dayText';
+    }
   }
 
   Widget? _buildStatusIcon(Color textColor) {
@@ -188,41 +216,101 @@ class QaulChatBubble extends StatelessWidget {
               horizontal: ChatBubbleStyle.horizontalPadding,
               vertical: ChatBubbleStyle.verticalPadding,
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  fit: FlexFit.loose,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: maxTextWidth),
-                    child: Text(
-                      message.content.trim().replaceAll(RegExp(r'\s+'), ' '),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxTextWidth),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final content = message.content
+                      .trim()
+                      .replaceAll(RegExp(r'\s+'), ' ');
+                  final messageSpan = TextSpan(
+                    style: ChatBubbleStyle.textStyle,
+                    text: content,
+                  );
+                  final gap = ChatBubbleStyle.gapBetweenTextAndDate;
+                  final timeLabelPainter = TextPainter(
+                    text: TextSpan(
+                      text: timeLabel,
+                      style: ChatBubbleStyle.timeStyle,
+                    ),
+                    textDirection: TextDirection.ltr,
+                  );
+                  timeLabelPainter.layout();
+                  var timeBlockWidth = timeLabelPainter.width +
+                      ChatBubbleStyle.gapBetweenTimeAndStatusIcon;
+                  if (isPrimary && statusIcon != null) {
+                    timeBlockWidth += 14.0;
+                  }
+                  final maxMessageWidth =
+                      (constraints.maxWidth - gap - timeBlockWidth)
+                          .clamp(0.0, double.infinity);
+
+                  final painter = TextPainter(
+                    text: messageSpan,
+                    textDirection: TextDirection.ltr,
+                  );
+                  painter.layout(maxWidth: maxMessageWidth);
+                  final lineHeight = ChatBubbleStyle.textStyle.fontSize! *
+                      (ChatBubbleStyle.textStyle.height ?? 1.2);
+                  final fitsOnOneLine = painter.height <= lineHeight * 1.1;
+
+                  Widget timeRow = Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(timeLabel, style: ChatBubbleStyle.timeStyle),
+                      const SizedBox(
+                          width:
+                              ChatBubbleStyle.gapBetweenTimeAndStatusIcon),
+                      if (isPrimary && statusIcon != null) statusIcon,
+                    ],
+                  );
+
+                  if (!showTimestamp) {
+                    return RichText(
                       textAlign: TextAlign.left,
                       textWidthBasis: TextWidthBasis.longestLine,
-                      style: ChatBubbleStyle.textStyle,
-                    ),
-                  ),
-                ),
-                if (showTimestamp)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 1.5),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                      text: messageSpan,
+                    );
+                  }
+
+                  if (fitsOnOneLine) {
+                    return Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const SizedBox(
-                          width: ChatBubbleStyle.gapBetweenTextAndDate,
+                        Flexible(
+                          child: RichText(
+                            textAlign: TextAlign.left,
+                            textWidthBasis: TextWidthBasis.longestLine,
+                            text: messageSpan,
+                          ),
                         ),
-                        Text(timeLabel, style: ChatBubbleStyle.timeStyle),
-                        if (isPrimary && statusIcon != null) ...[
-                          const SizedBox(width: 4),
-                          statusIcon,
-                        ],
+                        SizedBox(width: gap),
+                        timeRow,
                       ],
-                    ),
-                  ),
-              ],
+                    );
+                  }
+
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: isPrimary
+                        ? CrossAxisAlignment.end
+                        : CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        textAlign: TextAlign.left,
+                        textWidthBasis: TextWidthBasis.longestLine,
+                        text: messageSpan,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: gap),
+                        child: timeRow,
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),

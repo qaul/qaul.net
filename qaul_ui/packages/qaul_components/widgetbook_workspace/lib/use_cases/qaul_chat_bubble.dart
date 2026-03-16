@@ -77,6 +77,16 @@ Widget buildChatBubbleConversationUseCase(BuildContext context) {
       edges: const [],
     ),
     QaulChatBubbleMessage(
+      content: 'Message with delay',
+      sentAt: today
+          .subtract(const Duration(days: 4))
+          .copyWith(hour: 12, minute: 14),
+      receivedAt: today.copyWith(hour: 12, minute: 30),
+      status: MessageStatus.read,
+      messageType: MessageType.primary,
+      edges: const [],
+    ),
+    QaulChatBubbleMessage(
       content: 'Out and delivered',
       sentAt: now.subtract(const Duration(minutes: 12)),
       receivedAt: now.subtract(const Duration(minutes: 12)),
