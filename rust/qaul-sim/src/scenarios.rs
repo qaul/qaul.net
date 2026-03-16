@@ -123,6 +123,22 @@ pub fn mixed_star_ble_internet(n: usize) -> Simulator {
     Simulator::new(topo, default_config())
 }
 
+/// Scenario: Feed propagation across a mesh.
+/// Creates a line topology, converges routing, then tests that feed messages
+/// can be saved on one node and retrieved.
+pub fn feed_propagation(n: usize, rtt_us: u32) -> Simulator {
+    let topo = Topology::line(n, rtt_us);
+    Simulator::new(topo, default_config())
+}
+
+/// Scenario: Message scheduling and delivery.
+/// Creates a line topology, converges routing, then tests that messages
+/// can be scheduled on one node and checked via the scheduler.
+pub fn message_scheduling(n: usize, rtt_us: u32) -> Simulator {
+    let topo = Topology::line(n, rtt_us);
+    Simulator::new(topo, default_config())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -268,5 +284,196 @@ mod tests {
         assert!(m.max_hop_count >= 2, "Max hops should be >= 2 in a line");
         assert!(m.avg_hop_count > 0.0, "Average hops should be > 0");
         println!("5-node line: avg_hops={:.2}, max_hops={}", m.avg_hop_count, m.max_hop_count);
+    }
+
+    #[test]
+    fn feed_propagation_across_mesh() {
+        use libqaul::services::feed::proto_net;
+
+        let mut sim = feed_propagation(3, 5000);
+        let mut rng = rand::rng();
+
+        // Converge routing first
+        sim.run(10, &mut rng);
+        assert!(sim.is_fully_converged());
+
+        // Node 0 saves a feed message
+        let sender_id = sim.nodes[0].peer_id.to_bytes();
+        let msg = proto_net::FeedMessageContent {
+            sender: sender_id.clone(),
+            content: "hello from node 0".to_string(),
+            time: 1000,
+        };
+        sim.nodes[0]
+            .services
+            .feed
+            .save_message(vec![1, 2, 3], msg.clone());
+
+        // Verify node 0 can retrieve it
+        let list = sim.nodes[0].services.feed.get_messages(0);
+        assert_eq!(list.feed_message.len(), 1);
+        assert_eq!(list.feed_message[0].content, "hello from node 0");
+
+        // Simulate sync: node 0 tells node 1 about message IDs
+        let ids = sim.nodes[0].services.feed.get_latest_message_ids(10);
+        assert_eq!(ids.len(), 1);
+
+        // Node 1 checks which IDs it's missing
+        let missing = sim.nodes[1].services.feed.process_received_feed_ids(&ids);
+        assert_eq!(missing.len(), 1, "Node 1 should be missing the message");
+
+        // Node 0 provides the message data
+        let messages = sim.nodes[0].services.feed.get_messages_by_ids(&missing);
+        assert_eq!(messages.len(), 1);
+
+        // Node 1 saves the synced message
+        let (msg_id, sender, content, time) = &messages[0];
+        sim.nodes[1]
+            .services
+            .feed
+            .save_message_by_sync(msg_id, sender, content.clone(), *time);
+
+        // Verify node 1 now has it
+        let list1 = sim.nodes[1].services.feed.get_messages(0);
+        assert_eq!(list1.feed_message.len(), 1);
+        assert_eq!(list1.feed_message[0].content, "hello from node 0");
+
+        // Node 2 should still be empty
+        let list2 = sim.nodes[2].services.feed.get_messages(0);
+        assert_eq!(list2.feed_message.len(), 0);
+    }
+
+    #[test]
+    fn message_scheduling_and_delivery() {
+        use libqaul::services::messaging::proto;
+        use prost::Message;
+
+        let mut sim = message_scheduling(3, 5000);
+        let mut rng = rand::rng();
+
+        // Converge routing
+        sim.run(10, &mut rng);
+        assert!(sim.is_fully_converged());
+
+        let sender_id = sim.nodes[0].peer_id;
+        let receiver_id = sim.nodes[2].peer_id;
+
+        // Create a mock container
+        let envelope = proto::Envelope {
+            sender_id: sender_id.to_bytes(),
+            receiver_id: receiver_id.to_bytes(),
+            payload: vec![1, 2, 3],
+        };
+        let container = proto::Container {
+            signature: vec![10, 20, 30],
+            envelope: Some(envelope),
+        };
+
+        // Schedule message on node 0
+        sim.nodes[0].services.messaging.schedule_message(
+            receiver_id,
+            container.clone(),
+            true,
+            false,
+            false,
+            false,
+        );
+
+        // Check scheduler — should find a route and return the message
+        let result = sim.nodes[0]
+            .services
+            .messaging
+            .check_scheduler(&sim.nodes[0].router.routing_table);
+
+        assert!(result.is_some(), "Scheduler should find a route to receiver");
+
+        let (next_hop, _module, data) = result.unwrap();
+        // The next hop should be node 1 (intermediate in the line)
+        assert_eq!(next_hop, sim.nodes[1].peer_id, "Should route via node 1");
+
+        // Verify the data is a valid Container
+        let decoded = proto::Container::decode(&data[..]).unwrap();
+        assert_eq!(decoded.signature, vec![10, 20, 30]);
+
+        // After popping, scheduler should be empty
+        let result2 = sim.nodes[0]
+            .services
+            .messaging
+            .check_scheduler(&sim.nodes[0].router.routing_table);
+        assert!(result2.is_none(), "Queue should be empty after pop");
+    }
+
+    #[test]
+    fn feed_pagination_instance() {
+        let sim = feed_propagation(2, 5000);
+        let sender_id = sim.nodes[0].peer_id.to_bytes();
+
+        // Insert 10 messages
+        for i in 1..=10u64 {
+            use libqaul::services::feed::proto_net;
+            let msg = proto_net::FeedMessageContent {
+                sender: sender_id.clone(),
+                content: format!("msg {}", i),
+                time: 1000 + i,
+            };
+            sim.nodes[0]
+                .services
+                .feed
+                .save_message(vec![i as u8], msg);
+        }
+
+        // Paginate: first 3
+        let page1 = sim.nodes[0].services.feed.get_paginated_messages(0, 3);
+        assert_eq!(page1.feed_message.len(), 3);
+        // Newest first (indices 10, 9, 8)
+        assert_eq!(page1.feed_message[0].index, 10);
+        assert_eq!(page1.feed_message[2].index, 8);
+        let p = page1.pagination.unwrap();
+        assert!(p.has_more);
+        assert_eq!(p.total, 10);
+
+        // Next page
+        let page2 = sim.nodes[0].services.feed.get_paginated_messages(3, 3);
+        assert_eq!(page2.feed_message.len(), 3);
+        assert_eq!(page2.feed_message[0].index, 7);
+    }
+
+    #[test]
+    fn unconfirmed_message_tracking() {
+        use libqaul::services::messaging::{proto, MessagingServiceType};
+
+        let sim = message_scheduling(2, 5000);
+        let receiver_id = sim.nodes[1].peer_id;
+
+        let container = proto::Container {
+            signature: vec![42, 43, 44],
+            envelope: Some(proto::Envelope {
+                sender_id: sim.nodes[0].peer_id.to_bytes(),
+                receiver_id: receiver_id.to_bytes(),
+                payload: vec![],
+            }),
+        };
+
+        // Save unconfirmed
+        sim.nodes[0].services.messaging.save_unconfirmed_message(
+            MessagingServiceType::Chat,
+            &[1, 2, 3],
+            &receiver_id,
+            &container,
+            false,
+        );
+
+        // Confirm it
+        sim.nodes[0]
+            .services
+            .messaging
+            .on_confirmed_message(&container.signature);
+
+        // The unconfirmed tree should no longer have this entry
+        let unconfirmed = sim.nodes[0].services.messaging.unconfirmed.read().unwrap();
+        assert!(
+            unconfirmed.unconfirmed.get(&container.signature).unwrap().is_none(),
+            "Message should be removed after confirmation"
+        );
     }
 }

@@ -81,6 +81,37 @@ impl RpcState {
             libqaul_receive,
         }
     }
+
+    /// Send RPC message from external to libqaul (instance method).
+    pub fn send_to_libqaul(&self, binary_message: Vec<u8>) {
+        if let Err(err) = self.extern_send.send(binary_message) {
+            log::error!("{:?}", err);
+        }
+    }
+
+    /// Receive RPC message from libqaul to external (instance method).
+    pub fn receive_from_libqaul(&self) -> Result<Vec<u8>, TryRecvError> {
+        self.extern_receive.try_recv()
+    }
+
+    /// Send RPC message from libqaul to external (instance method).
+    pub fn send_to_extern(&self, message: Vec<u8>) {
+        if let Err(err) = self.libqaul_send.send(message) {
+            log::error!("{:?}", err);
+        }
+    }
+
+    /// Send a wrapped RPC message to external (instance method).
+    pub fn send_message(&self, data: Vec<u8>, module: i32, request_id: String, user_id: Vec<u8>) {
+        let buf = build_rpc_message(data, module, request_id, user_id);
+        self.send_to_extern(buf);
+    }
+
+    /// Increase message counter (instance method).
+    pub fn increase_message_counter(&self) {
+        let mut counter = self.send_count.write().unwrap();
+        counter.count = counter.count + 1;
+    }
 }
 
 /// RPC Module - wrapper for instance-based RPC channel management
@@ -114,6 +145,22 @@ impl Default for RpcModule {
     fn default() -> Self {
         Self::new()
     }
+}
+
+/// Build a protobuf-encoded RPC message container (shared inner logic).
+fn build_rpc_message(data: Vec<u8>, module: i32, request_id: String, user_id: Vec<u8>) -> Vec<u8> {
+    let proto_message = proto::QaulRpc {
+        module,
+        request_id,
+        user_id,
+        data,
+    };
+
+    let mut buf = Vec::with_capacity(proto_message.encoded_len());
+    proto_message
+        .encode(&mut buf)
+        .expect("Vec<u8> provides capacity as needed");
+    buf
 }
 
 /// Handling of RPC messages of libqaul (global state - for backward compatibility)
@@ -287,21 +334,7 @@ impl Rpc {
 
     /// sends an RPC message to the outside
     pub fn send_message(data: Vec<u8>, module: i32, request_id: String, user_id: Vec<u8>) {
-        // Create RPC message container
-        let proto_message = proto::QaulRpc {
-            module,
-            request_id,
-            user_id,
-            data,
-        };
-
-        // encode message
-        let mut buf = Vec::with_capacity(proto_message.encoded_len());
-        proto_message
-            .encode(&mut buf)
-            .expect("Vec<u8> provides capacity as needed");
-
-        // send the message
+        let buf = build_rpc_message(data, module, request_id, user_id);
         Self::send_to_extern(buf);
     }
 

@@ -289,6 +289,40 @@ impl ChatFileState {
             }),
         }
     }
+
+    /// Get DB refs for user account (instance method).
+    /// Takes an explicit `sled::Db` instead of calling `DataBase::get_user_db()`.
+    pub fn get_db_ref(&self, user_id: &PeerId, db: &sled::Db) -> UserFiles {
+        {
+            let all_files = self.inner.read().unwrap();
+            if let Some(user_files) = all_files.db_ref.get(&user_id.to_bytes()) {
+                return UserFiles {
+                    histories: user_files.histories.clone(),
+                    file_chunks: user_files.file_chunks.clone(),
+                };
+            }
+        }
+
+        self.create_userfiles(user_id, db)
+    }
+
+    /// Create user file data when it does not exist (instance method).
+    fn create_userfiles(&self, user_id: &PeerId, db: &sled::Db) -> UserFiles {
+        let histories: sled::Tree = db.open_tree("chat_file").unwrap();
+        let file_chunks: sled::Tree = db.open_tree("file_chunks").unwrap();
+
+        let user_files = UserFiles {
+            histories,
+            file_chunks,
+        };
+
+        let mut all_files = self.inner.write().unwrap();
+        all_files
+            .db_ref
+            .insert(user_id.to_bytes(), user_files.clone());
+
+        user_files
+    }
 }
 
 pub struct ChatFile {}

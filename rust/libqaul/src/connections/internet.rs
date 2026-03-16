@@ -172,6 +172,58 @@ pub struct InternetReConnection {
 pub struct InternetReConnections {
     peers: HashMap<Multiaddr, InternetReConnection>,
 }
+
+impl InternetReConnections {
+    /// Add or update a reconnection entry (shared inner logic).
+    fn add_reconnection_inner(&mut self, address: Multiaddr) {
+        if let Some(peer) = self.peers.get_mut(&address) {
+            peer.last_try = Timestamp::get_timestamp();
+        } else {
+            self.peers.insert(
+                address.clone(),
+                InternetReConnection {
+                    address: address.clone(),
+                    attempt: 0,
+                    last_try: Timestamp::get_timestamp(),
+                },
+            );
+        }
+    }
+
+    /// Remove a reconnection entry (shared inner logic).
+    fn remove_reconnection_inner(&mut self, address: Multiaddr) {
+        self.peers.remove(&address);
+    }
+
+    /// Update last_try timestamp for a reconnection entry (shared inner logic).
+    fn set_redialed_inner(&mut self, addresse: &Multiaddr) {
+        if let Some(peer) = self.peers.get_mut(addresse) {
+            peer.last_try = Timestamp::get_timestamp();
+        }
+    }
+
+    /// Check if any reconnection is due (shared inner logic).
+    fn check_reconnection_inner(&self) -> Option<Multiaddr> {
+        let now_ts = Timestamp::get_timestamp();
+        for (addr, peer) in self.peers.iter() {
+            if (now_ts - peer.last_try) > 10000 {
+                return Some(addr.clone());
+            }
+        }
+        None
+    }
+}
+
+/// Add a connection entry to the connections map (shared inner logic).
+fn add_connection_impl(connections: &mut BTreeMap<String, PeerId>, address: String, peer_id: &PeerId) {
+    connections.insert(address, peer_id.clone());
+}
+
+/// Get PeerId from address in the connections map (shared inner logic).
+fn peerid_from_address_impl(connections: &BTreeMap<String, PeerId>, address: String) -> Option<PeerId> {
+    connections.get(&address).cloned()
+}
+
 static INTERNETRECONNECTIONS: InitCell<RwLock<InternetReConnections>> = InitCell::new();
 static INTERNETCONNECTIONS: InitCell<RwLock<BTreeMap<String, PeerId>>> = InitCell::new();
 
@@ -194,6 +246,42 @@ impl InternetState {
             }),
             connections: RwLock::new(BTreeMap::new()),
         }
+    }
+
+    /// Add a connection entry (instance method).
+    pub fn add_connection(&self, address: String, peer_id: &PeerId) {
+        let mut connections = self.connections.write().unwrap();
+        add_connection_impl(&mut connections, address, peer_id);
+    }
+
+    /// Get PeerId from address (instance method).
+    pub fn peerid_from_address(&self, address: String) -> Option<PeerId> {
+        let connections = self.connections.read().unwrap();
+        peerid_from_address_impl(&connections, address)
+    }
+
+    /// Add reconnection entry (instance method).
+    pub fn add_reconnection(&self, address: Multiaddr) {
+        let mut reconnections = self.reconnections.write().unwrap();
+        reconnections.add_reconnection_inner(address);
+    }
+
+    /// Remove reconnection entry (instance method).
+    pub fn remove_reconnection(&self, address: Multiaddr) {
+        let mut reconnections = self.reconnections.write().unwrap();
+        reconnections.remove_reconnection_inner(address);
+    }
+
+    /// Set redialed timestamp (instance method).
+    pub fn set_redialed(&self, addresse: &Multiaddr) {
+        let mut reconnections = self.reconnections.write().unwrap();
+        reconnections.set_redialed_inner(addresse);
+    }
+
+    /// Check reconnection (instance method).
+    pub fn check_reconnection(&self) -> Option<Multiaddr> {
+        let reconnections = self.reconnections.read().unwrap();
+        reconnections.check_reconnection_inner()
     }
 }
 
@@ -367,9 +455,7 @@ impl Internet {
     /// set tried time
     pub fn set_redialed(addresse: &Multiaddr) {
         let mut reconnections = INTERNETRECONNECTIONS.get().write().unwrap();
-        if let Some(peer) = reconnections.peers.get_mut(addresse) {
-            peer.last_try = Timestamp::get_timestamp();
-        }
+        reconnections.set_redialed_inner(addresse);
     }
 
     /// redial a remote peer
@@ -380,49 +466,29 @@ impl Internet {
     /// add connection entry
     pub fn add_connection(address: String, peer_id: &PeerId) {
         let mut connections = INTERNETCONNECTIONS.get().write().unwrap();
-        connections.insert(address.clone(), peer_id.clone());
+        add_connection_impl(&mut connections, address, peer_id);
     }
 
     /// peerid from multi-address uri
     pub fn peerid_from_address(address: String) -> Option<PeerId> {
         let connections = INTERNETCONNECTIONS.get().read().unwrap();
-        if let Some(v) = connections.get(&address) {
-            return Some(v.clone());
-        }
-        return None;
+        peerid_from_address_impl(&connections, address)
     }
 
     /// add reconnection
     pub fn add_reconnection(address: Multiaddr) {
         let mut reconnections = INTERNETRECONNECTIONS.get().write().unwrap();
-        if let Some(peer) = reconnections.peers.get_mut(&address) {
-            peer.last_try = Timestamp::get_timestamp();
-        } else {
-            reconnections.peers.insert(
-                address.clone(),
-                InternetReConnection {
-                    address: address.clone(),
-                    attempt: 0,
-                    last_try: Timestamp::get_timestamp(),
-                },
-            );
-        }
+        reconnections.add_reconnection_inner(address);
     }
 
     pub fn remove_reconnection(address: Multiaddr) {
         let mut reconnections = INTERNETRECONNECTIONS.get().write().unwrap();
-        reconnections.peers.remove(&address);
+        reconnections.remove_reconnection_inner(address);
     }
 
     /// check redial
     pub fn check_reconnection() -> Option<Multiaddr> {
         let reconnections = INTERNETRECONNECTIONS.get().read().unwrap();
-        let now_ts = Timestamp::get_timestamp();
-        for (addr, peer) in reconnections.peers.iter() {
-            if (now_ts - peer.last_try) > 10000 {
-                return Some(addr.clone());
-            }
-        }
-        None
+        reconnections.check_reconnection_inner()
     }
 }

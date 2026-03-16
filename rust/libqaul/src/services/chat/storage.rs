@@ -64,6 +64,38 @@ impl ChatState {
             }),
         }
     }
+
+    /// Get DB refs for user account (instance method).
+    /// Takes an explicit `sled::Db` instead of calling `DataBase::get_user_db()`.
+    pub fn get_db_ref(&self, account_id: PeerId, db: &sled::Db) -> ChatAccountDb {
+        {
+            let chat = self.inner.read().unwrap();
+            if let Some(chat_user) = chat.db_ref.get(&account_id.to_bytes()) {
+                return ChatAccountDb {
+                    messages: chat_user.messages.clone(),
+                    message_ids: chat_user.message_ids.clone(),
+                };
+            }
+        }
+
+        self.create_chatuser(account_id, db)
+    }
+
+    /// Create user data when it does not exist (instance method).
+    fn create_chatuser(&self, account_id: PeerId, db: &sled::Db) -> ChatAccountDb {
+        let messages: sled::Tree = db.open_tree("chat_messages").unwrap();
+        let message_ids: sled::Tree = db.open_tree("chat_message_ids").unwrap();
+
+        let chat_user = ChatAccountDb {
+            messages,
+            message_ids,
+        };
+
+        let mut chat = self.inner.write().unwrap();
+        chat.db_ref.insert(account_id.to_bytes(), chat_user.clone());
+
+        chat_user
+    }
 }
 
 impl ChatStorage {

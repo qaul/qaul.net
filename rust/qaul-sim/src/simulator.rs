@@ -12,19 +12,25 @@ use libp2p::PeerId;
 use rand::Rng;
 use std::sync::Arc;
 
+use libqaul::node::user_accounts::UserAccountsState;
 use libqaul::router::RouterState;
+use libqaul::services::ServicesState;
 use libqaul::storage::configuration::RoutingOptions;
 
 use crate::metrics::Metrics;
 use crate::network;
 use crate::topology::Topology;
 
-/// A simulated node wrapping a real RouterState.
+/// A simulated node wrapping a real RouterState and service-level state.
 pub struct SimNode {
     /// The node's libp2p PeerId.
     pub peer_id: PeerId,
     /// The node's router state (owns all routing tables).
     pub router: Arc<RouterState>,
+    /// The node's services state (feed, messaging, etc.).
+    pub services: ServicesState,
+    /// The node's user accounts state.
+    pub user_accounts: UserAccountsState,
 }
 
 /// The main simulator.
@@ -58,6 +64,8 @@ impl Simulator {
             nodes.push(SimNode {
                 peer_id,
                 router,
+                services: ServicesState::new(),
+                user_accounts: UserAccountsState::new(),
             });
         }
 
