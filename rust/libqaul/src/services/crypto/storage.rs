@@ -187,6 +187,37 @@ impl CryptoStorageState {
             }),
         }
     }
+
+    /// Get DB refs for user account (instance method).
+    /// Takes an explicit `sled::Db` instead of calling `DataBase::get_user_db()`.
+    pub fn get_db_ref(&self, account_id: PeerId, db: &sled::Db) -> CryptoAccount {
+        {
+            let crypto_storage = self.inner.read().unwrap();
+            if let Some(crypto_account_db) = crypto_storage.db_ref.get(&account_id.to_bytes()) {
+                return CryptoAccount {
+                    state: crypto_account_db.state.clone(),
+                    cache: crypto_account_db.cache.clone(),
+                };
+            }
+        }
+
+        self.create_cryptoaccountdb(account_id, db)
+    }
+
+    /// Create crypto account db entry when it does not exist (instance method).
+    fn create_cryptoaccountdb(&self, account_id: PeerId, db: &sled::Db) -> CryptoAccount {
+        let state: sled::Tree = db.open_tree("crypto_state").unwrap();
+        let cache: sled::Tree = db.open_tree("crypto_cache").unwrap();
+
+        let crypto_account = CryptoAccount { state, cache };
+
+        let mut crypto_storage = self.inner.write().unwrap();
+        crypto_storage
+            .db_ref
+            .insert(account_id.to_bytes(), crypto_account.clone());
+
+        crypto_account
+    }
 }
 
 impl CryptoStorage {

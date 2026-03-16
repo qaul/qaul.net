@@ -66,6 +66,48 @@ impl UserAccountsState {
             inner: RwLock::new(accounts),
         }
     }
+
+    /// Get user account by ID (instance method).
+    pub fn get_by_id(&self, account_id: PeerId) -> Option<UserAccount> {
+        let accounts = self.inner.read().unwrap();
+        accounts.get_by_id_inner(account_id)
+    }
+
+    /// Get user account by name (instance method).
+    pub fn get_by_name(&self, name: &str) -> Option<UserAccount> {
+        let accounts = self.inner.read().unwrap();
+        accounts.get_by_name_inner(name)
+    }
+
+    /// Get default user account (instance method).
+    pub fn get_default_user(&self) -> Option<UserAccount> {
+        let accounts = self.inner.read().unwrap();
+        accounts.get_default_user_inner()
+    }
+
+    /// Get all user accounts (instance method).
+    pub fn get_all(&self) -> Vec<UserAccount> {
+        let accounts = self.inner.read().unwrap();
+        accounts.get_all_inner()
+    }
+
+    /// Return the number of registered user accounts (instance method).
+    pub fn len(&self) -> usize {
+        let accounts = self.inner.read().unwrap();
+        accounts.len_inner()
+    }
+
+    /// Check if a user has password set (instance method).
+    pub fn has_password(&self, user_id: PeerId) -> bool {
+        let accounts = self.inner.read().unwrap();
+        accounts.has_password_inner(user_id)
+    }
+
+    /// Verify password for user (instance method).
+    pub fn verify_password(&self, user_id: PeerId, password: String) -> Result<bool, String> {
+        let accounts = self.inner.read().unwrap();
+        accounts.verify_password_inner(user_id, password)
+    }
 }
 
 impl UserAccounts {
@@ -122,6 +164,61 @@ impl UserAccounts {
         }
 
         accounts
+    }
+
+    /// Get user account by ID (inner logic).
+    pub fn get_by_id_inner(&self, account_id: PeerId) -> Option<UserAccount> {
+        self.users.iter().find(|u| u.id == account_id).cloned()
+    }
+
+    /// Get user account by name (inner logic).
+    pub fn get_by_name_inner(&self, name: &str) -> Option<UserAccount> {
+        self.users.iter().find(|u| u.name == name).cloned()
+    }
+
+    /// Get default user account (inner logic).
+    pub fn get_default_user_inner(&self) -> Option<UserAccount> {
+        self.users.first().cloned()
+    }
+
+    /// Get all user accounts (inner logic).
+    pub fn get_all_inner(&self) -> Vec<UserAccount> {
+        self.users.clone()
+    }
+
+    /// Return the number of registered user accounts (inner logic).
+    pub fn len_inner(&self) -> usize {
+        self.users.len()
+    }
+
+    /// Check if a user has password set (inner logic).
+    pub fn has_password_inner(&self, user_id: PeerId) -> bool {
+        self.users
+            .iter()
+            .find(|u| u.id == user_id)
+            .map_or(false, |user| user.password_hash.is_some())
+    }
+
+    /// Verify password for user (inner logic).
+    pub fn verify_password_inner(&self, user_id: PeerId, password: String) -> Result<bool, String> {
+        let user = self
+            .users
+            .iter()
+            .find(|u| u.id == user_id)
+            .ok_or("User not found")?;
+
+        match &user.password_hash {
+            Some(hash) => {
+                let argon2 = Argon2::default();
+                let parsed_hash = PasswordHash::new(hash)
+                    .map_err(|e| format!("Invalid stored hash format {}", e))?;
+                match argon2.verify_password(password.as_bytes(), &parsed_hash) {
+                    Ok(()) => Ok(true),
+                    Err(_) => Ok(false),
+                }
+            }
+            None => Ok(true),
+        }
     }
 
     /// Initialize from global configuration (global state - for backward compatibility)
@@ -249,81 +346,34 @@ impl UserAccounts {
 
     /// verify password for user
     pub fn verify_password(user_id: PeerId, password: String) -> Result<bool, String> {
-        let users = USERACCOUNTS.get().read().unwrap();
-        let user = users
-            .users
-            .iter()
-            .find(|u| u.id == user_id)
-            .ok_or("User not found")?;
-
-        match &user.password_hash {
-            Some(hash) => {
-                let argon2 = Argon2::default();
-                let parsed_hash = PasswordHash::new(hash)
-                    .map_err(|e| format!("Invalid stored hash format {}", e))?;
-                match argon2.verify_password(password.as_bytes(), &parsed_hash) {
-                    Ok(()) => Ok(true),
-                    Err(_) => Ok(false),
-                }
-            }
-            // no password is set, so always allow
-            None => Ok(true),
-        }
+        let accounts = USERACCOUNTS.get().read().unwrap();
+        accounts.verify_password_inner(user_id, password)
     }
 
     /// check if a user has password set
     pub fn has_password(user_id: PeerId) -> bool {
-        let users = USERACCOUNTS.get().read().unwrap();
-        users
-            .users
-            .iter()
-            .find(|u| u.id == user_id)
-            .map_or(false, |user| user.password_hash.is_some())
+        let accounts = USERACCOUNTS.get().read().unwrap();
+        accounts.has_password_inner(user_id)
     }
 
     /// get user account by id
     pub fn get_by_id(account_id: PeerId) -> Option<UserAccount> {
-        // get state
         let accounts = USERACCOUNTS.get().read().unwrap();
-
-        // search for ID in accounts
-        let mut account_result = None;
-        for item in &accounts.users {
-            if item.id == account_id {
-                account_result = Some(item.clone());
-                break;
-            }
-        }
-
-        account_result
+        accounts.get_by_id_inner(account_id)
     }
 
     /// Return the number of registered user accounts on this node.
     #[allow(dead_code)]
     pub fn len() -> usize {
-        let users = USERACCOUNTS.get().read().unwrap();
-        users.users.len()
+        let accounts = USERACCOUNTS.get().read().unwrap();
+        accounts.len_inner()
     }
 
     /// Return the default user.
     /// The first registered user account is returned.
     pub fn get_default_user() -> Option<UserAccount> {
-        // get state
-        let users = USERACCOUNTS.get().read().unwrap();
-
-        // check if a user exists
-        if users.users.len() == 0 {
-            return None;
-        }
-
-        // get user account
-        let user = users.users.first().unwrap();
-        // Some(UserAccount {
-        //     id: user.id.clone(),
-        //     keys: user.keys.clone(),
-        //     name: user.name.clone(),
-        // });
-        Some(user.clone())
+        let accounts = USERACCOUNTS.get().read().unwrap();
+        accounts.get_default_user_inner()
     }
 
     /// to fill the routing table get all users
@@ -346,7 +396,7 @@ impl UserAccounts {
 
     pub fn get_all_users() -> Vec<UserAccount> {
         let accounts = USERACCOUNTS.get().read().unwrap();
-        accounts.users.clone()
+        accounts.get_all_inner()
     }
 
     /// checks if user account exists

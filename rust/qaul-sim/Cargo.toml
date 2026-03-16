@@ -8,6 +8,7 @@ description = "Full-mesh simulation and benchmarking for qaul routing"
 [dependencies]
 libqaul = { path = "../libqaul" }
 libp2p = { version = "0.56.0", features = ["tokio", "macros"] }
+prost = "0.14"
 rand = "0.9"
 log = "0.4"
 env_logger = "0.11"
