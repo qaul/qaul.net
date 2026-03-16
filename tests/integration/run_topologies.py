@@ -10,20 +10,26 @@ For each topology:
 Results are written to results/<date>-<topology_name>.json.
 
 Usage:
-    python3 run_topologies.py
-    python3 run_topologies.py topologies/line-5.json   # run one topology only
+    ./run_topologies.py
+    ./run_topologies.py topologies/line-5.json   # run one topology only
 """
 
+import datetime
 import json
 import os
 import sys
 import time
 import traceback
-import datetime
 
 sys.path.insert(0, ".")
 
-from lib.network import apply_topology, clear_topology, start_qaul, stop_qaul, wait_for_nodes
+from lib.network import (
+    apply_topology,
+    clear_topology,
+    start_qaul,
+    stop_qaul,
+    wait_for_nodes,
+)
 from lib.topology import load_node_ids
 from lib.node import Node
 
@@ -62,10 +68,6 @@ TOPOLOGIES = [
 ]
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
 def local_user_id(node: Node) -> str:
     """Return the qaul user ID of the node's own local account."""
     for user in node.known_users():
@@ -79,10 +81,6 @@ def distant_pair(node_ids: list[str]) -> tuple[str, str]:
     sorted_ids = sorted(node_ids)
     return sorted_ids[0], sorted_ids[-1]
 
-
-# ---------------------------------------------------------------------------
-# Individual test suites
-# ---------------------------------------------------------------------------
 
 def test_node_startup(node_ids: list[str]) -> dict:
     """
@@ -128,16 +126,24 @@ def test_user_discovery(node_ids: list[str], discovery_wait: int) -> dict:
     )
 
     result["passed"] = True
-    result["notes"] = f"node {first_id} knows node {last_id}'s user after {discovery_wait}s"
+    result["notes"] = (
+        f"node {first_id} knows node {last_id}'s user after {discovery_wait}s"
+    )
     return result
 
 
-def test_message_routing(node_ids: list[str], discovery_wait: int, propagation_wait: int) -> dict:
+def test_message_routing(
+    node_ids: list[str], discovery_wait: int, propagation_wait: int
+) -> dict:
     """
     After discovery_wait, send a feed message from the first node.
     After propagation_wait more seconds it must appear on the last node.
     """
-    result = {"passed": False, "notes": "", "actual_wait_s": discovery_wait + propagation_wait}
+    result = {
+        "passed": False,
+        "notes": "",
+        "actual_wait_s": discovery_wait + propagation_wait,
+    }
     test_message = f"hello from {sorted(node_ids)[0]}"
 
     first_id, last_id = distant_pair(node_ids)
@@ -170,10 +176,6 @@ def test_message_routing(node_ids: list[str], discovery_wait: int, propagation_w
     return result
 
 
-# ---------------------------------------------------------------------------
-# Per-topology runner
-# ---------------------------------------------------------------------------
-
 def run_topology(config: dict) -> dict:
     topo_file = config["file"]
     discovery_wait = config["discovery_wait"]
@@ -181,9 +183,9 @@ def run_topology(config: dict) -> dict:
     topo_name = os.path.splitext(os.path.basename(topo_file))[0]
 
     node_ids = load_node_ids(topo_file)
-    print(f"\n{'='*50}")
+    print(f"\n{'=' * 50}")
     print(f"topology: {topo_name}  ({len(node_ids)} nodes)")
-    print(f"{'='*50}")
+    print(f"{'=' * 50}")
 
     record = {
         "topology": topo_name,
@@ -192,7 +194,7 @@ def run_topology(config: dict) -> dict:
         "propagation_wait_s": propagation_wait,
         "tests": {},
         "overall_passed": False,
-        "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
     }
 
     try:
@@ -213,9 +215,21 @@ def run_topology(config: dict) -> dict:
     suite_passed = True
 
     for test_name, test_fn, kwargs in [
-        ("test_node_startup",    test_node_startup,    {"node_ids": node_ids}),
-        ("test_user_discovery",  test_user_discovery,  {"node_ids": node_ids, "discovery_wait": discovery_wait}),
-        ("test_message_routing", test_message_routing, {"node_ids": node_ids, "discovery_wait": discovery_wait, "propagation_wait": propagation_wait}),
+        ("test_node_startup", test_node_startup, {"node_ids": node_ids}),
+        (
+            "test_user_discovery",
+            test_user_discovery,
+            {"node_ids": node_ids, "discovery_wait": discovery_wait},
+        ),
+        (
+            "test_message_routing",
+            test_message_routing,
+            {
+                "node_ids": node_ids,
+                "discovery_wait": discovery_wait,
+                "propagation_wait": propagation_wait,
+            },
+        ),
     ]:
         print(f"  running {test_name}...")
         t0 = time.time()
@@ -228,12 +242,20 @@ def run_topology(config: dict) -> dict:
             print(f"    {status}: {result['notes']}")
         except AssertionError as e:
             elapsed = time.time() - t0
-            record["tests"][test_name] = {"passed": False, "notes": str(e), "elapsed_s": round(elapsed, 1)}
+            record["tests"][test_name] = {
+                "passed": False,
+                "notes": str(e),
+                "elapsed_s": round(elapsed, 1),
+            }
             print(f"    FAIL: {e}")
             suite_passed = False
         except Exception as e:
             elapsed = time.time() - t0
-            record["tests"][test_name] = {"passed": False, "notes": f"ERROR: {e}", "elapsed_s": round(elapsed, 1)}
+            record["tests"][test_name] = {
+                "passed": False,
+                "notes": f"ERROR: {e}",
+                "elapsed_s": round(elapsed, 1),
+            }
             print(f"    ERROR: {e}")
             traceback.print_exc()
             suite_passed = False
@@ -248,22 +270,14 @@ def run_topology(config: dict) -> dict:
     return record
 
 
-# ---------------------------------------------------------------------------
-# Results writer
-# ---------------------------------------------------------------------------
-
 def save_result(record: dict):
     os.makedirs("results", exist_ok=True)
-    date = datetime.datetime.utcnow().strftime("%Y-%m-%d")
+    date = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d")
     filename = f"results/{date}-{record['topology']}.json"
     with open(filename, "w") as f:
         json.dump(record, f, indent=2)
     print(f"  result saved to {filename}")
 
-
-# ---------------------------------------------------------------------------
-# Entry point
-# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
     # Optional: single topology passed as argument
@@ -272,7 +286,11 @@ if __name__ == "__main__":
         configs = [c for c in TOPOLOGIES if c["file"] == topo_arg]
         if not configs:
             # Allow passing just the filename without the directory prefix
-            configs = [c for c in TOPOLOGIES if os.path.basename(c["file"]) == os.path.basename(topo_arg)]
+            configs = [
+                c
+                for c in TOPOLOGIES
+                if os.path.basename(c["file"]) == os.path.basename(topo_arg)
+            ]
         if not configs:
             print(f"unknown topology: {topo_arg}")
             print(f"known topologies: {[c['file'] for c in TOPOLOGIES]}")
@@ -290,6 +308,12 @@ if __name__ == "__main__":
         all_results.append(record)
         if record["overall_passed"]:
             total_passed += 1
+        else:
+            total_failed += 1
+
+    print(f"\n{'=' * 50}")
+    print(f"Topologies: {total_passed} passed, {total_failed} failed")
+    print(f"{'=' * 50}")
         else:
             total_failed += 1
 
