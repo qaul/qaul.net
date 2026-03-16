@@ -27,6 +27,15 @@ def stop_qaul():
     subprocess.run(["sudo", f"{MESHNET_LAB}/software.py", "stop", "qaul"], check=True)
 
 
+def kill_node(node_id: str):
+    """Kill the qauld process for a single node by reading its PID file."""
+    import subprocess
+    pid_file = f"/tmp/qaul-{node_id}.pid"
+    with open(pid_file) as f:
+        pid = f.read().strip()
+    subprocess.run(["sudo", "kill", pid], check=True)
+
+
 def wait_for_nodes(node_ids: list[str], timeout: int = 30):
     """Block until all nodes are reachable via qauld-ctl, or raise on timeout."""
     from lib.node import Node

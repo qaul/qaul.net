@@ -23,8 +23,8 @@ from lib.network import (
     stop_qaul,
     wait_for_nodes,
 )
-from lib.topology import load_node_ids
 from lib.node import Node
+from lib.topology import load_node_ids
 
 TOPOLOGY = "topologies/line-5.json"
 NODE_IDS = load_node_ids(TOPOLOGY)
@@ -63,8 +63,10 @@ def test_all_nodes_appear_in_routing_table(
     t_start = time.time()
     deadline = t_start + discovery_wait
 
-    print(f"  polling router table on node {observer.id} every {poll_interval}s "
-          f"(expecting {expected_count} users, timeout {discovery_wait}s)...")
+    print(
+        f"  polling router table on node {observer.id} every {poll_interval}s "
+        f"(expecting {expected_count} users, timeout {discovery_wait}s)..."
+    )
 
     while time.time() < deadline:
         elapsed = time.time() - t_start
@@ -74,7 +76,11 @@ def test_all_nodes_appear_in_routing_table(
             uid = entry["user_id"]
             if uid not in first_seen:
                 first_seen[uid] = round(elapsed, 1)
-                hops = entry["connections"][0]["hop_count"] if entry["connections"] else "?"
+                hops = (
+                    entry["connections"][0]["hop_count"]
+                    if entry["connections"]
+                    else "?"
+                )
                 print(f"    +{elapsed:.0f}s  discovered user {uid}  (hop_count={hops})")
 
         if len(first_seen) >= expected_count:
@@ -92,8 +98,10 @@ def test_all_nodes_appear_in_routing_table(
     )
 
     convergence_time = max(first_seen.values())
-    print(f"  full convergence at {convergence_time}s  "
-          f"(all {expected_count} users in routing table)")
+    print(
+        f"  PASS: full convergence at {convergence_time}s "
+        f"(all {expected_count} users in routing table, limit {discovery_wait}s)"
+    )
 
     return {
         "passed": True,
@@ -110,6 +118,8 @@ if __name__ == "__main__":
     try:
         setup()
         result = test_all_nodes_appear_in_routing_table()
-        print(f"\n  convergence timeline: {result['discovery_timeline']}")
+        print(f"  PASS: convergence timeline: {result['discovery_timeline']}")
+    except AssertionError as e:
+        print(f"  FAIL: {e}")
     finally:
         teardown()
