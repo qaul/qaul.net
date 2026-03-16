@@ -58,6 +58,39 @@ impl GroupStorageState {
             }),
         }
     }
+
+    /// Get DB refs for user account (instance method).
+    /// Takes an explicit `sled::Db` instead of calling `DataBase::get_user_db()`.
+    pub fn get_db_ref(&self, account_id: PeerId, db: &sled::Db) -> GroupAccountDb {
+        // check if user account data already exists
+        {
+            let group_storage = self.inner.read().unwrap();
+            if let Some(group_account_db) = group_storage.db_ref.get(&account_id.to_bytes()) {
+                return GroupAccountDb {
+                    groups: group_account_db.groups.clone(),
+                    invited: group_account_db.invited.clone(),
+                };
+            }
+        }
+
+        // create group account db entry if it does not exist
+        self.create_groupaccountdb(account_id, db)
+    }
+
+    /// Create group account db entry when it does not exist (instance method).
+    fn create_groupaccountdb(&self, account_id: PeerId, db: &sled::Db) -> GroupAccountDb {
+        let groups: sled::Tree = db.open_tree("groups").unwrap();
+        let invited: sled::Tree = db.open_tree("invited").unwrap();
+
+        let group_account_db = GroupAccountDb { groups, invited };
+
+        let mut group_storage = self.inner.write().unwrap();
+        group_storage
+            .db_ref
+            .insert(account_id.to_bytes(), group_account_db.clone());
+
+        group_account_db
+    }
 }
 
 impl GroupStorage {

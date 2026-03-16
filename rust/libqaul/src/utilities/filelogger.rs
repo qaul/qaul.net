@@ -34,6 +34,12 @@ impl FileLoggerState {
             inner: RwLock::new(FileLoggerConfig { enable }),
         }
     }
+
+    /// Enable or disable file logging (instance method).
+    pub fn enable(&self, enable: bool) {
+        let mut config = self.inner.write().unwrap();
+        config.set_enable(enable);
+    }
 }
 
 /// mutable state of file logger configuration
@@ -42,6 +48,13 @@ static FILELOGGERCONFIG: InitCell<RwLock<FileLoggerConfig>> = InitCell::new();
 /// File Logger Configuration
 pub struct FileLoggerConfig {
     pub enable: bool,
+}
+
+impl FileLoggerConfig {
+    /// Set enable/disable state (shared inner logic).
+    fn set_enable(&mut self, enable: bool) {
+        self.enable = enable;
+    }
 }
 
 /// Logger that writes log messages to all the loggers it encapsulates.
@@ -63,7 +76,7 @@ impl FileLogger {
     /// Enable / disable file logger
     pub fn enable(enable: bool) {
         let mut config = FILELOGGERCONFIG.get().write().unwrap();
-        config.enable = enable;
+        config.set_enable(enable);
     }
 }
 

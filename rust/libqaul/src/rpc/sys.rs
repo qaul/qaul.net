@@ -46,6 +46,25 @@ impl SysRpcState {
             libqaul_receive,
         }
     }
+
+    /// Send SYS message from external to libqaul (instance method).
+    pub fn send_to_libqaul(&self, binary_message: Vec<u8>) {
+        if let Err(err) = self.extern_send.send(binary_message) {
+            log::error!("{:?}", err);
+        }
+    }
+
+    /// Receive SYS message from libqaul to external (instance method).
+    pub fn receive_from_libqaul(&self) -> Result<Vec<u8>, TryRecvError> {
+        self.extern_receive.try_recv()
+    }
+
+    /// Send SYS message from libqaul to external (instance method).
+    pub fn send_to_extern(&self, message: Vec<u8>) {
+        if let Err(err) = self.libqaul_send.send(message) {
+            log::error!("{:?}", err);
+        }
+    }
 }
 
 /// receiving end of the mpsc channel
