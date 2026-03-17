@@ -10,7 +10,6 @@ use libp2p::PeerId;
 use prost::Message;
 use serde::{Deserialize, Serialize};
 use sled;
-use state::InitCell;
 use std::{convert::TryInto, fmt, sync::RwLock};
 
 use super::messaging::{proto, MessagingServiceType};
@@ -78,16 +77,13 @@ impl DtnStorageState {
     }
 }
 
-/// mutable state of storge
-pub static STORAGESTATE: InitCell<RwLock<DtnStorageState>> = InitCell::new();
-
 /// Instance-based DTN state.
 /// Replaces the global STORAGESTATE static for multi-instance use.
 pub struct DtnModuleState {
     /// DTN storage inner state.
     pub inner: RwLock<DtnStorageState>,
-    /// Temporary sled database backing (kept alive for tree references).
-    _db: sled::Db,
+    /// Sled database backing (kept alive for tree references).
+    _db: RwLock<sled::Db>,
 }
 
 impl DtnModuleState {
@@ -103,7 +99,37 @@ impl DtnModuleState {
                 db_ref: dtn_messages,
                 db_ref_id: dtn_ids,
             }),
-            _db: db,
+            _db: RwLock::new(db),
+        }
+    }
+
+    /// Re-initialize this DtnModuleState with a production sled database.
+    /// Replaces the temporary in-memory DB and tree references with
+    /// production-backed ones. Called from `Dtn::init()`.
+    pub fn init_production(&self, db: sled::Db) {
+        let dtn_messages: sled::Tree = db.open_tree("dtn-messages").unwrap();
+        let db_ref_id: sled::Tree = db.open_tree("dtn-messages-ids").unwrap();
+
+        // calc current used size
+        let mut used_size: u64 = 0;
+        for entry in dtn_messages.iter() {
+            if let Ok((_, message_entry_bytes)) = entry {
+                let message_entry: DtnMessageEntry =
+                    bincode::deserialize(&message_entry_bytes).unwrap();
+                used_size = used_size + (message_entry.size as u64);
+            }
+        }
+
+        {
+            let mut state = self.inner.write().unwrap();
+            state.message_counts = dtn_messages.len() as u32;
+            state.used_size = used_size;
+            state.db_ref = dtn_messages;
+            state.db_ref_id = db_ref_id;
+        }
+        {
+            let mut db_lock = self._db.write().unwrap();
+            *db_lock = db;
         }
     }
 
@@ -126,32 +152,16 @@ impl DtnModuleState {
 pub struct Dtn {}
 
 impl Dtn {
+    /// Helper to access the global DtnModuleState from QaulState.
+    fn state() -> &'static DtnModuleState {
+        &crate::QaulState::global().services.dtn
+    }
+
     /// init function
     /// Read dtn message table and initialize storage state
     pub fn init() {
         let db = DataBase::get_node_db();
-
-        // open trees
-        let dtn_messages: sled::Tree = db.open_tree("dtn-messages").unwrap();
-        let db_ref_id: sled::Tree = db.open_tree("dtn-messages-ids").unwrap();
-
-        // calc current used size
-        let mut used_size: u64 = 0;
-        for entry in dtn_messages.iter() {
-            if let Ok((_, message_entry_bytes)) = entry {
-                let message_entry: DtnMessageEntry =
-                    bincode::deserialize(&message_entry_bytes).unwrap();
-                used_size = used_size + (message_entry.size as u64);
-            }
-        }
-        let storage_state = DtnStorageState {
-            message_counts: dtn_messages.len() as u32,
-            used_size,
-            db_ref: dtn_messages,
-            db_ref_id: db_ref_id,
-        };
-
-        STORAGESTATE.set(RwLock::new(storage_state));
+        Self::state().init_production(db);
     }
 
     /// Convert Group ID from String to Binary
@@ -205,7 +215,7 @@ impl Dtn {
         org_sig: &Vec<u8>,
         dtn_payload: &Vec<u8>,
     ) -> (i32, i32) {
-        let mut storage_state = STORAGESTATE.get().write().unwrap();
+        let mut storage_state = Self::state().inner.write().unwrap();
 
         // check already received
         if storage_state.db_ref_id.contains_key(org_sig).unwrap() {
@@ -324,7 +334,7 @@ impl Dtn {
 
     /// this function is called when receive DTN response
     pub fn on_dtn_response(dtn_response: &super::messaging::proto::DtnResponse) {
-        let mut state = STORAGESTATE.get().write().unwrap();
+        let mut state = Self::state().inner.write().unwrap();
         state.on_dtn_response_inner(dtn_response);
     }
 
@@ -402,8 +412,8 @@ impl Dtn {
         match proto_rpc::Dtn::decode(&data[..]) {
             Ok(dtn) => match dtn.message {
                 Some(proto_rpc::dtn::Message::DtnStateRequest(_req)) => {
-                    let state = STORAGESTATE.get().read().unwrap();
-                    let unconfirmed = super::messaging::UNCONFIRMED.get().read().unwrap();
+                    let state = Self::state().inner.read().unwrap();
+                    let unconfirmed = super::messaging::Messaging::state().unconfirmed.read().unwrap();
                     let unconfrimed_len = unconfirmed.unconfirmed.len();
 
                     let proto_message = proto_rpc::Dtn {

@@ -11,7 +11,6 @@ pub mod debug;
 pub mod sys;
 
 use crossbeam_channel::{unbounded, Receiver, Sender, TryRecvError};
-use state::InitCell;
 use std::sync::RwLock;
 
 use prost::Message;
@@ -42,15 +41,6 @@ pub use qaul_proto::qaul_rpc as proto;
 pub struct MessageCounter {
     count: i32,
 }
-/// state of message counter
-static EXTERN_SEND_COUNT: InitCell<RwLock<MessageCounter>> = InitCell::new();
-
-/// receiving end of the mpsc channel (global state - deprecated)
-static EXTERN_RECEIVE: InitCell<Receiver<Vec<u8>>> = InitCell::new();
-/// sending end of the mpsc channel (global state - deprecated)
-static EXTERN_SEND: InitCell<Sender<Vec<u8>>> = InitCell::new();
-/// sending end of th mpsc channel for libqaul to send (global state - deprecated)
-static LIBQAUL_SEND: InitCell<Sender<Vec<u8>>> = InitCell::new();
 
 /// Instance-based RPC state.
 /// Replaces the global EXTERN_SEND_COUNT, EXTERN_RECEIVE, EXTERN_SEND,
@@ -167,37 +157,22 @@ fn build_rpc_message(data: Vec<u8>, module: i32, request_id: String, user_id: Ve
 pub struct Rpc {}
 
 impl Rpc {
-    /// Initialize RPC module
-    /// Create the sending and receiving channels and put them to state.
-    /// Return the receiving channel for libqaul.
-    pub fn init() -> Receiver<Vec<u8>> {
-        // create channels
-        let (libqaul_send, extern_receive) = unbounded();
-        let (extern_send, libqaul_receive) = unbounded();
+    /// Access the global RpcState from QaulState.
+    fn state() -> &'static RpcState {
+        &crate::QaulState::global().rpc
+    }
 
-        // save to state
-        EXTERN_RECEIVE.set(extern_receive);
-        EXTERN_SEND.set(extern_send);
-        LIBQAUL_SEND.set(libqaul_send.clone());
-
-        // create bug fixing counter
-        let message_counter = MessageCounter { count: 0 };
-        EXTERN_SEND_COUNT.set(RwLock::new(message_counter));
-
-        // return libqaul receiving channel
-        libqaul_receive
+    /// Initialize RPC module.
+    /// State is now owned by QaulState, so this is a no-op.
+    pub fn init() {
+        // State is created by QaulState::new(); nothing to do here.
     }
 
     /// send rpc message from the outside to the inside
     /// of the worker thread of libqaul.
     pub fn send_to_libqaul(binary_message: Vec<u8>) {
-        let sender = EXTERN_SEND.get().clone();
-        match sender.send(binary_message) {
-            Ok(()) => {}
-            Err(err) => {
-                // log error message
-                log::error!("{:?}", err);
-            }
+        if let Err(err) = Self::state().extern_send.send(binary_message) {
+            log::error!("{:?}", err);
         }
     }
 
@@ -205,26 +180,19 @@ impl Rpc {
     /// are new messages from inside libqaul for
     /// the outside.
     pub fn receive_from_libqaul() -> Result<Vec<u8>, TryRecvError> {
-        let receiver = EXTERN_RECEIVE.get().clone();
-        receiver.try_recv()
+        Self::state().extern_receive.try_recv()
     }
 
     /// get the number of messages in the receiving cue
     pub fn receive_from_libqaul_queue_length() -> usize {
-        let receiver = EXTERN_RECEIVE.get().clone();
-        receiver.len()
+        Self::state().extern_receive.len()
     }
 
     /// send an rpc message from inside libqaul thread
     /// to the extern.
     pub fn send_to_extern(message: Vec<u8>) {
-        let sender = LIBQAUL_SEND.get().clone();
-        match sender.send(message) {
-            Ok(()) => {}
-            Err(err) => {
-                // log error message
-                log::error!("{:?}", err);
-            }
+        if let Err(err) = Self::state().libqaul_send.send(message) {
+            log::error!("{:?}", err);
         }
     }
 
@@ -344,7 +312,7 @@ impl Rpc {
     /// it changes and can be removed anytime.
     /// Please don't use it for anything serious.
     pub fn send_rpc_count() -> i32 {
-        let counter = EXTERN_SEND_COUNT.get().read().unwrap();
+        let counter = Self::state().send_count.read().unwrap();
         counter.count
     }
 
@@ -354,7 +322,7 @@ impl Rpc {
     /// it changes and can be removed anytime.
     /// Please don't use it for anything serious.
     pub fn increase_message_counter() {
-        let mut counter = EXTERN_SEND_COUNT.get().write().unwrap();
+        let mut counter = Self::state().send_count.write().unwrap();
         counter.count = counter.count + 1;
     }
 }

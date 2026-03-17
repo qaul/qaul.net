@@ -1,8 +1,7 @@
 use crate::utilities::timestamp::{self, Timestamp};
-use state::InitCell;
-use std::sync::RwLock;
+use std::sync::{OnceLock, RwLock};
 
-static STATE: InitCell<RwLock<NetworkEmulatorStat>> = InitCell::new();
+static STATE: OnceLock<RwLock<NetworkEmulatorStat>> = OnceLock::new();
 
 pub struct NetworkEmulatorStat {
     pub loss_rate: u64,
@@ -19,11 +18,11 @@ impl NetworkEmulator {
             total_message: 0,
             total_drop: 0,
         };
-        STATE.set(RwLock::new(state));
+        let _ = STATE.set(RwLock::new(state));
     }
 
     pub fn is_lost() -> bool {
-        let mut state = STATE.get().write().unwrap();
+        let mut state = STATE.get().unwrap().write().unwrap();
         state.total_message = state.total_message + 1;
 
         let lost_rate = state.total_drop * 100 / state.total_message;

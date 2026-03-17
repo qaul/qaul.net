@@ -22,14 +22,10 @@ use libp2p::{
     PeerId,
 };
 use prost::Message;
-use state::InitCell;
 use std::sync::RwLock;
 
 /// Import protobuf message definition
 pub use qaul_proto::qaul_rpc_user_accounts as proto;
-
-/// mutable state of users table
-static USERACCOUNTS: InitCell<RwLock<UserAccounts>> = InitCell::new();
 
 #[derive(Clone)]
 pub struct UserAccount {
@@ -202,15 +198,17 @@ impl UserAccounts {
         }
     }
 
-    /// Initialize from global configuration (global state - for backward compatibility)
-    ///
-    /// Note: This uses global state. For new code, prefer using `create_from_config()`.
-    pub fn init() {
-        let config = Configuration::get();
-        let accounts = Self::create_from_config(&config);
+    /// Get a reference to the UserAccountsState from QaulState.
+    fn state() -> &'static UserAccountsState {
+        &crate::QaulState::global().user_accounts
+    }
 
-        // save users to state
-        USERACCOUNTS.set(RwLock::new(accounts));
+    /// Initialize from global configuration.
+    ///
+    /// This is now a no-op: user accounts are loaded during `Libqaul::new()`
+    /// via `QaulState::new_production()`. Kept for backward compatibility.
+    pub fn init() {
+        // No-op: accounts are already in QaulState.
     }
 
     /// create a new user account with username and an optional password
@@ -266,7 +264,7 @@ impl UserAccounts {
         };
 
         // save it to state
-        let mut users = USERACCOUNTS.get().write().unwrap();
+        let mut users = Self::state().inner.write().unwrap();
         users.users.push(user.clone());
 
         // save it to config
@@ -315,7 +313,7 @@ impl UserAccounts {
         Configuration::save();
 
         {
-            let mut users = USERACCOUNTS.get().write().unwrap();
+            let mut users = Self::state().inner.write().unwrap();
             if let Some(user) = users.users.iter_mut().find(|u| u.id == user_id) {
                 user.password_hash = password_hash;
                 user.password_salt = password_salt;
@@ -327,33 +325,33 @@ impl UserAccounts {
 
     /// verify password for user
     pub fn verify_password(user_id: PeerId, password: String) -> Result<bool, String> {
-        let accounts = USERACCOUNTS.get().read().unwrap();
+        let accounts = Self::state().inner.read().unwrap();
         accounts.verify_password_inner(user_id, password)
     }
 
     /// check if a user has password set
     pub fn has_password(user_id: PeerId) -> bool {
-        let accounts = USERACCOUNTS.get().read().unwrap();
+        let accounts = Self::state().inner.read().unwrap();
         accounts.has_password_inner(user_id)
     }
 
     /// get user account by id
     pub fn get_by_id(account_id: PeerId) -> Option<UserAccount> {
-        let accounts = USERACCOUNTS.get().read().unwrap();
+        let accounts = Self::state().inner.read().unwrap();
         accounts.get_by_id_inner(account_id)
     }
 
     /// Return the number of registered user accounts on this node.
     #[allow(dead_code)]
     pub fn len() -> usize {
-        let accounts = USERACCOUNTS.get().read().unwrap();
+        let accounts = Self::state().inner.read().unwrap();
         accounts.len_inner()
     }
 
     /// Return the default user.
     /// The first registered user account is returned.
     pub fn get_default_user() -> Option<UserAccount> {
-        let accounts = USERACCOUNTS.get().read().unwrap();
+        let accounts = Self::state().inner.read().unwrap();
         accounts.get_default_user_inner()
     }
 
@@ -361,7 +359,7 @@ impl UserAccounts {
     pub fn get_user_info() -> Vec<router::users::User> {
         let mut user_info = Vec::new();
 
-        let users = USERACCOUNTS.get().read().unwrap();
+        let users = Self::state().inner.read().unwrap();
         for user in &users.users {
             user_info.push(router::users::User {
                 id: user.id,
@@ -376,7 +374,7 @@ impl UserAccounts {
     }
 
     pub fn get_all_users() -> Vec<UserAccount> {
-        let accounts = USERACCOUNTS.get().read().unwrap();
+        let accounts = Self::state().inner.read().unwrap();
         accounts.get_all_inner()
     }
 
@@ -386,7 +384,7 @@ impl UserAccounts {
     #[allow(dead_code)]
     pub fn is_account(user_id: PeerId) -> bool {
         // get user accounts state
-        let users = USERACCOUNTS.get().read().unwrap();
+        let users = Self::state().inner.read().unwrap();
 
         // loop through user accounts and compare
         for user in &users.users {

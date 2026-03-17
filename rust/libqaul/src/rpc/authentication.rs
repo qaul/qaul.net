@@ -13,7 +13,6 @@ use crate::utilities::timestamp::Timestamp;
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use libp2p::PeerId;
 use prost::Message;
-use state::InitCell;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
 
@@ -218,30 +217,24 @@ fn verify_challenge_impl(
     }
 }
 
-/// Global counter for generating unique nonces
-/// Monotonically increasing to ensure each challenge has a unique identifier
-static NONCE_COUNTER: InitCell<RwLock<u64>> = InitCell::new();
-/// Map of active authentication challenges indexed by user ID
-static ACTIVE_CHALLENGES: InitCell<RwLock<BTreeMap<Vec<u8>, AuthChallenge>>> = InitCell::new();
-/// Map of authenticated users with their session expiration times
-static AUTHENTICATED_USERS: InitCell<RwLock<BTreeMap<Vec<u8>, u64>>> = InitCell::new();
-
 pub struct Authentication {}
 
 #[allow(dead_code)]
 impl Authentication {
-    /// Initialize the authentication system
-    /// Sets up the global state for nonce generation, challenge tracking,
-    /// and authenticated user sessions.
+    /// Access the global AuthenticationState from QaulState.
+    fn state() -> &'static AuthenticationState {
+        &crate::QaulState::global().auth
+    }
+
+    /// Initialize the authentication system.
+    /// State is now owned by QaulState, so this is a no-op.
     pub fn init() {
-        NONCE_COUNTER.set(RwLock::new(1));
-        ACTIVE_CHALLENGES.set(RwLock::new(BTreeMap::new()));
-        AUTHENTICATED_USERS.set(RwLock::new(BTreeMap::new()));
+        // State is created by QaulState::new(); nothing to do here.
     }
 
     /// Generate the next unique nonce
     fn next_nonce() -> u64 {
-        next_nonce_impl(NONCE_COUNTER.get())
+        next_nonce_impl(&Self::state().nonce_counter)
     }
 
     /// Create an authentication challenge for a user
@@ -257,9 +250,10 @@ impl Authentication {
 
         log::info!("Storing challenge with key: {:?}", qaul_id.to_bytes());
 
+        let state = Self::state();
         let nonce = create_challenge_impl(
-            NONCE_COUNTER.get(),
-            ACTIVE_CHALLENGES.get(),
+            &state.nonce_counter,
+            &state.active_challenges,
             qaul_id,
         );
         Ok(nonce)
@@ -277,9 +271,11 @@ impl Authentication {
         log::info!("Verifying challenge at timestamp: {}", now);
         log::info!("Looking for challenge with key: {:?}", qaul_id_bytes);
 
+        let state = Self::state();
+
         // Debug: print all active challenges
         {
-            let challenges = ACTIVE_CHALLENGES.get().read().unwrap();
+            let challenges = state.active_challenges.read().unwrap();
             log::info!("Total active challenges: {}", challenges.len());
             for (key, challenge) in challenges.iter() {
                 log::info!(
@@ -294,8 +290,8 @@ impl Authentication {
         let user = UserAccounts::get_by_id(qaul_id).ok_or("User not found".to_string())?;
 
         verify_challenge_impl(
-            ACTIVE_CHALLENGES.get(),
-            AUTHENTICATED_USERS.get(),
+            &state.active_challenges,
+            &state.authenticated_users,
             qaul_id,
             challenge_hash,
             user.password_hash,
@@ -304,18 +300,18 @@ impl Authentication {
 
     /// Mark a user as authenticated with a session
     fn mark_authenticated(qaul_id: PeerId) {
-        mark_authenticated_impl(AUTHENTICATED_USERS.get(), qaul_id);
+        mark_authenticated_impl(&Self::state().authenticated_users, qaul_id);
     }
 
     /// Check if a user has an active authenticated session
     /// Also performs cleanup of expired sessions
     pub fn is_authenticated(qaul_id: PeerId) -> bool {
-        is_authenticated_impl(AUTHENTICATED_USERS.get(), qaul_id)
+        is_authenticated_impl(&Self::state().authenticated_users, qaul_id)
     }
 
     /// Logout a user by removing their authenticated session
     pub fn logout(qaul_id: PeerId) {
-        logout_impl(AUTHENTICATED_USERS.get(), qaul_id);
+        logout_impl(&Self::state().authenticated_users, qaul_id);
     }
 
     /// Remove expired challenges from the active challenges map

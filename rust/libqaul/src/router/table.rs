@@ -12,7 +12,6 @@
 
 use libp2p::PeerId;
 use prost::Message;
-use state::InitCell;
 use std::collections::{BTreeMap, HashMap};
 use std::sync::RwLock;
 
@@ -21,9 +20,6 @@ use crate::connections::ConnectionModule;
 use crate::router::router_net_proto;
 use crate::rpc::Rpc;
 use crate::utilities::qaul_id::QaulId;
-
-/// mutable state of table
-static ROUTINGTABLE: InitCell<RwLock<RoutingTable>> = InitCell::new();
 
 /// table entry per user
 #[derive(Debug, Clone)]
@@ -175,86 +171,37 @@ impl RoutingTableState {
 }
 
 impl RoutingTable {
-    /// Initialize routing table
-    /// Creates global routing table and saves it to state.
-    pub fn init() {
-        // create global routing table and save it to state
-        let table = RoutingTable {
-            table: HashMap::new(),
-        };
-        ROUTINGTABLE.set(RwLock::new(table));
-    }
-
     /// set and replace routing table with a new table
+    /// Delegates to the global RouterState instance.
     pub fn set(new_table: RoutingTable) {
-        let mut table = ROUTINGTABLE.get().write().unwrap();
-        table.table = new_table.table;
+        super::RouterState::global().routing_table.set(new_table);
     }
 
-    /// Create routing information for a specific neighbour node,
-    /// to be sent to this neighbour node.
+    /// Create routing information for a specific neighbour node.
+    /// Delegates to the global RouterState instance.
     pub fn create_routing_info(
         neighbour: PeerId,
         last_sent: u64,
     ) -> router_net_proto::RoutingInfoTable {
-        // get access to routing table
-        let routing_table = ROUTINGTABLE.get().read().unwrap();
-        let mut table = router_net_proto::RoutingInfoTable {
-            entry: Vec::with_capacity(routing_table.table.len()),
-        };
-
-        // loop through routing table
-        for (user_id, user) in routing_table.table.iter() {
-            if user.connections.is_empty() {
-                continue;
-            }
-
-            // choose best link quality
-            let min_conn = user
-                .connections
-                .iter()
-                .min_by_key(|connection| connection.lq)
-                .unwrap();
-
-            if neighbour != min_conn.node && (min_conn.last_update >= last_sent || min_conn.hc == 0)
-            {
-                let table_entry = router_net_proto::RoutingInfoEntry {
-                    user: user_id.clone(),
-                    rtt: min_conn.rtt,
-                    hc: vec![min_conn.hc],
-                    pgid: user.pgid,
-                };
-                table.entry.push(table_entry);
-            }
-        }
-
-        table
+        super::RouterState::global()
+            .routing_table
+            .create_routing_info(neighbour, last_sent)
     }
 
-    /// get online users and hope count
+    /// get online users and hop count
+    /// Delegates to the global RouterState instance.
     pub fn get_online_users() -> BTreeMap<Vec<u8>, u8> {
-        let mut user_ids: BTreeMap<Vec<u8>, u8> = BTreeMap::new();
-
-        // get access to routing table
-        let routing_table = ROUTINGTABLE.get().read().unwrap();
-
-        // loop through routing table
-        for (user_id, user) in routing_table.table.iter() {
-            if !user.connections.is_empty() {
-                user_ids.insert(user_id.clone(), user.connections[0].hc);
-            }
-        }
-        user_ids
+        super::RouterState::global().routing_table.get_online_users()
     }
 
-    /// get online users and hope count
+    /// get online users info
     pub fn get_online_users_info() -> BTreeMap<Vec<u8>, Vec<RoutingConnectionEntry>> {
+        let routing_table = super::RouterState::global()
+            .routing_table
+            .inner
+            .read()
+            .unwrap();
         let mut users: BTreeMap<Vec<u8>, Vec<RoutingConnectionEntry>> = BTreeMap::new();
-
-        // get access to routing table
-        let routing_table = ROUTINGTABLE.get().read().unwrap();
-
-        // loop through routing table
         for (user_id, user) in routing_table.table.iter() {
             if !user.connections.is_empty() {
                 users.insert(user_id.clone(), user.connections.clone());
@@ -263,10 +210,13 @@ impl RoutingTable {
         users
     }
 
-    /// send protobuf RPC neighbours list
+    /// send protobuf RPC routing table list
     pub fn rpc_send_routing_table(request_id: String) {
-        // get routing table state
-        let routing_table = ROUTINGTABLE.get().read().unwrap();
+        let routing_table = super::RouterState::global()
+            .routing_table
+            .inner
+            .read()
+            .unwrap();
         let mut table_list = Vec::with_capacity(routing_table.table.len());
 
         // loop through all user table entries
@@ -334,8 +284,11 @@ impl RoutingTable {
     /// It selects the best route according to the rank_routing_connection function.
     ///
     pub fn get_route_to_user(user_id: PeerId) -> Option<RoutingConnectionEntry> {
-        // get routing table state
-        let routing_table = ROUTINGTABLE.get().read().unwrap();
+        let routing_table = super::RouterState::global()
+            .routing_table
+            .inner
+            .read()
+            .unwrap();
 
         // get q8id for qaul user
         let user_q8id = QaulId::to_q8id(user_id);

@@ -14,7 +14,6 @@
 
 use libp2p::PeerId;
 use prost::Message;
-use state::InitCell;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::sync::RwLock;
@@ -30,13 +29,6 @@ use crate::router::{
 use crate::rpc::Rpc;
 use crate::utilities::qaul_id::QaulId;
 use crate::utilities::timestamp::Timestamp;
-
-/// Mutable module state
-/// Tables with all stats for each connection module
-static LOCAL: InitCell<RwLock<RoutingTable>> = InitCell::new();
-static INTERNET: InitCell<RwLock<ConnectionTable>> = InitCell::new();
-static LAN: InitCell<RwLock<ConnectionTable>> = InitCell::new();
-static BLE: InitCell<RwLock<ConnectionTable>> = InitCell::new();
 
 /// Connection entry for UserEntry
 struct NeighbourEntry {
@@ -384,43 +376,21 @@ impl ConnectionTableState {
 
 impl ConnectionTable {
     /// Initialize connection tables
-    /// Creates a table for each ConnectionModule
-    /// and saves it to state.
+    ///
+    /// The per-module tables (local, internet, lan, ble) already exist inside
+    /// `RouterState::global().connections`. This method only populates the
+    /// local-user entries for every registered user account.
     pub fn init() {
-        {
-            let internet = ConnectionTable {
-                table: HashMap::new(),
-            };
-            INTERNET.set(RwLock::new(internet));
-
-            let lan = ConnectionTable {
-                table: HashMap::new(),
-            };
-            LAN.set(RwLock::new(lan));
-
-            let ble = ConnectionTable {
-                table: HashMap::new(),
-            };
-            BLE.set(RwLock::new(ble));
-
-            let local = RoutingTable {
-                table: HashMap::new(),
-            };
-            LOCAL.set(RwLock::new(local));
-        }
-
         // create filled state for locally registered users
-        {
-            for user in node::user_accounts::UserAccounts::get_user_info() {
-                Self::add_local_user(user.id);
-            }
+        for user in node::user_accounts::UserAccounts::get_user_info() {
+            Self::add_local_user(user.id);
         }
     }
 
     /// add a new local user to state
     pub fn add_local_user(user_id: PeerId) {
         let node_id = node::Node::get_id();
-        let mut routing_table = LOCAL.get().write().unwrap();
+        let mut routing_table = super::RouterState::global().connections.local.write().unwrap();
 
         let mut connections = Vec::with_capacity(1);
 
@@ -535,11 +505,12 @@ impl ConnectionTable {
         module: ConnectionModule,
     ) {
         // get access to the connection table
+        let state = super::RouterState::global();
         let mut connection_table;
         match module {
-            ConnectionModule::Internet => connection_table = INTERNET.get().write().unwrap(),
-            ConnectionModule::Lan => connection_table = LAN.get().write().unwrap(),
-            ConnectionModule::Ble => connection_table = BLE.get().write().unwrap(),
+            ConnectionModule::Internet => connection_table = state.connections.internet.write().unwrap(),
+            ConnectionModule::Lan => connection_table = state.connections.lan.write().unwrap(),
+            ConnectionModule::Ble => connection_table = state.connections.ble.write().unwrap(),
             ConnectionModule::Local => return,
             ConnectionModule::None => return,
         }
@@ -604,7 +575,7 @@ impl ConnectionTable {
     /// update propagation id for local users
     pub fn update_propagation_id(propagation_id: u32) {
         //update local user's propagation id
-        let mut local = LOCAL.get().write().unwrap();
+        let mut local = super::RouterState::global().connections.local.write().unwrap();
         for (_user_id, user) in local.table.iter_mut() {
             user.pgid = propagation_id;
             // QUESTION: is this of any use?
@@ -642,7 +613,7 @@ impl ConnectionTable {
     /// insert local routes into routing table
     fn local_routes_to_intermediary_table(mut table: RoutingTable) -> RoutingTable {
         // get local routes
-        let local = LOCAL.get().read().unwrap();
+        let local = super::RouterState::global().connections.local.read().unwrap();
 
         // fill it into routing table
         for (user_id, user) in &local.table {
@@ -658,11 +629,12 @@ impl ConnectionTable {
         conn: ConnectionModule,
     ) -> RoutingTable {
         // get connections table
+        let state = super::RouterState::global();
         let mut connection_table;
         match conn {
-            ConnectionModule::Internet => connection_table = INTERNET.get().write().unwrap(),
-            ConnectionModule::Lan => connection_table = LAN.get().write().unwrap(),
-            ConnectionModule::Ble => connection_table = BLE.get().write().unwrap(),
+            ConnectionModule::Internet => connection_table = state.connections.internet.write().unwrap(),
+            ConnectionModule::Lan => connection_table = state.connections.lan.write().unwrap(),
+            ConnectionModule::Ble => connection_table = state.connections.ble.write().unwrap(),
             ConnectionModule::Local => return table,
             ConnectionModule::None => return table,
         }
@@ -839,11 +811,12 @@ impl ConnectionTable {
         conn: ConnectionModule,
     ) -> Vec<proto::ConnectionsUserEntry> {
         // request connection table from state
+        let state = super::RouterState::global();
         let connection_table;
         match conn {
-            ConnectionModule::Lan => connection_table = LAN.get().read().unwrap(),
-            ConnectionModule::Internet => connection_table = INTERNET.get().read().unwrap(),
-            ConnectionModule::Ble => connection_table = BLE.get().read().unwrap(),
+            ConnectionModule::Lan => connection_table = state.connections.lan.read().unwrap(),
+            ConnectionModule::Internet => connection_table = state.connections.internet.read().unwrap(),
+            ConnectionModule::Ble => connection_table = state.connections.ble.read().unwrap(),
             ConnectionModule::Local => return Vec::new(),
             ConnectionModule::None => return Vec::new(),
         }

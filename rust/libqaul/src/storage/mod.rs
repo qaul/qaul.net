@@ -17,10 +17,6 @@ pub mod database;
 
 use configuration::Configuration;
 use database::DataBase;
-use state;
-
-/// make storage path accessible (global state - deprecated)
-static STORAGE_PATH: state::InitCell<String> = state::InitCell::new();
 
 /// Storage module instance
 ///
@@ -82,10 +78,14 @@ impl Storage {
     /// initialize storage module
     /// requires the path to the data storage folder
     ///
-    /// Note: This uses global state. For new code, prefer using `StorageModule::new()`.
+    /// Stores the path in QaulState and initializes configuration and database.
+    /// QaulState::init_global() must be called before this.
     pub fn init(path: String) {
-        // put path to state
-        STORAGE_PATH.set(path);
+        // put path to QaulState
+        {
+            let mut sp = crate::QaulState::global().storage_path.write().unwrap();
+            *sp = path;
+        }
 
         // initialize configuration
         Configuration::init();
@@ -100,17 +100,13 @@ impl Storage {
     /// as a string, without a trailing slash.
     ///
     /// e.g. on Linux: /home/USERNAME/.config/qaul
-    ///
-    /// Note: This uses global state. For new code, prefer using `StorageModule::get_path()`.
     pub fn get_path() -> String {
-        STORAGE_PATH.get().clone()
+        crate::QaulState::global().storage_path.read().unwrap().clone()
     }
 
     /// get data storage path for user account
-    ///
-    /// Note: This uses global state. For new code, prefer using `StorageModule::get_account_path()`.
     pub fn get_account_path(account_id: PeerId) -> PathBuf {
-        let storage_path_string = STORAGE_PATH.get().clone();
+        let storage_path_string = Self::get_path();
         let storage_path = Path::new(&storage_path_string);
         let account_storage_path = storage_path.join(account_id.to_base58());
 

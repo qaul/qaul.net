@@ -7,7 +7,6 @@
 
 use libp2p::PeerId;
 use sled;
-use state::InitCell;
 use std::{collections::BTreeMap, path::Path, sync::RwLock};
 
 use crate::router::users::UserData;
@@ -40,8 +39,10 @@ impl DatabaseState {
     }
 }
 
-/// make database globally accessible
-static DATABASE: InitCell<RwLock<DataBase>> = InitCell::new();
+/// Access the database state via QaulState::global().
+fn state() -> &'static DatabaseState {
+    &crate::QaulState::global().database
+}
 
 /// DataBase Module
 #[derive(Clone, Debug)]
@@ -79,16 +80,15 @@ impl DataBase {
     }
 
     /// Initialize data base,
-    /// open data base from disk and set it to global state.
-    ///
-    /// Note: This uses global state. For new code, prefer using `DataBase::create()`.
+    /// open data base from disk and load it into QaulState.
     pub fn init() {
         // create node data base path
         let path_string = super::Storage::get_path();
         let database = Self::create(&path_string);
 
-        // put data base structure to state
-        DATABASE.set(RwLock::new(database));
+        // put data base structure to QaulState
+        let mut db = state().inner.write().unwrap();
+        *db = database;
     }
 
     /// Get the node database from this instance
@@ -120,11 +120,9 @@ impl DataBase {
         db
     }
 
-    /// get node DB (global state - for backward compatibility)
-    ///
-    /// Note: This uses global state. For new code, prefer using `DataBase::node_db()`.
+    /// get node DB via QaulState
     pub fn get_node_db() -> sled::Db {
-        let database = DATABASE.get().read().unwrap();
+        let database = state().inner.read().unwrap();
         database.node.clone()
     }
 
@@ -141,7 +139,7 @@ impl DataBase {
         // otherwise open it from disk and save it to state
         else {
             // get data base structure
-            let mut database = DATABASE.get().write().unwrap();
+            let mut database = state().inner.write().unwrap();
 
             // create path
             let path = Path::new(database.path.as_str());
@@ -165,7 +163,7 @@ impl DataBase {
     /// check if user account data base has already been opened
     fn user_db_opened(account_id: PeerId) -> Option<sled::Db> {
         // get data base structure
-        let database = DATABASE.get().read().unwrap();
+        let database = state().inner.read().unwrap();
 
         // check if data base is opened and return the output
         if let Some(db) = database.users.get(&account_id.to_bytes()) {

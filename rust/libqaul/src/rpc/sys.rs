@@ -15,7 +15,6 @@
 use crate::connections::ble::Ble;
 use crate::connections::{internet::Internet, lan::Lan};
 use crossbeam_channel::{unbounded, Receiver, Sender, TryRecvError};
-use state::InitCell;
 
 #[cfg(target_os = "android")]
 use crate::api::android::Android;
@@ -67,42 +66,26 @@ impl SysRpcState {
     }
 }
 
-/// receiving end of the mpsc channel
-static EXTERN_RECEIVE: InitCell<Receiver<Vec<u8>>> = InitCell::new();
-/// sending end of the mpsc channel
-static EXTERN_SEND: InitCell<Sender<Vec<u8>>> = InitCell::new();
-/// sending end of th mpsc channel for libqaul to send
-static LIBQAUL_SEND: InitCell<Sender<Vec<u8>>> = InitCell::new();
-
 /// Handling of SYS messages of libqaul
 pub struct Sys {}
 
 impl Sys {
-    /// Initialize SYS module
-    /// Create the sending and receiving channels and put them to state.
-    /// Return the receiving channel for libqaul.
-    pub fn init() -> Receiver<Vec<u8>> {
-        // create channels
-        //let (libqaul_send, extern_receive) = unbounded();
-        let (extern_send, libqaul_receive) = unbounded();
+    /// Access the global SysRpcState from QaulState.
+    fn state() -> &'static SysRpcState {
+        &crate::QaulState::global().sys
+    }
 
-        // save to state
-        EXTERN_SEND.set(extern_send);
-
-        // return libqaul receiving channel
-        libqaul_receive
+    /// Initialize SYS module.
+    /// State is now owned by QaulState, so this is a no-op.
+    pub fn init() {
+        // State is created by QaulState::new(); nothing to do here.
     }
 
     /// send sys message from the outside to the inside
     /// of the worker thread of libqaul.
     pub fn send_to_libqaul(binary_message: Vec<u8>) {
-        let sender = EXTERN_SEND.get().clone();
-        match sender.send(binary_message) {
-            Ok(()) => {}
-            Err(err) => {
-                // log error message
-                log::error!("{:?}", err);
-            }
+        if let Err(err) = Self::state().extern_send.send(binary_message) {
+            log::error!("{:?}", err);
         }
     }
 
@@ -110,21 +93,15 @@ impl Sys {
     /// are new messages from inside libqaul for
     /// the outside.
     pub fn receive_from_libqaul() -> Result<Vec<u8>, TryRecvError> {
-        let receiver = EXTERN_RECEIVE.get().clone();
-        receiver.try_recv()
+        Self::state().extern_receive.try_recv()
     }
 
     /// send an rpc message from inside libqaul thread
     /// to the extern.
     #[allow(dead_code)]
     pub fn send_to_extern(message: Vec<u8>) {
-        let sender = LIBQAUL_SEND.get().clone();
-        match sender.send(message) {
-            Ok(()) => {}
-            Err(err) => {
-                // log error message
-                log::error!("{:?}", err);
-            }
+        if let Err(err) = Self::state().libqaul_send.send(message) {
+            log::error!("{:?}", err);
         }
     }
 

@@ -29,7 +29,7 @@ mod c;
 pub mod android;
 
 /// Global instance holder for backward compatibility
-static INSTANCE: state::InitCell<Arc<Libqaul>> = state::InitCell::new();
+static INSTANCE: std::sync::OnceLock<Arc<Libqaul>> = std::sync::OnceLock::new();
 
 /// Start libqaul in a separate thread and return the instance
 ///
@@ -86,7 +86,7 @@ pub fn start_instance_in_thread(
     );
 
     // Store in global for backward compatibility
-    INSTANCE.set(Arc::clone(&instance));
+    let _ = INSTANCE.set(Arc::clone(&instance));
 
     instance
 }
@@ -95,7 +95,7 @@ pub fn start_instance_in_thread(
 ///
 /// Returns None if libqaul hasn't been started yet.
 pub fn get_instance() -> Option<Arc<Libqaul>> {
-    INSTANCE.try_get().map(|i| Arc::clone(i))
+    INSTANCE.get().map(Arc::clone)
 }
 
 /// start libqaul in an own thread
@@ -185,7 +185,7 @@ pub fn start_android(storage_path: String) -> Arc<Libqaul> {
 /// If you send any message before it finished initializing, libqaul will crash.
 /// Wait therefore until this function returns true before sending anything to libqaul.
 pub fn initialization_finished() -> bool {
-    if let Some(instance) = INSTANCE.try_get() {
+    if let Some(instance) = INSTANCE.get() {
         return instance.is_initialized();
     }
     false
@@ -193,12 +193,21 @@ pub fn initialization_finished() -> bool {
 
 /// send an RPC message to libqaul
 pub fn send_rpc(binary_message: Vec<u8>) {
-    Rpc::send_to_libqaul(binary_message);
+    // Prefer instance-based path when available
+    if let Some(instance) = INSTANCE.get() {
+        instance.state.rpc.send_to_libqaul(binary_message);
+    } else {
+        Rpc::send_to_libqaul(binary_message);
+    }
 }
 
 /// receive a RPC message from libqaul
 pub fn receive_rpc() -> Result<Vec<u8>, TryRecvError> {
-    Rpc::receive_from_libqaul()
+    if let Some(instance) = INSTANCE.get() {
+        instance.state.rpc.receive_from_libqaul()
+    } else {
+        Rpc::receive_from_libqaul()
+    }
 }
 
 /// count of rpc messages to receive in the queue
@@ -213,10 +222,18 @@ pub fn send_rpc_count() -> i32 {
 
 /// send a SYS message to libqaul
 pub fn send_sys(binary_message: Vec<u8>) {
-    Sys::send_to_libqaul(binary_message);
+    if let Some(instance) = INSTANCE.get() {
+        instance.state.sys.send_to_libqaul(binary_message);
+    } else {
+        Sys::send_to_libqaul(binary_message);
+    }
 }
 
 /// receive a SYS message from libqaul
 pub fn receive_sys() -> Result<Vec<u8>, TryRecvError> {
-    Sys::receive_from_libqaul()
+    if let Some(instance) = INSTANCE.get() {
+        instance.state.sys.receive_from_libqaul()
+    } else {
+        Sys::receive_from_libqaul()
+    }
 }

@@ -9,7 +9,6 @@ use libp2p::{identity::PublicKey, PeerId};
 use prost::Message;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha512};
-use state::InitCell;
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
@@ -24,9 +23,6 @@ use crate::utilities::qaul_id::QaulId;
 
 /// Import protobuf users RPC message definition
 pub use qaul_proto::qaul_rpc_users as proto;
-
-/// mutable state of users table
-static USERS: InitCell<RwLock<Users>> = InitCell::new();
 
 /// implementation of all known users for routing references
 pub struct Users {
@@ -85,21 +81,16 @@ impl UsersState {
 }
 
 impl Users {
-    /// Initialize the router::users::Users module
-    /// this module is automatically initialized
-    /// when the router module is initialized
-    pub fn init() {
-        {
-            // create users table and save it to state
-            let users = Users {
-                users: BTreeMap::new(),
-            };
-            USERS.set(RwLock::new(users));
-        }
+    /// Helper to access the global UsersState.
+    fn state() -> &'static UsersState {
+        &super::RouterState::global().users
+    }
 
-        // fill user table with users from data base
+    /// Initialize the router::users::Users module.
+    /// Loads users from the database into the existing RouterState users table.
+    pub fn init() {
         let tree = DbUsers::get_tree();
-        let mut users = USERS.get().write().unwrap();
+        let mut users = Self::state().inner.write().unwrap();
         // iterate over all values in db
         for res in tree.iter() {
             if let Ok((_vec, user_bytes)) = res {
@@ -141,7 +132,7 @@ impl Users {
         });
 
         // add user to the users table
-        let mut users = USERS.get().write().unwrap();
+        let mut users = Self::state().inner.write().unwrap();
         users.users.insert(
             q8id,
             User {
@@ -168,7 +159,7 @@ impl Users {
         {
             let id_bytes = id.to_bytes();
             let q8id = &id_bytes[6..14];
-            let users = USERS.get().read().unwrap();
+            let users = Self::state().inner.read().unwrap();
 
             // check if user already exists
             if users.users.contains_key(q8id) {
@@ -181,7 +172,7 @@ impl Users {
 
     /// check missed users from ids
     pub fn get_missed_ids(ids: &[Vec<u8>]) -> Vec<Vec<u8>> {
-        let users = USERS.get().read().unwrap();
+        let users = Self::state().inner.read().unwrap();
         let mut missed = Vec::with_capacity(ids.len());
 
         missed.extend(
@@ -201,14 +192,14 @@ impl Users {
 
     /// get the public key of a known user by it's q8id
     pub fn get_pub_key_by_q8id(q8id: &[u8]) -> Option<PublicKey> {
-        let store = USERS.get().read().unwrap();
+        let store = Self::state().inner.read().unwrap();
 
         store.users.get(q8id).map(|user| user.key.clone())
     }
 
     /// get user by q8id
     pub fn get_user_id_by_q8id(q8id: &[u8]) -> Option<PeerId> {
-        let store = USERS.get().read().unwrap();
+        let store = Self::state().inner.read().unwrap();
 
         store.users.get(q8id).map(|user| user.id)
     }
@@ -230,7 +221,7 @@ impl Users {
     /// create and send the user info table for the
     /// RouterInfo message which is sent regularly to neighbours
     pub fn get_user_info_table_by_q8ids(q8ids: &[Vec<u8>]) -> router_net_proto::UserInfoTable {
-        let store = USERS.get().read().unwrap();
+        let store = Self::state().inner.read().unwrap();
         let mut users = router_net_proto::UserInfoTable {
             info: Vec::with_capacity(q8ids.len()),
         };
@@ -280,7 +271,7 @@ impl Users {
         let q8id_my = &my_user_bytes[6..14];
 
         // find user from users
-        let users = USERS.get().read().unwrap();
+        let users = Self::state().inner.read().unwrap();
         if !users.users.contains_key(q8id) {
             return Err("user no exists".to_string());
         }
@@ -443,7 +434,7 @@ impl Users {
         let q8id = &user_id_bytes[6..14];
 
         // acquire a lock to lookup the user entry
-        let mut store = USERS.get().write().unwrap();
+        let mut store = Self::state().inner.write().unwrap();
         match store.users.get_mut(q8id) {
             // pass found user to f
             Some(user) => f(user_id, q8id, user),
@@ -456,7 +447,7 @@ impl Users {
     /// Only completes successfully if there is a default user account, otherwise it always returns
     /// an empty list.
     fn build_user_list(filter: UserFilter, offset: u32, limit: u32, request_id: String) {
-        let users = USERS.get().read().unwrap();
+        let users = Self::state().inner.read().unwrap();
 
         let user_list = if let Some(account) = UserAccounts::get_default_user() {
             let online_users = RoutingTable::get_online_users_info();

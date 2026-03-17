@@ -7,15 +7,11 @@
 
 use libp2p::PeerId;
 use sled;
-use state::InitCell;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
 
 use super::{Group, GroupInvited};
 use crate::storage::database::DataBase;
-
-/// mutable state of all user groups
-pub static GROUPSTORAGE: InitCell<RwLock<GroupStorage>> = InitCell::new();
 
 /// Group DB links for user account
 #[derive(Clone)]
@@ -94,20 +90,24 @@ impl GroupStorageState {
 }
 
 impl GroupStorage {
+    /// Helper to access the global GroupStorageState from QaulState.
+    fn state() -> &'static GroupStorageState {
+        &crate::QaulState::global().services.groups
+    }
+
     /// Initialize Group Storage
+    ///
+    /// No-op: the state is now owned by `QaulState` and initialized there.
     pub fn init() {
-        let group_storage = GroupStorage {
-            db_ref: BTreeMap::new(),
-        };
-        GROUPSTORAGE.set(RwLock::new(group_storage));
+        // State already exists in QaulState::global().services.groups
     }
 
     /// get DB refs for user account
     pub fn get_db_ref(account_id: PeerId) -> GroupAccountDb {
         // check if user account data exists
         {
-            // get chat state
-            let group_storage = GROUPSTORAGE.get().read().unwrap();
+            // get group state
+            let group_storage = Self::state().inner.read().unwrap();
 
             // check if user account ID is in map
             if let Some(group_account_db) = group_storage.db_ref.get(&account_id.to_bytes()) {
@@ -147,7 +147,7 @@ impl GroupStorage {
         let group_account_db = GroupAccountDb { groups, invited };
 
         // get group storage for writing
-        let mut group_storage = GROUPSTORAGE.get().write().unwrap();
+        let mut group_storage = Self::state().inner.write().unwrap();
 
         // add user to state
         group_storage

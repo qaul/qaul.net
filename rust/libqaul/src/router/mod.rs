@@ -7,8 +7,8 @@
 //! qaul router.
 
 use prost::Message;
-use state::InitCell;
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
+use std::sync::OnceLock;
 
 pub mod connections;
 pub mod feed_requester;
@@ -21,12 +21,8 @@ pub mod users;
 
 use crate::storage::configuration::{Configuration, RoutingOptions};
 use connections::ConnectionTable;
-use feed_requester::{FeedRequester, FeedResponser};
-use flooder::Flooder;
-use info::RouterInfo;
 use neighbours::Neighbours;
 use table::RoutingTable;
-use user_requester::{UserRequester, UserResponser};
 use users::Users;
 
 /// Import protobuf message definition
@@ -35,11 +31,7 @@ pub use qaul_proto::qaul_rpc_router as proto;
 
 /// Global RouterState instance for backward compatibility.
 /// New code should use instance methods on RouterState directly.
-static GLOBAL_ROUTER_STATE: InitCell<Arc<RouterState>> = InitCell::new();
-
-/// mutable state of router,
-/// used for storing the router configuration (global state - deprecated)
-static ROUTER: InitCell<RwLock<Router>> = InitCell::new();
+static GLOBAL_ROUTER_STATE: OnceLock<Arc<RouterState>> = OnceLock::new();
 
 /// Instance-based router state that owns all routing sub-state.
 ///
@@ -105,7 +97,7 @@ impl RouterState {
     /// Get a reference to the global RouterState instance.
     /// Panics if the global state has not been initialized.
     pub fn global() -> &'static Arc<RouterState> {
-        GLOBAL_ROUTER_STATE.get()
+        GLOBAL_ROUTER_STATE.get().expect("RouterState not initialized")
     }
 
     /// Initialize the global RouterState from the current Configuration.
@@ -113,7 +105,7 @@ impl RouterState {
     fn init_global() {
         let config = Configuration::get();
         let state = Arc::new(RouterState::new(config.routing.clone()));
-        GLOBAL_ROUTER_STATE.set(state);
+        let _ = GLOBAL_ROUTER_STATE.set(state);
     }
 }
 
@@ -148,62 +140,33 @@ impl RouterModule {
 }
 
 /// qaul community router access
-#[derive(Clone)]
-pub struct Router {
-    pub configuration: RoutingOptions,
-}
+pub struct Router {}
 
 impl Router {
     /// Initialize the qaul router
     pub fn init() {
-        let config = Configuration::get();
-        let router = Router {
-            configuration: config.routing.clone(),
-        };
-        // set configuration to state
-        ROUTER.set(RwLock::new(router));
-
-        // Initialize the global RouterState instance
+        // Initialize the global RouterState instance.
+        // All sub-module state (flooder, feed_requester, user_requester, etc.)
+        // lives inside RouterState. Per-module globals are no longer needed.
         RouterState::init_global();
 
-        // initialize direct neighbours table
+        // initialize direct neighbours table (database-backed)
         Neighbours::init();
 
-        // initialize users table
+        // initialize users table (database-backed)
         Users::init();
 
-        // initialize flooder queue
-        Flooder::init();
-
-        // initialize feed_requester queue
-        FeedRequester::init();
-
-        // initialize feed_response queue
-        FeedResponser::init();
-
-        // initialize user_requester queue
-        UserRequester::init();
-
-        // initialize user_response queue
-        UserResponser::init();
-
-        // initialize the global routing table
-        RoutingTable::init();
-
         // initialize the routing information collection
-        // tables per connection module
+        // tables per connection module (database-backed)
         ConnectionTable::init();
 
-        // initialize RouterInfo submodule that
-        // schedules the sending of the routing information
-        // to the neighbouring nodes.
-        RouterInfo::init(config.routing.sending_table_period);
+        // RouterInfo scheduler is already initialized as part of RouterState::init_global().
+        // No separate RouterInfo::init() call needed.
     }
 
     /// Get router configuration from state
     pub fn get_configuration() -> RoutingOptions {
-        let router = ROUTER.get().read().unwrap();
-        router.configuration.clone()
+        RouterState::global().configuration.clone()
     }
 
     /// Process incoming RPC request messages and send them to

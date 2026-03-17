@@ -10,9 +10,8 @@ use libp2p::PeerId;
 use crate::node::user_accounts::UserAccount;
 use crate::rpc::Rpc;
 use prost::Message;
-use state::InitCell;
 use std::collections::BTreeMap;
-use std::sync::RwLock;
+use std::sync::{OnceLock, RwLock};
 
 mod rtc_managing;
 mod rtc_messaging;
@@ -53,7 +52,7 @@ pub struct RtcSessions {
 }
 
 /// mutable state for sessions
-pub static RTCSESSIONS: InitCell<RwLock<RtcSessions>> = InitCell::new();
+pub static RTCSESSIONS: OnceLock<RwLock<RtcSessions>> = OnceLock::new();
 
 /// Real Time Communication Module
 pub struct Rtc {}
@@ -64,12 +63,12 @@ impl Rtc {
         let rtc_sessions = RtcSessions {
             sessions: BTreeMap::new(),
         };
-        RTCSESSIONS.set(RwLock::new(rtc_sessions));
+        let _ = RTCSESSIONS.set(RwLock::new(rtc_sessions));
     }
 
     /// get session from session_id
     pub fn get_session_from_id(group_id: &Vec<u8>) -> Option<RtcSession> {
-        let sessions = RTCSESSIONS.get().read().unwrap();
+        let sessions = RTCSESSIONS.get().unwrap().read().unwrap();
         if sessions.sessions.contains_key(group_id) {
             return Some(sessions.sessions.get(group_id).unwrap().clone());
         }
@@ -78,13 +77,13 @@ impl Rtc {
 
     /// get session from session_id
     pub fn update_session(session: RtcSession) {
-        let mut sessions = RTCSESSIONS.get().write().unwrap();
+        let mut sessions = RTCSESSIONS.get().unwrap().write().unwrap();
         sessions.sessions.insert(session.group_id.clone(), session);
     }
 
     /// remove session on the storage
     pub fn remove_session(session_id: &Vec<u8>) {
-        let mut sessions = RTCSESSIONS.get().write().unwrap();
+        let mut sessions = RTCSESSIONS.get().unwrap().write().unwrap();
         sessions.sessions.remove(session_id);
     }
 

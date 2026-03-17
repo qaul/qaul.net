@@ -7,16 +7,12 @@
 
 use libp2p::PeerId;
 use sled;
-use state::InitCell;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
 
 use super::CryptoState;
 use crate::services::messaging::proto;
 use crate::storage::database::DataBase;
-
-/// mutable state of messages, scheduled for sending
-pub static CRYPTOSTORAGE: InitCell<RwLock<CryptoStorage>> = InitCell::new();
 
 /// Group DB links for user account
 #[derive(Clone)]
@@ -221,22 +217,24 @@ impl CryptoStorageState {
 }
 
 impl CryptoStorage {
+    /// Helper to access the global CryptoStorageState from QaulState.
+    fn state() -> &'static CryptoStorageState {
+        &crate::QaulState::global().services.crypto
+    }
+
     /// Initialize the crypto storage
+    ///
+    /// No-op: the state is now owned by `QaulState` and initialized there.
     pub fn init() {
-        // initialize data base
-        // and store the tree reference in the module state.
-        let crypto_storage = CryptoStorage {
-            db_ref: BTreeMap::new(),
-        };
-        CRYPTOSTORAGE.set(RwLock::new(crypto_storage));
+        // State already exists in QaulState::global().services.crypto
     }
 
     /// get DB refs for user account
     pub fn get_db_ref(account_id: PeerId) -> CryptoAccount {
         // check if user account data exists
         {
-            // get chat state
-            let crypto_storage = CRYPTOSTORAGE.get().read().unwrap();
+            // get crypto state
+            let crypto_storage = Self::state().inner.read().unwrap();
 
             // check if user account ID is in map
             if let Some(crypto_account_db) = crypto_storage.db_ref.get(&account_id.to_bytes()) {
@@ -251,10 +249,6 @@ impl CryptoStorage {
         let crypto_account = Self::create_groupaccountdb(account_id);
 
         // return crypto_account_db structure
-        // CryptoAccount {
-        //     state: crypto_account.state.clone(),
-        //     cache: crypto_account.cache.clone(),
-        // }
         crypto_account.clone()
     }
 
@@ -269,8 +263,8 @@ impl CryptoStorage {
 
         let crypto_account = CryptoAccount { state, cache };
 
-        // get group storage for writing
-        let mut crypto_storage = CRYPTOSTORAGE.get().write().unwrap();
+        // get crypto storage for writing
+        let mut crypto_storage = Self::state().inner.write().unwrap();
 
         // add user to state
         crypto_storage
