@@ -19,6 +19,7 @@ pub struct CryptoNoise {}
 impl CryptoNoise {
     /// Encrypt a Message with first handshake
     pub fn encrypt_noise_kk_handshake_1<D, C, H, P>(
+        qaul_state: &crate::QaulState,
         data: Vec<u8>,
         user_account: UserAccount,
         storage: CryptoAccount,
@@ -39,11 +40,14 @@ impl CryptoNoise {
 
         // get receivers public key
         let remote_key: PublicKey;
-        match Users::get_pub_key(&remote_id) {
-            Some(key) => remote_key = key,
-            None => {
-                log::error!("No key found for user {:?}", remote_id);
-                return (None, 0, 0);
+        {
+            let rs = qaul_state.get_router();
+            match Users::get_pub_key(&rs, &remote_id) {
+                Some(key) => remote_key = key,
+                None => {
+                    log::error!("No key found for user {:?}", remote_id);
+                    return (None, 0, 0);
+                }
             }
         }
 
@@ -206,6 +210,7 @@ impl CryptoNoise {
     ///
     /// Returns the decrypted message and the current crypto state
     pub fn decrypt_noise_kk_handshake_1<D, C, H, P>(
+        qaul_state: &crate::QaulState,
         data: Vec<u8>,
         _storage: CryptoAccount,
         remote_id: PeerId,
@@ -225,11 +230,14 @@ impl CryptoNoise {
 
         // get receivers public key
         let remote_key: PublicKey;
-        match Users::get_pub_key(&remote_id) {
-            Some(key) => remote_key = key,
-            None => {
-                log::error!("No key found for user {:?}", remote_id);
-                return None;
+        {
+            let rs = qaul_state.get_router();
+            match Users::get_pub_key(&rs, &remote_id) {
+                Some(key) => remote_key = key,
+                None => {
+                    log::error!("No key found for user {:?}", remote_id);
+                    return None;
+                }
             }
         }
 

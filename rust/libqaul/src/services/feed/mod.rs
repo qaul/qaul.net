@@ -380,15 +380,10 @@ impl FeedState {
 }
 
 impl Feed {
-    /// Access the global FeedState owned by QaulState.
-    pub(crate) fn state() -> &'static FeedState {
-        &crate::QaulState::global().services.feed
-    }
-
     /// initialize feed module
-    pub fn init() {
+    pub fn init(state: &crate::QaulState) {
         // get database and initialize tree
-        let db = DataBase::get_node_db();
+        let db = DataBase::get_node_db(state);
         let tree: sled::Tree = db.open_tree("feed").unwrap();
         let tree_ids: sled::Tree = db.open_tree("feed_id").unwrap();
 
@@ -417,11 +412,12 @@ impl Feed {
         }
 
         // swap temporary DB with production DB in existing state
-        Self::state().init_production(db, tree, tree_ids, last_message);
+        state.services.feed.init_production(db, tree, tree_ids, last_message);
     }
 
     /// Send message via all swarms
     pub fn send(
+        state: &crate::QaulState,
         user_account: &UserAccount,
         content: String,
         lan: Option<&mut Lan>,
@@ -458,7 +454,7 @@ impl Feed {
             .expect("Vec<u8> provides capacity as needed");
 
         // save message in feed store
-        Self::save_message(container.signature.clone(), msg);
+        Self::save_message(state, container.signature.clone(), msg);
 
         // flood via floodsub
         if lan.is_some() {
@@ -466,7 +462,7 @@ impl Feed {
                 .swarm
                 .behaviour_mut()
                 .floodsub
-                .publish(Node::get_topic(), buf.clone());
+                .publish(Node::get_topic(state), buf.clone());
         }
         if internet.is_some() {
             internet
@@ -474,13 +470,14 @@ impl Feed {
                 .swarm
                 .behaviour_mut()
                 .floodsub
-                .publish(Node::get_topic(), buf.clone());
+                .publish(Node::get_topic(state), buf.clone());
         }
-        crate::connections::ble::Ble::send_feed_message(Node::get_topic(), buf);
+        crate::connections::ble::Ble::send_feed_message(state, Node::get_topic(state), buf);
     }
 
     /// Process a received message
     pub fn received(
+        state: &crate::QaulState,
         via_conn: ConnectionModule,
         _via_node: PeerId,
         feed_container: proto_net::FeedContainer,
@@ -491,7 +488,8 @@ impl Feed {
 
                 if let Ok(user_id_decoded) = PeerId::from_bytes(&message.sender) {
                     // check if sending user public is in user store
-                    let result = router::users::Users::get_pub_key(&user_id_decoded);
+                    let rs = state.get_router();
+                    let result = router::users::Users::get_pub_key(&rs, &user_id_decoded);
 
                     if let Some(key) = result {
                         // validate message
@@ -512,7 +510,7 @@ impl Feed {
                         let mut new_message = true;
 
                         {
-                            let feed = Self::state().inner.read().unwrap();
+                            let feed = state.services.feed.inner.read().unwrap();
 
                             if feed.messages.contains_key(&feed_container.signature) {
                                 new_message = false;
@@ -522,7 +520,7 @@ impl Feed {
                         // check if message exists
                         if new_message {
                             // write message to store
-                            Self::save_message(feed_container.signature.clone(), feed_content);
+                            Self::save_message(state, feed_container.signature.clone(), feed_content);
 
                             // display message
                             log::trace!("message received:");
@@ -540,7 +538,7 @@ impl Feed {
                                 .expect("Vec<u8> provides capacity as needed");
 
                             // forward message
-                            Flooder::add(buf, Node::get_topic(), via_conn);
+                            Flooder::add(&rs, buf, Node::get_topic(state), via_conn);
                         } else {
                             log::trace!(
                                 "message key {:?} already in store",
@@ -560,41 +558,41 @@ impl Feed {
     }
 
     //Save message by sync
-    pub fn save_message_by_sync(message_id: &[u8], sender_id: &[u8], content: String, time: u64) {
-        Self::state().save_message_by_sync(message_id, sender_id, content, time);
+    pub fn save_message_by_sync(state: &crate::QaulState, message_id: &[u8], sender_id: &[u8], content: String, time: u64) {
+        state.services.feed.save_message_by_sync(message_id, sender_id, content, time);
     }
 
     /// Save a Message
     ///
     /// This function saves a new message in the data base and in the in-memory BTreeMap
-    fn save_message(signature: Vec<u8>, message: proto_net::FeedMessageContent) {
-        Self::state().save_message(signature, message);
+    fn save_message(state: &crate::QaulState, signature: Vec<u8>, message: proto_net::FeedMessageContent) {
+        state.services.feed.save_message(signature, message);
     }
 
-    pub fn get_latest_message_ids(count: usize) -> Vec<Vec<u8>> {
-        Self::state().get_latest_message_ids(count)
+    pub fn get_latest_message_ids(state: &crate::QaulState, count: usize) -> Vec<Vec<u8>> {
+        state.services.feed.get_latest_message_ids(count)
     }
 
     //return missing feed ids to request to the neighbour
-    pub fn process_received_feed_ids(ids: &[Vec<u8>]) -> Vec<Vec<u8>> {
-        Self::state().process_received_feed_ids(ids)
+    pub fn process_received_feed_ids(state: &crate::QaulState, ids: &[Vec<u8>]) -> Vec<Vec<u8>> {
+        state.services.feed.process_received_feed_ids(ids)
     }
 
-    pub fn get_messges_by_ids(ids: &[Vec<u8>]) -> Vec<(Vec<u8>, Vec<u8>, String, u64)> {
-        Self::state().get_messages_by_ids(ids)
+    pub fn get_messges_by_ids(state: &crate::QaulState, ids: &[Vec<u8>]) -> Vec<(Vec<u8>, Vec<u8>, String, u64)> {
+        state.services.feed.get_messages_by_ids(ids)
     }
 
     /// Get messages from data base
     ///
     /// This function get messages from data base
     /// that are newer then the last message.
-    fn get_messages(last_message: u64) -> proto::FeedMessageList {
-        Self::state().get_messages(last_message)
+    fn get_messages(state: &crate::QaulState, last_message: u64) -> proto::FeedMessageList {
+        state.services.feed.get_messages(last_message)
     }
 
     /// Get messages from database using pagination
-    fn get_paginated_messages(offset: u32, limit: u32) -> proto::FeedMessageList {
-        Self::state().get_paginated_messages(offset, limit)
+    fn get_paginated_messages(state: &crate::QaulState, offset: u32, limit: u32) -> proto::FeedMessageList {
+        state.services.feed.get_paginated_messages(offset, limit)
     }
 
     /// Sign a message with the private key
@@ -610,6 +608,7 @@ impl Feed {
 
     /// Process incoming RPC request messages for feed module
     pub fn rpc(
+        state: &crate::QaulState,
         data: Vec<u8>,
         user_id: Vec<u8>,
         lan: Option<&mut Lan>,
@@ -623,9 +622,9 @@ impl Feed {
                         // get feed messages from data base
                         // Pagination is optional: when limit is set to 0, we fallback to the previous index-based impl
                         let feed_list = if feed_request.limit > 0 {
-                            Self::get_paginated_messages(feed_request.offset, feed_request.limit)
+                            Self::get_paginated_messages(state, feed_request.offset, feed_request.limit)
                         } else {
-                            Self::get_messages(feed_request.last_index)
+                            Self::get_messages(state, feed_request.last_index)
                         };
 
                         // pack message
@@ -641,6 +640,7 @@ impl Feed {
 
                         // send message
                         Rpc::send_message(
+                            state,
                             buf,
                             crate::rpc::proto::Modules::Feed.into(),
                             request_id,
@@ -655,11 +655,11 @@ impl Feed {
                         let user_account;
                         match PeerId::from_bytes(&user_id) {
                             Ok(user_id_decoded) => {
-                                match UserAccounts::get_by_id(user_id_decoded) {
+                                match UserAccounts::get_by_id(state,user_id_decoded) {
                                     Some(account) => {
                                         user_account = account;
                                         // send the message
-                                        Self::send(&user_account, send_feed.content, lan, internet);
+                                        Self::send(state, &user_account, send_feed.content, lan, internet);
                                     }
                                     None => {
                                         log::error!(

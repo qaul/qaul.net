@@ -12,7 +12,7 @@
 
 use libp2p::{floodsub::Topic, PeerId};
 use prost::Message;
-use std::{collections::BTreeMap, fmt, sync::RwLock};
+use std::{collections::BTreeMap, fmt, sync::RwLock, sync::Mutex};
 use uuid::Uuid;
 
 use crate::connections::ConnectionModule;
@@ -43,6 +43,9 @@ pub struct BleModuleState {
     pub to_confirm: RwLock<BTreeMap<Vec<u8>, ToConfirm>>,
     /// Discovered and available BLE nodes.
     pub nodes: RwLock<BTreeMap<Vec<u8>, BleNode>>,
+    /// Sender for libqaul → ble_module direction (tokio mpsc).
+    /// Set during BLE init on Linux; None on other platforms.
+    pub ble_sender: Mutex<Option<tokio::sync::mpsc::Sender<Vec<u8>>>>,
     /// BLE crypto module state (transport encryption sessions).
     #[cfg(feature = "ble-encryption")]
     pub crypto: RwLock<crypto::BleCryptoModule>,
@@ -59,6 +62,7 @@ impl BleModuleState {
             }),
             to_confirm: RwLock::new(BTreeMap::new()),
             nodes: RwLock::new(BTreeMap::new()),
+            ble_sender: Mutex::new(None),
             #[cfg(feature = "ble-encryption")]
             crypto: RwLock::new(crypto::BleCryptoModule::new()),
         }
@@ -125,23 +129,41 @@ pub struct Ble {
 
 impl Ble {
     /// initialize the BLE module
-    pub async fn init() {
+    pub async fn init(state: &crate::QaulState) {
         // get q8id
-        let ble_id = Node::get_q8id();
+        let ble_id = Node::get_q8id(state);
         #[cfg(all(target_os = "linux", feature = "ble"))]
-        tokio::spawn(async move {
-            while !ble_module::is_ble_enabled().await {
-                log::error!("BLE not enabled, Please power on bluetooth on your device");
-                tokio::time::sleep(std::time::Duration::from_secs(5)).await;
-            }
-            ble_module::init(Box::new(|sys_msg| Sys::send_to_libqaul(sys_msg)));
-        });
+        {
+            // Create the channel from libqaul → ble_module.
+            // Store the sender in BleModuleState; pass the receiver to ble_module.
+            let (ble_tx, ble_rx) = tokio::sync::mpsc::channel(32);
+            *state.connections.ble.ble_sender.lock().unwrap() = Some(ble_tx);
+            let rpc_receiver = ble_module::rpc::BleRpc { receiver: ble_rx };
+
+            // Capture the SYS channel sender for the 'static tokio::spawn closure.
+            let sys_sender = state.sys.extern_send.clone();
+            tokio::spawn(async move {
+                while !ble_module::is_ble_enabled().await {
+                    log::error!("BLE not enabled, Please power on bluetooth on your device");
+                    tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+                }
+                let sender = sys_sender;
+                ble_module::init(
+                    Box::new(move |sys_msg| {
+                        if let Err(err) = sender.send(sys_msg) {
+                            log::error!("{:?}", err);
+                        }
+                    }),
+                    rpc_receiver,
+                );
+            });
+        }
 
         // initialize local state via QaulState
         {
-            let state = &crate::QaulState::global().connections.ble;
+            let ble_state = &state.connections.ble;
             // Set BLE ID in the inner state
-            let mut ble = state.inner.write().unwrap();
+            let mut ble = ble_state.inner.write().unwrap();
             ble.ble_id = ble_id;
             ble.status = ModuleStatus::Uninitalized;
             ble.devices = Vec::new();
@@ -155,20 +177,20 @@ impl Ble {
         tokio::time::sleep(std::time::Duration::from_secs(2)).await;
 
         //#[cfg(target_os = "android")]
-        Self::info_send_request();
+        Self::info_send_request(state);
     }
 
     /// set module status
-    fn status_set(status: ModuleStatus) {
+    fn status_set(state: &crate::QaulState, status: ModuleStatus) {
         // get module state
-        let mut ble = crate::QaulState::global().connections.ble.inner.write().unwrap();
+        let mut ble = state.connections.ble.inner.write().unwrap();
 
         // set status
         ble.status = status;
     }
 
     /// send info request
-    fn info_send_request() {
+    fn info_send_request(state: &crate::QaulState) {
         // create message
         let message = proto::Ble {
             message: Some(proto::ble::Message::InfoRequest(proto::BleInfoRequest {})),
@@ -181,14 +203,14 @@ impl Ble {
             .expect("Vec<u8> provides capacity as needed");
 
         // send the message
-        Sys::send_message(buf);
+        Sys::send_message(state, buf);
 
         // update module status
-        Self::status_set(ModuleStatus::InfoRequestSent);
+        Self::status_set(state, ModuleStatus::InfoRequestSent);
     }
 
     /// info request received
-    fn info_received(message: proto::BleInfoResponse) {
+    fn info_received(state: &crate::QaulState, message: proto::BleInfoResponse) {
         //ble.devices.extend(message.device);
         if let Some(device) = message.device {
             // log received info
@@ -196,7 +218,7 @@ impl Ble {
             log::info!("BLE info received");
             log::info!("-------------------------");
             log::info!("This Devices ID");
-            let node_id = Node::get_id();
+            let node_id = Node::get_id(state);
             log::info!("- Node ID: {}", node_id.to_base58());
             log::info!("- Small Node ID: {:?}", QaulId::to_q8id(node_id));
             log::info!("-------------------------");
@@ -231,24 +253,24 @@ impl Ble {
 
             // save to state
             {
-                let mut ble = crate::QaulState::global().connections.ble.inner.write().unwrap();
+                let mut ble = state.connections.ble.inner.write().unwrap();
                 ble.devices.push(device);
             }
 
             // start module
-            Self::module_start();
+            Self::module_start(state);
         } else {
             log::error!("No Bluetooth device available.");
         }
     }
 
     /// start module
-    pub fn module_start() {
+    pub fn module_start(state: &crate::QaulState) {
         log::info!("BLE send start request");
 
         let qaul_id;
         {
-            let ble = crate::QaulState::global().connections.ble.inner.write().unwrap();
+            let ble = state.connections.ble.inner.write().unwrap();
             qaul_id = ble.ble_id.clone();
         }
 
@@ -268,18 +290,18 @@ impl Ble {
             .expect("Vec<u8> provides capacity as needed");
 
         // send the message
-        Sys::send_message(buf);
+        Sys::send_message(state, buf);
 
         // update module status
-        Self::status_set(ModuleStatus::StartRequestSent);
+        Self::status_set(state, ModuleStatus::StartRequestSent);
     }
 
     /// check start module result
-    fn module_start_result(message: proto::BleStartResult) {
+    fn module_start_result(state: &crate::QaulState, message: proto::BleStartResult) {
         log::info!("BLE module start result received");
         if message.success {
             log::info!("BLE Module successfully started");
-            Self::status_set(ModuleStatus::StartSuccess);
+            Self::status_set(state, ModuleStatus::StartSuccess);
         } else {
             // TODO: manage rights, etc.
             log::warn!("BLE start error: {}", message.error_message);
@@ -311,6 +333,7 @@ impl Ble {
 
                     // send message
                     Rpc::send_message(
+                        state,
                         buf,
                         crate::rpc::proto::Modules::Ble.into(),
                         "".to_string(),
@@ -329,7 +352,7 @@ impl Ble {
     }
 
     /// stop module
-    pub fn module_stop() {
+    pub fn module_stop(state: &crate::QaulState) {
         log::info!("BLE send stop request");
 
         // create stop message
@@ -342,20 +365,20 @@ impl Ble {
             .expect("Vec<u8> provides capacity as needed");
 
         // send the message
-        Sys::send_message(buf);
+        Sys::send_message(state, buf);
 
         // update module status
-        Self::status_set(ModuleStatus::StopRequestSent);
+        Self::status_set(state, ModuleStatus::StopRequestSent);
 
         // TODO: empty all lists: Neighbours, Nodes, to Confirm
     }
 
     /// check start module result
-    fn module_stop_result(message: proto::BleStopResult) {
+    fn module_stop_result(state: &crate::QaulState, message: proto::BleStopResult) {
         if message.success {
             log::info!("BLE module successfully stopped");
             // update module status
-            Self::status_set(ModuleStatus::Stopped);
+            Self::status_set(state, ModuleStatus::Stopped);
         } else {
             // TODO: how to handle that?
             log::error!("BLE stop request error: {}", message.error_message);
@@ -369,7 +392,7 @@ impl Ble {
     ///
     /// * BLE translation table
     /// * BLE Neighbours list
-    fn node_discovered(q8id: Vec<u8>, node_id: Vec<u8>) {
+    fn node_discovered(state: &crate::QaulState, q8id: Vec<u8>, node_id: Vec<u8>) {
         log::info!("BLE node discovered");
 
         // create node entry
@@ -381,7 +404,7 @@ impl Ble {
         // add node to local state
         {
             // get state
-            let mut nodes = crate::QaulState::global().connections.ble.nodes.write().unwrap();
+            let mut nodes = state.connections.ble.nodes.write().unwrap();
 
             // add node
             nodes.insert(q8id, node.clone());
@@ -391,7 +414,8 @@ impl Ble {
         match PeerId::from_bytes(&node.id) {
             Ok(node_id) => {
                 log::info!("    Node ID: {}", node_id.to_base58());
-                Neighbours::update_node(ConnectionModule::Ble, node_id, 50);
+                let rs = state.get_router();
+                Neighbours::update_node(&rs, ConnectionModule::Ble, node_id, 50);
             }
             Err(e) => {
                 log::error!("{}", e);
@@ -400,9 +424,9 @@ impl Ble {
     }
 
     /// add a node to the available nodes list
-    fn node_to_confirm(q8id: Vec<u8>) {
+    fn node_to_confirm(state: &crate::QaulState, q8id: Vec<u8>) {
         // check if node confirmation request has already been sent
-        if let true = Self::node_confirmation_in_progress(&q8id) {
+        if let true = Self::node_confirmation_in_progress(state, &q8id) {
             log::info!("node id confirmation in progress");
             return;
         }
@@ -415,19 +439,19 @@ impl Ble {
         };
 
         // get state
-        let mut nodes = crate::QaulState::global().connections.ble.to_confirm.write().unwrap();
+        let mut nodes = state.connections.ble.to_confirm.write().unwrap();
 
         // add node
         nodes.insert(q8id.clone(), confirm);
 
         // send identification message
-        Self::identification_send(q8id, true);
+        Self::identification_send(state, q8id, true);
     }
 
     /// Check if node is already scheduled for confirmation
-    fn node_confirmation_in_progress(q8id: &Vec<u8>) -> bool {
+    fn node_confirmation_in_progress(state: &crate::QaulState, q8id: &Vec<u8>) -> bool {
         // get state
-        let nodes = crate::QaulState::global().connections.ble.to_confirm.read().unwrap();
+        let nodes = state.connections.ble.to_confirm.read().unwrap();
 
         // search node
         if let Some(to_confirm) = nodes.get(q8id) {
@@ -440,25 +464,26 @@ impl Ble {
     }
 
     /// a new device got discovered via bluetooth
-    fn device_discovered(message: proto::BleDeviceDiscovered) {
+    fn device_discovered(state: &crate::QaulState, message: proto::BleDeviceDiscovered) {
         log::info!("BLE device discovered: {:x?}", message.qaul_id.clone());
         // check if node is known
-        if let Some(node) = Neighbours::node_from_q8id(message.qaul_id.clone()) {
+        let rs = state.get_router();
+        if let Some(node) = Neighbours::node_from_q8id(&rs, message.qaul_id.clone()) {
             log::info!(
                 "BLE discovered Node ID: {}",
                 QaulId::bytes_to_log_string(&node.id)
             );
             // add it to translation table
-            Self::node_discovered(message.qaul_id, node.id);
+            Self::node_discovered(state, message.qaul_id, node.id);
         } else {
             log::info!("BLE discovered Node ID unknown");
             // confirm node
-            Self::node_to_confirm(message.qaul_id);
+            Self::node_to_confirm(state, message.qaul_id);
         }
     }
 
     /// a formerly discovered device became unavailable
-    fn device_unavailable(message: proto::BleDeviceUnavailable) {
+    fn device_unavailable(state: &crate::QaulState, message: proto::BleDeviceUnavailable) {
         log::info!(
             "BLE device became unavailable: {:?}",
             message.qaul_id.clone()
@@ -466,17 +491,18 @@ impl Ble {
 
         // Clean up crypto session
         #[cfg(feature = "ble-encryption")]
-        BleCrypto::on_node_unavailable(&message.qaul_id);
+        BleCrypto::on_node_unavailable(state, &message.qaul_id);
 
         // get state
-        let mut nodes = crate::QaulState::global().connections.ble.nodes.write().unwrap();
+        let mut nodes = state.connections.ble.nodes.write().unwrap();
 
         // remove device from list
         if let Some((_, ble_node)) = nodes.remove_entry(&message.qaul_id) {
             // remove it from neighbours list
             match PeerId::from_bytes(&ble_node.id) {
                 Ok(node_id) => {
-                    Neighbours::delete(ConnectionModule::Ble, node_id);
+                    let rs = state.get_router();
+                    Neighbours::delete(&rs, ConnectionModule::Ble, node_id);
                 }
                 Err(e) => {
                     log::error!("{}", e);
@@ -484,7 +510,7 @@ impl Ble {
             }
         } else {
             // remove it from TO_CONFIRM list
-            let mut to_confirm = crate::QaulState::global().connections.ble.to_confirm.write().unwrap();
+            let mut to_confirm = state.connections.ble.to_confirm.write().unwrap();
             if let None = to_confirm.remove_entry(&message.qaul_id) {
                 // remove it from neighbours list
                 log::error!("node to remove not found");
@@ -495,7 +521,7 @@ impl Ble {
     /// Identification Received
     ///
     /// Received identity information from another node
-    fn identification_received(q8id: Vec<u8>, identification: proto_net::Identification) {
+    fn identification_received(state: &crate::QaulState, q8id: Vec<u8>, identification: proto_net::Identification) {
         log::info!("BLE identification received from {:?}", q8id.clone());
 
         // add node id
@@ -505,7 +531,7 @@ impl Ble {
 
             // remove node from to_confirm
             {
-                let mut to_confirm = crate::QaulState::global().connections.ble.to_confirm.write().unwrap();
+                let mut to_confirm = state.connections.ble.to_confirm.write().unwrap();
                 to_confirm.remove_entry(&q8id);
             }
 
@@ -519,41 +545,41 @@ impl Ble {
             };
 
             // add node to discovered lists
-            Self::node_discovered(q8id.clone(), node.id);
+            Self::node_discovered(state, q8id.clone(), node.id);
 
             // check if to send a response
             if identification.request {
-                Self::identification_send(q8id.clone(), false);
+                Self::identification_send(state, q8id.clone(), false);
             }
 
             // Initiate encrypted handshake after identification
             #[cfg(feature = "ble-encryption")]
-            if let Some(handshake_msg) = BleCrypto::initiate_handshake(&q8id, remote_id) {
-                Self::send_handshake_message(q8id, handshake_msg);
+            if let Some(handshake_msg) = BleCrypto::initiate_handshake(state, &q8id, remote_id) {
+                Self::send_handshake_message(state, q8id, handshake_msg);
             }
         }
     }
 
     /// Send a handshake message to a peer
     #[cfg(feature = "ble-encryption")]
-    fn send_handshake_message(receiver_small_id: Vec<u8>, handshake: proto_net::NoiseHandshake) {
+    fn send_handshake_message(state: &crate::QaulState, receiver_small_id: Vec<u8>, handshake: proto_net::NoiseHandshake) {
         log::info!(
             "BLE sending handshake message {} to {:?}",
             handshake.message_number,
             receiver_small_id
         );
         let message = proto_net::ble_message::Message::Handshake(handshake);
-        Self::create_send_message_raw(receiver_small_id, message);
+        Self::create_send_message_raw(state, receiver_small_id, message);
     }
 
     /// Send Identification
     ///
     /// Send identity information to another node
-    fn identification_send(receiver_q8id: Vec<u8>, request: bool) {
+    fn identification_send(state: &crate::QaulState, receiver_q8id: Vec<u8>, request: bool) {
         log::info!("BLE send identity information");
 
         // get node ID
-        let node_id = Node::get_id();
+        let node_id = Node::get_id(state);
 
         // create identification message
         let identification = proto_net::Identification {
@@ -566,7 +592,7 @@ impl Ble {
         // create unified message
         let message = proto_net::ble_message::Message::Identification(identification);
 
-        Self::create_send_message(receiver_q8id, message);
+        Self::create_send_message(state, receiver_q8id, message);
     }
 
     /// send message
@@ -574,7 +600,7 @@ impl Ble {
     /// * receiver_id: the small qaul id of the receiving node
     /// * sender_id: the small qaul id of the sending node (this node)
     /// * data: the binary data of the message to send
-    pub fn message_send(receiver_id: Vec<u8>, sender_id: Vec<u8>, data: Vec<u8>) {
+    pub fn message_send(state: &crate::QaulState, receiver_id: Vec<u8>, sender_id: Vec<u8>, data: Vec<u8>) {
         log::info!("BLE send message to {:x?}", receiver_id.clone());
         // create a random UUID as message id
         let message_id = Uuid::new_v4().as_bytes().to_vec();
@@ -599,7 +625,7 @@ impl Ble {
             .expect("Vec<u8> provides capacity as needed");
 
         // send the message
-        Sys::send_message(buf);
+        Sys::send_message(state, buf);
     }
 
     /// result of message sending
@@ -612,35 +638,36 @@ impl Ble {
     }
 
     /// send routing info message
-    pub fn send_routing_info(node_id: PeerId, data: Vec<u8>) {
+    pub fn send_routing_info(state: &crate::QaulState, node_id: PeerId, data: Vec<u8>) {
         log::info!("BLE send routing information");
         let message = proto_net::ble_message::Message::Info(data);
 
-        Self::create_send_message(QaulId::to_q8id(node_id), message);
+        Self::create_send_message(state, QaulId::to_q8id(node_id), message);
     }
 
     /// send messaging message
-    pub fn send_messaging_message(node_id: PeerId, data: Vec<u8>) {
+    pub fn send_messaging_message(state: &crate::QaulState, node_id: PeerId, data: Vec<u8>) {
         log::info!("BLE send messaging message to {}", node_id.to_base58());
 
         let message = proto_net::ble_message::Message::Messaging(data);
 
-        Self::create_send_message(QaulId::to_q8id(node_id), message);
+        Self::create_send_message(state, QaulId::to_q8id(node_id), message);
     }
 
     /// send feed message
-    pub fn send_feed_message(_topic: Topic, data: Vec<u8>) {
+    pub fn send_feed_message(state: &crate::QaulState, _topic: Topic, data: Vec<u8>) {
         log::info!("BLE send public message");
 
         // find all nodes, that are only connected through BLE
-        let nodes = Neighbours::get_ble_only_nodes();
+        let rs = state.get_router();
+        let nodes = Neighbours::get_ble_only_nodes(&rs);
 
         // create BLE message
         let message = proto_net::ble_message::Message::Feed(data);
 
         // send it nodes
         for node_id in nodes {
-            Self::create_send_message(QaulId::to_q8id(node_id), message.clone());
+            Self::create_send_message(state, QaulId::to_q8id(node_id), message.clone());
         }
     }
 
@@ -648,9 +675,9 @@ impl Ble {
     ///
     /// If no encrypted session is established, the message is sent unencrypted.
     #[cfg(feature = "ble-encryption")]
-    fn create_send_message(receiver_q8id: Vec<u8>, message: proto_net::ble_message::Message) {
+    fn create_send_message(state: &crate::QaulState, receiver_q8id: Vec<u8>, message: proto_net::ble_message::Message) {
         // Check if encrypted session is established
-        if BleCrypto::is_session_established(&receiver_q8id) {
+        if BleCrypto::is_session_established(state, &receiver_q8id) {
             // Encode inner message
             let proto_message = proto_net::BleMessage {
                 message: Some(message.clone()),
@@ -661,11 +688,11 @@ impl Ble {
                 .expect("encoding failed");
 
             // Encrypt the message
-            match BleCrypto::encrypt(&receiver_q8id, plaintext) {
+            match BleCrypto::encrypt(state, &receiver_q8id, plaintext) {
                 Ok(encrypted) => {
                     log::trace!("BLE: sending encrypted message");
                     let encrypted_msg = proto_net::ble_message::Message::Encrypted(encrypted);
-                    Self::create_send_message_raw(receiver_q8id, encrypted_msg);
+                    Self::create_send_message_raw(state, receiver_q8id, encrypted_msg);
                     return;
                 }
                 Err(e) => {
@@ -676,21 +703,21 @@ impl Ble {
         }
 
         // Fallback: send unencrypted (during handshake or if encryption fails)
-        Self::create_send_message_raw(receiver_q8id, message);
+        Self::create_send_message_raw(state, receiver_q8id, message);
     }
 
     /// Send a message without transport encryption.
     #[cfg(not(feature = "ble-encryption"))]
-    fn create_send_message(receiver_q8id: Vec<u8>, message: proto_net::ble_message::Message) {
-        Self::create_send_message_raw(receiver_q8id, message);
+    fn create_send_message(state: &crate::QaulState, receiver_q8id: Vec<u8>, message: proto_net::ble_message::Message) {
+        Self::create_send_message_raw(state, receiver_q8id, message);
     }
 
     /// Send a message without encryption
     ///
     /// This is used for handshake messages and as fallback when encryption fails.
-    fn create_send_message_raw(receiver_q8id: Vec<u8>, message: proto_net::ble_message::Message) {
+    fn create_send_message_raw(state: &crate::QaulState, receiver_q8id: Vec<u8>, message: proto_net::ble_message::Message) {
         // get small qaul id of this node
-        let sender_id = Node::get_q8id();
+        let sender_id = Node::get_q8id(state);
 
         // create message
         let proto_message = proto_net::BleMessage {
@@ -704,15 +731,16 @@ impl Ble {
             .expect("Vec<u8> provides capacity as needed");
 
         // send the message
-        Self::message_send(receiver_q8id, sender_id, buf);
+        Self::message_send(state, receiver_q8id, sender_id, buf);
     }
 
     /// BLE message received
-    fn message_received(message: proto::BleDirectReceived) {
+    fn message_received(state: &crate::QaulState, message: proto::BleDirectReceived) {
         log::info!("BLE message received");
         // get node ID of sender
         let node_id: PeerId;
-        if let Some(node) = Neighbours::node_from_q8id(message.from.clone()) {
+        let rs = state.get_router();
+        if let Some(node) = Neighbours::node_from_q8id(&rs, message.from.clone()) {
             match PeerId::from_bytes(&node.id) {
                 Ok(id) => node_id = id,
                 Err(e) => {
@@ -729,7 +757,7 @@ impl Ble {
             //
             // if we don't know the ID of the peer yet,
             // put in our peer ID
-            node_id = Node::get_id();
+            node_id = Node::get_id(state);
         }
 
         // decode and distribute messages
@@ -739,12 +767,12 @@ impl Ble {
                 #[cfg(feature = "ble-encryption")]
                 Some(proto_net::ble_message::Message::Encrypted(encrypted)) => {
                     log::info!("BLE encrypted message received");
-                    match BleCrypto::decrypt(&message.from, encrypted) {
+                    match BleCrypto::decrypt(state, &message.from, encrypted) {
                         Ok(plaintext) => {
                             // Decode and process inner message
                             match proto_net::BleMessage::decode(&plaintext[..]) {
                                 Ok(inner) => {
-                                    Self::process_decrypted_message(message.from, node_id, inner);
+                                    Self::process_decrypted_message(state, message.from, node_id, inner);
                                 }
                                 Err(e) => {
                                     log::error!("BLE inner message decoding error: {}", e);
@@ -766,7 +794,7 @@ impl Ble {
                 #[cfg(feature = "ble-encryption")]
                 Some(proto_net::ble_message::Message::Handshake(handshake)) => {
                     log::info!("BLE handshake message received");
-                    Self::handle_handshake(message.from, node_id, handshake);
+                    Self::handle_handshake(state, message.from, node_id, handshake);
                 }
                 #[cfg(not(feature = "ble-encryption"))]
                 Some(proto_net::ble_message::Message::Handshake(_)) => {
@@ -778,13 +806,14 @@ impl Ble {
                         received_from: node_id,
                         data,
                     };
-                    crate::router::info::RouterInfo::received(received);
+                    let rs = state.get_router();
+                    crate::router::info::RouterInfo::received(state, &rs, received);
                 }
                 Some(proto_net::ble_message::Message::Feed(data)) => {
                     log::info!("BLE public message received");
                     match feed::proto_net::FeedContainer::decode(&data[..]) {
                         Ok(feed_container) => {
-                            feed::Feed::received(ConnectionModule::Ble, node_id, feed_container);
+                            feed::Feed::received(state, ConnectionModule::Ble, node_id, feed_container);
                         }
                         Err(e) => {
                             log::error!("BleMessage feed decoding error: {}", e);
@@ -797,11 +826,11 @@ impl Ble {
                         received_from: node_id,
                         data,
                     };
-                    messaging::Messaging::received(received);
+                    messaging::Messaging::received(state, received);
                 }
                 Some(proto_net::ble_message::Message::Identification(identification)) => {
                     log::info!("BLE identification received");
-                    Self::identification_received(message.from, identification);
+                    Self::identification_received(state, message.from, identification);
                 }
                 _ => {
                     log::error!("unprocessable BleMessage");
@@ -816,6 +845,7 @@ impl Ble {
     /// Process a decrypted BLE message
     #[cfg(feature = "ble-encryption")]
     fn process_decrypted_message(
+        state: &crate::QaulState,
         from: Vec<u8>,
         node_id: PeerId,
         ble_message: proto_net::BleMessage,
@@ -827,13 +857,14 @@ impl Ble {
                     received_from: node_id,
                     data,
                 };
-                crate::router::info::RouterInfo::received(received);
+                let rs = state.get_router();
+                crate::router::info::RouterInfo::received(state, &rs, received);
             }
             Some(proto_net::ble_message::Message::Feed(data)) => {
                 log::info!("BLE public message received (decrypted)");
                 match feed::proto_net::FeedContainer::decode(&data[..]) {
                     Ok(feed_container) => {
-                        feed::Feed::received(ConnectionModule::Ble, node_id, feed_container);
+                        feed::Feed::received(state, ConnectionModule::Ble, node_id, feed_container);
                     }
                     Err(e) => {
                         log::error!("BleMessage feed decoding error: {}", e);
@@ -846,11 +877,11 @@ impl Ble {
                     received_from: node_id,
                     data,
                 };
-                messaging::Messaging::received(received);
+                messaging::Messaging::received(state, received);
             }
             Some(proto_net::ble_message::Message::Identification(identification)) => {
                 log::info!("BLE identification received (decrypted)");
-                Self::identification_received(from, identification);
+                Self::identification_received(state, from, identification);
             }
             _ => {
                 log::error!("unprocessable decrypted BleMessage");
@@ -860,15 +891,15 @@ impl Ble {
 
     /// Handle incoming handshake messages
     #[cfg(feature = "ble-encryption")]
-    fn handle_handshake(from: Vec<u8>, remote_id: PeerId, handshake: proto_net::NoiseHandshake) {
+    fn handle_handshake(state: &crate::QaulState, from: Vec<u8>, remote_id: PeerId, handshake: proto_net::NoiseHandshake) {
         match handshake.message_number {
             1 => {
                 // Check for simultaneous handshake initiation (race condition).
                 // If we also have a pending handshake to this peer, use a
                 // deterministic tiebreaker: the peer with the lexicographically
                 // lower small_id becomes the initiator.
-                if BleCrypto::has_pending_session(&from) {
-                    let local_id = Node::get_q8id();
+                if BleCrypto::has_pending_session(state, &from) {
+                    let local_id = Node::get_q8id(state);
                     if local_id < from.to_vec() {
                         // We have the lower ID, so we stay as initiator.
                         // Ignore the remote's handshake 1; they will process
@@ -889,9 +920,9 @@ impl Ble {
 
                 // Received first handshake, respond with second
                 log::info!("BLE: processing handshake 1 from {:?}", from);
-                match BleCrypto::process_handshake_1(&from, handshake, remote_id) {
+                match BleCrypto::process_handshake_1(state, &from, handshake, remote_id) {
                     Ok(response) => {
-                        Self::send_handshake_message(from, response);
+                        Self::send_handshake_message(state, from, response);
                     }
                     Err(e) => {
                         log::error!("BLE handshake 1 failed: {:?}", e);
@@ -901,7 +932,7 @@ impl Ble {
             2 => {
                 // Received second handshake, complete session
                 log::info!("BLE: processing handshake 2 from {:?}", from);
-                match BleCrypto::process_handshake_2(&from, handshake) {
+                match BleCrypto::process_handshake_2(state, &from, handshake) {
                     Ok(()) => {
                         log::info!("BLE encryption session established with {:?}", from);
                     }
@@ -920,26 +951,26 @@ impl Ble {
     }
 
     /// receive sys messages from BLE module
-    pub fn sys_received(data: Vec<u8>) {
+    pub fn sys_received(state: &crate::QaulState, data: Vec<u8>) {
         match proto::Ble::decode(&data[..]) {
             Ok(ble) => match ble.message {
                 Some(proto::ble::Message::InfoResponse(info_response)) => {
-                    Self::info_received(info_response);
+                    Self::info_received(state, info_response);
                 }
                 Some(proto::ble::Message::StartResult(start_result)) => {
-                    Self::module_start_result(start_result);
+                    Self::module_start_result(state, start_result);
                 }
                 Some(proto::ble::Message::StopResult(stop_result)) => {
-                    Self::module_stop_result(stop_result);
+                    Self::module_stop_result(state, stop_result);
                 }
                 Some(proto::ble::Message::DeviceDiscovered(device)) => {
-                    Self::device_discovered(device);
+                    Self::device_discovered(state, device);
                 }
                 Some(proto::ble::Message::DeviceUnavailable(device)) => {
-                    Self::device_unavailable(device);
+                    Self::device_unavailable(state, device);
                 }
                 Some(proto::ble::Message::DirectReceived(direct_received)) => {
-                    Self::message_received(direct_received);
+                    Self::message_received(state, direct_received);
                 }
                 Some(proto::ble::Message::DirectSendResult(direct_send_result)) => {
                     Self::message_send_result(direct_send_result);
@@ -955,7 +986,7 @@ impl Ble {
     }
 
     /// Process incoming RPC request messages for BLE module
-    pub fn rpc(data: Vec<u8>, request_id: String) {
+    pub fn rpc(state: &crate::QaulState, data: Vec<u8>, request_id: String) {
         log::trace!("BLE rpc message received");
 
         match proto_rpc::Ble::decode(&data[..]) {
@@ -963,7 +994,7 @@ impl Ble {
                 match ble.message {
                     Some(proto_rpc::ble::Message::InfoRequest(_)) => {
                         // get module state
-                        let ble = crate::QaulState::global().connections.ble.inner.read().unwrap();
+                        let ble = state.connections.ble.inner.read().unwrap();
 
                         // create binary device info message
                         let mut device_info: Vec<u8> = Vec::new();
@@ -994,6 +1025,7 @@ impl Ble {
 
                         // send message
                         Rpc::send_message(
+                            state,
                             buf,
                             crate::rpc::proto::Modules::Ble.into(),
                             request_id,
@@ -1002,17 +1034,17 @@ impl Ble {
                     }
                     Some(proto_rpc::ble::Message::StartRequest(_)) => {
                         // start BLE module
-                        Self::module_start();
+                        Self::module_start(state);
                     }
                     Some(proto_rpc::ble::Message::StopRequest(_)) => {
                         // stop BLE module
-                        Self::module_stop();
+                        Self::module_stop(state);
                     }
                     Some(proto_rpc::ble::Message::DiscoveredRequest(_)) => {
                         // get nodes state
-                        let nodes = crate::QaulState::global().connections.ble.nodes.read().unwrap();
+                        let nodes = state.connections.ble.nodes.read().unwrap();
                         // get to confirm state
-                        let to_confirm = crate::QaulState::global().connections.ble.to_confirm.read().unwrap();
+                        let to_confirm = state.connections.ble.to_confirm.read().unwrap();
 
                         // create discovered response message
                         let discovered = proto_rpc::DiscoveredResponse {
@@ -1033,6 +1065,7 @@ impl Ble {
 
                         // send message
                         Rpc::send_message(
+                            state,
                             buf,
                             crate::rpc::proto::Modules::Ble.into(),
                             request_id,
@@ -1042,7 +1075,7 @@ impl Ble {
                     Some(proto_rpc::ble::Message::RightsResult(rights_result)) => {
                         if rights_result.rights_granted {
                             log::info!("BLE rights granted");
-                            Self::module_start();
+                            Self::module_start(state);
                         } else {
                             log::error!("BLE rights not granted");
                         }

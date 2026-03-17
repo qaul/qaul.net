@@ -182,27 +182,21 @@ pub struct Neighbour {
 }
 
 impl Neighbours {
-    /// Initialize neighbours module.
-    /// Opens the database tree and stores it in the global RouterState.
-    pub fn init() {
-        // get nodes tree from data base and set it on the RouterState instance
-        let db = DataBase::get_node_db();
+    /// Initialize neighbours module with an explicit router state reference.
+    /// Opens the database tree and stores it in the RouterState.
+    pub fn init_with_state(state: &crate::QaulState, router: &super::RouterState) {
+        let db = DataBase::get_node_db(state);
         let tree = db.open_tree("nodes").unwrap();
-        super::RouterState::global().neighbours.set_nodes_db(tree);
-    }
-
-    /// Helper to access the global NeighboursState.
-    fn state() -> &'static NeighboursState {
-        &super::RouterState::global().neighbours
+        router.neighbours.set_nodes_db(tree);
     }
 
     /// update table with a new value
     ///
     /// If the node already exists, it updates it's rtt value.
     /// If the node does not yet exist, it creates it.
-    pub fn update_node(module: ConnectionModule, node_id: PeerId, rtt: u32) {
+    pub fn update_node(router: &super::RouterState, module: ConnectionModule, node_id: PeerId, rtt: u32) {
         log::trace!("update_node node {:?}", node_id);
-        let ns = Self::state();
+        let ns = &router.neighbours;
         let table_lock = match ns.get_table(&module) {
             Some(t) => t,
             None => return,
@@ -230,7 +224,7 @@ impl Neighbours {
             );
 
             // add neighbour in RouterInfo neighbours table
-            RouterInfo::add_neighbour(node_id);
+            RouterInfo::add_neighbour(router, node_id);
 
             // add node to nodes database
             let db = ns.nodes_db.read().unwrap();
@@ -251,9 +245,9 @@ impl Neighbours {
     }
 
     /// Delete Neighbour
-    /// Delegates to the global RouterState instance.
-    pub fn delete(module: ConnectionModule, node_id: PeerId) {
-        Self::state().delete(module, node_id);
+    /// Delegates to the provided RouterState instance.
+    pub fn delete(router: &super::RouterState, module: ConnectionModule, node_id: PeerId) {
+        router.neighbours.delete(module, node_id);
     }
 
     /// Calculate average rtt using Exponentially Weighted Moving Average (EWMA)
@@ -274,24 +268,24 @@ impl Neighbours {
     }
 
     /// get rtt for a neighbour
-    /// Delegates to the global RouterState instance.
-    pub fn get_rtt(neighbour_id: &PeerId, module: &ConnectionModule) -> Option<u32> {
-        Self::state().get_rtt(neighbour_id, module)
+    /// Delegates to the provided RouterState instance.
+    pub fn get_rtt(router: &super::RouterState, neighbour_id: &PeerId, module: &ConnectionModule) -> Option<u32> {
+        router.neighbours.get_rtt(neighbour_id, module)
     }
 
     /// Is this node ID a neighbour in any module?
-    /// Delegates to the global RouterState instance.
-    pub fn is_neighbour(node_id: &PeerId) -> ConnectionModule {
-        Self::state().is_neighbour(node_id)
+    /// Delegates to the provided RouterState instance.
+    pub fn is_neighbour(router: &super::RouterState, node_id: &PeerId) -> ConnectionModule {
+        router.neighbours.is_neighbour(node_id)
     }
 
     /// Search for a neighbour by it's small qaul ID
     #[allow(dead_code)]
     #[deprecated(since = "2.0.0-rc.4", note = "Use `node_from_q8id` instead.")]
-    pub fn node_from_small_id(small_id: Vec<u8>) -> Option<Node> {
+    pub fn node_from_small_id(router: &super::RouterState, small_id: Vec<u8>) -> Option<Node> {
         #[allow(deprecated)]
         let prefix = QaulId::small_to_search_prefix(small_id);
-        let db = Self::state().nodes_db.read().unwrap();
+        let db = router.neighbours.nodes_db.read().unwrap();
         let tree = db.as_ref()?;
         let mut result = tree.scan_prefix(prefix);
         if let Some(Ok((_key, node_bytes))) = result.next() {
@@ -302,9 +296,9 @@ impl Neighbours {
     }
 
     /// Search for a neighbour by it's q8id (8 Byte qaul ID)
-    pub fn node_from_q8id(q8id: Vec<u8>) -> Option<Node> {
+    pub fn node_from_q8id(router: &super::RouterState, q8id: Vec<u8>) -> Option<Node> {
         let prefix = QaulId::q8id_to_search_prefix(q8id);
-        let db = Self::state().nodes_db.read().unwrap();
+        let db = router.neighbours.nodes_db.read().unwrap();
         let tree = db.as_ref()?;
         let mut result = tree.scan_prefix(prefix);
         if let Some(Ok((_key, node_bytes))) = result.next() {
@@ -315,14 +309,14 @@ impl Neighbours {
     }
 
     /// Get a list of all neighbours that are only connected via BLE module
-    /// Delegates to the global RouterState instance.
-    pub fn get_ble_only_nodes() -> Vec<PeerId> {
-        Self::state().get_ble_only_nodes()
+    /// Delegates to the provided RouterState instance.
+    pub fn get_ble_only_nodes(router: &super::RouterState) -> Vec<PeerId> {
+        router.neighbours.get_ble_only_nodes()
     }
 
     /// send protobuf RPC neighbours list
-    pub fn rpc_send_neighbours_list(request_id: String) {
-        let ns = Self::state();
+    pub fn rpc_send_neighbours_list(state: &crate::QaulState, router: &super::RouterState, request_id: String) {
+        let ns = &router.neighbours;
 
         let lan_neighbours = {
             let lan = ns.lan.read().unwrap();
@@ -374,6 +368,7 @@ impl Neighbours {
             .expect("Vec<u8> provides capacity as needed");
 
         Rpc::send_message(
+            state,
             buf,
             crate::rpc::proto::Modules::Router.into(),
             request_id,

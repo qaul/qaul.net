@@ -15,7 +15,6 @@ use std::fs::File;
 use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use std::sync::OnceLock;
 use std::time::Duration;
 
 use crate::rpc::authentication::AuthenticationState;
@@ -44,18 +43,6 @@ use storage::StorageModule;
 use utilities::filelogger::FileLogger;
 use utilities::timestamp::Timestamp;
 use utilities::upgrade;
-
-/// check this when the library finished initializing
-static INITIALIZED: OnceLock<bool> = OnceLock::new();
-
-/// default configs
-static DEFCONFIGS: OnceLock<BTreeMap<String, String>> = OnceLock::new();
-
-/// Global QaulState instance.
-/// Set once during `Libqaul::new()` (bootstrap phase).
-/// Fields behind RwLock (router, node, config, database, storage_path)
-/// are populated later by Storage::init(), Node::init(), Router::init().
-static GLOBAL_QAUL_STATE: OnceLock<Arc<QaulState>> = OnceLock::new();
 
 /// Top-level state container that owns all instance-based state.
 ///
@@ -91,20 +78,13 @@ pub struct QaulState {
     pub storage_path: std::sync::RwLock<String>,
     /// File logger state
     pub filelogger: FileLoggerState,
+    /// Default configuration values passed at startup.
+    pub default_configs: BTreeMap<String, String>,
+    /// Whether the instance has finished initializing (event loop started).
+    pub initialized: AtomicBool,
 }
 
 impl QaulState {
-    /// Get a reference to the global QaulState instance.
-    /// Panics if the global state has not been initialized.
-    pub fn global() -> &'static Arc<QaulState> {
-        GLOBAL_QAUL_STATE.get().expect("QaulState not initialized")
-    }
-
-    /// Initialize the global QaulState. Called once during `Libqaul::new()`.
-    fn init_global(state: Arc<QaulState>) {
-        let _ = GLOBAL_QAUL_STATE.set(state);
-    }
-
     /// Replace the router state with the real one after initialization.
     pub fn replace_router(&self, router_state: Arc<router::RouterState>) {
         *self.router.write().unwrap() = router_state;
@@ -142,17 +122,20 @@ impl QaulState {
             database: storage::database::DatabaseState::new_temporary(),
             storage_path: std::sync::RwLock::new(String::new()),
             filelogger: FileLoggerState::new(),
+            default_configs: BTreeMap::new(),
+            initialized: AtomicBool::new(false),
         }
     }
 
     /// Create a `QaulState` with defaults suitable for production.
     ///
     /// Configuration and database fields start with defaults and are
-    /// populated later by `Storage::init()` which writes into `QaulState::global()`.
+    /// populated later by `Storage::init()`.
     pub fn new_production(
         node_identity: Arc<node::NodeIdentity>,
         user_accounts: node::user_accounts::UserAccountsState,
         router_state: Arc<router::RouterState>,
+        default_configs: BTreeMap<String, String>,
     ) -> Self {
         Self {
             router: std::sync::RwLock::new(router_state),
@@ -167,6 +150,8 @@ impl QaulState {
             database: storage::database::DatabaseState::new_temporary(),
             storage_path: std::sync::RwLock::new(String::new()),
             filelogger: FileLoggerState::new(),
+            default_configs,
+            initialized: AtomicBool::new(false),
         }
     }
 }
@@ -243,11 +228,9 @@ impl Libqaul {
         }
 
         // check configuration options
-        if let Some(def_cfg) = def_config {
-            let _ = DEFCONFIGS.set(def_cfg.clone());
-        } else {
-            let _ = DEFCONFIGS.set(BTreeMap::new());
-        }
+        let def_configs = def_config.unwrap_or_default();
+
+        // Default configs are stored in QaulState and applied after Configuration::init().
 
         // Bootstrap QaulState early with defaults so that Storage::init(),
         // Configuration::init(), and DataBase::init() can write into it.
@@ -261,17 +244,31 @@ impl Libqaul {
                 temp_node,
                 node::user_accounts::UserAccountsState::new(),
                 temp_router,
+                def_configs,
             ))
         };
-        QaulState::init_global(Arc::clone(&qaul_state));
-
         // Initialize storage module.
         // Storage::init() now writes storage_path, config, and database
-        // into QaulState::global().
-        let storage = Arc::new(StorageModule::new(storage_path.clone()));
+        // into QaulState.
+        let storage = Arc::new(StorageModule::new(&qaul_state, storage_path.clone()));
 
-        // Initialize logger
-        Self::init_logger(&storage_path);
+        // Apply default port override from CLI-provided config, if any.
+        if let Some(port_str) = qaul_state.default_configs.get("port") {
+            if let Ok(port) = port_str.parse::<u16>() {
+                let mut config = qaul_state.config.inner.write().unwrap();
+                config.internet.listen = {
+                    let listen_ipv4_quic = format!("/ip4/0.0.0.0/udp/{}/quic-v1", port);
+                    let listen_ipv4 = format!("/ip4/0.0.0.0/tcp/{}", port);
+                    let listen_ipv6_quic = format!("/ip6/::/udp/{}/quic-v1", port);
+                    let listen_ipv6 = format!("/ip6/::/tcp/{}", port);
+                    vec![listen_ipv4_quic, listen_ipv4, listen_ipv6_quic, listen_ipv6]
+                };
+            }
+        }
+
+        // Initialize logger (pass shared config handle so FileLogger can read
+        // the enable/disable flag that FileLoggerState will toggle at runtime).
+        Self::init_logger(&storage_path, qaul_state.filelogger.config_handle());
 
         log::trace!("test log to ensure that logging is working");
 
@@ -288,24 +285,23 @@ impl Libqaul {
         };
 
         // Also initialize global router state for backward compatibility
-        Router::init();
+        Router::init(&*qaul_state);
 
         // Now update QaulState with the real node identity, user accounts,
         // and router state (config/database are already populated by Storage::init).
         {
-            let config = storage::configuration::Configuration::get();
+            let config = storage::configuration::Configuration::get(&qaul_state);
             let user_accounts = node::user_accounts::UserAccounts::create_from_config(&config);
             *qaul_state.user_accounts.inner.write().unwrap() = user_accounts;
 
-            let router_state = Arc::clone(router::RouterState::global());
-            qaul_state.replace_router(router_state);
+            // Router::init() already stored real RouterState into QaulState.
             qaul_state.replace_node(Arc::clone(&node.node));
             qaul_state.filelogger.enable(config.debug.log);
         }
 
         // Initialize node global state for backward compatibility.
-        // This now delegates to QaulState::global().node and saves config if needed.
-        Node::init();
+        // This now delegates to qaul_state.node and saves config if needed.
+        Node::init(&qaul_state);
 
         // Use the QaulState's channel receivers
         let rpc_receiver = qaul_state.rpc.libqaul_receive.clone();
@@ -315,7 +311,7 @@ impl Libqaul {
         let services = Arc::new(std::sync::RwLock::new(ServicesModule::new()));
         {
             let mut svc = services.write().unwrap();
-            svc.initialize();
+            svc.initialize(&*qaul_state);
         }
 
         // Also initialize global state for backward compatibility
@@ -350,7 +346,7 @@ impl Libqaul {
     }
 
     /// Initialize the logger with appropriate configuration for the platform
-    fn init_logger(storage_path: &str) {
+    fn init_logger(storage_path: &str, log_config: Arc<std::sync::RwLock<utilities::filelogger::FileLoggerConfig>>) {
         let path = Path::new(storage_path);
         let log_path = path.join("logs");
 
@@ -390,11 +386,14 @@ impl Libqaul {
             let env_logger = Box::new(android_logger::AndroidLogger::new(
                 Config::default().with_max_level(log::LevelFilter::Info),
             ));
-            let w_logger = FileLogger::new(*simplelog::WriteLogger::new(
-                simplelog::LevelFilter::Error,
-                simplelog::Config::default(),
-                File::create(log_file_path).unwrap(),
-            ));
+            let w_logger = FileLogger::new(
+                *simplelog::WriteLogger::new(
+                    simplelog::LevelFilter::Error,
+                    simplelog::Config::default(),
+                    File::create(log_file_path).unwrap(),
+                ),
+                log_config.clone(),
+            );
             multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info)
                 .unwrap();
         }
@@ -407,11 +406,14 @@ impl Libqaul {
                     .filter(None, log::LevelFilter::Info)
                     .build(),
             );
-            let w_logger = FileLogger::new(*simplelog::WriteLogger::new(
-                simplelog::LevelFilter::Error,
-                simplelog::Config::default(),
-                File::create(log_file_path).unwrap(),
-            ));
+            let w_logger = FileLogger::new(
+                *simplelog::WriteLogger::new(
+                    simplelog::LevelFilter::Error,
+                    simplelog::Config::default(),
+                    File::create(log_file_path).unwrap(),
+                ),
+                log_config.clone(),
+            );
             multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info)
                 .unwrap();
         }
@@ -445,11 +447,14 @@ impl Libqaul {
                     .filter(None, level_filter)
                     .build(),
             );
-            let w_logger = FileLogger::new(*simplelog::WriteLogger::new(
-                simplelog::LevelFilter::Error,
-                simplelog::Config::default(),
-                File::create(log_file_path).unwrap(),
-            ));
+            let w_logger = FileLogger::new(
+                *simplelog::WriteLogger::new(
+                    simplelog::LevelFilter::Error,
+                    simplelog::Config::default(),
+                    File::create(log_file_path).unwrap(),
+                ),
+                log_config.clone(),
+            );
             multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info)
                 .unwrap();
         }
@@ -506,7 +511,7 @@ impl Libqaul {
     /// It should be called after `new()` returns.
     pub async fn run(&self) {
         // initialize Connection Modules
-        let conn = Connections::init().await;
+        let conn = Connections::init(&*self.state).await;
         let mut internet = conn.internet.unwrap();
         let mut lan = conn.lan.unwrap();
 
@@ -524,9 +529,9 @@ impl Libqaul {
         let mut messaging_ticker = Ticker::new(Duration::from_millis(10));
         let mut retransmit_ticker = Ticker::new(Duration::from_millis(1000));
 
-        // Mark as initialized
+        // Mark as initialized (both on Libqaul and QaulState for API compatibility)
         self.initialized.store(true, Ordering::SeqCst);
-        let _ = INITIALIZED.set(true);
+        self.state.initialized.store(true, Ordering::SeqCst);
 
         log::trace!("initializing finished, start event loop");
 
@@ -616,7 +621,7 @@ impl Libqaul {
                                 router.neighbours.delete(ConnectionModule::Lan, peer_id);
                             },
                             libp2p::swarm::SwarmEvent::Behaviour(behaviour) => {
-                                lan.swarm.behaviour_mut().process_events(behaviour);
+                                lan.swarm.behaviour_mut().process_events(&*self.state, behaviour);
                             }
                             _ => {}
                         }
@@ -628,7 +633,7 @@ impl Libqaul {
                                 match error {
                                     libp2p::swarm::DialError::Transport(unreachable_addrs) => {
                                         for (addr, _) in unreachable_addrs {
-                                            if Internet::is_active_connection(&addr){
+                                            if Internet::is_active_connection(&*self.state, &addr){
                                                 self.state.connections.internet.add_reconnection(addr);
                                             }
                                         }
@@ -654,7 +659,7 @@ impl Libqaul {
 
                                 match endpoint {
                                     libp2p::core::ConnectedPoint::Dialer{address, ..} =>{
-                                        if Internet::is_active_connection(&address){
+                                        if Internet::is_active_connection(&*self.state, &address){
                                             self.state.connections.internet.add_reconnection(address);
                                         }
                                     }
@@ -662,7 +667,7 @@ impl Libqaul {
                                 }
                             }
                             libp2p::swarm::SwarmEvent::Behaviour(behaviour) => {
-                                internet.swarm.behaviour_mut().process_events(behaviour);
+                                internet.swarm.behaviour_mut().process_events(&*self.state, behaviour);
                             }
                             _ => {}
                         }
@@ -704,12 +709,12 @@ impl Libqaul {
         match event {
             EventType::Rpc => {
                 if let Ok(rpc_message) = self.rpc_receiver.try_recv() {
-                    Rpc::process_received_message(rpc_message, Some(lan), Some(internet)).await;
+                    Rpc::process_received_message(&*self.state, rpc_message, Some(lan), Some(internet)).await;
                 }
             }
             EventType::Sys => {
                 if let Ok(sys_message) = self.sys_receiver.try_recv() {
-                    Sys::process_received_message(sys_message, Some(lan), Some(internet));
+                    Sys::process_received_message(&*self.state, sys_message, Some(lan), Some(internet));
                 }
             }
             EventType::Flooding => {
@@ -729,7 +734,7 @@ impl Libqaul {
                             .publish(msg.topic.clone(), msg.message.clone());
                     }
                     if !matches!(msg.incoming_via, ConnectionModule::Ble) {
-                        Ble::send_feed_message(msg.topic, msg.message);
+                        Ble::send_feed_message(&*self.state, msg.topic, msg.message);
                     }
                 }
             }
@@ -746,8 +751,9 @@ impl Libqaul {
                         );
                         continue;
                     }
-                    let data = RouterInfo::create_feed_request(&request.feed_ids);
+                    let data = RouterInfo::create_feed_request(&*self.state, &request.feed_ids);
                     Self::send_via_module(
+                        &*self.state,
                         connection_module,
                         request.neighbour_id,
                         data,
@@ -769,8 +775,9 @@ impl Libqaul {
                         );
                         continue;
                     }
-                    let data = RouterInfo::create_feed_response(&request.feeds);
+                    let data = RouterInfo::create_feed_response(&*self.state, &request.feeds);
                     Self::send_via_module(
+                        &*self.state,
                         connection_module,
                         request.neighbour_id,
                         data,
@@ -792,8 +799,9 @@ impl Libqaul {
                         );
                         continue;
                     }
-                    let data = RouterInfo::create_user_request(&request.user_ids);
+                    let data = RouterInfo::create_user_request(&*self.state, &request.user_ids);
                     Self::send_via_module(
+                        &*self.state,
                         connection_module,
                         request.neighbour_id,
                         data,
@@ -815,8 +823,9 @@ impl Libqaul {
                         );
                         continue;
                     }
-                    let data = RouterInfo::create_user_response(&request.users);
+                    let data = RouterInfo::create_user_response(&*self.state, &request.users);
                     Self::send_via_module(
+                        &*self.state,
                         connection_module,
                         request.neighbour_id,
                         data,
@@ -826,10 +835,7 @@ impl Libqaul {
                 }
             }
             EventType::RoutingInfo => {
-                // RouterInfo::check_scheduler() has deep cross-cutting global dependencies
-                // (Node::get_id, RoutingTable::create_routing_info, etc.)
-                // Keep as global for now; will migrate in Phase 3/4.
-                if let Some((neighbour_id, connection_module, data)) = RouterInfo::check_scheduler()
+                if let Some((neighbour_id, connection_module, data)) = RouterInfo::check_scheduler(&*self.state, &router)
                 {
                     log::trace!(
                         "sending routing information via {:?} to {:?}, {:?}",
@@ -837,7 +843,7 @@ impl Libqaul {
                         neighbour_id,
                         Timestamp::get_timestamp()
                     );
-                    Self::send_via_module(connection_module, neighbour_id, data, lan, internet);
+                    Self::send_via_module(&*self.state, connection_module, neighbour_id, data, lan, internet);
                 }
             }
             EventType::ReConnecting => {
@@ -879,14 +885,14 @@ impl Libqaul {
                                 .send_qaul_messaging_message(neighbour_id, data);
                         }
                         ConnectionModule::Ble => {
-                            Ble::send_messaging_message(neighbour_id, data);
+                            Ble::send_messaging_message(&*self.state, neighbour_id, data);
                         }
                         ConnectionModule::Local => {
                             let message = qaul_messaging::types::QaulMessagingReceived {
                                 received_from: neighbour_id,
                                 data,
                             };
-                            Messaging::received(message);
+                            Messaging::received(&*self.state, message);
                         }
                         ConnectionModule::None => {}
                     }
@@ -896,13 +902,14 @@ impl Libqaul {
                 // MessagingRetransmit::process() uses Messaging::state() for
                 // unconfirmed messages, RoutingTable::get_online_users, and
                 // Messaging::schedule_message — all routed through QaulState.
-                services::messaging::retransmit::MessagingRetransmit::process();
+                services::messaging::retransmit::MessagingRetransmit::process(&*self.state);
             }
         }
     }
 
     /// Helper to send data via the appropriate connection module
     fn send_via_module(
+        state: &crate::QaulState,
         connection_module: ConnectionModule,
         neighbour_id: libp2p::PeerId,
         data: Vec<u8>,
@@ -921,7 +928,7 @@ impl Libqaul {
                 .qaul_info
                 .send_qaul_info_message(neighbour_id, data),
             ConnectionModule::Ble => {
-                Ble::send_routing_info(neighbour_id, data);
+                Ble::send_routing_info(state, neighbour_id, data);
             }
             ConnectionModule::Local => {}
             ConnectionModule::None => {}
@@ -955,12 +962,6 @@ extern crate log;
 extern crate android_logger;
 #[cfg(target_os = "android")]
 use android_logger::Config;
-
-/// Get default config values
-pub fn get_default_config(pattern: &str) -> Option<String> {
-    let def_config = DEFCONFIGS.get()?;
-    def_config.get(&pattern.to_string()).cloned()
-}
 
 /// Event Types of the async loop
 enum EventType {

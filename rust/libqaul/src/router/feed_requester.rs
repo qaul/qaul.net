@@ -52,9 +52,9 @@ impl FeedRequesterState {
 
 impl FeedRequester {
     /// Add a message to the ring buffer for sending.
-    /// Delegates to the global RouterState instance.
-    pub fn add(neighbour_id: &PeerId, feed_ids: &[Vec<u8>]) {
-        super::RouterState::global().feed_requester.add(neighbour_id, feed_ids);
+    /// Delegates to the provided RouterState instance.
+    pub fn add(router: &super::RouterState, neighbour_id: &PeerId, feed_ids: &[Vec<u8>]) {
+        router.feed_requester.add(neighbour_id, feed_ids);
     }
 }
 
@@ -95,8 +95,8 @@ impl FeedResponserState {
 
 impl FeedResponser {
     /// Add a message to the ring buffer for sending.
-    /// Delegates to the global RouterState instance.
-    pub fn add(neighbour_id: &PeerId, feeds: &[(Vec<u8>, Vec<u8>, String, u64)]) {
-        super::RouterState::global().feed_responser.add(neighbour_id, feeds);
+    /// Delegates to the provided RouterState instance.
+    pub fn add(router: &super::RouterState, neighbour_id: &PeerId, feeds: &[(Vec<u8>, Vec<u8>, String, u64)]) {
+        router.feed_responser.add(neighbour_id, feeds);
     }
 }

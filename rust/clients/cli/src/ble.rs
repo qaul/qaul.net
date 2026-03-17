@@ -19,7 +19,7 @@ impl Ble {
     /// CLI command interpretation
     ///
     /// The CLI commands of BLE module are processed here
-    pub fn cli(command: &str) {
+    pub fn cli(state: &super::CliState, command: &str) {
         match command {
             // request BLE device info
             cmd if cmd.starts_with("info") => {
@@ -28,7 +28,7 @@ impl Ble {
                     message: Some(proto::ble::Message::InfoRequest(proto::InfoRequest {})),
                 };
                 // send the message
-                Self::rpc_send(proto_message);
+                Self::rpc_send(state, proto_message);
             }
             // send start request for BLE module
             cmd if cmd.starts_with("start") => {
@@ -37,7 +37,7 @@ impl Ble {
                     message: Some(proto::ble::Message::StartRequest(proto::StartRequest {})),
                 };
                 // send the message
-                Self::rpc_send(proto_message);
+                Self::rpc_send(state, proto_message);
             }
             // send stop request for BLE module
             cmd if cmd.starts_with("stop") => {
@@ -46,7 +46,7 @@ impl Ble {
                     message: Some(proto::ble::Message::StopRequest(proto::StopRequest {})),
                 };
                 // send the message
-                Self::rpc_send(proto_message);
+                Self::rpc_send(state, proto_message);
             }
             // request discovered devices
             cmd if cmd.starts_with("discovered") => {
@@ -57,7 +57,7 @@ impl Ble {
                     )),
                 };
                 // send the message
-                Self::rpc_send(proto_message);
+                Self::rpc_send(state, proto_message);
             }
             // unknown command
             _ => log::error!("unknown BLE command"),
@@ -65,7 +65,7 @@ impl Ble {
     }
 
     /// Send rpc message to libqaul
-    fn rpc_send(proto_message: proto::Ble) {
+    fn rpc_send(state: &super::CliState, proto_message: proto::Ble) {
         // encode message
         let mut buf = Vec::with_capacity(proto_message.encoded_len());
         proto_message
@@ -73,7 +73,7 @@ impl Ble {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Ble.into(), "".to_string());
+        Rpc::send_message(state, buf, super::rpc::proto::Modules::Ble.into(), "".to_string());
     }
 
     /// Print BLE module information

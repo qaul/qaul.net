@@ -47,9 +47,9 @@ impl UserRequesterState {
 
 impl UserRequester {
     /// Add a message to the ring buffer for sending.
-    /// Delegates to the global RouterState instance.
-    pub fn add(neighbour_id: &PeerId, user_ids: &[Vec<u8>]) {
-        super::RouterState::global().user_requester.add(neighbour_id, user_ids);
+    /// Delegates to the provided RouterState instance.
+    pub fn add(router: &super::RouterState, neighbour_id: &PeerId, user_ids: &[Vec<u8>]) {
+        router.user_requester.add(neighbour_id, user_ids);
     }
 }
 
@@ -90,8 +90,8 @@ impl UserResponserState {
 
 impl UserResponser {
     /// Add a message to the ring buffer for sending.
-    /// Delegates to the global RouterState instance.
-    pub fn add(neighbour_id: &PeerId, table: &super::router_net_proto::UserInfoTable) {
-        super::RouterState::global().user_responser.add(neighbour_id, table);
+    /// Delegates to the provided RouterState instance.
+    pub fn add(router: &super::RouterState, neighbour_id: &PeerId, table: &super::router_net_proto::UserInfoTable) {
+        router.user_responser.add(neighbour_id, table);
     }
 }

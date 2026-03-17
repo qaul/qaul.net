@@ -7,10 +7,10 @@ use prost::Message;
 pub struct RtcManaging {}
 impl RtcManaging {
     /// process session list from cli
-    pub fn session_list(_my_user_id: &PeerId) -> super::proto_rpc::RtcSessionListResponse {
+    pub fn session_list(state: &crate::QaulState, _my_user_id: &PeerId) -> super::proto_rpc::RtcSessionListResponse {
         let mut res = super::proto_rpc::RtcSessionListResponse { sessions: vec![] };
 
-        let sessions = super::RTCSESSIONS.get().unwrap().read().unwrap();
+        let sessions = super::Rtc::rtc_state(state).sessions.read().unwrap();
         for (_id, session) in sessions.sessions.iter() {
             let entry = super::proto_rpc::RtcSession {
                 group_id: session.group_id.clone(),
@@ -24,11 +24,12 @@ impl RtcManaging {
     }
     /// process session request from cli
     pub fn session_request(
+        state: &crate::QaulState,
         my_user_id: &PeerId,
         req: &super::proto_rpc::RtcSessionRequest,
     ) -> Result<Vec<u8>, String> {
         //check if session already exists
-        if let Some(_session) = super::Rtc::get_session_from_id(&req.group_id) {
+        if let Some(_session) = super::Rtc::get_session_from_id(state, &req.group_id) {
             return Err("session alrady exists!".to_string());
         }
 
@@ -40,7 +41,7 @@ impl RtcManaging {
             state: 1, //sent request
             created_at: timestamp::Timestamp::get_timestamp(),
         };
-        super::Rtc::update_session(session);
+        super::Rtc::update_session(state, session);
 
         //send session request message on the messaging service
         let proto_message = super::proto_net::RtcContainer {
@@ -54,9 +55,9 @@ impl RtcManaging {
             .encode(&mut message_buff)
             .expect("Vec<u8> provides capacity as needed");
 
-        if let Some(user_account) = UserAccounts::get_by_id(*my_user_id) {
+        if let Some(user_account) = UserAccounts::get_by_id(state, *my_user_id) {
             let receiver = PeerId::from_bytes(&req.group_id).unwrap();
-            super::Rtc::send_rtc_message_through_message(&user_account, receiver, &message_buff);
+            super::Rtc::send_rtc_message_through_message(state, &user_account, receiver, &message_buff);
         } else {
             return Err("user account has problem".to_string());
         }
@@ -66,6 +67,7 @@ impl RtcManaging {
 
     /// send session management message
     fn send_session_management(
+        state: &crate::QaulState,
         my_user_id: &PeerId,
         group_id: &Vec<u8>,
         option: u32,
@@ -84,9 +86,9 @@ impl RtcManaging {
             .encode(&mut message_buff)
             .expect("Vec<u8> provides capacity as needed");
 
-        if let Some(user_account) = UserAccounts::get_by_id(*my_user_id) {
+        if let Some(user_account) = UserAccounts::get_by_id(state, *my_user_id) {
             let receiver = PeerId::from_bytes(group_id).unwrap();
-            super::Rtc::send_rtc_message_through_message(&user_account, receiver, &message_buff);
+            super::Rtc::send_rtc_message_through_message(state, &user_account, receiver, &message_buff);
         } else {
             return Err("user account has problem".to_string());
         }
@@ -95,33 +97,34 @@ impl RtcManaging {
 
     /// process session mangement request from cli
     pub fn session_management(
+        state: &crate::QaulState,
         my_user_id: &PeerId,
         req: &super::proto_rpc::RtcSessionManagement,
     ) -> Result<Vec<u8>, String> {
         //check if session already exists
-        match super::Rtc::get_session_from_id(&req.group_id) {
+        match super::Rtc::get_session_from_id(state, &req.group_id) {
             Some(mut session) => {
                 match req.option {
                     1 => {
                         //update entry
                         session.created_at = timestamp::Timestamp::get_timestamp();
                         session.state = 3;
-                        super::Rtc::update_session(session.clone());
+                        super::Rtc::update_session(state, session.clone());
                     }
                     2 => {
                         //decline
-                        super::Rtc::remove_session(&req.group_id);
+                        super::Rtc::remove_session(state, &req.group_id);
                     }
                     3 => {
                         //end
-                        super::Rtc::remove_session(&req.group_id);
+                        super::Rtc::remove_session(state, &req.group_id);
                     }
                     _ => {
                         return Err("unknown session management option".to_string());
                     }
                 }
                 if let Err(error) =
-                    Self::send_session_management(my_user_id, &session.group_id.clone(), req.option)
+                    Self::send_session_management(state, my_user_id, &session.group_id.clone(), req.option)
                 {
                     return Err(error);
                 }
@@ -133,12 +136,13 @@ impl RtcManaging {
 
     /// process session request from network
     pub fn on_session_request(
+        state: &crate::QaulState,
         sender_id: &PeerId,
         receiver_id: &PeerId,
         _req: &super::proto_net::RtcSessionRequest,
     ) {
         // check session already exist
-        if let Some(_session) = super::Rtc::get_session_from_id(&sender_id.to_bytes()) {
+        if let Some(_session) = super::Rtc::get_session_from_id(state, &sender_id.to_bytes()) {
             log::error!("session already exists id: {}", sender_id.to_string());
             return;
         }
@@ -151,31 +155,32 @@ impl RtcManaging {
             state: 2, //received state
             created_at: timestamp::Timestamp::get_timestamp(),
         };
-        super::Rtc::update_session(session);
+        super::Rtc::update_session(state, session);
     }
 
     /// process session request from network
     pub fn on_session_management(
+        state: &crate::QaulState,
         sender_id: &PeerId,
         _receiver_id: &PeerId,
         req: &super::proto_net::RtcSessionManagement,
     ) {
-        match super::Rtc::get_session_from_id(&sender_id.to_bytes()) {
+        match super::Rtc::get_session_from_id(state, &sender_id.to_bytes()) {
             Some(mut session) => {
                 match req.option {
                     1 => {
                         //established
                         session.state = 3;
                         session.created_at = timestamp::Timestamp::get_timestamp();
-                        Rtc::update_session(session);
+                        Rtc::update_session(state, session);
                     }
                     2 => {
                         //decline
-                        super::Rtc::remove_session(&sender_id.to_bytes());
+                        super::Rtc::remove_session(state, &sender_id.to_bytes());
                     }
                     3 => {
                         //end
-                        super::Rtc::remove_session(&sender_id.to_bytes());
+                        super::Rtc::remove_session(state, &sender_id.to_bytes());
                     }
                     _ => {
                         log::error!("session management unknown option: {}", req.option);

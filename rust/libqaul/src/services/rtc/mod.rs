@@ -11,7 +11,7 @@ use crate::node::user_accounts::UserAccount;
 use crate::rpc::Rpc;
 use prost::Message;
 use std::collections::BTreeMap;
-use std::sync::{OnceLock, RwLock};
+use std::sync::RwLock;
 
 mod rtc_managing;
 mod rtc_messaging;
@@ -51,24 +51,36 @@ pub struct RtcSessions {
     pub sessions: BTreeMap<Vec<u8>, RtcSession>,
 }
 
-/// mutable state for sessions
-pub static RTCSESSIONS: OnceLock<RwLock<RtcSessions>> = OnceLock::new();
+/// Instance-based RTC state wrapping sessions.
+pub struct RtcState {
+    pub sessions: RwLock<RtcSessions>,
+}
+
+impl RtcState {
+    pub fn new() -> Self {
+        Self {
+            sessions: RwLock::new(RtcSessions {
+                sessions: BTreeMap::new(),
+            }),
+        }
+    }
+}
 
 /// Real Time Communication Module
 pub struct Rtc {}
 
 impl Rtc {
-    /// initialize group chat module
-    pub fn init() {
-        let rtc_sessions = RtcSessions {
-            sessions: BTreeMap::new(),
-        };
-        let _ = RTCSESSIONS.set(RwLock::new(rtc_sessions));
+    /// initialize group chat module (now a no-op, state lives in ServicesState)
+    pub fn init() {}
+
+    /// Helper to access the RTC state from QaulState.
+    pub(crate) fn rtc_state(state: &crate::QaulState) -> &RtcState {
+        &state.services.rtc
     }
 
     /// get session from session_id
-    pub fn get_session_from_id(group_id: &Vec<u8>) -> Option<RtcSession> {
-        let sessions = RTCSESSIONS.get().unwrap().read().unwrap();
+    pub fn get_session_from_id(state: &crate::QaulState, group_id: &Vec<u8>) -> Option<RtcSession> {
+        let sessions = Self::rtc_state(state).sessions.read().unwrap();
         if sessions.sessions.contains_key(group_id) {
             return Some(sessions.sessions.get(group_id).unwrap().clone());
         }
@@ -76,19 +88,20 @@ impl Rtc {
     }
 
     /// get session from session_id
-    pub fn update_session(session: RtcSession) {
-        let mut sessions = RTCSESSIONS.get().unwrap().write().unwrap();
+    pub fn update_session(state: &crate::QaulState, session: RtcSession) {
+        let mut sessions = Self::rtc_state(state).sessions.write().unwrap();
         sessions.sessions.insert(session.group_id.clone(), session);
     }
 
     /// remove session on the storage
-    pub fn remove_session(session_id: &Vec<u8>) {
-        let mut sessions = RTCSESSIONS.get().unwrap().write().unwrap();
+    pub fn remove_session(state: &crate::QaulState, session_id: &Vec<u8>) {
+        let mut sessions = Self::rtc_state(state).sessions.write().unwrap();
         sessions.sessions.remove(session_id);
     }
 
     /// Send capsuled group message through messaging service
     pub fn send_rtc_message_through_message(
+        state: &crate::QaulState,
         user_account: &UserAccount,
         receiver: PeerId,
         data: &[u8],
@@ -96,13 +109,13 @@ impl Rtc {
         // create direct chat room
         let group_id = GroupId::from_peers(&user_account.id, &receiver);
         let group_id_bytes = group_id.to_bytes();
-        if !group::GroupStorage::group_exists(user_account.id, &group_id_bytes) {
-            group::GroupManage::create_new_direct_chat_group(&user_account.id, &receiver);
+        if !group::GroupStorage::group_exists(state, user_account.id, &group_id_bytes) {
+            group::GroupManage::create_new_direct_chat_group(state, &user_account.id, &receiver);
         }
 
         //get last index
         let group;
-        match group::GroupStorage::get_group(user_account.id, &group_id_bytes) {
+        match group::GroupStorage::get_group(state, user_account.id, &group_id_bytes) {
             Some(v) => group = v,
             None => return,
         }
@@ -137,6 +150,7 @@ impl Rtc {
 
         // send message via messaging
         if let Err(e) = Messaging::pack_and_send_message(
+            state,
             user_account,
             &receiver,
             send_message.encode_to_vec(),
@@ -149,12 +163,13 @@ impl Rtc {
     }
 
     /// Process incoming NET messages for rtc module
-    pub fn net(sender_id: &PeerId, receiver_id: &PeerId, data: &Vec<u8>) {
+    pub fn net(state: &crate::QaulState, sender_id: &PeerId, receiver_id: &PeerId, data: &Vec<u8>) {
         match proto_net::RtcContainer::decode(&data[..]) {
             Ok(messaging) => match messaging.message {
                 Some(proto_net::rtc_container::Message::RtcSessionRequest(session_req)) => {
                     log::error!("on_session_request");
                     rtc_managing::RtcManaging::on_session_request(
+                        state,
                         &sender_id,
                         &receiver_id,
                         &session_req,
@@ -163,6 +178,7 @@ impl Rtc {
                 Some(proto_net::rtc_container::Message::RtcSessionManagement(session_mgr)) => {
                     log::error!("on_session_management");
                     rtc_managing::RtcManaging::on_session_management(
+                        state,
                         &sender_id,
                         &receiver_id,
                         &session_mgr,
@@ -196,14 +212,14 @@ impl Rtc {
     }
 
     /// Process incoming RPC request messages
-    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
+    pub fn rpc(state: &crate::QaulState, data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
         let my_user_id = PeerId::from_bytes(&user_id).unwrap();
 
         match proto_rpc::RtcRpc::decode(&data[..]) {
             Ok(rtc_rpc) => {
                 match rtc_rpc.message {
                     Some(proto_rpc::rtc_rpc::Message::RtcSessionRequest(session_req)) => {
-                        match RtcManaging::session_request(&my_user_id, &session_req) {
+                        match RtcManaging::session_request(state, &my_user_id, &session_req) {
                             Err(error) => {
                                 log::error!("rtc request error {}", error);
                             }
@@ -225,6 +241,7 @@ impl Rtc {
 
                                 // send message
                                 Rpc::send_message(
+                                    state,
                                     buf,
                                     crate::rpc::proto::Modules::Rtc.into(),
                                     request_id,
@@ -235,18 +252,18 @@ impl Rtc {
                     }
                     Some(proto_rpc::rtc_rpc::Message::RtcSessionManagement(session_req)) => {
                         if let Err(error) =
-                            RtcManaging::session_management(&my_user_id, &session_req)
+                            RtcManaging::session_management(state, &my_user_id, &session_req)
                         {
                             log::error!("rtc management error {}", error);
                         }
                     }
                     Some(proto_rpc::rtc_rpc::Message::RtcOutgoing(session_req)) => {
-                        if let Err(error) = RtcMessaging::send_message(&my_user_id, &session_req) {
+                        if let Err(error) = RtcMessaging::send_message(state, &my_user_id, &session_req) {
                             log::error!("rtc message error {}", error);
                         }
                     }
                     Some(proto_rpc::rtc_rpc::Message::RtcSessionListRequest(_session_req)) => {
-                        let res = RtcManaging::session_list(&my_user_id);
+                        let res = RtcManaging::session_list(state, &my_user_id);
                         //make response
                         let proto_message = proto_rpc::RtcRpc {
                             message: Some(proto_rpc::rtc_rpc::Message::RtcSessionListResponse(res)),
@@ -260,6 +277,7 @@ impl Rtc {
 
                         // send message
                         Rpc::send_message(
+                            state,
                             buf,
                             crate::rpc::proto::Modules::Rtc.into(),
                             request_id,

@@ -191,8 +191,8 @@ impl RouterInfo {
     ///
     /// The scheduler is already created when RouterState is initialized.
     /// This method just updates the interval if needed.
-    pub fn init(interval_seconds: u64) {
-        let mut scheduler = super::RouterState::global().scheduler.inner.write().unwrap();
+    pub fn init(router: &super::RouterState, interval_seconds: u64) {
+        let mut scheduler = router.scheduler.inner.write().unwrap();
         scheduler.interval = Duration::from_secs(interval_seconds);
     }
 
@@ -200,7 +200,7 @@ impl RouterInfo {
     /// and checks if there is any timeout.
     /// If it finds a timeout it returns the node id
     /// to send a routing information to.
-    pub fn check_scheduler() -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
+    pub fn check_scheduler(state: &crate::QaulState, router: &super::RouterState) -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
         let mut found_neighbour: Option<PeerId> = None;
         let mut neighbour_last_sent: u64 = 0;
         let mut neighbour_is_first: bool = false;
@@ -209,7 +209,7 @@ impl RouterInfo {
 
         {
             // get state for reading
-            let scheduler = super::RouterState::global().scheduler.inner.read().unwrap();
+            let scheduler = router.scheduler.inner.read().unwrap();
 
             // loop over all neighbours
             for (id, ctx) in scheduler.neighbours.iter() {
@@ -232,12 +232,12 @@ impl RouterInfo {
             propagation_timestamp = Timestamp::get_timestamp();
 
             // get scheduler for writing
-            let mut scheduler = super::RouterState::global().scheduler.inner.write().unwrap();
+            let mut scheduler = router.scheduler.inner.write().unwrap();
             scheduler.propagation_id = propagation_id;
             scheduler.propagation_timestamp = propagation_timestamp;
 
             // update propagation ID
-            super::connections::ConnectionTable::update_propagation_id(propagation_id);
+            super::connections::ConnectionTable::update_propagation_id(router, propagation_id);
         }
 
         // process finding
@@ -245,10 +245,10 @@ impl RouterInfo {
             // Check whether this node is
             // still connected and over which connection module
             // we can approach it.
-            let module = Neighbours::is_neighbour(&node_id);
+            let module = Neighbours::is_neighbour(router, &node_id);
 
             // get scheduler for writing
-            let mut scheduler = super::RouterState::global().scheduler.inner.write().unwrap();
+            let mut scheduler = router.scheduler.inner.write().unwrap();
 
             if module == ConnectionModule::None {
                 log::debug!("node is not a neighbour anymore: {:?}", node_id);
@@ -262,7 +262,7 @@ impl RouterInfo {
                 }
 
                 // create routing information
-                let data = Self::create(node_id.clone(), neighbour_last_sent, neighbour_is_first);
+                let data = Self::create(state, router, node_id.clone(), neighbour_last_sent, neighbour_is_first);
 
                 // create result
                 return Some((node_id, module, data));
@@ -273,18 +273,18 @@ impl RouterInfo {
     }
 
     /// add new neighbour entry
-    pub fn add_neighbour(node_id: PeerId) {
+    pub fn add_neighbour(router: &super::RouterState, node_id: PeerId) {
         let exists;
         log::trace!("add new neighbour {:?} to RouterInfo scheduler", node_id);
         // check if a neighbour entry exists
         {
-            let scheduler = super::RouterState::global().scheduler.inner.read().unwrap();
+            let scheduler = router.scheduler.inner.read().unwrap();
             exists = scheduler.neighbours.contains_key(&node_id);
         }
 
         // if it does not exist add it to scheduler
         if !exists {
-            let mut scheduler = super::RouterState::global().scheduler.inner.write().unwrap();
+            let mut scheduler = router.scheduler.inner.write().unwrap();
             let interval = scheduler.interval;
             scheduler.neighbours.insert(
                 node_id,
@@ -298,16 +298,16 @@ impl RouterInfo {
 
     /// Create routing information for a neighbour node,
     /// encode the information and return the byte code.
-    pub fn create(neighbour: PeerId, last_sent: u64, is_first: bool) -> Vec<u8> {
-        let node_id = Node::get_id();
+    pub fn create(state: &crate::QaulState, router: &super::RouterState, neighbour: PeerId, last_sent: u64, is_first: bool) -> Vec<u8> {
+        let node_id = Node::get_id(state);
 
         // create routing table
-        let routes = RoutingTable::create_routing_info(neighbour, last_sent);
+        let routes = RoutingTable::create_routing_info(router, neighbour, last_sent);
 
         // create latest Feed ids table
         let feeds = router_net_proto::FeedIdsTable {
             ids: if is_first {
-                Feed::get_latest_message_ids(5)
+                Feed::get_latest_message_ids(state, 5)
             } else {
                 Vec::new()
             },
@@ -344,7 +344,7 @@ impl RouterInfo {
             .expect("Vec<u8> provides capacity as needed");
 
         // sign data
-        let keys = Node::get_keys();
+        let keys = Node::get_keys(state);
         let signature = keys.sign(&buf).unwrap();
 
         // create signed container
@@ -363,8 +363,8 @@ impl RouterInfo {
     }
 
     /// creating feed request message
-    pub fn create_feed_request(ids: &[Vec<u8>]) -> Vec<u8> {
-        let node_id = Node::get_id();
+    pub fn create_feed_request(state: &crate::QaulState, ids: &[Vec<u8>]) -> Vec<u8> {
+        let node_id = Node::get_id(state);
 
         //create latest Feed ids table
         let feeds = router_net_proto::FeedIdsTable { ids: ids.to_vec() };
@@ -391,7 +391,7 @@ impl RouterInfo {
             .expect("Vec<u8> provides capacity as needed");
 
         // sign data
-        let keys = Node::get_keys();
+        let keys = Node::get_keys(state);
         let signature = keys.sign(&buf).unwrap();
 
         // create signed container
@@ -410,8 +410,8 @@ impl RouterInfo {
     }
 
     /// create_feed_response
-    pub fn create_feed_response(messages: &[(Vec<u8>, Vec<u8>, String, u64)]) -> Vec<u8> {
-        let node_id = Node::get_id();
+    pub fn create_feed_response(state: &crate::QaulState, messages: &[(Vec<u8>, Vec<u8>, String, u64)]) -> Vec<u8> {
+        let node_id = Node::get_id(state);
 
         // create latest Feed ids table
         let mut feeds = router_net_proto::FeedResponseTable {
@@ -449,7 +449,7 @@ impl RouterInfo {
             .expect("Vec<u8> provides capacity as needed");
 
         // sign data
-        let keys = Node::get_keys();
+        let keys = Node::get_keys(state);
         let signature = keys.sign(&buf).unwrap();
 
         // create signed container
@@ -468,8 +468,8 @@ impl RouterInfo {
     }
 
     /// creating user request message
-    pub fn create_user_request(ids: &[Vec<u8>]) -> Vec<u8> {
-        let node_id = Node::get_id();
+    pub fn create_user_request(state: &crate::QaulState, ids: &[Vec<u8>]) -> Vec<u8> {
+        let node_id = Node::get_id(state);
 
         //create latest Feed ids table
         let users = router_net_proto::UserIdTable { ids: ids.to_vec() };
@@ -494,7 +494,7 @@ impl RouterInfo {
             .expect("Vec<u8> provides capacity as needed");
 
         // sign data
-        let keys = Node::get_keys();
+        let keys = Node::get_keys(state);
         let signature = keys.sign(&buf).unwrap();
 
         // create signed container
@@ -513,8 +513,8 @@ impl RouterInfo {
     }
 
     /// create_user_response
-    pub fn create_user_response(users: &router_net_proto::UserInfoTable) -> Vec<u8> {
-        let node_id = Node::get_id();
+    pub fn create_user_response(state: &crate::QaulState, users: &router_net_proto::UserInfoTable) -> Vec<u8> {
+        let node_id = Node::get_id(state);
         let timestamp = Timestamp::get_timestamp();
 
         let mut buf = Vec::with_capacity(users.encoded_len());
@@ -536,7 +536,7 @@ impl RouterInfo {
             .expect("Vec<u8> provides capacity as needed");
 
         // sign data
-        let keys = Node::get_keys();
+        let keys = Node::get_keys(state);
         let signature = keys.sign(&buf).unwrap();
 
         // create signed container
@@ -555,7 +555,7 @@ impl RouterInfo {
     }
 
     /// process received qaul_info message
-    pub fn received(received: QaulInfoReceived) {
+    pub fn received(state: &crate::QaulState, router: &super::RouterState, received: QaulInfoReceived) {
         // decode message to structure
         let decoding_result = router_net_proto::RouterInfoContainer::decode(&received.data[..]);
 
@@ -590,9 +590,10 @@ impl RouterInfo {
                                                 .iter()
                                                 .map(|e| e.user.clone())
                                                 .collect::<Vec<_>>();
-                                            let missed_users = Users::get_missed_ids(&user_ids);
+                                            let missed_users = Users::get_missed_ids(router, &user_ids);
                                             if !missed_users.is_empty() {
                                                 UserRequester::add(
+                                                    router,
                                                     &received.received_from,
                                                     &missed_users,
                                                 );
@@ -600,6 +601,7 @@ impl RouterInfo {
 
                                             //process routing table
                                             ConnectionTable::process_received_routing_info(
+                                                router,
                                                 received.received_from,
                                                 &entry,
                                             );
@@ -608,9 +610,10 @@ impl RouterInfo {
                                     }
                                     match feeds {
                                         Some(router_net_proto::FeedIdsTable { ids }) => {
-                                            let missing_ids = Feed::process_received_feed_ids(&ids);
+                                            let missing_ids = Feed::process_received_feed_ids(state, &ids);
                                             if !missing_ids.is_empty() {
                                                 FeedRequester::add(
+                                                    router,
                                                     &received.received_from,
                                                     &missing_ids,
                                                 );
@@ -627,9 +630,9 @@ impl RouterInfo {
                                 if let Ok(message) = message_info {
                                     match message.feeds {
                                         Some(table) => {
-                                            let feeds = Feed::get_messges_by_ids(&table.ids);
+                                            let feeds = Feed::get_messges_by_ids(state, &table.ids);
                                             if !feeds.is_empty() {
-                                                FeedResponser::add(&received.received_from, &feeds);
+                                                FeedResponser::add(router, &received.received_from, &feeds);
                                             }
                                         }
                                         _ => {}
@@ -650,6 +653,7 @@ impl RouterInfo {
                                                     feed.sender_id.clone(),
                                                 ));
                                                 Feed::save_message_by_sync(
+                                                    state,
                                                     &feed.message_id,
                                                     &feed.sender_id,
                                                     feed.content,
@@ -657,9 +661,10 @@ impl RouterInfo {
                                                 );
                                             }
                                             // check missed users
-                                            let missed_users = Users::get_missed_ids(&user_ids);
+                                            let missed_users = Users::get_missed_ids(router, &user_ids);
                                             if !missed_users.is_empty() {
                                                 UserRequester::add(
+                                                    router,
                                                     &received.received_from,
                                                     &missed_users,
                                                 );
@@ -673,15 +678,15 @@ impl RouterInfo {
                                 let message_info =
                                     router_net_proto::UserIdTable::decode(&content.content[..]);
                                 if let Ok(message) = message_info {
-                                    let table = Users::get_user_info_table_by_q8ids(&message.ids);
-                                    UserResponser::add(&received.received_from, &table);
+                                    let table = Users::get_user_info_table_by_q8ids(router, &message.ids);
+                                    UserResponser::add(router, &received.received_from, &table);
                                 }
                             }
                             Ok(router_net_proto::RouterInfoModule::UserResponse) => {
                                 let message_info =
                                     router_net_proto::UserInfoTable::decode(&content.content[..]);
                                 if let Ok(message) = message_info {
-                                    Users::add_user_info_table(&message.info);
+                                    Users::add_user_info_table(state, router, &message.info);
                                 }
                             }
                             Err(_) => {}
