@@ -86,6 +86,10 @@ class Node:
             "chat", "conversation", "--group-id", group_id, "--index", str(index)
         )
 
+    def send_chat_message(self, group_id: str, message: str):
+        """Send a direct/group chat message."""
+        self._run("chat", "send", "--group-id", group_id, "--message", message)
+
     def router_table(self) -> list[dict]:
         """Return the current routing table: best route per known user."""
         return self._run_json("router", "table")
