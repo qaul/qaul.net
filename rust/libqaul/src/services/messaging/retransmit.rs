@@ -20,7 +20,7 @@ impl MessagingRetransmit {
     /// process retransmission
     pub fn process() {
         // get unconfirmed table
-        let unconfirmed = super::UNCONFIRMED.get().write().unwrap();
+        let unconfirmed = super::Messaging::state().unconfirmed.write().unwrap();
         if unconfirmed.unconfirmed.len() == 0 {
             // there are no message to retransmit
             return;

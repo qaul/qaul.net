@@ -20,7 +20,6 @@ use crate::utilities::qaul_id::QaulId;
 use libp2p::PeerId;
 use prost::Message;
 use qaul_info::QaulInfoReceived;
-use state::InitCell;
 use std::{
     collections::HashMap,
     sync::RwLock,
@@ -37,15 +36,12 @@ use crate::{
     utilities::timestamp::Timestamp,
 };
 
-use crate::feed_requester::FeedRequester;
-use crate::feed_requester::FeedResponser;
+use crate::router::feed_requester::FeedRequester;
+use crate::router::feed_requester::FeedResponser;
 use crate::services::feed::Feed;
 
 use crate::router::user_requester::UserRequester;
 use crate::router::user_requester::UserResponser;
-
-/// mutable state of Neighbours table per ConnectionModule
-static SCHEDULER: InitCell<RwLock<Scheduler>> = InitCell::new();
 
 /// global scheduler state
 #[derive(Clone, Debug)]
@@ -192,15 +188,12 @@ impl RouterInfo {
     /// with the interval in seconds that the
     /// routing information shall be sent
     /// to neighbours.
+    ///
+    /// The scheduler is already created when RouterState is initialized.
+    /// This method just updates the interval if needed.
     pub fn init(interval_seconds: u64) {
-        // neighbours list for routing info scheduler
-        let scheduler = Scheduler {
-            neighbours: HashMap::new(),
-            interval: Duration::from_secs(interval_seconds),
-            propagation_id: 0,
-            propagation_timestamp: Timestamp::get_timestamp(),
-        };
-        SCHEDULER.set(RwLock::new(scheduler));
+        let mut scheduler = super::RouterState::global().scheduler.inner.write().unwrap();
+        scheduler.interval = Duration::from_secs(interval_seconds);
     }
 
     /// This loops over all neighbours
@@ -216,7 +209,7 @@ impl RouterInfo {
 
         {
             // get state for reading
-            let scheduler = SCHEDULER.get().read().unwrap();
+            let scheduler = super::RouterState::global().scheduler.inner.read().unwrap();
 
             // loop over all neighbours
             for (id, ctx) in scheduler.neighbours.iter() {
@@ -239,7 +232,7 @@ impl RouterInfo {
             propagation_timestamp = Timestamp::get_timestamp();
 
             // get scheduler for writing
-            let mut scheduler = SCHEDULER.get().write().unwrap();
+            let mut scheduler = super::RouterState::global().scheduler.inner.write().unwrap();
             scheduler.propagation_id = propagation_id;
             scheduler.propagation_timestamp = propagation_timestamp;
 
@@ -254,8 +247,8 @@ impl RouterInfo {
             // we can approach it.
             let module = Neighbours::is_neighbour(&node_id);
 
-            // get SCHEDULER for writing
-            let mut scheduler = SCHEDULER.get().write().unwrap();
+            // get scheduler for writing
+            let mut scheduler = super::RouterState::global().scheduler.inner.write().unwrap();
 
             if module == ConnectionModule::None {
                 log::debug!("node is not a neighbour anymore: {:?}", node_id);
@@ -285,13 +278,13 @@ impl RouterInfo {
         log::trace!("add new neighbour {:?} to RouterInfo scheduler", node_id);
         // check if a neighbour entry exists
         {
-            let scheduler = SCHEDULER.get().read().unwrap();
+            let scheduler = super::RouterState::global().scheduler.inner.read().unwrap();
             exists = scheduler.neighbours.contains_key(&node_id);
         }
 
         // if it does not exist add it to scheduler
         if !exists {
-            let mut scheduler = SCHEDULER.get().write().unwrap();
+            let mut scheduler = super::RouterState::global().scheduler.inner.write().unwrap();
             let interval = scheduler.interval;
             scheduler.neighbours.insert(
                 node_id,

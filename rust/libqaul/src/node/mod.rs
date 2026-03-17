@@ -15,7 +15,6 @@ use base64::Engine;
 use libp2p::identity::ed25519;
 use libp2p::{floodsub::Topic, identity::Keypair, PeerId};
 use prost::Message;
-use state;
 use std::sync::{Arc, RwLock};
 
 use crate::connections::{internet::Internet, lan::Lan};
@@ -23,9 +22,6 @@ use crate::rpc::Rpc;
 use crate::storage::configuration::Configuration;
 use crate::utilities::qaul_id::QaulId;
 use user_accounts::UserAccounts;
-
-/// central state of this instances Node struct (global state - deprecated)
-static NODE: state::InitCell<Node> = state::InitCell::new();
 
 /// Import protobuf message definition
 pub use qaul_proto::qaul_rpc_node as proto;
@@ -131,115 +127,70 @@ impl NodeIdentity {
     }
 }
 
-/// This Node (global state wrapper - for backward compatibility)
-pub struct Node {
-    id: PeerId,
-    keys: Keypair,
-    topic: Topic,
-}
+/// This Node (global state wrapper - delegates to QaulState)
+pub struct Node;
 
 impl Node {
+    /// Get a snapshot of the NodeIdentity from QaulState.
+    fn state() -> Arc<NodeIdentity> {
+        crate::QaulState::global().get_node()
+    }
+
     /// start an existing node from the config parameters
+    ///
+    /// This is now a no-op: node identity is created during `Libqaul::new()`
+    /// via `NodeModule::new()` and stored in `QaulState`. Kept for backward
+    /// compatibility so existing call sites don't break.
     pub fn init() {
-        // initialize users of this node
+        // UserAccounts::init() is also a no-op now; call it for compat.
         UserAccounts::init();
 
-        // initialize node
-        {
-            if !Configuration::is_node_initialized() {
-                // create a new node and save it to configuration
-                log::trace!("Create a new node.");
-                Self::new();
-            } else {
-                // instantiate node from configuration
-                log::trace!("Setup node from configuration.");
-                Self::from_config();
-            }
+        if !Configuration::is_node_initialized() {
+            // Save the generated node identity to configuration
+            log::trace!("Create a new node (saving identity to config).");
+            Self::save_to_config();
+        } else {
+            log::trace!("Node already initialized from configuration.");
         }
     }
 
-    /// create a new node and save the parameters into config
-    fn new() {
-        // create node
-        let keys_ed25519 = Keypair::generate_ed25519();
-        let id = PeerId::from(keys_ed25519.public());
-        let topic = Topic::new("pages");
-        let node = Node {
-            id,
-            keys: keys_ed25519.clone(),
-            topic,
-        };
-
-        // save node to configuration file
+    /// Save the current node identity (from QaulState) into the configuration file.
+    /// Called when a brand-new node is created.
+    fn save_to_config() {
+        let node = Self::state();
         {
             let mut config = Configuration::get_mut();
-            config.node.keys = base64::engine::general_purpose::STANDARD
-                .encode(keys_ed25519.clone().try_into_ed25519().unwrap().to_bytes());
-            config.node.id = id.to_string();
+            config.node.keys = node.keys_to_config();
+            config.node.id = node.id.to_string();
             config.node.initialized = 1;
         }
         Configuration::save();
-
-        // display id
-        log::trace!("Peer Id: {}", node.id.clone());
-
-        // save node to state
-        NODE.set(node);
-    }
-
-    /// start an existing node from the config parameters
-    fn from_config() {
-        let config = Configuration::get();
-        let mut basedecode = base64::engine::general_purpose::STANDARD
-            .decode(&config.node.keys)
-            .unwrap();
-        let ed25519_keys = ed25519::Keypair::try_from_bytes(&mut basedecode).unwrap();
-        let keys = Keypair::from(ed25519_keys);
-        let id = PeerId::from(keys.public());
-        let topic = Topic::new("pages");
-
-        // check if saved ID and the id from the keypair are equal
-        if id.to_string() == config.node.id {
-            log::trace!("id's match {}", config.node.id);
-        } else {
-            log::error!("------------------------------------");
-            log::error!("ERROR: id's are not equal");
-            log::error!("{}  {}", id.to_string(), config.node.id);
-            log::error!("------------------------------------");
-        }
-
-        let node = Node { id, keys, topic };
-        NODE.set(node);
+        log::trace!("Peer Id: {}", node.id);
     }
 
     /// get a cloned PeerId
     pub fn get_id() -> PeerId {
-        let node = NODE.get();
-        node.id.clone()
+        Self::state().id
     }
 
     /// get small node ID
     pub fn get_q8id() -> Vec<u8> {
-        let node = NODE.get();
-        QaulId::to_q8id(node.id)
+        QaulId::to_q8id(Self::state().id)
     }
 
     /// get the string of a PeerId
     pub fn get_id_string() -> String {
-        let node = NODE.get();
-        node.id.to_string()
+        Self::state().id.to_string()
     }
 
-    /// Get the Keypair of this node
-    pub fn get_keys<'a>() -> &'a Keypair {
-        let node = NODE.get();
-        &node.keys
+    /// Get the Keypair of this node (cloned)
+    pub fn get_keys() -> Keypair {
+        Self::state().keys.clone()
     }
 
     /// get the cloned Topic
     pub fn get_topic() -> Topic {
-        let node = NODE.get();
-        node.topic.clone()
+        Self::state().topic.clone()
     }
 
     /// Process incoming RPC request messages for node module

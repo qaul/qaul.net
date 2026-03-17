@@ -11,12 +11,8 @@
 
 use crate::connections::ConnectionModule;
 use libp2p::floodsub::Topic;
-use state::InitCell;
 use std::collections::VecDeque;
 use std::sync::RwLock;
-
-// mutable state of feed messages
-pub static FLOODER: InitCell<RwLock<Flooder>> = InitCell::new();
 
 pub struct FloodMessageContainer {
     pub message: Vec<u8>,
@@ -29,7 +25,6 @@ pub struct Flooder {
 }
 
 /// Instance-based flooder state.
-/// Replaces the global FLOODER static for multi-instance use.
 pub struct FlooderState {
     pub inner: RwLock<Flooder>,
 }
@@ -57,24 +52,9 @@ impl FlooderState {
 }
 
 impl Flooder {
-    /// Initialize the flooder and create the ring buffer.
-    pub fn init() {
-        let flooder = Flooder {
-            to_send: VecDeque::new(),
-        };
-        FLOODER.set(RwLock::new(flooder));
-    }
-
     /// Add a message to the ring buffer for sending.
+    /// Delegates to the global RouterState instance.
     pub fn add(message: Vec<u8>, topic: Topic, incoming_via: ConnectionModule) {
-        let msg = FloodMessageContainer {
-            message,
-            topic,
-            incoming_via,
-        };
-
-        // add it to sending queue
-        let mut flooder = FLOODER.get().write().unwrap();
-        flooder.to_send.push_back(msg);
+        super::RouterState::global().flooder.add(message, topic, incoming_via);
     }
 }

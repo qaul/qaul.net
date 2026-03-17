@@ -35,7 +35,6 @@ use libp2p::{
     tcp, yamux, Multiaddr, PeerId, SwarmBuilder,
 };
 use prost::Message;
-use state::InitCell;
 use std::time::Duration;
 use std::{
     collections::{BTreeMap, HashMap},
@@ -224,9 +223,6 @@ fn peerid_from_address_impl(connections: &BTreeMap<String, PeerId>, address: Str
     connections.get(&address).cloned()
 }
 
-static INTERNETRECONNECTIONS: InitCell<RwLock<InternetReConnections>> = InitCell::new();
-static INTERNETCONNECTIONS: InitCell<RwLock<BTreeMap<String, PeerId>>> = InitCell::new();
-
 /// Instance-based internet connections state.
 /// Replaces the global INTERNETRECONNECTIONS and INTERNETCONNECTIONS statics
 /// for multi-instance use.
@@ -336,10 +332,8 @@ impl Internet {
     pub async fn init(node_keys: &Keypair) -> Self {
         log::trace!("Internet.init() start");
 
-        INTERNETRECONNECTIONS.set(RwLock::new(InternetReConnections {
-            peers: HashMap::new(),
-        }));
-        INTERNETCONNECTIONS.set(RwLock::new(BTreeMap::<String, PeerId>::new()));
+        // Internet state is now managed by QaulState::global().connections.internet
+        // No InitCell initialization needed.
 
         // create ping configuration
         let mut ping_config = ping::Config::new();
@@ -454,8 +448,7 @@ impl Internet {
 
     /// set tried time
     pub fn set_redialed(addresse: &Multiaddr) {
-        let mut reconnections = INTERNETRECONNECTIONS.get().write().unwrap();
-        reconnections.set_redialed_inner(addresse);
+        crate::QaulState::global().connections.internet.set_redialed(addresse);
     }
 
     /// redial a remote peer
@@ -465,30 +458,25 @@ impl Internet {
 
     /// add connection entry
     pub fn add_connection(address: String, peer_id: &PeerId) {
-        let mut connections = INTERNETCONNECTIONS.get().write().unwrap();
-        add_connection_impl(&mut connections, address, peer_id);
+        crate::QaulState::global().connections.internet.add_connection(address, peer_id);
     }
 
     /// peerid from multi-address uri
     pub fn peerid_from_address(address: String) -> Option<PeerId> {
-        let connections = INTERNETCONNECTIONS.get().read().unwrap();
-        peerid_from_address_impl(&connections, address)
+        crate::QaulState::global().connections.internet.peerid_from_address(address)
     }
 
     /// add reconnection
     pub fn add_reconnection(address: Multiaddr) {
-        let mut reconnections = INTERNETRECONNECTIONS.get().write().unwrap();
-        reconnections.add_reconnection_inner(address);
+        crate::QaulState::global().connections.internet.add_reconnection(address);
     }
 
     pub fn remove_reconnection(address: Multiaddr) {
-        let mut reconnections = INTERNETRECONNECTIONS.get().write().unwrap();
-        reconnections.remove_reconnection_inner(address);
+        crate::QaulState::global().connections.internet.remove_reconnection(address);
     }
 
     /// check redial
     pub fn check_reconnection() -> Option<Multiaddr> {
-        let reconnections = INTERNETRECONNECTIONS.get().read().unwrap();
-        reconnections.check_reconnection_inner()
+        crate::QaulState::global().connections.internet.check_reconnection()
     }
 }

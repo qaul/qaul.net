@@ -10,7 +10,6 @@ use libp2p::PeerId;
 use prost::Message;
 use serde::{Deserialize, Serialize};
 use sled;
-use state::InitCell;
 use std::collections::VecDeque;
 use std::sync::RwLock;
 
@@ -33,8 +32,6 @@ use qaul_messaging::QaulMessagingReceived;
 /// Import protobuf message definition
 pub use qaul_proto::qaul_net_messaging as proto;
 
-/// mutable state of messages, scheduled for sending
-pub static MESSAGING: InitCell<RwLock<Messaging>> = InitCell::new();
 
 /// Messaging Scheduling Structure
 pub struct ScheduledMessage {
@@ -46,8 +43,6 @@ pub struct ScheduledMessage {
     is_dtn: bool,
 }
 
-/// mutable state of messages, scheduled for sending
-pub static UNCONFIRMED: InitCell<RwLock<UnConfirmedMessages>> = InitCell::new();
 
 // TODO: check if it wouldn't be easier to store
 // the message
@@ -184,8 +179,9 @@ pub struct MessagingState {
     pub messaging: RwLock<Messaging>,
     /// Unconfirmed messages tracking.
     pub unconfirmed: RwLock<UnConfirmedMessages>,
-    /// Temporary sled database backing (kept alive for tree references).
-    _db: sled::Db,
+    /// Sled database backing (kept alive for tree references).
+    /// Wrapped in RwLock so `init_production` can swap it after construction.
+    _db: RwLock<sled::Db>,
 }
 
 impl MessagingState {
@@ -200,7 +196,36 @@ impl MessagingState {
             unconfirmed: RwLock::new(UnConfirmedMessages {
                 unconfirmed: unconfirmed_tree,
             }),
-            _db: db,
+            _db: RwLock::new(db),
+        }
+    }
+
+    /// Create a MessagingState backed by a production sled database.
+    pub fn from_production(db: sled::Db) -> Self {
+        let unconfirmed_tree = db.open_tree("unconfirmed").unwrap();
+        Self {
+            messaging: RwLock::new(Messaging {
+                to_send: VecDeque::new(),
+            }),
+            unconfirmed: RwLock::new(UnConfirmedMessages {
+                unconfirmed: unconfirmed_tree,
+            }),
+            _db: RwLock::new(db),
+        }
+    }
+
+    /// Re-initialize this MessagingState with a production sled database.
+    /// Replaces the temporary in-memory DB and unconfirmed tree with
+    /// production-backed ones. Called from `Messaging::init()`.
+    pub fn init_production(&self, db: sled::Db) {
+        let unconfirmed_tree = db.open_tree("unconfirmed").unwrap();
+        {
+            let mut unconfirmed = self.unconfirmed.write().unwrap();
+            unconfirmed.unconfirmed = unconfirmed_tree;
+        }
+        {
+            let mut db_lock = self._db.write().unwrap();
+            *db_lock = db;
         }
     }
 
@@ -290,7 +315,7 @@ impl MessagingState {
     }
 
     /// Mark message as scheduled (instance method).
-    fn on_scheduled_message(&self, signature: &[u8]) {
+    pub(crate) fn on_scheduled_message(&self, signature: &[u8]) {
         let mut unconfirmed = self.unconfirmed.write().unwrap();
         unconfirmed.on_scheduled_inner(signature);
     }
@@ -303,23 +328,19 @@ impl MessagingState {
 }
 
 impl Messaging {
+    /// Helper to access the global MessagingState from QaulState.
+    pub(crate) fn state() -> &'static MessagingState {
+        &crate::QaulState::global().services.messaging
+    }
+
     /// Initialize messaging and create the ring buffer.
     pub fn init() {
         #[cfg(emulate)]
         /// init emulator
         network_emul::NetworkEmulator::init();
 
-        let messaging = Messaging {
-            to_send: VecDeque::new(),
-        };
-        MESSAGING.set(RwLock::new(messaging));
-
         let db = DataBase::get_node_db();
-
-        // open trees
-        let unconfirmed: sled::Tree = db.open_tree("unconfirmed").unwrap();
-        let unconfirmed_messages = UnConfirmedMessages { unconfirmed };
-        UNCONFIRMED.set(RwLock::new(unconfirmed_messages));
+        Self::state().init_production(db);
     }
 
     /// Save a message to the data base to wait for confirmation
@@ -330,19 +351,7 @@ impl Messaging {
         container: &proto::Container,
         is_dtn: bool,
     ) {
-        let new_entry = UnConfirmedMessage {
-            receiver_id: receiver.to_bytes(),
-            container: container.encode_to_vec(),
-            last_sent: Timestamp::get_timestamp(),
-            message_type,
-            message_id: message_id.to_vec(),
-            retry: 1,
-            scheduled: false,
-            scheduled_dtn: false,
-            is_dtn,
-        };
-        let mut unconfirmed = UNCONFIRMED.get().write().unwrap();
-        unconfirmed.save_unconfirmed_inner(container.signature.clone(), new_entry);
+        Self::state().save_unconfirmed_message(message_type, message_id, receiver, container, is_dtn);
     }
 
     /// Process confirmation message
@@ -360,7 +369,7 @@ impl Messaging {
             bs58::encode(signature).into_string()
         );
 
-        let unconfirmed = UNCONFIRMED.get().write().unwrap();
+        let unconfirmed = Self::state().unconfirmed.write().unwrap();
 
         // check and remove unconfirmed from DB
         match unconfirmed.unconfirmed.remove(signature) {
@@ -439,13 +448,11 @@ impl Messaging {
     }
 
     fn on_scheduled_message(signature: &[u8]) {
-        let mut unconfirmed = UNCONFIRMED.get().write().unwrap();
-        unconfirmed.on_scheduled_inner(signature);
+        Self::state().on_scheduled_message(signature);
     }
 
     fn on_scheduled_as_dtn_message(signature: &[u8]) {
-        let mut unconfirmed = UNCONFIRMED.get().write().unwrap();
-        unconfirmed.on_scheduled_as_dtn_inner(signature);
+        Self::state().on_scheduled_as_dtn_message(signature);
     }
 
     /// pack, sign and schedule a message for sending
@@ -661,7 +668,7 @@ impl Messaging {
 
         // get scheduled messaging buffer
         {
-            let mut messaging = MESSAGING.get().write().unwrap();
+            let mut messaging = Self::state().messaging.write().unwrap();
             message_item = messaging.to_send.pop_front();
         }
 

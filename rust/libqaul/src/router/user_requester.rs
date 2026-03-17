@@ -7,15 +7,8 @@
 //! the user information is requested from the sending node.
 
 use libp2p::PeerId;
-use state::InitCell;
 use std::collections::VecDeque;
 use std::sync::RwLock;
-
-/// mutable state of user requester
-pub static USERREQUESTER: InitCell<RwLock<UserRequester>> = InitCell::new();
-
-/// mutable state of the user responser
-pub static USERRESPONSER: InitCell<RwLock<UserResponser>> = InitCell::new();
 
 /// User Request Structure
 pub struct UserRequest {
@@ -53,24 +46,10 @@ impl UserRequesterState {
 }
 
 impl UserRequester {
-    /// Initialize and create the ring buffer.
-    pub fn init() {
-        let user_requester = UserRequester {
-            to_send: VecDeque::new(),
-        };
-        USERREQUESTER.set(RwLock::new(user_requester));
-    }
-
     /// Add a message to the ring buffer for sending.
+    /// Delegates to the global RouterState instance.
     pub fn add(neighbour_id: &PeerId, user_ids: &[Vec<u8>]) {
-        let msg = UserRequest {
-            neighbour_id: neighbour_id.clone(),
-            user_ids: user_ids.to_vec(),
-        };
-
-        // add it to sending queue
-        let mut user_requester = USERREQUESTER.get().write().unwrap();
-        user_requester.to_send.push_back(msg);
+        super::RouterState::global().user_requester.add(neighbour_id, user_ids);
     }
 }
 
@@ -110,22 +89,9 @@ impl UserResponserState {
 }
 
 impl UserResponser {
-    /// Initialize and create the ring buffer.
-    pub fn init() {
-        let user_responser = UserResponser {
-            to_send: VecDeque::new(),
-        };
-        USERRESPONSER.set(RwLock::new(user_responser));
-    }
-
     /// Add a message to the ring buffer for sending.
+    /// Delegates to the global RouterState instance.
     pub fn add(neighbour_id: &PeerId, table: &super::router_net_proto::UserInfoTable) {
-        let msg = UserResponse {
-            neighbour_id: neighbour_id.clone(),
-            users: table.clone(),
-        };
-        // add it to sending queue
-        let mut user_responser = USERRESPONSER.get().write().unwrap();
-        user_responser.to_send.push_back(msg);
+        super::RouterState::global().user_responser.add(neighbour_id, table);
     }
 }

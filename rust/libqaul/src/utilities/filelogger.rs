@@ -7,9 +7,8 @@
 //! enable and disable logging to file during runtime.
 
 use crate::storage::configuration::Configuration;
-use state::InitCell;
 use std::fs::File;
-use std::sync::RwLock;
+use std::sync::{OnceLock, RwLock};
 
 extern crate log;
 
@@ -43,7 +42,7 @@ impl FileLoggerState {
 }
 
 /// mutable state of file logger configuration
-static FILELOGGERCONFIG: InitCell<RwLock<FileLoggerConfig>> = InitCell::new();
+static FILELOGGERCONFIG: OnceLock<RwLock<FileLoggerConfig>> = OnceLock::new();
 
 /// File Logger Configuration
 pub struct FileLoggerConfig {
@@ -69,13 +68,13 @@ impl FileLogger {
         let config = FileLoggerConfig {
             enable: cfg.debug.log,
         };
-        FILELOGGERCONFIG.set(RwLock::new(config));
+        let _ = FILELOGGERCONFIG.set(RwLock::new(config));
         FileLogger { logger }
     }
 
     /// Enable / disable file logger
     pub fn enable(enable: bool) {
-        let mut config = FILELOGGERCONFIG.get().write().unwrap();
+        let mut config = FILELOGGERCONFIG.get().unwrap().write().unwrap();
         config.set_enable(enable);
     }
 }
@@ -83,13 +82,13 @@ impl FileLogger {
 impl log::Log for FileLogger {
     /// Check if file logger is enabled
     fn enabled(&self, metadata: &log::Metadata) -> bool {
-        let config = FILELOGGERCONFIG.get().read().unwrap();
+        let config = FILELOGGERCONFIG.get().unwrap().read().unwrap();
         config.enable && self.logger.enabled(metadata)
     }
 
     /// log to file logger
     fn log(&self, record: &log::Record) {
-        let config = FILELOGGERCONFIG.get().read().unwrap();
+        let config = FILELOGGERCONFIG.get().unwrap().read().unwrap();
         if config.enable {
             self.logger.log(record);
         }
@@ -97,7 +96,7 @@ impl log::Log for FileLogger {
 
     /// flush logs to file
     fn flush(&self) {
-        let config = FILELOGGERCONFIG.get().read().unwrap();
+        let config = FILELOGGERCONFIG.get().unwrap().read().unwrap();
         if config.enable {
             self.logger.flush();
         }

@@ -5,19 +5,23 @@
 //!
 //! Library for qaul
 
-use crate::rpc::authentication::Authentication;
 use crossbeam_channel::Receiver;
 use filetime::FileTime;
 use futures::prelude::*;
 use futures::{future::FutureExt, pin_mut, select};
 use futures_ticker::Ticker;
-use state::InitCell;
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::OnceLock;
 use std::time::Duration;
+
+use crate::rpc::authentication::AuthenticationState;
+use crate::rpc::sys::SysRpcState;
+use crate::rpc::RpcState;
+use crate::utilities::filelogger::FileLoggerState;
 
 // crate modules
 pub mod api;
@@ -31,24 +35,141 @@ pub mod utilities;
 
 use connections::{ble::Ble, internet::Internet, ConnectionModule, Connections, ConnectionsModule};
 use node::{Node, NodeModule};
-use router::{
-    feed_requester, flooder, info::RouterInfo, neighbours::Neighbours, user_requester, Router,
-    RouterModule,
-};
+use router::{info::RouterInfo, Router, RouterModule};
 use rpc::sys::Sys;
 use rpc::{Rpc, RpcModule};
 use services::messaging::Messaging;
-use services::{Services, ServicesModule};
+use services::ServicesModule;
 use storage::StorageModule;
 use utilities::filelogger::FileLogger;
 use utilities::timestamp::Timestamp;
 use utilities::upgrade;
 
 /// check this when the library finished initializing
-static INITIALIZED: InitCell<bool> = InitCell::new();
+static INITIALIZED: OnceLock<bool> = OnceLock::new();
 
 /// default configs
-static DEFCONFIGS: InitCell<BTreeMap<String, String>> = InitCell::new();
+static DEFCONFIGS: OnceLock<BTreeMap<String, String>> = OnceLock::new();
+
+/// Global QaulState instance.
+/// Set once during `Libqaul::new()` (bootstrap phase).
+/// Fields behind RwLock (router, node, config, database, storage_path)
+/// are populated later by Storage::init(), Node::init(), Router::init().
+static GLOBAL_QAUL_STATE: OnceLock<Arc<QaulState>> = OnceLock::new();
+
+/// Top-level state container that owns all instance-based state.
+///
+/// `Libqaul` owns this via `Arc<QaulState>`. All event-loop handlers
+/// and RPC dispatch functions receive `&QaulState` instead of reaching
+/// into global statics.
+pub struct QaulState {
+    /// Router state (routing tables, neighbours, flooder, scheduler, etc.)
+    /// Wrapped in RwLock because QaulState is created before Router::init()
+    /// populates the real state.
+    pub router: std::sync::RwLock<Arc<router::RouterState>>,
+    /// Services state (messaging, feed, chat, crypto, groups, dtn)
+    pub services: services::ServicesState,
+    /// User accounts state
+    pub user_accounts: node::user_accounts::UserAccountsState,
+    /// Authentication state (challenge-response sessions)
+    pub auth: AuthenticationState,
+    /// RPC channel state (external ↔ libqaul channels)
+    pub rpc: RpcState,
+    /// SYS RPC channel state (external ↔ libqaul SYS channels)
+    pub sys: SysRpcState,
+    /// Connection states (Internet reconnections, BLE)
+    pub connections: connections::ConnectionsState,
+    /// Node identity (PeerId, Keypair, topic)
+    /// Wrapped in RwLock because QaulState is created before Node::init()
+    /// loads the real identity from config.
+    pub node: std::sync::RwLock<Arc<node::NodeIdentity>>,
+    /// Configuration state
+    pub config: storage::configuration::ConfigurationState,
+    /// Database state
+    pub database: storage::database::DatabaseState,
+    /// Storage path (set during Storage::init)
+    pub storage_path: std::sync::RwLock<String>,
+    /// File logger state
+    pub filelogger: FileLoggerState,
+}
+
+impl QaulState {
+    /// Get a reference to the global QaulState instance.
+    /// Panics if the global state has not been initialized.
+    pub fn global() -> &'static Arc<QaulState> {
+        GLOBAL_QAUL_STATE.get().expect("QaulState not initialized")
+    }
+
+    /// Initialize the global QaulState. Called once during `Libqaul::new()`.
+    fn init_global(state: Arc<QaulState>) {
+        let _ = GLOBAL_QAUL_STATE.set(state);
+    }
+
+    /// Replace the router state with the real one after initialization.
+    pub fn replace_router(&self, router_state: Arc<router::RouterState>) {
+        *self.router.write().unwrap() = router_state;
+    }
+
+    /// Replace the node identity with the real one after initialization.
+    pub fn replace_node(&self, node_identity: Arc<node::NodeIdentity>) {
+        *self.node.write().unwrap() = node_identity;
+    }
+
+    /// Get a snapshot of the current router state.
+    pub fn get_router(&self) -> Arc<router::RouterState> {
+        self.router.read().unwrap().clone()
+    }
+
+    /// Get a snapshot of the current node identity.
+    pub fn get_node(&self) -> Arc<node::NodeIdentity> {
+        self.node.read().unwrap().clone()
+    }
+
+    /// Create a `QaulState` suitable for simulation / testing.
+    /// Uses temporary in-memory databases and default configuration.
+    pub fn new_for_simulation() -> Self {
+        let config = storage::configuration::Configuration::default();
+        Self {
+            router: std::sync::RwLock::new(Arc::new(router::RouterState::new(config.routing.clone()))),
+            services: services::ServicesState::new(),
+            user_accounts: node::user_accounts::UserAccountsState::new(),
+            auth: AuthenticationState::new(),
+            rpc: RpcState::new(),
+            sys: SysRpcState::new(),
+            connections: connections::ConnectionsState::new(),
+            node: std::sync::RwLock::new(Arc::new(node::NodeIdentity::generate())),
+            config: storage::configuration::ConfigurationState::from_config(config),
+            database: storage::database::DatabaseState::new_temporary(),
+            storage_path: std::sync::RwLock::new(String::new()),
+            filelogger: FileLoggerState::new(),
+        }
+    }
+
+    /// Create a `QaulState` with defaults suitable for production.
+    ///
+    /// Configuration and database fields start with defaults and are
+    /// populated later by `Storage::init()` which writes into `QaulState::global()`.
+    pub fn new_production(
+        node_identity: Arc<node::NodeIdentity>,
+        user_accounts: node::user_accounts::UserAccountsState,
+        router_state: Arc<router::RouterState>,
+    ) -> Self {
+        Self {
+            router: std::sync::RwLock::new(router_state),
+            services: services::ServicesState::new(),
+            user_accounts,
+            auth: AuthenticationState::new(),
+            rpc: RpcState::new(),
+            sys: SysRpcState::new(),
+            connections: connections::ConnectionsState::new(),
+            node: std::sync::RwLock::new(node_identity),
+            config: storage::configuration::ConfigurationState::new(),
+            database: storage::database::DatabaseState::new_temporary(),
+            storage_path: std::sync::RwLock::new(String::new()),
+            filelogger: FileLoggerState::new(),
+        }
+    }
+}
 
 /// Libqaul - Main library instance
 ///
@@ -62,6 +183,10 @@ static DEFCONFIGS: InitCell<BTreeMap<String, String>> = InitCell::new();
 /// libqaul.run().await;
 /// ```
 pub struct Libqaul {
+    /// Unified instance-based state (owns all sub-states).
+    /// Event-loop handlers and RPC dispatch use this instead of globals.
+    pub state: Arc<QaulState>,
+
     /// Storage module (configuration and database)
     pub storage: Arc<StorageModule>,
 
@@ -119,17 +244,30 @@ impl Libqaul {
 
         // check configuration options
         if let Some(def_cfg) = def_config {
-            DEFCONFIGS.set(def_cfg.clone());
+            let _ = DEFCONFIGS.set(def_cfg.clone());
         } else {
-            DEFCONFIGS.set(BTreeMap::new());
+            let _ = DEFCONFIGS.set(BTreeMap::new());
         }
 
-        // initialize rpc system
-        let rpc_receiver = Rpc::init();
-        let sys_receiver = Sys::init();
+        // Bootstrap QaulState early with defaults so that Storage::init(),
+        // Configuration::init(), and DataBase::init() can write into it.
+        let qaul_state = {
+            // Create a temporary NodeIdentity; will be replaced after config is loaded.
+            let temp_node = Arc::new(node::NodeIdentity::generate());
+            let temp_router = Arc::new(router::RouterState::new(
+                storage::configuration::RoutingOptions::default(),
+            ));
+            Arc::new(QaulState::new_production(
+                temp_node,
+                node::user_accounts::UserAccountsState::new(),
+                temp_router,
+            ))
+        };
+        QaulState::init_global(Arc::clone(&qaul_state));
 
-        // initialize storage module (instance-based)
-        // This also sets up global state for backward compatibility
+        // Initialize storage module.
+        // Storage::init() now writes storage_path, config, and database
+        // into QaulState::global().
         let storage = Arc::new(StorageModule::new(storage_path.clone()));
 
         // Initialize logger
@@ -143,17 +281,35 @@ impl Libqaul {
             Arc::new(NodeModule::new(&config))
         };
 
-        // Also initialize global state for backward compatibility
-        Node::init();
-
         // initialize router module (instance-based)
         let router = {
             let config = storage.config.read().unwrap();
             Arc::new(RouterModule::new(&config))
         };
 
-        // Also initialize global state for backward compatibility
+        // Also initialize global router state for backward compatibility
         Router::init();
+
+        // Now update QaulState with the real node identity, user accounts,
+        // and router state (config/database are already populated by Storage::init).
+        {
+            let config = storage::configuration::Configuration::get();
+            let user_accounts = node::user_accounts::UserAccounts::create_from_config(&config);
+            *qaul_state.user_accounts.inner.write().unwrap() = user_accounts;
+
+            let router_state = Arc::clone(router::RouterState::global());
+            qaul_state.replace_router(router_state);
+            qaul_state.replace_node(Arc::clone(&node.node));
+            qaul_state.filelogger.enable(config.debug.log);
+        }
+
+        // Initialize node global state for backward compatibility.
+        // This now delegates to QaulState::global().node and saves config if needed.
+        Node::init();
+
+        // Use the QaulState's channel receivers
+        let rpc_receiver = qaul_state.rpc.libqaul_receive.clone();
+        let sys_receiver = qaul_state.sys.libqaul_receive.clone();
 
         // initialize services module (instance-based)
         let services = Arc::new(std::sync::RwLock::new(ServicesModule::new()));
@@ -178,6 +334,7 @@ impl Libqaul {
         }
 
         let instance = Arc::new(Self {
+            state: qaul_state,
             storage,
             node,
             router,
@@ -369,7 +526,7 @@ impl Libqaul {
 
         // Mark as initialized
         self.initialized.store(true, Ordering::SeqCst);
-        INITIALIZED.set(true);
+        let _ = INITIALIZED.set(true);
 
         log::trace!("initializing finished, start event loop");
 
@@ -412,6 +569,8 @@ impl Libqaul {
         messaging_ticker: &mut Ticker,
         retransmit_ticker: &mut Ticker,
     ) {
+        // Take a snapshot of the router state once; it doesn't change after init.
+        let router = self.state.get_router();
         loop {
             let evt = {
                 let lan_fut = lan.swarm.next().fuse();
@@ -454,7 +613,7 @@ impl Libqaul {
                             }
                             libp2p::swarm::SwarmEvent::ConnectionClosed{peer_id, ..} => {
                                 log::trace!("lan connection closed: {:?}", peer_id);
-                                Neighbours::delete(ConnectionModule::Lan, peer_id);
+                                router.neighbours.delete(ConnectionModule::Lan, peer_id);
                             },
                             libp2p::swarm::SwarmEvent::Behaviour(behaviour) => {
                                 lan.swarm.behaviour_mut().process_events(behaviour);
@@ -470,7 +629,7 @@ impl Libqaul {
                                     libp2p::swarm::DialError::Transport(unreachable_addrs) => {
                                         for (addr, _) in unreachable_addrs {
                                             if Internet::is_active_connection(&addr){
-                                                Internet::add_reconnection(addr);
+                                                self.state.connections.internet.add_reconnection(addr);
                                             }
                                         }
                                     },
@@ -483,20 +642,20 @@ impl Libqaul {
                                 match endpoint{
                                     libp2p::core::ConnectedPoint::Dialer{address, ..} =>{
                                         log::info!("connection established! peer={}, endpoint={}", peer_id.to_base58(), address.to_string());
-                                        Internet::remove_reconnection(address.clone());
-                                        Internet::add_connection(address.to_string(), &peer_id);
+                                        self.state.connections.internet.remove_reconnection(address.clone());
+                                        self.state.connections.internet.add_connection(address.to_string(), &peer_id);
                                     }
                                     _ => {}
                                 }
                             }
                             libp2p::swarm::SwarmEvent::ConnectionClosed{peer_id, endpoint, ..} => {
                                 log::trace!("internet connection closed: {:?}", peer_id);
-                                Neighbours::delete(ConnectionModule::Internet, peer_id);
+                                router.neighbours.delete(ConnectionModule::Internet, peer_id);
 
                                 match endpoint {
                                     libp2p::core::ConnectedPoint::Dialer{address, ..} =>{
                                         if Internet::is_active_connection(&address){
-                                            Internet::add_reconnection(address);
+                                            self.state.connections.internet.add_reconnection(address);
                                         }
                                     }
                                     _ => {}
@@ -530,13 +689,18 @@ impl Libqaul {
         }
     }
 
-    /// Handle a single event from the event loop
+    /// Handle a single event from the event loop.
+    ///
+    /// Uses `self.state.*` instance methods instead of global statics where possible.
+    /// Some handlers still delegate to global static methods when the underlying
+    /// module has deep cross-cutting global dependencies (e.g., `RouterInfo::create()`).
     async fn handle_event(
         &self,
         event: EventType,
         lan: &mut connections::lan::Lan,
         internet: &mut connections::internet::Internet,
     ) {
+        let router = self.state.get_router();
         match event {
             EventType::Rpc => {
                 if let Ok(rpc_message) = self.rpc_receiver.try_recv() {
@@ -549,7 +713,7 @@ impl Libqaul {
                 }
             }
             EventType::Flooding => {
-                let mut flooder = flooder::FLOODER.get().write().unwrap();
+                let mut flooder = router.flooder.inner.write().unwrap();
                 while let Some(msg) = flooder.to_send.pop_front() {
                     if !matches!(msg.incoming_via, ConnectionModule::Lan) {
                         lan.swarm
@@ -570,9 +734,11 @@ impl Libqaul {
                 }
             }
             EventType::FeedRequest => {
-                let mut feed_requester = feed_requester::FEEDREQUESTER.get().write().unwrap();
+                let mut feed_requester =
+                    router.feed_requester.inner.write().unwrap();
                 while let Some(request) = feed_requester.to_send.pop_front() {
-                    let connection_module = Neighbours::is_neighbour(&request.neighbour_id);
+                    let connection_module =
+                        router.neighbours.is_neighbour(&request.neighbour_id);
                     if connection_module == ConnectionModule::None {
                         log::error!(
                             "sending feed requests, node is not a neighbour anymore: {:?}",
@@ -591,9 +757,11 @@ impl Libqaul {
                 }
             }
             EventType::FeedResponse => {
-                let mut feed_responser = feed_requester::FEEDRESPONSER.get().write().unwrap();
+                let mut feed_responser =
+                    router.feed_responser.inner.write().unwrap();
                 while let Some(request) = feed_responser.to_send.pop_front() {
-                    let connection_module = Neighbours::is_neighbour(&request.neighbour_id);
+                    let connection_module =
+                        router.neighbours.is_neighbour(&request.neighbour_id);
                     if connection_module == ConnectionModule::None {
                         log::error!(
                             "sending feed requests, node is not a neighbour anymore: {:?}",
@@ -612,9 +780,11 @@ impl Libqaul {
                 }
             }
             EventType::UserRequest => {
-                let mut user_requester = user_requester::USERREQUESTER.get().write().unwrap();
+                let mut user_requester =
+                    router.user_requester.inner.write().unwrap();
                 while let Some(request) = user_requester.to_send.pop_front() {
-                    let connection_module = Neighbours::is_neighbour(&request.neighbour_id);
+                    let connection_module =
+                        router.neighbours.is_neighbour(&request.neighbour_id);
                     if connection_module == ConnectionModule::None {
                         log::error!(
                             "sending feed requests, node is not a neighbour anymore: {:?}",
@@ -633,9 +803,11 @@ impl Libqaul {
                 }
             }
             EventType::UserResponse => {
-                let mut user_responser = user_requester::USERRESPONSER.get().write().unwrap();
+                let mut user_responser =
+                    router.user_responser.inner.write().unwrap();
                 while let Some(request) = user_responser.to_send.pop_front() {
-                    let connection_module = Neighbours::is_neighbour(&request.neighbour_id);
+                    let connection_module =
+                        router.neighbours.is_neighbour(&request.neighbour_id);
                     if connection_module == ConnectionModule::None {
                         log::error!(
                             "sending feed requests, node is not a neighbour anymore: {:?}",
@@ -654,6 +826,9 @@ impl Libqaul {
                 }
             }
             EventType::RoutingInfo => {
+                // RouterInfo::check_scheduler() has deep cross-cutting global dependencies
+                // (Node::get_id, RoutingTable::create_routing_info, etc.)
+                // Keep as global for now; will migrate in Phase 3/4.
                 if let Some((neighbour_id, connection_module, data)) = RouterInfo::check_scheduler()
                 {
                     log::trace!(
@@ -666,17 +841,23 @@ impl Libqaul {
                 }
             }
             EventType::ReConnecting => {
-                if let Some(addr) = Internet::check_reconnection() {
+                if let Some(addr) = self.state.connections.internet.check_reconnection() {
                     log::trace!("redial....: {:?}", addr);
                     Internet::peer_redial(&addr, &mut internet.swarm).await;
-                    Internet::set_redialed(&addr);
+                    self.state.connections.internet.set_redialed(&addr);
                 }
             }
             EventType::RoutingTable => {
-                router::connections::ConnectionTable::create_routing_table();
+                router
+                    .connections
+                    .create_routing_table(&router.configuration);
             }
             EventType::Messaging => {
-                if let Some((neighbour_id, connection_module, data)) = Messaging::check_scheduler()
+                if let Some((neighbour_id, connection_module, data)) =
+                    self.state
+                        .services
+                        .messaging
+                        .check_scheduler(&router.routing_table)
                 {
                     log::trace!(
                         "sending messaging message via {:?} to {}",
@@ -712,6 +893,9 @@ impl Libqaul {
                 }
             }
             EventType::Retransmit => {
+                // MessagingRetransmit::process() uses Messaging::state() for
+                // unconfirmed messages, RoutingTable::get_online_users, and
+                // Messaging::schedule_message — all routed through QaulState.
                 services::messaging::retransmit::MessagingRetransmit::process();
             }
         }
@@ -774,11 +958,8 @@ use android_logger::Config;
 
 /// Get default config values
 pub fn get_default_config(pattern: &str) -> Option<String> {
-    let def_config = DEFCONFIGS.get();
-    if let Some(v) = def_config.get(&pattern.to_string()) {
-        return Some(v.clone());
-    }
-    None
+    let def_config = DEFCONFIGS.get()?;
+    def_config.get(&pattern.to_string()).cloned()
 }
 
 /// Event Types of the async loop
@@ -797,635 +978,10 @@ enum EventType {
     Retransmit,
 }
 
-/// initialize and start libqaul with a optional custom configuration options
-/// and poll all the necessary modules
-///
-/// Input Values:
-///
-/// * Provide a path where libqaul can save all data.
-/// * Optionally you can provide the following configuration values:
-///   * listening port of the Internet connection module (default = randomly assigned)
+/// Legacy entry point — removed in favor of `Libqaul::new()` + `Libqaul::run()`.
+/// Use `start_instance()` or `api::start_instance_in_thread()` instead.
+#[deprecated(since = "2.0.0", note = "Use start_instance() instead")]
 pub async fn start(storage_path: String, def_config: Option<BTreeMap<String, String>>) -> () {
-    // print storage path
-    println!("storage path: {}", storage_path);
-
-    // check if we need to upgrade our stored data
-    if upgrade::Upgrade::init(storage_path.clone()) == false {
-        println!("upgrade to new version failed");
-        // restart node
-        std::process::exit(0);
-    }
-
-    // check configuration options
-    if let Some(def_cfg) = def_config {
-        DEFCONFIGS.set(def_cfg.clone());
-    } else {
-        DEFCONFIGS.set(BTreeMap::new());
-    }
-
-    // initialize rpc system
-    let libqaul_rpc_receive = Rpc::init();
-    let libqaul_sys_receive = Sys::init();
-
-    // initialize storage module.
-    // This will initialize configuration & data base
-    storage::Storage::init(storage_path.clone());
-
-    // --- initialize logger ---
-    // prepare logger path
-    // the path of the log file follows the following naming convention:
-    // error_234324232.log
-    let path = Path::new(&storage_path);
-    let log_path = path.join("logs");
-
-    // create log directory if missing
-    std::fs::create_dir_all(&log_path).unwrap();
-
-    // create log file name
-    let log_file_name: String =
-        "error_".to_string() + Timestamp::get_timestamp().to_string().as_str() + ".log";
-    let log_file_path = log_path.join(log_file_name);
-
-    // maintain log files
-    let paths = std::fs::read_dir(log_path).unwrap();
-    // --- logger init-end ---
-
-    let mut logfiles: BTreeMap<i64, String> = BTreeMap::new();
-    let mut logfile_times: Vec<i64> = vec![];
-    for path in paths {
-        let filename = String::from(path.as_ref().unwrap().path().to_str().unwrap());
-        let metadata = std::fs::metadata(filename.clone()).unwrap();
-        //print!("path={}", path.unwrap().path().display());
-        let mtime = FileTime::from_last_modification_time(&metadata);
-        //println!("{}", mtime.seconds());
-        logfile_times.push(mtime.seconds());
-        logfiles.insert(mtime.seconds(), filename);
-    }
-    logfile_times.sort();
-
-    if logfile_times.len() > 2 {
-        for i in 0..(logfile_times.len() - 2) {
-            if let Some(filename) = logfiles.get(&logfile_times[i]) {
-                std::fs::remove_file(std::path::Path::new(filename)).unwrap();
-            }
-        }
-    }
-
-    // logging on android with android logger
-    #[cfg(target_os = "android")]
-    {
-        let env_logger = Box::new(android_logger::AndroidLogger::new(
-            Config::default().with_max_level(log::LevelFilter::Info),
-        ));
-        let w_logger = FileLogger::new(*simplelog::WriteLogger::new(
-            simplelog::LevelFilter::Error,
-            simplelog::Config::default(),
-            File::create(log_file_path).unwrap(),
-        ));
-        multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info)
-            .unwrap();
-    }
-
-    // logging on ios
-    #[cfg(target_os = "ios")]
-    {
-        let env_logger = Box::new(
-            pretty_env_logger::formatted_builder()
-                .filter(None, log::LevelFilter::Info)
-                .build(),
-        );
-        let w_logger = FileLogger::new(*simplelog::WriteLogger::new(
-            simplelog::LevelFilter::Error,
-            simplelog::Config::default(),
-            File::create(log_file_path).unwrap(),
-        ));
-        multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info)
-            .unwrap();
-    }
-
-    // only use the simple logger on desktop systems
-    #[cfg(not(any(target_os = "android", target_os = "ios")))]
-    {
-        // find rust env var
-        let mut env_log_level = String::from("error");
-        for (key, value) in std::env::vars() {
-            if key == "RUST_LOG" {
-                env_log_level = value;
-                break;
-            }
-        }
-
-        // define log level
-        let mut level_filter = log::LevelFilter::Error;
-        if env_log_level == "warn" {
-            level_filter = log::LevelFilter::Warn;
-        } else if env_log_level == "debug" {
-            level_filter = log::LevelFilter::Debug;
-        } else if env_log_level == "info" {
-            level_filter = log::LevelFilter::Info;
-        } else if env_log_level == "trace" {
-            level_filter = log::LevelFilter::Trace;
-        }
-
-        let env_logger = Box::new(
-            pretty_env_logger::formatted_builder()
-                .filter(None, level_filter)
-                .build(),
-        );
-        let w_logger = FileLogger::new(*simplelog::WriteLogger::new(
-            simplelog::LevelFilter::Error,
-            simplelog::Config::default(),
-            File::create(log_file_path).unwrap(),
-        ));
-        multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info)
-            .unwrap();
-    }
-
-    log::trace!("test log to ensure that logging is working");
-
-    // initialize node & user accounts
-    Node::init();
-
-    // initialize router
-    Router::init();
-
-    Authentication::init();
-
-    // initialize Connection Modules
-    let conn = Connections::init().await;
-    let mut internet = conn.internet.unwrap();
-    let mut lan = conn.lan.unwrap();
-
-    // initialize services
-    Services::init();
-
-    // check RPC once every 10 milliseconds
-    // TODO: interval is only in unstable. Use it once it is stable.
-    //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html
-    //let mut rpc_interval = async_std::stream::interval(Duration::from_millis(10));
-    let mut rpc_ticker = Ticker::new(Duration::from_millis(10));
-
-    // check SYS once every 10 milliseconds
-    // TODO: interval is only in unstable. Use it once it is stable.
-    //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html
-    //let mut rpc_interval = async_std::stream::interval(Duration::from_millis(10));
-    let mut sys_ticker = Ticker::new(Duration::from_millis(10));
-
-    // check flooding message queue periodically
-    let mut flooding_ticker = Ticker::new(Duration::from_millis(100));
-
-    // check feed request to neighbour
-    let mut feedreq_ticker = Ticker::new(Duration::from_millis(100));
-
-    // check feed request to neighbour
-    let mut feedresp_ticker = Ticker::new(Duration::from_millis(100));
-
-    // check user request to neighbour
-    let mut userreq_ticker = Ticker::new(Duration::from_millis(100));
-
-    // check user request to neighbour
-    let mut userresp_ticker = Ticker::new(Duration::from_millis(100));
-
-    // send routing info periodically to neighbours
-    let mut routing_info_ticker = Ticker::new(Duration::from_millis(100));
-
-    // try to connect to intertnet neighbour if there is no connection in internet
-    let mut connection_ticker = Ticker::new(Duration::from_millis(1000));
-
-    // re-create routing table periodically
-    let mut routing_table_ticker = Ticker::new(Duration::from_millis(1000));
-
-    // manage the message sending
-    let mut messaging_ticker = Ticker::new(Duration::from_millis(10));
-
-    // manage the message retransmit
-    let mut retransmit_ticker = Ticker::new(Duration::from_millis(1000));
-
-    // set initialized flag
-    INITIALIZED.set(true);
-
-    log::trace!("initializing finished, start event loop");
-
-    loop {
-        let evt = {
-            let lan_fut = lan.swarm.next().fuse();
-            let internet_fut = internet.swarm.next().fuse();
-            let rpc_fut = rpc_ticker.next().fuse();
-            let sys_fut = sys_ticker.next().fuse();
-            let flooding_fut = flooding_ticker.next().fuse();
-            let feedreq_fut = feedreq_ticker.next().fuse();
-            let feedresp_fut = feedresp_ticker.next().fuse();
-            let userreq_fut = userreq_ticker.next().fuse();
-            let userresp_fut = userresp_ticker.next().fuse();
-            let routing_info_fut = routing_info_ticker.next().fuse();
-            let connection_fut = connection_ticker.next().fuse();
-            let routing_table_fut = routing_table_ticker.next().fuse();
-            let messaging_fut = messaging_ticker.next().fuse();
-            let retransmit_fut = retransmit_ticker.next().fuse();
-
-            // This Macro is shown wrong by Rust-Language-Server > 0.2.400
-            // You need to downgrade to version 0.2.400 if this happens to you
-            pin_mut!(
-                lan_fut,
-                internet_fut,
-                rpc_fut,
-                sys_fut,
-                flooding_fut,
-                feedreq_fut,
-                feedresp_fut,
-                userreq_fut,
-                userresp_fut,
-                routing_info_fut,
-                connection_fut,
-                routing_table_fut,
-                messaging_fut,
-                retransmit_fut,
-            );
-
-            select! {
-                lan_event = lan_fut => {
-                    //log::trace!("Unhandled lan connection module event: {:?}", lan_event);
-                    match lan_event.unwrap() {
-                        libp2p::swarm::SwarmEvent::ConnectionEstablished{peer_id,  ..} => {
-                            log::trace!("lan connection established: {:?}", peer_id);
-                        }
-                        libp2p::swarm::SwarmEvent::ConnectionClosed{peer_id, ..} => {
-                            //remove from neighbour table, after then scheduler will auto remove this neighbour
-                            log::trace!("lan connection closed: {:?}", peer_id);
-                            Neighbours::delete(ConnectionModule::Lan, peer_id);
-                        },
-                        // libp2p::swarm::SwarmEvent::BannedPeer {peer_id, ..} => {
-                        //     //remove from neighbour table, after then scheduler will auto remove this neighbour
-                        //     log::trace!("lan connection banned: {:?}", peer_id);
-                        //     Neighbours::delete(ConnectionModule::Lan, peer_id);
-                        // },
-                        libp2p::swarm::SwarmEvent::Behaviour(behaviour) => {
-                            lan.swarm.behaviour_mut().process_events(behaviour);
-                        }
-                        _ => {}
-                    }
-                    None
-                },
-                internet_event = internet_fut => {
-                    //log::trace!("Unhandled internet connection module event: {:?}", internet_event);
-                    match internet_event.unwrap() {
-                        libp2p::swarm::SwarmEvent::OutgoingConnectionError{error, ..} => {
-                            // Get list of addresses which we failed to connect to
-                            // Since `UnknownPeerUnreachableAddr` error was removed, we need to parse
-                            // list of outgoing connection errors to get list of addresses
-                            match error {
-                                libp2p::swarm::DialError::Transport(unreachable_addrs) => {
-                                    for (addr, _) in unreachable_addrs {
-
-                                        // check if address is active
-                                        if Internet::is_active_connection(&addr){
-                                            Internet::add_reconnection(addr);
-                                        }
-
-                                    }
-                                },
-                                _ => {
-                                    log::trace!("INTERNET Outgoing Connection Error");
-                                }
-                            }
-                        }
-                        libp2p::swarm::SwarmEvent::ConnectionEstablished{peer_id, endpoint, ..} => {
-                            // remove from attempting connections
-                            match endpoint{
-                                libp2p::core::ConnectedPoint::Dialer{address, ..} =>{
-                                    log::info!("connection established! peer={}, endpoint={}", peer_id.to_base58(), address.to_string());
-                                    Internet::remove_reconnection(address.clone());
-                                    Internet::add_connection(address.to_string(), &peer_id);
-                                }
-                                _ => {}
-                            }
-                        }
-                        libp2p::swarm::SwarmEvent::ConnectionClosed{peer_id, endpoint, ..} => {
-                            // remove from neighbour table, after then scheduler will auto remove this neighbour
-                            log::trace!("internet connection closed: {:?}", peer_id);
-                            Neighbours::delete(ConnectionModule::Internet, peer_id);
-
-                            // add new reconnection
-                            match endpoint {
-                                libp2p::core::ConnectedPoint::Dialer{address, ..} =>{
-                                    //check if address is active
-                                    if Internet::is_active_connection(&address){
-                                        Internet::add_reconnection(address);
-                                    }
-                                }
-                                _ => {}
-                            }
-                        }
-                        // libp2p::swarm::SwarmEvent::BannedPeer {peer_id, ..} => {
-                        //     // remove from neighbour table, after then scheduler will auto remove this neighbour
-                        //     log::trace!("internet connection banned: {:?}", peer_id);
-                        //     Neighbours::delete(ConnectionModule::Internet, peer_id);
-                        // }
-                        libp2p::swarm::SwarmEvent::Behaviour(behaviour) => {
-                            internet.swarm.behaviour_mut().process_events(behaviour);
-                        }
-                        _ => {}
-                    }
-                    None
-                },
-                _rpc_event = rpc_fut => Some(EventType::Rpc),
-                _sys_event = sys_fut => Some(EventType::Sys),
-                _flooding_event = flooding_fut => Some(EventType::Flooding),
-                _feedreq_event = feedreq_fut => Some(EventType::FeedRequest),
-                _feedresp_event = feedresp_fut => Some(EventType::FeedResponse),
-                _userreq_event = userreq_fut => Some(EventType::UserRequest),
-                _userresp_event = userresp_fut => Some(EventType::UserResponse),
-                _routing_info_event = routing_info_fut => Some(EventType::RoutingInfo),
-                _connection_event = connection_fut => Some(EventType::ReConnecting),
-                _routing_table_event = routing_table_fut => Some(EventType::RoutingTable),
-                _messaging_event = messaging_fut => Some(EventType::Messaging),
-                _retransmit_event = retransmit_fut => Some(EventType::Retransmit),
-            }
-        };
-
-        if let Some(event) = evt {
-            match event {
-                EventType::Rpc => {
-                    if let Ok(rpc_message) = libqaul_rpc_receive.try_recv() {
-                        // we received a message, send it to RPC
-                        Rpc::process_received_message(
-                            rpc_message,
-                            Some(&mut lan),
-                            Some(&mut internet),
-                        )
-                        .await;
-                    }
-                }
-                EventType::Sys => {
-                    if let Ok(sys_message) = libqaul_sys_receive.try_recv() {
-                        // we received a message, send it to SYS
-                        Sys::process_received_message(
-                            sys_message,
-                            Some(&mut lan),
-                            Some(&mut internet),
-                        );
-                    }
-                }
-                EventType::Flooding => {
-                    // send messages in the flooding queue
-                    // get sending queue
-                    let mut flooder = flooder::FLOODER.get().write().unwrap();
-
-                    // loop over messages to send & flood them
-                    while let Some(msg) = flooder.to_send.pop_front() {
-                        // check which swarm to send to
-                        if !matches!(msg.incoming_via, ConnectionModule::Lan) {
-                            lan.swarm
-                                .behaviour_mut()
-                                .floodsub
-                                .publish(msg.topic.clone(), msg.message.clone());
-                        }
-                        if !matches!(msg.incoming_via, ConnectionModule::Internet) {
-                            internet
-                                .swarm
-                                .behaviour_mut()
-                                .floodsub
-                                .publish(msg.topic.clone(), msg.message.clone());
-                        }
-                        if !matches!(msg.incoming_via, ConnectionModule::Ble) {
-                            Ble::send_feed_message(msg.topic, msg.message);
-                        }
-                    }
-                }
-                EventType::FeedRequest => {
-                    // get sending queue
-                    let mut feed_requester = feed_requester::FEEDREQUESTER.get().write().unwrap();
-
-                    // loop over messages to send & flood them
-                    while let Some(request) = feed_requester.to_send.pop_front() {
-                        let connection_module = Neighbours::is_neighbour(&request.neighbour_id);
-                        if connection_module == ConnectionModule::None {
-                            log::error!(
-                                "sending feed requests, node is not a neighbour anymore: {:?}",
-                                request.neighbour_id
-                            );
-                            continue;
-                        }
-
-                        let data = RouterInfo::create_feed_request(&request.feed_ids);
-                        match connection_module {
-                            ConnectionModule::Lan => lan
-                                .swarm
-                                .behaviour_mut()
-                                .qaul_info
-                                .send_qaul_info_message(request.neighbour_id, data),
-                            ConnectionModule::Internet => internet
-                                .swarm
-                                .behaviour_mut()
-                                .qaul_info
-                                .send_qaul_info_message(request.neighbour_id, data),
-                            ConnectionModule::Ble => {
-                                Ble::send_routing_info(request.neighbour_id, data);
-                            }
-                            ConnectionModule::Local => {}
-                            ConnectionModule::None => {}
-                        }
-                    }
-                }
-                EventType::FeedResponse => {
-                    // get sending queue
-                    let mut feed_responser = feed_requester::FEEDRESPONSER.get().write().unwrap();
-
-                    // loop over messages to send & flood them
-                    while let Some(request) = feed_responser.to_send.pop_front() {
-                        let connection_module = Neighbours::is_neighbour(&request.neighbour_id);
-                        if connection_module == ConnectionModule::None {
-                            log::error!(
-                                "sending feed requests, node is not a neighbour anymore: {:?}",
-                                request.neighbour_id
-                            );
-                            continue;
-                        }
-
-                        let data = RouterInfo::create_feed_response(&request.feeds);
-                        match connection_module {
-                            ConnectionModule::Lan => lan
-                                .swarm
-                                .behaviour_mut()
-                                .qaul_info
-                                .send_qaul_info_message(request.neighbour_id, data),
-                            ConnectionModule::Internet => internet
-                                .swarm
-                                .behaviour_mut()
-                                .qaul_info
-                                .send_qaul_info_message(request.neighbour_id, data),
-                            ConnectionModule::Ble => {
-                                Ble::send_routing_info(request.neighbour_id, data);
-                            }
-                            ConnectionModule::Local => {}
-                            ConnectionModule::None => {}
-                        }
-                    }
-                }
-                EventType::UserRequest => {
-                    // send messages in the flooding queue
-                    // get sending queue
-                    let mut user_requester = user_requester::USERREQUESTER.get().write().unwrap();
-
-                    // loop over messages to send & flood them
-                    while let Some(request) = user_requester.to_send.pop_front() {
-                        let connection_module = Neighbours::is_neighbour(&request.neighbour_id);
-                        if connection_module == ConnectionModule::None {
-                            log::error!(
-                                "sending feed requests, node is not a neighbour anymore: {:?}",
-                                request.neighbour_id
-                            );
-                            continue;
-                        }
-
-                        let data = RouterInfo::create_user_request(&request.user_ids);
-                        match connection_module {
-                            ConnectionModule::Lan => lan
-                                .swarm
-                                .behaviour_mut()
-                                .qaul_info
-                                .send_qaul_info_message(request.neighbour_id, data),
-                            ConnectionModule::Internet => internet
-                                .swarm
-                                .behaviour_mut()
-                                .qaul_info
-                                .send_qaul_info_message(request.neighbour_id, data),
-                            ConnectionModule::Ble => {
-                                Ble::send_routing_info(request.neighbour_id, data);
-                            }
-                            ConnectionModule::Local => {}
-                            ConnectionModule::None => {}
-                        }
-                    }
-                }
-                EventType::UserResponse => {
-                    // get sending queue
-                    let mut user_responser = user_requester::USERRESPONSER.get().write().unwrap();
-
-                    // loop over messages to send & flood them
-                    while let Some(request) = user_responser.to_send.pop_front() {
-                        let connection_module = Neighbours::is_neighbour(&request.neighbour_id);
-                        if connection_module == ConnectionModule::None {
-                            log::error!(
-                                "sending feed requests, node is not a neighbour anymore: {:?}",
-                                request.neighbour_id
-                            );
-                            continue;
-                        }
-
-                        // make data
-                        let data = RouterInfo::create_user_response(&request.users);
-                        match connection_module {
-                            ConnectionModule::Lan => lan
-                                .swarm
-                                .behaviour_mut()
-                                .qaul_info
-                                .send_qaul_info_message(request.neighbour_id, data),
-                            ConnectionModule::Internet => internet
-                                .swarm
-                                .behaviour_mut()
-                                .qaul_info
-                                .send_qaul_info_message(request.neighbour_id, data),
-                            ConnectionModule::Ble => {
-                                Ble::send_routing_info(request.neighbour_id, data);
-                            }
-                            ConnectionModule::Local => {}
-                            ConnectionModule::None => {}
-                        }
-                    }
-                }
-
-                EventType::RoutingInfo => {
-                    // send routing info to neighbours
-                    // check scheduler
-                    if let Some((neighbour_id, connection_module, data)) =
-                        RouterInfo::check_scheduler()
-                    {
-                        log::trace!(
-                            "sending routing information via {:?} to {:?}, {:?}",
-                            connection_module,
-                            neighbour_id,
-                            Timestamp::get_timestamp()
-                        );
-                        // send routing information
-                        match connection_module {
-                            ConnectionModule::Lan => lan
-                                .swarm
-                                .behaviour_mut()
-                                .qaul_info
-                                .send_qaul_info_message(neighbour_id, data),
-                            ConnectionModule::Internet => internet
-                                .swarm
-                                .behaviour_mut()
-                                .qaul_info
-                                .send_qaul_info_message(neighbour_id, data),
-                            ConnectionModule::Ble => {
-                                Ble::send_routing_info(neighbour_id, data);
-                            }
-                            ConnectionModule::Local => {}
-                            ConnectionModule::None => {}
-                        }
-                    }
-                }
-                EventType::ReConnecting => {
-                    if let Some(addr) = Internet::check_reconnection() {
-                        log::trace!("redial....: {:?}", addr);
-                        Internet::peer_redial(&addr, &mut internet.swarm).await;
-                        Internet::set_redialed(&addr);
-                    }
-                }
-                EventType::RoutingTable => {
-                    // create new routing table
-                    router::connections::ConnectionTable::create_routing_table();
-                }
-                EventType::Messaging => {
-                    // send scheduled messages
-                    if let Some((neighbour_id, connection_module, data)) =
-                        Messaging::check_scheduler()
-                    {
-                        log::trace!(
-                            "sending messaging message via {:?} to {}",
-                            connection_module,
-                            neighbour_id.to_base58()
-                        );
-                        // send messaging message via the best module
-                        match connection_module {
-                            ConnectionModule::Lan => {
-                                lan.swarm
-                                    .behaviour_mut()
-                                    .qaul_messaging
-                                    .send_qaul_messaging_message(neighbour_id, data);
-                            }
-                            ConnectionModule::Internet => {
-                                internet
-                                    .swarm
-                                    .behaviour_mut()
-                                    .qaul_messaging
-                                    .send_qaul_messaging_message(neighbour_id, data);
-                            }
-                            ConnectionModule::Ble => {
-                                Ble::send_messaging_message(neighbour_id, data);
-                            }
-                            ConnectionModule::Local => {
-                                let message = qaul_messaging::types::QaulMessagingReceived {
-                                    received_from: neighbour_id,
-                                    data,
-                                };
-                                // forward to messaging module
-                                Messaging::received(message);
-                            }
-                            ConnectionModule::None => {
-                                // TODO: DTN behaviour
-                                // reschedule it for the moment
-                            }
-                        }
-                    }
-                }
-                EventType::Retransmit => {
-                    // check if there are messages to retransmit
-                    services::messaging::retransmit::MessagingRetransmit::process();
-                }
-            }
-        }
-    }
+    let instance = start_instance(storage_path, def_config).await;
+    instance.run().await;
 }
