@@ -90,5 +90,4 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
     implementation "androidx.lifecycle:lifecycle-service:2.3.1"
     api 'com.google.android.gms:play-services-location:17.1.0'
-    implementation 'com.google.code.gson:gson:2.8.7'
 }
