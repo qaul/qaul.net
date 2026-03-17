@@ -31,7 +31,6 @@ NODE_IDS = load_node_ids(TOPOLOGY)
 DISCOVERY_WAIT = 120
 STABILITY_DURATION = 300  # 5 minutes
 POLL_INTERVAL = 10
-RTT_TOLERANCE_PERCENT = 20
 
 
 def setup():
@@ -50,7 +49,6 @@ def test_routing_table_is_stable(
     discovery_wait: int = DISCOVERY_WAIT,
     stability_duration: int = STABILITY_DURATION,
     poll_interval: int = POLL_INTERVAL,
-    rtt_tolerance_percent: int = RTT_TOLERANCE_PERCENT,
 ) -> dict:
     """
     After waiting for full convergence, poll the routing table repeatedly
@@ -137,31 +135,31 @@ def test_routing_table_is_stable(
         + "\n".join(f"  {uid}: {count} flap(s)" for uid, count in flaps.items())
     )
 
-    rtt_violations = []
+    # compute RTT drift for recording — not asserted, just observed.
+    # RTT in simulated namespaces varies with host CPU load and has no
+    # relation to qaul's routing quality. Recording it lets us spot trends
+    # across runs without producing false test failures.
+    rtt_summary = {}
     for uid, rtts in rtt_observations.items():
         if len(rtts) < 2:
             continue
-        baseline_rtt = rtt_observations[uid][0]
+        baseline_rtt = rtts[0]
         if baseline_rtt == 0:
             continue
-        for rtt in rtts[1:]:
-            drift = abs(rtt - baseline_rtt) / baseline_rtt * 100
-            if drift > rtt_tolerance_percent:
-                rtt_violations.append(
-                    f"  {uid}: baseline {baseline_rtt}ms, observed {rtt}ms "
-                    f"({drift:.0f}% drift, limit {rtt_tolerance_percent}%)"
-                )
-
-    assert not rtt_violations, (
-        f"RTT drift exceeded {rtt_tolerance_percent}% tolerance:\n"
-        + "\n".join(rtt_violations)
-    )
+        max_drift = max(abs(r - baseline_rtt) / baseline_rtt * 100 for r in rtts[1:])
+        rtt_summary[uid] = {
+            "baseline_ms": baseline_rtt,
+            "min_ms": min(rtts),
+            "max_ms": max(rtts),
+            "max_drift_percent": round(max_drift, 1),
+        }
 
     hop_change_count = sum(1 for changes in hop_changes.values() if len(changes) > 1)
 
     print(
         f"  PASS: {poll_count} polls over {stability_duration}s — "
-        f"0 flaps, 0 RTT violations, {hop_change_count} hop count change(s)"
+        f"0 flaps, {hop_change_count} hop count change(s) "
+        f"(RTT drift recorded, not asserted)"
     )
 
     return {
@@ -169,6 +167,7 @@ def test_routing_table_is_stable(
         "poll_count": poll_count,
         "flaps": flaps,
         "hop_changes": {uid: v for uid, v in hop_changes.items() if len(v) > 1},
+        "rtt_drift": rtt_summary,
         "notes": (
             f"{poll_count} polls over {stability_duration}s: "
             f"0 flaps, {hop_change_count} hop count change(s)"

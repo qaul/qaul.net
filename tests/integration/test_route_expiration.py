@@ -82,19 +82,30 @@ def test_dead_node_route_expires(
     observer = Node(observer_id)
     target = Node(target_id)
 
-    print(f"  waiting {discovery_wait}s for convergence...")
-    time.sleep(discovery_wait)
+    # poll until the target appears in the observer's routing table rather
+    # than sleeping a fixed duration — convergence time varies with server
+    # load and a fixed sleep can expire before the target is reachable.
+    print(f"  waiting for target node {target_id} to appear in observer {observer_id}'s "
+          f"routing table (timeout {discovery_wait}s)...")
 
-    # get target's qaul user_id before killing it
     target_user_id = _local_user_id(target)
     print(f"  target node {target_id} has user_id {target_user_id}")
 
-    # find that user in the observer's routing table and record hop_count
-    observer_table = {
-        entry["user_id"]: entry["connections"][0]
-        for entry in observer.router_table()
-        if entry["connections"]
-    }
+    t_start = time.time()
+    deadline = t_start + discovery_wait
+    observer_table = {}
+
+    while time.time() < deadline:
+        observer_table = {
+            entry["user_id"]: entry["connections"][0]
+            for entry in observer.router_table()
+            if entry["connections"]
+        }
+        if target_user_id in observer_table:
+            elapsed = round(time.time() - t_start, 1)
+            print(f"  target found in routing table after {elapsed}s")
+            break
+        time.sleep(poll_interval)
 
     assert target_user_id in observer_table, (
         f"target user {target_user_id} not found in observer {observer_id}'s "
