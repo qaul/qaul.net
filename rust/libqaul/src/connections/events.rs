@@ -15,7 +15,7 @@ use crate::router::{info::RouterInfo, neighbours::Neighbours};
 use crate::services::messaging::Messaging;
 
 /// Handle incoming QaulInfo behaviour events
-pub fn qaul_info_event(event: QaulInfoEvent, _module: ConnectionModule) {
+pub fn qaul_info_event(state: &crate::QaulState, event: QaulInfoEvent, _module: ConnectionModule) {
     match event {
         // received a RoutingInfo message
         QaulInfoEvent::Message(message) => {
@@ -25,13 +25,14 @@ pub fn qaul_info_event(event: QaulInfoEvent, _module: ConnectionModule) {
             );
 
             // forward to router
-            RouterInfo::received(message);
+            let rs = state.get_router();
+            RouterInfo::received(state, &rs, message);
         }
     }
 }
 
 /// Handle incoming QaulMessaging behaviour events
-pub fn qaul_messaging_event(event: QaulMessagingEvent, _module: ConnectionModule) {
+pub fn qaul_messaging_event(state: &crate::QaulState, event: QaulMessagingEvent, _module: ConnectionModule) {
     match event {
         // received a messaging message
         QaulMessagingEvent::Message(message) => {
@@ -41,13 +42,13 @@ pub fn qaul_messaging_event(event: QaulMessagingEvent, _module: ConnectionModule
             );
 
             // forward to messaging module
-            Messaging::received(message);
+            Messaging::received(state, message);
         }
     }
 }
 
 /// Handle incoming ping event
-pub fn ping_event(event: Event, module: ConnectionModule) {
+pub fn ping_event(state: &crate::QaulState, event: Event, module: ConnectionModule) {
     match event {
         Event {
             peer,
@@ -65,8 +66,14 @@ pub fn ping_event(event: Event, module: ConnectionModule) {
                 duration.as_secs() * 1_000_000 + (duration.subsec_nanos() / 1_000) as u64,
             );
             match rtt_micros {
-                Ok(micros) => Neighbours::update_node(module, peer, micros),
-                Err(_) => Neighbours::update_node(module, peer, 4294967295),
+                Ok(micros) => {
+                    let rs = state.get_router();
+                    Neighbours::update_node(&rs, module, peer, micros);
+                },
+                Err(_) => {
+                    let rs = state.get_router();
+                    Neighbours::update_node(&rs, module, peer, 4294967295);
+                },
             }
         }
         // Event {

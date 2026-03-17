@@ -53,8 +53,8 @@ impl FlooderState {
 
 impl Flooder {
     /// Add a message to the ring buffer for sending.
-    /// Delegates to the global RouterState instance.
-    pub fn add(message: Vec<u8>, topic: Topic, incoming_via: ConnectionModule) {
-        super::RouterState::global().flooder.add(message, topic, incoming_via);
+    /// Delegates to the provided RouterState instance.
+    pub fn add(router: &super::RouterState, message: Vec<u8>, topic: Topic, incoming_via: ConnectionModule) {
+        router.flooder.add(message, topic, incoming_via);
     }
 }

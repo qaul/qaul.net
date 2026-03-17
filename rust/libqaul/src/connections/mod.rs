@@ -129,19 +129,19 @@ pub struct Connections {
 }
 
 impl Connections {
-    /// initialize connections (global state - for backward compatibility)
-    pub async fn init() -> Connections {
+    /// initialize connections
+    pub async fn init(state: &crate::QaulState) -> Connections {
         // get node keys
-        let node_keys = Node::get_keys();
+        let node_keys = Node::get_keys(state);
 
         // initialize Lan module
-        let lan = Lan::init(&node_keys).await;
+        let lan = Lan::init(state, &node_keys).await;
 
         // initialize Internet overlay module
-        let internet = Internet::init(&node_keys).await;
+        let internet = Internet::init(state, &node_keys).await;
 
         // initialize BLE  module
-        Ble::init().await;
+        Ble::init(state).await;
 
         let conn = Connections {
             lan: Some(lan),
@@ -152,14 +152,14 @@ impl Connections {
     }
 
     /// Process incoming RPC request messages
-    pub fn rpc(data: Vec<u8>, internet_opt: Option<&mut Internet>, request_id: String) {
+    pub fn rpc(state: &crate::QaulState, data: Vec<u8>, internet_opt: Option<&mut Internet>, request_id: String) {
         match proto::Connections::decode(&data[..]) {
             Ok(connections) => {
                 match connections.message {
                     Some(proto::connections::Message::InternetNodesRequest(
                         _internet_nodes_request,
                     )) => {
-                        Self::rpc_send_node_list(proto::Info::Request, request_id);
+                        Self::rpc_send_node_list(state, proto::Info::Request, request_id);
                     }
                     Some(proto::connections::Message::InternetNodesAdd(nodes_entry)) => {
                         // check if we have a valid address
@@ -168,7 +168,7 @@ impl Connections {
 
                         {
                             // get config
-                            let mut config = Configuration::get_mut();
+                            let mut config = Configuration::get_mut(state);
 
                             // add the node to config if the address is valid
                             let address_result: Result<Multiaddr, libp2p::multiaddr::Error> =
@@ -188,7 +188,7 @@ impl Connections {
                                     if let Some(internet) = internet_opt {
                                         let mut connected = false;
                                         // if we already have connection history, check if there is connected
-                                        if let Some(peer_id) = Internet::peerid_from_address(
+                                        if let Some(peer_id) = Internet::peerid_from_address(state,
                                             nodes_entry.address.clone(),
                                         ) {
                                             connected = internet.swarm.is_connected(&peer_id);
@@ -207,11 +207,11 @@ impl Connections {
 
                         // save configuration
                         if valid {
-                            Configuration::save();
+                            Configuration::save(state);
                         }
 
                         // send response message
-                        Self::rpc_send_node_list(info, request_id);
+                        Self::rpc_send_node_list(state, info, request_id);
                     }
 
                     Some(proto::connections::Message::InternetNodesRename(nodes_entry)) => {
@@ -220,7 +220,7 @@ impl Connections {
                             let mut nodes: Vec<InternetPeer> = Vec::new();
 
                             // get config
-                            let mut config = Configuration::get_mut();
+                            let mut config = Configuration::get_mut(state);
 
                             // loop through addresses and remove the equal
                             for peer in &config.internet.peers {
@@ -245,10 +245,10 @@ impl Connections {
 
                         // save configuration
                         if info == proto::Info::StateSuccess {
-                            Configuration::save();
+                            Configuration::save(state);
                         }
                         // send response
-                        Self::rpc_send_node_list(info, request_id);
+                        Self::rpc_send_node_list(state, info, request_id);
                     }
 
                     Some(proto::connections::Message::InternetNodesRemove(nodes_entry)) => {
@@ -258,7 +258,7 @@ impl Connections {
                             let mut nodes: Vec<InternetPeer> = Vec::new();
 
                             // get config
-                            let mut config = Configuration::get_mut();
+                            let mut config = Configuration::get_mut(state);
 
                             // loop through addresses and remove the equal
                             for peer in &config.internet.peers {
@@ -277,11 +277,11 @@ impl Connections {
                         }
 
                         // save configuration
-                        Configuration::save();
+                        Configuration::save(state);
 
                         // check connection and disconnect node
                         if let Some(peer_id) =
-                            Internet::peerid_from_address(nodes_entry.address.clone())
+                            Internet::peerid_from_address(state, nodes_entry.address.clone())
                         {
                             let internet = internet_opt.unwrap();
                             if internet.swarm.is_connected(&peer_id) {
@@ -290,7 +290,7 @@ impl Connections {
                         }
 
                         // send response
-                        Self::rpc_send_node_list(info, request_id);
+                        Self::rpc_send_node_list(state, info, request_id);
                     }
                     Some(proto::connections::Message::InternetNodesState(nodes_entry)) => {
                         let mut info = proto::Info::RemoveErrorNotFound;
@@ -300,7 +300,7 @@ impl Connections {
                             let mut nodes: Vec<InternetPeer> = Vec::new();
 
                             // get config
-                            let mut config = Configuration::get_mut();
+                            let mut config = Configuration::get_mut(state);
 
                             // loop through addresses and remove the equal
                             for peer in &config.internet.peers {
@@ -328,14 +328,14 @@ impl Connections {
                         }
 
                         // save configuration
-                        Configuration::save();
+                        Configuration::save(state);
 
                         if info == proto::Info::StateSuccess && changed_state == true {
                             let internet = internet_opt.unwrap();
                             // already has connection history, we simply handle banned peer list
                             if nodes_entry.enabled == false {
                                 if let Some(peer_id) =
-                                    Internet::peerid_from_address(nodes_entry.address.clone())
+                                    Internet::peerid_from_address(state, nodes_entry.address.clone())
                                 {
                                     if internet.swarm.is_connected(&peer_id) {
                                         if let Err(_) = internet.swarm.disconnect_peer_id(peer_id) {
@@ -345,7 +345,7 @@ impl Connections {
                             } else {
                                 let mut connected = false;
                                 if let Some(peer_id) =
-                                    Internet::peerid_from_address(nodes_entry.address.clone())
+                                    Internet::peerid_from_address(state, nodes_entry.address.clone())
                                 {
                                     connected = internet.swarm.is_connected(&peer_id);
                                 }
@@ -361,7 +361,7 @@ impl Connections {
                         }
 
                         // send response
-                        Self::rpc_send_node_list(info, request_id);
+                        Self::rpc_send_node_list(state, info, request_id);
                     }
                     _ => {}
                 }
@@ -373,11 +373,11 @@ impl Connections {
     }
 
     /// create and send a node list message
-    fn rpc_send_node_list(info: proto::Info, request_id: String) {
+    fn rpc_send_node_list(state: &crate::QaulState, info: proto::Info, request_id: String) {
         let mut nodes: Vec<proto::InternetNodesEntry> = Vec::new();
 
         // get list of peer nodes from config
-        let config = Configuration::get();
+        let config = Configuration::get(state);
 
         // fill all the nodes
         for peer in &config.internet.peers {
@@ -399,11 +399,11 @@ impl Connections {
         };
 
         // send the message
-        Self::rpc_send_message(proto_message, request_id);
+        Self::rpc_send_message(state, proto_message, request_id);
     }
 
     /// encode and send connections RPC message to UI
-    fn rpc_send_message(message: proto::Connections, request_id: String) {
+    fn rpc_send_message(state: &crate::QaulState, message: proto::Connections, request_id: String) {
         // encode message
         let mut buf = Vec::with_capacity(message.encoded_len());
         message
@@ -412,6 +412,7 @@ impl Connections {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Connections.into(),
             request_id,

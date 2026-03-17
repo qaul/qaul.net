@@ -12,7 +12,6 @@
 extern crate android_logger;
 extern crate log;
 
-use lazy_static::*;
 use std::{ffi::c_void, sync::Mutex};
 
 /// Modules for integrating with JavaVM
@@ -21,12 +20,9 @@ use jni::sys::{jint, jstring, JNI_ERR, JNI_VERSION_1_6};
 use jni::JNIEnv;
 use jni::{JavaVM, NativeMethod};
 
-lazy_static! {
-    // jvm
-    static ref JVM_GLOBAL: Mutex<Option<JavaVM>> = Mutex::new(None);
-    //callback
-    static ref JNI_CALLBACK: Mutex<Option<GlobalRef>> = Mutex::new(None);
-}
+/// JNI requires global statics — `extern "system"` functions cannot carry context.
+static JVM_GLOBAL: Mutex<Option<JavaVM>> = Mutex::new(None);
+static JNI_CALLBACK: Mutex<Option<GlobalRef>> = Mutex::new(None);
 
 #[no_mangle]
 pub fn nativeSetCallback(env: JNIEnv, _obj: JObject, callback: JObject) {
@@ -93,7 +89,8 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_initialized(
     mut _env: JNIEnv,
     _: JClass,
 ) -> bool {
-    super::initialization_finished()
+    let state = super::c::get_c_state();
+    state.initialized.load(std::sync::atomic::Ordering::SeqCst)
 }
 
 /// get number of messages sent via RPC to libqaul from android
@@ -103,8 +100,8 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_sendcounter(
     mut _env: JNIEnv,
     _: JClass,
 ) -> jint {
-    // return number of RPC messages sent to libqaul
-    super::send_rpc_count() as jint
+    let state = super::c::get_c_state();
+    crate::rpc::Rpc::send_rpc_count(&*state) as jint
 }
 
 /// get number of messages queued to be received by this program
@@ -114,9 +111,8 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_receivequeue(
     mut _env: JNIEnv,
     _: JClass,
 ) -> jint {
-    // return the number of RPC messages in the pipeline to be
-    // received by the GUI
-    super::receive_rpc_queued() as jint
+    let state = super::c::get_c_state();
+    crate::rpc::Rpc::receive_from_libqaul_queue_length(&*state) as jint
 }
 
 /// send an rpc message from android to libqaul
@@ -130,7 +126,8 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_send<'local>(
     let binary_message: Vec<u8> = env.convert_byte_array(&message).unwrap();
 
     // send it to libqaul
-    super::send_rpc(binary_message);
+    let state = super::c::get_c_state();
+    crate::rpc::Rpc::send_to_libqaul(&*state, binary_message);
 }
 
 /// receive an rpc message on android from libqaul
@@ -139,8 +136,9 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_receive<'local>(
     env: JNIEnv<'local>,
     _: JClass,
 ) -> JByteArray<'local> {
+    let state = super::c::get_c_state();
     // check if there is an RPC message
-    if let Ok(message) = super::receive_rpc() {
+    if let Ok(message) = crate::rpc::Rpc::receive_from_libqaul(&*state) {
         // convert message to java byte array
         let byte_array = env.byte_array_from_slice(&message).unwrap();
         // return byte array
@@ -169,7 +167,8 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_syssend<'local>(
     let binary_message: Vec<u8> = env.convert_byte_array(&message).unwrap();
 
     // send it to libqaul
-    super::send_sys(binary_message);
+    let state = super::c::get_c_state();
+    crate::rpc::sys::Sys::send_to_libqaul(&*state, binary_message);
 }
 
 /// receive a sys message on android from libqaul
@@ -178,8 +177,9 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_sysreceive<'local>(
     env: JNIEnv<'local>,
     _: JClass,
 ) -> JByteArray<'local> {
+    let state = super::c::get_c_state();
     // check if there is an RPC message
-    if let Ok(message) = super::receive_sys() {
+    if let Ok(message) = crate::rpc::sys::Sys::receive_from_libqaul(&*state) {
         // convert message to java byte array
         let byte_array = env.byte_array_from_slice(&message).unwrap();
         // return byte array

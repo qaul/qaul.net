@@ -3,7 +3,6 @@
 
 //! # RPC client functions
 
-use libqaul;
 use prost::Message;
 
 /// protobuf RPC definition
@@ -15,9 +14,9 @@ pub struct Rpc {}
 
 impl Rpc {
     /// encode and send an rpc message to libqaul
-    pub fn send_message(data: Vec<u8>, module: i32, request_id: String) {
+    pub fn send_message(state: &super::CliState, data: Vec<u8>, module: i32, request_id: String) {
         // get user
-        let my_user_id = super::user_accounts::UserAccounts::get_user_id();
+        let my_user_id = super::user_accounts::UserAccounts::get_user_id(state);
 
         // check authorisation
         if my_user_id == None {
@@ -57,12 +56,12 @@ impl Rpc {
             .encode(&mut buf)
             .expect("Vec<u8> provides capacity as needed");
 
-        // send the message
-        libqaul::api::send_rpc(buf);
+        // send the message via the instance's RPC channel
+        libqaul::rpc::Rpc::send_to_libqaul(&*state.instance.state, buf);
     }
 
     /// receive an rpc message from libqaul
-    pub fn received_message(data: Vec<u8>) {
+    pub fn received_message(state: &super::CliState, data: Vec<u8>) {
         match proto::QaulRpc::decode(&data[..]) {
             Ok(message) => {
                 log::trace!("qaul rpc message received");
@@ -75,7 +74,7 @@ impl Rpc {
                         // TODO: authorisation
                     }
                     Ok(proto::Modules::Useraccounts) => {
-                        super::user_accounts::UserAccounts::rpc(message.data);
+                        super::user_accounts::UserAccounts::rpc(state, message.data);
                     }
                     Ok(proto::Modules::Users) => {
                         super::users::Users::rpc(message.data);
@@ -111,7 +110,7 @@ impl Rpc {
                         super::dtn::Dtn::rpc(message.data);
                     }
                     Ok(proto::Modules::Auth) => {
-                        super::authentication::Auth::rpc(message.data);
+                        super::authentication::Auth::rpc(state, message.data);
                     }
                     Ok(proto::Modules::None) => {}
                     Err(_) => {}

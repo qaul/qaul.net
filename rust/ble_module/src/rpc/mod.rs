@@ -12,10 +12,6 @@ use async_trait::async_trait;
 use prost::Message;
 pub use qaul_proto::qaul_sys_ble as proto_sys;
 pub use qaul_proto::qaul_sys_ble::Ble;
-use state::InitCell;
-
-/// sender of the mpsc channel: libqaul ---> ble_module
-static EXTERN_SEND: InitCell<tokio::sync::mpsc::Sender<Vec<u8>>> = InitCell::new();
 
 #[async_trait]
 pub trait SysRpcReceiver {
@@ -33,31 +29,6 @@ impl SysRpcReceiver for BleRpc {
             .recv()
             .await
             .and_then(process_received_message)
-    }
-}
-
-/// Initialize RPC module
-/// Create the sending and receiving channels and persist them across threads.
-/// Return the receiver for the channel libqaul ---> ble_module
-pub fn init() -> BleRpc {
-    // create channels
-    let (libqaul_send, ble_rec) = tokio::sync::mpsc::channel(32);
-    // save to state
-    EXTERN_SEND.set(libqaul_send);
-
-    // return ble receiver
-    BleRpc { receiver: ble_rec }
-}
-
-/// send sys message libqaul ---> ble_module
-#[allow(dead_code)]
-pub fn send_to_ble_module(binary_message: Vec<u8>) {
-    if let Err(err) = EXTERN_SEND
-        .try_get()
-        .ok_or("Sender libqaul ---> ble_module not yet initialized!")
-        .map(|sender| sender.try_send(binary_message))
-    {
-        log::error!("{:?}", err);
     }
 }
 

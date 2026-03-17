@@ -49,33 +49,33 @@ pub struct QaulLanBehaviour {
 }
 
 impl QaulLanBehaviour {
-    pub fn process_events(&mut self, event: QaulLanEvent) {
+    pub fn process_events(&mut self, state: &crate::QaulState, event: QaulLanEvent) {
         match event {
             QaulLanEvent::QaulInfo(ev) => {
-                self.qaul_info_event(ev);
+                self.qaul_info_event(state, ev);
             }
             QaulLanEvent::QaulMessaging(ev) => {
-                self.qaul_messaging_event(ev);
+                self.qaul_messaging_event(state, ev);
             }
             QaulLanEvent::Ping(ev) => {
-                self.ping_event(ev);
+                self.ping_event(state, ev);
             }
             QaulLanEvent::Mdns(ev) => {
                 self.mdsn_event(ev);
             }
             QaulLanEvent::Floodsub(ev) => {
-                self.floodsub_event(ev);
+                self.floodsub_event(state, ev);
             }
         }
     }
-    fn qaul_info_event(&mut self, event: QaulInfoEvent) {
-        events::qaul_info_event(event, ConnectionModule::Lan);
+    fn qaul_info_event(&mut self, state: &crate::QaulState, event: QaulInfoEvent) {
+        events::qaul_info_event(state, event, ConnectionModule::Lan);
     }
-    fn qaul_messaging_event(&mut self, event: QaulMessagingEvent) {
-        events::qaul_messaging_event(event, ConnectionModule::Lan);
+    fn qaul_messaging_event(&mut self, state: &crate::QaulState, event: QaulMessagingEvent) {
+        events::qaul_messaging_event(state, event, ConnectionModule::Lan);
     }
-    fn ping_event(&mut self, event: ping::Event) {
-        events::ping_event(event, ConnectionModule::Lan);
+    fn ping_event(&mut self, state: &crate::QaulState, event: ping::Event) {
+        events::ping_event(state, event, ConnectionModule::Lan);
     }
     fn mdsn_event(&mut self, event: mdns::Event) {
         match event {
@@ -103,12 +103,12 @@ impl QaulLanBehaviour {
         }
     }
 
-    fn floodsub_event(&mut self, event: floodsub::Event) {
+    fn floodsub_event(&mut self, state: &crate::QaulState, event: floodsub::Event) {
         match event {
             floodsub::Event::Message(msg) => {
                 // feed Message
                 if let Ok(resp) = proto_net::FeedContainer::decode(&msg.data[..]) {
-                    Feed::received(ConnectionModule::Lan, msg.source, resp);
+                    Feed::received(state, ConnectionModule::Lan, msg.source, resp);
                 }
             }
             _ => (),
@@ -161,13 +161,13 @@ pub struct Lan {
 
 impl Lan {
     /// Initialize swarm for LAN connection module
-    pub async fn init(node_keys: &Keypair) -> Lan {
+    pub async fn init(state: &crate::QaulState, node_keys: &Keypair) -> Lan {
         log::trace!("Lan::init() start");
 
         // create ping configuration
         let mut ping_config = ping::Config::new();
 
-        let config = Configuration::get();
+        let config = Configuration::get(state);
         ping_config =
             ping_config.with_interval(Duration::from_secs(config.routing.ping_neighbour_period));
 
@@ -175,17 +175,17 @@ impl Lan {
 
         // create MDNS behaviour
         // TODO create MdnsConfig {ttl: Duration::from_secs(300), query_interval: Duration::from_secs(30) }
-        let mdns = mdns::tokio::Behaviour::new(mdns::Config::default(), Node::get_id()).unwrap();
+        let mdns = mdns::tokio::Behaviour::new(mdns::Config::default(), Node::get_id(state)).unwrap();
 
         // create behaviour
         let mut behaviour: QaulLanBehaviour = QaulLanBehaviour {
-            floodsub: floodsub::Behaviour::new(Node::get_id()),
+            floodsub: floodsub::Behaviour::new(Node::get_id(state)),
             mdns,
             ping: ping::Behaviour::new(ping_config),
-            qaul_info: QaulInfo::new(Node::get_id()),
-            qaul_messaging: QaulMessaging::new(Node::get_id()),
+            qaul_info: QaulInfo::new(Node::get_id(state)),
+            qaul_messaging: QaulMessaging::new(Node::get_id(state)),
         };
-        behaviour.floodsub.subscribe(Node::get_topic());
+        behaviour.floodsub.subscribe(Node::get_topic(state));
 
         let mut swarm = SwarmBuilder::with_existing_identity(node_keys.to_owned())
             .with_tokio()
@@ -210,7 +210,7 @@ impl Lan {
 
         // connect swarm to the defined listening interfaces in
         // the configuration array config.lan.listen
-        let config = Configuration::get();
+        let config = Configuration::get(state);
 
         for listen in &config.lan.listen {
             Swarm::listen_on(&mut swarm, listen.parse().expect("can get a local socket"))

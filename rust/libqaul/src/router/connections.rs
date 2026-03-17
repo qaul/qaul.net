@@ -380,17 +380,19 @@ impl ConnectionTable {
     /// The per-module tables (local, internet, lan, ble) already exist inside
     /// `RouterState::global().connections`. This method only populates the
     /// local-user entries for every registered user account.
-    pub fn init() {
+    /// Initialize connection tables with an explicit router state reference.
+    /// Populates the local-user entries for every registered user account.
+    pub fn init_with_state(state: &crate::QaulState, router: &super::RouterState) {
         // create filled state for locally registered users
-        for user in node::user_accounts::UserAccounts::get_user_info() {
-            Self::add_local_user(user.id);
+        for user in node::user_accounts::UserAccounts::get_user_info(state) {
+            Self::add_local_user(state, router, user.id);
         }
     }
 
     /// add a new local user to state
-    pub fn add_local_user(user_id: PeerId) {
-        let node_id = node::Node::get_id();
-        let mut routing_table = super::RouterState::global().connections.local.write().unwrap();
+    pub fn add_local_user(state: &crate::QaulState, router: &super::RouterState, user_id: PeerId) {
+        let node_id = node::Node::get_id(state);
+        let mut routing_table = router.connections.local.write().unwrap();
 
         let mut connections = Vec::with_capacity(1);
 
@@ -423,27 +425,29 @@ impl ConnectionTable {
     /// process received routing info table
     /// enter it into all modules where we are connected to
     pub fn process_received_routing_info(
+        router: &super::RouterState,
         neighbour_id: PeerId,
         info: &[router_net_proto::RoutingInfoEntry],
     ) {
         // try Lan module
-        if let Some(rtt) = Neighbours::get_rtt(&neighbour_id, &ConnectionModule::Lan) {
-            Self::fill_received_routing_info(ConnectionModule::Lan, neighbour_id, rtt, info);
+        if let Some(rtt) = Neighbours::get_rtt(router, &neighbour_id, &ConnectionModule::Lan) {
+            Self::fill_received_routing_info(router, ConnectionModule::Lan, neighbour_id, rtt, info);
         }
 
         // try Internet module
-        if let Some(rtt) = Neighbours::get_rtt(&neighbour_id, &ConnectionModule::Internet) {
-            Self::fill_received_routing_info(ConnectionModule::Internet, neighbour_id, rtt, info);
+        if let Some(rtt) = Neighbours::get_rtt(router, &neighbour_id, &ConnectionModule::Internet) {
+            Self::fill_received_routing_info(router, ConnectionModule::Internet, neighbour_id, rtt, info);
         }
 
         // try Bluetooth module
-        if let Some(rtt) = Neighbours::get_rtt(&neighbour_id, &ConnectionModule::Ble) {
-            Self::fill_received_routing_info(ConnectionModule::Ble, neighbour_id, rtt, info);
+        if let Some(rtt) = Neighbours::get_rtt(router, &neighbour_id, &ConnectionModule::Ble) {
+            Self::fill_received_routing_info(router, ConnectionModule::Ble, neighbour_id, rtt, info);
         }
     }
 
     /// populate connection table with incoming routing information
     fn fill_received_routing_info(
+        router: &super::RouterState,
         conn: ConnectionModule,
         neighbour_id: PeerId,
         rtt: u32,
@@ -467,50 +471,34 @@ impl ConnectionTable {
                 id: neighbour_id,
                 rtt: total_rtt,
                 hc,
-                lq: Self::calculate_linkquality(total_rtt, hc),
+                lq: Self::calculate_linkquality_from_router(router, total_rtt, hc),
                 last_update: Timestamp::get_timestamp(),
             };
 
             // add it to state
-            Self::add_connection(entry.user.clone(), entry.pgid, neighbour, conn);
+            Self::add_connection(router, entry.user.clone(), entry.pgid, neighbour, conn);
         }
     }
 
-    /// calculate link quality
-    ///
-    /// returns the calculated link quality for a connection.
-    ///
-    /// The link quality is currently calculated using the
-    /// round trip time (rtt) and adding a penalty for each hop
-    /// according hop count (hc).
-    ///
-    /// The smaller the value is better is the link quality.
-    pub fn calculate_linkquality(rtt: u32, hc: u8) -> u32 {
-        // get the router configuration
-        let config = super::Router::get_configuration();
-
-        // calculate link quality
-        // `hop_count_penalty` is seconds unit, thus it must be converted micro seconds
-        let lq = rtt + (hc as u32 * (config.hop_count_penalty as u32) * 1000_000);
-
-        // return link quality
-        lq
+    /// calculate link quality using router state directly
+    fn calculate_linkquality_from_router(router: &super::RouterState, rtt: u32, hc: u8) -> u32 {
+        rtt + (hc as u32 * (router.configuration.hop_count_penalty as u32) * 1000_000)
     }
 
     /// add connection to local state
     fn add_connection(
+        router: &super::RouterState,
         user_q8id: Vec<u8>,
         pgid: u32,
         connection: NeighbourEntry,
         module: ConnectionModule,
     ) {
         // get access to the connection table
-        let state = super::RouterState::global();
         let mut connection_table;
         match module {
-            ConnectionModule::Internet => connection_table = state.connections.internet.write().unwrap(),
-            ConnectionModule::Lan => connection_table = state.connections.lan.write().unwrap(),
-            ConnectionModule::Ble => connection_table = state.connections.ble.write().unwrap(),
+            ConnectionModule::Internet => connection_table = router.connections.internet.write().unwrap(),
+            ConnectionModule::Lan => connection_table = router.connections.lan.write().unwrap(),
+            ConnectionModule::Ble => connection_table = router.connections.ble.write().unwrap(),
             ConnectionModule::Local => return,
             ConnectionModule::None => return,
         }
@@ -573,9 +561,9 @@ impl ConnectionTable {
     }
 
     /// update propagation id for local users
-    pub fn update_propagation_id(propagation_id: u32) {
+    pub fn update_propagation_id(router: &super::RouterState, propagation_id: u32) {
         //update local user's propagation id
-        let mut local = super::RouterState::global().connections.local.write().unwrap();
+        let mut local = router.connections.local.write().unwrap();
         for (_user_id, user) in local.table.iter_mut() {
             user.pgid = propagation_id;
             // QUESTION: is this of any use?
@@ -585,7 +573,7 @@ impl ConnectionTable {
     }
 
     /// Create a routing table and set it to active routing table
-    pub fn create_routing_table() {
+    pub fn create_routing_table(router: &super::RouterState) {
         // create a new table
         let mut table = RoutingTable {
             table: HashMap::new(),
@@ -594,26 +582,26 @@ impl ConnectionTable {
         // set static routes for local users
         // create them first, for that they are always routed to ourselves
         {
-            table = Self::local_routes_to_intermediary_table(table);
+            table = Self::local_routes_to_intermediary_table(router, table);
         }
 
         // calculate from lan module
-        table = Self::calculate_intermediary_table(table, ConnectionModule::Lan);
+        table = Self::calculate_intermediary_table(router, table, ConnectionModule::Lan);
 
         // calculate from internet module
-        table = Self::calculate_intermediary_table(table, ConnectionModule::Internet);
+        table = Self::calculate_intermediary_table(router, table, ConnectionModule::Internet);
 
         // calculate from ble module
-        table = Self::calculate_intermediary_table(table, ConnectionModule::Ble);
+        table = Self::calculate_intermediary_table(router, table, ConnectionModule::Ble);
 
         // set table as new active routing table
-        RoutingTable::set(table);
+        RoutingTable::set(router, table);
     }
 
     /// insert local routes into routing table
-    fn local_routes_to_intermediary_table(mut table: RoutingTable) -> RoutingTable {
+    fn local_routes_to_intermediary_table(router: &super::RouterState, mut table: RoutingTable) -> RoutingTable {
         // get local routes
-        let local = super::RouterState::global().connections.local.read().unwrap();
+        let local = router.connections.local.read().unwrap();
 
         // fill it into routing table
         for (user_id, user) in &local.table {
@@ -625,16 +613,16 @@ impl ConnectionTable {
 
     /// calculate a routing table for a module
     fn calculate_intermediary_table(
+        router: &super::RouterState,
         mut table: RoutingTable,
         conn: ConnectionModule,
     ) -> RoutingTable {
         // get connections table
-        let state = super::RouterState::global();
         let mut connection_table;
         match conn {
-            ConnectionModule::Internet => connection_table = state.connections.internet.write().unwrap(),
-            ConnectionModule::Lan => connection_table = state.connections.lan.write().unwrap(),
-            ConnectionModule::Ble => connection_table = state.connections.ble.write().unwrap(),
+            ConnectionModule::Internet => connection_table = router.connections.internet.write().unwrap(),
+            ConnectionModule::Lan => connection_table = router.connections.lan.write().unwrap(),
+            ConnectionModule::Ble => connection_table = router.connections.ble.write().unwrap(),
             ConnectionModule::Local => return table,
             ConnectionModule::None => return table,
         }
@@ -643,7 +631,7 @@ impl ConnectionTable {
 
         // iterate over connection table
         for (user_id, user) in connection_table.table.iter_mut() {
-            let (b_expired_pgid, connection_entry) = Self::find_best_connection(user);
+            let (b_expired_pgid, connection_entry) = Self::find_best_connection(router, user);
             if !b_expired_pgid {
                 if let Some(connection) = connection_entry {
                     // fill entry into routing table
@@ -703,9 +691,8 @@ impl ConnectionTable {
 
     /// find best entry
     /// and remove all old entries
-    fn find_best_connection(user: &mut UserEntry) -> (bool, Option<NeighbourEntry>) {
-        let config = super::Router::get_configuration();
-        Self::find_best_connection_with_config(user, &config)
+    fn find_best_connection(router: &super::RouterState, user: &mut UserEntry) -> (bool, Option<NeighbourEntry>) {
+        Self::find_best_connection_with_config(user, &router.configuration)
     }
 
     /// find best entry with explicit config (for instance-based and global use)
@@ -777,13 +764,13 @@ impl ConnectionTable {
     }
 
     /// send protobuf RPC connections list
-    pub fn rpc_send_connections_list(request_id: String) {
+    pub fn rpc_send_connections_list(state: &crate::QaulState, router: &super::RouterState, request_id: String) {
         // create connections list
         let connections_list = proto::ConnectionsList {
-            lan: Self::rpc_create_connection_module_list(ConnectionModule::Lan),
-            internet: Self::rpc_create_connection_module_list(ConnectionModule::Internet),
-            ble: Self::rpc_create_connection_module_list(ConnectionModule::Ble),
-            local: Self::rpc_create_connection_module_list(ConnectionModule::Local),
+            lan: Self::rpc_create_connection_module_list(router, ConnectionModule::Lan),
+            internet: Self::rpc_create_connection_module_list(router, ConnectionModule::Internet),
+            ble: Self::rpc_create_connection_module_list(router, ConnectionModule::Ble),
+            local: Self::rpc_create_connection_module_list(router, ConnectionModule::Local),
         };
 
         // create rpc connections list protobuf message
@@ -799,6 +786,7 @@ impl ConnectionTable {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             crate::rpc::proto::Modules::Router.into(),
             request_id,
@@ -808,15 +796,15 @@ impl ConnectionTable {
 
     /// create rpc connection module list
     fn rpc_create_connection_module_list(
+        router: &super::RouterState,
         conn: ConnectionModule,
     ) -> Vec<proto::ConnectionsUserEntry> {
         // request connection table from state
-        let state = super::RouterState::global();
         let connection_table;
         match conn {
-            ConnectionModule::Lan => connection_table = state.connections.lan.read().unwrap(),
-            ConnectionModule::Internet => connection_table = state.connections.internet.read().unwrap(),
-            ConnectionModule::Ble => connection_table = state.connections.ble.read().unwrap(),
+            ConnectionModule::Lan => connection_table = router.connections.lan.read().unwrap(),
+            ConnectionModule::Internet => connection_table = router.connections.internet.read().unwrap(),
+            ConnectionModule::Ble => connection_table = router.connections.ble.read().unwrap(),
             ConnectionModule::Local => return Vec::new(),
             ConnectionModule::None => return Vec::new(),
         }

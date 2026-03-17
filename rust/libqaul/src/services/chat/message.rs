@@ -24,6 +24,7 @@ pub struct ChatMessage {}
 impl ChatMessage {
     /// send message
     pub fn send(
+        state: &crate::QaulState,
         user_account: &UserAccount,
         receiver: &PeerId,
         common_message: &proto::CommonMessage,
@@ -34,6 +35,7 @@ impl ChatMessage {
             )),
         };
         Messaging::pack_and_send_message(
+            state,
             user_account,
             &receiver,
             send_message.encode_to_vec(),
@@ -45,6 +47,7 @@ impl ChatMessage {
 
     /// send message
     pub fn send_chat_message(
+        state: &crate::QaulState,
         account_id: &PeerId,
         group_id: &[u8],
         message: String,
@@ -59,7 +62,7 @@ impl ChatMessage {
             }
         }
 
-        match GroupStorage::get_group(account_id.to_owned(), group_id) {
+        match GroupStorage::get_group(state, account_id.to_owned(), group_id) {
             Some(v) => group = v,
             None => {
                 let error_string = "Group not found".to_string();
@@ -68,10 +71,11 @@ impl ChatMessage {
                     // get user id from q8id
                     Some(user_q8id) => {
                         // create direct chat
-                        match crate::router::users::Users::get_user_id_by_q8id(&user_q8id) {
+                        let rs = state.get_router();
+                        match crate::router::users::Users::get_user_id_by_q8id(&rs, &user_q8id) {
                             Some(user_id) => {
                                 group =
-                                    GroupManage::create_new_direct_chat_group(account_id, &user_id)
+                                    GroupManage::create_new_direct_chat_group(state, account_id, &user_id)
                             }
                             None => return Err(error_string),
                         }
@@ -117,6 +121,7 @@ impl ChatMessage {
 
         // save outgoing message
         ChatStorage::save_message(
+            state,
             account_id,
             &groupid,
             account_id,
@@ -127,12 +132,12 @@ impl ChatMessage {
         );
 
         // send to all group members
-        if let Some(user_account) = UserAccounts::get_by_id(*account_id) {
+        if let Some(user_account) = UserAccounts::get_by_id(state,*account_id) {
             for user_id in group.members.keys() {
                 let receiver = PeerId::from_bytes(user_id).unwrap();
                 if receiver != *account_id {
                     log::trace!("send message to {}", receiver.to_base58());
-                    if let Err(error) = Self::send(&user_account, &receiver, &common_message) {
+                    if let Err(error) = Self::send(state, &user_account, &receiver, &common_message) {
                         log::error!("chat message send error {}", error);
                     }
                 }
@@ -141,7 +146,7 @@ impl ChatMessage {
 
         // update member state
         my_member.last_message_index = last_index;
-        Group::update_group_member(account_id, &groupid.id, &my_member);
+        Group::update_group_member(state, account_id, &groupid.id, &my_member);
 
         Ok(true)
     }

@@ -70,11 +70,6 @@ impl SysRpcState {
 pub struct Sys {}
 
 impl Sys {
-    /// Access the global SysRpcState from QaulState.
-    fn state() -> &'static SysRpcState {
-        &crate::QaulState::global().sys
-    }
-
     /// Initialize SYS module.
     /// State is now owned by QaulState, so this is a no-op.
     pub fn init() {
@@ -83,8 +78,8 @@ impl Sys {
 
     /// send sys message from the outside to the inside
     /// of the worker thread of libqaul.
-    pub fn send_to_libqaul(binary_message: Vec<u8>) {
-        if let Err(err) = Self::state().extern_send.send(binary_message) {
+    pub fn send_to_libqaul(state: &crate::QaulState, binary_message: Vec<u8>) {
+        if let Err(err) = state.sys.extern_send.send(binary_message) {
             log::error!("{:?}", err);
         }
     }
@@ -92,15 +87,15 @@ impl Sys {
     /// check the receiving sys channel if there
     /// are new messages from inside libqaul for
     /// the outside.
-    pub fn receive_from_libqaul() -> Result<Vec<u8>, TryRecvError> {
-        Self::state().extern_receive.try_recv()
+    pub fn receive_from_libqaul(state: &crate::QaulState) -> Result<Vec<u8>, TryRecvError> {
+        state.sys.extern_receive.try_recv()
     }
 
     /// send an rpc message from inside libqaul thread
     /// to the extern.
     #[allow(dead_code)]
-    pub fn send_to_extern(message: Vec<u8>) {
-        if let Err(err) = Self::state().libqaul_send.send(message) {
+    pub fn send_to_extern(state: &crate::QaulState, message: Vec<u8>) {
+        if let Err(err) = state.sys.libqaul_send.send(message) {
             log::error!("{:?}", err);
         }
     }
@@ -111,20 +106,30 @@ impl Sys {
     /// protobuf format to rust structures and send it to
     /// the module responsible.
     pub fn process_received_message(
+        state: &crate::QaulState,
         data: Vec<u8>,
         _lan: Option<&mut Lan>,
         _internet: Option<&mut Internet>,
     ) {
         // as there is only BLE module just forward the data
-        Ble::sys_received(data);
+        Ble::sys_received(state, data);
     }
 
     /// sends a SYS message to the outside
     #[allow(unused_variables)]
-    pub fn send_message(data: Vec<u8>) {
+    pub fn send_message(state: &crate::QaulState, data: Vec<u8>) {
         // send to linux BLE module
         #[cfg(all(target_os = "linux", feature = "ble"))]
-        ble_module::rpc::send_to_ble_module(data);
+        {
+            let guard = state.connections.ble.ble_sender.lock().unwrap();
+            if let Some(sender) = guard.as_ref() {
+                if let Err(err) = sender.try_send(data) {
+                    log::error!("{:?}", err);
+                }
+            } else {
+                log::error!("BLE module sender not yet initialized!");
+            }
+        }
 
         // send to android BLE module
         #[cfg(target_os = "android")]

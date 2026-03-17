@@ -48,12 +48,13 @@ pub struct GroupMessage {}
 impl GroupMessage {
     /// process group message from network
     pub fn on_message(
+        state: &crate::QaulState,
         sender_id: &PeerId,
         account_id: &PeerId,
         group_id: &[u8],
         message_id: &[u8],
     ) -> Result<bool, String> {
-        let group = GroupStorage::get_group(account_id.to_owned(), group_id)
+        let group = GroupStorage::get_group(state, account_id.to_owned(), group_id)
             .ok_or_else(|| "group not found".to_string())?;
         let account_id_bytes = account_id.to_bytes();
         let sender_id_bytes = sender_id.to_bytes();
@@ -75,7 +76,7 @@ impl GroupMessage {
         // change members status
         if sender_msg_index > sender.last_message_index {
             sender.last_message_index = sender_msg_index;
-            super::Group::update_group_member(account_id, group_id, &sender);
+            super::Group::update_group_member(state, account_id, group_id, &sender);
         }
 
         Ok(true)

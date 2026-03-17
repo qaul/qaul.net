@@ -95,19 +95,14 @@ impl ChatState {
 }
 
 impl ChatStorage {
-    /// Helper to access the global ChatState from QaulState.
-    fn state() -> &'static ChatState {
-        &crate::QaulState::global().services.chat
-    }
-
     /// initialize chat storage
     pub fn init() {
         // State is already created by QaulState; nothing to do here.
     }
 
     /// Flush all chat-related trees for an account.
-    pub fn flush_account(account_id: &PeerId) {
-        let db_ref = Self::get_db_ref(account_id.to_owned());
+    pub fn flush_account(state: &crate::QaulState, account_id: &PeerId) {
+        let db_ref = Self::get_db_ref(state, account_id.to_owned());
         Self::maybe_flush_tree(
             &db_ref.messages,
             FlushMode::Immediate,
@@ -185,9 +180,9 @@ impl ChatStorage {
 
     /// check if messages exists
     #[allow(dead_code)]
-    pub fn messages_exist(user_id: &PeerId, message_ids: &Vec<Vec<u8>>) -> bool {
+    pub fn messages_exist(state: &crate::QaulState, user_id: &PeerId, message_ids: &Vec<Vec<u8>>) -> bool {
         // get data base of user account
-        let db_ref = Self::get_db_ref(user_id.clone());
+        let db_ref = Self::get_db_ref(state, user_id.clone());
         for id in message_ids {
             if !db_ref.message_ids.contains_key(id).unwrap() {
                 return false;
@@ -198,8 +193,8 @@ impl ChatStorage {
 
     /// remove messages by ids
     #[allow(dead_code)]
-    pub fn remove_messages(user_id: &PeerId, message_ids: &Vec<Vec<u8>>) {
-        let db_ref = Self::get_db_ref(user_id.clone());
+    pub fn remove_messages(state: &crate::QaulState, user_id: &PeerId, message_ids: &Vec<Vec<u8>>) {
+        let db_ref = Self::get_db_ref(state, user_id.clone());
         for id in message_ids {
             match db_ref.message_ids.get(id) {
                 Ok(opt_key) => {
@@ -237,6 +232,7 @@ impl ChatStorage {
     /// If there is a chat message ID set, it also references it in the
     /// chat id data base.
     pub fn save_message(
+        state: &crate::QaulState,
         account_id: &PeerId,
         group_id: &GroupId,
         sender_id: &PeerId,
@@ -246,6 +242,7 @@ impl ChatStorage {
         status: rpc_proto::MessageStatus,
     ) {
         Self::save_message_with_mode(
+            state,
             account_id,
             group_id,
             sender_id,
@@ -262,6 +259,7 @@ impl ChatStorage {
     /// Useful when multiple writes are performed in sequence.
     #[allow(dead_code)]
     pub fn save_message_deferred(
+        state: &crate::QaulState,
         account_id: &PeerId,
         group_id: &GroupId,
         sender_id: &PeerId,
@@ -271,6 +269,7 @@ impl ChatStorage {
         status: rpc_proto::MessageStatus,
     ) {
         Self::save_message_with_mode(
+            state,
             account_id,
             group_id,
             sender_id,
@@ -283,6 +282,7 @@ impl ChatStorage {
     }
 
     fn save_message_with_mode(
+        state: &crate::QaulState,
         account_id: &PeerId,
         group_id: &GroupId,
         sender_id: &PeerId,
@@ -295,7 +295,7 @@ impl ChatStorage {
         log::trace!("chat save_message");
 
         // get data base of user account
-        let db_ref = Self::get_db_ref(account_id.clone());
+        let db_ref = Self::get_db_ref(state, account_id.clone());
 
         // check if message_id already exists
         // this protects the double saving of incoming messages
@@ -315,6 +315,7 @@ impl ChatStorage {
         // update last message
         match flush_mode {
             FlushMode::Immediate => GroupStorage::group_update_last_chat_message(
+                state,
                 account_id.to_owned(),
                 group_id_bytes.clone(),
                 sender_id.to_owned(),
@@ -322,6 +323,7 @@ impl ChatStorage {
                 received_at,
             ),
             FlushMode::Deferred => GroupStorage::group_update_last_chat_message_deferred(
+                state,
                 account_id.to_owned(),
                 group_id_bytes.clone(),
                 sender_id.to_owned(),
@@ -359,12 +361,14 @@ impl ChatStorage {
 
     /// updating chat message status as confirmed
     pub fn update_confirmation(
+        state: &crate::QaulState,
         account_id: PeerId,
         receiver_id: PeerId,
         message_id: &[u8],
         received_at: u64,
     ) {
         Self::update_confirmation_with_mode(
+            state,
             account_id,
             receiver_id,
             message_id,
@@ -376,12 +380,14 @@ impl ChatStorage {
     /// Update confirmation without flushing the messages tree.
     #[allow(dead_code)]
     pub fn update_confirmation_deferred(
+        state: &crate::QaulState,
         account_id: PeerId,
         receiver_id: PeerId,
         message_id: &[u8],
         received_at: u64,
     ) {
         Self::update_confirmation_with_mode(
+            state,
             account_id,
             receiver_id,
             message_id,
@@ -391,13 +397,14 @@ impl ChatStorage {
     }
 
     fn update_confirmation_with_mode(
+        state: &crate::QaulState,
         account_id: PeerId,
         receiver_id: PeerId,
         message_id: &[u8],
         received_at: u64,
         flush_mode: FlushMode,
     ) {
-        let db_ref = Self::get_db_ref(account_id);
+        let db_ref = Self::get_db_ref(state, account_id);
         let receiver_id_bytes = receiver_id.to_bytes();
 
         Self::mutate_chat_message_by_id(&db_ref, message_id, flush_mode, |chat_msg| {
@@ -419,43 +426,46 @@ impl ChatStorage {
 
     /// update message status
     pub fn udate_status(
+        state: &crate::QaulState,
         account_id: &PeerId,
         message_id: &[u8],
         status: super::rpc_proto::MessageStatus,
     ) {
-        Self::udate_status_with_mode(account_id, message_id, status, FlushMode::Immediate);
+        Self::udate_status_with_mode(state, account_id, message_id, status, FlushMode::Immediate);
     }
 
     /// Update message status without flushing the messages tree.
     #[allow(dead_code)]
     pub fn udate_status_deferred(
+        state: &crate::QaulState,
         account_id: &PeerId,
         message_id: &[u8],
         status: super::rpc_proto::MessageStatus,
     ) {
-        Self::udate_status_with_mode(account_id, message_id, status, FlushMode::Deferred);
+        Self::udate_status_with_mode(state, account_id, message_id, status, FlushMode::Deferred);
     }
 
     fn udate_status_with_mode(
+        state: &crate::QaulState,
         account_id: &PeerId,
         message_id: &[u8],
         status: super::rpc_proto::MessageStatus,
         flush_mode: FlushMode,
     ) {
-        let db_ref = Self::get_db_ref(account_id.to_owned());
+        let db_ref = Self::get_db_ref(state, account_id.to_owned());
         Self::mutate_chat_message_by_id(&db_ref, message_id, flush_mode, |chat_msg| {
             chat_msg.status = status as i32;
         });
     }
 
     /// Get chat messages of a specific conversation from data base
-    pub fn get_messages(account_id: PeerId, group_id: Vec<u8>) -> rpc_proto::ChatConversationList {
+    pub fn get_messages(state: &crate::QaulState, account_id: PeerId, group_id: Vec<u8>) -> rpc_proto::ChatConversationList {
         // create empty messages list
         let mut message_list: Vec<rpc_proto::ChatMessage> = Vec::new();
 
         if let Ok(group_id_typed) = GroupId::from_bytes(&group_id) {
             // get database references for this user account
-            let db_ref = Self::get_db_ref(account_id);
+            let db_ref = Self::get_db_ref(state, account_id);
 
             // create message keys
             let (first_key, last_key) = Self::get_db_key_range(group_id_typed.as_slice());
@@ -478,7 +488,7 @@ impl ChatStorage {
             }
 
             // clear unread messages from group
-            GroupStorage::group_clear_unread(account_id, group_id.clone());
+            GroupStorage::group_clear_unread(state, account_id, group_id.clone());
         }
 
         rpc_proto::ChatConversationList {
@@ -524,11 +534,11 @@ impl ChatStorage {
     }
 
     /// get user account data base tree references
-    fn get_db_ref(account_id: PeerId) -> ChatAccountDb {
+    fn get_db_ref(state: &crate::QaulState, account_id: PeerId) -> ChatAccountDb {
         // check if user account data exists
         {
             // get chat state
-            let chat = Self::state().inner.read().unwrap();
+            let chat = state.services.chat.inner.read().unwrap();
 
             // check if user account ID is in map
             if let Some(chat_user) = chat.db_ref.get(&account_id.to_bytes()) {
@@ -540,7 +550,7 @@ impl ChatStorage {
         }
 
         // create user data if it does not exist
-        let chat_user = Self::create_chatuser(account_id);
+        let chat_user = Self::create_chatuser(state, account_id);
 
         // return chat_user structure
         ChatAccountDb {
@@ -550,9 +560,9 @@ impl ChatStorage {
     }
 
     /// create user data when it does not exist
-    fn create_chatuser(account_id: PeerId) -> ChatAccountDb {
+    fn create_chatuser(state: &crate::QaulState, account_id: PeerId) -> ChatAccountDb {
         // get user data base
-        let db = DataBase::get_user_db(account_id);
+        let db = DataBase::get_user_db(state, account_id);
 
         // open trees
         let messages: sled::Tree = db.open_tree("chat_messages").unwrap();
@@ -564,7 +574,7 @@ impl ChatStorage {
         };
 
         // get chat state for writing
-        let mut chat = Self::state().inner.write().unwrap();
+        let mut chat = state.services.chat.inner.write().unwrap();
 
         // add user to state
         chat.db_ref.insert(account_id.to_bytes(), chat_user.clone());

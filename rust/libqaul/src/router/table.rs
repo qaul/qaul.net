@@ -172,31 +172,32 @@ impl RoutingTableState {
 
 impl RoutingTable {
     /// set and replace routing table with a new table
-    /// Delegates to the global RouterState instance.
-    pub fn set(new_table: RoutingTable) {
-        super::RouterState::global().routing_table.set(new_table);
+    /// Delegates to the provided RouterState instance.
+    pub fn set(router: &super::RouterState, new_table: RoutingTable) {
+        router.routing_table.set(new_table);
     }
 
     /// Create routing information for a specific neighbour node.
-    /// Delegates to the global RouterState instance.
+    /// Delegates to the provided RouterState instance.
     pub fn create_routing_info(
+        router: &super::RouterState,
         neighbour: PeerId,
         last_sent: u64,
     ) -> router_net_proto::RoutingInfoTable {
-        super::RouterState::global()
+        router
             .routing_table
             .create_routing_info(neighbour, last_sent)
     }
 
     /// get online users and hop count
-    /// Delegates to the global RouterState instance.
-    pub fn get_online_users() -> BTreeMap<Vec<u8>, u8> {
-        super::RouterState::global().routing_table.get_online_users()
+    /// Delegates to the provided RouterState instance.
+    pub fn get_online_users(router: &super::RouterState) -> BTreeMap<Vec<u8>, u8> {
+        router.routing_table.get_online_users()
     }
 
     /// get online users info
-    pub fn get_online_users_info() -> BTreeMap<Vec<u8>, Vec<RoutingConnectionEntry>> {
-        let routing_table = super::RouterState::global()
+    pub fn get_online_users_info(router: &super::RouterState) -> BTreeMap<Vec<u8>, Vec<RoutingConnectionEntry>> {
+        let routing_table = router
             .routing_table
             .inner
             .read()
@@ -211,8 +212,8 @@ impl RoutingTable {
     }
 
     /// send protobuf RPC routing table list
-    pub fn rpc_send_routing_table(request_id: String) {
-        let routing_table = super::RouterState::global()
+    pub fn rpc_send_routing_table(state: &crate::QaulState, router: &super::RouterState, request_id: String) {
+        let routing_table = router
             .routing_table
             .inner
             .read()
@@ -268,6 +269,7 @@ impl RoutingTable {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             crate::rpc::proto::Modules::Router.into(),
             request_id,
@@ -283,8 +285,8 @@ impl RoutingTable {
     ///
     /// It selects the best route according to the rank_routing_connection function.
     ///
-    pub fn get_route_to_user(user_id: PeerId) -> Option<RoutingConnectionEntry> {
-        let routing_table = super::RouterState::global()
+    pub fn get_route_to_user(router: &super::RouterState, user_id: PeerId) -> Option<RoutingConnectionEntry> {
+        let routing_table = router
             .routing_table
             .inner
             .read()

@@ -10,14 +10,11 @@
 //! libqaul.
 //! The communication will happen via protobuf rpc messages.
 
-use crossbeam_channel::TryRecvError;
 use directories::ProjectDirs;
 use std::collections::BTreeMap;
 use std::sync::Arc;
 use std::thread;
 
-use crate::rpc::sys::Sys;
-use crate::rpc::Rpc;
 use crate::Libqaul;
 
 /// C API module
@@ -27,9 +24,6 @@ mod c;
 /// The module only compiled, when the compile target is android.
 #[cfg(target_os = "android")]
 pub mod android;
-
-/// Global instance holder for backward compatibility
-static INSTANCE: std::sync::OnceLock<Arc<Libqaul>> = std::sync::OnceLock::new();
 
 /// Start libqaul in a separate thread and return the instance
 ///
@@ -50,8 +44,7 @@ static INSTANCE: std::sync::OnceLock<Arc<Libqaul>> = std::sync::OnceLock::new();
 /// // Access instance data
 /// println!("Node ID: {}", instance.node_id());
 ///
-/// // RPC communication still works via global channels
-/// libqaul::api::send_rpc(message);
+/// // RPC communication via instance.state channels
 /// ```
 pub fn start_instance_in_thread(
     storage_path: String,
@@ -85,17 +78,10 @@ pub fn start_instance_in_thread(
          Check if another process is using the database.",
     );
 
-    // Store in global for backward compatibility
-    let _ = INSTANCE.set(Arc::clone(&instance));
+    // Store state for C FFI functions (the only global needed for extern "C" ABI)
+    c::set_c_state(Arc::clone(&instance.state));
 
     instance
-}
-
-/// Get the global instance (if started via start/start_with_config)
-///
-/// Returns None if libqaul hasn't been started yet.
-pub fn get_instance() -> Option<Arc<Libqaul>> {
-    INSTANCE.get().map(Arc::clone)
 }
 
 /// start libqaul in an own thread
@@ -177,63 +163,4 @@ pub fn start_desktop() -> Option<Arc<Libqaul>> {
 pub fn start_android(storage_path: String) -> Arc<Libqaul> {
     // start libqaul in an own thread
     start_instance_in_thread(storage_path, None)
-}
-
-/// Check if libqaul finished initializing
-///
-/// The initialization of libqaul can take several seconds.
-/// If you send any message before it finished initializing, libqaul will crash.
-/// Wait therefore until this function returns true before sending anything to libqaul.
-pub fn initialization_finished() -> bool {
-    if let Some(instance) = INSTANCE.get() {
-        return instance.is_initialized();
-    }
-    false
-}
-
-/// send an RPC message to libqaul
-pub fn send_rpc(binary_message: Vec<u8>) {
-    // Prefer instance-based path when available
-    if let Some(instance) = INSTANCE.get() {
-        instance.state.rpc.send_to_libqaul(binary_message);
-    } else {
-        Rpc::send_to_libqaul(binary_message);
-    }
-}
-
-/// receive a RPC message from libqaul
-pub fn receive_rpc() -> Result<Vec<u8>, TryRecvError> {
-    if let Some(instance) = INSTANCE.get() {
-        instance.state.rpc.receive_from_libqaul()
-    } else {
-        Rpc::receive_from_libqaul()
-    }
-}
-
-/// count of rpc messages to receive in the queue
-pub fn receive_rpc_queued() -> usize {
-    Rpc::receive_from_libqaul_queue_length()
-}
-
-/// count of sent rpc messages
-pub fn send_rpc_count() -> i32 {
-    Rpc::send_rpc_count()
-}
-
-/// send a SYS message to libqaul
-pub fn send_sys(binary_message: Vec<u8>) {
-    if let Some(instance) = INSTANCE.get() {
-        instance.state.sys.send_to_libqaul(binary_message);
-    } else {
-        Sys::send_to_libqaul(binary_message);
-    }
-}
-
-/// receive a SYS message from libqaul
-pub fn receive_sys() -> Result<Vec<u8>, TryRecvError> {
-    if let Some(instance) = INSTANCE.get() {
-        instance.state.sys.receive_from_libqaul()
-    } else {
-        Sys::receive_from_libqaul()
-    }
 }

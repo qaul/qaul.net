@@ -16,11 +16,11 @@ impl Feed {
     /// CLI command interpretation
     ///
     /// The CLI commands of feed module are processed here
-    pub fn cli(command: &str) {
+    pub fn cli(state: &super::CliState, command: &str) {
         match command {
             // send feed message
             cmd if cmd.starts_with("send ") => {
-                Self::send_feed_message(cmd.strip_prefix("send ").unwrap().to_string());
+                Self::send_feed_message(state, cmd.strip_prefix("send ").unwrap().to_string());
             }
             // request feed list
             cmd if cmd.starts_with("list") => {
@@ -28,14 +28,14 @@ impl Feed {
                     Some(index_str) => {
                         if let Ok(index) = index_str.parse::<u64>() {
                             // request messages
-                            Self::request_feed_list(index);
+                            Self::request_feed_list(state, index);
                         } else {
                             log::error!("feed list index is not a valid number");
                         }
                     }
                     None => {
                         // request all messages
-                        Self::request_feed_list(0);
+                        Self::request_feed_list(state, 0);
                     }
                 }
             }
@@ -47,7 +47,7 @@ impl Feed {
                         if parts.len() == 2 {
                             match (parts[0].parse::<u32>(), parts[1].parse::<u32>()) {
                                 (Ok(offset), Ok(limit)) => {
-                                    Self::request_feed_page(offset, limit);
+                                    Self::request_feed_page(state, offset, limit);
                                 }
                                 _ => {
                                     log::error!("feed page offset and limit must be valid numbers");
@@ -59,7 +59,7 @@ impl Feed {
                     }
                     None => {
                         // default pagination: offset=0, limit=10
-                        Self::request_feed_page(0, 10);
+                        Self::request_feed_page(state, 0, 10);
                     }
                 }
             }
@@ -69,7 +69,7 @@ impl Feed {
     }
 
     /// create and send feed message via rpc
-    fn send_feed_message(message_text: String) {
+    fn send_feed_message(state: &super::CliState, message_text: String) {
         // create feed send message
         let proto_message = proto::Feed {
             message: Some(proto::feed::Message::Send(proto::SendMessage {
@@ -84,11 +84,11 @@ impl Feed {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Feed.into(), "".to_string());
+        Rpc::send_message(state, buf, super::rpc::proto::Modules::Feed.into(), "".to_string());
     }
 
     /// request feed list via rpc
-    fn request_feed_list(last_index: u64) {
+    fn request_feed_list(state: &super::CliState, last_index: u64) {
         // create feed list request message
         let proto_message = proto::Feed {
             message: Some(proto::feed::Message::Request(proto::FeedMessageRequest {
@@ -106,11 +106,11 @@ impl Feed {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Feed.into(), "".to_string());
+        Rpc::send_message(state, buf, super::rpc::proto::Modules::Feed.into(), "".to_string());
     }
 
     /// request paginated feed list via rpc
-    fn request_feed_page(offset: u32, limit: u32) {
+    fn request_feed_page(state: &super::CliState, offset: u32, limit: u32) {
         let proto_message = proto::Feed {
             message: Some(proto::feed::Message::Request(proto::FeedMessageRequest {
                 last_received: Vec::new(),
@@ -125,7 +125,7 @@ impl Feed {
             .encode(&mut buf)
             .expect("Vec<u8> provides capacity as needed");
 
-        Rpc::send_message(buf, super::rpc::proto::Modules::Feed.into(), "".to_string());
+        Rpc::send_message(state, buf, super::rpc::proto::Modules::Feed.into(), "".to_string());
     }
 
     /// Process received RPC message

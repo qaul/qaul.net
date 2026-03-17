@@ -8,7 +8,6 @@
 
 use prost::Message;
 use std::sync::Arc;
-use std::sync::OnceLock;
 
 pub mod connections;
 pub mod feed_requester;
@@ -29,9 +28,6 @@ use users::Users;
 pub use qaul_proto::qaul_net_router_net_info as router_net_proto;
 pub use qaul_proto::qaul_rpc_router as proto;
 
-/// Global RouterState instance for backward compatibility.
-/// New code should use instance methods on RouterState directly.
-static GLOBAL_ROUTER_STATE: OnceLock<Arc<RouterState>> = OnceLock::new();
 
 /// Instance-based router state that owns all routing sub-state.
 ///
@@ -94,18 +90,12 @@ impl RouterState {
         }
     }
 
-    /// Get a reference to the global RouterState instance.
-    /// Panics if the global state has not been initialized.
-    pub fn global() -> &'static Arc<RouterState> {
-        GLOBAL_ROUTER_STATE.get().expect("RouterState not initialized")
-    }
-
-    /// Initialize the global RouterState from the current Configuration.
-    /// Called during Router::init() for backward compatibility.
-    fn init_global() {
-        let config = Configuration::get();
+    /// Initialize the RouterState from the current Configuration
+    /// and store it in QaulState.
+    fn init_into_qaul_state(qaul_state: &crate::QaulState) {
+        let config = Configuration::get(qaul_state);
         let state = Arc::new(RouterState::new(config.routing.clone()));
-        let _ = GLOBAL_ROUTER_STATE.set(state);
+        qaul_state.replace_router(state);
     }
 }
 
@@ -144,48 +134,49 @@ pub struct Router {}
 
 impl Router {
     /// Initialize the qaul router
-    pub fn init() {
-        // Initialize the global RouterState instance.
-        // All sub-module state (flooder, feed_requester, user_requester, etc.)
-        // lives inside RouterState. Per-module globals are no longer needed.
-        RouterState::init_global();
+    pub fn init(qaul_state: &crate::QaulState) {
+
+        // Initialize the RouterState and store it in QaulState.
+        RouterState::init_into_qaul_state(qaul_state);
+
+        let rs = qaul_state.get_router();
 
         // initialize direct neighbours table (database-backed)
-        Neighbours::init();
+        Neighbours::init_with_state(qaul_state, &rs);
 
         // initialize users table (database-backed)
-        Users::init();
+        Users::init_with_state(qaul_state, &rs);
 
         // initialize the routing information collection
         // tables per connection module (database-backed)
-        ConnectionTable::init();
+        ConnectionTable::init_with_state(qaul_state, &rs);
 
         // RouterInfo scheduler is already initialized as part of RouterState::init_global().
         // No separate RouterInfo::init() call needed.
     }
 
-    /// Get router configuration from state
-    pub fn get_configuration() -> RoutingOptions {
-        RouterState::global().configuration.clone()
+    /// Get router configuration from an explicit state reference
+    pub fn get_configuration_from(router: &RouterState) -> RoutingOptions {
+        router.configuration.clone()
     }
 
     /// Process incoming RPC request messages and send them to
     /// the submodules
-    pub fn rpc(data: Vec<u8>, request_id: String) {
+    pub fn rpc(state: &crate::QaulState, router_state: &RouterState, data: Vec<u8>, request_id: String) {
         match proto::Router::decode(&data[..]) {
             Ok(router) => {
                 match router.message {
                     Some(proto::router::Message::RoutingTableRequest(_request)) => {
                         // send routing table list
-                        RoutingTable::rpc_send_routing_table(request_id);
+                        RoutingTable::rpc_send_routing_table(state, router_state, request_id);
                     }
                     Some(proto::router::Message::ConnectionsRequest(_request)) => {
                         // send connections list
-                        ConnectionTable::rpc_send_connections_list(request_id);
+                        ConnectionTable::rpc_send_connections_list(state, router_state, request_id);
                     }
                     Some(proto::router::Message::NeighboursRequest(_request)) => {
                         // send neighbours list
-                        Neighbours::rpc_send_neighbours_list(request_id);
+                        Neighbours::rpc_send_neighbours_list(state, router_state, request_id);
                     }
                     _ => {}
                 }

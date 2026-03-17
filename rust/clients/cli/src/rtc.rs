@@ -18,7 +18,7 @@ impl Rtc {
     /// CLI command interpretation
     ///
     /// The CLI commands of RTC module are processed here
-    pub fn cli(command: &str) {
+    pub fn cli(state: &super::CliState, command: &str) {
         match command {
             // rtc session request
             cmd if cmd.starts_with("request ") => {
@@ -28,7 +28,7 @@ impl Rtc {
                 if let Some(user_id_str) = iter.next() {
                     match Self::id_string_to_bin(user_id_str.to_string()) {
                         Ok(user_id) => {
-                            Self::request_session(user_id);
+                            Self::request_session(state, user_id);
                         }
                         Err(e) => {
                             log::error!("{}", e);
@@ -48,7 +48,7 @@ impl Rtc {
                 if let Some(group_id_str) = iter.next() {
                     match Self::id_string_to_bin(group_id_str.to_string()) {
                         Ok(group_id) => {
-                            Self::accept_session(group_id);
+                            Self::accept_session(state, group_id);
                         }
                         Err(e) => {
                             log::error!("{}", e);
@@ -68,7 +68,7 @@ impl Rtc {
                 if let Some(group_id_str) = iter.next() {
                     match Self::id_string_to_bin(group_id_str.to_string()) {
                         Ok(group_id) => {
-                            Self::decline_session(group_id);
+                            Self::decline_session(state, group_id);
                         }
                         Err(e) => {
                             log::error!("{}", e);
@@ -88,7 +88,7 @@ impl Rtc {
                 if let Some(group_id_str) = iter.next() {
                     match Self::id_string_to_bin(group_id_str.to_string()) {
                         Ok(group_id) => {
-                            Self::end_session(group_id);
+                            Self::end_session(state, group_id);
                         }
                         Err(e) => {
                             log::error!("{}", e);
@@ -109,7 +109,7 @@ impl Rtc {
                     match Self::id_string_to_bin(group_id_str.to_string()) {
                         Ok(group_id) => {
                             if let Some(message_str) = iter.next() {
-                                Self::send_session(group_id, message_str.to_string());
+                                Self::send_session(state, group_id, message_str.to_string());
                             } else {
                                 log::error!("rtc send command no contents");
                             }
@@ -126,7 +126,7 @@ impl Rtc {
 
             // rtc send message
             cmd if cmd.starts_with("list") => {
-                Self::list_session();
+                Self::list_session(state);
             }
 
             // unknown command
@@ -152,7 +152,7 @@ impl Rtc {
     }
 
     /// session request
-    fn request_session(user_id: Vec<u8>) {
+    fn request_session(state: &super::CliState, user_id: Vec<u8>) {
         // create group send message
         let proto_message = proto::RtcRpc {
             message: Some(proto::rtc_rpc::Message::RtcSessionRequest(
@@ -169,11 +169,11 @@ impl Rtc {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
+        Rpc::send_message(state, buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
     }
 
     /// accept session
-    fn accept_session(group_id: Vec<u8>) {
+    fn accept_session(state: &super::CliState, group_id: Vec<u8>) {
         // create group send message
         let proto_message = proto::RtcRpc {
             message: Some(proto::rtc_rpc::Message::RtcSessionManagement(
@@ -191,11 +191,11 @@ impl Rtc {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
+        Rpc::send_message(state, buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
     }
 
     /// decline session
-    fn decline_session(group_id: Vec<u8>) {
+    fn decline_session(state: &super::CliState, group_id: Vec<u8>) {
         // decline session message
         let proto_message = proto::RtcRpc {
             message: Some(proto::rtc_rpc::Message::RtcSessionManagement(
@@ -213,11 +213,11 @@ impl Rtc {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
+        Rpc::send_message(state, buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
     }
 
     /// end session
-    fn end_session(group_id: Vec<u8>) {
+    fn end_session(state: &super::CliState, group_id: Vec<u8>) {
         // end session message
         let proto_message = proto::RtcRpc {
             message: Some(proto::rtc_rpc::Message::RtcSessionManagement(
@@ -235,11 +235,11 @@ impl Rtc {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
+        Rpc::send_message(state, buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
     }
 
     /// send session
-    fn send_session(group_id: Vec<u8>, message: String) {
+    fn send_session(state: &super::CliState, group_id: Vec<u8>, message: String) {
         let rtc_content = proto_net::RtcContent {
             content: Some(proto_net::rtc_content::Content::ChatContent(
                 proto_net::RtcChatContent {
@@ -268,11 +268,11 @@ impl Rtc {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
+        Rpc::send_message(state, buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
     }
 
     /// session list
-    fn list_session() {
+    fn list_session(state: &super::CliState) {
         let proto_message = proto::RtcRpc {
             message: Some(proto::rtc_rpc::Message::RtcSessionListRequest(
                 proto::RtcSessionListRequest {},
@@ -286,7 +286,7 @@ impl Rtc {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
+        Rpc::send_message(state, buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
     }
 
     /// Process received RPC message

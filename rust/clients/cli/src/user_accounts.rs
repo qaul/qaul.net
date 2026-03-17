@@ -6,14 +6,9 @@
 use super::rpc::Rpc;
 use prost::Message;
 use serde::{Deserialize, Serialize};
-use state::InitCell;
-use std::sync::RwLock;
 
 /// protobuf RPC definition
 use qaul_proto::qaul_rpc_user_accounts as proto;
-
-/// mutable user account state
-static USERACCOUNTS: InitCell<RwLock<UserAccounts>> = InitCell::new();
 
 /// default user initialization
 pub enum MyUserAccountInitialiation {
@@ -49,7 +44,7 @@ pub struct UserAccounts {
 
 impl UserAccounts {
     /// Initialize User Accounts
-    pub fn init() {
+    pub fn init(state: &super::CliState) {
         // create user accounts state
         let user_accounts = UserAccounts {
             initialiation: MyUserAccountInitialiation::Uninitialized,
@@ -60,18 +55,18 @@ impl UserAccounts {
                 pending_username: None,
             },
         };
-        USERACCOUNTS.set(RwLock::new(user_accounts));
+        *state.user_accounts.write().unwrap() = Some(user_accounts);
 
         // request default user
-        Self::request_default_account();
+        Self::request_default_account(state);
         // check for existing session
-        super::authentication::Auth::restore_session();
+        super::authentication::Auth::restore_session(state);
     }
 
     /// return user id
-    pub fn get_user_id() -> Option<Vec<u8>> {
-        // get state
-        let user_accounts = USERACCOUNTS.get().read().unwrap();
+    pub fn get_user_id(state: &super::CliState) -> Option<Vec<u8>> {
+        let guard = state.user_accounts.read().unwrap();
+        let user_accounts = guard.as_ref().expect("UserAccounts not initialized");
 
         if let Some(my_user_account) = &user_accounts.my_user_account {
             return Some(my_user_account.id.clone());
@@ -83,31 +78,31 @@ impl UserAccounts {
     /// CLI command interpretation
     ///
     /// The CLI commands of user accounts module are processed here
-    pub fn cli(command: &str) {
+    pub fn cli(state: &super::CliState, command: &str) {
         match command {
             // request default user account
             cmd if cmd.starts_with("default") => {
-                Self::request_default_account();
+                Self::request_default_account(state);
             }
             // create new user account
             cmd if cmd.starts_with("create ") => {
-                Self::create_user_account(cmd.strip_prefix("create ").unwrap().to_string());
+                Self::create_user_account(state, cmd.strip_prefix("create ").unwrap().to_string());
             }
             // set/reset password for an existing account
             cmd if cmd.starts_with("password") => {
-                Self::handle_password_change();
+                Self::handle_password_change(state);
             }
             // login command
             cmd if cmd.starts_with("login ") => {
-                Self::handle_login(cmd.strip_prefix("login ").unwrap().to_string());
+                Self::handle_login(state, cmd.strip_prefix("login ").unwrap().to_string());
             }
             // logout command
             "logout" => {
-                Self::handle_logout();
+                Self::handle_logout(state);
             }
             // check authentication status
             "status" => {
-                Self::check_auth_status();
+                Self::check_auth_status(state);
             }
             // unknown command
             _ => log::error!("unknown account command"),
@@ -115,10 +110,10 @@ impl UserAccounts {
     }
 
     /// Create new user account
-    fn create_user_account(args: String) {
+    fn create_user_account(state: &super::CliState, args: String) {
         // logout any existing session before creating new account
-        if let Some(_session) = super::authentication::Auth::get_session_info() {
-            super::authentication::Auth::clear_session();
+        if let Some(_session) = super::authentication::Auth::get_session_info(state) {
+            super::authentication::Auth::clear_session(state);
         }
 
         let (username, password) = Self::parse_create_args(&args);
@@ -140,6 +135,7 @@ impl UserAccounts {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Useraccounts.into(),
             "".to_string(),
@@ -191,9 +187,9 @@ impl UserAccounts {
     }
 
     /// handle the password change for current user
-    fn handle_password_change() {
+    fn handle_password_change(state: &super::CliState) {
         // check if user is logged in
-        if super::authentication::Auth::get_session_info().is_none() {
+        if super::authentication::Auth::get_session_info(state).is_none() {
             println!("You are not logged in, please log into a user account first.");
             return;
         }
@@ -212,6 +208,7 @@ impl UserAccounts {
         proto_message.encode(&mut buf).unwrap();
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Useraccounts.into(),
             "".to_string(),
@@ -219,7 +216,7 @@ impl UserAccounts {
     }
 
     /// Request default user account
-    fn request_default_account() {
+    fn request_default_account(state: &super::CliState) {
         // create info request message
         let proto_message = proto::UserAccounts {
             message: Some(proto::user_accounts::Message::GetDefaultUserAccount(true)),
@@ -233,6 +230,7 @@ impl UserAccounts {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Useraccounts.into(),
             "".to_string(),
@@ -240,7 +238,7 @@ impl UserAccounts {
     }
 
     // Handle login command
-    fn handle_login(args: String) {
+    fn handle_login(state: &super::CliState, args: String) {
         let parts: Vec<&str> = args.split_whitespace().collect();
         if parts.is_empty() {
             println!("Usage: account login <username> -p <password>");
@@ -264,26 +262,26 @@ impl UserAccounts {
         println!("Authenticating user: {}", username);
 
         if let Some(pwd) = password {
-            Self::set_pending_auth(username.clone(), pwd);
+            Self::set_pending_auth(state, username.clone(), pwd);
         } else {
             // for passwordless logins
-            Self::set_pending_auth(username.clone(), String::new());
+            Self::set_pending_auth(state, username.clone(), String::new());
         }
 
-        super::authentication::Auth::initiate_login(username);
+        super::authentication::Auth::initiate_login(state, username);
     }
 
-    fn handle_logout() {
-        if let Some(ref account) = Self::get_my_account() {
-            super::authentication::Auth::logout(account.id.clone());
+    fn handle_logout(state: &super::CliState) {
+        if let Some(ref account) = Self::get_my_account(state) {
+            super::authentication::Auth::logout(state, account.id.clone());
             println!("Logging out...");
         } else {
             println!("Not logged in");
         }
     }
 
-    fn check_auth_status() {
-        if let Some(session) = super::authentication::Auth::get_session_info() {
+    fn check_auth_status(state: &super::CliState) {
+        if let Some(session) = super::authentication::Auth::get_session_info(state) {
             println!("Authentication Status: Logged In");
             println!("  User: {}", session.username);
             println!("  Session created: {}", session.created_at);
@@ -292,27 +290,31 @@ impl UserAccounts {
         }
     }
 
-    fn get_my_account() -> Option<proto::MyUserAccount> {
-        let user_accounts = USERACCOUNTS.get().read().unwrap();
+    fn get_my_account(state: &super::CliState) -> Option<proto::MyUserAccount> {
+        let guard = state.user_accounts.read().unwrap();
+        let user_accounts = guard.as_ref().expect("UserAccounts not initialized");
         user_accounts.my_user_account.clone()
     }
 
     /// Store pending auth info (called by auth module)
-    pub fn set_pending_auth_salt(salt: String) {
-        let mut user_accounts = USERACCOUNTS.get().write().unwrap();
+    pub fn set_pending_auth_salt(state: &super::CliState, salt: String) {
+        let mut guard = state.user_accounts.write().unwrap();
+        let user_accounts = guard.as_mut().expect("UserAccounts not initialized");
         if let Some(ref mut pending) = user_accounts.auth.pending_auth {
             pending.salt = Some(salt);
         }
     }
 
     /// Get pending auth info
-    pub fn get_pending_auth() -> Option<PendingAuth> {
-        let user_accounts = USERACCOUNTS.get().read().unwrap();
+    pub fn get_pending_auth(state: &super::CliState) -> Option<PendingAuth> {
+        let guard = state.user_accounts.read().unwrap();
+        let user_accounts = guard.as_ref().expect("UserAccounts not initialized");
         user_accounts.auth.pending_auth.clone()
     }
 
-    pub fn set_pending_auth(username: String, password: String) {
-        let mut user_accounts = USERACCOUNTS.get().write().unwrap();
+    pub fn set_pending_auth(state: &super::CliState, username: String, password: String) {
+        let mut guard = state.user_accounts.write().unwrap();
+        let user_accounts = guard.as_mut().expect("UserAccounts not initialized");
         user_accounts.auth.pending_auth = Some(PendingAuth {
             username,
             password,
@@ -321,46 +323,46 @@ impl UserAccounts {
         });
     }
 
-    pub fn set_pending_user_id(user_id: Vec<u8>) {
-        let mut user_accounts = USERACCOUNTS.get().write().unwrap();
+    pub fn set_pending_user_id(state: &super::CliState, user_id: Vec<u8>) {
+        let mut guard = state.user_accounts.write().unwrap();
+        let user_accounts = guard.as_mut().expect("UserAccounts not initialized");
         if let Some(ref mut pending) = user_accounts.auth.pending_auth {
             pending.user_id = Some(user_id);
         }
     }
 
-    pub fn clear_pending_auth() {
-        let mut user_accounts = USERACCOUNTS.get().write().unwrap();
+    pub fn clear_pending_auth(state: &super::CliState) {
+        let mut guard = state.user_accounts.write().unwrap();
+        let user_accounts = guard.as_mut().expect("UserAccounts not initialized");
         user_accounts.auth.pending_auth = None;
         user_accounts.auth.pending_username = None;
     }
 
     // Username management
-    pub fn set_pending_username(username: String) {
-        let mut user_accounts = USERACCOUNTS.get().write().unwrap();
+    pub fn set_pending_username(state: &super::CliState, username: String) {
+        let mut guard = state.user_accounts.write().unwrap();
+        let user_accounts = guard.as_mut().expect("UserAccounts not initialized");
         user_accounts.auth.pending_username = Some(username);
     }
 
-    pub fn get_pending_username() -> Option<String> {
-        let user_accounts = USERACCOUNTS.get().read().unwrap();
+    pub fn get_pending_username(state: &super::CliState) -> Option<String> {
+        let guard = state.user_accounts.read().unwrap();
+        let user_accounts = guard.as_ref().expect("UserAccounts not initialized");
         user_accounts.auth.pending_username.clone()
     }
 
     // Session management
-    pub fn set_session_token(token: Option<String>) {
-        let mut user_accounts = USERACCOUNTS.get().write().unwrap();
+    pub fn set_session_token(state: &super::CliState, token: Option<String>) {
+        let mut guard = state.user_accounts.write().unwrap();
+        let user_accounts = guard.as_mut().expect("UserAccounts not initialized");
         user_accounts.auth.session_token = token;
     }
-
-    // pub fn get_session_token() -> Option<String> {
-    //     let user_accounts = USERACCOUNTS.get().read().unwrap();
-    //     user_accounts.auth.session_token.clone()
-    // }
 
     /// Process received RPC message
     ///
     /// Decodes received protobuf encoded binary RPC message
     /// of the user accounts module.
-    pub fn rpc(data: Vec<u8>) {
+    pub fn rpc(state: &super::CliState, data: Vec<u8>) {
         match proto::UserAccounts::decode(&data[..]) {
             Ok(user_accounts) => {
                 match user_accounts.message {
@@ -368,7 +370,8 @@ impl UserAccounts {
                         proto_defaultuseraccount,
                     )) => {
                         // get state
-                        let mut user_accounts = USERACCOUNTS.get().write().unwrap();
+                        let mut state_guard = state.user_accounts.write().unwrap();
+                        let ua_state = state_guard.as_mut().expect("UserAccounts not initialized");
 
                         // check if default user is set
                         if proto_defaultuseraccount.user_account_exists {
@@ -390,8 +393,8 @@ impl UserAccounts {
                                 }
 
                                 // save it to state
-                                user_accounts.my_user_account = Some(my_user_account);
-                                user_accounts.initialiation =
+                                ua_state.my_user_account = Some(my_user_account);
+                                ua_state.initialiation =
                                     MyUserAccountInitialiation::Initialized;
                             } else {
                                 log::error!("unexpected message configuration");
@@ -405,13 +408,14 @@ impl UserAccounts {
                             println!("");
 
                             // save it to state
-                            user_accounts.initialiation =
+                            ua_state.initialiation =
                                 MyUserAccountInitialiation::NoDefaultAccount;
                         }
                     }
                     Some(proto::user_accounts::Message::MyUserAccount(proto_myuseraccount)) => {
                         // get state
-                        let mut user_accounts = USERACCOUNTS.get().write().unwrap();
+                        let mut state_guard = state.user_accounts.write().unwrap();
+                        let ua_state = state_guard.as_mut().expect("UserAccounts not initialized");
 
                         // print received user
                         println!("New user account created:");
@@ -422,8 +426,8 @@ impl UserAccounts {
                         println!("    public key: {}", proto_myuseraccount.key_base58);
 
                         // save it to state
-                        user_accounts.my_user_account = Some(proto_myuseraccount);
-                        user_accounts.initialiation = MyUserAccountInitialiation::Initialized;
+                        ua_state.my_user_account = Some(proto_myuseraccount);
+                        ua_state.initialiation = MyUserAccountInitialiation::Initialized;
                     }
                     // handle password change response
                     Some(proto::user_accounts::Message::SetPasswordResponse(response)) => {

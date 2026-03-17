@@ -39,6 +39,9 @@ pub struct ServicesState {
     pub groups: group::storage::GroupStorageState,
     /// DTN module state (DTN message tracking).
     pub dtn: dtn::DtnModuleState,
+    /// RTC session state.
+    #[cfg(feature = "rtc")]
+    pub rtc: rtc::RtcState,
 }
 
 impl ServicesState {
@@ -52,6 +55,8 @@ impl ServicesState {
             crypto: crypto::CryptoStorageState::new(),
             groups: group::storage::GroupStorageState::new(),
             dtn: dtn::DtnModuleState::new(),
+            #[cfg(feature = "rtc")]
+            rtc: rtc::RtcState::new(),
         }
     }
 }
@@ -77,16 +82,16 @@ impl ServicesModule {
     ///
     /// This should be called after creating the instance to initialize
     /// all sub-services.
-    pub fn initialize(&mut self) {
+    pub fn initialize(&mut self, state: &crate::QaulState) {
         if !self.initialized {
             crypto::Crypto::init();
-            feed::Feed::init();
-            messaging::Messaging::init();
+            feed::Feed::init(state);
+            messaging::Messaging::init(state);
             chat::Chat::init();
             group::Group::init();
             #[cfg(feature = "rtc")]
             rtc::Rtc::init();
-            dtn::Dtn::init();
+            dtn::Dtn::init(state);
             self.initialized = true;
         }
     }
@@ -112,13 +117,13 @@ impl Services {
     /// This function needs to be called at startup
     ///
     /// Note: This uses global state. For new code, prefer using `ServicesModule`.
-    pub fn init() {
+    pub fn init(state: &crate::QaulState) {
         crypto::Crypto::init();
-        feed::Feed::init();
-        messaging::Messaging::init();
+        feed::Feed::init(state);
+        messaging::Messaging::init(state);
         chat::Chat::init();
         group::Group::init();
-        dtn::Dtn::init();
+        dtn::Dtn::init(state);
 
         #[cfg(feature = "rtc")]
         rtc::Rtc::init();

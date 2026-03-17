@@ -18,16 +18,17 @@ pub struct MessagingRetransmit {}
 
 impl MessagingRetransmit {
     /// process retransmission
-    pub fn process() {
+    pub fn process(state: &crate::QaulState) {
         // get unconfirmed table
-        let unconfirmed = super::Messaging::state().unconfirmed.write().unwrap();
+        let unconfirmed = state.services.messaging.unconfirmed.write().unwrap();
         if unconfirmed.unconfirmed.len() == 0 {
             // there are no message to retransmit
             return;
         }
 
         // get online users from route table
-        let online_users = router::table::RoutingTable::get_online_users();
+        let rs = state.get_router();
+        let online_users = router::table::RoutingTable::get_online_users(&rs);
 
         let mut updated = false;
         let cur_time = Timestamp::get_timestamp();
@@ -68,6 +69,7 @@ impl MessagingRetransmit {
                                 bs58::encode(&container.signature).into_string()
                             );
                             super::Messaging::schedule_message(
+                                state,
                                 receiver,
                                 container,
                                 true,

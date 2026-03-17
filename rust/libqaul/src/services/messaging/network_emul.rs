@@ -1,7 +1,4 @@
-use crate::utilities::timestamp::{self, Timestamp};
-use std::sync::{OnceLock, RwLock};
-
-static STATE: OnceLock<RwLock<NetworkEmulatorStat>> = OnceLock::new();
+use std::sync::RwLock;
 
 pub struct NetworkEmulatorStat {
     pub loss_rate: u64,
@@ -12,23 +9,21 @@ pub struct NetworkEmulatorStat {
 pub struct NetworkEmulator {}
 
 impl NetworkEmulator {
-    pub fn init() {
-        let state = NetworkEmulatorStat {
-            loss_rate: 5,
-            total_message: 0,
-            total_drop: 0,
-        };
-        let _ = STATE.set(RwLock::new(state));
+    pub fn init(state: &crate::QaulState) {
+        let mut emul = state.services.messaging.network_emul.write().unwrap();
+        emul.loss_rate = 5;
+        emul.total_message = 0;
+        emul.total_drop = 0;
     }
 
-    pub fn is_lost() -> bool {
-        let mut state = STATE.get().unwrap().write().unwrap();
-        state.total_message = state.total_message + 1;
+    pub fn is_lost(state: &crate::QaulState) -> bool {
+        let mut emul = state.services.messaging.network_emul.write().unwrap();
+        emul.total_message = emul.total_message + 1;
 
-        let lost_rate = state.total_drop * 100 / state.total_message;
-        if lost_rate < state.loss_rate {
-            state.total_drop = state.total_drop + 1;
+        let lost_rate = emul.total_drop * 100 / emul.total_message;
+        if lost_rate < emul.loss_rate {
+            emul.total_drop = emul.total_drop + 1;
         }
-        lost_rate < state.loss_rate
+        lost_rate < emul.loss_rate
     }
 }

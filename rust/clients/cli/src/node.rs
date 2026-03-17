@@ -16,11 +16,11 @@ impl Node {
     /// CLI command interpretation
     ///
     /// The CLI commands of node module are processed here
-    pub fn cli(command: &str) {
+    pub fn cli(state: &super::CliState, command: &str) {
         match command {
             // node functions
             cmd if cmd.starts_with("info") => {
-                Self::info();
+                Self::info(state);
             }
             // unknown command
             _ => log::error!("unknown node command"),
@@ -28,7 +28,7 @@ impl Node {
     }
 
     /// create rpc info request
-    fn info() {
+    fn info(state: &super::CliState) {
         // create info request message
         let proto_message = proto::Node {
             message: Some(proto::node::Message::GetNodeInfo(true)),
@@ -41,7 +41,7 @@ impl Node {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Node.into(), "".to_string());
+        Rpc::send_message(state, buf, super::rpc::proto::Modules::Node.into(), "".to_string());
     }
 
     /// Process received RPC message

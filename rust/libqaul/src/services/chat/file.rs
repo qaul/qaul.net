@@ -324,11 +324,6 @@ impl ChatFileState {
 pub struct ChatFile {}
 /// File sharing module to process transfer, receive and RPC commands
 impl ChatFile {
-    /// Helper to access the global ChatFileState from QaulState.
-    fn state() -> &'static ChatFileState {
-        &crate::QaulState::global().services.chat_files
-    }
-
     /// initialize chat file module
     pub fn init() {
         // State is already created by QaulState; nothing to do here.
@@ -336,11 +331,11 @@ impl ChatFile {
 
     /// File history is stored based on the users account id.
     /// This function getting history table based on the users account id.
-    fn get_db_ref(user_id: &PeerId) -> UserFiles {
+    fn get_db_ref(state: &crate::QaulState, user_id: &PeerId) -> UserFiles {
         // check if user data exists
         {
             // get chat file state
-            let all_files = Self::state().inner.read().unwrap();
+            let all_files = state.services.chat_files.inner.read().unwrap();
 
             // check if user ID is in map
             if let Some(user_files) = all_files.db_ref.get(&user_id.to_bytes()) {
@@ -352,7 +347,7 @@ impl ChatFile {
         }
 
         // create user data if it does not exist
-        let user_files = Self::create_userfiles(user_id);
+        let user_files = Self::create_userfiles(state, user_id);
 
         // return chat_user structure
         UserFiles {
@@ -362,9 +357,9 @@ impl ChatFile {
     }
 
     /// create [user => file history] when it does not exist
-    fn create_userfiles(user_id: &PeerId) -> UserFiles {
+    fn create_userfiles(state: &crate::QaulState, user_id: &PeerId) -> UserFiles {
         // get user data base
-        let db = DataBase::get_user_db(user_id.clone());
+        let db = DataBase::get_user_db(state, user_id.clone());
 
         // open trees
         let histories: sled::Tree = db.open_tree("chat_file").unwrap();
@@ -376,7 +371,7 @@ impl ChatFile {
         };
 
         // get chat file state for writing
-        let mut all_files = Self::state().inner.write().unwrap();
+        let mut all_files = state.services.chat_files.inner.write().unwrap();
 
         // add user to state
         all_files
@@ -389,6 +384,7 @@ impl ChatFile {
 
     /// Update file message confirmation in data base
     pub fn update_confirmation(
+        state: &crate::QaulState,
         account_id: PeerId,
         receiver_id: PeerId,
         file_id: u64,
@@ -397,7 +393,7 @@ impl ChatFile {
         log::trace!("update confirmation");
 
         // get db reference
-        let user_files = ChatFile::get_db_ref(&account_id);
+        let user_files = ChatFile::get_db_ref(state, &account_id);
 
         // get file history
         if let Some(mut file_history) = user_files.get_filehistory(file_id) {
@@ -405,6 +401,7 @@ impl ChatFile {
             if file_history.reception_confirmed(receiver_id) {
                 // update chat message
                 ChatStorage::update_confirmation(
+                    state,
                     account_id,
                     receiver_id,
                     &file_history.message_id,
@@ -423,9 +420,9 @@ impl ChatFile {
     }
 
     /// Create and return the file path for a file
-    fn create_file_path(account_id: PeerId, file_id: u64, file_extension: &str) -> PathBuf {
+    fn create_file_path(state: &crate::QaulState, account_id: PeerId, file_id: u64, file_extension: &str) -> PathBuf {
         // create path to file storage directory
-        let account_storage_path = crate::storage::Storage::get_account_path(account_id);
+        let account_storage_path = crate::storage::Storage::get_account_path(state, account_id);
         let files_storage_path = account_storage_path.join("files");
 
         // create file directory if it doesn't exist
@@ -500,11 +497,12 @@ impl ChatFile {
     /// Getting file histories from table.
     /// This function is called from RPC command (file history [offset limit])
     pub fn file_history(
+        state: &crate::QaulState,
         user_account: &UserAccount,
         history_req: &proto_rpc::FileHistoryRequest,
     ) -> Vec<FileHistory> {
         // get DB references
-        let db_ref = Self::get_db_ref(&user_account.id);
+        let db_ref = Self::get_db_ref(state, &user_account.id);
 
         let mut histories: Vec<FileHistory> = vec![];
 
@@ -537,6 +535,7 @@ impl ChatFile {
 
     /// send a file from RPC to users
     fn send(
+        state: &crate::QaulState,
         user_account: &UserAccount,
         group_id: &[u8],
         path_name: String,
@@ -544,7 +543,7 @@ impl ChatFile {
     ) -> Result<bool, String> {
         // get group
         let group;
-        match GroupStorage::get_group(user_account.id, group_id) {
+        match GroupStorage::get_group(state, user_account.id, group_id) {
             Some(v) => group = v,
             None => {
                 match GroupId::from_bytes(group_id) {
@@ -553,10 +552,12 @@ impl ChatFile {
                         match direct_group.is_direct(user_account.id.clone()) {
                             Some(remote_q8id) => {
                                 // get remote user
-                                match Users::get_user_id_by_q8id(&remote_q8id) {
+                                let rs = state.get_router();
+                                match Users::get_user_id_by_q8id(&rs, &remote_q8id) {
                                     Some(remote_id) => {
                                         // create group
                                         group = GroupManage::create_new_direct_chat_group(
+                                            state,
                                             &user_account.id,
                                             &remote_id,
                                         )
@@ -610,7 +611,7 @@ impl ChatFile {
         let file_id = Self::generate_file_id(group_id, &user_id_bytes, &file_name, size);
 
         // get file path
-        let file_path = Self::create_file_path(user_account.id, file_id, extension.as_str());
+        let file_path = Self::create_file_path(state, user_account.id, file_id, extension.as_str());
 
         // TODO: start in new async thread here
 
@@ -626,7 +627,7 @@ impl ChatFile {
         }
 
         // create message ID
-        let message_id = group::GroupManage::get_new_message_id(&user_account.id, group_id);
+        let message_id = group::GroupManage::get_new_message_id(state, &user_account.id, group_id);
 
         // 1. file info message
         let file_info = proto_net::ChatFileInfo {
@@ -648,6 +649,7 @@ impl ChatFile {
 
         // send message to all group members
         Self::send_filecontainer_to_group(
+            state,
             user_account,
             &group,
             &message_id,
@@ -677,7 +679,7 @@ impl ChatFile {
             received_at: 0,
         };
 
-        let db_ref = Self::get_db_ref(&user_account.id);
+        let db_ref = Self::get_db_ref(state, &user_account.id);
 
         // save file history to data base
         let file_history_bytes = bincode::serialize(&file_history).unwrap();
@@ -694,6 +696,7 @@ impl ChatFile {
 
         // save file message to chat conversation
         Self::save_filemsg_in_chat(
+            state,
             user_account,
             &user_account.id,
             &groupid,
@@ -732,6 +735,7 @@ impl ChatFile {
 
             // send message to all group members
             Self::send_filecontainer_to_group(
+                state,
                 user_account,
                 &group,
                 &message_id,
@@ -744,6 +748,7 @@ impl ChatFile {
 
         // set file status to sent
         ChatStorage::udate_status(
+            state,
             &user_account.id,
             &message_id,
             super::rpc_proto::MessageStatus::Sent,
@@ -756,6 +761,7 @@ impl ChatFile {
     ///
     /// Creates a chat message and saves it to the chat db.
     fn save_filemsg_in_chat(
+        state: &crate::QaulState,
         user_account: &UserAccount,
         sender_id: &PeerId,
         group_id: &GroupId,
@@ -775,6 +781,7 @@ impl ChatFile {
 
         // save file message to chat
         ChatStorage::save_message(
+            state,
             &user_account.id,
             &group_id,
             &sender_id,
@@ -787,6 +794,7 @@ impl ChatFile {
 
     /// Pack a FileContainer message and send it to all Group members
     fn send_filecontainer_to_group(
+        state: &crate::QaulState,
         user_account: &UserAccount,
         group: &Group,
         message_id: &[u8],
@@ -811,6 +819,7 @@ impl ChatFile {
         let message_bytes = message.encode_to_vec();
 
         Group::send_to_remote_members(
+            state,
             user_account,
             group,
             &message_bytes,
@@ -840,6 +849,7 @@ impl ChatFile {
     /// This function will check if the file is fully downloaded,
     /// and will initiate the storage process if yes.
     fn try_store_file(
+        state: &crate::QaulState,
         user_account: &UserAccount,
         user_files: UserFiles,
         file_history: FileHistory,
@@ -858,18 +868,19 @@ impl ChatFile {
         if (count + 1) as u32 == file_history.message_count {
             log::trace!("store_file");
 
-            Self::store_file(user_account, user_files, file_history);
+            Self::store_file(state, user_account, user_files, file_history);
         }
     }
 
     /// Store a completely downloaded file
-    fn store_file(user_account: &UserAccount, user_files: UserFiles, file_history: FileHistory) {
+    fn store_file(state: &crate::QaulState, user_account: &UserAccount, user_files: UserFiles, file_history: FileHistory) {
         // get all chunks from data base
         let file_id_bytes = file_history.file_id.to_be_bytes();
         let iterator = user_files.get_file_chunks(&file_id_bytes);
 
         // create file
         let file_path = Self::create_file_path(
+            state,
             user_account.id,
             file_history.file_id,
             &file_history.file_extension,
@@ -900,6 +911,7 @@ impl ChatFile {
 
         // set file status to received
         ChatStorage::udate_status(
+            state,
             &user_account.id,
             &file_history.message_id,
             super::rpc_proto::MessageStatus::Received,
@@ -908,13 +920,14 @@ impl ChatFile {
 
     /// process chat file data message
     fn process_data_message(
+        state: &crate::QaulState,
         user_account: &UserAccount,
         _sender_id: PeerId,
         _group_id: Vec<u8>,
         file_data: proto_net::ChatFileData,
     ) {
         // get DB references
-        let user_files = Self::get_db_ref(&user_account.id);
+        let user_files = Self::get_db_ref(state, &user_account.id);
 
         // save file chunk in DB
         user_files.save_file_chunk(file_data.file_id, file_data.start_index, file_data.data);
@@ -923,7 +936,7 @@ impl ChatFile {
         match user_files.get_filehistory(file_data.file_id) {
             Some(file_history) => {
                 // create file once everything has been received
-                Self::try_store_file(user_account, user_files, file_history);
+                Self::try_store_file(state, user_account, user_files, file_history);
             }
             None => {
                 log::warn!("haven't received file info message yet");
@@ -956,6 +969,7 @@ impl ChatFile {
 
     /// process chat file info message
     fn process_info_message(
+        state: &crate::QaulState,
         user_account: &UserAccount,
         sender_id: PeerId,
         group_id: Vec<u8>,
@@ -964,7 +978,7 @@ impl ChatFile {
         file_info: proto_net::ChatFileInfo,
     ) {
         // get db
-        let user_files = Self::get_db_ref(&user_account.id);
+        let user_files = Self::get_db_ref(state, &user_account.id);
 
         // check if it already exists in DB
         let file_history;
@@ -997,6 +1011,7 @@ impl ChatFile {
 
         // save message to chat
         Self::save_filemsg_in_chat(
+            state,
             user_account,
             &sender_id,
             &groupid,
@@ -1005,11 +1020,12 @@ impl ChatFile {
         );
 
         // create file once everything has been received
-        Self::try_store_file(user_account, user_files, file_history);
+        Self::try_store_file(state, user_account, user_files, file_history);
     }
 
     /// process chat file container message from network
     pub fn process_net_chatfilecontainer(
+        state: &crate::QaulState,
         sender_id: PeerId,
         user_account: UserAccount,
         group_id: Vec<u8>,
@@ -1022,6 +1038,7 @@ impl ChatFile {
             Ok(messaging) => match messaging.message {
                 Some(proto_net::chat_file_container::Message::FileInfo(file_info)) => {
                     Self::process_info_message(
+                        state,
                         &user_account,
                         sender_id,
                         group_id,
@@ -1031,7 +1048,7 @@ impl ChatFile {
                     );
                 }
                 Some(proto_net::chat_file_container::Message::FileData(file_data)) => {
-                    Self::process_data_message(&user_account, sender_id, group_id, file_data);
+                    Self::process_data_message(state, &user_account, sender_id, group_id, file_data);
                 }
                 None => {
                     log::error!(
@@ -1052,16 +1069,17 @@ impl ChatFile {
     }
 
     /// Process incoming RPC request messages for file sharing module
-    pub async fn rpc(data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
+    pub async fn rpc(state: &crate::QaulState, data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
         let account_id = PeerId::from_bytes(&user_id).unwrap();
 
         match proto_rpc::ChatFile::decode(&data[..]) {
             Ok(chatfile) => {
                 match chatfile.message {
                     Some(proto_rpc::chat_file::Message::SendFileRequest(send_req)) => {
-                        let user_account = UserAccounts::get_by_id(account_id).unwrap();
+                        let user_account = UserAccounts::get_by_id(state,account_id).unwrap();
 
                         if let Err(e) = Self::send(
+                            state,
                             &user_account,
                             &send_req.group_id,
                             send_req.path_name,
@@ -1075,7 +1093,7 @@ impl ChatFile {
 
                         // get user account
                         let user_account;
-                        match UserAccounts::get_by_id(account_id) {
+                        match UserAccounts::get_by_id(state,account_id) {
                             Some(account) => user_account = account,
                             None => {
                                 log::error!("user account not found");
@@ -1083,7 +1101,7 @@ impl ChatFile {
                             }
                         }
 
-                        let list = Self::file_history(&user_account, &history_req);
+                        let list = Self::file_history(state, &user_account, &history_req);
 
                         let mut histories = Vec::with_capacity(list.len());
                         for entry in &list {
@@ -1110,6 +1128,7 @@ impl ChatFile {
 
                         // send message
                         Rpc::send_message(
+                            state,
                             buf,
                             crate::rpc::proto::Modules::Chatfile.into(),
                             request_id,
