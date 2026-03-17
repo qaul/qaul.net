@@ -1,0 +1,37 @@
+{
+  "topology": "line-5",
+  "node_count": 5,
+  "tests": {
+    "test_route_discovery": {
+      "passed": true,
+      "convergence_time_s": 100.6,
+      "discovery_timeline": {
+        "hPG5RSucj34": 5.0,
+        "WFS3UeK76e4": 15.1,
+        "ZHHL6ydcREB": 15.1,
+        "H75MtX17WcF": 100.6,
+        "bXB6eBcFTNZ": 100.6
+      },
+      "notes": "all 5 nodes discovered in 100.6s (limit 120s)",
+      "elapsed_s": 100.6
+    },
+    "test_route_stability": {
+      "passed": false,
+      "notes": "RTT drift exceeded 20% tolerance:\n  hA6SBjGtRBi: baseline 765ms, observed 925ms (21% drift, limit 20%)\n  hA6SBjGtRBi: baseline 765ms, observed 925ms (21% drift, limit 20%)\n  hA6SBjGtRBi: baseline 765ms, observed 925ms (21% drift, limit 20%)\n  2wv8SCqof9k: baseline 440ms, observed 635ms (44% drift, limit 20%)\n  2wv8SCqof9k: baseline 440ms, observed 583ms (32% drift, limit 20%)\n  2wv8SCqof9k: baseline 440ms, observed 576ms (31% drift, limit 20%)",
+      "elapsed_s": 240.4
+    },
+    "test_neighbour_detection": {
+      "passed": true,
+      "nodes_checked": 5,
+      "notes": "all 5 nodes have correct LAN neighbours matching topology",
+      "elapsed_s": 30.3
+    },
+    "test_route_expiration": {
+      "passed": false,
+      "notes": "target user jUPn7FVFXcT not found in observer 0000's routing table after 120s \u2014 convergence incomplete",
+      "elapsed_s": 120.1
+    }
+  },
+  "overall_passed": false,
+  "timestamp": "2026-03-17T11:19:23.345049+00:00"
+}

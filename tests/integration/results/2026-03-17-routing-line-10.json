@@ -1,0 +1,45 @@
+{
+  "topology": "line-10",
+  "node_count": 10,
+  "tests": {
+    "test_route_discovery": {
+      "passed": true,
+      "convergence_time_s": 145.9,
+      "discovery_timeline": {
+        "7og57vHYQuu": 5.0,
+        "ahoGGwCX99G": 15.1,
+        "JHba7Lpva9u": 25.1,
+        "UbpotWMJKsY": 45.3,
+        "gcjH1n5QMqV": 130.8,
+        "XmbnP169KYE": 130.8,
+        "NksE1eFg8FF": 130.8,
+        "X9a4kfRJ33A": 130.8,
+        "Y3jKz9RBhQN": 130.8,
+        "AZswN9CDN5D": 145.9
+      },
+      "notes": "all 10 nodes discovered in 145.9s (limit 200s)",
+      "elapsed_s": 145.9
+    },
+    "test_route_stability": {
+      "passed": false,
+      "notes": "route flapping detected across 12 polls:\n  cgtynVZXrY1: 1 flap(s)\n  5pjoftCrmv1: 1 flap(s)",
+      "elapsed_s": 320.4
+    },
+    "test_neighbour_detection": {
+      "passed": true,
+      "nodes_checked": 10,
+      "notes": "all 10 nodes have correct LAN neighbours matching topology",
+      "elapsed_s": 30.6
+    },
+    "test_route_expiration": {
+      "passed": true,
+      "hop_count": 9,
+      "expiration_threshold_s": 100,
+      "actual_expiration_s": 87.3,
+      "notes": "node 0009 at hop 9: route expired in 87.3s (threshold 100s)",
+      "elapsed_s": 287.4
+    }
+  },
+  "overall_passed": false,
+  "timestamp": "2026-03-17T12:50:39.913534+00:00"
+}

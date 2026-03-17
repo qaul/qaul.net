@@ -1,0 +1,25 @@
+{
+  "topology": "line-10",
+  "node_count": 10,
+  "discovery_wait_s": 200,
+  "propagation_wait_s": 30,
+  "tests": {
+    "test_node_startup": {
+      "passed": true,
+      "notes": "all 10 nodes responded with distinct IDs",
+      "elapsed_s": 0.3
+    },
+    "test_user_discovery": {
+      "passed": false,
+      "notes": "node 0000 does not know about node 0009 after 200s\n  known user IDs: ['12D3KooWEW1PUdH24vR3m4zLY8waWj3cWoLLSh5DPgTowmqdEkQa', '12D3KooWEiWWuB6X6EenxU72e4DWVfZCbkvzxwhS47hGUDUPSxju', '12D3KooWMDrbxgdUtphytsA68DHUTs3zTUbzuXMxftECcadbShER', '12D3KooWMRq7RRpuU1L4aFrC8VHvh9JmZqecDXCXfux4Dqh6QHzJ', '12D3KooWP9nYYvVoaNWDWxKPd8tGCnidZYcfVnDeB4mRxHmkbWLj', '12D3KooWPc5vHWqQsQKFU4YQCcDmDoBxeDGTDFxEnNi9nrAiJnff', '12D3KooWSAioikwwGiEUJmX79ZSB3FCcZVUUEKm3UZWR67PREanz']",
+      "elapsed_s": 200.1
+    },
+    "test_message_routing": {
+      "passed": false,
+      "notes": "message not found on node 0009 after 30s\n  messages seen: []",
+      "elapsed_s": 230.1
+    }
+  },
+  "overall_passed": false,
+  "timestamp": "2026-03-13T15:03:32.735381Z"
+}
