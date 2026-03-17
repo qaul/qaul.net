@@ -12,7 +12,6 @@
 
 use libp2p::{floodsub::Topic, PeerId};
 use prost::Message;
-use state::InitCell;
 use std::{collections::BTreeMap, fmt, sync::RwLock};
 use uuid::Uuid;
 
@@ -35,16 +34,6 @@ pub use qaul_proto::qaul_rpc_ble as proto_rpc;
 /// Protobuf BLE system communication with BLE module
 pub use qaul_proto::qaul_sys_ble as proto;
 
-/// Module State
-static BLE: InitCell<RwLock<Ble>> = InitCell::new();
-/// List of detected BLE nodes needing ID confirmation
-static TO_CONFIRM: InitCell<RwLock<BTreeMap<Vec<u8>, ToConfirm>>> = InitCell::new();
-/// List of discovered and available BLE nodes
-///
-/// This structure contains a translation table from
-/// the BLE ID to the BLE ID
-static NODES: InitCell<RwLock<BTreeMap<Vec<u8>, BleNode>>> = InitCell::new();
-
 /// Instance-based BLE module state.
 /// Replaces the global BLE, TO_CONFIRM, and NODES statics for multi-instance use.
 pub struct BleModuleState {
@@ -54,6 +43,9 @@ pub struct BleModuleState {
     pub to_confirm: RwLock<BTreeMap<Vec<u8>, ToConfirm>>,
     /// Discovered and available BLE nodes.
     pub nodes: RwLock<BTreeMap<Vec<u8>, BleNode>>,
+    /// BLE crypto module state (transport encryption sessions).
+    #[cfg(feature = "ble-encryption")]
+    pub crypto: RwLock<crypto::BleCryptoModule>,
 }
 
 impl BleModuleState {
@@ -67,6 +59,8 @@ impl BleModuleState {
             }),
             to_confirm: RwLock::new(BTreeMap::new()),
             nodes: RwLock::new(BTreeMap::new()),
+            #[cfg(feature = "ble-encryption")]
+            crypto: RwLock::new(crypto::BleCryptoModule::new()),
         }
     }
 }
@@ -143,19 +137,14 @@ impl Ble {
             ble_module::init(Box::new(|sys_msg| Sys::send_to_libqaul(sys_msg)));
         });
 
-        // initialize local state
+        // initialize local state via QaulState
         {
-            // create node states
-            TO_CONFIRM.set(RwLock::new(BTreeMap::new()));
-            NODES.set(RwLock::new(BTreeMap::new()));
-
-            // set it to state
-            let ble = Ble {
-                ble_id,
-                status: ModuleStatus::Uninitalized,
-                devices: Vec::new(),
-            };
-            BLE.set(RwLock::new(ble));
+            let state = &crate::QaulState::global().connections.ble;
+            // Set BLE ID in the inner state
+            let mut ble = state.inner.write().unwrap();
+            ble.ble_id = ble_id;
+            ble.status = ModuleStatus::Uninitalized;
+            ble.devices = Vec::new();
         }
 
         #[cfg(feature = "ble-encryption")]
@@ -172,7 +161,7 @@ impl Ble {
     /// set module status
     fn status_set(status: ModuleStatus) {
         // get module state
-        let mut ble = BLE.get().write().unwrap();
+        let mut ble = crate::QaulState::global().connections.ble.inner.write().unwrap();
 
         // set status
         ble.status = status;
@@ -242,7 +231,7 @@ impl Ble {
 
             // save to state
             {
-                let mut ble = BLE.get().write().unwrap();
+                let mut ble = crate::QaulState::global().connections.ble.inner.write().unwrap();
                 ble.devices.push(device);
             }
 
@@ -259,7 +248,7 @@ impl Ble {
 
         let qaul_id;
         {
-            let ble = BLE.get().write().unwrap();
+            let ble = crate::QaulState::global().connections.ble.inner.write().unwrap();
             qaul_id = ble.ble_id.clone();
         }
 
@@ -392,7 +381,7 @@ impl Ble {
         // add node to local state
         {
             // get state
-            let mut nodes = NODES.get().write().unwrap();
+            let mut nodes = crate::QaulState::global().connections.ble.nodes.write().unwrap();
 
             // add node
             nodes.insert(q8id, node.clone());
@@ -426,7 +415,7 @@ impl Ble {
         };
 
         // get state
-        let mut nodes = TO_CONFIRM.get().write().unwrap();
+        let mut nodes = crate::QaulState::global().connections.ble.to_confirm.write().unwrap();
 
         // add node
         nodes.insert(q8id.clone(), confirm);
@@ -438,7 +427,7 @@ impl Ble {
     /// Check if node is already scheduled for confirmation
     fn node_confirmation_in_progress(q8id: &Vec<u8>) -> bool {
         // get state
-        let nodes = TO_CONFIRM.get().read().unwrap();
+        let nodes = crate::QaulState::global().connections.ble.to_confirm.read().unwrap();
 
         // search node
         if let Some(to_confirm) = nodes.get(q8id) {
@@ -480,7 +469,7 @@ impl Ble {
         BleCrypto::on_node_unavailable(&message.qaul_id);
 
         // get state
-        let mut nodes = NODES.get().write().unwrap();
+        let mut nodes = crate::QaulState::global().connections.ble.nodes.write().unwrap();
 
         // remove device from list
         if let Some((_, ble_node)) = nodes.remove_entry(&message.qaul_id) {
@@ -495,7 +484,7 @@ impl Ble {
             }
         } else {
             // remove it from TO_CONFIRM list
-            let mut to_confirm = TO_CONFIRM.get().write().unwrap();
+            let mut to_confirm = crate::QaulState::global().connections.ble.to_confirm.write().unwrap();
             if let None = to_confirm.remove_entry(&message.qaul_id) {
                 // remove it from neighbours list
                 log::error!("node to remove not found");
@@ -516,7 +505,7 @@ impl Ble {
 
             // remove node from to_confirm
             {
-                let mut to_confirm = TO_CONFIRM.get().write().unwrap();
+                let mut to_confirm = crate::QaulState::global().connections.ble.to_confirm.write().unwrap();
                 to_confirm.remove_entry(&q8id);
             }
 
@@ -974,7 +963,7 @@ impl Ble {
                 match ble.message {
                     Some(proto_rpc::ble::Message::InfoRequest(_)) => {
                         // get module state
-                        let ble = BLE.get().read().unwrap();
+                        let ble = crate::QaulState::global().connections.ble.inner.read().unwrap();
 
                         // create binary device info message
                         let mut device_info: Vec<u8> = Vec::new();
@@ -1021,9 +1010,9 @@ impl Ble {
                     }
                     Some(proto_rpc::ble::Message::DiscoveredRequest(_)) => {
                         // get nodes state
-                        let nodes = NODES.get().read().unwrap();
+                        let nodes = crate::QaulState::global().connections.ble.nodes.read().unwrap();
                         // get to confirm state
-                        let to_confirm = TO_CONFIRM.get().read().unwrap();
+                        let to_confirm = crate::QaulState::global().connections.ble.to_confirm.read().unwrap();
 
                         // create discovered response message
                         let discovered = proto_rpc::DiscoveredResponse {

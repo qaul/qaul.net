@@ -10,7 +10,6 @@ use libp2p::PeerId;
 use prost::Message;
 use serde::{Deserialize, Serialize};
 use sled;
-use state::InitCell;
 use std::{
     collections::BTreeMap,
     ffi::OsStr,
@@ -38,9 +37,6 @@ pub use qaul_proto::qaul_rpc_chatfile as proto_rpc;
 
 /// Size of the biggest file data package
 pub const DEF_PACKAGE_SIZE: u32 = 64000;
-
-/// mutable state of all file
-static ALLFILES: InitCell<RwLock<AllFiles>> = InitCell::new();
 
 /// Structure to management for file histories based on the each user_id.
 pub struct AllFiles {
@@ -329,13 +325,14 @@ impl ChatFileState {
 pub struct ChatFile {}
 /// File sharing module to process transfer, receive and RPC commands
 impl ChatFile {
+    /// Helper to access the global ChatFileState from QaulState.
+    fn state() -> &'static ChatFileState {
+        &crate::QaulState::global().services.chat_files
+    }
+
     /// initialize chat file module
     pub fn init() {
-        // create file history state
-        let all_files = AllFiles {
-            db_ref: BTreeMap::new(),
-        };
-        ALLFILES.set(RwLock::new(all_files));
+        // State is already created by QaulState; nothing to do here.
     }
 
     /// File history is stored based on the users account id.
@@ -343,8 +340,8 @@ impl ChatFile {
     fn get_db_ref(user_id: &PeerId) -> UserFiles {
         // check if user data exists
         {
-            // get chat state
-            let all_files = ALLFILES.get().read().unwrap();
+            // get chat file state
+            let all_files = Self::state().inner.read().unwrap();
 
             // check if user ID is in map
             if let Some(user_files) = all_files.db_ref.get(&user_id.to_bytes()) {
@@ -379,8 +376,8 @@ impl ChatFile {
             file_chunks,
         };
 
-        // get chat state for writing
-        let mut all_files = ALLFILES.get().write().unwrap();
+        // get chat file state for writing
+        let mut all_files = Self::state().inner.write().unwrap();
 
         // add user to state
         all_files

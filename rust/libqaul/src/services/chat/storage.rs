@@ -8,7 +8,6 @@
 
 use libp2p::PeerId;
 use sled;
-use state::InitCell;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
 
@@ -17,9 +16,6 @@ use crate::services::group::{group_id::GroupId, GroupStorage};
 use crate::storage::database::DataBase;
 use crate::utilities::timestamp::Timestamp;
 use prost::Message;
-
-/// mutable state of chat messages
-static CHAT: InitCell<RwLock<ChatStorage>> = InitCell::new();
 
 /// chat DB references per user account
 #[derive(Clone)]
@@ -99,13 +95,14 @@ impl ChatState {
 }
 
 impl ChatStorage {
+    /// Helper to access the global ChatState from QaulState.
+    fn state() -> &'static ChatState {
+        &crate::QaulState::global().services.chat
+    }
+
     /// initialize chat storage
     pub fn init() {
-        // create chat storage
-        let chat = ChatStorage {
-            db_ref: BTreeMap::new(),
-        };
-        CHAT.set(RwLock::new(chat));
+        // State is already created by QaulState; nothing to do here.
     }
 
     /// Flush all chat-related trees for an account.
@@ -531,7 +528,7 @@ impl ChatStorage {
         // check if user account data exists
         {
             // get chat state
-            let chat = CHAT.get().read().unwrap();
+            let chat = Self::state().inner.read().unwrap();
 
             // check if user account ID is in map
             if let Some(chat_user) = chat.db_ref.get(&account_id.to_bytes()) {
@@ -567,7 +564,7 @@ impl ChatStorage {
         };
 
         // get chat state for writing
-        let mut chat = CHAT.get().write().unwrap();
+        let mut chat = Self::state().inner.write().unwrap();
 
         // add user to state
         chat.db_ref.insert(account_id.to_bytes(), chat_user.clone());

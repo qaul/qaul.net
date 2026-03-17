@@ -10,7 +10,7 @@ impl RtcManaging {
     pub fn session_list(_my_user_id: &PeerId) -> super::proto_rpc::RtcSessionListResponse {
         let mut res = super::proto_rpc::RtcSessionListResponse { sessions: vec![] };
 
-        let sessions = super::RTCSESSIONS.get().read().unwrap();
+        let sessions = super::RTCSESSIONS.get().unwrap().read().unwrap();
         for (_id, session) in sessions.sessions.iter() {
             let entry = super::proto_rpc::RtcSession {
                 group_id: session.group_id.clone(),

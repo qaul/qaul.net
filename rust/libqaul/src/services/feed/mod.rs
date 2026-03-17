@@ -15,7 +15,6 @@ use libp2p::{
 use prost::Message;
 use serde::{Deserialize, Serialize};
 use sled;
-use state::InitCell;
 use std::collections::BTreeMap;
 use std::{convert::TryInto, sync::RwLock};
 
@@ -34,9 +33,6 @@ use crate::utilities::timestamp;
 pub use qaul_proto::qaul_net_feed as proto_net;
 /// Import protobuf message definition
 pub use qaul_proto::qaul_rpc_feed as proto;
-
-/// mutable state of feed messages
-static FEED: InitCell<RwLock<Feed>> = InitCell::new();
 
 /// For storing in data base
 #[derive(Serialize, Deserialize, Clone)]
@@ -78,8 +74,9 @@ pub struct Feed {
 pub struct FeedState {
     /// Feed inner state.
     pub inner: RwLock<Feed>,
-    /// Temporary sled database backing (kept alive for tree references).
-    _db: sled::Db,
+    /// Sled database backing (kept alive for tree references).
+    /// Wrapped in RwLock so `init_production` can swap it after construction.
+    _db: RwLock<sled::Db>,
 }
 
 /// Inner (instance) methods on `Feed` that contain the shared business logic.
@@ -286,6 +283,19 @@ impl Feed {
 }
 
 impl FeedState {
+    /// Create a FeedState from production sled database.
+    pub fn from_production(db: sled::Db, tree: sled::Tree, tree_ids: sled::Tree, last_message: u64) -> Self {
+        Self {
+            inner: RwLock::new(Feed {
+                messages: BTreeMap::new(),
+                tree,
+                tree_ids,
+                last_message,
+            }),
+            _db: RwLock::new(db),
+        }
+    }
+
     /// Create a new empty FeedState with a temporary in-memory database.
     pub fn new() -> Self {
         let db = sled::Config::new().temporary(true).open().unwrap();
@@ -298,7 +308,22 @@ impl FeedState {
                 tree_ids,
                 last_message: 0,
             }),
-            _db: db,
+            _db: RwLock::new(db),
+        }
+    }
+
+    /// Swap the temporary database with a production one and reload the trees.
+    /// Called during `Feed::init()` after `QaulState` is available.
+    pub fn init_production(&self, db: sled::Db, tree: sled::Tree, tree_ids: sled::Tree, last_message: u64) {
+        {
+            let mut feed = self.inner.write().unwrap();
+            feed.tree = tree;
+            feed.tree_ids = tree_ids;
+            feed.last_message = last_message;
+        }
+        {
+            let mut db_lock = self._db.write().unwrap();
+            *db_lock = db;
         }
     }
 
@@ -355,6 +380,11 @@ impl FeedState {
 }
 
 impl Feed {
+    /// Access the global FeedState owned by QaulState.
+    pub(crate) fn state() -> &'static FeedState {
+        &crate::QaulState::global().services.feed
+    }
+
     /// initialize feed module
     pub fn init() {
         // get database and initialize tree
@@ -386,14 +416,8 @@ impl Feed {
             }
         }
 
-        // create feed messages state
-        let feed = Feed {
-            messages: BTreeMap::new(),
-            tree,
-            tree_ids,
-            last_message,
-        };
-        FEED.set(RwLock::new(feed));
+        // swap temporary DB with production DB in existing state
+        Self::state().init_production(db, tree, tree_ids, last_message);
     }
 
     /// Send message via all swarms
@@ -488,7 +512,7 @@ impl Feed {
                         let mut new_message = true;
 
                         {
-                            let feed = FEED.get().read().unwrap();
+                            let feed = Self::state().inner.read().unwrap();
 
                             if feed.messages.contains_key(&feed_container.signature) {
                                 new_message = false;
@@ -537,32 +561,27 @@ impl Feed {
 
     //Save message by sync
     pub fn save_message_by_sync(message_id: &[u8], sender_id: &[u8], content: String, time: u64) {
-        let mut feed = FEED.get().write().unwrap();
-        feed.save_message_by_sync_inner(message_id, sender_id, content, time);
+        Self::state().save_message_by_sync(message_id, sender_id, content, time);
     }
 
     /// Save a Message
     ///
     /// This function saves a new message in the data base and in the in-memory BTreeMap
     fn save_message(signature: Vec<u8>, message: proto_net::FeedMessageContent) {
-        let mut feed = FEED.get().write().unwrap();
-        feed.save_message_inner(signature, message);
+        Self::state().save_message(signature, message);
     }
 
     pub fn get_latest_message_ids(count: usize) -> Vec<Vec<u8>> {
-        let feed = FEED.get().read().unwrap();
-        feed.get_latest_message_ids_inner(count)
+        Self::state().get_latest_message_ids(count)
     }
 
     //return missing feed ids to request to the neighbour
     pub fn process_received_feed_ids(ids: &[Vec<u8>]) -> Vec<Vec<u8>> {
-        let feed = FEED.get().read().unwrap();
-        feed.process_received_feed_ids_inner(ids)
+        Self::state().process_received_feed_ids(ids)
     }
 
     pub fn get_messges_by_ids(ids: &[Vec<u8>]) -> Vec<(Vec<u8>, Vec<u8>, String, u64)> {
-        let feed = FEED.get().read().unwrap();
-        feed.get_messages_by_ids_inner(ids)
+        Self::state().get_messages_by_ids(ids)
     }
 
     /// Get messages from data base
@@ -570,14 +589,12 @@ impl Feed {
     /// This function get messages from data base
     /// that are newer then the last message.
     fn get_messages(last_message: u64) -> proto::FeedMessageList {
-        let feed = FEED.get().read().unwrap();
-        feed.get_messages_inner(last_message)
+        Self::state().get_messages(last_message)
     }
 
     /// Get messages from database using pagination
     fn get_paginated_messages(offset: u32, limit: u32) -> proto::FeedMessageList {
-        let feed = FEED.get().read().unwrap();
-        build_feed_list_from(&feed.tree, offset, limit)
+        Self::state().get_paginated_messages(offset, limit)
     }
 
     /// Sign a message with the private key

@@ -18,7 +18,6 @@ use libp2p::PeerId;
 use noise_protocol::{CipherState, HandshakeState, U8Array, DH};
 use noise_rust_crypto::{ChaCha20Poly1305, Sha256, X25519};
 use rand::Rng;
-use state::InitCell;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
 
@@ -26,9 +25,6 @@ use super::proto_net;
 use crate::node::user_accounts::UserAccounts;
 use crate::router::users::Users;
 use crate::services::crypto::Crypto25519;
-
-/// Global state for BLE crypto sessions (for backward compatibility)
-static BLE_CRYPTO: InitCell<RwLock<BleCryptoModule>> = InitCell::new();
 
 /// BLE Crypto Module - Instance-based session manager
 ///
@@ -535,30 +531,36 @@ impl Default for BleCryptoModule {
 /// For new code, prefer using `BleCryptoModule` directly.
 pub struct BleCrypto;
 
+/// Helper to access the BLE crypto state from QaulState.
+fn ble_crypto() -> &'static RwLock<BleCryptoModule> {
+    &crate::QaulState::global().connections.ble.crypto
+}
+
 impl BleCrypto {
-    /// Initialize the BLE crypto module (global state)
+    /// Initialize the BLE crypto module.
+    ///
+    /// State is now managed by QaulState::global().connections.ble.crypto,
+    /// so this is a no-op aside from logging.
     pub fn init() {
-        let crypto = BleCryptoModule::new();
-        BLE_CRYPTO.set(RwLock::new(crypto));
         log::info!("BLE crypto module initialized");
     }
 
     /// Check if a session is established for the given small_id
     pub fn is_session_established(small_id: &[u8]) -> bool {
-        let crypto = BLE_CRYPTO.get().read().unwrap();
+        let crypto = ble_crypto().read().unwrap();
         crypto.is_session_established(small_id)
     }
 
     /// Get session ID for a given small_id (if session exists)
     #[allow(dead_code)]
     pub fn get_session_id(small_id: &[u8]) -> Option<u32> {
-        let crypto = BLE_CRYPTO.get().read().unwrap();
+        let crypto = ble_crypto().read().unwrap();
         crypto.get_session_id(small_id)
     }
 
     /// Check if there is a pending session for the given small_id
     pub fn has_pending_session(small_id: &[u8]) -> bool {
-        let crypto = BLE_CRYPTO.get().read().unwrap();
+        let crypto = ble_crypto().read().unwrap();
         crypto.has_pending_session(small_id)
     }
 
@@ -567,7 +569,7 @@ impl BleCrypto {
         small_id: &[u8],
         remote_id: PeerId,
     ) -> Option<proto_net::NoiseHandshake> {
-        let mut crypto = BLE_CRYPTO.get().write().unwrap();
+        let mut crypto = ble_crypto().write().unwrap();
         crypto.initiate_handshake(small_id, remote_id)
     }
 
@@ -577,7 +579,7 @@ impl BleCrypto {
         handshake: proto_net::NoiseHandshake,
         remote_id: PeerId,
     ) -> Result<proto_net::NoiseHandshake, String> {
-        let mut crypto = BLE_CRYPTO.get().write().unwrap();
+        let mut crypto = ble_crypto().write().unwrap();
         crypto.process_handshake_1(small_id, handshake, remote_id)
     }
 
@@ -586,7 +588,7 @@ impl BleCrypto {
         small_id: &[u8],
         handshake: proto_net::NoiseHandshake,
     ) -> Result<(), String> {
-        let mut crypto = BLE_CRYPTO.get().write().unwrap();
+        let mut crypto = ble_crypto().write().unwrap();
         crypto.process_handshake_2(small_id, handshake)
     }
 
@@ -595,7 +597,7 @@ impl BleCrypto {
         small_id: &[u8],
         plaintext: Vec<u8>,
     ) -> Result<proto_net::EncryptedBleTransport, String> {
-        let mut crypto = BLE_CRYPTO.get().write().unwrap();
+        let mut crypto = ble_crypto().write().unwrap();
         crypto.encrypt(small_id, plaintext)
     }
 
@@ -604,13 +606,13 @@ impl BleCrypto {
         small_id: &[u8],
         encrypted: proto_net::EncryptedBleTransport,
     ) -> Result<Vec<u8>, String> {
-        let mut crypto = BLE_CRYPTO.get().write().unwrap();
+        let mut crypto = ble_crypto().write().unwrap();
         crypto.decrypt(small_id, encrypted)
     }
 
     /// Clean up session when a node becomes unavailable
     pub fn on_node_unavailable(small_id: &[u8]) {
-        let mut crypto = BLE_CRYPTO.get().write().unwrap();
+        let mut crypto = ble_crypto().write().unwrap();
         crypto.on_node_unavailable(small_id);
     }
 }
