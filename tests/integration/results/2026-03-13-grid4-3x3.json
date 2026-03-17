@@ -1,0 +1,25 @@
+{
+  "topology": "grid4-3x3",
+  "node_count": 9,
+  "discovery_wait_s": 120,
+  "propagation_wait_s": 30,
+  "tests": {
+    "test_node_startup": {
+      "passed": true,
+      "notes": "all 9 nodes responded with distinct IDs",
+      "elapsed_s": 0.3
+    },
+    "test_user_discovery": {
+      "passed": false,
+      "notes": "node 0000 does not know about node 0008 after 120s\n  known user IDs: ['12D3KooWJFWRHvqWJbaunvPUxqhw3BakR5arnksoE6cFE24x2sdx']",
+      "elapsed_s": 120.1
+    },
+    "test_message_routing": {
+      "passed": false,
+      "notes": "message not found on node 0008 after 30s\n  messages seen: []",
+      "elapsed_s": 150.1
+    }
+  },
+  "overall_passed": false,
+  "timestamp": "2026-03-13T15:12:47.080308Z"
+}

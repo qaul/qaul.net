@@ -1,0 +1,40 @@
+{
+  "topology": "grid4-3x3",
+  "node_count": 9,
+  "tests": {
+    "test_route_expiration": {
+      "passed": null,
+      "notes": "skipped \u2014 grid topology has redundant paths"
+    },
+    "test_route_discovery": {
+      "passed": true,
+      "convergence_time_s": 55.4,
+      "discovery_timeline": {
+        "UeamkbRe9NU": 5.0,
+        "AhuvPiAGy49": 10.1,
+        "9Xc4h2PTgts": 15.1,
+        "UbWDN5rJ3nW": 20.2,
+        "1365aQWD1eg": 25.2,
+        "Px8hyufCbmb": 30.2,
+        "fngj2JRnu9k": 40.3,
+        "Ery8Z4uxpcc": 55.4,
+        "E1tJg6UYAvp": 55.4
+      },
+      "notes": "all 9 nodes discovered in 55.4s (limit 120s)",
+      "elapsed_s": 55.5
+    },
+    "test_route_stability": {
+      "passed": false,
+      "notes": "RTT drift exceeded 20% tolerance:\n  Q3erM2ttyL8: baseline 461ms, observed 366ms (21% drift, limit 20%)\n  Q3erM2ttyL8: baseline 461ms, observed 363ms (21% drift, limit 20%)\n  Q3erM2ttyL8: baseline 461ms, observed 332ms (28% drift, limit 20%)\n  Q3erM2ttyL8: baseline 461ms, observed 344ms (25% drift, limit 20%)\n  CcrHg4H3VfW: baseline 1033ms, observed 1494ms (45% drift, limit 20%)\n  CcrHg4H3VfW: baseline 1033ms, observed 1597ms (55% drift, limit 20%)\n  CcrHg4H3VfW: baseline 1033ms, observed 1241ms (20% drift, limit 20%)\n  CcrHg4H3VfW: baseline 1033ms, observed 1252ms (21% drift, limit 20%)\n  9P1sCkzoWee: baseline 1210ms, observed 1913ms (58% drift, limit 20%)\n  9P1sCkzoWee: baseline 1210ms, observed 1470ms (21% drift, limit 20%)\n  9P1sCkzoWee: baseline 1210ms, observed 1857ms (53% drift, limit 20%)\n  fjr4ZCDeEsH: baseline 669ms, observed 905ms (35% drift, limit 20%)\n  fjr4ZCDeEsH: baseline 669ms, observed 1288ms (93% drift, limit 20%)\n  fjr4ZCDeEsH: baseline 669ms, observed 1067ms (59% drift, limit 20%)\n  fjr4ZCDeEsH: baseline 669ms, observed 1139ms (70% drift, limit 20%)\n  fjr4ZCDeEsH: baseline 669ms, observed 850ms (27% drift, limit 20%)\n  fjr4ZCDeEsH: baseline 669ms, observed 963ms (44% drift, limit 20%)\n  fjr4ZCDeEsH: baseline 669ms, observed 986ms (47% drift, limit 20%)\n  d73VQSfpUaY: baseline 790ms, observed 1006ms (27% drift, limit 20%)\n  d73VQSfpUaY: baseline 790ms, observed 1006ms (27% drift, limit 20%)\n  d73VQSfpUaY: baseline 790ms, observed 1006ms (27% drift, limit 20%)\n  d73VQSfpUaY: baseline 790ms, observed 1764ms (123% drift, limit 20%)\n  d73VQSfpUaY: baseline 790ms, observed 1778ms (125% drift, limit 20%)\n  Ma1fRU2iW3z: baseline 572ms, observed 777ms (36% drift, limit 20%)\n  Ma1fRU2iW3z: baseline 572ms, observed 891ms (56% drift, limit 20%)\n  Ma1fRU2iW3z: baseline 572ms, observed 713ms (25% drift, limit 20%)\n  Ma1fRU2iW3z: baseline 572ms, observed 876ms (53% drift, limit 20%)\n  Ma1fRU2iW3z: baseline 572ms, observed 1114ms (95% drift, limit 20%)\n  Ma1fRU2iW3z: baseline 572ms, observed 1451ms (154% drift, limit 20%)\n  Ma1fRU2iW3z: baseline 572ms, observed 940ms (64% drift, limit 20%)\n  Ma1fRU2iW3z: baseline 572ms, observed 1467ms (156% drift, limit 20%)\n  Ma1fRU2iW3z: baseline 572ms, observed 772ms (35% drift, limit 20%)\n  Ma1fRU2iW3z: baseline 572ms, observed 782ms (37% drift, limit 20%)\n  CESgvVgPc2b: baseline 274ms, observed 335ms (22% drift, limit 20%)\n  CESgvVgPc2b: baseline 274ms, observed 466ms (70% drift, limit 20%)\n  CESgvVgPc2b: baseline 274ms, observed 379ms (38% drift, limit 20%)\n  CESgvVgPc2b: baseline 274ms, observed 380ms (39% drift, limit 20%)\n  CESgvVgPc2b: baseline 274ms, observed 473ms (73% drift, limit 20%)\n  CESgvVgPc2b: baseline 274ms, observed 679ms (148% drift, limit 20%)\n  CESgvVgPc2b: baseline 274ms, observed 385ms (41% drift, limit 20%)\n  CESgvVgPc2b: baseline 274ms, observed 422ms (54% drift, limit 20%)\n  CESgvVgPc2b: baseline 274ms, observed 338ms (23% drift, limit 20%)\n  CESgvVgPc2b: baseline 274ms, observed 441ms (61% drift, limit 20%)",
+      "elapsed_s": 240.4
+    },
+    "test_neighbour_detection": {
+      "passed": true,
+      "nodes_checked": 9,
+      "notes": "all 9 nodes have correct LAN neighbours matching topology",
+      "elapsed_s": 30.5
+    }
+  },
+  "overall_passed": false,
+  "timestamp": "2026-03-17T11:35:21.171896+00:00"
+}
