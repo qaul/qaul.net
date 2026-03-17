@@ -24,59 +24,59 @@ pub struct Cli {}
 
 impl Cli {
     /// enter a program line to be processed
-    pub fn process_command(command: String) {
+    pub fn process_command(state: &super::CliState, command: String) {
         match command {
             // node functions
             cmd if cmd.starts_with("node ") => {
-                Node::cli(cmd.strip_prefix("node ").unwrap());
+                Node::cli(state, cmd.strip_prefix("node ").unwrap());
             }
             // user accounts functions
             cmd if cmd.starts_with("account ") => {
-                UserAccounts::cli(cmd.strip_prefix("account ").unwrap());
+                UserAccounts::cli(state, cmd.strip_prefix("account ").unwrap());
             }
             // users functions
             cmd if cmd.starts_with("users ") => {
-                Users::cli(cmd.strip_prefix("users ").unwrap());
+                Users::cli(state, cmd.strip_prefix("users ").unwrap());
             }
             // router functions
             cmd if cmd.starts_with("router ") => {
-                Router::cli(cmd.strip_prefix("router ").unwrap());
+                Router::cli(state, cmd.strip_prefix("router ").unwrap());
             }
             // feed functions
             cmd if cmd.starts_with("feed ") => {
-                Feed::cli(cmd.strip_prefix("feed ").unwrap());
+                Feed::cli(state, cmd.strip_prefix("feed ").unwrap());
             }
             // chat functions
             cmd if cmd.starts_with("chat ") => {
-                Chat::cli(cmd.strip_prefix("chat ").unwrap());
+                Chat::cli(state, cmd.strip_prefix("chat ").unwrap());
             }
             // connections functions
             cmd if cmd.starts_with("connections ") => {
-                Connections::cli(cmd.strip_prefix("connections ").unwrap());
+                Connections::cli(state, cmd.strip_prefix("connections ").unwrap());
             }
             // ble functions
             cmd if cmd.starts_with("ble ") => {
-                Ble::cli(cmd.strip_prefix("ble ").unwrap());
+                Ble::cli(state, cmd.strip_prefix("ble ").unwrap());
             }
             // debugging functions
             cmd if cmd.starts_with("debug ") => {
-                Debug::cli(cmd.strip_prefix("debug ").unwrap());
+                Debug::cli(state, cmd.strip_prefix("debug ").unwrap());
             }
             // file sharing functions
             cmd if cmd.starts_with("file ") => {
-                ChatFile::cli(cmd.strip_prefix("file ").unwrap());
+                ChatFile::cli(state, cmd.strip_prefix("file ").unwrap());
             }
             // group functions
             cmd if cmd.starts_with("group ") => {
-                Group::cli(cmd.strip_prefix("group ").unwrap());
+                Group::cli(state, cmd.strip_prefix("group ").unwrap());
             }
             // rtc functions
             cmd if cmd.starts_with("rtc ") => {
-                Rtc::cli(cmd.strip_prefix("rtc ").unwrap());
+                Rtc::cli(state, cmd.strip_prefix("rtc ").unwrap());
             }
             // dtn functions
             cmd if cmd.starts_with("dtn ") => {
-                Dtn::cli(cmd.strip_prefix("dtn ").unwrap());
+                Dtn::cli(state, cmd.strip_prefix("dtn ").unwrap());
             }
             // unknown command
             _ => log::error!("unknown command"),

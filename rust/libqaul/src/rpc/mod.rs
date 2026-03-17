@@ -157,11 +157,6 @@ fn build_rpc_message(data: Vec<u8>, module: i32, request_id: String, user_id: Ve
 pub struct Rpc {}
 
 impl Rpc {
-    /// Access the global RpcState from QaulState.
-    fn state() -> &'static RpcState {
-        &crate::QaulState::global().rpc
-    }
-
     /// Initialize RPC module.
     /// State is now owned by QaulState, so this is a no-op.
     pub fn init() {
@@ -170,8 +165,8 @@ impl Rpc {
 
     /// send rpc message from the outside to the inside
     /// of the worker thread of libqaul.
-    pub fn send_to_libqaul(binary_message: Vec<u8>) {
-        if let Err(err) = Self::state().extern_send.send(binary_message) {
+    pub fn send_to_libqaul(state: &crate::QaulState, binary_message: Vec<u8>) {
+        if let Err(err) = state.rpc.extern_send.send(binary_message) {
             log::error!("{:?}", err);
         }
     }
@@ -179,19 +174,19 @@ impl Rpc {
     /// check the receiving rpc channel if there
     /// are new messages from inside libqaul for
     /// the outside.
-    pub fn receive_from_libqaul() -> Result<Vec<u8>, TryRecvError> {
-        Self::state().extern_receive.try_recv()
+    pub fn receive_from_libqaul(state: &crate::QaulState) -> Result<Vec<u8>, TryRecvError> {
+        state.rpc.extern_receive.try_recv()
     }
 
     /// get the number of messages in the receiving cue
-    pub fn receive_from_libqaul_queue_length() -> usize {
-        Self::state().extern_receive.len()
+    pub fn receive_from_libqaul_queue_length(state: &crate::QaulState) -> usize {
+        state.rpc.extern_receive.len()
     }
 
     /// send an rpc message from inside libqaul thread
     /// to the extern.
-    pub fn send_to_extern(message: Vec<u8>) {
-        if let Err(err) = Self::state().libqaul_send.send(message) {
+    pub fn send_to_extern(state: &crate::QaulState, message: Vec<u8>) {
+        if let Err(err) = state.rpc.libqaul_send.send(message) {
             log::error!("{:?}", err);
         }
     }
@@ -202,34 +197,38 @@ impl Rpc {
     /// protobuf format to rust structures and send it to
     /// the module responsible.
     pub async fn process_received_message(
+        state: &crate::QaulState,
         data: Vec<u8>,
         lan: Option<&mut Lan>,
         internet: Option<&mut Internet>,
     ) {
-        Self::increase_message_counter();
+        Self::increase_message_counter(state);
 
         match QaulRpc::decode(&data[..]) {
             Ok(message) => {
                 match Modules::try_from(message.module) {
                     Ok(Modules::Node) => {
-                        Self::increase_message_counter();
-                        Node::rpc(message.data, lan, internet, message.request_id);
+                        Self::increase_message_counter(state);
+                        Node::rpc(state, message.data, lan, internet, message.request_id);
                     }
                     Ok(Modules::Rpc) => {
                         log::trace!("Message Modules::Rpc received");
                         // TODO: authorisation
                     }
                     Ok(Modules::Useraccounts) => {
-                        UserAccounts::rpc(message.data, message.user_id, message.request_id);
+                        UserAccounts::rpc(state, message.data, message.user_id, message.request_id);
                     }
                     Ok(Modules::Users) => {
-                        Users::rpc(message.data, message.user_id, message.request_id);
+                        let rs = state.get_router();
+                        Users::rpc(state, &rs, message.data, message.user_id, message.request_id);
                     }
                     Ok(Modules::Router) => {
-                        Router::rpc(message.data, message.request_id);
+                        let rs = state.get_router();
+                        Router::rpc(state, &rs, message.data, message.request_id);
                     }
                     Ok(Modules::Feed) => {
                         Feed::rpc(
+                            state,
                             message.data,
                             message.user_id,
                             lan,
@@ -238,16 +237,17 @@ impl Rpc {
                         );
                     }
                     Ok(Modules::Connections) => {
-                        Connections::rpc(message.data, internet, message.request_id);
+                        Connections::rpc(state, message.data, internet, message.request_id);
                     }
                     Ok(Modules::Ble) => {
-                        Ble::rpc(message.data, message.request_id);
+                        Ble::rpc(state, message.data, message.request_id);
                     }
                     Ok(Modules::Debug) => {
-                        Debug::rpc(message.data, message.user_id, message.request_id);
+                        Debug::rpc(state, message.data, message.user_id, message.request_id);
                     }
                     Ok(Modules::Chat) => {
                         Chat::rpc(
+                            state,
                             message.data,
                             message.user_id,
                             lan,
@@ -257,17 +257,17 @@ impl Rpc {
                     }
                     Ok(Modules::Chatfile) => {
                         log::trace!("Message Modules::Chatfile received");
-                        ChatFile::rpc(message.data, message.user_id, message.request_id).await;
+                        ChatFile::rpc(state, message.data, message.user_id, message.request_id).await;
                     }
                     Ok(Modules::Group) => {
                         log::trace!("Message Modules::Group received");
-                        Group::rpc(message.data, message.user_id, message.request_id);
+                        Group::rpc(state, message.data, message.user_id, message.request_id);
                     }
                     Ok(Modules::Rtc) => {
                         #[cfg(feature = "rtc")]
                         {
                             log::trace!("Message Modules::Rtc received");
-                            Rtc::rpc(message.data, message.user_id, message.request_id);
+                            Rtc::rpc(state, message.data, message.user_id, message.request_id);
                         }
                         #[cfg(not(feature = "rtc"))]
                         {
@@ -276,11 +276,12 @@ impl Rpc {
                     }
                     Ok(Modules::Dtn) => {
                         log::trace!("Message Modules::Group received");
-                        Dtn::rpc(message.data, message.user_id, message.request_id);
+                        Dtn::rpc(state, message.data, message.user_id, message.request_id);
                     }
                     Ok(Modules::Auth) => {
                         log::trace!("Auth message received in CLI");
                         authentication::Authentication::rpc(
+                            state,
                             message.data,
                             message.user_id,
                             message.request_id,
@@ -301,9 +302,9 @@ impl Rpc {
     }
 
     /// sends an RPC message to the outside
-    pub fn send_message(data: Vec<u8>, module: i32, request_id: String, user_id: Vec<u8>) {
+    pub fn send_message(state: &crate::QaulState, data: Vec<u8>, module: i32, request_id: String, user_id: Vec<u8>) {
         let buf = build_rpc_message(data, module, request_id, user_id);
-        Self::send_to_extern(buf);
+        Self::send_to_extern(state, buf);
     }
 
     /// get message count of all messages sent to libqaul
@@ -311,8 +312,8 @@ impl Rpc {
     /// This function is for bug fixing only,
     /// it changes and can be removed anytime.
     /// Please don't use it for anything serious.
-    pub fn send_rpc_count() -> i32 {
-        let counter = Self::state().send_count.read().unwrap();
+    pub fn send_rpc_count(state: &crate::QaulState) -> i32 {
+        let counter = state.rpc.send_count.read().unwrap();
         counter.count
     }
 
@@ -321,8 +322,8 @@ impl Rpc {
     /// This function is for bug fixing only,
     /// it changes and can be removed anytime.
     /// Please don't use it for anything serious.
-    pub fn increase_message_counter() {
-        let mut counter = Self::state().send_count.write().unwrap();
+    pub fn increase_message_counter(state: &crate::QaulState) {
+        let mut counter = state.rpc.send_count.write().unwrap();
         counter.count = counter.count + 1;
     }
 }

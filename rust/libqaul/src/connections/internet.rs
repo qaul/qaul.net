@@ -61,34 +61,34 @@ pub struct QaulInternetBehaviour {
 }
 
 impl QaulInternetBehaviour {
-    pub fn process_events(&mut self, event: QaulInternetEvent) {
+    pub fn process_events(&mut self, state: &crate::QaulState, event: QaulInternetEvent) {
         match event {
             QaulInternetEvent::QaulInfo(ev) => {
-                self.qaul_info_event(ev);
+                self.qaul_info_event(state, ev);
             }
             QaulInternetEvent::QaulMessaging(ev) => {
-                self.qaul_messaging_event(ev);
+                self.qaul_messaging_event(state, ev);
             }
             QaulInternetEvent::Ping(ev) => {
-                self.ping_event(ev);
+                self.ping_event(state, ev);
             }
             QaulInternetEvent::Identify(ev) => {
                 self.identify_event(ev);
             }
             QaulInternetEvent::Floodsub(ev) => {
-                self.floodsub_event(ev);
+                self.floodsub_event(state, ev);
             }
         }
     }
 
-    fn qaul_info_event(&mut self, event: QaulInfoEvent) {
-        events::qaul_info_event(event, ConnectionModule::Internet);
+    fn qaul_info_event(&mut self, state: &crate::QaulState, event: QaulInfoEvent) {
+        events::qaul_info_event(state, event, ConnectionModule::Internet);
     }
-    fn qaul_messaging_event(&mut self, event: QaulMessagingEvent) {
-        events::qaul_messaging_event(event, ConnectionModule::Internet);
+    fn qaul_messaging_event(&mut self, state: &crate::QaulState, event: QaulMessagingEvent) {
+        events::qaul_messaging_event(state, event, ConnectionModule::Internet);
     }
-    fn ping_event(&mut self, event: ping::Event) {
-        events::ping_event(event, ConnectionModule::Internet);
+    fn ping_event(&mut self, state: &crate::QaulState, event: ping::Event) {
+        events::ping_event(state, event, ConnectionModule::Internet);
     }
 
     fn identify_event(&mut self, event: identify::Event) {
@@ -148,12 +148,12 @@ impl QaulInternetBehaviour {
         }
     }
 
-    fn floodsub_event(&mut self, event: floodsub::Event) {
+    fn floodsub_event(&mut self, state: &crate::QaulState, event: floodsub::Event) {
         match event {
             floodsub::Event::Message(msg) => {
                 // feed Message
                 if let Ok(resp) = proto_net::FeedContainer::decode(&msg.data[..]) {
-                    Feed::received(ConnectionModule::Internet, msg.source, resp);
+                    Feed::received(state, ConnectionModule::Internet, msg.source, resp);
                 }
             }
             _ => (),
@@ -229,7 +229,7 @@ fn peerid_from_address_impl(connections: &BTreeMap<String, PeerId>, address: Str
 pub struct InternetState {
     /// Reconnection tracking.
     pub reconnections: RwLock<InternetReConnections>,
-    /// Active connections mapping (address string → PeerId).
+    /// Active connections mapping (address string -> PeerId).
     pub connections: RwLock<BTreeMap<String, PeerId>>,
 }
 
@@ -329,16 +329,15 @@ pub struct Internet {
 
 impl Internet {
     /// Initialize swarm for Internet overlay connection module
-    pub async fn init(node_keys: &Keypair) -> Self {
+    pub async fn init(state: &crate::QaulState, node_keys: &Keypair) -> Self {
         log::trace!("Internet.init() start");
 
-        // Internet state is now managed by QaulState::global().connections.internet
-        // No InitCell initialization needed.
+        // Internet state is managed by state.connections.internet.
 
         // create ping configuration
         let mut ping_config = ping::Config::new();
 
-        let config = Configuration::get();
+        let config = Configuration::get(state);
         ping_config =
             ping_config.with_interval(Duration::from_secs(config.routing.ping_neighbour_period));
 
@@ -346,16 +345,16 @@ impl Internet {
 
         // create behaviour
         let mut behaviour: QaulInternetBehaviour = QaulInternetBehaviour {
-            floodsub: floodsub::Behaviour::new(Node::get_id()),
+            floodsub: floodsub::Behaviour::new(Node::get_id(state)),
             identify: identify::Behaviour::new(identify::Config::new(
                 "/ipfs/0.1.0".into(),
-                Node::get_keys().public(),
+                Node::get_keys(state).public(),
             )),
             ping: ping::Behaviour::new(ping_config),
-            qaul_info: QaulInfo::new(Node::get_id()),
-            qaul_messaging: QaulMessaging::new(Node::get_id()),
+            qaul_info: QaulInfo::new(Node::get_id(state)),
+            qaul_messaging: QaulMessaging::new(Node::get_id(state)),
         };
-        behaviour.floodsub.subscribe(Node::get_topic());
+        behaviour.floodsub.subscribe(Node::get_topic(state));
 
         let mut swarm = SwarmBuilder::with_existing_identity(node_keys.to_owned())
             .with_tokio()
@@ -380,7 +379,7 @@ impl Internet {
 
         // connect swarm to the listening interfaces defined in
         // the configuration array config.internet.listen
-        let config = Configuration::get();
+        let config = Configuration::get(state);
 
         for listen in &config.internet.listen {
             match Swarm::listen_on(&mut swarm, listen.parse().expect("can get a local socket")) {
@@ -410,8 +409,8 @@ impl Internet {
     }
 
     // check if connection is active
-    pub fn is_active_connection(address: &Multiaddr) -> bool {
-        let config = Configuration::get();
+    pub fn is_active_connection(state: &crate::QaulState, address: &Multiaddr) -> bool {
+        let config = Configuration::get(state);
         let address_str = address.to_string();
         for peer in &config.internet.peers {
             if address_str == peer.address {
@@ -447,8 +446,8 @@ impl Internet {
     }
 
     /// set tried time
-    pub fn set_redialed(addresse: &Multiaddr) {
-        crate::QaulState::global().connections.internet.set_redialed(addresse);
+    pub fn set_redialed(state: &crate::QaulState, addresse: &Multiaddr) {
+        state.connections.internet.set_redialed(addresse);
     }
 
     /// redial a remote peer
@@ -457,26 +456,26 @@ impl Internet {
     }
 
     /// add connection entry
-    pub fn add_connection(address: String, peer_id: &PeerId) {
-        crate::QaulState::global().connections.internet.add_connection(address, peer_id);
+    pub fn add_connection(state: &crate::QaulState, address: String, peer_id: &PeerId) {
+        state.connections.internet.add_connection(address, peer_id);
     }
 
     /// peerid from multi-address uri
-    pub fn peerid_from_address(address: String) -> Option<PeerId> {
-        crate::QaulState::global().connections.internet.peerid_from_address(address)
+    pub fn peerid_from_address(state: &crate::QaulState, address: String) -> Option<PeerId> {
+        state.connections.internet.peerid_from_address(address)
     }
 
     /// add reconnection
-    pub fn add_reconnection(address: Multiaddr) {
-        crate::QaulState::global().connections.internet.add_reconnection(address);
+    pub fn add_reconnection(state: &crate::QaulState, address: Multiaddr) {
+        state.connections.internet.add_reconnection(address);
     }
 
-    pub fn remove_reconnection(address: Multiaddr) {
-        crate::QaulState::global().connections.internet.remove_reconnection(address);
+    pub fn remove_reconnection(state: &crate::QaulState, address: Multiaddr) {
+        state.connections.internet.remove_reconnection(address);
     }
 
     /// check redial
-    pub fn check_reconnection() -> Option<Multiaddr> {
-        crate::QaulState::global().connections.internet.check_reconnection()
+    pub fn check_reconnection(state: &crate::QaulState) -> Option<Multiaddr> {
+        state.connections.internet.check_reconnection()
     }
 }

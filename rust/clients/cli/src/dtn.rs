@@ -17,21 +17,21 @@ impl Dtn {
     /// CLI command interpretation
     ///
     /// The CLI commands of dtn are processed here
-    pub fn cli(command: &str) {
+    pub fn cli(state: &super::CliState, command: &str) {
         match command {
             // state
             cmd if cmd.starts_with("state") => {
-                Self::dtn_state();
+                Self::dtn_state(state);
             }
             // config
             cmd if cmd.starts_with("config") => {
-                Self::dtn_config();
+                Self::dtn_config(state);
             }
             // add user
             cmd if cmd.starts_with("add ") => match cmd.strip_prefix("add ") {
                 Some(user_id_str) => {
                     if let Ok(id) = Self::id_string_to_bin(user_id_str.to_string()) {
-                        Self::dtn_add_user(id);
+                        Self::dtn_add_user(state, id);
                     } else {
                         log::error!("invalid user id");
                     }
@@ -44,7 +44,7 @@ impl Dtn {
             cmd if cmd.starts_with("remove ") => match cmd.strip_prefix("remove ") {
                 Some(user_id_str) => {
                     if let Ok(id) = Self::id_string_to_bin(user_id_str.to_string()) {
-                        Self::dtn_remove_user(id);
+                        Self::dtn_remove_user(state, id);
                     } else {
                         log::error!("invalid user id");
                     }
@@ -57,7 +57,7 @@ impl Dtn {
             cmd if cmd.starts_with("size ") => match cmd.strip_prefix("size ") {
                 Some(total_size_str) => {
                     if let Ok(total_size) = total_size_str.parse::<u32>() {
-                        Self::dtn_total_size(total_size);
+                        Self::dtn_total_size(state, total_size);
                     } else {
                         log::error!("invalid storage size");
                     }
@@ -89,7 +89,7 @@ impl Dtn {
     }
 
     /// dtn state
-    fn dtn_state() {
+    fn dtn_state(state: &super::CliState) {
         // create group send message
         let proto_message = proto::Dtn {
             message: Some(proto::dtn::Message::DtnStateRequest(
@@ -98,6 +98,7 @@ impl Dtn {
         };
         // send message
         Rpc::send_message(
+            state,
             proto_message.encode_to_vec(),
             super::rpc::proto::Modules::Dtn.into(),
             "".to_string(),
@@ -105,7 +106,7 @@ impl Dtn {
     }
 
     /// dtn state
-    fn dtn_config() {
+    fn dtn_config(state: &super::CliState) {
         // create group send message
         let proto_message = proto::Dtn {
             message: Some(proto::dtn::Message::DtnConfigRequest(
@@ -114,6 +115,7 @@ impl Dtn {
         };
         // send message
         Rpc::send_message(
+            state,
             proto_message.encode_to_vec(),
             super::rpc::proto::Modules::Dtn.into(),
             "".to_string(),
@@ -121,7 +123,7 @@ impl Dtn {
     }
 
     /// dtn add user
-    fn dtn_add_user(user_id: Vec<u8>) {
+    fn dtn_add_user(state: &super::CliState, user_id: Vec<u8>) {
         // create group send message
         let proto_message = proto::Dtn {
             message: Some(proto::dtn::Message::DtnAddUserRequest(
@@ -130,6 +132,7 @@ impl Dtn {
         };
         // send message
         Rpc::send_message(
+            state,
             proto_message.encode_to_vec(),
             super::rpc::proto::Modules::Dtn.into(),
             "".to_string(),
@@ -137,7 +140,7 @@ impl Dtn {
     }
 
     /// dtn remove user
-    fn dtn_remove_user(user_id: Vec<u8>) {
+    fn dtn_remove_user(state: &super::CliState, user_id: Vec<u8>) {
         // create group send message
         let proto_message = proto::Dtn {
             message: Some(proto::dtn::Message::DtnRemoveUserRequest(
@@ -146,6 +149,7 @@ impl Dtn {
         };
         // send message
         Rpc::send_message(
+            state,
             proto_message.encode_to_vec(),
             super::rpc::proto::Modules::Dtn.into(),
             "".to_string(),
@@ -153,7 +157,7 @@ impl Dtn {
     }
 
     /// dtn total_size
-    fn dtn_total_size(total_size: u32) {
+    fn dtn_total_size(state: &super::CliState, total_size: u32) {
         // create group send message
         let proto_message = proto::Dtn {
             message: Some(proto::dtn::Message::DtnSetTotalSizeRequest(
@@ -162,6 +166,7 @@ impl Dtn {
         };
         // send message
         Rpc::send_message(
+            state,
             proto_message.encode_to_vec(),
             super::rpc::proto::Modules::Dtn.into(),
             "".to_string(),

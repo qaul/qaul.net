@@ -20,14 +20,14 @@ impl Users {
     /// CLI command interpretation
     ///
     /// The CLI commands of users are processed here
-    pub fn cli(command: &str) {
+    pub fn cli(state: &super::CliState, command: &str) {
         match command {
             // request list of all users
             cmd if cmd.starts_with("list") => {
-                Self::request_user_list();
+                Self::request_user_list(state);
             }
             cmd if cmd.starts_with("online") => {
-                Self::request_online_user_list();
+                Self::request_online_user_list(state);
             }
             // verify a user
             cmd if cmd.starts_with("verify ") => {
@@ -67,7 +67,7 @@ impl Users {
     }
 
     /// create rpc request for user list
-    fn request_user_list() {
+    fn request_user_list(state: &super::CliState) {
         // create request message
         let proto_message = proto::Users {
             message: Some(proto::users::Message::UserRequest(proto::UserRequest {
@@ -84,13 +84,14 @@ impl Users {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Users.into(),
             "".to_string(),
         );
     }
 
-    fn request_online_user_list() {
+    fn request_online_user_list(state: &super::CliState) {
         // create request message
         let proto_message = proto::Users {
             message: Some(proto::users::Message::UserOnlineRequest(
@@ -109,6 +110,7 @@ impl Users {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Users.into(),
             "".to_string(),
@@ -140,6 +142,7 @@ impl Users {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Users.into(),
             "".to_string(),
@@ -171,6 +174,7 @@ impl Users {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Users.into(),
             "".to_string(),
@@ -209,6 +213,7 @@ impl Users {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Users.into(),
             "".to_string(),

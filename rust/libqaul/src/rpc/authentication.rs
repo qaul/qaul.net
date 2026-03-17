@@ -221,11 +221,6 @@ pub struct Authentication {}
 
 #[allow(dead_code)]
 impl Authentication {
-    /// Access the global AuthenticationState from QaulState.
-    fn state() -> &'static AuthenticationState {
-        &crate::QaulState::global().auth
-    }
-
     /// Initialize the authentication system.
     /// State is now owned by QaulState, so this is a no-op.
     pub fn init() {
@@ -233,27 +228,27 @@ impl Authentication {
     }
 
     /// Generate the next unique nonce
-    fn next_nonce() -> u64 {
-        next_nonce_impl(&Self::state().nonce_counter)
+    fn next_nonce(state: &crate::QaulState) -> u64 {
+        next_nonce_impl(&state.auth.nonce_counter)
     }
 
     /// Create an authentication challenge for a user
-    pub fn create_challenge(qaul_id: PeerId) -> Result<u64, String> {
+    pub fn create_challenge(state: &crate::QaulState, qaul_id: PeerId) -> Result<u64, String> {
         println!(
             "LIBQAUL: Creating challenge for qaul_id: {:?}",
             qaul_id.to_bytes()
         );
         // Verify user exists in the system
-        if UserAccounts::get_by_id(qaul_id).is_none() {
+        if UserAccounts::get_by_id(state, qaul_id).is_none() {
             return Err("User not found".to_string());
         }
 
         log::info!("Storing challenge with key: {:?}", qaul_id.to_bytes());
 
-        let state = Self::state();
+        let auth = &state.auth;
         let nonce = create_challenge_impl(
-            &state.nonce_counter,
-            &state.active_challenges,
+            &auth.nonce_counter,
+            &auth.active_challenges,
             qaul_id,
         );
         Ok(nonce)
@@ -264,18 +259,18 @@ impl Authentication {
     // 1. An active challenge exists for the user
     // 2. The challenge hasn't expired
     // 3. The response correctly incorporates the password hash and nonce
-    pub fn verify_challenge(qaul_id: PeerId, challenge_hash: Vec<u8>) -> Result<bool, String> {
+    pub fn verify_challenge(state: &crate::QaulState, qaul_id: PeerId, challenge_hash: Vec<u8>) -> Result<bool, String> {
         let now = Timestamp::get_timestamp();
         let qaul_id_bytes = qaul_id.to_bytes();
 
         log::info!("Verifying challenge at timestamp: {}", now);
         log::info!("Looking for challenge with key: {:?}", qaul_id_bytes);
 
-        let state = Self::state();
+        let auth = &state.auth;
 
         // Debug: print all active challenges
         {
-            let challenges = state.active_challenges.read().unwrap();
+            let challenges = auth.active_challenges.read().unwrap();
             log::info!("Total active challenges: {}", challenges.len());
             for (key, challenge) in challenges.iter() {
                 log::info!(
@@ -287,11 +282,11 @@ impl Authentication {
             }
         }
 
-        let user = UserAccounts::get_by_id(qaul_id).ok_or("User not found".to_string())?;
+        let user = UserAccounts::get_by_id(state, qaul_id).ok_or("User not found".to_string())?;
 
         verify_challenge_impl(
-            &state.active_challenges,
-            &state.authenticated_users,
+            &auth.active_challenges,
+            &auth.authenticated_users,
             qaul_id,
             challenge_hash,
             user.password_hash,
@@ -308,13 +303,13 @@ impl Authentication {
 
     /// Check if a user has an active authenticated session
     /// Also performs cleanup of expired sessions
-    pub fn is_authenticated(qaul_id: PeerId) -> bool {
-        is_authenticated_impl(&Self::state().authenticated_users, qaul_id)
+    pub fn is_authenticated(state: &crate::QaulState, qaul_id: PeerId) -> bool {
+        is_authenticated_impl(&state.auth.authenticated_users, qaul_id)
     }
 
     /// Logout a user by removing their authenticated session
-    pub fn logout(qaul_id: PeerId) {
-        logout_impl(&Self::state().authenticated_users, qaul_id);
+    pub fn logout(state: &crate::QaulState, qaul_id: PeerId) {
+        logout_impl(&state.auth.authenticated_users, qaul_id);
     }
 
     /// Remove expired challenges from the active challenges map
@@ -327,15 +322,15 @@ impl Authentication {
     // - UsersRequest: Send list of available users
     // - AuthRequest: Create and send authentication challenge
     // - AuthResponse: Verify challenge response and authenticate
-    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
+    pub fn rpc(state: &crate::QaulState, data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
         match proto::AuthRpc::decode(&data[..]) {
             Ok(auth_rpc) => match auth_rpc.message {
                 Some(proto::auth_rpc::Message::UsersRequest(_)) => {
-                    Self::handle_users_request(request_id);
+                    Self::handle_users_request(state, request_id);
                 }
                 Some(proto::auth_rpc::Message::AuthRequest(auth_request)) => {
                     match PeerId::from_bytes(&auth_request.qaul_id) {
-                        Ok(peer_id) => match Self::create_challenge(peer_id) {
+                        Ok(peer_id) => match Self::create_challenge(state, peer_id) {
                             Ok(nonce) => {
                                 let challenge = proto::AuthRpc {
                                     message: Some(proto::auth_rpc::Message::AuthChallenge(
@@ -350,6 +345,7 @@ impl Authentication {
                                 challenge.encode(&mut buf).unwrap();
 
                                 Rpc::send_message(
+                                    state,
                                     buf,
                                     crate::rpc::proto::Modules::Auth.into(),
                                     request_id,
@@ -357,11 +353,12 @@ impl Authentication {
                                 );
                             }
                             Err(e) => {
-                                Self::send_auth_result(false, e, request_id);
+                                Self::send_auth_result(state, false, e, request_id);
                             }
                         },
                         Err(_) => {
                             Self::send_auth_result(
+                                state,
                                 false,
                                 "Invalid qaul ID".to_string(),
                                 request_id,
@@ -374,16 +371,18 @@ impl Authentication {
                     match PeerId::from_bytes(&user_id) {
                         Ok(peer_id) => {
                             log::info!("Converted to PeerId: {:?}", peer_id.to_bytes());
-                            match Self::verify_challenge(peer_id, auth_response.challenge_hash) {
+                            match Self::verify_challenge(state, peer_id, auth_response.challenge_hash) {
                                 Ok(success) => {
                                     if success {
                                         Self::send_auth_result(
+                                            state,
                                             true,
                                             "Authentication successful".to_string(),
                                             request_id,
                                         );
                                     } else {
                                         Self::send_auth_result(
+                                            state,
                                             false,
                                             "Invalid credentials".to_string(),
                                             request_id,
@@ -391,12 +390,13 @@ impl Authentication {
                                     }
                                 }
                                 Err(e) => {
-                                    Self::send_auth_result(false, e, request_id);
+                                    Self::send_auth_result(state, false, e, request_id);
                                 }
                             }
                         }
                         Err(_) => {
                             Self::send_auth_result(
+                                state,
                                 false,
                                 "Invalid user ID".to_string(),
                                 request_id,
@@ -415,7 +415,7 @@ impl Authentication {
     }
 
     /// Send authentication result to the client
-    fn send_auth_result(success: bool, message: String, request_id: String) {
+    fn send_auth_result(state: &crate::QaulState, success: bool, message: String, request_id: String) {
         let result = proto::AuthRpc {
             message: Some(proto::auth_rpc::Message::AuthResult(proto::AuthResult {
                 success,
@@ -427,6 +427,7 @@ impl Authentication {
         result.encode(&mut buf).unwrap();
 
         Rpc::send_message(
+            state,
             buf,
             crate::rpc::proto::Modules::Auth.into(),
             request_id,
@@ -435,8 +436,8 @@ impl Authentication {
     }
 
     /// Handle request for list of users
-    fn handle_users_request(request_id: String) {
-        let config = crate::storage::configuration::Configuration::get();
+    fn handle_users_request(state: &crate::QaulState, request_id: String) {
+        let config = crate::storage::configuration::Configuration::get(state);
 
         let mut users_list = Vec::new();
 
@@ -481,6 +482,7 @@ impl Authentication {
         rpc_message.encode(&mut buf).unwrap();
 
         Rpc::send_message(
+            state,
             buf,
             crate::rpc::proto::Modules::Auth.into(),
             request_id,

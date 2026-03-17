@@ -20,7 +20,6 @@ log = "0.4"
 pretty_env_logger = "0.5"
 prost = "0.14"
 futures-ticker = "0.0.3"
-state = "0.6"
 bs58 = "0.5"
 clap = { version = "4.5", features = ["derive"]}
 tokio-util = { version = "0.7.18", features = ["codec"] }

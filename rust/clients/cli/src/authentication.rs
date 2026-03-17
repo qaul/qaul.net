@@ -53,9 +53,9 @@ impl Auth {
     }
 
     /// Save token to config
-    fn save_token_to_config(user_id: String, token: String) {
+    fn save_token_to_config(state: &super::CliState, user_id: String, token: String) {
         {
-            let mut config = Configuration::get_mut();
+            let mut config = Configuration::get_mut(&*state.instance.state);
             for user in &mut config.user_accounts {
                 if user.id == user_id {
                     user.session_token = Some(token);
@@ -63,13 +63,13 @@ impl Auth {
                 }
             }
         }
-        Configuration::save();
+        Configuration::save(&*state.instance.state);
     }
 
     /// Get session info
     /// Load token from config instead of file
-    pub fn get_session_info() -> Option<SessionInfo> {
-        let config = Configuration::get();
+    pub fn get_session_info(state: &super::CliState) -> Option<SessionInfo> {
+        let config = Configuration::get(&*state.instance.state);
 
         // Find first user with a token
         for user in &config.user_accounts {
@@ -86,10 +86,10 @@ impl Auth {
     }
 
     /// Clear session - just remove token from config
-    pub fn clear_session() {
+    pub fn clear_session(state: &super::CliState) {
         // Find and clear the active session token
         {
-            let mut config = Configuration::get_mut();
+            let mut config = Configuration::get_mut(&*state.instance.state);
             for user in &mut config.user_accounts {
                 if user.session_token.is_some() {
                     user.session_token = None;
@@ -97,19 +97,19 @@ impl Auth {
                 }
             }
         }
-        Configuration::save();
-        UserAccounts::set_session_token(None);
+        Configuration::save(&*state.instance.state);
+        UserAccounts::set_session_token(state, None);
     }
 
     /// Restore session on startup - load from config
-    pub fn restore_session() {
-        let config = Configuration::get();
+    pub fn restore_session(state: &super::CliState) {
+        let config = Configuration::get(&*state.instance.state);
 
         // Find user with token and restore
         for user in &config.user_accounts {
             if let Some(token) = &user.session_token {
                 log::info!("Restored session for user: {}", user.name);
-                UserAccounts::set_session_token(Some(token.clone()));
+                UserAccounts::set_session_token(state, Some(token.clone()));
                 break; // Only one active session
             }
         }
@@ -118,11 +118,11 @@ impl Auth {
     /// Initiate the login process for a user
     /// Starts authentication by requesting the list of users from the node
     /// to validate the username and retrieve salt for password hashing.
-    pub fn initiate_login(username: String) {
+    pub fn initiate_login(state: &super::CliState, username: String) {
         println!("Requesting users list...");
 
         // store username for later use in authentication flow
-        UserAccounts::set_pending_username(username);
+        UserAccounts::set_pending_username(state, username);
 
         let users_request = proto::UsersRequest {};
 
@@ -133,12 +133,12 @@ impl Auth {
         let mut buf = Vec::with_capacity(proto_message.encoded_len());
         proto_message.encode(&mut buf).unwrap();
 
-        Rpc::send_message(buf, super::rpc::proto::Modules::Auth.into(), "".to_string());
+        Rpc::send_message(state, buf, super::rpc::proto::Modules::Auth.into(), "".to_string());
     }
 
     /// Handle logout
-    pub fn logout(_user_id: Vec<u8>) {
-        Self::clear_session();
+    pub fn logout(state: &super::CliState, _user_id: Vec<u8>) {
+        Self::clear_session(state);
         println!("Logged out successfully");
     }
 
@@ -147,17 +147,17 @@ impl Auth {
     /// - UsersResponse: Validates user and requests authentication
     /// - AuthChallenge: Computes challenge response
     /// - AuthResult: Handles authentication success/failure
-    pub fn rpc(data: Vec<u8>) {
+    pub fn rpc(state: &super::CliState, data: Vec<u8>) {
         match proto::AuthRpc::decode(&data[..]) {
             Ok(auth_rpc) => match auth_rpc.message {
                 Some(proto::auth_rpc::Message::UsersResponse(response)) => {
-                    Self::handle_users_response(response);
+                    Self::handle_users_response(state, response);
                 }
                 Some(proto::auth_rpc::Message::AuthChallenge(challenge)) => {
-                    Self::handle_auth_challenge(challenge);
+                    Self::handle_auth_challenge(state, challenge);
                 }
                 Some(proto::auth_rpc::Message::AuthResult(result)) => {
-                    Self::handle_auth_result(result);
+                    Self::handle_auth_result(state, result);
                 }
                 _ => {
                     log::error!("Unexpected auth RPC message");
@@ -172,8 +172,8 @@ impl Auth {
     /// Handle users list response from node
     /// validates that the requested user exists and has a password set,
     /// then initiates the authentication challenge if valid.
-    fn handle_users_response(response: proto::UsersResponse) {
-        if let Some(pending_username) = UserAccounts::get_pending_username() {
+    fn handle_users_response(state: &super::CliState, response: proto::UsersResponse) {
+        if let Some(pending_username) = UserAccounts::get_pending_username(state) {
             // find the user in the response
             if let Some(user_info) = response
                 .users
@@ -186,9 +186,10 @@ impl Auth {
                         println!("Found user with password");
                         // store salt and user ID for challenge response
                         UserAccounts::set_pending_auth_salt(
+                            state,
                             user_info.salt.clone().expect("REASON"),
                         );
-                        UserAccounts::set_pending_user_id(user_info.user_id.clone());
+                        UserAccounts::set_pending_user_id(state, user_info.user_id.clone());
                         // request authentication challenge from node
                         let auth_request = proto::AuthRequest {
                             qaul_id: user_info.user_id.clone(),
@@ -202,6 +203,7 @@ impl Auth {
                         proto_message.encode(&mut buf).unwrap();
 
                         Rpc::send_message(
+                            state,
                             buf,
                             super::rpc::proto::Modules::Auth.into(),
                             "".to_string(),
@@ -210,17 +212,17 @@ impl Auth {
                         println!("Requesting authentication challenge...");
                     } else {
                         println!("User has password but no salt available");
-                        UserAccounts::clear_pending_auth();
+                        UserAccounts::clear_pending_auth(state);
                     }
                 } else {
                     println!("User has no password set, so authenticating without password");
                     // this would be improved as the token implementation is completed
                     let user_id_str = bs58::encode(&user_info.user_id).into_string();
                     let token = Self::generate_token(&user_id_str, &pending_username);
-                    Self::save_token_to_config(user_id_str, token.clone());
+                    Self::save_token_to_config(state, user_id_str, token.clone());
 
-                    UserAccounts::set_session_token(Some(token));
-                    UserAccounts::clear_pending_auth();
+                    UserAccounts::set_session_token(state, Some(token));
+                    UserAccounts::clear_pending_auth(state);
 
                     println!("Authentication successful!");
                 }
@@ -231,7 +233,7 @@ impl Auth {
                 for user in &response.users {
                     println!("  - {}", user.username);
                 }
-                UserAccounts::clear_pending_auth();
+                UserAccounts::clear_pending_auth(state);
             }
         }
     }
@@ -240,8 +242,8 @@ impl Auth {
     /// Computes the challenge response using a double Argon2 hash:
     /// 1. Hash the password with the user's salt
     /// 2. Combine with nonce and hash again with a new salt
-    fn handle_auth_challenge(challenge: proto::AuthChallenge) {
-        if let Some(pending) = UserAccounts::get_pending_auth() {
+    fn handle_auth_challenge(state: &super::CliState, challenge: proto::AuthChallenge) {
+        if let Some(pending) = UserAccounts::get_pending_auth(state) {
             if let Some(salt_str) = pending.salt {
                 let argon2 = Argon2::default();
                 // Parse the stored salt
@@ -270,6 +272,7 @@ impl Auth {
                                     proto_message.encode(&mut buf).unwrap();
 
                                     Rpc::send_message(
+                                        state,
                                         buf,
                                         super::rpc::proto::Modules::Auth.into(),
                                         "".to_string(),
@@ -279,18 +282,18 @@ impl Auth {
                                 }
                                 Err(e) => {
                                     println!("Failed to compute challenge response: {}", e);
-                                    UserAccounts::clear_pending_auth();
+                                    UserAccounts::clear_pending_auth(state);
                                 }
                             }
                         }
                         Err(e) => {
                             println!("Failed to compute password hash: {}", e);
-                            UserAccounts::clear_pending_auth();
+                            UserAccounts::clear_pending_auth(state);
                         }
                     },
                     Err(e) => {
                         println!("Invalid salt format: {}", e);
-                        UserAccounts::clear_pending_auth();
+                        UserAccounts::clear_pending_auth(state);
                     }
                 }
             }
@@ -302,25 +305,25 @@ impl Auth {
     /// Handle authentication result from server
     /// On success, generates a random session token and persists the session.
     /// On failure, displays error message and clears pending authentication.
-    fn handle_auth_result(result: proto::AuthResult) {
+    fn handle_auth_result(state: &super::CliState, result: proto::AuthResult) {
         if result.success {
             println!("Authentication successful!");
 
-            if let Some(pending) = UserAccounts::get_pending_auth() {
+            if let Some(pending) = UserAccounts::get_pending_auth(state) {
                 if let Some(user_id) = pending.user_id {
                     let user_id_str = bs58::encode(&user_id).into_string();
                     // Generate random session token
                     let token = Self::generate_token(&user_id_str, &pending.username);
-                    Self::save_token_to_config(user_id_str, token.clone());
+                    Self::save_token_to_config(state, user_id_str, token.clone());
 
-                    UserAccounts::set_session_token(Some(token));
+                    UserAccounts::set_session_token(state, Some(token));
                 }
             }
 
-            UserAccounts::clear_pending_auth();
+            UserAccounts::clear_pending_auth(state);
         } else {
             println!("Authentication failed: {}", result.error_message);
-            UserAccounts::clear_pending_auth();
+            UserAccounts::clear_pending_auth(state);
         }
     }
 }

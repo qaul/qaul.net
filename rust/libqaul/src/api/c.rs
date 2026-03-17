@@ -11,6 +11,27 @@
 
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
+use std::sync::{Arc, Mutex};
+
+/// C FFI requires a global state handle because `extern "C"` functions
+/// cannot carry context parameters. This is the ONLY global in the
+/// non-Android/non-JNI code path.
+static C_STATE: Mutex<Option<Arc<crate::QaulState>>> = Mutex::new(None);
+
+/// Store the `QaulState` arc for C FFI functions.
+pub(super) fn set_c_state(state: Arc<crate::QaulState>) {
+    *C_STATE.lock().unwrap() = Some(state);
+}
+
+/// Retrieve the `QaulState` arc. Panics if libqaul has not been started.
+pub(super) fn get_c_state() -> Arc<crate::QaulState> {
+    C_STATE
+        .lock()
+        .unwrap()
+        .as_ref()
+        .expect("libqaul not started — call start() first")
+        .clone()
+}
 
 /// test function
 #[no_mangle]
@@ -59,17 +80,18 @@ pub extern "C" fn start_desktop() {
 /// Don't send any messages to libqaul before it finished initializing.
 #[no_mangle]
 pub extern "C" fn initialized() -> i32 {
-    if super::initialization_finished() {
+    let state = get_c_state();
+    if state.initialized.load(std::sync::atomic::Ordering::SeqCst) {
         return 1;
     }
-
     0
 }
 
 /// Yields the total number of messages queued to be received.
 #[no_mangle]
 pub extern "C" fn receivequeue() -> i32 {
-    return super::receive_rpc_queued() as i32;
+    let state = get_c_state();
+    crate::rpc::Rpc::receive_from_libqaul_queue_length(&*state) as i32
 }
 
 /// send RPC messages to libqaul
@@ -104,7 +126,8 @@ pub extern "C" fn send_rpc_to_libqaul(message: *const u8, message_length: u32) -
     }
 
     // send it further to libqaul
-    crate::rpc::Rpc::send_to_libqaul(rust_buffer_owned);
+    let state = get_c_state();
+    crate::rpc::Rpc::send_to_libqaul(&*state, rust_buffer_owned);
 
     // return success
     0
@@ -127,7 +150,8 @@ pub extern "C" fn send_rpc_to_libqaul(message: *const u8, message_length: u32) -
 #[no_mangle]
 pub extern "C" fn receive_rpc_from_libqaul(buffer: *mut libc::c_uchar, buffer_length: u32) -> i32 {
     // poll rpc channel
-    let received = crate::rpc::Rpc::receive_from_libqaul();
+    let state = get_c_state();
+    let received = crate::rpc::Rpc::receive_from_libqaul(&*state);
 
     match received {
         Ok(message) => {
@@ -159,17 +183,6 @@ pub extern "C" fn receive_rpc_from_libqaul(buffer: *mut libc::c_uchar, buffer_le
                 std::ptr::copy_nonoverlapping(message.as_ptr(), buffer, message.len());
             }
 
-            // // https://doc.rust-lang.org/std/mem/fn.transmute.html
-            // let u8_slice = unsafe {
-            // &*( &slice as *const [c_char] as *const [u8])
-            // };
-
-            // unsafe {
-            //     //buffer.copy_from_nonoverlapping(message, message.len());
-            //     //let msg = message;
-            //     //std::ptr::copy_nonoverlapping(message, buffer, message.len());
-            // }
-
             // return message length
             let len: i32 = message.len() as i32;
             return len;
@@ -187,7 +200,8 @@ pub extern "C" fn receive_rpc_from_libqaul(buffer: *mut libc::c_uchar, buffer_le
 #[no_mangle]
 pub extern "C" fn receive_rpc_from_libqaul_queued_length() -> i32 {
     // check rpc queue len
-    crate::rpc::Rpc::receive_from_libqaul_queue_length() as i32
+    let state = get_c_state();
+    crate::rpc::Rpc::receive_from_libqaul_queue_length(&*state) as i32
 }
 
 /// Get the number of messages ever sent to rpc.
@@ -196,7 +210,8 @@ pub extern "C" fn receive_rpc_from_libqaul_queued_length() -> i32 {
 #[no_mangle]
 pub extern "C" fn send_rpc_to_libqaul_count() -> i32 {
     // get message count of messages sent to libqaul
-    crate::rpc::Rpc::send_rpc_count()
+    let state = get_c_state();
+    crate::rpc::Rpc::send_rpc_count(&*state)
 }
 
 /// send SYS messages to libqaul
@@ -231,7 +246,8 @@ pub extern "C" fn send_sys_to_libqaul(message: *const u8, message_length: u32) -
     }
 
     // send it further to libqaul
-    crate::rpc::sys::Sys::send_to_libqaul(rust_buffer_owned);
+    let state = get_c_state();
+    crate::rpc::sys::Sys::send_to_libqaul(&*state, rust_buffer_owned);
 
     // return success
     0

@@ -8,7 +8,6 @@
 use super::Rpc;
 use crate::storage::configuration::Configuration;
 use crate::storage::Storage;
-use crate::utilities::filelogger::FileLogger;
 use prost::Message;
 
 /// Import protobuf message definition
@@ -19,7 +18,7 @@ pub struct Debug {}
 
 impl Debug {
     /// Process incoming RPC request messages for debug module
-    pub fn rpc(data: Vec<u8>, _user_id: Vec<u8>, request_id: String) {
+    pub fn rpc(state: &crate::QaulState, data: Vec<u8>, _user_id: Vec<u8>, request_id: String) {
         match proto::Debug::decode(&data[..]) {
             Ok(debug) => {
                 match debug.message {
@@ -39,6 +38,7 @@ impl Debug {
 
                         // send message
                         Rpc::send_message(
+                            state,
                             buf,
                             crate::rpc::proto::Modules::Debug.into(),
                             request_id,
@@ -53,25 +53,25 @@ impl Debug {
                     Some(proto::debug::Message::LogToFile(log_to_file)) => {
                         if log_to_file.enable {
                             // start log
-                            FileLogger::enable(true);
-                            if Configuration::get_debug_log() == false {
-                                Configuration::enable_debug_log(true);
-                                Configuration::save();
+                            state.filelogger.enable(true);
+                            if Configuration::get_debug_log(state) == false {
+                                Configuration::enable_debug_log(state, true);
+                                Configuration::save(state);
                                 log::info!("starting debug log..");
                             }
                         } else {
                             // stop log
-                            if Configuration::get_debug_log() == true {
-                                Configuration::enable_debug_log(false);
-                                Configuration::save();
+                            if Configuration::get_debug_log(state) == true {
+                                Configuration::enable_debug_log(state, false);
+                                Configuration::save(state);
                                 log::info!("stop debug log..");
                             }
-                            FileLogger::enable(false);
+                            state.filelogger.enable(false);
                         }
                     }
                     Some(proto::debug::Message::StoragePathRequest(_storage_path_request)) => {
                         // create and return storage path response message
-                        let path = Storage::get_path();
+                        let path = Storage::get_path(state);
                         let proto_message = proto::Debug {
                             message: Some(proto::debug::Message::StoragePathResponse(
                                 proto::StoragePathResponse { storage_path: path },
@@ -86,6 +86,7 @@ impl Debug {
 
                         // send message
                         Rpc::send_message(
+                            state,
                             buf,
                             crate::rpc::proto::Modules::Debug.into(),
                             request_id,

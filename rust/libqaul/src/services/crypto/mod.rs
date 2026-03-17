@@ -110,6 +110,7 @@ impl Crypto {
     /// The function returns the packed message on success,
     /// or none on failure.
     pub fn encrypt(
+        state: &crate::QaulState,
         data: Vec<u8>,
         user_account: UserAccount,
         remote_id: PeerId,
@@ -120,7 +121,7 @@ impl Crypto {
         let process_state: messaging::proto::CryptoState;
 
         // get data base object
-        let crypto_account = CryptoStorage::get_db_ref(user_account.id.clone());
+        let crypto_account = CryptoStorage::get_db_ref(state, user_account.id.clone());
 
         // check if there is a handshake state?
         match crypto_account.get_state(remote_id) {
@@ -145,7 +146,7 @@ impl Crypto {
                         ChaCha20Poly1305,
                         Sha256,
                         &[u8],
-                    >(data, user_account, crypto_account, remote_id);
+                    >(state, data, user_account, crypto_account, remote_id);
 
                 log::trace!("encrypt with new session_id: {}", session_id);
 
@@ -262,13 +263,14 @@ impl Crypto {
     ///
     /// The function returns the decrypted data on success or none otherwise.
     pub fn decrypt(
+        state: &crate::QaulState,
         message: messaging::proto::Encrypted,
         user_account: UserAccount,
         remote_id: PeerId,
         message_id: &Vec<u8>,
     ) -> Option<Vec<u8>> {
         // get data base object
-        let crypto_account = CryptoStorage::get_db_ref(user_account.id.clone());
+        let crypto_account = CryptoStorage::get_db_ref(state, user_account.id.clone());
 
         log::trace!(
             "decrypt message\n\tmessage_id: {}\n\tsession_id: {}",
@@ -379,6 +381,7 @@ impl Crypto {
                                     Sha256,
                                     &[u8],
                                 >(
+                                    state,
                                     data.data,
                                     crypto_account.clone(),
                                     remote_id,
@@ -413,6 +416,7 @@ impl Crypto {
 
                                     // pack and send encrypted message
                                     match messaging::Messaging::pack_and_send_encrypted_data(
+                                        state,
                                         &user_account,
                                         &remote_id,
                                         encrypted_message,

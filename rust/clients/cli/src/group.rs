@@ -18,7 +18,7 @@ impl Group {
     /// CLI command interpretation
     ///
     /// The CLI commands of group module are processed here
-    pub fn cli(command: &str) {
+    pub fn cli(state: &super::CliState, command: &str) {
         match command {
             // create group
             cmd if cmd.starts_with("create ") => {
@@ -32,7 +32,7 @@ impl Group {
                 let group_name = command_string.trim().to_string();
 
                 if group_name.len() > 0 {
-                    Self::create_group(group_name.clone());
+                    Self::create_group(state, group_name.clone());
                 } else {
                     log::error!("group create command incorrectly formatted");
                 }
@@ -60,7 +60,7 @@ impl Group {
                             };
 
                             if group_name.len() > 0 {
-                                Self::rename_group(group_id, group_name.to_string());
+                                Self::rename_group(state, group_id, group_name.to_string());
                             } else {
                                 log::error!("group name is missing");
                             }
@@ -88,7 +88,7 @@ impl Group {
                 if let Some(group_id_str) = iter.next() {
                     match Self::uuid_string_to_bin(group_id_str.to_string()) {
                         Ok(group_id) => {
-                            Self::group_info(group_id);
+                            Self::group_info(state, group_id);
                         }
                         Err(e) => {
                             log::error!("{}", e);
@@ -102,11 +102,11 @@ impl Group {
             // group list
             cmd if cmd.starts_with("list") => {
                 //let command_string = cmd.strip_prefix("list ").unwrap().to_string();
-                Self::group_list();
+                Self::group_list(state);
             }
             // group list
             cmd if cmd.starts_with("invited") => {
-                Self::group_invited();
+                Self::group_invited(state);
             }
             // group invite
             cmd if cmd.starts_with("invite ") => {
@@ -125,7 +125,7 @@ impl Group {
                             if let Some(user_id_str) = iter.next() {
                                 match Self::id_string_to_bin(user_id_str.to_string()) {
                                     Ok(user_id) => {
-                                        Self::invite(group_id, user_id);
+                                        Self::invite(state, group_id, user_id);
                                     }
                                     Err(e) => {
                                         log::error!("{}", e);
@@ -159,7 +159,7 @@ impl Group {
                 if let Some(group_id_str) = iter.next() {
                     match Self::uuid_string_to_bin(group_id_str.to_string()) {
                         Ok(group_id) => {
-                            Self::reply_invite(group_id, true);
+                            Self::reply_invite(state, group_id, true);
                         }
                         Err(e) => {
                             log::error!("{}", e);
@@ -184,7 +184,7 @@ impl Group {
                 if let Some(group_id_str) = iter.next() {
                     match Self::uuid_string_to_bin(group_id_str.to_string()) {
                         Ok(group_id) => {
-                            Self::reply_invite(group_id, false);
+                            Self::reply_invite(state, group_id, false);
                         }
                         Err(e) => {
                             log::error!("{}", e);
@@ -212,7 +212,7 @@ impl Group {
                             if let Some(user_id_str) = iter.next() {
                                 match Self::id_string_to_bin(user_id_str.to_string()) {
                                     Ok(user_id) => {
-                                        Self::remove_member(group_id, user_id);
+                                        Self::remove_member(state, group_id, user_id);
                                     }
                                     Err(e) => {
                                         log::error!("{}", e);
@@ -263,7 +263,7 @@ impl Group {
     }
 
     /// create group
-    fn create_group(group_name: String) {
+    fn create_group(state: &super::CliState, group_name: String) {
         // create group send message
         let proto_message = proto::Group {
             message: Some(proto::group::Message::GroupCreateRequest(
@@ -281,6 +281,7 @@ impl Group {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Group.into(),
             "".to_string(),
@@ -288,7 +289,7 @@ impl Group {
     }
 
     /// rename group
-    fn rename_group(group_id: Vec<u8>, group_name: String) {
+    fn rename_group(state: &super::CliState, group_id: Vec<u8>, group_name: String) {
         // rename group send message
         let proto_message = proto::Group {
             message: Some(proto::group::Message::GroupRenameRequest(
@@ -307,6 +308,7 @@ impl Group {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Group.into(),
             "".to_string(),
@@ -314,7 +316,7 @@ impl Group {
     }
 
     /// group info
-    fn group_info(group_id: Vec<u8>) {
+    fn group_info(state: &super::CliState, group_id: Vec<u8>) {
         // group info send message
         let proto_message = proto::Group {
             message: Some(proto::group::Message::GroupInfoRequest(
@@ -332,6 +334,7 @@ impl Group {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Group.into(),
             "".to_string(),
@@ -339,7 +342,7 @@ impl Group {
     }
 
     /// group list
-    fn group_list() {
+    fn group_list(state: &super::CliState) {
         // group list send message
         let proto_message = proto::Group {
             message: Some(proto::group::Message::GroupListRequest(
@@ -355,6 +358,7 @@ impl Group {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Group.into(),
             "".to_string(),
@@ -362,7 +366,7 @@ impl Group {
     }
 
     /// group invited
-    fn group_invited() {
+    fn group_invited(state: &super::CliState) {
         // group list send message
         let proto_message = proto::Group {
             message: Some(proto::group::Message::GroupInvitedRequest(
@@ -372,6 +376,7 @@ impl Group {
 
         // send message
         Rpc::send_message(
+            state,
             proto_message.encode_to_vec(),
             super::rpc::proto::Modules::Group.into(),
             "".to_string(),
@@ -379,7 +384,7 @@ impl Group {
     }
 
     /// group invite
-    fn invite(group_id: Vec<u8>, user_id: Vec<u8>) {
+    fn invite(state: &super::CliState, group_id: Vec<u8>, user_id: Vec<u8>) {
         // group invite send message
         let proto_message = proto::Group {
             message: Some(proto::group::Message::GroupInviteMemberRequest(
@@ -398,6 +403,7 @@ impl Group {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Group.into(),
             "".to_string(),
@@ -405,7 +411,7 @@ impl Group {
     }
 
     /// reply invite
-    fn reply_invite(group_id: Vec<u8>, accept: bool) {
+    fn reply_invite(state: &super::CliState, group_id: Vec<u8>, accept: bool) {
         // group invite send message
         let proto_message = proto::Group {
             message: Some(proto::group::Message::GroupReplyInviteRequest(
@@ -424,6 +430,7 @@ impl Group {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Group.into(),
             "".to_string(),
@@ -431,7 +438,7 @@ impl Group {
     }
 
     /// remove member
-    fn remove_member(group_id: Vec<u8>, user_id: Vec<u8>) {
+    fn remove_member(state: &super::CliState, group_id: Vec<u8>, user_id: Vec<u8>) {
         // group invite send message
         let proto_message = proto::Group {
             message: Some(proto::group::Message::GroupRemoveMemberRequest(
@@ -450,6 +457,7 @@ impl Group {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Group.into(),
             "".to_string(),

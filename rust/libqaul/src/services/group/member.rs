@@ -54,6 +54,7 @@ impl Member {
     }
 
     fn save_group_event_message(
+        state: &crate::QaulState,
         account_id: &PeerId,
         group_id: &GroupId,
         sender_id: &PeerId,
@@ -61,6 +62,7 @@ impl Member {
         user_id: Vec<u8>,
     ) {
         ChatStorage::save_message(
+            state,
             account_id,
             group_id,
             sender_id,
@@ -72,10 +74,10 @@ impl Member {
     }
 
     /// invite member from rpc command
-    pub fn invite(account_id: &PeerId, group_id: &[u8], user_id: &PeerId) -> Result<bool, String> {
+    pub fn invite(state: &crate::QaulState, account_id: &PeerId, group_id: &[u8], user_id: &PeerId) -> Result<bool, String> {
         // get group
         let mut group;
-        match GroupStorage::get_group(account_id.to_owned(), group_id) {
+        match GroupStorage::get_group(state, account_id.to_owned(), group_id) {
             Some(my_group) => group = my_group,
             None => return Err("group not found".to_string()),
         }
@@ -126,8 +128,8 @@ impl Member {
             )),
         };
 
-        if let Some(user_account) = UserAccounts::get_by_id(*account_id) {
-            Group::send_notify_message(&user_account, user_id, proto_message.encode_to_vec());
+        if let Some(user_account) = UserAccounts::get_by_id(state, *account_id) {
+            Group::send_notify_message(state, &user_account, user_id, proto_message.encode_to_vec());
 
             // save new user
             let member = super::GroupMember {
@@ -142,7 +144,7 @@ impl Member {
 
             group.members.insert(user_id_bytes, member);
 
-            GroupStorage::save_group(user_account.id, group);
+            GroupStorage::save_group(state, user_account.id, group);
         } else {
             return Err("user account problem".to_string());
         }
@@ -151,13 +153,14 @@ impl Member {
 
     /// reply to invited message from rpc command
     pub fn reply_invite(
+        state: &crate::QaulState,
         account_id: &PeerId,
         group_id: &[u8],
         accept: bool,
     ) -> Result<bool, String> {
         // check if there is a group invite
         let invite;
-        match GroupStorage::get_invite(account_id.to_owned(), group_id) {
+        match GroupStorage::get_invite(state, account_id.to_owned(), group_id) {
             Some(my_invite) => invite = my_invite,
             None => return Err("there is no group invite".to_string()),
         }
@@ -179,11 +182,11 @@ impl Member {
             )),
         };
 
-        if let Some(user_account) = UserAccounts::get_by_id(*account_id) {
-            Group::send_notify_message(&user_account, &receiver, proto_message.encode_to_vec());
+        if let Some(user_account) = UserAccounts::get_by_id(state, *account_id) {
+            Group::send_notify_message(state, &user_account, &receiver, proto_message.encode_to_vec());
 
             // remove invited
-            GroupStorage::remove_invite_deferred(account_id.to_owned(), group_id);
+            GroupStorage::remove_invite_deferred(state, account_id.to_owned(), group_id);
         } else {
             return Err("user account problem".to_string());
         }
@@ -191,12 +194,13 @@ impl Member {
         // save group into data base if invite was accepted
         if accept {
             // save group to data base
-            GroupStorage::save_group_deferred(account_id.to_owned(), invite.group);
+            GroupStorage::save_group_deferred(state, account_id.to_owned(), invite.group);
         }
-        GroupStorage::flush_account(account_id);
+        GroupStorage::flush_account(state, account_id);
 
         if accept {
             Self::save_group_event_message(
+                state,
                 account_id,
                 &GroupId::from_bytes(group_id).unwrap(),
                 account_id,
@@ -209,10 +213,10 @@ impl Member {
     }
 
     /// remove member from rpc command
-    pub fn remove(account_id: &PeerId, group_id: &[u8], user_id: &PeerId) -> Result<bool, String> {
+    pub fn remove(state: &crate::QaulState, account_id: &PeerId, group_id: &[u8], user_id: &PeerId) -> Result<bool, String> {
         // get user account from node
         let user_account;
-        match UserAccounts::get_by_id(*account_id) {
+        match UserAccounts::get_by_id(state, *account_id) {
             Some(my_account) => user_account = my_account,
             None => return Err("user account has problem".to_string()),
         }
@@ -222,7 +226,7 @@ impl Member {
 
         // get group from data base
         let mut group;
-        match GroupStorage::get_group(account_id.to_owned(), group_id) {
+        match GroupStorage::get_group(state, account_id.to_owned(), group_id) {
             Some(my_group) => group = my_group,
             None => return Err("group not found".to_string()),
         }
@@ -250,7 +254,7 @@ impl Member {
             group.revision += 1;
 
             // save to data base
-            GroupStorage::save_group(account_id.to_owned(), group);
+            GroupStorage::save_group(state, account_id.to_owned(), group);
         } else {
             return Err("this user is not member of this group".to_string());
         }
@@ -263,10 +267,11 @@ impl Member {
                 },
             )),
         };
-        Group::send_notify_message(&user_account, user_id, proto_message.encode_to_vec());
+        Group::send_notify_message(state, &user_account, user_id, proto_message.encode_to_vec());
 
         // save group event
         Self::save_group_event_message(
+            state,
             account_id,
             &GroupId::from_bytes(group_id).unwrap(),
             user_id,
@@ -279,6 +284,7 @@ impl Member {
 
     /// process group invite message from network
     pub fn on_be_invited(
+        state: &crate::QaulState,
         sender_id: &PeerId,
         account_id: &PeerId,
         invite_message: &super::proto_net::InviteMember,
@@ -309,18 +315,19 @@ impl Member {
             group,
         };
 
-        GroupStorage::save_invite(account_id.to_owned(), invited);
+        GroupStorage::save_invite(state, account_id.to_owned(), invited);
     }
 
     /// process incoming invite accept
     fn on_accpeted_invite(
+        state: &crate::QaulState,
         sender_id: &PeerId,
         account_id: &PeerId,
         resp: &super::proto_net::ReplyInvite,
     ) -> Result<bool, String> {
         // get group from data base
         let mut group;
-        match GroupStorage::get_group(account_id.to_owned(), &resp.group_id) {
+        match GroupStorage::get_group(state, account_id.to_owned(), &resp.group_id) {
             Some(my_group) => group = my_group,
             None => return Err("group not found".to_string()),
         }
@@ -348,10 +355,11 @@ impl Member {
 
         // save group
         let group_id = GroupId::from_bytes(&group.id).unwrap();
-        GroupStorage::save_group(account_id.to_owned(), group);
+        GroupStorage::save_group(state, account_id.to_owned(), group);
 
         // save event
         Self::save_group_event_message(
+            state,
             account_id,
             &group_id,
             sender_id,
@@ -364,13 +372,14 @@ impl Member {
 
     /// process reject group invite
     fn on_declined_invite(
+        state: &crate::QaulState,
         sender_id: &PeerId,
         account_id: &PeerId,
         resp: &super::proto_net::ReplyInvite,
     ) -> Result<bool, String> {
         // get group from data base
         let mut group;
-        match GroupStorage::get_group(account_id.to_owned(), &resp.group_id) {
+        match GroupStorage::get_group(state, account_id.to_owned(), &resp.group_id) {
             Some(my_group) => group = my_group,
             None => return Err("group not found".to_string()),
         }
@@ -391,21 +400,22 @@ impl Member {
         }
 
         group.members.remove(&sender_id_bytes);
-        GroupStorage::save_group(account_id.to_owned(), group);
+        GroupStorage::save_group(state, account_id.to_owned(), group);
 
         Ok(true)
     }
 
     /// process accept or decline invite message from network
     pub fn on_reply_invite(
+        state: &crate::QaulState,
         sender_id: &PeerId,
         receiver_id: &PeerId,
         resp: &super::proto_net::ReplyInvite,
     ) -> Result<bool, String> {
         if resp.accept {
-            Self::on_accpeted_invite(sender_id, receiver_id, resp)
+            Self::on_accpeted_invite(state, sender_id, receiver_id, resp)
         } else {
-            if let Err(e) = Self::on_declined_invite(sender_id, receiver_id, resp) {
+            if let Err(e) = Self::on_declined_invite(state, sender_id, receiver_id, resp) {
                 log::error!("on_decline error {}", e);
             }
             Ok(false)
@@ -414,13 +424,14 @@ impl Member {
 
     /// user has been removed from group by administrator
     pub fn on_removed(
+        state: &crate::QaulState,
         sender_id: &PeerId,
         account_id: &PeerId,
         message: &super::proto_net::RemovedMember,
     ) -> Result<bool, String> {
         // get group from data base
         let mut group;
-        match GroupStorage::get_group(account_id.to_owned(), &message.group_id) {
+        match GroupStorage::get_group(state, account_id.to_owned(), &message.group_id) {
             Some(my_group) => group = my_group,
             None => return Err("group not found".to_string()),
         }
@@ -450,10 +461,11 @@ impl Member {
 
         // save group
         let group_id = GroupId::from_bytes(&group.id).unwrap();
-        GroupStorage::save_group(account_id.to_owned(), group);
+        GroupStorage::save_group(state, account_id.to_owned(), group);
 
         // save event
         Self::save_group_event_message(
+            state,
             account_id,
             &group_id,
             sender_id,

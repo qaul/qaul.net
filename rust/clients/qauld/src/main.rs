@@ -58,28 +58,28 @@ async fn main() {
     }
 
     // start libqaul in new thread and save configuration file to current working path
-    libqaul::api::start_with_config(storage_path.clone(), Some(def_config.clone()));
+    let instance = libqaul::api::start_instance_in_thread(storage_path.clone(), Some(def_config.clone()));
 
     // wait until libqaul finished initializing
-    while libqaul::api::initialization_finished() == false {
+    while !instance.is_initialized() {
         // wait a little while
         std::thread::sleep(Duration::from_millis(10));
     }
 
     // if no account, creating new accounts
-    if libqaul::node::user_accounts::UserAccounts::len() == 0 {
+    if libqaul::node::user_accounts::UserAccounts::len(&*instance.state) == 0 {
         let user_name: String;
         if let Some(usr_name) = cli_arguments.name.as_deref() {
             user_name = usr_name.to_string();
         } else {
             user_name = create_default_named();
         }
-        libqaul::node::user_accounts::UserAccounts::create(user_name.clone(), None);
+        libqaul::node::user_accounts::UserAccounts::create(&*instance.state, user_name.clone(), None);
     }
 
     // since we're now starting a socket server, the main thread now has work to do,
     // so, we can get rid of the loop
-    if let Err(err) = socket::start_server(PathBuf::from(storage_path)).await {
+    if let Err(err) = socket::start_server(PathBuf::from(storage_path), instance).await {
         eprintln!("Err: {err}")
     }
 }

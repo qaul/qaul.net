@@ -95,7 +95,7 @@ fn spawn_rpc_poller(register: Arc<Mutex<HashMap<String, Sender<Bytes>>>>) {
         let mut futures_ticker = Ticker::new(Duration::from_millis(10));
         loop {
             futures_ticker.next().await;
-            match libqaul::api::receive_rpc() {
+            match libqaul::rpc::Rpc::receive_from_libqaul(&*instance_clone.state) {
                 Ok(data) => match proto::QaulRpc::decode(&data[..]) {
                     Ok(msg) => {
                         let client_id = msg.request_id;

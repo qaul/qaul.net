@@ -148,14 +148,15 @@ impl Group {
     }
 
     /// update group member
-    pub fn update_group_member(account_id: &PeerId, group_id: &[u8], member: &GroupMember) {
-        GroupStorage::with_group_mut(account_id, group_id, |group| {
+    pub fn update_group_member(state: &crate::QaulState, account_id: &PeerId, group_id: &[u8], member: &GroupMember) {
+        GroupStorage::with_group_mut(state, account_id, group_id, |group| {
             group.members.insert(member.user_id.clone(), member.clone());
         });
     }
 
     /// Send an already encoded messaging payload to all remote group members.
     pub fn send_to_remote_members(
+        state: &crate::QaulState,
         user_account: &UserAccount,
         group: &Group,
         data: &[u8],
@@ -170,6 +171,7 @@ impl Group {
             }
 
             if let Err(error) = Messaging::pack_and_send_message(
+                state,
                 user_account,
                 &receiver,
                 data.to_vec(),
@@ -183,7 +185,7 @@ impl Group {
     }
 
     /// Send packed notify message directly
-    pub fn send_notify_message(user_account: &UserAccount, receiver: &PeerId, data: Vec<u8>) {
+    pub fn send_notify_message(state: &crate::QaulState, user_account: &UserAccount, receiver: &PeerId, data: Vec<u8>) {
         // pack group container into messaging message
         let proto_message = proto::Messaging {
             message: Some(proto::messaging::Message::GroupInviteMessage(
@@ -193,6 +195,7 @@ impl Group {
 
         // send message via messaging
         match Messaging::pack_and_send_message(
+            state,
             user_account,
             receiver,
             proto_message.encode_to_vec(),
@@ -210,6 +213,7 @@ impl Group {
     /// Send capsuled group message through messaging service
     #[allow(dead_code)]
     pub fn send_group_message(
+        state: &crate::QaulState,
         user_account: &UserAccount,
         receiver: &PeerId,
         group_id: Vec<u8>,
@@ -217,7 +221,7 @@ impl Group {
     ) {
         // get last index
         let group;
-        match GroupStorage::get_group(user_account.id, &group_id) {
+        match GroupStorage::get_group(state, user_account.id, &group_id) {
             Some(v) => group = v,
             None => return,
         }
@@ -251,6 +255,7 @@ impl Group {
 
         // send message via messaging
         match Messaging::pack_and_send_message(
+            state,
             user_account,
             &receiver,
             send_message.encode_to_vec(),
@@ -261,7 +266,7 @@ impl Group {
             Ok(_) => {
                 // update member state
                 my_member.last_message_index = last_index;
-                Self::update_group_member(&user_account.id, &group_id, &my_member);
+                Self::update_group_member(state, &user_account.id, &group_id, &my_member);
             }
             Err(err) => {
                 log::error!("group message sending failed {}", err);
@@ -270,9 +275,9 @@ impl Group {
     }
 
     /// Send group updated to all members
-    fn post_group_update(account_id: &PeerId, group_id: &[u8]) {
+    fn post_group_update(state: &crate::QaulState, account_id: &PeerId, group_id: &[u8]) {
         let group;
-        match GroupStorage::get_group(account_id.to_owned(), group_id) {
+        match GroupStorage::get_group(state, account_id.to_owned(), group_id) {
             Some(my_group) => group = my_group,
             None => return,
         }
@@ -313,8 +318,9 @@ impl Group {
         let send_message_bytes = send_message.encode_to_vec();
 
         // send to all group members
-        if let Some(user_account) = UserAccounts::get_by_id(*account_id) {
+        if let Some(user_account) = UserAccounts::get_by_id(state, *account_id) {
             Self::send_to_remote_members(
+                state,
                 &user_account,
                 &group,
                 &send_message_bytes,
@@ -326,10 +332,10 @@ impl Group {
     }
 
     /// Process incoming NET messages for group chat module
-    pub fn net(sender_id: &PeerId, receiver_id: &PeerId, data: &[u8]) {
+    pub fn net(state: &crate::QaulState, sender_id: &PeerId, receiver_id: &PeerId, data: &[u8]) {
         // check receiver id is in users list
         let user;
-        match UserAccounts::get_by_id(*receiver_id) {
+        match UserAccounts::get_by_id(state, *receiver_id) {
             Some(usr) => {
                 user = usr;
             }
@@ -343,30 +349,30 @@ impl Group {
             Ok(messaging) => match messaging.message {
                 Some(proto_net::group_container::Message::InviteMember(invite_member)) => {
                     log::trace!("group::on_receive_invite");
-                    Member::on_be_invited(&sender_id, &receiver_id, &invite_member);
+                    Member::on_be_invited(state, &sender_id, &receiver_id, &invite_member);
                 }
                 Some(proto_net::group_container::Message::Removed(removed)) => {
                     log::trace!("group::on_removed");
                     // remove user from group and deactivate group
-                    if let Err(error) = Member::on_removed(&sender_id, &receiver_id, &removed) {
+                    if let Err(error) = Member::on_removed(state, &sender_id, &receiver_id, &removed) {
                         log::error!("group on_removed error {}", error);
                     }
                 }
                 Some(proto_net::group_container::Message::ReplyInvite(reply_invite)) => {
                     log::trace!("group::on_answered for invite");
                     if let Err(error) =
-                        Member::on_reply_invite(sender_id, receiver_id, &reply_invite)
+                        Member::on_reply_invite(state, sender_id, receiver_id, &reply_invite)
                     {
                         log::error!("group on_reply_invite error {}", error);
                     } else {
                         if reply_invite.accept {
-                            Self::post_group_update(&user.id, &reply_invite.group_id);
+                            Self::post_group_update(state, &user.id, &reply_invite.group_id);
                         }
                     }
                 }
                 Some(proto_net::group_container::Message::GroupInfo(group_info)) => {
                     log::trace!("group info arrived");
-                    manage::GroupManage::on_group_notify(*sender_id, *receiver_id, &group_info);
+                    manage::GroupManage::on_group_notify(state, *sender_id, *receiver_id, &group_info);
                 }
                 None => {
                     log::error!("group message from {} was empty", sender_id.to_base58())
@@ -384,7 +390,7 @@ impl Group {
     }
 
     /// Process incoming RPC request messages for group chat module
-    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
+    pub fn rpc(state: &crate::QaulState, data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
         let my_user_id = PeerId::from_bytes(&user_id).unwrap();
 
         match proto_rpc::Group::decode(&data[..]) {
@@ -392,6 +398,7 @@ impl Group {
                 match group.message {
                     Some(proto_rpc::group::Message::GroupCreateRequest(group_create_req)) => {
                         let id = GroupManage::create_new_group(
+                            state,
                             &my_user_id,
                             group_create_req.group_name.clone(),
                         );
@@ -410,6 +417,7 @@ impl Group {
 
                         // send message
                         Rpc::send_message(
+                            state,
                             proto_message.encode_to_vec(),
                             crate::rpc::proto::Modules::Group.into(),
                             request_id,
@@ -420,6 +428,7 @@ impl Group {
                         let mut status = true;
                         let mut message: String = "".to_string();
                         if let Err(err) = GroupManage::rename_group(
+                            state,
                             &my_user_id,
                             &group_rename_req.group_id,
                             group_rename_req.group_name.clone(),
@@ -440,6 +449,7 @@ impl Group {
 
                         // send message
                         Rpc::send_message(
+                            state,
                             proto_message.encode_to_vec(),
                             crate::rpc::proto::Modules::Group.into(),
                             request_id,
@@ -448,11 +458,11 @@ impl Group {
 
                         // post updates
                         if status {
-                            Self::post_group_update(&my_user_id, &group_rename_req.group_id);
+                            Self::post_group_update(state, &my_user_id, &group_rename_req.group_id);
                         }
                     }
                     Some(proto_rpc::group::Message::GroupInfoRequest(group_info_req)) => {
-                        match GroupManage::group_info(&my_user_id, &group_info_req.group_id) {
+                        match GroupManage::group_info(state, &my_user_id, &group_info_req.group_id) {
                             Ok(res) => {
                                 let proto_message = proto_rpc::Group {
                                     message: Some(proto_rpc::group::Message::GroupInfoResponse(
@@ -462,6 +472,7 @@ impl Group {
 
                                 // send message
                                 Rpc::send_message(
+                                    state,
                                     proto_message.encode_to_vec(),
                                     crate::rpc::proto::Modules::Group.into(),
                                     request_id,
@@ -474,12 +485,13 @@ impl Group {
                         }
                     }
                     Some(proto_rpc::group::Message::GroupListRequest(_group_list_req)) => {
-                        let list = GroupManage::group_list(&my_user_id);
+                        let list = GroupManage::group_list(state, &my_user_id);
                         let proto_message = proto_rpc::Group {
                             message: Some(proto_rpc::group::Message::GroupListResponse(list)),
                         };
                         // send message
                         Rpc::send_message(
+                            state,
                             proto_message.encode_to_vec(),
                             crate::rpc::proto::Modules::Group.into(),
                             request_id,
@@ -487,12 +499,13 @@ impl Group {
                         );
                     }
                     Some(proto_rpc::group::Message::GroupInvitedRequest(_group_invited_req)) => {
-                        let invited = GroupManage::invited_list(&my_user_id);
+                        let invited = GroupManage::invited_list(state, &my_user_id);
                         let proto_message = proto_rpc::Group {
                             message: Some(proto_rpc::group::Message::GroupInvitedResponse(invited)),
                         };
                         // send message
                         Rpc::send_message(
+                            state,
                             proto_message.encode_to_vec(),
                             crate::rpc::proto::Modules::Group.into(),
                             request_id,
@@ -503,6 +516,7 @@ impl Group {
                         let mut status = true;
                         let mut message: String = "".to_string();
                         if let Err(err) = Member::invite(
+                            state,
                             &my_user_id,
                             &invite_req.group_id,
                             &PeerId::from_bytes(&invite_req.user_id).unwrap(),
@@ -523,6 +537,7 @@ impl Group {
 
                         // send message
                         Rpc::send_message(
+                            state,
                             proto_message.encode_to_vec(),
                             crate::rpc::proto::Modules::Group.into(),
                             request_id,
@@ -534,7 +549,7 @@ impl Group {
                         let mut message: String = "".to_string();
 
                         if let Err(err) =
-                            Member::reply_invite(&my_user_id, &reply_req.group_id, reply_req.accept)
+                            Member::reply_invite(state, &my_user_id, &reply_req.group_id, reply_req.accept)
                         {
                             status = false;
                             message = err.clone();
@@ -551,6 +566,7 @@ impl Group {
 
                         // send message
                         Rpc::send_message(
+                            state,
                             proto_message.encode_to_vec(),
                             crate::rpc::proto::Modules::Group.into(),
                             request_id,
@@ -562,6 +578,7 @@ impl Group {
                         let mut message: String = "".to_string();
 
                         if let Err(err) = Member::remove(
+                            state,
                             &my_user_id,
                             &remove_req.group_id,
                             &PeerId::from_bytes(&remove_req.user_id).unwrap(),
@@ -583,6 +600,7 @@ impl Group {
 
                         // send message
                         Rpc::send_message(
+                            state,
                             proto_message.encode_to_vec(),
                             crate::rpc::proto::Modules::Group.into(),
                             request_id,
@@ -590,7 +608,7 @@ impl Group {
                         );
 
                         if status {
-                            Self::post_group_update(&my_user_id, &remove_req.group_id);
+                            Self::post_group_update(state, &my_user_id, &remove_req.group_id);
                         }
                     }
                     _ => {

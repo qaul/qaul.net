@@ -182,6 +182,9 @@ pub struct MessagingState {
     /// Sled database backing (kept alive for tree references).
     /// Wrapped in RwLock so `init_production` can swap it after construction.
     _db: RwLock<sled::Db>,
+    /// Network emulator state (only compiled with the `emulate` cfg flag).
+    #[cfg(emulate)]
+    pub network_emul: RwLock<network_emul::NetworkEmulatorStat>,
 }
 
 impl MessagingState {
@@ -197,6 +200,12 @@ impl MessagingState {
                 unconfirmed: unconfirmed_tree,
             }),
             _db: RwLock::new(db),
+            #[cfg(emulate)]
+            network_emul: RwLock::new(network_emul::NetworkEmulatorStat {
+                loss_rate: 5,
+                total_message: 0,
+                total_drop: 0,
+            }),
         }
     }
 
@@ -211,6 +220,12 @@ impl MessagingState {
                 unconfirmed: unconfirmed_tree,
             }),
             _db: RwLock::new(db),
+            #[cfg(emulate)]
+            network_emul: RwLock::new(network_emul::NetworkEmulatorStat {
+                loss_rate: 5,
+                total_message: 0,
+                total_drop: 0,
+            }),
         }
     }
 
@@ -328,30 +343,26 @@ impl MessagingState {
 }
 
 impl Messaging {
-    /// Helper to access the global MessagingState from QaulState.
-    pub(crate) fn state() -> &'static MessagingState {
-        &crate::QaulState::global().services.messaging
-    }
-
     /// Initialize messaging and create the ring buffer.
-    pub fn init() {
+    pub fn init(state: &crate::QaulState) {
         #[cfg(emulate)]
         /// init emulator
         network_emul::NetworkEmulator::init();
 
-        let db = DataBase::get_node_db();
-        Self::state().init_production(db);
+        let db = DataBase::get_node_db(state);
+        state.services.messaging.init_production(db);
     }
 
     /// Save a message to the data base to wait for confirmation
     pub fn save_unconfirmed_message(
+        state: &crate::QaulState,
         message_type: MessagingServiceType,
         message_id: &[u8],
         receiver: &PeerId,
         container: &proto::Container,
         is_dtn: bool,
     ) {
-        Self::state().save_unconfirmed_message(message_type, message_id, receiver, container, is_dtn);
+        state.services.messaging.save_unconfirmed_message(message_type, message_id, receiver, container, is_dtn);
     }
 
     /// Process confirmation message
@@ -359,6 +370,7 @@ impl Messaging {
     /// Removes the message from the unconfirmed table and notifies
     /// the related service (if needed) that the message was received.
     pub fn on_confirmed_message(
+        state: &crate::QaulState,
         signature: &[u8],
         sender_id: PeerId,
         user_account: UserAccount,
@@ -369,7 +381,7 @@ impl Messaging {
             bs58::encode(signature).into_string()
         );
 
-        let unconfirmed = Self::state().unconfirmed.write().unwrap();
+        let unconfirmed = state.services.messaging.unconfirmed.write().unwrap();
 
         // check and remove unconfirmed from DB
         match unconfirmed.unconfirmed.remove(signature) {
@@ -407,6 +419,7 @@ impl Messaging {
                                 log::trace!("Confirmation: Chat");
                                 // set received info in chat data base
                                 ChatStorage::update_confirmation(
+                                    state,
                                     user_account.id,
                                     sender_id,
                                     &unconfirmed.message_id,
@@ -421,6 +434,7 @@ impl Messaging {
 
                                         // confirm message reception in data base
                                         ChatFile::update_confirmation(
+                                            state,
                                             user_account.id,
                                             sender_id,
                                             file_id,
@@ -447,12 +461,12 @@ impl Messaging {
         }
     }
 
-    fn on_scheduled_message(signature: &[u8]) {
-        Self::state().on_scheduled_message(signature);
+    fn on_scheduled_message(state: &crate::QaulState, signature: &[u8]) {
+        state.services.messaging.on_scheduled_message(signature);
     }
 
-    fn on_scheduled_as_dtn_message(signature: &[u8]) {
-        Self::state().on_scheduled_as_dtn_message(signature);
+    fn on_scheduled_as_dtn_message(state: &crate::QaulState, signature: &[u8]) {
+        state.services.messaging.on_scheduled_as_dtn_message(signature);
     }
 
     /// pack, sign and schedule a message for sending
@@ -461,6 +475,7 @@ impl Messaging {
     /// otherwise an error message string.
 
     pub fn pack_and_send_message(
+        state: &crate::QaulState,
         user_account: &UserAccount,
         receiver: &PeerId,
         data: Vec<u8>,
@@ -472,7 +487,7 @@ impl Messaging {
 
         // encrypt data
         let encrypted_message: proto::Encrypted;
-        let encryption_result = Crypto::encrypt(data, user_account.to_owned(), receiver.clone());
+        let encryption_result = Crypto::encrypt(state, data, user_account.to_owned(), receiver.clone());
 
         match encryption_result {
             Some(encrypted) => {
@@ -482,6 +497,7 @@ impl Messaging {
         }
 
         return Self::pack_and_send_encrypted_data(
+            state,
             user_account,
             receiver,
             encrypted_message,
@@ -495,6 +511,7 @@ impl Messaging {
     /// The function returns the message signature on success,
     /// otherwise an error message string.
     pub fn pack_and_send_encrypted_data(
+        state: &crate::QaulState,
         user_account: &UserAccount,
         receiver: &PeerId,
         encrypted_message: proto::Encrypted,
@@ -538,6 +555,7 @@ impl Messaging {
             // in common message case, save into unconfirmed table
             if message_needs_confirmation {
                 Self::save_unconfirmed_message(
+                    state,
                     MessagingServiceType::Chat,
                     message_id,
                     receiver,
@@ -548,6 +566,7 @@ impl Messaging {
 
             // schedule message for sending
             Self::schedule_message(
+                state,
                 receiver.clone(),
                 container,
                 message_needs_confirmation,
@@ -565,6 +584,7 @@ impl Messaging {
 
     /// pack, sign and schedule a message for sending
     pub fn send_dtn_message(
+        state: &crate::QaulState,
         user_account: &UserAccount,
         storage_node_id: &PeerId,
         org_container: &proto::Container,
@@ -590,6 +610,7 @@ impl Messaging {
 
             // in common message case, save into unconfirmed table
             Self::save_unconfirmed_message(
+                state,
                 MessagingServiceType::Chat,
                 &[],
                 &storage_node_id,
@@ -599,6 +620,7 @@ impl Messaging {
 
             // schedule message for sending
             Self::schedule_message(
+                state,
                 storage_node_id.clone(),
                 container_dtn,
                 true,
@@ -621,6 +643,7 @@ impl Messaging {
     /// This buffer is checked regularly by libqaul for sending.
     ///
     pub fn schedule_message(
+        state: &crate::QaulState,
         receiver: PeerId,
         container: proto::Container,
         is_common: bool,
@@ -663,20 +686,21 @@ impl Messaging {
     ///
     /// Check if there is a message scheduled for sending.
     ///
-    pub fn check_scheduler() -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
+    pub fn check_scheduler(state: &crate::QaulState) -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
         let message_item: Option<ScheduledMessage>;
 
         // get scheduled messaging buffer
         {
-            let mut messaging = Self::state().messaging.write().unwrap();
+            let mut messaging = state.services.messaging.messaging.write().unwrap();
             message_item = messaging.to_send.pop_front();
         }
 
         if let Some(message) = message_item {
             // check for route
-            if let Some(route) = RoutingTable::get_route_to_user(message.receiver) {
+            let rs = state.get_router();
+            if let Some(route) = RoutingTable::get_route_to_user(&rs, message.receiver) {
                 // update unconfirmed table set scheduled flag.
-                Self::on_scheduled_message(&message.container.signature);
+                Self::on_scheduled_message(state, &message.container.signature);
 
                 // create binary message
                 let data = message.container.encode_to_vec();
@@ -695,10 +719,11 @@ impl Messaging {
                         PeerId::from_bytes(&message.container.envelope.as_ref().unwrap().sender_id)
                     {
                         if let Some(storage_node_id) =
-                            super::dtn::Dtn::get_storage_user(&my_user_id)
+                            super::dtn::Dtn::get_storage_user(state, &my_user_id)
                         {
-                            if let Some(user_account) = UserAccounts::get_by_id(my_user_id) {
+                            if let Some(user_account) = UserAccounts::get_by_id(state,my_user_id) {
                                 if let Err(_e) = Self::send_dtn_message(
+                                    state,
                                     &user_account,
                                     &storage_node_id,
                                     &message.container,
@@ -707,7 +732,7 @@ impl Messaging {
                                 } else {
                                     log::error!("DTN scheduled...");
                                     // update unconfirmed table
-                                    Self::on_scheduled_as_dtn_message(&message.container.signature);
+                                    Self::on_scheduled_as_dtn_message(state, &message.container.signature);
                                 }
                             }
                         }
@@ -721,6 +746,7 @@ impl Messaging {
 
     /// Send a confirmation message for a received message
     pub fn send_confirmation(
+        state: &crate::QaulState,
         user_id: &PeerId,
         receiver_id: &PeerId,
         signature: &[u8],
@@ -731,7 +757,7 @@ impl Messaging {
             bs58::encode(signature).into_string()
         );
 
-        if let Some(user) = UserAccounts::get_by_id(user_id.clone()) {
+        if let Some(user) = UserAccounts::get_by_id(state,user_id.clone()) {
             // create timestamp
             let timestamp = Timestamp::get_timestamp();
 
@@ -753,6 +779,7 @@ impl Messaging {
 
             // send message via messaging
             Self::pack_and_send_message(
+                state,
                 &user,
                 receiver_id,
                 message_buf,
@@ -766,7 +793,7 @@ impl Messaging {
     }
 
     /// received message from qaul_messaging behaviour
-    pub fn received(received: QaulMessagingReceived) {
+    pub fn received(state: &crate::QaulState, received: QaulMessagingReceived) {
         // decode message container
         match proto::Container::decode(&received.data[..]) {
             Ok(container) => {
@@ -786,16 +813,16 @@ impl Messaging {
                 };
 
                 // check if message is local user account
-                match UserAccounts::get_by_id(receiver_id) {
+                match UserAccounts::get_by_id(state,receiver_id) {
                     // we are the receiving node,
                     // process and save the message
                     Some(user_account) => {
-                        MessagingProcess::process_received_message(user_account, container)
+                        MessagingProcess::process_received_message(state, user_account, container)
                     }
 
                     // schedule it for further sending otherwise
                     None => {
-                        Self::schedule_message(receiver_id, container, true, true, false, false)
+                        Self::schedule_message(state, receiver_id, container, true, true, false, false)
                     }
                 }
             }

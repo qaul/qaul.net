@@ -131,24 +131,19 @@ impl NodeIdentity {
 pub struct Node;
 
 impl Node {
-    /// Get a snapshot of the NodeIdentity from QaulState.
-    fn state() -> Arc<NodeIdentity> {
-        crate::QaulState::global().get_node()
-    }
-
     /// start an existing node from the config parameters
     ///
     /// This is now a no-op: node identity is created during `Libqaul::new()`
     /// via `NodeModule::new()` and stored in `QaulState`. Kept for backward
     /// compatibility so existing call sites don't break.
-    pub fn init() {
+    pub fn init(state: &crate::QaulState) {
         // UserAccounts::init() is also a no-op now; call it for compat.
         UserAccounts::init();
 
-        if !Configuration::is_node_initialized() {
+        if !Configuration::is_node_initialized(state) {
             // Save the generated node identity to configuration
             log::trace!("Create a new node (saving identity to config).");
-            Self::save_to_config();
+            Self::save_to_config(state);
         } else {
             log::trace!("Node already initialized from configuration.");
         }
@@ -156,45 +151,46 @@ impl Node {
 
     /// Save the current node identity (from QaulState) into the configuration file.
     /// Called when a brand-new node is created.
-    fn save_to_config() {
-        let node = Self::state();
+    fn save_to_config(state: &crate::QaulState) {
+        let node = state.get_node();
         {
-            let mut config = Configuration::get_mut();
+            let mut config = Configuration::get_mut(state);
             config.node.keys = node.keys_to_config();
             config.node.id = node.id.to_string();
             config.node.initialized = 1;
         }
-        Configuration::save();
+        Configuration::save(state);
         log::trace!("Peer Id: {}", node.id);
     }
 
     /// get a cloned PeerId
-    pub fn get_id() -> PeerId {
-        Self::state().id
+    pub fn get_id(state: &crate::QaulState) -> PeerId {
+        state.get_node().id
     }
 
     /// get small node ID
-    pub fn get_q8id() -> Vec<u8> {
-        QaulId::to_q8id(Self::state().id)
+    pub fn get_q8id(state: &crate::QaulState) -> Vec<u8> {
+        QaulId::to_q8id(state.get_node().id)
     }
 
     /// get the string of a PeerId
-    pub fn get_id_string() -> String {
-        Self::state().id.to_string()
+    pub fn get_id_string(state: &crate::QaulState) -> String {
+        state.get_node().id.to_string()
     }
 
     /// Get the Keypair of this node (cloned)
-    pub fn get_keys() -> Keypair {
-        Self::state().keys.clone()
+    pub fn get_keys(state: &crate::QaulState) -> Keypair {
+        state.get_node().keys.clone()
     }
 
     /// get the cloned Topic
-    pub fn get_topic() -> Topic {
-        Self::state().topic.clone()
+    pub fn get_topic(state: &crate::QaulState) -> Topic {
+        state.get_node().topic.clone()
     }
 
     /// Process incoming RPC request messages for node module
     pub fn rpc(
+        state: &crate::QaulState,
         data: Vec<u8>,
         lan: Option<&mut Lan>,
         internet: Option<&mut Internet>,
@@ -204,7 +200,7 @@ impl Node {
             Ok(node) => {
                 match node.message {
                     Some(proto::node::Message::GetNodeInfo(_)) => {
-                        Rpc::increase_message_counter();
+                        Rpc::increase_message_counter(state);
 
                         // create address list
                         let mut addresses: Vec<String> = Vec::new();
@@ -232,7 +228,7 @@ impl Node {
 
                         // create response message
                         let proto_nodeinformation = proto::NodeInformation {
-                            id_base58: Self::get_id_string(),
+                            id_base58: Self::get_id_string(state),
                             addresses,
                         };
 
@@ -248,6 +244,7 @@ impl Node {
 
                         // send message
                         Rpc::send_message(
+                            state,
                             buf,
                             crate::rpc::proto::Modules::Node.into(),
                             request_id,

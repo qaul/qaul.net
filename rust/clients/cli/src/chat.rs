@@ -19,7 +19,7 @@ impl Chat {
     /// CLI command interpretation
     ///
     /// The CLI commands of feed module are processed here
-    pub fn cli(command: &str) {
+    pub fn cli(state: &super::CliState, command: &str) {
         match command {
             // send chat message
             cmd if cmd.starts_with("send ") => {
@@ -53,7 +53,7 @@ impl Chat {
                     // get message string
                     if let Some(message) = command_string.strip_prefix(group_id_str) {
                         // send message
-                        Self::send_chat_message(group_id, message.to_string().trim().to_string());
+                        Self::send_chat_message(state, group_id, message.to_string().trim().to_string());
                         println!("chat message sent [{}] {}", group_id_str, message);
                         return;
                     } else {
@@ -105,7 +105,7 @@ impl Chat {
                         }
 
                         // request chat conversation
-                        Self::request_chat_conversation(group_id, last_index);
+                        Self::request_chat_conversation(state, group_id, last_index);
                     }
                     None => {
                         // request all messages
@@ -144,7 +144,7 @@ impl Chat {
     }
 
     /// Create and send feed message via rpc
-    fn send_chat_message(group_id: Vec<u8>, message_text: String) {
+    fn send_chat_message(state: &super::CliState, group_id: Vec<u8>, message_text: String) {
         // create feed send message
         let proto_message = proto::Chat {
             message: Some(proto::chat::Message::Send(proto::ChatMessageSend {
@@ -160,14 +160,14 @@ impl Chat {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Chat.into(), "".to_string());
+        Rpc::send_message(state, buf, super::rpc::proto::Modules::Chat.into(), "".to_string());
     }
 
     /// Request chat conversation via rpc
     ///
     /// This provides all chat messages of a specific conversation.
     /// The conversation is addressed via it's group id
-    fn request_chat_conversation(group_id: Vec<u8>, last_index: u64) {
+    fn request_chat_conversation(state: &super::CliState, group_id: Vec<u8>, last_index: u64) {
         // create feed list request message
         let proto_message = proto::Chat {
             message: Some(proto::chat::Message::ConversationRequest(
@@ -185,7 +185,7 @@ impl Chat {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(buf, super::rpc::proto::Modules::Chat.into(), "".to_string());
+        Rpc::send_message(state, buf, super::rpc::proto::Modules::Chat.into(), "".to_string());
     }
 
     fn analyze_content(content: &Vec<u8>) -> Result<Vec<String>, String> {

@@ -57,6 +57,7 @@ impl Chat {
 
     /// Process incoming RPC request messages for chat module
     pub fn rpc(
+        state: &crate::QaulState,
         data: Vec<u8>,
         user_id: Vec<u8>,
         _lan: Option<&mut Lan>,
@@ -71,7 +72,7 @@ impl Chat {
                     Some(rpc_proto::chat::Message::ConversationRequest(conversation_request)) => {
                         // get messages of a conversation from data base
                         let conversation_list =
-                            ChatStorage::get_messages(account_id, conversation_request.group_id);
+                            ChatStorage::get_messages(state, account_id, conversation_request.group_id);
 
                         // pack message
                         let proto_message = rpc_proto::Chat {
@@ -86,6 +87,7 @@ impl Chat {
                             .encode(&mut buf)
                             .expect("Vec<u8> provides capacity as needed");
                         Rpc::send_message(
+                            state,
                             buf,
                             crate::rpc::proto::Modules::Chat.into(),
                             request_id,
@@ -100,7 +102,7 @@ impl Chat {
                         // get user account from user_id
                         let user_account;
                         match PeerId::from_bytes(&user_id) {
-                            Ok(user_id_decoded) => match UserAccounts::get_by_id(user_id_decoded) {
+                            Ok(user_id_decoded) => match UserAccounts::get_by_id(state,user_id_decoded) {
                                 Some(account) => {
                                     user_account = account;
                                 }
@@ -120,6 +122,7 @@ impl Chat {
 
                         // send the message
                         if let Err(error) = ChatMessage::send_chat_message(
+                            state,
                             &user_account.id,
                             &message.group_id,
                             message.content,

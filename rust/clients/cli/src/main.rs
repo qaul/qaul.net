@@ -9,6 +9,7 @@
 use futures::prelude::*;
 use futures::{future::FutureExt, pin_mut, select};
 use futures_ticker::Ticker;
+use std::sync::{Arc, RwLock};
 use std::time::Duration;
 use tokio::io::{self, AsyncBufReadExt, BufReader};
 
@@ -35,6 +36,14 @@ use cli::Cli;
 use rpc::Rpc;
 use user_accounts::UserAccounts;
 
+/// CLI-wide state passed to all modules instead of using globals.
+pub struct CliState {
+    /// The libqaul instance.
+    pub instance: Arc<libqaul::Libqaul>,
+    /// User accounts state (replaces the former USERACCOUNTS static).
+    pub user_accounts: RwLock<Option<UserAccounts>>,
+}
+
 /// Event Types of the async loop
 enum EventType {
     Cli(String),
@@ -59,8 +68,14 @@ async fn main() {
     // Print node info
     println!("Node ID: {}", instance.node_id());
 
+    // Create CLI state
+    let cli_state = Arc::new(CliState {
+        instance,
+        user_accounts: RwLock::new(None),
+    });
+
     // initialize user accounts
-    UserAccounts::init();
+    UserAccounts::init(&cli_state);
 
     // listen for new commands from CLI
     let stdin = io::stdin();
@@ -68,9 +83,6 @@ async fn main() {
     let mut lines = reader.lines();
 
     // check RPC once every 10 milliseconds
-    // TODO: interval is only in unstable. Use it once it is stable.
-    //       https://docs.rs/async-std/1.5.0/async_std/stream/fn.interval.html
-    //let mut rpc_interval = async_std::stream::interval(Duration::from_millis(10));
     let mut futures_ticker = Ticker::new(Duration::from_millis(10));
 
     // loop and poll CLI and RPC
@@ -79,8 +91,6 @@ async fn main() {
             let line_fut = lines.next_line().fuse();
             let rpc_fut = futures_ticker.next().fuse();
 
-            // This Macro is shown wrong by Rust-Language-Server > 0.2.400
-            // You need to downgrade to version 0.2.400 if this happens to you
             pin_mut!(line_fut);
             pin_mut!(rpc_fut);
 
@@ -99,14 +109,16 @@ async fn main() {
         if let Some(event) = evt {
             match event {
                 EventType::Cli(line) => {
-                    Cli::process_command(line);
+                    Cli::process_command(&cli_state, line);
                 }
-                EventType::Rpc => match libqaul::api::receive_rpc() {
-                    Ok(data) => {
-                        Rpc::received_message(data);
+                EventType::Rpc => {
+                    match libqaul::rpc::Rpc::receive_from_libqaul(&*cli_state.instance.state) {
+                        Ok(data) => {
+                            Rpc::received_message(&cli_state, data);
+                        }
+                        _ => {}
                     }
-                    _ => {}
-                },
+                }
             }
         }
     }

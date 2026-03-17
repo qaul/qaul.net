@@ -39,11 +39,6 @@ impl DatabaseState {
     }
 }
 
-/// Access the database state via QaulState::global().
-fn state() -> &'static DatabaseState {
-    &crate::QaulState::global().database
-}
-
 /// DataBase Module
 #[derive(Clone, Debug)]
 pub struct DataBase {
@@ -81,13 +76,13 @@ impl DataBase {
 
     /// Initialize data base,
     /// open data base from disk and load it into QaulState.
-    pub fn init() {
+    pub fn init(state: &crate::QaulState) {
         // create node data base path
-        let path_string = super::Storage::get_path();
+        let path_string = super::Storage::get_path(state);
         let database = Self::create(&path_string);
 
         // put data base structure to QaulState
-        let mut db = state().inner.write().unwrap();
+        let mut db = state.database.inner.write().unwrap();
         *db = database;
     }
 
@@ -121,8 +116,8 @@ impl DataBase {
     }
 
     /// get node DB via QaulState
-    pub fn get_node_db() -> sled::Db {
-        let database = state().inner.read().unwrap();
+    pub fn get_node_db(state: &crate::QaulState) -> sled::Db {
+        let database = state.database.inner.read().unwrap();
         database.node.clone()
     }
 
@@ -131,15 +126,15 @@ impl DataBase {
     /// Each user account has an own storage folder
     /// with a data base.
     /// The data base is opened on request.
-    pub fn get_user_db(account_id: PeerId) -> sled::Db {
+    pub fn get_user_db(state: &crate::QaulState, account_id: PeerId) -> sled::Db {
         // check if user account data base is already open
-        if let Some(db) = Self::user_db_opened(account_id) {
+        if let Some(db) = Self::user_db_opened(state, account_id) {
             return db;
         }
         // otherwise open it from disk and save it to state
         else {
             // get data base structure
-            let mut database = state().inner.write().unwrap();
+            let mut database = state.database.inner.write().unwrap();
 
             // create path
             let path = Path::new(database.path.as_str());
@@ -161,9 +156,9 @@ impl DataBase {
     }
 
     /// check if user account data base has already been opened
-    fn user_db_opened(account_id: PeerId) -> Option<sled::Db> {
+    fn user_db_opened(state: &crate::QaulState, account_id: PeerId) -> Option<sled::Db> {
         // get data base structure
-        let database = state().inner.read().unwrap();
+        let database = state.database.inner.read().unwrap();
 
         // check if data base is opened and return the output
         if let Some(db) = database.users.get(&account_id.to_bytes()) {
@@ -180,9 +175,9 @@ pub struct DbUsers {}
 
 impl DbUsers {
     /// Add a user to the DB
-    pub fn add_user(user: UserData) {
+    pub fn add_user(state: &crate::QaulState, user: UserData) {
         // get node data base
-        let db = DataBase::get_node_db();
+        let db = DataBase::get_node_db(state);
 
         // open tree from data base
         let tree: sled::Tree = db.open_tree("users").unwrap();
@@ -202,9 +197,9 @@ impl DbUsers {
     }
 
     // get user table
-    pub fn get_tree() -> sled::Tree {
+    pub fn get_tree(state: &crate::QaulState) -> sled::Tree {
         // get data base
-        let db = DataBase::get_node_db();
+        let db = DataBase::get_node_db(state);
 
         // open tree from data base
         db.open_tree("users").unwrap()
