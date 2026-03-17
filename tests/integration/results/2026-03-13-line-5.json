@@ -1,0 +1,27 @@
+{
+  "topology": "line-5",
+  "node_count": 5,
+  "discovery_wait_s": 120,
+  "propagation_wait_s": 30,
+  "tests": {
+    "test_node_startup": {
+      "passed": true,
+      "notes": "all 5 nodes responded with distinct IDs",
+      "elapsed_s": 0.2
+    },
+    "test_user_discovery": {
+      "passed": true,
+      "notes": "node 0000 knows node 0004's user after 120s",
+      "actual_wait_s": 120,
+      "elapsed_s": 120.1
+    },
+    "test_message_routing": {
+      "passed": true,
+      "notes": "message from 0000 reached 0004 after 120s discovery + 30s propagation",
+      "actual_wait_s": 150,
+      "elapsed_s": 150.0
+    }
+  },
+  "overall_passed": true,
+  "timestamp": "2026-03-13T14:56:36.576124Z"
+}

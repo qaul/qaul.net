@@ -1,0 +1,32 @@
+{
+  "topology": "line-5",
+  "node_count": 5,
+  "tests": {
+    "test_route_discovery": {
+      "passed": false,
+      "notes": "1 of 5 nodes still not in routing table after 120.7s\n  discovered: 4  expected: 5",
+      "elapsed_s": 120.7
+    },
+    "test_route_stability": {
+      "passed": false,
+      "notes": "RTT drift exceeded 20% tolerance:\n  3FzbwGVyP7g: baseline 1383ms, observed 1726ms (25% drift, limit 20%)\n  YeK4aKr2A35: baseline 835ms, observed 1020ms (22% drift, limit 20%)\n  YeK4aKr2A35: baseline 835ms, observed 1124ms (35% drift, limit 20%)\n  GDPiqMmSEzq: baseline 422ms, observed 580ms (37% drift, limit 20%)\n  GDPiqMmSEzq: baseline 422ms, observed 580ms (37% drift, limit 20%)\n  GDPiqMmSEzq: baseline 422ms, observed 585ms (39% drift, limit 20%)",
+      "elapsed_s": 240.4
+    },
+    "test_neighbour_detection": {
+      "passed": true,
+      "nodes_checked": 5,
+      "notes": "all 5 nodes have correct LAN neighbours matching topology",
+      "elapsed_s": 30.3
+    },
+    "test_route_expiration": {
+      "passed": true,
+      "hop_count": 4,
+      "expiration_threshold_s": 50,
+      "actual_expiration_s": 56.8,
+      "notes": "node 0004 at hop 4: route expired in 56.8s (threshold 50s)",
+      "elapsed_s": 176.9
+    }
+  },
+  "overall_passed": false,
+  "timestamp": "2026-03-16T16:52:00.776978+00:00"
+}

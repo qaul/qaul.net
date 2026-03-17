@@ -1,0 +1,47 @@
+{
+  "topology": "grid8-4x4",
+  "node_count": 16,
+  "tests": {
+    "test_route_expiration": {
+      "passed": null,
+      "notes": "skipped \u2014 grid topology has redundant paths"
+    },
+    "test_route_discovery": {
+      "passed": true,
+      "convergence_time_s": 30.2,
+      "discovery_timeline": {
+        "HEmwFNaKYsv": 5.0,
+        "M7ZQMjdisrZ": 10.1,
+        "KpWgdTbvw2X": 10.1,
+        "Z18ZLySswCv": 10.1,
+        "VPHBAfZBMGV": 10.1,
+        "QNGNudZ4Zdp": 20.1,
+        "6bCyeqmiDkr": 20.1,
+        "KSMJ9yRs5q5": 20.1,
+        "MwzHRNU7Yon": 20.1,
+        "VRGtnWh6oMW": 20.1,
+        "fciUkbPcxgx": 20.1,
+        "AjJ5PGTziu8": 20.1,
+        "NthcJ2LpfCR": 30.2,
+        "B4Wv8FtsdZs": 30.2,
+        "VH5KXnUQ4Ks": 30.2,
+        "JYHXV3hR1Lc": 30.2
+      },
+      "notes": "all 16 nodes discovered in 30.2s (limit 90s)",
+      "elapsed_s": 30.2
+    },
+    "test_route_stability": {
+      "passed": false,
+      "notes": "route flapping detected across 12 polls:\n  156tEpGmKdE: 1 flap(s)",
+      "elapsed_s": 210.5
+    },
+    "test_neighbour_detection": {
+      "passed": true,
+      "nodes_checked": 16,
+      "notes": "all 16 nodes have correct LAN neighbours matching topology",
+      "elapsed_s": 31.0
+    }
+  },
+  "overall_passed": false,
+  "timestamp": "2026-03-17T11:29:06.062298+00:00"
+}

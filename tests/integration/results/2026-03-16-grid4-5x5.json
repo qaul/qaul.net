@@ -1,0 +1,27 @@
+{
+  "topology": "grid4-5x5",
+  "node_count": 25,
+  "discovery_wait_s": 180,
+  "propagation_wait_s": 30,
+  "tests": {
+    "test_node_startup": {
+      "passed": true,
+      "notes": "all 25 nodes responded with distinct IDs",
+      "elapsed_s": 0.8
+    },
+    "test_user_discovery": {
+      "passed": true,
+      "notes": "node 0000 knows node 0018's user after 180s",
+      "actual_wait_s": 180,
+      "elapsed_s": 180.1
+    },
+    "test_message_routing": {
+      "passed": true,
+      "notes": "message from 0000 reached 0018 after 180s discovery + 30s propagation",
+      "actual_wait_s": 210,
+      "elapsed_s": 210.1
+    }
+  },
+  "overall_passed": true,
+  "timestamp": "2026-03-16T14:07:55.144789+00:00"
+}
