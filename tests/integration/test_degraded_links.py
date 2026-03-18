@@ -67,52 +67,43 @@ def teardown():
     clear_topology()
 
 
-def _get_link_interface(node_id: str, neighbour_id: str) -> str:
+def _node_pid(node_id: str) -> str:
+    """Return the PID of the qauld process for a node.
+
+    meshnet-lab starts qauld with --name=test-<node_id>, so we find it
+    via pgrep rather than a PID file (meshnet-lab does not write PID files).
     """
-    Return the name of the veth interface on node_id that connects to neighbour_id.
-    meshnet-lab names these: veth-<node_id>-<neighbour_id>
-    """
-    return f"veth-{node_id}-{neighbour_id}"
+    result = subprocess.run(
+        ["pgrep", "-f", f"qauld --name=test-{node_id}"],
+        capture_output=True, text=True, check=True,
+    )
+    return result.stdout.strip()
 
 
-def _apply_packet_loss(node_id: str, iface: str, loss_percent: int):
-    """Apply packet loss to an interface inside a network namespace."""
+def _apply_packet_loss(node_id: str, loss_percent: int):
+    """Apply packet loss on a node's uplink interface.
+
+    Each node has a single 'uplink' interface connecting it to the meshnet-lab
+    switch. Uses nsenter via /proc/<pid>/ns/net to enter the node's namespace.
+    """
+    pid = _node_pid(node_id)
     subprocess.run(
         [
-            "sudo",
-            "ip",
-            "netns",
-            "exec",
-            node_id,
-            "tc",
-            "qdisc",
-            "add",
-            "dev",
-            iface,
-            "root",
-            "netem",
-            "loss",
-            f"{loss_percent}%",
+            "sudo", "nsenter", f"--net=/proc/{pid}/ns/net",
+            "tc", "qdisc", "add", "dev", "uplink",
+            "root", "netem", "loss", f"{loss_percent}%",
         ],
         check=True,
     )
 
 
-def _remove_packet_loss(node_id: str, iface: str):
-    """Remove tc qdisc from an interface inside a network namespace."""
+def _remove_packet_loss(node_id: str):
+    """Remove tc qdisc from a node's uplink interface."""
+    pid = _node_pid(node_id)
     subprocess.run(
         [
-            "sudo",
-            "ip",
-            "netns",
-            "exec",
-            node_id,
-            "tc",
-            "qdisc",
-            "del",
-            "dev",
-            iface,
-            "root",
+            "sudo", "nsenter", f"--net=/proc/{pid}/ns/net",
+            "tc", "qdisc", "del", "dev", "uplink", "root",
         ],
         check=False,  # don't fail if qdisc wasn't set
     )
@@ -135,12 +126,9 @@ def test_feed_delivery_under_packet_loss(
     nodes = [Node(nid) for nid in sorted_ids]
     sender = nodes[0]
 
-    # pick the two middle nodes as the degraded link
-    mid = len(sorted_ids) // 2
-    loss_node_a = sorted_ids[mid - 1]
-    loss_node_b = sorted_ids[mid]
-    iface_a = _get_link_interface(loss_node_a, loss_node_b)
-    iface_b = _get_link_interface(loss_node_b, loss_node_a)
+    # apply packet loss on the middle node's uplink — this degrades all traffic
+    # passing through the centre of the line topology
+    loss_node = sorted_ids[len(sorted_ids) // 2]
 
     # wait for routing convergence
     print(f"  waiting up to {discovery_wait}s for convergence...")
@@ -163,14 +151,8 @@ def test_feed_delivery_under_packet_loss(
     else:
         raise AssertionError(f"convergence not reached within {discovery_wait}s")
 
-    # apply packet loss on both sides of the degraded link
-    print(
-        f"  applying {loss_percent}% packet loss on link "
-        f"{loss_node_a}↔{loss_node_b} "
-        f"(ifaces: {iface_a}, {iface_b})"
-    )
-    _apply_packet_loss(loss_node_a, iface_a, loss_percent)
-    _apply_packet_loss(loss_node_b, iface_b, loss_percent)
+    print(f"  applying {loss_percent}% packet loss on node {loss_node}'s uplink")
+    _apply_packet_loss(loss_node, loss_percent)
 
     # send messages
     stamp = int(time.time())
@@ -191,8 +173,7 @@ def test_feed_delivery_under_packet_loss(
 
     # remove packet loss before measuring results
     print("  removing packet loss...")
-    _remove_packet_loss(loss_node_a, iface_a)
-    _remove_packet_loss(loss_node_b, iface_b)
+    _remove_packet_loss(loss_node)
 
     # measure delivery on each node
     delivery_rates = {}
@@ -231,10 +212,10 @@ def test_feed_delivery_under_packet_loss(
         "passed": True,
         "loss_percent": loss_percent,
         "send_count": send_count,
-        "degraded_link": f"{loss_node_a}↔{loss_node_b}",
+        "degraded_node": loss_node,
         "delivery_rates": delivery_rates,
         "notes": (
-            f"{loss_percent}% packet loss on {loss_node_a}↔{loss_node_b}: "
+            f"{loss_percent}% packet loss on node {loss_node} uplink: "
             f"far node delivery rate {far_rate * 100:.0f}%"
         ),
     }
