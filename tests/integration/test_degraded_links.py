@@ -153,7 +153,7 @@ def test_feed_delivery_under_packet_loss(
         remote_count = sum(
             1
             for e in table
-            if e["connections"] and e["connections"][0]["module"] != "Local"
+            if e["connections"] and e["connections"][0]["module"].lower() != "local"
         )
         if remote_count >= expected_remote:
             elapsed = round(time.time() - t_start, 1)
