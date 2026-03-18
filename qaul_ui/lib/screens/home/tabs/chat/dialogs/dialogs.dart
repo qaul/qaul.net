@@ -68,79 +68,73 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
         centerTitle: false,
         leading: IconButtonFactory.close(),
       ),
-      body: Stack(
-        children: [
-          ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 8),
-            children: [
-              const SizedBox(height: 140, width: double.maxFinite),
-              QaulAvatar.groupLarge(),
-              const SizedBox(height: 20),
-              LayoutBuilder(builder: (context, constraints) {
-                return SizedBox(
-                  width: constraints.constrainWidth(400),
-                  child: TextFormField(
-                    key: _nameKey,
-                    controller: nameCtrl,
-                    validator: (val) {
-                      if (val == null || val.isEmpty) {
-                        return l10n.fieldRequiredErrorMessage;
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      hintText: l10n.createGroupHint,
-                    ),
+      body: LoadingDecorator(
+        isLoading: loading.value,
+        backgroundColor: Colors.black38,
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 8),
+          children: [
+            const SizedBox(height: 140, width: double.maxFinite),
+            QaulAvatar.groupLarge(),
+            const SizedBox(height: 20),
+            LayoutBuilder(builder: (context, constraints) {
+              return SizedBox(
+                width: constraints.constrainWidth(400),
+                child: TextFormField(
+                  key: _nameKey,
+                  controller: nameCtrl,
+                  validator: (val) {
+                    if (val == null || val.isEmpty) {
+                      return l10n.fieldRequiredErrorMessage;
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    hintText: l10n.createGroupHint,
+                  ),
+                ),
+              );
+            }),
+            const SizedBox(height: 20),
+            QaulButton(
+              label: l10n.createButtonHint,
+              onPressed: () async {
+                if (!_nameKey.currentState!.validate()) return;
+                loading.value = true;
+
+                var name = nameCtrl.text;
+                await createChatGroup(name, worker, ref);
+                if (!context.mounted) return;
+
+                final group = ref
+                    .read(chatRoomsProvider)
+                    .firstWhereOrNull((g) => g.name == name);
+                if (group == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(l10n.genericErrorMessage),
+                  ));
+                  Navigator.pop(context);
+                  return;
+                }
+
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        InviteUsersToGroupDialog(room: group),
                   ),
                 );
-              }),
-              const SizedBox(height: 20),
-              QaulButton(
-                label: l10n.createButtonHint,
-                onPressed: () async {
-                  if (!_nameKey.currentState!.validate()) return;
-                  loading.value = true;
 
-                  var name = nameCtrl.text;
-                  await createChatGroup(name, worker, ref);
-                  if (!context.mounted) return;
+                if (!context.mounted) return;
+                var chatRoom = ref
+                    .read(chatRoomsProvider)
+                    .firstWhereOrNull((g) => g.name == name);
 
-                  final group = ref
-                      .read(chatRoomsProvider)
-                      .firstWhereOrNull((g) => g.name == name);
-                  if (group == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(l10n.genericErrorMessage),
-                    ));
-                    Navigator.pop(context);
-                    return;
-                  }
-
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => InviteUsersToGroupDialog(room: group),
-                    ),
-                  );
-
-                  if (!context.mounted) return;
-                  var chatRoom = ref
-                      .read(chatRoomsProvider)
-                      .firstWhereOrNull((g) => g.name == name);
-
-                  Navigator.pop(context, chatRoom);
-                },
-              ),
-            ],
-          ),
-          if (loading.value)
-            Positioned.fill(
-              child: Container(
-                color: Colors.black38,
-                child: const LoadingIndicator(),
-              ),
+                Navigator.pop(context, chatRoom);
+              },
             ),
-        ],
+          ],
+        ),
       ),
     );
   }

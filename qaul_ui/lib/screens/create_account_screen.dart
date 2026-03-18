@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/legacy.dart';
 import 'package:logging/logging.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 
+import '../decorators/loading_decorator.dart';
 import '../helpers/navigation_helper.dart';
 import '../l10n/app_localizations.dart';
 import '../widgets/widgets.dart';
@@ -87,9 +88,11 @@ class CreateAccountScreen extends HookConsumerWidget {
 
     return Scaffold(
         resizeToAvoidBottomInset: false,
-        body: Stack(
-          children: [
-            Padding(
+        body: SizedBox.expand(
+          child: LoadingDecorator(
+            isLoading: loading.value,
+            backgroundColor: Colors.black54,
+            child: Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 40, vertical: 120),
               child: Column(
@@ -122,18 +125,7 @@ class CreateAccountScreen extends HookConsumerWidget {
                 ],
               ),
             ),
-            if (loading.value) ...[
-              SizedBox.expand(
-                child: IgnorePointer(
-                  ignoring: true,
-                  child: Container(
-                    color: Colors.black54,
-                    child: const LoadingIndicator(),
-                  ),
-                ),
-              )
-            ],
-          ],
+          ),
         ));
   }
 

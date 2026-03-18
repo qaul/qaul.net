@@ -48,12 +48,13 @@ class FileMessageWidget extends StatelessWidget {
                 height: 42,
                 decoration: const BoxDecoration(
                     color: Colors.black12, shape: BoxShape.circle),
-                child: _isReceivingFile()
-                    ? const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: CircularProgressIndicator(),
-                      )
-                    : const Icon(Icons.description),
+                child: LoadingDecorator(
+                  isLoading: _isReceivingFile(),
+                  backgroundColor: Colors.transparent,
+                  hideChildWhenLoading: true,
+                  loadingPadding: const EdgeInsets.all(8.0),
+                  child: const Icon(Icons.description),
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(

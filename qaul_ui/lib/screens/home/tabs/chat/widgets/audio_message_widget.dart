@@ -112,7 +112,12 @@ class _AudioMessageWidgetState extends State<AudioMessageWidget> {
           if (_isReceivingFile())
             const Padding(
               padding: EdgeInsets.all(8.0),
-              child: CircularProgressIndicator(),
+              child: LoadingDecorator(
+                isLoading: true,
+                backgroundColor: Colors.transparent,
+                hideChildWhenLoading: true,
+                child: SizedBox(width: 36, height: 36),
+              ),
             )
           else ...[
             Row(
