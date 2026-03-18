@@ -29,6 +29,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:utils/utils.dart';
 
 import '../../../../../../decorators/cron_task_decorator.dart';
+import '../../../../../../decorators/loading_decorator.dart';
 import '../../../../../../l10n/app_localizations.dart';
 import '../../../../../../stores/stores.dart';
 import '../../../../../providers/providers.dart';
@@ -224,7 +225,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final room = ref.watch(currentOpenChatRoom);
 
     if (room == null) {
-      return const Scaffold(body: Center(child: LoadingIndicator()));
+      return Scaffold(
+        body: LoadingDecorator(
+          isLoading: true,
+          backgroundColor: Colors.transparent,
+          hideChildWhenLoading: true,
+          child: const SizedBox(width: 48, height: 48),
+        ),
+      );
     }
 
     final refreshCurrentRoom = useCallback(() async {

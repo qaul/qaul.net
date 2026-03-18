@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
+import '../decorators/loading_decorator.dart';
 import '../l10n/app_localizations.dart';
 import '../widgets/widgets.dart';
 
@@ -19,7 +20,12 @@ class LicenseScreen extends StatelessWidget {
           future: bundle.loadString('assets/license/agpl-3.0.md'),
           builder: (context, ss) {
             if (!ss.hasData || ss.connectionState != ConnectionState.done) {
-              return const LoadingIndicator();
+              return LoadingDecorator(
+                isLoading: true,
+                backgroundColor: Colors.transparent,
+                hideChildWhenLoading: true,
+                child: const SizedBox(width: 48, height: 48),
+              );
             }
             return Markdown(
               data: ss.data ?? 'An error occurred',
