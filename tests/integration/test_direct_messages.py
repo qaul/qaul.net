@@ -74,7 +74,7 @@ def _get_group_id_for_user(sender: Node, target_user_id: str) -> str:
 def _local_user_id(node: Node) -> str:
     """Return the qaul user ID of the node's own local account."""
     for entry in node.router_table():
-        if entry["connections"] and entry["connections"][0]["module"] == "Local":
+        if entry["connections"] and entry["connections"][0]["module"].lower() == "local":
             return entry["user_id"]
     raise ValueError(f"No Local entry in router table for node {node.id}")
 
@@ -106,9 +106,18 @@ def test_direct_message_unicast(
     )
     t_start = time.time()
     deadline = t_start + discovery_wait
-    recipient_user_id = _local_user_id(recipient)
+    recipient_user_id = None
 
     while time.time() < deadline:
+        # resolve recipient's user_id on first successful read — the router
+        # table may not have a Local entry immediately after qauld starts
+        if recipient_user_id is None:
+            try:
+                recipient_user_id = _local_user_id(recipient)
+            except ValueError:
+                time.sleep(poll_interval)
+                continue
+
         known = sender.known_user_ids()
         if recipient_user_id in known:
             elapsed = round(time.time() - t_start, 1)
@@ -116,6 +125,11 @@ def test_direct_message_unicast(
             break
         time.sleep(poll_interval)
     else:
+        if recipient_user_id is None:
+            raise AssertionError(
+                f"recipient {recipient_id} never populated its own router table "
+                f"within {discovery_wait}s"
+            )
         raise AssertionError(
             f"sender {sender_id} did not discover recipient {recipient_id} "
             f"(user {recipient_user_id}) within {discovery_wait}s"

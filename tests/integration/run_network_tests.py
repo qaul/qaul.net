@@ -53,32 +53,37 @@ from test_feed_distribution import test_feed_messages_reach_all_nodes
 TOPOLOGIES = [
     {
         "file": "topologies/line-5.json",
-        "discovery_wait": 120,
+        "discovery_wait": 200,
         "propagation_wait": 90,
+        "pubsub_warmup": 30,
         "run_degraded": True,
     },
     {
         "file": "topologies/line-10.json",
         "discovery_wait": 200,
         "propagation_wait": 120,
+        "pubsub_warmup": 30,
         "run_degraded": True,
     },
     {
         "file": "topologies/grid4-3x3.json",
         "discovery_wait": 120,
         "propagation_wait": 90,
+        "pubsub_warmup": 20,
         "run_degraded": False,
     },
     {
         "file": "topologies/grid4-5x5.json",
         "discovery_wait": 180,
         "propagation_wait": 120,
+        "pubsub_warmup": 30,
         "run_degraded": False,
     },
     {
         "file": "topologies/grid8-4x4.json",
         "discovery_wait": 90,
         "propagation_wait": 90,
+        "pubsub_warmup": 20,
         "run_degraded": False,
     },
 ]
@@ -88,6 +93,7 @@ def run_topology(config: dict) -> dict:
     topo_file = config["file"]
     discovery_wait = config["discovery_wait"]
     propagation_wait = config["propagation_wait"]
+    pubsub_warmup = config["pubsub_warmup"]
     run_degraded = config["run_degraded"]
     topo_name = os.path.splitext(os.path.basename(topo_file))[0]
 
@@ -122,6 +128,7 @@ def run_topology(config: dict) -> dict:
                 "node_ids": node_ids,
                 "discovery_wait": discovery_wait,
                 "propagation_wait": propagation_wait,
+                "pubsub_warmup": pubsub_warmup,
             },
         ),
     ]

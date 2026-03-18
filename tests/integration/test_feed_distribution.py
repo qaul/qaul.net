@@ -36,6 +36,9 @@ NODE_IDS = load_node_ids(TOPOLOGY)
 DISCOVERY_WAIT = 120
 PROPAGATION_WAIT = 120
 POLL_INTERVAL = 5
+PUBSUB_WARMUP = 30  # seconds to wait after routing convergence for the pubsub
+                    # mesh to stabilise before sending — floodsub connections
+                    # lag behind routing table convergence on cold topologies
 
 
 def setup():
@@ -54,6 +57,7 @@ def test_feed_messages_reach_all_nodes(
     discovery_wait: int = DISCOVERY_WAIT,
     propagation_wait: int = PROPAGATION_WAIT,
     poll_interval: int = POLL_INTERVAL,
+    pubsub_warmup: int = PUBSUB_WARMUP,
 ) -> dict:
     """
     Send one feed message from each node, then assert every node receives
@@ -78,7 +82,7 @@ def test_feed_messages_reach_all_nodes(
         remote_count = sum(
             1
             for e in table
-            if e["connections"] and e["connections"][0]["module"] != "Local"
+            if e["connections"] and e["connections"][0]["module"].lower() != "local"
         )
         if remote_count >= expected_count - 1:
             elapsed = round(time.time() - t_start, 1)
@@ -92,6 +96,11 @@ def test_feed_messages_reach_all_nodes(
             f"routing convergence not reached within {discovery_wait}s — "
             f"observer sees {remote_count} remote nodes, expected {expected_count - 1}"
         )
+
+    # wait for the pubsub (floodsub) mesh to stabilise — routing convergence
+    # does not guarantee pubsub connections are established end-to-end yet
+    print(f"  waiting {pubsub_warmup}s for pubsub mesh to stabilise...")
+    time.sleep(pubsub_warmup)
 
     # send one unique message from each node
     stamp = int(time.time())

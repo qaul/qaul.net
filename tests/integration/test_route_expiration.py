@@ -60,7 +60,7 @@ def teardown():
 def _local_user_id(node: Node) -> str:
     """Return the qaul user ID of the node's own local account."""
     for entry in node.router_table():
-        if entry["connections"] and entry["connections"][0]["module"] == "Local":
+        if entry["connections"] and entry["connections"][0]["module"].lower() == "local":
             return entry["user_id"]
     raise ValueError(f"No Local entry in router table for node {node.id}")
 
