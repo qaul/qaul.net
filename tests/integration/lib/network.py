@@ -28,11 +28,16 @@ def stop_qaul():
 
 
 def kill_node(node_id: str):
-    """Kill the qauld process for a single node by reading its PID file."""
-    import subprocess
-    pid_file = f"/tmp/qaul-{node_id}.pid"
-    with open(pid_file) as f:
-        pid = f.read().strip()
+    """Kill the qauld process for a single node.
+
+    meshnet-lab starts qauld with --name=test-<node_id> and writes no PID
+    file, so we find the process via pgrep.
+    """
+    result = subprocess.run(
+        ["pgrep", "-f", f"qauld --name=test-{node_id}"],
+        capture_output=True, text=True, check=True,
+    )
+    pid = result.stdout.strip()
     subprocess.run(["sudo", "kill", pid], check=True)
 
 
