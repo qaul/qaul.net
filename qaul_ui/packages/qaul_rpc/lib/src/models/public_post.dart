@@ -4,7 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../generated/services/feed/feed.pb.dart';
-import 'user.dart' show PaginatedData, PaginationState;
+import 'pagination.dart';
 
 final publicMessagesProvider =
     NotifierProvider<PublicPostListNotifier, PaginatedData<PublicPost>>(

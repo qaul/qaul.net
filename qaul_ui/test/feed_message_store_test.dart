@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl/Intl.dart';
+import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_ui/stores/stores.dart';
@@ -206,7 +206,7 @@ void main() {
         overrides: [
           defaultUserProvider.overrideWith((_) => defaultUser),
           publicMessagesProvider.overrideWith(() => _TestPublicPostListNotifier()),
-          usersProvider.overrideWith(() => _TestPaginatedUsersNotifier()),
+          usersStoreProvider.overrideWith(() => _TestUsersStore()),
           qaulWorkerProvider.overrideWith((ref) {
             mockWorker = _MockWorkerForFeedPagination(ref);
             return mockWorker;
@@ -234,7 +234,7 @@ void main() {
         overrides: [
           defaultUserProvider.overrideWith((_) => defaultUser),
           publicMessagesProvider.overrideWith(() => _TestPublicPostListNotifier()),
-          usersProvider.overrideWith(() => _TestPaginatedUsersNotifier()),
+          usersStoreProvider.overrideWith(() => _TestUsersStore()),
           qaulWorkerProvider.overrideWith((ref) {
             mockWorker = _MockWorkerForFeedPagination(ref);
             return mockWorker;
@@ -257,15 +257,16 @@ void main() {
         offset: 0,
         limit: 50,
       );
-      late _MockWorkerForFeedPagination mockWorker;
+      _MockWorkerForFeedPagination? mockWorker;
       final container = ProviderContainer(
         overrides: [
           defaultUserProvider.overrideWith((_) => defaultUser),
           publicMessagesProvider.overrideWith(() => _TestPublicPostListNotifier()),
-          usersProvider.overrideWith(() => _TestPaginatedUsersNotifier()),
+          usersStoreProvider.overrideWith(() => _TestUsersStore()),
           qaulWorkerProvider.overrideWith((ref) {
-            mockWorker = _MockWorkerForFeedPagination(ref);
-            return mockWorker;
+            final worker = _MockWorkerForFeedPagination(ref);
+            mockWorker = worker;
+            return worker;
           }),
         ],
       );
@@ -273,8 +274,9 @@ void main() {
 
       await container.read(feedMessageStoreProvider.notifier).loadMorePublic();
 
-      expect(mockWorker.lastOffset, isNull);
-      expect(mockWorker.lastLimit, isNull);
+      // loadMorePublic should short-circuit when hasMore is false.
+      expect(mockWorker?.lastOffset, isNull);
+      expect(mockWorker?.lastLimit, isNull);
     });
   });
 }

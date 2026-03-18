@@ -4,6 +4,8 @@ import 'package:equatable/equatable.dart';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:hooks_riverpod/legacy.dart';
 
+import 'pagination.dart';
+
 final defaultUserProvider = StateProvider<User?>((ref) => null);
 
 /// Read-only mirror of user data for the RPC layer.
@@ -12,20 +14,6 @@ final defaultUserProvider = StateProvider<User?>((ref) => null);
 /// (which live in the `qaul_rpc` package and cannot import app-layer stores)
 /// can look up users during message decoding.
 final userLookupProvider = StateProvider<List<User>>((ref) => []);
-
-class PaginationState {
-  const PaginationState({
-    required this.hasMore,
-    required this.total,
-    required this.offset,
-    required this.limit,
-  });
-
-  final bool hasMore;
-  final int total;
-  final int offset;
-  final int limit;
-}
 
 enum ConnectionStatus { online, reachable, offline }
 

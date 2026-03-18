@@ -28,8 +28,12 @@ class FeedMessageStore extends Notifier<List<FeedMessage>> {
     ref.listen(publicMessagesProvider, (_, _) => _asyncInit());
     ref.listen(usersStoreProvider, (_, _) => _asyncInit());
     if (!_initializedOnce) {
-      ref.read(feedLoadingProvider.notifier).state = true;
-      _asyncInit();
+      // Defer side-effects until after provider build completes.
+      Future.microtask(() {
+        if (_initializedOnce) return;
+        ref.read(feedLoadingProvider.notifier).state = true;
+        _asyncInit();
+      });
     }
     return [];
   }
