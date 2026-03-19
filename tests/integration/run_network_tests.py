@@ -54,7 +54,7 @@ TOPOLOGIES = [
     {
         "file": "topologies/line-5.json",
         "discovery_wait": 200,
-        "propagation_wait": 90,
+        "propagation_wait": 180,
         "pubsub_warmup": 30,
         "run_degraded": True,
     },
@@ -142,6 +142,7 @@ def run_topology(config: dict) -> dict:
                     "node_ids": node_ids,
                     "discovery_wait": discovery_wait,
                     "propagation_wait": propagation_wait,
+                    "pubsub_warmup": pubsub_warmup,
                 },
             )
         )
