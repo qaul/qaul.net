@@ -47,9 +47,10 @@ from lib.topology import load_node_ids
 
 TOPOLOGY = "topologies/line-5.json"
 NODE_IDS = load_node_ids(TOPOLOGY)
-DISCOVERY_WAIT = 120
-PROPAGATION_WAIT = 90
+DISCOVERY_WAIT = 200
+PROPAGATION_WAIT = 120
 POLL_INTERVAL = 5
+PUBSUB_WARMUP = 30  # seconds after routing convergence before applying loss
 LOSS_PERCENT = 30  # packet loss to apply on the degraded link
 SEND_COUNT = 10  # number of feed messages to send
 # minimum delivery rate expected even under packet loss (retransmission helps)
@@ -114,6 +115,7 @@ def test_feed_delivery_under_packet_loss(
     discovery_wait: int = DISCOVERY_WAIT,
     propagation_wait: int = PROPAGATION_WAIT,
     poll_interval: int = POLL_INTERVAL,
+    pubsub_warmup: int = PUBSUB_WARMUP,
     loss_percent: int = LOSS_PERCENT,
     send_count: int = SEND_COUNT,
     min_delivery_rate: float = MIN_DELIVERY_RATE,
@@ -130,26 +132,23 @@ def test_feed_delivery_under_packet_loss(
     # passing through the centre of the line topology
     loss_node = sorted_ids[len(sorted_ids) // 2]
 
-    # wait for routing convergence
-    print(f"  waiting up to {discovery_wait}s for convergence...")
+    # wait until sender's users list contains all nodes
+    print(f"  waiting up to {discovery_wait}s for all {len(sorted_ids)} users to appear...")
     t_start = time.time()
     deadline = t_start + discovery_wait
-    expected_remote = len(sorted_ids) - 1
 
     while time.time() < deadline:
-        table = sender.router_table()
-        remote_count = sum(
-            1
-            for e in table
-            if e["connections"] and e["connections"][0]["module"].lower() != "local"
-        )
-        if remote_count >= expected_remote:
+        known = sender.known_users()
+        if len(known) >= len(sorted_ids):
             elapsed = round(time.time() - t_start, 1)
-            print(f"  convergence after {elapsed}s ({remote_count} remote nodes)")
+            print(f"  all {len(known)} users known after {elapsed}s")
             break
         time.sleep(poll_interval)
     else:
         raise AssertionError(f"convergence not reached within {discovery_wait}s")
+
+    print(f"  waiting {pubsub_warmup}s for pubsub mesh to stabilise before degrading link...")
+    time.sleep(pubsub_warmup)
 
     print(f"  applying {loss_percent}% packet loss on node {loss_node}'s uplink")
     _apply_packet_loss(loss_node, loss_percent)

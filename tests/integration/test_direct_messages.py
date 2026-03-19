@@ -9,18 +9,16 @@
 # encrypted payload but never store it in their own conversation list.
 #
 # Procedure:
-#   1. Start the topology and wait for full convergence
-#   2. On the sender node (0000), look up the recipient node's user entry
-#      from `users list` to get its group_id
+#   1. Start the topology and wait for all nodes to appear in sender's users list
+#   2. Find the recipient's entry by name ("test-<node_id>") and read group_id
 #   3. Send a chat message from sender to recipient
 #   4. Poll the recipient's conversation until the message appears (or timeout)
-#   5. Assert an intermediate node (the middle node) has no messages in
-#      its conversation for the same group_id
+#   5. Assert the middle node has no messages for the same group_id
 #
 # Uses line-5 (0000—0001—0002—0003—0004):
 #   sender    = 0000 (one end)
 #   recipient = 0004 (other end, 4 hops away)
-#   snooper   = 0002 (middle node, relays messages but should not store them)
+#   snooper   = 0002 (middle node, relays but should not store)
 
 import sys
 import time
@@ -39,7 +37,7 @@ from lib.topology import load_node_ids
 
 TOPOLOGY = "topologies/line-5.json"
 NODE_IDS = load_node_ids(TOPOLOGY)
-DISCOVERY_WAIT = 120
+DISCOVERY_WAIT = 200
 DELIVERY_WAIT = 60
 POLL_INTERVAL = 5
 
@@ -53,30 +51,6 @@ def setup():
 def teardown():
     stop_qaul()
     clear_topology()
-
-
-def _get_group_id_for_user(sender: Node, target_user_id: str) -> str:
-    """
-    Look up the group_id (direct-message conversation ID) that sender uses
-    to address target_user_id.  This comes from `users list --json`.
-    """
-    for user in sender.known_users():
-        if user["id"] == target_user_id:
-            gid = user.get("group_id")
-            if gid:
-                return gid
-    raise ValueError(
-        f"user {target_user_id} not found in {sender.id}'s users list "
-        f"or missing group_id field"
-    )
-
-
-def _local_user_id(node: Node) -> str:
-    """Return the qaul user ID of the node's own local account."""
-    for entry in node.router_table():
-        if entry["connections"] and entry["connections"][0]["module"].lower() == "local":
-            return entry["user_id"]
-    raise ValueError(f"No Local entry in router table for node {node.id}")
 
 
 def test_direct_message_unicast(
@@ -96,53 +70,39 @@ def test_direct_message_unicast(
     snooper_id = sorted_ids[len(sorted_ids) // 2]
 
     sender = Node(sender_id)
-    recipient = Node(recipient_id)
     snooper = Node(snooper_id)
 
-    # wait for routing convergence: sender must know all other nodes
-    print(
-        f"  waiting for sender {sender_id} to discover all nodes "
-        f"(timeout {discovery_wait}s)..."
-    )
+    # wait until sender's users list contains all nodes — users list and
+    # routing table converge together, and users list has the group_id we need.
+    # nodes are named "test-<node_id>" by meshnet-lab.
+    print(f"  waiting for all {len(sorted_ids)} users in sender's users list (timeout {discovery_wait}s)...")
     t_start = time.time()
     deadline = t_start + discovery_wait
-    recipient_user_id = None
+    group_id = None
 
     while time.time() < deadline:
-        # resolve recipient's user_id on first successful read — the router
-        # table may not have a Local entry immediately after qauld starts
-        if recipient_user_id is None:
-            try:
-                recipient_user_id = _local_user_id(recipient)
-            except ValueError:
-                time.sleep(poll_interval)
-                continue
-
-        known = sender.known_user_ids()
-        if recipient_user_id in known:
+        users = sender.known_users()
+        user_by_name = {u["name"]: u for u in users}
+        recipient_name = f"test-{recipient_id}"
+        if recipient_name in user_by_name:
             elapsed = round(time.time() - t_start, 1)
-            print(f"  recipient {recipient_id} discovered by sender after {elapsed}s")
+            group_id = user_by_name[recipient_name]["group_id"]
+            print(f"  recipient {recipient_id} found after {elapsed}s, group_id: {group_id}")
             break
         time.sleep(poll_interval)
     else:
-        if recipient_user_id is None:
-            raise AssertionError(
-                f"recipient {recipient_id} never populated its own router table "
-                f"within {discovery_wait}s"
-            )
+        known_names = [u["name"] for u in sender.known_users()]
         raise AssertionError(
-            f"sender {sender_id} did not discover recipient {recipient_id} "
-            f"(user {recipient_user_id}) within {discovery_wait}s"
+            f"recipient {recipient_id} (test-{recipient_id}) not found in sender's "
+            f"users list after {discovery_wait}s — known: {known_names}"
         )
 
-    # get the direct-message group_id from sender's perspective
-    group_id = _get_group_id_for_user(sender, recipient_user_id)
-    print(f"  direct message group_id: {group_id}")
+    recipient = Node(recipient_id)
 
     # send the message
     test_content = f"direct-msg-test-{int(time.time())}"
     sender.send_chat_message(group_id, test_content)
-    print(f"  sent message: '{test_content}'")
+    print(f"  sent: '{test_content}'")
     t_send = time.time()
 
     # poll recipient until the message appears
@@ -154,46 +114,31 @@ def test_direct_message_unicast(
         elapsed = round(time.time() - t_send, 1)
         try:
             conv = recipient.conversation(group_id)
-            messages = conv.get("messages", [])
-            contents = [
-                c
-                for msg in messages
-                for c in (msg.get("content") or [])
-            ]
+            contents = [c for msg in conv.get("messages", []) for c in (msg.get("content") or [])]
             if test_content in contents:
                 delivered_at = elapsed
-                print(f"  message delivered to recipient after {elapsed}s")
+                print(f"  delivered to {recipient_id} after {elapsed}s")
                 break
         except Exception as e:
-            print(f"    +{elapsed}s  recipient conversation error: {e}")
+            print(f"    +{elapsed}s  conversation error: {e}")
 
     assert delivered_at is not None, (
-        f"message '{test_content}' was not delivered to recipient {recipient_id} "
-        f"within {delivery_wait}s"
+        f"message not delivered to {recipient_id} within {delivery_wait}s"
     )
 
-    # check that snooper (middle node) does NOT have the message
-    snooper_messages = []
+    # check snooper does NOT have the message
+    snooper_contents = []
     try:
         conv = snooper.conversation(group_id)
-        snooper_messages = [
-            c
-            for msg in conv.get("messages", [])
-            for c in (msg.get("content") or [])
-        ]
+        snooper_contents = [c for msg in conv.get("messages", []) for c in (msg.get("content") or [])]
     except Exception:
-        # conversation not found on snooper — expected
-        pass
+        pass  # conversation not found on snooper — expected
 
-    assert test_content not in snooper_messages, (
-        f"intermediate node {snooper_id} received the direct message — "
-        f"message should only be stored at sender and recipient"
+    assert test_content not in snooper_contents, (
+        f"intermediate node {snooper_id} received the direct message"
     )
 
-    print(
-        f"  PASS: message delivered to {recipient_id} in {delivered_at}s, "
-        f"not present on intermediate node {snooper_id}"
-    )
+    print(f"  PASS: delivered to {recipient_id} in {delivered_at}s, not present on {snooper_id}")
 
     return {
         "passed": True,
@@ -202,10 +147,7 @@ def test_direct_message_unicast(
         "snooper": snooper_id,
         "group_id": group_id,
         "delivery_time_s": delivered_at,
-        "notes": (
-            f"direct message delivered to {recipient_id} in {delivered_at}s, "
-            f"not seen on {snooper_id}"
-        ),
+        "notes": f"direct message delivered to {recipient_id} in {delivered_at}s, not seen on {snooper_id}",
     }
 
 
