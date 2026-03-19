@@ -448,45 +448,52 @@ class _NavBarItem extends StatelessWidget {
       ),
     );
 
-    final content = Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: _kNavBarSelectedSize,
-          height: _kNavBarSelectedSize,
-          child: Material(
-            color: isSelected ? selectedBackgroundColor : Colors.transparent,
-            borderRadius: BorderRadius.circular(_kNavBarSelectedRadius),
-            child: InkWell(
-              onTap: onTap,
+    final content = SizedBox(
+      width: _kNavBarSelectedSize,
+      height: _kNavBarSelectedSize,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.topCenter,
+        children: [
+          SizedBox(
+            width: _kNavBarSelectedSize,
+            height: _kNavBarSelectedSize,
+            child: Material(
+              color: isSelected ? selectedBackgroundColor : Colors.transparent,
               borderRadius: BorderRadius.circular(_kNavBarSelectedRadius),
-              splashColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              child: Tooltip(
-                message: tooltip,
-                child: Center(
-                  child: SizedBox(
-                    width: iconSize.width,
-                    height: iconSize.height,
-                    child: iconWidget,
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(_kNavBarSelectedRadius),
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                child: Tooltip(
+                  message: tooltip,
+                  child: Center(
+                    child: SizedBox(
+                      width: iconSize.width,
+                      height: iconSize.height,
+                      child: iconWidget,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-        if (isSelected && tooltip.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: _kNavBarLabelTopPadding),
-            child: Text(
-              tooltip.toUpperCase(),
-              style: _kNavBarLabelStyle.copyWith(color: activeColor),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
+          if (isSelected && tooltip.isNotEmpty)
+            Positioned(
+              top: _kNavBarSelectedSize + _kNavBarLabelTopPadding,
+              child: IgnorePointer(
+                child: Text(
+                  tooltip.toUpperCase(),
+                  style: _kNavBarLabelStyle.copyWith(color: activeColor),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
 
     if (badgeCount != null && badgeCount! > 0) {
