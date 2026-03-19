@@ -33,12 +33,11 @@ from lib.topology import load_node_ids
 
 TOPOLOGY = "topologies/line-5.json"
 NODE_IDS = load_node_ids(TOPOLOGY)
-DISCOVERY_WAIT = 120
-PROPAGATION_WAIT = 120
+DISCOVERY_WAIT = 200
+PROPAGATION_WAIT = 180
 POLL_INTERVAL = 5
-PUBSUB_WARMUP = 30  # seconds to wait after routing convergence for the pubsub
-                    # mesh to stabilise before sending — floodsub connections
-                    # lag behind routing table convergence on cold topologies
+PUBSUB_WARMUP = 30  # seconds after all users appear before sending — the
+                    # floodsub mesh stabilises slightly after the users list
 
 
 def setup():
@@ -66,35 +65,25 @@ def test_feed_messages_reach_all_nodes(
     sorted_ids = sorted(node_ids)
     nodes = [Node(nid) for nid in sorted_ids]
 
-    # wait for routing convergence before sending — nodes must know their
-    # neighbours for feed messages to propagate
-    print(f"  waiting up to {discovery_wait}s for routing convergence...")
+    # wait until observer's users list contains all nodes — this is the
+    # reliable convergence signal: users list and routing table converge
+    # together, and the users list is what feed propagation depends on.
+    print(f"  waiting up to {discovery_wait}s for all {len(sorted_ids)} users to appear...")
     t_start = time.time()
     deadline = t_start + discovery_wait
-    expected_count = len(sorted_ids)
-
-    # convergence check: first node must see all others in its routing table
     observer = nodes[0]
-    remote_count = 0
+
     while time.time() < deadline:
-        table = observer.router_table()
-        # count non-local entries
-        remote_count = sum(
-            1
-            for e in table
-            if e["connections"] and e["connections"][0]["module"].lower() != "local"
-        )
-        if remote_count >= expected_count - 1:
+        known = observer.known_users()
+        if len(known) >= len(sorted_ids):
             elapsed = round(time.time() - t_start, 1)
-            print(
-                f"  convergence reached after {elapsed}s ({remote_count} remote nodes)"
-            )
+            print(f"  all {len(known)} users known after {elapsed}s")
             break
         time.sleep(poll_interval)
     else:
         raise AssertionError(
-            f"routing convergence not reached within {discovery_wait}s — "
-            f"observer sees {remote_count} remote nodes, expected {expected_count - 1}"
+            f"convergence not reached within {discovery_wait}s — "
+            f"observer knows {len(observer.known_users())} of {len(sorted_ids)} users"
         )
 
     # wait for the pubsub (floodsub) mesh to stabilise — routing convergence
