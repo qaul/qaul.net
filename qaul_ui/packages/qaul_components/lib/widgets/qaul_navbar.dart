@@ -81,7 +81,7 @@ const double _kNavBarVerticalSpacing = 41.5;
 const Color kNavBarSelectedBackgroundDark = Color(0xFF898989);
 const Color _kNavBarDarkBackground = Color(0xFF000000);
 const double _kNavBarMobileHeight = 100.0;
-const double _kNavBarHorizontalPadding = 8.0;
+const double _kNavBarHorizontalPadding = 16.0;
 const double _kNavBarVerticalTopSpacing = 24.0;
 const double _kNavBarVerticalMenuPadding = 24.0;
 const double _kNavBarLabelTopPadding = 4.0;
@@ -211,7 +211,7 @@ class _QaulNavBarVerticalLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tooltips = tabTooltips ?? QaulNavBar.defaultTabTooltips();
-    final menuButton = _buildMenuButton(
+    final menuButton = _buildVerticalMenuButton(
       overflowMenuLabels: overflowMenuLabels,
       onOverflowSelected: onOverflowSelected,
     );
@@ -316,7 +316,7 @@ class _QaulNavBarHorizontalLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tooltips = tabTooltips ?? QaulNavBar.defaultTabTooltips();
-    final menuButton = _buildMenuButton(
+    final menuButton = _buildHorizontalMenuButton(
       overflowMenuLabels: overflowMenuLabels,
       onOverflowSelected: onOverflowSelected,
     );
@@ -333,7 +333,8 @@ class _QaulNavBarHorizontalLayout extends StatelessWidget {
               horizontal: _kNavBarHorizontalPadding,
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _NavBarItem(
                   tab: TabType.account,
@@ -405,43 +406,136 @@ Widget _barBackground(
   );
 }
 
-Widget _buildMenuButton({
+Widget _buildMenuButtonBase({
   required Map<NavBarOverflowOption, String> overflowMenuLabels,
   required void Function(NavBarOverflowOption) onOverflowSelected,
+  required EdgeInsetsGeometry? padding,
+  required Widget Function(BuildContext context) iconBuilder,
 }) {
+  final icon = Builder(builder: (context) => iconBuilder(context));
+  final itemBuilder = (BuildContext context) {
+    return NavBarOverflowOption.values
+        .map(
+          (option) => PopupMenuItem<NavBarOverflowOption>(
+            value: option,
+            child: Text(overflowMenuLabels[option]!),
+          ),
+        )
+        .toList();
+  };
+
+  if (padding == null) {
+    return PopupMenuButton<NavBarOverflowOption>(
+      onSelected: onOverflowSelected,
+      splashRadius: _kNavBarMenuSplashRadius,
+      child: icon,
+      itemBuilder: itemBuilder,
+    );
+  }
+
   return PopupMenuButton<NavBarOverflowOption>(
     onSelected: onOverflowSelected,
     splashRadius: _kNavBarMenuSplashRadius,
-    iconSize: _kNavBarMenuIconSize.height,
-    icon: Builder(
-      builder: (context) {
-        final theme = Theme.of(context);
-        final color = theme.brightness == Brightness.dark
-            ? (theme.iconTheme.color ?? Colors.white)
-            : kNavBarIconColorLight;
-        return SizedBox(
-          width: _kNavBarMenuIconSize.width,
-          height: _kNavBarMenuIconSize.height,
-          child: SvgPicture.asset(
-            navBarIconPath('menu'),
-            package: 'qaul_components',
-            width: _kNavBarMenuIconSize.width,
-            height: _kNavBarMenuIconSize.height,
-            fit: BoxFit.contain,
-            colorFilter: ColorFilter.mode(color, BlendMode.srcATop),
+    padding: padding,
+    child: icon,
+    itemBuilder: itemBuilder,
+  );
+}
+
+Widget _buildVerticalMenuButton({
+  required Map<NavBarOverflowOption, String> overflowMenuLabels,
+  required void Function(NavBarOverflowOption) onOverflowSelected,
+}) {
+  return _buildMenuButtonBase(
+    overflowMenuLabels: overflowMenuLabels,
+    onOverflowSelected: onOverflowSelected,
+    padding: null,
+    iconBuilder: (context) {
+      final theme = Theme.of(context);
+      final color = theme.brightness == Brightness.dark
+          ? (theme.iconTheme.color ?? Colors.white)
+          : kNavBarIconColorLight;
+
+      return SvgPicture.asset(
+        navBarIconPath('menu'),
+        package: 'qaul_components',
+        fit: BoxFit.contain,
+        colorFilter: ColorFilter.mode(color, BlendMode.srcATop),
+      );
+    },
+  );
+}
+
+class _NavBarOverflowMenuButton extends StatelessWidget {
+  const _NavBarOverflowMenuButton({
+    required this.overflowMenuLabels,
+    required this.onOverflowSelected,
+    required this.iconBuilder,
+  });
+
+  final Map<NavBarOverflowOption, String> overflowMenuLabels;
+  final void Function(NavBarOverflowOption) onOverflowSelected;
+  final Widget Function(BuildContext context) iconBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      radius: _kNavBarMenuSplashRadius,
+      onTapDown: (details) async {
+        final renderBox = context.findRenderObject() as RenderBox?;
+        if (renderBox == null) return;
+
+        final origin = renderBox.localToGlobal(Offset.zero);
+        final size = renderBox.size;
+
+        final selected = await showMenu<NavBarOverflowOption>(
+          context: context,
+          position: RelativeRect.fromLTRB(
+            origin.dx,
+            origin.dy,
+            origin.dx + size.width,
+            origin.dy + size.height,
           ),
+          items: NavBarOverflowOption.values
+              .map(
+                (option) => PopupMenuItem<NavBarOverflowOption>(
+                  value: option,
+                  child: Text(overflowMenuLabels[option]!),
+                ),
+              )
+              .toList(),
         );
+
+        if (selected != null) {
+          onOverflowSelected(selected);
+        }
       },
-    ),
-    itemBuilder: (BuildContext context) {
-      return NavBarOverflowOption.values
-          .map(
-            (option) => PopupMenuItem<NavBarOverflowOption>(
-              value: option,
-              child: Text(overflowMenuLabels[option]!),
-            ),
-          )
-          .toList();
+      child: iconBuilder(context),
+    );
+  }
+}
+
+Widget _buildHorizontalMenuButton({
+  required Map<NavBarOverflowOption, String> overflowMenuLabels,
+  required void Function(NavBarOverflowOption) onOverflowSelected,
+}) {
+  return _NavBarOverflowMenuButton(
+    overflowMenuLabels: overflowMenuLabels,
+    onOverflowSelected: onOverflowSelected,
+    iconBuilder: (context) {
+      final theme = Theme.of(context);
+      final color = theme.brightness == Brightness.dark
+          ? (theme.iconTheme.color ?? Colors.white)
+          : kNavBarIconColorLight;
+
+      return SvgPicture.asset(
+        navBarIconPath('menu'),
+        package: 'qaul_components',
+        width: _kNavBarMenuIconSize.width,
+        height: _kNavBarMenuIconSize.height,
+        fit: BoxFit.contain,
+        colorFilter: ColorFilter.mode(color, BlendMode.srcATop),
+      );
     },
   );
 }
@@ -487,15 +581,12 @@ class _NavBarItem extends StatelessWidget {
             focusColor: Colors.transparent,
             highlightColor: Colors.transparent,
             borderRadius: BorderRadius.circular(kNavBarAccountSize / 2),
-            child: Center(
-              child:
-                  avatarChild ??
-                  CircleAvatar(
-                    radius: kNavBarAccountSize / 2,
-                    backgroundColor: Colors.grey.shade700,
-                    child: const Text('WW', style: kNavBarAvatarTextStyle),
-                  ),
-            ),
+            child: avatarChild ??
+                CircleAvatar(
+                  radius: kNavBarAccountSize / 2,
+                  backgroundColor: Colors.grey.shade700,
+                  child: const Text('WW', style: kNavBarAvatarTextStyle),
+                ),
           ),
         ),
       );
