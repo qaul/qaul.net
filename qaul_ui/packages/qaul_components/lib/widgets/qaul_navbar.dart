@@ -411,7 +411,9 @@ Widget _buildMenuButtonBase({
   required Widget Function(BuildContext context) iconBuilder,
 }) {
   final icon = Builder(builder: (context) => iconBuilder(context));
-  final itemBuilder = (BuildContext context) {
+  List<PopupMenuEntry<NavBarOverflowOption>> itemBuilderFn(
+    BuildContext context,
+  ) {
     return NavBarOverflowOption.values
         .map(
           (option) => PopupMenuItem<NavBarOverflowOption>(
@@ -420,23 +422,23 @@ Widget _buildMenuButtonBase({
           ),
         )
         .toList();
-  };
+  }
 
   if (padding == null) {
     return PopupMenuButton<NavBarOverflowOption>(
       onSelected: onOverflowSelected,
       splashRadius: _kNavBarMenuSplashRadius,
+      itemBuilder: itemBuilderFn,
       child: icon,
-      itemBuilder: itemBuilder,
     );
   }
 
   return PopupMenuButton<NavBarOverflowOption>(
     onSelected: onOverflowSelected,
     splashRadius: _kNavBarMenuSplashRadius,
+    itemBuilder: itemBuilderFn,
     padding: padding,
     child: icon,
-    itemBuilder: itemBuilder,
   );
 }
 
@@ -477,38 +479,70 @@ class _NavBarOverflowMenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      radius: _kNavBarMenuSplashRadius,
-      onTapDown: (details) async {
-        final renderBox = context.findRenderObject() as RenderBox?;
-        if (renderBox == null) return;
+    final theme = Theme.of(context);
+    final hoverColor = theme.brightness == Brightness.dark
+        ? Colors.white.withValues(alpha: 0.10)
+        : Colors.black.withValues(alpha: 0.06);
 
-        final origin = renderBox.localToGlobal(Offset.zero);
-        final size = renderBox.size;
+    const hitSize = 40.0;
+    final iconW = _kNavBarMenuIconSize.width;
+    final iconH = _kNavBarMenuIconSize.height;
 
-        final selected = await showMenu<NavBarOverflowOption>(
-          context: context,
-          position: RelativeRect.fromLTRB(
-            origin.dx,
-            origin.dy,
-            origin.dx + size.width,
-            origin.dy + size.height,
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        SizedBox(
+          width: iconW,
+          height: iconH,
+          child: iconBuilder(context),
+        ),
+        Positioned(
+          left: (iconW - hitSize) / 2,
+          top: (iconH - hitSize) / 2,
+          width: hitSize,
+          height: hitSize,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(hitSize / 2),
+              hoverColor: hoverColor,
+              splashColor: hoverColor,
+              focusColor: Colors.transparent,
+              onTapDown: (details) async {
+                final renderBox = context.findRenderObject() as RenderBox?;
+                if (renderBox == null) return;
+
+                final origin = renderBox.localToGlobal(Offset.zero);
+
+                final anchorLeft = origin.dx + (hitSize - iconW) / 2;
+                final anchorTop = origin.dy + (hitSize - iconH) / 2;
+
+                final selected = await showMenu<NavBarOverflowOption>(
+                  context: context,
+                  position: RelativeRect.fromLTRB(
+                    anchorLeft,
+                    anchorTop,
+                    anchorLeft + iconW,
+                    anchorTop + iconH,
+                  ),
+                  items: NavBarOverflowOption.values
+                      .map(
+                        (option) => PopupMenuItem<NavBarOverflowOption>(
+                          value: option,
+                          child: Text(overflowMenuLabels[option]!),
+                        ),
+                      )
+                      .toList(),
+                );
+
+                if (selected != null) {
+                  onOverflowSelected(selected);
+                }
+              },
+            ),
           ),
-          items: NavBarOverflowOption.values
-              .map(
-                (option) => PopupMenuItem<NavBarOverflowOption>(
-                  value: option,
-                  child: Text(overflowMenuLabels[option]!),
-                ),
-              )
-              .toList(),
-        );
-
-        if (selected != null) {
-          onOverflowSelected(selected);
-        }
-      },
-      child: iconBuilder(context),
+        ),
+      ],
     );
   }
 }
