@@ -1,6 +1,7 @@
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_svg/flutter_svg.dart';
+import '../styles/qaul_color_sheet.dart';
 
 // ---------------------------------------------------------------------------
 // Enums
@@ -59,16 +60,21 @@ String navBarTabIconPath(TabType tab, bool selected) {
 
 @visibleForTesting
 (Color, Color, Color) navBarColors(ThemeData theme) {
+  final colorSheet = QaulColorSheet(
+  );
+  colorSheet.mode = theme.brightness == Brightness.dark
+      ? QaulColorMode.dark
+      : QaulColorMode.light;
   final iconColor = theme.iconTheme.color ?? Colors.white;
   if (theme.brightness == Brightness.dark) {
     return (
-      kNavBarSelectedBackgroundDark,
+      colorSheet.surfaceContainer,
       iconColor,
       theme.navigationBarTheme.surfaceTintColor ?? iconColor,
     );
   }
   return (
-    kNavBarSelectedBackgroundLight,
+    colorSheet.surfaceContainer,
     kNavBarIconColorLight,
     kNavBarIconColorLight,
   );
