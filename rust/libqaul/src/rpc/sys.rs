@@ -46,36 +46,12 @@ impl SysRpcState {
         }
     }
 
-    /// Send SYS message from external to libqaul (instance method).
-    pub fn send_to_libqaul(&self, binary_message: Vec<u8>) {
-        if let Err(err) = self.extern_send.send(binary_message) {
-            log::error!("{:?}", err);
-        }
-    }
-
-    /// Receive SYS message from libqaul to external (instance method).
-    pub fn receive_from_libqaul(&self) -> Result<Vec<u8>, TryRecvError> {
-        self.extern_receive.try_recv()
-    }
-
-    /// Send SYS message from libqaul to external (instance method).
-    pub fn send_to_extern(&self, message: Vec<u8>) {
-        if let Err(err) = self.libqaul_send.send(message) {
-            log::error!("{:?}", err);
-        }
-    }
 }
 
 /// Handling of SYS messages of libqaul
 pub struct Sys {}
 
 impl Sys {
-    /// Initialize SYS module.
-    /// State is now owned by QaulState, so this is a no-op.
-    pub fn init() {
-        // State is created by QaulState::new(); nothing to do here.
-    }
-
     /// send sys message from the outside to the inside
     /// of the worker thread of libqaul.
     pub fn send_to_libqaul(state: &crate::QaulState, binary_message: Vec<u8>) {
@@ -89,15 +65,6 @@ impl Sys {
     /// the outside.
     pub fn receive_from_libqaul(state: &crate::QaulState) -> Result<Vec<u8>, TryRecvError> {
         state.sys.extern_receive.try_recv()
-    }
-
-    /// send an rpc message from inside libqaul thread
-    /// to the extern.
-    #[allow(dead_code)]
-    pub fn send_to_extern(state: &crate::QaulState, message: Vec<u8>) {
-        if let Err(err) = state.sys.libqaul_send.send(message) {
-            log::error!("{:?}", err);
-        }
     }
 
     /// Process received binary protobuf encoded SYS message

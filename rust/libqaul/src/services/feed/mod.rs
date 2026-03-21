@@ -79,208 +79,6 @@ pub struct FeedState {
     _db: RwLock<sled::Db>,
 }
 
-/// Inner (instance) methods on `Feed` that contain the shared business logic.
-/// Both `FeedState` wrappers and the global `Feed` static methods delegate here.
-impl Feed {
-    /// Save a message to the in-memory BTreeMap and the sled database.
-    fn save_message_inner(&mut self, signature: Vec<u8>, message: proto_net::FeedMessageContent) {
-        let sender_id = message.sender.clone();
-        let content = message.content.clone();
-        let timestamp_sent = message.time;
-
-        self.messages.insert(signature.clone(), message);
-
-        let last_message = self.last_message + 1;
-        let timestamp_received = timestamp::Timestamp::get_timestamp();
-
-        let message_data = FeedMessageData {
-            index: last_message,
-            message_id: signature,
-            sender_id,
-            timestamp_sent,
-            timestamp_received,
-            content,
-        };
-
-        let message_data_bytes = bincode::serialize(&message_data).unwrap();
-        if let Err(e) = self
-            .tree
-            .insert(&last_message.to_be_bytes(), message_data_bytes)
-        {
-            log::error!("Error saving feed message to data base: {}", e);
-        } else if let Err(e) = self.tree.flush() {
-            log::error!("Error when flushing data base to disk: {}", e);
-        }
-
-        let last_message_bytes = bincode::serialize(&last_message).unwrap();
-        if let Err(e) = self
-            .tree_ids
-            .insert(&message_data.message_id[..], last_message_bytes)
-        {
-            log::error!("Error saving feed id to data base: {}", e);
-        } else if let Err(e) = self.tree_ids.flush() {
-            log::error!("Error when flushing data base to disk: {}", e);
-        }
-
-        self.last_message = last_message;
-    }
-
-    /// Save a message received via sync to the in-memory BTreeMap and the sled database.
-    /// Returns early if the message already exists.
-    fn save_message_by_sync_inner(
-        &mut self,
-        message_id: &[u8],
-        sender_id: &[u8],
-        content: String,
-        time: u64,
-    ) {
-        if let Some(_index) = self.tree_ids.get(&message_id[..]).unwrap() {
-            return;
-        }
-
-        let msg_content = proto_net::FeedMessageContent {
-            sender: sender_id.to_vec(),
-            content: content.clone(),
-            time,
-        };
-
-        self.messages.insert(message_id.to_vec(), msg_content);
-
-        let last_message = self.last_message + 1;
-        let timestamp_received = timestamp::Timestamp::get_timestamp();
-
-        let message_data = FeedMessageData {
-            index: last_message,
-            message_id: message_id.to_vec(),
-            sender_id: sender_id.to_vec(),
-            timestamp_sent: time,
-            timestamp_received,
-            content,
-        };
-
-        let message_data_bytes = bincode::serialize(&message_data).unwrap();
-        if let Err(e) = self
-            .tree
-            .insert(&last_message.to_be_bytes(), message_data_bytes)
-        {
-            log::error!("Error saving feed message to data base: {}", e);
-        } else if let Err(e) = self.tree.flush() {
-            log::error!("Error when flushing data base to disk: {}", e);
-        }
-
-        let last_message_bytes = bincode::serialize(&last_message).unwrap();
-        if let Err(e) = self.tree_ids.insert(&message_id[..], last_message_bytes) {
-            log::error!("Error saving feed id to data base: {}", e);
-        } else if let Err(e) = self.tree_ids.flush() {
-            log::error!("Error when flushing data base to disk: {}", e);
-        }
-
-        self.last_message = last_message;
-    }
-
-    /// Get messages newer than `last_message` from the database.
-    fn get_messages_inner(&self, last_message: u64) -> proto::FeedMessageList {
-        let mut feed_list = proto::FeedMessageList {
-            feed_message: Vec::with_capacity(
-                self.last_message.saturating_sub(last_message) as usize,
-            ),
-            pagination: None,
-        };
-
-        if self.last_message > last_message {
-            let first_message = last_message + 1;
-            let first_message_bytes = first_message.to_be_bytes().to_vec();
-            for res in self.tree.range(first_message_bytes.as_slice()..) {
-                match res {
-                    Ok((_id, message_bytes)) => {
-                        let message: FeedMessageData =
-                            bincode::deserialize(&message_bytes).unwrap();
-                        let sender_id_base58 = bs58::encode(&message.sender_id).into_string();
-                        let time_sent = timestamp::Timestamp::create_time();
-                        let time_rfc3339 = humantime::format_rfc3339(time_sent).to_string();
-
-                        let feed_message = proto::FeedMessage {
-                            sender_id: message.sender_id.clone(),
-                            sender_id_base58,
-                            message_id: message.message_id.clone(),
-                            message_id_base58: bs58::encode(message.message_id).into_string(),
-                            time_sent: time_rfc3339.clone(),
-                            timestamp_sent: message.timestamp_sent,
-                            time_received: time_rfc3339,
-                            timestamp_received: message.timestamp_received,
-                            content: message.content.clone(),
-                            index: message.index,
-                        };
-                        feed_list.feed_message.push(feed_message);
-                    }
-                    Err(e) => {
-                        log::error!("Error retrieving feed message from data base: {}", e);
-                    }
-                }
-            }
-        }
-
-        feed_list
-    }
-
-    /// Get the IDs of the latest `count` messages.
-    fn get_latest_message_ids_inner(&self, count: usize) -> Vec<Vec<u8>> {
-        let mut msg_count: usize = count;
-        if self.last_message < (count as u64) {
-            msg_count = self.last_message as usize;
-        }
-        let mut ids = Vec::with_capacity(msg_count);
-
-        let first_message = self.last_message - (msg_count as u64);
-        let first_message_bytes = first_message.to_be_bytes().to_vec();
-        for res in self.tree.range(first_message_bytes.as_slice()..) {
-            match res {
-                Ok((_id, message_bytes)) => {
-                    let message: FeedMessageData = bincode::deserialize(&message_bytes).unwrap();
-                    ids.push(message.message_id.clone());
-                }
-                Err(e) => {
-                    log::error!("Error retrieving feed message from data base: {}", e);
-                }
-            }
-        }
-        ids
-    }
-
-    /// Return IDs from `ids` that are not present in the database.
-    fn process_received_feed_ids_inner(&self, ids: &[Vec<u8>]) -> Vec<Vec<u8>> {
-        let mut missing_ids = Vec::with_capacity(ids.len());
-        for id in ids {
-            match self.tree_ids.get(&id[..]).unwrap() {
-                Some(_index) => {}
-                _ => {
-                    missing_ids.push(id.clone());
-                }
-            }
-        }
-        missing_ids
-    }
-
-    /// Retrieve full message data for each of the given IDs.
-    fn get_messages_by_ids_inner(&self, ids: &[Vec<u8>]) -> Vec<(Vec<u8>, Vec<u8>, String, u64)> {
-        let mut res = Vec::with_capacity(ids.len());
-        for id in ids {
-            if let Some(index_bytes) = self.tree_ids.get(&id[..]).unwrap() {
-                let index: u64 = bincode::deserialize(&index_bytes).unwrap();
-                if let Some(message_bytes) = self.tree.get(index.to_be_bytes()).unwrap() {
-                    let message: FeedMessageData = bincode::deserialize(&message_bytes).unwrap();
-                    res.push((
-                        id.clone(),
-                        message.sender_id.clone(),
-                        message.content.clone(),
-                        message.timestamp_sent,
-                    ));
-                }
-            }
-        }
-        res
-    }
-}
 
 impl FeedState {
     /// Create a FeedState from production sled database.
@@ -327,55 +125,186 @@ impl FeedState {
         }
     }
 
-    /// Save a message (instance method).
+    /// Save a message to the in-memory BTreeMap and the sled database.
     pub fn save_message(&self, signature: Vec<u8>, message: proto_net::FeedMessageContent) {
         let mut feed = self.inner.write().unwrap();
-        feed.save_message_inner(signature, message);
+        let sender_id = message.sender.clone();
+        let content = message.content.clone();
+        let timestamp_sent = message.time;
+
+        feed.messages.insert(signature.clone(), message);
+
+        let last_message = feed.last_message + 1;
+        let timestamp_received = timestamp::Timestamp::get_timestamp();
+
+        let message_data = FeedMessageData {
+            index: last_message,
+            message_id: signature,
+            sender_id,
+            timestamp_sent,
+            timestamp_received,
+            content,
+        };
+
+        let message_data_bytes = bincode::serialize(&message_data).unwrap();
+        if let Err(e) = feed.tree.insert(&last_message.to_be_bytes(), message_data_bytes) {
+            log::error!("Error saving feed message to data base: {}", e);
+        } else if let Err(e) = feed.tree.flush() {
+            log::error!("Error when flushing data base to disk: {}", e);
+        }
+
+        let last_message_bytes = bincode::serialize(&last_message).unwrap();
+        if let Err(e) = feed.tree_ids.insert(&message_data.message_id[..], last_message_bytes) {
+            log::error!("Error saving feed id to data base: {}", e);
+        } else if let Err(e) = feed.tree_ids.flush() {
+            log::error!("Error when flushing data base to disk: {}", e);
+        }
+
+        feed.last_message = last_message;
     }
 
-    /// Save message by sync (instance method).
-    pub fn save_message_by_sync(
-        &self,
-        message_id: &[u8],
-        sender_id: &[u8],
-        content: String,
-        time: u64,
-    ) {
+    /// Save a message received via sync. Returns early if it already exists.
+    pub fn save_message_by_sync(&self, message_id: &[u8], sender_id: &[u8], content: String, time: u64) {
         let mut feed = self.inner.write().unwrap();
-        feed.save_message_by_sync_inner(message_id, sender_id, content, time);
+        if let Some(_index) = feed.tree_ids.get(&message_id[..]).unwrap() {
+            return;
+        }
+
+        let msg_content = proto_net::FeedMessageContent {
+            sender: sender_id.to_vec(),
+            content: content.clone(),
+            time,
+        };
+        feed.messages.insert(message_id.to_vec(), msg_content);
+
+        let last_message = feed.last_message + 1;
+        let timestamp_received = timestamp::Timestamp::get_timestamp();
+
+        let message_data = FeedMessageData {
+            index: last_message,
+            message_id: message_id.to_vec(),
+            sender_id: sender_id.to_vec(),
+            timestamp_sent: time,
+            timestamp_received,
+            content,
+        };
+
+        let message_data_bytes = bincode::serialize(&message_data).unwrap();
+        if let Err(e) = feed.tree.insert(&last_message.to_be_bytes(), message_data_bytes) {
+            log::error!("Error saving feed message to data base: {}", e);
+        } else if let Err(e) = feed.tree.flush() {
+            log::error!("Error when flushing data base to disk: {}", e);
+        }
+
+        let last_message_bytes = bincode::serialize(&last_message).unwrap();
+        if let Err(e) = feed.tree_ids.insert(&message_id[..], last_message_bytes) {
+            log::error!("Error saving feed id to data base: {}", e);
+        } else if let Err(e) = feed.tree_ids.flush() {
+            log::error!("Error when flushing data base to disk: {}", e);
+        }
+
+        feed.last_message = last_message;
     }
 
-    /// Get messages newer than `last_message` (instance method).
+    /// Get messages newer than `last_message` from the database.
     pub fn get_messages(&self, last_message: u64) -> proto::FeedMessageList {
         let feed = self.inner.read().unwrap();
-        feed.get_messages_inner(last_message)
+        let mut feed_list = proto::FeedMessageList {
+            feed_message: Vec::with_capacity(feed.last_message.saturating_sub(last_message) as usize),
+            pagination: None,
+        };
+
+        if feed.last_message > last_message {
+            let first_message = last_message + 1;
+            let first_message_bytes = first_message.to_be_bytes().to_vec();
+            for res in feed.tree.range(first_message_bytes.as_slice()..) {
+                match res {
+                    Ok((_id, message_bytes)) => {
+                        let message: FeedMessageData = bincode::deserialize(&message_bytes).unwrap();
+                        let sender_id_base58 = bs58::encode(&message.sender_id).into_string();
+                        let time_sent = timestamp::Timestamp::create_time();
+                        let time_rfc3339 = humantime::format_rfc3339(time_sent).to_string();
+
+                        feed_list.feed_message.push(proto::FeedMessage {
+                            sender_id: message.sender_id.clone(),
+                            sender_id_base58,
+                            message_id: message.message_id.clone(),
+                            message_id_base58: bs58::encode(message.message_id).into_string(),
+                            time_sent: time_rfc3339.clone(),
+                            timestamp_sent: message.timestamp_sent,
+                            time_received: time_rfc3339,
+                            timestamp_received: message.timestamp_received,
+                            content: message.content.clone(),
+                            index: message.index,
+                        });
+                    }
+                    Err(e) => {
+                        log::error!("Error retrieving feed message from data base: {}", e);
+                    }
+                }
+            }
+        }
+
+        feed_list
     }
 
-    /// Get paginated messages (instance method).
+    /// Get paginated messages.
     pub fn get_paginated_messages(&self, offset: u32, limit: u32) -> proto::FeedMessageList {
         let feed = self.inner.read().unwrap();
         build_feed_list_from(&feed.tree, offset, limit)
     }
 
-    /// Get latest message IDs (instance method).
+    /// Get latest message IDs.
     pub fn get_latest_message_ids(&self, count: usize) -> Vec<Vec<u8>> {
         let feed = self.inner.read().unwrap();
-        feed.get_latest_message_ids_inner(count)
+        let mut msg_count: usize = count;
+        if feed.last_message < (count as u64) {
+            msg_count = feed.last_message as usize;
+        }
+        let mut ids = Vec::with_capacity(msg_count);
+
+        let first_message = feed.last_message - (msg_count as u64);
+        let first_message_bytes = first_message.to_be_bytes().to_vec();
+        for res in feed.tree.range(first_message_bytes.as_slice()..) {
+            match res {
+                Ok((_id, message_bytes)) => {
+                    let message: FeedMessageData = bincode::deserialize(&message_bytes).unwrap();
+                    ids.push(message.message_id.clone());
+                }
+                Err(e) => {
+                    log::error!("Error retrieving feed message from data base: {}", e);
+                }
+            }
+        }
+        ids
     }
 
-    /// Return missing feed IDs (instance method).
+    /// Return IDs from `ids` that are not present in the database.
     pub fn process_received_feed_ids(&self, ids: &[Vec<u8>]) -> Vec<Vec<u8>> {
         let feed = self.inner.read().unwrap();
-        feed.process_received_feed_ids_inner(ids)
+        let mut missing_ids = Vec::with_capacity(ids.len());
+        for id in ids {
+            if feed.tree_ids.get(&id[..]).unwrap().is_none() {
+                missing_ids.push(id.clone());
+            }
+        }
+        missing_ids
     }
 
-    /// Get messages by IDs (instance method).
-    pub fn get_messages_by_ids(
-        &self,
-        ids: &[Vec<u8>],
-    ) -> Vec<(Vec<u8>, Vec<u8>, String, u64)> {
+    /// Retrieve full message data for each of the given IDs.
+    pub fn get_messages_by_ids(&self, ids: &[Vec<u8>]) -> Vec<(Vec<u8>, Vec<u8>, String, u64)> {
         let feed = self.inner.read().unwrap();
-        feed.get_messages_by_ids_inner(ids)
+        let mut res = Vec::with_capacity(ids.len());
+        for id in ids {
+            if let Some(index_bytes) = feed.tree_ids.get(&id[..]).unwrap() {
+                let index: u64 = bincode::deserialize(&index_bytes).unwrap();
+                if let Some(message_bytes) = feed.tree.get(index.to_be_bytes()).unwrap() {
+                    let message: FeedMessageData = bincode::deserialize(&message_bytes).unwrap();
+                    res.push((id.clone(), message.sender_id.clone(), message.content.clone(), message.timestamp_sent));
+                }
+            }
+        }
+        res
     }
 }
 
@@ -454,7 +383,7 @@ impl Feed {
             .expect("Vec<u8> provides capacity as needed");
 
         // save message in feed store
-        Self::save_message(state, container.signature.clone(), msg);
+        state.services.feed.save_message(container.signature.clone(), msg);
 
         // flood via floodsub
         if lan.is_some() {
@@ -520,7 +449,7 @@ impl Feed {
                         // check if message exists
                         if new_message {
                             // write message to store
-                            Self::save_message(state, feed_container.signature.clone(), feed_content);
+                            state.services.feed.save_message(feed_container.signature.clone(), feed_content);
 
                             // display message
                             log::trace!("message received:");
@@ -557,44 +486,6 @@ impl Feed {
         }
     }
 
-    //Save message by sync
-    pub fn save_message_by_sync(state: &crate::QaulState, message_id: &[u8], sender_id: &[u8], content: String, time: u64) {
-        state.services.feed.save_message_by_sync(message_id, sender_id, content, time);
-    }
-
-    /// Save a Message
-    ///
-    /// This function saves a new message in the data base and in the in-memory BTreeMap
-    fn save_message(state: &crate::QaulState, signature: Vec<u8>, message: proto_net::FeedMessageContent) {
-        state.services.feed.save_message(signature, message);
-    }
-
-    pub fn get_latest_message_ids(state: &crate::QaulState, count: usize) -> Vec<Vec<u8>> {
-        state.services.feed.get_latest_message_ids(count)
-    }
-
-    //return missing feed ids to request to the neighbour
-    pub fn process_received_feed_ids(state: &crate::QaulState, ids: &[Vec<u8>]) -> Vec<Vec<u8>> {
-        state.services.feed.process_received_feed_ids(ids)
-    }
-
-    pub fn get_messges_by_ids(state: &crate::QaulState, ids: &[Vec<u8>]) -> Vec<(Vec<u8>, Vec<u8>, String, u64)> {
-        state.services.feed.get_messages_by_ids(ids)
-    }
-
-    /// Get messages from data base
-    ///
-    /// This function get messages from data base
-    /// that are newer then the last message.
-    fn get_messages(state: &crate::QaulState, last_message: u64) -> proto::FeedMessageList {
-        state.services.feed.get_messages(last_message)
-    }
-
-    /// Get messages from database using pagination
-    fn get_paginated_messages(state: &crate::QaulState, offset: u32, limit: u32) -> proto::FeedMessageList {
-        state.services.feed.get_paginated_messages(offset, limit)
-    }
-
     /// Sign a message with the private key
     /// The signature can be validated with the corresponding public key.
     pub fn sign_message(buf: &[u8], keys: &Keypair) -> Vec<u8> {
@@ -622,9 +513,9 @@ impl Feed {
                         // get feed messages from data base
                         // Pagination is optional: when limit is set to 0, we fallback to the previous index-based impl
                         let feed_list = if feed_request.limit > 0 {
-                            Self::get_paginated_messages(state, feed_request.offset, feed_request.limit)
+                            state.services.feed.get_paginated_messages(feed_request.offset, feed_request.limit)
                         } else {
-                            Self::get_messages(state, feed_request.last_index)
+                            state.services.feed.get_messages(feed_request.last_index)
                         };
 
                         // pack message

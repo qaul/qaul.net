@@ -152,7 +152,10 @@ impl Router {
 
         // initialize the routing information collection
         // tables per connection module (database-backed)
-        ConnectionTable::init_with_state(qaul_state, &rs);
+        for user in crate::node::user_accounts::UserAccounts::get_user_info(qaul_state) {
+            let node_id = crate::node::Node::get_id(qaul_state);
+            rs.connections.add_local_user(user.id, node_id);
+        }
 
         // RouterInfo scheduler is already initialized as part of RouterState::init_global().
         // No separate RouterInfo::init() call needed.

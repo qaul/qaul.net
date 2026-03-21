@@ -70,9 +70,6 @@ impl RtcState {
 pub struct Rtc {}
 
 impl Rtc {
-    /// initialize group chat module (now a no-op, state lives in ServicesState)
-    pub fn init() {}
-
     /// Helper to access the RTC state from QaulState.
     pub(crate) fn rtc_state(state: &crate::QaulState) -> &RtcState {
         &state.services.rtc

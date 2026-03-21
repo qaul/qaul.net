@@ -20,12 +20,8 @@ use std::sync::RwLock;
 
 use super::proto;
 use crate::connections::ConnectionModule;
-use crate::node;
 use crate::router::router_net_proto;
-use crate::router::{
-    neighbours::Neighbours,
-    table::{RoutingConnectionEntry, RoutingTable, RoutingUserEntry},
-};
+use crate::router::table::{RoutingConnectionEntry, RoutingTable, RoutingUserEntry};
 use crate::rpc::Rpc;
 use crate::utilities::qaul_id::QaulId;
 use crate::utilities::timestamp::Timestamp;

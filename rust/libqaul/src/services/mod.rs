@@ -89,8 +89,6 @@ impl ServicesModule {
             messaging::Messaging::init(state);
             chat::Chat::init();
             group::Group::init();
-            #[cfg(feature = "rtc")]
-            rtc::Rtc::init();
             dtn::Dtn::init(state);
             self.initialized = true;
         }
@@ -124,8 +122,5 @@ impl Services {
         chat::Chat::init();
         group::Group::init();
         dtn::Dtn::init(state);
-
-        #[cfg(feature = "rtc")]
-        rtc::Rtc::init();
     }
 }
