@@ -502,7 +502,7 @@ impl Ble {
             match PeerId::from_bytes(&ble_node.id) {
                 Ok(node_id) => {
                     let rs = state.get_router();
-                    Neighbours::delete(&rs, ConnectionModule::Ble, node_id);
+                    rs.neighbours.delete(ConnectionModule::Ble, node_id);
                 }
                 Err(e) => {
                     log::error!("{}", e);
@@ -660,7 +660,7 @@ impl Ble {
 
         // find all nodes, that are only connected through BLE
         let rs = state.get_router();
-        let nodes = Neighbours::get_ble_only_nodes(&rs);
+        let nodes = rs.neighbours.get_ble_only_nodes();
 
         // create BLE message
         let message = proto_net::ble_message::Message::Feed(data);

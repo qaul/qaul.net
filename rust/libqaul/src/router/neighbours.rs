@@ -267,18 +267,6 @@ impl Neighbours {
         smoothed_rtt as u32
     }
 
-    /// get rtt for a neighbour
-    /// Delegates to the provided RouterState instance.
-    pub fn get_rtt(router: &super::RouterState, neighbour_id: &PeerId, module: &ConnectionModule) -> Option<u32> {
-        router.neighbours.get_rtt(neighbour_id, module)
-    }
-
-    /// Is this node ID a neighbour in any module?
-    /// Delegates to the provided RouterState instance.
-    pub fn is_neighbour(router: &super::RouterState, node_id: &PeerId) -> ConnectionModule {
-        router.neighbours.is_neighbour(node_id)
-    }
-
     /// Search for a neighbour by it's small qaul ID
     #[allow(dead_code)]
     #[deprecated(since = "2.0.0-rc.4", note = "Use `node_from_q8id` instead.")]
@@ -306,12 +294,6 @@ impl Neighbours {
             return Some(node);
         }
         None
-    }
-
-    /// Get a list of all neighbours that are only connected via BLE module
-    /// Delegates to the provided RouterState instance.
-    pub fn get_ble_only_nodes(router: &super::RouterState) -> Vec<PeerId> {
-        router.neighbours.get_ble_only_nodes()
     }
 
     /// send protobuf RPC neighbours list

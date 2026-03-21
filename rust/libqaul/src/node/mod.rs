@@ -137,9 +137,6 @@ impl Node {
     /// via `NodeModule::new()` and stored in `QaulState`. Kept for backward
     /// compatibility so existing call sites don't break.
     pub fn init(state: &crate::QaulState) {
-        // UserAccounts::init() is also a no-op now; call it for compat.
-        UserAccounts::init();
-
         if !Configuration::is_node_initialized(state) {
             // Save the generated node identity to configuration
             log::trace!("Create a new node (saving identity to config).");

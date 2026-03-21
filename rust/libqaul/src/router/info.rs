@@ -30,15 +30,14 @@ use crate::{
     connections::ConnectionModule,
     node::Node,
     router::{
-        connections::ConnectionTable, neighbours::Neighbours, router_net_proto,
-        table::RoutingTable, users::Users,
+        router_net_proto,
+        users::Users,
     },
     utilities::timestamp::Timestamp,
 };
 
 use crate::router::feed_requester::FeedRequester;
 use crate::router::feed_requester::FeedResponser;
-use crate::services::feed::Feed;
 
 use crate::router::user_requester::UserRequester;
 use crate::router::user_requester::UserResponser;
@@ -237,7 +236,7 @@ impl RouterInfo {
             scheduler.propagation_timestamp = propagation_timestamp;
 
             // update propagation ID
-            super::connections::ConnectionTable::update_propagation_id(router, propagation_id);
+            router.connections.update_propagation_id(propagation_id);
         }
 
         // process finding
@@ -245,7 +244,7 @@ impl RouterInfo {
             // Check whether this node is
             // still connected and over which connection module
             // we can approach it.
-            let module = Neighbours::is_neighbour(router, &node_id);
+            let module = router.neighbours.is_neighbour(&node_id);
 
             // get scheduler for writing
             let mut scheduler = router.scheduler.inner.write().unwrap();
@@ -302,12 +301,12 @@ impl RouterInfo {
         let node_id = Node::get_id(state);
 
         // create routing table
-        let routes = RoutingTable::create_routing_info(router, neighbour, last_sent);
+        let routes = router.routing_table.create_routing_info(neighbour, last_sent);
 
         // create latest Feed ids table
         let feeds = router_net_proto::FeedIdsTable {
             ids: if is_first {
-                Feed::get_latest_message_ids(state, 5)
+                state.services.feed.get_latest_message_ids(5)
             } else {
                 Vec::new()
             },
@@ -600,17 +599,18 @@ impl RouterInfo {
                                             }
 
                                             //process routing table
-                                            ConnectionTable::process_received_routing_info(
-                                                router,
+                                            router.connections.process_received_routing_info(
                                                 received.received_from,
                                                 &entry,
+                                                &router.neighbours,
+                                                &router.configuration,
                                             );
                                         }
                                         _ => {}
                                     }
                                     match feeds {
                                         Some(router_net_proto::FeedIdsTable { ids }) => {
-                                            let missing_ids = Feed::process_received_feed_ids(state, &ids);
+                                            let missing_ids = state.services.feed.process_received_feed_ids(&ids);
                                             if !missing_ids.is_empty() {
                                                 FeedRequester::add(
                                                     router,
@@ -630,7 +630,7 @@ impl RouterInfo {
                                 if let Ok(message) = message_info {
                                     match message.feeds {
                                         Some(table) => {
-                                            let feeds = Feed::get_messges_by_ids(state, &table.ids);
+                                            let feeds = state.services.feed.get_messages_by_ids(&table.ids);
                                             if !feeds.is_empty() {
                                                 FeedResponser::add(router, &received.received_from, &feeds);
                                             }
@@ -652,8 +652,7 @@ impl RouterInfo {
                                                 user_ids.push(QaulId::bytes_to_q8id(
                                                     feed.sender_id.clone(),
                                                 ));
-                                                Feed::save_message_by_sync(
-                                                    state,
+                                                state.services.feed.save_message_by_sync(
                                                     &feed.message_id,
                                                     &feed.sender_id,
                                                     feed.content,
