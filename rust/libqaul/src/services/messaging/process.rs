@@ -82,7 +82,7 @@ impl MessagingProcess {
             }
             Some(super::proto::messaging::Message::DtnResponse(dtn_response)) => {
                 // update DTN state
-                dtn::Dtn::on_dtn_response(state, &dtn_response);
+                state.services.dtn.on_dtn_response(&dtn_response);
 
                 // update unconfirmed table
                 super::Messaging::on_confirmed_message(

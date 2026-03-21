@@ -72,36 +72,6 @@ impl RpcState {
         }
     }
 
-    /// Send RPC message from external to libqaul (instance method).
-    pub fn send_to_libqaul(&self, binary_message: Vec<u8>) {
-        if let Err(err) = self.extern_send.send(binary_message) {
-            log::error!("{:?}", err);
-        }
-    }
-
-    /// Receive RPC message from libqaul to external (instance method).
-    pub fn receive_from_libqaul(&self) -> Result<Vec<u8>, TryRecvError> {
-        self.extern_receive.try_recv()
-    }
-
-    /// Send RPC message from libqaul to external (instance method).
-    pub fn send_to_extern(&self, message: Vec<u8>) {
-        if let Err(err) = self.libqaul_send.send(message) {
-            log::error!("{:?}", err);
-        }
-    }
-
-    /// Send a wrapped RPC message to external (instance method).
-    pub fn send_message(&self, data: Vec<u8>, module: i32, request_id: String, user_id: Vec<u8>) {
-        let buf = build_rpc_message(data, module, request_id, user_id);
-        self.send_to_extern(buf);
-    }
-
-    /// Increase message counter (instance method).
-    pub fn increase_message_counter(&self) {
-        let mut counter = self.send_count.write().unwrap();
-        counter.count = counter.count + 1;
-    }
 }
 
 /// RPC Module - wrapper for instance-based RPC channel management
@@ -157,12 +127,6 @@ fn build_rpc_message(data: Vec<u8>, module: i32, request_id: String, user_id: Ve
 pub struct Rpc {}
 
 impl Rpc {
-    /// Initialize RPC module.
-    /// State is now owned by QaulState, so this is a no-op.
-    pub fn init() {
-        // State is created by QaulState::new(); nothing to do here.
-    }
-
     /// send rpc message from the outside to the inside
     /// of the worker thread of libqaul.
     pub fn send_to_libqaul(state: &crate::QaulState, binary_message: Vec<u8>) {

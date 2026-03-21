@@ -47,35 +47,6 @@ pub struct DtnStorageState {
     pub db_ref_id: sled::Tree,
 }
 
-impl DtnStorageState {
-    /// Process a DTN response by updating storage state and removing entries.
-    pub fn on_dtn_response_inner(&mut self, dtn_response: &super::messaging::proto::DtnResponse) {
-        if self.db_ref.contains_key(&dtn_response.signature).unwrap() {
-            let entry_bytes = self.db_ref.get(&dtn_response.signature).unwrap().unwrap();
-            let entry: DtnMessageEntry = bincode::deserialize(&entry_bytes).unwrap();
-            if self.used_size > entry.size as u64 {
-                self.used_size = self.used_size + (entry.size as u64);
-            } else {
-                self.used_size = 0;
-            }
-            if self.message_counts > 0 {
-                self.message_counts = self.message_counts - 1;
-            }
-
-            if let Err(_) = self.db_ref.remove(&dtn_response.signature) {
-                log::error!("remove storage node entry error!");
-            } else if let Err(_) = self.db_ref.flush() {
-                log::error!("remove storage node entry flush error!");
-            }
-
-            if let Err(_) = self.db_ref_id.remove(&entry.org_sig) {
-                log::error!("remove storage node id entry error!");
-            } else if let Err(_) = self.db_ref_id.flush() {
-                log::error!("remove storage node id entry flush error!");
-            }
-        }
-    }
-}
 
 /// Instance-based DTN state.
 /// Replaces the global STORAGESTATE static for multi-instance use.
@@ -136,7 +107,30 @@ impl DtnModuleState {
     /// Process DTN response (instance method).
     pub fn on_dtn_response(&self, dtn_response: &super::messaging::proto::DtnResponse) {
         let mut state = self.inner.write().unwrap();
-        state.on_dtn_response_inner(dtn_response);
+        if state.db_ref.contains_key(&dtn_response.signature).unwrap() {
+            let entry_bytes = state.db_ref.get(&dtn_response.signature).unwrap().unwrap();
+            let entry: DtnMessageEntry = bincode::deserialize(&entry_bytes).unwrap();
+            if state.used_size > entry.size as u64 {
+                state.used_size = state.used_size + (entry.size as u64);
+            } else {
+                state.used_size = 0;
+            }
+            if state.message_counts > 0 {
+                state.message_counts = state.message_counts - 1;
+            }
+
+            if let Err(_) = state.db_ref.remove(&dtn_response.signature) {
+                log::error!("remove storage node entry error!");
+            } else if let Err(_) = state.db_ref.flush() {
+                log::error!("remove storage node entry flush error!");
+            }
+
+            if let Err(_) = state.db_ref_id.remove(&entry.org_sig) {
+                log::error!("remove storage node id entry error!");
+            } else if let Err(_) = state.db_ref_id.flush() {
+                log::error!("remove storage node id entry flush error!");
+            }
+        }
     }
 
     /// Get DTN storage state (instance method).
@@ -308,8 +302,7 @@ impl Dtn {
                 signature: signature.clone(),
                 envelope: Some(envelop),
             };
-            super::messaging::Messaging::save_unconfirmed_message(
-                state,
+            state.services.messaging.save_unconfirmed_message(
                 MessagingServiceType::DtnStored,
                 &vec![],
                 receiver_id,
@@ -327,12 +320,6 @@ impl Dtn {
                 .unwrap(),
         )
         // update storage state
-    }
-
-    /// this function is called when receive DTN response
-    pub fn on_dtn_response(qaul_state: &crate::QaulState, dtn_response: &super::messaging::proto::DtnResponse) {
-        let mut state = qaul_state.services.dtn.inner.write().unwrap();
-        state.on_dtn_response_inner(dtn_response);
     }
 
     /// process DTN messages from network

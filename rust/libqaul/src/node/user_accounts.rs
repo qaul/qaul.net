@@ -61,48 +61,6 @@ impl UserAccountsState {
             inner: RwLock::new(accounts),
         }
     }
-
-    /// Get user account by ID (instance method).
-    pub fn get_by_id(&self, account_id: PeerId) -> Option<UserAccount> {
-        let accounts = self.inner.read().unwrap();
-        accounts.get_by_id_inner(account_id)
-    }
-
-    /// Get user account by name (instance method).
-    pub fn get_by_name(&self, name: &str) -> Option<UserAccount> {
-        let accounts = self.inner.read().unwrap();
-        accounts.get_by_name_inner(name)
-    }
-
-    /// Get default user account (instance method).
-    pub fn get_default_user(&self) -> Option<UserAccount> {
-        let accounts = self.inner.read().unwrap();
-        accounts.get_default_user_inner()
-    }
-
-    /// Get all user accounts (instance method).
-    pub fn get_all(&self) -> Vec<UserAccount> {
-        let accounts = self.inner.read().unwrap();
-        accounts.get_all_inner()
-    }
-
-    /// Return the number of registered user accounts (instance method).
-    pub fn len(&self) -> usize {
-        let accounts = self.inner.read().unwrap();
-        accounts.len_inner()
-    }
-
-    /// Check if a user has password set (instance method).
-    pub fn has_password(&self, user_id: PeerId) -> bool {
-        let accounts = self.inner.read().unwrap();
-        accounts.has_password_inner(user_id)
-    }
-
-    /// Verify password for user (instance method).
-    pub fn verify_password(&self, user_id: PeerId, password: String) -> Result<bool, String> {
-        let accounts = self.inner.read().unwrap();
-        accounts.verify_password_inner(user_id, password)
-    }
 }
 
 impl UserAccounts {
@@ -198,14 +156,6 @@ impl UserAccounts {
         }
     }
 
-    /// Initialize from global configuration.
-    ///
-    /// This is now a no-op: user accounts are loaded during `Libqaul::new()`
-    /// via `QaulState::new_production()`. Kept for backward compatibility.
-    pub fn init() {
-        // No-op: accounts are already in QaulState.
-    }
-
     /// create a new user account with username and an optional password
     pub fn create(state: &crate::QaulState, name: String, password: Option<String>) -> UserAccount {
         // create user
@@ -282,7 +232,8 @@ impl UserAccounts {
         crate::router::users::Users::add(state, &rs, id, keys_ed25519.public(), name.clone(), false, false);
 
         // add user to routing table / connections table
-        crate::router::connections::ConnectionTable::add_local_user(state, &rs, id);
+        let node_id = crate::node::Node::get_id(state);
+        rs.connections.add_local_user(id, node_id);
 
         // display id
         log::trace!("created user account '{}' {:?}", name, id);

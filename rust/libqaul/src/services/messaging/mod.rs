@@ -23,7 +23,6 @@ use super::chat::{ChatFile, ChatStorage};
 use super::crypto::Crypto;
 use crate::connections::ConnectionModule;
 use crate::node::user_accounts::{UserAccount, UserAccounts};
-use crate::router::table::RoutingTable;
 use crate::storage::database::DataBase;
 use crate::utilities::timestamp::Timestamp;
 use process::MessagingProcess;
@@ -99,76 +98,10 @@ pub struct UnConfirmedMessages {
     pub unconfirmed: sled::Tree,
 }
 
-impl UnConfirmedMessages {
-    /// Save a pre-built unconfirmed message entry into the database.
-    pub fn save_unconfirmed_inner(&mut self, signature: Vec<u8>, entry: UnConfirmedMessage) {
-        let entry_bytes = bincode::serialize(&entry).unwrap();
-        if let Err(e) = self.unconfirmed.insert(signature, entry_bytes) {
-            log::error!("{}", e);
-        }
-        if let Err(e) = self.unconfirmed.flush() {
-            log::error!("Error unconfirmed table flush: {}", e);
-        }
-    }
-
-    /// Mark a message as scheduled in the unconfirmed table.
-    pub fn on_scheduled_inner(&mut self, signature: &[u8]) {
-        let Some(unconfirmed_message_bytes) = self.unconfirmed.get(signature).unwrap() else {
-            return;
-        };
-        let mut unconfirmed_message: UnConfirmedMessage =
-            bincode::deserialize(&unconfirmed_message_bytes).unwrap();
-        if unconfirmed_message.scheduled {
-            return;
-        }
-
-        unconfirmed_message.scheduled = true;
-        let unconfirmed_message_todb = bincode::serialize(&unconfirmed_message).unwrap();
-        if let Err(_e) = self
-            .unconfirmed
-            .insert(signature.to_vec(), unconfirmed_message_todb)
-        {
-            log::error!("error updating unconfirmed table");
-        } else if let Err(_e) = self.unconfirmed.flush() {
-            log::error!("error updating unconfirmed table");
-        }
-    }
-
-    /// Mark a message as scheduled via DTN in the unconfirmed table.
-    pub fn on_scheduled_as_dtn_inner(&mut self, signature: &[u8]) {
-        let Some(unconfirmed_message_bytes) = self.unconfirmed.get(signature).unwrap() else {
-            return;
-        };
-        let mut unconfirmed_message: UnConfirmedMessage =
-            bincode::deserialize(&unconfirmed_message_bytes).unwrap();
-        if unconfirmed_message.scheduled {
-            return;
-        }
-
-        unconfirmed_message.scheduled_dtn = true;
-        let unconfirmed_message_todb = bincode::serialize(&unconfirmed_message).unwrap();
-        if let Err(_e) = self
-            .unconfirmed
-            .insert(signature.to_vec(), unconfirmed_message_todb)
-        {
-            log::error!("error updating unconfirmed table");
-        } else if let Err(_e) = self.unconfirmed.flush() {
-            log::error!("error updating unconfirmed table");
-        }
-    }
-}
-
 /// Qaul Messaging Structure
 pub struct Messaging {
     /// ring buffer of messages scheduled for sending
     pub to_send: VecDeque<ScheduledMessage>,
-}
-
-impl Messaging {
-    /// Push a pre-built scheduled message onto the send queue.
-    pub fn schedule_message_inner(&mut self, msg: ScheduledMessage) {
-        self.to_send.push_back(msg);
-    }
 }
 
 /// Instance-based messaging state owning the scheduled message queue
@@ -264,7 +197,7 @@ impl MessagingState {
         };
 
         let mut messaging = self.messaging.write().unwrap();
-        messaging.schedule_message_inner(msg);
+        messaging.to_send.push_back(msg);
     }
 
     /// Check scheduler for next message to send (instance method).
@@ -310,8 +243,14 @@ impl MessagingState {
             scheduled_dtn: false,
             is_dtn,
         };
-        let mut unconfirmed = self.unconfirmed.write().unwrap();
-        unconfirmed.save_unconfirmed_inner(container.signature.clone(), new_entry);
+        let entry_bytes = bincode::serialize(&new_entry).unwrap();
+        let unconfirmed = self.unconfirmed.write().unwrap();
+        if let Err(e) = unconfirmed.unconfirmed.insert(container.signature.clone(), entry_bytes) {
+            log::error!("{}", e);
+        }
+        if let Err(e) = unconfirmed.unconfirmed.flush() {
+            log::error!("Error unconfirmed table flush: {}", e);
+        }
     }
 
     /// Process confirmation message (instance method).
@@ -331,14 +270,42 @@ impl MessagingState {
 
     /// Mark message as scheduled (instance method).
     pub(crate) fn on_scheduled_message(&self, signature: &[u8]) {
-        let mut unconfirmed = self.unconfirmed.write().unwrap();
-        unconfirmed.on_scheduled_inner(signature);
+        let unconfirmed = self.unconfirmed.write().unwrap();
+        let Some(unconfirmed_message_bytes) = unconfirmed.unconfirmed.get(signature).unwrap() else {
+            return;
+        };
+        let mut unconfirmed_message: UnConfirmedMessage =
+            bincode::deserialize(&unconfirmed_message_bytes).unwrap();
+        if unconfirmed_message.scheduled {
+            return;
+        }
+        unconfirmed_message.scheduled = true;
+        let unconfirmed_message_todb = bincode::serialize(&unconfirmed_message).unwrap();
+        if let Err(_e) = unconfirmed.unconfirmed.insert(signature.to_vec(), unconfirmed_message_todb) {
+            log::error!("error updating unconfirmed table");
+        } else if let Err(_e) = unconfirmed.unconfirmed.flush() {
+            log::error!("error updating unconfirmed table");
+        }
     }
 
     /// Mark message as scheduled via DTN (instance method).
     pub fn on_scheduled_as_dtn_message(&self, signature: &[u8]) {
-        let mut unconfirmed = self.unconfirmed.write().unwrap();
-        unconfirmed.on_scheduled_as_dtn_inner(signature);
+        let unconfirmed = self.unconfirmed.write().unwrap();
+        let Some(unconfirmed_message_bytes) = unconfirmed.unconfirmed.get(signature).unwrap() else {
+            return;
+        };
+        let mut unconfirmed_message: UnConfirmedMessage =
+            bincode::deserialize(&unconfirmed_message_bytes).unwrap();
+        if unconfirmed_message.scheduled {
+            return;
+        }
+        unconfirmed_message.scheduled_dtn = true;
+        let unconfirmed_message_todb = bincode::serialize(&unconfirmed_message).unwrap();
+        if let Err(_e) = unconfirmed.unconfirmed.insert(signature.to_vec(), unconfirmed_message_todb) {
+            log::error!("error updating unconfirmed table");
+        } else if let Err(_e) = unconfirmed.unconfirmed.flush() {
+            log::error!("error updating unconfirmed table");
+        }
     }
 }
 
@@ -351,18 +318,6 @@ impl Messaging {
 
         let db = DataBase::get_node_db(state);
         state.services.messaging.init_production(db);
-    }
-
-    /// Save a message to the data base to wait for confirmation
-    pub fn save_unconfirmed_message(
-        state: &crate::QaulState,
-        message_type: MessagingServiceType,
-        message_id: &[u8],
-        receiver: &PeerId,
-        container: &proto::Container,
-        is_dtn: bool,
-    ) {
-        state.services.messaging.save_unconfirmed_message(message_type, message_id, receiver, container, is_dtn);
     }
 
     /// Process confirmation message
@@ -461,14 +416,6 @@ impl Messaging {
         }
     }
 
-    fn on_scheduled_message(state: &crate::QaulState, signature: &[u8]) {
-        state.services.messaging.on_scheduled_message(signature);
-    }
-
-    fn on_scheduled_as_dtn_message(state: &crate::QaulState, signature: &[u8]) {
-        state.services.messaging.on_scheduled_as_dtn_message(signature);
-    }
-
     /// pack, sign and schedule a message for sending
     ///
     /// The function returns the message signature on success,
@@ -554,8 +501,7 @@ impl Messaging {
 
             // in common message case, save into unconfirmed table
             if message_needs_confirmation {
-                Self::save_unconfirmed_message(
-                    state,
+                state.services.messaging.save_unconfirmed_message(
                     MessagingServiceType::Chat,
                     message_id,
                     receiver,
@@ -565,8 +511,7 @@ impl Messaging {
             }
 
             // schedule message for sending
-            Self::schedule_message(
-                state,
+            state.services.messaging.schedule_message(
                 receiver.clone(),
                 container,
                 message_needs_confirmation,
@@ -609,8 +554,7 @@ impl Messaging {
             };
 
             // in common message case, save into unconfirmed table
-            Self::save_unconfirmed_message(
-                state,
+            state.services.messaging.save_unconfirmed_message(
                 MessagingServiceType::Chat,
                 &[],
                 &storage_node_id,
@@ -619,8 +563,7 @@ impl Messaging {
             );
 
             // schedule message for sending
-            Self::schedule_message(
-                state,
+            state.services.messaging.schedule_message(
                 storage_node_id.clone(),
                 container_dtn,
                 true,
@@ -634,95 +577,6 @@ impl Messaging {
         } else {
             return Err("dtn messaging signing error".to_string());
         }
-    }
-
-    /// schedule a message
-    ///
-    /// schedule a message for sending.
-    /// This function adds the message to the ring buffer for sending.
-    /// This buffer is checked regularly by libqaul for sending.
-    ///
-    pub fn schedule_message(
-        state: &crate::QaulState,
-        receiver: PeerId,
-        container: proto::Container,
-        is_common: bool,
-        is_forward: bool,
-        scheduled_dtn: bool,
-        is_dtn: bool,
-    ) {
-        #[cfg(emulate)]
-        if network_emul::NetworkEmulator::is_lost() {
-            log::error!(
-                "drop message, signature: {}",
-                bs58::encode(&container.signature).into_string()
-            );
-            return;
-        }
-
-        state.services.messaging.schedule_message(receiver, container, is_common, is_forward, scheduled_dtn, is_dtn);
-    }
-
-    /// Check Scheduler
-    ///
-    /// Check if there is a message scheduled for sending.
-    ///
-    pub fn check_scheduler(state: &crate::QaulState) -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
-        let message_item: Option<ScheduledMessage>;
-
-        // get scheduled messaging buffer
-        {
-            let mut messaging = state.services.messaging.messaging.write().unwrap();
-            message_item = messaging.to_send.pop_front();
-        }
-
-        if let Some(message) = message_item {
-            // check for route
-            let rs = state.get_router();
-            if let Some(route) = RoutingTable::get_route_to_user(&rs, message.receiver) {
-                // update unconfirmed table set scheduled flag.
-                Self::on_scheduled_message(state, &message.container.signature);
-
-                // create binary message
-                let data = message.container.encode_to_vec();
-
-                // return information
-                return Some((route.node, route.module, data));
-            } else {
-                // user is offline we schedule through DTN service
-                if !message.is_forward
-                    && !message.is_dtn
-                    && !message.scheduled_dtn
-                    && message.is_common
-                {
-                    // get storage node id
-                    if let Ok(my_user_id) =
-                        PeerId::from_bytes(&message.container.envelope.as_ref().unwrap().sender_id)
-                    {
-                        if let Some(storage_node_id) =
-                            super::dtn::Dtn::get_storage_user(state, &my_user_id)
-                        {
-                            if let Some(user_account) = UserAccounts::get_by_id(state,my_user_id) {
-                                if let Err(_e) = Self::send_dtn_message(
-                                    state,
-                                    &user_account,
-                                    &storage_node_id,
-                                    &message.container,
-                                ) {
-                                    log::error!("DTN scheduling error!");
-                                } else {
-                                    log::error!("DTN scheduled...");
-                                    // update unconfirmed table
-                                    Self::on_scheduled_as_dtn_message(state, &message.container.signature);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        None
     }
 
     /// Send a confirmation message for a received message
@@ -803,7 +657,7 @@ impl Messaging {
 
                     // schedule it for further sending otherwise
                     None => {
-                        Self::schedule_message(state, receiver_id, container, true, true, false, false)
+                        state.services.messaging.schedule_message(receiver_id, container, true, true, false, false)
                     }
                 }
             }

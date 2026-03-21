@@ -171,30 +171,6 @@ impl RoutingTableState {
 }
 
 impl RoutingTable {
-    /// set and replace routing table with a new table
-    /// Delegates to the provided RouterState instance.
-    pub fn set(router: &super::RouterState, new_table: RoutingTable) {
-        router.routing_table.set(new_table);
-    }
-
-    /// Create routing information for a specific neighbour node.
-    /// Delegates to the provided RouterState instance.
-    pub fn create_routing_info(
-        router: &super::RouterState,
-        neighbour: PeerId,
-        last_sent: u64,
-    ) -> router_net_proto::RoutingInfoTable {
-        router
-            .routing_table
-            .create_routing_info(neighbour, last_sent)
-    }
-
-    /// get online users and hop count
-    /// Delegates to the provided RouterState instance.
-    pub fn get_online_users(router: &super::RouterState) -> BTreeMap<Vec<u8>, u8> {
-        router.routing_table.get_online_users()
-    }
-
     /// get online users info
     pub fn get_online_users_info(router: &super::RouterState) -> BTreeMap<Vec<u8>, Vec<RoutingConnectionEntry>> {
         let routing_table = router
@@ -275,49 +251,6 @@ impl RoutingTable {
             request_id,
             Vec::new(),
         );
-    }
-
-    /// Get the routing connection entry for a specific user
-    ///
-    /// The connection entry for the provided user_id contains
-    /// the neighbour id as well as the connection module via
-    /// which to send the packages.
-    ///
-    /// It selects the best route according to the rank_routing_connection function.
-    ///
-    pub fn get_route_to_user(router: &super::RouterState, user_id: PeerId) -> Option<RoutingConnectionEntry> {
-        let routing_table = router
-            .routing_table
-            .inner
-            .read()
-            .unwrap();
-
-        // get q8id for qaul user
-        let user_q8id = QaulId::to_q8id(user_id);
-
-        // find user
-        if let Some(user_entry) = routing_table.table.get(&user_q8id) {
-            let mut compare: Option<&RoutingConnectionEntry> = None;
-
-            // find best route
-            for connection in &user_entry.connections {
-                match compare {
-                    Some(current) => {
-                        if Self::compare_connections(current, connection) {
-                            compare = Some(connection);
-                        }
-                    }
-                    None => compare = Some(connection),
-                }
-            }
-
-            // return route
-            match compare {
-                None => return None,
-                Some(connection) => return Some(connection.to_owned()),
-            }
-        }
-        None
     }
 
     /// Compare two routing connections and decides which one is better

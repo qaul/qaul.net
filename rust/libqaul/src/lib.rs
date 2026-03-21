@@ -854,9 +854,10 @@ impl Libqaul {
                 }
             }
             EventType::RoutingTable => {
-                router
+                let table = router
                     .connections
                     .create_routing_table(&router.configuration);
+                router.routing_table.set(table);
             }
             EventType::Messaging => {
                 if let Some((neighbour_id, connection_module, data)) =
