@@ -656,19 +656,17 @@ impl ChatFile {
         // read file contents and create and send FileData messages
 
         let user_account_clone = user_account.clone();
-        let message_id_clone = message_id.clone();
-        let group_clone = group.clone();
-        let mesage_count_clone = mesage_count;
+
         tokio::task::spawn_blocking(move || {
             if let Err(e) = Self::send_file_chunks_blocking(
                 user_account_clone,
-                group_clone,
-                message_id_clone,
+                group,
+                message_id,
                 file_id,
                 timestamp,
                 path_name,
                 size,
-                mesage_count_clone,
+                mesage_count,
             ) {
                 log::error!("File send failed: {}", e);
             }
