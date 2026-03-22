@@ -566,7 +566,7 @@ impl ChatFile {
         // TODO: start in new async thread here
 
         // copy file
-        if let Err(e) = fs::copy(&path_name, file_path) {
+        if let Err(e) = fs::copy(&path_name, &file_path) {
             log::error!("copy file error {}", e);
         }
 
@@ -659,8 +659,6 @@ impl ChatFile {
         let message_id_clone = message_id.clone();
         let group_clone = group.clone();
         let mesage_count_clone = mesage_count;
-        let file_path_clone = file_path.clone();
-
         tokio::task::spawn_blocking(move || {
             if let Err(e) = Self::send_file_chunks_blocking(
                 user_account_clone,
@@ -669,7 +667,6 @@ impl ChatFile {
                 file_id,
                 timestamp,
                 path_name,
-                file_path_clone,
                 size,
                 mesage_count_clone,
             ) {
@@ -687,15 +684,9 @@ impl ChatFile {
         file_id: u64,
         timestamp: u64,
         path_name: String,
-        file_path: PathBuf,
         size: u32,
         message_count: u32,
     ) -> Result<(), String> {
-        // do the initial file copy async as well to avoid blocking the main thread
-        if let Err(e) = fs::copy(&path_name, file_path) {
-            log::error!("copy file error {}", e.to_string());
-        }
-
         let mut file = File::open(path_name).map_err(|e| e.to_string())?;
 
         let mut buffer: [u8; DEF_PACKAGE_SIZE as usize] = [0; DEF_PACKAGE_SIZE as usize];
