@@ -20,36 +20,36 @@ impl Users {
     /// CLI command interpretation
     ///
     /// The CLI commands of users are processed here
-    pub fn cli(command: &str) {
+    pub fn cli(state: &super::CliState, command: &str) {
         match command {
             // request list of all users
             cmd if cmd.starts_with("list") => {
-                Self::request_user_list();
+                Self::request_user_list(state);
             }
             cmd if cmd.starts_with("online") => {
-                Self::request_online_user_list();
+                Self::request_online_user_list(state);
             }
             // verify a user
             cmd if cmd.starts_with("verify ") => {
                 let user_id = cmd.strip_prefix("verify ").unwrap();
 
-                Self::send_user_update(user_id, true, false);
+                Self::send_user_update(state, user_id, true, false);
             }
             // block a user
             cmd if cmd.starts_with("block ") => {
                 let user_id = cmd.strip_prefix("block ").unwrap();
 
-                Self::send_user_update(user_id, false, true);
+                Self::send_user_update(state, user_id, false, true);
             }
             // security number for a user
             cmd if cmd.starts_with("secure ") => {
                 let user_id = cmd.strip_prefix("secure ").unwrap();
-                Self::send_user_secure_number(user_id);
+                Self::send_user_secure_number(state, user_id);
             }
             // get a single user by id
             cmd if cmd.starts_with("get ") => {
                 let user_id = cmd.strip_prefix("get ").unwrap();
-                Self::request_user_by_id(user_id);
+                Self::request_user_by_id(state, user_id);
             }
             // unknown command
             _ => log::error!("unknown users command"),
@@ -57,7 +57,7 @@ impl Users {
     }
 
     /// create rpc request for user list
-    fn request_user_list() {
+    fn request_user_list(state: &super::CliState) {
         // create request message
         let proto_message = proto::Users {
             message: Some(proto::users::Message::UserRequest(proto::UserRequest {
@@ -74,13 +74,14 @@ impl Users {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Users.into(),
             "".to_string(),
         );
     }
 
-    fn request_online_user_list() {
+    fn request_online_user_list(state: &super::CliState) {
         // create request message
         let proto_message = proto::Users {
             message: Some(proto::users::Message::UserOnlineRequest(
@@ -99,6 +100,7 @@ impl Users {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Users.into(),
             "".to_string(),
@@ -106,7 +108,7 @@ impl Users {
     }
 
     /// create rpc user security number message
-    fn send_user_secure_number(user_id_base58: &str) {
+    fn send_user_secure_number(state: &super::CliState, user_id_base58: &str) {
         let user_id = bs58::decode(user_id_base58).into_vec().unwrap();
 
         // create request message
@@ -124,6 +126,7 @@ impl Users {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Users.into(),
             "".to_string(),
@@ -131,7 +134,7 @@ impl Users {
     }
 
     /// create rpc request to get a single user by id
-    fn request_user_by_id(user_id_base58: &str) {
+    fn request_user_by_id(state: &super::CliState, user_id_base58: &str) {
         let user_id = bs58::decode(user_id_base58).into_vec().unwrap();
 
         // create request message
@@ -149,6 +152,7 @@ impl Users {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Users.into(),
             "".to_string(),
@@ -156,7 +160,7 @@ impl Users {
     }
 
     /// create rpc user update message
-    fn send_user_update(user_id_base58: &str, verified: bool, blocked: bool) {
+    fn send_user_update(state: &super::CliState, user_id_base58: &str, verified: bool, blocked: bool) {
         let user_id = bs58::decode(user_id_base58).into_vec().unwrap();
 
         // create request message
@@ -181,6 +185,7 @@ impl Users {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Users.into(),
             "".to_string(),

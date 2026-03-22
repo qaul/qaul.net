@@ -15,9 +15,10 @@ mod ble;
 pub mod rpc;
 
 /// initialize and start the ble_module in an own thread
-pub fn init(sys_rpc_callback: Box<dyn FnMut(Vec<u8>) + Send>) {
-    let rpc_receiver = rpc::init();
-
+///
+/// The `rpc_receiver` is the receiving end of the channel from libqaul to ble_module.
+/// The caller creates the channel and keeps the sender.
+pub fn init(sys_rpc_callback: Box<dyn FnMut(Vec<u8>) + Send>, rpc_receiver: rpc::BleRpc) {
     thread::spawn(move || {
         let rt = runtime::Builder::new_current_thread()
             .enable_all()

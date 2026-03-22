@@ -7,16 +7,15 @@
 //! These tests verify that instance creation works correctly
 //! and all modules are properly initialized.
 
-use once_cell::sync::Lazy;
-use std::sync::Arc;
+use std::sync::{Arc, LazyLock};
 use tempfile::TempDir;
 
 /// Shared instance for all tests in this file.
 /// Uses Lazy to ensure the instance is created only once per process.
-static INSTANCE: Lazy<(Arc<libqaul::Libqaul>, TempDir)> = Lazy::new(|| {
+static INSTANCE: LazyLock<(Arc<libqaul::Libqaul>, TempDir)> = LazyLock::new(|| {
     let dir = TempDir::new().expect("Failed to create temp directory");
     let path = dir.path().to_str().unwrap().to_string();
-    let instance = async_std::task::block_on(libqaul::start_instance(path, None));
+    let instance = futures::executor::block_on(libqaul::start_instance(path, None));
     (instance, dir)
 });
 

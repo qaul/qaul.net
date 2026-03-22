@@ -18,7 +18,6 @@ use libp2p::PeerId;
 use noise_protocol::{CipherState, HandshakeState, U8Array, DH};
 use noise_rust_crypto::{ChaCha20Poly1305, Sha256, X25519};
 use rand::Rng;
-use state::InitCell;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
 
@@ -26,9 +25,6 @@ use super::proto_net;
 use crate::node::user_accounts::UserAccounts;
 use crate::router::users::Users;
 use crate::services::crypto::Crypto25519;
-
-/// Global state for BLE crypto sessions (for backward compatibility)
-static BLE_CRYPTO: InitCell<RwLock<BleCryptoModule>> = InitCell::new();
 
 /// BLE Crypto Module - Instance-based session manager
 ///
@@ -111,13 +107,14 @@ impl BleCryptoModule {
     /// Returns the first handshake message to send to the peer.
     pub fn initiate_handshake(
         &mut self,
+        state: &crate::QaulState,
         small_id: &[u8],
         remote_id: PeerId,
     ) -> Option<proto_net::NoiseHandshake> {
         log::info!("BLE crypto: initiating handshake with {:?}", small_id);
 
         // Get the default user account
-        let user_account = match UserAccounts::get_default_user() {
+        let user_account = match UserAccounts::get_default_user(state) {
             Some(account) => account,
             None => {
                 log::error!("BLE crypto: no user account available for handshake");
@@ -126,30 +123,33 @@ impl BleCryptoModule {
         };
 
         // Get the remote public key
-        let remote_key = match Users::get_pub_key(&remote_id) {
-            Some(key) => key,
-            None => {
-                log::error!("BLE crypto: no public key found for remote node");
-                return None;
+        let remote_key = {
+            let rs = state.get_router();
+            match Users::get_pub_key(&rs, &remote_id) {
+                Some(key) => key,
+                None => {
+                    log::error!("BLE crypto: no public key found for remote node");
+                    return None;
+                }
             }
         };
 
         // Create crypto state
-        let state = Self::create_crypto_state::<X25519>(true, &user_account.keys, remote_key)?;
-        let session_id = state.session_id;
+        let state_crypto = Self::create_crypto_state::<X25519>(true, &user_account.keys, remote_key)?;
+        let session_id = state_crypto.session_id;
 
         // Create handshake
         let pattern = noise_protocol::patterns::noise_kk();
         let prologue: Vec<u8> = Vec::new();
-        let e = <X25519 as DH>::Key::from_slice(&state.e);
+        let e = <X25519 as DH>::Key::from_slice(&state_crypto.e);
 
         let mut handshake: HandshakeState<X25519, ChaCha20Poly1305, Sha256> = HandshakeState::new(
             pattern,
             true,
             prologue.as_slice(),
-            Some(U8Array::from_slice(&state.s)),
+            Some(U8Array::from_slice(&state_crypto.s)),
             Some(e),
-            Some(U8Array::from_slice(&state.rs)),
+            Some(U8Array::from_slice(&state_crypto.rs)),
             None,
         );
 
@@ -163,7 +163,7 @@ impl BleCryptoModule {
         };
 
         // Save session state
-        self.sessions.insert(small_id.to_vec(), state);
+        self.sessions.insert(small_id.to_vec(), state_crypto);
 
         log::info!(
             "BLE crypto: handshake 1 created, session_id: {}",
@@ -183,6 +183,7 @@ impl BleCryptoModule {
     /// Returns the second handshake message to send back.
     pub fn process_handshake_1(
         &mut self,
+        qaul_state: &crate::QaulState,
         small_id: &[u8],
         handshake: proto_net::NoiseHandshake,
         remote_id: PeerId,
@@ -190,7 +191,7 @@ impl BleCryptoModule {
         log::info!("BLE crypto: processing handshake 1 from {:?}", small_id);
 
         // Get the default user account
-        let user_account = match UserAccounts::get_default_user() {
+        let user_account = match UserAccounts::get_default_user(qaul_state) {
             Some(account) => account,
             None => {
                 return Err("No user account available".to_string());
@@ -198,10 +199,13 @@ impl BleCryptoModule {
         };
 
         // Get the remote public key
-        let remote_key = match Users::get_pub_key(&remote_id) {
-            Some(key) => key,
-            None => {
-                return Err("No public key found for remote node".to_string());
+        let remote_key = {
+            let rs = qaul_state.get_router();
+            match Users::get_pub_key(&rs, &remote_id) {
+                Some(key) => key,
+                None => {
+                    return Err("No public key found for remote node".to_string());
+                }
             }
         };
 
@@ -531,86 +535,97 @@ impl Default for BleCryptoModule {
 
 /// BleCrypto - Global state wrapper for backward compatibility
 ///
-/// This struct provides static methods that access the global BLE_CRYPTO state.
-/// For new code, prefer using `BleCryptoModule` directly.
+/// This struct provides static methods that access the BLE crypto state
+/// via the provided `&QaulState` reference.
 pub struct BleCrypto;
 
+/// Helper to access the BLE crypto state from QaulState.
+fn ble_crypto(state: &crate::QaulState) -> &RwLock<BleCryptoModule> {
+    &state.connections.ble.crypto
+}
+
 impl BleCrypto {
-    /// Initialize the BLE crypto module (global state)
+    /// Initialize the BLE crypto module.
+    ///
+    /// State is now managed by QaulState.connections.ble.crypto,
+    /// so this is a no-op aside from logging.
     pub fn init() {
-        let crypto = BleCryptoModule::new();
-        BLE_CRYPTO.set(RwLock::new(crypto));
         log::info!("BLE crypto module initialized");
     }
 
     /// Check if a session is established for the given small_id
-    pub fn is_session_established(small_id: &[u8]) -> bool {
-        let crypto = BLE_CRYPTO.get().read().unwrap();
+    pub fn is_session_established(state: &crate::QaulState, small_id: &[u8]) -> bool {
+        let crypto = ble_crypto(state).read().unwrap();
         crypto.is_session_established(small_id)
     }
 
     /// Get session ID for a given small_id (if session exists)
     #[allow(dead_code)]
-    pub fn get_session_id(small_id: &[u8]) -> Option<u32> {
-        let crypto = BLE_CRYPTO.get().read().unwrap();
+    pub fn get_session_id(state: &crate::QaulState, small_id: &[u8]) -> Option<u32> {
+        let crypto = ble_crypto(state).read().unwrap();
         crypto.get_session_id(small_id)
     }
 
     /// Check if there is a pending session for the given small_id
-    pub fn has_pending_session(small_id: &[u8]) -> bool {
-        let crypto = BLE_CRYPTO.get().read().unwrap();
+    pub fn has_pending_session(state: &crate::QaulState, small_id: &[u8]) -> bool {
+        let crypto = ble_crypto(state).read().unwrap();
         crypto.has_pending_session(small_id)
     }
 
     /// Initiate a handshake with a remote node
     pub fn initiate_handshake(
+        state: &crate::QaulState,
         small_id: &[u8],
         remote_id: PeerId,
     ) -> Option<proto_net::NoiseHandshake> {
-        let mut crypto = BLE_CRYPTO.get().write().unwrap();
-        crypto.initiate_handshake(small_id, remote_id)
+        let mut crypto = ble_crypto(state).write().unwrap();
+        crypto.initiate_handshake(state, small_id, remote_id)
     }
 
     /// Process incoming handshake message 1 and generate response
     pub fn process_handshake_1(
+        state: &crate::QaulState,
         small_id: &[u8],
         handshake: proto_net::NoiseHandshake,
         remote_id: PeerId,
     ) -> Result<proto_net::NoiseHandshake, String> {
-        let mut crypto = BLE_CRYPTO.get().write().unwrap();
-        crypto.process_handshake_1(small_id, handshake, remote_id)
+        let mut crypto = ble_crypto(state).write().unwrap();
+        crypto.process_handshake_1(state, small_id, handshake, remote_id)
     }
 
     /// Process incoming handshake message 2 to complete the session
     pub fn process_handshake_2(
+        state: &crate::QaulState,
         small_id: &[u8],
         handshake: proto_net::NoiseHandshake,
     ) -> Result<(), String> {
-        let mut crypto = BLE_CRYPTO.get().write().unwrap();
+        let mut crypto = ble_crypto(state).write().unwrap();
         crypto.process_handshake_2(small_id, handshake)
     }
 
     /// Encrypt a message for transport
     pub fn encrypt(
+        state: &crate::QaulState,
         small_id: &[u8],
         plaintext: Vec<u8>,
     ) -> Result<proto_net::EncryptedBleTransport, String> {
-        let mut crypto = BLE_CRYPTO.get().write().unwrap();
+        let mut crypto = ble_crypto(state).write().unwrap();
         crypto.encrypt(small_id, plaintext)
     }
 
     /// Decrypt an incoming encrypted message
     pub fn decrypt(
+        state: &crate::QaulState,
         small_id: &[u8],
         encrypted: proto_net::EncryptedBleTransport,
     ) -> Result<Vec<u8>, String> {
-        let mut crypto = BLE_CRYPTO.get().write().unwrap();
+        let mut crypto = ble_crypto(state).write().unwrap();
         crypto.decrypt(small_id, encrypted)
     }
 
     /// Clean up session when a node becomes unavailable
-    pub fn on_node_unavailable(small_id: &[u8]) {
-        let mut crypto = BLE_CRYPTO.get().write().unwrap();
+    pub fn on_node_unavailable(state: &crate::QaulState, small_id: &[u8]) {
+        let mut crypto = ble_crypto(state).write().unwrap();
         crypto.on_node_unavailable(small_id);
     }
 }

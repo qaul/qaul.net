@@ -9,7 +9,6 @@ use libp2p::PeerId;
 use prost::Message;
 
 use super::UnConfirmedMessage;
-use crate::router;
 use crate::utilities::qaul_id::QaulId;
 use crate::utilities::timestamp::Timestamp;
 
@@ -18,16 +17,17 @@ pub struct MessagingRetransmit {}
 
 impl MessagingRetransmit {
     /// process retransmission
-    pub fn process() {
+    pub fn process(state: &crate::QaulState) {
         // get unconfirmed table
-        let unconfirmed = super::UNCONFIRMED.get().write().unwrap();
+        let unconfirmed = state.services.messaging.unconfirmed.write().unwrap();
         if unconfirmed.unconfirmed.len() == 0 {
             // there are no message to retransmit
             return;
         }
 
         // get online users from route table
-        let online_users = router::table::RoutingTable::get_online_users();
+        let rs = state.get_router();
+        let online_users = rs.routing_table.get_online_users();
 
         let mut updated = false;
         let cur_time = Timestamp::get_timestamp();
@@ -67,7 +67,7 @@ impl MessagingRetransmit {
                                 "retrans message, signature: {}",
                                 bs58::encode(&container.signature).into_string()
                             );
-                            super::Messaging::schedule_message(
+                            state.services.messaging.schedule_message(
                                 receiver,
                                 container,
                                 true,

@@ -39,6 +39,7 @@ impl GroupManage {
     }
 
     fn save_group_event_deferred(
+        state: &crate::QaulState,
         account_id: &PeerId,
         group_id: &GroupId,
         sender_id: &PeerId,
@@ -46,6 +47,7 @@ impl GroupManage {
         user_id: Vec<u8>,
     ) {
         ChatStorage::save_message_deferred(
+            state,
             account_id,
             group_id,
             sender_id,
@@ -62,18 +64,19 @@ impl GroupManage {
     /// this function will create a new direct chat group and
     /// return it.
     pub fn get_group_create_direct(
+        state: &crate::QaulState,
         account_id: PeerId,
         group_id: GroupId,
         remote_id: &PeerId,
     ) -> Option<Group> {
         // try to get group from data base
-        match GroupStorage::get_group(account_id.clone(), &group_id.to_bytes()) {
+        match GroupStorage::get_group(state, account_id.clone(), &group_id.to_bytes()) {
             Some(group) => return Some(group),
             None => {
                 // check if it is the direct chat group for the connection
                 if group_id == GroupId::from_peers(&account_id, remote_id) {
                     // create a new direct chat group
-                    let group = Self::create_new_direct_chat_group(&account_id, &remote_id);
+                    let group = Self::create_new_direct_chat_group(state, &account_id, &remote_id);
                     return Some(group);
                 }
             }
@@ -88,11 +91,11 @@ impl GroupManage {
     ///
     /// * `account_id` your user account ID
     /// * `user_id` the user ID of the other user
-    pub fn create_new_direct_chat_group(account_id: &PeerId, user_id: &PeerId) -> Group {
+    pub fn create_new_direct_chat_group(state: &crate::QaulState, account_id: &PeerId, user_id: &PeerId) -> Group {
         let group_id = GroupId::from_peers(account_id, user_id).to_bytes();
 
         // check if group already exists
-        if let Some(group) = GroupStorage::get_group(account_id.to_owned(), &group_id) {
+        if let Some(group) = GroupStorage::get_group(state, account_id.to_owned(), &group_id) {
             return group;
         }
 
@@ -127,13 +130,13 @@ impl GroupManage {
         group.is_direct_chat = true;
 
         // save group to data base
-        GroupStorage::save_group(account_id.to_owned(), group.clone());
+        GroupStorage::save_group(state, account_id.to_owned(), group.clone());
 
         group
     }
 
     /// create new group from rpc command
-    pub fn create_new_group(account_id: &PeerId, name: String) -> Vec<u8> {
+    pub fn create_new_group(state: &crate::QaulState, account_id: &PeerId, name: String) -> Vec<u8> {
         let mut group = Group::new();
 
         group.id = uuid::Uuid::new_v4().as_bytes().to_vec();
@@ -152,7 +155,7 @@ impl GroupManage {
         group.name = name;
 
         // save group
-        GroupStorage::save_group(account_id.to_owned(), group.clone());
+        GroupStorage::save_group(state, account_id.to_owned(), group.clone());
 
         // save group created event
         let event = chat::rpc_proto::ChatContentMessage {
@@ -165,6 +168,7 @@ impl GroupManage {
         };
 
         ChatStorage::save_message(
+            state,
             account_id,
             &GroupId::from_bytes(&group.id).unwrap(),
             account_id,
@@ -180,8 +184,8 @@ impl GroupManage {
     /// rename group from RPC command
     ///
     /// `account_id` the user account ID
-    pub fn rename_group(account_id: &PeerId, group_id: &[u8], name: String) -> Result<(), String> {
-        match GroupStorage::try_with_group_mut(account_id, group_id, |group| {
+    pub fn rename_group(state: &crate::QaulState, account_id: &PeerId, group_id: &[u8], name: String) -> Result<(), String> {
+        match GroupStorage::try_with_group_mut(state, account_id, group_id, |group| {
             // check if administrator
             if let Some(member) = group.get_member(&account_id.to_bytes()) {
                 if member.role != 255 {
@@ -202,8 +206,8 @@ impl GroupManage {
     }
 
     /// get a new message ID
-    pub fn get_new_message_id(account_id: &PeerId, group_id: &[u8]) -> Vec<u8> {
-        match GroupStorage::try_with_group_mut(account_id, group_id, |group| {
+    pub fn get_new_message_id(state: &crate::QaulState, account_id: &PeerId, group_id: &[u8]) -> Vec<u8> {
+        match GroupStorage::try_with_group_mut(state, account_id, group_id, |group| {
             let account_id_bytes = account_id.to_bytes();
             let member = group.members.get_mut(&account_id_bytes).ok_or(())?;
             member.last_message_index += 1;
@@ -218,11 +222,12 @@ impl GroupManage {
     ///
     /// `account_id` the user account ID
     pub fn group_info(
+        state: &crate::QaulState,
         account_id: &PeerId,
         group_id: &[u8],
     ) -> Result<super::proto_rpc::GroupInfo, String> {
         let group;
-        match GroupStorage::get_group(account_id.to_owned(), group_id) {
+        match GroupStorage::get_group(state, account_id.to_owned(), group_id) {
             Some(group_result) => group = group_result,
             None => return Err("group not found".to_string()),
         }
@@ -251,8 +256,8 @@ impl GroupManage {
     /// get group list from rpc command
     ///
     /// `account_id` the user account ID
-    pub fn group_list(account_id: &PeerId) -> super::proto_rpc::GroupListResponse {
-        let db_ref = GroupStorage::get_db_ref(account_id.to_owned());
+    pub fn group_list(state: &crate::QaulState, account_id: &PeerId) -> super::proto_rpc::GroupListResponse {
+        let db_ref = GroupStorage::get_db_ref(state, account_id.to_owned());
 
         let mut res = super::proto_rpc::GroupListResponse {
             groups: Vec::with_capacity(db_ref.groups.len()),
@@ -289,8 +294,8 @@ impl GroupManage {
     }
 
     /// get invited list from rpc command
-    pub fn invited_list(account_id: &PeerId) -> super::proto_rpc::GroupInvitedResponse {
-        let db_ref = GroupStorage::get_db_ref(account_id.to_owned());
+    pub fn invited_list(state: &crate::QaulState, account_id: &PeerId) -> super::proto_rpc::GroupInvitedResponse {
+        let db_ref = GroupStorage::get_db_ref(state, account_id.to_owned());
 
         let mut res = super::proto_rpc::GroupInvitedResponse {
             invited: Vec::with_capacity(db_ref.invited.len()),
@@ -333,6 +338,7 @@ impl GroupManage {
 
     /// process group notify message from network
     pub fn on_group_notify(
+        state: &crate::QaulState,
         sender_id: PeerId,
         account_id: PeerId,
         notify: &super::proto_net::GroupInfo,
@@ -355,7 +361,7 @@ impl GroupManage {
 
         // get group
         let mut group: Group;
-        match GroupStorage::get_group(account_id, &notify.group_id) {
+        match GroupStorage::get_group(state, account_id, &notify.group_id) {
             Some(my_group) => {
                 group = my_group;
 
@@ -426,12 +432,13 @@ impl GroupManage {
         }
 
         // save group
-        GroupStorage::save_group(account_id, group);
+        GroupStorage::save_group(state, account_id, group);
 
         // save events
         let mut wrote_group_events = false;
         if first_join {
             Self::save_group_event_deferred(
+                state,
                 &account_id,
                 &group_id,
                 &sender_id,
@@ -442,6 +449,7 @@ impl GroupManage {
         } else {
             for new_member in &new_members {
                 Self::save_group_event_deferred(
+                    state,
                     &account_id,
                     &group_id,
                     &sender_id,
@@ -453,6 +461,7 @@ impl GroupManage {
 
             for left_member in orign_members.keys() {
                 Self::save_group_event_deferred(
+                    state,
                     &account_id,
                     &group_id,
                     &sender_id,
@@ -464,8 +473,8 @@ impl GroupManage {
         }
 
         if wrote_group_events {
-            ChatStorage::flush_account(&account_id);
-            GroupStorage::flush_account(&account_id);
+            ChatStorage::flush_account(state, &account_id);
+            GroupStorage::flush_account(state, &account_id);
         }
     }
 }

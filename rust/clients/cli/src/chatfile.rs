@@ -17,7 +17,7 @@ impl ChatFile {
     /// CLI command interpretation
     ///
     /// The CLI commands of the chat file module are processed here
-    pub fn cli(command: &str) {
+    pub fn cli(state: &super::CliState, command: &str) {
         match command {
             // send file
             cmd if cmd.starts_with("send ") => {
@@ -55,7 +55,7 @@ impl ChatFile {
                             descr
                         );
 
-                        Self::send_file(group_id, file_path_name.to_string(), descr);
+                        Self::send_file(state, group_id, file_path_name.to_string(), descr);
                     } else {
                         log::error!("file pathname is not given");
                     }
@@ -81,7 +81,7 @@ impl ChatFile {
                     }
                 }
 
-                Self::send_file_history_command(offset as u32, limit as u32);
+                Self::send_file_history_command(state, offset as u32, limit as u32);
             }
             // unknown command
             _ => log::error!("unknown file command"),
@@ -114,7 +114,7 @@ impl ChatFile {
     }
 
     /// send file via rpc
-    fn send_file(group_id: Vec<u8>, file_name: String, description: String) {
+    fn send_file(state: &super::CliState, group_id: Vec<u8>, file_name: String, description: String) {
         // create file send message
         let proto_message = proto::ChatFile {
             message: Some(proto::chat_file::Message::SendFileRequest(
@@ -134,6 +134,7 @@ impl ChatFile {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Chatfile.into(),
             "".to_string(),
@@ -141,7 +142,7 @@ impl ChatFile {
     }
 
     /// send file history list command via rpc
-    fn send_file_history_command(offset: u32, limit: u32) {
+    fn send_file_history_command(state: &super::CliState, offset: u32, limit: u32) {
         // create file history message
         let proto_message = proto::ChatFile {
             message: Some(proto::chat_file::Message::FileHistory(
@@ -157,6 +158,7 @@ impl ChatFile {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Chatfile.into(),
             "".to_string(),

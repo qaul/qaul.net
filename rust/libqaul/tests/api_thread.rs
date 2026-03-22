@@ -7,15 +7,15 @@
 //! with the event loop running in a background thread.
 
 use crossbeam_channel::TryRecvError;
-use once_cell::sync::Lazy;
-use std::sync::Arc;
+use std::sync::{Arc, LazyLock};
+
 use std::time::Duration;
 use tempfile::TempDir;
 
 /// Shared instance for all tests in this file.
 /// Uses Lazy to ensure the instance is created only once per process.
 /// The event loop runs in a background thread.
-static INSTANCE: Lazy<(Arc<libqaul::Libqaul>, TempDir)> = Lazy::new(|| {
+static INSTANCE: LazyLock<(Arc<libqaul::Libqaul>, TempDir)> = LazyLock::new(|| {
     let dir = TempDir::new().expect("Failed to create temp directory");
     let path = dir.path().to_str().unwrap().to_string();
     let instance = libqaul::api::start_instance_in_thread(path, None);
@@ -85,15 +85,14 @@ fn test_storage_accessible() {
 
 #[test]
 fn test_rpc_channel_functional() {
-    // Note: We don't use the shared INSTANCE here to avoid conflicts with RPC state
-    // Instead we just test the RPC functions don't panic
+    let (instance, _) = &*INSTANCE;
 
     // send_rpc should not panic (even with empty message)
     // We send an empty message which won't be valid, but the channel should accept it
-    libqaul::api::send_rpc(vec![]);
+    libqaul::rpc::Rpc::send_to_libqaul(&*instance.state, vec![]);
 
     // receive_rpc should return Empty error (no response pending)
-    let result = libqaul::api::receive_rpc();
+    let result = libqaul::rpc::Rpc::receive_from_libqaul(&*instance.state);
     assert!(
         matches!(result, Err(TryRecvError::Empty)),
         "receive_rpc() should return Empty when no messages are queued"

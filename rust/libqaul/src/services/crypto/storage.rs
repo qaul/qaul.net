@@ -7,16 +7,12 @@
 
 use libp2p::PeerId;
 use sled;
-use state::InitCell;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
 
 use super::CryptoState;
 use crate::services::messaging::proto;
 use crate::storage::database::DataBase;
-
-/// mutable state of messages, scheduled for sending
-pub static CRYPTOSTORAGE: InitCell<RwLock<CryptoStorage>> = InitCell::new();
 
 /// Group DB links for user account
 #[derive(Clone)]
@@ -171,23 +167,69 @@ pub struct CryptoStorage {
     db_ref: BTreeMap<Vec<u8>, CryptoAccount>,
 }
 
+/// Instance-based crypto storage state.
+/// Replaces the global CRYPTOSTORAGE static for multi-instance use.
+pub struct CryptoStorageState {
+    /// Crypto storage inner state.
+    pub inner: RwLock<CryptoStorage>,
+}
+
+impl CryptoStorageState {
+    /// Create a new empty CryptoStorageState.
+    pub fn new() -> Self {
+        Self {
+            inner: RwLock::new(CryptoStorage {
+                db_ref: BTreeMap::new(),
+            }),
+        }
+    }
+
+    /// Get DB refs for user account (instance method).
+    /// Takes an explicit `sled::Db` instead of calling `DataBase::get_user_db()`.
+    pub fn get_db_ref(&self, account_id: PeerId, db: &sled::Db) -> CryptoAccount {
+        {
+            let crypto_storage = self.inner.read().unwrap();
+            if let Some(crypto_account_db) = crypto_storage.db_ref.get(&account_id.to_bytes()) {
+                return CryptoAccount {
+                    state: crypto_account_db.state.clone(),
+                    cache: crypto_account_db.cache.clone(),
+                };
+            }
+        }
+
+        self.create_cryptoaccountdb(account_id, db)
+    }
+
+    /// Create crypto account db entry when it does not exist (instance method).
+    fn create_cryptoaccountdb(&self, account_id: PeerId, db: &sled::Db) -> CryptoAccount {
+        let state: sled::Tree = db.open_tree("crypto_state").unwrap();
+        let cache: sled::Tree = db.open_tree("crypto_cache").unwrap();
+
+        let crypto_account = CryptoAccount { state, cache };
+
+        let mut crypto_storage = self.inner.write().unwrap();
+        crypto_storage
+            .db_ref
+            .insert(account_id.to_bytes(), crypto_account.clone());
+
+        crypto_account
+    }
+}
+
 impl CryptoStorage {
     /// Initialize the crypto storage
+    ///
+    /// No-op: the state is now owned by `QaulState` and initialized there.
     pub fn init() {
-        // initialize data base
-        // and store the tree reference in the module state.
-        let crypto_storage = CryptoStorage {
-            db_ref: BTreeMap::new(),
-        };
-        CRYPTOSTORAGE.set(RwLock::new(crypto_storage));
+        // State already exists in QaulState.services.crypto
     }
 
     /// get DB refs for user account
-    pub fn get_db_ref(account_id: PeerId) -> CryptoAccount {
+    pub fn get_db_ref(state: &crate::QaulState, account_id: PeerId) -> CryptoAccount {
         // check if user account data exists
         {
-            // get chat state
-            let crypto_storage = CRYPTOSTORAGE.get().read().unwrap();
+            // get crypto state
+            let crypto_storage = state.services.crypto.inner.read().unwrap();
 
             // check if user account ID is in map
             if let Some(crypto_account_db) = crypto_storage.db_ref.get(&account_id.to_bytes()) {
@@ -199,29 +241,25 @@ impl CryptoStorage {
         }
 
         // create crypto account db entry if it does not exist
-        let crypto_account = Self::create_groupaccountdb(account_id);
+        let crypto_account = Self::create_groupaccountdb(state, account_id);
 
         // return crypto_account_db structure
-        // CryptoAccount {
-        //     state: crypto_account.state.clone(),
-        //     cache: crypto_account.cache.clone(),
-        // }
         crypto_account.clone()
     }
 
     /// create group account db entry when it does not exist
-    fn create_groupaccountdb(account_id: PeerId) -> CryptoAccount {
+    fn create_groupaccountdb(state: &crate::QaulState, account_id: PeerId) -> CryptoAccount {
         // get user data base
-        let db = DataBase::get_user_db(account_id);
+        let db = DataBase::get_user_db(state, account_id);
 
         // open trees
-        let state: sled::Tree = db.open_tree("crypto_state").unwrap();
+        let state_tree: sled::Tree = db.open_tree("crypto_state").unwrap();
         let cache: sled::Tree = db.open_tree("crypto_cache").unwrap();
 
-        let crypto_account = CryptoAccount { state, cache };
+        let crypto_account = CryptoAccount { state: state_tree, cache };
 
-        // get group storage for writing
-        let mut crypto_storage = CRYPTOSTORAGE.get().write().unwrap();
+        // get crypto storage for writing
+        let mut crypto_storage = state.services.crypto.inner.write().unwrap();
 
         // add user to state
         crypto_storage

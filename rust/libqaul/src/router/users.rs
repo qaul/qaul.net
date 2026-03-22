@@ -9,7 +9,6 @@ use libp2p::{identity::PublicKey, PeerId};
 use prost::Message;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha512};
-use state::InitCell;
 use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
@@ -25,31 +24,73 @@ use crate::utilities::qaul_id::QaulId;
 /// Import protobuf users RPC message definition
 pub use qaul_proto::qaul_rpc_users as proto;
 
-/// mutable state of users table
-static USERS: InitCell<RwLock<Users>> = InitCell::new();
-
 /// implementation of all known users for routing references
 pub struct Users {
     /// the BTreeMap key is the 8 byte qaul ID (q8id)
     pub users: BTreeMap<Vec<u8>, User>,
 }
 
-impl Users {
-    /// Initialize the router::users::Users module
-    /// this module is automatically initialized
-    /// when the router module is initialized
-    pub fn init() {
-        {
-            // create users table and save it to state
-            let users = Users {
-                users: BTreeMap::new(),
-            };
-            USERS.set(RwLock::new(users));
-        }
+/// Instance-based users state for multi-instance / simulation use.
+/// Does not touch the database — purely in-memory.
+pub struct UsersState {
+    pub inner: RwLock<Users>,
+}
 
-        // fill user table with users from data base
-        let tree = DbUsers::get_tree();
-        let mut users = USERS.get().write().unwrap();
+impl UsersState {
+    /// Create a new empty users state.
+    pub fn new() -> Self {
+        Self {
+            inner: RwLock::new(Users {
+                users: BTreeMap::new(),
+            }),
+        }
+    }
+
+    /// Add a user to the in-memory table (no database persistence).
+    pub fn add(&self, id: PeerId, key: PublicKey, name: String) {
+        let id_bytes = id.to_bytes();
+        let q8id = id_bytes[6..14].to_vec();
+
+        let mut users = self.inner.write().unwrap();
+        users.users.insert(
+            q8id,
+            User {
+                id,
+                key,
+                name,
+                verified: false,
+                blocked: false,
+            },
+        );
+    }
+
+    /// Check for missed user IDs.
+    pub fn get_missed_ids(&self, ids: &[Vec<u8>]) -> Vec<Vec<u8>> {
+        let users = self.inner.read().unwrap();
+        ids.iter()
+            .filter(|id| !users.users.contains_key(id.as_slice()))
+            .cloned()
+            .collect()
+    }
+
+    /// Get user ID by q8id.
+    pub fn get_user_id_by_q8id(&self, q8id: &[u8]) -> Option<PeerId> {
+        let store = self.inner.read().unwrap();
+        store.users.get(q8id).map(|user| user.id)
+    }
+}
+
+impl Users {
+    /// Initialize the router::users::Users module with an explicit router state reference.
+    /// Loads users from the database into the provided RouterState users table.
+    pub fn init_with_state(state: &crate::QaulState, router: &super::RouterState) {
+        let tree = DbUsers::get_tree(state);
+        let mut users = router.users.inner.write().unwrap();
+        Self::init_from_tree(&mut users, &tree);
+    }
+
+    /// Load users from a database tree into the users table.
+    fn init_from_tree(users: &mut Users, tree: &sled::Tree) {
         // iterate over all values in db
         for res in tree.iter() {
             if let Ok((_vec, user_bytes)) = res {
@@ -77,12 +118,12 @@ impl Users {
     /// add a new user
     ///
     /// This user will be added to the users list in memory and to the data base
-    pub fn add(id: PeerId, key: PublicKey, name: String, verified: bool, blocked: bool) {
+    pub fn add(state: &crate::QaulState, router: &super::RouterState, id: PeerId, key: PublicKey, name: String, verified: bool, blocked: bool) {
         let id_bytes = id.to_bytes();
         let q8id = id_bytes[6..14].to_vec();
 
         // save user to the data base
-        DbUsers::add_user(UserData {
+        DbUsers::add_user(state, UserData {
             id: id_bytes,
             key: key.encode_protobuf(),
             name: name.clone(),
@@ -91,7 +132,7 @@ impl Users {
         });
 
         // add user to the users table
-        let mut users = USERS.get().write().unwrap();
+        let mut users = router.users.inner.write().unwrap();
         users.users.insert(
             q8id,
             User {
@@ -107,7 +148,7 @@ impl Users {
     /// add a new user to the users list, and check whether the
     /// User ID matches the public key
     /// and save it to the data base
-    pub fn add_with_check(id: PeerId, key: PublicKey, name: String) {
+    pub fn add_with_check(state: &crate::QaulState, router: &super::RouterState, id: PeerId, key: PublicKey, name: String) {
         // check if user is valid
         if id != key.to_peer_id() {
             log::error!("user id & key do not match {}", id.to_base58());
@@ -118,7 +159,7 @@ impl Users {
         {
             let id_bytes = id.to_bytes();
             let q8id = &id_bytes[6..14];
-            let users = USERS.get().read().unwrap();
+            let users = router.users.inner.read().unwrap();
 
             // check if user already exists
             if users.users.contains_key(q8id) {
@@ -126,12 +167,12 @@ impl Users {
             }
         }
         // add user
-        Self::add(id, key, name, false, false);
+        Self::add(state, router, id, key, name, false, false);
     }
 
     /// check missed users from ids
-    pub fn get_missed_ids(ids: &[Vec<u8>]) -> Vec<Vec<u8>> {
-        let users = USERS.get().read().unwrap();
+    pub fn get_missed_ids(router: &super::RouterState, ids: &[Vec<u8>]) -> Vec<Vec<u8>> {
+        let users = router.users.inner.read().unwrap();
         let mut missed = Vec::with_capacity(ids.len());
 
         missed.extend(
@@ -144,21 +185,21 @@ impl Users {
     }
 
     /// get the public key of a known user
-    pub fn get_pub_key(user_id: &PeerId) -> Option<PublicKey> {
+    pub fn get_pub_key(router: &super::RouterState, user_id: &PeerId) -> Option<PublicKey> {
         let user_id_bytes = user_id.to_bytes();
-        Self::get_pub_key_by_q8id(&user_id_bytes[6..14])
+        Self::get_pub_key_by_q8id(router, &user_id_bytes[6..14])
     }
 
     /// get the public key of a known user by it's q8id
-    pub fn get_pub_key_by_q8id(q8id: &[u8]) -> Option<PublicKey> {
-        let store = USERS.get().read().unwrap();
+    pub fn get_pub_key_by_q8id(router: &super::RouterState, q8id: &[u8]) -> Option<PublicKey> {
+        let store = router.users.inner.read().unwrap();
 
         store.users.get(q8id).map(|user| user.key.clone())
     }
 
     /// get user by q8id
-    pub fn get_user_id_by_q8id(q8id: &[u8]) -> Option<PeerId> {
-        let store = USERS.get().read().unwrap();
+    pub fn get_user_id_by_q8id(router: &super::RouterState, q8id: &[u8]) -> Option<PeerId> {
+        let store = router.users.inner.read().unwrap();
 
         store.users.get(q8id).map(|user| user.id)
     }
@@ -168,19 +209,19 @@ impl Users {
     ///
     /// This is a wrapper function for the PeerIds for the function
     /// `get_user_info_table_by_q8ids(q8ids)`
-    pub fn _get_user_info_table_by_ids(ids: &[PeerId]) -> router_net_proto::UserInfoTable {
+    pub fn _get_user_info_table_by_ids(router: &super::RouterState, ids: &[PeerId]) -> router_net_proto::UserInfoTable {
         let q8ids = ids
             .iter()
             .map(|id| QaulId::to_q8id(id.to_owned()))
             .collect::<Vec<_>>();
 
-        Self::get_user_info_table_by_q8ids(&q8ids)
+        Self::get_user_info_table_by_q8ids(router, &q8ids)
     }
 
     /// create and send the user info table for the
     /// RouterInfo message which is sent regularly to neighbours
-    pub fn get_user_info_table_by_q8ids(q8ids: &[Vec<u8>]) -> router_net_proto::UserInfoTable {
-        let store = USERS.get().read().unwrap();
+    pub fn get_user_info_table_by_q8ids(router: &super::RouterState, q8ids: &[Vec<u8>]) -> router_net_proto::UserInfoTable {
+        let store = router.users.inner.read().unwrap();
         let mut users = router_net_proto::UserInfoTable {
             info: Vec::with_capacity(q8ids.len()),
         };
@@ -199,14 +240,14 @@ impl Users {
     }
 
     /// add new users from the received bytes of a UserInfoTable
-    pub fn add_user_info_table(users: &[router_net_proto::UserInfo]) {
+    pub fn add_user_info_table(state: &crate::QaulState, router: &super::RouterState, users: &[router_net_proto::UserInfo]) {
         // loop through it and add it to the users list
         for value in users {
             let id_result = PeerId::from_bytes(&value.id);
             let key_result = PublicKey::try_decode_protobuf(&value.key);
 
             if let (Ok(id), Ok(key)) = (id_result, key_result) {
-                Self::add_with_check(id, key, value.name.clone());
+                Self::add_with_check(state, router, id, key, value.name.clone());
             }
         }
     }
@@ -224,13 +265,13 @@ impl Users {
     }
 
     /// get security number
-    fn get_security_number(my_user: &PeerId, user_id: &[u8]) -> Result<Vec<u8>, String> {
+    fn get_security_number(router: &super::RouterState, my_user: &PeerId, user_id: &[u8]) -> Result<Vec<u8>, String> {
         let q8id = &user_id[6..14];
         let my_user_bytes = my_user.to_bytes();
         let q8id_my = &my_user_bytes[6..14];
 
         // find user from users
-        let users = USERS.get().read().unwrap();
+        let users = router.users.inner.read().unwrap();
         if !users.users.contains_key(q8id) {
             return Err("user no exists".to_string());
         }
@@ -262,12 +303,14 @@ impl Users {
     }
 
     /// Process incoming RPC request messages
-    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
+    pub fn rpc(state: &crate::QaulState, router: &super::RouterState, data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
         match proto::Users::decode(&data[..]) {
             Ok(users) => {
                 match users.message {
                     Some(proto::users::Message::UserRequest(user_request)) => {
                         Self::build_user_list(
+                            state,
+                            router,
                             UserFilter::All,
                             user_request.offset,
                             user_request.limit,
@@ -276,6 +319,8 @@ impl Users {
                     }
                     Some(proto::users::Message::UserOnlineRequest(user_online_request)) => {
                         Self::build_user_list(
+                            state,
+                            router,
                             UserFilter::OnlineOnly,
                             user_online_request.offset,
                             user_online_request.limit,
@@ -286,13 +331,14 @@ impl Users {
                         log::trace!("UserUpdate protobuf RPC message");
                         // attempt to find the user with the associated id
                         Self::with_resolved_user(
+                            router,
                             &updated_user.id,
                             |user_id, _q8id, user_result| {
                                 user_result.verified = updated_user.verified;
                                 user_result.blocked = updated_user.blocked;
 
                                 // persist the updated entity
-                                DbUsers::add_user(UserData {
+                                DbUsers::add_user(state, UserData {
                                     id: user_id.to_bytes(),
                                     key: user_result.key.encode_protobuf(),
                                     name: user_result.name.clone(),
@@ -313,7 +359,7 @@ impl Users {
                                 return;
                             }
                         };
-                        match Self::get_security_number(&account_id, &secure_req.user_id) {
+                        match Self::get_security_number(router, &account_id, &secure_req.user_id) {
                             Ok(security_hash) => {
                                 let mut security_number_blocks =
                                     Vec::with_capacity(security_hash.len() / 2);
@@ -323,6 +369,7 @@ impl Users {
                                 }
 
                                 send_users_rpc_message(
+                                    state,
                                     proto::users::Message::SecurityNumberResponse(
                                         proto::SecurityNumberResponse {
                                             user_id: secure_req.user_id.clone(),
@@ -343,12 +390,12 @@ impl Users {
                         // attempt to find the user with the associated id
                         let account_id = PeerId::from_bytes(&user_id).ok();
 
-                        Self::with_resolved_user(&req.user_id, move |_, q8id, user| {
-                            let online_users = RoutingTable::get_online_users_info();
+                        Self::with_resolved_user(router, &req.user_id, |_, q8id, user| {
+                            let online_users = RoutingTable::get_online_users_info(router);
                             let entry = build_user_entry(user, &online_users, &account_id, q8id);
 
                             // send encoded rpc message containing found user entity
-                            send_users_rpc_message(proto::users::Message::GetUserByIdResponse(
+                            send_users_rpc_message(state, proto::users::Message::GetUserByIdResponse(
                                 proto::GetUserByIdResponse { user: Some(entry) },
                             ), request_id);
                         });
@@ -378,7 +425,7 @@ impl Users {
     }
 
     /// helper function that, given a set of user id bytes, will attempt to find that user entity and pass it to a closure
-    fn with_resolved_user<F>(user_id_bytes: &[u8], f: F)
+    fn with_resolved_user<F>(router: &super::RouterState, user_id_bytes: &[u8], f: F)
     where
         F: FnOnce(PeerId, &[u8], &mut User),
     {
@@ -393,7 +440,7 @@ impl Users {
         let q8id = &user_id_bytes[6..14];
 
         // acquire a lock to lookup the user entry
-        let mut store = USERS.get().write().unwrap();
+        let mut store = router.users.inner.write().unwrap();
         match store.users.get_mut(q8id) {
             // pass found user to f
             Some(user) => f(user_id, q8id, user),
@@ -405,11 +452,11 @@ impl Users {
     ///
     /// Only completes successfully if there is a default user account, otherwise it always returns
     /// an empty list.
-    fn build_user_list(filter: UserFilter, offset: u32, limit: u32, request_id: String) {
-        let users = USERS.get().read().unwrap();
+    fn build_user_list(state: &crate::QaulState, router: &super::RouterState, filter: UserFilter, offset: u32, limit: u32, request_id: String) {
+        let users = router.users.inner.read().unwrap();
 
-        let user_list = if let Some(account) = UserAccounts::get_default_user() {
-            let online_users = RoutingTable::get_online_users_info();
+        let user_list = if let Some(account) = UserAccounts::get_default_user(state) {
+            let online_users = RoutingTable::get_online_users_info(router);
             build_user_list_from(
                 &users.users,
                 &online_users,
@@ -425,7 +472,7 @@ impl Users {
             }
         };
 
-        send_users_rpc_message(proto::users::Message::UserList(user_list), request_id);
+        send_users_rpc_message(state, proto::users::Message::UserList(user_list), request_id);
     }
 }
 
@@ -457,7 +504,7 @@ pub struct UserData {
     pub blocked: bool,
 }
 
-fn send_users_rpc_message(message: proto::users::Message, request_id: String) {
+fn send_users_rpc_message(state: &crate::QaulState, message: proto::users::Message, request_id: String) {
     let proto_message = proto::Users {
         message: Some(message),
     };
@@ -468,6 +515,7 @@ fn send_users_rpc_message(message: proto::users::Message, request_id: String) {
         .expect("Vec<u8> provides capacity as needed");
 
     Rpc::send_message(
+        state,
         buf,
         crate::rpc::proto::Modules::Users.into(),
         request_id,

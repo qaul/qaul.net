@@ -12,15 +12,8 @@
 //! advertised and can be requested from the sending node.
 
 use libp2p::PeerId;
-use state::InitCell;
 use std::collections::VecDeque;
 use std::sync::RwLock;
-
-/// mutable state of feed requester
-pub static FEEDREQUESTER: InitCell<RwLock<FeedRequester>> = InitCell::new();
-
-/// mutable state of the feed responser
-pub static FEEDRESPONSER: InitCell<RwLock<FeedResponser>> = InitCell::new();
 
 /// Feed Request Structure
 pub struct FeedRequest {
@@ -33,25 +26,35 @@ pub struct FeedRequester {
     pub to_send: VecDeque<FeedRequest>,
 }
 
-impl FeedRequester {
-    /// Initialize the flooder and create the ring buffer.
-    pub fn init() {
-        let feed_requester = FeedRequester {
-            to_send: VecDeque::new(),
-        };
-        FEEDREQUESTER.set(RwLock::new(feed_requester));
+/// Instance-based feed requester state.
+pub struct FeedRequesterState {
+    pub inner: RwLock<FeedRequester>,
+}
+
+impl FeedRequesterState {
+    pub fn new() -> Self {
+        Self {
+            inner: RwLock::new(FeedRequester {
+                to_send: VecDeque::new(),
+            }),
+        }
     }
 
-    /// Add a message to the ring buffer for sending.
-    pub fn add(neighbour_id: &PeerId, feed_ids: &[Vec<u8>]) {
+    pub fn add(&self, neighbour_id: &PeerId, feed_ids: &[Vec<u8>]) {
         let msg = FeedRequest {
             neighbour_id: neighbour_id.clone(),
             feed_ids: feed_ids.to_vec(),
         };
-
-        // add it to sending queue
-        let mut feed_requester = FEEDREQUESTER.get().write().unwrap();
+        let mut feed_requester = self.inner.write().unwrap();
         feed_requester.to_send.push_back(msg);
+    }
+}
+
+impl FeedRequester {
+    /// Add a message to the ring buffer for sending.
+    /// Delegates to the provided RouterState instance.
+    pub fn add(router: &super::RouterState, neighbour_id: &PeerId, feed_ids: &[Vec<u8>]) {
+        router.feed_requester.add(neighbour_id, feed_ids);
     }
 }
 
@@ -66,24 +69,34 @@ pub struct FeedResponser {
     pub to_send: VecDeque<FeedResponse>,
 }
 
-impl FeedResponser {
-    /// Initialize the flooder and create the ring buffer.
-    pub fn init() {
-        let feed_responser = FeedResponser {
-            to_send: VecDeque::new(),
-        };
-        FEEDRESPONSER.set(RwLock::new(feed_responser));
+/// Instance-based feed responser state.
+pub struct FeedResponserState {
+    pub inner: RwLock<FeedResponser>,
+}
+
+impl FeedResponserState {
+    pub fn new() -> Self {
+        Self {
+            inner: RwLock::new(FeedResponser {
+                to_send: VecDeque::new(),
+            }),
+        }
     }
 
-    /// Add a message to the ring buffer for sending.
-    pub fn add(neighbour_id: &PeerId, feeds: &[(Vec<u8>, Vec<u8>, String, u64)]) {
+    pub fn add(&self, neighbour_id: &PeerId, feeds: &[(Vec<u8>, Vec<u8>, String, u64)]) {
         let msg = FeedResponse {
             neighbour_id: neighbour_id.clone(),
             feeds: feeds.to_vec(),
         };
-
-        // add it to sending queue
-        let mut feed_responser = FEEDRESPONSER.get().write().unwrap();
+        let mut feed_responser = self.inner.write().unwrap();
         feed_responser.to_send.push_back(msg);
+    }
+}
+
+impl FeedResponser {
+    /// Add a message to the ring buffer for sending.
+    /// Delegates to the provided RouterState instance.
+    pub fn add(router: &super::RouterState, neighbour_id: &PeerId, feeds: &[(Vec<u8>, Vec<u8>, String, u64)]) {
+        router.feed_responser.add(neighbour_id, feeds);
     }
 }

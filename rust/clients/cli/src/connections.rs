@@ -20,11 +20,11 @@ impl Connections {
     /// CLI command interpretation
     ///
     /// The CLI commands of users are processed here
-    pub fn cli(command: &str) {
+    pub fn cli(state: &super::CliState, command: &str) {
         match command {
             // request list of all internet nodes
             cmd if cmd.starts_with("nodes list") => {
-                Self::internet_nodes_list();
+                Self::internet_nodes_list(state);
             }
             // add an internet node
             cmd if cmd.starts_with("nodes add ") => {
@@ -35,7 +35,7 @@ impl Connections {
                     let mut address_str = address.to_string();
                     address_str.push(' ');
                     if let Some(name) = args_str.strip_prefix(address_str.as_str()) {
-                        Self::internet_node_add(String::from(address), String::from(name));
+                        Self::internet_node_add(state, String::from(address), String::from(name));
                     } else {
                         log::error!("usage: connections nodes add address name");
                     }
@@ -52,7 +52,7 @@ impl Connections {
                     let mut address_str = address.to_string();
                     address_str.push(' ');
                     if let Some(name) = args_str.strip_prefix(address_str.as_str()) {
-                        Self::internet_node_rename(String::from(address), String::from(name));
+                        Self::internet_node_rename(state, String::from(address), String::from(name));
                     } else {
                         log::error!("usage: connections nodes rename address name");
                     }
@@ -64,19 +64,19 @@ impl Connections {
             cmd if cmd.starts_with("nodes remove ") => {
                 let address = cmd.strip_prefix("nodes remove ").unwrap();
 
-                Self::internet_node_remove(String::from(address));
+                Self::internet_node_remove(state, String::from(address));
             }
             // activate an internet node
             cmd if cmd.starts_with("nodes activate ") => {
                 let address = cmd.strip_prefix("nodes activate ").unwrap();
 
-                Self::internet_node_activate(String::from(address));
+                Self::internet_node_activate(state, String::from(address));
             }
             // deactivate an internet node
             cmd if cmd.starts_with("nodes deactivate ") => {
                 let address = cmd.strip_prefix("nodes deactivate ").unwrap();
 
-                Self::internet_node_deactivate(String::from(address));
+                Self::internet_node_deactivate(state, String::from(address));
             }
             // unknown command
             _ => log::error!("unknown connections command"),
@@ -84,7 +84,7 @@ impl Connections {
     }
 
     /// send an rpc request for internet peering nodes list
-    fn internet_nodes_list() {
+    fn internet_nodes_list(state: &super::CliState) {
         // create request message
         let proto_message = proto::Connections {
             message: Some(proto::connections::Message::InternetNodesRequest(
@@ -93,11 +93,11 @@ impl Connections {
         };
 
         // send message
-        Self::send_message(proto_message);
+        Self::send_message(state, proto_message);
     }
 
     /// send an RPC message to add a new internet peer node connection
-    fn internet_node_add(address: String, name: String) {
+    fn internet_node_add(state: &super::CliState, address: String, name: String) {
         // create message
         let proto_message = proto::Connections {
             message: Some(proto::connections::Message::InternetNodesAdd(
@@ -110,11 +110,11 @@ impl Connections {
         };
 
         // send message
-        Self::send_message(proto_message);
+        Self::send_message(state, proto_message);
     }
 
     /// send an RPC message to add a new internet peer node connection
-    fn internet_node_rename(address: String, name: String) {
+    fn internet_node_rename(state: &super::CliState, address: String, name: String) {
         // create message
         let proto_message = proto::Connections {
             message: Some(proto::connections::Message::InternetNodesRename(
@@ -127,13 +127,13 @@ impl Connections {
         };
 
         // send message
-        Self::send_message(proto_message);
+        Self::send_message(state, proto_message);
     }
 
     /// Send an rpc message to remove a specific internet peer node connection
     ///
     /// The nodes are specified by their libp2p multiaddress
-    fn internet_node_remove(address: String) {
+    fn internet_node_remove(state: &super::CliState, address: String) {
         // create message
         let proto_message = proto::Connections {
             message: Some(proto::connections::Message::InternetNodesRemove(
@@ -146,13 +146,13 @@ impl Connections {
         };
 
         // send message
-        Self::send_message(proto_message);
+        Self::send_message(state, proto_message);
     }
 
     /// Send an rpc message to activate a specific internet peer node connection
     ///
     /// The nodes are specified by their libp2p multiaddress
-    fn internet_node_activate(address: String) {
+    fn internet_node_activate(state: &super::CliState, address: String) {
         // create message
         let proto_message = proto::Connections {
             message: Some(proto::connections::Message::InternetNodesState(
@@ -164,13 +164,13 @@ impl Connections {
             )),
         };
         // send message
-        Self::send_message(proto_message);
+        Self::send_message(state, proto_message);
     }
 
     /// Send an rpc message to deactivate a specific internet peer node connection
     ///
     /// The nodes are specified by their libp2p multiaddress
-    fn internet_node_deactivate(address: String) {
+    fn internet_node_deactivate(state: &super::CliState, address: String) {
         // create message
         let proto_message = proto::Connections {
             message: Some(proto::connections::Message::InternetNodesState(
@@ -182,11 +182,11 @@ impl Connections {
             )),
         };
         // send message
-        Self::send_message(proto_message);
+        Self::send_message(state, proto_message);
     }
 
     /// Encode and send a protobuf connections message to RPC
-    fn send_message(message: proto::Connections) {
+    fn send_message(state: &super::CliState, message: proto::Connections) {
         // encode message
         let mut buf = Vec::with_capacity(message.encoded_len());
         message
@@ -195,6 +195,7 @@ impl Connections {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Connections.into(),
             "".to_string(),

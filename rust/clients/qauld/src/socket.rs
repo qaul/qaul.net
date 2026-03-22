@@ -25,7 +25,10 @@ pub use qaul_proto::qaul_rpc as proto;
 /// Runs infinitely until a shutdown signal is receibed.
 /// It accepts connections on `qauld.sock` in cwd,
 /// forwards requests to libqaul, and sends responses back to clients.
-pub async fn start_server(socket_dir: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn start_server(
+    socket_dir: PathBuf,
+    instance: Arc<libqaul::Libqaul>,
+) -> Result<(), Box<dyn std::error::Error>> {
     let socket_path = socket_dir.join("qauld.sock");
     if socket_path.exists() {
         fs::remove_file(&socket_path)?;
@@ -39,11 +42,12 @@ pub async fn start_server(socket_dir: PathBuf) -> Result<(), Box<dyn std::error:
 
     //  Central RPC poller. Polls libqaul for a response
     let register_clone = client_request_register.clone();
+    let instance_clone = instance.clone();
     tokio::spawn(async move {
         let mut futures_ticker = Ticker::new(Duration::from_millis(10));
         loop {
             futures_ticker.next().await;
-            match libqaul::api::receive_rpc() {
+            match libqaul::rpc::Rpc::receive_from_libqaul(&*instance_clone.state) {
                 Ok(data) => match proto::QaulRpc::decode(&data[..]) {
                     Ok(msg) => {
                         let client_id = msg.request_id;
@@ -74,6 +78,7 @@ pub async fn start_server(socket_dir: PathBuf) -> Result<(), Box<dyn std::error:
             res = listener.accept() => {
                 let (stream, addr) = res?;
                 let register_clone = client_request_register.clone();
+                let instance_clone = instance.clone();
                 tokio::spawn(async move {
                     log::info!("client connected: {addr:#?}");
 
@@ -104,7 +109,7 @@ pub async fn start_server(socket_dir: PathBuf) -> Result<(), Box<dyn std::error:
                                                 log::error!("{:?}", error);
                                             }
                                         }
-                                        libqaul::api::send_rpc(data);
+                                        libqaul::rpc::Rpc::send_to_libqaul(&*instance_clone.state, data);
                                     }
                                     None => { break; }
                                 }

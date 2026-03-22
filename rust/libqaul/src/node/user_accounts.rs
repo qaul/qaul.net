@@ -22,14 +22,10 @@ use libp2p::{
     PeerId,
 };
 use prost::Message;
-use state::InitCell;
 use std::sync::RwLock;
 
 /// Import protobuf message definition
 pub use qaul_proto::qaul_rpc_user_accounts as proto;
-
-/// mutable state of users table
-static USERACCOUNTS: InitCell<RwLock<UserAccounts>> = InitCell::new();
 
 #[derive(Clone)]
 pub struct UserAccount {
@@ -42,6 +38,29 @@ pub struct UserAccount {
 
 pub struct UserAccounts {
     pub users: Vec<UserAccount>,
+}
+
+/// Instance-based user accounts state.
+/// Replaces the global USERACCOUNTS static for multi-instance use.
+pub struct UserAccountsState {
+    /// User accounts inner state.
+    pub inner: RwLock<UserAccounts>,
+}
+
+impl UserAccountsState {
+    /// Create a new empty UserAccountsState.
+    pub fn new() -> Self {
+        Self {
+            inner: RwLock::new(UserAccounts { users: Vec::new() }),
+        }
+    }
+
+    /// Create from an existing UserAccounts.
+    pub fn from_accounts(accounts: UserAccounts) -> Self {
+        Self {
+            inner: RwLock::new(accounts),
+        }
+    }
 }
 
 impl UserAccounts {
@@ -82,19 +101,63 @@ impl UserAccounts {
         accounts
     }
 
-    /// Initialize from global configuration (global state - for backward compatibility)
-    ///
-    /// Note: This uses global state. For new code, prefer using `create_from_config()`.
-    pub fn init() {
-        let config = Configuration::get();
-        let accounts = Self::create_from_config(&config);
+    /// Get user account by ID (inner logic).
+    pub fn get_by_id_inner(&self, account_id: PeerId) -> Option<UserAccount> {
+        self.users.iter().find(|u| u.id == account_id).cloned()
+    }
 
-        // save users to state
-        USERACCOUNTS.set(RwLock::new(accounts));
+    /// Get user account by name (inner logic).
+    pub fn get_by_name_inner(&self, name: &str) -> Option<UserAccount> {
+        self.users.iter().find(|u| u.name == name).cloned()
+    }
+
+    /// Get default user account (inner logic).
+    pub fn get_default_user_inner(&self) -> Option<UserAccount> {
+        self.users.first().cloned()
+    }
+
+    /// Get all user accounts (inner logic).
+    pub fn get_all_inner(&self) -> Vec<UserAccount> {
+        self.users.clone()
+    }
+
+    /// Return the number of registered user accounts (inner logic).
+    pub fn len_inner(&self) -> usize {
+        self.users.len()
+    }
+
+    /// Check if a user has password set (inner logic).
+    pub fn has_password_inner(&self, user_id: PeerId) -> bool {
+        self.users
+            .iter()
+            .find(|u| u.id == user_id)
+            .map_or(false, |user| user.password_hash.is_some())
+    }
+
+    /// Verify password for user (inner logic).
+    pub fn verify_password_inner(&self, user_id: PeerId, password: String) -> Result<bool, String> {
+        let user = self
+            .users
+            .iter()
+            .find(|u| u.id == user_id)
+            .ok_or("User not found")?;
+
+        match &user.password_hash {
+            Some(hash) => {
+                let argon2 = Argon2::default();
+                let parsed_hash = PasswordHash::new(hash)
+                    .map_err(|e| format!("Invalid stored hash format {}", e))?;
+                match argon2.verify_password(password.as_bytes(), &parsed_hash) {
+                    Ok(()) => Ok(true),
+                    Err(_) => Ok(false),
+                }
+            }
+            None => Ok(true),
+        }
     }
 
     /// create a new user account with username and an optional password
-    pub fn create(name: String, password: Option<String>) -> UserAccount {
+    pub fn create(state: &crate::QaulState, name: String, password: Option<String>) -> UserAccount {
         // create user
         let keys_ed25519 = Keypair::generate_ed25519();
         let keys_config = base64::engine::general_purpose::STANDARD
@@ -146,12 +209,12 @@ impl UserAccounts {
         };
 
         // save it to state
-        let mut users = USERACCOUNTS.get().write().unwrap();
+        let mut users = state.user_accounts.inner.write().unwrap();
         users.users.push(user.clone());
 
         // save it to config
         {
-            let mut config = Configuration::get_mut();
+            let mut config = Configuration::get_mut(state);
             config.user_accounts.push(configuration::UserAccount {
                 name: name.clone(),
                 id: id.to_string(),
@@ -162,13 +225,15 @@ impl UserAccounts {
                 storage: configuration::StorageOptions::default(),
             });
         }
-        Configuration::save();
+        Configuration::save(state);
 
         // add it to users list
-        crate::router::users::Users::add(id, keys_ed25519.public(), name.clone(), false, false);
+        let rs = state.get_router();
+        crate::router::users::Users::add(state, &rs, id, keys_ed25519.public(), name.clone(), false, false);
 
         // add user to routing table / connections table
-        crate::router::connections::ConnectionTable::add_local_user(id);
+        let node_id = crate::node::Node::get_id(state);
+        rs.connections.add_local_user(id, node_id);
 
         // display id
         log::trace!("created user account '{}' {:?}", name, id);
@@ -177,12 +242,12 @@ impl UserAccounts {
     }
 
     /// set or update the password for existing user
-    pub fn set_password(user_id: PeerId, password: Option<String>) -> Result<(), String> {
+    pub fn set_password(state: &crate::QaulState, user_id: PeerId, password: Option<String>) -> Result<(), String> {
         let (password_hash, password_salt) = Self::hash_password(password);
 
         // update the configuration
         {
-            let mut config = Configuration::get_mut();
+            let mut config = Configuration::get_mut(state);
             if let Some(user_config) = config
                 .user_accounts
                 .iter_mut()
@@ -192,10 +257,10 @@ impl UserAccounts {
                 user_config.password_salt = password_salt.clone();
             }
         }
-        Configuration::save();
+        Configuration::save(state);
 
         {
-            let mut users = USERACCOUNTS.get().write().unwrap();
+            let mut users = state.user_accounts.inner.write().unwrap();
             if let Some(user) = users.users.iter_mut().find(|u| u.id == user_id) {
                 user.password_hash = password_hash;
                 user.password_salt = password_salt;
@@ -206,89 +271,42 @@ impl UserAccounts {
     }
 
     /// verify password for user
-    pub fn verify_password(user_id: PeerId, password: String) -> Result<bool, String> {
-        let users = USERACCOUNTS.get().read().unwrap();
-        let user = users
-            .users
-            .iter()
-            .find(|u| u.id == user_id)
-            .ok_or("User not found")?;
-
-        match &user.password_hash {
-            Some(hash) => {
-                let argon2 = Argon2::default();
-                let parsed_hash = PasswordHash::new(hash)
-                    .map_err(|e| format!("Invalid stored hash format {}", e))?;
-                match argon2.verify_password(password.as_bytes(), &parsed_hash) {
-                    Ok(()) => Ok(true),
-                    Err(_) => Ok(false),
-                }
-            }
-            // no password is set, so always allow
-            None => Ok(true),
-        }
+    pub fn verify_password(state: &crate::QaulState, user_id: PeerId, password: String) -> Result<bool, String> {
+        let accounts = state.user_accounts.inner.read().unwrap();
+        accounts.verify_password_inner(user_id, password)
     }
 
     /// check if a user has password set
-    pub fn has_password(user_id: PeerId) -> bool {
-        let users = USERACCOUNTS.get().read().unwrap();
-        users
-            .users
-            .iter()
-            .find(|u| u.id == user_id)
-            .map_or(false, |user| user.password_hash.is_some())
+    pub fn has_password(state: &crate::QaulState, user_id: PeerId) -> bool {
+        let accounts = state.user_accounts.inner.read().unwrap();
+        accounts.has_password_inner(user_id)
     }
 
     /// get user account by id
-    pub fn get_by_id(account_id: PeerId) -> Option<UserAccount> {
-        // get state
-        let accounts = USERACCOUNTS.get().read().unwrap();
-
-        // search for ID in accounts
-        let mut account_result = None;
-        for item in &accounts.users {
-            if item.id == account_id {
-                account_result = Some(item.clone());
-                break;
-            }
-        }
-
-        account_result
+    pub fn get_by_id(state: &crate::QaulState, account_id: PeerId) -> Option<UserAccount> {
+        let accounts = state.user_accounts.inner.read().unwrap();
+        accounts.get_by_id_inner(account_id)
     }
 
     /// Return the number of registered user accounts on this node.
     #[allow(dead_code)]
-    pub fn len() -> usize {
-        let users = USERACCOUNTS.get().read().unwrap();
-        users.users.len()
+    pub fn len(state: &crate::QaulState) -> usize {
+        let accounts = state.user_accounts.inner.read().unwrap();
+        accounts.len_inner()
     }
 
     /// Return the default user.
     /// The first registered user account is returned.
-    pub fn get_default_user() -> Option<UserAccount> {
-        // get state
-        let users = USERACCOUNTS.get().read().unwrap();
-
-        // check if a user exists
-        if users.users.len() == 0 {
-            return None;
-        }
-
-        // get user account
-        let user = users.users.first().unwrap();
-        // Some(UserAccount {
-        //     id: user.id.clone(),
-        //     keys: user.keys.clone(),
-        //     name: user.name.clone(),
-        // });
-        Some(user.clone())
+    pub fn get_default_user(state: &crate::QaulState) -> Option<UserAccount> {
+        let accounts = state.user_accounts.inner.read().unwrap();
+        accounts.get_default_user_inner()
     }
 
     /// to fill the routing table get all users
-    pub fn get_user_info() -> Vec<router::users::User> {
+    pub fn get_user_info(state: &crate::QaulState) -> Vec<router::users::User> {
         let mut user_info = Vec::new();
 
-        let users = USERACCOUNTS.get().read().unwrap();
+        let users = state.user_accounts.inner.read().unwrap();
         for user in &users.users {
             user_info.push(router::users::User {
                 id: user.id,
@@ -302,18 +320,18 @@ impl UserAccounts {
         user_info
     }
 
-    pub fn get_all_users() -> Vec<UserAccount> {
-        let accounts = USERACCOUNTS.get().read().unwrap();
-        accounts.users.clone()
+    pub fn get_all_users(state: &crate::QaulState) -> Vec<UserAccount> {
+        let accounts = state.user_accounts.inner.read().unwrap();
+        accounts.get_all_inner()
     }
 
     /// checks if user account exists
     ///
     /// returns true if a user account with the given ID exists
     #[allow(dead_code)]
-    pub fn is_account(user_id: PeerId) -> bool {
+    pub fn is_account(state: &crate::QaulState, user_id: PeerId) -> bool {
         // get user accounts state
-        let users = USERACCOUNTS.get().read().unwrap();
+        let users = state.user_accounts.inner.read().unwrap();
 
         // loop through user accounts and compare
         for user in &users.users {
@@ -326,14 +344,14 @@ impl UserAccounts {
     }
 
     /// Process incoming RPC request messages for user accounts
-    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
+    pub fn rpc(state: &crate::QaulState, data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
         match proto::UserAccounts::decode(&data[..]) {
             Ok(user_accounts) => {
                 match user_accounts.message {
                     Some(proto::user_accounts::Message::GetDefaultUserAccount(_)) => {
                         // create message
                         let proto_message;
-                        match Self::get_default_user() {
+                        match Self::get_default_user(state) {
                             Some(user_account) => {
                                 // get RPC key values
                                 let (key_type, key_base58) =
@@ -387,6 +405,7 @@ impl UserAccounts {
 
                         // send message
                         Rpc::send_message(
+                            state,
                             buf,
                             crate::rpc::proto::Modules::Useraccounts.into(),
                             request_id,
@@ -396,7 +415,7 @@ impl UserAccounts {
                     Some(proto::user_accounts::Message::CreateUserAccount(create_user_account)) => {
                         // create user account
                         let user_account =
-                            Self::create(create_user_account.name, create_user_account.password);
+                            Self::create(state, create_user_account.name, create_user_account.password);
 
                         // get RPC key values
                         let (key_type, key_base58) =
@@ -425,6 +444,7 @@ impl UserAccounts {
 
                         // send message
                         Rpc::send_message(
+                            state,
                             buf,
                             crate::rpc::proto::Modules::Useraccounts.into(),
                             request_id,
@@ -438,6 +458,7 @@ impl UserAccounts {
                             Ok(id) => id,
                             Err(_) => {
                                 Self::send_password_response(
+                                    state,
                                     false,
                                     "Invalid user Id".to_string(),
                                     request_id,
@@ -447,14 +468,15 @@ impl UserAccounts {
                         };
 
                         // attempt to set password and send response
-                        match Self::set_password(user_peer_id, set_password_req.password) {
+                        match Self::set_password(state, user_peer_id, set_password_req.password) {
                             Ok(()) => Self::send_password_response(
+                                state,
                                 true,
                                 "Password updated successfully".to_string(),
                                 request_id,
                             ),
                             Err(error) => {
-                                Self::send_password_response(false, error, request_id);
+                                Self::send_password_response(state, false, error, request_id);
                             }
                         }
                     }
@@ -468,7 +490,7 @@ impl UserAccounts {
     }
 
     /// send password operation response ot client
-    fn send_password_response(success: bool, message: String, request_id: String) {
+    fn send_password_response(state: &crate::QaulState, success: bool, message: String, request_id: String) {
         let proto_message = proto::UserAccounts {
             message: Some(proto::user_accounts::Message::SetPasswordResponse(
                 proto::SetPasswordResponse {
@@ -481,6 +503,7 @@ impl UserAccounts {
         let mut buf = Vec::with_capacity(proto_message.encoded_len());
         proto_message.encode(&mut buf).unwrap();
         Rpc::send_message(
+            state,
             buf,
             crate::rpc::proto::Modules::Useraccounts.into(),
             request_id,

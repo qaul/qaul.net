@@ -27,6 +27,7 @@ pub struct CryptoSessionManager {}
 impl CryptoSessionManager {
     /// decode and process crypto session protobuf messages
     pub fn process_cryptoservice_container(
+        state: &crate::QaulState,
         sender_id: &PeerId,
         user_account: UserAccount,
         data: Vec<u8>,
@@ -38,7 +39,7 @@ impl CryptoSessionManager {
                 Some(proto_net::cryptoservice_container::Message::SecondHandshake(
                     second_handshake,
                 )) => {
-                    Self::process_second_handshake(&user_account, sender_id, second_handshake);
+                    Self::process_second_handshake(state, &user_account, sender_id, second_handshake);
                 }
                 None => {
                     log::error!(
@@ -60,6 +61,7 @@ impl CryptoSessionManager {
 
     /// process second hand shake
     fn process_second_handshake(
+        state: &crate::QaulState,
         user_account: &UserAccount,
         sender_id: &PeerId,
         second_handshake: proto_net::SecondHandshake,
@@ -68,6 +70,7 @@ impl CryptoSessionManager {
 
         // confirm reception of the message
         messaging::Messaging::on_confirmed_message(
+            state,
             &second_handshake.signature,
             sender_id.to_owned(),
             user_account.to_owned(),

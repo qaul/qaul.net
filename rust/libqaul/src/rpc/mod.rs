@@ -11,7 +11,6 @@ pub mod debug;
 pub mod sys;
 
 use crossbeam_channel::{unbounded, Receiver, Sender, TryRecvError};
-use state::InitCell;
 use std::sync::RwLock;
 
 use prost::Message;
@@ -42,15 +41,38 @@ pub use qaul_proto::qaul_rpc as proto;
 pub struct MessageCounter {
     count: i32,
 }
-/// state of message counter
-static EXTERN_SEND_COUNT: InitCell<RwLock<MessageCounter>> = InitCell::new();
 
-/// receiving end of the mpsc channel (global state - deprecated)
-static EXTERN_RECEIVE: InitCell<Receiver<Vec<u8>>> = InitCell::new();
-/// sending end of the mpsc channel (global state - deprecated)
-static EXTERN_SEND: InitCell<Sender<Vec<u8>>> = InitCell::new();
-/// sending end of th mpsc channel for libqaul to send (global state - deprecated)
-static LIBQAUL_SEND: InitCell<Sender<Vec<u8>>> = InitCell::new();
+/// Instance-based RPC state.
+/// Replaces the global EXTERN_SEND_COUNT, EXTERN_RECEIVE, EXTERN_SEND,
+/// LIBQAUL_SEND statics for multi-instance use.
+pub struct RpcState {
+    /// Message counter (for debugging).
+    pub send_count: RwLock<MessageCounter>,
+    /// Sending end for external → libqaul direction.
+    pub extern_send: Sender<Vec<u8>>,
+    /// Receiving end for external → libqaul direction.
+    pub extern_receive: Receiver<Vec<u8>>,
+    /// Sending end for libqaul → external direction.
+    pub libqaul_send: Sender<Vec<u8>>,
+    /// Receiving end for libqaul → external direction.
+    pub libqaul_receive: Receiver<Vec<u8>>,
+}
+
+impl RpcState {
+    /// Create a new RpcState with fresh channels.
+    pub fn new() -> Self {
+        let (libqaul_send, extern_receive) = unbounded();
+        let (extern_send, libqaul_receive) = unbounded();
+        Self {
+            send_count: RwLock::new(MessageCounter { count: 0 }),
+            extern_send,
+            extern_receive,
+            libqaul_send,
+            libqaul_receive,
+        }
+    }
+
+}
 
 /// RPC Module - wrapper for instance-based RPC channel management
 ///
@@ -85,68 +107,51 @@ impl Default for RpcModule {
     }
 }
 
+/// Build a protobuf-encoded RPC message container (shared inner logic).
+fn build_rpc_message(data: Vec<u8>, module: i32, request_id: String, user_id: Vec<u8>) -> Vec<u8> {
+    let proto_message = proto::QaulRpc {
+        module,
+        request_id,
+        user_id,
+        data,
+    };
+
+    let mut buf = Vec::with_capacity(proto_message.encoded_len());
+    proto_message
+        .encode(&mut buf)
+        .expect("Vec<u8> provides capacity as needed");
+    buf
+}
+
 /// Handling of RPC messages of libqaul (global state - for backward compatibility)
 pub struct Rpc {}
 
 impl Rpc {
-    /// Initialize RPC module
-    /// Create the sending and receiving channels and put them to state.
-    /// Return the receiving channel for libqaul.
-    pub fn init() -> Receiver<Vec<u8>> {
-        // create channels
-        let (libqaul_send, extern_receive) = unbounded();
-        let (extern_send, libqaul_receive) = unbounded();
-
-        // save to state
-        EXTERN_RECEIVE.set(extern_receive);
-        EXTERN_SEND.set(extern_send);
-        LIBQAUL_SEND.set(libqaul_send.clone());
-
-        // create bug fixing counter
-        let message_counter = MessageCounter { count: 0 };
-        EXTERN_SEND_COUNT.set(RwLock::new(message_counter));
-
-        // return libqaul receiving channel
-        libqaul_receive
-    }
-
     /// send rpc message from the outside to the inside
     /// of the worker thread of libqaul.
-    pub fn send_to_libqaul(binary_message: Vec<u8>) {
-        let sender = EXTERN_SEND.get().clone();
-        match sender.send(binary_message) {
-            Ok(()) => {}
-            Err(err) => {
-                // log error message
-                log::error!("{:?}", err);
-            }
+    pub fn send_to_libqaul(state: &crate::QaulState, binary_message: Vec<u8>) {
+        if let Err(err) = state.rpc.extern_send.send(binary_message) {
+            log::error!("{:?}", err);
         }
     }
 
     /// check the receiving rpc channel if there
     /// are new messages from inside libqaul for
     /// the outside.
-    pub fn receive_from_libqaul() -> Result<Vec<u8>, TryRecvError> {
-        let receiver = EXTERN_RECEIVE.get().clone();
-        receiver.try_recv()
+    pub fn receive_from_libqaul(state: &crate::QaulState) -> Result<Vec<u8>, TryRecvError> {
+        state.rpc.extern_receive.try_recv()
     }
 
     /// get the number of messages in the receiving cue
-    pub fn receive_from_libqaul_queue_length() -> usize {
-        let receiver = EXTERN_RECEIVE.get().clone();
-        receiver.len()
+    pub fn receive_from_libqaul_queue_length(state: &crate::QaulState) -> usize {
+        state.rpc.extern_receive.len()
     }
 
     /// send an rpc message from inside libqaul thread
     /// to the extern.
-    pub fn send_to_extern(message: Vec<u8>) {
-        let sender = LIBQAUL_SEND.get().clone();
-        match sender.send(message) {
-            Ok(()) => {}
-            Err(err) => {
-                // log error message
-                log::error!("{:?}", err);
-            }
+    pub fn send_to_extern(state: &crate::QaulState, message: Vec<u8>) {
+        if let Err(err) = state.rpc.libqaul_send.send(message) {
+            log::error!("{:?}", err);
         }
     }
 
@@ -156,34 +161,38 @@ impl Rpc {
     /// protobuf format to rust structures and send it to
     /// the module responsible.
     pub async fn process_received_message(
+        state: &crate::QaulState,
         data: Vec<u8>,
         lan: Option<&mut Lan>,
         internet: Option<&mut Internet>,
     ) {
-        Self::increase_message_counter();
+        Self::increase_message_counter(state);
 
         match QaulRpc::decode(&data[..]) {
             Ok(message) => {
                 match Modules::try_from(message.module) {
                     Ok(Modules::Node) => {
-                        Self::increase_message_counter();
-                        Node::rpc(message.data, lan, internet, message.request_id);
+                        Self::increase_message_counter(state);
+                        Node::rpc(state, message.data, lan, internet, message.request_id);
                     }
                     Ok(Modules::Rpc) => {
                         log::trace!("Message Modules::Rpc received");
                         // TODO: authorisation
                     }
                     Ok(Modules::Useraccounts) => {
-                        UserAccounts::rpc(message.data, message.user_id, message.request_id);
+                        UserAccounts::rpc(state, message.data, message.user_id, message.request_id);
                     }
                     Ok(Modules::Users) => {
-                        Users::rpc(message.data, message.user_id, message.request_id);
+                        let rs = state.get_router();
+                        Users::rpc(state, &rs, message.data, message.user_id, message.request_id);
                     }
                     Ok(Modules::Router) => {
-                        Router::rpc(message.data, message.request_id);
+                        let rs = state.get_router();
+                        Router::rpc(state, &rs, message.data, message.request_id);
                     }
                     Ok(Modules::Feed) => {
                         Feed::rpc(
+                            state,
                             message.data,
                             message.user_id,
                             lan,
@@ -192,16 +201,17 @@ impl Rpc {
                         );
                     }
                     Ok(Modules::Connections) => {
-                        Connections::rpc(message.data, internet, message.request_id);
+                        Connections::rpc(state, message.data, internet, message.request_id);
                     }
                     Ok(Modules::Ble) => {
-                        Ble::rpc(message.data, message.request_id);
+                        Ble::rpc(state, message.data, message.request_id);
                     }
                     Ok(Modules::Debug) => {
-                        Debug::rpc(message.data, message.user_id, message.request_id);
+                        Debug::rpc(state, message.data, message.user_id, message.request_id);
                     }
                     Ok(Modules::Chat) => {
                         Chat::rpc(
+                            state,
                             message.data,
                             message.user_id,
                             lan,
@@ -211,17 +221,17 @@ impl Rpc {
                     }
                     Ok(Modules::Chatfile) => {
                         log::trace!("Message Modules::Chatfile received");
-                        ChatFile::rpc(message.data, message.user_id, message.request_id).await;
+                        ChatFile::rpc(state, message.data, message.user_id, message.request_id).await;
                     }
                     Ok(Modules::Group) => {
                         log::trace!("Message Modules::Group received");
-                        Group::rpc(message.data, message.user_id, message.request_id);
+                        Group::rpc(state, message.data, message.user_id, message.request_id);
                     }
                     Ok(Modules::Rtc) => {
                         #[cfg(feature = "rtc")]
                         {
                             log::trace!("Message Modules::Rtc received");
-                            Rtc::rpc(message.data, message.user_id, message.request_id);
+                            Rtc::rpc(state, message.data, message.user_id, message.request_id);
                         }
                         #[cfg(not(feature = "rtc"))]
                         {
@@ -230,11 +240,12 @@ impl Rpc {
                     }
                     Ok(Modules::Dtn) => {
                         log::trace!("Message Modules::Group received");
-                        Dtn::rpc(message.data, message.user_id, message.request_id);
+                        Dtn::rpc(state, message.data, message.user_id, message.request_id);
                     }
                     Ok(Modules::Auth) => {
                         log::trace!("Auth message received in CLI");
                         authentication::Authentication::rpc(
+                            state,
                             message.data,
                             message.user_id,
                             message.request_id,
@@ -255,23 +266,9 @@ impl Rpc {
     }
 
     /// sends an RPC message to the outside
-    pub fn send_message(data: Vec<u8>, module: i32, request_id: String, user_id: Vec<u8>) {
-        // Create RPC message container
-        let proto_message = proto::QaulRpc {
-            module,
-            request_id,
-            user_id,
-            data,
-        };
-
-        // encode message
-        let mut buf = Vec::with_capacity(proto_message.encoded_len());
-        proto_message
-            .encode(&mut buf)
-            .expect("Vec<u8> provides capacity as needed");
-
-        // send the message
-        Self::send_to_extern(buf);
+    pub fn send_message(state: &crate::QaulState, data: Vec<u8>, module: i32, request_id: String, user_id: Vec<u8>) {
+        let buf = build_rpc_message(data, module, request_id, user_id);
+        Self::send_to_extern(state, buf);
     }
 
     /// get message count of all messages sent to libqaul
@@ -279,8 +276,8 @@ impl Rpc {
     /// This function is for bug fixing only,
     /// it changes and can be removed anytime.
     /// Please don't use it for anything serious.
-    pub fn send_rpc_count() -> i32 {
-        let counter = EXTERN_SEND_COUNT.get().read().unwrap();
+    pub fn send_rpc_count(state: &crate::QaulState) -> i32 {
+        let counter = state.rpc.send_count.read().unwrap();
         counter.count
     }
 
@@ -289,8 +286,8 @@ impl Rpc {
     /// This function is for bug fixing only,
     /// it changes and can be removed anytime.
     /// Please don't use it for anything serious.
-    pub fn increase_message_counter() {
-        let mut counter = EXTERN_SEND_COUNT.get().write().unwrap();
+    pub fn increase_message_counter(state: &crate::QaulState) {
+        let mut counter = state.rpc.send_count.write().unwrap();
         counter.count = counter.count + 1;
     }
 }

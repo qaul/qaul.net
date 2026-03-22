@@ -4,7 +4,6 @@
 //! # Debug module functions
 
 use super::rpc::Rpc;
-use libqaul;
 use prost::Message;
 
 /// protobuf RPC definition
@@ -17,35 +16,35 @@ impl Debug {
     /// CLI command interpretation
     ///
     /// The CLI commands of debug module are processed here
-    pub fn cli(command: &str) {
+    pub fn cli(state: &super::CliState, command: &str) {
         match command {
             // print sent rpc messages
             cmd if cmd.starts_with("rpc sent") => {
-                Self::rpc_sent();
+                Self::rpc_sent(state);
             }
             // print queued rpc messages
             cmd if cmd.starts_with("rpc queued") => {
-                Self::rpc_queued();
+                Self::rpc_queued(state);
             }
             // send a heartbeat
             cmd if cmd.starts_with("heartbeat") => {
-                Self::heartbeat_send();
+                Self::heartbeat_send(state);
             }
             // let libqaul panic
             cmd if cmd.starts_with("panic") => {
-                Self::panic();
+                Self::panic(state);
             }
             // enable libqaul logging to file
             cmd if cmd.starts_with("log enable") => {
-                Self::debug_log_enable_send();
+                Self::debug_log_enable_send(state);
             }
             // disable libqaul logging to file
             cmd if cmd.starts_with("log disable") => {
-                Self::debug_log_disable_send();
+                Self::debug_log_disable_send(state);
             }
             // request storage path location
             cmd if cmd.starts_with("path") => {
-                Self::debug_path_send();
+                Self::debug_path_send(state);
             }
             // unknown command
             _ => log::error!("unknown debug command"),
@@ -54,21 +53,21 @@ impl Debug {
 
     /// print rpc message counter of messages sent
     /// from client to libqaul
-    fn rpc_sent() {
-        let count = libqaul::api::send_rpc_count();
+    fn rpc_sent(state: &super::CliState) {
+        let count = libqaul::rpc::Rpc::send_rpc_count(&*state.instance.state);
         println!("{} RPC messages sent by this client to libqaul", count);
     }
 
     /// print rpc message counter of queued messages
     /// in the message output of libqaul
-    fn rpc_queued() {
-        let count = libqaul::api::receive_rpc_queued();
+    fn rpc_queued(state: &super::CliState) {
+        let count = libqaul::rpc::Rpc::receive_from_libqaul_queue_length(&*state.instance.state);
         println!("{} RPC messages in libqaul's queue", count);
     }
 
     /// print rpc message counter of messages sent
     /// from client to libqaul
-    fn heartbeat_send() {
+    fn heartbeat_send(state: &super::CliState) {
         // create heartbeat message
         let proto_message = proto::Debug {
             message: Some(proto::debug::Message::HeartbeatRequest(
@@ -84,13 +83,14 @@ impl Debug {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Debug.into(),
             "".to_string(),
         );
     }
 
-    fn debug_log_enable_send() {
+    fn debug_log_enable_send(state: &super::CliState) {
         // create log enable message
         let proto_message = proto::Debug {
             message: Some(proto::debug::Message::LogToFile(proto::LogToFile {
@@ -106,13 +106,14 @@ impl Debug {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Debug.into(),
             "".to_string(),
         );
     }
 
-    fn debug_log_disable_send() {
+    fn debug_log_disable_send(state: &super::CliState) {
         // create log enable message
         let proto_message = proto::Debug {
             message: Some(proto::debug::Message::LogToFile(proto::LogToFile {
@@ -128,13 +129,14 @@ impl Debug {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Debug.into(),
             "".to_string(),
         );
     }
 
-    fn debug_path_send() {
+    fn debug_path_send(state: &super::CliState) {
         // create StoragePathRequest
         let proto_message = proto::Debug {
             message: Some(proto::debug::Message::StoragePathRequest(
@@ -149,6 +151,7 @@ impl Debug {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Debug.into(),
             "".to_string(),
@@ -157,7 +160,7 @@ impl Debug {
 
     /// send a debugging message to libqaul that
     /// let's it panic.
-    fn panic() {
+    fn panic(state: &super::CliState) {
         // create panic message
         let proto_message = proto::Debug {
             message: Some(proto::debug::Message::Panic(proto::Panic {})),
@@ -171,6 +174,7 @@ impl Debug {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Debug.into(),
             "".to_string(),

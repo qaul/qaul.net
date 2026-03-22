@@ -10,7 +10,6 @@ use libp2p::PeerId;
 use prost::Message;
 use serde::{Deserialize, Serialize};
 use sled;
-use state::InitCell;
 use std::{convert::TryInto, fmt, sync::RwLock};
 
 use super::messaging::{proto, MessagingServiceType};
@@ -48,20 +47,37 @@ pub struct DtnStorageState {
     pub db_ref_id: sled::Tree,
 }
 
-/// mutable state of storge
-pub static STORAGESTATE: InitCell<RwLock<DtnStorageState>> = InitCell::new();
 
-/// qaul Delayed
-///
-pub struct Dtn {}
+/// Instance-based DTN state.
+/// Replaces the global STORAGESTATE static for multi-instance use.
+pub struct DtnModuleState {
+    /// DTN storage inner state.
+    pub inner: RwLock<DtnStorageState>,
+    /// Sled database backing (kept alive for tree references).
+    _db: RwLock<sled::Db>,
+}
 
-impl Dtn {
-    /// init function
-    /// Read dtn message table and initialize storage state
-    pub fn init() {
-        let db = DataBase::get_node_db();
+impl DtnModuleState {
+    /// Create a new empty DtnModuleState with a temporary in-memory database.
+    pub fn new() -> Self {
+        let db = sled::Config::new().temporary(true).open().unwrap();
+        let dtn_messages = db.open_tree("dtn-messages").unwrap();
+        let dtn_ids = db.open_tree("dtn-messages-ids").unwrap();
+        Self {
+            inner: RwLock::new(DtnStorageState {
+                message_counts: 0,
+                used_size: 0,
+                db_ref: dtn_messages,
+                db_ref_id: dtn_ids,
+            }),
+            _db: RwLock::new(db),
+        }
+    }
 
-        // open trees
+    /// Re-initialize this DtnModuleState with a production sled database.
+    /// Replaces the temporary in-memory DB and tree references with
+    /// production-backed ones. Called from `Dtn::init()`.
+    pub fn init_production(&self, db: sled::Db) {
         let dtn_messages: sled::Tree = db.open_tree("dtn-messages").unwrap();
         let db_ref_id: sled::Tree = db.open_tree("dtn-messages-ids").unwrap();
 
@@ -74,14 +90,67 @@ impl Dtn {
                 used_size = used_size + (message_entry.size as u64);
             }
         }
-        let storage_state = DtnStorageState {
-            message_counts: dtn_messages.len() as u32,
-            used_size,
-            db_ref: dtn_messages,
-            db_ref_id: db_ref_id,
-        };
 
-        STORAGESTATE.set(RwLock::new(storage_state));
+        {
+            let mut state = self.inner.write().unwrap();
+            state.message_counts = dtn_messages.len() as u32;
+            state.used_size = used_size;
+            state.db_ref = dtn_messages;
+            state.db_ref_id = db_ref_id;
+        }
+        {
+            let mut db_lock = self._db.write().unwrap();
+            *db_lock = db;
+        }
+    }
+
+    /// Process DTN response (instance method).
+    pub fn on_dtn_response(&self, dtn_response: &super::messaging::proto::DtnResponse) {
+        let mut state = self.inner.write().unwrap();
+        if state.db_ref.contains_key(&dtn_response.signature).unwrap() {
+            let entry_bytes = state.db_ref.get(&dtn_response.signature).unwrap().unwrap();
+            let entry: DtnMessageEntry = bincode::deserialize(&entry_bytes).unwrap();
+            if state.used_size > entry.size as u64 {
+                state.used_size = state.used_size + (entry.size as u64);
+            } else {
+                state.used_size = 0;
+            }
+            if state.message_counts > 0 {
+                state.message_counts = state.message_counts - 1;
+            }
+
+            if let Err(_) = state.db_ref.remove(&dtn_response.signature) {
+                log::error!("remove storage node entry error!");
+            } else if let Err(_) = state.db_ref.flush() {
+                log::error!("remove storage node entry flush error!");
+            }
+
+            if let Err(_) = state.db_ref_id.remove(&entry.org_sig) {
+                log::error!("remove storage node id entry error!");
+            } else if let Err(_) = state.db_ref_id.flush() {
+                log::error!("remove storage node id entry flush error!");
+            }
+        }
+    }
+
+    /// Get DTN storage state (instance method).
+    /// Returns (used_size, message_counts).
+    pub fn get_state(&self) -> (u64, u32) {
+        let state = self.inner.read().unwrap();
+        (state.used_size, state.message_counts)
+    }
+}
+
+/// qaul Delayed
+///
+pub struct Dtn {}
+
+impl Dtn {
+    /// init function
+    /// Read dtn message table and initialize storage state
+    pub fn init(state: &crate::QaulState) {
+        let db = DataBase::get_node_db(state);
+        state.services.dtn.init_production(db);
     }
 
     /// Convert Group ID from String to Binary
@@ -102,9 +171,9 @@ impl Dtn {
     }
 
     /// Get storage node user id
-    pub fn get_storage_user(user_id: &PeerId) -> Option<PeerId> {
+    pub fn get_storage_user(state: &crate::QaulState, user_id: &PeerId) -> Option<PeerId> {
         let user_profile;
-        match Configuration::get_user(user_id.to_string()) {
+        match Configuration::get_user(state, user_id.to_string()) {
             Some(user_prof) => {
                 user_profile = user_prof.clone();
             }
@@ -130,12 +199,13 @@ impl Dtn {
 
     /// process DTN message by role as stroage node
     fn process_storage_node_message(
+        state: &crate::QaulState,
         user_account: &UserAccount,
         receiver_id: &PeerId,
         org_sig: &Vec<u8>,
         dtn_payload: &Vec<u8>,
     ) -> (i32, i32) {
-        let mut storage_state = STORAGESTATE.get().write().unwrap();
+        let mut storage_state = state.services.dtn.inner.write().unwrap();
 
         // check already received
         if storage_state.db_ref_id.contains_key(org_sig).unwrap() {
@@ -150,7 +220,7 @@ impl Dtn {
         }
 
         let user_profile;
-        match Configuration::get_user(user_account.id.to_string()) {
+        match Configuration::get_user(state,user_account.id.to_string()) {
             Some(user_prof) => {
                 user_profile = user_prof.clone();
             }
@@ -232,7 +302,7 @@ impl Dtn {
                 signature: signature.clone(),
                 envelope: Some(envelop),
             };
-            super::messaging::Messaging::save_unconfirmed_message(
+            state.services.messaging.save_unconfirmed_message(
                 MessagingServiceType::DtnStored,
                 &vec![],
                 receiver_id,
@@ -252,45 +322,9 @@ impl Dtn {
         // update storage state
     }
 
-    /// this function is called when receive DTN response
-    pub fn on_dtn_response(dtn_response: &super::messaging::proto::DtnResponse) {
-        // check if storage node case
-        let mut state = STORAGESTATE.get().write().unwrap();
-        if state.db_ref.contains_key(&dtn_response.signature).unwrap() {
-            // update storage node state
-            let entry_bytes = state.db_ref.get(&dtn_response.signature).unwrap().unwrap();
-            let entry: DtnMessageEntry = bincode::deserialize(&entry_bytes).unwrap();
-            if state.used_size > entry.size as u64 {
-                state.used_size = state.used_size + (entry.size as u64);
-            } else {
-                state.used_size = 0;
-            }
-            if state.message_counts > 0 {
-                state.message_counts = state.message_counts - 1;
-            }
-
-            // remove entry
-            if let Err(_) = state.db_ref.remove(&dtn_response.signature) {
-                log::error!("remove storage node entry error!");
-            } else {
-                if let Err(_) = state.db_ref.flush() {
-                    log::error!("remove storage node entry flush error!");
-                }
-            }
-
-            if let Err(_) = state.db_ref_id.remove(&entry.org_sig) {
-                log::error!("remove storage node id entry error!");
-            } else {
-                if let Err(_) = state.db_ref_id.flush() {
-                    log::error!("remove storage node id entry flush error!");
-                }
-            }
-        }
-    }
-
     /// process DTN messages from network
-    pub fn net(user_id: &PeerId, sender_id: &PeerId, signature: &Vec<u8>, dtn_payload: &Vec<u8>) {
-        if let Some(user_account) = UserAccounts::get_by_id(*user_id) {
+    pub fn net(state: &crate::QaulState, user_id: &PeerId, sender_id: &PeerId, signature: &Vec<u8>, dtn_payload: &Vec<u8>) {
+        if let Some(user_account) = UserAccounts::get_by_id(state,*user_id) {
             match proto::Container::decode(&dtn_payload[..]) {
                 Ok(container) => {
                     let envelope = container.envelope.as_ref().unwrap();
@@ -309,11 +343,13 @@ impl Dtn {
                         if receiver_id == *user_id {
                             // by process geneal message, the confirm message is transfered to the original sender.
                             super::messaging::process::MessagingProcess::process_received_message(
+                                state,
                                 user_account.clone(),
                                 container,
                             );
                         } else {
                             res = Self::process_storage_node_message(
+                                state,
                                 &user_account,
                                 &receiver_id,
                                 signature,
@@ -331,6 +367,7 @@ impl Dtn {
                             message: Some(proto::messaging::Message::DtnResponse(dnt_response)),
                         };
                         if let Err(_) = super::messaging::Messaging::pack_and_send_message(
+                            state,
                             &user_account,
                             sender_id,
                             send_message.encode_to_vec(),
@@ -348,7 +385,7 @@ impl Dtn {
     }
 
     /// process commands from RPC
-    pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
+    pub fn rpc(state: &crate::QaulState, data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
         // create peer ID from bytes
         let my_user_id;
         match PeerId::from_bytes(&user_id) {
@@ -362,15 +399,15 @@ impl Dtn {
         match proto_rpc::Dtn::decode(&data[..]) {
             Ok(dtn) => match dtn.message {
                 Some(proto_rpc::dtn::Message::DtnStateRequest(_req)) => {
-                    let state = STORAGESTATE.get().read().unwrap();
-                    let unconfirmed = super::messaging::UNCONFIRMED.get().read().unwrap();
+                    let dtn_state = state.services.dtn.inner.read().unwrap();
+                    let unconfirmed = state.services.messaging.unconfirmed.read().unwrap();
                     let unconfrimed_len = unconfirmed.unconfirmed.len();
 
                     let proto_message = proto_rpc::Dtn {
                         message: Some(proto_rpc::dtn::Message::DtnStateResponse(
                             proto_rpc::DtnStateResponse {
-                                used_size: state.used_size,
-                                dtn_message_count: state.message_counts,
+                                used_size: dtn_state.used_size,
+                                dtn_message_count: dtn_state.message_counts,
                                 unconfirmed_count: unconfrimed_len as u32,
                             },
                         )),
@@ -378,6 +415,7 @@ impl Dtn {
 
                     // send message
                     Rpc::send_message(
+                        state,
                         proto_message.encode_to_vec(),
                         crate::rpc::proto::Modules::Dtn.into(),
                         request_id,
@@ -385,7 +423,7 @@ impl Dtn {
                     );
                 }
                 Some(proto_rpc::dtn::Message::DtnConfigRequest(_req)) => {
-                    match Configuration::get_user(my_user_id.to_string()) {
+                    match Configuration::get_user(state,my_user_id.to_string()) {
                         Some(user_profile) => {
                             let mut users: Vec<Vec<u8>> = Vec::new();
                             // create users list
@@ -412,6 +450,7 @@ impl Dtn {
 
                             // send message
                             Rpc::send_message(
+                                state,
                                 proto_message.encode_to_vec(),
                                 crate::rpc::proto::Modules::Dtn.into(),
                                 request_id,
@@ -427,7 +466,7 @@ impl Dtn {
                     let mut status = true;
                     let mut message: String = "".to_string();
 
-                    match Configuration::get_user(my_user_id.to_string()) {
+                    match Configuration::get_user(state,my_user_id.to_string()) {
                         Some(user_profile) => {
                             // CHANGE: save it to user account and not to configuration directly
 
@@ -452,8 +491,8 @@ impl Dtn {
                             if status {
                                 let mut opt = user_profile.storage.clone();
                                 opt.users.push(user_id_string);
-                                Configuration::update_user_storage(my_user_id.to_string(), &opt);
-                                Configuration::save();
+                                Configuration::update_user_storage(state,my_user_id.to_string(), &opt);
+                                Configuration::save(state);
                             }
 
                             let proto_message = proto_rpc::Dtn {
@@ -463,6 +502,7 @@ impl Dtn {
                             };
                             // send message
                             Rpc::send_message(
+                                state,
                                 proto_message.encode_to_vec(),
                                 crate::rpc::proto::Modules::Dtn.into(),
                                 request_id,
@@ -478,7 +518,7 @@ impl Dtn {
                     let mut status = true;
                     let mut message: String = "".to_string();
 
-                    match Configuration::get_user(my_user_id.to_string()) {
+                    match Configuration::get_user(state,my_user_id.to_string()) {
                         Some(user_profile) => {
                             // CHANGE: save it to user_account and not to configuration directly
 
@@ -511,8 +551,8 @@ impl Dtn {
                             if status {
                                 let mut opt = user_profile.storage.clone();
                                 opt.users.remove(idx.unwrap());
-                                Configuration::update_user_storage(my_user_id.to_string(), &opt);
-                                Configuration::save();
+                                Configuration::update_user_storage(state,my_user_id.to_string(), &opt);
+                                Configuration::save(state);
                             }
 
                             let proto_message = proto_rpc::Dtn {
@@ -522,6 +562,7 @@ impl Dtn {
                             };
                             // send message
                             Rpc::send_message(
+                                state,
                                 proto_message.encode_to_vec(),
                                 crate::rpc::proto::Modules::Dtn.into(),
                                 request_id,
@@ -534,14 +575,14 @@ impl Dtn {
                     }
                 }
                 Some(proto_rpc::dtn::Message::DtnSetTotalSizeRequest(req)) => {
-                    match Configuration::get_user(my_user_id.to_string()) {
+                    match Configuration::get_user(state,my_user_id.to_string()) {
                         // CHANGE: save it in user profile, not to configuration directly.
                         Some(_user_profile) => {
-                            Configuration::update_total_size(
+                            Configuration::update_total_size(state,
                                 my_user_id.to_string(),
                                 req.total_size,
                             );
-                            Configuration::save();
+                            Configuration::save(state);
 
                             let proto_message = proto_rpc::Dtn {
                                 message: Some(proto_rpc::dtn::Message::DtnSetTotalSizeResponse(
@@ -553,6 +594,7 @@ impl Dtn {
                             };
                             // send message
                             Rpc::send_message(
+                                state,
                                 proto_message.encode_to_vec(),
                                 crate::rpc::proto::Modules::Dtn.into(),
                                 request_id,

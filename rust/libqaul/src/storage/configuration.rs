@@ -11,15 +11,34 @@
 
 use config::{Config, File};
 use serde::{Deserialize, Serialize};
-use state::InitCell;
 use std::{
     fs,
     path::Path,
     sync::{RwLock, RwLockReadGuard, RwLockWriteGuard},
 };
 
-/// make configuration globally accessible mutable state
-static CONFIG: InitCell<RwLock<Configuration>> = InitCell::new();
+/// Instance-based configuration state.
+/// Replaces the global CONFIG static for multi-instance use.
+pub struct ConfigurationState {
+    /// Configuration inner state.
+    pub inner: RwLock<Configuration>,
+}
+
+impl ConfigurationState {
+    /// Create a new ConfigurationState with default configuration.
+    pub fn new() -> Self {
+        Self {
+            inner: RwLock::new(Configuration::default()),
+        }
+    }
+
+    /// Create from an existing Configuration.
+    pub fn from_config(config: Configuration) -> Self {
+        Self {
+            inner: RwLock::new(config),
+        }
+    }
+}
 
 /// Configuration of the local Node
 ///
@@ -80,15 +99,7 @@ pub struct Internet {
 
 impl Default for Internet {
     fn default() -> Self {
-        let mut port: u16 = 0;
-        if let Some(port_str) = super::super::get_default_config("port") {
-            match port_str.parse::<u16>() {
-                Ok(p) => {
-                    port = p;
-                }
-                _ => {}
-            }
-        }
+        let port: u16 = 0;
         // allow unused_variable needed for android
         #[allow(unused_variables)]
         let listen_ipv4_quic: String = format!("/ip4/0.0.0.0/udp/{}/quic-v1", port);
@@ -283,16 +294,15 @@ impl Configuration {
             .expect(&format!("Could not write config to {:?}.", config_path));
     }
 
-    /// Initialize configuration (global state - for backward compatibility)
-    ///
-    /// Note: This uses global state. For new code, prefer using `Configuration::load_or_create()`.
-    pub fn init() {
+    /// Initialize configuration, loading from disk into QaulState.
+    pub fn init(state: &crate::QaulState) {
         // create configuration path
-        let path_string = super::Storage::get_path();
+        let path_string = super::Storage::get_path(state);
         let config = Self::load_or_create(&path_string);
 
-        // put configuration to state
-        CONFIG.set(RwLock::new(config));
+        // put configuration into QaulState
+        let mut cfg = state.config.inner.write().unwrap();
+        *cfg = config;
     }
 
     /// Load a configuration file for upgrading purposes
@@ -307,14 +317,14 @@ impl Configuration {
     }
 
     /// lend configuration for reading
-    pub fn get<'a>() -> RwLockReadGuard<'a, Configuration> {
-        let config = CONFIG.get().read().unwrap();
+    pub fn get<'a>(state: &'a crate::QaulState) -> RwLockReadGuard<'a, Configuration> {
+        let config = state.config.inner.read().unwrap();
         config
     }
 
     /// get user account
-    pub fn get_user(user_id: String) -> Option<UserAccount> {
-        let config = CONFIG.get().read().unwrap();
+    pub fn get_user(state: &crate::QaulState, user_id: String) -> Option<UserAccount> {
+        let config = state.config.inner.read().unwrap();
         for user in &config.user_accounts {
             if user.id == user_id {
                 return Some(user.clone());
@@ -324,8 +334,8 @@ impl Configuration {
     }
 
     /// CHANGE: remove this function & save configuration directly via UserAccount
-    pub fn update_user_storage(user_id: String, opt: &StorageOptions) {
-        let mut config = CONFIG.get().write().unwrap();
+    pub fn update_user_storage(state: &crate::QaulState, user_id: String, opt: &StorageOptions) {
+        let mut config = state.config.inner.write().unwrap();
         for i in 0..config.user_accounts.len() {
             if let Some(user) = config.user_accounts.get_mut(i) {
                 if user.id == user_id {
@@ -337,8 +347,8 @@ impl Configuration {
     }
 
     /// CHANGE: remove this function and save configuration directly via UserAccount
-    pub fn update_total_size(user_id: String, size: u32) {
-        let mut config = CONFIG.get().write().unwrap();
+    pub fn update_total_size(state: &crate::QaulState, user_id: String, size: u32) {
+        let mut config = state.config.inner.write().unwrap();
         for i in 0..config.user_accounts.len() {
             if let Some(user) = config.user_accounts.get_mut(i) {
                 if user.id == user_id {
@@ -350,27 +360,27 @@ impl Configuration {
     }
 
     /// lend configuration for writing
-    pub fn get_mut<'a>() -> RwLockWriteGuard<'a, Configuration> {
-        let config_mutable = CONFIG.get().write().unwrap();
+    pub fn get_mut<'a>(state: &'a crate::QaulState) -> RwLockWriteGuard<'a, Configuration> {
+        let config_mutable = state.config.inner.write().unwrap();
         config_mutable
     }
 
     /// Enable/disable logging to file for debugging
-    pub fn enable_debug_log(enable: bool) {
-        let mut config_mutable = CONFIG.get().write().unwrap();
+    pub fn enable_debug_log(state: &crate::QaulState, enable: bool) {
+        let mut config_mutable = state.config.inner.write().unwrap();
         config_mutable.debug.log = enable;
     }
 
     /// Check if logging to file for debugging is enabled
-    pub fn get_debug_log() -> bool {
-        let config_mutable = CONFIG.get().read().unwrap();
+    pub fn get_debug_log(state: &crate::QaulState) -> bool {
+        let config_mutable = state.config.inner.read().unwrap();
         config_mutable.debug.log
     }
 
     /// Returns true/false whether this node has been initialized,
     /// or needs to be created for the first time.
-    pub fn is_node_initialized() -> bool {
-        let config = CONFIG.get().read().unwrap();
+    pub fn is_node_initialized(state: &crate::QaulState) -> bool {
+        let config = state.config.inner.read().unwrap();
         if config.node.initialized == 0 {
             return false;
         }
@@ -378,14 +388,14 @@ impl Configuration {
     }
 
     /// Save current configuration to config.yaml file
-    pub fn save() {
-        let config = CONFIG.get();
+    pub fn save(state: &crate::QaulState) {
+        let config = &state.config.inner;
 
         // create yaml configuration format
         let yaml = serde_yaml_ng::to_string(config).expect("Couldn't encode into YAML values.");
 
         // create path to config file
-        let path_string = super::Storage::get_path();
+        let path_string = super::Storage::get_path(state);
         let path = Path::new(path_string.as_str());
         let config_path = path.join("config.yaml");
 

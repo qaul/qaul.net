@@ -10,7 +10,6 @@ use libp2p::PeerId;
 use prost::Message;
 use serde::{Deserialize, Serialize};
 use sled;
-use state::InitCell;
 use std::collections::VecDeque;
 use std::sync::RwLock;
 
@@ -24,7 +23,6 @@ use super::chat::{ChatFile, ChatStorage};
 use super::crypto::Crypto;
 use crate::connections::ConnectionModule;
 use crate::node::user_accounts::{UserAccount, UserAccounts};
-use crate::router::table::RoutingTable;
 use crate::storage::database::DataBase;
 use crate::utilities::timestamp::Timestamp;
 use process::MessagingProcess;
@@ -33,8 +31,6 @@ use qaul_messaging::QaulMessagingReceived;
 /// Import protobuf message definition
 pub use qaul_proto::qaul_net_messaging as proto;
 
-/// mutable state of messages, scheduled for sending
-pub static MESSAGING: InitCell<RwLock<Messaging>> = InitCell::new();
 
 /// Messaging Scheduling Structure
 pub struct ScheduledMessage {
@@ -46,8 +42,6 @@ pub struct ScheduledMessage {
     is_dtn: bool,
 }
 
-/// mutable state of messages, scheduled for sending
-pub static UNCONFIRMED: InitCell<RwLock<UnConfirmedMessages>> = InitCell::new();
 
 // TODO: check if it wouldn't be easier to store
 // the message
@@ -110,28 +104,128 @@ pub struct Messaging {
     pub to_send: VecDeque<ScheduledMessage>,
 }
 
-impl Messaging {
-    /// Initialize messaging and create the ring buffer.
-    pub fn init() {
-        #[cfg(emulate)]
-        /// init emulator
-        network_emul::NetworkEmulator::init();
+/// Instance-based messaging state owning the scheduled message queue
+/// and unconfirmed message tracking.
+/// Replaces the global MESSAGING and UNCONFIRMED statics for multi-instance use.
+pub struct MessagingState {
+    /// Scheduled messages queue.
+    pub messaging: RwLock<Messaging>,
+    /// Unconfirmed messages tracking.
+    pub unconfirmed: RwLock<UnConfirmedMessages>,
+    /// Sled database backing (kept alive for tree references).
+    /// Wrapped in RwLock so `init_production` can swap it after construction.
+    _db: RwLock<sled::Db>,
+    /// Network emulator state (only compiled with the `emulate` cfg flag).
+    #[cfg(emulate)]
+    pub network_emul: RwLock<network_emul::NetworkEmulatorStat>,
+}
 
-        let messaging = Messaging {
-            to_send: VecDeque::new(),
-        };
-        MESSAGING.set(RwLock::new(messaging));
-
-        let db = DataBase::get_node_db();
-
-        // open trees
-        let unconfirmed: sled::Tree = db.open_tree("unconfirmed").unwrap();
-        let unconfirmed_messages = UnConfirmedMessages { unconfirmed };
-        UNCONFIRMED.set(RwLock::new(unconfirmed_messages));
+impl MessagingState {
+    /// Create a new empty MessagingState with a temporary in-memory database.
+    pub fn new() -> Self {
+        let db = sled::Config::new().temporary(true).open().unwrap();
+        let unconfirmed_tree = db.open_tree("unconfirmed").unwrap();
+        Self {
+            messaging: RwLock::new(Messaging {
+                to_send: VecDeque::new(),
+            }),
+            unconfirmed: RwLock::new(UnConfirmedMessages {
+                unconfirmed: unconfirmed_tree,
+            }),
+            _db: RwLock::new(db),
+            #[cfg(emulate)]
+            network_emul: RwLock::new(network_emul::NetworkEmulatorStat {
+                loss_rate: 5,
+                total_message: 0,
+                total_drop: 0,
+            }),
+        }
     }
 
-    /// Save a message to the data base to wait for confirmation
+    /// Create a MessagingState backed by a production sled database.
+    pub fn from_production(db: sled::Db) -> Self {
+        let unconfirmed_tree = db.open_tree("unconfirmed").unwrap();
+        Self {
+            messaging: RwLock::new(Messaging {
+                to_send: VecDeque::new(),
+            }),
+            unconfirmed: RwLock::new(UnConfirmedMessages {
+                unconfirmed: unconfirmed_tree,
+            }),
+            _db: RwLock::new(db),
+            #[cfg(emulate)]
+            network_emul: RwLock::new(network_emul::NetworkEmulatorStat {
+                loss_rate: 5,
+                total_message: 0,
+                total_drop: 0,
+            }),
+        }
+    }
+
+    /// Re-initialize this MessagingState with a production sled database.
+    /// Replaces the temporary in-memory DB and unconfirmed tree with
+    /// production-backed ones. Called from `Messaging::init()`.
+    pub fn init_production(&self, db: sled::Db) {
+        let unconfirmed_tree = db.open_tree("unconfirmed").unwrap();
+        {
+            let mut unconfirmed = self.unconfirmed.write().unwrap();
+            unconfirmed.unconfirmed = unconfirmed_tree;
+        }
+        {
+            let mut db_lock = self._db.write().unwrap();
+            *db_lock = db;
+        }
+    }
+
+    /// Schedule a message for sending (instance method).
+    pub fn schedule_message(
+        &self,
+        receiver: PeerId,
+        container: proto::Container,
+        is_common: bool,
+        is_forward: bool,
+        scheduled_dtn: bool,
+        is_dtn: bool,
+    ) {
+        let msg = ScheduledMessage {
+            receiver,
+            container,
+            is_common,
+            is_forward,
+            scheduled_dtn,
+            is_dtn,
+        };
+
+        let mut messaging = self.messaging.write().unwrap();
+        messaging.to_send.push_back(msg);
+    }
+
+    /// Check scheduler for next message to send (instance method).
+    /// Takes routing table state as an explicit parameter.
+    pub fn check_scheduler(
+        &self,
+        routing_table: &crate::router::table::RoutingTableState,
+    ) -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
+        let message_item: Option<ScheduledMessage>;
+        {
+            let mut messaging = self.messaging.write().unwrap();
+            message_item = messaging.to_send.pop_front();
+        }
+
+        if let Some(message) = message_item {
+            if let Some(route) = routing_table.get_route_to_user(message.receiver) {
+                self.on_scheduled_message(&message.container.signature);
+                let data = message.container.encode_to_vec();
+                return Some((route.node, route.module, data));
+            }
+        }
+
+        None
+    }
+
+    /// Save a message to the unconfirmed table (instance method).
     pub fn save_unconfirmed_message(
+        &self,
         message_type: MessagingServiceType,
         message_id: &[u8],
         receiver: &PeerId,
@@ -149,20 +243,81 @@ impl Messaging {
             scheduled_dtn: false,
             is_dtn,
         };
-        let unconfirmed = UNCONFIRMED.get().write().unwrap();
-
-        // insert message to data base
-        let new_entry_bytes = bincode::serialize(&new_entry).unwrap();
-        if let Err(e) = unconfirmed
-            .unconfirmed
-            .insert(container.signature.clone(), new_entry_bytes)
-        {
+        let entry_bytes = bincode::serialize(&new_entry).unwrap();
+        let unconfirmed = self.unconfirmed.write().unwrap();
+        if let Err(e) = unconfirmed.unconfirmed.insert(container.signature.clone(), entry_bytes) {
             log::error!("{}", e);
         }
-        // flush
         if let Err(e) = unconfirmed.unconfirmed.flush() {
             log::error!("Error unconfirmed table flush: {}", e);
         }
+    }
+
+    /// Process confirmation message (instance method).
+    pub fn on_confirmed_message(&self, signature: &[u8]) {
+        let unconfirmed = self.unconfirmed.write().unwrap();
+        match unconfirmed.unconfirmed.remove(signature) {
+            Ok(_v) => {
+                if let Err(e) = unconfirmed.unconfirmed.flush() {
+                    log::error!("Error unconfirmed table flush: {}", e);
+                }
+            }
+            Err(e) => {
+                log::error!("{}", e);
+            }
+        }
+    }
+
+    /// Mark message as scheduled (instance method).
+    pub(crate) fn on_scheduled_message(&self, signature: &[u8]) {
+        let unconfirmed = self.unconfirmed.write().unwrap();
+        let Some(unconfirmed_message_bytes) = unconfirmed.unconfirmed.get(signature).unwrap() else {
+            return;
+        };
+        let mut unconfirmed_message: UnConfirmedMessage =
+            bincode::deserialize(&unconfirmed_message_bytes).unwrap();
+        if unconfirmed_message.scheduled {
+            return;
+        }
+        unconfirmed_message.scheduled = true;
+        let unconfirmed_message_todb = bincode::serialize(&unconfirmed_message).unwrap();
+        if let Err(_e) = unconfirmed.unconfirmed.insert(signature.to_vec(), unconfirmed_message_todb) {
+            log::error!("error updating unconfirmed table");
+        } else if let Err(_e) = unconfirmed.unconfirmed.flush() {
+            log::error!("error updating unconfirmed table");
+        }
+    }
+
+    /// Mark message as scheduled via DTN (instance method).
+    pub fn on_scheduled_as_dtn_message(&self, signature: &[u8]) {
+        let unconfirmed = self.unconfirmed.write().unwrap();
+        let Some(unconfirmed_message_bytes) = unconfirmed.unconfirmed.get(signature).unwrap() else {
+            return;
+        };
+        let mut unconfirmed_message: UnConfirmedMessage =
+            bincode::deserialize(&unconfirmed_message_bytes).unwrap();
+        if unconfirmed_message.scheduled {
+            return;
+        }
+        unconfirmed_message.scheduled_dtn = true;
+        let unconfirmed_message_todb = bincode::serialize(&unconfirmed_message).unwrap();
+        if let Err(_e) = unconfirmed.unconfirmed.insert(signature.to_vec(), unconfirmed_message_todb) {
+            log::error!("error updating unconfirmed table");
+        } else if let Err(_e) = unconfirmed.unconfirmed.flush() {
+            log::error!("error updating unconfirmed table");
+        }
+    }
+}
+
+impl Messaging {
+    /// Initialize messaging and create the ring buffer.
+    pub fn init(state: &crate::QaulState) {
+        #[cfg(emulate)]
+        /// init emulator
+        network_emul::NetworkEmulator::init();
+
+        let db = DataBase::get_node_db(state);
+        state.services.messaging.init_production(db);
     }
 
     /// Process confirmation message
@@ -170,6 +325,7 @@ impl Messaging {
     /// Removes the message from the unconfirmed table and notifies
     /// the related service (if needed) that the message was received.
     pub fn on_confirmed_message(
+        state: &crate::QaulState,
         signature: &[u8],
         sender_id: PeerId,
         user_account: UserAccount,
@@ -180,7 +336,7 @@ impl Messaging {
             bs58::encode(signature).into_string()
         );
 
-        let unconfirmed = UNCONFIRMED.get().write().unwrap();
+        let unconfirmed = state.services.messaging.unconfirmed.write().unwrap();
 
         // check and remove unconfirmed from DB
         match unconfirmed.unconfirmed.remove(signature) {
@@ -218,6 +374,7 @@ impl Messaging {
                                 log::trace!("Confirmation: Chat");
                                 // set received info in chat data base
                                 ChatStorage::update_confirmation(
+                                    state,
                                     user_account.id,
                                     sender_id,
                                     &unconfirmed.message_id,
@@ -232,6 +389,7 @@ impl Messaging {
 
                                         // confirm message reception in data base
                                         ChatFile::update_confirmation(
+                                            state,
                                             user_account.id,
                                             sender_id,
                                             file_id,
@@ -258,64 +416,13 @@ impl Messaging {
         }
     }
 
-    fn on_scheduled_message(signature: &[u8]) {
-        let unconfirmed = UNCONFIRMED.get().write().unwrap();
-        let Some(unconfirmed_message_bytes) = unconfirmed.unconfirmed.get(signature).unwrap()
-        else {
-            return;
-        };
-        let mut unconfirmed_message: UnConfirmedMessage =
-            bincode::deserialize(&unconfirmed_message_bytes).unwrap();
-        if unconfirmed_message.scheduled {
-            return;
-        }
-
-        unconfirmed_message.scheduled = true;
-        let unconfirmed_message_todb = bincode::serialize(&unconfirmed_message).unwrap();
-        if let Err(_e) = unconfirmed
-            .unconfirmed
-            .insert(signature.to_vec(), unconfirmed_message_todb)
-        {
-            log::error!("error updating unconfirmed table");
-        } else {
-            if let Err(_e) = unconfirmed.unconfirmed.flush() {
-                log::error!("error updating unconfirmed table");
-            }
-        }
-    }
-
-    fn on_scheduled_as_dtn_message(signature: &[u8]) {
-        let unconfirmed = UNCONFIRMED.get().write().unwrap();
-        let Some(unconfirmed_message_bytes) = unconfirmed.unconfirmed.get(signature).unwrap()
-        else {
-            return;
-        };
-        let mut unconfirmed_message: UnConfirmedMessage =
-            bincode::deserialize(&unconfirmed_message_bytes).unwrap();
-        if unconfirmed_message.scheduled {
-            return;
-        }
-
-        unconfirmed_message.scheduled_dtn = true;
-        let unconfirmed_message_todb = bincode::serialize(&unconfirmed_message).unwrap();
-        if let Err(_e) = unconfirmed
-            .unconfirmed
-            .insert(signature.to_vec(), unconfirmed_message_todb)
-        {
-            log::error!("error updating unconfirmed table");
-        } else {
-            if let Err(_e) = unconfirmed.unconfirmed.flush() {
-                log::error!("error updating unconfirmed table");
-            }
-        }
-    }
-
     /// pack, sign and schedule a message for sending
     ///
     /// The function returns the message signature on success,
     /// otherwise an error message string.
 
     pub fn pack_and_send_message(
+        state: &crate::QaulState,
         user_account: &UserAccount,
         receiver: &PeerId,
         data: Vec<u8>,
@@ -327,7 +434,7 @@ impl Messaging {
 
         // encrypt data
         let encrypted_message: proto::Encrypted;
-        let encryption_result = Crypto::encrypt(data, user_account.to_owned(), receiver.clone());
+        let encryption_result = Crypto::encrypt(state, data, user_account.to_owned(), receiver.clone());
 
         match encryption_result {
             Some(encrypted) => {
@@ -337,6 +444,7 @@ impl Messaging {
         }
 
         return Self::pack_and_send_encrypted_data(
+            state,
             user_account,
             receiver,
             encrypted_message,
@@ -350,6 +458,7 @@ impl Messaging {
     /// The function returns the message signature on success,
     /// otherwise an error message string.
     pub fn pack_and_send_encrypted_data(
+        state: &crate::QaulState,
         user_account: &UserAccount,
         receiver: &PeerId,
         encrypted_message: proto::Encrypted,
@@ -392,7 +501,7 @@ impl Messaging {
 
             // in common message case, save into unconfirmed table
             if message_needs_confirmation {
-                Self::save_unconfirmed_message(
+                state.services.messaging.save_unconfirmed_message(
                     MessagingServiceType::Chat,
                     message_id,
                     receiver,
@@ -402,7 +511,7 @@ impl Messaging {
             }
 
             // schedule message for sending
-            Self::schedule_message(
+            state.services.messaging.schedule_message(
                 receiver.clone(),
                 container,
                 message_needs_confirmation,
@@ -420,6 +529,7 @@ impl Messaging {
 
     /// pack, sign and schedule a message for sending
     pub fn send_dtn_message(
+        state: &crate::QaulState,
         user_account: &UserAccount,
         storage_node_id: &PeerId,
         org_container: &proto::Container,
@@ -444,7 +554,7 @@ impl Messaging {
             };
 
             // in common message case, save into unconfirmed table
-            Self::save_unconfirmed_message(
+            state.services.messaging.save_unconfirmed_message(
                 MessagingServiceType::Chat,
                 &[],
                 &storage_node_id,
@@ -453,7 +563,7 @@ impl Messaging {
             );
 
             // schedule message for sending
-            Self::schedule_message(
+            state.services.messaging.schedule_message(
                 storage_node_id.clone(),
                 container_dtn,
                 true,
@@ -469,105 +579,9 @@ impl Messaging {
         }
     }
 
-    /// schedule a message
-    ///
-    /// schedule a message for sending.
-    /// This function adds the message to the ring buffer for sending.
-    /// This buffer is checked regularly by libqaul for sending.
-    ///
-    pub fn schedule_message(
-        receiver: PeerId,
-        container: proto::Container,
-        is_common: bool,
-        is_forward: bool,
-        scheduled_dtn: bool,
-        is_dtn: bool,
-    ) {
-        #[cfg(emulate)]
-        if network_emul::NetworkEmulator::is_lost() {
-            log::error!(
-                "drop message, signature: {}",
-                bs58::encode(&container.signature).into_string()
-            );
-            return;
-        }
-
-        let msg = ScheduledMessage {
-            receiver,
-            container,
-            is_common,
-            is_forward,
-            scheduled_dtn,
-            is_dtn,
-        };
-
-        // add it to sending queue
-        let mut messaging = MESSAGING.get().write().unwrap();
-        messaging.to_send.push_back(msg);
-    }
-
-    /// Check Scheduler
-    ///
-    /// Check if there is a message scheduled for sending.
-    ///
-    pub fn check_scheduler() -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
-        let message_item: Option<ScheduledMessage>;
-
-        // get scheduled messaging buffer
-        {
-            let mut messaging = MESSAGING.get().write().unwrap();
-            message_item = messaging.to_send.pop_front();
-        }
-
-        if let Some(message) = message_item {
-            // check for route
-            if let Some(route) = RoutingTable::get_route_to_user(message.receiver) {
-                // update unconfirmed table set scheduled flag.
-                Self::on_scheduled_message(&message.container.signature);
-
-                // create binary message
-                let data = message.container.encode_to_vec();
-
-                // return information
-                return Some((route.node, route.module, data));
-            } else {
-                // user is offline we schedule through DTN service
-                if !message.is_forward
-                    && !message.is_dtn
-                    && !message.scheduled_dtn
-                    && message.is_common
-                {
-                    // get storage node id
-                    if let Ok(my_user_id) =
-                        PeerId::from_bytes(&message.container.envelope.as_ref().unwrap().sender_id)
-                    {
-                        if let Some(storage_node_id) =
-                            super::dtn::Dtn::get_storage_user(&my_user_id)
-                        {
-                            if let Some(user_account) = UserAccounts::get_by_id(my_user_id) {
-                                if let Err(_e) = Self::send_dtn_message(
-                                    &user_account,
-                                    &storage_node_id,
-                                    &message.container,
-                                ) {
-                                    log::error!("DTN scheduling error!");
-                                } else {
-                                    log::error!("DTN scheduled...");
-                                    // update unconfirmed table
-                                    Self::on_scheduled_as_dtn_message(&message.container.signature);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        None
-    }
-
     /// Send a confirmation message for a received message
     pub fn send_confirmation(
+        state: &crate::QaulState,
         user_id: &PeerId,
         receiver_id: &PeerId,
         signature: &[u8],
@@ -578,7 +592,7 @@ impl Messaging {
             bs58::encode(signature).into_string()
         );
 
-        if let Some(user) = UserAccounts::get_by_id(user_id.clone()) {
+        if let Some(user) = UserAccounts::get_by_id(state,user_id.clone()) {
             // create timestamp
             let timestamp = Timestamp::get_timestamp();
 
@@ -600,6 +614,7 @@ impl Messaging {
 
             // send message via messaging
             Self::pack_and_send_message(
+                state,
                 &user,
                 receiver_id,
                 message_buf,
@@ -613,7 +628,7 @@ impl Messaging {
     }
 
     /// received message from qaul_messaging behaviour
-    pub fn received(received: QaulMessagingReceived) {
+    pub fn received(state: &crate::QaulState, received: QaulMessagingReceived) {
         // decode message container
         match proto::Container::decode(&received.data[..]) {
             Ok(container) => {
@@ -633,16 +648,16 @@ impl Messaging {
                 };
 
                 // check if message is local user account
-                match UserAccounts::get_by_id(receiver_id) {
+                match UserAccounts::get_by_id(state,receiver_id) {
                     // we are the receiving node,
                     // process and save the message
                     Some(user_account) => {
-                        MessagingProcess::process_received_message(user_account, container)
+                        MessagingProcess::process_received_message(state, user_account, container)
                     }
 
                     // schedule it for further sending otherwise
                     None => {
-                        Self::schedule_message(receiver_id, container, true, true, false, false)
+                        state.services.messaging.schedule_message(receiver_id, container, true, true, false, false)
                     }
                 }
             }

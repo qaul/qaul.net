@@ -7,8 +7,7 @@
 //! qaul router.
 
 use prost::Message;
-use state::InitCell;
-use std::sync::RwLock;
+use std::sync::Arc;
 
 pub mod connections;
 pub mod feed_requester;
@@ -21,21 +20,84 @@ pub mod users;
 
 use crate::storage::configuration::{Configuration, RoutingOptions};
 use connections::ConnectionTable;
-use feed_requester::{FeedRequester, FeedResponser};
-use flooder::Flooder;
-use info::RouterInfo;
 use neighbours::Neighbours;
 use table::RoutingTable;
-use user_requester::{UserRequester, UserResponser};
 use users::Users;
 
 /// Import protobuf message definition
-pub use qaul_proto::qaul_rpc_router as proto;
 pub use qaul_proto::qaul_net_router_net_info as router_net_proto;
+pub use qaul_proto::qaul_rpc_router as proto;
 
-/// mutable state of router,
-/// used for storing the router configuration (global state - deprecated)
-static ROUTER: InitCell<RwLock<Router>> = InitCell::new();
+
+/// Instance-based router state that owns all routing sub-state.
+///
+/// This replaces the scattered global statics across router submodules.
+/// Each `RouterState` instance is fully independent, enabling multiple
+/// nodes to run in the same process.
+pub struct RouterState {
+    /// Router configuration
+    pub configuration: RoutingOptions,
+
+    /// Neighbour tables per connection module
+    pub neighbours: neighbours::NeighboursState,
+
+    /// Connection tables per connection module
+    pub connections: connections::ConnectionTableState,
+
+    /// Global routing table
+    pub routing_table: table::RoutingTableState,
+
+    /// Routing info scheduler
+    pub scheduler: info::SchedulerState,
+
+    /// Flood message queue
+    pub flooder: flooder::FlooderState,
+
+    /// Feed request queue
+    pub feed_requester: feed_requester::FeedRequesterState,
+
+    /// Feed response queue
+    pub feed_responser: feed_requester::FeedResponserState,
+
+    /// User request queue
+    pub user_requester: user_requester::UserRequesterState,
+
+    /// User response queue
+    pub user_responser: user_requester::UserResponserState,
+
+    /// Users table
+    pub users: users::UsersState,
+}
+
+impl RouterState {
+    /// Create a new RouterState with default empty tables.
+    /// This does NOT touch any global state or databases.
+    /// Suitable for simulation.
+    pub fn new(config: RoutingOptions) -> Self {
+        let interval = config.sending_table_period;
+        Self {
+            configuration: config,
+            neighbours: neighbours::NeighboursState::new(),
+            connections: connections::ConnectionTableState::new(),
+            routing_table: table::RoutingTableState::new(),
+            scheduler: info::SchedulerState::new(interval),
+            flooder: flooder::FlooderState::new(),
+            feed_requester: feed_requester::FeedRequesterState::new(),
+            feed_responser: feed_requester::FeedResponserState::new(),
+            user_requester: user_requester::UserRequesterState::new(),
+            user_responser: user_requester::UserResponserState::new(),
+            users: users::UsersState::new(),
+        }
+    }
+
+    /// Initialize the RouterState from the current Configuration
+    /// and store it in QaulState.
+    fn init_into_qaul_state(qaul_state: &crate::QaulState) {
+        let config = Configuration::get(qaul_state);
+        let state = Arc::new(RouterState::new(config.routing.clone()));
+        qaul_state.replace_router(state);
+    }
+}
 
 /// Router Module - holds all router state for a single instance
 ///
@@ -68,78 +130,56 @@ impl RouterModule {
 }
 
 /// qaul community router access
-#[derive(Clone)]
-pub struct Router {
-    pub configuration: RoutingOptions,
-}
+pub struct Router {}
 
 impl Router {
     /// Initialize the qaul router
-    pub fn init() {
-        let config = Configuration::get();
-        let router = Router {
-            configuration: config.routing.clone(),
-        };
-        // set configuration to state
-        ROUTER.set(RwLock::new(router));
+    pub fn init(qaul_state: &crate::QaulState) {
 
-        // initialize direct neighbours table
-        Neighbours::init();
+        // Initialize the RouterState and store it in QaulState.
+        RouterState::init_into_qaul_state(qaul_state);
 
-        // initialize users table
-        Users::init();
+        let rs = qaul_state.get_router();
 
-        // initialize flooder queue
-        Flooder::init();
+        // initialize direct neighbours table (database-backed)
+        Neighbours::init_with_state(qaul_state, &rs);
 
-        // initialize feed_requester queue
-        FeedRequester::init();
-
-        // initialize feed_response queue
-        FeedResponser::init();
-
-        // initialize user_requester queue
-        UserRequester::init();
-
-        // initialize user_response queue
-        UserResponser::init();
-
-        // initialize the global routing table
-        RoutingTable::init();
+        // initialize users table (database-backed)
+        Users::init_with_state(qaul_state, &rs);
 
         // initialize the routing information collection
-        // tables per connection module
-        ConnectionTable::init();
+        // tables per connection module (database-backed)
+        for user in crate::node::user_accounts::UserAccounts::get_user_info(qaul_state) {
+            let node_id = crate::node::Node::get_id(qaul_state);
+            rs.connections.add_local_user(user.id, node_id);
+        }
 
-        // initialize RouterInfo submodule that
-        // schedules the sending of the routing information
-        // to the neighbouring nodes.
-        RouterInfo::init(config.routing.sending_table_period);
+        // RouterInfo scheduler is already initialized as part of RouterState::init_global().
+        // No separate RouterInfo::init() call needed.
     }
 
-    /// Get router configuration from state
-    pub fn get_configuration() -> RoutingOptions {
-        let router = ROUTER.get().read().unwrap();
+    /// Get router configuration from an explicit state reference
+    pub fn get_configuration_from(router: &RouterState) -> RoutingOptions {
         router.configuration.clone()
     }
 
     /// Process incoming RPC request messages and send them to
     /// the submodules
-    pub fn rpc(data: Vec<u8>, request_id: String) {
+    pub fn rpc(state: &crate::QaulState, router_state: &RouterState, data: Vec<u8>, request_id: String) {
         match proto::Router::decode(&data[..]) {
             Ok(router) => {
                 match router.message {
                     Some(proto::router::Message::RoutingTableRequest(_request)) => {
                         // send routing table list
-                        RoutingTable::rpc_send_routing_table(request_id);
+                        RoutingTable::rpc_send_routing_table(state, router_state, request_id);
                     }
                     Some(proto::router::Message::ConnectionsRequest(_request)) => {
                         // send connections list
-                        ConnectionTable::rpc_send_connections_list(request_id);
+                        ConnectionTable::rpc_send_connections_list(state, router_state, request_id);
                     }
                     Some(proto::router::Message::NeighboursRequest(_request)) => {
                         // send neighbours list
-                        Neighbours::rpc_send_neighbours_list(request_id);
+                        Neighbours::rpc_send_neighbours_list(state, router_state, request_id);
                     }
                     _ => {}
                 }

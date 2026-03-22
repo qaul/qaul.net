@@ -16,21 +16,21 @@ impl Router {
     /// CLI command interpretation
     ///
     /// The CLI commands of router module are processed here
-    pub fn cli(command: &str) {
+    pub fn cli(state: &super::CliState, command: &str) {
         match command {
             // request routing table,
             // with per module connectivity per user.
             cmd if cmd.starts_with("table list") => {
-                Self::request_routing_table();
+                Self::request_routing_table(state);
             }
             // request neighbours list of all neighbouring nodes.
             cmd if cmd.starts_with("neighbours list") => {
-                Self::request_neighbours_list();
+                Self::request_neighbours_list(state);
             }
             // request connections table, with all known connections
             // per connection module.
             cmd if cmd.starts_with("connections list") => {
-                Self::request_connections_list();
+                Self::request_connections_list(state);
             }
             // unknown command
             _ => log::error!("unknown router command"),
@@ -38,7 +38,7 @@ impl Router {
     }
 
     /// create rpc request for routing table list
-    fn request_routing_table() {
+    fn request_routing_table(state: &super::CliState) {
         // create request message
         let proto_message = proto::Router {
             message: Some(proto::router::Message::RoutingTableRequest(
@@ -47,11 +47,11 @@ impl Router {
         };
 
         // send message
-        Self::send_message(proto_message);
+        Self::send_message(state, proto_message);
     }
 
     /// create rpc request for neighbours list
-    fn request_neighbours_list() {
+    fn request_neighbours_list(state: &super::CliState) {
         // create request message
         let proto_message = proto::Router {
             message: Some(proto::router::Message::NeighboursRequest(
@@ -60,11 +60,11 @@ impl Router {
         };
 
         // send message
-        Self::send_message(proto_message);
+        Self::send_message(state, proto_message);
     }
 
     /// create rpc request for connections list
-    fn request_connections_list() {
+    fn request_connections_list(state: &super::CliState) {
         // create request message
         let proto_message = proto::Router {
             message: Some(proto::router::Message::ConnectionsRequest(
@@ -73,11 +73,11 @@ impl Router {
         };
 
         // send message
-        Self::send_message(proto_message);
+        Self::send_message(state, proto_message);
     }
 
     /// Encode and send protobuf message
-    fn send_message(message: proto::Router) {
+    fn send_message(state: &super::CliState, message: proto::Router) {
         // encode message
         let mut buf = Vec::with_capacity(message.encoded_len());
         message
@@ -86,6 +86,7 @@ impl Router {
 
         // send message
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Router.into(),
             "".to_string(),

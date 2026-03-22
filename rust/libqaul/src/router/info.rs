@@ -20,7 +20,6 @@ use crate::utilities::qaul_id::QaulId;
 use libp2p::PeerId;
 use prost::Message;
 use qaul_info::QaulInfoReceived;
-use state::InitCell;
 use std::{
     collections::HashMap,
     sync::RwLock,
@@ -31,21 +30,17 @@ use crate::{
     connections::ConnectionModule,
     node::Node,
     router::{
-        connections::ConnectionTable, neighbours::Neighbours, router_net_proto,
-        table::RoutingTable, users::Users,
+        router_net_proto,
+        users::Users,
     },
     utilities::timestamp::Timestamp,
 };
 
-use crate::feed_requester::FeedRequester;
-use crate::feed_requester::FeedResponser;
-use crate::services::feed::Feed;
+use crate::router::feed_requester::FeedRequester;
+use crate::router::feed_requester::FeedResponser;
 
 use crate::router::user_requester::UserRequester;
 use crate::router::user_requester::UserResponser;
-
-/// mutable state of Neighbours table per ConnectionModule
-static SCHEDULER: InitCell<RwLock<Scheduler>> = InitCell::new();
 
 /// global scheduler state
 #[derive(Clone, Debug)]
@@ -54,31 +49,133 @@ pub struct Scheduler {
     /// routing information.
     /// If a node is interconnected via several connection
     /// modules, the table is only sent on one of them.
-    neighbours: HashMap<PeerId, SchedulerEntry>,
+    pub neighbours: HashMap<PeerId, SchedulerEntry>,
 
     /// interval in which updated routing information
     /// shall be sent to the neighbouring nodes.
-    interval: Duration,
+    pub interval: Duration,
 
     /// propagation ID
     ///
     /// A number that is increased by one
     /// on each propagation cycle
-    propagation_id: u32,
+    pub propagation_id: u32,
 
     /// propagation update time
     ///
     /// timestamp of the last propagation update
-    propagation_timestamp: u64,
+    pub propagation_timestamp: u64,
 }
 
 /// An entry for the scheduler neighbour list
 /// that contains the time stamp
 #[derive(Clone, Debug, Copy)]
-struct SchedulerEntry {
+pub struct SchedulerEntry {
     /// time of the last send
-    timestamp: SystemTime,
-    is_first: bool,
+    pub timestamp: SystemTime,
+    pub is_first: bool,
+}
+
+/// Instance-based scheduler state.
+/// Replaces the global SCHEDULER static for multi-instance use.
+pub struct SchedulerState {
+    pub inner: RwLock<Scheduler>,
+}
+
+impl SchedulerState {
+    /// Create a new scheduler state with the given interval in seconds.
+    pub fn new(interval_seconds: u64) -> Self {
+        Self {
+            inner: RwLock::new(Scheduler {
+                neighbours: HashMap::new(),
+                interval: Duration::from_secs(interval_seconds),
+                propagation_id: 0,
+                propagation_timestamp: Timestamp::get_timestamp(),
+            }),
+        }
+    }
+
+    /// Add a new neighbour entry to the scheduler.
+    pub fn add_neighbour(&self, node_id: PeerId) {
+        let exists;
+        {
+            let scheduler = self.inner.read().unwrap();
+            exists = scheduler.neighbours.contains_key(&node_id);
+        }
+
+        if !exists {
+            let mut scheduler = self.inner.write().unwrap();
+            let interval = scheduler.interval;
+            scheduler.neighbours.insert(
+                node_id,
+                SchedulerEntry {
+                    timestamp: SystemTime::now() - interval,
+                    is_first: true,
+                },
+            );
+        }
+    }
+
+    /// Check the scheduler for expired entries. Returns the next node to send to.
+    /// This is the instance-based version for simulation use.
+    pub fn check_scheduler(
+        &self,
+        neighbours_state: &super::neighbours::NeighboursState,
+        connections_state: &super::connections::ConnectionTableState,
+    ) -> Option<(PeerId, ConnectionModule, u64, bool)> {
+        let mut found_neighbour: Option<PeerId> = None;
+        let mut neighbour_last_sent: u64 = 0;
+        let mut neighbour_is_first: bool = false;
+        let mut propagation_id: u32;
+        let mut propagation_timestamp: u64;
+
+        {
+            let scheduler = self.inner.read().unwrap();
+
+            for (id, ctx) in scheduler.neighbours.iter() {
+                if ctx.timestamp + scheduler.interval < SystemTime::now() {
+                    found_neighbour = Some(*id);
+                    neighbour_last_sent = Timestamp::get_timestamp_by(&ctx.timestamp);
+                    neighbour_is_first = ctx.is_first;
+                    break;
+                }
+            }
+
+            propagation_id = scheduler.propagation_id;
+            propagation_timestamp = scheduler.propagation_timestamp;
+        }
+
+        // check if we have to update the propagation ID
+        if Timestamp::get_timestamp() >= propagation_timestamp + 10 * 1000 {
+            propagation_id += 1;
+            propagation_timestamp = Timestamp::get_timestamp();
+
+            let mut scheduler = self.inner.write().unwrap();
+            scheduler.propagation_id = propagation_id;
+            scheduler.propagation_timestamp = propagation_timestamp;
+
+            connections_state.update_propagation_id(propagation_id);
+        }
+
+        if let Some(node_id) = found_neighbour {
+            let module = neighbours_state.is_neighbour(&node_id);
+
+            let mut scheduler = self.inner.write().unwrap();
+
+            if module == ConnectionModule::None {
+                scheduler.neighbours.remove(&node_id);
+            } else {
+                if let Some(entry) = scheduler.neighbours.get_mut(&node_id) {
+                    entry.timestamp = SystemTime::now();
+                    entry.is_first = false;
+                }
+
+                return Some((node_id, module, neighbour_last_sent, neighbour_is_first));
+            }
+        }
+
+        None
+    }
 }
 
 /// RouterInfo Module
@@ -90,22 +187,19 @@ impl RouterInfo {
     /// with the interval in seconds that the
     /// routing information shall be sent
     /// to neighbours.
-    pub fn init(interval_seconds: u64) {
-        // neighbours list for routing info scheduler
-        let scheduler = Scheduler {
-            neighbours: HashMap::new(),
-            interval: Duration::from_secs(interval_seconds),
-            propagation_id: 0,
-            propagation_timestamp: Timestamp::get_timestamp(),
-        };
-        SCHEDULER.set(RwLock::new(scheduler));
+    ///
+    /// The scheduler is already created when RouterState is initialized.
+    /// This method just updates the interval if needed.
+    pub fn init(router: &super::RouterState, interval_seconds: u64) {
+        let mut scheduler = router.scheduler.inner.write().unwrap();
+        scheduler.interval = Duration::from_secs(interval_seconds);
     }
 
     /// This loops over all neighbours
     /// and checks if there is any timeout.
     /// If it finds a timeout it returns the node id
     /// to send a routing information to.
-    pub fn check_scheduler() -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
+    pub fn check_scheduler(state: &crate::QaulState, router: &super::RouterState) -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
         let mut found_neighbour: Option<PeerId> = None;
         let mut neighbour_last_sent: u64 = 0;
         let mut neighbour_is_first: bool = false;
@@ -114,7 +208,7 @@ impl RouterInfo {
 
         {
             // get state for reading
-            let scheduler = SCHEDULER.get().read().unwrap();
+            let scheduler = router.scheduler.inner.read().unwrap();
 
             // loop over all neighbours
             for (id, ctx) in scheduler.neighbours.iter() {
@@ -137,12 +231,12 @@ impl RouterInfo {
             propagation_timestamp = Timestamp::get_timestamp();
 
             // get scheduler for writing
-            let mut scheduler = SCHEDULER.get().write().unwrap();
+            let mut scheduler = router.scheduler.inner.write().unwrap();
             scheduler.propagation_id = propagation_id;
             scheduler.propagation_timestamp = propagation_timestamp;
 
             // update propagation ID
-            super::connections::ConnectionTable::update_propagation_id(propagation_id);
+            router.connections.update_propagation_id(propagation_id);
         }
 
         // process finding
@@ -150,10 +244,10 @@ impl RouterInfo {
             // Check whether this node is
             // still connected and over which connection module
             // we can approach it.
-            let module = Neighbours::is_neighbour(&node_id);
+            let module = router.neighbours.is_neighbour(&node_id);
 
-            // get SCHEDULER for writing
-            let mut scheduler = SCHEDULER.get().write().unwrap();
+            // get scheduler for writing
+            let mut scheduler = router.scheduler.inner.write().unwrap();
 
             if module == ConnectionModule::None {
                 log::debug!("node is not a neighbour anymore: {:?}", node_id);
@@ -167,7 +261,7 @@ impl RouterInfo {
                 }
 
                 // create routing information
-                let data = Self::create(node_id.clone(), neighbour_last_sent, neighbour_is_first);
+                let data = Self::create(state, router, node_id.clone(), neighbour_last_sent, neighbour_is_first);
 
                 // create result
                 return Some((node_id, module, data));
@@ -178,18 +272,18 @@ impl RouterInfo {
     }
 
     /// add new neighbour entry
-    pub fn add_neighbour(node_id: PeerId) {
+    pub fn add_neighbour(router: &super::RouterState, node_id: PeerId) {
         let exists;
         log::trace!("add new neighbour {:?} to RouterInfo scheduler", node_id);
         // check if a neighbour entry exists
         {
-            let scheduler = SCHEDULER.get().read().unwrap();
+            let scheduler = router.scheduler.inner.read().unwrap();
             exists = scheduler.neighbours.contains_key(&node_id);
         }
 
         // if it does not exist add it to scheduler
         if !exists {
-            let mut scheduler = SCHEDULER.get().write().unwrap();
+            let mut scheduler = router.scheduler.inner.write().unwrap();
             let interval = scheduler.interval;
             scheduler.neighbours.insert(
                 node_id,
@@ -203,16 +297,16 @@ impl RouterInfo {
 
     /// Create routing information for a neighbour node,
     /// encode the information and return the byte code.
-    pub fn create(neighbour: PeerId, last_sent: u64, is_first: bool) -> Vec<u8> {
-        let node_id = Node::get_id();
+    pub fn create(state: &crate::QaulState, router: &super::RouterState, neighbour: PeerId, last_sent: u64, is_first: bool) -> Vec<u8> {
+        let node_id = Node::get_id(state);
 
         // create routing table
-        let routes = RoutingTable::create_routing_info(neighbour, last_sent);
+        let routes = router.routing_table.create_routing_info(neighbour, last_sent);
 
         // create latest Feed ids table
         let feeds = router_net_proto::FeedIdsTable {
             ids: if is_first {
-                Feed::get_latest_message_ids(5)
+                state.services.feed.get_latest_message_ids(5)
             } else {
                 Vec::new()
             },
@@ -249,7 +343,7 @@ impl RouterInfo {
             .expect("Vec<u8> provides capacity as needed");
 
         // sign data
-        let keys = Node::get_keys();
+        let keys = Node::get_keys(state);
         let signature = keys.sign(&buf).unwrap();
 
         // create signed container
@@ -268,8 +362,8 @@ impl RouterInfo {
     }
 
     /// creating feed request message
-    pub fn create_feed_request(ids: &[Vec<u8>]) -> Vec<u8> {
-        let node_id = Node::get_id();
+    pub fn create_feed_request(state: &crate::QaulState, ids: &[Vec<u8>]) -> Vec<u8> {
+        let node_id = Node::get_id(state);
 
         //create latest Feed ids table
         let feeds = router_net_proto::FeedIdsTable { ids: ids.to_vec() };
@@ -296,7 +390,7 @@ impl RouterInfo {
             .expect("Vec<u8> provides capacity as needed");
 
         // sign data
-        let keys = Node::get_keys();
+        let keys = Node::get_keys(state);
         let signature = keys.sign(&buf).unwrap();
 
         // create signed container
@@ -315,8 +409,8 @@ impl RouterInfo {
     }
 
     /// create_feed_response
-    pub fn create_feed_response(messages: &[(Vec<u8>, Vec<u8>, String, u64)]) -> Vec<u8> {
-        let node_id = Node::get_id();
+    pub fn create_feed_response(state: &crate::QaulState, messages: &[(Vec<u8>, Vec<u8>, String, u64)]) -> Vec<u8> {
+        let node_id = Node::get_id(state);
 
         // create latest Feed ids table
         let mut feeds = router_net_proto::FeedResponseTable {
@@ -354,7 +448,7 @@ impl RouterInfo {
             .expect("Vec<u8> provides capacity as needed");
 
         // sign data
-        let keys = Node::get_keys();
+        let keys = Node::get_keys(state);
         let signature = keys.sign(&buf).unwrap();
 
         // create signed container
@@ -373,8 +467,8 @@ impl RouterInfo {
     }
 
     /// creating user request message
-    pub fn create_user_request(ids: &[Vec<u8>]) -> Vec<u8> {
-        let node_id = Node::get_id();
+    pub fn create_user_request(state: &crate::QaulState, ids: &[Vec<u8>]) -> Vec<u8> {
+        let node_id = Node::get_id(state);
 
         //create latest Feed ids table
         let users = router_net_proto::UserIdTable { ids: ids.to_vec() };
@@ -399,7 +493,7 @@ impl RouterInfo {
             .expect("Vec<u8> provides capacity as needed");
 
         // sign data
-        let keys = Node::get_keys();
+        let keys = Node::get_keys(state);
         let signature = keys.sign(&buf).unwrap();
 
         // create signed container
@@ -418,8 +512,8 @@ impl RouterInfo {
     }
 
     /// create_user_response
-    pub fn create_user_response(users: &router_net_proto::UserInfoTable) -> Vec<u8> {
-        let node_id = Node::get_id();
+    pub fn create_user_response(state: &crate::QaulState, users: &router_net_proto::UserInfoTable) -> Vec<u8> {
+        let node_id = Node::get_id(state);
         let timestamp = Timestamp::get_timestamp();
 
         let mut buf = Vec::with_capacity(users.encoded_len());
@@ -441,7 +535,7 @@ impl RouterInfo {
             .expect("Vec<u8> provides capacity as needed");
 
         // sign data
-        let keys = Node::get_keys();
+        let keys = Node::get_keys(state);
         let signature = keys.sign(&buf).unwrap();
 
         // create signed container
@@ -460,7 +554,7 @@ impl RouterInfo {
     }
 
     /// process received qaul_info message
-    pub fn received(received: QaulInfoReceived) {
+    pub fn received(state: &crate::QaulState, router: &super::RouterState, received: QaulInfoReceived) {
         // decode message to structure
         let decoding_result = router_net_proto::RouterInfoContainer::decode(&received.data[..]);
 
@@ -495,27 +589,31 @@ impl RouterInfo {
                                                 .iter()
                                                 .map(|e| e.user.clone())
                                                 .collect::<Vec<_>>();
-                                            let missed_users = Users::get_missed_ids(&user_ids);
+                                            let missed_users = Users::get_missed_ids(router, &user_ids);
                                             if !missed_users.is_empty() {
                                                 UserRequester::add(
+                                                    router,
                                                     &received.received_from,
                                                     &missed_users,
                                                 );
                                             }
 
                                             //process routing table
-                                            ConnectionTable::process_received_routing_info(
+                                            router.connections.process_received_routing_info(
                                                 received.received_from,
                                                 &entry,
+                                                &router.neighbours,
+                                                &router.configuration,
                                             );
                                         }
                                         _ => {}
                                     }
                                     match feeds {
                                         Some(router_net_proto::FeedIdsTable { ids }) => {
-                                            let missing_ids = Feed::process_received_feed_ids(&ids);
+                                            let missing_ids = state.services.feed.process_received_feed_ids(&ids);
                                             if !missing_ids.is_empty() {
                                                 FeedRequester::add(
+                                                    router,
                                                     &received.received_from,
                                                     &missing_ids,
                                                 );
@@ -532,9 +630,9 @@ impl RouterInfo {
                                 if let Ok(message) = message_info {
                                     match message.feeds {
                                         Some(table) => {
-                                            let feeds = Feed::get_messges_by_ids(&table.ids);
+                                            let feeds = state.services.feed.get_messages_by_ids(&table.ids);
                                             if !feeds.is_empty() {
-                                                FeedResponser::add(&received.received_from, &feeds);
+                                                FeedResponser::add(router, &received.received_from, &feeds);
                                             }
                                         }
                                         _ => {}
@@ -554,7 +652,7 @@ impl RouterInfo {
                                                 user_ids.push(QaulId::bytes_to_q8id(
                                                     feed.sender_id.clone(),
                                                 ));
-                                                Feed::save_message_by_sync(
+                                                state.services.feed.save_message_by_sync(
                                                     &feed.message_id,
                                                     &feed.sender_id,
                                                     feed.content,
@@ -562,9 +660,10 @@ impl RouterInfo {
                                                 );
                                             }
                                             // check missed users
-                                            let missed_users = Users::get_missed_ids(&user_ids);
+                                            let missed_users = Users::get_missed_ids(router, &user_ids);
                                             if !missed_users.is_empty() {
                                                 UserRequester::add(
+                                                    router,
                                                     &received.received_from,
                                                     &missed_users,
                                                 );
@@ -578,15 +677,15 @@ impl RouterInfo {
                                 let message_info =
                                     router_net_proto::UserIdTable::decode(&content.content[..]);
                                 if let Ok(message) = message_info {
-                                    let table = Users::get_user_info_table_by_q8ids(&message.ids);
-                                    UserResponser::add(&received.received_from, &table);
+                                    let table = Users::get_user_info_table_by_q8ids(router, &message.ids);
+                                    UserResponser::add(router, &received.received_from, &table);
                                 }
                             }
                             Ok(router_net_proto::RouterInfoModule::UserResponse) => {
                                 let message_info =
                                     router_net_proto::UserInfoTable::decode(&content.content[..]);
                                 if let Ok(message) = message_info {
-                                    Users::add_user_info_table(&message.info);
+                                    Users::add_user_info_table(state, router, &message.info);
                                 }
                             }
                             Err(_) => {}

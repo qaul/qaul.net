@@ -10,10 +10,11 @@ pub struct RtcMessaging {}
 impl RtcMessaging {
     /// process rtc message command from cli
     pub fn send_message(
+        state: &crate::QaulState,
         my_user_id: &PeerId,
         req: &super::proto_rpc::RtcOutgoing,
     ) -> Result<bool, String> {
-        match super::Rtc::get_session_from_id(&req.group_id) {
+        match super::Rtc::get_session_from_id(state, &req.group_id) {
             Some(session) => {
                 if session.state != 3 {
                     return Err("session is not established".to_string());
@@ -34,9 +35,10 @@ impl RtcMessaging {
                 };
 
                 let message_id: Vec<u8> = Vec::new();
-                if let Some(user_account) = UserAccounts::get_by_id(*my_user_id) {
+                if let Some(user_account) = UserAccounts::get_by_id(state, *my_user_id) {
                     let receiver = PeerId::from_bytes(&req.group_id).unwrap();
                     if let Err(e) = messaging::Messaging::pack_and_send_message(
+                        state,
                         &user_account,
                         &receiver,
                         send_message.encode_to_vec(),
@@ -60,12 +62,13 @@ impl RtcMessaging {
     /// proccess message from network
     #[allow(dead_code)]
     pub fn on_message(
+        state: &crate::QaulState,
         sender_id: &PeerId,
         _receiver_id: &PeerId,
         req: &super::proto_net::RtcMessage,
         _signature: Vec<u8>,
     ) {
-        match super::Rtc::get_session_from_id(&sender_id.to_bytes()) {
+        match super::Rtc::get_session_from_id(state, &sender_id.to_bytes()) {
             None => {
                 log::error!(
                     "on_message session does not exist {}",
@@ -91,6 +94,7 @@ impl RtcMessaging {
 
                 // send message
                 Rpc::send_message(
+                    state,
                     buf,
                     crate::rpc::proto::Modules::Rtc.into(),
                     "".to_string(),
