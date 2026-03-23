@@ -1,0 +1,148 @@
+{
+  "topology": "grid8-4x4",
+  "node_count": 16,
+  "tests": {
+    "test_direct_messages": {
+      "passed": true,
+      "sender": "0000",
+      "recipient": "000f",
+      "snooper": "0008",
+      "delivery_time_s": 5,
+      "notes": "delivered in 5s, not seen on 0008",
+      "elapsed_s": 5.2
+    },
+    "test_feed_distribution": {
+      "passed": false,
+      "notes": "propagation incomplete after 120s",
+      "missing": [
+        {
+          "node": "0000",
+          "missing": "feed-dist-000c-1774277861"
+        },
+        {
+          "node": "0001",
+          "missing": "feed-dist-000c-1774277861"
+        },
+        {
+          "node": "0002",
+          "missing": "feed-dist-000c-1774277861"
+        },
+        {
+          "node": "0003",
+          "missing": "feed-dist-000c-1774277861"
+        },
+        {
+          "node": "0004",
+          "missing": "feed-dist-000c-1774277861"
+        },
+        {
+          "node": "0005",
+          "missing": "feed-dist-000c-1774277861"
+        },
+        {
+          "node": "0006",
+          "missing": "feed-dist-000c-1774277861"
+        },
+        {
+          "node": "0007",
+          "missing": "feed-dist-000c-1774277861"
+        },
+        {
+          "node": "0008",
+          "missing": "feed-dist-000c-1774277861"
+        },
+        {
+          "node": "0009",
+          "missing": "feed-dist-000c-1774277861"
+        },
+        {
+          "node": "000a",
+          "missing": "feed-dist-000c-1774277861"
+        },
+        {
+          "node": "000b",
+          "missing": "feed-dist-000c-1774277861"
+        },
+        {
+          "node": "000c",
+          "missing": "feed-dist-0000-1774277861"
+        },
+        {
+          "node": "000c",
+          "missing": "feed-dist-0001-1774277861"
+        },
+        {
+          "node": "000c",
+          "missing": "feed-dist-0002-1774277861"
+        },
+        {
+          "node": "000c",
+          "missing": "feed-dist-0003-1774277861"
+        },
+        {
+          "node": "000c",
+          "missing": "feed-dist-0004-1774277861"
+        },
+        {
+          "node": "000c",
+          "missing": "feed-dist-0005-1774277861"
+        },
+        {
+          "node": "000c",
+          "missing": "feed-dist-0006-1774277861"
+        },
+        {
+          "node": "000c",
+          "missing": "feed-dist-0007-1774277861"
+        },
+        {
+          "node": "000c",
+          "missing": "feed-dist-0008-1774277861"
+        },
+        {
+          "node": "000c",
+          "missing": "feed-dist-0009-1774277861"
+        },
+        {
+          "node": "000c",
+          "missing": "feed-dist-000a-1774277861"
+        },
+        {
+          "node": "000c",
+          "missing": "feed-dist-000b-1774277861"
+        },
+        {
+          "node": "000c",
+          "missing": "feed-dist-000d-1774277861"
+        },
+        {
+          "node": "000c",
+          "missing": "feed-dist-000e-1774277861"
+        },
+        {
+          "node": "000c",
+          "missing": "feed-dist-000f-1774277861"
+        },
+        {
+          "node": "000d",
+          "missing": "feed-dist-000c-1774277861"
+        },
+        {
+          "node": "000e",
+          "missing": "feed-dist-000c-1774277861"
+        },
+        {
+          "node": "000f",
+          "missing": "feed-dist-000c-1774277861"
+        }
+      ],
+      "elapsed_s": 132.6
+    },
+    "test_degraded_links": {
+      "passed": null,
+      "notes": "skipped \u2014 grid topology"
+    }
+  },
+  "overall_passed": false,
+  "timestamp": "2026-03-23T14:56:45.404147+00:00"
+}

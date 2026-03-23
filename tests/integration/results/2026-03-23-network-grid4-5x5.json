@@ -1,0 +1,56 @@
+{
+  "topology": "grid4-5x5",
+  "node_count": 25,
+  "tests": {
+    "test_direct_messages": {
+      "passed": true,
+      "sender": "0000",
+      "recipient": "0018",
+      "snooper": "000c",
+      "delivery_time_s": 5,
+      "notes": "delivered in 5s, not seen on 000c",
+      "elapsed_s": 5.2
+    },
+    "test_feed_distribution": {
+      "passed": false,
+      "notes": "propagation incomplete after 120s",
+      "missing": [
+        {
+          "node": "0004",
+          "missing": "feed-dist-000a-1774277658"
+        },
+        {
+          "node": "0004",
+          "missing": "feed-dist-000f-1774277658"
+        },
+        {
+          "node": "0004",
+          "missing": "feed-dist-0010-1774277658"
+        },
+        {
+          "node": "0004",
+          "missing": "feed-dist-0011-1774277658"
+        },
+        {
+          "node": "0004",
+          "missing": "feed-dist-0014-1774277658"
+        },
+        {
+          "node": "0004",
+          "missing": "feed-dist-0015-1774277658"
+        },
+        {
+          "node": "0004",
+          "missing": "feed-dist-0016-1774277658"
+        }
+      ],
+      "elapsed_s": 143.7
+    },
+    "test_degraded_links": {
+      "passed": null,
+      "notes": "skipped \u2014 grid topology"
+    }
+  },
+  "overall_passed": false,
+  "timestamp": "2026-03-23T14:51:46.284299+00:00"
+}

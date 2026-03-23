@@ -1,0 +1,12 @@
+{
+  "topology": "line-5",
+  "node_count": 5,
+  "tests": {
+    "_setup": {
+      "passed": false,
+      "notes": "only 2/5 users after 200s"
+    }
+  },
+  "overall_passed": false,
+  "timestamp": "2026-03-19T14:33:35.350545+00:00"
+}
