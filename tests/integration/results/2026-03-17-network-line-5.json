@@ -1,0 +1,23 @@
+{
+  "topology": "line-5",
+  "node_count": 5,
+  "tests": {
+    "test_direct_messages": {
+      "passed": false,
+      "notes": "ERROR: No Local entry in router table for node 0004",
+      "elapsed_s": 0.0
+    },
+    "test_feed_distribution": {
+      "passed": false,
+      "notes": "feed propagation incomplete after 90s:\n  node 0000: missing 3 message(s): {'feed-dist-0003-1773763488', 'feed-dist-0004-1773763488', 'feed-dist-0002-1773763488'}\n  node 0001: missing 3 message(s): {'feed-dist-0003-1773763488', 'feed-dist-0004-1773763488', 'feed-dist-0002-1773763488'}\n  node 0002: missing 2 message(s): {'feed-dist-0000-1773763488', 'feed-dist-0001-1773763488'}\n  node 0003: missing 2 message(s): {'feed-dist-0000-1773763488', 'feed-dist-0001-1773763488'}\n  node 0004: missing 2 message(s): {'feed-dist-0000-1773763488', 'feed-dist-0001-1773763488'}",
+      "elapsed_s": 133.2
+    },
+    "test_degraded_links": {
+      "passed": false,
+      "notes": "convergence not reached within 120s",
+      "elapsed_s": 120.7
+    }
+  },
+  "overall_passed": false,
+  "timestamp": "2026-03-17T16:04:00.983715+00:00"
+}
