@@ -1,0 +1,29 @@
+{
+  "topology": "grid4-3x3",
+  "node_count": 9,
+  "tests": {
+    "test_direct_messages": {
+      "passed": true,
+      "sender": "0000",
+      "recipient": "0008",
+      "snooper": "0004",
+      "delivery_time_s": 6,
+      "notes": "delivered in 6s, not seen on 0004",
+      "elapsed_s": 5.2
+    },
+    "test_feed_distribution": {
+      "passed": true,
+      "node_count": 9,
+      "message_count": 9,
+      "propagation_time_s": 2,
+      "notes": "all 9 nodes received all 9 messages in 2s",
+      "elapsed_s": 2.8
+    },
+    "test_degraded_links": {
+      "passed": null,
+      "notes": "skipped \u2014 grid topology"
+    }
+  },
+  "overall_passed": true,
+  "timestamp": "2026-03-23T14:49:10.668168+00:00"
+}
