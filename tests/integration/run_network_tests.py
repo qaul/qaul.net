@@ -27,11 +27,11 @@ from lib.node import Node
 from lib.topology import load_node_ids
 
 TOPOLOGIES = [
-    {"file": "topologies/line-5.json",   "discovery_wait": 200, "run_degraded": True},
-    {"file": "topologies/line-10.json",  "discovery_wait": 250, "run_degraded": True},
-    {"file": "topologies/grid4-3x3.json","discovery_wait": 150, "run_degraded": False},
-    {"file": "topologies/grid4-5x5.json","discovery_wait": 200, "run_degraded": False},
-    {"file": "topologies/grid8-4x4.json","discovery_wait": 120, "run_degraded": False},
+    {"file": "topologies/line-5.json",   "discovery_wait": 200, "degraded_loss_percents": [30, 50, 80]},
+    {"file": "topologies/line-10.json",  "discovery_wait": 400, "degraded_loss_percents": [30, 50, 80]},
+    {"file": "topologies/grid4-3x3.json","discovery_wait": 200, "degraded_loss_percents": []},
+    {"file": "topologies/grid4-5x5.json","discovery_wait": 250, "degraded_loss_percents": []},
+    {"file": "topologies/grid8-4x4.json","discovery_wait": 200, "degraded_loss_percents": []},
 ]
 
 
@@ -59,23 +59,34 @@ def wait_for_convergence(node_ids: list[str], timeout: int = 200):
         known = len(observer.known_users())
         raise TimeoutError(f"only {known}/{len(node_ids)} users after {timeout}s")
 
-    # prove pubsub mesh is ready with a sentinel message
-    sentinel = f"sentinel-{int(time.time())}"
-    observer.send_feed_message(sentinel)
-    print(f"  sent sentinel '{sentinel}', waiting for all nodes to receive it...")
+    # prove pubsub mesh is ready with a sentinel message.
+    # floodsub connections lag behind routing by up to 60-120s, so the first
+    # sentinel may be sent before the mesh is formed and get lost. resend every
+    # 30s: once pubsub stabilises, the next sentinel will reach all nodes.
+    sent_sentinels: list[str] = []
+    deadline = time.time() + 300
+    last_sent = 0.0
 
-    deadline = time.time() + 120
     while time.time() < deadline:
-        if all(sentinel in Node(nid).feed_message_contents() for nid in sorted_ids):
-            print("  sentinel received by all nodes — mesh is ready")
-            return
+        if time.time() - last_sent >= 30:
+            sentinel = f"sentinel-{int(time.time())}"
+            observer.send_feed_message(sentinel)
+            sent_sentinels.append(sentinel)
+            print(f"  sent sentinel '{sentinel}', waiting for all nodes to receive it...")
+            last_sent = time.time()
+
+        for s in sent_sentinels:
+            if all(s in Node(nid).feed_message_contents() for nid in sorted_ids):
+                print("  sentinel received by all nodes — mesh is ready")
+                return
+
         time.sleep(5)
 
-    missing = [nid for nid in sorted_ids if sentinel not in Node(nid).feed_message_contents()]
-    raise TimeoutError(f"sentinel not received by {missing} within 120s")
+    missing = [nid for nid in sorted_ids if sent_sentinels[-1] not in Node(nid).feed_message_contents()]
+    raise TimeoutError(f"sentinel not received by {missing} within 300s")
 
 
-def run_bash_test(script: str, node_ids: list[str]) -> dict:
+def run_bash_test(script: str, node_ids: list[str], env: dict | None = None) -> dict:
     """
     Run a bash test script with node IDs as arguments.
     Progress messages go to the terminal (stderr is inherited).
@@ -83,12 +94,16 @@ def run_bash_test(script: str, node_ids: list[str]) -> dict:
     """
     t0 = time.time()
     script_path = os.path.join(os.path.dirname(__file__), script)
+    run_env = os.environ.copy()
+    if env:
+        run_env.update(env)
     try:
         result = subprocess.run(
             ["bash", script_path] + node_ids,
             stdout=subprocess.PIPE,
             text=True,
             timeout=300,
+            env=run_env,
         )
         elapsed = round(time.time() - t0, 1)
         json_lines = [l for l in result.stdout.splitlines() if l.strip().startswith("{")]
@@ -125,20 +140,12 @@ def run_topology(config: dict) -> dict:
         wait_for_nodes(node_ids, timeout=60)
         wait_for_convergence(node_ids, timeout=config["discovery_wait"])
 
-        tests = [
+        suite_passed = True
+
+        for test_name, script in [
             ("test_direct_messages",   "test_direct_messages.sh"),
             ("test_feed_distribution", "test_feed_distribution.sh"),
-        ]
-        if config["run_degraded"]:
-            tests.append(("test_degraded_links", "test_degraded_links.sh"))
-        else:
-            record["tests"]["test_degraded_links"] = {
-                "passed": None,
-                "notes": "skipped — grid topology",
-            }
-
-        suite_passed = True
-        for test_name, script in tests:
+        ]:
             print(f"\n  [{test_name}]")
             result = run_bash_test(script, sorted_ids)
             record["tests"][test_name] = result
@@ -147,6 +154,27 @@ def run_topology(config: dict) -> dict:
             else:
                 print(f"    FAIL: {result.get('notes', '')}")
                 suite_passed = False
+
+        loss_percents = config.get("degraded_loss_percents", [])
+        if loss_percents:
+            for pct in loss_percents:
+                test_name = f"test_degraded_links_{pct}pct"
+                print(f"\n  [{test_name}]")
+                result = run_bash_test(
+                    "test_degraded_links.sh", sorted_ids,
+                    env={"LOSS_PERCENT": str(pct)},
+                )
+                record["tests"][test_name] = result
+                if result.get("passed"):
+                    print(f"    pass ({result.get('elapsed_s', '?')}s)")
+                else:
+                    print(f"    FAIL: {result.get('notes', '')}")
+                    suite_passed = False
+        else:
+            record["tests"]["test_degraded_links"] = {
+                "passed": None,
+                "notes": "skipped — grid topology",
+            }
 
         record["overall_passed"] = suite_passed
 
