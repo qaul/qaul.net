@@ -26,6 +26,7 @@ def start_qaul():
     returns empty). A hard pkill here guarantees a clean slate every time.
     """
     subprocess.run(["sudo", "pkill", "-SIGKILL", "-x", "qauld"], capture_output=True)
+    subprocess.run(["sudo", "sh", "-c", "rm -f /tmp/qaul-*.pid"], capture_output=True)
     time.sleep(2)
     subprocess.run(["sudo", f"{MESHNET_LAB}/software.py", "start", "qaul"], check=True)
 
