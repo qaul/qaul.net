@@ -18,7 +18,15 @@ def clear_topology():
 
 
 def start_qaul():
-    """Start qauld in all namespaces."""
+    """Start qauld in all namespaces.
+
+    Kills any stale qauld processes first. software.py start qaul is a no-op
+    when processes are already running (PID file check), and stop_qaul() cannot
+    kill processes whose namespaces have already been deleted (get_remote_mapping
+    returns empty). A hard pkill here guarantees a clean slate every time.
+    """
+    subprocess.run(["sudo", "pkill", "-SIGKILL", "-x", "qauld"], capture_output=True)
+    time.sleep(2)
     subprocess.run(["sudo", f"{MESHNET_LAB}/software.py", "start", "qaul"], check=True)
 
 
