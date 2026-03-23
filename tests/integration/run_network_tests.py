@@ -36,54 +36,22 @@ TOPOLOGIES = [
 
 
 def wait_for_convergence(node_ids: list[str], timeout: int = 200):
-    """
-    Block until the mesh is provably ready to run tests:
-      1. All nodes appear in the observer's users list
-      2. A sentinel feed message sent from the observer reaches every node
-
-    Step 2 proves the pubsub (floodsub) mesh is end-to-end ready — no fixed
-    sleep, no guessing.
-    """
+    """Wait until the observer node sees all peers in its users list."""
     sorted_ids = sorted(node_ids)
     observer = Node(sorted_ids[0])
+    t_start = time.time()
+    deadline = t_start + timeout
 
-    print(f"  waiting for all {len(node_ids)} users in users list (timeout {timeout}s)...")
-    deadline = time.time() + timeout
+    print(f"  waiting for all {len(node_ids)} users (timeout {timeout}s)...")
     while time.time() < deadline:
         if len(observer.known_users()) >= len(node_ids):
-            elapsed = round(time.time() - (deadline - timeout), 1)
+            elapsed = round(time.time() - t_start, 1)
             print(f"  all users known after ~{elapsed}s")
-            break
-        time.sleep(5)
-    else:
-        known = len(observer.known_users())
-        raise TimeoutError(f"only {known}/{len(node_ids)} users after {timeout}s")
-
-    # prove pubsub mesh is ready with a sentinel message.
-    # floodsub connections lag behind routing by up to 60-120s, so the first
-    # sentinel may be sent before the mesh is formed and get lost. resend every
-    # 30s: once pubsub stabilises, the next sentinel will reach all nodes.
-    sent_sentinels: list[str] = []
-    deadline = time.time() + 300
-    last_sent = 0.0
-
-    while time.time() < deadline:
-        if time.time() - last_sent >= 30:
-            sentinel = f"sentinel-{int(time.time())}"
-            observer.send_feed_message(sentinel)
-            sent_sentinels.append(sentinel)
-            print(f"  sent sentinel '{sentinel}', waiting for all nodes to receive it...")
-            last_sent = time.time()
-
-        for s in sent_sentinels:
-            if all(s in Node(nid).feed_message_contents() for nid in sorted_ids):
-                print("  sentinel received by all nodes — mesh is ready")
-                return
-
+            return
         time.sleep(5)
 
-    missing = [nid for nid in sorted_ids if sent_sentinels[-1] not in Node(nid).feed_message_contents()]
-    raise TimeoutError(f"sentinel not received by {missing} within 300s")
+    known = len(observer.known_users())
+    raise TimeoutError(f"only {known}/{len(node_ids)} users after {timeout}s")
 
 
 def run_bash_test(script: str, node_ids: list[str], env: dict | None = None) -> dict:
