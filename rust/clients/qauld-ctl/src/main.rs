@@ -9,7 +9,10 @@ use clap::Parser;
 use cli::{Cli, Commands};
 use futures::{SinkExt, StreamExt};
 use prost::Message;
-use tokio::net::UnixStream;
+use tokio::{
+    io::{AsyncRead, AsyncWrite},
+    net::UnixStream,
+};
 use tokio_util::codec::{Framed, LengthDelimitedCodec};
 use uuid::Uuid;
 
@@ -21,10 +24,17 @@ pub use qaul_proto::qaul_rpc as proto;
 mod cli;
 mod commands;
 
+/// Default TCP address used for windows
+#[cfg(windows)]
+const DEFAULT_TCP_ADDR: &str = "127.0.0.1:9199";
+
 /// A Pre flight requesst to get the user ID before executing any command
-async fn preflight_request(
-    client: &mut Framed<UnixStream, LengthDelimitedCodec>,
-) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+async fn preflight_request<T>(
+    client: &mut Framed<T, LengthDelimitedCodec>,
+) -> Result<Vec<u8>, Box<dyn std::error::Error>>
+where
+    T: AsyncRead + AsyncWrite + Unpin,
+{
     log::info!("executing preflight request");
     let (data, module) = commands::default_user_proto_message();
     let request_id = Uuid::new_v4().to_string();
@@ -59,25 +69,10 @@ async fn preflight_request(
     Ok(user_id_bytes)
 }
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    pretty_env_logger::init();
-
-    let cli = Cli::parse();
-    let qauld_sock = if let Some(socket) = cli.socket {
-        socket
-    } else if let Some(socket_dir) = cli.dir {
-        let path = PathBuf::from(socket_dir).join("qauld.sock");
-        path.to_str()
-            .expect("failed to get name of dir")
-            .to_string()
-    } else {
-        "qauld.sock".to_string()
-    };
-
-    let client = UnixStream::connect(&qauld_sock).await?;
-    println!("qauld-ctl connected to qauld daemon at: {qauld_sock}");
-
+async fn run<T>(client: T, cli: Cli) -> Result<(), Box<dyn std::error::Error>>
+where
+    T: AsyncRead + AsyncWrite + Unpin,
+{
     let mut framed_client = LengthDelimitedCodec::builder()
         .length_field_offset(0)
         .length_field_type::<u16>()
@@ -98,6 +93,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let (data, module) = rpc_command.encode_request()?;
+
     // Create RPC message container
     let proto_message = proto::QaulRpc {
         module: module.into(),
@@ -110,6 +106,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     proto_message
         .encode(&mut rpc_msg)
         .expect("Vec<u8> provides capacity as needed");
+
     framed_client.send(rpc_msg.into()).await?;
 
     if rpc_command.expects_response() {
@@ -119,6 +116,45 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 _ => {}
             }
         }
+    }
+
+    Ok(())
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    pretty_env_logger::init();
+    let cli = Cli::parse();
+
+    #[cfg(unix)]
+    {
+        let qauld_sock = if let Some(socket) = &cli.socket {
+            socket.clone()
+        } else if let Some(socket_dir) = &cli.dir {
+            let path = PathBuf::from(socket_dir).join("qauld.sock");
+            path.to_str()
+                .expect("failed to get name of dir")
+                .to_string()
+        } else {
+            "qauld.sock".to_string()
+        };
+
+        let client = UnixStream::connect(&qauld_sock).await?;
+        println!("qauld-ctl connected to qauld daemon at: {qauld_sock}");
+        run(client, cli).await?;
+    }
+
+    #[cfg(windows)]
+    {
+        let addr = if let Some(socket) = &cli.socket {
+            socket.clone()
+        } else {
+            DEFAULT_TCP_ADDR.to_string()
+        };
+
+        let client = TcpStream::connect(&addr).await?;
+        println!("qauld-ctl connected to qauld daemon at: {addr}");
+        run(client, cli).await?;
     }
 
     Ok(())
