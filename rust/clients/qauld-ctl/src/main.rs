@@ -9,12 +9,14 @@ use clap::Parser;
 use cli::{Cli, Commands};
 use futures::{SinkExt, StreamExt};
 use prost::Message;
-use tokio::{
-    io::{AsyncRead, AsyncWrite},
-    net::UnixStream,
-};
+use tokio::io::{AsyncRead, AsyncWrite};
 use tokio_util::codec::{Framed, LengthDelimitedCodec};
 use uuid::Uuid;
+
+#[cfg(windows)]
+use tokio::net::TcpStream;
+#[cfg(unix)]
+use tokio::net::UnixStream;
 
 use crate::commands::RpcCommand;
 
