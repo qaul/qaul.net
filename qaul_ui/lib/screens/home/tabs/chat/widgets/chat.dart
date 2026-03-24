@@ -23,13 +23,13 @@ import 'package:mime/mime.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' hide context, Context;
 import 'package:path_provider/path_provider.dart';
+import 'package:qaul_components/qaul_components.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:record/record.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:utils/utils.dart';
 
 import '../../../../../../decorators/cron_task_decorator.dart';
-import '../../../../../../decorators/loading_decorator.dart';
 import '../../../../../../l10n/app_localizations.dart';
 import '../../../../../../stores/stores.dart';
 import '../../../../../providers/providers.dart';
@@ -226,12 +226,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     if (room == null) {
       return Scaffold(
-        body: LoadingDecorator(
-          isLoading: true,
-          backgroundColor: Colors.transparent,
-          hideChildWhenLoading: true,
-          child: const SizedBox(width: 48, height: 48),
-        ),
+        body: const QaulLoadingIndicator(),
       );
     }
 

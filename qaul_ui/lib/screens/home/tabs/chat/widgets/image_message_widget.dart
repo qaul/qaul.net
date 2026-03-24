@@ -103,12 +103,7 @@ class _ImageMessageWidgetState extends State<ImageMessageWidget> {
         height: 80,
         width: 80,
         padding: const EdgeInsets.all(20),
-        child: LoadingDecorator(
-          isLoading: true,
-          backgroundColor: Colors.transparent,
-          hideChildWhenLoading: true,
-          child: const SizedBox(width: 40, height: 40),
-        ),
+        child: const QaulLoadingIndicator(),
       );
     } else if (_size.aspectRatio == 0) {
       image = Container(color: color, height: _size.height, width: _size.width);

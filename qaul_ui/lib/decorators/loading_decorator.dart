@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../widgets/widgets.dart';
+import 'package:qaul_components/qaul_components.dart';
 
 class LoadingDecorator extends StatelessWidget {
   const LoadingDecorator({
@@ -8,12 +7,10 @@ class LoadingDecorator extends StatelessWidget {
     required this.child,
     this.isLoading = false,
     this.backgroundColor = Colors.black26,
-    this.hideChildWhenLoading = false,
     this.loadingPadding = EdgeInsets.zero,
   });
   final bool isLoading;
   final Color backgroundColor;
-  final bool hideChildWhenLoading;
   final EdgeInsetsGeometry loadingPadding;
   final Widget child;
 
@@ -23,15 +20,7 @@ class LoadingDecorator extends StatelessWidget {
       children: [
         IgnorePointer(
           ignoring: isLoading,
-          child: hideChildWhenLoading
-              ? Visibility(
-                  visible: !isLoading,
-                  maintainState: true,
-                  maintainAnimation: true,
-                  maintainSize: true,
-                  child: child,
-                )
-              : child,
+          child: child,
         ),
         if (isLoading)
           Positioned.fill(
@@ -39,7 +28,7 @@ class LoadingDecorator extends StatelessWidget {
               color: backgroundColor,
               child: Padding(
                 padding: loadingPadding,
-                child: const LoadingIndicator(),
+                child: const QaulLoadingIndicator(),
               ),
             ),
           ),
