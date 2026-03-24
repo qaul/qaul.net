@@ -44,7 +44,7 @@ void main() {
     test('returns dark theme colors for Brightness.dark', () {
       final theme = ThemeData.dark();
       final (selected, icon, active) = navBarColors(theme);
-      expect(selected, kNavBarSelectedBackgroundDark);
+      expect(selected, const Color(0xFF333333));
       expect(icon, theme.iconTheme.color ?? Colors.white);
       expect(active, theme.navigationBarTheme.surfaceTintColor ?? theme.iconTheme.color ?? Colors.white);
     });
@@ -52,7 +52,7 @@ void main() {
     test('returns light theme colors for Brightness.light', () {
       final theme = ThemeData.light();
       final (selected, icon, active) = navBarColors(theme);
-      expect(selected, kNavBarSelectedBackgroundLight);
+      expect(selected, const Color(0xFFE5E5E5));
       expect(icon, kNavBarIconColorLight);
       expect(active, kNavBarIconColorLight);
     });
