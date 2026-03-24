@@ -403,6 +403,24 @@ impl UserAccounts {
         accounts.get_all_inner()
     }
 
+    /// Remove a user account from the in-memory state.
+    ///
+    /// Called by account management when deleting an account.
+    /// Does NOT modify config or disk — only the runtime vec.
+    pub fn remove(state: &crate::QaulState, user_id: PeerId) {
+        let mut users = state.user_accounts.inner.write().unwrap();
+        users.users.retain(|u| u.id != user_id);
+    }
+
+    /// Add an existing UserAccount to the in-memory state.
+    ///
+    /// Called by account management when restoring an account.
+    /// Does NOT modify config or disk — only the runtime vec.
+    pub fn add(state: &crate::QaulState, user: UserAccount) {
+        let mut users = state.user_accounts.inner.write().unwrap();
+        users.users.push(user);
+    }
+
     /// checks if user account exists
     ///
     /// returns true if a user account with the given ID exists
