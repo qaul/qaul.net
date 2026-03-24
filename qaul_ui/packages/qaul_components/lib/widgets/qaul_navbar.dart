@@ -60,11 +60,7 @@ String navBarTabIconPath(TabType tab, bool selected) {
 
 @visibleForTesting
 (Color, Color, Color) navBarColors(ThemeData theme) {
-  final colorSheet = QaulColorSheet(
-  );
-  colorSheet.mode = theme.brightness == Brightness.dark
-      ? QaulColorMode.dark
-      : QaulColorMode.light;
+  final colorSheet = QaulColorSheet(theme.brightness);
   final iconColor = theme.iconTheme.color ?? Colors.white;
   if (theme.brightness == Brightness.dark) {
     return (
@@ -83,8 +79,6 @@ String navBarTabIconPath(TabType tab, bool selected) {
 const double _kNavBarSelectedSize = 45.0;
 const double _kNavBarSelectedRadius = 10.0;
 const double _kNavBarVerticalSpacing = 41.5;
-@visibleForTesting
-const Color kNavBarSelectedBackgroundDark = Color(0xFF898989);
 const Color _kNavBarDarkBackground = Color(0xFF000000);
 const double _kNavBarMobileHeight = 100.0;
 const double _kNavBarHorizontalPadding = 8.0;
@@ -110,8 +104,6 @@ Size navBarTabIconSize(TabType tab) =>
     _kNavBarTabIconSizes[tab] ?? (throw StateError('$tab has no icon size'));
 
 const Size _kNavBarMenuIconSize = Size(4.92, 20);
-@visibleForTesting
-const Color kNavBarSelectedBackgroundLight = Color(0xFFE5E5E5);
 @visibleForTesting
 const Color kNavBarIconColorLight = Color(0xFF000000);
 
