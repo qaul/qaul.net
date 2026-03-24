@@ -20,7 +20,7 @@ mod crypto25519;
 pub mod events;
 mod noise;
 pub mod sessionmanager;
-mod storage;
+pub mod storage;
 
 use rand::Rng;
 

@@ -54,6 +54,8 @@ crc = "3.2"
 fs_extra = "1.3"
 semver = "1.0"
 argon2 = "0.5.3"
+tar = "0.4"
+flate2 = "1.0"
 
 # Search module dependencies
 tantivy = "0.25.0"
