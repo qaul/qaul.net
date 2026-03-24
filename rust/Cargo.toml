@@ -4,9 +4,6 @@ members = [
     # qaul library
     "libqaul",
 
-    # ble module
-    "ble_module",
-    
     # protobuf types
     "qaul-proto",
 
@@ -19,3 +16,4 @@ members = [
     "libp2p_modules/qaul_info",
     "libp2p_modules/qaul_messaging"
 ]
+exclude = ["ble_module"]
