@@ -329,12 +329,7 @@ class _QaulNavBarVerticalLayout extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   tabList,
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: _kNavBarVerticalMenuPadding,
-                    ),
-                    child: menuButton,
-                  ),
+                  menuSection,
                 ],
               );
 
@@ -348,12 +343,11 @@ class _QaulNavBarVerticalLayout extends StatelessWidget {
       },
     );
 
-    if (isLandscape) return bar;
-
     return SafeArea(
-      top: portrait,
-      left: portrait || !ltr,
-      right: portrait || ltr,
+      top: !isLandscape,
+      left: isLandscape ? !ltr : true,
+      right: isLandscape ? ltr : true,
+      bottom: false,
       child: bar,
     );
   }
