@@ -84,6 +84,15 @@ const double _kNavBarMobileHeight = 100.0;
 const double _kNavBarHorizontalPadding = 16.0;
 const double _kNavBarVerticalTopSpacing = 24.0;
 const double _kNavBarVerticalMenuPadding = 24.0;
+// Vertical metrics lerp: when available height is between compact and loose,
+// spacing is interpolated linearly. Below compact the navbar becomes scrollable
+// via SingleChildScrollView as a last resort.
+// Compact ≈ iPhone SE landscape minus safe-area (~300 px visible).
+// Loose ≈ iPad portrait / large phone portrait (~520 px visible).
+const double _kNavBarHeightCompact = 300.0;
+const double _kNavBarHeightLoose = 520.0;
+// Minimum gap used at the compact end of the lerp.
+const double _kNavBarCompactGap = 10.0;
 const double _kNavBarLabelTopPadding = 4.0;
 const double _kNavBarVerticalWidthPercentage = 0.1;
 const double _kNavBarVerticalMaxWidth = 1000.0;
@@ -112,6 +121,31 @@ const TextStyle _kNavBarLabelStyle = TextStyle(
   fontSize: 8,
   fontWeight: FontWeight.w600,
 );
+
+typedef _NavBarVerticalMetrics = ({
+  double topPadding,
+  double gap,
+  double menuPadding,
+});
+
+_NavBarVerticalMetrics _navBarVerticalMetricsForHeight(double maxHeight) {
+  if (!maxHeight.isFinite || maxHeight <= 0) {
+    return (
+      topPadding: _kNavBarVerticalTopSpacing,
+      gap: _kNavBarVerticalSpacing,
+      menuPadding: _kNavBarVerticalMenuPadding,
+    );
+  }
+  final t =
+      ((maxHeight - _kNavBarHeightCompact) / (_kNavBarHeightLoose - _kNavBarHeightCompact))
+          .clamp(0.0, 1.0);
+  double lerpLoose(double compact, double loose) => compact + (loose - compact) * t;
+  return (
+    topPadding: lerpLoose(_kNavBarCompactGap, _kNavBarVerticalTopSpacing),
+    gap: lerpLoose(_kNavBarCompactGap, _kNavBarVerticalSpacing),
+    menuPadding: lerpLoose(_kNavBarCompactGap, _kNavBarVerticalMenuPadding),
+  );
+}
 
 const Map<NavBarOverflowOption, String> _kNavBarOverflowMenuLabelsEn = {
   NavBarOverflowOption.settings: 'Settings',
@@ -214,77 +248,107 @@ class _QaulNavBarVerticalLayout extends StatelessWidget {
       onOverflowSelected: onOverflowSelected,
     );
 
-    return SafeArea(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final width = constraints.maxWidth.isFinite
-              ? (constraints.maxWidth * _kNavBarVerticalWidthPercentage).clamp(
-                  0.0,
-                  _kNavBarVerticalMaxWidth,
-                )
-              : _kNavBarVerticalDefaultWidth;
-          return ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: width),
-            child: _BarBackground(
-              vertical: true,
-              child: Column(
+    final ltr = Directionality.of(context) == TextDirection.ltr;
+    final isLandscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
+
+    final bar = LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth.isFinite
+            ? (constraints.maxWidth * _kNavBarVerticalWidthPercentage).clamp(
+                0.0,
+                _kNavBarVerticalMaxWidth,
+              )
+            : _kNavBarVerticalDefaultWidth;
+        final maxH = constraints.maxHeight;
+        final metrics = _navBarVerticalMetricsForHeight(maxH);
+        final hasBoundedHeight = maxH.isFinite;
+
+        final tabList = Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: metrics.topPadding),
+            _NavBarItem(
+              tab: TabType.account,
+              isSelected: selectedTab == TabType.account,
+              onTap: () => onTabSelected(TabType.account),
+              avatarChild: avatarChild,
+              tooltip: tooltips[TabType.account] ?? '',
+            ),
+            SizedBox(height: metrics.gap),
+            _NavBarItem(
+              tab: TabType.public,
+              isSelected: selectedTab == TabType.public,
+              onTap: () => onTabSelected(TabType.public),
+              tooltip: tooltips[TabType.public] ?? '',
+              badgeCount: publicNotificationCount,
+            ),
+            SizedBox(height: metrics.gap),
+            _NavBarItem(
+              tab: TabType.users,
+              isSelected: selectedTab == TabType.users,
+              onTap: () => onTabSelected(TabType.users),
+              tooltip: tooltips[TabType.users] ?? '',
+            ),
+            SizedBox(height: metrics.gap),
+            _NavBarItem(
+              tab: TabType.chat,
+              isSelected: selectedTab == TabType.chat,
+              onTap: () => onTabSelected(TabType.chat),
+              tooltip: tooltips[TabType.chat] ?? '',
+              badgeCount: chatNotificationCount,
+            ),
+            SizedBox(height: metrics.gap),
+            _NavBarItem(
+              tab: TabType.network,
+              isSelected: selectedTab == TabType.network,
+              onTap: () => onTabSelected(TabType.network),
+              tooltip: tooltips[TabType.network] ?? '',
+            ),
+          ],
+        );
+
+        final menuSection = Padding(
+          padding: EdgeInsets.symmetric(vertical: metrics.menuPadding),
+          child: menuButton,
+        );
+
+        final barChild = hasBoundedHeight
+            ? Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      physics: const ClampingScrollPhysics(),
+                      child: tabList,
+                    ),
+                  ),
+                  menuSection,
+                ],
+              )
+            : Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: _kNavBarVerticalTopSpacing),
-                      _NavBarItem(
-                        tab: TabType.account,
-                        isSelected: selectedTab == TabType.account,
-                        onTap: () => onTabSelected(TabType.account),
-                        avatarChild: avatarChild,
-                        tooltip: tooltips[TabType.account] ?? '',
-                      ),
-                      const SizedBox(height: _kNavBarVerticalSpacing),
-                      _NavBarItem(
-                        tab: TabType.public,
-                        isSelected: selectedTab == TabType.public,
-                        onTap: () => onTabSelected(TabType.public),
-                        tooltip: tooltips[TabType.public] ?? '',
-                        badgeCount: publicNotificationCount,
-                      ),
-                      const SizedBox(height: _kNavBarVerticalSpacing),
-                      _NavBarItem(
-                        tab: TabType.users,
-                        isSelected: selectedTab == TabType.users,
-                        onTap: () => onTabSelected(TabType.users),
-                        tooltip: tooltips[TabType.users] ?? '',
-                      ),
-                      const SizedBox(height: _kNavBarVerticalSpacing),
-                      _NavBarItem(
-                        tab: TabType.chat,
-                        isSelected: selectedTab == TabType.chat,
-                        onTap: () => onTabSelected(TabType.chat),
-                        tooltip: tooltips[TabType.chat] ?? '',
-                        badgeCount: chatNotificationCount,
-                      ),
-                      const SizedBox(height: _kNavBarVerticalSpacing),
-                      _NavBarItem(
-                        tab: TabType.network,
-                        isSelected: selectedTab == TabType.network,
-                        onTap: () => onTabSelected(TabType.network),
-                        tooltip: tooltips[TabType.network] ?? '',
-                      ),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: _kNavBarVerticalMenuPadding,
-                    ),
-                    child: menuButton,
-                  ),
+                  tabList,
+                  menuSection,
                 ],
-              ),
-            ),
-          );
-        },
-      ),
+              );
+
+        return ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: width),
+          child: _BarBackground(
+            vertical: true,
+            child: barChild,
+          ),
+        );
+      },
+    );
+
+    return SafeArea(
+      top: !isLandscape,
+      left: isLandscape ? !ltr : true,
+      right: isLandscape ? ltr : true,
+      bottom: false,
+      child: bar,
     );
   }
 }
