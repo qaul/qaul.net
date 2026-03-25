@@ -84,8 +84,14 @@ const double _kNavBarMobileHeight = 100.0;
 const double _kNavBarHorizontalPadding = 16.0;
 const double _kNavBarVerticalTopSpacing = 24.0;
 const double _kNavBarVerticalMenuPadding = 24.0;
+// Vertical metrics lerp: when available height is between compact and loose,
+// spacing is interpolated linearly. Below compact the navbar becomes scrollable
+// via SingleChildScrollView as a last resort.
+// Compact ≈ iPhone SE landscape minus safe-area (~300 px visible).
+// Loose ≈ iPad portrait / large phone portrait (~520 px visible).
 const double _kNavBarHeightCompact = 300.0;
 const double _kNavBarHeightLoose = 520.0;
+// Minimum gap used at the compact end of the lerp.
 const double _kNavBarCompactGap = 10.0;
 const double _kNavBarLabelTopPadding = 4.0;
 const double _kNavBarVerticalWidthPercentage = 0.1;
@@ -243,9 +249,8 @@ class _QaulNavBarVerticalLayout extends StatelessWidget {
     );
 
     final ltr = Directionality.of(context) == TextDirection.ltr;
-    final mq = MediaQuery.of(context);
-    final isLandscape = mq.size.width > mq.size.height;
-    final portrait = !isLandscape;
+    final isLandscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
 
     final bar = LayoutBuilder(
       builder: (context, constraints) {
