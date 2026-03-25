@@ -405,70 +405,41 @@ class _BarBackground extends StatelessWidget {
   }
 }
 
-Widget _buildMenuButtonBase({
+Widget _buildVerticalMenuButton({
   required Map<NavBarOverflowOption, String> overflowMenuLabels,
   required void Function(NavBarOverflowOption) onOverflowSelected,
-  required EdgeInsetsGeometry? padding,
-  required Widget Function(BuildContext context) iconBuilder,
 }) {
-  final icon = Builder(builder: (context) => iconBuilder(context));
-  List<PopupMenuEntry<NavBarOverflowOption>> itemBuilderFn(
-    BuildContext context,
-  ) {
-    return NavBarOverflowOption.values
+  return PopupMenuButton<NavBarOverflowOption>(
+    onSelected: onOverflowSelected,
+    splashRadius: _kNavBarMenuSplashRadius,
+    itemBuilder: (context) => NavBarOverflowOption.values
         .map(
           (option) => PopupMenuItem<NavBarOverflowOption>(
             value: option,
             child: Text(overflowMenuLabels[option]!),
           ),
         )
-        .toList();
-  }
+        .toList(),
+    child: Builder(
+      builder: (context) {
+        final theme = Theme.of(context);
+        final color = theme.brightness == Brightness.dark
+            ? (theme.iconTheme.color ?? Colors.white)
+            : kNavBarIconColorLight;
 
-  if (padding == null) {
-    return PopupMenuButton<NavBarOverflowOption>(
-      onSelected: onOverflowSelected,
-      splashRadius: _kNavBarMenuSplashRadius,
-      itemBuilder: itemBuilderFn,
-      child: icon,
-    );
-  }
-
-  return PopupMenuButton<NavBarOverflowOption>(
-    onSelected: onOverflowSelected,
-    splashRadius: _kNavBarMenuSplashRadius,
-    itemBuilder: itemBuilderFn,
-    padding: padding,
-    child: icon,
-  );
-}
-
-Widget _buildVerticalMenuButton({
-  required Map<NavBarOverflowOption, String> overflowMenuLabels,
-  required void Function(NavBarOverflowOption) onOverflowSelected,
-}) {
-  return _buildMenuButtonBase(
-    overflowMenuLabels: overflowMenuLabels,
-    onOverflowSelected: onOverflowSelected,
-    padding: null,
-    iconBuilder: (context) {
-      final theme = Theme.of(context);
-      final color = theme.brightness == Brightness.dark
-          ? (theme.iconTheme.color ?? Colors.white)
-          : kNavBarIconColorLight;
-
-      return SvgPicture.asset(
-        navBarIconPath('menu'),
-        package: 'qaul_components',
-        fit: BoxFit.contain,
-        colorFilter: ColorFilter.mode(color, BlendMode.srcATop),
-      );
-    },
+        return SvgPicture.asset(
+          navBarIconPath('menu'),
+          package: 'qaul_components',
+          fit: BoxFit.contain,
+          colorFilter: ColorFilter.mode(color, BlendMode.srcATop),
+        );
+      },
+    ),
   );
 }
 
 class _NavBarOverflowMenuButton extends StatelessWidget {
-  const _NavBarOverflowMenuButton({
+  _NavBarOverflowMenuButton({
     required this.overflowMenuLabels,
     required this.onOverflowSelected,
     required this.iconBuilder,
@@ -477,6 +448,8 @@ class _NavBarOverflowMenuButton extends StatelessWidget {
   final Map<NavBarOverflowOption, String> overflowMenuLabels;
   final void Function(NavBarOverflowOption) onOverflowSelected;
   final Widget Function(BuildContext context) iconBuilder;
+
+  final _iconKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -493,6 +466,7 @@ class _NavBarOverflowMenuButton extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         SizedBox(
+          key: _iconKey,
           width: iconW,
           height: iconH,
           child: iconBuilder(context),
@@ -510,21 +484,20 @@ class _NavBarOverflowMenuButton extends StatelessWidget {
               splashColor: hoverColor,
               focusColor: Colors.transparent,
               onTapDown: (details) async {
-                final renderBox = context.findRenderObject() as RenderBox?;
+                final renderBox =
+                    _iconKey.currentContext?.findRenderObject() as RenderBox?;
                 if (renderBox == null) return;
 
                 final origin = renderBox.localToGlobal(Offset.zero);
-
-                final anchorLeft = origin.dx + (hitSize - iconW) / 2;
-                final anchorTop = origin.dy + (hitSize - iconH) / 2;
+                final size = renderBox.size;
 
                 final selected = await showMenu<NavBarOverflowOption>(
                   context: context,
                   position: RelativeRect.fromLTRB(
-                    anchorLeft,
-                    anchorTop,
-                    anchorLeft + iconW,
-                    anchorTop + iconH,
+                    origin.dx,
+                    origin.dy,
+                    origin.dx + size.width,
+                    origin.dy + size.height,
                   ),
                   items: NavBarOverflowOption.values
                       .map(
