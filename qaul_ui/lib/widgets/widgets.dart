@@ -25,8 +25,6 @@ part 'dropdown_builder.dart';
 
 part 'language_select_dropdown.dart';
 
-part 'loading_indicator.dart';
-
 part 'platform_aware_builder.dart';
 
 part 'platform_aware_switch.dart';
