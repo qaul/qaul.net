@@ -254,6 +254,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }, [room]);
 
     final l10n = AppLocalizations.of(context)!;
+    final mq = MediaQuery.of(context);
+    final isLandscape = mq.size.width > mq.size.height;
+    final isIosLandscape = Platform.isIOS && isLandscape;
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -297,6 +301,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         callback: () => refreshCurrentRoom(),
         schedule: const Duration(milliseconds: 300),
         child: SafeArea(
+          top: !isIosLandscape,
           bottom: false,
           child: Chat(
             showUserAvatars: true,

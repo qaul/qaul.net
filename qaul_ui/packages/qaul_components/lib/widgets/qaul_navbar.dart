@@ -242,107 +242,114 @@ class _QaulNavBarVerticalLayout extends StatelessWidget {
       onOverflowSelected: onOverflowSelected,
     );
 
-    final portrait = MediaQuery.orientationOf(context) == Orientation.portrait;
     final ltr = Directionality.of(context) == TextDirection.ltr;
+    final mq = MediaQuery.of(context);
+    final isLandscape = mq.size.width > mq.size.height;
+    final portrait = !isLandscape;
+
+    final bar = LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth.isFinite
+            ? (constraints.maxWidth * _kNavBarVerticalWidthPercentage).clamp(
+                0.0,
+                _kNavBarVerticalMaxWidth,
+              )
+            : _kNavBarVerticalDefaultWidth;
+        final maxH = constraints.maxHeight;
+        final metrics = _navBarVerticalMetricsForHeight(maxH);
+        final hasBoundedHeight = maxH.isFinite;
+
+        final tabList = Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: metrics.topPadding),
+            _NavBarItem(
+              tab: TabType.account,
+              isSelected: selectedTab == TabType.account,
+              onTap: () => onTabSelected(TabType.account),
+              avatarChild: avatarChild,
+              tooltip: tooltips[TabType.account] ?? '',
+            ),
+            SizedBox(height: metrics.gap),
+            _NavBarItem(
+              tab: TabType.public,
+              isSelected: selectedTab == TabType.public,
+              onTap: () => onTabSelected(TabType.public),
+              tooltip: tooltips[TabType.public] ?? '',
+              badgeCount: publicNotificationCount,
+            ),
+            SizedBox(height: metrics.gap),
+            _NavBarItem(
+              tab: TabType.users,
+              isSelected: selectedTab == TabType.users,
+              onTap: () => onTabSelected(TabType.users),
+              tooltip: tooltips[TabType.users] ?? '',
+            ),
+            SizedBox(height: metrics.gap),
+            _NavBarItem(
+              tab: TabType.chat,
+              isSelected: selectedTab == TabType.chat,
+              onTap: () => onTabSelected(TabType.chat),
+              tooltip: tooltips[TabType.chat] ?? '',
+              badgeCount: chatNotificationCount,
+            ),
+            SizedBox(height: metrics.gap),
+            _NavBarItem(
+              tab: TabType.network,
+              isSelected: selectedTab == TabType.network,
+              onTap: () => onTabSelected(TabType.network),
+              tooltip: tooltips[TabType.network] ?? '',
+            ),
+          ],
+        );
+
+        final menuSection = Padding(
+          padding: EdgeInsets.symmetric(vertical: metrics.menuPadding),
+          child: menuButton,
+        );
+
+        final barChild = hasBoundedHeight
+            ? Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      physics: const ClampingScrollPhysics(),
+                      child: tabList,
+                    ),
+                  ),
+                  menuSection,
+                ],
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  tabList,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: _kNavBarVerticalMenuPadding,
+                    ),
+                    child: menuButton,
+                  ),
+                ],
+              );
+
+        return ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: width),
+          child: _BarBackground(
+            vertical: true,
+            child: barChild,
+          ),
+        );
+      },
+    );
+
+    if (isLandscape) return bar;
 
     return SafeArea(
+      top: portrait,
       left: portrait || !ltr,
       right: portrait || ltr,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final width = constraints.maxWidth.isFinite
-              ? (constraints.maxWidth * _kNavBarVerticalWidthPercentage).clamp(
-                  0.0,
-                  _kNavBarVerticalMaxWidth,
-                )
-              : _kNavBarVerticalDefaultWidth;
-          final maxH = constraints.maxHeight;
-          final metrics = _navBarVerticalMetricsForHeight(maxH);
-          final hasBoundedHeight = maxH.isFinite;
-
-          final tabList = Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: metrics.topPadding),
-              _NavBarItem(
-                tab: TabType.account,
-                isSelected: selectedTab == TabType.account,
-                onTap: () => onTabSelected(TabType.account),
-                avatarChild: avatarChild,
-                tooltip: tooltips[TabType.account] ?? '',
-              ),
-              SizedBox(height: metrics.gap),
-              _NavBarItem(
-                tab: TabType.public,
-                isSelected: selectedTab == TabType.public,
-                onTap: () => onTabSelected(TabType.public),
-                tooltip: tooltips[TabType.public] ?? '',
-                badgeCount: publicNotificationCount,
-              ),
-              SizedBox(height: metrics.gap),
-              _NavBarItem(
-                tab: TabType.users,
-                isSelected: selectedTab == TabType.users,
-                onTap: () => onTabSelected(TabType.users),
-                tooltip: tooltips[TabType.users] ?? '',
-              ),
-              SizedBox(height: metrics.gap),
-              _NavBarItem(
-                tab: TabType.chat,
-                isSelected: selectedTab == TabType.chat,
-                onTap: () => onTabSelected(TabType.chat),
-                tooltip: tooltips[TabType.chat] ?? '',
-                badgeCount: chatNotificationCount,
-              ),
-              SizedBox(height: metrics.gap),
-              _NavBarItem(
-                tab: TabType.network,
-                isSelected: selectedTab == TabType.network,
-                onTap: () => onTabSelected(TabType.network),
-                tooltip: tooltips[TabType.network] ?? '',
-              ),
-            ],
-          );
-
-          final menuSection = Padding(
-            padding: EdgeInsets.symmetric(vertical: metrics.menuPadding),
-            child: menuButton,
-          );
-
-          final barChild = hasBoundedHeight
-              ? Column(
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(
-                        physics: const ClampingScrollPhysics(),
-                        child: tabList,
-                      ),
-                    ),
-                    menuSection,
-                  ],
-                )
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    tabList,
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: _kNavBarVerticalMenuPadding,
-                      ),
-                      child: menuButton,
-                    ),
-                  ],
-                );
-
-          return ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: width),
-            child: _BarBackground(
-              vertical: true,
-              child: barChild,
-            ),
-          );
-        },
-      ),
+      child: bar,
     );
   }
 }
