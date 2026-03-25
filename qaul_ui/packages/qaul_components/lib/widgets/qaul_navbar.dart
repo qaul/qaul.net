@@ -225,8 +225,7 @@ class _QaulNavBarVerticalLayout extends StatelessWidget {
               : _kNavBarVerticalDefaultWidth;
           return ConstrainedBox(
             constraints: BoxConstraints(maxWidth: width),
-            child: _barBackground(
-              context,
+            child: _BarBackground(
               vertical: true,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -323,15 +322,13 @@ class _QaulNavBarHorizontalLayout extends StatelessWidget {
       top: false,
       child: SizedBox(
         height: _kNavBarMobileHeight,
-        child: _barBackground(
-          context,
+        child: _BarBackground(
           vertical: false,
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: _kNavBarHorizontalPadding,
             ),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _NavBarItem(
@@ -377,31 +374,35 @@ class _QaulNavBarHorizontalLayout extends StatelessWidget {
   }
 }
 
-Widget _barBackground(
-  BuildContext context, {
-  required Widget child,
-  required bool vertical,
-}) {
-  final theme = Theme.of(context);
-  final ltr = Directionality.of(context) == TextDirection.ltr;
-  final barTheme = theme.appBarTheme;
-  final side = BorderSide(color: barTheme.shadowColor ?? Colors.transparent);
-  final backgroundColor = theme.brightness == Brightness.dark
-      ? _kNavBarDarkBackground
-      : (barTheme.backgroundColor ?? Colors.transparent);
+class _BarBackground extends StatelessWidget {
+  const _BarBackground({required this.vertical, required this.child});
 
-  return Container(
-    alignment: Alignment.center,
-    decoration: BoxDecoration(
-      border: Border(
-        bottom: BorderSide.none,
-        left: !vertical ? BorderSide.none : (!ltr ? side : BorderSide.none),
-        right: !vertical ? BorderSide.none : (ltr ? side : BorderSide.none),
+  final bool vertical;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final ltr = Directionality.of(context) == TextDirection.ltr;
+    final barTheme = theme.appBarTheme;
+    final side = BorderSide(color: barTheme.shadowColor ?? Colors.transparent);
+    final backgroundColor = theme.brightness == Brightness.dark
+        ? _kNavBarDarkBackground
+        : (barTheme.backgroundColor ?? Colors.transparent);
+
+    return Container(
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide.none,
+          left: !vertical ? BorderSide.none : (!ltr ? side : BorderSide.none),
+          right: !vertical ? BorderSide.none : (ltr ? side : BorderSide.none),
+        ),
+        color: backgroundColor,
       ),
-      color: backgroundColor,
-    ),
-    child: child,
-  );
+      child: child,
+    );
+  }
 }
 
 Widget _buildMenuButtonBase({
