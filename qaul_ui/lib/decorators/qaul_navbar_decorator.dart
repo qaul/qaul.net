@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_components/qaul_components.dart';
@@ -26,33 +24,21 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
 
   @override
   Widget build(BuildContext context) {
-    final mq = MediaQuery.of(context);
-    final isLandscape = mq.size.width > mq.size.height;
-    final isIosLandscape = Platform.isIOS && isLandscape;
-
     return ResponsiveLayout(
-      mobileBody: MediaQuery.removePadding(
-        context: context,
-        removeTop: isIosLandscape,
-        child: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              Expanded(child: widget.child(_pageViewKey)),
-              const _ConnectedNavBar(vertical: false),
-            ],
-          ),
-        ),
-      ),
-      tabletBody: MediaQuery.removePadding(
-        context: context,
-        removeTop: isIosLandscape,
-        child: Row(
+      mobileBody: SafeArea(
+        bottom: false,
+        child: Column(
           children: [
-            const _ConnectedNavBar(vertical: true),
             Expanded(child: widget.child(_pageViewKey)),
+            const _ConnectedNavBar(vertical: false),
           ],
         ),
+      ),
+      tabletBody: Row(
+        children: [
+          const _ConnectedNavBar(vertical: true),
+          Expanded(child: widget.child(_pageViewKey)),
+        ],
       ),
     );
   }
