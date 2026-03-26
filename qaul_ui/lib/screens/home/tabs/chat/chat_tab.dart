@@ -96,7 +96,7 @@ class _ChatState extends _BaseTabState<_Chat> {
                   content: _contentFromOverview(
                     room.lastMessagePreview,
                     theme,
-                    users: users,
+                    room: room,
                     l10n: l10n,
                   ),
                   trailingMetadata: Row(
@@ -119,8 +119,9 @@ class _ChatState extends _BaseTabState<_Chat> {
                 );
               }
 
-              final otherUser =
-                  _resolveOtherUserForDirectRoom(room, users, defaultUser);
+              final otherUser = ref
+                  .read(usersStoreProvider.notifier)
+                  .otherUserInDirectRoom(room, defaultUser);
 
               if (otherUser == null) {
                 _log.warning('single-person room with unknown otherUser');
@@ -133,7 +134,6 @@ class _ChatState extends _BaseTabState<_Chat> {
                   room.lastMessagePreview,
                   theme,
                   room: room,
-                  users: users,
                   l10n: l10n,
                 ),
                 trailingMetadata: Row(
@@ -200,7 +200,7 @@ class _ChatState extends _BaseTabState<_Chat> {
                   : ChatScreen(
                       currentOpenChat,
                       defaultUser,
-                      otherUser: getOtherUser(currentOpenChat, users, defaultUser),
+                      otherUser: getOtherUser(currentOpenChat, defaultUser),
                     ),
             ),
           ),
@@ -209,8 +209,10 @@ class _ChatState extends _BaseTabState<_Chat> {
     );
   }
 
-  User? getOtherUser(ChatRoom chat, List<User> users, User defaultUser) {
-    final otherUser = _resolveOtherUserForDirectRoom(chat, users, defaultUser);
+  User? getOtherUser(ChatRoom chat, User defaultUser) {
+    final otherUser = ref
+        .read(usersStoreProvider.notifier)
+        .otherUserInDirectRoom(chat, defaultUser);
 
     if (otherUser == null && !chat.isGroupChatRoom) {
       _log.warning('single-person room with unknown otherUser');
@@ -221,8 +223,7 @@ class _ChatState extends _BaseTabState<_Chat> {
   Widget _contentFromOverview(
     MessageContent? message,
     TextTheme theme, {
-    ChatRoom? room,
-    required List<User> users,
+    required ChatRoom room,
     required AppLocalizations l10n,
   }) {
     if (message is TextMessageContent) {
@@ -237,7 +238,6 @@ class _ChatState extends _BaseTabState<_Chat> {
         message,
         theme,
         room: room,
-        users: users,
         l10n: l10n,
       );
     } else if (message is FileShareContent) {
@@ -256,8 +256,7 @@ class _ChatState extends _BaseTabState<_Chat> {
   Widget _contentFromGroupEvent(
     GroupEventContent message,
     TextTheme theme, {
-    ChatRoom? room,
-    required List<User> users,
+    required ChatRoom room,
     required AppLocalizations l10n,
   }) {
     if (message.type == GroupEventContentType.none) {
@@ -279,9 +278,9 @@ class _ChatState extends _BaseTabState<_Chat> {
         overflow: TextOverflow.ellipsis,
       );
     } else {
-      final u = users.firstWhereOrNull((e) => e.idBase58 == message.userIdBase58) ??
-          room?.members
-              .firstWhereOrNull((member) => member.idBase58 == message.userIdBase58);
+      final u = ref
+          .read(usersStoreProvider.notifier)
+          .findMemberInRoom(message.userId, room);
       if (u == null) {
         _log.warning('group event message from unknown user');
         return Text(
@@ -324,16 +323,6 @@ class _ChatState extends _BaseTabState<_Chat> {
     }
   }
 
-  User? _resolveOtherUserForDirectRoom(
-      ChatRoom room, List<User> users, User defaultUser) {
-    final fromStore = users.firstWhereOrNull(
-      (u) => u.conversationId?.equals(room.conversationId) ?? false,
-    );
-    if (fromStore != null) return fromStore;
-
-    return room.members
-        .firstWhereOrNull((u) => u.idBase58 != defaultUser.idBase58);
-  }
 }
 
 class _GroupInviteTile extends HookConsumerWidget {

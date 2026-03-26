@@ -553,13 +553,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   User _author(Message e, AppLocalizations l10n) {
     if (e.senderId.equals(user.id)) return user;
-    final store = ref.read(usersStoreProvider);
-    final fromStore = store.firstWhereOrNull((usr) => usr.id.equals(e.senderId));
-    if (fromStore != null) return fromStore;
-    final fromRoom =
-        room.members.firstWhereOrNull((m) => m.id.equals(e.senderId));
-    if (fromRoom != null) return fromRoom;
-    return User(name: l10n.unknown, id: e.senderId);
+    final store = ref.read(usersStoreProvider.notifier);
+    return store.findMemberInRoom(e.senderId, room) ??
+        User(name: l10n.unknown, id: e.senderId);
   }
 
   List<types.Message>? messages(ChatRoom room,

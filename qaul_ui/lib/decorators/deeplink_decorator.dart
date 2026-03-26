@@ -73,12 +73,26 @@ class _DeepLinkWrapperState extends ConsumerState<DeepLinkWrapper> {
     }
   }
 
-  void _navigateToChat(String id) {
+  Future<void> _navigateToChat(String id) async {
     final usr = ref.read(defaultUserProvider)!;
     final room = _roomWithId(id);
     if (room == null) return;
-    final otherUser = room.isGroupChatRoom ? null : _otherUserForRoom(room, usr);
-    if (!room.isGroupChatRoom && otherUser == null) return;
+
+    User? otherUser;
+    if (!room.isGroupChatRoom) {
+      final store = ref.read(usersStoreProvider.notifier);
+      // Try the sync store lookup first; if missing, fetch via RPC.
+      otherUser = store.otherUserInDirectRoom(room, usr);
+      if (otherUser == null) {
+        final otherMember = room.members
+            .firstWhereOrNull((m) => m.idBase58 != usr.idBase58);
+        if (otherMember == null) return;
+        otherUser = await store.getByUserID(otherMember.idBase58);
+      }
+      if (otherUser == null) return;
+    }
+
+    if (!mounted) return;
     openChat(room, ref: ref, context: context, user: usr, otherUser: otherUser);
   }
 
@@ -86,14 +100,4 @@ class _DeepLinkWrapperState extends ConsumerState<DeepLinkWrapper> {
 
   ChatRoom? _roomWithId(String id) =>
       ref.read(chatRoomsProvider).firstWhereOrNull((r) => r.idBase58 == id);
-
-  User? _otherUserForRoom(ChatRoom room, User defaultUser) {
-    final users = ref.read(usersStoreProvider);
-    final fromStore = users.firstWhereOrNull(
-      (u) => u.conversationId?.equals(room.conversationId) ?? false,
-    );
-    if (fromStore != null) return fromStore;
-    return room.members
-        .firstWhereOrNull((member) => member.idBase58 != defaultUser.idBase58);
-  }
 }
