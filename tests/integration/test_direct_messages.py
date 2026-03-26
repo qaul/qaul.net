@@ -1,40 +1,19 @@
-# test_direct_messages.py
-#
-# Verifies that a direct chat message is delivered to the intended recipient
-# and is NOT received by an intermediate node that is not the recipient.
-#
-# In qaul, direct messages use a group_id derived from the two participants'
-# user IDs (GroupId::from_peers). The message is routed unicast through the
-# mesh — only the two participants store it. Intermediate nodes relay the
-# encrypted payload but never store it in their own conversation list.
-#
-# Procedure:
-#   1. Start the topology and wait for all nodes to appear in sender's users list
-#   2. Find the recipient's entry by name ("test-<node_id>") and read group_id
-#   3. Send a chat message from sender to recipient
-#   4. Poll the recipient's conversation until the message appears (or timeout)
-#   5. Assert the middle node has no messages for the same group_id
-#
-# Uses line-5 (0000—0001—0002—0003—0004):
-#   sender    = 0000 (one end)
-#   recipient = 0004 (other end, 4 hops away)
-#   snooper   = 0002 (middle node, relays but should not store)
+"""
+Verify that a direct chat message is delivered to the intended recipient
+and is NOT received by an intermediate node.
+"""
 
-import sys
 import time
 
-sys.path.insert(0, ".")
+import pytest
 
-from lib.network import (
-    apply_topology,
-    clear_topology,
-    start_qaul,
-    stop_qaul,
-    wait_for_nodes,
-)
+from conftest import all_topology_files
 from lib.node import Node
 from lib.topology import load_node_ids
 
+TOPOLOGIES = all_topology_files()
+
+# defaults for standalone / run_network_tests.py usage
 TOPOLOGY = "topologies/line-5.json"
 NODE_IDS = load_node_ids(TOPOLOGY)
 DISCOVERY_WAIT = 200
@@ -43,12 +22,14 @@ POLL_INTERVAL = 5
 
 
 def setup():
+    from lib.network import apply_topology, start_qaul, wait_for_nodes
     apply_topology(TOPOLOGY)
     start_qaul()
     wait_for_nodes(NODE_IDS, timeout=60)
 
 
 def teardown():
+    from lib.network import stop_qaul, clear_topology
     stop_qaul()
     clear_topology()
 
@@ -72,10 +53,9 @@ def test_direct_message_unicast(
     sender = Node(sender_id)
     snooper = Node(snooper_id)
 
-    # wait until sender's users list contains all nodes — users list and
-    # routing table converge together, and users list has the group_id we need.
-    # nodes are named "test-<node_id>" by meshnet-lab.
-    print(f"  waiting for all {len(sorted_ids)} users in sender's users list (timeout {discovery_wait}s)...")
+    # wait until sender knows the recipient
+    recipient_name = f"test-{recipient_id}"
+    print(f"  waiting for {recipient_name} (timeout {discovery_wait}s)...")
     t_start = time.time()
     deadline = t_start + discovery_wait
     group_id = None
@@ -83,80 +63,72 @@ def test_direct_message_unicast(
     while time.time() < deadline:
         users = sender.known_users()
         user_by_name = {u["name"]: u for u in users}
-        recipient_name = f"test-{recipient_id}"
         if recipient_name in user_by_name:
-            elapsed = round(time.time() - t_start, 1)
             group_id = user_by_name[recipient_name]["group_id"]
-            print(f"  recipient {recipient_id} found after {elapsed}s, group_id: {group_id}")
+            print(f"  found after {round(time.time() - t_start, 1)}s, group_id={group_id}")
             break
         time.sleep(poll_interval)
     else:
-        known_names = [u["name"] for u in sender.known_users()]
-        raise AssertionError(
-            f"recipient {recipient_id} (test-{recipient_id}) not found in sender's "
-            f"users list after {discovery_wait}s — known: {known_names}"
-        )
+        known = [u["name"] for u in sender.known_users()]
+        raise AssertionError(f"{recipient_name} not found after {discovery_wait}s — known: {known}")
 
     recipient = Node(recipient_id)
-
-    # send the message
-    test_content = f"direct-msg-test-{int(time.time())}"
-    sender.send_chat_message(group_id, test_content)
-    print(f"  sent: '{test_content}'")
+    content = f"direct-msg-test-{int(time.time())}"
+    sender.send_chat_message(group_id, content)
+    print(f"  sent: '{content}'")
     t_send = time.time()
 
-    # poll recipient until the message appears
+    # poll recipient
     delivered_at = None
-    deadline = t_send + delivery_wait
-
-    while time.time() < deadline:
+    while time.time() < t_send + delivery_wait:
         time.sleep(poll_interval)
-        elapsed = round(time.time() - t_send, 1)
         try:
             conv = recipient.conversation(group_id)
-            contents = [c for msg in conv.get("messages", []) for c in (msg.get("content") or [])]
-            if test_content in contents:
-                delivered_at = elapsed
-                print(f"  delivered to {recipient_id} after {elapsed}s")
+            msgs = [c for msg in conv.get("messages", []) for c in (msg.get("content") or [])]
+            if content in msgs:
+                delivered_at = round(time.time() - t_send, 1)
                 break
-        except Exception as e:
-            print(f"    +{elapsed}s  conversation error: {e}")
+        except Exception:
+            pass
 
-    assert delivered_at is not None, (
-        f"message not delivered to {recipient_id} within {delivery_wait}s"
-    )
+    assert delivered_at is not None, f"not delivered to {recipient_id} within {delivery_wait}s"
 
-    # check snooper does NOT have the message
-    snooper_contents = []
+    # snooper must NOT have it
+    snooper_msgs = []
     try:
         conv = snooper.conversation(group_id)
-        snooper_contents = [c for msg in conv.get("messages", []) for c in (msg.get("content") or [])]
+        snooper_msgs = [c for msg in conv.get("messages", []) for c in (msg.get("content") or [])]
     except Exception:
-        pass  # conversation not found on snooper — expected
+        pass
 
-    assert test_content not in snooper_contents, (
-        f"intermediate node {snooper_id} received the direct message"
-    )
-
-    print(f"  PASS: delivered to {recipient_id} in {delivered_at}s, not present on {snooper_id}")
+    assert content not in snooper_msgs, f"snooper {snooper_id} received the message"
+    print(f"  PASS: delivered in {delivered_at}s, not on {snooper_id}")
 
     return {
         "passed": True,
         "sender": sender_id,
         "recipient": recipient_id,
         "snooper": snooper_id,
-        "group_id": group_id,
         "delivery_time_s": delivered_at,
-        "notes": f"direct message delivered to {recipient_id} in {delivered_at}s, not seen on {snooper_id}",
+        "notes": f"delivered in {delivered_at}s, not seen on {snooper_id}",
     }
+
+
+# --- pytest entry point ---
+
+@pytest.mark.network
+@pytest.mark.parametrize("converged_network", TOPOLOGIES, indirect=True)
+def test_direct_message_unicast_pytest(converged_network):
+    """pytest wrapper using the converged_network fixture."""
+    test_direct_message_unicast(
+        node_ids=converged_network["node_ids"],
+        discovery_wait=1,  # already converged
+    )
 
 
 if __name__ == "__main__":
     try:
         setup()
-        result = test_direct_message_unicast()
-        print(f"  result: {result}")
-    except AssertionError as e:
-        print(f"  FAIL: {e}")
+        test_direct_message_unicast()
     finally:
         teardown()

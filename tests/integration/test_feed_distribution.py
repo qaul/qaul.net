@@ -1,52 +1,35 @@
-# test_feed_distribution.py
-#
-# Verifies that a feed message sent from one node reaches ALL other nodes
-# with no duplicates.
-#
-# Feed messages in qaul use libp2p floodsub — every connected peer forwards
-# each message to all its peers. On a fully converged mesh, every node should
-# eventually receive every feed message exactly once.
-#
-# Procedure:
-#   1. Start the topology and wait for full convergence
-#   2. Send one feed message from each node using a unique content string
-#   3. Poll every node's feed list until all expected messages appear
-#   4. Assert each message appears exactly once on every node (no duplicates)
-#
-# The test sends N messages (one per node) and expects every node to end up
-# with all N messages. This exercises multi-hop propagation across the mesh.
+"""
+Verify that feed messages from each node reach ALL other nodes, no duplicates.
+"""
 
-import sys
 import time
 
-sys.path.insert(0, ".")
+import pytest
 
-from lib.network import (
-    apply_topology,
-    clear_topology,
-    start_qaul,
-    stop_qaul,
-    wait_for_nodes,
-)
+from conftest import all_topology_files
 from lib.node import Node
 from lib.topology import load_node_ids
 
+TOPOLOGIES = all_topology_files()
+
+# defaults for standalone / run_network_tests.py usage
 TOPOLOGY = "topologies/line-5.json"
 NODE_IDS = load_node_ids(TOPOLOGY)
 DISCOVERY_WAIT = 200
 PROPAGATION_WAIT = 180
 POLL_INTERVAL = 5
-PUBSUB_WARMUP = 30  # seconds after all users appear before sending — the
-                    # floodsub mesh stabilises slightly after the users list
+PUBSUB_WARMUP = 30
 
 
 def setup():
+    from lib.network import apply_topology, start_qaul, wait_for_nodes
     apply_topology(TOPOLOGY)
     start_qaul()
     wait_for_nodes(NODE_IDS, timeout=60)
 
 
 def teardown():
+    from lib.network import stop_qaul, clear_topology
     stop_qaul()
     clear_topology()
 
@@ -64,136 +47,102 @@ def test_feed_messages_reach_all_nodes(
     """
     sorted_ids = sorted(node_ids)
     nodes = [Node(nid) for nid in sorted_ids]
-
-    # wait until observer's users list contains all nodes — this is the
-    # reliable convergence signal: users list and routing table converge
-    # together, and the users list is what feed propagation depends on.
-    print(f"  waiting up to {discovery_wait}s for all {len(sorted_ids)} users to appear...")
-    t_start = time.time()
-    deadline = t_start + discovery_wait
     observer = nodes[0]
 
+    # convergence wait
+    print(f"  waiting up to {discovery_wait}s for all {len(sorted_ids)} users...")
+    t_start = time.time()
+    deadline = t_start + discovery_wait
     while time.time() < deadline:
-        known = observer.known_users()
-        if len(known) >= len(sorted_ids):
-            elapsed = round(time.time() - t_start, 1)
-            print(f"  all {len(known)} users known after {elapsed}s")
+        if len(observer.known_users()) >= len(sorted_ids):
+            print(f"  all users known after {round(time.time() - t_start, 1)}s")
             break
         time.sleep(poll_interval)
     else:
         raise AssertionError(
             f"convergence not reached within {discovery_wait}s — "
-            f"observer knows {len(observer.known_users())} of {len(sorted_ids)} users"
+            f"observer knows {len(observer.known_users())} of {len(sorted_ids)}"
         )
 
-    # wait for the pubsub (floodsub) mesh to stabilise — routing convergence
-    # does not guarantee pubsub connections are established end-to-end yet
-    print(f"  waiting {pubsub_warmup}s for pubsub mesh to stabilise...")
-    time.sleep(pubsub_warmup)
+    if pubsub_warmup > 0:
+        print(f"  pubsub warmup {pubsub_warmup}s...")
+        time.sleep(pubsub_warmup)
 
-    # send one unique message from each node
+    # send one message per node
     stamp = int(time.time())
     messages = {}
     for node in nodes:
         content = f"feed-dist-{node.id}-{stamp}"
         node.send_feed_message(content)
         messages[node.id] = content
-        print(f"  sent from {node.id}: '{content}'")
 
-    expected_contents = set(messages.values())
-    print(
-        f"  waiting up to {propagation_wait}s for all {len(expected_contents)} messages to propagate..."
-    )
+    expected = set(messages.values())
+    print(f"  waiting up to {propagation_wait}s for {len(expected)} messages...")
 
-    # poll each node until it has all messages
     t_send = time.time()
     deadline = t_send + propagation_wait
-
-    # track per-node arrival times for reporting
     first_complete: dict[str, float] = {}
 
     while time.time() < deadline:
         time.sleep(poll_interval)
         elapsed = round(time.time() - t_send, 1)
-
         all_done = True
         for node in nodes:
             if node.id in first_complete:
                 continue
-            contents = node.feed_message_contents()
-            received = set(contents)
-            missing = expected_contents - received
-            if not missing:
+            received = set(node.feed_message_contents())
+            if not (expected - received):
                 first_complete[node.id] = elapsed
-                print(
-                    f"    +{elapsed}s  node {node.id} has all {len(expected_contents)} messages"
-                )
             else:
                 all_done = False
-
         if all_done:
             break
 
-    # assert all nodes received all messages
+    # final check
     failures = []
-    duplicate_failures = []
-
     for node in nodes:
         contents = node.feed_message_contents()
-        received = set(contents)
-        missing = expected_contents - received
+        missing = expected - set(contents)
         if missing:
-            failures.append(
-                f"  node {node.id}: missing {len(missing)} message(s): {missing}"
-            )
+            failures.append(f"node {node.id}: missing {len(missing)}")
+        for c in expected:
+            if contents.count(c) > 1:
+                failures.append(f"node {node.id}: duplicate '{c}'")
 
-        # check for duplicates
-        for content in expected_contents:
-            count = contents.count(content)
-            if count > 1:
-                duplicate_failures.append(
-                    f"  node {node.id}: message '{content}' appears {count} times"
-                )
+    assert not failures, f"propagation failed:\n  " + "\n  ".join(failures)
 
-    assert not failures, (
-        f"feed propagation incomplete after {propagation_wait}s:\n"
-        + "\n".join(failures)
-    )
-    assert not duplicate_failures, "duplicate feed messages detected:\n" + "\n".join(
-        duplicate_failures
-    )
-
-    not_complete = [nid for nid in sorted_ids if nid not in first_complete]
-    if not_complete:
-        # they completed in the final poll but we didn't record the exact time
-        for nid in not_complete:
+    for nid in sorted_ids:
+        if nid not in first_complete:
             first_complete[nid] = round(time.time() - t_send, 1)
 
     max_time = max(first_complete.values())
-    print(
-        f"  PASS: all {len(sorted_ids)} nodes received all {len(expected_contents)} messages "
-        f"within {max_time}s, no duplicates"
-    )
+    print(f"  PASS: all nodes got all messages within {max_time}s")
 
     return {
         "passed": True,
         "node_count": len(sorted_ids),
-        "message_count": len(expected_contents),
-        "completion_times_s": first_complete,
+        "message_count": len(expected),
         "max_propagation_s": max_time,
-        "notes": (
-            f"all {len(sorted_ids)} nodes received all {len(expected_contents)} feed messages "
-            f"within {max_time}s, no duplicates"
-        ),
+        "notes": f"all {len(sorted_ids)} nodes received all messages within {max_time}s",
     }
+
+
+# --- pytest entry point ---
+
+@pytest.mark.network
+@pytest.mark.parametrize("converged_network", TOPOLOGIES, indirect=True)
+def test_feed_distribution_pytest(converged_network):
+    """pytest wrapper using the converged_network fixture."""
+    test_feed_messages_reach_all_nodes(
+        node_ids=converged_network["node_ids"],
+        discovery_wait=1,
+        pubsub_warmup=0,
+    )
 
 
 if __name__ == "__main__":
     try:
         setup()
-        result = test_feed_messages_reach_all_nodes()
-        print(f"  result: {result}")
-    except AssertionError as e:
-        print(f"  FAIL: {e}")
+        test_feed_messages_reach_all_nodes()
     finally:
         teardown()
