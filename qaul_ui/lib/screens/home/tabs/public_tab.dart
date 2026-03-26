@@ -32,46 +32,107 @@ class _PublicState extends _BaseTabState<_Public> {
   }
 }
 
-class _PublicTabView extends HookConsumerWidget {
+class _PublicTabView extends ConsumerStatefulWidget {
   const _PublicTabView(this.disablePageViewScroll);
 
   final ValueNotifier<bool> disablePageViewScroll;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    useEffect(() {
+  ConsumerState<_PublicTabView> createState() => _PublicTabViewState();
+}
+
+class _PublicTabViewState extends ConsumerState<_PublicTabView> {
+  static const _pageSize = 50;
+  late final ScrollController _scrollController;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+  int _currentOffset = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(publicNotificationControllerProvider).initialize();
-      return () {};
-    }, []);
+      _currentOffset = _pageSize;
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent * 0.8) {
+      _loadMore();
+    }
+  }
+
+  void _updatePaginationFromResult(PaginatedPosts? result) {
+    final paginationState = result?.pagination;
+    if (paginationState != null) {
+      setState(() => _hasMore = paginationState.hasMore);
+      _currentOffset = paginationState.offset + paginationState.limit;
+      return;
+    }
+    _currentOffset += _pageSize;
+  }
+
+  Future<void> _loadMore() async {
+    if (_isLoadingMore || !_hasMore) return;
+
+    setState(() => _isLoadingMore = true);
+    try {
+      final result = await ref
+          .read(feedMessageStoreProvider.notifier)
+          .loadMore(_currentOffset, limit: _pageSize);
+      _updatePaginationFromResult(result);
+    } finally {
+      if (mounted) setState(() => _isLoadingMore = false);
+    }
+  }
+
+  Future<void> _refreshPublic() async {
+    await ref.read(feedMessageStoreProvider.notifier).refreshPublic();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen(feedMessageStoreProvider, (_, _) {
+      final pagination =
+          ref.read(publicMessagesProvider.notifier).pagination;
+      if (pagination != null && !pagination.hasMore) {
+        setState(() => _hasMore = false);
+      }
+    });
 
     final messages = ref.watch(feedMessageStoreProvider);
 
     final l10n = AppLocalizations.of(context)!;
 
-    final onCreatePublicMessagePressed = useCallback(() async {
-      disablePageViewScroll.value = true;
-      await showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        barrierColor: Colors.transparent,
-        builder: (context) {
-          return Padding(
-            padding: MediaQuery.of(context).viewInsets,
-            child: _CreatePublicMessage(),
-          );
-        },
-      );
-      disablePageViewScroll.value = false;
-    }, []);
-
-    final refreshPublic = useCallback(() async {
-      await ref.read(feedMessageStoreProvider.notifier).refreshPublic();
-    }, []);
-
     return Scaffold(
       resizeToAvoidBottomInset: true,
       floatingActionButton: QaulFAB(
-        onPressed: onCreatePublicMessagePressed,
+        onPressed: () async {
+          widget.disablePageViewScroll.value = true;
+          await showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            barrierColor: Colors.transparent,
+            builder: (context) {
+              return Padding(
+                padding: MediaQuery.of(context).viewInsets,
+                child: _CreatePublicMessage(),
+              );
+            },
+          );
+          widget.disablePageViewScroll.value = false;
+        },
         svgAsset: 'assets/icons/public-filled.svg',
         package: 'qaul_components',
         heroTag: 'publicTabFAB',
@@ -79,34 +140,37 @@ class _PublicTabView extends HookConsumerWidget {
       ),
       body: CronTaskDecorator(
         schedule: const Duration(milliseconds: 2500),
-        callback: () async => await refreshPublic(),
+        callback: () async => await _refreshPublic(),
         child: RefreshIndicator(
-          onRefresh: () async => await refreshPublic(),
-          child: EmptyStateTextDecorator(
-            l10n.emptyPublicList,
-            isEmpty: messages.isEmpty,
-            child: ListView.separated(
-              controller: ScrollController(),
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: messages.length,
-              separatorBuilder: (_, _) => const Divider(height: 12.0),
-              itemBuilder: (_, i) {
-                final msg = messages[i];
-                var theme = Theme.of(context).textTheme;
-                return QaulListTile.user(
-                  msg.author,
-                  useUserColorOnName: true,
-                  isContentSelectable: true,
-                  content: Text(msg.content ?? '', style: theme.bodyLarge),
-                  trailingMetadata: Text(
-                    msg.sentTimestamp,
-                    style: theme.bodySmall!.copyWith(
-                      fontStyle: FontStyle.italic,
+          onRefresh: () async => await _refreshPublic(),
+          child: LoadingDecorator(
+            isLoading: _isLoadingMore,
+            child: EmptyStateTextDecorator(
+              l10n.emptyPublicList,
+              isEmpty: messages.isEmpty,
+              child: ListView.separated(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: messages.length,
+                separatorBuilder: (_, _) => const Divider(height: 12.0),
+                itemBuilder: (_, i) {
+                  final msg = messages[i];
+                  var theme = Theme.of(context).textTheme;
+                  return QaulListTile.user(
+                    msg.author,
+                    useUserColorOnName: true,
+                    isContentSelectable: true,
+                    content: Text(msg.content ?? '', style: theme.bodyLarge),
+                    trailingMetadata: Text(
+                      msg.sentTimestamp,
+                      style: theme.bodySmall!.copyWith(
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
-                  ),
-                  nameTapRoutesToDetailsScreen: true,
-                );
-              },
+                    nameTapRoutesToDetailsScreen: true,
+                  );
+                },
+              ),
             ),
           ),
         ),

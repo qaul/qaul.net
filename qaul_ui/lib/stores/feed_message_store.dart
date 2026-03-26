@@ -21,6 +21,9 @@ class FeedMessage extends PublicPost {
 }
 
 class FeedMessageStore extends Notifier<List<FeedMessage>> {
+  PaginationState? get pagination =>
+      ref.read(publicMessagesProvider.notifier).pagination;
+
   @override
   build() {
     ref.listen(publicMessagesProvider, (_, _) => _asyncInit());
@@ -61,6 +64,11 @@ class FeedMessageStore extends Notifier<List<FeedMessage>> {
     await worker.requestPublicMessages(
       lastIndex: indexes.isEmpty ? null : indexes.reduce(math.max),
     );
+  }
+
+  Future<PaginatedPosts?> loadMore(int offset, {int limit = 50}) async {
+    final worker = ref.read(qaulWorkerProvider);
+    return await worker.requestPublicMessages(offset: offset, limit: limit);
   }
 
   Future<void> sendMessage(String messageText) async {

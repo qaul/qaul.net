@@ -164,7 +164,11 @@ class StubLibqaulWorker implements LibqaulWorker {
   Future<List<InternetNode>> requestNodes() => throw UnimplementedError();
 
   @override
-  Future<List<PublicPost>> requestPublicMessages({int? lastIndex}) =>
+  Future<PaginatedPosts?> requestPublicMessages({
+    int? lastIndex,
+    int? offset,
+    int? limit,
+  }) =>
       throw UnimplementedError();
 
   @override

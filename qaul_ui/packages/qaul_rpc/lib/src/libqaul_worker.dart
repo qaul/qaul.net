@@ -86,19 +86,24 @@ class LibqaulWorker {
     await _sendMessage(Modules.FEED, msg);
   }
 
-  Future<List<PublicPost>> requestPublicMessages({int? lastIndex}) async {
-    final msg = Feed(
-      request: FeedMessageRequest(lastIndex: Int64(lastIndex ?? 0)),
-    );
-    final result = await _sendRequest<List<PublicPost>>(
+  Future<PaginatedPosts?> requestPublicMessages({
+    int? lastIndex,
+    int? offset,
+    int? limit,
+  }) async {
+    final request = FeedMessageRequest(lastIndex: Int64(lastIndex ?? 0));
+    if (offset != null) request.offset = offset;
+    if (limit != null) request.limit = limit;
+    final msg = Feed(request: request);
+    final result = await _sendRequest<PaginatedPosts>(
       module: Modules.FEED,
       data: msg,
       adapter: (res) {
-        if (res.data is List<PublicPost>) return res.data as List<PublicPost>;
+        if (res.data is PaginatedPosts) return res.data as PaginatedPosts;
         return null;
       },
     );
-    return result ?? [];
+    return result;
   }
 
   Future<PaginatedUsers?> getUsers({int? offset, int? limit}) async {

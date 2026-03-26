@@ -26,7 +26,7 @@ class PublicNotificationController
     if (preferences.containsKey(cacheKey)) {
       _lastIndex = preferences.getInt(cacheKey)!;
     }
-    ref.read(qaulWorkerProvider).requestPublicMessages();
+    ref.read(qaulWorkerProvider).requestPublicMessages(offset: 0, limit: 50);
     _log.config('Initialized:\n\t· Last Post Index: $_lastIndex');
   }
 
