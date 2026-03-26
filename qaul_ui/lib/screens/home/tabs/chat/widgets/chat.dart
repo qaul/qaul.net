@@ -551,16 +551,23 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
-  User _author(Message e) => e.senderId.equals(user.id)
-      ? user
-      : ref.read(usersStoreProvider).firstWhere((usr) => usr.id.equals(e.senderId));
+  User _author(Message e, AppLocalizations l10n) {
+    if (e.senderId.equals(user.id)) return user;
+    final store = ref.read(usersStoreProvider);
+    final fromStore = store.firstWhereOrNull((usr) => usr.id.equals(e.senderId));
+    if (fromStore != null) return fromStore;
+    final fromRoom =
+        room.members.firstWhereOrNull((m) => m.id.equals(e.senderId));
+    if (fromRoom != null) return fromRoom;
+    return User(name: l10n.unknown, id: e.senderId);
+  }
 
   List<types.Message>? messages(ChatRoom room,
       {required AppLocalizations l10n}) {
     return room.messages
         ?.sorted()
-        .map(
-            (e) => e.toInternalMessage(_author(e), ref, l10n: l10n, room: room))
+        .map((e) =>
+            e.toInternalMessage(_author(e, l10n), ref, l10n: l10n, room: room))
         .toList();
   }
 

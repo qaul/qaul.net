@@ -1,19 +1,59 @@
 part of 'abstract_rpc_module_translator.dart';
 
+Future<List<User>> _resolveUsersForGroupInfo(
+  GroupInfo g,
+  List<User> knownUsers,
+  Ref ref,
+) async {
+  final fetch = ref.read(fetchUserByIdForRpcProvider);
+  final onResolved = ref.read(onGroupMemberUserResolvedProvider);
+  final memberIdSet =
+      g.members.map((m) => Base58Encode(Uint8List.fromList(m.userId))).toSet();
+  final result = <User>[];
+  for (final user in knownUsers) {
+    if (memberIdSet.contains(user.idBase58)) {
+      result.add(user);
+    }
+  }
+  if (fetch == null) return result;
+
+  final resolvedIds = result.map((u) => u.idBase58).toSet();
+  final toFetch = <Uint8List>[];
+  for (final m in g.members) {
+    final idBytes = Uint8List.fromList(m.userId);
+    if (resolvedIds.contains(Base58Encode(idBytes))) continue;
+    resolvedIds.add(Base58Encode(idBytes));
+    toFetch.add(idBytes);
+  }
+  if (toFetch.isEmpty) return result;
+
+  final fetched = await Future.wait(toFetch.map(fetch));
+  for (var i = 0; i < toFetch.length; i++) {
+    final u = fetched[i];
+    if (u != null) {
+      result.add(u);
+      onResolved?.call(u);
+    }
+  }
+  return result;
+}
+
 class GroupTranslator extends RpcModuleTranslator {
   @override
   Modules get type => Modules.GROUP;
 
   @override
   Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Ref ref) async {
-    final users = ref.read(userLookupProvider);
+    final knownUsers = ref.read(userLookupProvider);
     final message = Group.fromBuffer(data);
 
     switch (message.whichMessage()) {
       case Group_Message.groupInfoResponse:
+        final info = message.ensureGroupInfoResponse();
+        final users = await _resolveUsersForGroupInfo(info, knownUsers, ref);
         return RpcTranslatorResponse(
           type,
-          ChatRoom.fromRpcGroupInfo(message.ensureGroupInfoResponse(), users),
+          ChatRoom.fromRpcGroupInfo(info, users),
         );
       case Group_Message.groupCreateResponse:
         final createResult = message.ensureGroupCreateResponse().result;
@@ -31,18 +71,20 @@ class GroupTranslator extends RpcModuleTranslator {
         final replyResult = message.ensureGroupReplyInviteResponse().result;
         return _receiveGroupResultResponse(replyResult);
       case Group_Message.groupListResponse:
-        final groups = message
-            .ensureGroupListResponse()
-            .groups
-            .map((g) => ChatRoom.fromRpcGroupInfo(g, users))
-            .toList();
-        return RpcTranslatorResponse(type, groups);
+        final groupsPb = message.ensureGroupListResponse().groups;
+        final rooms = <ChatRoom>[];
+        for (final g in groupsPb) {
+          final users = await _resolveUsersForGroupInfo(g, knownUsers, ref);
+          rooms.add(ChatRoom.fromRpcGroupInfo(g, users));
+        }
+        return RpcTranslatorResponse(type, rooms);
       case Group_Message.groupInvitedResponse:
-        final invites = message
-            .ensureGroupInvitedResponse()
-            .invited
-            .map((e) => GroupInvite.fromRpcGroupInvited(e, users))
-            .toList();
+        final invited = message.ensureGroupInvitedResponse().invited;
+        final invites = <GroupInvite>[];
+        for (final e in invited) {
+          final users = await _resolveUsersForGroupInfo(e.group, knownUsers, ref);
+          invites.add(GroupInvite.fromRpcGroupInvited(e, users));
+        }
         return RpcTranslatorResponse(type, invites);
       default:
         return super.decodeMessageBytes(data, ref);

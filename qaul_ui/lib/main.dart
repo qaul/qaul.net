@@ -15,7 +15,17 @@ import 'l10n/app_localizations.dart';
 import 'qaul_app.dart';
 import 'stores/stores.dart';
 
-final _container = ProviderContainer();
+final _container = ProviderContainer(
+  overrides: [
+    fetchUserByIdForRpcProvider.overrideWith(
+      (ref) => (id) => ref.read(qaulWorkerProvider).getUserById(id),
+    ),
+    onGroupMemberUserResolvedProvider.overrideWith(
+      (ref) => (u) =>
+          ref.read(usersStoreProvider.notifier).mergeResolvedRpcUser(u),
+    ),
+  ],
+);
 
 void main() async {
   runZonedGuarded<Future<void>>(() async {

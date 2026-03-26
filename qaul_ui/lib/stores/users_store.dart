@@ -53,6 +53,11 @@ class UsersStore extends Notifier<List<User>> {
     }
   }
 
+  void mergeResolvedRpcUser(User u) {
+    _updateMany([u]);
+    _syncLookup();
+  }
+
   /// Always hits the RPC, bypassing the local-first check in [getByUserID].
   /// Updates the user in state via merge if found.
   Future<User?> refreshUser(String idBase58) async {
