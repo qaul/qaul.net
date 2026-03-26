@@ -41,6 +41,22 @@ class UsersStore extends Notifier<List<User>> {
   // Single-user lookups
   // ---------------------------------------------------------------------------
 
+  /// Resolves a user by [id] from the store, falling back to
+  /// [ChatRoom.members] if not found.
+  User? findMemberInRoom(Uint8List id, ChatRoom room) {
+    return state.firstWhereOrNull((u) => u.id.equals(id)) ??
+        room.members.firstWhereOrNull((m) => m.id.equals(id));
+  }
+
+  /// Resolves the other participant in a direct (1-to-1) chat room.
+  User? otherUserInDirectRoom(ChatRoom room, User defaultUser) {
+    final otherMember = room.members.firstWhereOrNull(
+      (m) => m.idBase58 != defaultUser.idBase58,
+    );
+    if (otherMember == null) return null;
+    return findMemberInRoom(otherMember.id, room);
+  }
+
   Future<User?> getByUserID(String idBase58) async {
     final match = state.where((u) => u.idBase58 == idBase58);
     if (match.isNotEmpty) return match.first;
@@ -51,6 +67,11 @@ class UsersStore extends Notifier<List<User>> {
     } catch (_) {
       return null;
     }
+  }
+
+  void mergeResolvedRpcUser(User u) {
+    _updateMany([u]);
+    _syncLookup();
   }
 
   /// Always hits the RPC, bypassing the local-first check in [getByUserID].
