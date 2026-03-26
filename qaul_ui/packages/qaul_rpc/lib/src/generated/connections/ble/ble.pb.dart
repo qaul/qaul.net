@@ -495,6 +495,7 @@ class BleDeviceInfo extends $pb.GeneratedMessage {
   ///
   /// Android: BluetoothAdapter getAddress()
   /// https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getAddress()
+  /// Android can not get macAddress of device because of permission issue.
   @$pb.TagNumber(2)
   $core.String get id => $_getSZ(1);
   @$pb.TagNumber(2)
@@ -509,6 +510,8 @@ class BleDeviceInfo extends $pb.GeneratedMessage {
   ///
   /// Android: BluetoothAdapter getName()
   /// https://developer.android.com/reference/kotlin/android/bluetooth/BluetoothAdapter#getName()
+  /// On Android 12+ if user not granted permission we can not get adapter
+  /// name.
   @$pb.TagNumber(3)
   $core.String get name => $_getSZ(2);
   @$pb.TagNumber(3)
@@ -605,7 +608,7 @@ class BleDeviceInfo extends $pb.GeneratedMessage {
   @$pb.TagNumber(9)
   void clearLeAudio() => $_clearField(9);
 
-  /// is periodic advertisment supported?
+  /// is periodic advertisement supported?
   ///
   /// Android: BluetoothAdapter isLePeriodicAdvertisingSupported()
   /// https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#isLePeriodicAdvertisingSupported()
@@ -621,7 +624,7 @@ class BleDeviceInfo extends $pb.GeneratedMessage {
   /// Is multi advertisement supported?
   ///
   /// When multi advertisement is supported one can have different
-  /// advertisement types parallely. Each advertisement has a
+  /// advertisement types in parallel. Each advertisement has a
   /// different device address.
   /// For scanning devices it looks, as if multiple devices devices
   /// would advertise themselves.
@@ -721,7 +724,7 @@ class BleStartRequest extends $pb.GeneratedMessage {
 
   /// qaul ID
   ///
-  /// The small 16 byte qaul id
+  /// The small 8 byte qaul id
   /// to be used to identify this node
   @$pb.TagNumber(1)
   $core.List<$core.int> get qaulId => $_getN(0);

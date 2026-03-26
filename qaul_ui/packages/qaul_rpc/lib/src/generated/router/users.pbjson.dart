@@ -104,6 +104,24 @@ const Users$json = {
       '9': 0,
       '10': 'securityNumberResponse'
     },
+    {
+      '1': 'get_user_by_id_request',
+      '3': 7,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.users.GetUserByIDRequest',
+      '9': 0,
+      '10': 'getUserByIdRequest'
+    },
+    {
+      '1': 'get_user_by_id_response',
+      '3': 8,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.users.GetUserByIDResponse',
+      '9': 0,
+      '10': 'getUserByIdResponse'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -120,7 +138,11 @@ final $typed_data.Uint8List usersDescriptor = $convert.base64Decode(
     'JfChdzZWN1cml0eV9udW1iZXJfcmVxdWVzdBgFIAEoCzIlLnFhdWwucnBjLnVzZXJzLlNlY3Vy'
     'aXR5TnVtYmVyUmVxdWVzdEgAUhVzZWN1cml0eU51bWJlclJlcXVlc3QSYgoYc2VjdXJpdHlfbn'
     'VtYmVyX3Jlc3BvbnNlGAYgASgLMiYucWF1bC5ycGMudXNlcnMuU2VjdXJpdHlOdW1iZXJSZXNw'
-    'b25zZUgAUhZzZWN1cml0eU51bWJlclJlc3BvbnNlQgkKB21lc3NhZ2U=');
+    'b25zZUgAUhZzZWN1cml0eU51bWJlclJlc3BvbnNlElgKFmdldF91c2VyX2J5X2lkX3JlcXVlc3'
+    'QYByABKAsyIi5xYXVsLnJwYy51c2Vycy5HZXRVc2VyQnlJRFJlcXVlc3RIAFISZ2V0VXNlckJ5'
+    'SWRSZXF1ZXN0ElsKF2dldF91c2VyX2J5X2lkX3Jlc3BvbnNlGAggASgLMiMucWF1bC5ycGMudX'
+    'NlcnMuR2V0VXNlckJ5SURSZXNwb25zZUgAUhNnZXRVc2VyQnlJZFJlc3BvbnNlQgkKB21lc3Nh'
+    'Z2U=');
 
 @$core.Deprecated('Use userRequestDescriptor instead')
 const UserRequest$json = {
@@ -292,3 +314,36 @@ final $typed_data.Uint8List securityNumberResponseDescriptor = $convert.base64De
     'ChZTZWN1cml0eU51bWJlclJlc3BvbnNlEhcKB3VzZXJfaWQYASABKAxSBnVzZXJJZBIjCg1zZW'
     'N1cml0eV9oYXNoGAIgASgMUgxzZWN1cml0eUhhc2gSNAoWc2VjdXJpdHlfbnVtYmVyX2Jsb2Nr'
     'cxgDIAMoDVIUc2VjdXJpdHlOdW1iZXJCbG9ja3M=');
+
+@$core.Deprecated('Use getUserByIDRequestDescriptor instead')
+const GetUserByIDRequest$json = {
+  '1': 'GetUserByIDRequest',
+  '2': [
+    {'1': 'user_id', '3': 10, '4': 1, '5': 12, '10': 'userId'},
+  ],
+};
+
+/// Descriptor for `GetUserByIDRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getUserByIDRequestDescriptor =
+    $convert.base64Decode(
+        'ChJHZXRVc2VyQnlJRFJlcXVlc3QSFwoHdXNlcl9pZBgKIAEoDFIGdXNlcklk');
+
+@$core.Deprecated('Use getUserByIDResponseDescriptor instead')
+const GetUserByIDResponse$json = {
+  '1': 'GetUserByIDResponse',
+  '2': [
+    {
+      '1': 'user',
+      '3': 10,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.users.UserEntry',
+      '10': 'user'
+    },
+  ],
+};
+
+/// Descriptor for `GetUserByIDResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getUserByIDResponseDescriptor = $convert.base64Decode(
+    'ChNHZXRVc2VyQnlJRFJlc3BvbnNlEi0KBHVzZXIYCiABKAsyGS5xYXVsLnJwYy51c2Vycy5Vc2'
+    'VyRW50cnlSBHVzZXI=');

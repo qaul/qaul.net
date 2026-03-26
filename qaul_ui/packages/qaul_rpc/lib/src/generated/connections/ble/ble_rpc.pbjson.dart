@@ -124,7 +124,7 @@ final $typed_data.Uint8List infoRequestDescriptor =
 const InfoResponse$json = {
   '1': 'InfoResponse',
   '2': [
-    {'1': 'small_id', '3': 1, '4': 1, '5': 12, '10': 'smallId'},
+    {'1': 'q8id', '3': 1, '4': 1, '5': 12, '10': 'q8id'},
     {'1': 'status', '3': 2, '4': 1, '5': 9, '10': 'status'},
     {'1': 'device_info', '3': 3, '4': 1, '5': 12, '10': 'deviceInfo'},
   ],
@@ -132,8 +132,8 @@ const InfoResponse$json = {
 
 /// Descriptor for `InfoResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List infoResponseDescriptor = $convert.base64Decode(
-    'CgxJbmZvUmVzcG9uc2USGQoIc21hbGxfaWQYASABKAxSB3NtYWxsSWQSFgoGc3RhdHVzGAIgAS'
-    'gJUgZzdGF0dXMSHwoLZGV2aWNlX2luZm8YAyABKAxSCmRldmljZUluZm8=');
+    'CgxJbmZvUmVzcG9uc2USEgoEcThpZBgBIAEoDFIEcThpZBIWCgZzdGF0dXMYAiABKAlSBnN0YX'
+    'R1cxIfCgtkZXZpY2VfaW5mbxgDIAEoDFIKZGV2aWNlSW5mbw==');
 
 @$core.Deprecated('Use startRequestDescriptor instead')
 const StartRequest$json = {

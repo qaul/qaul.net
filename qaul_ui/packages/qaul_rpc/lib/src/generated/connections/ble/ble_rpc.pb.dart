@@ -270,12 +270,12 @@ class InfoRequest extends $pb.GeneratedMessage {
 /// as well as all available BLE devices
 class InfoResponse extends $pb.GeneratedMessage {
   factory InfoResponse({
-    $core.List<$core.int>? smallId,
+    $core.List<$core.int>? q8id,
     $core.String? status,
     $core.List<$core.int>? deviceInfo,
   }) {
     final result = create();
-    if (smallId != null) result.smallId = smallId;
+    if (q8id != null) result.q8id = q8id;
     if (status != null) result.status = status;
     if (deviceInfo != null) result.deviceInfo = deviceInfo;
     return result;
@@ -295,7 +295,7 @@ class InfoResponse extends $pb.GeneratedMessage {
       package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.ble'),
       createEmptyInstance: create)
     ..a<$core.List<$core.int>>(
-        1, _omitFieldNames ? '' : 'smallId', $pb.PbFieldType.OY)
+        1, _omitFieldNames ? '' : 'q8id', $pb.PbFieldType.OY)
     ..aOS(2, _omitFieldNames ? '' : 'status')
     ..a<$core.List<$core.int>>(
         3, _omitFieldNames ? '' : 'deviceInfo', $pb.PbFieldType.OY)
@@ -320,15 +320,15 @@ class InfoResponse extends $pb.GeneratedMessage {
       $pb.GeneratedMessage.$_defaultFor<InfoResponse>(create);
   static InfoResponse? _defaultInstance;
 
-  /// the small 16 byte BLE id
+  /// the small 8 byte BLE id
   @$pb.TagNumber(1)
-  $core.List<$core.int> get smallId => $_getN(0);
+  $core.List<$core.int> get q8id => $_getN(0);
   @$pb.TagNumber(1)
-  set smallId($core.List<$core.int> value) => $_setBytes(0, value);
+  set q8id($core.List<$core.int> value) => $_setBytes(0, value);
   @$pb.TagNumber(1)
-  $core.bool hasSmallId() => $_has(0);
+  $core.bool hasQ8id() => $_has(0);
   @$pb.TagNumber(1)
-  void clearSmallId() => $_clearField(1);
+  void clearQ8id() => $_clearField(1);
 
   /// status of the module
   @$pb.TagNumber(2)
