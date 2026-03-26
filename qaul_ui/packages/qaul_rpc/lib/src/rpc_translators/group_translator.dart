@@ -2,36 +2,45 @@ part of 'abstract_rpc_module_translator.dart';
 
 Future<List<User>> _resolveUsersForGroupInfo(
   GroupInfo g,
-  List<User> knownUsers,
+  Map<String, User> knownUsersById,
+  Map<String, User?> resolvedCache,
   Ref ref,
 ) async {
   final fetch = ref.read(fetchUserByIdForRpcProvider);
   final onResolved = ref.read(onGroupMemberUserResolvedProvider);
-  final memberIdSet =
-      g.members.map((m) => Base58Encode(Uint8List.fromList(m.userId))).toSet();
   final result = <User>[];
-  for (final user in knownUsers) {
-    if (memberIdSet.contains(user.idBase58)) {
-      result.add(user);
-    }
-  }
-  if (fetch == null) return result;
+  final missingIds = <String>[];
+  final missingIdBytes = <Uint8List>[];
 
-  final resolvedIds = result.map((u) => u.idBase58).toSet();
-  final toFetch = <Uint8List>[];
   for (final m in g.members) {
     final idBytes = Uint8List.fromList(m.userId);
-    if (resolvedIds.contains(Base58Encode(idBytes))) continue;
-    resolvedIds.add(Base58Encode(idBytes));
-    toFetch.add(idBytes);
+    final idBase58 = Base58Encode(idBytes);
+    final known = knownUsersById[idBase58];
+    if (known != null) {
+      result.add(known);
+      continue;
+    }
+    if (resolvedCache.containsKey(idBase58)) {
+      final cached = resolvedCache[idBase58];
+      if (cached != null) {
+        result.add(cached);
+      }
+      continue;
+    }
+    missingIds.add(idBase58);
+    missingIdBytes.add(idBytes);
   }
-  if (toFetch.isEmpty) return result;
 
-  final fetched = await Future.wait(toFetch.map(fetch));
-  for (var i = 0; i < toFetch.length; i++) {
+  if (fetch == null || missingIdBytes.isEmpty) return result;
+
+  final fetched = await Future.wait(missingIdBytes.map(fetch));
+  for (var i = 0; i < missingIdBytes.length; i++) {
+    final idBase58 = missingIds[i];
     final u = fetched[i];
+    resolvedCache[idBase58] = u;
     if (u != null) {
       result.add(u);
+      knownUsersById[idBase58] = u;
       onResolved?.call(u);
     }
   }
@@ -45,12 +54,17 @@ class GroupTranslator extends RpcModuleTranslator {
   @override
   Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Ref ref) async {
     final knownUsers = ref.read(userLookupProvider);
+    final knownUsersById = <String, User>{
+      for (final u in knownUsers) u.idBase58: u,
+    };
+    final resolvedCache = <String, User?>{};
     final message = Group.fromBuffer(data);
 
     switch (message.whichMessage()) {
       case Group_Message.groupInfoResponse:
         final info = message.ensureGroupInfoResponse();
-        final users = await _resolveUsersForGroupInfo(info, knownUsers, ref);
+        final users =
+            await _resolveUsersForGroupInfo(info, knownUsersById, resolvedCache, ref);
         return RpcTranslatorResponse(
           type,
           ChatRoom.fromRpcGroupInfo(info, users),
@@ -74,7 +88,8 @@ class GroupTranslator extends RpcModuleTranslator {
         final groupsPb = message.ensureGroupListResponse().groups;
         final rooms = <ChatRoom>[];
         for (final g in groupsPb) {
-          final users = await _resolveUsersForGroupInfo(g, knownUsers, ref);
+          final users =
+              await _resolveUsersForGroupInfo(g, knownUsersById, resolvedCache, ref);
           rooms.add(ChatRoom.fromRpcGroupInfo(g, users));
         }
         return RpcTranslatorResponse(type, rooms);
@@ -82,7 +97,12 @@ class GroupTranslator extends RpcModuleTranslator {
         final invited = message.ensureGroupInvitedResponse().invited;
         final invites = <GroupInvite>[];
         for (final e in invited) {
-          final users = await _resolveUsersForGroupInfo(e.group, knownUsers, ref);
+          final users = await _resolveUsersForGroupInfo(
+            e.group,
+            knownUsersById,
+            resolvedCache,
+            ref,
+          );
           invites.add(GroupInvite.fromRpcGroupInvited(e, users));
         }
         return RpcTranslatorResponse(type, invites);

@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
+import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -15,10 +17,27 @@ import 'l10n/app_localizations.dart';
 import 'qaul_app.dart';
 import 'stores/stores.dart';
 
+final _inFlightUserFetchById = <String, Future<User?>>{};
+
 final _container = ProviderContainer(
   overrides: [
     fetchUserByIdForRpcProvider.overrideWith(
-      (ref) => (id) => ref.read(qaulWorkerProvider).getUserById(id),
+      (ref) => (id) {
+        final idBase58 = Base58Encode(id);
+        final inStore = ref
+            .read(usersStoreProvider)
+            .firstWhereOrNull((u) => u.idBase58 == idBase58);
+        if (inStore != null) return Future.value(inStore);
+
+        final inFlight = _inFlightUserFetchById[idBase58];
+        if (inFlight != null) return inFlight;
+
+        final request = ref.read(qaulWorkerProvider).getUserById(id);
+        _inFlightUserFetchById[idBase58] = request;
+        return request.whenComplete(() {
+          _inFlightUserFetchById.remove(idBase58);
+        });
+      },
     ),
     onGroupMemberUserResolvedProvider.overrideWith(
       (ref) => (u) =>

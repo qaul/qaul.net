@@ -75,9 +75,10 @@ class _DeepLinkWrapperState extends ConsumerState<DeepLinkWrapper> {
 
   void _navigateToChat(String id) {
     final usr = ref.read(defaultUserProvider)!;
-    final otherUser = _userWithId(id);
     final room = _roomWithId(id);
-    if (otherUser == null || room == null) return;
+    if (room == null) return;
+    final otherUser = room.isGroupChatRoom ? null : _otherUserForRoom(room, usr);
+    if (!room.isGroupChatRoom && otherUser == null) return;
     openChat(room, ref: ref, context: context, user: usr, otherUser: otherUser);
   }
 
@@ -86,5 +87,13 @@ class _DeepLinkWrapperState extends ConsumerState<DeepLinkWrapper> {
   ChatRoom? _roomWithId(String id) =>
       ref.read(chatRoomsProvider).firstWhereOrNull((r) => r.idBase58 == id);
 
-  User? _userWithId(String id) => ref.read(usersStoreProvider).firstWhereOrNull((u) => u.idBase58 == id);
+  User? _otherUserForRoom(ChatRoom room, User defaultUser) {
+    final users = ref.read(usersStoreProvider);
+    final fromStore = users.firstWhereOrNull(
+      (u) => u.conversationId?.equals(room.conversationId) ?? false,
+    );
+    if (fromStore != null) return fromStore;
+    return room.members
+        .firstWhereOrNull((member) => member.idBase58 != defaultUser.idBase58);
+  }
 }
