@@ -2,9 +2,8 @@
 """
 Run network behaviour tests across topologies.
 
-Warms the network ONCE per topology (apply → start → wait for convergence →
-send sentinel and wait for all nodes to receive it), then runs the three bash
-test scripts back to back without tearing down between them.
+Warms the network ONCE per topology (apply -> start -> wait for convergence),
+then runs the Python test functions back to back without tearing down between them.
 
 Results saved to results/<date>-network-<topology>.json.
 
@@ -16,15 +15,18 @@ Usage:
 import datetime
 import json
 import os
-import subprocess
 import sys
 import time
+import traceback
 
 sys.path.insert(0, ".")
 
 from lib.network import apply_topology, clear_topology, start_qaul, stop_qaul, wait_for_nodes
 from lib.node import Node
 from lib.topology import load_node_ids
+from test_direct_messages import test_direct_message_unicast
+from test_feed_distribution import test_feed_messages_reach_all_nodes
+from test_degraded_links import test_feed_delivery_under_packet_loss
 
 TOPOLOGIES = [
     {"file": "topologies/line-5.json",   "discovery_wait": 200, "degraded_loss_percents": [30, 50, 80]},
@@ -54,34 +56,20 @@ def wait_for_convergence(node_ids: list[str], timeout: int = 200):
     raise TimeoutError(f"only {known}/{len(node_ids)} users after {timeout}s")
 
 
-def run_bash_test(script: str, node_ids: list[str], env: dict | None = None) -> dict:
-    """
-    Run a bash test script with node IDs as arguments.
-    Progress messages go to the terminal (stderr is inherited).
-    The last JSON line on stdout is the test result.
-    """
+def run_test(name: str, fn, kwargs: dict) -> dict:
+    """Run a single test function, catching errors and returning a result dict."""
     t0 = time.time()
-    script_path = os.path.join(os.path.dirname(__file__), script)
-    run_env = os.environ.copy()
-    if env:
-        run_env.update(env)
     try:
-        result = subprocess.run(
-            ["bash", script_path] + node_ids,
-            stdout=subprocess.PIPE,
-            text=True,
-            timeout=300,
-            env=run_env,
-        )
-        elapsed = round(time.time() - t0, 1)
-        json_lines = [l for l in result.stdout.splitlines() if l.strip().startswith("{")]
-        if not json_lines:
-            return {"passed": False, "notes": f"no JSON output from {script}", "elapsed_s": elapsed}
-        data = json.loads(json_lines[-1])
-        data["elapsed_s"] = elapsed
-        return data
+        result = fn(**kwargs)
+        result["elapsed_s"] = round(time.time() - t0, 1)
+        return result
     except Exception as e:
-        return {"passed": False, "notes": f"ERROR: {e}", "elapsed_s": round(time.time() - t0, 1)}
+        traceback.print_exc()
+        return {
+            "passed": False,
+            "notes": f"ERROR: {e}",
+            "elapsed_s": round(time.time() - t0, 1),
+        }
 
 
 def run_topology(config: dict) -> dict:
@@ -110,28 +98,45 @@ def run_topology(config: dict) -> dict:
 
         suite_passed = True
 
-        for test_name, script in [
-            ("test_direct_messages",   "test_direct_messages.sh"),
-            ("test_feed_distribution", "test_feed_distribution.sh"),
-        ]:
-            print(f"\n  [{test_name}]")
-            result = run_bash_test(script, sorted_ids)
-            record["tests"][test_name] = result
-            if result.get("passed"):
-                print(f"    pass ({result.get('elapsed_s', '?')}s)")
-            else:
-                print(f"    FAIL: {result.get('notes', '')}")
-                suite_passed = False
+        # direct messages
+        print(f"\n  [test_direct_messages]")
+        result = run_test("test_direct_messages", test_direct_message_unicast, {
+            "node_ids": sorted_ids,
+            "discovery_wait": 1,  # already converged
+        })
+        record["tests"]["test_direct_messages"] = result
+        if result.get("passed"):
+            print(f"    pass ({result.get('elapsed_s', '?')}s)")
+        else:
+            print(f"    FAIL: {result.get('notes', '')}")
+            suite_passed = False
 
+        # feed distribution
+        print(f"\n  [test_feed_distribution]")
+        result = run_test("test_feed_distribution", test_feed_messages_reach_all_nodes, {
+            "node_ids": sorted_ids,
+            "discovery_wait": 1,  # already converged
+            "pubsub_warmup": 0,   # already warmed
+        })
+        record["tests"]["test_feed_distribution"] = result
+        if result.get("passed"):
+            print(f"    pass ({result.get('elapsed_s', '?')}s)")
+        else:
+            print(f"    FAIL: {result.get('notes', '')}")
+            suite_passed = False
+
+        # degraded links
         loss_percents = config.get("degraded_loss_percents", [])
         if loss_percents:
             for pct in loss_percents:
                 test_name = f"test_degraded_links_{pct}pct"
                 print(f"\n  [{test_name}]")
-                result = run_bash_test(
-                    "test_degraded_links.sh", sorted_ids,
-                    env={"LOSS_PERCENT": str(pct)},
-                )
+                result = run_test(test_name, test_feed_delivery_under_packet_loss, {
+                    "node_ids": sorted_ids,
+                    "discovery_wait": 1,
+                    "pubsub_warmup": 0,
+                    "loss_percent": pct,
+                })
                 record["tests"][test_name] = result
                 if result.get("passed"):
                     print(f"    pass ({result.get('elapsed_s', '?')}s)")

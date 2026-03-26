@@ -20,13 +20,13 @@ class Node:
         return res.stdout.strip()
 
     def _run_json(self, *args):
-        """execut qauld-ctl command with --json, return jso output."""
+        """Execute qauld-ctl command with --json, return parsed JSON."""
         res = self._run("--json", *args)
         #print(f"{res}")
         return json.loads(res)
 
     def is_reachable(self) -> bool:
-        """checks if qauld is reachanle on current node"""
+        """Check if qauld is reachable on this node."""
         try:
             self._run_json("node", "info")
             return True
@@ -68,7 +68,7 @@ class Node:
     def create_account(self, name: str, password: str = "") -> dict:
         """create a new account."""
         args = ["account", "create", "--username", name]
-        if password.__len__() != 0:
+        if password:
             args += ["--password", password]
         return self._run_json(*args)
 
@@ -101,3 +101,16 @@ class Node:
     def router_connections(self) -> dict:
         """Return all candidate routes per user, pre best-route selection."""
         return self._run_json("router", "connections")
+
+    def local_user_id(self) -> str:
+        """Return the qaul user ID of this node's own local account."""
+        # try users list first (connections[].module == "LOCAL")
+        for user in self.known_users():
+            for c in user.get("connections", []):
+                if c.get("module") == "LOCAL":
+                    return user["id"]
+        # fallback: router table (connections[0].module == "Local")
+        for entry in self.router_table():
+            if entry["connections"] and entry["connections"][0]["module"].lower() == "local":
+                return entry["user_id"]
+        raise ValueError(f"No LOCAL user found on node {self.id}")
