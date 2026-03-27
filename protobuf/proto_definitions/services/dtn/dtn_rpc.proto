@@ -25,6 +25,10 @@ message DTN {
         DtnSetTotalSizeRequest dtn_set_total_size_request = 9;
         // dtn set total size response
         DtnSetTotalSizeResponse dtn_set_total_size_response = 10;
+        // dtn send routed request
+        DtnSendRoutedRequest dtn_send_routed_request = 11;
+        // dtn send routed response
+        DtnSendRoutedResponse dtn_send_routed_response = 12;
     }
 }
 
@@ -91,5 +95,33 @@ message DtnSetTotalSizeResponse {
     // total_size
     bool status = 1;
     // users
+    string message = 2;
+}
+
+// Custody route configuration for a single route
+message DtnCustodyRouteConfig {
+    // ordered list of custodian user IDs
+    repeated bytes custody_users = 1;
+}
+
+// Request to send a directed custody routed DTN message
+message DtnSendRoutedRequest {
+    // the receiver user ID
+    bytes receiver_id = 1;
+    // the message data to send
+    bytes data = 2;
+    // one or more custody routes
+    repeated DtnCustodyRouteConfig routes = 3;
+    // how many seconds until the message expires (0 = no expiry)
+    uint64 expiry_seconds = 4;
+    // maximum number of custody handoffs allowed
+    uint32 max_handoffs = 5;
+}
+
+// Response to a directed custody routed DTN send request
+message DtnSendRoutedResponse {
+    // whether the request was accepted
+    bool status = 1;
+    // error or status message
     string message = 2;
 }

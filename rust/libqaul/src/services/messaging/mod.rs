@@ -469,6 +469,51 @@ impl Messaging {
         }
     }
 
+    /// Pack, sign and schedule a DtnRoutedV2 message for sending
+    pub fn send_dtn_routed_v2_message(
+        user_account: &UserAccount,
+        target_id: &PeerId,
+        routed_v2: proto::DtnRoutedV2,
+    ) -> Result<Vec<u8>, String> {
+        // Create envelope payload with DtnRoutedV2
+        let dtn_payload = proto::EnvelopPayload {
+            payload: Some(proto::envelop_payload::Payload::DtnRoutedV2(routed_v2)),
+        };
+        let envelope = proto::Envelope {
+            sender_id: user_account.id.to_bytes(),
+            receiver_id: target_id.to_bytes(),
+            payload: dtn_payload.encode_to_vec(),
+        };
+
+        if let Ok(signature) = user_account.keys.sign(&envelope.encode_to_vec()) {
+            let container = proto::Container {
+                signature: signature.clone(),
+                envelope: Some(envelope),
+            };
+
+            Self::save_unconfirmed_message(
+                MessagingServiceType::DtnStored,
+                &[],
+                target_id,
+                &container,
+                true,
+            );
+
+            Self::schedule_message(
+                target_id.clone(),
+                container,
+                true,
+                false,
+                true,
+                true,
+            );
+
+            Ok(signature)
+        } else {
+            Err("dtn v2 messaging signing error".to_string())
+        }
+    }
+
     /// schedule a message
     ///
     /// schedule a message for sending.

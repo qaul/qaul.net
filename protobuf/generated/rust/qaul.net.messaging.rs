@@ -30,7 +30,7 @@ pub struct Envelope {
 /// envelop payload
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct EnvelopPayload {
-    #[prost(oneof = "envelop_payload::Payload", tags = "1, 2")]
+    #[prost(oneof = "envelop_payload::Payload", tags = "1, 2, 3")]
     pub payload: ::core::option::Option<envelop_payload::Payload>,
 }
 /// Nested message and enum types in `EnvelopPayload`.
@@ -43,6 +43,9 @@ pub mod envelop_payload {
         /// DTN message
         #[prost(bytes, tag = "2")]
         Dtn(::prost::alloc::vec::Vec<u8>),
+        /// directed custody routed DTN message
+        #[prost(message, tag = "3")]
+        DtnRoutedV2(super::DtnRoutedV2),
     }
 }
 /// encrypted message data
@@ -205,14 +208,14 @@ pub struct RtcMessage {
     pub content: ::prost::alloc::vec::Vec<u8>,
 }
 /// DTN message
-#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Dtn {
-    #[prost(oneof = "dtn::Message", tags = "1, 2")]
+    #[prost(oneof = "dtn::Message", tags = "1, 2, 3")]
     pub message: ::core::option::Option<dtn::Message>,
 }
 /// Nested message and enum types in `Dtn`.
 pub mod dtn {
-    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Oneof)]
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Message {
         /// message container
         #[prost(bytes, tag = "1")]
@@ -220,7 +223,44 @@ pub mod dtn {
         /// message received response
         #[prost(message, tag = "2")]
         Response(super::DtnResponse),
+        /// directed custody routed DTN message
+        #[prost(message, tag = "3")]
+        RoutedV2(super::DtnRoutedV2),
     }
+}
+/// Custody route: an ordered list of custodian users
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct CustodyRoute {
+    /// ordered list of custodian user IDs
+    #[prost(bytes = "vec", repeated, tag = "1")]
+    pub custody_users: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
+    /// index of the next custodian to try in this route
+    #[prost(uint32, tag = "2")]
+    pub next_index: u32,
+}
+/// Directed custody routed DTN message
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DtnRoutedV2 {
+    /// the original encrypted container bytes
+    #[prost(bytes = "vec", tag = "1")]
+    pub container: ::prost::alloc::vec::Vec<u8>,
+    /// one or more custody routes, tried in priority order
+    #[prost(message, repeated, tag = "2")]
+    pub routes: ::prost::alloc::vec::Vec<CustodyRoute>,
+    /// signature of the original message (used for dedup)
+    #[prost(bytes = "vec", tag = "3")]
+    pub original_signature: ::prost::alloc::vec::Vec<u8>,
+    /// public key of the original sender
+    #[prost(bytes = "vec", tag = "4")]
+    pub sender_public_key: ::prost::alloc::vec::Vec<u8>,
+    /// expiry timestamp (milliseconds since epoch), 0 = no expiry
+    #[prost(uint64, tag = "5")]
+    pub expires_at: u64,
+    /// remaining allowed handoffs before message is dropped
+    #[prost(uint32, tag = "6")]
+    pub remaining_handoffs: u32,
 }
 /// DTN response
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
