@@ -10,6 +10,7 @@ use prost::Message;
 
 use super::UnConfirmedMessage;
 use crate::router;
+use crate::services::dtn;
 use crate::utilities::qaul_id::QaulId;
 use crate::utilities::timestamp::Timestamp;
 
@@ -126,5 +127,8 @@ impl MessagingRetransmit {
                 log::error!("updating unconfirmed table error!");
             }
         }
+
+        // Process V2 DTN routed messages
+        dtn::Dtn::process_retransmit_v2();
     }
 }

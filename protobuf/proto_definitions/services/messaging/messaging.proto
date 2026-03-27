@@ -29,6 +29,8 @@ message EnvelopPayload {
         Encrypted encrypted = 1;
         // DTN message
         bytes dtn = 2;
+        // directed custody routed DTN message
+        DtnRoutedV2 dtn_routed_v2 = 3;
     }
 }
 
@@ -167,7 +169,33 @@ message Dtn {
         bytes container = 1;
         // message received response
         DtnResponse response = 2;
+        // directed custody routed DTN message
+        DtnRoutedV2 routed_v2 = 3;
     }
+}
+
+// Custody route: an ordered list of custodian users
+message CustodyRoute {
+    // ordered list of custodian user IDs
+    repeated bytes custody_users = 1;
+    // index of the next custodian to try in this route
+    uint32 next_index = 2;
+}
+
+// Directed custody routed DTN message
+message DtnRoutedV2 {
+    // the original encrypted container bytes
+    bytes container = 1;
+    // one or more custody routes, tried in priority order
+    repeated CustodyRoute routes = 2;
+    // signature of the original message (used for dedup)
+    bytes original_signature = 3;
+    // public key of the original sender
+    bytes sender_public_key = 4;
+    // expiry timestamp (milliseconds since epoch), 0 = no expiry
+    uint64 expires_at = 5;
+    // remaining allowed handoffs before message is dropped
+    uint32 remaining_handoffs = 6;
 }
 
 // DTN response

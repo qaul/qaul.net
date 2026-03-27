@@ -78,8 +78,10 @@ impl MessagingProcess {
                 }
             }
             Some(super::proto::messaging::Message::DtnResponse(dtn_response)) => {
-                // update DTN state
+                // update DTN V1 state
                 dtn::Dtn::on_dtn_response(&dtn_response);
+                // update DTN V2 state
+                dtn::Dtn::on_dtn_response_v2(&dtn_response);
 
                 // update unconfirmed table
                 super::Messaging::on_confirmed_message(
@@ -312,6 +314,9 @@ impl MessagingProcess {
                     }
                     Some(super::proto::envelop_payload::Payload::Dtn(dtn)) => {
                         dtn::Dtn::net(&receiver_id, &sender_id, &container.signature, &dtn);
+                    }
+                    Some(super::proto::envelop_payload::Payload::DtnRoutedV2(routed_v2)) => {
+                        dtn::Dtn::net_routed_v2(&receiver_id, &sender_id, &container.signature, routed_v2);
                     }
                     _ => {
                         log::error!("unknown envelop payload");
