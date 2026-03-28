@@ -63,7 +63,15 @@ class ChatRoom with EquatableMixin implements Comparable {
   factory ChatRoom.blank({required User otherUser}) {
     assert(otherUser.conversationId != null);
     return ChatRoom(
-        conversationId: otherUser.conversationId!, name: otherUser.name);
+      conversationId: otherUser.conversationId!,
+      name: otherUser.name,
+      members: [
+        ChatRoomUser(
+          otherUser,
+          joinedAt: DateTime.utc(1970),
+        ),
+      ],
+    );
   }
 
   factory ChatRoom.fromRpcGroupInfo(GroupInfo g, List<User> users) {
