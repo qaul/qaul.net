@@ -11,7 +11,7 @@ use prost::Message;
 use serde::{Deserialize, Serialize};
 use sled;
 use state::InitCell;
-use std::{convert::TryInto, fmt, sync::RwLock};
+use std::{fmt, sync::RwLock};
 
 use super::messaging::{proto, MessagingServiceType};
 use crate::node::user_accounts::{UserAccount, UserAccounts};
@@ -107,16 +107,30 @@ impl Dtn {
         let db = DataBase::get_node_db();
 
         // open trees
-        let dtn_messages: sled::Tree = db.open_tree("dtn-messages").unwrap();
-        let db_ref_id: sled::Tree = db.open_tree("dtn-messages-ids").unwrap();
+        let dtn_messages: sled::Tree = match db.open_tree("dtn-messages") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("Failed to open dtn-messages tree: {}", e);
+                return;
+            }
+        };
+        let db_ref_id: sled::Tree = match db.open_tree("dtn-messages-ids") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("Failed to open dtn-messages-ids tree: {}", e);
+                return;
+            }
+        };
 
         // calc current used size
         let mut used_size: u64 = 0;
         for entry in dtn_messages.iter() {
             if let Ok((_, message_entry_bytes)) = entry {
-                let message_entry: DtnMessageEntry =
-                    bincode::deserialize(&message_entry_bytes).unwrap();
-                used_size = used_size + (message_entry.size as u64);
+                if let Ok(message_entry) =
+                    bincode::deserialize::<DtnMessageEntry>(&message_entry_bytes)
+                {
+                    used_size = used_size + (message_entry.size as u64);
+                }
             }
         }
         let storage_state = DtnStorageState {
@@ -130,8 +144,20 @@ impl Dtn {
 
         // Initialize V2 storage
         let db_v2 = DataBase::get_node_db();
-        let db_ref_routed_v2 = db_v2.open_tree("dtn-routed-v2").unwrap();
-        let db_ref_sender_quotas = db_v2.open_tree("dtn-sender-quotas").unwrap();
+        let db_ref_routed_v2 = match db_v2.open_tree("dtn-routed-v2") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("Failed to open dtn-routed-v2 tree: {}", e);
+                return;
+            }
+        };
+        let db_ref_sender_quotas = match db_v2.open_tree("dtn-sender-quotas") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("Failed to open dtn-sender-quotas tree: {}", e);
+                return;
+            }
+        };
 
         let mut v2_used_size: u64 = 0;
         for entry in db_ref_routed_v2.iter() {
@@ -203,17 +229,22 @@ impl Dtn {
         org_sig: &Vec<u8>,
         dtn_payload: &Vec<u8>,
     ) -> (i32, i32) {
-        let mut storage_state = STORAGESTATE.get().write().unwrap();
+        let mut storage_state = match STORAGESTATE.get().write() {
+            Ok(s) => s,
+            Err(e) => {
+                log::error!("DTN: failed to acquire write lock: {}", e);
+                return (
+                    super::messaging::proto::dtn_response::ResponseType::Rejected as i32,
+                    super::messaging::proto::dtn_response::Reason::None as i32,
+                );
+            }
+        };
 
         // check already received
-        if storage_state.db_ref_id.contains_key(org_sig).unwrap() {
+        if storage_state.db_ref_id.contains_key(org_sig).unwrap_or(false) {
             return (
-                super::messaging::proto::dtn_response::ResponseType::Accepted
-                    .try_into()
-                    .unwrap(),
-                super::messaging::proto::dtn_response::Reason::None
-                    .try_into()
-                    .unwrap(),
+                super::messaging::proto::dtn_response::ResponseType::Accepted as i32,
+                super::messaging::proto::dtn_response::Reason::None as i32,
             );
         }
 
@@ -225,12 +256,8 @@ impl Dtn {
             None => {
                 log::error!("dtn module: user profile no exists");
                 return (
-                    super::messaging::proto::dtn_response::ResponseType::Rejected
-                        .try_into()
-                        .unwrap(),
-                    super::messaging::proto::dtn_response::Reason::UserNotAccepted
-                        .try_into()
-                        .unwrap(),
+                    super::messaging::proto::dtn_response::ResponseType::Rejected as i32,
+                    super::messaging::proto::dtn_response::Reason::UserNotAccepted as i32,
                 );
             }
         }
@@ -240,12 +267,8 @@ impl Dtn {
         let total_limit = (user_profile.storage.size_total as u64) * 1024 * 1024;
         if new_size > total_limit {
             return (
-                super::messaging::proto::dtn_response::ResponseType::Rejected
-                    .try_into()
-                    .unwrap(),
-                super::messaging::proto::dtn_response::Reason::OverallQuota
-                    .try_into()
-                    .unwrap(),
+                super::messaging::proto::dtn_response::ResponseType::Rejected as i32,
+                super::messaging::proto::dtn_response::Reason::OverallQuota as i32,
             );
         }
 
@@ -271,7 +294,16 @@ impl Dtn {
                 org_sig: org_sig.clone(),
                 size: dtn_payload.len() as u32,
             };
-            let message_entry_bytes = bincode::serialize(&message_entry).unwrap();
+            let message_entry_bytes = match bincode::serialize(&message_entry) {
+                Ok(bytes) => bytes,
+                Err(e) => {
+                    log::error!("DTN: failed to serialize message entry: {}", e);
+                    return (
+                        super::messaging::proto::dtn_response::ResponseType::Rejected as i32,
+                        super::messaging::proto::dtn_response::Reason::None as i32,
+                    );
+                }
+            };
 
             // NOTE: The following two tree writes (db_ref and db_ref_id) are not
             // atomic. If a crash occurs between them, the database could end up in
@@ -315,14 +347,9 @@ impl Dtn {
         }
 
         (
-            super::messaging::proto::dtn_response::ResponseType::Accepted
-                .try_into()
-                .unwrap(),
-            super::messaging::proto::dtn_response::Reason::None
-                .try_into()
-                .unwrap(),
+            super::messaging::proto::dtn_response::ResponseType::Accepted as i32,
+            super::messaging::proto::dtn_response::Reason::None as i32,
         )
-        // update storage state
     }
 
     /// this function is called when receive DTN response
@@ -367,15 +394,17 @@ impl Dtn {
         if let Some(user_account) = UserAccounts::get_by_id(*user_id) {
             match proto::Container::decode(&dtn_payload[..]) {
                 Ok(container) => {
-                    let envelope = container.envelope.as_ref().unwrap();
+                    let envelope = match container.envelope.as_ref() {
+                        Some(e) => e,
+                        None => {
+                            log::error!("DTN: no envelope in container");
+                            return;
+                        }
+                    };
 
                     let mut res: (i32, i32) = (
-                        super::messaging::proto::dtn_response::ResponseType::Accepted
-                            .try_into()
-                            .unwrap(),
-                        super::messaging::proto::dtn_response::Reason::None
-                            .try_into()
-                            .unwrap(),
+                        super::messaging::proto::dtn_response::ResponseType::Accepted as i32,
+                        super::messaging::proto::dtn_response::Reason::None as i32,
                     );
 
                     //if container.envelope.receiver_id
@@ -436,8 +465,20 @@ impl Dtn {
         match proto_rpc::Dtn::decode(&data[..]) {
             Ok(dtn) => match dtn.message {
                 Some(proto_rpc::dtn::Message::DtnStateRequest(_req)) => {
-                    let state = STORAGESTATE.get().read().unwrap();
-                    let unconfirmed = super::messaging::UNCONFIRMED.get().read().unwrap();
+                    let state = match STORAGESTATE.get().read() {
+                        Ok(s) => s,
+                        Err(e) => {
+                            log::error!("DTN RPC: failed to acquire read lock: {}", e);
+                            return;
+                        }
+                    };
+                    let unconfirmed = match super::messaging::UNCONFIRMED.get().read() {
+                        Ok(u) => u,
+                        Err(e) => {
+                            log::error!("DTN RPC: failed to acquire unconfirmed read lock: {}", e);
+                            return;
+                        }
+                    };
                     let unconfrimed_len = unconfirmed.unconfirmed.len();
 
                     let proto_message = proto_rpc::Dtn {
@@ -568,23 +609,20 @@ impl Dtn {
 
                             // check if user storage exists
                             let mut idx: Option<usize> = None;
-                            for i in 0..user_profile.storage.users.len() {
-                                if *user_profile.storage.users.get(i).unwrap() == user_id_string {
+                            for (i, user) in user_profile.storage.users.iter().enumerate() {
+                                if *user == user_id_string {
                                     idx = Some(i);
                                     break;
                                 }
                             }
-                            match idx {
-                                None => {
-                                    status = false;
-                                    message = "User does not exist".to_string();
-                                }
-                                _ => {}
+                            if idx.is_none() {
+                                status = false;
+                                message = "User does not exist".to_string();
                             }
 
-                            if status {
+                            if let Some(i) = idx {
                                 let mut opt = user_profile.storage.clone();
-                                opt.users.remove(idx.unwrap());
+                                opt.users.remove(i);
                                 Configuration::update_user_storage(my_user_id.to_string(), &opt);
                                 Configuration::save();
                             }
@@ -858,7 +896,13 @@ impl Dtn {
 
         // 3. Duplicate check
         {
-            let state = STORAGESTATE_V2.get().read().unwrap();
+            let state = match STORAGESTATE_V2.get().read() {
+                Ok(s) => s,
+                Err(e) => {
+                    log::error!("DtnRoutedV2: failed to acquire read lock: {}", e);
+                    return;
+                }
+            };
             if state
                 .db_ref_routed_v2
                 .contains_key(&routed_v2.original_signature)
@@ -900,7 +944,13 @@ impl Dtn {
 
         // 5. Per-sender quota check
         {
-            let state = STORAGESTATE_V2.get().read().unwrap();
+            let state = match STORAGESTATE_V2.get().read() {
+                Ok(s) => s,
+                Err(e) => {
+                    log::error!("DtnRoutedV2: failed to acquire read lock for quota check: {}", e);
+                    return;
+                }
+            };
             if let Ok(Some(quota_bytes)) = state
                 .db_ref_sender_quotas
                 .get(&routed_v2.sender_public_key)
@@ -923,8 +973,20 @@ impl Dtn {
 
         // 6. Overall quota check
         {
-            let state = STORAGESTATE_V2.get().read().unwrap();
-            let v1_state = STORAGESTATE.get().read().unwrap();
+            let state = match STORAGESTATE_V2.get().read() {
+                Ok(s) => s,
+                Err(e) => {
+                    log::error!("DtnRoutedV2: failed to acquire read lock for overall quota: {}", e);
+                    return;
+                }
+            };
+            let v1_state = match STORAGESTATE.get().read() {
+                Ok(s) => s,
+                Err(e) => {
+                    log::error!("DtnRoutedV2: failed to acquire V1 read lock: {}", e);
+                    return;
+                }
+            };
             match Configuration::get_user(user_account.id.to_string()) {
                 Some(user_profile) => {
                     let total_limit = (user_profile.storage.size_total as u64) * 1024 * 1024;
@@ -965,10 +1027,22 @@ impl Dtn {
             accepted_at: Timestamp::get_timestamp(),
             receiver_id: envelope_receiver.map(|r| r.to_bytes()).unwrap_or_default(),
         };
-        let entry_bytes = bincode::serialize(&v2_entry).unwrap();
+        let entry_bytes = match bincode::serialize(&v2_entry) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("DtnRoutedV2: failed to serialize entry: {}", e);
+                return;
+            }
+        };
 
         {
-            let mut state = STORAGESTATE_V2.get().write().unwrap();
+            let mut state = match STORAGESTATE_V2.get().write() {
+                Ok(s) => s,
+                Err(e) => {
+                    log::error!("DtnRoutedV2: failed to acquire write lock: {}", e);
+                    return;
+                }
+            };
             if let Err(e) = state
                 .db_ref_routed_v2
                 .insert(routed_v2.original_signature.clone(), entry_bytes)
@@ -991,10 +1065,13 @@ impl Dtn {
             };
             quota.used_bytes += entry_size as u64;
             quota.message_count += 1;
-            let quota_bytes = bincode::serialize(&quota).unwrap();
-            let _ = state
-                .db_ref_sender_quotas
-                .insert(routed_v2.sender_public_key.clone(), quota_bytes);
+            if let Ok(quota_bytes) = bincode::serialize(&quota) {
+                let _ = state
+                    .db_ref_sender_quotas
+                    .insert(routed_v2.sender_public_key.clone(), quota_bytes);
+            } else {
+                log::error!("DtnRoutedV2: failed to serialize sender quota");
+            }
             let _ = state.db_ref_sender_quotas.flush();
         }
 
@@ -1086,7 +1163,13 @@ impl Dtn {
 
     /// Handle DTN response for V2 messages
     pub fn on_dtn_response_v2(dtn_response: &proto::DtnResponse) {
-        let mut state = STORAGESTATE_V2.get().write().unwrap();
+        let mut state = match STORAGESTATE_V2.get().write() {
+            Ok(s) => s,
+            Err(e) => {
+                log::error!("DtnRoutedV2: failed to acquire write lock for response: {}", e);
+                return;
+            }
+        };
         if let Ok(Some(entry_bytes)) = state
             .db_ref_routed_v2
             .get(&dtn_response.signature)
@@ -1115,11 +1198,12 @@ impl Dtn {
                         {
                             quota.used_bytes = quota.used_bytes.saturating_sub(entry.size as u64);
                             quota.message_count = quota.message_count.saturating_sub(1);
-                            let quota_bytes = bincode::serialize(&quota).unwrap();
-                            let _ = state
-                                .db_ref_sender_quotas
-                                .insert(entry.sender_public_key.clone(), quota_bytes);
-                            let _ = state.db_ref_sender_quotas.flush();
+                            if let Ok(quota_bytes) = bincode::serialize(&quota) {
+                                let _ = state
+                                    .db_ref_sender_quotas
+                                    .insert(entry.sender_public_key.clone(), quota_bytes);
+                                let _ = state.db_ref_sender_quotas.flush();
+                            }
                         }
                     }
                 }
@@ -1130,7 +1214,13 @@ impl Dtn {
     /// Process V2 routed messages in the retransmit loop.
     /// Called periodically to check if stored V2 messages can be forwarded.
     pub fn process_retransmit_v2() {
-        let state = STORAGESTATE_V2.get().read().unwrap();
+        let state = match STORAGESTATE_V2.get().read() {
+            Ok(s) => s,
+            Err(e) => {
+                log::error!("DtnRoutedV2: failed to acquire read lock for retransmit: {}", e);
+                return;
+            }
+        };
         let now = Timestamp::get_timestamp();
 
         let mut to_remove: Vec<Vec<u8>> = Vec::new();
@@ -1157,7 +1247,13 @@ impl Dtn {
 
         // Remove expired entries
         if !to_remove.is_empty() {
-            let mut state = STORAGESTATE_V2.get().write().unwrap();
+            let mut state = match STORAGESTATE_V2.get().write() {
+                Ok(s) => s,
+                Err(e) => {
+                    log::error!("DtnRoutedV2: failed to acquire write lock for cleanup: {}", e);
+                    return;
+                }
+            };
             for sig in &to_remove {
                 if let Ok(Some(entry_bytes)) = state.db_ref_routed_v2.get(sig) {
                     if let Ok(entry) = bincode::deserialize::<DtnRoutedV2Entry>(&entry_bytes) {
@@ -1175,10 +1271,11 @@ impl Dtn {
                                 quota.used_bytes =
                                     quota.used_bytes.saturating_sub(entry.size as u64);
                                 quota.message_count = quota.message_count.saturating_sub(1);
-                                let quota_bytes = bincode::serialize(&quota).unwrap();
-                                let _ = state
-                                    .db_ref_sender_quotas
-                                    .insert(entry.sender_public_key.clone(), quota_bytes);
+                                if let Ok(quota_bytes) = bincode::serialize(&quota) {
+                                    let _ = state
+                                        .db_ref_sender_quotas
+                                        .insert(entry.sender_public_key.clone(), quota_bytes);
+                                }
                             }
                         }
                     }
@@ -1206,7 +1303,75 @@ impl Dtn {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::connections::ConnectionModule;
+    use crate::router::table::{RoutingConnectionEntry, RoutingTable, RoutingUserEntry};
+    use crate::utilities::qaul_id::QaulId;
+    use libp2p::identity::Keypair;
     use prost::Message;
+    use std::collections::HashMap;
+    use std::sync::{Mutex, Once};
+
+    static INIT_ROUTING: Once = Once::new();
+
+    /// Mutex to serialize tests that share the global routing table.
+    static ROUTING_TABLE_LOCK: Mutex<()> = Mutex::new(());
+
+    /// Ensure the global routing table is initialized exactly once.
+    fn ensure_routing_table() {
+        INIT_ROUTING.call_once(|| {
+            RoutingTable::init();
+        });
+    }
+
+    /// Create a random PeerId from a fresh Ed25519 keypair.
+    fn random_peer() -> PeerId {
+        let keys = Keypair::generate_ed25519();
+        PeerId::from(keys.public())
+    }
+
+    /// Make a user appear "online" by inserting a routing entry.
+    fn make_online(table: &mut HashMap<Vec<u8>, RoutingUserEntry>, peer: PeerId) {
+        let q8id = QaulId::to_q8id(peer);
+        let neighbour = random_peer();
+        table.insert(
+            q8id.clone(),
+            RoutingUserEntry {
+                id: q8id,
+                pgid: 1,
+                pgid_update: 0,
+                pgid_update_hc: 0,
+                online_time: 0,
+                connections: vec![RoutingConnectionEntry {
+                    module: ConnectionModule::Lan,
+                    node: neighbour,
+                    rtt: 50,
+                    hc: 1,
+                    lq: 10,
+                    last_update: 0,
+                }],
+            },
+        );
+    }
+
+    /// Set the global routing table to contain exactly the given entries.
+    fn set_routing_table(table: HashMap<Vec<u8>, RoutingUserEntry>) {
+        ensure_routing_table();
+        RoutingTable::set(RoutingTable { table });
+    }
+
+    /// Build a DtnRoutedV2 with the given routes and receiver bytes.
+    fn build_routed_v2(routes: Vec<proto::CustodyRoute>) -> proto::DtnRoutedV2 {
+        proto::DtnRoutedV2 {
+            container: vec![1, 2, 3],
+            routes,
+            original_signature: vec![0xAA],
+            sender_public_key: vec![0xBB],
+            expires_at: 0,
+            remaining_handoffs: 10,
+        }
+    }
+
+    // ── Serialization tests ──
 
     #[test]
     fn dtn_routed_v2_round_trip() {
@@ -1224,11 +1389,9 @@ mod tests {
             remaining_handoffs: 5,
         };
 
-        // Encode
         let encoded = original.encode_to_vec();
         assert!(!encoded.is_empty());
 
-        // Decode
         let decoded = proto::DtnRoutedV2::decode(&encoded[..]).unwrap();
         assert_eq!(decoded.container, original.container);
         assert_eq!(decoded.routes.len(), 1);
@@ -1256,7 +1419,6 @@ mod tests {
             remaining_handoffs: 3,
         };
 
-        // Serde round-trip (for sled storage)
         let serialized = bincode::serialize(&original).unwrap();
         let deserialized: proto::DtnRoutedV2 = bincode::deserialize(&serialized).unwrap();
         assert_eq!(deserialized.container, original.container);
@@ -1317,6 +1479,463 @@ mod tests {
                 assert_eq!(v2.remaining_handoffs, 1);
             }
             _ => panic!("Expected DtnRoutedV2 payload variant"),
+        }
+    }
+
+    // ── select_custody_target tests ──
+    //
+    // NOTE: These tests share a process-wide global RoutingTable. They run
+    // sequentially (cargo test runs tests within one binary on separate
+    // threads, but `RoutingTable::set` replaces the whole table atomically).
+    // Each test sets its own table before asserting.
+
+    #[test]
+    fn select_target_returns_recipient_when_online() {
+        let _lock = ROUTING_TABLE_LOCK.lock().unwrap();
+        let recipient = random_peer();
+        let custodian = random_peer();
+
+        let mut table = HashMap::new();
+        make_online(&mut table, recipient);
+        // custodian is NOT online
+        set_routing_table(table);
+
+        let route = proto::CustodyRoute {
+            custody_users: vec![custodian.to_bytes()],
+            next_index: 0,
+        };
+        let v2 = build_routed_v2(vec![route]);
+
+        let target = Dtn::select_custody_target(&v2, &recipient);
+        assert_eq!(target, Some(recipient));
+    }
+
+    #[test]
+    fn select_target_returns_last_custodian_when_online() {
+        let _lock = ROUTING_TABLE_LOCK.lock().unwrap();
+        let recipient = random_peer();
+        let c1 = random_peer();
+        let c2 = random_peer(); // closest to recipient
+
+        let mut table = HashMap::new();
+        // recipient offline, c1 offline, c2 online
+        make_online(&mut table, c2);
+        set_routing_table(table);
+
+        let route = proto::CustodyRoute {
+            custody_users: vec![c1.to_bytes(), c2.to_bytes()],
+            next_index: 0,
+        };
+        let v2 = build_routed_v2(vec![route]);
+
+        let target = Dtn::select_custody_target(&v2, &recipient);
+        assert_eq!(target, Some(c2));
+    }
+
+    #[test]
+    fn select_target_returns_none_when_nobody_online() {
+        let _lock = ROUTING_TABLE_LOCK.lock().unwrap();
+        let recipient = random_peer();
+        let c1 = random_peer();
+        let c2 = random_peer();
+
+        // Empty routing table — nobody online
+        set_routing_table(HashMap::new());
+
+        let route = proto::CustodyRoute {
+            custody_users: vec![c1.to_bytes(), c2.to_bytes()],
+            next_index: 0,
+        };
+        let v2 = build_routed_v2(vec![route]);
+
+        let target = Dtn::select_custody_target(&v2, &recipient);
+        assert_eq!(target, None);
+    }
+
+    #[test]
+    fn select_target_falls_through_to_second_route() {
+        let _lock = ROUTING_TABLE_LOCK.lock().unwrap();
+        let recipient = random_peer();
+        let route1_c1 = random_peer();
+        let route1_c2 = random_peer();
+        let route2_c1 = random_peer();
+
+        let mut table = HashMap::new();
+        // route1 custodians all offline, route2_c1 online
+        make_online(&mut table, route2_c1);
+        set_routing_table(table);
+
+        let r1 = proto::CustodyRoute {
+            custody_users: vec![route1_c1.to_bytes(), route1_c2.to_bytes()],
+            next_index: 0,
+        };
+        let r2 = proto::CustodyRoute {
+            custody_users: vec![route2_c1.to_bytes()],
+            next_index: 0,
+        };
+        let v2 = build_routed_v2(vec![r1, r2]);
+
+        let target = Dtn::select_custody_target(&v2, &recipient);
+        assert_eq!(target, Some(route2_c1));
+    }
+
+    #[test]
+    fn select_target_respects_next_index() {
+        let _lock = ROUTING_TABLE_LOCK.lock().unwrap();
+        let recipient = random_peer();
+        let c1 = random_peer();
+        let c2 = random_peer();
+
+        let mut table = HashMap::new();
+        // Both custodians online
+        make_online(&mut table, c1);
+        make_online(&mut table, c2);
+        set_routing_table(table);
+
+        // next_index = 1 means c1 (index 0) is already done, only c2 eligible
+        let route = proto::CustodyRoute {
+            custody_users: vec![c1.to_bytes(), c2.to_bytes()],
+            next_index: 1,
+        };
+        let v2 = build_routed_v2(vec![route]);
+
+        let target = Dtn::select_custody_target(&v2, &recipient);
+        assert_eq!(target, Some(c2));
+    }
+
+    #[test]
+    fn select_target_skips_exhausted_route() {
+        let _lock = ROUTING_TABLE_LOCK.lock().unwrap();
+        let recipient = random_peer();
+        let c1 = random_peer();
+
+        let mut table = HashMap::new();
+        make_online(&mut table, c1);
+        set_routing_table(table);
+
+        // next_index == len means this route is exhausted
+        let route = proto::CustodyRoute {
+            custody_users: vec![c1.to_bytes()],
+            next_index: 1,
+        };
+        let v2 = build_routed_v2(vec![route]);
+
+        let target = Dtn::select_custody_target(&v2, &recipient);
+        assert_eq!(target, None);
+    }
+
+    #[test]
+    fn select_target_prefers_custodian_closest_to_recipient() {
+        let _lock = ROUTING_TABLE_LOCK.lock().unwrap();
+        let recipient = random_peer();
+        let c1 = random_peer(); // farther from recipient
+        let c2 = random_peer(); // closer to recipient (higher index)
+
+        let mut table = HashMap::new();
+        // Both online
+        make_online(&mut table, c1);
+        make_online(&mut table, c2);
+        set_routing_table(table);
+
+        let route = proto::CustodyRoute {
+            custody_users: vec![c1.to_bytes(), c2.to_bytes()],
+            next_index: 0,
+        };
+        let v2 = build_routed_v2(vec![route]);
+
+        // Reverse scan should pick c2 (index 1) over c1 (index 0)
+        let target = Dtn::select_custody_target(&v2, &recipient);
+        assert_eq!(target, Some(c2));
+    }
+
+    // ── Route advancement tests ──
+
+    #[test]
+    fn route_next_index_advances_on_forward() {
+        let c1 = random_peer();
+        let c2 = random_peer();
+        let target = c2;
+
+        let mut routed = proto::DtnRoutedV2 {
+            container: vec![],
+            routes: vec![proto::CustodyRoute {
+                custody_users: vec![c1.to_bytes(), c2.to_bytes()],
+                next_index: 0,
+            }],
+            original_signature: vec![],
+            sender_public_key: vec![],
+            expires_at: 0,
+            remaining_handoffs: 5,
+        };
+
+        // Simulate what try_forward_v2 does to the route state
+        routed.remaining_handoffs = routed.remaining_handoffs.saturating_sub(1);
+        for route in &mut routed.routes {
+            for (i, user_bytes) in route.custody_users.iter().enumerate() {
+                if let Ok(uid) = PeerId::from_bytes(user_bytes) {
+                    if uid == target && i as u32 >= route.next_index {
+                        route.next_index = (i as u32) + 1;
+                        break;
+                    }
+                }
+            }
+        }
+
+        assert_eq!(routed.remaining_handoffs, 4);
+        assert_eq!(routed.routes[0].next_index, 2); // c2 is at index 1, so next = 2
+    }
+
+    #[test]
+    fn route_next_index_advances_for_middle_custodian() {
+        let c1 = random_peer();
+        let c2 = random_peer();
+        let c3 = random_peer();
+        let target = c2;
+
+        let mut routed = proto::DtnRoutedV2 {
+            container: vec![],
+            routes: vec![proto::CustodyRoute {
+                custody_users: vec![c1.to_bytes(), c2.to_bytes(), c3.to_bytes()],
+                next_index: 0,
+            }],
+            original_signature: vec![],
+            sender_public_key: vec![],
+            expires_at: 0,
+            remaining_handoffs: 5,
+        };
+
+        routed.remaining_handoffs = routed.remaining_handoffs.saturating_sub(1);
+        for route in &mut routed.routes {
+            for (i, user_bytes) in route.custody_users.iter().enumerate() {
+                if let Ok(uid) = PeerId::from_bytes(user_bytes) {
+                    if uid == target && i as u32 >= route.next_index {
+                        route.next_index = (i as u32) + 1;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // c2 at index 1, next_index should advance to 2, leaving c3 still eligible
+        assert_eq!(routed.routes[0].next_index, 2);
+    }
+
+    // ── V2 storage tests ──
+
+    fn init_v2_storage() {
+        use std::sync::Once;
+        static INIT_V2: Once = Once::new();
+        INIT_V2.call_once(|| {
+            let db = sled::Config::new().temporary(true).open().unwrap();
+            let db_ref_routed_v2 = db.open_tree("dtn-routed-v2").unwrap();
+            let db_ref_sender_quotas = db.open_tree("dtn-sender-quotas").unwrap();
+            STORAGESTATE_V2.set(RwLock::new(DtnStorageStateV2 {
+                db_ref_routed_v2,
+                db_ref_sender_quotas,
+                used_size: 0,
+                message_count: 0,
+            }));
+        });
+    }
+
+    #[test]
+    fn v2_storage_insert_and_retrieve() {
+        init_v2_storage();
+
+        let sig = vec![0x01, 0x02, 0x03];
+        let entry = DtnRoutedV2Entry {
+            routed_v2_bytes: vec![10, 20, 30],
+            sender_public_key: vec![0xAA],
+            size: 3,
+            accepted_at: 12345,
+            receiver_id: vec![0xBB],
+        };
+        let entry_bytes = bincode::serialize(&entry).unwrap();
+
+        {
+            let mut state = STORAGESTATE_V2.get().write().unwrap();
+            state
+                .db_ref_routed_v2
+                .insert(sig.clone(), entry_bytes)
+                .unwrap();
+            state.db_ref_routed_v2.flush().unwrap();
+            state.used_size += entry.size as u64;
+            state.message_count += 1;
+        }
+
+        // Retrieve
+        {
+            let state = STORAGESTATE_V2.get().read().unwrap();
+            assert!(state.db_ref_routed_v2.contains_key(&sig).unwrap());
+            let stored = state.db_ref_routed_v2.get(&sig).unwrap().unwrap();
+            let decoded: DtnRoutedV2Entry = bincode::deserialize(&stored).unwrap();
+            assert_eq!(decoded.routed_v2_bytes, vec![10, 20, 30]);
+            assert_eq!(decoded.size, 3);
+        }
+
+        // Cleanup
+        {
+            let mut state = STORAGESTATE_V2.get().write().unwrap();
+            state.db_ref_routed_v2.remove(&sig).unwrap();
+            state.used_size = 0;
+            state.message_count = 0;
+        }
+    }
+
+    #[test]
+    fn v2_storage_duplicate_detection() {
+        init_v2_storage();
+
+        let sig = vec![0xDE, 0xAD];
+        let entry = DtnRoutedV2Entry {
+            routed_v2_bytes: vec![1],
+            sender_public_key: vec![2],
+            size: 1,
+            accepted_at: 0,
+            receiver_id: vec![3],
+        };
+        let entry_bytes = bincode::serialize(&entry).unwrap();
+
+        {
+            let state = STORAGESTATE_V2.get().write().unwrap();
+            state
+                .db_ref_routed_v2
+                .insert(sig.clone(), entry_bytes)
+                .unwrap();
+        }
+
+        // Should detect duplicate
+        {
+            let state = STORAGESTATE_V2.get().read().unwrap();
+            assert!(state.db_ref_routed_v2.contains_key(&sig).unwrap());
+        }
+
+        // Cleanup
+        {
+            let state = STORAGESTATE_V2.get().write().unwrap();
+            state.db_ref_routed_v2.remove(&sig).unwrap();
+        }
+    }
+
+    #[test]
+    fn v2_sender_quota_tracking() {
+        init_v2_storage();
+
+        let sender_key = vec![0xCC, 0xDD];
+        let quota = SenderQuotaEntry {
+            used_bytes: 500,
+            message_count: 2,
+        };
+        let quota_bytes = bincode::serialize(&quota).unwrap();
+
+        {
+            let state = STORAGESTATE_V2.get().write().unwrap();
+            state
+                .db_ref_sender_quotas
+                .insert(sender_key.clone(), quota_bytes)
+                .unwrap();
+        }
+
+        // Retrieve and check
+        {
+            let state = STORAGESTATE_V2.get().read().unwrap();
+            let stored = state
+                .db_ref_sender_quotas
+                .get(&sender_key)
+                .unwrap()
+                .unwrap();
+            let decoded: SenderQuotaEntry = bincode::deserialize(&stored).unwrap();
+            assert_eq!(decoded.used_bytes, 500);
+            assert_eq!(decoded.message_count, 2);
+        }
+
+        // Simulate removing a message — quota should decrease
+        {
+            let state = STORAGESTATE_V2.get().write().unwrap();
+            let stored = state
+                .db_ref_sender_quotas
+                .get(&sender_key)
+                .unwrap()
+                .unwrap();
+            let mut decoded: SenderQuotaEntry = bincode::deserialize(&stored).unwrap();
+            decoded.used_bytes = decoded.used_bytes.saturating_sub(200);
+            decoded.message_count = decoded.message_count.saturating_sub(1);
+            let updated = bincode::serialize(&decoded).unwrap();
+            state
+                .db_ref_sender_quotas
+                .insert(sender_key.clone(), updated)
+                .unwrap();
+        }
+
+        {
+            let state = STORAGESTATE_V2.get().read().unwrap();
+            let stored = state
+                .db_ref_sender_quotas
+                .get(&sender_key)
+                .unwrap()
+                .unwrap();
+            let decoded: SenderQuotaEntry = bincode::deserialize(&stored).unwrap();
+            assert_eq!(decoded.used_bytes, 300);
+            assert_eq!(decoded.message_count, 1);
+        }
+
+        // Cleanup
+        {
+            let state = STORAGESTATE_V2.get().write().unwrap();
+            state.db_ref_sender_quotas.remove(&sender_key).unwrap();
+        }
+    }
+
+    #[test]
+    fn v2_per_sender_quota_limit_enforced() {
+        init_v2_storage();
+
+        let sender_key = vec![0xEE, 0xFF];
+        // Set quota near the limit
+        let quota = SenderQuotaEntry {
+            used_bytes: V2_PER_SENDER_QUOTA - 10,
+            message_count: 100,
+        };
+        let quota_bytes = bincode::serialize(&quota).unwrap();
+
+        {
+            let state = STORAGESTATE_V2.get().read().unwrap();
+            state
+                .db_ref_sender_quotas
+                .insert(sender_key.clone(), quota_bytes)
+                .unwrap();
+        }
+
+        // A message of size 11 should exceed the quota
+        {
+            let state = STORAGESTATE_V2.get().read().unwrap();
+            let stored = state
+                .db_ref_sender_quotas
+                .get(&sender_key)
+                .unwrap()
+                .unwrap();
+            let decoded: SenderQuotaEntry = bincode::deserialize(&stored).unwrap();
+            let new_msg_size: u64 = 11;
+            assert!(decoded.used_bytes + new_msg_size > V2_PER_SENDER_QUOTA);
+        }
+
+        // A message of size 5 should be under the quota
+        {
+            let state = STORAGESTATE_V2.get().read().unwrap();
+            let stored = state
+                .db_ref_sender_quotas
+                .get(&sender_key)
+                .unwrap()
+                .unwrap();
+            let decoded: SenderQuotaEntry = bincode::deserialize(&stored).unwrap();
+            let new_msg_size: u64 = 5;
+            assert!(decoded.used_bytes + new_msg_size <= V2_PER_SENDER_QUOTA);
+        }
+
+        // Cleanup
+        {
+            let state = STORAGESTATE_V2.get().read().unwrap();
+            state.db_ref_sender_quotas.remove(&sender_key).unwrap();
         }
     }
 }

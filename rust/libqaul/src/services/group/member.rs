@@ -132,11 +132,9 @@ impl Member {
             // save new user
             let member = super::GroupMember {
                 user_id: user_id_bytes.clone(),
-                role: super::proto_rpc::GroupMemberRole::User.try_into().unwrap(),
+                role: super::proto_rpc::GroupMemberRole::User as i32,
                 joined_at: timestamp::Timestamp::get_timestamp(),
-                state: super::proto_rpc::GroupMemberState::Invited
-                    .try_into()
-                    .unwrap(),
+                state: super::proto_rpc::GroupMemberState::Invited as i32,
                 last_message_index: 0,
             };
 
@@ -196,13 +194,20 @@ impl Member {
         GroupStorage::flush_account(account_id);
 
         if accept {
-            Self::save_group_event_message(
-                account_id,
-                &GroupId::from_bytes(group_id).unwrap(),
-                account_id,
-                chat::rpc_proto::GroupEventType::InviteAccepted,
-                account_id.to_bytes(),
-            );
+            match GroupId::from_bytes(group_id) {
+                Ok(id) => {
+                    Self::save_group_event_message(
+                        account_id,
+                        &id,
+                        account_id,
+                        chat::rpc_proto::GroupEventType::InviteAccepted,
+                        account_id.to_bytes(),
+                    );
+                }
+                Err(e) => {
+                    log::error!("failed to parse group id in reply_invite: {}", e);
+                }
+            }
         }
 
         Ok(true)
@@ -266,13 +271,20 @@ impl Member {
         Group::send_notify_message(&user_account, user_id, proto_message.encode_to_vec());
 
         // save group event
-        Self::save_group_event_message(
-            account_id,
-            &GroupId::from_bytes(group_id).unwrap(),
-            user_id,
-            chat::rpc_proto::GroupEventType::Left,
-            user_id.to_bytes(),
-        );
+        match GroupId::from_bytes(group_id) {
+            Ok(id) => {
+                Self::save_group_event_message(
+                    account_id,
+                    &id,
+                    user_id,
+                    chat::rpc_proto::GroupEventType::Left,
+                    user_id.to_bytes(),
+                );
+            }
+            Err(e) => {
+                log::error!("failed to parse group id in remove: {}", e);
+            }
+        }
 
         Ok(true)
     }
@@ -347,7 +359,14 @@ impl Member {
         group.revision += 1;
 
         // save group
-        let group_id = GroupId::from_bytes(&group.id).unwrap();
+        let group_id = match GroupId::from_bytes(&group.id) {
+            Ok(id) => id,
+            Err(e) => {
+                log::error!("failed to parse group id in on_accepted_invite: {}", e);
+                GroupStorage::save_group(account_id.to_owned(), group);
+                return Ok(true);
+            }
+        };
         GroupStorage::save_group(account_id.to_owned(), group);
 
         // save event
@@ -449,7 +468,14 @@ impl Member {
         group.status = super::proto_rpc::GroupStatus::Deactivated as i32;
 
         // save group
-        let group_id = GroupId::from_bytes(&group.id).unwrap();
+        let group_id = match GroupId::from_bytes(&group.id) {
+            Ok(id) => id,
+            Err(e) => {
+                log::error!("failed to parse group id in on_removed: {}", e);
+                GroupStorage::save_group(account_id.to_owned(), group);
+                return Ok(true);
+            }
+        };
         GroupStorage::save_group(account_id.to_owned(), group);
 
         // save event

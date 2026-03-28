@@ -48,12 +48,17 @@ impl Crypto25519 {
 
                 // make sure the transformation was correct and we have the correct secret key
                 {
-                    let retransformed_ed25519_keypair = libp2p::identity::ed25519::Keypair::from(
-                        libp2p::identity::ed25519::SecretKey::try_from_bytes(
-                            ed25519_dalek_secret_bytes,
-                        )
-                        .unwrap(),
-                    );
+                    let secret_key = match libp2p::identity::ed25519::SecretKey::try_from_bytes(
+                        ed25519_dalek_secret_bytes,
+                    ) {
+                        Ok(k) => k,
+                        Err(e) => {
+                            log::error!("Failed to reconstruct secret key from bytes: {}", e);
+                            return None;
+                        }
+                    };
+                    let retransformed_ed25519_keypair =
+                        libp2p::identity::ed25519::Keypair::from(secret_key);
                     assert!(
                         ed25519_dalek_keypair_bytes == retransformed_ed25519_keypair.to_bytes(),
                         "secret key transformation failed"

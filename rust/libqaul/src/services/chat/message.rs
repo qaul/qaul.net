@@ -129,7 +129,13 @@ impl ChatMessage {
         // send to all group members
         if let Some(user_account) = UserAccounts::get_by_id(*account_id) {
             for user_id in group.members.keys() {
-                let receiver = PeerId::from_bytes(user_id).unwrap();
+                let receiver = match PeerId::from_bytes(user_id) {
+                    Ok(id) => id,
+                    Err(e) => {
+                        log::error!("Error parsing receiver user id: {:?}", e);
+                        continue;
+                    }
+                };
                 if receiver != *account_id {
                     log::trace!("send message to {}", receiver.to_base58());
                     if let Err(error) = Self::send(&user_account, &receiver, &common_message) {

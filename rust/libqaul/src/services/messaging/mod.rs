@@ -125,7 +125,13 @@ impl Messaging {
         let db = DataBase::get_node_db();
 
         // open trees
-        let unconfirmed: sled::Tree = db.open_tree("unconfirmed").unwrap();
+        let unconfirmed: sled::Tree = match db.open_tree("unconfirmed") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("Failed to open unconfirmed tree: {}", e);
+                return;
+            }
+        };
         let unconfirmed_messages = UnConfirmedMessages { unconfirmed };
         UNCONFIRMED.set(RwLock::new(unconfirmed_messages));
     }
@@ -149,10 +155,22 @@ impl Messaging {
             scheduled_dtn: false,
             is_dtn,
         };
-        let unconfirmed = UNCONFIRMED.get().write().unwrap();
+        let unconfirmed = match UNCONFIRMED.get().write() {
+            Ok(u) => u,
+            Err(e) => {
+                log::error!("Failed to acquire unconfirmed write lock: {}", e);
+                return;
+            }
+        };
 
         // insert message to data base
-        let new_entry_bytes = bincode::serialize(&new_entry).unwrap();
+        let new_entry_bytes = match bincode::serialize(&new_entry) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("Failed to serialize unconfirmed entry: {}", e);
+                return;
+            }
+        };
         if let Err(e) = unconfirmed
             .unconfirmed
             .insert(container.signature.clone(), new_entry_bytes)
@@ -180,7 +198,13 @@ impl Messaging {
             bs58::encode(signature).into_string()
         );
 
-        let unconfirmed = UNCONFIRMED.get().write().unwrap();
+        let unconfirmed = match UNCONFIRMED.get().write() {
+            Ok(u) => u,
+            Err(e) => {
+                log::error!("Failed to acquire unconfirmed write lock: {}", e);
+                return;
+            }
+        };
 
         // check and remove unconfirmed from DB
         match unconfirmed.unconfirmed.remove(signature) {
@@ -191,8 +215,13 @@ impl Messaging {
 
                 match v {
                     Some(unconfirmed_bytes) => {
-                        let unconfirmed: UnConfirmedMessage =
-                            bincode::deserialize(&unconfirmed_bytes).unwrap();
+                        let unconfirmed: UnConfirmedMessage = match bincode::deserialize(&unconfirmed_bytes) {
+                            Ok(u) => u,
+                            Err(e) => {
+                                log::error!("Failed to deserialize unconfirmed message: {}", e);
+                                return;
+                            }
+                        };
 
                         // check message and decide what to do
                         match unconfirmed.message_type {
@@ -259,19 +288,36 @@ impl Messaging {
     }
 
     fn on_scheduled_message(signature: &[u8]) {
-        let unconfirmed = UNCONFIRMED.get().write().unwrap();
-        let Some(unconfirmed_message_bytes) = unconfirmed.unconfirmed.get(signature).unwrap()
-        else {
-            return;
+        let unconfirmed = match UNCONFIRMED.get().write() {
+            Ok(u) => u,
+            Err(e) => {
+                log::error!("Failed to acquire unconfirmed write lock: {}", e);
+                return;
+            }
         };
-        let mut unconfirmed_message: UnConfirmedMessage =
-            bincode::deserialize(&unconfirmed_message_bytes).unwrap();
+        let unconfirmed_message_bytes = match unconfirmed.unconfirmed.get(signature) {
+            Ok(Some(bytes)) => bytes,
+            _ => return,
+        };
+        let mut unconfirmed_message: UnConfirmedMessage = match bincode::deserialize(&unconfirmed_message_bytes) {
+            Ok(u) => u,
+            Err(e) => {
+                log::error!("Failed to deserialize unconfirmed message: {}", e);
+                return;
+            }
+        };
         if unconfirmed_message.scheduled {
             return;
         }
 
         unconfirmed_message.scheduled = true;
-        let unconfirmed_message_todb = bincode::serialize(&unconfirmed_message).unwrap();
+        let unconfirmed_message_todb = match bincode::serialize(&unconfirmed_message) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("Failed to serialize unconfirmed message: {}", e);
+                return;
+            }
+        };
         if let Err(_e) = unconfirmed
             .unconfirmed
             .insert(signature.to_vec(), unconfirmed_message_todb)
@@ -285,19 +331,36 @@ impl Messaging {
     }
 
     fn on_scheduled_as_dtn_message(signature: &[u8]) {
-        let unconfirmed = UNCONFIRMED.get().write().unwrap();
-        let Some(unconfirmed_message_bytes) = unconfirmed.unconfirmed.get(signature).unwrap()
-        else {
-            return;
+        let unconfirmed = match UNCONFIRMED.get().write() {
+            Ok(u) => u,
+            Err(e) => {
+                log::error!("Failed to acquire unconfirmed write lock: {}", e);
+                return;
+            }
         };
-        let mut unconfirmed_message: UnConfirmedMessage =
-            bincode::deserialize(&unconfirmed_message_bytes).unwrap();
+        let unconfirmed_message_bytes = match unconfirmed.unconfirmed.get(signature) {
+            Ok(Some(bytes)) => bytes,
+            _ => return,
+        };
+        let mut unconfirmed_message: UnConfirmedMessage = match bincode::deserialize(&unconfirmed_message_bytes) {
+            Ok(u) => u,
+            Err(e) => {
+                log::error!("Failed to deserialize unconfirmed message: {}", e);
+                return;
+            }
+        };
         if unconfirmed_message.scheduled {
             return;
         }
 
         unconfirmed_message.scheduled_dtn = true;
-        let unconfirmed_message_todb = bincode::serialize(&unconfirmed_message).unwrap();
+        let unconfirmed_message_todb = match bincode::serialize(&unconfirmed_message) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("Failed to serialize unconfirmed message: {}", e);
+                return;
+            }
+        };
         if let Err(_e) = unconfirmed
             .unconfirmed
             .insert(signature.to_vec(), unconfirmed_message_todb)
@@ -568,7 +631,13 @@ impl Messaging {
 
         // get scheduled messaging buffer
         {
-            let mut messaging = MESSAGING.get().write().unwrap();
+            let mut messaging = match MESSAGING.get().write() {
+                Ok(m) => m,
+                Err(e) => {
+                    log::error!("Failed to acquire messaging write lock: {}", e);
+                    return None;
+                }
+            };
             message_item = messaging.to_send.pop_front();
         }
 
@@ -591,23 +660,25 @@ impl Messaging {
                     && message.is_common
                 {
                     // get storage node id
-                    if let Ok(my_user_id) =
-                        PeerId::from_bytes(&message.container.envelope.as_ref().unwrap().sender_id)
-                    {
-                        if let Some(storage_node_id) =
-                            super::dtn::Dtn::get_storage_user(&my_user_id)
+                    if let Some(envelope) = message.container.envelope.as_ref() {
+                        if let Ok(my_user_id) =
+                            PeerId::from_bytes(&envelope.sender_id)
                         {
-                            if let Some(user_account) = UserAccounts::get_by_id(my_user_id) {
-                                if let Err(_e) = Self::send_dtn_message(
-                                    &user_account,
-                                    &storage_node_id,
-                                    &message.container,
-                                ) {
-                                    log::error!("DTN scheduling error!");
-                                } else {
-                                    log::error!("DTN scheduled...");
-                                    // update unconfirmed table
-                                    Self::on_scheduled_as_dtn_message(&message.container.signature);
+                            if let Some(storage_node_id) =
+                                super::dtn::Dtn::get_storage_user(&my_user_id)
+                            {
+                                if let Some(user_account) = UserAccounts::get_by_id(my_user_id) {
+                                    if let Err(_e) = Self::send_dtn_message(
+                                        &user_account,
+                                        &storage_node_id,
+                                        &message.container,
+                                    ) {
+                                        log::error!("DTN scheduling error!");
+                                    } else {
+                                        log::error!("DTN scheduled...");
+                                        // update unconfirmed table
+                                        Self::on_scheduled_as_dtn_message(&message.container.signature);
+                                    }
                                 }
                             }
                         }
