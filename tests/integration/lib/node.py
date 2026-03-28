@@ -1,5 +1,40 @@
+import concurrent.futures
 import json
 import subprocess
+
+
+def batch_query(nodes: dict, method: str, *args, max_workers: int = 32) -> dict:
+    """Call a Node method on multiple nodes in parallel.
+
+    Args:
+        nodes: {node_id: Node} dict
+        method: name of a Node method (e.g. "feed_message_contents")
+        *args: positional args forwarded to the method
+        max_workers: max concurrent threads
+
+    Returns: {node_id: result} dict
+    """
+    results = {}
+    errors = {}
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=min(len(nodes), max_workers)) as pool:
+        futures = {
+            pool.submit(getattr(node, method), *args): nid
+            for nid, node in nodes.items()
+        }
+        for future in concurrent.futures.as_completed(futures):
+            nid = futures[future]
+            try:
+                results[nid] = future.result()
+            except Exception as e:
+                errors[nid] = e
+
+    if errors:
+        raise RuntimeError(
+            f"batch_query({method}) failed on {len(errors)} node(s): "
+            + ", ".join(f"{nid}: {e}" for nid, e in errors.items())
+        )
+    return results
 
 
 class Node:
