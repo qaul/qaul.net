@@ -784,11 +784,21 @@ impl IdleBleService {
 
     /// Check if bluetooth is powered on by the device.
     pub async fn is_ble_enabled() -> bool {
-        let session = bluer::Session::new().await.unwrap();
-        let adapter = session.default_adapter().await.unwrap();
-        let ble_enabled: bool = adapter.is_powered().await.unwrap();
-        drop(session);
-        return ble_enabled;
+        let session = match bluer::Session::new().await {
+            Ok(s) => s,
+            Err(e) => {
+                log::warn!("Failed to create BLE session: {}", e);
+                return false;
+            }
+        };
+        let adapter = match session.default_adapter().await {
+            Ok(a) => a,
+            Err(e) => {
+                log::warn!("No default BLE adapter found: {}", e);
+                return false;
+            }
+        };
+        adapter.is_powered().await.unwrap_or(false)
     }
 }
 
