@@ -27,12 +27,31 @@ void main() {
         lastMessageIndex: lastMessageIndex,
       );
 
-  group('ChatRoom Equatable props (idBase58, lastMessageIndex)', () {
-    test('rooms with same idBase58 and same lastMessageIndex are equal', () {
+  group('ChatRoom Equatable props (idBase58, lastMessageIndex, messages)', () {
+    test('rooms with same idBase58, lastMessageIndex, and messages are equal', () {
       final a = room(messages: [message(1)], lastMessageIndex: 1);
       final b = room(messages: [message(1)], lastMessageIndex: 1);
       expect(a, equals(b));
       expect(a.hashCode, equals(b.hashCode));
+    });
+
+    test('rooms with same id and index but different message status are not equal', () {
+      final a = room(messages: [message(1)], lastMessageIndex: 1);
+      final b = room(
+        messages: [
+          Message(
+            senderId: Uint8List.fromList('sender'.codeUnits),
+            messageId: Uint8List.fromList('msg1'.codeUnits),
+            content: const TextMessageContent('text'),
+            index: 1,
+            sentAt: DateTime(2020, 1, 1),
+            receivedAt: DateTime(2020, 1, 1),
+            status: MessageState.confirmed,
+          ),
+        ],
+        lastMessageIndex: 1,
+      );
+      expect(a, isNot(equals(b)));
     });
 
     test('rooms with same idBase58 but different lastMessageIndex are not equal', () {
@@ -78,6 +97,35 @@ void main() {
       expect(list.single.idBase58, roomA.idBase58);
       expect(list.single.messages!.length, 2);
       expect(list.single.lastMessageIndex, 2);
+    });
+
+    test('update preserves messages when group RPC omits message list', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final notifier = container.read(chatRoomsProvider.notifier);
+
+      final withChat = ChatRoom(
+        conversationId: conversationId,
+        name: 'G',
+        isDirectChat: false,
+        messages: [message(1)],
+        lastMessageIndex: 1,
+      );
+      notifier.add(withChat);
+
+      final groupOverview = ChatRoom(
+        conversationId: conversationId,
+        name: 'G renamed',
+        isDirectChat: false,
+        messages: null,
+        lastMessageIndex: null,
+      );
+      notifier.update(groupOverview);
+
+      final list = container.read(chatRoomsProvider);
+      expect(list.single.name, 'G renamed');
+      expect(list.single.messages!.length, 1);
+      expect(list.single.lastMessageIndex, 1);
     });
 
     test('contains returns false when no room has that idBase58', () {

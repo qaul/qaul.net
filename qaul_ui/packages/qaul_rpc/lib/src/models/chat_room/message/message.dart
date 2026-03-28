@@ -51,5 +51,5 @@ class Message with EquatableMixin implements Comparable<Message> {
   }
 
   @override
-  List<Object?> get props => [senderId, messageId, content];
+  List<Object?> get props => [senderId, messageId, content, status];
 }
