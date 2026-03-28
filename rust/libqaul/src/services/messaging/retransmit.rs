@@ -21,7 +21,13 @@ impl MessagingRetransmit {
     /// process retransmission
     pub fn process() {
         // get unconfirmed table
-        let unconfirmed = super::UNCONFIRMED.get().write().unwrap();
+        let unconfirmed = match super::UNCONFIRMED.get().write() {
+            Ok(u) => u,
+            Err(e) => {
+                log::error!("Failed to acquire unconfirmed write lock: {}", e);
+                return;
+            }
+        };
         if unconfirmed.unconfirmed.len() == 0 {
             // there are no message to retransmit
             return;
@@ -35,7 +41,13 @@ impl MessagingRetransmit {
         for entry in unconfirmed.unconfirmed.iter() {
             if let Ok((signature, unconfirmed_message_bytes)) = entry {
                 let mut unconfirmed_message: UnConfirmedMessage =
-                    bincode::deserialize(&unconfirmed_message_bytes).unwrap();
+                    match bincode::deserialize(&unconfirmed_message_bytes) {
+                        Ok(u) => u,
+                        Err(e) => {
+                            log::error!("Failed to deserialize unconfirmed message: {}", e);
+                            continue;
+                        }
+                    };
 
                 // let's assume message transmit in 3 seconds
                 if cur_time < (unconfirmed_message.last_sent + 3000) {
@@ -61,8 +73,13 @@ impl MessagingRetransmit {
                         if let Ok(container) =
                             super::proto::Container::decode(&unconfirmed_message.container[..])
                         {
-                            let receiver =
-                                PeerId::from_bytes(&unconfirmed_message.receiver_id).unwrap();
+                            let receiver = match PeerId::from_bytes(&unconfirmed_message.receiver_id) {
+                                Ok(r) => r,
+                                Err(e) => {
+                                    log::error!("Failed to parse receiver PeerId: {}", e);
+                                    continue;
+                                }
+                            };
 
                             log::trace!(
                                 "retrans message, signature: {}",
@@ -85,8 +102,13 @@ impl MessagingRetransmit {
 
                             unconfirmed_message.retry = new_retry;
                             unconfirmed_message.last_sent = cur_time;
-                            let unconfirmed_message_todb =
-                                bincode::serialize(&unconfirmed_message).unwrap();
+                            let unconfirmed_message_todb = match bincode::serialize(&unconfirmed_message) {
+                                Ok(bytes) => bytes,
+                                Err(e) => {
+                                    log::error!("Failed to serialize unconfirmed message: {}", e);
+                                    continue;
+                                }
+                            };
                             if let Err(_e) = unconfirmed
                                 .unconfirmed
                                 .insert(signature, unconfirmed_message_todb)

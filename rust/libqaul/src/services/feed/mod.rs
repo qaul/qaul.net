@@ -78,8 +78,20 @@ impl Feed {
     pub fn init() {
         // get database and initialize tree
         let db = DataBase::get_node_db();
-        let tree: sled::Tree = db.open_tree("feed").unwrap();
-        let tree_ids: sled::Tree = db.open_tree("feed_id").unwrap();
+        let tree: sled::Tree = match db.open_tree("feed") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("Failed to open feed tree: {}", e);
+                return;
+            }
+        };
+        let tree_ids: sled::Tree = match db.open_tree("feed_id") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("Failed to open feed_id tree: {}", e);
+                return;
+            }
+        };
 
         // get last key
         let last_message: u64;
@@ -156,16 +168,14 @@ impl Feed {
         Self::save_message(container.signature.clone(), msg);
 
         // flood via floodsub
-        if lan.is_some() {
-            lan.unwrap()
-                .swarm
+        if let Some(lan) = lan {
+            lan.swarm
                 .behaviour_mut()
                 .floodsub
                 .publish(Node::get_topic(), buf.clone());
         }
-        if internet.is_some() {
+        if let Some(internet) = internet {
             internet
-                .unwrap()
                 .swarm
                 .behaviour_mut()
                 .floodsub
@@ -207,7 +217,13 @@ impl Feed {
                         let mut new_message = true;
 
                         {
-                            let feed = FEED.get().read().unwrap();
+                            let feed = match FEED.get().read() {
+                                Ok(f) => f,
+                                Err(e) => {
+                                    log::error!("Failed to acquire feed read lock: {}", e);
+                                    return;
+                                }
+                            };
 
                             if feed.messages.contains_key(&feed_container.signature) {
                                 new_message = false;
@@ -256,8 +272,14 @@ impl Feed {
 
     //Save message by sync
     pub fn save_message_by_sync(message_id: &[u8], sender_id: &[u8], content: String, time: u64) {
-        let mut feed = FEED.get().write().unwrap();
-        if let Some(_index) = feed.tree_ids.get(&message_id[..]).unwrap() {
+        let mut feed = match FEED.get().write() {
+            Ok(f) => f,
+            Err(e) => {
+                log::error!("Failed to acquire feed write lock: {}", e);
+                return;
+            }
+        };
+        if feed.tree_ids.get(&message_id[..]).unwrap_or(None).is_some() {
             return;
         }
 
@@ -287,7 +309,13 @@ impl Feed {
         };
 
         // save to data base
-        let message_data_bytes = bincode::serialize(&message_data).unwrap();
+        let message_data_bytes = match bincode::serialize(&message_data) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("Failed to serialize feed message data: {}", e);
+                return;
+            }
+        };
         if let Err(e) = feed
             .tree
             .insert(&last_message.to_be_bytes(), message_data_bytes)
@@ -299,7 +327,13 @@ impl Feed {
             }
         }
 
-        let last_message_bytes = bincode::serialize(&last_message).unwrap();
+        let last_message_bytes = match bincode::serialize(&last_message) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("Failed to serialize last_message index: {}", e);
+                return;
+            }
+        };
         if let Err(e) = feed.tree_ids.insert(&message_id[..], last_message_bytes) {
             log::error!("Error saving feed id to data base: {}", e);
         } else {
@@ -317,7 +351,13 @@ impl Feed {
     /// This function saves a new message in the data base and in the in-memory BTreeMap
     fn save_message(signature: Vec<u8>, message: proto_net::FeedMessageContent) {
         // open feed map for writing
-        let mut feed = FEED.get().write().unwrap();
+        let mut feed = match FEED.get().write() {
+            Ok(f) => f,
+            Err(e) => {
+                log::error!("Failed to acquire feed write lock: {}", e);
+                return;
+            }
+        };
 
         let sender_id = message.sender.clone();
         let content = message.content.clone();
@@ -343,7 +383,13 @@ impl Feed {
         };
 
         // save to data base
-        let message_data_bytes = bincode::serialize(&message_data).unwrap();
+        let message_data_bytes = match bincode::serialize(&message_data) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("Failed to serialize feed message data: {}", e);
+                return;
+            }
+        };
         if let Err(e) = feed
             .tree
             .insert(&last_message.to_be_bytes(), message_data_bytes)
@@ -355,7 +401,13 @@ impl Feed {
             }
         }
 
-        let last_message_bytes = bincode::serialize(&last_message).unwrap();
+        let last_message_bytes = match bincode::serialize(&last_message) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("Failed to serialize last_message index: {}", e);
+                return;
+            }
+        };
         if let Err(e) = feed
             .tree_ids
             .insert(&message_data.message_id[..], last_message_bytes)
@@ -373,7 +425,13 @@ impl Feed {
 
     pub fn get_latest_message_ids(count: usize) -> Vec<Vec<u8>> {
         // get feed message store
-        let feed = FEED.get().read().unwrap();
+        let feed = match FEED.get().read() {
+            Ok(f) => f,
+            Err(e) => {
+                log::error!("Failed to acquire feed read lock: {}", e);
+                return Vec::new();
+            }
+        };
         let mut msg_count: usize = count;
         if feed.last_message < (count as u64) {
             msg_count = feed.last_message as usize;
@@ -385,8 +443,10 @@ impl Feed {
         for res in feed.tree.range(first_message_bytes.as_slice()..) {
             match res {
                 Ok((_id, message_bytes)) => {
-                    let message: FeedMessageData = bincode::deserialize(&message_bytes).unwrap();
-                    ids.push(message.message_id.clone());
+                    match bincode::deserialize::<FeedMessageData>(&message_bytes) {
+                        Ok(message) => ids.push(message.message_id.clone()),
+                        Err(e) => log::error!("Failed to deserialize feed message: {}", e),
+                    }
                 }
                 Err(e) => {
                     log::error!("Error retrieving feed message from data base: {}", e);
@@ -400,10 +460,16 @@ impl Feed {
     pub fn process_received_feed_ids(ids: &[Vec<u8>]) -> Vec<Vec<u8>> {
         let mut missing_ids = Vec::with_capacity(ids.len());
 
-        let feed = FEED.get().read().unwrap();
+        let feed = match FEED.get().read() {
+            Ok(f) => f,
+            Err(e) => {
+                log::error!("Failed to acquire feed read lock: {}", e);
+                return missing_ids;
+            }
+        };
         for id in ids {
-            match feed.tree_ids.get(&id[..]).unwrap() {
-                Some(_index) => {}
+            match feed.tree_ids.get(&id[..]) {
+                Ok(Some(_index)) => {}
                 _ => {
                     missing_ids.push(id.clone());
                 }
@@ -414,18 +480,26 @@ impl Feed {
 
     pub fn get_messges_by_ids(ids: &[Vec<u8>]) -> Vec<(Vec<u8>, Vec<u8>, String, u64)> {
         let mut res = Vec::with_capacity(ids.len());
-        let feed = FEED.get().read().unwrap();
+        let feed = match FEED.get().read() {
+            Ok(f) => f,
+            Err(e) => {
+                log::error!("Failed to acquire feed read lock: {}", e);
+                return res;
+            }
+        };
         for id in ids {
-            if let Some(index_bytes) = feed.tree_ids.get(&id[..]).unwrap() {
-                let index: u64 = bincode::deserialize(&index_bytes).unwrap();
-                if let Some(message_bytes) = feed.tree.get(index.to_be_bytes()).unwrap() {
-                    let message: FeedMessageData = bincode::deserialize(&message_bytes).unwrap();
-                    res.push((
-                        id.clone(),
-                        message.sender_id.clone(),
-                        message.content.clone(),
-                        message.timestamp_sent,
-                    ));
+            if let Ok(Some(index_bytes)) = feed.tree_ids.get(&id[..]) {
+                if let Ok(index) = bincode::deserialize::<u64>(&index_bytes) {
+                    if let Ok(Some(message_bytes)) = feed.tree.get(index.to_be_bytes()) {
+                        if let Ok(message) = bincode::deserialize::<FeedMessageData>(&message_bytes) {
+                            res.push((
+                                id.clone(),
+                                message.sender_id.clone(),
+                                message.content.clone(),
+                                message.timestamp_sent,
+                            ));
+                        }
+                    }
                 }
             }
         }
@@ -438,7 +512,16 @@ impl Feed {
     /// that are newer then the last message.
     fn get_messages(last_message: u64) -> proto::FeedMessageList {
         // get feed message store
-        let feed = FEED.get().read().unwrap();
+        let feed = match FEED.get().read() {
+            Ok(f) => f,
+            Err(e) => {
+                log::error!("Failed to acquire feed read lock: {}", e);
+                return proto::FeedMessageList {
+                    feed_message: Vec::new(),
+                    pagination: None,
+                };
+            }
+        };
         let mut feed_list = proto::FeedMessageList {
             feed_message: Vec::with_capacity(
                 feed.last_message.saturating_sub(last_message) as usize
@@ -455,8 +538,13 @@ impl Feed {
             for res in feed.tree.range(first_message_bytes.as_slice()..) {
                 match res {
                     Ok((_id, message_bytes)) => {
-                        let message: FeedMessageData =
-                            bincode::deserialize(&message_bytes).unwrap();
+                        let message: FeedMessageData = match bincode::deserialize(&message_bytes) {
+                            Ok(m) => m,
+                            Err(e) => {
+                                log::error!("Failed to deserialize feed message: {}", e);
+                                continue;
+                            }
+                        };
 
                         if feed.messages.contains_key(&message.message_id) {
                             log::trace!("key exist");
@@ -504,14 +592,29 @@ impl Feed {
 
     /// Get messages from database using pagination
     fn get_paginated_messages(offset: u32, limit: u32) -> proto::FeedMessageList {
-        let feed = FEED.get().read().unwrap();
+        let feed = match FEED.get().read() {
+            Ok(f) => f,
+            Err(e) => {
+                log::error!("Failed to acquire feed read lock: {}", e);
+                return proto::FeedMessageList {
+                    feed_message: Vec::new(),
+                    pagination: None,
+                };
+            }
+        };
         build_feed_list_from(&feed.tree, offset, limit)
     }
 
     /// Sign a message with the private key
     /// The signature can be validated with the corresponding public key.
     pub fn sign_message(buf: &[u8], keys: &Keypair) -> Vec<u8> {
-        keys.sign(buf).unwrap()
+        match keys.sign(buf) {
+            Ok(sig) => sig,
+            Err(e) => {
+                log::error!("Failed to sign feed message: {}", e);
+                Vec::new()
+            }
+        }
     }
 
     /// validate a message via the public key of the sender
@@ -635,7 +738,13 @@ fn build_feed_list_from(tree: &sled::Tree, offset: u32, limit: u32) -> proto::Fe
     for res in iter {
         match res {
             Ok((_key, message_bytes)) => {
-                let message: FeedMessageData = bincode::deserialize(&message_bytes).unwrap();
+                let message: FeedMessageData = match bincode::deserialize(&message_bytes) {
+                    Ok(m) => m,
+                    Err(e) => {
+                        log::error!("Failed to deserialize feed message: {}", e);
+                        continue;
+                    }
+                };
 
                 let sender_id_base58 = bs58::encode(&message.sender_id).into_string();
 

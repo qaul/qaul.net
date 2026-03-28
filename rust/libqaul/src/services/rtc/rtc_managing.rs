@@ -10,7 +10,13 @@ impl RtcManaging {
     pub fn session_list(_my_user_id: &PeerId) -> super::proto_rpc::RtcSessionListResponse {
         let mut res = super::proto_rpc::RtcSessionListResponse { sessions: vec![] };
 
-        let sessions = super::RTCSESSIONS.get().read().unwrap();
+        let sessions = match super::RTCSESSIONS.get().read() {
+            Ok(s) => s,
+            Err(e) => {
+                log::error!("Error reading RTC sessions lock in session_list: {}", e);
+                return res;
+            }
+        };
         for (_id, session) in sessions.sessions.iter() {
             let entry = super::proto_rpc::RtcSession {
                 group_id: session.group_id.clone(),
@@ -55,7 +61,12 @@ impl RtcManaging {
             .expect("Vec<u8> provides capacity as needed");
 
         if let Some(user_account) = UserAccounts::get_by_id(*my_user_id) {
-            let receiver = PeerId::from_bytes(&req.group_id).unwrap();
+            let receiver = match PeerId::from_bytes(&req.group_id) {
+                Ok(id) => id,
+                Err(e) => {
+                    return Err(format!("Error parsing PeerId from group_id: {}", e));
+                }
+            };
             super::Rtc::send_rtc_message_through_message(&user_account, receiver, &message_buff);
         } else {
             return Err("user account has problem".to_string());
@@ -85,7 +96,12 @@ impl RtcManaging {
             .expect("Vec<u8> provides capacity as needed");
 
         if let Some(user_account) = UserAccounts::get_by_id(*my_user_id) {
-            let receiver = PeerId::from_bytes(group_id).unwrap();
+            let receiver = match PeerId::from_bytes(group_id) {
+                Ok(id) => id,
+                Err(e) => {
+                    return Err(format!("Error parsing PeerId from group_id: {}", e));
+                }
+            };
             super::Rtc::send_rtc_message_through_message(&user_account, receiver, &message_buff);
         } else {
             return Err("user account has problem".to_string());

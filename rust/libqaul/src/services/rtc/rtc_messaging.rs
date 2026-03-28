@@ -35,7 +35,12 @@ impl RtcMessaging {
 
                 let message_id: Vec<u8> = Vec::new();
                 if let Some(user_account) = UserAccounts::get_by_id(*my_user_id) {
-                    let receiver = PeerId::from_bytes(&req.group_id).unwrap();
+                    let receiver = match PeerId::from_bytes(&req.group_id) {
+                        Ok(id) => id,
+                        Err(e) => {
+                            return Err(format!("Error parsing PeerId from group_id: {}", e));
+                        }
+                    };
                     if let Err(e) = messaging::Messaging::pack_and_send_message(
                         &user_account,
                         &receiver,
