@@ -208,14 +208,14 @@ pub struct RtcMessage {
     pub content: ::prost::alloc::vec::Vec<u8>,
 }
 /// DTN message
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Dtn {
     #[prost(oneof = "dtn::Message", tags = "1, 2, 3")]
     pub message: ::core::option::Option<dtn::Message>,
 }
 /// Nested message and enum types in `Dtn`.
 pub mod dtn {
-    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Oneof)]
     pub enum Message {
         /// message container
         #[prost(bytes, tag = "1")]
@@ -228,38 +228,30 @@ pub mod dtn {
         RoutedV2(super::DtnRoutedV2),
     }
 }
-/// Custody route: an ordered list of custodian users
+/// DTN source routed message (V2)
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
-pub struct CustodyRoute {
-    /// ordered list of custodian user IDs
-    #[prost(bytes = "vec", repeated, tag = "1")]
-    pub custody_users: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
-    /// index of the next custodian to try in this route
-    #[prost(uint32, tag = "2")]
-    pub next_index: u32,
-}
-/// Directed custody routed DTN message
-#[derive(serde::Serialize, serde::Deserialize)]
-#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct DtnRoutedV2 {
     /// the original encrypted container bytes
     #[prost(bytes = "vec", tag = "1")]
     pub container: ::prost::alloc::vec::Vec<u8>,
-    /// one or more custody routes, tried in priority order
-    #[prost(message, repeated, tag = "2")]
-    pub routes: ::prost::alloc::vec::Vec<CustodyRoute>,
+    /// ordered list of custody user IDs
+    #[prost(bytes = "vec", repeated, tag = "2")]
+    pub custody_route: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
+    /// index of the first custody entry that has not yet taken custody
+    #[prost(uint32, tag = "3")]
+    pub next_route_index: u32,
     /// signature of the original message (used for dedup)
-    #[prost(bytes = "vec", tag = "3")]
-    pub original_signature: ::prost::alloc::vec::Vec<u8>,
-    /// public key of the original sender
     #[prost(bytes = "vec", tag = "4")]
+    pub original_signature: ::prost::alloc::vec::Vec<u8>,
+    /// public key of the original sender (protobuf-encoded)
+    #[prost(bytes = "vec", tag = "5")]
     pub sender_public_key: ::prost::alloc::vec::Vec<u8>,
     /// expiry timestamp (milliseconds since epoch), 0 = no expiry
-    #[prost(uint64, tag = "5")]
+    #[prost(uint64, tag = "6")]
     pub expires_at: u64,
     /// remaining allowed handoffs before message is dropped
-    #[prost(uint32, tag = "6")]
+    #[prost(uint32, tag = "7")]
     pub remaining_handoffs: u32,
 }
 /// DTN response

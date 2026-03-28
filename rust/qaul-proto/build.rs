@@ -60,10 +60,6 @@ fn main() {
 
     // make DTN V2 messages serializable for sled storage
     prost_build.type_attribute(
-        "CustodyRoute",
-        "#[derive(serde::Serialize, serde::Deserialize)]",
-    );
-    prost_build.type_attribute(
         "DtnRoutedV2",
         "#[derive(serde::Serialize, serde::Deserialize)]",
     );

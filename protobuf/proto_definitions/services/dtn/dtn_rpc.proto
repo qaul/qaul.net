@@ -29,6 +29,10 @@ message DTN {
         DtnSendRoutedRequest dtn_send_routed_request = 11;
         // dtn send routed response
         DtnSendRoutedResponse dtn_send_routed_response = 12;
+        // dtn set custody enabled request
+        DtnSetCustodyEnabledRequest dtn_set_custody_enabled_request = 13;
+        // dtn set custody enabled response
+        DtnSetCustodyEnabledResponse dtn_set_custody_enabled_response = 14;
     }
 }
 
@@ -98,20 +102,14 @@ message DtnSetTotalSizeResponse {
     string message = 2;
 }
 
-// Custody route configuration for a single route
-message DtnCustodyRouteConfig {
-    // ordered list of custodian user IDs
-    repeated bytes custody_users = 1;
-}
-
-// Request to send a directed custody routed DTN message
+// Request to send a DTN source routed message
 message DtnSendRoutedRequest {
     // the receiver user ID
     bytes receiver_id = 1;
-    // the message data to send
+    // the message data to send (signed Container bytes)
     bytes data = 2;
-    // one or more custody routes
-    repeated DtnCustodyRouteConfig routes = 3;
+    // ordered list of custody user IDs
+    repeated bytes custody_route = 3;
     // how many seconds until the message expires (0 = no expiry)
     uint64 expiry_seconds = 4;
     // maximum number of custody handoffs allowed
@@ -121,6 +119,20 @@ message DtnSendRoutedRequest {
 // Response to a directed custody routed DTN send request
 message DtnSendRoutedResponse {
     // whether the request was accepted
+    bool status = 1;
+    // error or status message
+    string message = 2;
+}
+
+// Request to enable or disable DTN V2 custody acceptance
+message DtnSetCustodyEnabledRequest {
+    // whether to enable custody acceptance
+    bool enabled = 1;
+}
+
+// Response to custody enable/disable request
+message DtnSetCustodyEnabledResponse {
+    // whether the request was successful
     bool status = 1;
     // error or status message
     string message = 2;

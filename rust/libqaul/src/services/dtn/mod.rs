@@ -6,6 +6,7 @@
 //! The DTN service sends and receives DTN messages into the network.
 //! They should reach everyone in the network.
 
+use libp2p::identity::PublicKey;
 use libp2p::PeerId;
 use prost::Message;
 use serde::{Deserialize, Serialize};
@@ -693,6 +694,9 @@ impl Dtn {
                 Some(proto_rpc::dtn::Message::DtnSendRoutedRequest(req)) => {
                     Self::rpc_send_routed(my_user_id, req, request_id);
                 }
+                Some(proto_rpc::dtn::Message::DtnSetCustodyEnabledRequest(req)) => {
+                    Self::rpc_set_custody_enabled(my_user_id, req, request_id);
+                }
                 _ => {
                     log::error!("Unhandled Protobuf DTN RPC message");
                 }
@@ -732,34 +736,24 @@ impl Dtn {
             }
         };
 
-        // Validate routes
-        if req.routes.is_empty() {
-            send_response(false, "at least one route is required".to_string());
+        // Validate custody route
+        if req.custody_route.is_empty() {
+            send_response(false, "at least one custody user is required".to_string());
             return;
         }
-        if req.routes.len() > 5 {
-            send_response(false, "maximum 5 routes allowed".to_string());
+        if req.custody_route.len() > 10 {
+            send_response(false, "maximum 10 custody users allowed".to_string());
             return;
         }
-        for route in &req.routes {
-            if route.custody_users.is_empty() {
-                send_response(false, "routes must not be empty".to_string());
-                return;
-            }
-            if route.custody_users.len() > 10 {
-                send_response(false, "maximum 10 custodians per route".to_string());
-                return;
-            }
-            for user_bytes in &route.custody_users {
-                if let Ok(uid) = PeerId::from_bytes(user_bytes) {
-                    if uid == my_user_id || uid == receiver_id {
-                        send_response(false, "custodians must not include sender or receiver".to_string());
-                        return;
-                    }
-                } else {
-                    send_response(false, "invalid custodian user ID".to_string());
+        for user_bytes in &req.custody_route {
+            if let Ok(uid) = PeerId::from_bytes(user_bytes) {
+                if uid == my_user_id || uid == receiver_id {
+                    send_response(false, "custodians must not include sender or receiver".to_string());
                     return;
                 }
+            } else {
+                send_response(false, "invalid custodian user ID".to_string());
+                return;
             }
         }
 
@@ -772,15 +766,8 @@ impl Dtn {
             }
         };
 
-        // Build custody routes
-        let routes: Vec<proto::CustodyRoute> = req
-            .routes
-            .iter()
-            .map(|r| proto::CustodyRoute {
-                custody_users: r.custody_users.clone(),
-                next_index: 0,
-            })
-            .collect();
+        // Use the flat custody route directly
+        let custody_route = req.custody_route.clone();
 
         // Calculate expiry
         let expires_at = if req.expiry_seconds > 0 {
@@ -790,18 +777,34 @@ impl Dtn {
         };
 
         // Calculate remaining handoffs
-        let total_custodians: u32 = routes.iter().map(|r| r.custody_users.len() as u32).sum();
+        let total_custodians: u32 = custody_route.len() as u32;
         let remaining_handoffs = if req.max_handoffs > 0 {
             req.max_handoffs
         } else {
             total_custodians * 2
         };
 
+        // Extract original_signature from the inner Container
+        let original_signature = match proto::Container::decode(&req.data[..]) {
+            Ok(container) => {
+                if container.signature.is_empty() {
+                    send_response(false, "inner container has no signature".to_string());
+                    return;
+                }
+                container.signature
+            }
+            Err(e) => {
+                send_response(false, format!("invalid container data: {}", e));
+                return;
+            }
+        };
+
         // Build the DtnRoutedV2 message
         let routed_v2 = proto::DtnRoutedV2 {
             container: req.data.clone(),
-            routes,
-            original_signature: Vec::new(), // will be set after signing
+            custody_route,
+            next_route_index: 0,
+            original_signature,
             sender_public_key: user_account.keys.public().encode_protobuf(),
             expires_at,
             remaining_handoffs,
@@ -820,9 +823,30 @@ impl Dtn {
         match super::messaging::Messaging::send_dtn_routed_v2_message(
             &user_account,
             &target,
-            routed_v2,
+            routed_v2.clone(),
         ) {
             Ok(_sig) => {
+                // Store in V2 state so on_dtn_response_v2 can clean up
+                // when the first custodian responds
+                let entry_size = routed_v2.container.len() as u32;
+                let v2_entry = DtnRoutedV2Entry {
+                    routed_v2_bytes: routed_v2.encode_to_vec(),
+                    sender_public_key: routed_v2.sender_public_key.clone(),
+                    size: entry_size,
+                    accepted_at: Timestamp::get_timestamp(),
+                    receiver_id: receiver_id.to_bytes(),
+                };
+                if let Ok(entry_bytes) = bincode::serialize(&v2_entry) {
+                    if let Ok(mut state) = STORAGESTATE_V2.get().write() {
+                        let _ = state.db_ref_routed_v2.insert(
+                            routed_v2.original_signature.clone(),
+                            entry_bytes,
+                        );
+                        let _ = state.db_ref_routed_v2.flush();
+                        state.used_size += entry_size as u64;
+                        state.message_count += 1;
+                    }
+                }
                 send_response(true, "".to_string());
             }
             Err(e) => {
@@ -833,9 +857,44 @@ impl Dtn {
 
     /// Determine where to forward a V2 DTN message.
     ///
-    /// Returns the recipient if online, otherwise scans custody routes
-    /// in priority order, within each route scanning from the end
-    /// (closest to recipient) backward to next_index.
+    /// Returns the recipient if online, otherwise scans the custody route
+    /// forward from `next_route_index`, returning the first reachable user.
+    /// Handle DtnSetCustodyEnabledRequest RPC
+    fn rpc_set_custody_enabled(
+        my_user_id: PeerId,
+        req: proto_rpc::DtnSetCustodyEnabledRequest,
+        request_id: String,
+    ) {
+        let send_response = |status: bool, message: String| {
+            let proto_message = proto_rpc::Dtn {
+                message: Some(proto_rpc::dtn::Message::DtnSetCustodyEnabledResponse(
+                    proto_rpc::DtnSetCustodyEnabledResponse { status, message },
+                )),
+            };
+            Rpc::send_message(
+                proto_message.encode_to_vec(),
+                crate::rpc::proto::Modules::Dtn.into(),
+                request_id.clone(),
+                Vec::new(),
+            );
+        };
+
+        match Configuration::get_user(my_user_id.to_string()) {
+            Some(mut user_profile) => {
+                user_profile.storage.dtn_v2_custody_enabled = req.enabled;
+                Configuration::update_user_storage(
+                    my_user_id.to_string(),
+                    &user_profile.storage,
+                );
+                Configuration::save();
+                send_response(true, "".to_string());
+            }
+            None => {
+                send_response(false, "user profile not found".to_string());
+            }
+        }
+    }
+
     pub fn select_custody_target(
         routed_v2: &proto::DtnRoutedV2,
         receiver_id: &PeerId,
@@ -845,19 +904,16 @@ impl Dtn {
             return Some(*receiver_id);
         }
 
-        // Try each route in priority order
-        for route in &routed_v2.routes {
-            let len = route.custody_users.len();
-            let start = route.next_index as usize;
-            if start >= len {
-                continue;
-            }
-            // Scan from the end (closest to recipient) backward to next_index
-            for i in (start..len).rev() {
-                if let Ok(custodian_id) = PeerId::from_bytes(&route.custody_users[i]) {
-                    if RoutingTable::get_route_to_user(custodian_id).is_some() {
-                        return Some(custodian_id);
-                    }
+        // Strict forward scan from next_route_index
+        let start = routed_v2.next_route_index as usize;
+        let len = routed_v2.custody_route.len();
+        if start >= len {
+            return None;
+        }
+        for i in start..len {
+            if let Ok(custodian_id) = PeerId::from_bytes(&routed_v2.custody_route[i]) {
+                if RoutingTable::get_route_to_user(custodian_id).is_some() {
+                    return Some(custodian_id);
                 }
             }
         }
@@ -869,14 +925,26 @@ impl Dtn {
     pub fn net_routed_v2(
         user_id: &PeerId,
         sender_id: &PeerId,
-        signature: &[u8],
+        _signature: &[u8],
         routed_v2: proto::DtnRoutedV2,
     ) {
         log::info!("Received DtnRoutedV2 message from {}", sender_id.to_base58());
 
         let user_account = match UserAccounts::get_by_id(*user_id) {
             Some(ua) => ua,
-            None => return,
+            None => {
+                log::error!("DtnRoutedV2: user account not found for {}", user_id.to_base58());
+                if let Some(default_user) = UserAccounts::get_default_user() {
+                    Self::send_v2_response(
+                        &default_user,
+                        sender_id,
+                        &routed_v2.original_signature,
+                        proto::dtn_response::ResponseType::Rejected,
+                        proto::dtn_response::Reason::UserNotAccepted,
+                    );
+                }
+                return;
+            }
         };
 
         // 1. Expiry check
@@ -887,7 +955,7 @@ impl Dtn {
                 Self::send_v2_response(
                     &user_account,
                     sender_id,
-                    signature,
+                    &routed_v2.original_signature,
                     proto::dtn_response::ResponseType::Rejected,
                     proto::dtn_response::Reason::None,
                 );
@@ -901,7 +969,7 @@ impl Dtn {
             Self::send_v2_response(
                 &user_account,
                 sender_id,
-                signature,
+                &routed_v2.original_signature,
                 proto::dtn_response::ResponseType::Rejected,
                 proto::dtn_response::Reason::None,
             );
@@ -926,7 +994,7 @@ impl Dtn {
                 Self::send_v2_response(
                     &user_account,
                     sender_id,
-                    signature,
+                    &routed_v2.original_signature,
                     proto::dtn_response::ResponseType::Accepted,
                     proto::dtn_response::Reason::None,
                 );
@@ -948,7 +1016,7 @@ impl Dtn {
                 Self::send_v2_response(
                     &user_account,
                     sender_id,
-                    signature,
+                    &routed_v2.original_signature,
                     proto::dtn_response::ResponseType::Accepted,
                     proto::dtn_response::Reason::None,
                 );
@@ -956,7 +1024,94 @@ impl Dtn {
             }
         }
 
-        // 5. Per-sender quota check
+        // 5. Custody opt-in check
+        match Configuration::get_user(user_account.id.to_string()) {
+            Some(user_profile) => {
+                if !user_profile.storage.dtn_v2_custody_enabled {
+                    log::warn!("DtnRoutedV2: custody not enabled for this node");
+                    Self::send_v2_response(
+                        &user_account,
+                        sender_id,
+                        &routed_v2.original_signature,
+                        proto::dtn_response::ResponseType::Rejected,
+                        proto::dtn_response::Reason::UserNotAccepted,
+                    );
+                    return;
+                }
+            }
+            None => {
+                log::error!("DtnRoutedV2: user profile not found for custody check");
+                Self::send_v2_response(
+                    &user_account,
+                    sender_id,
+                    &routed_v2.original_signature,
+                    proto::dtn_response::ResponseType::Rejected,
+                    proto::dtn_response::Reason::UserNotAccepted,
+                );
+                return;
+            }
+        }
+
+        // 6. Sender signature verification
+        {
+            let inner_container = match proto::Container::decode(&routed_v2.container[..]) {
+                Ok(c) => c,
+                Err(e) => {
+                    log::error!("DtnRoutedV2: failed to decode inner container: {}", e);
+                    Self::send_v2_response(
+                        &user_account,
+                        sender_id,
+                        &routed_v2.original_signature,
+                        proto::dtn_response::ResponseType::Rejected,
+                        proto::dtn_response::Reason::None,
+                    );
+                    return;
+                }
+            };
+            let sender_key = match PublicKey::try_decode_protobuf(&routed_v2.sender_public_key) {
+                Ok(k) => k,
+                Err(e) => {
+                    log::error!("DtnRoutedV2: invalid sender public key: {}", e);
+                    Self::send_v2_response(
+                        &user_account,
+                        sender_id,
+                        &routed_v2.original_signature,
+                        proto::dtn_response::ResponseType::Rejected,
+                        proto::dtn_response::Reason::None,
+                    );
+                    return;
+                }
+            };
+            if let Some(envelope) = inner_container.envelope.as_ref() {
+                let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
+                envelope
+                    .encode(&mut envelope_buf)
+                    .expect("Vec<u8> provides capacity as needed");
+                if !sender_key.verify(&envelope_buf, &inner_container.signature) {
+                    log::error!("DtnRoutedV2: inner container signature verification failed");
+                    Self::send_v2_response(
+                        &user_account,
+                        sender_id,
+                        &routed_v2.original_signature,
+                        proto::dtn_response::ResponseType::Rejected,
+                        proto::dtn_response::Reason::UserNotAccepted,
+                    );
+                    return;
+                }
+            } else {
+                log::error!("DtnRoutedV2: inner container has no envelope");
+                Self::send_v2_response(
+                    &user_account,
+                    sender_id,
+                    &routed_v2.original_signature,
+                    proto::dtn_response::ResponseType::Rejected,
+                    proto::dtn_response::Reason::None,
+                );
+                return;
+            }
+        }
+
+        // 7. Per-sender quota check
         {
             let state = match STORAGESTATE_V2.get().read() {
                 Ok(s) => s,
@@ -975,7 +1130,7 @@ impl Dtn {
                         Self::send_v2_response(
                             &user_account,
                             sender_id,
-                            signature,
+                            &routed_v2.original_signature,
                             proto::dtn_response::ResponseType::Rejected,
                             proto::dtn_response::Reason::UserQuota,
                         );
@@ -985,7 +1140,7 @@ impl Dtn {
             }
         }
 
-        // 6. Overall quota check
+        // 7. Overall quota check
         {
             let state = match STORAGESTATE_V2.get().read() {
                 Ok(s) => s,
@@ -1011,7 +1166,7 @@ impl Dtn {
                         Self::send_v2_response(
                             &user_account,
                             sender_id,
-                            signature,
+                            &routed_v2.original_signature,
                             proto::dtn_response::ResponseType::Rejected,
                             proto::dtn_response::Reason::OverallQuota,
                         );
@@ -1023,7 +1178,7 @@ impl Dtn {
                     Self::send_v2_response(
                         &user_account,
                         sender_id,
-                        signature,
+                        &routed_v2.original_signature,
                         proto::dtn_response::ResponseType::Rejected,
                         proto::dtn_response::Reason::UserNotAccepted,
                     );
@@ -1032,7 +1187,7 @@ impl Dtn {
             }
         }
 
-        // 7. Accept custody: store in DB
+        // 8. Accept custody: store in DB
         let entry_size = routed_v2.container.len() as u32;
         let v2_entry = DtnRoutedV2Entry {
             routed_v2_bytes: routed_v2.encode_to_vec(),
@@ -1093,12 +1248,12 @@ impl Dtn {
         Self::send_v2_response(
             &user_account,
             sender_id,
-            signature,
+            &routed_v2.original_signature,
             proto::dtn_response::ResponseType::Accepted,
             proto::dtn_response::Reason::None,
         );
 
-        // 8. Attempt immediate forward
+        // 9. Attempt immediate forward
         if let Some(recv_id) = envelope_receiver {
             Self::try_forward_v2(&user_account, &routed_v2, &recv_id);
         }
@@ -1111,18 +1266,15 @@ impl Dtn {
         receiver_id: &PeerId,
     ) {
         if let Some(target) = Self::select_custody_target(routed_v2, receiver_id) {
-            // Advance the route state: if target is in a route, advance next_index
             let mut forwarded = routed_v2.clone();
             forwarded.remaining_handoffs = forwarded.remaining_handoffs.saturating_sub(1);
 
-            // Advance next_index for the route containing the target
-            for route in &mut forwarded.routes {
-                for (i, user_bytes) in route.custody_users.iter().enumerate() {
-                    if let Ok(uid) = PeerId::from_bytes(user_bytes) {
-                        if uid == target && i as u32 >= route.next_index {
-                            route.next_index = (i as u32) + 1;
-                            break;
-                        }
+            // Advance next_route_index past the target
+            for (i, user_bytes) in forwarded.custody_route.iter().enumerate() {
+                if let Ok(uid) = PeerId::from_bytes(user_bytes) {
+                    if uid == target && i as u32 >= forwarded.next_route_index {
+                        forwarded.next_route_index = (i as u32) + 1;
+                        break;
                     }
                 }
             }
@@ -1373,11 +1525,12 @@ mod tests {
         RoutingTable::set(RoutingTable { table });
     }
 
-    /// Build a DtnRoutedV2 with the given routes and receiver bytes.
-    fn build_routed_v2(routes: Vec<proto::CustodyRoute>) -> proto::DtnRoutedV2 {
+    /// Build a DtnRoutedV2 with the given custody route and next_route_index.
+    fn build_routed_v2(custody_route: Vec<Vec<u8>>, next_route_index: u32) -> proto::DtnRoutedV2 {
         proto::DtnRoutedV2 {
             container: vec![1, 2, 3],
-            routes,
+            custody_route,
+            next_route_index,
             original_signature: vec![0xAA],
             sender_public_key: vec![0xBB],
             expires_at: 0,
@@ -1389,14 +1542,10 @@ mod tests {
 
     #[test]
     fn dtn_routed_v2_round_trip() {
-        let route = proto::CustodyRoute {
-            custody_users: vec![vec![1, 2, 3], vec![4, 5, 6]],
-            next_index: 0,
-        };
-
         let original = proto::DtnRoutedV2 {
             container: vec![10, 20, 30, 40],
-            routes: vec![route],
+            custody_route: vec![vec![1, 2, 3], vec![4, 5, 6]],
+            next_route_index: 0,
             original_signature: vec![0xAA, 0xBB],
             sender_public_key: vec![0xCC, 0xDD],
             expires_at: 1234567890,
@@ -1408,9 +1557,10 @@ mod tests {
 
         let decoded = proto::DtnRoutedV2::decode(&encoded[..]).unwrap();
         assert_eq!(decoded.container, original.container);
-        assert_eq!(decoded.routes.len(), 1);
-        assert_eq!(decoded.routes[0].custody_users.len(), 2);
-        assert_eq!(decoded.routes[0].next_index, 0);
+        assert_eq!(decoded.custody_route.len(), 2);
+        assert_eq!(decoded.custody_route[0], vec![1, 2, 3]);
+        assert_eq!(decoded.custody_route[1], vec![4, 5, 6]);
+        assert_eq!(decoded.next_route_index, 0);
         assert_eq!(decoded.original_signature, original.original_signature);
         assert_eq!(decoded.sender_public_key, original.sender_public_key);
         assert_eq!(decoded.expires_at, original.expires_at);
@@ -1419,14 +1569,10 @@ mod tests {
 
     #[test]
     fn dtn_routed_v2_serde_round_trip() {
-        let route = proto::CustodyRoute {
-            custody_users: vec![vec![1, 2, 3]],
-            next_index: 1,
-        };
-
         let original = proto::DtnRoutedV2 {
             container: vec![10, 20],
-            routes: vec![route],
+            custody_route: vec![vec![1, 2, 3]],
+            next_route_index: 1,
             original_signature: vec![0xAA],
             sender_public_key: vec![0xCC],
             expires_at: 0,
@@ -1473,7 +1619,8 @@ mod tests {
     fn envelop_payload_dtn_routed_v2_variant() {
         let routed_v2 = proto::DtnRoutedV2 {
             container: vec![1, 2, 3],
-            routes: vec![],
+            custody_route: vec![],
+            next_route_index: 0,
             original_signature: vec![],
             sender_public_key: vec![],
             expires_at: 0,
@@ -1514,33 +1661,25 @@ mod tests {
         // custodian is NOT online
         set_routing_table(table);
 
-        let route = proto::CustodyRoute {
-            custody_users: vec![custodian.to_bytes()],
-            next_index: 0,
-        };
-        let v2 = build_routed_v2(vec![route]);
+        let v2 = build_routed_v2(vec![custodian.to_bytes()], 0);
 
         let target = Dtn::select_custody_target(&v2, &recipient);
         assert_eq!(target, Some(recipient));
     }
 
     #[test]
-    fn select_target_returns_last_custodian_when_online() {
+    fn select_target_returns_first_reachable_custodian() {
         let _lock = ROUTING_TABLE_LOCK.lock().unwrap();
         let recipient = random_peer();
         let c1 = random_peer();
-        let c2 = random_peer(); // closest to recipient
+        let c2 = random_peer();
 
         let mut table = HashMap::new();
         // recipient offline, c1 offline, c2 online
         make_online(&mut table, c2);
         set_routing_table(table);
 
-        let route = proto::CustodyRoute {
-            custody_users: vec![c1.to_bytes(), c2.to_bytes()],
-            next_index: 0,
-        };
-        let v2 = build_routed_v2(vec![route]);
+        let v2 = build_routed_v2(vec![c1.to_bytes(), c2.to_bytes()], 0);
 
         let target = Dtn::select_custody_target(&v2, &recipient);
         assert_eq!(target, Some(c2));
@@ -1556,45 +1695,14 @@ mod tests {
         // Empty routing table — nobody online
         set_routing_table(HashMap::new());
 
-        let route = proto::CustodyRoute {
-            custody_users: vec![c1.to_bytes(), c2.to_bytes()],
-            next_index: 0,
-        };
-        let v2 = build_routed_v2(vec![route]);
+        let v2 = build_routed_v2(vec![c1.to_bytes(), c2.to_bytes()], 0);
 
         let target = Dtn::select_custody_target(&v2, &recipient);
         assert_eq!(target, None);
     }
 
     #[test]
-    fn select_target_falls_through_to_second_route() {
-        let _lock = ROUTING_TABLE_LOCK.lock().unwrap();
-        let recipient = random_peer();
-        let route1_c1 = random_peer();
-        let route1_c2 = random_peer();
-        let route2_c1 = random_peer();
-
-        let mut table = HashMap::new();
-        // route1 custodians all offline, route2_c1 online
-        make_online(&mut table, route2_c1);
-        set_routing_table(table);
-
-        let r1 = proto::CustodyRoute {
-            custody_users: vec![route1_c1.to_bytes(), route1_c2.to_bytes()],
-            next_index: 0,
-        };
-        let r2 = proto::CustodyRoute {
-            custody_users: vec![route2_c1.to_bytes()],
-            next_index: 0,
-        };
-        let v2 = build_routed_v2(vec![r1, r2]);
-
-        let target = Dtn::select_custody_target(&v2, &recipient);
-        assert_eq!(target, Some(route2_c1));
-    }
-
-    #[test]
-    fn select_target_respects_next_index() {
+    fn select_target_respects_next_route_index() {
         let _lock = ROUTING_TABLE_LOCK.lock().unwrap();
         let recipient = random_peer();
         let c1 = random_peer();
@@ -1606,12 +1714,8 @@ mod tests {
         make_online(&mut table, c2);
         set_routing_table(table);
 
-        // next_index = 1 means c1 (index 0) is already done, only c2 eligible
-        let route = proto::CustodyRoute {
-            custody_users: vec![c1.to_bytes(), c2.to_bytes()],
-            next_index: 1,
-        };
-        let v2 = build_routed_v2(vec![route]);
+        // next_route_index = 1 means c1 (index 0) is already done, only c2 eligible
+        let v2 = build_routed_v2(vec![c1.to_bytes(), c2.to_bytes()], 1);
 
         let target = Dtn::select_custody_target(&v2, &recipient);
         assert_eq!(target, Some(c2));
@@ -1627,23 +1731,19 @@ mod tests {
         make_online(&mut table, c1);
         set_routing_table(table);
 
-        // next_index == len means this route is exhausted
-        let route = proto::CustodyRoute {
-            custody_users: vec![c1.to_bytes()],
-            next_index: 1,
-        };
-        let v2 = build_routed_v2(vec![route]);
+        // next_route_index == len means the route is exhausted
+        let v2 = build_routed_v2(vec![c1.to_bytes()], 1);
 
         let target = Dtn::select_custody_target(&v2, &recipient);
         assert_eq!(target, None);
     }
 
     #[test]
-    fn select_target_prefers_custodian_closest_to_recipient() {
+    fn select_target_picks_first_reachable_in_forward_order() {
         let _lock = ROUTING_TABLE_LOCK.lock().unwrap();
         let recipient = random_peer();
-        let c1 = random_peer(); // farther from recipient
-        let c2 = random_peer(); // closer to recipient (higher index)
+        let c1 = random_peer(); // first in route
+        let c2 = random_peer(); // second in route
 
         let mut table = HashMap::new();
         // Both online
@@ -1651,31 +1751,25 @@ mod tests {
         make_online(&mut table, c2);
         set_routing_table(table);
 
-        let route = proto::CustodyRoute {
-            custody_users: vec![c1.to_bytes(), c2.to_bytes()],
-            next_index: 0,
-        };
-        let v2 = build_routed_v2(vec![route]);
+        let v2 = build_routed_v2(vec![c1.to_bytes(), c2.to_bytes()], 0);
 
-        // Reverse scan should pick c2 (index 1) over c1 (index 0)
+        // Forward scan should pick c1 (index 0) as the first reachable
         let target = Dtn::select_custody_target(&v2, &recipient);
-        assert_eq!(target, Some(c2));
+        assert_eq!(target, Some(c1));
     }
 
     // ── Route advancement tests ──
 
     #[test]
-    fn route_next_index_advances_on_forward() {
+    fn route_next_route_index_advances_on_forward() {
         let c1 = random_peer();
         let c2 = random_peer();
         let target = c2;
 
         let mut routed = proto::DtnRoutedV2 {
             container: vec![],
-            routes: vec![proto::CustodyRoute {
-                custody_users: vec![c1.to_bytes(), c2.to_bytes()],
-                next_index: 0,
-            }],
+            custody_route: vec![c1.to_bytes(), c2.to_bytes()],
+            next_route_index: 0,
             original_signature: vec![],
             sender_public_key: vec![],
             expires_at: 0,
@@ -1684,23 +1778,21 @@ mod tests {
 
         // Simulate what try_forward_v2 does to the route state
         routed.remaining_handoffs = routed.remaining_handoffs.saturating_sub(1);
-        for route in &mut routed.routes {
-            for (i, user_bytes) in route.custody_users.iter().enumerate() {
-                if let Ok(uid) = PeerId::from_bytes(user_bytes) {
-                    if uid == target && i as u32 >= route.next_index {
-                        route.next_index = (i as u32) + 1;
-                        break;
-                    }
+        for (i, user_bytes) in routed.custody_route.iter().enumerate() {
+            if let Ok(uid) = PeerId::from_bytes(user_bytes) {
+                if uid == target && i as u32 >= routed.next_route_index {
+                    routed.next_route_index = (i as u32) + 1;
+                    break;
                 }
             }
         }
 
         assert_eq!(routed.remaining_handoffs, 4);
-        assert_eq!(routed.routes[0].next_index, 2); // c2 is at index 1, so next = 2
+        assert_eq!(routed.next_route_index, 2); // c2 is at index 1, so next = 2
     }
 
     #[test]
-    fn route_next_index_advances_for_middle_custodian() {
+    fn route_next_route_index_advances_for_middle_custodian() {
         let c1 = random_peer();
         let c2 = random_peer();
         let c3 = random_peer();
@@ -1708,10 +1800,8 @@ mod tests {
 
         let mut routed = proto::DtnRoutedV2 {
             container: vec![],
-            routes: vec![proto::CustodyRoute {
-                custody_users: vec![c1.to_bytes(), c2.to_bytes(), c3.to_bytes()],
-                next_index: 0,
-            }],
+            custody_route: vec![c1.to_bytes(), c2.to_bytes(), c3.to_bytes()],
+            next_route_index: 0,
             original_signature: vec![],
             sender_public_key: vec![],
             expires_at: 0,
@@ -1719,19 +1809,17 @@ mod tests {
         };
 
         routed.remaining_handoffs = routed.remaining_handoffs.saturating_sub(1);
-        for route in &mut routed.routes {
-            for (i, user_bytes) in route.custody_users.iter().enumerate() {
-                if let Ok(uid) = PeerId::from_bytes(user_bytes) {
-                    if uid == target && i as u32 >= route.next_index {
-                        route.next_index = (i as u32) + 1;
-                        break;
-                    }
+        for (i, user_bytes) in routed.custody_route.iter().enumerate() {
+            if let Ok(uid) = PeerId::from_bytes(user_bytes) {
+                if uid == target && i as u32 >= routed.next_route_index {
+                    routed.next_route_index = (i as u32) + 1;
+                    break;
                 }
             }
         }
 
-        // c2 at index 1, next_index should advance to 2, leaving c3 still eligible
-        assert_eq!(routed.routes[0].next_index, 2);
+        // c2 at index 1, next_route_index should advance to 2, leaving c3 still eligible
+        assert_eq!(routed.next_route_index, 2);
     }
 
     // ── V2 storage tests ──
@@ -1951,5 +2039,109 @@ mod tests {
             let state = STORAGESTATE_V2.get().read().unwrap();
             state.db_ref_sender_quotas.remove(&sender_key).unwrap();
         }
+    }
+
+    // ── Signature verification tests ──
+
+    /// Helper: create a properly signed inner Container with a real keypair.
+    /// Returns (keypair, container_bytes, container_signature).
+    fn build_signed_container(receiver: &PeerId) -> (Keypair, Vec<u8>, Vec<u8>) {
+        let keys = Keypair::generate_ed25519();
+        let sender = PeerId::from(keys.public());
+
+        let envelope = proto::Envelope {
+            sender_id: sender.to_bytes(),
+            receiver_id: receiver.to_bytes(),
+            payload: vec![0xDE, 0xAD],
+        };
+
+        let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
+        envelope.encode(&mut envelope_buf).unwrap();
+
+        let signature = keys.sign(&envelope_buf).unwrap();
+
+        let container = proto::Container {
+            signature: signature.clone(),
+            envelope: Some(envelope),
+        };
+
+        (keys, container.encode_to_vec(), signature)
+    }
+
+    #[test]
+    fn signature_verification_accepts_valid_signature() {
+        let receiver = random_peer();
+        let (keys, container_bytes, _sig) = build_signed_container(&receiver);
+
+        // Decode the inner container
+        let inner = proto::Container::decode(&container_bytes[..]).unwrap();
+        let sender_key = keys.public();
+
+        // Re-encode envelope and verify
+        let envelope = inner.envelope.as_ref().unwrap();
+        let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
+        envelope.encode(&mut envelope_buf).unwrap();
+
+        assert!(sender_key.verify(&envelope_buf, &inner.signature));
+    }
+
+    #[test]
+    fn signature_verification_rejects_wrong_key() {
+        let receiver = random_peer();
+        let (_keys, container_bytes, _sig) = build_signed_container(&receiver);
+
+        // Use a different key to verify
+        let wrong_keys = Keypair::generate_ed25519();
+        let wrong_key = wrong_keys.public();
+
+        let inner = proto::Container::decode(&container_bytes[..]).unwrap();
+        let envelope = inner.envelope.as_ref().unwrap();
+        let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
+        envelope.encode(&mut envelope_buf).unwrap();
+
+        assert!(!wrong_key.verify(&envelope_buf, &inner.signature));
+    }
+
+    #[test]
+    fn signature_verification_rejects_tampered_envelope() {
+        let receiver = random_peer();
+        let (keys, container_bytes, _sig) = build_signed_container(&receiver);
+
+        let mut inner = proto::Container::decode(&container_bytes[..]).unwrap();
+        // Tamper with the envelope
+        inner.envelope.as_mut().unwrap().payload = vec![0xFF, 0xFF];
+
+        let sender_key = keys.public();
+        let envelope = inner.envelope.as_ref().unwrap();
+        let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
+        envelope.encode(&mut envelope_buf).unwrap();
+
+        // Original signature should not verify against tampered envelope
+        assert!(!sender_key.verify(&envelope_buf, &inner.signature));
+    }
+
+    #[test]
+    fn original_signature_extracted_from_inner_container() {
+        let receiver = random_peer();
+        let (_keys, container_bytes, expected_sig) = build_signed_container(&receiver);
+
+        // Simulate what rpc_send_routed does: decode Container to get signature
+        let inner = proto::Container::decode(&container_bytes[..]).unwrap();
+        assert_eq!(inner.signature, expected_sig);
+        assert!(!inner.signature.is_empty());
+    }
+
+    #[test]
+    fn public_key_protobuf_round_trip() {
+        let keys = Keypair::generate_ed25519();
+        let pub_key = keys.public();
+
+        // Encode to protobuf bytes (as stored in sender_public_key)
+        let encoded = pub_key.encode_protobuf();
+        assert!(!encoded.is_empty());
+
+        // Decode back
+        let decoded = libp2p::identity::PublicKey::try_decode_protobuf(&encoded).unwrap();
+        assert_eq!(decoded, pub_key);
     }
 }

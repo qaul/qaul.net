@@ -7,7 +7,7 @@
 //! - Protobuf encode/decode through the full envelope chain
 //! - V2 storage entry serialization via bincode (as used in sled)
 //! - Expiry and handoff validation logic
-//! - Multi-route message construction and round-trip
+//! - Single flat route message construction and round-trip
 //! - Duplicate detection via sled (temporary DB)
 //! - Quota tracking via sled (temporary DB)
 
@@ -45,37 +45,39 @@ fn random_peer() -> PeerId {
     PeerId::from(keys.public())
 }
 
-/// Build a DtnRoutedV2 with a real inner Container.
+/// Build a DtnRoutedV2 with a properly signed inner Container.
 fn build_test_v2(
     receiver: &PeerId,
-    custodian_routes: Vec<Vec<PeerId>>,
+    custodians: Vec<PeerId>,
     expires_at: u64,
     remaining_handoffs: u32,
 ) -> proto::DtnRoutedV2 {
-    let sender = random_peer();
+    let keys = Keypair::generate_ed25519();
+    let sender = PeerId::from(keys.public());
     let envelope = proto::Envelope {
         sender_id: sender.to_bytes(),
         receiver_id: receiver.to_bytes(),
         payload: vec![],
     };
+
+    // Sign the envelope properly
+    let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
+    envelope.encode(&mut envelope_buf).unwrap();
+    let signature = keys.sign(&envelope_buf).unwrap();
+
     let container = proto::Container {
-        signature: vec![0x01, 0x02],
+        signature: signature.clone(),
         envelope: Some(envelope),
     };
 
-    let routes: Vec<proto::CustodyRoute> = custodian_routes
-        .into_iter()
-        .map(|custodians| proto::CustodyRoute {
-            custody_users: custodians.iter().map(|c| c.to_bytes()).collect(),
-            next_index: 0,
-        })
-        .collect();
+    let custody_route: Vec<Vec<u8>> = custodians.iter().map(|c| c.to_bytes()).collect();
 
     proto::DtnRoutedV2 {
         container: container.encode_to_vec(),
-        routes,
-        original_signature: (0..16).map(|_| rand::random::<u8>()).collect(),
-        sender_public_key: sender.to_bytes(),
+        custody_route,
+        next_route_index: 0,
+        original_signature: signature,
+        sender_public_key: keys.public().encode_protobuf(),
         expires_at,
         remaining_handoffs,
     }
@@ -89,7 +91,7 @@ fn v2_message_survives_full_envelope_chain() {
     let sender = random_peer();
     let custodian = random_peer();
 
-    let v2 = build_test_v2(&receiver, vec![vec![custodian]], 0, 5);
+    let v2 = build_test_v2(&receiver, vec![custodian], 0, 5);
 
     // Wrap in EnvelopPayload
     let payload = proto::EnvelopPayload {
@@ -123,8 +125,8 @@ fn v2_message_survives_full_envelope_chain() {
     match decoded_payload.payload {
         Some(proto::envelop_payload::Payload::DtnRoutedV2(decoded_v2)) => {
             assert_eq!(decoded_v2.remaining_handoffs, 5);
-            assert_eq!(decoded_v2.routes.len(), 1);
-            assert_eq!(decoded_v2.routes[0].custody_users[0], custodian.to_bytes());
+            assert_eq!(decoded_v2.custody_route.len(), 1);
+            assert_eq!(decoded_v2.custody_route[0], custodian.to_bytes());
 
             // Decode the inner container to get the ultimate receiver
             let inner = proto::Container::decode(&decoded_v2.container[..]).unwrap();
@@ -139,7 +141,7 @@ fn v2_message_survives_full_envelope_chain() {
 #[test]
 fn v2_message_in_dtn_oneof() {
     let receiver = random_peer();
-    let v2 = build_test_v2(&receiver, vec![vec![random_peer()]], 0, 3);
+    let v2 = build_test_v2(&receiver, vec![random_peer()], 0, 3);
 
     // Wrap in Dtn message (the other transport path)
     let dtn = proto::Dtn {
@@ -164,7 +166,7 @@ fn v2_sled_store_and_retrieve() {
     let tree = db.open_tree("v2-messages").unwrap();
 
     let receiver = random_peer();
-    let v2 = build_test_v2(&receiver, vec![vec![random_peer()]], 0, 5);
+    let v2 = build_test_v2(&receiver, vec![random_peer()], 0, 5);
     let sig = v2.original_signature.clone();
     let v2_bytes = v2.encode_to_vec();
 
@@ -320,7 +322,7 @@ fn v2_expired_messages_detected_in_storage_scan() {
     let receiver = random_peer();
 
     // Expired message
-    let expired_v2 = build_test_v2(&receiver, vec![vec![random_peer()]], 1, 5);
+    let expired_v2 = build_test_v2(&receiver, vec![random_peer()], 1, 5);
     let expired_entry = DtnRoutedV2Entry {
         routed_v2_bytes: expired_v2.encode_to_vec(),
         sender_public_key: expired_v2.sender_public_key.clone(),
@@ -335,7 +337,7 @@ fn v2_expired_messages_detected_in_storage_scan() {
     .unwrap();
 
     // Non-expired message
-    let valid_v2 = build_test_v2(&receiver, vec![vec![random_peer()]], u64::MAX, 5);
+    let valid_v2 = build_test_v2(&receiver, vec![random_peer()], u64::MAX, 5);
     let valid_entry = DtnRoutedV2Entry {
         routed_v2_bytes: valid_v2.encode_to_vec(),
         sender_public_key: valid_v2.sender_public_key.clone(),
@@ -380,7 +382,7 @@ fn v2_expired_messages_detected_in_storage_scan() {
 }
 
 #[test]
-fn v2_multi_route_construction_and_advancement() {
+fn v2_flat_route_construction_and_advancement() {
     let c1 = random_peer();
     let c2 = random_peer();
     let c3 = random_peer();
@@ -388,43 +390,32 @@ fn v2_multi_route_construction_and_advancement() {
 
     let mut v2 = proto::DtnRoutedV2 {
         container: vec![],
-        routes: vec![
-            proto::CustodyRoute {
-                custody_users: vec![c1.to_bytes(), c2.to_bytes()],
-                next_index: 0,
-            },
-            proto::CustodyRoute {
-                custody_users: vec![c3.to_bytes()],
-                next_index: 0,
-            },
-        ],
+        custody_route: vec![c1.to_bytes(), c2.to_bytes(), c3.to_bytes()],
+        next_route_index: 0,
         original_signature: vec![0xAA],
         sender_public_key: vec![],
         expires_at: 0,
         remaining_handoffs: 6,
     };
 
-    // Simulate forwarding to c2 (index 1 in route 0)
+    // Simulate forwarding to c2 (index 1)
     let target = c2;
     v2.remaining_handoffs = v2.remaining_handoffs.saturating_sub(1);
-    for route in &mut v2.routes {
-        for (i, user_bytes) in route.custody_users.iter().enumerate() {
-            if let Ok(uid) = PeerId::from_bytes(user_bytes) {
-                if uid == target && i as u32 >= route.next_index {
-                    route.next_index = (i as u32) + 1;
-                    break;
-                }
+    for (i, user_bytes) in v2.custody_route.iter().enumerate() {
+        if let Ok(uid) = PeerId::from_bytes(user_bytes) {
+            if uid == target && i as u32 >= v2.next_route_index {
+                v2.next_route_index = (i as u32) + 1;
+                break;
             }
         }
     }
 
     assert_eq!(v2.remaining_handoffs, 5);
-    assert_eq!(v2.routes[0].next_index, 2); // past c2
-    assert_eq!(v2.routes[1].next_index, 0); // route 2 unchanged
+    assert_eq!(v2.next_route_index, 2); // past c2, c3 still eligible
 
     // Encode and decode — verify state persists
     let encoded = v2.encode_to_vec();
     let decoded = proto::DtnRoutedV2::decode(&encoded[..]).unwrap();
-    assert_eq!(decoded.routes[0].next_index, 2);
+    assert_eq!(decoded.next_route_index, 2);
     assert_eq!(decoded.remaining_handoffs, 5);
 }
