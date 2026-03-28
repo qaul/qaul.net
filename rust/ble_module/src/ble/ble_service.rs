@@ -808,35 +808,43 @@ impl StartedBleService {
 
 pub async fn get_device_info() -> Result<BleInfoResponse, Box<dyn Error>> {
     let session = bluer::Session::new().await?;
-    let adapter = session.default_adapter().await?;
-    let has_multiple_adv_support = adapter
-        .supported_advertising_features()
-        .await?
-        .map_or(false, |feats| {
-            feats.contains(&bluer::adv::PlatformFeature::HardwareOffload)
-        });
-    let max_adv_length = adapter
-        .supported_advertising_capabilities()
-        .await?
-        .map(|caps| caps.max_advertisement_length)
-        .unwrap_or(30);
-    let this_device = BleDeviceInfo {
-        ble_support: true,
-        id: format!("{}", adapter.address().await?),
-        name: adapter.name().into(),
-        bluetooth_on: adapter.is_powered().await?,
-        adv_extended: max_adv_length > 31,
-        adv_extended_bytes: max_adv_length as u32,
-        le_2m: false,                   // TODO: provide actual value
-        le_coded: false,                // TODO: provide actual value
-        le_audio: false,                // TODO: provide actual value
-        le_periodic_adv_support: false, // TODO: provide actual value
-        le_multiple_adv_support: has_multiple_adv_support,
-        offload_filter_support: false, // TODO: provide actual value
-        offload_scan_batching_support: false, // TODO: provide actual value
-    };
+    let adapter_names = session.adapter_names().await?;
+    let mut devices = Vec::new();
+
+    for adapter_name in adapter_names {
+        let adapter = session.adapter(&adapter_name)?;
+        let has_multiple_adv_support = adapter
+            .supported_advertising_features()
+            .await?
+            .map_or(false, |feats| {
+                feats.contains(&bluer::adv::PlatformFeature::HardwareOffload)
+            });
+        let max_adv_length = adapter
+            .supported_advertising_capabilities()
+            .await?
+            .map(|caps| caps.max_advertisement_length)
+            .unwrap_or(30);
+        let device_info = BleDeviceInfo {
+            ble_support: true,
+            id: format!("{}", adapter.address().await?),
+            name: adapter.name().into(),
+            bluetooth_on: adapter.is_powered().await?,
+            adv_extended: max_adv_length > 31,
+            adv_extended_bytes: max_adv_length as u32,
+            le_2m: false,                   // TODO: provide actual value
+            le_coded: false,                // TODO: provide actual value
+            le_audio: false,                // TODO: provide actual value
+            le_periodic_adv_support: false, // TODO: provide actual value
+            le_multiple_adv_support: has_multiple_adv_support,
+            offload_filter_support: false, // TODO: provide actual value
+            offload_scan_batching_support: false, // TODO: provide actual value
+        };
+        devices.push(device_info);
+    }
+
     let response = BleInfoResponse {
-        device: Some(this_device),
+        device: None,
+        devices,
     };
     Ok(response)
 }
