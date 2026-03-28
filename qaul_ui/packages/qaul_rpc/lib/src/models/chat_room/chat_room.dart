@@ -124,21 +124,42 @@ class ChatRoom with EquatableMixin implements Comparable {
     return '$room)';
   }
 
-  ChatRoom mergeWithConversationList(ChatConversationList c) {
+  ChatRoom copyWith({
+    Uint8List? conversationId,
+    Uint8List? lastMessageSenderId,
+    int? lastMessageIndex,
+    String? name,
+    DateTime? lastMessageTime,
+    MessageContent? lastMessagePreview,
+    List<Message>? messages,
+    int? unreadCount,
+    DateTime? createdAt,
+    bool? isDirectChat,
+    List<ChatRoomUser>? members,
+    int? revisionNumber,
+    ChatRoomStatus? status,
+  }) =>
+      ChatRoom(
+        conversationId: conversationId ?? this.conversationId,
+        lastMessageSenderId: lastMessageSenderId ?? this.lastMessageSenderId,
+        lastMessageIndex: lastMessageIndex ?? this.lastMessageIndex,
+        name: name ?? this.name,
+        lastMessageTime: lastMessageTime ?? this.lastMessageTime,
+        lastMessagePreview: lastMessagePreview ?? this.lastMessagePreview,
+        messages: messages ?? this.messages,
+        unreadCount: unreadCount ?? this.unreadCount,
+        createdAt: createdAt ?? this.createdAt,
+        isDirectChat: isDirectChat ?? this.isDirectChat,
+        members: members ?? this.members,
+        revisionNumber: revisionNumber ?? this.revisionNumber,
+        status: status ?? this.status,
+      );
+
+  ChatRoom copyWithMessages(ChatConversationList c) {
     assert(conversationId.equals(Uint8List.fromList(c.groupId)));
-    return ChatRoom(
-      conversationId: conversationId,
+    return copyWith(
       messages: c.messageList.map((e) => Message.fromChatMessage(e)).toList(),
       lastMessageIndex: c.messageList.fold<int>(0, maxIndex),
-      name: name,
-      lastMessageTime: lastMessageTime,
-      unreadCount: unreadCount,
-      lastMessagePreview: lastMessagePreview,
-      lastMessageSenderId: lastMessageSenderId,
-      createdAt: createdAt,
-      isDirectChat: isDirectChat,
-      members: members,
-      status: status,
     );
   }
 

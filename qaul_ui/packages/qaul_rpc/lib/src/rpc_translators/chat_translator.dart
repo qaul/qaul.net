@@ -26,22 +26,19 @@ class ChatTranslator extends RpcModuleTranslator {
       final currentOpenRoom = ref.read(currentOpenChatRoom.notifier);
 
       final groupBytes = Uint8List.fromList(res.data.groupId);
-      ChatRoom? roomWithMessages;
-      if (room != null) {
-        roomWithMessages = room.mergeWithConversationList(res.data);
-        state.update(roomWithMessages);
-      } else {
-        final open = currentOpenRoom.state;
-        if (open != null && open.conversationId.equals(groupBytes)) {
-          roomWithMessages = open.mergeWithConversationList(res.data);
-        }
-      }
+      final openRoom = currentOpenRoom.state;
+      final isOpenRoom = openRoom != null &&
+          openRoom.conversationId.equals(groupBytes);
 
-      final open = currentOpenRoom.state;
-      if (open != null &&
-          roomWithMessages != null &&
-          open.idBase58 == roomWithMessages.idBase58) {
-        currentOpenRoom.state = roomWithMessages;
+      final source = room ?? (isOpenRoom ? openRoom : null);
+      if (source == null) return;
+
+      final merged = source.copyWithMessages(res.data);
+
+      if (room != null) state.update(merged);
+
+      if (isOpenRoom) {
+        currentOpenRoom.state = merged;
       }
     } else {
       super.processResponse(res, ref);
