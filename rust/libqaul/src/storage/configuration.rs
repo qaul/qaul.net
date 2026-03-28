@@ -209,6 +209,9 @@ pub struct StorageOptions {
     pub users: Vec<String>,
     //Sending the table every 10 seconds to direct neighbours.
     pub size_total: u32,
+    // Whether this node accepts DTN V2 custody requests
+    #[serde(default)]
+    pub dtn_v2_custody_enabled: bool,
 }
 
 impl Default for StorageOptions {
@@ -216,6 +219,7 @@ impl Default for StorageOptions {
         StorageOptions {
             users: vec![],
             size_total: 1024, //1024 MB
+            dtn_v2_custody_enabled: false,
         }
     }
 }
