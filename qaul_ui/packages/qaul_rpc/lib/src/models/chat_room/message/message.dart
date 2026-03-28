@@ -29,7 +29,7 @@ class Message with EquatableMixin implements Comparable<Message> {
         ? [m.index.hashCode, m.sentAt.toInt()]
         : m.messageId;
 
-    return Message(
+    final result = Message(
       senderId: Uint8List.fromList(m.senderId),
       messageId: Uint8List.fromList(id),
       content: MessageContent.fromBuffer(m.content),
@@ -38,6 +38,15 @@ class Message with EquatableMixin implements Comparable<Message> {
       sentAt: DateTime.fromMillisecondsSinceEpoch(m.sentAt.toInt()),
       receivedAt: DateTime.fromMillisecondsSinceEpoch(m.receivedAt.toInt()),
     );
+    if (kDebugMode) {
+      debugPrint(
+        '[chat_message_state] index=${result.index} '
+        'proto=${m.status.name} -> model=${result.status.name} '
+        'confirmations=${m.messageReceptionConfirmed.length} '
+        'msgId=${result.messageIdBase58}',
+      );
+    }
+    return result;
   }
 
   @override
@@ -51,5 +60,5 @@ class Message with EquatableMixin implements Comparable<Message> {
   }
 
   @override
-  List<Object?> get props => [senderId, messageId, content];
+  List<Object?> get props => [senderId, messageId, content, status];
 }

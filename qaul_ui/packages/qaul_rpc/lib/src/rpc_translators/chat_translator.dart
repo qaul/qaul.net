@@ -25,24 +25,26 @@ class ChatTranslator extends RpcModuleTranslator {
           .firstWhereOrNull((r) => r.conversationId.equals(res.data.groupId));
       final currentOpenRoom = ref.read(currentOpenChatRoom.notifier);
 
+      final groupBytes = Uint8List.fromList(res.data.groupId);
+      ChatRoom? roomWithMessages;
       if (room != null) {
-        final roomWithMessages = room.mergeWithConversationList(res.data);
+        roomWithMessages = room.mergeWithConversationList(res.data);
         state.update(roomWithMessages);
-
-        if (_currentOpenRoomEqualsChatConversationList(currentOpenRoom, res)) {
-          currentOpenRoom.state = roomWithMessages;
+      } else {
+        final open = currentOpenRoom.state;
+        if (open != null && open.conversationId.equals(groupBytes)) {
+          roomWithMessages = open.mergeWithConversationList(res.data);
         }
+      }
+
+      final open = currentOpenRoom.state;
+      if (open != null &&
+          roomWithMessages != null &&
+          open.idBase58 == roomWithMessages.idBase58) {
+        currentOpenRoom.state = roomWithMessages;
       }
     } else {
       super.processResponse(res, ref);
     }
   }
-
-  bool _currentOpenRoomEqualsChatConversationList(
-    StateController<ChatRoom?> currentOpenRoomNotifier,
-    RpcTranslatorResponse res,
-  ) =>
-      currentOpenRoomNotifier.state != null &&
-      currentOpenRoomNotifier.state!.conversationId
-          .equals((res.data as ChatConversationList).groupId);
 }
