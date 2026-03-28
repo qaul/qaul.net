@@ -25,6 +25,7 @@ pub mod connections;
 pub mod node;
 mod router;
 mod rpc;
+mod search;
 mod services;
 pub mod storage;
 pub mod utilities;

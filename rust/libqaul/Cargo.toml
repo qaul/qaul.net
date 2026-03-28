@@ -58,6 +58,11 @@ fs_extra = "1.3"
 semver = "1.0"
 argon2 = "0.5.3"
 
+# Search module dependencies
+tantivy = "0.25.0"
+regex = "1"
+thiserror = "2.0.18"
+
 # only for desktop platforms: Linux, Mac, Windows
 directories = "6.0"
 
