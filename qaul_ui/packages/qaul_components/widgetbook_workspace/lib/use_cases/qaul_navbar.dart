@@ -53,8 +53,8 @@ class _NavBarUseCaseState extends State<_NavBarUseCase> {
         selectedTab: _selectedTab,
         onTabSelected: (tab) => setState(() => _selectedTab = tab),
         tabTooltips: QaulNavBar.defaultTabTooltips(),
-        publicNotificationCount: widget.vertical ? null : 2,
-        chatNotificationCount: widget.vertical ? 1 : null,
+        publicNotificationCount: widget.vertical ? 1 : 2,
+        chatNotificationCount: widget.vertical ? 2 : 3,
       ),
     );
 
