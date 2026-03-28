@@ -174,8 +174,12 @@ impl Lan {
         log::trace!("Lan::init() ping_config");
 
         // create MDNS behaviour
-        // TODO create MdnsConfig {ttl: Duration::from_secs(300), query_interval: Duration::from_secs(30) }
-        let mdns = mdns::tokio::Behaviour::new(mdns::Config::default(), Node::get_id()).unwrap();
+        let mdns_config = mdns::Config {
+            ttl: Duration::from_secs(300),
+            query_interval: Duration::from_secs(30),
+            enable_ipv6: false,
+        };
+        let mdns = mdns::tokio::Behaviour::new(mdns_config, Node::get_id()).unwrap();
 
         // create behaviour
         let mut behaviour: QaulLanBehaviour = QaulLanBehaviour {
