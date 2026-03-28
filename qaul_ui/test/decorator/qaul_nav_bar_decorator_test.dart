@@ -157,7 +157,14 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byWidgetPredicate((w) => w is PopupMenuButton));
+      final overflowInk = find.descendant(
+        of: find.byType(QaulNavBar),
+        matching: find.byWidgetPredicate(
+          (w) => w is InkWell && w.onTap == null && w.onTapDown != null,
+        ),
+      );
+      expect(overflowInk, findsOneWidget);
+      await tester.tap(overflowInk);
       await tester.pumpAndSettle();
 
       await tester.tap(find.byWidgetPredicate(

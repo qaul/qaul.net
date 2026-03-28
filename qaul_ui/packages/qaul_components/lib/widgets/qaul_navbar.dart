@@ -484,7 +484,7 @@ Widget _buildVerticalMenuButton({
 }
 
 class _OverflowHitMenuSlot extends SingleChildRenderObjectWidget {
-  _OverflowHitMenuSlot({
+  const _OverflowHitMenuSlot({
     required this.layoutSize,
     required this.childOffset,
     required super.child,
