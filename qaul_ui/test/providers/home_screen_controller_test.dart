@@ -66,6 +66,17 @@ void main() {
           expect(state, tab);
         }
       });
+
+    });
+
+    group('setTabFromPageIndex', () {
+      test('updates selected tab state only', () {
+        final notifier = container.read(homeScreenControllerProvider.notifier);
+
+        notifier.setTabFromPageIndex(TabType.chat.index);
+
+        expect(container.read(homeScreenControllerProvider), TabType.chat);
+      });
     });
 
     group('state listener', () {

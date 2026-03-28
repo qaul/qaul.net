@@ -35,6 +35,7 @@ class HomeScreen extends HookConsumerWidget {
             key: key,
             controller: tabCtrl.controller(),
             allowImplicitScrolling: true,
+            onPageChanged: tabCtrl.setTabFromPageIndex,
             physics: !disablePageViewScroll.value && _isMobile
                 ? const PageScrollPhysics()
                 : const NeverScrollableScrollPhysics(),

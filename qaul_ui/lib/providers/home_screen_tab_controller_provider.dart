@@ -17,13 +17,18 @@ class HomeScreenTabController extends Notifier<TabType> {
     return _pageController;
   }
 
-  void _goToIndex(int index) {
+  void _setTabIndex(int index) {
     assert(!index.isNegative && index < TabType.values.length);
     state = TabType.values[index];
-    if (_pageController.hasClients) {
-      _pageController.jumpToPage(state.index);
-    }
   }
 
-  void goToTab(TabType tab) => _goToIndex(TabType.values.indexOf(tab));
+  void setTabFromPageIndex(int index) => _setTabIndex(index);
+
+  void goToTab(TabType tab) {
+    final index = TabType.values.indexOf(tab);
+    _setTabIndex(index);
+    if (_pageController.hasClients) {
+      _pageController.jumpToPage(index);
+    }
+  }
 }
