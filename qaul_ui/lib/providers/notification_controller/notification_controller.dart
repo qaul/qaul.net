@@ -52,8 +52,14 @@ class NotificationController<T> {
       LocalNotifications.instance.removeNotifications();
 }
 
-mixin DataProcessingStrategy<T> {
+mixin DataProcessingStrategy<T> on NotificationController<List<T>> {
   ValueNotifier<int?> newNotificationCount = ValueNotifier(null);
+
+  @override
+  void removeNotifications() {
+    newNotificationCount.value = null;
+    super.removeNotifications();
+  }
 
   void execute(List<T>? previous, List<T> current) async {
     final queue = Queue<T>()..addAll(entriesToBeProcessed(current));
