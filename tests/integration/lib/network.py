@@ -1,3 +1,4 @@
+import concurrent.futures
 import os
 import subprocess
 import time
@@ -51,20 +52,31 @@ def kill_node(node_id: str):
 
 
 def wait_for_nodes(node_ids: list[str], timeout: int = 30):
-    """Block until all nodes are reachable via qauld-ctl, or raise on timeout."""
+    """Block until all nodes are reachable via qauld-ctl, checking in parallel."""
     from lib.node import Node
 
     deadline = time.time() + timeout
-    remaining = list(node_ids)
+    remaining = set(node_ids)
+    max_workers = min(len(node_ids), 32)
 
-    while remaining and time.time() < deadline:
-        still_down = []
-        for nid in remaining:
-            if not Node(nid).is_reachable():
-                still_down.append(nid)
-        remaining = still_down
-        if remaining:
-            time.sleep(1)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
+        while remaining and time.time() < deadline:
+            futures = {
+                pool.submit(Node(nid).is_reachable): nid
+                for nid in remaining
+            }
+            try:
+                for future in concurrent.futures.as_completed(futures, timeout=max(1, deadline - time.time())):
+                    nid = futures[future]
+                    try:
+                        if future.result():
+                            remaining.discard(nid)
+                    except Exception:
+                        pass
+            except concurrent.futures.TimeoutError:
+                pass
+            if remaining:
+                time.sleep(1)
 
     if remaining:
-        raise TimeoutError(f"Nodes still not reachable after {timeout}s: {remaining}")
+        raise TimeoutError(f"Nodes still not reachable after {timeout}s: {sorted(remaining)}")
