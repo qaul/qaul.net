@@ -180,6 +180,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   User? get otherUser => widget.otherUser;
 
+  User? _directChatPeer(ChatRoom forRoom) {
+    if (forRoom.isGroupChatRoom) return null;
+    if (otherUser != null) return otherUser;
+    return ref
+        .read(usersStoreProvider.notifier)
+        .otherUserInDirectRoom(forRoom, user);
+  }
+
   final Map<String, String> _overflowMenuOptions = {};
 
   void _handleClick(String value) {
@@ -201,8 +209,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    assert(otherUser != null || room.isGroupChatRoom,
-        'Must either be a group chat or contain another user');
     _scheduleUpdateCurrentOpenChat();
   }
 
@@ -254,6 +260,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }, [room]);
 
     final l10n = AppLocalizations.of(context)!;
+    final directPeer = _directChatPeer(room);
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -263,11 +270,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           children: [
             (room.isGroupChatRoom)
                 ? QaulAvatar.groupSmall()
-                : QaulAvatar.small(user: otherUser),
+                : QaulAvatar.small(user: directPeer),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                otherUser?.name ?? room.name ?? 'Group',
+                directPeer?.name ?? room.name ?? 'Group',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -533,7 +540,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             },
             theme: DefaultChatTheme(
               userAvatarNameColors: [
-                colorGenerationStrategy(otherUser?.idBase58 ?? room.idBase58),
+                colorGenerationStrategy(
+                    directPeer?.idBase58 ?? room.idBase58),
               ],
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               sentMessageBodyTextStyle: const TextStyle(
