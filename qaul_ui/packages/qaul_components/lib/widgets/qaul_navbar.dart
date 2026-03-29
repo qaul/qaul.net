@@ -84,8 +84,14 @@ const double _kNavBarMobileHeight = 100.0;
 const double _kNavBarHorizontalPadding = 16.0;
 const double _kNavBarVerticalTopSpacing = 24.0;
 const double _kNavBarVerticalMenuPadding = 24.0;
+// Vertical metrics lerp: when available height is between compact and loose,
+// spacing is interpolated linearly. Below compact the navbar becomes scrollable
+// via SingleChildScrollView as a last resort.
+// Compact ≈ iPhone SE landscape minus safe-area (~300 px visible).
+// Loose ≈ iPad portrait / large phone portrait (~520 px visible).
 const double _kNavBarHeightCompact = 300.0;
 const double _kNavBarHeightLoose = 520.0;
+// Minimum gap used at the compact end of the lerp.
 const double _kNavBarCompactGap = 10.0;
 const double _kNavBarLabelTopPadding = 4.0;
 const double _kNavBarVerticalWidthPercentage = 0.1;
@@ -95,6 +101,10 @@ const double _kNavBarMenuSplashRadius = 20.0;
 const double _kNavBarBadgeFontSize = 10.0;
 const double _kNavBarBadgePositionOffset = 8.0;
 
+// iOS SafeArea reports the full notch/Dynamic Island inset, but the vertical
+// rail only needs a fraction of that because its content is already inset by
+// its own padding. 0.78 was measured on iPhone 14/15 (notch & Dynamic Island)
+// to keep icons clear of the rounded corners without wasting excessive space.
 const double _kIosLandscapeVerticalRailInsetScale = 0.78;
 
 const Map<TabType, Size> _kNavBarTabIconSizes = {
