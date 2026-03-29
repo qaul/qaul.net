@@ -40,6 +40,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />
 
+    <!-- Android 13 requires notification permission for foreground service notifications -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <!-- Audio messages support -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!-- Optional: Add this permission if you want to use bluetooth telephony device like headset/earbuds (min SDK: 23) -->

@@ -40,13 +40,13 @@ class FlutterBackgroundService : Service() {
         val CHANNEL_NAME = "qaul.net Channel"
 
         @JvmStatic
-        val CHANNEL_DESCRIPTION = "This channel is used for the qaul.net background service to inform the user that the app is still running in the background"
+        val CHANNEL_DESCRIPTION = "Notifies you when qaul.net is running in the background to receive messages"
 
         @JvmStatic
         val NOTIFICATION_TITLE = "qaul.net"
 
         @JvmStatic
-        val NOTIFICATION_DESCRIPTION = "The app is running in the Background"
+        val NOTIFICATION_DESCRIPTION = "Listening for incoming messages in the background"
     }
 
     private var wifiLock: WifiManager.WifiLock? = null

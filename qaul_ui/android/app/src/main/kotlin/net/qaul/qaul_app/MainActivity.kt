@@ -34,6 +34,7 @@ class MainActivity : FlutterActivity() {
         const val LOCATION_ENABLE_REQ_CODE = 112
         const val REQUEST_ENABLE_BT = 113
         const val BLE_PERMISSION_REQ_CODE_12 = 114
+        const val NOTIFICATION_PERMISSION_REQ_CODE = 115
 
         lateinit var permissionHandler: PermissionHandler
     }
@@ -41,12 +42,12 @@ class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         permissionHandler = PermissionHandler(this)
-        // Check if the background service is enabled in preferences, if so, start it
-        if (PreferenceManager.isBackgroundServiceEnabled(this)) {
-            startBackgroundService()
-        }
         if (!PreferenceManager.hasShownLocationPermissionDialog(this)) {
-            showLocationPermissionDialog();
+            showLocationPermissionDialog()
+        } else {
+            // Permissions dialog was already shown in a previous session;
+            // request notification permission if needed, then start the service
+            requestNotificationPermissionThenStartService()
         }
     }
 
@@ -141,6 +142,18 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    private fun requestNotificationPermissionThenStartService() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), NOTIFICATION_PERMISSION_REQ_CODE)
+        } else {
+            // Permission already granted or not needed (pre-Android 13)
+            if (PreferenceManager.isBackgroundServiceEnabled(this)) {
+                startBackgroundService()
+            }
+        }
+    }
+
     private fun startBackgroundService() {
         val serviceIntent = Intent(this, FlutterBackgroundService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -210,15 +223,15 @@ class MainActivity : FlutterActivity() {
     @RequiresApi(Build.VERSION_CODES.M)
     private fun showLocationPermissionDialog() {
         val builder: MaterialAlertDialogBuilder = MaterialAlertDialogBuilder(context)
-        builder.setTitle("Location Permissions")
+        builder.setTitle("Permissions")
         builder.setMessage("""
-            This app uses Bluetooth Low Energy to find and connect with nearby devices. The app will request the required permissions to do so.
+            This app uses Bluetooth Low Energy to find and connect with nearby devices, and runs in the background to ensure you receive messages and notifications even when the app is not in the foreground.
 
             Up to Android 11, this app requires location permissions in order to use Bluetooth Low Energy.
-            
+
             These permissions are only used to communicate via Bluetooth Low Energy, no location data is used by this app. However, other devices might use the Bluetooth Low Energy beacons to detect your location.
-            
-            You can manage these permissions in the Android settings.
+
+            You will see a persistent notification while the app is running in the background. You can manage these permissions in the Android settings.
         """.trimIndent())
         builder.setPositiveButton(
                 "OK"
@@ -230,6 +243,7 @@ class MainActivity : FlutterActivity() {
             } else {
                 permissionHandler.requestLocationPermission()
             }
+            // Notification permission will be requested after BLE/location result in onRequestPermissionsResult
         }
         builder.setCancelable(false)
         builder.show()
@@ -257,6 +271,8 @@ class MainActivity : FlutterActivity() {
                 }
                 bleWrapperClass?.onResult(requestCode = requestCode, status = true)
             }
+            // Chain: request notification permission after location permission
+            requestNotificationPermissionThenStartService()
         } else if (requestCode == BLE_PERMISSION_REQ_CODE_12) {
             AppLog.e(
                     "MainActivity", "REQ CODED -  " + requestCode + "  Size  " + grantResults.size
@@ -270,6 +286,13 @@ class MainActivity : FlutterActivity() {
                     }
                 }
                 bleWrapperClass?.onResult(requestCode = requestCode, status = true)
+            }
+            // Chain: request notification permission after BLE permission
+            requestNotificationPermissionThenStartService()
+        } else if (requestCode == NOTIFICATION_PERMISSION_REQ_CODE) {
+            // Notification permission resolved; start the background service
+            if (PreferenceManager.isBackgroundServiceEnabled(this)) {
+                startBackgroundService()
             }
         }
     }
