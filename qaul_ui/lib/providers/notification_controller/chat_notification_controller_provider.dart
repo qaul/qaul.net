@@ -41,6 +41,18 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
   // ***************************************************************************
   @override
   Iterable<ChatRoom> entriesToBeProcessed(List<ChatRoom> values) {
+    // Sync cache for rooms where messages were read (unreadCount decreased),
+    // so future increases are correctly detected as new messages.
+    var cacheUpdated = false;
+    for (final room in values.where(_localCacheContains)) {
+      final cached = _chats.firstWhereOrNull((c) => c.roomIdBase58 == room.idBase58);
+      if (cached != null && room.unreadCount < cached.unreadCount) {
+        _updateLocalCachedChatWith(room);
+        cacheUpdated = true;
+      }
+    }
+    if (cacheUpdated) updatePersistentCachedData();
+
     var newMessages =
         List<ChatRoom>.from(values.where((room) => !_localCacheContains(room)))
           ..addAll(values.where(_localCacheContains).where(_hasNewMessage));
