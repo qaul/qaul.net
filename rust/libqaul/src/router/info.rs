@@ -466,9 +466,6 @@ impl RouterInfo {
 
         match decoding_result {
             Ok(container) => {
-                // TODO: check signature
-                //let signature = container.signature;message.ids
-
                 // decode message
                 let message_result =
                     router_net_proto::RouterInfoContent::decode(&container.message[..]);
@@ -586,7 +583,14 @@ impl RouterInfo {
                                 let message_info =
                                     router_net_proto::UserInfoTable::decode(&content.content[..]);
                                 if let Ok(message) = message_info {
-                                    Users::add_user_info_table(&message.info);
+                                    // Process signed profiles first (verified, preferred)
+                                    if !message.signed_profiles.is_empty() {
+                                        Users::add_signed_user_info_table(&message.signed_profiles);
+                                    }
+                                    // Fall back to legacy unsigned info for any remaining unknowns
+                                    if !message.info.is_empty() {
+                                        Users::add_user_info_table(&message.info);
+                                    }
                                 }
                             }
                             Err(_) => {}

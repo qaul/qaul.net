@@ -99,6 +99,14 @@ message UserEntry {
     // routing connection entries
     // RoutingTableConnection connections = 11;
     repeated RoutingTableConnection connections = 11;
+    // bio / status text
+    string bio = 12;
+    // avatar bytes (small image)
+    bytes avatar = 13;
+    // profile version number
+    uint64 profile_version = 14;
+    // profile last updated timestamp (ms since epoch)
+    uint64 profile_updated_at = 15;
 }
 
 // Connection modules

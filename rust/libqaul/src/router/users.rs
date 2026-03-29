@@ -53,21 +53,56 @@ impl Users {
         // iterate over all values in db
         for res in tree.iter() {
             if let Ok((_vec, user_bytes)) = res {
-                // decode user bytes
-                let user: UserData = bincode::deserialize(&user_bytes).unwrap();
+                // decode user bytes with migration fallback
+                let user_data: UserData = match bincode::deserialize(&user_bytes) {
+                    Ok(u) => u,
+                    Err(_) => {
+                        // Try legacy format for backward compat
+                        match bincode::deserialize::<UserDataLegacy>(&user_bytes) {
+                            Ok(legacy) => {
+                                let migrated = UserData {
+                                    id: legacy.id,
+                                    key: legacy.key,
+                                    name: legacy.name,
+                                    verified: legacy.verified,
+                                    blocked: legacy.blocked,
+                                    bio: String::new(),
+                                    avatar: Vec::new(),
+                                    version: 0,
+                                    updated_at: 0,
+                                    signed_profile_bytes: Vec::new(),
+                                    signed_profile_signature: Vec::new(),
+                                };
+                                // Re-save in new format
+                                DbUsers::add_user(migrated.clone());
+                                migrated
+                            }
+                            Err(e) => {
+                                log::error!("Failed to deserialize user data: {}", e);
+                                continue;
+                            }
+                        }
+                    }
+                };
                 // encode values from bytes
-                let q8id = user.id[6..14].to_vec();
-                let id = PeerId::from_bytes(&user.id).unwrap();
-                let key = PublicKey::try_decode_protobuf(&user.key).unwrap();
+                let q8id = user_data.id[6..14].to_vec();
+                let id = PeerId::from_bytes(&user_data.id).unwrap();
+                let key = PublicKey::try_decode_protobuf(&user_data.key).unwrap();
                 // fill result into user table
                 users.users.insert(
                     q8id,
                     User {
                         id,
                         key,
-                        name: user.name,
-                        verified: user.verified,
-                        blocked: user.blocked,
+                        name: user_data.name,
+                        verified: user_data.verified,
+                        blocked: user_data.blocked,
+                        bio: user_data.bio,
+                        avatar: user_data.avatar,
+                        version: user_data.version,
+                        updated_at: user_data.updated_at,
+                        signed_profile_bytes: user_data.signed_profile_bytes,
+                        signed_profile_signature: user_data.signed_profile_signature,
                     },
                 );
             }
@@ -77,7 +112,19 @@ impl Users {
     /// add a new user
     ///
     /// This user will be added to the users list in memory and to the data base
-    pub fn add(id: PeerId, key: PublicKey, name: String, verified: bool, blocked: bool) {
+    pub fn add(
+        id: PeerId,
+        key: PublicKey,
+        name: String,
+        verified: bool,
+        blocked: bool,
+        bio: String,
+        avatar: Vec<u8>,
+        version: u64,
+        updated_at: u64,
+        signed_profile_bytes: Vec<u8>,
+        signed_profile_signature: Vec<u8>,
+    ) {
         let id_bytes = id.to_bytes();
         let q8id = id_bytes[6..14].to_vec();
 
@@ -88,6 +135,12 @@ impl Users {
             name: name.clone(),
             verified,
             blocked,
+            bio: bio.clone(),
+            avatar: avatar.clone(),
+            version,
+            updated_at,
+            signed_profile_bytes: signed_profile_bytes.clone(),
+            signed_profile_signature: signed_profile_signature.clone(),
         });
 
         // add user to the users table
@@ -100,6 +153,12 @@ impl Users {
                 name,
                 verified,
                 blocked,
+                bio,
+                avatar,
+                version,
+                updated_at,
+                signed_profile_bytes,
+                signed_profile_signature,
             },
         );
     }
@@ -126,7 +185,7 @@ impl Users {
             }
         }
         // add user
-        Self::add(id, key, name, false, false);
+        Self::add(id, key, name, false, false, String::new(), Vec::new(), 0, 0, Vec::new(), Vec::new());
     }
 
     /// check missed users from ids
@@ -156,6 +215,24 @@ impl Users {
         store.users.get(q8id).map(|user| user.key.clone())
     }
 
+    /// get a snapshot of a user by q8id (clones all fields)
+    pub fn get_user_snapshot(q8id: &[u8]) -> Option<User> {
+        let store = USERS.get().read().unwrap();
+        store.users.get(q8id).map(|u| User {
+            id: u.id,
+            key: u.key.clone(),
+            name: u.name.clone(),
+            verified: u.verified,
+            blocked: u.blocked,
+            bio: u.bio.clone(),
+            avatar: u.avatar.clone(),
+            version: u.version,
+            updated_at: u.updated_at,
+            signed_profile_bytes: u.signed_profile_bytes.clone(),
+            signed_profile_signature: u.signed_profile_signature.clone(),
+        })
+    }
+
     /// get user by q8id
     pub fn get_user_id_by_q8id(q8id: &[u8]) -> Option<PeerId> {
         let store = USERS.get().read().unwrap();
@@ -181,21 +258,30 @@ impl Users {
     /// RouterInfo message which is sent regularly to neighbours
     pub fn get_user_info_table_by_q8ids(q8ids: &[Vec<u8>]) -> router_net_proto::UserInfoTable {
         let store = USERS.get().read().unwrap();
-        let mut users = router_net_proto::UserInfoTable {
+        let mut table = router_net_proto::UserInfoTable {
             info: Vec::with_capacity(q8ids.len()),
+            signed_profiles: Vec::with_capacity(q8ids.len()),
         };
 
         for q8id in q8ids {
             if let Some(value) = store.users.get(q8id) {
-                let user_info = router_net_proto::UserInfo {
+                // Always include legacy UserInfo for backward compat
+                table.info.push(router_net_proto::UserInfo {
                     id: value.id.to_bytes(),
                     key: value.key.encode_protobuf(),
                     name: value.name.clone(),
-                };
-                users.info.push(user_info);
+                });
+
+                // Include signed profile if available
+                if !value.signed_profile_bytes.is_empty() {
+                    table.signed_profiles.push(router_net_proto::SignedUserProfile {
+                        profile: value.signed_profile_bytes.clone(),
+                        signature: value.signed_profile_signature.clone(),
+                    });
+                }
             }
         }
-        users
+        table
     }
 
     /// add new users from the received bytes of a UserInfoTable
@@ -207,6 +293,121 @@ impl Users {
 
             if let (Ok(id), Ok(key)) = (id_result, key_result) {
                 Self::add_with_check(id, key, value.name.clone());
+            }
+        }
+    }
+
+    /// Create a SignedUserProfile for a user, signed with the given keypair.
+    pub fn create_signed_profile(
+        user: &User,
+        keys: &libp2p::identity::Keypair,
+    ) -> router_net_proto::SignedUserProfile {
+        let profile = router_net_proto::UserProfile {
+            id: user.id.to_bytes(),
+            key: user.key.encode_protobuf(),
+            name: user.name.clone(),
+            avatar: user.avatar.clone(),
+            bio: user.bio.clone(),
+            version: user.version,
+            updated_at: user.updated_at,
+        };
+
+        let profile_bytes = profile.encode_to_vec();
+        let signature = keys.sign(&profile_bytes).unwrap_or_default();
+
+        router_net_proto::SignedUserProfile {
+            profile: profile_bytes,
+            signature,
+        }
+    }
+
+    /// Verify a SignedUserProfile.
+    ///
+    /// Checks that:
+    /// 1. The profile bytes decode to a valid UserProfile
+    /// 2. The embedded public key can be decoded
+    /// 3. The signature verifies against the profile bytes
+    /// 4. The PeerId matches the public key
+    pub fn verify_signed_profile(
+        signed: &router_net_proto::SignedUserProfile,
+    ) -> Result<router_net_proto::UserProfile, String> {
+        let profile = router_net_proto::UserProfile::decode(&signed.profile[..])
+            .map_err(|e| format!("failed to decode UserProfile: {}", e))?;
+
+        let key = PublicKey::try_decode_protobuf(&profile.key)
+            .map_err(|e| format!("failed to decode public key: {}", e))?;
+
+        if !key.verify(&signed.profile, &signed.signature) {
+            return Err("signature verification failed".to_string());
+        }
+
+        let id = PeerId::from_bytes(&profile.id)
+            .map_err(|e| format!("invalid PeerId: {}", e))?;
+        if id != key.to_peer_id() {
+            return Err("PeerId does not match public key".to_string());
+        }
+
+        Ok(profile)
+    }
+
+    /// Process received signed user profiles with version checking.
+    ///
+    /// For each profile: verify the signature, then accept only if the
+    /// version is higher than the currently stored version (or the user
+    /// is new).
+    pub fn add_signed_user_info_table(signed_profiles: &[router_net_proto::SignedUserProfile]) {
+        for signed in signed_profiles {
+            match Self::verify_signed_profile(signed) {
+                Ok(profile) => {
+                    let id = match PeerId::from_bytes(&profile.id) {
+                        Ok(id) => id,
+                        Err(_) => continue,
+                    };
+                    let key = match PublicKey::try_decode_protobuf(&profile.key) {
+                        Ok(k) => k,
+                        Err(_) => continue,
+                    };
+                    let id_bytes = id.to_bytes();
+                    let q8id = id_bytes[6..14].to_vec();
+
+                    let should_update = {
+                        let users = USERS.get().read().unwrap();
+                        match users.users.get(&q8id) {
+                            Some(existing) => {
+                                profile.version > existing.version
+                                    || (profile.version == existing.version
+                                        && profile.updated_at > existing.updated_at)
+                            }
+                            None => true,
+                        }
+                    };
+
+                    if should_update {
+                        // Preserve local-only flags
+                        let (verified, blocked) = {
+                            let users = USERS.get().read().unwrap();
+                            users.users.get(&q8id)
+                                .map(|u| (u.verified, u.blocked))
+                                .unwrap_or((false, false))
+                        };
+                        Self::add(
+                            id,
+                            key,
+                            profile.name.clone(),
+                            verified,
+                            blocked,
+                            profile.bio.clone(),
+                            profile.avatar.clone(),
+                            profile.version,
+                            profile.updated_at,
+                            signed.profile.clone(),
+                            signed.signature.clone(),
+                        );
+                    }
+                }
+                Err(e) => {
+                    log::warn!("Rejected signed user profile: {}", e);
+                }
             }
         }
     }
@@ -298,6 +499,12 @@ impl Users {
                                     name: user_result.name.clone(),
                                     verified: updated_user.verified,
                                     blocked: updated_user.blocked,
+                                    bio: user_result.bio.clone(),
+                                    avatar: user_result.avatar.clone(),
+                                    version: user_result.version,
+                                    updated_at: user_result.updated_at,
+                                    signed_profile_bytes: user_result.signed_profile_bytes.clone(),
+                                    signed_profile_signature: user_result.signed_profile_signature.clone(),
                                 });
                             },
                         );
@@ -445,6 +652,22 @@ pub struct User {
     pub name: String,
     pub verified: bool,
     pub blocked: bool,
+    pub bio: String,
+    pub avatar: Vec<u8>,
+    pub version: u64,
+    pub updated_at: u64,
+    pub signed_profile_bytes: Vec<u8>,
+    pub signed_profile_signature: Vec<u8>,
+}
+
+/// Legacy user structure for backward-compatible deserialization
+#[derive(Serialize, Deserialize)]
+struct UserDataLegacy {
+    pub id: Vec<u8>,
+    pub key: Vec<u8>,
+    pub name: String,
+    pub verified: bool,
+    pub blocked: bool,
 }
 
 /// user structure for storing it in the data base
@@ -455,6 +678,12 @@ pub struct UserData {
     pub name: String,
     pub verified: bool,
     pub blocked: bool,
+    pub bio: String,
+    pub avatar: Vec<u8>,
+    pub version: u64,
+    pub updated_at: u64,
+    pub signed_profile_bytes: Vec<u8>,
+    pub signed_profile_signature: Vec<u8>,
 }
 
 fn send_users_rpc_message(message: proto::users::Message, request_id: String) {
@@ -514,6 +743,10 @@ fn build_user_entry(
         verified: user.verified,
         blocked: user.blocked,
         connections,
+        bio: user.bio.clone(),
+        avatar: user.avatar.clone(),
+        profile_version: user.version,
+        profile_updated_at: user.updated_at,
     }
 }
 
@@ -618,6 +851,12 @@ mod tests {
                     name: format!("user_{}", i),
                     verified: false,
                     blocked: false,
+                    bio: String::new(),
+                    avatar: Vec::new(),
+                    version: 0,
+                    updated_at: 0,
+                    signed_profile_bytes: Vec::new(),
+                    signed_profile_signature: Vec::new(),
                 },
             );
             ids.push(id);
@@ -890,5 +1129,94 @@ mod tests {
         let conn = &entry.connections[0];
         assert_eq!(conn.hop_count, 1);
         assert_eq!(conn.rtt, 10);
+    }
+
+    #[test]
+    fn sign_verify_profile_roundtrip() {
+        let kp = Keypair::generate_ed25519();
+        let pk = kp.public();
+        let id = pk.to_peer_id();
+
+        let user = User {
+            id,
+            key: pk,
+            name: "test_user".to_string(),
+            verified: false,
+            blocked: false,
+            bio: "hello world".to_string(),
+            avatar: vec![0xFF, 0xD8],
+            version: 1,
+            updated_at: 12345,
+            signed_profile_bytes: Vec::new(),
+            signed_profile_signature: Vec::new(),
+        };
+
+        let signed = Users::create_signed_profile(&user, &kp);
+        assert!(!signed.profile.is_empty());
+        assert!(!signed.signature.is_empty());
+
+        let verified = Users::verify_signed_profile(&signed);
+        assert!(verified.is_ok());
+        let profile = verified.unwrap();
+        assert_eq!(profile.name, "test_user");
+        assert_eq!(profile.bio, "hello world");
+        assert_eq!(profile.version, 1);
+    }
+
+    #[test]
+    fn tampered_profile_rejected() {
+        let kp = Keypair::generate_ed25519();
+        let pk = kp.public();
+        let id = pk.to_peer_id();
+
+        let user = User {
+            id,
+            key: pk,
+            name: "test_user".to_string(),
+            verified: false,
+            blocked: false,
+            bio: String::new(),
+            avatar: Vec::new(),
+            version: 1,
+            updated_at: 0,
+            signed_profile_bytes: Vec::new(),
+            signed_profile_signature: Vec::new(),
+        };
+
+        let mut signed = Users::create_signed_profile(&user, &kp);
+        // Tamper with the profile bytes
+        if let Some(byte) = signed.profile.last_mut() {
+            *byte ^= 0xFF;
+        }
+
+        let result = Users::verify_signed_profile(&signed);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn wrong_key_profile_rejected() {
+        let kp1 = Keypair::generate_ed25519();
+        let kp2 = Keypair::generate_ed25519();
+        let pk1 = kp1.public();
+        let id1 = pk1.to_peer_id();
+
+        let user = User {
+            id: id1,
+            key: pk1,
+            name: "test_user".to_string(),
+            verified: false,
+            blocked: false,
+            bio: String::new(),
+            avatar: Vec::new(),
+            version: 1,
+            updated_at: 0,
+            signed_profile_bytes: Vec::new(),
+            signed_profile_signature: Vec::new(),
+        };
+
+        // Sign with wrong key
+        let signed = Users::create_signed_profile(&user, &kp2);
+        let result = Users::verify_signed_profile(&signed);
+        assert!(result.is_err());
     }
 }

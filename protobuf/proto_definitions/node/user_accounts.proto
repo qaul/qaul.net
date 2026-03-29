@@ -11,6 +11,8 @@ message UserAccounts {
         MyUserAccount my_user_account = 4;
         SetPasswordRequest set_password_request = 5;
         SetPasswordResponse set_password_response = 6;
+        UpdateProfileRequest update_profile_request = 7;
+        UpdateProfileResponse update_profile_response = 8;
     }
 }
 
@@ -35,6 +37,26 @@ message SetPasswordResponse {
 message DefaultUserAccount {
     bool user_account_exists = 1;
     MyUserAccount my_user_account = 2;
+}
+
+// Request to update the local user's profile
+message UpdateProfileRequest {
+    // new display name (empty = no change)
+    string name = 1;
+    // new avatar image bytes (empty = no change)
+    bytes avatar = 2;
+    // new bio / status text (empty = no change)
+    string bio = 3;
+}
+
+// Response after profile update
+message UpdateProfileResponse {
+    // whether the update succeeded
+    bool success = 1;
+    // error message if failed
+    string error_message = 2;
+    // the new profile version after update
+    uint64 new_version = 3;
 }
 
 // Information about my user
