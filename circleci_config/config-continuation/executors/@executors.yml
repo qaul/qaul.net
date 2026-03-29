@@ -28,8 +28,8 @@ rust-linux-arm:
     CARGO_NET_GIT_FETCH_WITH_CLI: "true"
 rust-macos:
   macos:
-    xcode: 14.0.1
-  resource_class: macos.m1.medium.gen1
+      xcode: 26.3.0
+  resource_class: m4pro.medium
   working_directory: ~/qaul.net
   shell: /bin/bash --login -o pipefail
   environment:

@@ -215,8 +215,8 @@ executors:
         environment:
             CARGO_NET_GIT_FETCH_WITH_CLI: "true"
         macos:
-            xcode: 14.0.1
-        resource_class: macos.m1.medium.gen1
+            xcode: 26.3.0
+        resource_class: m4pro.medium
         shell: /bin/bash --login -o pipefail
         working_directory: ~/qaul.net
 jobs:
@@ -651,8 +651,8 @@ jobs:
         steps:
             - checkout-project
             - run:
-                command: choco install cmake -y
-                name: Install CMake
+                command: choco install cmake mingw -y
+                name: Install CMake and MinGW
                 shell: powershell.exe
             - run:
                 command: |

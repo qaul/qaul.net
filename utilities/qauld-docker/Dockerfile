@@ -1,7 +1,7 @@
 FROM rust:latest AS builder
 
 RUN apt-get update
-RUN apt-get install -y git protobuf-compiler
+RUN apt-get install -y git protobuf-compiler libdbus-1-dev pkg-config
 
 RUN git clone https://github.com/qaul/qaul.net.git /qaul
 

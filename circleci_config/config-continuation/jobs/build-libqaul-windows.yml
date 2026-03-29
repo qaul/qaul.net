@@ -8,9 +8,9 @@ environment:
 steps:
   - checkout-project
   - run:
-      name: Install CMake
+      name: Install CMake and MinGW
       shell: powershell.exe
-      command: choco install cmake -y
+      command: choco install cmake mingw -y
   - run:
       name: Install protoc
       shell: powershell.exe
