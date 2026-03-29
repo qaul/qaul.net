@@ -18,7 +18,7 @@ steps:
       shell: powershell.exe
       command: |
         choco install msys2 -y
-        C:\tools\msys64\usr\bin\bash.exe -lc "pacman -S --noconfirm mingw-w64-x86_64-binutils"
+        C:\tools\msys64\usr\bin\bash.exe -lc "pacman -S --noconfirm mingw-w64-x86_64-toolchain"
   - run:
       name: Install Rust
       command: |
