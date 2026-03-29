@@ -651,14 +651,16 @@ jobs:
         steps:
             - checkout-project
             - run:
-                command: choco install cmake mingw -y
-                name: Install CMake and MinGW
+                command: |
+                    choco install cmake protoc -y
+                    protoc --version
+                name: Install CMake and protoc
                 shell: powershell.exe
             - run:
                 command: |
-                    choco install protoc -y
-                    protoc --version
-                name: Install protoc
+                    choco install msys2 -y
+                    C:\tools\msys64\usr\bin\bash.exe -lc "pacman -S --noconfirm mingw-w64-x86_64-binutils"
+                name: Install dlltool via MSYS2
                 shell: powershell.exe
             - run:
                 command: |
@@ -670,7 +672,7 @@ jobs:
                 name: Install Rust
             - run:
                 command: |
-                    export PATH="/c/ProgramData/chocolatey/lib/mingw/tools/install/mingw64/bin:/c/Users/circleci/.cargo/bin:/c/Program Files/CMake/bin:$PATH"
+                    export PATH="/c/tools/msys64/mingw64/bin:/c/Users/circleci/.cargo/bin:/c/Program Files/CMake/bin:$PATH"
                     cd rust && cargo build --release
                 name: Build dll Libqaul
                 no_output_timeout: 30m
