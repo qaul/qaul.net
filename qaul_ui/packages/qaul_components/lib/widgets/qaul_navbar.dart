@@ -105,6 +105,12 @@ const double _kNavBarMenuHitDiameter = 40.0;
 const double _kNavBarBadgeFontSize = 10.0;
 const double _kNavBarBadgePositionOffset = 8.0;
 
+// iOS SafeArea reports the full notch/Dynamic Island inset, but the vertical
+// rail only needs a fraction of that because its content is already inset by
+// its own padding. 0.78 was measured on iPhone 14/15 (notch & Dynamic Island)
+// to keep icons clear of the rounded corners without wasting excessive space.
+const double _kIosLandscapeVerticalRailInsetScale = 0.78;
+
 const Map<TabType, Size> _kNavBarTabIconSizes = {
   TabType.chat: Size(34, 21),
   TabType.network: Size(23, 23),
@@ -159,6 +165,24 @@ const Map<NavBarOverflowOption, String> _kNavBarOverflowMenuLabelsEn = {
   NavBarOverflowOption.oldNetwork: 'Routing table',
   NavBarOverflowOption.files: 'File history',
 };
+
+Color _navBarShellBackgroundColor(ThemeData theme) {
+  final barTheme = theme.appBarTheme;
+  return theme.brightness == Brightness.dark
+      ? _kNavBarDarkBackground
+      : (barTheme.backgroundColor ?? Colors.transparent);
+}
+
+EdgeInsets _iosLandscapeVerticalRailPadding(BuildContext context, bool ltr) {
+  final p = MediaQuery.paddingOf(context);
+  const s = _kIosLandscapeVerticalRailInsetScale;
+  return EdgeInsets.only(
+    left: ltr ? p.left * s : 0,
+    right: !ltr ? p.right * s : 0,
+    top: 0,
+    bottom: p.bottom * s,
+  );
+}
 
 // ---------------------------------------------------------------------------
 // QaulNavBar widget
@@ -252,9 +276,13 @@ class _QaulNavBarVerticalLayout extends StatelessWidget {
       onOverflowSelected: onOverflowSelected,
     );
 
+    final theme = Theme.of(context);
+    final shellColor = _navBarShellBackgroundColor(theme);
     final ltr = Directionality.of(context) == TextDirection.ltr;
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
+    final iosLandscapeRail =
+        theme.platform == TargetPlatform.iOS && isLandscape;
 
     final bar = LayoutBuilder(
       builder: (context, constraints) {
@@ -347,12 +375,20 @@ class _QaulNavBarVerticalLayout extends StatelessWidget {
       },
     );
 
-    return SafeArea(
-      top: !isLandscape,
-      left: isLandscape ? !ltr : true,
-      right: isLandscape ? ltr : true,
-      bottom: false,
-      child: bar,
+    return ColoredBox(
+      color: shellColor,
+      child: iosLandscapeRail
+          ? Padding(
+              padding: _iosLandscapeVerticalRailPadding(context, ltr),
+              child: bar,
+            )
+          : SafeArea(
+              top: !isLandscape,
+              left: isLandscape ? ltr : true,
+              right: isLandscape ? !ltr : true,
+              bottom: isLandscape,
+              child: bar,
+            ),
     );
   }
 }
@@ -386,54 +422,60 @@ class _QaulNavBarHorizontalLayout extends StatelessWidget {
       onOverflowSelected: onOverflowSelected,
     );
 
-    return SafeArea(
-      top: false,
-      child: SizedBox(
-        height: _kNavBarMobileHeight,
-        child: _BarBackground(
-          vertical: false,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: _kNavBarHorizontalPadding,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _NavBarItem(
-                  tab: TabType.account,
-                  isSelected: selectedTab == TabType.account,
-                  onTap: () => onTabSelected(TabType.account),
-                  avatarChild: avatarChild,
-                  tooltip: tooltips[TabType.account] ?? '',
-                ),
-                _NavBarItem(
-                  tab: TabType.public,
-                  isSelected: selectedTab == TabType.public,
-                  onTap: () => onTabSelected(TabType.public),
-                  tooltip: tooltips[TabType.public] ?? '',
-                  badgeCount: publicNotificationCount,
-                ),
-                _NavBarItem(
-                  tab: TabType.users,
-                  isSelected: selectedTab == TabType.users,
-                  onTap: () => onTabSelected(TabType.users),
-                  tooltip: tooltips[TabType.users] ?? '',
-                ),
-                _NavBarItem(
-                  tab: TabType.chat,
-                  isSelected: selectedTab == TabType.chat,
-                  onTap: () => onTabSelected(TabType.chat),
-                  tooltip: tooltips[TabType.chat] ?? '',
-                  badgeCount: chatNotificationCount,
-                ),
-                _NavBarItem(
-                  tab: TabType.network,
-                  isSelected: selectedTab == TabType.network,
-                  onTap: () => onTabSelected(TabType.network),
-                  tooltip: tooltips[TabType.network] ?? '',
-                ),
-                menuButton,
-              ],
+    final theme = Theme.of(context);
+    final shellColor = _navBarShellBackgroundColor(theme);
+
+    return ColoredBox(
+      color: shellColor,
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: _kNavBarMobileHeight,
+          child: _BarBackground(
+            vertical: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: _kNavBarHorizontalPadding,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _NavBarItem(
+                    tab: TabType.account,
+                    isSelected: selectedTab == TabType.account,
+                    onTap: () => onTabSelected(TabType.account),
+                    avatarChild: avatarChild,
+                    tooltip: tooltips[TabType.account] ?? '',
+                  ),
+                  _NavBarItem(
+                    tab: TabType.public,
+                    isSelected: selectedTab == TabType.public,
+                    onTap: () => onTabSelected(TabType.public),
+                    tooltip: tooltips[TabType.public] ?? '',
+                    badgeCount: publicNotificationCount,
+                  ),
+                  _NavBarItem(
+                    tab: TabType.users,
+                    isSelected: selectedTab == TabType.users,
+                    onTap: () => onTabSelected(TabType.users),
+                    tooltip: tooltips[TabType.users] ?? '',
+                  ),
+                  _NavBarItem(
+                    tab: TabType.chat,
+                    isSelected: selectedTab == TabType.chat,
+                    onTap: () => onTabSelected(TabType.chat),
+                    tooltip: tooltips[TabType.chat] ?? '',
+                    badgeCount: chatNotificationCount,
+                  ),
+                  _NavBarItem(
+                    tab: TabType.network,
+                    isSelected: selectedTab == TabType.network,
+                    onTap: () => onTabSelected(TabType.network),
+                    tooltip: tooltips[TabType.network] ?? '',
+                  ),
+                  menuButton,
+                ],
+              ),
             ),
           ),
         ),
