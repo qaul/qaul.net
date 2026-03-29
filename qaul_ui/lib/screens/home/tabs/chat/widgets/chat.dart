@@ -75,22 +75,14 @@ Future<void> openChat(
   await Navigator.push(
     context,
     MaterialPageRoute(
-        builder: (context) => ChatScreen(
-              room,
-              user,
-              otherUser: otherUser,
-            ),
-        settings: const RouteSettings(name: _kChatRouteName)),
+      builder: (context) => ChatScreen(room, user, otherUser: otherUser),
+      settings: const RouteSettings(name: _kChatRouteName),
+    ),
   );
 }
 
 class ChatScreen extends StatefulHookConsumerWidget {
-  const ChatScreen(
-    this.room,
-    this.user, {
-    super.key,
-    this.otherUser,
-  });
+  const ChatScreen(this.room, this.user, {super.key, this.otherUser});
 
   final ChatRoom room;
 
@@ -131,8 +123,9 @@ class ChatScreen extends StatefulHookConsumerWidget {
           // Only show "joined" message for users who actually accepted invitations
           // Don't show for users who only had pending invites
           if (room != null) {
-            final roomUser = room.members
-                .firstWhereOrNull((member) => member.id.equals(author.id));
+            final roomUser = room.members.firstWhereOrNull(
+              (member) => member.id.equals(author.id),
+            );
             if (roomUser?.invitationState == InvitationState.sent) {
               // User only had a pending invite, don't show "joined" message
               event = '';
@@ -147,8 +140,9 @@ class ChatScreen extends StatefulHookConsumerWidget {
           // Only show "left" message for users who were actually in the group
           // Don't show for users who only had pending invites
           if (room != null) {
-            final roomUser = room.members
-                .firstWhereOrNull((member) => member.id.equals(author.id));
+            final roomUser = room.members.firstWhereOrNull(
+              (member) => member.id.equals(author.id),
+            );
             if (roomUser?.invitationState == InvitationState.sent) {
               // User only had a pending invite, don't show "left" message
               event = '';
@@ -193,9 +187,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void _handleClick(String value) {
     switch (value) {
       case 'groupSettings':
-        Navigator.push(context, MaterialPageRoute(builder: (_) {
-          return _GroupSettingsPage(room);
-        }));
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) {
+              return _GroupSettingsPage(room);
+            },
+          ),
+        );
         break;
     }
   }
@@ -231,9 +230,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final room = ref.watch(currentOpenChatRoom);
 
     if (room == null) {
-      return Scaffold(
-        body: const QaulLoadingIndicator(),
-      );
+      return Scaffold(body: const QaulLoadingIndicator());
     }
 
     final refreshCurrentRoom = useCallback(() async {
@@ -303,255 +300,255 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       body: CronTaskDecorator(
         callback: () => refreshCurrentRoom(),
         schedule: const Duration(milliseconds: 300),
-        child: SafeArea(
-          bottom: false,
-          child: Chat(
-            showUserAvatars: true,
-            showUserNames: room.isGroupChatRoom,
-            user: user.toInternalUser(),
-            messages: messages(room, l10n: l10n) ?? [],
+        child: Chat(
+          showUserAvatars: true,
+          showUserNames: room.isGroupChatRoom,
+          user: user.toInternalUser(),
+          messages: messages(room, l10n: l10n) ?? [],
+          onSendPressed: sendMessage,
+          inputOptions: const InputOptions(
+            sendButtonVisibilityMode: SendButtonVisibilityMode.always,
+          ),
+          avatarBuilder: (id) {
+            var user = room.members.firstWhereOrNull(
+              (u) => id.id == u.idBase58,
+            );
+            if (user == null) return const SizedBox();
+            return QaulAvatar.small(user: user, badgeEnabled: false);
+          },
+          emptyState: Center(child: Text(l10n.chatEmptyState)),
+          bubbleBuilder: _bubbleBuilder,
+          customBottomWidget: _CustomInput(
+            isDisabled: room.status != ChatRoomStatus.active,
+            disabledMessage: room.status != ChatRoomStatus.inviteAccepted
+                ? null
+                : 'Please wait for the admin to confirm your acceptance to send messages',
+            sendButtonVisibilityMode: SendButtonVisibilityMode.editing,
+            hintText: room.isGroupChatRoom
+                ? l10n.groupChatMessageHint
+                : l10n.securePrivateMessageHint,
             onSendPressed: sendMessage,
-            inputOptions: const InputOptions(
-              sendButtonVisibilityMode: SendButtonVisibilityMode.always,
-            ),
-            avatarBuilder: (id) {
-              var user =
-                  room.members.firstWhereOrNull((u) => id.id == u.idBase58);
-              if (user == null) return const SizedBox();
-              return QaulAvatar.small(user: user, badgeEnabled: false);
-            },
-            emptyState: Center(child: Text(l10n.chatEmptyState)),
-            bubbleBuilder: _bubbleBuilder,
-            customBottomWidget: _CustomInput(
-              isDisabled: room.status != ChatRoomStatus.active,
-              disabledMessage: room.status != ChatRoomStatus.inviteAccepted
-                  ? null
-                  : 'Please wait for the admin to confirm your acceptance to send messages',
-              sendButtonVisibilityMode: SendButtonVisibilityMode.editing,
-              hintText: room.isGroupChatRoom
-                  ? l10n.groupChatMessageHint
-                  : l10n.securePrivateMessageHint,
-              onSendPressed: sendMessage,
-              onAttachmentPressed: (room.messages?.isEmpty ?? true)
-                  ? null
-                  : ({types.PartialText? text}) async {
-                      FilePickerResult? result;
-                      try {
-                        result = await FilePicker.platform.pickFiles();
-                      } catch (e) {
-                        debugPrint(e.toString());
-                      }
+            onAttachmentPressed: (room.messages?.isEmpty ?? true)
+                ? null
+                : ({types.PartialText? text}) async {
+                    FilePickerResult? result;
+                    try {
+                      result = await FilePicker.platform.pickFiles();
+                    } catch (e) {
+                      debugPrint(e.toString());
+                    }
 
-                      if (result != null && result.files.single.path != null) {
-                        File file = File(result.files.single.path!);
+                    if (result != null && result.files.single.path != null) {
+                      File file = File(result.files.single.path!);
 
-                        if (!context.mounted) return;
-                        showModalBottomSheet(
-                          context: context,
-                          useSafeArea: true,
-                          isScrollControlled: true,
-                          builder: (context) {
-                            final dialog = _SendFileDialog(
-                              file,
-                              room: room,
-                              partialMessage: text?.text,
-                              onSendPressed: (description) {
-                                final worker = ref.read(qaulWorkerProvider);
-                                worker.sendFile(
-                                  pathName: file.path,
-                                  conversationId: room.conversationId,
-                                  description: description.text,
-                                );
-                              },
-                            );
-                            if (!Platform.isIOS) {
-                              return dialog;
-                            }
-
-                            final bottomPadding =
-                                MediaQuery.of(context).viewInsets.bottom;
-                            return SingleChildScrollView(
-                              child: Container(
-                                padding: EdgeInsets.only(bottom: bottomPadding),
-                                child: dialog,
-                              ),
-                            );
-                          },
-                        );
-                      }
-                    },
-              onPickImagePressed: !(Platform.isAndroid || Platform.isIOS)
-                  ? null
-                  : (room.messages?.isEmpty ?? true)
-                      ? null
-                      : ({types.PartialText? text}) async {
-                          final result = await ImagePicker()
-                              .pickImage(source: ImageSource.camera);
-
-                          if (result != null) {
-                            File file = File(result.path);
-
-                            if (!context.mounted) return;
-                            showModalBottomSheet(
-                              context: context,
-                              useSafeArea: true,
-                              isScrollControlled: true,
-                              builder: (context) {
-                                final dialog = _SendFileDialog(
-                                  file,
-                                  room: room,
-                                  partialMessage: text?.text,
-                                  onSendPressed: (description) {
-                                    final worker = ref.read(qaulWorkerProvider);
-                                    worker.sendFile(
-                                      pathName: file.path,
-                                      conversationId: room.conversationId,
-                                      description: description.text,
-                                    );
-                                  },
-                                );
-                                if (!Platform.isIOS) {
-                                  return dialog;
-                                }
-
-                                final bottomPadding =
-                                    MediaQuery.of(context).viewInsets.bottom;
-                                return SingleChildScrollView(
-                                  child: Container(
-                                    padding: EdgeInsets.only(
-                                      bottom: bottomPadding,
-                                    ),
-                                    child: dialog,
-                                  ),
-                                );
-                              },
-                            );
-                          }
-                        },
-              // the record package is not supported on Linux
-              onSendAudioPressed: Platform.isLinux
-                  ? null
-                  : (room.messages?.isEmpty ?? true)
-                      ? null
-                      : ({types.PartialText? text}) async {
-                          // ignore: use_build_context_synchronously
-                          if (!context.mounted) return;
-                          showModalBottomSheet(
-                            context: context,
-                            enableDrag: false,
-                            isDismissible: false,
-                            builder: (_) {
-                              return _RecordAudioDialog(
-                                room: room,
-                                partialMessage: text?.text,
-                                onSendPressed: (file, description) {
-                                  final worker = ref.read(qaulWorkerProvider);
-                                  worker.sendFile(
-                                    pathName: file.path,
-                                    conversationId: room.conversationId,
-                                    description: description.text,
-                                  );
-                                },
+                      if (!context.mounted) return;
+                      showModalBottomSheet(
+                        context: context,
+                        useSafeArea: true,
+                        isScrollControlled: true,
+                        builder: (context) {
+                          final dialog = _SendFileDialog(
+                            file,
+                            room: room,
+                            partialMessage: text?.text,
+                            onSendPressed: (description) {
+                              final worker = ref.read(qaulWorkerProvider);
+                              worker.sendFile(
+                                pathName: file.path,
+                                conversationId: room.conversationId,
+                                description: description.text,
                               );
                             },
                           );
+                          if (!Platform.isIOS) {
+                            return dialog;
+                          }
+
+                          final bottomPadding = MediaQuery.of(
+                            context,
+                          ).viewInsets.bottom;
+                          return SingleChildScrollView(
+                            child: Container(
+                              padding: EdgeInsets.only(bottom: bottomPadding),
+                              child: dialog,
+                            ),
+                          );
                         },
-            ),
-            onMessageTap: (context, message) async {
-              if (message is! types.FileMessage || _isReceivingFile(message)) {
+                      );
+                    }
+                  },
+            onPickImagePressed: !(Platform.isAndroid || Platform.isIOS)
+                ? null
+                : (room.messages?.isEmpty ?? true)
+                ? null
+                : ({types.PartialText? text}) async {
+                    final result = await ImagePicker().pickImage(
+                      source: ImageSource.camera,
+                    );
+
+                    if (result != null) {
+                      File file = File(result.path);
+
+                      if (!context.mounted) return;
+                      showModalBottomSheet(
+                        context: context,
+                        useSafeArea: true,
+                        isScrollControlled: true,
+                        builder: (context) {
+                          final dialog = _SendFileDialog(
+                            file,
+                            room: room,
+                            partialMessage: text?.text,
+                            onSendPressed: (description) {
+                              final worker = ref.read(qaulWorkerProvider);
+                              worker.sendFile(
+                                pathName: file.path,
+                                conversationId: room.conversationId,
+                                description: description.text,
+                              );
+                            },
+                          );
+                          if (!Platform.isIOS) {
+                            return dialog;
+                          }
+
+                          final bottomPadding = MediaQuery.of(
+                            context,
+                          ).viewInsets.bottom;
+                          return SingleChildScrollView(
+                            child: Container(
+                              padding: EdgeInsets.only(bottom: bottomPadding),
+                              child: dialog,
+                            ),
+                          );
+                        },
+                      );
+                    }
+                  },
+            // the record package is not supported on Linux
+            onSendAudioPressed: Platform.isLinux
+                ? null
+                : (room.messages?.isEmpty ?? true)
+                ? null
+                : ({types.PartialText? text}) async {
+                    // ignore: use_build_context_synchronously
+                    if (!context.mounted) return;
+                    showModalBottomSheet(
+                      context: context,
+                      enableDrag: false,
+                      isDismissible: false,
+                      builder: (_) {
+                        return _RecordAudioDialog(
+                          room: room,
+                          partialMessage: text?.text,
+                          onSendPressed: (file, description) {
+                            final worker = ref.read(qaulWorkerProvider);
+                            worker.sendFile(
+                              pathName: file.path,
+                              conversationId: room.conversationId,
+                              description: description.text,
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+          ),
+          onMessageTap: (context, message) async {
+            if (message is! types.FileMessage || _isReceivingFile(message)) {
+              return;
+            }
+            if (Platform.isIOS || Platform.isAndroid) {
+              OpenFilex.open(message.uri);
+              return;
+            }
+
+            final file = Uri.file(message.uri);
+
+            final parentDirectory = File.fromUri(file).parent.uri;
+
+            for (final uri in [file, parentDirectory]) {
+              if (await canLaunchUrl(uri)) {
+                launchUrl(uri);
                 return;
               }
-              if (Platform.isIOS || Platform.isAndroid) {
-                OpenFilex.open(message.uri);
-                return;
-              }
+            }
+          },
+          textMessageBuilder:
+              (message, {required int messageWidth, required bool showName}) {
+                final msgIdx = room.messages!.indexWhere(
+                  (element) => element.messageIdBase58 == message.id,
+                );
 
-              final file = Uri.file(message.uri);
-
-              final parentDirectory = File.fromUri(file).parent.uri;
-
-              for (final uri in [file, parentDirectory]) {
-                if (await canLaunchUrl(uri)) {
-                  launchUrl(uri);
-                  return;
+                var prevMsgWasFromSamePerson = false;
+                if (msgIdx > 0) {
+                  final prevMsg = room.messages![msgIdx - 1];
+                  prevMsgWasFromSamePerson =
+                      prevMsg.content is TextMessageContent &&
+                      prevMsg.senderIdBase58 == message.author.id;
                 }
-              }
-            },
-            textMessageBuilder: (message,
-                {required int messageWidth, required bool showName}) {
-              final msgIdx = room.messages!.indexWhere(
-                  (element) => element.messageIdBase58 == message.id);
 
-              var prevMsgWasFromSamePerson = false;
-              if (msgIdx > 0) {
-                final prevMsg = room.messages![msgIdx - 1];
-                prevMsgWasFromSamePerson =
-                    prevMsg.content is TextMessageContent &&
-                        prevMsg.senderIdBase58 == message.author.id;
-              }
-
-              return TextMessage(
-                message: message,
-                usePreviewData: true,
-                hideBackgroundOnEmojiMessages: true,
-                showName: showName && !prevMsgWasFromSamePerson,
-                emojiEnlargementBehavior: EmojiEnlargementBehavior.multi,
-                nameBuilder: (usr) {
-                  var user = room.members
-                      .firstWhereOrNull((u) => usr.id == u.idBase58);
-                  if (user == null) return const SizedBox();
-                  final color = colorGenerationStrategy(user.idBase58);
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 4.0),
-                    child: Text(
-                      user.name,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: color,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
-            fileMessageBuilder: (message, {required int messageWidth}) {
-              return SizedBox(
-                width: messageWidth.toDouble(),
-                child: FileMessageWidget(
+                return TextMessage(
                   message: message,
-                  isDefaultUser: message.author.id == user.idBase58,
-                ),
-              );
-            },
-            imageMessageBuilder: (message, {required int messageWidth}) {
-              return ImageMessageWidget(
+                  usePreviewData: true,
+                  hideBackgroundOnEmojiMessages: true,
+                  showName: showName && !prevMsgWasFromSamePerson,
+                  emojiEnlargementBehavior: EmojiEnlargementBehavior.multi,
+                  nameBuilder: (usr) {
+                    var user = room.members.firstWhereOrNull(
+                      (u) => usr.id == u.idBase58,
+                    );
+                    if (user == null) return const SizedBox();
+                    final color = colorGenerationStrategy(user.idBase58);
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 4.0),
+                      child: Text(
+                        user.name,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: color,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+          fileMessageBuilder: (message, {required int messageWidth}) {
+            return SizedBox(
+              width: messageWidth.toDouble(),
+              child: FileMessageWidget(
                 message: message,
-                messageWidth: messageWidth,
                 isDefaultUser: message.author.id == user.idBase58,
-              );
-            },
-            audioMessageBuilder: (message, {required int messageWidth}) {
-              return AudioMessageWidget(
-                message: message,
-                messageWidth: messageWidth,
-                isDefaultUser: message.author.id == user.idBase58,
-              );
-            },
-            theme: DefaultChatTheme(
-              userAvatarNameColors: [
-                colorGenerationStrategy(
-                    directPeer?.idBase58 ?? room.idBase58),
-              ],
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              sentMessageBodyTextStyle: const TextStyle(
-                fontSize: 17,
-                color: Colors.white,
               ),
-              receivedMessageBodyTextStyle: const TextStyle(
-                fontSize: 17,
-                color: Colors.black,
-              ),
+            );
+          },
+          imageMessageBuilder: (message, {required int messageWidth}) {
+            return ImageMessageWidget(
+              message: message,
+              messageWidth: messageWidth,
+              isDefaultUser: message.author.id == user.idBase58,
+            );
+          },
+          audioMessageBuilder: (message, {required int messageWidth}) {
+            return AudioMessageWidget(
+              message: message,
+              messageWidth: messageWidth,
+              isDefaultUser: message.author.id == user.idBase58,
+            );
+          },
+          theme: DefaultChatTheme(
+            userAvatarNameColors: [
+              colorGenerationStrategy(directPeer?.idBase58 ?? room.idBase58),
+            ],
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            sentMessageBodyTextStyle: const TextStyle(
+              fontSize: 17,
+              color: Colors.white,
+            ),
+            receivedMessageBodyTextStyle: const TextStyle(
+              fontSize: 17,
+              color: Colors.black,
             ),
           ),
         ),
@@ -566,12 +563,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         User(name: l10n.unknown, id: e.senderId);
   }
 
-  List<types.Message>? messages(ChatRoom room,
-      {required AppLocalizations l10n}) {
+  List<types.Message>? messages(
+    ChatRoom room, {
+    required AppLocalizations l10n,
+  }) {
     return room.messages
         ?.sorted()
-        .map((e) =>
-            e.toInternalMessage(_author(e, l10n), ref, l10n: l10n, room: room))
+        .map(
+          (e) => e.toInternalMessage(
+            _author(e, l10n),
+            ref,
+            l10n: l10n,
+            room: room,
+          ),
+        )
         .toList();
   }
 
@@ -586,34 +591,40 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         padding: const EdgeInsets.fromLTRB(0, 4, 0, 6),
         margin: const EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey, width: 0.5),
-            borderRadius: const BorderRadius.all(Radius.circular(20))),
+          border: Border.all(color: Colors.grey, width: 0.5),
+          borderRadius: const BorderRadius.all(Radius.circular(20)),
+        ),
         child: child,
       );
     }
 
     const radius = 20.0;
 
-    return Builder(builder: (context) {
-      return Bubble(
-        elevation: 0,
-        nipRadius: 0,
-        nipWidth: 0.1,
-        nipHeight: radius,
-        radius: const Radius.circular(radius),
-        padding: EdgeInsets.zero,
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        color: user.toInternalUser().id != message.author.id
-            ? Colors.grey.shade200
-            : Colors.lightBlue.shade700,
-        nip: nextMessageInGroup
-            ? BubbleNip.no
-            : user.toInternalUser().id != message.author.id
-                ? BubbleNip.leftBottom
-                : BubbleNip.rightBottom,
-        child: ClipRRect(borderRadius: BorderRadius.circular(20), child: child),
-      );
-    });
+    return Builder(
+      builder: (context) {
+        return Bubble(
+          elevation: 0,
+          nipRadius: 0,
+          nipWidth: 0.1,
+          nipHeight: radius,
+          radius: const Radius.circular(radius),
+          padding: EdgeInsets.zero,
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          color: user.toInternalUser().id != message.author.id
+              ? Colors.grey.shade200
+              : Colors.lightBlue.shade700,
+          nip: nextMessageInGroup
+              ? BubbleNip.no
+              : user.toInternalUser().id != message.author.id
+              ? BubbleNip.leftBottom
+              : BubbleNip.rightBottom,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: child,
+          ),
+        );
+      },
+    );
   }
 
   bool _isReceivingFile(types.FileMessage message) {
@@ -637,14 +648,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 }
 
 extension _MessageExtension on Message {
-  types.Message toInternalMessage(User author, WidgetRef ref,
-      {required AppLocalizations l10n, ChatRoom? room}) {
+  types.Message toInternalMessage(
+    User author,
+    WidgetRef ref, {
+    required AppLocalizations l10n,
+    ChatRoom? room,
+  }) {
     var mappedState = status == MessageState.sent
         ? types.Status.sent
         : status == MessageState.confirmedByAll ||
-                status == MessageState.confirmed
-            ? types.Status.seen
-            : null;
+              status == MessageState.confirmed
+        ? types.Status.seen
+        : null;
 
     if (content is TextMessageContent) {
       return types.TextMessage(

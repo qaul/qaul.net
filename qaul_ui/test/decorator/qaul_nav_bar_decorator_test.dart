@@ -49,6 +49,92 @@ void main() {
     );
   }
 
+  Widget buildDecoratorWithPadding({
+    required EdgeInsets systemPadding,
+    required Size size,
+    void Function(EdgeInsets childPadding)? onChildBuilt,
+  }) {
+    return ProviderScope(
+      overrides: [
+        defaultUserProvider.overrideWith((_) => testUser),
+        publicNotificationControllerProvider.overrideWith(
+          (ref) => StubPublicNotificationController(ref),
+        ),
+        chatNotificationControllerProvider.overrideWith(
+          (ref) => StubChatNotificationController(ref),
+        ),
+      ],
+      child: MediaQuery(
+        data: MediaQueryData(size: size, padding: systemPadding),
+        child: MaterialApp(
+          theme: QaulApp.lightTheme,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          builder: (context, child) => child!,
+          home: Material(
+            child: QaulNavBarDecorator(
+              child: (pageViewKey) => Builder(
+                builder: (context) {
+                  onChildBuilt?.call(MediaQuery.paddingOf(context));
+                  return SizedBox(key: pageViewKey);
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  group('tablet layout SafeArea', () {
+    testWidgets('has SafeArea with left:false and bottom:false',
+        (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1024, 768));
+      await tester.pumpWidget(buildDecorator());
+
+      final safeAreas = tester.widgetList<SafeArea>(find.byType(SafeArea));
+      final tabletSafeArea = safeAreas.where(
+        (sa) => sa.left == false && sa.bottom == false,
+      );
+      expect(tabletSafeArea, isNotEmpty,
+          reason: 'tablet body should be wrapped in '
+              'SafeArea(left: false, bottom: false)');
+    });
+
+    testWidgets('consumes right system inset for content pane',
+        (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1024, 768));
+
+      EdgeInsets? observed;
+      await tester.pumpWidget(buildDecoratorWithPadding(
+        size: const Size(1024, 768),
+        systemPadding: const EdgeInsets.only(right: 48),
+        onChildBuilt: (p) => observed = p,
+      ));
+
+      expect(observed, isNotNull);
+      expect(observed!.right, 0.0,
+          reason: 'SafeArea should consume the right inset');
+    });
+
+    testWidgets('preserves left padding for descendants (no double-inset)',
+        (tester) async {
+      await tester.binding.setSurfaceSize(const Size(1024, 768));
+
+      EdgeInsets? observed;
+      await tester.pumpWidget(buildDecoratorWithPadding(
+        size: const Size(1024, 768),
+        systemPadding: const EdgeInsets.only(left: 24),
+        onChildBuilt: (p) => observed = p,
+      ));
+
+      expect(observed, isNotNull);
+      expect(observed!.left, 24.0,
+          reason: 'left padding should pass through since '
+              'SafeArea has left:false — navbar handles this edge');
+    });
+  });
+
   group('QaulNavBarDecorator', () {
     testWidgets('composes nav bar and content area', (tester) async {
       await tester.binding.setSurfaceSize(const Size(400, 800));

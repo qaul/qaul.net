@@ -34,11 +34,15 @@ class _QaulNavBarDecoratorState extends State<QaulNavBarDecorator> {
           ],
         ),
       ),
-      tabletBody: Row(
-        children: [
-          const _ConnectedNavBar(vertical: true),
-          Expanded(child: widget.child(_pageViewKey)),
-        ],
+      tabletBody: SafeArea(
+        left: false,
+        bottom: false,
+        child: Row(
+          children: [
+            const _ConnectedNavBar(vertical: true),
+            Expanded(child: widget.child(_pageViewKey)),
+          ],
+        ),
       ),
     );
   }
