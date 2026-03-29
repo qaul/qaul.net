@@ -131,7 +131,7 @@ executors:
         working_directory: ~/qaul.net/qaul_ui
     flutter-android:
         docker:
-            - image: cimg/android:2023.08.1
+            - image: cimg/android:2026.03.1
         environment:
             _JAVA_OPTIONS: -Xmx2048m
             FASTLANE_LANE: upload_beta_playstore
@@ -263,7 +263,7 @@ jobs:
                     curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
                     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
                     sudo apt update
-                    sudo apt install gh unzip
+                    sudo apt install -y gh unzip ninja-build
                 name: Install Github CLI and unzip
             - run:
                 command: |
@@ -363,7 +363,7 @@ jobs:
             - run:
                 command: |
                     sudo apt update && sudo apt install -y snapd
-                    sudo snap install snapcraft --edge --classic
+                    sudo snap install snapcraft --classic
                     sudo snap install lxd
                 name: Install core package dependencies
             - run:
@@ -380,7 +380,7 @@ jobs:
             - run:
                 command: |
                     sudo apt update && sudo apt install -y snapd
-                    sudo snap install snapcraft --edge --classic
+                    sudo snap install snapcraft --classic
                     sudo snap install lxd
                 name: Install core package dependencies
             - run:

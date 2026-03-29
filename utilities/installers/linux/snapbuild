@@ -27,7 +27,7 @@ echo ""
 echo "Building Flutter application..."
 
 lxd init --auto
-snapcraft --use-lxd
+snapcraft pack --use-lxd
 
 FILENAME="qaul-$(uname -m)-$VERSION.snap"
 mv ./*.snap "$FILENAME"

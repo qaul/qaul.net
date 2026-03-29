@@ -5,7 +5,7 @@ steps:
       name: Install core package dependencies
       command: |
         sudo apt update && sudo apt install -y snapd
-        sudo snap install snapcraft --edge --classic
+        sudo snap install snapcraft --classic
         sudo snap install lxd
   - run:
       name: Build Flutter Application for Linux
