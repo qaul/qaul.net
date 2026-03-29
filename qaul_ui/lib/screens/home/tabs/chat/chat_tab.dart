@@ -93,6 +93,7 @@ class _ChatState extends _BaseTabState<_Chat> {
               if (room.isGroupChatRoom) {
                 return QaulListTile.group(
                   room,
+                  unreadCount: room.unreadCount,
                   content: _contentFromOverview(
                     room.lastMessagePreview,
                     theme,
@@ -130,6 +131,7 @@ class _ChatState extends _BaseTabState<_Chat> {
 
               return QaulListTile.user(
                 otherUser,
+                unreadCount: room.unreadCount,
                 content: _contentFromOverview(
                   room.lastMessagePreview,
                   theme,

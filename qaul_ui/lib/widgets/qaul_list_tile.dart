@@ -14,6 +14,7 @@ class QaulListTile extends StatelessWidget {
     this.nameTapRoutesToDetailsScreen = false,
     this.avatarTapRoutesToDetailsScreen = true,
     this.isContentSelectable = false,
+    this.unreadCount,
   })  : assert(trailingIcon == null || trailingMetadata == null),
         assert(user != null || room != null);
 
@@ -30,6 +31,7 @@ class QaulListTile extends StatelessWidget {
     bool nameTapRoutesToDetailsScreen = false,
     bool avatarTapRoutesToDetailsScreen = true,
     bool isContentSelectable = false,
+    int? unreadCount,
   }) {
     return QaulListTile._(
       user: user,
@@ -43,6 +45,7 @@ class QaulListTile extends StatelessWidget {
       avatarTapRoutesToDetailsScreen: avatarTapRoutesToDetailsScreen,
       useUserColorOnName: useUserColorOnName,
       isContentSelectable: isContentSelectable,
+      unreadCount: unreadCount,
     );
   }
 
@@ -55,6 +58,7 @@ class QaulListTile extends StatelessWidget {
     VoidCallback? onTap,
     bool isThreeLine = false,
     bool useUserColorOnName = false,
+    int? unreadCount,
   }) {
     return QaulListTile._(
       room: room,
@@ -66,6 +70,7 @@ class QaulListTile extends StatelessWidget {
       useUserColorOnName: useUserColorOnName,
       tapRoutesToDetailsScreen: false,
       avatarTapRoutesToDetailsScreen: false,
+      unreadCount: unreadCount,
     );
   }
 
@@ -95,6 +100,8 @@ class QaulListTile extends StatelessWidget {
   final bool useUserColorOnName;
 
   final bool isContentSelectable;
+
+  final int? unreadCount;
 
   Color get _userColor => colorGenerationStrategy(user!.idBase58);
 
@@ -140,6 +147,29 @@ class QaulListTile extends StatelessWidget {
 
     if (onAvatarTapFallback != null) {
       leading = GestureDetector(onTap: onAvatarTapFallback, child: leading);
+    }
+
+    final uc = unreadCount;
+    if (uc != null && uc > 0) {
+      final label = uc > 99 ? '99+' : '$uc';
+      leading = Badge(
+        showBadge: true,
+        badgeAnimation: const BadgeAnimation.slide(toAnimate: false),
+        badgeStyle: const BadgeStyle(
+          badgeColor: Colors.lightBlue,
+          elevation: 0,
+        ),
+        badgeContent: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 10,
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        position: BadgePosition.topEnd(top: -4, end: -4),
+        child: leading,
+      );
     }
 
     Widget tileTitle = title;
