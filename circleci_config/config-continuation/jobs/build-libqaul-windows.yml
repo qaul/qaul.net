@@ -29,7 +29,7 @@ steps:
       name: Build dll Libqaul
       no_output_timeout: 30m
       command: |
-        export PATH="/c/Users/circleci/.cargo/bin:/c/Program Files/CMake/bin:$PATH"
+        export PATH="/c/ProgramData/chocolatey/lib/mingw/tools/install/mingw64/bin:/c/Users/circleci/.cargo/bin:/c/Program Files/CMake/bin:$PATH"
         cd rust && cargo build --release
   - run:
       name: zip command-line binaries
