@@ -136,9 +136,8 @@ pub async fn start_server(socket_dir: PathBuf) -> Result<(), Box<dyn std::error:
             fs::remove_file(&socket_path)?;
         }
 
-        fs::set_permissions(&socket_path, Permissions::from_mode(0o666))?;
-
         let listener = UnixListener::bind(&socket_path)?;
+        fs::set_permissions(&socket_path, Permissions::from_mode(0o666))?;
         println!("qauld unix socket server started");
 
         loop {
