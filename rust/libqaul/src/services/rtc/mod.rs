@@ -69,22 +69,40 @@ impl Rtc {
 
     /// get session from session_id
     pub fn get_session_from_id(group_id: &Vec<u8>) -> Option<RtcSession> {
-        let sessions = RTCSESSIONS.get().read().unwrap();
-        if sessions.sessions.contains_key(group_id) {
-            return Some(sessions.sessions.get(group_id).unwrap().clone());
+        let sessions = match RTCSESSIONS.get().read() {
+            Ok(s) => s,
+            Err(e) => {
+                log::error!("Error reading RTC sessions lock: {}", e);
+                return None;
+            }
+        };
+        if let Some(session) = sessions.sessions.get(group_id) {
+            return Some(session.clone());
         }
         None
     }
 
     /// get session from session_id
     pub fn update_session(session: RtcSession) {
-        let mut sessions = RTCSESSIONS.get().write().unwrap();
+        let mut sessions = match RTCSESSIONS.get().write() {
+            Ok(s) => s,
+            Err(e) => {
+                log::error!("Error writing RTC sessions lock: {}", e);
+                return;
+            }
+        };
         sessions.sessions.insert(session.group_id.clone(), session);
     }
 
     /// remove session on the storage
     pub fn remove_session(session_id: &Vec<u8>) {
-        let mut sessions = RTCSESSIONS.get().write().unwrap();
+        let mut sessions = match RTCSESSIONS.get().write() {
+            Ok(s) => s,
+            Err(e) => {
+                log::error!("Error writing RTC sessions lock for removal: {}", e);
+                return;
+            }
+        };
         sessions.sessions.remove(session_id);
     }
 
@@ -195,7 +213,13 @@ impl Rtc {
 
     /// Process incoming RPC request messages
     pub fn rpc(data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
-        let my_user_id = PeerId::from_bytes(&user_id).unwrap();
+        let my_user_id = match PeerId::from_bytes(&user_id) {
+            Ok(id) => id,
+            Err(e) => {
+                log::error!("Error parsing PeerId from bytes in RTC rpc: {}", e);
+                return;
+            }
+        };
 
         match proto_rpc::RtcRpc::decode(&data[..]) {
             Ok(rtc_rpc) => {

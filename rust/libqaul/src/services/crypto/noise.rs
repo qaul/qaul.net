@@ -48,7 +48,13 @@ impl CryptoNoise {
         }
 
         // create crypto state
-        state = Self::create_crypto_state::<D>(true, user_account.clone(), remote_key);
+        state = match Self::create_crypto_state::<D>(true, user_account.clone(), remote_key) {
+            Some(s) => s,
+            None => {
+                log::error!("Failed to create crypto state for handshake 1");
+                return (None, 0, 0);
+            }
+        };
         let session_id = state.session_id;
 
         log::trace!("new session generated with session_id: {}", session_id);
@@ -121,7 +127,13 @@ impl CryptoNoise {
             Some(U8Array::from_slice(state.s.clone().as_slice())),
             Some(e),
             Some(U8Array::from_slice(state.rs.clone().as_slice())),
-            Some(U8Array::from_slice(state.re.clone().unwrap().as_slice())),
+            Some(U8Array::from_slice(match state.re.clone() {
+                Some(re) => re,
+                None => {
+                    log::error!("Missing remote ephemeral key in crypto state");
+                    return (None, 0);
+                }
+            }.as_slice())),
         );
 
         // set message index
@@ -178,8 +190,15 @@ impl CryptoNoise {
         nonce = state.index_nonce_out;
 
         // create cipher
+        let cipher_out = match state.clone().cipher_out {
+            Some(key) => key,
+            None => {
+                log::error!("Missing cipher_out key in transport state");
+                return (None, 0);
+            }
+        };
         let mut cipher: CipherState<C> =
-            CipherState::new(state.clone().cipher_out.unwrap().as_slice(), nonce);
+            CipherState::new(cipher_out.as_slice(), nonce);
 
         // encrypt message
         message = Some(cipher.encrypt_vec(data.as_slice()));
@@ -227,7 +246,13 @@ impl CryptoNoise {
         }
 
         // create initial crypto state
-        state = Self::create_crypto_state::<D>(false, user_account.clone(), remote_key);
+        state = match Self::create_crypto_state::<D>(false, user_account.clone(), remote_key) {
+            Some(s) => s,
+            None => {
+                log::error!("Failed to create crypto state for decryption handshake 1");
+                return None;
+            }
+        };
         // save session_id to state
         state.session_id = session_id;
 
@@ -376,8 +401,15 @@ impl CryptoNoise {
         log::trace!("Decrypting with full encryption");
 
         // create cipher
+        let cipher_in = match state.cipher_in.clone() {
+            Some(key) => key,
+            None => {
+                log::error!("Missing cipher_in key in transport state");
+                return None;
+            }
+        };
         let mut cipher: CipherState<C> =
-            CipherState::new(state.cipher_in.clone().unwrap().as_slice(), nonce);
+            CipherState::new(cipher_in.as_slice(), nonce);
 
         // decrypt message
         match cipher.decrypt_vec(data.as_slice()) {
@@ -402,7 +434,7 @@ impl CryptoNoise {
         initiator: bool,
         user_account: UserAccount,
         remote_key: PublicKey,
-    ) -> CryptoState
+    ) -> Option<CryptoState>
     where
         D: DH,
     {
@@ -411,10 +443,22 @@ impl CryptoNoise {
         let session_id: u32 = rng.random();
 
         // create private key
-        let private_key = Crypto25519::private_key_to_montgomery(user_account.keys).unwrap();
+        let private_key = match Crypto25519::private_key_to_montgomery(user_account.keys) {
+            Some(key) => key,
+            None => {
+                log::error!("Failed to convert private key to montgomery form");
+                return None;
+            }
+        };
 
         // create public key
-        let remote_public_key = Crypto25519::public_key_to_montgomery(remote_key).unwrap();
+        let remote_public_key = match Crypto25519::public_key_to_montgomery(remote_key) {
+            Some(key) => key,
+            None => {
+                log::error!("Failed to convert remote public key to montgomery form");
+                return None;
+            }
+        };
 
         // create new ephemeral key
         let e = D::genkey();
@@ -444,6 +488,6 @@ impl CryptoNoise {
             out_of_order_indexes: false,
         };
 
-        state
+        Some(state)
     }
 }

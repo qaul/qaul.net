@@ -58,6 +58,12 @@ fn main() {
     );
     prost_build.type_attribute("Data", "#[derive(serde::Serialize, serde::Deserialize)]");
 
+    // make DTN V2 messages serializable for sled storage
+    prost_build.type_attribute(
+        "DtnRoutedV2",
+        "#[derive(serde::Serialize, serde::Deserialize)]",
+    );
+
     // compile these protobuf files
     match prost_build.compile_protos(
         &[

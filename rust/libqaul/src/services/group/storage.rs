@@ -56,14 +56,19 @@ impl GroupStorage {
         // check if user account data exists
         {
             // get chat state
-            let group_storage = GROUPSTORAGE.get().read().unwrap();
-
-            // check if user account ID is in map
-            if let Some(group_account_db) = group_storage.db_ref.get(&account_id.to_bytes()) {
-                return GroupAccountDb {
-                    groups: group_account_db.groups.clone(),
-                    invited: group_account_db.invited.clone(),
-                };
+            match GROUPSTORAGE.get().read() {
+                Ok(group_storage) => {
+                    // check if user account ID is in map
+                    if let Some(group_account_db) = group_storage.db_ref.get(&account_id.to_bytes()) {
+                        return GroupAccountDb {
+                            groups: group_account_db.groups.clone(),
+                            invited: group_account_db.invited.clone(),
+                        };
+                    }
+                }
+                Err(e) => {
+                    log::error!("failed to read group storage lock: {}", e);
+                }
             }
         }
 
@@ -90,18 +95,34 @@ impl GroupStorage {
         let db = DataBase::get_user_db(account_id);
 
         // open trees
-        let groups: sled::Tree = db.open_tree("groups").unwrap();
-        let invited: sled::Tree = db.open_tree("invited").unwrap();
+        let groups: sled::Tree = match db.open_tree("groups") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("failed to open groups tree: {}", e);
+                db.open_tree("__fallback_groups").expect("critical: cannot open fallback groups tree")
+            }
+        };
+        let invited: sled::Tree = match db.open_tree("invited") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("failed to open invited tree: {}", e);
+                db.open_tree("__fallback_invited").expect("critical: cannot open fallback invited tree")
+            }
+        };
 
         let group_account_db = GroupAccountDb { groups, invited };
 
         // get group storage for writing
-        let mut group_storage = GROUPSTORAGE.get().write().unwrap();
-
-        // add user to state
-        group_storage
-            .db_ref
-            .insert(account_id.to_bytes(), group_account_db.clone());
+        match GROUPSTORAGE.get().write() {
+            Ok(mut group_storage) => {
+                group_storage
+                    .db_ref
+                    .insert(account_id.to_bytes(), group_account_db.clone());
+            }
+            Err(e) => {
+                log::error!("failed to write group storage lock: {}", e);
+            }
+        }
 
         // return structure
         group_account_db
@@ -115,7 +136,13 @@ impl GroupStorage {
         // get group
         match db_ref.groups.get(group_id) {
             Ok(Some(group_bytes)) => {
-                let group: Group = bincode::deserialize(&group_bytes).unwrap();
+                let group: Group = match bincode::deserialize(&group_bytes) {
+                    Ok(v) => v,
+                    Err(e) => {
+                        log::error!("failed to deserialize group: {}", e);
+                        return None;
+                    }
+                };
                 return Some(group);
             }
             Ok(None) => return None,
@@ -192,7 +219,13 @@ impl GroupStorage {
         let db_ref = Self::get_db_ref(account_id);
 
         // save group in data base
-        let group_bytes = bincode::serialize(&group).unwrap();
+        let group_bytes = match bincode::serialize(&group) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("failed to serialize group: {}", e);
+                return;
+            }
+        };
         if let Err(e) = db_ref.groups.insert(group.id.clone(), group_bytes) {
             log::error!("Error saving group to data base: {}", e);
         }
@@ -283,7 +316,13 @@ impl GroupStorage {
         // get invite
         match db_ref.invited.get(group_id) {
             Ok(Some(invite_bytes)) => {
-                let invite: GroupInvited = bincode::deserialize(&invite_bytes).unwrap();
+                let invite: GroupInvited = match bincode::deserialize(&invite_bytes) {
+                    Ok(v) => v,
+                    Err(e) => {
+                        log::error!("failed to deserialize group invite: {}", e);
+                        return None;
+                    }
+                };
                 return Some(invite);
             }
             Ok(None) => return None,
@@ -312,7 +351,13 @@ impl GroupStorage {
         let db_ref = Self::get_db_ref(account_id);
 
         // save group invite in data base
-        let invite_bytes = bincode::serialize(&invite).unwrap();
+        let invite_bytes = match bincode::serialize(&invite) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("failed to serialize group invite: {}", e);
+                return;
+            }
+        };
         if let Err(e) = db_ref.invited.insert(invite.group.id.clone(), invite_bytes) {
             log::error!("Error saving group invite to data base: {}", e);
         }

@@ -23,7 +23,13 @@ impl NetworkEmulator {
     }
 
     pub fn is_lost() -> bool {
-        let mut state = STATE.get().write().unwrap();
+        let mut state = match STATE.get().write() {
+            Ok(s) => s,
+            Err(e) => {
+                log::error!("Error writing network emulator state lock: {}", e);
+                return false;
+            }
+        };
         state.total_message = state.total_message + 1;
 
         let lost_rate = state.total_drop * 100 / state.total_message;
