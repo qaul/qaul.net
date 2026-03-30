@@ -299,6 +299,16 @@ impl Libqaul {
             qaul_state.filelogger.enable(config.debug.log);
         }
 
+        // Now that real node identity and user accounts are loaded, register
+        // local users in the router's connection table.
+        {
+            let rs = qaul_state.get_router();
+            let node_id = crate::node::Node::get_id(&qaul_state);
+            for user in crate::node::user_accounts::UserAccounts::get_user_info(&qaul_state) {
+                rs.connections.add_local_user(user.id, node_id);
+            }
+        }
+
         // Initialize node global state for backward compatibility.
         // This now delegates to qaul_state.node and saves config if needed.
         Node::init(&qaul_state);
@@ -455,8 +465,8 @@ impl Libqaul {
                 ),
                 log_config.clone(),
             );
-            multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info)
-                .unwrap();
+            // Ignore error if global logger was already set (e.g. multi-instance tests).
+            let _ = multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info);
         }
     }
 
