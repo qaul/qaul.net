@@ -124,6 +124,54 @@ fn test_node_has_topic() {
     assert!(!topic_id.is_empty(), "Topic should not be empty");
 }
 
+/// Regression test: after restart, local users loaded from config must appear
+/// in the router's local connection table.  Without this, the node has no
+/// routes for its own users and is invisible to the network.
+#[test]
+fn test_local_users_in_routing_table_after_restart() {
+    // --- first run: create a user so it gets persisted to config ---
+    let dir = tempfile::TempDir::new().expect("temp dir");
+    let path = dir.path().to_str().unwrap().to_string();
+
+    let user_id = {
+        let instance = futures::executor::block_on(libqaul::start_instance(path.clone(), None));
+        let user = libqaul::node::user_accounts::UserAccounts::create(
+            &*instance.state,
+            "alice".into(),
+            None,
+        );
+        user.id
+    }; // first instance dropped, database released
+
+    // --- second run: simulate restart with the same storage path ---
+    let instance = futures::executor::block_on(libqaul::start_instance(path, None));
+
+    // user accounts should have been loaded from the saved config
+    {
+        let users = instance.state.user_accounts.inner.read().unwrap();
+        assert_eq!(
+            users.users.len(),
+            1,
+            "There should be exactly one user account after restart"
+        );
+    }
+
+    // The local routing table must contain the user – this is the actual bug check.
+    let router = instance.state.get_router();
+    let local = router.connections.local.read().unwrap();
+    assert!(
+        !local.table.is_empty(),
+        "Local connection table must not be empty after restart (routing broken)"
+    );
+
+    // Verify the specific user is present
+    let user_q8id = libqaul::utilities::qaul_id::QaulId::to_q8id(user_id);
+    assert!(
+        local.table.contains_key(&user_q8id),
+        "Local connection table must contain the restarted user's q8id"
+    );
+}
+
 #[test]
 fn test_config_node_marked_initialized() {
     let (_, dir) = &*INSTANCE;
