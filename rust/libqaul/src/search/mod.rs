@@ -71,6 +71,10 @@ pub struct Search {
     // avoiding repeated string-based lookups into the schema.
     id_field: Field,
     content_field: Field,
+
+    // True if this index was freshly created (not opened from an existing directory).
+    // Callers use this to decide whether a batch backfill of existing data is needed.
+    is_fresh: bool,
 }
 
 impl Search {
@@ -94,9 +98,11 @@ impl Search {
         std::fs::create_dir_all(index_path)?;
 
         // create (or open, if existing) the Index for the corresponding Schema in the provided path
-        let index = match Index::create_in_dir(index_path, schema.clone()) {
-            Ok(index) => index,
-            Err(tantivy::TantivyError::IndexAlreadyExists) => Index::open_in_dir(index_path)?,
+        let (index, is_fresh) = match Index::create_in_dir(index_path, schema.clone()) {
+            Ok(index) => (index, true),
+            Err(tantivy::TantivyError::IndexAlreadyExists) => {
+                (Index::open_in_dir(index_path)?, false)
+            }
             Err(e) => return Err(e.into()),
         };
 
@@ -114,15 +120,23 @@ impl Search {
         //   "There must be only one writer at a time. This single IndexWriter is already multithreaded."
         //
         // That is why we keep it persistent per instance of Search, initializing it
-        // with a 50Mb memory_arena budget (also suggested by the docs).
-        let writer: IndexWriter = index.writer(50_000_000)?;
+        // with a 15Mb memory_arena budget (suitable for mobile).
+        let writer: IndexWriter = index.writer(15_000_000)?;
 
         Ok(Self {
             writer,
             reader,
             id_field,
             content_field,
+            is_fresh,
         })
+    }
+
+    /// Returns `true` if this index was freshly created (not opened from an existing directory).
+    ///
+    /// Callers use this to decide whether a batch backfill of existing data is needed.
+    pub fn is_fresh(&self) -> bool {
+        self.is_fresh
     }
 
     /// Stages a single document for indexing, deduplicating by ID.
@@ -176,6 +190,7 @@ impl Search {
     ///
     /// Note: Unlike `index` and `index_many`, this commits on its own.
     /// It's NOT designed to be called inside a batch operation.
+    #[allow(dead_code)]
     pub fn remove(&mut self, id: &str) -> Result<(), SearchError> {
         self.delete_id(id);
         self.commit()?;
