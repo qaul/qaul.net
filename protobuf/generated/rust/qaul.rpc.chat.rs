@@ -3,7 +3,7 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Chat {
     /// message type
-    #[prost(oneof = "chat::Message", tags = "3, 4, 5")]
+    #[prost(oneof = "chat::Message", tags = "3, 4, 5, 6, 7")]
     pub message: ::core::option::Option<chat::Message>,
 }
 /// Nested message and enum types in `Chat`.
@@ -20,6 +20,12 @@ pub mod chat {
         /// send a new chat message
         #[prost(message, tag = "5")]
         Send(super::ChatMessageSend),
+        /// search chat messages
+        #[prost(message, tag = "6")]
+        SearchRequest(super::ChatSearchRequest),
+        /// search results
+        #[prost(message, tag = "7")]
+        SearchResult(super::ChatSearchResult),
     }
 }
 /// request messages of a specific chat conversation
@@ -147,6 +153,42 @@ pub struct GroupEvent {
     /// user ID of user joined or left
     #[prost(bytes = "vec", tag = "2")]
     pub user_id: ::prost::alloc::vec::Vec<u8>,
+}
+/// search chat messages request
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct ChatSearchRequest {
+    /// search query string
+    #[prost(string, tag = "1")]
+    pub query: ::prost::alloc::string::String,
+}
+/// search results
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ChatSearchResult {
+    /// the query that produced these results
+    #[prost(string, tag = "1")]
+    pub query: ::prost::alloc::string::String,
+    /// matching messages
+    #[prost(message, repeated, tag = "2")]
+    pub items: ::prost::alloc::vec::Vec<ChatSearchResultItem>,
+}
+/// a single search result item
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct ChatSearchResultItem {
+    /// message id
+    #[prost(bytes = "vec", tag = "1")]
+    pub message_id: ::prost::alloc::vec::Vec<u8>,
+    /// group id of the conversation
+    #[prost(bytes = "vec", tag = "2")]
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
+    /// sender id
+    #[prost(bytes = "vec", tag = "3")]
+    pub sender_id: ::prost::alloc::vec::Vec<u8>,
+    /// message text content
+    #[prost(string, tag = "4")]
+    pub content: ::prost::alloc::string::String,
+    /// time when the message was sent
+    #[prost(uint64, tag = "5")]
+    pub sent_at: u64,
 }
 /// send chat message
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
