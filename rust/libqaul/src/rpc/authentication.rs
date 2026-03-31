@@ -199,6 +199,18 @@ impl Authentication {
         authenticated.remove(&qaul_id.to_bytes());
     }
 
+    /// Logout a user if the authentication system has been initialized.
+    /// Returns false if the auth system was not initialized (no-op).
+    pub fn try_logout(qaul_id: PeerId) -> bool {
+        if let Some(lock) = AUTHENTICATED_USERS.try_get() {
+            let mut authenticated = lock.write().unwrap();
+            authenticated.remove(&qaul_id.to_bytes());
+            true
+        } else {
+            false
+        }
+    }
+
     /// Remove expired challenges from the active challenges map
     fn cleanup_expired_challenge(challenges: &mut BTreeMap<Vec<u8>, AuthChallenge>, now: u64) {
         challenges.retain(|_, challenge| now < challenge.expires_at);
