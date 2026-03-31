@@ -37,11 +37,6 @@ pub async fn is_ble_enabled() -> bool {
 
 /// Start the setup and main loop of this library
 async fn main_loop(mut sys_rpc_callback: Box<dyn FnMut(Vec<u8>) + Send>, ble_rpc_receiver: BleRpc) {
-    let ble_service = IdleBleService::new().await.unwrap_or_else(|err| {
-        error!("{:#?}", err);
-        std::process::exit(1);
-    });
-
     let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<Vec<u8>>();
 
     tokio::task::spawn_local(async move {
@@ -50,7 +45,7 @@ async fn main_loop(mut sys_rpc_callback: Box<dyn FnMut(Vec<u8>) + Send>, ble_rpc
         }
     });
 
-    listen_for_sys_msgs(ble_rpc_receiver, ble_service, BleResultSender::new(tx))
+    listen_for_sys_msgs(ble_rpc_receiver, BleResultSender::new(tx))
         .await
         .unwrap_or_else(|err| {
             error!("{:#?}", err);

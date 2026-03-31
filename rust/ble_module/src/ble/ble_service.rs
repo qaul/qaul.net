@@ -61,17 +61,20 @@ enum BleMainLoopEvent {
 }
 
 impl IdleBleService {
-    /// Initialize a new BleService.    
+    /// Initialize a new BleService with a specific BLE device.
     ///
-    /// Gets default Bluetooth adapter and initializes a Bluer session
-    pub async fn new() -> Result<QaulBleService, Box<dyn Error>> {
+    /// Finds the Bluetooth adapter matching `device_id` and initializes a Bluer session.
+    /// Returns an error if no adapter with the given ID is found.
+    pub async fn new(device_id: &str) -> Result<QaulBleService, Box<dyn Error>> {
         let session = bluer::Session::new().await?;
         let agent = bluer::agent::Agent {
             request_default: false,
             ..Default::default()
         };
         let _ = session.register_agent(agent).await?;
-        let adapter = session.default_adapter().await?;
+
+        // Find the adapter matching the requested device_id
+        let adapter = Self::find_adapter_by_id(&session, device_id).await?;
         adapter.set_powered(true).await?;
         Ok(QaulBleService::Idle(IdleBleService {
             ble_handles: vec![],
@@ -80,6 +83,28 @@ impl IdleBleService {
             device_block_list: vec![],
             address_lookup: RefCell::new(HashMap::new()),
         }))
+    }
+
+    /// Find a Bluetooth adapter whose address matches `device_id`.
+    /// Falls back to the default adapter if `device_id` is empty.
+    async fn find_adapter_by_id(
+        session: &Session,
+        device_id: &str,
+    ) -> Result<Adapter, Box<dyn Error>> {
+        if device_id.is_empty() {
+            return Ok(session.default_adapter().await?);
+        }
+
+        let adapter_names = session.adapter_names().await?;
+        for name in &adapter_names {
+            let adapter = session.adapter(name)?;
+            let addr = format!("{}", adapter.address().await?);
+            if addr == device_id {
+                return Ok(adapter);
+            }
+        }
+
+        Err(format!("BLE device with ID '{}' not found", device_id).into())
     }
 
     /// Starts BLE advertisement, scan, and listen.
@@ -250,7 +275,7 @@ impl IdleBleService {
                 self.adapter.clone()
             });
 
-            // Set up discovery filter and start streaming the discovered devices adn out of range checker.
+            // Set up discovery filter and start streaming the discovered devices and out of range checker.
             let _ = adapter.set_discovery_filter(get_filter()).await;
             let mut device_result_sender = internal_sender.clone();
             let device_stream = match adapter.discover_devices().await {
@@ -534,7 +559,7 @@ impl IdleBleService {
         Ok(msg_receivers)
     }
 
-    /// Async message listner which is spawned every time a new device tries to write to the msg_char().
+    /// Async message listener which is spawned every time a new device tries to write to the msg_char().
     /// The messages are streamed in chunks of 40 or less bytes.
     /// The function handles maintains a message map for each nearby users to separate sending queues.
     async fn spawn_msg_listener(
@@ -784,11 +809,21 @@ impl IdleBleService {
 
     /// Check if bluetooth is powered on by the device.
     pub async fn is_ble_enabled() -> bool {
-        let session = bluer::Session::new().await.unwrap();
-        let adapter = session.default_adapter().await.unwrap();
-        let ble_enabled: bool = adapter.is_powered().await.unwrap();
-        drop(session);
-        return ble_enabled;
+        let session = match bluer::Session::new().await {
+            Ok(s) => s,
+            Err(e) => {
+                log::warn!("Failed to create BLE session: {}", e);
+                return false;
+            }
+        };
+        let adapter = match session.default_adapter().await {
+            Ok(a) => a,
+            Err(e) => {
+                log::warn!("No default BLE adapter found: {}", e);
+                return false;
+            }
+        };
+        adapter.is_powered().await.unwrap_or(false)
     }
 }
 
@@ -808,35 +843,44 @@ impl StartedBleService {
 
 pub async fn get_device_info() -> Result<BleInfoResponse, Box<dyn Error>> {
     let session = bluer::Session::new().await?;
-    let adapter = session.default_adapter().await?;
-    let has_multiple_adv_support = adapter
-        .supported_advertising_features()
-        .await?
-        .map_or(false, |feats| {
-            feats.contains(&bluer::adv::PlatformFeature::HardwareOffload)
-        });
-    let max_adv_length = adapter
-        .supported_advertising_capabilities()
-        .await?
-        .map(|caps| caps.max_advertisement_length)
-        .unwrap_or(30);
-    let this_device = BleDeviceInfo {
-        ble_support: true,
-        id: format!("{}", adapter.address().await?),
-        name: adapter.name().into(),
-        bluetooth_on: adapter.is_powered().await?,
-        adv_extended: max_adv_length > 31,
-        adv_extended_bytes: max_adv_length as u32,
-        le_2m: false,                   // TODO: provide actual value
-        le_coded: false,                // TODO: provide actual value
-        le_audio: false,                // TODO: provide actual value
-        le_periodic_adv_support: false, // TODO: provide actual value
-        le_multiple_adv_support: has_multiple_adv_support,
-        offload_filter_support: false, // TODO: provide actual value
-        offload_scan_batching_support: false, // TODO: provide actual value
-    };
+    let adapter_names = session.adapter_names().await?;
+    let mut devices = Vec::new();
+
+    for adapter_name in adapter_names {
+        let adapter = session.adapter(&adapter_name)?;
+        let has_multiple_adv_support = adapter
+            .supported_advertising_features()
+            .await?
+            .map_or(false, |feats| {
+                feats.contains(&bluer::adv::PlatformFeature::HardwareOffload)
+            });
+        let max_adv_length = adapter
+            .supported_advertising_capabilities()
+            .await?
+            .map(|caps| caps.max_advertisement_length)
+            .unwrap_or(30);
+        let device_info = BleDeviceInfo {
+            ble_support: true,
+            id: format!("{}", adapter.address().await?),
+            name: adapter.name().into(),
+            bluetooth_on: adapter.is_powered().await?,
+            adv_extended: max_adv_length > 31,
+            adv_extended_bytes: max_adv_length as u32,
+            le_2m: false,                   // TODO: provide actual value
+            le_coded: false,                // TODO: provide actual value
+            le_audio: false,                // TODO: provide actual value
+            le_periodic_adv_support: false, // TODO: provide actual value
+            le_multiple_adv_support: has_multiple_adv_support,
+            offload_filter_support: false, // TODO: provide actual value
+            offload_scan_batching_support: false, // TODO: provide actual value
+        };
+        devices.push(device_info);
+    }
+
+    #[allow(deprecated)]
     let response = BleInfoResponse {
-        device: Some(this_device),
+        device: None,
+        devices,
     };
     Ok(response)
 }
