@@ -10,6 +10,7 @@ use prost::Message;
 
 pub mod file;
 pub mod message;
+pub mod search;
 pub mod storage;
 
 use crate::connections::{internet::Internet, lan::Lan};
@@ -17,6 +18,7 @@ use crate::node::user_accounts::UserAccounts;
 use crate::rpc::Rpc;
 pub use file::ChatFile;
 pub use message::ChatMessage;
+pub use search::ChatSearch;
 pub use storage::ChatStorage;
 
 /// Import protobuf message definition
@@ -33,6 +35,9 @@ impl Chat {
 
         // initialize the chat file management
         ChatFile::init();
+
+        // initialize the chat search indexes
+        ChatSearch::init();
     }
 
     /// Generate a Chat Message ID
@@ -126,6 +131,40 @@ impl Chat {
                         ) {
                             log::error!("Outgoing chat message error: {}", error)
                         }
+                    }
+                    Some(rpc_proto::chat::Message::SearchRequest(search_request)) => {
+                        let results = ChatSearch::search(&account_id, &search_request.query);
+
+                        let items: Vec<rpc_proto::ChatSearchResultItem> = results
+                            .into_iter()
+                            .map(|r| rpc_proto::ChatSearchResultItem {
+                                message_id: r.message_id,
+                                group_id: r.group_id,
+                                sender_id: r.sender_id,
+                                content: r.content,
+                                sent_at: r.sent_at,
+                            })
+                            .collect();
+
+                        let proto_message = rpc_proto::Chat {
+                            message: Some(rpc_proto::chat::Message::SearchResult(
+                                rpc_proto::ChatSearchResult {
+                                    query: search_request.query,
+                                    items,
+                                },
+                            )),
+                        };
+
+                        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+                        proto_message
+                            .encode(&mut buf)
+                            .expect("Vec<u8> provides capacity as needed");
+                        Rpc::send_message(
+                            buf,
+                            crate::rpc::proto::Modules::Chat.into(),
+                            request_id,
+                            Vec::new(),
+                        );
                     }
                     _ => {
                         log::error!("Unhandled Protobuf Chat Message");

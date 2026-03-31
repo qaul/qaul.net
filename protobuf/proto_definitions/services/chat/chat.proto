@@ -12,6 +12,11 @@ message Chat {
 
         // send a new chat message
         ChatMessageSend send = 5;
+
+        // search chat messages
+        ChatSearchRequest search_request = 6;
+        // search results
+        ChatSearchResult search_result = 7;
     }
 }
 
@@ -153,6 +158,34 @@ enum GroupEventType {
     // the group update from the administrator yet,
     // and are therefore not yet an official member of the group.
     INVITE_ACCEPTED = 7;
+}
+
+// search chat messages request
+message ChatSearchRequest {
+    // search query string
+    string query = 1;
+}
+
+// search results
+message ChatSearchResult {
+    // the query that produced these results
+    string query = 1;
+    // matching messages
+    repeated ChatSearchResultItem items = 2;
+}
+
+// a single search result item
+message ChatSearchResultItem {
+    // message id
+    bytes message_id = 1;
+    // group id of the conversation
+    bytes group_id = 2;
+    // sender id
+    bytes sender_id = 3;
+    // message text content
+    string content = 4;
+    // time when the message was sent
+    uint64 sent_at = 5;
 }
 
 // send chat message
