@@ -653,7 +653,7 @@ impl ChatFile {
         );
 
         // 2. file data message
-        // read file contents and create and send FileData messages
+        // read file contents and create and send FileData messages in a blocking thread
 
         let user_account_clone = user_account.clone();
 
