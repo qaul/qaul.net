@@ -169,8 +169,6 @@ impl Ble {
             ble.devices = Vec::new();
         }
 
-        #[cfg(feature = "ble-encryption")]
-        BleCrypto::init();
         #[cfg(not(feature = "ble-encryption"))]
         log::info!("BLE transport encryption disabled (feature `ble-encryption`)");
 
@@ -270,7 +268,7 @@ impl Ble {
 
         let qaul_id;
         {
-            let ble = state.connections.ble.inner.write().unwrap();
+            let ble = state.connections.ble.inner.read().unwrap();
             qaul_id = ble.ble_id.clone();
         }
 

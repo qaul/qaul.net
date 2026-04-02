@@ -705,16 +705,13 @@ impl Libqaul {
     }
 
     /// Handle a single event from the event loop.
-    ///
-    /// Uses `self.state.*` instance methods instead of global statics where possible.
-    /// Some handlers still delegate to global static methods when the underlying
-    /// module has deep cross-cutting global dependencies (e.g., `RouterInfo::create()`).
     async fn handle_event(
         &self,
         event: EventType,
         lan: &mut connections::lan::Lan,
         internet: &mut connections::internet::Internet,
     ) {
+        // Reuse the router snapshot taken in event_loop() instead of cloning the Arc again.
         let router = self.state.get_router();
         match event {
             EventType::Rpc => {

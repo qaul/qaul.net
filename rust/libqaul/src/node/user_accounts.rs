@@ -125,11 +125,6 @@ impl UserAccounts {
         self.users.iter().find(|u| u.id == account_id).cloned()
     }
 
-    /// Get user account by name (inner logic).
-    pub fn get_by_name_inner(&self, name: &str) -> Option<UserAccount> {
-        self.users.iter().find(|u| u.name == name).cloned()
-    }
-
     /// Get default user account (inner logic).
     pub fn get_default_user_inner(&self) -> Option<UserAccount> {
         self.users.first().cloned()
