@@ -31,52 +31,17 @@ pub struct Users {
 }
 
 /// Instance-based users state for multi-instance / simulation use.
-/// Does not touch the database — purely in-memory.
 pub struct UsersState {
     pub inner: RwLock<Users>,
 }
 
 impl UsersState {
-    /// Create a new empty users state.
     pub fn new() -> Self {
         Self {
             inner: RwLock::new(Users {
                 users: BTreeMap::new(),
             }),
         }
-    }
-
-    /// Add a user to the in-memory table (no database persistence).
-    pub fn add(&self, id: PeerId, key: PublicKey, name: String) {
-        let id_bytes = id.to_bytes();
-        let q8id = id_bytes[6..14].to_vec();
-
-        let mut users = self.inner.write().unwrap();
-        users.users.insert(
-            q8id,
-            User {
-                id,
-                key,
-                name,
-                verified: false,
-                blocked: false,
-            },
-        );
-    }
-
-    /// Check for missed user IDs.
-    pub fn get_missed_ids(&self, ids: &[Vec<u8>]) -> Vec<Vec<u8>> {
-        let users = self.inner.read().unwrap();
-        ids.iter()
-            .filter(|id| !users.users.contains_key(id.as_slice()))
-            .cloned()
-            .collect()
-    }
-
-    /// Get user ID by q8id.
-    pub fn get_user_id_by_q8id(&self, q8id: &[u8]) -> Option<PeerId> {
-        let store = self.inner.read().unwrap();
-        store.users.get(q8id).map(|user| user.id)
     }
 }
 

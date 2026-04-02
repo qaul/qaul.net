@@ -268,40 +268,27 @@ impl MessagingState {
         }
     }
 
-    /// Mark message as scheduled (instance method).
     pub(crate) fn on_scheduled_message(&self, signature: &[u8]) {
-        let unconfirmed = self.unconfirmed.write().unwrap();
-        let Some(unconfirmed_message_bytes) = unconfirmed.unconfirmed.get(signature).unwrap() else {
-            return;
-        };
-        let mut unconfirmed_message: UnConfirmedMessage =
-            bincode::deserialize(&unconfirmed_message_bytes).unwrap();
-        if unconfirmed_message.scheduled {
-            return;
-        }
-        unconfirmed_message.scheduled = true;
-        let unconfirmed_message_todb = bincode::serialize(&unconfirmed_message).unwrap();
-        if let Err(_e) = unconfirmed.unconfirmed.insert(signature.to_vec(), unconfirmed_message_todb) {
-            log::error!("error updating unconfirmed table");
-        } else if let Err(_e) = unconfirmed.unconfirmed.flush() {
-            log::error!("error updating unconfirmed table");
-        }
+        self.mark_unconfirmed(signature, |msg| msg.scheduled = true);
     }
 
-    /// Mark message as scheduled via DTN (instance method).
     pub fn on_scheduled_as_dtn_message(&self, signature: &[u8]) {
+        self.mark_unconfirmed(signature, |msg| msg.scheduled_dtn = true);
+    }
+
+    /// Shared helper: load an unconfirmed message, apply a mutation, persist it back.
+    fn mark_unconfirmed(&self, signature: &[u8], mutate: impl FnOnce(&mut UnConfirmedMessage)) {
         let unconfirmed = self.unconfirmed.write().unwrap();
-        let Some(unconfirmed_message_bytes) = unconfirmed.unconfirmed.get(signature).unwrap() else {
+        let Some(bytes) = unconfirmed.unconfirmed.get(signature).unwrap() else {
             return;
         };
-        let mut unconfirmed_message: UnConfirmedMessage =
-            bincode::deserialize(&unconfirmed_message_bytes).unwrap();
-        if unconfirmed_message.scheduled {
+        let mut msg: UnConfirmedMessage = bincode::deserialize(&bytes).unwrap();
+        if msg.scheduled {
             return;
         }
-        unconfirmed_message.scheduled_dtn = true;
-        let unconfirmed_message_todb = bincode::serialize(&unconfirmed_message).unwrap();
-        if let Err(_e) = unconfirmed.unconfirmed.insert(signature.to_vec(), unconfirmed_message_todb) {
+        mutate(&mut msg);
+        let serialized = bincode::serialize(&msg).unwrap();
+        if let Err(_e) = unconfirmed.unconfirmed.insert(signature.to_vec(), serialized) {
             log::error!("error updating unconfirmed table");
         } else if let Err(_e) = unconfirmed.unconfirmed.flush() {
             log::error!("error updating unconfirmed table");

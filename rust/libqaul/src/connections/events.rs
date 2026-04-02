@@ -65,16 +65,9 @@ pub fn ping_event(state: &crate::QaulState, event: Event, module: ConnectionModu
             let rtt_micros = u32::try_from(
                 duration.as_secs() * 1_000_000 + (duration.subsec_nanos() / 1_000) as u64,
             );
-            match rtt_micros {
-                Ok(micros) => {
-                    let rs = state.get_router();
-                    Neighbours::update_node(&rs, module, peer, micros);
-                },
-                Err(_) => {
-                    let rs = state.get_router();
-                    Neighbours::update_node(&rs, module, peer, 4294967295);
-                },
-            }
+            let rs = state.get_router();
+            let micros = rtt_micros.unwrap_or(u32::MAX);
+            Neighbours::update_node(&rs, module, peer, micros);
         }
         // Event {
         //     peer,
