@@ -545,13 +545,6 @@ fn ble_crypto(state: &crate::QaulState) -> &RwLock<BleCryptoModule> {
 }
 
 impl BleCrypto {
-    /// Initialize the BLE crypto module.
-    ///
-    /// State is now managed by QaulState.connections.ble.crypto,
-    /// so this is a no-op aside from logging.
-    pub fn init() {
-        log::info!("BLE crypto module initialized");
-    }
 
     /// Check if a session is established for the given small_id
     pub fn is_session_established(state: &crate::QaulState, small_id: &[u8]) -> bool {
