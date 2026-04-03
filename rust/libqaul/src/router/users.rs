@@ -128,23 +128,22 @@ impl Users {
         let id_bytes = id.to_bytes();
         let q8id = QaulId::bytes_to_q8id(id_bytes.clone());
 
-        // save user to the data base
         DbUsers::add_user(UserData {
             id: id_bytes,
-            key: key.encode_protobuf(),
-            name: name.clone(),
-            verified,
-            blocked,
-            bio: bio.clone(),
-            avatar: avatar.clone(),
-            version,
-            updated_at,
-            signed_profile_bytes: signed_profile_bytes.clone(),
-            signed_profile_signature: signed_profile_signature.clone(),
+            key: user.key.encode_protobuf(),
+            name: user.name.clone(),
+            verified: user.verified,
+            blocked: user.blocked,
+            bio: user.bio.clone(),
+            avatar: user.avatar.clone(),
+            version: user.version,
+            updated_at: user.updated_at,
+            signed_profile_bytes: user.signed_profile_bytes.clone(),
+            signed_profile_signature: user.signed_profile_signature.clone(),
         });
 
-        // add user to the users table
         let mut users = USERS.get().write().unwrap();
+<<<<<<< HEAD
         if users.users.len() >= 100_000 {
             log::warn!(
                 "users table has reached {} entries; possible resource exhaustion",
@@ -167,6 +166,9 @@ impl Users {
                 signed_profile_signature,
             },
         );
+=======
+        users.users.insert(q8id, user);
+>>>>>>> 3b1cb142 (simplify)
     }
 
     /// add a new user to the users list, and check whether the
@@ -190,8 +192,13 @@ impl Users {
                 return;
             }
         }
-        // add user
-        Self::add(id, key, name, false, false, String::new(), Vec::new(), 0, 0, Vec::new(), Vec::new());
+        Self::add(User {
+            id, key, name,
+            verified: false, blocked: false,
+            bio: String::new(), avatar: Vec::new(),
+            version: 0, updated_at: 0,
+            signed_profile_bytes: Vec::new(), signed_profile_signature: Vec::new(),
+        });
     }
 
     /// check missed users from ids
@@ -221,22 +228,10 @@ impl Users {
         store.users.get(q8id).map(|user| user.key.clone())
     }
 
-    /// get a snapshot of a user by q8id (clones all fields)
+    /// get a snapshot of a user by q8id
     pub fn get_user_snapshot(q8id: &[u8]) -> Option<User> {
         let store = USERS.get().read().unwrap();
-        store.users.get(q8id).map(|u| User {
-            id: u.id,
-            key: u.key.clone(),
-            name: u.name.clone(),
-            verified: u.verified,
-            blocked: u.blocked,
-            bio: u.bio.clone(),
-            avatar: u.avatar.clone(),
-            version: u.version,
-            updated_at: u.updated_at,
-            signed_profile_bytes: u.signed_profile_bytes.clone(),
-            signed_profile_signature: u.signed_profile_signature.clone(),
-        })
+        store.users.get(q8id).cloned()
     }
 
     /// get user by q8id
@@ -319,7 +314,16 @@ impl Users {
         };
 
         let profile_bytes = profile.encode_to_vec();
-        let signature = keys.sign(&profile_bytes).unwrap_or_default();
+        let signature = match keys.sign(&profile_bytes) {
+            Ok(sig) => sig,
+            Err(e) => {
+                log::error!("Failed to sign user profile: {}", e);
+                return router_net_proto::SignedUserProfile {
+                    profile: profile_bytes,
+                    signature: Vec::new(),
+                };
+            }
+        };
 
         router_net_proto::SignedUserProfile {
             profile: profile_bytes,
@@ -376,39 +380,31 @@ impl Users {
                     let id_bytes = id.to_bytes();
                     let q8id = id_bytes[6..14].to_vec();
 
-                    let should_update = {
+                    let (should_update, verified, blocked) = {
                         let users = USERS.get().read().unwrap();
                         match users.users.get(&q8id) {
                             Some(existing) => {
-                                profile.version > existing.version
+                                let dominated = profile.version > existing.version
                                     || (profile.version == existing.version
-                                        && profile.updated_at > existing.updated_at)
+                                        && profile.updated_at > existing.updated_at);
+                                (dominated, existing.verified, existing.blocked)
                             }
-                            None => true,
+                            None => (true, false, false),
                         }
                     };
 
                     if should_update {
-                        // Preserve local-only flags
-                        let (verified, blocked) = {
-                            let users = USERS.get().read().unwrap();
-                            users.users.get(&q8id)
-                                .map(|u| (u.verified, u.blocked))
-                                .unwrap_or((false, false))
-                        };
-                        Self::add(
-                            id,
-                            key,
-                            profile.name.clone(),
-                            verified,
-                            blocked,
-                            profile.bio.clone(),
-                            profile.avatar.clone(),
-                            profile.version,
-                            profile.updated_at,
-                            signed.profile.clone(),
-                            signed.signature.clone(),
-                        );
+                        Self::add(User {
+                            id, key,
+                            name: profile.name.clone(),
+                            verified, blocked,
+                            bio: profile.bio.clone(),
+                            avatar: profile.avatar.clone(),
+                            version: profile.version,
+                            updated_at: profile.updated_at,
+                            signed_profile_bytes: signed.profile.clone(),
+                            signed_profile_signature: signed.signature.clone(),
+                        });
                     }
                 }
                 Err(e) => {
@@ -655,6 +651,7 @@ enum UserFilter {
 }
 
 /// user structure
+#[derive(Clone)]
 pub struct User {
     pub id: PeerId,
     pub key: PublicKey,
