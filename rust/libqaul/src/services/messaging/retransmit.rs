@@ -77,22 +77,30 @@ impl MessagingRetransmit {
                             );
 
                             // update entry
-                            let mut new_retry = unconfirmed_message.retry;
+                            let new_retry = unconfirmed_message.retry + 1;
                             if new_retry > 10 {
-                                new_retry = 1;
-                            }
-
-                            unconfirmed_message.retry = new_retry;
-                            unconfirmed_message.last_sent = cur_time;
-                            let unconfirmed_message_todb =
-                                bincode::serialize(&unconfirmed_message).unwrap();
-                            if let Err(_e) = unconfirmed
-                                .unconfirmed
-                                .insert(signature, unconfirmed_message_todb)
-                            {
-                                log::error!("updating unconfirmed table error!");
-                            } else {
+                                // max retries reached, remove from unconfirmed
+                                log::warn!(
+                                    "retransmit: max retries reached for message, removing: {}",
+                                    bs58::encode(&signature).into_string()
+                                );
+                                if let Err(_e) = unconfirmed.unconfirmed.remove(&signature) {
+                                    log::error!("removing expired unconfirmed message error!");
+                                }
                                 updated = true;
+                            } else {
+                                unconfirmed_message.retry = new_retry;
+                                unconfirmed_message.last_sent = cur_time;
+                                let unconfirmed_message_todb =
+                                    bincode::serialize(&unconfirmed_message).unwrap();
+                                if let Err(_e) = unconfirmed
+                                    .unconfirmed
+                                    .insert(signature, unconfirmed_message_todb)
+                                {
+                                    log::error!("updating unconfirmed table error!");
+                                } else {
+                                    updated = true;
+                                }
                             }
                         }
                     }
