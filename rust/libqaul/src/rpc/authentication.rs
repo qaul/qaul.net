@@ -178,7 +178,8 @@ impl Authentication {
     /// Mark a user as authenticated with a session
     fn mark_authenticated(qaul_id: PeerId) {
         let mut authenticated = AUTHENTICATED_USERS.get().write().unwrap();
-        let expires_at = Timestamp::get_timestamp() + (86400 * 365 * 100);
+        // Session expires after 24 hours (86400 seconds * 1000 milliseconds)
+        let expires_at = Timestamp::get_timestamp() + (86400 * 1000);
         authenticated.insert(qaul_id.to_bytes(), expires_at);
     }
 

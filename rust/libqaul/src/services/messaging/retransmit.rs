@@ -46,6 +46,19 @@ impl MessagingRetransmit {
                     continue;
                 }
 
+                // expire messages older than 1 hour to prevent indefinite accumulation
+                if cur_time.saturating_sub(unconfirmed_message.last_sent) > 3_600_000 {
+                    log::warn!(
+                        "retransmit: message expired (>1h), removing: {}",
+                        bs58::encode(&signature).into_string()
+                    );
+                    if let Err(_e) = unconfirmed.unconfirmed.remove(&signature) {
+                        log::error!("removing expired unconfirmed message error!");
+                    }
+                    updated = true;
+                    continue;
+                }
+
                 let qaul_id = QaulId::bytes_as_q8id(&unconfirmed_message.receiver_id);
                 //1. check receiver is online
                 if let Some(_hc) = online_users.get(qaul_id) {

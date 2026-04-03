@@ -185,7 +185,14 @@ impl CryptoNoise {
         message = Some(cipher.encrypt_vec(data.as_slice()));
 
         // save new nonce to state
-        state.index_nonce_out = nonce + 1;
+        if nonce >= u64::MAX - 1 {
+            log::error!(
+                "nonce overflow imminent for session {}: session must be renegotiated",
+                state.session_id
+            );
+        } else {
+            state.index_nonce_out = nonce + 1;
+        }
 
         // save state
         storage.save_state(remote_id, state.session_id, state);

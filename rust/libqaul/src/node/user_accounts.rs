@@ -37,6 +37,7 @@ pub struct UserAccount {
     pub keys: Keypair,
     pub name: String,
     pub password_hash: Option<String>,
+    // Note: salt is embedded in the Argon2 password_hash string; this field is kept for backward compatibility
     pub password_salt: Option<String>,
 }
 

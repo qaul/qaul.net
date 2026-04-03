@@ -205,6 +205,11 @@ impl Dtn {
             };
             let message_entry_bytes = bincode::serialize(&message_entry).unwrap();
 
+            // NOTE: The following two tree writes (db_ref and db_ref_id) are not
+            // atomic. If a crash occurs between them, the database could end up in
+            // an inconsistent state (e.g. an entry in db_ref without a corresponding
+            // entry in db_ref_id, or vice versa). A sled transaction spanning both
+            // trees would fix this but requires a larger refactor.
             if let Err(_e) = storage_state
                 .db_ref
                 .insert(signature.clone(), message_entry_bytes)
@@ -268,7 +273,9 @@ impl Dtn {
             state.used_size = state.used_size.saturating_sub(entry.size as u64);
             state.message_counts = state.message_counts.saturating_sub(1);
 
-            // remove entry
+            // NOTE: The following two tree removals (db_ref and db_ref_id) are not
+            // atomic. A crash between them could leave stale entries in one tree.
+            // A sled transaction spanning both trees would fix this.
             if let Err(_) = state.db_ref.remove(&dtn_response.signature) {
                 log::error!("remove storage node entry error!");
             } else {

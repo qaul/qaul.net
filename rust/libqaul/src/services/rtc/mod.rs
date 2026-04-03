@@ -179,7 +179,10 @@ impl Rtc {
                 //     );
                 // }
                 _ => {
-                    log::error!("rtc message from {} was empty", sender_id.to_base58())
+                    log::warn!(
+                        "unhandled or empty RTC message variant from {} (RtcMessage processing is commented out)",
+                        sender_id.to_base58()
+                    );
                 }
             },
             Err(e) => {
