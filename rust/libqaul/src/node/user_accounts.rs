@@ -164,8 +164,7 @@ impl UserAccounts {
         }
         Configuration::save();
 
-        // create initial signed profile
-        let initial_user = router::users::User {
+        let mut initial_user = router::users::User {
             id,
             key: keys_ed25519.public(),
             name: name.clone(),
@@ -179,13 +178,9 @@ impl UserAccounts {
             signed_profile_signature: Vec::new(),
         };
         let signed = router::users::Users::create_signed_profile(&initial_user, &keys_ed25519);
-
-        // add it to users list with signed profile
-        crate::router::users::Users::add(
-            id, keys_ed25519.public(), name.clone(), false, false,
-            String::new(), Vec::new(), 1, initial_user.updated_at,
-            signed.profile, signed.signature,
-        );
+        initial_user.signed_profile_bytes = signed.profile;
+        initial_user.signed_profile_signature = signed.signature;
+        crate::router::users::Users::add(initial_user);
 
         // add user to routing table / connections table
         crate::router::connections::ConnectionTable::add_local_user(id);
@@ -501,7 +496,6 @@ impl UserAccounts {
                             }
                         };
 
-                        // Read current user state and apply updates
                         let id_bytes = user_peer_id.to_bytes();
                         let q8id = id_bytes[6..14].to_vec();
 
@@ -533,24 +527,12 @@ impl UserAccounts {
                             }
                         };
 
-                        // Sign the updated profile
                         let signed = router::users::Users::create_signed_profile(&updated_user, &account.keys);
                         let new_version = updated_user.version;
-
-                        // Store the updated user with signed profile
-                        router::users::Users::add(
-                            updated_user.id,
-                            updated_user.key,
-                            updated_user.name,
-                            updated_user.verified,
-                            updated_user.blocked,
-                            updated_user.bio,
-                            updated_user.avatar,
-                            updated_user.version,
-                            updated_user.updated_at,
-                            signed.profile,
-                            signed.signature,
-                        );
+                        let mut user_to_store = updated_user;
+                        user_to_store.signed_profile_bytes = signed.profile;
+                        user_to_store.signed_profile_signature = signed.signature;
+                        router::users::Users::add(user_to_store);
 
                         Self::send_update_profile_response(true, String::new(), new_version, request_id);
                     }
