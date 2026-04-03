@@ -2,7 +2,7 @@
 /// user account rpc message container
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct UserAccounts {
-    #[prost(oneof = "user_accounts::Message", tags = "1, 2, 3, 4, 5, 6")]
+    #[prost(oneof = "user_accounts::Message", tags = "1, 2, 3, 4, 5, 6, 7, 8")]
     pub message: ::core::option::Option<user_accounts::Message>,
 }
 /// Nested message and enum types in `UserAccounts`.
@@ -21,6 +21,10 @@ pub mod user_accounts {
         SetPasswordRequest(super::SetPasswordRequest),
         #[prost(message, tag = "6")]
         SetPasswordResponse(super::SetPasswordResponse),
+        #[prost(message, tag = "7")]
+        UpdateProfileRequest(super::UpdateProfileRequest),
+        #[prost(message, tag = "8")]
+        UpdateProfileResponse(super::UpdateProfileResponse),
     }
 }
 /// create a new user on this node
@@ -52,6 +56,32 @@ pub struct DefaultUserAccount {
     pub user_account_exists: bool,
     #[prost(message, optional, tag = "2")]
     pub my_user_account: ::core::option::Option<MyUserAccount>,
+}
+/// Request to update the local user's profile
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct UpdateProfileRequest {
+    /// new display name (empty = no change)
+    #[prost(string, tag = "1")]
+    pub name: ::prost::alloc::string::String,
+    /// new avatar image bytes (empty = no change)
+    #[prost(bytes = "vec", tag = "2")]
+    pub avatar: ::prost::alloc::vec::Vec<u8>,
+    /// new bio / status text (empty = no change)
+    #[prost(string, tag = "3")]
+    pub bio: ::prost::alloc::string::String,
+}
+/// Response after profile update
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct UpdateProfileResponse {
+    /// whether the update succeeded
+    #[prost(bool, tag = "1")]
+    pub success: bool,
+    /// error message if failed
+    #[prost(string, tag = "2")]
+    pub error_message: ::prost::alloc::string::String,
+    /// the new profile version after update
+    #[prost(uint64, tag = "3")]
+    pub new_version: u64,
 }
 /// Information about my user
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]

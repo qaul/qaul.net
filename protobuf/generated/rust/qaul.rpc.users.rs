@@ -130,6 +130,18 @@ pub struct UserEntry {
     /// RoutingTableConnection connections = 11;
     #[prost(message, repeated, tag = "11")]
     pub connections: ::prost::alloc::vec::Vec<RoutingTableConnection>,
+    /// bio / status text
+    #[prost(string, tag = "12")]
+    pub bio: ::prost::alloc::string::String,
+    /// avatar bytes (small image)
+    #[prost(bytes = "vec", tag = "13")]
+    pub avatar: ::prost::alloc::vec::Vec<u8>,
+    /// profile version number
+    #[prost(uint64, tag = "14")]
+    pub profile_version: u64,
+    /// profile last updated timestamp (ms since epoch)
+    #[prost(uint64, tag = "15")]
+    pub profile_updated_at: u64,
 }
 /// Routing table connection entry.
 /// This message contains a connection to a specific user.
