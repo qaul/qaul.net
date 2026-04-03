@@ -120,7 +120,14 @@ impl RpcCommand for ChatSubcmd {
             Some(chat::Message::ConversationList(proto_conversation)) => {
                 // Conversation table
                 println!("");
-                let group_id = Uuid::from_bytes(proto_conversation.group_id.try_into().unwrap());
+                let group_id_bytes: [u8; 16] = match proto_conversation.group_id.try_into() {
+                    Ok(b) => b,
+                    Err(e) => {
+                        log::error!("invalid group id bytes: {:?}", e);
+                        return Ok(());
+                    }
+                };
+                let group_id = Uuid::from_bytes(group_id_bytes);
 
                 println!("Conversation [ {} ]", group_id.to_string());
                 println!("");

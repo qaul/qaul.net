@@ -335,8 +335,14 @@ impl Connections {
                                         Multiaddr,
                                         libp2p::multiaddr::Error,
                                     > = nodes_entry.address.clone().parse();
-                                    let address = address_result.unwrap();
-                                    Internet::peer_dial(address, &mut internet.swarm);
+                                    match address_result {
+                                        Ok(address) => {
+                                            Internet::peer_dial(address, &mut internet.swarm);
+                                        }
+                                        Err(e) => {
+                                            log::error!("failed to parse multiaddr '{}': {}", nodes_entry.address, e);
+                                        }
+                                    }
                                 }
                             }
                         }

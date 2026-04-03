@@ -48,7 +48,13 @@ impl Upgrade {
                 return false;
             }
         } else {
-            old_version = fs::read_to_string(path).unwrap();
+            match fs::read_to_string(&path) {
+                Ok(v) => old_version = v,
+                Err(e) => {
+                    println!("failed to read version file: {}", e);
+                    return false;
+                }
+            }
         }
 
         // check if old version is equal to new version
@@ -65,12 +71,24 @@ impl Upgrade {
     fn upgrade(storage_path: &Path, old_version: &str) -> bool {
         println!("running upgrade check for version {}", old_version);
 
-        let mut version = Version::parse(old_version).unwrap();
+        let mut version = match Version::parse(old_version) {
+            Ok(v) => v,
+            Err(e) => {
+                println!("failed to parse old version '{}': {}", old_version, e);
+                return false;
+            }
+        };
 
         // check if libqaul is upgradable
         // the last possible upgradable version at the moment is 2.0.0-beta.18
         // all previous versions need to upgrade to that one in order to upgrade further.
-        let last_upgradable_version = Version::parse("2.0.0-beta.18").unwrap();
+        let last_upgradable_version = match Version::parse("2.0.0-beta.18") {
+            Ok(v) => v,
+            Err(e) => {
+                println!("failed to parse last upgradable version: {}", e);
+                return false;
+            }
+        };
         if version < last_upgradable_version {
             // issue an informative message
             println!(
@@ -96,11 +114,24 @@ impl Upgrade {
         // put new upgrade version below this chain.
 
         // upgrade to version 2.0.0-rc.1
-        if version < Version::parse("2.0.0-rc.1").unwrap() {
+        let version_rc1 = match Version::parse("2.0.0-rc.1") {
+            Ok(v) => v,
+            Err(e) => {
+                println!("failed to parse version 2.0.0-rc.1: {}", e);
+                return false;
+            }
+        };
+        if version < version_rc1 {
             match v2_0_0_rc_1::VersionUpgrade::upgrade(storage_path, &backup_path) {
                 Ok((new_version, new_path)) => {
                     // update values
-                    version = Version::parse(&new_version).unwrap();
+                    version = match Version::parse(&new_version) {
+                        Ok(v) => v,
+                        Err(e) => {
+                            println!("failed to parse upgraded version '{}': {}", new_version, e);
+                            return false;
+                        }
+                    };
                     backup_path = new_path;
                 }
                 Err(e) => {
@@ -111,11 +142,24 @@ impl Upgrade {
         }
 
         // upgrade to version 2.0.0-rc.5
-        if version < Version::parse("2.0.0-rc.5").unwrap() {
+        let version_rc5 = match Version::parse("2.0.0-rc.5") {
+            Ok(v) => v,
+            Err(e) => {
+                println!("failed to parse version 2.0.0-rc.5: {}", e);
+                return false;
+            }
+        };
+        if version < version_rc5 {
             match v2_0_0_rc_5::VersionUpgrade::upgrade(storage_path, &backup_path) {
                 Ok((new_version, new_path)) => {
                     // update values
-                    version = Version::parse(&new_version).unwrap();
+                    version = match Version::parse(&new_version) {
+                        Ok(v) => v,
+                        Err(e) => {
+                            println!("failed to parse upgraded version '{}': {}", new_version, e);
+                            return false;
+                        }
+                    };
                     backup_path = new_path;
                 }
                 Err(e) => {

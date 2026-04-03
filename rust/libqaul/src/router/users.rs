@@ -56,7 +56,7 @@ impl Users {
                 // decode user bytes
                 let user: UserData = bincode::deserialize(&user_bytes).unwrap();
                 // encode values from bytes
-                let q8id = user.id[6..14].to_vec();
+                let q8id = QaulId::bytes_to_q8id(user.id.clone());
                 let id = PeerId::from_bytes(&user.id).unwrap();
                 let key = PublicKey::try_decode_protobuf(&user.key).unwrap();
                 // fill result into user table
@@ -79,7 +79,7 @@ impl Users {
     /// This user will be added to the users list in memory and to the data base
     pub fn add(id: PeerId, key: PublicKey, name: String, verified: bool, blocked: bool) {
         let id_bytes = id.to_bytes();
-        let q8id = id_bytes[6..14].to_vec();
+        let q8id = QaulId::bytes_to_q8id(id_bytes.clone());
 
         // save user to the data base
         DbUsers::add_user(UserData {
@@ -92,6 +92,12 @@ impl Users {
 
         // add user to the users table
         let mut users = USERS.get().write().unwrap();
+        if users.users.len() >= 100_000 {
+            log::warn!(
+                "users table has reached {} entries; possible resource exhaustion",
+                users.users.len()
+            );
+        }
         users.users.insert(
             q8id,
             User {
@@ -117,7 +123,7 @@ impl Users {
         // check if user already exists
         {
             let id_bytes = id.to_bytes();
-            let q8id = &id_bytes[6..14];
+            let q8id = QaulId::bytes_as_q8id(&id_bytes);
             let users = USERS.get().read().unwrap();
 
             // check if user already exists
@@ -146,7 +152,7 @@ impl Users {
     /// get the public key of a known user
     pub fn get_pub_key(user_id: &PeerId) -> Option<PublicKey> {
         let user_id_bytes = user_id.to_bytes();
-        Self::get_pub_key_by_q8id(&user_id_bytes[6..14])
+        Self::get_pub_key_by_q8id(QaulId::bytes_as_q8id(&user_id_bytes))
     }
 
     /// get the public key of a known user by it's q8id
@@ -225,9 +231,9 @@ impl Users {
 
     /// get security number
     fn get_security_number(my_user: &PeerId, user_id: &[u8]) -> Result<Vec<u8>, String> {
-        let q8id = &user_id[6..14];
+        let q8id = QaulId::bytes_as_q8id(user_id);
         let my_user_bytes = my_user.to_bytes();
-        let q8id_my = &my_user_bytes[6..14];
+        let q8id_my = QaulId::bytes_as_q8id(&my_user_bytes);
 
         // find user from users
         let users = USERS.get().read().unwrap();
@@ -390,7 +396,7 @@ impl Users {
                 return;
             }
         };
-        let q8id = &user_id_bytes[6..14];
+        let q8id = QaulId::bytes_as_q8id(user_id_bytes);
 
         // acquire a lock to lookup the user entry
         let mut store = USERS.get().write().unwrap();

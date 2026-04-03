@@ -15,7 +15,10 @@ fn send_user_update(
     verified: bool,
     blocked: bool,
 ) -> Result<Users, Box<dyn std::error::Error>> {
-    let user_id = bs58::decode(user_id_base58).into_vec().unwrap();
+    let user_id = match bs58::decode(user_id_base58).into_vec() {
+        Ok(v) => v,
+        Err(e) => return Err(format!("invalid base58 user id: {}", e).into()),
+    };
 
     // create request message
     let proto_message = Users {
@@ -179,7 +182,7 @@ impl RpcCommand for UsersSubcmd {
                         println!("  Connections: module | hc | rtt | via");
                         for cnn in user.connections {
                             let module = ConnectionModule::try_from(cnn.module)
-                                .unwrap()
+                                .unwrap_or(ConnectionModule::None)
                                 .as_str_name();
                             println!(
                                 "      {} | {} | {} | {}",
@@ -232,7 +235,7 @@ impl RpcCommand for UsersSubcmd {
                         println!("Connections: module | hc | rtt | via");
                         for cnn in user.connections {
                             let module = ConnectionModule::try_from(cnn.module)
-                                .unwrap()
+                                .unwrap_or(ConnectionModule::None)
                                 .as_str_name();
                             println!(
                                 "  {} | {} | {} | {}",
