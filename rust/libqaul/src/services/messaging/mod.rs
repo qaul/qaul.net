@@ -503,6 +503,14 @@ impl Messaging {
 
         // add it to sending queue
         let mut messaging = MESSAGING.get().write().unwrap();
+        const MAX_QUEUE_SIZE: usize = 10_000;
+        if messaging.to_send.len() >= MAX_QUEUE_SIZE {
+            log::warn!(
+                "messaging send queue full ({} messages), dropping oldest message",
+                messaging.to_send.len()
+            );
+            messaging.to_send.pop_front();
+        }
         messaging.to_send.push_back(msg);
     }
 

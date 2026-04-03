@@ -24,7 +24,13 @@ impl Chat {
             // send chat message
             cmd if cmd.starts_with("send ") => {
                 // get group id
-                let command_string = cmd.strip_prefix("send ").unwrap().to_string();
+                let command_string = match cmd.strip_prefix("send ") {
+                    Some(s) => s.to_string(),
+                    None => {
+                        log::error!("chat send command incorrectly formatted");
+                        return;
+                    }
+                };
                 let mut iter = command_string.split_whitespace();
 
                 if let Some(group_id_str) = iter.next() {
@@ -254,8 +260,14 @@ impl Chat {
                     Some(proto::chat::Message::ConversationList(proto_conversation)) => {
                         // Conversation table
                         println!("");
-                        let group_id =
-                            uuid::Uuid::from_bytes(proto_conversation.group_id.try_into().unwrap());
+                        let group_id_bytes: [u8; 16] = match proto_conversation.group_id.try_into() {
+                            Ok(b) => b,
+                            Err(e) => {
+                                log::error!("invalid group id bytes: {:?}", e);
+                                return;
+                            }
+                        };
+                        let group_id = uuid::Uuid::from_bytes(group_id_bytes);
 
                         println!("Conversation [ {} ]", group_id.to_string());
                         println!("");

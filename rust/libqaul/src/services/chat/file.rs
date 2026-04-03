@@ -228,6 +228,7 @@ pub struct FileHistory {
     /// file extension
     pub file_extension: String,
     /// file size in bytes
+    // TODO: u32 limits files to 4GB; consider u64 for large file support
     pub file_size: u32,
     /// file sent
     pub sent_at: u64,

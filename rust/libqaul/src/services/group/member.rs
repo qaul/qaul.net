@@ -382,12 +382,12 @@ impl Member {
         }
 
         // check if user is invite pending state
-        if !group.members.contains_key(&sender_id_bytes) {
-            return Err("member is not invite pending state".to_string());
-        }
-        let member = group.members.get(&sender_id_bytes).unwrap();
-        if member.state > 0 {
-            return Err("member is not invite pending state, it's joined".to_string());
+        match group.members.get(&sender_id_bytes) {
+            None => return Err("member is not invite pending state".to_string()),
+            Some(member) if member.state > 0 => {
+                return Err("member is not invite pending state, it's joined".to_string());
+            }
+            Some(_) => {}
         }
 
         group.members.remove(&sender_id_bytes);

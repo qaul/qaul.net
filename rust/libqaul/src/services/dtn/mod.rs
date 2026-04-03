@@ -205,6 +205,11 @@ impl Dtn {
             };
             let message_entry_bytes = bincode::serialize(&message_entry).unwrap();
 
+            // NOTE: The following two tree writes (db_ref and db_ref_id) are not
+            // atomic. If a crash occurs between them, the database could end up in
+            // an inconsistent state (e.g. an entry in db_ref without a corresponding
+            // entry in db_ref_id, or vice versa). A sled transaction spanning both
+            // trees would fix this but requires a larger refactor.
             if let Err(_e) = storage_state
                 .db_ref
                 .insert(signature.clone(), message_entry_bytes)
@@ -256,20 +261,21 @@ impl Dtn {
     pub fn on_dtn_response(dtn_response: &super::messaging::proto::DtnResponse) {
         // check if storage node case
         let mut state = STORAGESTATE.get().write().unwrap();
-        if state.db_ref.contains_key(&dtn_response.signature).unwrap() {
+        if let Ok(Some(entry_bytes)) = state.db_ref.get(&dtn_response.signature) {
             // update storage node state
-            let entry_bytes = state.db_ref.get(&dtn_response.signature).unwrap().unwrap();
-            let entry: DtnMessageEntry = bincode::deserialize(&entry_bytes).unwrap();
-            if state.used_size > entry.size as u64 {
-                state.used_size = state.used_size + (entry.size as u64);
-            } else {
-                state.used_size = 0;
-            }
-            if state.message_counts > 0 {
-                state.message_counts = state.message_counts - 1;
-            }
+            let entry: DtnMessageEntry = match bincode::deserialize(&entry_bytes) {
+                Ok(e) => e,
+                Err(e) => {
+                    log::error!("DTN: failed to deserialize entry: {}", e);
+                    return;
+                }
+            };
+            state.used_size = state.used_size.saturating_sub(entry.size as u64);
+            state.message_counts = state.message_counts.saturating_sub(1);
 
-            // remove entry
+            // NOTE: The following two tree removals (db_ref and db_ref_id) are not
+            // atomic. A crash between them could leave stale entries in one tree.
+            // A sled transaction spanning both trees would fix this.
             if let Err(_) = state.db_ref.remove(&dtn_response.signature) {
                 log::error!("remove storage node entry error!");
             } else {

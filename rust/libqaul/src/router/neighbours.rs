@@ -108,6 +108,12 @@ impl Neighbours {
             node.rtt = Self::calculate_rtt(node.rtt, rtt);
             node.updated_at = Timestamp::get_timestamp();
         } else {
+            if neighbours.nodes.len() >= 100_000 {
+                log::warn!(
+                    "neighbours table has reached {} entries; possible resource exhaustion",
+                    neighbours.nodes.len()
+                );
+            }
             log::trace!("add node {:?} to neighbours table", node_id);
             neighbours.nodes.insert(
                 node_id,

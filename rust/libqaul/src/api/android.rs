@@ -30,9 +30,21 @@ lazy_static! {
 
 #[no_mangle]
 pub fn nativeSetCallback(env: JNIEnv, _obj: JObject, callback: JObject) {
-    let callback = env.new_global_ref(JObject::from(callback)).unwrap();
+    let callback = match env.new_global_ref(JObject::from(callback)) {
+        Ok(cb) => cb,
+        Err(e) => {
+            log::error!("nativeSetCallback: failed to create global ref: {:?}", e);
+            return;
+        }
+    };
 
-    let mut ptr_fn = JNI_CALLBACK.lock().unwrap();
+    let mut ptr_fn = match JNI_CALLBACK.lock() {
+        Ok(guard) => guard,
+        Err(e) => {
+            log::error!("nativeSetCallback: failed to lock JNI_CALLBACK: {:?}", e);
+            return;
+        }
+    };
     *ptr_fn = Some(callback);
 }
 
@@ -52,7 +64,13 @@ unsafe fn JNI_OnLoad(java_vm: JavaVM, _: *mut std::os::raw::c_void) -> jint {
         log::error!("android jni: register natives failed");
     }
 
-    let mut ptr_jvm = JVM_GLOBAL.lock().unwrap();
+    let mut ptr_jvm = match JVM_GLOBAL.lock() {
+        Ok(guard) => guard,
+        Err(e) => {
+            log::error!("JNI_OnLoad: failed to lock JVM_GLOBAL: {:?}", e);
+            return JNI_ERR;
+        }
+    };
     *ptr_jvm = Some(java_vm);
 
     JNI_VERSION_1_6
@@ -62,12 +80,13 @@ unsafe fn JNI_OnLoad(java_vm: JavaVM, _: *mut std::os::raw::c_void) -> jint {
 #[no_mangle]
 pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_hello(env: JNIEnv, _: JClass) -> jstring {
     // create a string
-    let output = env
-        .new_string(format!("Hello qaul!"))
-        .expect("Couldn't create java string!");
-
-    // return the raw pointer
-    output.into_raw()
+    match env.new_string(format!("Hello qaul!")) {
+        Ok(output) => output.into_raw(),
+        Err(e) => {
+            log::error!("hello: failed to create java string: {:?}", e);
+            std::ptr::null_mut()
+        }
+    }
 }
 
 /// start libqaul from android
@@ -78,10 +97,13 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_start(
     path: JString,
 ) {
     // get path string
-    let android_path: String = env
-        .get_string(&path)
-        .expect("Couldn't get Java path string!")
-        .into();
+    let android_path: String = match env.get_string(&path) {
+        Ok(s) => s.into(),
+        Err(e) => {
+            log::error!("start: failed to get Java path string: {:?}", e);
+            return;
+        }
+    };
 
     // start libqaul in an own thread
     super::start_android(android_path);
@@ -127,7 +149,13 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_send<'local>(
     message: JByteArray<'local>,
 ) {
     // get the message out of java
-    let binary_message: Vec<u8> = env.convert_byte_array(&message).unwrap();
+    let binary_message: Vec<u8> = match env.convert_byte_array(&message) {
+        Ok(msg) => msg,
+        Err(e) => {
+            log::error!("send: failed to convert byte array: {:?}", e);
+            return;
+        }
+    };
 
     // send it to libqaul
     super::send_rpc(binary_message);
@@ -142,15 +170,23 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_receive<'local>(
     // check if there is an RPC message
     if let Ok(message) = super::receive_rpc() {
         // convert message to java byte array
-        let byte_array = env.byte_array_from_slice(&message).unwrap();
-        // return byte array
-        return byte_array;
+        match env.byte_array_from_slice(&message) {
+            Ok(byte_array) => return byte_array,
+            Err(e) => {
+                log::error!("receive: failed to create byte array from message: {:?}", e);
+            }
+        }
     }
 
-    // there is no message and we return an empty array
+    // there is no message (or conversion failed) and we return an empty array
     let buf: [u8; 0] = [0; 0];
-    let empty_array = env.byte_array_from_slice(&buf).unwrap();
-    empty_array
+    match env.byte_array_from_slice(&buf) {
+        Ok(empty_array) => empty_array,
+        Err(e) => {
+            log::error!("receive: failed to create empty byte array: {:?}", e);
+            JByteArray::default()
+        }
+    }
 }
 
 /// # BLE Module Functions
@@ -166,7 +202,13 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_syssend<'local>(
     message: JByteArray<'local>,
 ) {
     // get the message out of java
-    let binary_message: Vec<u8> = env.convert_byte_array(&message).unwrap();
+    let binary_message: Vec<u8> = match env.convert_byte_array(&message) {
+        Ok(msg) => msg,
+        Err(e) => {
+            log::error!("syssend: failed to convert byte array: {:?}", e);
+            return;
+        }
+    };
 
     // send it to libqaul
     super::send_sys(binary_message);
@@ -181,15 +223,23 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_sysreceive<'local>(
     // check if there is an RPC message
     if let Ok(message) = super::receive_sys() {
         // convert message to java byte array
-        let byte_array = env.byte_array_from_slice(&message).unwrap();
-        // return byte array
-        return byte_array;
+        match env.byte_array_from_slice(&message) {
+            Ok(byte_array) => return byte_array,
+            Err(e) => {
+                log::error!("sysreceive: failed to create byte array from message: {:?}", e);
+            }
+        }
     }
 
-    // there is no message and we return an empty array
+    // there is no message (or conversion failed) and we return an empty array
     let buf: [u8; 0] = [0; 0];
-    let empty_array = env.byte_array_from_slice(&buf).unwrap();
-    empty_array
+    match env.byte_array_from_slice(&buf) {
+        Ok(empty_array) => empty_array,
+        Err(e) => {
+            log::error!("sysreceive: failed to create empty byte array: {:?}", e);
+            JByteArray::default()
+        }
+    }
 }
 
 pub struct Android {}
@@ -202,8 +252,20 @@ impl Android {
     }
 
     unsafe fn register_natives(jvm: &JavaVM, class_name: &str, methods: &[NativeMethod]) -> jint {
-        let mut env: JNIEnv = jvm.get_env().unwrap();
-        let jni_version = env.get_version().unwrap();
+        let mut env: JNIEnv = match jvm.get_env() {
+            Ok(e) => e,
+            Err(e) => {
+                log::error!("register_natives: failed to get JNI env: {:?}", e);
+                return JNI_ERR;
+            }
+        };
+        let jni_version = match env.get_version() {
+            Ok(v) => v,
+            Err(e) => {
+                log::error!("register_natives: failed to get JNI version: {:?}", e);
+                return JNI_ERR;
+            }
+        };
         let version: jint = jni_version.into();
 
         let clazz = match env.find_class(class_name) {
@@ -228,17 +290,31 @@ impl Android {
     where
         F: Fn(&JObject, &mut JNIEnv) + Send + 'static,
     {
-        let ptr_jvm = JVM_GLOBAL.lock().unwrap();
+        let ptr_jvm = match JVM_GLOBAL.lock() {
+            Ok(guard) => guard,
+            Err(e) => {
+                log::error!("call_jvm: failed to lock JVM_GLOBAL: {:?}", e);
+                return;
+            }
+        };
         if (*ptr_jvm).is_none() {
             return;
         }
-        let ptr_fn = callback.lock().unwrap();
+        let ptr_fn = match callback.lock() {
+            Ok(guard) => guard,
+            Err(e) => {
+                log::error!("call_jvm: failed to lock callback: {:?}", e);
+                return;
+            }
+        };
         if (*ptr_fn).is_none() {
             return;
         }
+        // Safe: we checked is_none() above
         let jvm: &JavaVM = (*ptr_jvm).as_ref().unwrap();
         match jvm.attach_current_thread_permanently() {
             Ok(mut env) => {
+                // Safe: we checked is_none() above
                 let obj = (*ptr_fn).as_ref().unwrap().as_obj();
                 run(obj, &mut env);
                 if let Ok(true) = env.exception_check() {
@@ -254,7 +330,13 @@ impl Android {
 
     pub fn call_java_callback(fun_type: Vec<u8>) {
         Self::call_jvm(&JNI_CALLBACK, move |obj: &JObject, env: &mut JNIEnv| {
-            let jmessage = env.byte_array_from_slice(fun_type.as_slice()).unwrap();
+            let jmessage = match env.byte_array_from_slice(fun_type.as_slice()) {
+                Ok(arr) => arr,
+                Err(e) => {
+                    log::error!("call_java_callback: failed to create byte array: {:?}", e);
+                    return;
+                }
+            };
             match env.call_method(
                 obj,
                 "OnLibqaulMessage",

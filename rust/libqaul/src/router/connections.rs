@@ -222,8 +222,9 @@ impl ConnectionTable {
         let config = super::Router::get_configuration();
 
         // calculate link quality
-        // `hop_count_penalty` is seconds unit, thus it must be converted micro seconds
-        let lq = rtt + (hc as u32 * (config.hop_count_penalty as u32) * 1000_000);
+        // `hop_count_penalty` is seconds unit, thus it must be converted to micro seconds
+        let penalty = (hc as u64) * (config.hop_count_penalty as u64) * 1_000_000;
+        let lq = (rtt as u64).saturating_add(penalty).min(u32::MAX as u64) as u32;
 
         // return link quality
         lq
@@ -276,7 +277,7 @@ impl ConnectionTable {
             } else if pgid < user.pgid {
                 if user.pgid_update_hc == connection.hc {
                     //reboot node case
-                    if (user.pgid - pgid) > (connection.hc as u32) {
+                    if user.pgid.saturating_sub(pgid) > (connection.hc as u32) {
                         user.pgid = pgid;
                         user.pgid_update = now_ts;
                         user.pgid_update_hc = connection.hc;
@@ -311,7 +312,9 @@ impl ConnectionTable {
             user.pgid = propagation_id;
             // QUESTION: is this of any use?
             user.pgid_update = Timestamp::get_timestamp();
-            user.connections.get_mut(0).unwrap().last_update = Timestamp::get_timestamp();
+            if let Some(conn) = user.connections.get_mut(0) {
+                conn.last_update = Timestamp::get_timestamp();
+            }
         }
     }
 

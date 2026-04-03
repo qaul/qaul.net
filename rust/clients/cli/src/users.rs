@@ -31,25 +31,35 @@ impl Users {
             }
             // verify a user
             cmd if cmd.starts_with("verify ") => {
-                let user_id = cmd.strip_prefix("verify ").unwrap();
-
-                Self::send_user_update(user_id, true, false);
+                if let Some(user_id) = cmd.strip_prefix("verify ") {
+                    Self::send_user_update(user_id, true, false);
+                } else {
+                    log::error!("verify command incorrectly formatted");
+                }
             }
             // block a user
             cmd if cmd.starts_with("block ") => {
-                let user_id = cmd.strip_prefix("block ").unwrap();
-
-                Self::send_user_update(user_id, false, true);
+                if let Some(user_id) = cmd.strip_prefix("block ") {
+                    Self::send_user_update(user_id, false, true);
+                } else {
+                    log::error!("block command incorrectly formatted");
+                }
             }
             // security number for a user
             cmd if cmd.starts_with("secure ") => {
-                let user_id = cmd.strip_prefix("secure ").unwrap();
-                Self::send_user_secure_number(user_id);
+                if let Some(user_id) = cmd.strip_prefix("secure ") {
+                    Self::send_user_secure_number(user_id);
+                } else {
+                    log::error!("secure command incorrectly formatted");
+                }
             }
             // get a single user by id
             cmd if cmd.starts_with("get ") => {
-                let user_id = cmd.strip_prefix("get ").unwrap();
-                Self::request_user_by_id(user_id);
+                if let Some(user_id) = cmd.strip_prefix("get ") {
+                    Self::request_user_by_id(user_id);
+                } else {
+                    log::error!("get command incorrectly formatted");
+                }
             }
             // unknown command
             _ => log::error!("unknown users command"),
@@ -107,7 +117,13 @@ impl Users {
 
     /// create rpc user security number message
     fn send_user_secure_number(user_id_base58: &str) {
-        let user_id = bs58::decode(user_id_base58).into_vec().unwrap();
+        let user_id = match bs58::decode(user_id_base58).into_vec() {
+            Ok(v) => v,
+            Err(e) => {
+                log::error!("invalid base58 user id '{}': {}", user_id_base58, e);
+                return;
+            }
+        };
 
         // create request message
         let proto_message = proto::Users {
@@ -132,7 +148,13 @@ impl Users {
 
     /// create rpc request to get a single user by id
     fn request_user_by_id(user_id_base58: &str) {
-        let user_id = bs58::decode(user_id_base58).into_vec().unwrap();
+        let user_id = match bs58::decode(user_id_base58).into_vec() {
+            Ok(v) => v,
+            Err(e) => {
+                log::error!("invalid base58 user id '{}': {}", user_id_base58, e);
+                return;
+            }
+        };
 
         // create request message
         let proto_message = proto::Users {
@@ -157,7 +179,13 @@ impl Users {
 
     /// create rpc user update message
     fn send_user_update(user_id_base58: &str, verified: bool, blocked: bool) {
-        let user_id = bs58::decode(user_id_base58).into_vec().unwrap();
+        let user_id = match bs58::decode(user_id_base58).into_vec() {
+            Ok(v) => v,
+            Err(e) => {
+                log::error!("invalid base58 user id '{}': {}", user_id_base58, e);
+                return;
+            }
+        };
 
         // create request message
         let proto_message = proto::Users {
@@ -240,7 +268,7 @@ impl Users {
                             println!("  Connections: module | hc | rtt | via");
                             for cnn in user.connections {
                                 let module = proto::ConnectionModule::try_from(cnn.module)
-                                    .unwrap()
+                                    .unwrap_or(proto::ConnectionModule::None)
                                     .as_str_name();
                                 println!(
                                     "      {} | {} | {} | {}",
@@ -294,7 +322,7 @@ impl Users {
                             println!("Connections: module | hc | rtt | via");
                             for cnn in user.connections {
                                 let module = proto::ConnectionModule::try_from(cnn.module)
-                                    .unwrap()
+                                    .unwrap_or(proto::ConnectionModule::None)
                                     .as_str_name();
                                 println!(
                                     "  {} | {} | {} | {}",

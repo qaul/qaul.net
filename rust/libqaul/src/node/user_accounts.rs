@@ -37,6 +37,7 @@ pub struct UserAccount {
     pub keys: Keypair,
     pub name: String,
     pub password_hash: Option<String>,
+    // Note: salt is embedded in the Argon2 password_hash string; this field is kept for backward compatibility
     pub password_salt: Option<String>,
 }
 
@@ -52,10 +53,28 @@ impl UserAccounts {
         let mut accounts = UserAccounts { users: Vec::new() };
 
         for user in &config.user_accounts {
-            let mut basedecode = base64::engine::general_purpose::STANDARD
+            let mut basedecode = match base64::engine::general_purpose::STANDARD
                 .decode(&user.keys)
-                .unwrap();
-            let ed25519_keys = ed25519::Keypair::try_from_bytes(&mut basedecode).unwrap();
+            {
+                Ok(bytes) => bytes,
+                Err(e) => {
+                    log::error!(
+                        "skipping user '{}': failed to base64-decode keys: {}",
+                        user.name, e
+                    );
+                    continue;
+                }
+            };
+            let ed25519_keys = match ed25519::Keypair::try_from_bytes(&mut basedecode) {
+                Ok(kp) => kp,
+                Err(e) => {
+                    log::error!(
+                        "skipping user '{}': failed to parse ed25519 keypair: {}",
+                        user.name, e
+                    );
+                    continue;
+                }
+            };
             let keys = Keypair::from(ed25519_keys);
             let id = PeerId::from(keys.public());
 
