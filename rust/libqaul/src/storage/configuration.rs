@@ -264,7 +264,13 @@ impl Configuration {
                 log::error!("no configuration file found, creating one.");
                 Configuration::default()
             }
-            Ok(c) => c.try_deserialize::<Configuration>().unwrap(),
+            Ok(c) => match c.try_deserialize::<Configuration>() {
+                Ok(config) => config,
+                Err(e) => {
+                    log::error!("failed to deserialize configuration: {}, using defaults", e);
+                    Configuration::default()
+                }
+            },
         }
     }
 
@@ -301,7 +307,13 @@ impl Configuration {
     /// Libqaul uses the `init()` function to load and initialize the configuration!
     pub fn load(path: &str) -> Option<Configuration> {
         if let Ok(c) = Config::builder().add_source(File::with_name(path)).build() {
-            return Some(c.try_deserialize::<Configuration>().unwrap());
+            match c.try_deserialize::<Configuration>() {
+                Ok(config) => return Some(config),
+                Err(e) => {
+                    log::error!("failed to deserialize configuration at {}: {}", path, e);
+                    return None;
+                }
+            }
         }
         None
     }

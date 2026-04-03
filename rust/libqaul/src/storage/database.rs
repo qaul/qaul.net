@@ -39,9 +39,9 @@ impl DataBase {
 
         // open node data base
         let node = sled::Config::default()
-            .path(db_path)
+            .path(db_path.clone())
             .open()
-            .expect("Failed to open sled db");
+            .expect(&format!("Failed to open sled database at {:?}", db_path));
 
         DataBase {
             path: storage_path.to_string(),
@@ -82,9 +82,9 @@ impl DataBase {
 
         // open data base from disk
         let db = sled::Config::default()
-            .path(db_path)
+            .path(db_path.clone())
             .open()
-            .expect("Failed to open sled db");
+            .expect(&format!("Failed to open sled database at {:?}", db_path));
 
         // save data base to state
         self.users.insert(account_id.to_bytes(), db.clone());
@@ -122,9 +122,9 @@ impl DataBase {
 
             // open data base from disk
             let db = sled::Config::default()
-                .path(db_path)
+                .path(db_path.clone())
                 .open()
-                .expect("Failed to open sled db");
+                .expect(&format!("Failed to open sled database at {:?}", db_path));
 
             // save data base to state
             database.users.insert(account_id.to_bytes(), db.clone());
