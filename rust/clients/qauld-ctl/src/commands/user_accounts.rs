@@ -89,36 +89,70 @@ impl RpcCommand for AccountSubcmd {
         }
     }
 
-    fn decode_response(&self, data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
+    fn decode_response(&self, data: &[u8], json: bool) -> Result<(), Box<dyn std::error::Error>> {
         let user_accounts = UserAccounts::decode(data)?;
         match user_accounts.message {
             Some(user_accounts::Message::DefaultUserAccount(default_useraccount)) => {
                 if default_useraccount.user_account_exists {
-                    if let Some(my_user_account) = default_useraccount.my_user_account {
-                        println!("Your user account is:");
-                        println!(
-                            "{}, ID[{}]",
-                            my_user_account.name, my_user_account.id_base58
-                        );
-                        println!("    public key: {}", my_user_account.key_base58);
-
-                        if my_user_account.has_password {
-                            println!("Your password is enabled");
+                    if let Some(acct) = default_useraccount.my_user_account {
+                        if json {
+                            println!(
+                                "{}",
+                                serde_json::to_string_pretty(&serde_json::json!({
+                                    "name": acct.name,
+                                    "id": acct.id_base58,
+                                    "public_key": acct.key_base58,
+                                    "has_password": acct.has_password,
+                                }))?
+                            );
                         } else {
-                            println!("Your password is disabled");
+                            println!("Your user account is:");
+                            println!("{}, ID[{}]", acct.name, acct.id_base58);
+                            println!("    public key: {}", acct.key_base58);
+                            if acct.has_password {
+                                println!("Your password is enabled");
+                            } else {
+                                println!("Your password is disabled");
+                            }
                         }
                     }
+                } else if json {
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&serde_json::json!({
+                            "exists": false,
+                        }))?
+                    );
                 } else {
                     println!("No user account created yet. Please create an account by running: qauld-ctl account create --help");
                 }
             }
             Some(user_accounts::Message::MyUserAccount(acct)) => {
-                println!("New user account created:");
-                println!("{}, ID[{}]", acct.name, acct.id_base58);
-                println!("    public key: {}", acct.key_base58);
+                if json {
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&serde_json::json!({
+                            "name": acct.name,
+                            "id": acct.id_base58,
+                            "public_key": acct.key_base58,
+                        }))?
+                    );
+                } else {
+                    println!("New user account created:");
+                    println!("{}, ID[{}]", acct.name, acct.id_base58);
+                    println!("    public key: {}", acct.key_base58);
+                }
             }
             Some(user_accounts::Message::SetPasswordResponse(response)) => {
-                if response.success {
+                if json {
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&serde_json::json!({
+                            "success": response.success,
+                            "error": response.error_message,
+                        }))?
+                    );
+                } else if response.success {
                     println!(" Password updated");
                 } else {
                     println!("{}", response.error_message);

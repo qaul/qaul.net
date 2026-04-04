@@ -6,7 +6,13 @@
 use futures::{stream::StreamExt, SinkExt};
 use futures_ticker::Ticker;
 use prost::Message;
-use std::{collections::HashMap, fs, path::PathBuf, sync::Arc};
+use std::{
+    collections::HashMap,
+    fs::{self, Permissions},
+    os::unix::fs::PermissionsExt,
+    path::PathBuf,
+    sync::Arc,
+};
 use tokio::{
     io::{AsyncRead, AsyncWrite},
     signal,
@@ -131,6 +137,7 @@ pub async fn start_server(socket_dir: PathBuf) -> Result<(), Box<dyn std::error:
         }
 
         let listener = UnixListener::bind(&socket_path)?;
+        fs::set_permissions(&socket_path, Permissions::from_mode(0o666))?;
         println!("qauld unix socket server started");
 
         loop {

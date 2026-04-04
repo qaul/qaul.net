@@ -114,47 +114,75 @@ impl RpcCommand for ChatSubcmd {
         }
     }
 
-    fn decode_response(&self, data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
+    fn decode_response(&self, data: &[u8], json: bool) -> Result<(), Box<dyn std::error::Error>> {
         let chat = Chat::decode(data)?;
         match chat.message {
             Some(chat::Message::ConversationList(proto_conversation)) => {
-                // Conversation table
-                println!("");
                 let group_id = Uuid::from_bytes(proto_conversation.group_id.try_into().unwrap());
 
-                println!("Conversation [ {} ]", group_id.to_string());
-                println!("");
-                println!("No. | Status | Sent At | Sender ID");
-                println!("  [Message ID] Received At");
-                println!("  Message Content");
-                println!("");
+                if json {
+                    let messages: Vec<serde_json::Value> = proto_conversation
+                        .message_list
+                        .iter()
+                        .filter_map(|message| {
+                            self.analyze_content(&message.content).ok().map(|content| {
+                                let status = MessageStatus::try_from(message.status)
+                                    .map(|s| format!("{:?}", s))
+                                    .unwrap_or_default();
+                                serde_json::json!({
+                                    "index": message.index,
+                                    "message_id": bs58::encode(&message.message_id).into_string(),
+                                    "sender_id": bs58::encode(&message.sender_id).into_string(),
+                                    "status": status,
+                                    "sent_at": message.sent_at,
+                                    "received_at": message.received_at,
+                                    "content": content,
+                                })
+                            })
+                        })
+                        .collect();
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&serde_json::json!({
+                            "group_id": group_id.to_string(),
+                            "messages": messages,
+                        }))?
+                    );
+                } else {
+                    println!("");
+                    println!("Conversation [ {} ]", group_id.to_string());
+                    println!("");
+                    println!("No. | Status | Sent At | Sender ID");
+                    println!("  [Message ID] Received At");
+                    println!("  Message Content");
+                    println!("");
 
-                // print all messages in the feed list
-                for message in proto_conversation.message_list {
-                    if let Ok(ss) = self.analyze_content(&message.content) {
-                        print! {"{} | ", message.index};
-                        match MessageStatus::try_from(message.status) {
-                            Ok(MessageStatus::Sending) => print!(".. | "),
-                            Ok(MessageStatus::Sent) => print!("✓. | "),
-                            Ok(MessageStatus::Confirmed) => print!("✓✓ | "),
-                            Ok(MessageStatus::ConfirmedByAll) => print!("✓✓✓| "),
-                            Ok(MessageStatus::Receiving) => print!("🚚 | "),
-                            Ok(MessageStatus::Received) => print!("📨 | "),
-                            Err(_) => {}
+                    for message in proto_conversation.message_list {
+                        if let Ok(ss) = self.analyze_content(&message.content) {
+                            print! {"{} | ", message.index};
+                            match MessageStatus::try_from(message.status) {
+                                Ok(MessageStatus::Sending) => print!(".. | "),
+                                Ok(MessageStatus::Sent) => print!("✓. | "),
+                                Ok(MessageStatus::Confirmed) => print!("✓✓ | "),
+                                Ok(MessageStatus::ConfirmedByAll) => print!("✓✓✓| "),
+                                Ok(MessageStatus::Receiving) => print!("🚚 | "),
+                                Ok(MessageStatus::Received) => print!("📨 | "),
+                                Err(_) => {}
+                            }
+
+                            print!("{} | ", message.sent_at);
+                            println!("{}", bs58::encode(message.sender_id).into_string());
+                            println!(
+                                " [{}] {}",
+                                bs58::encode(message.message_id).into_string(),
+                                message.received_at
+                            );
+
+                            for s in ss {
+                                println!("\t{}", s);
+                            }
+                            println!("");
                         }
-
-                        print!("{} | ", message.sent_at);
-                        println!("{}", bs58::encode(message.sender_id).into_string());
-                        println!(
-                            " [{}] {}",
-                            bs58::encode(message.message_id).into_string(),
-                            message.received_at
-                        );
-
-                        for s in ss {
-                            println!("\t{}", s);
-                        }
-                        println!("");
                     }
                 }
             }

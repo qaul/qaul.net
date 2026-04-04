@@ -29,9 +29,9 @@ use table::RoutingTable;
 use user_requester::{UserRequester, UserResponser};
 use users::Users;
 
+pub use qaul_proto::qaul_net_router_net_info as router_net_proto;
 /// Import protobuf message definition
 pub use qaul_proto::qaul_rpc_router as proto;
-pub use qaul_proto::qaul_net_router_net_info as router_net_proto;
 
 /// mutable state of router,
 /// used for storing the router configuration (global state - deprecated)

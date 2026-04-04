@@ -15,6 +15,10 @@ pub struct Cli {
     #[arg(short, long)]
     pub dir: Option<String>,
 
+    /// Specify if the output should be in JSON
+    #[arg(short, long, default_value = "false")]
+    pub json: bool,
+
     #[command(subcommand)]
     pub command: Commands,
 }
@@ -35,6 +39,8 @@ pub enum Commands {
     Chat(ChatArgs),
     /// chat files
     File(ChatFileArgs),
+    /// Router information
+    Router(RouterArgs),
 }
 
 #[derive(Args, Debug)]
@@ -241,6 +247,22 @@ pub enum ChatSubcmd {
         #[arg(short, long, default_value = "0")]
         index: u64,
     },
+}
+
+#[derive(Args, Debug)]
+pub struct RouterArgs {
+    #[command(subcommand)]
+    pub command: RouterSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum RouterSubcmd {
+    /// request and display routing table with per module connectivity per user
+    Table,
+    /// request and display neighbours list of all neighbouring nodes.
+    Neighbours,
+    /// request and display connections table, with all known connections per connection module.
+    Connections,
 }
 
 #[derive(Args, Debug)]

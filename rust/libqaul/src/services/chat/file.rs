@@ -32,9 +32,9 @@ use crate::{
 };
 use crate::{rpc::Rpc, services::group::GroupManage};
 
+pub use qaul_proto::qaul_net_chatfile as proto_net;
 /// Import protobuf message definition
 pub use qaul_proto::qaul_rpc_chatfile as proto_rpc;
-pub use qaul_proto::qaul_net_chatfile as proto_net;
 
 /// Size of the biggest file data package
 pub const DEF_PACKAGE_SIZE: u32 = 64000;

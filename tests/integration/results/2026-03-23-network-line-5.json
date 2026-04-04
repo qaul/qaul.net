@@ -1,0 +1,127 @@
+{
+  "topology": "line-5",
+  "node_count": 5,
+  "tests": {
+    "test_direct_messages": {
+      "passed": true,
+      "sender": "0000",
+      "recipient": "0004",
+      "snooper": "0002",
+      "delivery_time_s": 5,
+      "notes": "delivered in 5s, not seen on 0002",
+      "elapsed_s": 5.2
+    },
+    "test_feed_distribution": {
+      "passed": true,
+      "node_count": 5,
+      "message_count": 5,
+      "propagation_time_s": 1,
+      "notes": "all 5 nodes received all 5 messages in 1s",
+      "elapsed_s": 0.9
+    },
+    "test_degraded_links_30pct": {
+      "passed": true,
+      "loss_percent": 30,
+      "degraded_node": "0002",
+      "delivery_rates": {
+        "0000": {
+          "received": 10,
+          "sent": 10,
+          "rate_pct": 100
+        },
+        "0001": {
+          "received": 10,
+          "sent": 10,
+          "rate_pct": 100
+        },
+        "0002": {
+          "received": 10,
+          "sent": 10,
+          "rate_pct": 100
+        },
+        "0003": {
+          "received": 10,
+          "sent": 10,
+          "rate_pct": 100
+        },
+        "0004": {
+          "received": 10,
+          "sent": 10,
+          "rate_pct": 100
+        }
+      },
+      "notes": "30% loss on 0002: 0004 received 100%",
+      "elapsed_s": 91.8
+    },
+    "test_degraded_links_50pct": {
+      "passed": true,
+      "loss_percent": 50,
+      "degraded_node": "0002",
+      "delivery_rates": {
+        "0000": {
+          "received": 10,
+          "sent": 10,
+          "rate_pct": 100
+        },
+        "0001": {
+          "received": 10,
+          "sent": 10,
+          "rate_pct": 100
+        },
+        "0002": {
+          "received": 10,
+          "sent": 10,
+          "rate_pct": 100
+        },
+        "0003": {
+          "received": 10,
+          "sent": 10,
+          "rate_pct": 100
+        },
+        "0004": {
+          "received": 10,
+          "sent": 10,
+          "rate_pct": 100
+        }
+      },
+      "notes": "50% loss on 0002: 0004 received 100%",
+      "elapsed_s": 91.8
+    },
+    "test_degraded_links_80pct": {
+      "passed": false,
+      "loss_percent": 80,
+      "degraded_node": "0002",
+      "delivery_rates": {
+        "0000": {
+          "received": 10,
+          "sent": 10,
+          "rate_pct": 100
+        },
+        "0001": {
+          "received": 10,
+          "sent": 10,
+          "rate_pct": 100
+        },
+        "0002": {
+          "received": 0,
+          "sent": 10,
+          "rate_pct": 0
+        },
+        "0003": {
+          "received": 0,
+          "sent": 10,
+          "rate_pct": 0
+        },
+        "0004": {
+          "received": 0,
+          "sent": 10,
+          "rate_pct": 0
+        }
+      },
+      "notes": "80% loss on 0002: 0004 only 0% (min 50%)",
+      "elapsed_s": 91.8
+    }
+  },
+  "overall_passed": false,
+  "timestamp": "2026-03-23T14:35:03.154531+00:00"
+}

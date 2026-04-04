@@ -177,148 +177,262 @@ impl RpcCommand for GroupSubcmd {
             }
         }
     }
-    fn decode_response(&self, data: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
+    fn decode_response(&self, data: &[u8], json: bool) -> Result<(), Box<dyn std::error::Error>> {
         let group = Group::decode(data)?;
         match group.message {
-            Some(group::Message::GroupCreateResponse(create_group_response)) => {
-                println!("====================================");
-                println!("Group was created or updated");
-                let group_id = Uuid::from_bytes(create_group_response.group_id.try_into().unwrap());
-                println!("\tid: {}", group_id.to_string());
-            }
-            Some(group::Message::GroupRenameResponse(rename_group_response)) => {
-                let result = rename_group_response.result.unwrap();
-                println!("====================================");
-                println!("Group Rename status: {}", result.status);
-                let group_id = Uuid::from_bytes(rename_group_response.group_id.try_into().unwrap());
-                println!("\tid: {}", group_id.to_string());
-                if !result.status {
-                    println!("\terror: {}", result.message);
-                }
-            }
-            Some(group::Message::GroupInviteMemberResponse(invite_group_response)) => {
-                let result = invite_group_response.result.unwrap();
-                println!("====================================");
-                println!("Group Invite status: {}", result.status);
-                let group_id = Uuid::from_bytes(invite_group_response.group_id.try_into().unwrap());
-                println!("\tid: {}", group_id.to_string());
-                if !result.status {
-                    println!("\terror: {}", result.message);
-                }
-            }
-            Some(group::Message::GroupReplyInviteResponse(reply_group_response)) => {
-                let result = reply_group_response.result.unwrap();
-                println!("====================================");
-                println!("Reply Group Invite status: {}", result.status);
-                let group_id = Uuid::from_bytes(reply_group_response.group_id.try_into().unwrap());
-                println!("\tid: {}", group_id.to_string());
-                if !result.status {
-                    println!("\terror: {}", result.message);
-                }
-            }
-            Some(group::Message::GroupRemoveMemberResponse(remove_member_response)) => {
-                let result = remove_member_response.result.unwrap();
-                println!("====================================");
-                println!("Group Remove Member status: {}", result.status);
-                let group_id =
-                    Uuid::from_bytes(remove_member_response.group_id.try_into().unwrap());
-                println!("\tid: {}", group_id.to_string());
-                if !result.status {
-                    println!("\terror: {}", result.message);
-                }
-            }
-            Some(group::Message::GroupInfoResponse(group_info_response)) => {
-                // group
-                println!("====================================");
-                println!("Group Information");
-                let group_id = Uuid::from_bytes(group_info_response.group_id.try_into().unwrap());
-                println!("\tid: {}", group_id.to_string());
-                println!("\tname: {}", group_info_response.group_name.clone());
-                println!("\tcreated_at: {}", group_info_response.created_at);
-                println!("\tmembers: {}", group_info_response.members.len());
-            }
-            Some(group::Message::GroupListResponse(group_list_response)) => {
-                // List groups
-                println!("=============List Of Groups=================");
-                for group in group_list_response.groups {
-                    let group_id = uuid::Uuid::from_bytes(group.group_id.try_into().unwrap());
-                    let group_type: String;
-                    match group.is_direct_chat {
-                        true => group_type = "Direct".to_string(),
-                        false => group_type = "Group".to_string(),
-                    }
+            Some(group::Message::GroupCreateResponse(r)) => {
+                let group_id = Uuid::from_bytes(r.group_id.try_into().unwrap());
+                if json {
                     println!(
-                        "{} {} {}",
-                        group_type,
-                        group_id.to_string(),
-                        group.group_name.clone()
+                        "{}",
+                        serde_json::to_string_pretty(&serde_json::json!({
+                            "group_id": group_id.to_string(),
+                        }))?
                     );
-                    print!("\tstatus: ");
-                    match GroupStatus::try_from(group.status) {
-                        Ok(GroupStatus::Active) => println!("Active"),
-                        Ok(GroupStatus::InviteAccepted) => {
-                            println!("Invite Accepted")
-                        }
-                        Ok(GroupStatus::Deactivated) => println!("Deactivated"),
-                        Err(_) => println!("NOT SET"),
-                    }
-
-                    println!(
-                        "\tcreated_at: {}, members: {}",
-                        group.created_at,
-                        group.members.len()
-                    );
-                    for member in group.members {
-                        print!(
-                            "\t\t id: {} , state: ",
-                            bs58::encode(member.user_id.clone()).into_string()
-                        );
-                        match GroupMemberState::try_from(member.state) {
-                            Ok(GroupMemberState::Invited) => {
-                                print!("invited , role: ");
-                            }
-                            Ok(GroupMemberState::Activated) => {
-                                print!("activated , role: ");
-                            }
-                            Err(_) => {}
-                        }
-
-                        match GroupMemberRole::try_from(member.role) {
-                            Ok(GroupMemberRole::User) => {
-                                println!("user , sent: {}", member.last_message_index);
-                            }
-                            Ok(GroupMemberRole::Admin) => {
-                                println!("admin , sent: {}", member.last_message_index);
-                            }
-                            Err(_) => {}
-                        }
-                    }
-                    println!("\trevision: {}", group.revision);
-                    println!("\tunread messages: {}", group.unread_messages);
-                    println!("\tlast message:");
-                    println!(
-                        "\t\tsent_at: {} from: {}",
-                        group.last_message_at,
-                        bs58::encode(group.last_message_sender_id).into_string()
-                    );
-                    self.print_last_message(group.last_message);
+                } else {
+                    println!("====================================");
+                    println!("Group was created or updated");
+                    println!("\tid: {}", group_id.to_string());
                 }
             }
-            Some(group::Message::GroupInvitedResponse(group_invited_response)) => {
-                // List of pending invites
-                println!("=============List Of Invited=================");
-                for invite in group_invited_response.invited {
-                    if let Some(group) = invite.group {
+            Some(group::Message::GroupRenameResponse(r)) => {
+                let result = r.result.unwrap();
+                let group_id = Uuid::from_bytes(r.group_id.try_into().unwrap());
+                if json {
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&serde_json::json!({
+                            "group_id": group_id.to_string(),
+                            "success": result.status,
+                            "error": result.message,
+                        }))?
+                    );
+                } else {
+                    println!("====================================");
+                    println!("Group Rename status: {}", result.status);
+                    println!("\tid: {}", group_id.to_string());
+                    if !result.status {
+                        println!("\terror: {}", result.message);
+                    }
+                }
+            }
+            Some(group::Message::GroupInviteMemberResponse(r)) => {
+                let result = r.result.unwrap();
+                let group_id = Uuid::from_bytes(r.group_id.try_into().unwrap());
+                if json {
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&serde_json::json!({
+                            "group_id": group_id.to_string(),
+                            "success": result.status,
+                            "error": result.message,
+                        }))?
+                    );
+                } else {
+                    println!("====================================");
+                    println!("Group Invite status: {}", result.status);
+                    println!("\tid: {}", group_id.to_string());
+                    if !result.status {
+                        println!("\terror: {}", result.message);
+                    }
+                }
+            }
+            Some(group::Message::GroupReplyInviteResponse(r)) => {
+                let result = r.result.unwrap();
+                let group_id = Uuid::from_bytes(r.group_id.try_into().unwrap());
+                if json {
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&serde_json::json!({
+                            "group_id": group_id.to_string(),
+                            "success": result.status,
+                            "error": result.message,
+                        }))?
+                    );
+                } else {
+                    println!("====================================");
+                    println!("Reply Group Invite status: {}", result.status);
+                    println!("\tid: {}", group_id.to_string());
+                    if !result.status {
+                        println!("\terror: {}", result.message);
+                    }
+                }
+            }
+            Some(group::Message::GroupRemoveMemberResponse(r)) => {
+                let result = r.result.unwrap();
+                let group_id = Uuid::from_bytes(r.group_id.try_into().unwrap());
+                if json {
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&serde_json::json!({
+                            "group_id": group_id.to_string(),
+                            "success": result.status,
+                            "error": result.message,
+                        }))?
+                    );
+                } else {
+                    println!("====================================");
+                    println!("Group Remove Member status: {}", result.status);
+                    println!("\tid: {}", group_id.to_string());
+                    if !result.status {
+                        println!("\terror: {}", result.message);
+                    }
+                }
+            }
+            Some(group::Message::GroupInfoResponse(r)) => {
+                let group_id = Uuid::from_bytes(r.group_id.try_into().unwrap());
+                if json {
+                    let members: Vec<serde_json::Value> = r.members.iter().map(|m| {
+                        serde_json::json!({
+                            "user_id": bs58::encode(&m.user_id).into_string(),
+                            "state": GroupMemberState::try_from(m.state).map(|s| format!("{:?}", s)).unwrap_or_default(),
+                            "role": GroupMemberRole::try_from(m.role).map(|r| format!("{:?}", r)).unwrap_or_default(),
+                            "last_message_index": m.last_message_index,
+                        })
+                    }).collect();
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&serde_json::json!({
+                            "group_id": group_id.to_string(),
+                            "name": r.group_name,
+                            "created_at": r.created_at,
+                            "members": members,
+                        }))?
+                    );
+                } else {
+                    println!("====================================");
+                    println!("Group Information");
+                    println!("\tid: {}", group_id.to_string());
+                    println!("\tname: {}", r.group_name);
+                    println!("\tcreated_at: {}", r.created_at);
+                    println!("\tmembers: {}", r.members.len());
+                }
+            }
+            Some(group::Message::GroupListResponse(r)) => {
+                if json {
+                    let groups: Vec<serde_json::Value> = r.groups.iter().map(|group| {
+                        let group_id = uuid::Uuid::from_bytes(group.group_id.clone().try_into().unwrap());
+                        let status = GroupStatus::try_from(group.status)
+                            .map(|s| format!("{:?}", s))
+                            .unwrap_or_default();
+                        let members: Vec<serde_json::Value> = group.members.iter().map(|m| {
+                            serde_json::json!({
+                                "user_id": bs58::encode(&m.user_id).into_string(),
+                                "state": GroupMemberState::try_from(m.state).map(|s| format!("{:?}", s)).unwrap_or_default(),
+                                "role": GroupMemberRole::try_from(m.role).map(|r| format!("{:?}", r)).unwrap_or_default(),
+                                "last_message_index": m.last_message_index,
+                            })
+                        }).collect();
+                        serde_json::json!({
+                            "group_id": group_id.to_string(),
+                            "name": group.group_name,
+                            "is_direct_chat": group.is_direct_chat,
+                            "status": status,
+                            "created_at": group.created_at,
+                            "revision": group.revision,
+                            "unread_messages": group.unread_messages,
+                            "last_message_at": group.last_message_at,
+                            "last_message_sender_id": bs58::encode(&group.last_message_sender_id).into_string(),
+                            "members": members,
+                        })
+                    }).collect();
+                    println!("{}", serde_json::to_string_pretty(&groups)?);
+                } else {
+                    println!("=============List Of Groups=================");
+                    for group in r.groups {
                         let group_id = uuid::Uuid::from_bytes(group.group_id.try_into().unwrap());
-                        println!("id: {}", group_id.to_string());
-                        println!("\tname: {}", group.group_name.clone());
-                        println!("\tsender: {}", bs58::encode(invite.sender_id).into_string());
-                        println!("\treceived at: {}", invite.received_at);
+                        let group_type = if group.is_direct_chat {
+                            "Direct"
+                        } else {
+                            "Group"
+                        };
+                        println!(
+                            "{} {} {}",
+                            group_type,
+                            group_id.to_string(),
+                            group.group_name
+                        );
+                        print!("\tstatus: ");
+                        match GroupStatus::try_from(group.status) {
+                            Ok(GroupStatus::Active) => println!("Active"),
+                            Ok(GroupStatus::InviteAccepted) => println!("Invite Accepted"),
+                            Ok(GroupStatus::Deactivated) => println!("Deactivated"),
+                            Err(_) => println!("NOT SET"),
+                        }
                         println!(
                             "\tcreated_at: {}, members: {}",
-                            invite.received_at,
+                            group.created_at,
                             group.members.len()
                         );
+                        for member in group.members {
+                            print!(
+                                "\t\t id: {} , state: ",
+                                bs58::encode(member.user_id.clone()).into_string()
+                            );
+                            match GroupMemberState::try_from(member.state) {
+                                Ok(GroupMemberState::Invited) => print!("invited , role: "),
+                                Ok(GroupMemberState::Activated) => print!("activated , role: "),
+                                Err(_) => {}
+                            }
+                            match GroupMemberRole::try_from(member.role) {
+                                Ok(GroupMemberRole::User) => {
+                                    println!("user , sent: {}", member.last_message_index)
+                                }
+                                Ok(GroupMemberRole::Admin) => {
+                                    println!("admin , sent: {}", member.last_message_index)
+                                }
+                                Err(_) => {}
+                            }
+                        }
+                        println!("\trevision: {}", group.revision);
+                        println!("\tunread messages: {}", group.unread_messages);
+                        println!("\tlast message:");
+                        println!(
+                            "\t\tsent_at: {} from: {}",
+                            group.last_message_at,
+                            bs58::encode(group.last_message_sender_id).into_string()
+                        );
+                        self.print_last_message(group.last_message);
+                    }
+                }
+            }
+            Some(group::Message::GroupInvitedResponse(r)) => {
+                if json {
+                    let invited: Vec<serde_json::Value> = r
+                        .invited
+                        .iter()
+                        .filter_map(|invite| {
+                            invite.group.as_ref().map(|group| {
+                                let group_id = uuid::Uuid::from_bytes(
+                                    group.group_id.clone().try_into().unwrap(),
+                                );
+                                serde_json::json!({
+                                    "group_id": group_id.to_string(),
+                                    "name": group.group_name,
+                                    "sender_id": bs58::encode(&invite.sender_id).into_string(),
+                                    "received_at": invite.received_at,
+                                    "member_count": group.members.len(),
+                                })
+                            })
+                        })
+                        .collect();
+                    println!("{}", serde_json::to_string_pretty(&invited)?);
+                } else {
+                    println!("=============List Of Invited=================");
+                    for invite in r.invited {
+                        if let Some(group) = invite.group {
+                            let group_id =
+                                uuid::Uuid::from_bytes(group.group_id.try_into().unwrap());
+                            println!("id: {}", group_id.to_string());
+                            println!("\tname: {}", group.group_name);
+                            println!("\tsender: {}", bs58::encode(invite.sender_id).into_string());
+                            println!("\treceived at: {}", invite.received_at);
+                            println!(
+                                "\tcreated_at: {}, members: {}",
+                                invite.received_at,
+                                group.members.len()
+                            );
+                        }
                     }
                 }
             }

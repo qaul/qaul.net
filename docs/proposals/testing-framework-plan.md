@@ -108,10 +108,16 @@ qaul.net/
 
 Every test needs to talk to individual nodes. The way that works: each qauld instance runs inside a network namespace, but its working directory (`/tmp/qaul-<id>/`) is on the host filesystem. So `qauld-ctl --socket /tmp/qaul-<id>/qauld.sock` reaches it from the host without entering the namespace.
 
-The node wrapper just shells out to qauld-ctl and parses stdout:
+Now that qauld-ctl supports `--json`, the node wrapper uses it for all data-returning commands. This gives us two internal methods:
+
+- `_run(*args)` — for fire-and-forget commands that produce no structured output (e.g. `feed send`)
+- `_run_json(*args)` — for all data-returning commands; passes `--json` and returns a parsed Python dict or list
+
+This eliminates all string parsing. Every method that returns data works directly with Python objects.
 
 ```python
 import subprocess
+import json
 
 class Node:
     def __init__(self, node_id: str):
@@ -119,7 +125,7 @@ class Node:
         self.socket = f"/tmp/qaul-{node_id}/qauld.sock"
 
     def _run(self, *args) -> str:
-        """Run a qauld-ctl command against this node, return stdout."""
+        """Run a qauld-ctl command, return raw stdout."""
         cmd = ["qauld-ctl", "--socket", self.socket] + list(args)
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
         if result.returncode != 0:
@@ -128,55 +134,80 @@ class Node:
             )
         return result.stdout.strip()
 
+    def _run_json(self, *args):
+        """Run a qauld-ctl command with --json, return parsed output."""
+        output = self._run("--json", *args)
+        return json.loads(output)
+
     def is_alive(self) -> bool:
         """Check if qauld is reachable on this node."""
         try:
-            self._run("node", "info")
+            self._run_json("node", "info")
             return True
         except Exception:
             return False
 
-    def node_id(self) -> str:
-        """Get the qaul node ID (libp2p peer ID)."""
-        output = self._run("node", "info")
-        # parse "Node ID: <id>" from output
-        for line in output.splitlines():
-            if line.startswith("Node ID:"):
-                return line.split(":", 1)[1].strip()
-        raise ValueError(f"Could not parse node ID from: {output}")
+    def node_info(self) -> dict:
+        """Return the full node info dict: node_id, addresses."""
+        return self._run_json("node", "info")
 
-    def known_users(self) -> list[str]:
-        """Return list of known user IDs visible from this node."""
-        output = self._run("users", "list")
-        users = []
-        for line in output.splitlines():
-            # each line has format: N | name | <base58-id> | ...
-            parts = [p.strip() for p in line.split("|")]
-            if len(parts) >= 3 and parts[2]:
-                users.append(parts[2])
-        return users
+    def node_id(self) -> str:
+        """Get the libp2p peer ID of this node."""
+        return self.node_info()["node_id"]
+
+    def known_users(self) -> list[dict]:
+        """Return list of all known users as dicts."""
+        return self._run_json("users", "list")
+
+    def known_user_ids(self) -> list[str]:
+        """Return just the IDs of all known users."""
+        return [u["id"] for u in self.known_users()]
+
+    def get_user(self, user_id: str) -> dict:
+        """Get a single user by ID."""
+        return self._run_json("users", "get", "--user-id", user_id)
 
     def send_feed_message(self, message: str):
-        """Send a feed message into the network."""
+        """Send a feed message (fire-and-forget, no JSON needed)."""
         self._run("feed", "send", "--message", message)
 
-    def feed_messages(self) -> list[str]:
-        """Return feed message contents visible from this node."""
-        output = self._run("feed", "list")
-        messages = []
-        for line in output.splitlines():
-            if line.startswith("  "):  # indented content lines
-                messages.append(line.strip())
-        return messages
+    def feed_messages(self) -> list[dict]:
+        """Return all feed messages as a list of dicts."""
+        return self._run_json("feed", "list")
 
-    def create_account(self, name: str):
-        self._run("account", "create", "--username", name)
+    def feed_message_contents(self) -> list[str]:
+        """Return just the content strings of all feed messages."""
+        return [m["content"] for m in self.feed_messages()]
 
-    def default_account(self) -> str:
-        return self._run("account", "default")
+    def default_account(self) -> dict:
+        """Return the default account info dict."""
+        return self._run_json("account", "default")
+
+    def create_account(self, name: str, password: str = None) -> dict:
+        """Create a new user account, return the created account dict."""
+        args = ["account", "create", "--username", name]
+        if password:
+            args += ["--password", password]
+        return self._run_json(*args)
+
+    def groups(self) -> list[dict]:
+        """Return all groups this node is a member of."""
+        return self._run_json("group", "list")
+
+    def group_info(self, group_id: str) -> dict:
+        """Return info for a specific group."""
+        return self._run_json("group", "info", "--id", group_id)
+
+    def conversation(self, group_id: str, index: int = 0) -> dict:
+        """Return conversation history for a group."""
+        return self._run_json("chat", "conversation", "--group-id", group_id, "--index", str(index))
 ```
 
-The parsing logic here depends on the exact output format of each `qauld-ctl` command — you'll need to adjust these as you run them and see what comes out. The structure above is intentionally simple: just string parsing on the CLI output, no JSON mode needed for now.
+The key properties of this design:
+- No string parsing anywhere — all structured data comes back as Python dicts/lists via `json.loads`
+- `_run_json` is a one-liner that just prepends `--json` to any command
+- Methods that return data always return typed Python objects, making assertions in tests direct and readable
+- Fire-and-forget commands (`feed send`, `chat send`) still use `_run` since they produce no output
 
 ---
 
@@ -247,7 +278,9 @@ The default meshnet-lab path is `/home/qaul/meshnet-lab` but can be overridden w
 
 ## Step 5: Writing a test
 
-Tests are just Python scripts. Here's what a node discovery test looks like:
+Tests are just Python scripts. With JSON output, assertions are direct comparisons on Python objects — no regex, no line splitting, no fragile string matching.
+
+Here's what a node discovery test looks like:
 
 ```python
 # test_user_discovery.py
@@ -279,7 +312,7 @@ def teardown():
 def test_nodes_discover_neighbors(wait_seconds=60):
     """
     After waiting for the gossip protocol to propagate,
-    the first node should be able to see at least the second node's user.
+    node 0000 should be able to see node 0001's user.
     """
     print(f"  waiting {wait_seconds}s for node discovery...")
     time.sleep(wait_seconds)
@@ -288,18 +321,105 @@ def test_nodes_discover_neighbors(wait_seconds=60):
     node_b = Node("0001")
 
     id_b = node_b.node_id()
-    known_by_a = node_a.known_users()
+    known_ids = node_a.known_user_ids()
 
-    assert id_b in known_by_a, (
+    assert id_b in known_ids, (
         f"node 0000 does not know about node 0001 after {wait_seconds}s\n"
-        f"  known users: {known_by_a}"
+        f"  known user ids: {known_ids}"
     )
     print("  PASS: node 0000 knows about node 0001")
+
+def test_user_fields_are_present():
+    """
+    Users returned by users list should have all expected fields.
+    """
+    node = Node("0000")
+    users = node.known_users()
+
+    assert len(users) > 0, "node 0000 has no known users"
+
+    user = users[0]
+    for field in ("id", "name", "verified", "blocked", "connectivity", "group_id", "public_key"):
+        assert field in user, f"user entry missing field: {field}"
+
+    print("  PASS: user entries contain all expected fields")
 
 if __name__ == "__main__":
     try:
         setup()
         test_nodes_discover_neighbors()
+        test_user_fields_are_present()
+    finally:
+        teardown()
+```
+
+And a feed message routing test:
+
+```python
+# test_message_routing.py
+#
+# Checks that a feed message sent from node 0000 eventually
+# appears on node 0004 (4 hops away).
+
+import time
+import sys
+sys.path.insert(0, ".")
+
+from lib.network import apply_topology, clear_topology, start_qaul, stop_qaul, wait_for_nodes
+from lib.node import Node
+
+TOPOLOGY = "topologies/line-5.json"
+NODE_IDS = [f"{i:04x}" for i in range(5)]
+TEST_MESSAGE = "hello from node 0"
+
+def setup():
+    apply_topology(TOPOLOGY)
+    start_qaul()
+    wait_for_nodes(NODE_IDS, timeout=30)
+
+def teardown():
+    stop_qaul()
+    clear_topology()
+
+def test_feed_message_reaches_far_node(wait_seconds=90):
+    node_sender = Node("0000")
+    node_receiver = Node("0004")
+
+    node_sender.send_feed_message(TEST_MESSAGE)
+
+    print(f"  waiting {wait_seconds}s for message propagation...")
+    time.sleep(wait_seconds)
+
+    contents = node_receiver.feed_message_contents()
+
+    assert TEST_MESSAGE in contents, (
+        f"message '{TEST_MESSAGE}' not found on node 0004 after {wait_seconds}s\n"
+        f"  messages seen: {contents}"
+    )
+    print("  PASS: feed message reached node 0004")
+
+def test_feed_message_fields_are_present():
+    """
+    Feed messages should have all expected fields in JSON output.
+    """
+    node = Node("0000")
+    messages = node.feed_messages()
+
+    if not messages:
+        print("  SKIP: no feed messages yet")
+        return
+
+    msg = messages[0]
+    for field in ("index", "message_id", "sender_id", "content", "time_sent", "timestamp_sent"):
+        assert field in msg, f"feed message missing field: {field}"
+
+    print("  PASS: feed message entries contain all expected fields")
+
+if __name__ == "__main__":
+    try:
+        setup()
+        test_feed_message_reaches_far_node()
+        test_feed_message_fields_are_present()
     finally:
         teardown()
 ```
@@ -395,15 +515,16 @@ With this you can write tests that specifically check behaviour under degraded l
 
 ## Implementation order
 
-1. Build qauld-ctl from source on the server (`cargo build --release -p qauld-ctl`), then create a symlink: `ln -s /home/qaul/qaul.net/rust/target/release/qauld-ctl ~/bin/qauld-ctl`
-2. Fix `qaul_start.sh` in `/home/qaul/meshnet-lab/protocols/` — update the PID guard (the only change needed, qauld is already on PATH)
-3. Manually verify meshnet-lab works: create a 3-node line, start qaul, confirm sockets appear at `/tmp/qaul-*/qauld.sock`
-4. Manually run `qauld-ctl --socket /tmp/qaul-0000/qauld.sock node info` from the host — confirm it works
-5. Create `tests/integration/` in the qaul.net repo, write `lib/node.py`, test each method manually against a live node
-6. Write `lib/network.py`
-7. Write the first test (`test_node_startup.py`) — just checks all nodes come up and respond
-8. Write `test_user_discovery.py`
-9. Write `test_message_routing.py` (feed messages)
-10. Write `run.py`
+1. ✅ Build qauld-ctl from source on the server, create symlink at `~/bin/qauld-ctl`
+2. ✅ Fix `qaul_start.sh` PID guard
+3. ✅ Manually verify meshnet-lab + qaul works (3-node line topology)
+4. ✅ Manually verify qauld-ctl reaches a node via socket
+5. ✅ Add `--json` flag to qauld-ctl (all commands updated)
+6. Create `tests/integration/` in the qaul.net repo, write `lib/node.py` using `_run_json`
+7. Write `lib/network.py`
+8. Write `test_node_startup.py` — checks all nodes come up and `node info` returns valid JSON with expected fields
+9. Write `test_user_discovery.py` — checks node ID propagation and user entry field structure
+10. Write `test_message_routing.py` — checks feed message propagation across hops
+11. Write `run.py`
 
-The hard part is steps 7 and 8 — figuring out how long to wait for qaul's gossip protocol to propagate across N hops. This needs empirical measurement on the server before you can set realistic timeouts in the tests. The meshnet-lab `convergence1` test scenario is a good reference for how to approach this: start nodes, then poll for connectivity at increasing intervals.
+The hard part is steps 9 and 10 — figuring out how long to wait for qaul's gossip protocol to propagate across N hops. This needs empirical measurement on the server before you can set realistic timeouts in the tests. The meshnet-lab `convergence1` test scenario is a good reference for how to approach this: start nodes, then poll for connectivity at increasing intervals rather than sleeping a fixed duration.
