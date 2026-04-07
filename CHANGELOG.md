@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [2.0.0 Release Candidate 5] 2026-03-29
+
+Added
+
+- qauld-ctl binary to manage qauld daemon
+- New UI design of main navigation
+- linux BLE module
+- qaul specific BLE transport-encryption (still optional)
+- paginated loading for RPC layer
+
+Changed
+
+- Upgraded libp2p to current version 0.56.0
+  - Changed async_std to tokio
+- Upgraded rust libraries to the newest version
+- Upgraded flutter UI toolchain to newest version, with up to date libraries and better more performant architecture
+- Speed and memory improvements of libqaul
+- Better Android BLE GATT communication
+
+Fixed
+
+- fixed various bugs
+
 ## [2.0.0 Release Candidate 4] 2025-08-29
 
 Changed
