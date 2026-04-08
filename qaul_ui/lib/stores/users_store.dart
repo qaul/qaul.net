@@ -7,6 +7,7 @@ final usersStoreProvider = NotifierProvider<UsersStore, List<User>>(
 class UsersStore extends Notifier<List<User>> {
   PaginationState? _pagination;
   PaginationState? get pagination => _pagination;
+  final _inFlightByUserId = <String, Future<User?>>{};
 
   Timer? _pollingTimer;
   static const _pollingInterval = Duration(seconds: 3);
@@ -61,17 +62,25 @@ class UsersStore extends Notifier<List<User>> {
     final match = state.where((u) => u.idBase58 == idBase58);
     if (match.isNotEmpty) return match.first;
     try {
+      final inFlight = _inFlightByUserId[idBase58];
+      if (inFlight != null) return inFlight;
+
       final worker = ref.read(qaulWorkerProvider);
       final userId = Uint8List.fromList(Base58Decode(idBase58));
-      return worker.getUserById(userId);
+      final request = worker.getUserById(userId);
+      _inFlightByUserId[idBase58] = request;
+
+      final user = await request;
+      if (user != null) {
+        _updateMany([user]);
+        _syncLookup();
+      }
+      return user;
     } catch (_) {
       return null;
+    } finally {
+      _inFlightByUserId.remove(idBase58);
     }
-  }
-
-  void mergeResolvedRpcUser(User u) {
-    _updateMany([u]);
-    _syncLookup();
   }
 
   /// Always hits the RPC, bypassing the local-first check in [getByUserID].

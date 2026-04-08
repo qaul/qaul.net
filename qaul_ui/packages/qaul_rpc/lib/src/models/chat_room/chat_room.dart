@@ -75,13 +75,13 @@ class ChatRoom with EquatableMixin implements Comparable {
   }
 
   factory ChatRoom.fromRpcGroupInfo(GroupInfo g, List<User> users) {
-    final members = <ChatRoomUser>[];
-
-    for (final user in users) {
-      final m = g.members.firstWhereOrNull((m) => m.userId.equals(user.id));
-      if (m == null) continue;
-      members.add(ChatRoomUser.fromUser(user, m));
-    }
+    final usersById = <String, User>{for (final u in users) u.idBase58: u};
+    final members = g.members.map((m) {
+      final memberId = Uint8List.fromList(m.userId);
+      final user = usersById[Base58Encode(memberId)] ??
+          User(name: 'Name Undefined', id: memberId);
+      return ChatRoomUser.fromUser(user, m);
+    }).toList();
 
     return ChatRoom(
       conversationId: Uint8List.fromList(g.groupId),

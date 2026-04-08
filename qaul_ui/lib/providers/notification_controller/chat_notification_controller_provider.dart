@@ -27,7 +27,7 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
         return _ChatData.fromJson(jsonDecode(e));
       }));
     }
-    ref.read(qaulWorkerProvider).getAllChatRooms();
+    await ref.read(groupStoreProvider.notifier).refreshChatRooms();
     _log.config(
         'Initialized:\n\t· User: ${localUser.name}\n\t· Cached chats: $_chats');
   }
