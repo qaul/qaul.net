@@ -35,9 +35,11 @@ class _ChatState extends _BaseTabState<_Chat> {
       ..sort();
 
     final refreshChatsAndInvites = useCallback(() async {
-      final worker = ref.read(qaulWorkerProvider);
-      worker.getAllChatRooms();
-      worker.getGroupInvitesReceived();
+      final groups = ref.read(groupStoreProvider.notifier);
+      await Future.wait([
+        groups.refreshChatRooms(),
+        groups.refreshGroupInvites(),
+      ]);
     }, []);
 
     final mobile =

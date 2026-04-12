@@ -14,3 +14,4 @@ import 'package:utils/utils.dart';
 
 part 'users_store.dart';
 part 'feed_message_store.dart';
+part 'group_store.dart';

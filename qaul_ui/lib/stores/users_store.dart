@@ -7,6 +7,7 @@ final usersStoreProvider = NotifierProvider<UsersStore, List<User>>(
 class UsersStore extends Notifier<List<User>> {
   PaginationState? _pagination;
   PaginationState? get pagination => _pagination;
+  final _inFlightByUserId = <String, Future<User?>>{};
 
   Timer? _pollingTimer;
   static const _pollingInterval = Duration(seconds: 3);
@@ -57,21 +58,42 @@ class UsersStore extends Notifier<List<User>> {
     return findMemberInRoom(otherMember.id, room);
   }
 
-  Future<User?> getByUserID(String idBase58) async {
+  Future<User?> getByUserID(String idBase58) {
     final match = state.where((u) => u.idBase58 == idBase58);
-    if (match.isNotEmpty) return match.first;
+    if (match.isNotEmpty) return Future.value(match.first);
+
+    final inFlight = _inFlightByUserId[idBase58];
+    if (inFlight != null) return inFlight;
+
+    final Uint8List userId;
     try {
-      final worker = ref.read(qaulWorkerProvider);
-      final userId = Uint8List.fromList(Base58Decode(idBase58));
-      return worker.getUserById(userId);
+      userId = Uint8List.fromList(Base58Decode(idBase58));
     } catch (_) {
-      return null;
+      return Future.value(null);
     }
+
+    final request = _fetchAndMergeUser(idBase58, userId);
+    _inFlightByUserId[idBase58] = request;
+    return request;
   }
 
-  void mergeResolvedRpcUser(User u) {
-    _updateMany([u]);
-    _syncLookup();
+  /// Owning fetch path for [getByUserID]. The `try/finally` here is safe
+  /// because this is the only invocation that ever drives the in-flight
+  /// future to completion — concurrent callers receive the future via
+  /// [getByUserID]'s in-flight check, never re-enter this method.
+  Future<User?> _fetchAndMergeUser(String idBase58, Uint8List userId) async {
+    try {
+      final user = await ref.read(qaulWorkerProvider).getUserById(userId);
+      if (user != null) {
+        _updateMany([user]);
+        _syncLookup();
+      }
+      return user;
+    } catch (_) {
+      return null;
+    } finally {
+      _inFlightByUserId.remove(idBase58);
+    }
   }
 
   /// Always hits the RPC, bypassing the local-first check in [getByUserID].

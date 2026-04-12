@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:fast_base58/fast_base58.dart';
@@ -14,6 +15,20 @@ class _MockWorkerForGetByUserID extends StubLibqaulWorker {
   @override
   Future<User?> getUserById(Uint8List userId) =>
       Future.value(getUserByIdResult);
+}
+
+/// Mock worker whose `getUserById` future is held open by an external
+/// `Completer`, so tests can fire concurrent callers before the RPC resolves.
+class _DeferredMockWorkerForGetByUserID extends StubLibqaulWorker {
+  _DeferredMockWorkerForGetByUserID(super.ref);
+  final completer = Completer<User?>();
+  int callCount = 0;
+
+  @override
+  Future<User?> getUserById(Uint8List userId) {
+    callCount++;
+    return completer.future;
+  }
 }
 
 class _MockWorkerForGetMoreUsers extends StubLibqaulWorker {
@@ -136,6 +151,124 @@ void main() {
     final result = await store.getByUserID(unknownIdBase58);
 
     expect(result, isNull);
+  });
+
+  group('getByUserID dedup', () {
+    test('concurrent callers share a single RPC and one state merge',
+        () async {
+      final user = User(
+        name: 'Shared',
+        id: Uint8List.fromList('shared_user_id'.codeUnits),
+      );
+
+      late _DeferredMockWorkerForGetByUserID mockWorker;
+      final container = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith((_) => defaultUser),
+          qaulWorkerProvider.overrideWith((ref) {
+            mockWorker = _DeferredMockWorkerForGetByUserID(ref);
+            return mockWorker;
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final store = container.read(usersStoreProvider.notifier);
+
+      // Fire three concurrent callers BEFORE the RPC resolves.
+      final f1 = store.getByUserID(user.idBase58);
+      final f2 = store.getByUserID(user.idBase58);
+      final f3 = store.getByUserID(user.idBase58);
+
+      // Only one underlying RPC should have been dispatched.
+      expect(mockWorker.callCount, 1);
+
+      mockWorker.completer.complete(user);
+      final results = await Future.wait([f1, f2, f3]);
+
+      expect(results.every((r) => r?.idBase58 == user.idBase58), isTrue);
+      expect(mockWorker.callCount, 1);
+
+      // The user is merged into state exactly once.
+      final state = container.read(usersStoreProvider);
+      expect(state.where((u) => u.idBase58 == user.idBase58).length, 1);
+    });
+
+    test('in-flight cache is released after the RPC completes', () async {
+      final user = User(
+        name: 'Released',
+        id: Uint8List.fromList('released_user_id'.codeUnits),
+      );
+
+      late _DeferredMockWorkerForGetByUserID mockWorker;
+      final container = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith((_) => defaultUser),
+          qaulWorkerProvider.overrideWith((ref) {
+            mockWorker = _DeferredMockWorkerForGetByUserID(ref);
+            return mockWorker;
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final store = container.read(usersStoreProvider.notifier);
+
+      final first = store.getByUserID(user.idBase58);
+      mockWorker.completer.complete(user);
+      await first;
+
+      // Second call hits the local-first check and does not dispatch a new RPC.
+      final cached = await store.getByUserID(user.idBase58);
+      expect(cached?.idBase58, user.idBase58);
+      expect(mockWorker.callCount, 1);
+    });
+
+    test('error path dedups, returns null, and clears the in-flight entry',
+        () async {
+      final unknownIdBase58 = User(
+        name: 'X',
+        id: Uint8List.fromList('error_user_id'.codeUnits),
+      ).idBase58;
+
+      late _DeferredMockWorkerForGetByUserID mockWorker;
+      final container = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith((_) => defaultUser),
+          qaulWorkerProvider.overrideWith((ref) {
+            mockWorker = _DeferredMockWorkerForGetByUserID(ref);
+            return mockWorker;
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final store = container.read(usersStoreProvider.notifier);
+
+      final f1 = store.getByUserID(unknownIdBase58);
+      final f2 = store.getByUserID(unknownIdBase58);
+      expect(mockWorker.callCount, 1);
+
+      mockWorker.completer.completeError(StateError('boom'));
+      final results = await Future.wait([f1, f2]);
+
+      expect(results, [null, null]);
+      expect(mockWorker.callCount, 1);
+      expect(
+        container
+            .read(usersStoreProvider)
+            .any((u) => u.idBase58 == unknownIdBase58),
+        isFalse,
+      );
+
+      // A follow-up call must dispatch a fresh RPC, proving the `finally`
+      // in `_fetchAndMergeUser` cleared the in-flight entry on the error path.
+      final follow = store.getByUserID(unknownIdBase58);
+      expect(mockWorker.callCount, 2);
+      // The mock's completer has already errored; the new fetch awaits the
+      // same already-errored future and is caught by the inner `try/catch`.
+      expect(await follow, isNull);
+    });
   });
 
   test('store state includes all users including blocked', () async {

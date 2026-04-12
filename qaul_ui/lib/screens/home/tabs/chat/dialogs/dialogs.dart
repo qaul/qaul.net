@@ -55,8 +55,6 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final worker = ref.read(qaulWorkerProvider);
-
     final loading = useState(false);
     final nameCtrl = useTextEditingController();
 
@@ -103,7 +101,7 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
                 loading.value = true;
 
                 var name = nameCtrl.text;
-                await createChatGroup(name, worker, ref);
+                await createChatGroup(name, ref);
                 if (!context.mounted) return;
 
                 final group = ref
@@ -139,14 +137,13 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
     );
   }
 
-  Future<void> createChatGroup(
-      String name, LibqaulWorker worker, WidgetRef ref) async {
-    worker.createGroup(name);
+  Future<void> createChatGroup(String name, WidgetRef ref) async {
+    ref.read(qaulWorkerProvider).createGroup(name);
     for (var i = 0; i < 60; i++) {
       final groups = ref.read(chatRoomsProvider);
       if (groups.where((g) => g.name == name).isNotEmpty) break;
 
-      worker.getAllChatRooms();
+      await ref.read(groupStoreProvider.notifier).refreshChatRooms();
       await Future.delayed(const Duration(milliseconds: 1000));
     }
   }

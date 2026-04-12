@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
 import 'package:fast_base58/fast_base58.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hooks_riverpod/legacy.dart';
 
 final defaultUserProvider = StateProvider<User?>((ref) => null);
@@ -13,16 +12,6 @@ final defaultUserProvider = StateProvider<User?>((ref) => null);
 /// (which live in the `qaul_rpc` package and cannot import app-layer stores)
 /// can look up users during message decoding.
 final userLookupProvider = StateProvider<List<User>>((ref) => []);
-
-/// Resolves a user by raw id bytes when they are missing from [userLookupProvider].
-///
-/// The app must override this (typically to call [LibqaulWorker.getUserById]) so group
-/// and chat decoding can load members that are not in the paginated user list.
-final fetchUserByIdForRpcProvider =
-    Provider<Future<User?> Function(Uint8List userId)?>((ref) => null);
-
-/// When a user is fetched during group decoding, the app may merge them into [UsersStore].
-final onGroupMemberUserResolvedProvider = Provider<void Function(User)?>((ref) => null);
 
 class PaginationState {
   const PaginationState({
