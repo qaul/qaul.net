@@ -58,19 +58,32 @@ class UsersStore extends Notifier<List<User>> {
     return findMemberInRoom(otherMember.id, room);
   }
 
-  Future<User?> getByUserID(String idBase58) async {
+  Future<User?> getByUserID(String idBase58) {
     final match = state.where((u) => u.idBase58 == idBase58);
-    if (match.isNotEmpty) return match.first;
+    if (match.isNotEmpty) return Future.value(match.first);
+
+    final inFlight = _inFlightByUserId[idBase58];
+    if (inFlight != null) return inFlight;
+
+    final Uint8List userId;
     try {
-      final inFlight = _inFlightByUserId[idBase58];
-      if (inFlight != null) return inFlight;
+      userId = Uint8List.fromList(Base58Decode(idBase58));
+    } catch (_) {
+      return Future.value(null);
+    }
 
-      final worker = ref.read(qaulWorkerProvider);
-      final userId = Uint8List.fromList(Base58Decode(idBase58));
-      final request = worker.getUserById(userId);
-      _inFlightByUserId[idBase58] = request;
+    final request = _fetchAndMergeUser(idBase58, userId);
+    _inFlightByUserId[idBase58] = request;
+    return request;
+  }
 
-      final user = await request;
+  /// Owning fetch path for [getByUserID]. The `try/finally` here is safe
+  /// because this is the only invocation that ever drives the in-flight
+  /// future to completion — concurrent callers receive the future via
+  /// [getByUserID]'s in-flight check, never re-enter this method.
+  Future<User?> _fetchAndMergeUser(String idBase58, Uint8List userId) async {
+    try {
+      final user = await ref.read(qaulWorkerProvider).getUserById(userId);
       if (user != null) {
         _updateMany([user]);
         _syncLookup();
