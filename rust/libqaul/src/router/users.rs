@@ -72,6 +72,7 @@ impl Users {
                                     updated_at: 0,
                                     signed_profile_bytes: Vec::new(),
                                     signed_profile_signature: Vec::new(),
+                                    preferred_custody_route: Vec::new(),
                                 };
                                 // Re-save in new format
                                 DbUsers::add_user(migrated.clone());
@@ -85,9 +86,9 @@ impl Users {
                     }
                 };
                 // encode values from bytes
-                let q8id = QaulId::bytes_to_q8id(user.id.clone());
-                let id = PeerId::from_bytes(&user.id).unwrap();
-                let key = PublicKey::try_decode_protobuf(&user.key).unwrap();
+                let q8id = QaulId::bytes_to_q8id(user_data.id.clone());
+                let id = PeerId::from_bytes(&user_data.id).unwrap();
+                let key = PublicKey::try_decode_protobuf(&user_data.key).unwrap();
                 // fill result into user table
                 users.users.insert(
                     q8id,
@@ -103,6 +104,7 @@ impl Users {
                         updated_at: user_data.updated_at,
                         signed_profile_bytes: user_data.signed_profile_bytes,
                         signed_profile_signature: user_data.signed_profile_signature,
+                        preferred_custody_route: user_data.preferred_custody_route,
                     },
                 );
             }
@@ -112,20 +114,8 @@ impl Users {
     /// add a new user
     ///
     /// This user will be added to the users list in memory and to the data base
-    pub fn add(
-        id: PeerId,
-        key: PublicKey,
-        name: String,
-        verified: bool,
-        blocked: bool,
-        bio: String,
-        avatar: Vec<u8>,
-        version: u64,
-        updated_at: u64,
-        signed_profile_bytes: Vec<u8>,
-        signed_profile_signature: Vec<u8>,
-    ) {
-        let id_bytes = id.to_bytes();
+    pub fn add(user: User) {
+        let id_bytes = user.id.to_bytes();
         let q8id = QaulId::bytes_to_q8id(id_bytes.clone());
 
         DbUsers::add_user(UserData {
@@ -140,35 +130,17 @@ impl Users {
             updated_at: user.updated_at,
             signed_profile_bytes: user.signed_profile_bytes.clone(),
             signed_profile_signature: user.signed_profile_signature.clone(),
+            preferred_custody_route: user.preferred_custody_route.clone(),
         });
 
         let mut users = USERS.get().write().unwrap();
-<<<<<<< HEAD
         if users.users.len() >= 100_000 {
             log::warn!(
                 "users table has reached {} entries; possible resource exhaustion",
                 users.users.len()
             );
         }
-        users.users.insert(
-            q8id,
-            User {
-                id,
-                key,
-                name,
-                verified,
-                blocked,
-                bio,
-                avatar,
-                version,
-                updated_at,
-                signed_profile_bytes,
-                signed_profile_signature,
-            },
-        );
-=======
         users.users.insert(q8id, user);
->>>>>>> 3b1cb142 (simplify)
     }
 
     /// add a new user to the users list, and check whether the
@@ -198,6 +170,7 @@ impl Users {
             bio: String::new(), avatar: Vec::new(),
             version: 0, updated_at: 0,
             signed_profile_bytes: Vec::new(), signed_profile_signature: Vec::new(),
+            preferred_custody_route: Vec::new(),
         });
     }
 
@@ -311,6 +284,7 @@ impl Users {
             bio: user.bio.clone(),
             version: user.version,
             updated_at: user.updated_at,
+            preferred_custody_route: user.preferred_custody_route.clone(),
         };
 
         let profile_bytes = profile.encode_to_vec();
@@ -402,6 +376,7 @@ impl Users {
                             avatar: profile.avatar.clone(),
                             version: profile.version,
                             updated_at: profile.updated_at,
+                            preferred_custody_route: profile.preferred_custody_route.clone(), // wired after proto regen
                             signed_profile_bytes: signed.profile.clone(),
                             signed_profile_signature: signed.signature.clone(),
                         });
@@ -507,6 +482,7 @@ impl Users {
                                     updated_at: user_result.updated_at,
                                     signed_profile_bytes: user_result.signed_profile_bytes.clone(),
                                     signed_profile_signature: user_result.signed_profile_signature.clone(),
+                                    preferred_custody_route: user_result.preferred_custody_route.clone(),
                                 });
                             },
                         );
@@ -664,6 +640,9 @@ pub struct User {
     pub updated_at: u64,
     pub signed_profile_bytes: Vec<u8>,
     pub signed_profile_signature: Vec<u8>,
+    /// Preferred custody route for DTN V2 delivery when this user is offline.
+    /// Each entry is a PeerId (38 bytes) of a trusted custodian, in priority order.
+    pub preferred_custody_route: Vec<Vec<u8>>,
 }
 
 /// Legacy user structure for backward-compatible deserialization
@@ -690,6 +669,8 @@ pub struct UserData {
     pub updated_at: u64,
     pub signed_profile_bytes: Vec<u8>,
     pub signed_profile_signature: Vec<u8>,
+    #[serde(default)]
+    pub preferred_custody_route: Vec<Vec<u8>>,
 }
 
 fn send_users_rpc_message(message: proto::users::Message, request_id: String) {
@@ -753,6 +734,7 @@ fn build_user_entry(
         avatar: user.avatar.clone(),
         profile_version: user.version,
         profile_updated_at: user.updated_at,
+        preferred_custody_route: user.preferred_custody_route.clone(),
     }
 }
 
@@ -863,6 +845,7 @@ mod tests {
                     updated_at: 0,
                     signed_profile_bytes: Vec::new(),
                     signed_profile_signature: Vec::new(),
+                    preferred_custody_route: Vec::new(),
                 },
             );
             ids.push(id);
@@ -1155,6 +1138,7 @@ mod tests {
             updated_at: 12345,
             signed_profile_bytes: Vec::new(),
             signed_profile_signature: Vec::new(),
+            preferred_custody_route: Vec::new(),
         };
 
         let signed = Users::create_signed_profile(&user, &kp);
@@ -1187,6 +1171,7 @@ mod tests {
             updated_at: 0,
             signed_profile_bytes: Vec::new(),
             signed_profile_signature: Vec::new(),
+            preferred_custody_route: Vec::new(),
         };
 
         let mut signed = Users::create_signed_profile(&user, &kp);
@@ -1218,6 +1203,7 @@ mod tests {
             updated_at: 0,
             signed_profile_bytes: Vec::new(),
             signed_profile_signature: Vec::new(),
+            preferred_custody_route: Vec::new(),
         };
 
         // Sign with wrong key

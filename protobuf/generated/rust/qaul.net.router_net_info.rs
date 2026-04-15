@@ -117,6 +117,10 @@ pub struct UserProfile {
     /// timestamp in milliseconds since epoch
     #[prost(uint64, tag = "7")]
     pub updated_at: u64,
+    /// preferred custody route for DTN V2 delivery when this user is offline.
+    /// each entry is a PeerId (38 bytes) of a trusted custodian, in priority order.
+    #[prost(bytes = "vec", repeated, tag = "8")]
+    pub preferred_custody_route: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
 }
 /// Self-signed user profile wrapper
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]

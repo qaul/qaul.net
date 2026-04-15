@@ -106,6 +106,9 @@ message UserProfile {
     uint64 version = 6;
     // timestamp in milliseconds since epoch
     uint64 updated_at = 7;
+    // preferred custody route for DTN V2 delivery when this user is offline.
+    // each entry is a PeerId (38 bytes) of a trusted custodian, in priority order.
+    repeated bytes preferred_custody_route = 8;
 }
 
 // Self-signed user profile wrapper

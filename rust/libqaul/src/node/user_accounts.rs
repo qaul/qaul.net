@@ -195,6 +195,7 @@ impl UserAccounts {
             updated_at: crate::utilities::timestamp::Timestamp::get_timestamp(),
             signed_profile_bytes: Vec::new(),
             signed_profile_signature: Vec::new(),
+            preferred_custody_route: Vec::new(),
         };
         let signed = router::users::Users::create_signed_profile(&initial_user, &keys_ed25519);
         initial_user.signed_profile_bytes = signed.profile;
@@ -336,6 +337,7 @@ impl UserAccounts {
                 updated_at: 0,
                 signed_profile_bytes: Vec::new(),
                 signed_profile_signature: Vec::new(),
+                preferred_custody_route: Vec::new(),
             });
         }
 
@@ -523,6 +525,7 @@ impl UserAccounts {
                                 let new_name = if update_req.name.is_empty() { user.name.clone() } else { update_req.name.clone() };
                                 let new_bio = if update_req.bio.is_empty() { user.bio.clone() } else { update_req.bio.clone() };
                                 let new_avatar = if update_req.avatar.is_empty() { user.avatar.clone() } else { update_req.avatar.clone() };
+                                let new_custody_route = if update_req.preferred_custody_route.is_empty() { user.preferred_custody_route.clone() } else { update_req.preferred_custody_route.clone() };
                                 let new_version = user.version + 1;
                                 let new_updated_at = crate::utilities::timestamp::Timestamp::get_timestamp();
 
@@ -538,6 +541,7 @@ impl UserAccounts {
                                     updated_at: new_updated_at,
                                     signed_profile_bytes: Vec::new(),
                                     signed_profile_signature: Vec::new(),
+                                    preferred_custody_route: new_custody_route,
                                 }
                             }
                             None => {

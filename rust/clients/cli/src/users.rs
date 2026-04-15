@@ -202,6 +202,7 @@ impl Users {
                 avatar: Vec::new(),
                 profile_version: 0,
                 profile_updated_at: 0,
+                preferred_custody_route: Vec::new(),
             })),
         };
 

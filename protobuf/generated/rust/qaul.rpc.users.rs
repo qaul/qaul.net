@@ -142,6 +142,9 @@ pub struct UserEntry {
     /// profile last updated timestamp (ms since epoch)
     #[prost(uint64, tag = "15")]
     pub profile_updated_at: u64,
+    /// preferred custody route for DTN V2 delivery (ordered PeerIds)
+    #[prost(bytes = "vec", repeated, tag = "16")]
+    pub preferred_custody_route: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
 }
 /// Routing table connection entry.
 /// This message contains a connection to a specific user.

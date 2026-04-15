@@ -69,6 +69,10 @@ pub struct UpdateProfileRequest {
     /// new bio / status text (empty = no change)
     #[prost(string, tag = "3")]
     pub bio: ::prost::alloc::string::String,
+    /// preferred custody route for DTN V2 delivery (ordered PeerIds).
+    /// empty = no change; to clear, send a single empty bytes entry.
+    #[prost(bytes = "vec", repeated, tag = "4")]
+    pub preferred_custody_route: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
 }
 /// Response after profile update
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
