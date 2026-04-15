@@ -81,9 +81,17 @@ class LibqaulWorker {
   // *******************************
   // Public rpc requests
   // *******************************
-  Future<void> sendPublicMessage(String content) async {
+  Future<bool> sendPublicMessage(String content) async {
     final msg = Feed(send: SendMessage(content: content));
-    await _sendMessage(Modules.FEED, msg);
+    final result = await _sendRequest<bool>(
+      module: Modules.FEED,
+      data: msg,
+      adapter: (res) {
+        if (res.data is PaginatedPosts) return true;
+        return null;
+      },
+    );
+    return result ?? false;
   }
 
   Future<PaginatedPosts?> requestPublicMessages({

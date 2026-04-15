@@ -1,15 +1,9 @@
 import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../generated/services/feed/feed.pb.dart';
 import 'user.dart' show PaginationState;
-
-final publicMessagesProvider =
-    NotifierProvider<PublicPostListNotifier, List<PublicPost>>(
-  PublicPostListNotifier.new,
-);
 
 class PublicPost extends Equatable {
   const PublicPost({
@@ -55,53 +49,4 @@ class PaginatedPosts {
 
   final List<PublicPost> posts;
   final PaginationState? pagination;
-}
-
-class PublicPostListNotifier extends Notifier<List<PublicPost>> {
-  PaginationState? _pagination;
-  PaginationState? get pagination => _pagination;
-
-  @override
-  List<PublicPost> build() => [];
-
-  void add(PublicPost message) {
-    if (!contains(message)) {
-      state = [message, ...state];
-    }
-  }
-
-  bool contains(PublicPost message) {
-    return !state
-        .indexWhere(
-          (m) =>
-              m.senderIdBase58 == message.senderIdBase58 &&
-              m.messageIdBase58 == message.messageIdBase58,
-        )
-        .isNegative;
-  }
-
-  /// Replace the entire list (used for initial paginated load).
-  void setAll(List<PublicPost> posts, {PaginationState? pagination}) {
-    _pagination = pagination;
-    state = posts;
-  }
-
-  /// Append older messages at the end (used for "load more").
-  void appendOlder(List<PublicPost> posts, {PaginationState? pagination}) {
-    _pagination = pagination;
-    final existingIds = state.map((m) => m.messageIdBase58).toSet();
-    final newPosts =
-        posts.where((p) => !existingIds.contains(p.messageIdBase58)).toList();
-    if (newPosts.isEmpty) return;
-    state = [...state, ...newPosts];
-  }
-
-  /// Prepend newer messages at the start (used for polling sync).
-  void prependNewer(List<PublicPost> posts) {
-    final existingIds = state.map((m) => m.messageIdBase58).toSet();
-    final newPosts =
-        posts.where((p) => !existingIds.contains(p.messageIdBase58)).toList();
-    if (newPosts.isEmpty) return;
-    state = [...newPosts, ...state];
-  }
 }

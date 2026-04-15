@@ -182,7 +182,7 @@ class StubLibqaulWorker implements LibqaulWorker {
       throw UnimplementedError();
 
   @override
-  Future<void> sendPublicMessage(String content) => throw UnimplementedError();
+  Future<bool> sendPublicMessage(String content) => throw UnimplementedError();
 
   @override
   Future<void> setLibqaulLogging(bool enabled) => throw UnimplementedError();

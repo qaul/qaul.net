@@ -35,22 +35,6 @@ class FeedTranslator extends RpcModuleTranslator {
 
   @override
   Future<void> processResponse(RpcTranslatorResponse res, Ref ref) async {
-    if (res.module != type) return;
-    final provider = ref.read(publicMessagesProvider.notifier);
-
-    if (res.data is PaginatedPosts) {
-      final paginated = res.data as PaginatedPosts;
-      if (paginated.pagination != null) {
-        // Paginated response — bulk update
-        if (paginated.pagination!.offset == 0) {
-          provider.setAll(paginated.posts, pagination: paginated.pagination);
-        } else {
-          provider.appendOlder(paginated.posts, pagination: paginated.pagination);
-        }
-      } else {
-        // Legacy sync response (no pagination metadata) — prepend newer messages
-        provider.prependNewer(paginated.posts);
-      }
-    }
+    // Feed list updates are applied via LibqaulWorker futures (FeedMessageStore).
   }
 }
