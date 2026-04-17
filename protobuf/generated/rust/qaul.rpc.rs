@@ -66,6 +66,8 @@ pub enum Modules {
     Dtn = 14,
     /// Authentication
     Auth = 15,
+    /// Transport management (list, enable, disable)
+    Transports = 16,
 }
 impl Modules {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -90,6 +92,7 @@ impl Modules {
             Self::Rtc => "RTC",
             Self::Dtn => "DTN",
             Self::Auth => "AUTH",
+            Self::Transports => "TRANSPORTS",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
@@ -111,6 +114,7 @@ impl Modules {
             "RTC" => Some(Self::Rtc),
             "DTN" => Some(Self::Dtn),
             "AUTH" => Some(Self::Auth),
+            "TRANSPORTS" => Some(Self::Transports),
             _ => None,
         }
     }

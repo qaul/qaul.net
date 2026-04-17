@@ -62,4 +62,6 @@ enum Modules {
     DTN = 14;
     // Authentication
     AUTH = 15;
+    // Transport management (list, enable, disable)
+    TRANSPORTS = 16;
 }

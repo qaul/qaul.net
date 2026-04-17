@@ -34,8 +34,10 @@ pub mod storage;
 pub mod utilities;
 
 use connections::{
-    ble::Ble, internet::Internet, transport::Transport, ConnectionModule, Connections,
-    ConnectionsModule,
+    ble::{Ble, BleTransport},
+    internet::Internet,
+    transport::Transport,
+    ConnectionModule, Connections, ConnectionsModule,
 };
 use node::{Node, NodeModule};
 use router::{info::RouterInfo, Router, RouterModule};
@@ -529,6 +531,15 @@ impl Libqaul {
         let mut internet = conn.internet.unwrap();
         let mut lan = conn.lan.unwrap();
 
+        // build BLE transport wrapper
+        let mut ble_transport = BleTransport::new();
+
+        // build transport registry
+        let mut registry = connections::TransportRegistry::new();
+        registry.register(&lan as &dyn Transport);
+        registry.register(&internet as &dyn Transport);
+        registry.register(&ble_transport as &dyn Transport);
+
         // Set up all the tickers for periodic tasks
         let mut rpc_ticker = Ticker::new(Duration::from_millis(10));
         let mut sys_ticker = Ticker::new(Duration::from_millis(10));
@@ -553,6 +564,7 @@ impl Libqaul {
         self.event_loop(
             &mut lan,
             &mut internet,
+            &mut ble_transport,
             &mut rpc_ticker,
             &mut sys_ticker,
             &mut flooding_ticker,
@@ -575,6 +587,7 @@ impl Libqaul {
         &self,
         lan: &mut connections::lan::Lan,
         internet: &mut connections::internet::Internet,
+        ble: &mut BleTransport,
         rpc_ticker: &mut Ticker,
         sys_ticker: &mut Ticker,
         flooding_ticker: &mut Ticker,
@@ -703,7 +716,7 @@ impl Libqaul {
             };
 
             if let Some(event) = evt {
-                self.handle_event(event, lan, internet).await;
+                self.handle_event(event, lan, internet, ble).await;
             }
         }
     }
@@ -714,6 +727,7 @@ impl Libqaul {
         event: EventType,
         lan: &mut connections::lan::Lan,
         internet: &mut connections::internet::Internet,
+        ble: &mut BleTransport,
     ) {
         // Reuse the router snapshot taken in event_loop() instead of cloning the Arc again.
         let router = self.state.get_router();
@@ -738,7 +752,11 @@ impl Libqaul {
                         internet.publish_floodsub(msg.topic.clone(), msg.message.clone());
                     }
                     if !matches!(msg.incoming_via, ConnectionModule::Ble) {
+<<<<<<< HEAD
                         Ble::send_feed_message(&*self.state, msg.topic, msg.message);
+=======
+                        ble.publish_floodsub(msg.topic, msg.message);
+>>>>>>> 4d119ff2 (feat(qaul): ble migration and other changes)
                     }
                 }
             }
@@ -763,6 +781,7 @@ impl Libqaul {
                         data,
                         lan,
                         internet,
+                        ble,
                     );
                 }
             }
@@ -787,6 +806,7 @@ impl Libqaul {
                         data,
                         lan,
                         internet,
+                        ble,
                     );
                 }
             }
@@ -811,6 +831,7 @@ impl Libqaul {
                         data,
                         lan,
                         internet,
+                        ble,
                     );
                 }
             }
@@ -835,6 +856,7 @@ impl Libqaul {
                         data,
                         lan,
                         internet,
+                        ble,
                     );
                 }
             }
@@ -847,7 +869,11 @@ impl Libqaul {
                         neighbour_id,
                         Timestamp::get_timestamp()
                     );
+<<<<<<< HEAD
                     Self::send_via_module(&*self.state, connection_module, neighbour_id, data, lan, internet);
+=======
+                    Self::send_via_module(connection_module, neighbour_id, data, lan, internet, ble);
+>>>>>>> 4d119ff2 (feat(qaul): ble migration and other changes)
                 }
             }
             EventType::ReConnecting => {
@@ -883,7 +909,11 @@ impl Libqaul {
                             internet.send_qaul_messaging_message(neighbour_id, data);
                         }
                         ConnectionModule::Ble => {
+<<<<<<< HEAD
                             Ble::send_messaging_message(&*self.state, neighbour_id, data);
+=======
+                            ble.send_qaul_messaging_message(neighbour_id, data);
+>>>>>>> 4d119ff2 (feat(qaul): ble migration and other changes)
                         }
                         ConnectionModule::Local => {
                             let message = qaul_messaging::types::QaulMessagingReceived {
@@ -913,12 +943,17 @@ impl Libqaul {
         data: Vec<u8>,
         lan: &mut connections::lan::Lan,
         internet: &mut connections::internet::Internet,
+        ble: &mut BleTransport,
     ) {
         match connection_module {
             ConnectionModule::Lan => lan.send_qaul_info_message(neighbour_id, data),
             ConnectionModule::Internet => internet.send_qaul_info_message(neighbour_id, data),
             ConnectionModule::Ble => {
+<<<<<<< HEAD
                 Ble::send_routing_info(state, neighbour_id, data);
+=======
+                ble.send_qaul_info_message(neighbour_id, data);
+>>>>>>> 4d119ff2 (feat(qaul): ble migration and other changes)
             }
             ConnectionModule::Local => {}
             ConnectionModule::None => {}
