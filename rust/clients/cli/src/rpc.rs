@@ -112,6 +112,9 @@ impl Rpc {
                     Ok(proto::Modules::Auth) => {
                         super::authentication::Auth::rpc(state, message.data);
                     }
+                    Ok(proto::Modules::Transports) => {
+                        log::trace!("Transports RPC response received");
+                    }
                     Ok(proto::Modules::None) => {}
                     Err(_) => {}
                 }

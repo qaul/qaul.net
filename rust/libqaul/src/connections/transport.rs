@@ -25,9 +25,7 @@ impl std::fmt::Display for TransportError {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TransportStatus {
     Disabled,
-    Starting,
     Running,
-    Stopping,
     Error(String),
 }
 
@@ -52,6 +50,10 @@ pub struct TransportCapabilities {
     pub is_local_only: bool,
 }
 
+/// Common interface for all network transports (LAN, Internet, BLE, ...).
+///
+/// Each transport owns a libp2p swarm (or equivalent) and exposes a uniform
+/// set of operations so the event loop and RPC layer can treat them generically.
 pub trait Transport {
     fn id(&self) -> &'static str;
     fn label(&self) -> &'static str;
@@ -59,15 +61,39 @@ pub trait Transport {
     fn capabilities(&self) -> TransportCapabilities;
     fn status(&self) -> &TransportStatus;
 
+    /// Stop the transport: close listeners, disconnect peers.
+    /// Safe to call when already stopped (returns Ok).
+    fn stop(&mut self) -> Result<(), TransportError>;
+
+    /// Start the transport: open listeners on the configured addresses,
+    /// reconnect peers where applicable.
+    /// Safe to call when already running (returns Ok).
+    fn start(&mut self) -> Result<(), TransportError>;
+
     fn send_qaul_info_message(&mut self, peer_id: PeerId, data: Vec<u8>);
     fn send_qaul_messaging_message(&mut self, peer_id: PeerId, data: Vec<u8>);
     fn publish_floodsub(&mut self, topic: floodsub::Topic, data: Vec<u8>);
 
     fn listeners(&self) -> Vec<Multiaddr>;
     fn external_addresses(&self) -> Vec<Multiaddr>;
+
+    /// Whether this transport is currently accepting events.
+    fn is_enabled(&self) -> bool {
+        matches!(self.status(), TransportStatus::Running)
+    }
 }
 
+/// Per-transport configuration stored on disk.
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct TransportConfig {
     pub enabled: bool,
+}
+
+/// Holds metadata about a registered transport for RPC / UI queries.
+pub struct TransportInfo {
+    pub id: &'static str,
+    pub label: &'static str,
+    pub module: ConnectionModule,
+    pub status: TransportStatus,
+    pub capabilities: TransportCapabilities,
 }

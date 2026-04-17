@@ -39,6 +39,10 @@ pub mod qaul_rpc_connections {
     include!("../../../protobuf/generated/rust/qaul.rpc.connections.rs");
 }
 #[allow(clippy::all)]
+pub mod qaul_rpc_transports {
+    include!("../../../protobuf/generated/rust/qaul.rpc.transports.rs");
+}
+#[allow(clippy::all)]
 pub mod qaul_rpc_feed {
     include!("../../../protobuf/generated/rust/qaul.rpc.feed.rs");
 }
