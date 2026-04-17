@@ -16,6 +16,7 @@ use std::sync::RwLock;
 use prost::Message;
 
 use crate::connections::ble::Ble;
+use crate::connections::transport::Transport;
 use crate::connections::Connections;
 use crate::connections::{internet::Internet, lan::Lan};
 use crate::node::user_accounts::UserAccounts;
@@ -172,8 +173,13 @@ impl Rpc {
             Ok(message) => {
                 match Modules::try_from(message.module) {
                     Ok(Modules::Node) => {
-                        Self::increase_message_counter(state);
-                        Node::rpc(state, message.data, lan, internet, message.request_id);
+                        Self::increase_message_counter();
+                        Node::rpc(
+                            message.data,
+                            lan.map(|l| l as &mut dyn Transport),
+                            internet.map(|i| i as &mut dyn Transport),
+                            message.request_id,
+                        );
                     }
                     Ok(Modules::Rpc) => {
                         log::trace!("Message Modules::Rpc received");
@@ -195,8 +201,8 @@ impl Rpc {
                             state,
                             message.data,
                             message.user_id,
-                            lan,
-                            internet,
+                            lan.map(|l| l as &mut dyn Transport),
+                            internet.map(|i| i as &mut dyn Transport),
                             message.request_id,
                         );
                     }
@@ -214,8 +220,8 @@ impl Rpc {
                             state,
                             message.data,
                             message.user_id,
-                            lan,
-                            internet,
+                            lan.map(|l| l as &mut dyn Transport),
+                            internet.map(|i| i as &mut dyn Transport),
                             message.request_id,
                         );
                     }
