@@ -41,6 +41,9 @@ use std::{
     sync::RwLock,
 };
 
+use crate::connections::transport::{
+    Transport, TransportCapabilities, TransportStatus,
+};
 use crate::connections::{events, ConnectionModule};
 use crate::node::Node;
 use crate::services::feed::proto_net;
@@ -325,6 +328,62 @@ impl From<QaulMessagingEvent> for QaulInternetEvent {
 /// it creates a libp2p swarm
 pub struct Internet {
     pub swarm: Swarm<QaulInternetBehaviour>,
+    status: TransportStatus,
+}
+
+impl Transport for Internet {
+    fn id(&self) -> &'static str {
+        "internet"
+    }
+
+    fn label(&self) -> &'static str {
+        "Internet"
+    }
+
+    fn module(&self) -> ConnectionModule {
+        ConnectionModule::Internet
+    }
+
+    fn capabilities(&self) -> TransportCapabilities {
+        TransportCapabilities {
+            supports_runtime_toggle: true,
+            supports_peer_list: true,
+            is_local_only: false,
+        }
+    }
+
+    fn status(&self) -> &TransportStatus {
+        &self.status
+    }
+
+    fn send_qaul_info_message(&mut self, peer_id: PeerId, data: Vec<u8>) {
+        self.swarm
+            .behaviour_mut()
+            .qaul_info
+            .send_qaul_info_message(peer_id, data);
+    }
+
+    fn send_qaul_messaging_message(&mut self, peer_id: PeerId, data: Vec<u8>) {
+        self.swarm
+            .behaviour_mut()
+            .qaul_messaging
+            .send_qaul_messaging_message(peer_id, data);
+    }
+
+    fn publish_floodsub(&mut self, topic: floodsub::Topic, data: Vec<u8>) {
+        self.swarm
+            .behaviour_mut()
+            .floodsub
+            .publish(topic, data);
+    }
+
+    fn listeners(&self) -> Vec<Multiaddr> {
+        self.swarm.listeners().cloned().collect()
+    }
+
+    fn external_addresses(&self) -> Vec<Multiaddr> {
+        self.swarm.external_addresses().cloned().collect()
+    }
 }
 
 impl Internet {
@@ -402,10 +461,10 @@ impl Internet {
 
         log::trace!("Internet.init() peer_connect");
 
-        // construct internet object
-        let internet = Internet { swarm };
-
-        internet
+        Internet {
+            swarm,
+            status: TransportStatus::Running,
+        }
     }
 
     // check if connection is active
