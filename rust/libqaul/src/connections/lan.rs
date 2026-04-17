@@ -25,11 +25,14 @@ use libp2p::{
     identity::Keypair,
     mdns, noise, ping,
     swarm::{NetworkBehaviour, Swarm},
-    tcp, yamux, SwarmBuilder,
+    tcp, yamux, Multiaddr, PeerId, SwarmBuilder,
 };
 use prost::Message;
 use std::time::Duration;
 
+use crate::connections::transport::{
+    Transport, TransportCapabilities, TransportStatus,
+};
 use crate::connections::{events, ConnectionModule};
 use crate::node::Node;
 use crate::services::feed::proto_net;
@@ -157,6 +160,62 @@ impl From<QaulMessagingEvent> for QaulLanEvent {
 
 pub struct Lan {
     pub swarm: Swarm<QaulLanBehaviour>,
+    status: TransportStatus,
+}
+
+impl Transport for Lan {
+    fn id(&self) -> &'static str {
+        "lan"
+    }
+
+    fn label(&self) -> &'static str {
+        "LAN"
+    }
+
+    fn module(&self) -> ConnectionModule {
+        ConnectionModule::Lan
+    }
+
+    fn capabilities(&self) -> TransportCapabilities {
+        TransportCapabilities {
+            supports_runtime_toggle: true,
+            supports_peer_list: false,
+            is_local_only: true,
+        }
+    }
+
+    fn status(&self) -> &TransportStatus {
+        &self.status
+    }
+
+    fn send_qaul_info_message(&mut self, peer_id: PeerId, data: Vec<u8>) {
+        self.swarm
+            .behaviour_mut()
+            .qaul_info
+            .send_qaul_info_message(peer_id, data);
+    }
+
+    fn send_qaul_messaging_message(&mut self, peer_id: PeerId, data: Vec<u8>) {
+        self.swarm
+            .behaviour_mut()
+            .qaul_messaging
+            .send_qaul_messaging_message(peer_id, data);
+    }
+
+    fn publish_floodsub(&mut self, topic: floodsub::Topic, data: Vec<u8>) {
+        self.swarm
+            .behaviour_mut()
+            .floodsub
+            .publish(topic, data);
+    }
+
+    fn listeners(&self) -> Vec<Multiaddr> {
+        self.swarm.listeners().cloned().collect()
+    }
+
+    fn external_addresses(&self) -> Vec<Multiaddr> {
+        self.swarm.external_addresses().cloned().collect()
+    }
 }
 
 impl Lan {
@@ -221,8 +280,9 @@ impl Lan {
                 .expect("swarm can be started");
         }
 
-        let lan = Lan { swarm };
-
-        lan
+        Lan {
+            swarm,
+            status: TransportStatus::Running,
+        }
     }
 }

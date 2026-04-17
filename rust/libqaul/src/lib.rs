@@ -32,7 +32,10 @@ pub mod services;
 pub mod storage;
 pub mod utilities;
 
-use connections::{ble::Ble, internet::Internet, ConnectionModule, Connections, ConnectionsModule};
+use connections::{
+    ble::Ble, internet::Internet, transport::Transport, ConnectionModule, Connections,
+    ConnectionsModule,
+};
 use node::{Node, NodeModule};
 use router::{info::RouterInfo, Router, RouterModule};
 use rpc::sys::Sys;
@@ -728,17 +731,10 @@ impl Libqaul {
                 let mut flooder = router.flooder.inner.write().unwrap();
                 while let Some(msg) = flooder.to_send.pop_front() {
                     if !matches!(msg.incoming_via, ConnectionModule::Lan) {
-                        lan.swarm
-                            .behaviour_mut()
-                            .floodsub
-                            .publish(msg.topic.clone(), msg.message.clone());
+                        lan.publish_floodsub(msg.topic.clone(), msg.message.clone());
                     }
                     if !matches!(msg.incoming_via, ConnectionModule::Internet) {
-                        internet
-                            .swarm
-                            .behaviour_mut()
-                            .floodsub
-                            .publish(msg.topic.clone(), msg.message.clone());
+                        internet.publish_floodsub(msg.topic.clone(), msg.message.clone());
                     }
                     if !matches!(msg.incoming_via, ConnectionModule::Ble) {
                         Ble::send_feed_message(&*self.state, msg.topic, msg.message);
@@ -880,17 +876,10 @@ impl Libqaul {
                     );
                     match connection_module {
                         ConnectionModule::Lan => {
-                            lan.swarm
-                                .behaviour_mut()
-                                .qaul_messaging
-                                .send_qaul_messaging_message(neighbour_id, data);
+                            lan.send_qaul_messaging_message(neighbour_id, data);
                         }
                         ConnectionModule::Internet => {
-                            internet
-                                .swarm
-                                .behaviour_mut()
-                                .qaul_messaging
-                                .send_qaul_messaging_message(neighbour_id, data);
+                            internet.send_qaul_messaging_message(neighbour_id, data);
                         }
                         ConnectionModule::Ble => {
                             Ble::send_messaging_message(&*self.state, neighbour_id, data);
@@ -925,16 +914,8 @@ impl Libqaul {
         internet: &mut connections::internet::Internet,
     ) {
         match connection_module {
-            ConnectionModule::Lan => lan
-                .swarm
-                .behaviour_mut()
-                .qaul_info
-                .send_qaul_info_message(neighbour_id, data),
-            ConnectionModule::Internet => internet
-                .swarm
-                .behaviour_mut()
-                .qaul_info
-                .send_qaul_info_message(neighbour_id, data),
+            ConnectionModule::Lan => lan.send_qaul_info_message(neighbour_id, data),
+            ConnectionModule::Internet => internet.send_qaul_info_message(neighbour_id, data),
             ConnectionModule::Ble => {
                 Ble::send_routing_info(state, neighbour_id, data);
             }

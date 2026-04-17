@@ -9,6 +9,7 @@ pub mod ble;
 pub mod events;
 pub mod internet;
 pub mod lan;
+pub mod transport;
 
 use libp2p::Multiaddr;
 use prost::Message;
@@ -21,6 +22,7 @@ use crate::storage::configuration::InternetPeer;
 use ble::Ble;
 use internet::Internet;
 use lan::Lan;
+pub use transport::Transport;
 
 /// Import protobuf message definition
 pub use qaul_proto::qaul_rpc_connections as proto;
@@ -118,6 +120,17 @@ impl ConnectionsModule {
 impl Default for ConnectionsModule {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl ConnectionModule {
+    pub fn from_transport_id(id: &str) -> Self {
+        match id {
+            "lan" => ConnectionModule::Lan,
+            "internet" => ConnectionModule::Internet,
+            "ble" => ConnectionModule::Ble,
+            _ => ConnectionModule::None,
+        }
     }
 }
 

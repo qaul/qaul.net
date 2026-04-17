@@ -23,7 +23,7 @@ use crate::node::{
     Node,
 };
 
-use crate::connections::{internet::Internet, lan::Lan, ConnectionModule};
+use crate::connections::{transport::Transport, ConnectionModule};
 use crate::router;
 use crate::router::flooder::Flooder;
 use crate::rpc::Rpc;
@@ -349,8 +349,8 @@ impl Feed {
         state: &crate::QaulState,
         user_account: &UserAccount,
         content: String,
-        lan: Option<&mut Lan>,
-        internet: Option<&mut Internet>,
+        lan: Option<&mut dyn Transport>,
+        internet: Option<&mut dyn Transport>,
     ) {
         // create timestamp
         let timestamp = timestamp::Timestamp::get_timestamp();
@@ -385,21 +385,11 @@ impl Feed {
         // save message in feed store
         state.services.feed.save_message(container.signature.clone(), msg);
 
-        // flood via floodsub
-        if lan.is_some() {
-            lan.unwrap()
-                .swarm
-                .behaviour_mut()
-                .floodsub
-                .publish(Node::get_topic(state), buf.clone());
+        if let Some(lan) = lan {
+            lan.publish_floodsub(Node::get_topic(), buf.clone());
         }
-        if internet.is_some() {
-            internet
-                .unwrap()
-                .swarm
-                .behaviour_mut()
-                .floodsub
-                .publish(Node::get_topic(state), buf.clone());
+        if let Some(internet) = internet {
+            internet.publish_floodsub(Node::get_topic(), buf.clone());
         }
         crate::connections::ble::Ble::send_feed_message(state, Node::get_topic(state), buf);
     }
@@ -502,8 +492,8 @@ impl Feed {
         state: &crate::QaulState,
         data: Vec<u8>,
         user_id: Vec<u8>,
-        lan: Option<&mut Lan>,
-        internet: Option<&mut Internet>,
+        lan: Option<&mut dyn Transport>,
+        internet: Option<&mut dyn Transport>,
         request_id: String,
     ) {
         match proto::Feed::decode(&data[..]) {
