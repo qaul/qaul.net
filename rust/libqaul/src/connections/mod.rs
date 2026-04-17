@@ -26,6 +26,7 @@ pub use transport::Transport;
 
 /// Import protobuf message definition
 pub use qaul_proto::qaul_rpc_connections as proto;
+pub use qaul_proto::qaul_rpc_transports as transports_proto;
 
 /// enum with all connection modules
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -131,6 +132,50 @@ impl ConnectionModule {
             "ble" => ConnectionModule::Ble,
             _ => ConnectionModule::None,
         }
+    }
+}
+
+/// Registry of all transports, queryable by id.
+///
+/// Provides a uniform interface for toggling transports and querying their
+/// status without knowing the concrete type.
+pub struct TransportRegistry {
+    entries: Vec<transport::TransportInfo>,
+}
+
+impl TransportRegistry {
+    pub fn new() -> Self {
+        Self {
+            entries: Vec::new(),
+        }
+    }
+
+    /// Snapshot the current state of a transport into the registry.
+    pub fn register(&mut self, t: &dyn Transport) {
+        // Remove stale entry for this id if any.
+        self.entries.retain(|e| e.id != t.id());
+        self.entries.push(transport::TransportInfo {
+            id: t.id(),
+            label: t.label(),
+            module: t.module(),
+            status: t.status().clone(),
+            capabilities: t.capabilities(),
+        });
+    }
+
+    /// Refresh the status of a transport already in the registry.
+    pub fn update_status(&mut self, t: &dyn Transport) {
+        if let Some(entry) = self.entries.iter_mut().find(|e| e.id == t.id()) {
+            entry.status = t.status().clone();
+        }
+    }
+
+    pub fn get(&self, id: &str) -> Option<&transport::TransportInfo> {
+        self.entries.iter().find(|e| e.id == id)
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &transport::TransportInfo> {
+        self.entries.iter()
     }
 }
 
@@ -434,6 +479,135 @@ impl Connections {
             state,
             buf,
             super::rpc::proto::Modules::Connections.into(),
+            request_id,
+            Vec::new(),
+        );
+    }
+
+    /// Handle Transports RPC messages (list, enable/disable).
+    pub fn transports_rpc(
+        data: Vec<u8>,
+        lan: Option<&mut Lan>,
+        internet: Option<&mut Internet>,
+        request_id: String,
+    ) {
+        match transports_proto::Transports::decode(&data[..]) {
+            Ok(msg) => match msg.message {
+                Some(transports_proto::transports::Message::ListRequest(_)) => {
+                    Self::transports_rpc_list(lan, internet, request_id);
+                }
+                Some(transports_proto::transports::Message::SetEnabled(req)) => {
+                    Self::transports_rpc_set_enabled(req, lan, internet, request_id);
+                }
+                _ => {
+                    log::error!("Unhandled Transports RPC message");
+                }
+            },
+            Err(e) => {
+                log::error!("Failed to decode Transports RPC: {:?}", e);
+            }
+        }
+    }
+
+    fn transport_info_from(t: &dyn Transport) -> transports_proto::TransportInfo {
+        let status_str = match t.status() {
+            transport::TransportStatus::Running => "running",
+            transport::TransportStatus::Disabled => "disabled",
+            transport::TransportStatus::Error(ref e) => e.as_str(),
+        };
+        let caps = t.capabilities();
+        transports_proto::TransportInfo {
+            id: t.id().to_string(),
+            label: t.label().to_string(),
+            status: status_str.to_string(),
+            enabled: t.is_enabled(),
+            supports_runtime_toggle: caps.supports_runtime_toggle,
+            is_local_only: caps.is_local_only,
+        }
+    }
+
+    fn transports_rpc_list(
+        lan: Option<&mut Lan>,
+        internet: Option<&mut Internet>,
+        request_id: String,
+    ) {
+        let mut transports = Vec::new();
+        if let Some(l) = lan {
+            transports.push(Self::transport_info_from(l as &dyn Transport));
+        }
+        if let Some(i) = internet {
+            transports.push(Self::transport_info_from(i as &dyn Transport));
+        }
+
+        let response = transports_proto::Transports {
+            message: Some(transports_proto::transports::Message::List(
+                transports_proto::TransportsList { transports },
+            )),
+        };
+
+        let mut buf = Vec::with_capacity(response.encoded_len());
+        response
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
+
+        Rpc::send_message(
+            buf,
+            super::rpc::proto::Modules::Transports.into(),
+            request_id,
+            Vec::new(),
+        );
+    }
+
+    fn transports_rpc_set_enabled(
+        req: transports_proto::TransportSetEnabled,
+        lan: Option<&mut Lan>,
+        internet: Option<&mut Internet>,
+        request_id: String,
+    ) {
+        let (success, error) = match req.id.as_str() {
+            "lan" => {
+                if let Some(l) = lan {
+                    let result = if req.enabled { l.start() } else { l.stop() };
+                    match result {
+                        Ok(()) => (true, String::new()),
+                        Err(e) => (false, e.to_string()),
+                    }
+                } else {
+                    (false, "LAN transport not available".to_string())
+                }
+            }
+            "internet" => {
+                if let Some(i) = internet {
+                    let result = if req.enabled { i.start() } else { i.stop() };
+                    match result {
+                        Ok(()) => (true, String::new()),
+                        Err(e) => (false, e.to_string()),
+                    }
+                } else {
+                    (false, "Internet transport not available".to_string())
+                }
+            }
+            _ => (false, format!("unknown transport: {}", req.id)),
+        };
+
+        let response = transports_proto::Transports {
+            message: Some(transports_proto::transports::Message::SetEnabledResult(
+                transports_proto::TransportSetEnabledResult {
+                    id: req.id,
+                    success,
+                    error,
+                },
+            )),
+        };
+
+        let mut buf = Vec::with_capacity(response.encoded_len());
+        response
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
+
+        Rpc::send_message(
+            buf,
+            super::rpc::proto::Modules::Transports.into(),
             request_id,
             Vec::new(),
         );

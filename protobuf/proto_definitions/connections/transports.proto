@@ -1,0 +1,47 @@
+syntax = "proto3";
+package qaul.rpc.transports;
+
+// Transports RPC message container
+message Transports {
+    oneof message {
+        // Request a list of all transports and their status.
+        TransportsListRequest list_request = 1;
+        // Response with the list of transports.
+        TransportsList list = 2;
+        // Enable or disable a transport by id.
+        TransportSetEnabled set_enabled = 3;
+        // Result of a set_enabled call.
+        TransportSetEnabledResult set_enabled_result = 4;
+    }
+}
+
+// Request the list of all transports.
+message TransportsListRequest {}
+
+// List of all transports.
+message TransportsList {
+    repeated TransportInfo transports = 1;
+}
+
+// Information about a single transport.
+message TransportInfo {
+    string id = 1;
+    string label = 2;
+    string status = 3;
+    bool enabled = 4;
+    bool supports_runtime_toggle = 5;
+    bool is_local_only = 6;
+}
+
+// Enable or disable a transport.
+message TransportSetEnabled {
+    string id = 1;
+    bool enabled = 2;
+}
+
+// Result of set_enabled.
+message TransportSetEnabledResult {
+    string id = 1;
+    bool success = 2;
+    string error = 3;
+}

@@ -257,6 +257,14 @@ impl Rpc {
                             message.request_id,
                         );
                     }
+                    Ok(Modules::Transports) => {
+                        Connections::transports_rpc(
+                            message.data,
+                            lan,
+                            internet,
+                            message.request_id,
+                        );
+                    }
                     Ok(Modules::None) => {
                         log::error!("Message Modules::None received");
                     }

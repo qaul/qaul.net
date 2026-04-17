@@ -28,6 +28,7 @@
 //! ```
 
 use libp2p::{
+    core::transport::ListenerId,
     floodsub, identify,
     identity::Keypair,
     noise, ping,
@@ -42,7 +43,7 @@ use std::{
 };
 
 use crate::connections::transport::{
-    Transport, TransportCapabilities, TransportStatus,
+    Transport, TransportCapabilities, TransportError, TransportStatus,
 };
 use crate::connections::{events, ConnectionModule};
 use crate::node::Node;
@@ -329,6 +330,7 @@ impl From<QaulMessagingEvent> for QaulInternetEvent {
 pub struct Internet {
     pub swarm: Swarm<QaulInternetBehaviour>,
     status: TransportStatus,
+    listener_ids: Vec<ListenerId>,
 }
 
 impl Transport for Internet {
@@ -356,7 +358,74 @@ impl Transport for Internet {
         &self.status
     }
 
+    fn stop(&mut self) -> Result<(), TransportError> {
+        if self.status == TransportStatus::Disabled {
+            return Ok(());
+        }
+
+        for id in self.listener_ids.drain(..) {
+            self.swarm.remove_listener(id);
+        }
+
+        let peers: Vec<PeerId> = self.swarm.connected_peers().cloned().collect();
+        for peer in peers {
+            let _ = self.swarm.disconnect_peer_id(peer);
+        }
+
+        {
+            let mut config = Configuration::get_mut();
+            config.internet.active = false;
+        }
+        Configuration::save();
+
+        self.status = TransportStatus::Disabled;
+        log::info!("Internet transport stopped");
+        Ok(())
+    }
+
+    fn start(&mut self) -> Result<(), TransportError> {
+        if self.status == TransportStatus::Running {
+            return Ok(());
+        }
+
+        let config = Configuration::get();
+
+        if config.internet.do_listen {
+            for listen in &config.internet.listen {
+                match listen.parse() {
+                    Ok(addr) => match Swarm::listen_on(&mut self.swarm, addr) {
+                        Ok(id) => {
+                            self.listener_ids.push(id);
+                        }
+                        Err(e) => {
+                            log::error!("Internet start: failed to listen on {}: {}", listen, e);
+                        }
+                    },
+                    Err(e) => {
+                        log::error!("Internet start: invalid address {}: {}", listen, e);
+                    }
+                }
+            }
+        }
+
+        Self::peer_connect(&config, &mut self.swarm);
+        drop(config);
+
+        {
+            let mut config = Configuration::get_mut();
+            config.internet.active = true;
+        }
+        Configuration::save();
+
+        self.status = TransportStatus::Running;
+        log::info!("Internet transport started");
+        Ok(())
+    }
+
     fn send_qaul_info_message(&mut self, peer_id: PeerId, data: Vec<u8>) {
+        if !self.is_enabled() {
+            return;
+        }
         self.swarm
             .behaviour_mut()
             .qaul_info
@@ -364,6 +433,9 @@ impl Transport for Internet {
     }
 
     fn send_qaul_messaging_message(&mut self, peer_id: PeerId, data: Vec<u8>) {
+        if !self.is_enabled() {
+            return;
+        }
         self.swarm
             .behaviour_mut()
             .qaul_messaging
@@ -371,6 +443,9 @@ impl Transport for Internet {
     }
 
     fn publish_floodsub(&mut self, topic: floodsub::Topic, data: Vec<u8>) {
+        if !self.is_enabled() {
+            return;
+        }
         self.swarm
             .behaviour_mut()
             .floodsub
@@ -440,30 +515,43 @@ impl Internet {
         // the configuration array config.internet.listen
         let config = Configuration::get(state);
 
-        for listen in &config.internet.listen {
-            match Swarm::listen_on(&mut swarm, listen.parse().expect("can get a local socket")) {
-                Ok(listener_id) => {
-                    log::info!(
-                        "INTERNET listening on `{}` with ID {:?}",
-                        listen,
-                        listener_id
-                    );
-                }
-                Err(e) => {
-                    log::error!("Error INTERNET start listening on `{}`: {}", listen, e);
+        let mut listener_ids = Vec::new();
+        if active {
+            // listen on configured addresses
+            for listen in &config.internet.listen {
+                match Swarm::listen_on(
+                    &mut swarm,
+                    listen.parse().expect("can get a local socket"),
+                ) {
+                    Ok(listener_id) => {
+                        log::info!(
+                            "INTERNET listening on `{}` with ID {:?}",
+                            listen,
+                            listener_id
+                        );
+                        listener_ids.push(listener_id);
+                    }
+                    Err(e) => {
+                        log::error!("Error INTERNET start listening on `{}`: {}", listen, e);
+                    }
                 }
             }
+
+            // connect to remote peers
+            Self::peer_connect(&config, &mut swarm);
+            log::trace!("Internet.init() peer_connect");
+        } else {
+            log::info!("Internet transport disabled by configuration");
         }
-
-        // connect to remote peers that are specified in
-        // the configuration config.internet.peers
-        Self::peer_connect(&config, &mut swarm);
-
-        log::trace!("Internet.init() peer_connect");
 
         Internet {
             swarm,
-            status: TransportStatus::Running,
+            status: if active {
+                TransportStatus::Running
+            } else {
+                TransportStatus::Disabled
+            },
+            listener_ids,
         }
     }
 
