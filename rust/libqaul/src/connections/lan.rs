@@ -179,7 +179,7 @@ impl Lan {
             query_interval: Duration::from_secs(30),
             enable_ipv6: false,
         };
-        let mdns = mdns::tokio::Behaviour::new(mdns_config, Node::get_id()).unwrap();
+        let mdns = mdns::tokio::Behaviour::new(mdns_config, Node::get_id(state)).unwrap();
 
         // create behaviour
         let mut behaviour: QaulLanBehaviour = QaulLanBehaviour {

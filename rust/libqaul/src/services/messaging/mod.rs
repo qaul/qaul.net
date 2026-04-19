@@ -600,7 +600,7 @@ impl Messaging {
         };
 
         // add it to sending queue
-        let mut messaging = MESSAGING.get().write().unwrap();
+        let mut messaging = state.services.messaging.messaging.write().unwrap();
         const MAX_QUEUE_SIZE: usize = 10_000;
         if messaging.to_send.len() >= MAX_QUEUE_SIZE {
             log::warn!(
@@ -628,9 +628,9 @@ impl Messaging {
         if let Some(message) = message_item {
             // check for route
             let rs = state.get_router();
-            if let Some(route) = RoutingTable::get_route_to_user(&rs, message.receiver) {
+            if let Some(route) = rs.routing_table.get_route_to_user(message.receiver) {
                 // update unconfirmed table set scheduled flag.
-                Self::on_scheduled_message(state, &message.container.signature);
+                state.services.messaging.on_scheduled_message(&message.container.signature);
 
                 // create binary message
                 let data = message.container.encode_to_vec();
@@ -662,7 +662,7 @@ impl Messaging {
                                 } else {
                                     log::error!("DTN scheduled...");
                                     // update unconfirmed table
-                                    Self::on_scheduled_as_dtn_message(state, &message.container.signature);
+                                    state.services.messaging.on_scheduled_as_dtn_message(&message.container.signature);
                                 }
                             }
                         }
