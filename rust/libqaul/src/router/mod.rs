@@ -28,10 +28,6 @@ pub use qaul_proto::qaul_net_router_net_info as router_net_proto;
 /// Import protobuf message definition
 pub use qaul_proto::qaul_rpc_router as proto;
 
-/// mutable state of router,
-/// used for storing the router configuration (global state - deprecated)
-static ROUTER: InitCell<RwLock<Router>> = InitCell::new();
-
 /// Instance-based router state that owns all routing sub-state.
 ///
 /// This replaces the scattered global statics across router submodules.

@@ -20,6 +20,7 @@ use std::sync::RwLock;
 
 use super::proto;
 use crate::connections::ConnectionModule;
+use crate::node;
 use crate::router::router_net_proto;
 use crate::router::table::{RoutingConnectionEntry, RoutingTable, RoutingUserEntry};
 use crate::rpc::Rpc;
@@ -426,17 +427,17 @@ impl ConnectionTable {
         info: &[router_net_proto::RoutingInfoEntry],
     ) {
         // try Lan module
-        if let Some(rtt) = Neighbours::get_rtt(router, &neighbour_id, &ConnectionModule::Lan) {
+        if let Some(rtt) = router.neighbours.get_rtt(&neighbour_id, &ConnectionModule::Lan) {
             Self::fill_received_routing_info(router, ConnectionModule::Lan, neighbour_id, rtt, info);
         }
 
         // try Internet module
-        if let Some(rtt) = Neighbours::get_rtt(router, &neighbour_id, &ConnectionModule::Internet) {
+        if let Some(rtt) = router.neighbours.get_rtt(&neighbour_id, &ConnectionModule::Internet) {
             Self::fill_received_routing_info(router, ConnectionModule::Internet, neighbour_id, rtt, info);
         }
 
         // try Bluetooth module
-        if let Some(rtt) = Neighbours::get_rtt(router, &neighbour_id, &ConnectionModule::Ble) {
+        if let Some(rtt) = router.neighbours.get_rtt(&neighbour_id, &ConnectionModule::Ble) {
             Self::fill_received_routing_info(router, ConnectionModule::Ble, neighbour_id, rtt, info);
         }
     }
@@ -467,7 +468,7 @@ impl ConnectionTable {
                 id: neighbour_id,
                 rtt: total_rtt,
                 hc,
-                lq: Self::calculate_linkquality_from_router(router, total_rtt, hc),
+                lq: Self::calculate_linkquality(router, total_rtt, hc),
                 last_update: Timestamp::get_timestamp(),
             };
 
@@ -485,9 +486,9 @@ impl ConnectionTable {
     /// according hop count (hc).
     ///
     /// The smaller the value is better is the link quality.
-    pub fn calculate_linkquality(rtt: u32, hc: u8) -> u32 {
+    pub fn calculate_linkquality(router: &super::RouterState, rtt: u32, hc: u8) -> u32 {
         // get the router configuration
-        let config = super::Router::get_configuration();
+        let config = super::Router::get_configuration_from(router);
 
         // calculate link quality
         // `hop_count_penalty` is seconds unit, thus it must be converted to micro seconds
@@ -610,7 +611,7 @@ impl ConnectionTable {
         table = Self::calculate_intermediary_table(router, table, ConnectionModule::Ble);
 
         // set table as new active routing table
-        RoutingTable::set(router, table);
+        router.routing_table.set(table);
     }
 
     /// insert local routes into routing table

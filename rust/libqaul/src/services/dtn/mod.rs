@@ -328,8 +328,8 @@ impl Dtn {
     }
 
     /// this function is called when receive DTN response
-    pub fn on_dtn_response(dtn_response: &super::messaging::proto::DtnResponse) {
-        let mut state = STORAGESTATE.get().write().unwrap();
+    pub fn on_dtn_response(state: &crate::QaulState, dtn_response: &super::messaging::proto::DtnResponse) {
+        let mut state = state.services.dtn.inner.write().unwrap();
         if let Ok(Some(entry_bytes)) = state.db_ref.get(&dtn_response.signature) {
             // update storage node state
             let entry: DtnMessageEntry = match bincode::deserialize(&entry_bytes) {
