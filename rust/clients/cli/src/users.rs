@@ -32,7 +32,7 @@ impl Users {
             // verify a user
             cmd if cmd.starts_with("verify ") => {
                 if let Some(user_id) = cmd.strip_prefix("verify ") {
-                    Self::send_user_update(user_id, true, false);
+                    Self::send_user_update(state, user_id, true, false);
                 } else {
                     log::error!("verify command incorrectly formatted");
                 }
@@ -40,7 +40,7 @@ impl Users {
             // block a user
             cmd if cmd.starts_with("block ") => {
                 if let Some(user_id) = cmd.strip_prefix("block ") {
-                    Self::send_user_update(user_id, false, true);
+                    Self::send_user_update(state, user_id, false, true);
                 } else {
                     log::error!("block command incorrectly formatted");
                 }
@@ -48,7 +48,7 @@ impl Users {
             // security number for a user
             cmd if cmd.starts_with("secure ") => {
                 if let Some(user_id) = cmd.strip_prefix("secure ") {
-                    Self::send_user_secure_number(user_id);
+                    Self::send_user_secure_number(state, user_id);
                 } else {
                     log::error!("secure command incorrectly formatted");
                 }
@@ -56,7 +56,7 @@ impl Users {
             // get a single user by id
             cmd if cmd.starts_with("get ") => {
                 if let Some(user_id) = cmd.strip_prefix("get ") {
-                    Self::request_user_by_id(user_id);
+                    Self::request_user_by_id(state, user_id);
                 } else {
                     log::error!("get command incorrectly formatted");
                 }
@@ -118,7 +118,7 @@ impl Users {
     }
 
     /// create rpc user security number message
-    fn send_user_secure_number(user_id_base58: &str) {
+    fn send_user_secure_number(state: &super::CliState, user_id_base58: &str) {
         let user_id = match bs58::decode(user_id_base58).into_vec() {
             Ok(v) => v,
             Err(e) => {
@@ -150,7 +150,7 @@ impl Users {
     }
 
     /// create rpc request to get a single user by id
-    fn request_user_by_id(user_id_base58: &str) {
+    fn request_user_by_id(state: &super::CliState, user_id_base58: &str) {
         let user_id = match bs58::decode(user_id_base58).into_vec() {
             Ok(v) => v,
             Err(e) => {
@@ -182,7 +182,7 @@ impl Users {
     }
 
     /// create rpc user update message
-    fn send_user_update(user_id_base58: &str, verified: bool, blocked: bool) {
+    fn send_user_update(state: &super::CliState, user_id_base58: &str, verified: bool, blocked: bool) {
         let user_id = match bs58::decode(user_id_base58).into_vec() {
             Ok(v) => v,
             Err(e) => {

@@ -97,7 +97,7 @@ impl Users {
         });
 
         // add user to the users table
-        let mut users = USERS.get().write().unwrap();
+        let mut users = router.users.inner.write().unwrap();
         if users.users.len() >= 100_000 {
             log::warn!(
                 "users table has reached {} entries; possible resource exhaustion",
@@ -130,7 +130,7 @@ impl Users {
         {
             let id_bytes = id.to_bytes();
             let q8id = QaulId::bytes_as_q8id(&id_bytes);
-            let users = USERS.get().read().unwrap();
+            let users = router.users.inner.read().unwrap();
 
             // check if user already exists
             if users.users.contains_key(q8id) {
@@ -158,7 +158,7 @@ impl Users {
     /// get the public key of a known user
     pub fn get_pub_key(router: &super::RouterState, user_id: &PeerId) -> Option<PublicKey> {
         let user_id_bytes = user_id.to_bytes();
-        Self::get_pub_key_by_q8id(QaulId::bytes_as_q8id(&user_id_bytes))
+        Self::get_pub_key_by_q8id(router, QaulId::bytes_as_q8id(&user_id_bytes))
     }
 
     /// get the public key of a known user by it's q8id
@@ -236,7 +236,7 @@ impl Users {
     }
 
     /// get security number
-    fn get_security_number(my_user: &PeerId, user_id: &[u8]) -> Result<Vec<u8>, String> {
+    fn get_security_number(router: &super::RouterState, my_user: &PeerId, user_id: &[u8]) -> Result<Vec<u8>, String> {
         let q8id = QaulId::bytes_as_q8id(user_id);
         let my_user_bytes = my_user.to_bytes();
         let q8id_my = QaulId::bytes_as_q8id(&my_user_bytes);
@@ -367,6 +367,7 @@ impl Users {
 
                             // send encoded rpc message containing found user entity
                             send_users_rpc_message(
+                                state,
                                 proto::users::Message::GetUserByIdResponse(
                                     proto::GetUserByIdResponse { user: Some(entry) },
                                 ),

@@ -157,18 +157,10 @@ impl Authentication {
     }
 
     /// Mark a user as authenticated with a session
-<<<<<<< HEAD
-    fn mark_authenticated(qaul_id: PeerId) {
-        let mut authenticated = AUTHENTICATED_USERS.get().write().unwrap();
-        // Session expires after 24 hours (86400 seconds * 1000 milliseconds)
-        let expires_at = Timestamp::get_timestamp() + (86400 * 1000);
-        authenticated.insert(qaul_id.to_bytes(), expires_at);
-=======
     fn mark_authenticated(state: &crate::QaulState, qaul_id: PeerId) {
         let mut auth = state.auth.authenticated_users.write().unwrap();
         let expires_at = Timestamp::get_timestamp() + (86400 * 365 * 100);
         auth.insert(qaul_id.to_bytes(), expires_at);
->>>>>>> 23ae1244 (refactor(qaul): collapse redundant forwarding layers after instance-based refactoring)
     }
 
     /// Check if a user has an active authenticated session
