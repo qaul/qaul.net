@@ -253,13 +253,20 @@ pub struct GroupInfo {
 }
 /// Group list request
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
-pub struct GroupListRequest {}
+pub struct GroupListRequest {
+    #[prost(uint32, tag = "10")]
+    pub offset: u32,
+    #[prost(uint32, tag = "20")]
+    pub limit: u32,
+}
 /// Group info response
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GroupListResponse {
     /// group list
     #[prost(message, repeated, tag = "1")]
     pub groups: ::prost::alloc::vec::Vec<GroupInfo>,
+    #[prost(message, optional, tag = "2")]
+    pub pagination: ::core::option::Option<PaginationMetadata>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GroupInvited {
@@ -273,15 +280,33 @@ pub struct GroupInvited {
     #[prost(message, optional, tag = "3")]
     pub group: ::core::option::Option<GroupInfo>,
 }
-/// Group list request
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
-pub struct GroupInvitedRequest {}
-/// Group info response
+pub struct PaginationMetadata {
+    #[prost(bool, tag = "10")]
+    pub has_more: bool,
+    #[prost(uint32, tag = "20")]
+    pub total: u32,
+    #[prost(uint32, tag = "30")]
+    pub offset: u32,
+    #[prost(uint32, tag = "40")]
+    pub limit: u32,
+}
+/// Group invited list request
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct GroupInvitedRequest {
+    #[prost(uint32, tag = "10")]
+    pub offset: u32,
+    #[prost(uint32, tag = "20")]
+    pub limit: u32,
+}
+/// Group invited response
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GroupInvitedResponse {
     /// invited list
     #[prost(message, repeated, tag = "1")]
     pub invited: ::prost::alloc::vec::Vec<GroupInvited>,
+    #[prost(message, optional, tag = "2")]
+    pub pagination: ::core::option::Option<PaginationMetadata>,
 }
 /// Group member state
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
