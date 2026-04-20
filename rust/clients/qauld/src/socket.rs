@@ -29,6 +29,8 @@ use tokio::net::TcpListener;
 #[cfg(unix)]
 use tokio::net::UnixListener;
 
+use libqaul::Libqaul;
+
 /// protobuf RPC definition
 pub use qaul_proto::qaul_rpc as proto;
 
@@ -39,6 +41,7 @@ const DEFAULT_TCP_ADDR: &str = "127.0.0.1:9199";
 async fn handle_client<T>(
     stream: T,
     register: Arc<Mutex<HashMap<String, Sender<Bytes>>>>,
+    instance: Arc<Libqaul>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>>
 where
     T: AsyncRead + AsyncWrite + Unpin,
@@ -71,7 +74,7 @@ where
                                 log::error!("{:?}", error);
                             }
                         }
-                        libqaul::api::send_rpc(data);
+                        libqaul::rpc::Rpc::send_to_libqaul(&instance.state, data);
                     }
                     None => { break; }
                 }
@@ -90,12 +93,15 @@ where
 }
 
 /// RPC poller which forwards libqaul response
-fn spawn_rpc_poller(register: Arc<Mutex<HashMap<String, Sender<Bytes>>>>) {
+fn spawn_rpc_poller(
+    register: Arc<Mutex<HashMap<String, Sender<Bytes>>>>,
+    instance: Arc<Libqaul>,
+) {
     tokio::spawn(async move {
         let mut futures_ticker = Ticker::new(Duration::from_millis(10));
         loop {
             futures_ticker.next().await;
-            match libqaul::rpc::Rpc::receive_from_libqaul(&*instance_clone.state) {
+            match libqaul::rpc::Rpc::receive_from_libqaul(&instance.state) {
                 Ok(data) => match proto::QaulRpc::decode(&data[..]) {
                     Ok(msg) => {
                         let client_id = msg.request_id;
@@ -123,11 +129,14 @@ fn spawn_rpc_poller(register: Arc<Mutex<HashMap<String, Sender<Bytes>>>>) {
 
 /// Starts the qauld socket server.
 /// Runs infinitely until a shutdown signal is received.
-pub async fn start_server(socket_dir: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn start_server(
+    socket_dir: PathBuf,
+    instance: Arc<Libqaul>,
+) -> Result<(), Box<dyn std::error::Error>> {
     let client_request_register: Arc<Mutex<HashMap<String, Sender<Bytes>>>> =
         Arc::new(Mutex::new(HashMap::new()));
 
-    spawn_rpc_poller(client_request_register.clone());
+    spawn_rpc_poller(client_request_register.clone(), Arc::clone(&instance));
 
     #[cfg(unix)]
     {
@@ -145,9 +154,10 @@ pub async fn start_server(socket_dir: PathBuf) -> Result<(), Box<dyn std::error:
                 res = listener.accept() => {
                     let (stream, addr) = res?;
                     let register_clone = client_request_register.clone();
+                    let instance_clone = Arc::clone(&instance);
                     tokio::spawn(async move {
                         log::info!("client connected: {addr:#?}");
-                        if let Err(e) = handle_client(stream, register_clone).await {
+                        if let Err(e) = handle_client(stream, register_clone, instance_clone).await {
                             log::error!("client error: {e:#?}");
                         }
                     });
@@ -172,9 +182,10 @@ pub async fn start_server(socket_dir: PathBuf) -> Result<(), Box<dyn std::error:
                 res = listener.accept() => {
                     let (stream, addr) = res?;
                     let register_clone = client_request_register.clone();
+                    let instance_clone = Arc::clone(&instance);
                     tokio::spawn(async move {
                         log::info!("client connected: {addr:#?}");
-                        if let Err(e) = handle_client(stream, register_clone).await {
+                        if let Err(e) = handle_client(stream, register_clone, instance_clone).await {
                             log::error!("client error: {e:#?}");
                         }
                     });
