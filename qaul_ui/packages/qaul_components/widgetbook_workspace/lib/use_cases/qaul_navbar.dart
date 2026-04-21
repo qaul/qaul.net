@@ -23,7 +23,6 @@ class _NavBarUseCase extends StatefulWidget {
 
 class _NavBarUseCaseState extends State<_NavBarUseCase> {
   late TabType _selectedTab;
-  var _darkMode = false;
 
   @override
   void initState() {
@@ -32,60 +31,44 @@ class _NavBarUseCaseState extends State<_NavBarUseCase> {
   }
 
   Widget _buildContentArea() {
-    return Center(
-      child: SwitchListTile(
-        value: _darkMode,
-        onChanged: (value) => setState(() => _darkMode = value),
-        title: const Text('Dark mode'),
-      ),
-    );
+    return const Center(child: Text('Content preview area'));
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = _darkMode ? ThemeData.dark() : ThemeData.light();
-    final bar = Theme(
-      data: theme,
-      child: QaulNavBar(
-        vertical: widget.vertical,
-        overflowMenuLabels: navBarOverflowMenuLabelsDefault(),
-        onOverflowSelected: (_) {},
-        selectedTab: _selectedTab,
-        onTabSelected: (tab) => setState(() => _selectedTab = tab),
-        tabTooltips: QaulNavBar.defaultTabTooltips(),
-        publicNotificationCount: widget.vertical ? 1 : 2,
-        chatNotificationCount: widget.vertical ? 2 : 3,
-      ),
+    final bar = QaulNavBar(
+      vertical: widget.vertical,
+      overflowMenuLabels: navBarOverflowMenuLabelsDefault(),
+      onOverflowSelected: (_) {},
+      selectedTab: _selectedTab,
+      onTabSelected: (tab) => setState(() => _selectedTab = tab),
+      tabTooltips: QaulNavBar.defaultTabTooltips(),
+      publicNotificationCount: widget.vertical ? 1 : 2,
+      chatNotificationCount: widget.vertical ? 2 : 3,
     );
 
     if (widget.vertical) {
-      return Theme(
-        data: theme,
-        child: Material(
-          child: SizedBox.expand(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                bar,
-                Expanded(child: _buildContentArea()),
-              ],
-            ),
+      return Material(
+        child: SizedBox.expand(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              bar,
+              Expanded(child: _buildContentArea()),
+            ],
           ),
         ),
       );
     }
 
-    return Theme(
-      data: theme,
-      child: Material(
-        child: SizedBox.expand(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Expanded(child: _buildContentArea()),
-              bar,
-            ],
-          ),
+    return Material(
+      child: SizedBox.expand(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Expanded(child: _buildContentArea()),
+            bar,
+          ],
         ),
       ),
     );

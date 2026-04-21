@@ -3,9 +3,10 @@ import 'package:qaul_components/qaul_components.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
 Widget _frameHeader(BuildContext context, Widget child) {
+  final surface = Theme.of(context).scaffoldBackgroundColor;
   return Material(
     child: ColoredBox(
-      color: const Color(0xFFF1F1F1),
+      color: surface,
       child: Column(
         children: [
           child,
