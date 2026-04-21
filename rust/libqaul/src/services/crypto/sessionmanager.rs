@@ -41,6 +41,13 @@ impl CryptoSessionManager {
                 )) => {
                     Self::process_second_handshake(state, &user_account, sender_id, second_handshake);
                 }
+                Some(proto_net::cryptoservice_container::Message::RotateFirst(_))
+                | Some(proto_net::cryptoservice_container::Message::RotateSecond(_)) => {
+                    log::warn!(
+                        "Received rotation handshake from {} but rotation trigger wiring is not yet enabled (Phase 2). Dropping.",
+                        sender_id.to_base58()
+                    );
+                }
                 None => {
                     log::error!(
                         "Cryptoservice message from {} was empty",

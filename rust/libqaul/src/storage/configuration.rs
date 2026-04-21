@@ -209,6 +209,47 @@ impl Default for RoutingOptions {
     }
 }
 
+/// Crypto session rotation configuration.
+///
+/// Controls when qaul re-runs the Noise KK handshake between two
+/// peers and how long the previous session remains accepted for
+/// incoming messages after a rotation starts.
+///
+/// Defaults are `enabled: false` — rotation ships dormant and is
+/// opted in per node. All durations are in seconds; volumes are in
+/// message counts.
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct CryptoRotation {
+    /// Master switch. When `false` no rotation triggers fire and
+    /// no `RotateHandshakeFirst` frames are sent. Phase 1 leaves
+    /// this `false`.
+    pub enabled: bool,
+    /// Time-based trigger: rotate when the session is older than
+    /// this many seconds.
+    pub period_seconds: u64,
+    /// Outbound volume trigger: rotate once this many messages have
+    /// been encrypted under the session.
+    pub volume_messages: u64,
+    /// Grace period during which the old (draining) session is
+    /// still accepted for incoming messages after a rotation.
+    pub grace_period_seconds: u64,
+    /// Grace volume: additional messages accepted on the draining
+    /// session before it is retired, regardless of grace_period.
+    pub grace_volume_messages: u64,
+}
+
+impl Default for CryptoRotation {
+    fn default() -> Self {
+        CryptoRotation {
+            enabled: false,
+            period_seconds: 7 * 24 * 3600, // 7 days
+            volume_messages: 1 << 20,      // 2^20 ≈ 1,048,576
+            grace_period_seconds: 3600,    // 1 hour
+            grace_volume_messages: 256,
+        }
+    }
+}
+
 /// Storage Configuration Options
 ///
 /// The following options can be configured:
@@ -242,6 +283,8 @@ pub struct Configuration {
     pub user_accounts: Vec<UserAccount>,
     pub debug: DebugOption,
     pub routing: RoutingOptions,
+    #[serde(default)]
+    pub crypto_rotation: CryptoRotation,
 }
 
 impl Default for Configuration {
@@ -253,6 +296,7 @@ impl Default for Configuration {
             user_accounts: Vec::new(),
             debug: DebugOption::default(),
             routing: RoutingOptions::default(),
+            crypto_rotation: CryptoRotation::default(),
         }
     }
 }
