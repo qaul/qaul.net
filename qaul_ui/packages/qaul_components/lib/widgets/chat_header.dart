@@ -9,6 +9,7 @@ const double kChatHeaderAvatarSize = 40;
 const double _kHorizontalPadding = 12;
 const double _kBackAvatarGap = 4;
 const double _kAvatarTitleGap = 12;
+const double _kTitleSubtitleGap = 4;
 const double _kOnlineDotSize = 12;
 const double _kOnlineDotBorder = 1.5;
 const double _kHeaderControlIconSize = 30;
@@ -213,6 +214,7 @@ class ChatHeader extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: primaryStyle,
                   ),
+                  const SizedBox(height: _kTitleSubtitleGap),
                   Text(
                     _subtitle,
                     maxLines: 1,
