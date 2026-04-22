@@ -159,6 +159,7 @@ impl CryptoNoise {
         state.highest_index_nonce_in = 0;
         state.cipher_out = Some(key_out.as_slice().to_vec());
         state.index_nonce_out = 0;
+        state.established_at = Timestamp::get_timestamp();
 
         // save crypto state to data base
         storage.save_state(remote_id, state.session_id, state);
@@ -368,6 +369,7 @@ impl CryptoNoise {
         state.highest_index_nonce_in = 0;
         state.cipher_out = Some(key_out.as_slice().to_vec());
         state.index_nonce_out = 0;
+        state.established_at = Timestamp::get_timestamp();
 
         // save state to data base
         storage.save_state(remote_id, state.session_id, state);
@@ -463,6 +465,7 @@ impl CryptoNoise {
             cipher_in: None,
             highest_index_nonce_in: 0,
             out_of_order_indexes: false,
+            established_at: 0,
         };
 
         state
@@ -837,6 +840,7 @@ mod rotation_tests {
             cipher_in: Some(vec![0u8; 32]),
             highest_index_nonce_in: 0,
             out_of_order_indexes: false,
+            established_at: 0,
         }
     }
 
