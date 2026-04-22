@@ -1607,7 +1607,15 @@ class GroupInfo extends $pb.GeneratedMessage {
 
 /// Group list request
 class GroupListRequest extends $pb.GeneratedMessage {
-  factory GroupListRequest() => create();
+  factory GroupListRequest({
+    $core.int? offset,
+    $core.int? limit,
+  }) {
+    final result = create();
+    if (offset != null) result.offset = offset;
+    if (limit != null) result.limit = limit;
+    return result;
+  }
 
   GroupListRequest._();
 
@@ -1622,6 +1630,8 @@ class GroupListRequest extends $pb.GeneratedMessage {
       _omitMessageNames ? '' : 'GroupListRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.group'),
       createEmptyInstance: create)
+    ..aI(10, _omitFieldNames ? '' : 'offset', fieldType: $pb.PbFieldType.OU3)
+    ..aI(20, _omitFieldNames ? '' : 'limit', fieldType: $pb.PbFieldType.OU3)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1642,15 +1652,35 @@ class GroupListRequest extends $pb.GeneratedMessage {
   static GroupListRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<GroupListRequest>(create);
   static GroupListRequest? _defaultInstance;
+
+  @$pb.TagNumber(10)
+  $core.int get offset => $_getIZ(0);
+  @$pb.TagNumber(10)
+  set offset($core.int value) => $_setUnsignedInt32(0, value);
+  @$pb.TagNumber(10)
+  $core.bool hasOffset() => $_has(0);
+  @$pb.TagNumber(10)
+  void clearOffset() => $_clearField(10);
+
+  @$pb.TagNumber(20)
+  $core.int get limit => $_getIZ(1);
+  @$pb.TagNumber(20)
+  set limit($core.int value) => $_setUnsignedInt32(1, value);
+  @$pb.TagNumber(20)
+  $core.bool hasLimit() => $_has(1);
+  @$pb.TagNumber(20)
+  void clearLimit() => $_clearField(20);
 }
 
 /// Group info response
 class GroupListResponse extends $pb.GeneratedMessage {
   factory GroupListResponse({
     $core.Iterable<GroupInfo>? groups,
+    PaginationMetadata? pagination,
   }) {
     final result = create();
     if (groups != null) result.groups.addAll(groups);
+    if (pagination != null) result.pagination = pagination;
     return result;
   }
 
@@ -1669,6 +1699,8 @@ class GroupListResponse extends $pb.GeneratedMessage {
       createEmptyInstance: create)
     ..pPM<GroupInfo>(1, _omitFieldNames ? '' : 'groups',
         subBuilder: GroupInfo.create)
+    ..aOM<PaginationMetadata>(2, _omitFieldNames ? '' : 'pagination',
+        subBuilder: PaginationMetadata.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1693,6 +1725,17 @@ class GroupListResponse extends $pb.GeneratedMessage {
   /// group list
   @$pb.TagNumber(1)
   $pb.PbList<GroupInfo> get groups => $_getList(0);
+
+  @$pb.TagNumber(2)
+  PaginationMetadata get pagination => $_getN(1);
+  @$pb.TagNumber(2)
+  set pagination(PaginationMetadata value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasPagination() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearPagination() => $_clearField(2);
+  @$pb.TagNumber(2)
+  PaginationMetadata ensurePagination() => $_ensure(1);
 }
 
 class GroupInvited extends $pb.GeneratedMessage {
@@ -1782,9 +1825,107 @@ class GroupInvited extends $pb.GeneratedMessage {
   GroupInfo ensureGroup() => $_ensure(2);
 }
 
-/// Group list request
+class PaginationMetadata extends $pb.GeneratedMessage {
+  factory PaginationMetadata({
+    $core.bool? hasMore,
+    $core.int? total,
+    $core.int? offset,
+    $core.int? limit,
+  }) {
+    final result = create();
+    if (hasMore != null) result.hasMore = hasMore;
+    if (total != null) result.total = total;
+    if (offset != null) result.offset = offset;
+    if (limit != null) result.limit = limit;
+    return result;
+  }
+
+  PaginationMetadata._();
+
+  factory PaginationMetadata.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory PaginationMetadata.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'PaginationMetadata',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.group'),
+      createEmptyInstance: create)
+    ..aOB(10, _omitFieldNames ? '' : 'hasMore')
+    ..aI(20, _omitFieldNames ? '' : 'total', fieldType: $pb.PbFieldType.OU3)
+    ..aI(30, _omitFieldNames ? '' : 'offset', fieldType: $pb.PbFieldType.OU3)
+    ..aI(40, _omitFieldNames ? '' : 'limit', fieldType: $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PaginationMetadata clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PaginationMetadata copyWith(void Function(PaginationMetadata) updates) =>
+      super.copyWith((message) => updates(message as PaginationMetadata))
+          as PaginationMetadata;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static PaginationMetadata create() => PaginationMetadata._();
+  @$core.override
+  PaginationMetadata createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static PaginationMetadata getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<PaginationMetadata>(create);
+  static PaginationMetadata? _defaultInstance;
+
+  @$pb.TagNumber(10)
+  $core.bool get hasMore => $_getBF(0);
+  @$pb.TagNumber(10)
+  set hasMore($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(10)
+  $core.bool hasHasMore() => $_has(0);
+  @$pb.TagNumber(10)
+  void clearHasMore() => $_clearField(10);
+
+  @$pb.TagNumber(20)
+  $core.int get total => $_getIZ(1);
+  @$pb.TagNumber(20)
+  set total($core.int value) => $_setUnsignedInt32(1, value);
+  @$pb.TagNumber(20)
+  $core.bool hasTotal() => $_has(1);
+  @$pb.TagNumber(20)
+  void clearTotal() => $_clearField(20);
+
+  @$pb.TagNumber(30)
+  $core.int get offset => $_getIZ(2);
+  @$pb.TagNumber(30)
+  set offset($core.int value) => $_setUnsignedInt32(2, value);
+  @$pb.TagNumber(30)
+  $core.bool hasOffset() => $_has(2);
+  @$pb.TagNumber(30)
+  void clearOffset() => $_clearField(30);
+
+  @$pb.TagNumber(40)
+  $core.int get limit => $_getIZ(3);
+  @$pb.TagNumber(40)
+  set limit($core.int value) => $_setUnsignedInt32(3, value);
+  @$pb.TagNumber(40)
+  $core.bool hasLimit() => $_has(3);
+  @$pb.TagNumber(40)
+  void clearLimit() => $_clearField(40);
+}
+
+/// Group invited list request
 class GroupInvitedRequest extends $pb.GeneratedMessage {
-  factory GroupInvitedRequest() => create();
+  factory GroupInvitedRequest({
+    $core.int? offset,
+    $core.int? limit,
+  }) {
+    final result = create();
+    if (offset != null) result.offset = offset;
+    if (limit != null) result.limit = limit;
+    return result;
+  }
 
   GroupInvitedRequest._();
 
@@ -1799,6 +1940,8 @@ class GroupInvitedRequest extends $pb.GeneratedMessage {
       _omitMessageNames ? '' : 'GroupInvitedRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.group'),
       createEmptyInstance: create)
+    ..aI(10, _omitFieldNames ? '' : 'offset', fieldType: $pb.PbFieldType.OU3)
+    ..aI(20, _omitFieldNames ? '' : 'limit', fieldType: $pb.PbFieldType.OU3)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1819,15 +1962,35 @@ class GroupInvitedRequest extends $pb.GeneratedMessage {
   static GroupInvitedRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<GroupInvitedRequest>(create);
   static GroupInvitedRequest? _defaultInstance;
+
+  @$pb.TagNumber(10)
+  $core.int get offset => $_getIZ(0);
+  @$pb.TagNumber(10)
+  set offset($core.int value) => $_setUnsignedInt32(0, value);
+  @$pb.TagNumber(10)
+  $core.bool hasOffset() => $_has(0);
+  @$pb.TagNumber(10)
+  void clearOffset() => $_clearField(10);
+
+  @$pb.TagNumber(20)
+  $core.int get limit => $_getIZ(1);
+  @$pb.TagNumber(20)
+  set limit($core.int value) => $_setUnsignedInt32(1, value);
+  @$pb.TagNumber(20)
+  $core.bool hasLimit() => $_has(1);
+  @$pb.TagNumber(20)
+  void clearLimit() => $_clearField(20);
 }
 
-/// Group info response
+/// Group invited response
 class GroupInvitedResponse extends $pb.GeneratedMessage {
   factory GroupInvitedResponse({
     $core.Iterable<GroupInvited>? invited,
+    PaginationMetadata? pagination,
   }) {
     final result = create();
     if (invited != null) result.invited.addAll(invited);
+    if (pagination != null) result.pagination = pagination;
     return result;
   }
 
@@ -1846,6 +2009,8 @@ class GroupInvitedResponse extends $pb.GeneratedMessage {
       createEmptyInstance: create)
     ..pPM<GroupInvited>(1, _omitFieldNames ? '' : 'invited',
         subBuilder: GroupInvited.create)
+    ..aOM<PaginationMetadata>(2, _omitFieldNames ? '' : 'pagination',
+        subBuilder: PaginationMetadata.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1870,6 +2035,17 @@ class GroupInvitedResponse extends $pb.GeneratedMessage {
   /// invited list
   @$pb.TagNumber(1)
   $pb.PbList<GroupInvited> get invited => $_getList(0);
+
+  @$pb.TagNumber(2)
+  PaginationMetadata get pagination => $_getN(1);
+  @$pb.TagNumber(2)
+  set pagination(PaginationMetadata value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasPagination() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearPagination() => $_clearField(2);
+  @$pb.TagNumber(2)
+  PaginationMetadata ensurePagination() => $_ensure(1);
 }
 
 const $core.bool _omitFieldNames =
