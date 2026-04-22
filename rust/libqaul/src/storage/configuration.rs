@@ -355,6 +355,20 @@ impl Configuration {
         *cfg = config;
     }
 
+    /// Install an arbitrary `Configuration` for tests that need
+    /// `Configuration::get()` to return something deterministic
+    /// without touching the filesystem.
+    ///
+    /// The `InitCell` is write-once: subsequent calls are no-ops and
+    /// the first-installed config stays. Returns `true` when this
+    /// call was the one that installed the config.
+    #[cfg(test)]
+    pub fn init_for_tests(config: Configuration) -> bool {
+        // `InitCell::set` returns false when the cell already held a
+        // value; we treat that as an idempotent no-op.
+        CONFIG.set(RwLock::new(config))
+    }
+
     /// Load a configuration file for upgrading purposes
     ///
     /// This function is only to be used for the upgrading procedure.
