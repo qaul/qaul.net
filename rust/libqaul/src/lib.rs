@@ -613,6 +613,7 @@ impl Libqaul {
             &mut routing_table_ticker,
             &mut messaging_ticker,
             &mut retransmit_ticker,
+            &mut rotation_ticker,
         )
         .await;
     }
@@ -636,6 +637,7 @@ impl Libqaul {
         routing_table_ticker: &mut Ticker,
         messaging_ticker: &mut Ticker,
         retransmit_ticker: &mut Ticker,
+        rotation_ticker: &mut Ticker,
     ) {
         // Take a snapshot of the router state once; it doesn't change after init.
         let router = self.state.get_router();
@@ -655,6 +657,7 @@ impl Libqaul {
                 let routing_table_fut = routing_table_ticker.next().fuse();
                 let messaging_fut = messaging_ticker.next().fuse();
                 let retransmit_fut = retransmit_ticker.next().fuse();
+                let rotation_fut = rotation_ticker.next().fuse();
 
                 pin_mut!(
                     lan_fut,
@@ -671,6 +674,7 @@ impl Libqaul {
                     routing_table_fut,
                     messaging_fut,
                     retransmit_fut,
+                    rotation_fut,
                 );
 
                 select! {
@@ -748,6 +752,7 @@ impl Libqaul {
                     _routing_table_event = routing_table_fut => Some(EventType::RoutingTable),
                     _messaging_event = messaging_fut => Some(EventType::Messaging),
                     _retransmit_event = retransmit_fut => Some(EventType::Retransmit),
+                    _rotation_event = rotation_fut => Some(EventType::Rotation),
                 }
             };
 
@@ -969,6 +974,27 @@ impl Libqaul {
                 // Messaging::schedule_message — all routed through QaulState.
                 services::messaging::retransmit::MessagingRetransmit::process(&*self.state);
             }
+            EventType::Rotation => {
+                let enabled = {
+                    let cfg = storage::configuration::Configuration::get(&*self.state);
+                    cfg.crypto_rotation.enabled
+                };
+                if enabled {
+                    let now_ms = utilities::timestamp::Timestamp::get_timestamp();
+                    for account in
+                        node::user_accounts::UserAccounts::get_all_users(&*self.state)
+                    {
+                        let crypto_account = services::crypto::CryptoStorage::get_db_ref(
+                            &*self.state,
+                            account.id.clone(),
+                        );
+                        services::crypto::CryptoNoise::drain_expired_rotations(
+                            crypto_account,
+                            now_ms,
+                        );
+                    }
+                }
+            }
         }
     }
 
@@ -1033,6 +1059,7 @@ enum EventType {
     RoutingTable,
     Messaging,
     Retransmit,
+    Rotation,
 }
 
 /// Legacy entry point — removed in favor of `Libqaul::new()` + `Libqaul::run()`.

@@ -76,12 +76,11 @@ impl CryptoSessionManager {
                         sender_id.to_base58()
                     );
                 }
-                Some(proto_net::cryptoservice_container::Message::RotateFirst(_))
-                | Some(proto_net::cryptoservice_container::Message::RotateSecond(_)) => {
-                    log::warn!(
-                        "Received rotation handshake from {} but rotation trigger wiring is not yet enabled (Phase 2). Dropping.",
-                        sender_id.to_base58()
-                    );
+                Some(proto_net::cryptoservice_container::Message::RotateFirst(rotate_first)) => {
+                    Self::process_rotate_first(state, &user_account, sender_id, rotate_first);
+                }
+                Some(proto_net::cryptoservice_container::Message::RotateSecond(rotate_second)) => {
+                    Self::process_rotate_second(state, &user_account, sender_id, rotate_second);
                 }
                 None => {
                     log::error!(

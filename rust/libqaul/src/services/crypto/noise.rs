@@ -1478,6 +1478,7 @@ mod rotation_tests {
             cipher_in: Some(vec![0u8; 32]),
             highest_index_nonce_in: 0,
             out_of_order_indexes: false,
+            established_at: 0,
         }
     }
 
