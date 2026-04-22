@@ -101,12 +101,15 @@ impl Group {
             }
             // group list
             cmd if cmd.starts_with("list") => {
-                //let command_string = cmd.strip_prefix("list ").unwrap().to_string();
-                Self::group_list(state);
+                let rest = cmd.strip_prefix("list").unwrap_or("").trim();
+                let (offset, limit) = Self::parse_pagination(rest);
+                Self::group_list(state, offset, limit);
             }
-            // group list
+            // group invited
             cmd if cmd.starts_with("invited") => {
-                Self::group_invited(state);
+                let rest = cmd.strip_prefix("invited").unwrap_or("").trim();
+                let (offset, limit) = Self::parse_pagination(rest);
+                Self::group_invited(state, offset, limit);
             }
             // group invite
             cmd if cmd.starts_with("invite ") => {
@@ -341,22 +344,27 @@ impl Group {
         );
     }
 
+    /// Parse optional `offset limit` from a command suffix, defaulting to `0 0`.
+    fn parse_pagination(s: &str) -> (u32, u32) {
+        let mut parts = s.split_whitespace();
+        let offset = parts.next().and_then(|v| v.parse().ok()).unwrap_or(0);
+        let limit = parts.next().and_then(|v| v.parse().ok()).unwrap_or(0);
+        (offset, limit)
+    }
+
     /// group list
-    fn group_list(state: &super::CliState) {
-        // group list send message
+    fn group_list(state: &super::CliState, offset: u32, limit: u32) {
         let proto_message = proto::Group {
             message: Some(proto::group::Message::GroupListRequest(
-                proto::GroupListRequest {},
+                proto::GroupListRequest { offset, limit },
             )),
         };
 
-        // encode message
         let mut buf = Vec::with_capacity(proto_message.encoded_len());
         proto_message
             .encode(&mut buf)
             .expect("Vec<u8> provides capacity as needed");
 
-        // send message
         Rpc::send_message(
             state,
             buf,
@@ -366,15 +374,13 @@ impl Group {
     }
 
     /// group invited
-    fn group_invited(state: &super::CliState) {
-        // group list send message
+    fn group_invited(state: &super::CliState, offset: u32, limit: u32) {
         let proto_message = proto::Group {
             message: Some(proto::group::Message::GroupInvitedRequest(
-                proto::GroupInvitedRequest {},
+                proto::GroupInvitedRequest { offset, limit },
             )),
         };
 
-        // send message
         Rpc::send_message(
             state,
             proto_message.encode_to_vec(),
@@ -647,8 +653,13 @@ impl Group {
                         println!("\tmembers: {}", group_info_response.members.len());
                     }
                     Some(proto::group::Message::GroupListResponse(group_list_response)) => {
-                        // List groups
                         println!("=============List Of Groups=================");
+                        if let Some(ref p) = group_list_response.pagination {
+                            println!(
+                                "page: offset={}, limit={}, total={}, has_more={}",
+                                p.offset, p.limit, p.total, p.has_more
+                            );
+                        }
                         for group in group_list_response.groups {
                             let group_id_bytes: [u8; 16] = match group.group_id.try_into() {
                                 Ok(b) => b,
@@ -721,8 +732,13 @@ impl Group {
                         }
                     }
                     Some(proto::group::Message::GroupInvitedResponse(group_invited_response)) => {
-                        // List of pending invites
                         println!("=============List Of Invited=================");
+                        if let Some(ref p) = group_invited_response.pagination {
+                            println!(
+                                "page: offset={}, limit={}, total={}, has_more={}",
+                                p.offset, p.limit, p.total, p.has_more
+                            );
+                        }
                         for invite in group_invited_response.invited {
                             if let Some(group) = invite.group {
                                 let group_id_bytes: [u8; 16] = match group.group_id.try_into() {
