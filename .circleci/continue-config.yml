@@ -82,7 +82,7 @@ commands:
                 key: pub-cache-v4-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
                 name: Restore Flutter pub cache
             - run:
-                command: flutter pub get
+                command: ./bin/fluttergetall.sh
                 name: Install Flutter Dependencies
             - save_cache:
                 key: pub-cache-v4-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
@@ -225,13 +225,6 @@ jobs:
         steps:
             - checkout-project
             - install-flutter-deps
-            - run:
-                command: |
-                    cd packages/qaul_components
-                    flutter pub get
-                    cd widgetbook_workspace
-                    flutter pub get
-                name: Install widgetbook dependencies
             - run: flutter analyze
     build-and-deploy-docker-qauld:
         docker:
@@ -282,7 +275,7 @@ jobs:
                 version: $FLUTTER_VERSION
             - run: flutter doctor --verbose
             - run:
-                command: cd .. && flutter pub get
+                command: cd .. && ./bin/fluttergetall.sh
                 name: Install Flutter Dependencies
             - run:
                 command: ruby --version && sudo gem install bundler -N -v "$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)"
@@ -327,7 +320,7 @@ jobs:
                 version: $FLUTTER_VERSION
             - run: flutter doctor --verbose
             - run:
-                command: cd .. && flutter pub get
+                command: cd .. && ./bin/fluttergetall.sh
                 name: Install Flutter Dependencies
             - run:
                 command: |
@@ -1144,7 +1137,7 @@ jobs:
         steps:
             - checkout-project
             - install-flutter-deps
-            - run: flutter test
+            - run: ./bin/fluttertestall.sh
     verify-version-flutter:
         executor: flutter-ubuntu-lean
         steps:

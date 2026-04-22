@@ -14,6 +14,7 @@ and how you can build it for the supported operating systems.
   * [Raspberry Pi](qaul/flutter/raspberry.md)
 * [MacOS](qaul/flutter/macos.md)
 * [Windows](qaul/flutter/windows.md)
+* [Flutter dependencies and tests](qaul/flutter/dependencies-and-tests.md)
 
 ## Technical Concepts
 

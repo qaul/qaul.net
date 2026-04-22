@@ -28,7 +28,7 @@ steps:
   - run: flutter doctor --verbose
   - run:
       name: Install Flutter Dependencies
-      command: cd .. && flutter pub get
+      command: cd .. && ./bin/fluttergetall.sh
   - run:
       name: Install Bundle
       command: |
