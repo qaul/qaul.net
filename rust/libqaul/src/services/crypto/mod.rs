@@ -754,3 +754,234 @@ impl Crypto {
         None
     }
 }
+
+#[cfg(test)]
+mod phase2_tests {
+    //! Phase 2 unit tests — exercise the new rotation-aware helpers
+    //! (`resolve_primary_state`, `after_decrypt_rotation`) against
+    //! in-memory sled storage and a test-only configuration.
+    //!
+    //! End-to-end rotation tests (full Noise handshake, cross-peer
+    //! dispatch, replay / collision) require the global libqaul stack
+    //! and live in plan.md Phase 4 (`tests/integration/local_mesh.py`).
+
+    use super::*;
+    use crate::services::crypto::storage::{CryptoStorage, RotationMeta};
+    use crate::storage::configuration::{Configuration, CryptoRotation};
+    use libp2p::identity::Keypair;
+    use std::sync::Once;
+
+    static CONFIG_INIT: Once = Once::new();
+
+    /// Install a test `Configuration` with rotation enabled once per
+    /// process. Idempotent.
+    ///
+    /// We can't use `Configuration::default()` here: `Internet::default`
+    /// pulls values out of the `DEFCONFIGS` global which is only set
+    /// by `Libqaul::new`. Build the struct literally from the
+    /// sub-module `::default()`s that *are* self-contained.
+    fn install_test_config() {
+        use crate::storage::configuration::{
+            DebugOption, Internet, Lan, Node, RoutingOptions,
+        };
+        CONFIG_INIT.call_once(|| {
+            let cfg = Configuration {
+                node: Node {
+                    initialized: 0,
+                    id: String::new(),
+                    keys: String::new(),
+                },
+                lan: Lan {
+                    active: false,
+                    listen: Vec::new(),
+                },
+                internet: Internet {
+                    active: false,
+                    peers: Vec::new(),
+                    do_listen: false,
+                    listen: Vec::new(),
+                },
+                user_accounts: Vec::new(),
+                debug: DebugOption { log: false },
+                routing: RoutingOptions::default(),
+                crypto_rotation: CryptoRotation {
+                    enabled: true,
+                    period_seconds: 7 * 24 * 3600,
+                    volume_messages: 1_000_000,
+                    grace_period_seconds: 3600,
+                    grace_volume_messages: 256,
+                },
+            };
+            Configuration::init_for_tests(cfg);
+        });
+    }
+
+    fn fresh_peer() -> PeerId {
+        Keypair::generate_ed25519().public().to_peer_id()
+    }
+
+    fn dummy_state(session_id: u32) -> CryptoState {
+        CryptoState {
+            session_id,
+            state: CryptoProcessState::Transport,
+            initiator: true,
+            s: vec![],
+            rs: vec![],
+            e: vec![],
+            re: None,
+            cipher_out: Some(vec![0u8; 32]),
+            index_nonce_out: 0,
+            cipher_in: Some(vec![0u8; 32]),
+            highest_index_nonce_in: 0,
+            out_of_order_indexes: false,
+            established_at: 0,
+        }
+    }
+
+    // ------------------------------------------------------------------
+    //                       resolve_primary_state
+    // ------------------------------------------------------------------
+
+    // When rotation_meta names a primary and that state row exists,
+    // resolve_primary_state must return *that* row, even if the tree
+    // has multiple Transport rows for the same peer (the post-
+    // responder-step window).
+    #[test]
+    fn resolve_primary_prefers_meta_designated_row() {
+        let acct = CryptoStorage::test_account();
+        let remote = fresh_peer();
+        acct.save_state(remote, 10, dummy_state(10));
+        acct.save_state(remote, 20, dummy_state(20));
+        acct.save_rotation_meta(remote, &RotationMeta::primary_only(20));
+
+        let resolved = Crypto::resolve_primary_state(&acct, remote).unwrap();
+        assert_eq!(resolved.session_id, 20);
+    }
+
+    // With no rotation_meta row, fall back to the legacy get_state.
+    #[test]
+    fn resolve_primary_falls_back_without_meta() {
+        let acct = CryptoStorage::test_account();
+        let remote = fresh_peer();
+        acct.save_state(remote, 7, dummy_state(7));
+
+        let resolved = Crypto::resolve_primary_state(&acct, remote).unwrap();
+        assert_eq!(resolved.session_id, 7);
+    }
+
+    // If the meta-designated primary session has no matching state
+    // row (stale meta, interrupted write, etc.), fall back rather
+    // than surface `None`.
+    #[test]
+    fn resolve_primary_ignores_missing_state_for_meta_primary() {
+        let acct = CryptoStorage::test_account();
+        let remote = fresh_peer();
+        acct.save_state(remote, 7, dummy_state(7));
+        acct.save_rotation_meta(remote, &RotationMeta::primary_only(42));
+
+        let resolved = Crypto::resolve_primary_state(&acct, remote).unwrap();
+        assert_eq!(resolved.session_id, 7, "should fall back to existing row");
+    }
+
+    // ------------------------------------------------------------------
+    //                       after_decrypt_rotation
+    // ------------------------------------------------------------------
+
+    fn dummy_user_account() -> UserAccount {
+        let keys = Keypair::generate_ed25519();
+        let id = keys.public().to_peer_id();
+        UserAccount {
+            id,
+            keys,
+            name: "test".into(),
+            password_hash: None,
+            password_salt: None,
+        }
+    }
+
+    // A message decrypted on the draining session decrements the
+    // remaining-volume budget.
+    #[test]
+    fn after_decrypt_decrements_draining_volume() {
+        install_test_config();
+        let acct = CryptoStorage::test_account();
+        let user_account = dummy_user_account();
+        let remote = fresh_peer();
+        acct.save_state(remote, 50, dummy_state(50));
+        acct.save_rotation_meta(
+            remote,
+            &RotationMeta {
+                primary_session_id: 100,
+                pending_initiated_session_id: None,
+                draining_session_id: Some(50),
+                draining_until: Some(u64::MAX),
+                draining_remaining_volume: Some(10),
+            },
+        );
+
+        Crypto::after_decrypt_rotation(&user_account, &acct, remote, 50);
+
+        let meta = acct.get_rotation_meta(remote).unwrap();
+        assert_eq!(meta.draining_remaining_volume, Some(9));
+        // Primary fields untouched.
+        assert_eq!(meta.primary_session_id, 100);
+        assert_eq!(meta.draining_session_id, Some(50));
+    }
+
+    // Decrementing a budget already at zero saturates (no underflow).
+    #[test]
+    fn after_decrypt_saturates_at_zero() {
+        install_test_config();
+        let acct = CryptoStorage::test_account();
+        let user_account = dummy_user_account();
+        let remote = fresh_peer();
+        acct.save_state(remote, 50, dummy_state(50));
+        acct.save_rotation_meta(
+            remote,
+            &RotationMeta {
+                primary_session_id: 100,
+                pending_initiated_session_id: None,
+                draining_session_id: Some(50),
+                draining_until: Some(u64::MAX),
+                draining_remaining_volume: Some(0),
+            },
+        );
+
+        Crypto::after_decrypt_rotation(&user_account, &acct, remote, 50);
+
+        let meta = acct.get_rotation_meta(remote).unwrap();
+        assert_eq!(meta.draining_remaining_volume, Some(0));
+    }
+
+    // When rotation is disabled in config, the draining branch never
+    // runs — nothing mutates. We can only exercise this when the
+    // shared `install_test_config` *hasn't* run; use a fresh account
+    // without calling `install_test_config`. But because the InitCell
+    // is process-wide, once a previous test installs the enabled
+    // config it stays enabled. Instead, assert behaviour under the
+    // normal enabled path when session_id doesn't match any role:
+    // no mutation should happen.
+    #[test]
+    fn after_decrypt_noop_on_unrelated_session() {
+        install_test_config();
+        let acct = CryptoStorage::test_account();
+        let user_account = dummy_user_account();
+        let remote = fresh_peer();
+        acct.save_state(remote, 99, dummy_state(99));
+        let original = RotationMeta {
+            primary_session_id: 100,
+            pending_initiated_session_id: None,
+            draining_session_id: Some(50),
+            draining_until: Some(u64::MAX),
+            draining_remaining_volume: Some(10),
+        };
+        acct.save_rotation_meta(remote, &original);
+
+        // session_id 99 matches neither primary (100) nor draining
+        // (50) → no mutation.
+        Crypto::after_decrypt_rotation(&user_account, &acct, remote, 99);
+
+        let meta = acct.get_rotation_meta(remote).unwrap();
+        assert_eq!(meta, original);
+    }
+}
