@@ -275,7 +275,7 @@ jobs:
                 version: $FLUTTER_VERSION
             - run: flutter doctor --verbose
             - run:
-                command: cd .. && ./bin/fluttergetall.sh
+                command: ~/qaul.net/qaul_ui/bin/fluttergetall.sh
                 name: Install Flutter Dependencies
             - run:
                 command: ruby --version && sudo gem install bundler -N -v "$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)"
@@ -320,7 +320,7 @@ jobs:
                 version: $FLUTTER_VERSION
             - run: flutter doctor --verbose
             - run:
-                command: cd .. && ./bin/fluttergetall.sh
+                command: ~/qaul.net/qaul_ui/bin/fluttergetall.sh
                 name: Install Flutter Dependencies
             - run:
                 command: |
