@@ -9,6 +9,7 @@ use super::ble::Ble;
 use super::chat::Chat;
 use super::chatfile::ChatFile;
 use super::connections::Connections;
+use super::crypto::Crypto;
 use super::debug::Debug;
 use super::dtn::Dtn;
 use super::feed::Feed;
@@ -82,6 +83,10 @@ impl Cli {
             // dynamic transports (LAN / Internet / BLE) on/off
             cmd if cmd.starts_with("transports ") => {
                 Transports::cli(state, cmd.strip_prefix("transports ").unwrap());
+            }
+            // crypto functions (session rotation config)
+            cmd if cmd.starts_with("crypto ") => {
+                Crypto::cli(cmd.strip_prefix("crypto ").unwrap());
             }
             // unknown command
             _ => log::error!("unknown command"),

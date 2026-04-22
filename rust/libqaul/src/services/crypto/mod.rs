@@ -13,6 +13,7 @@
 
 use libp2p::PeerId;
 use noise_rust_crypto::{ChaCha20Poly1305, Sha256, X25519};
+use prost::Message;
 use serde::{Deserialize, Serialize};
 
 mod crypto25519;
@@ -753,6 +754,152 @@ impl Crypto {
 
         None
     }
+
+    // ------------------------------------------------------------------
+    //                         Crypto RPC handler
+    // ------------------------------------------------------------------
+
+    /// Dispatch a `Modules::Crypto` RPC request.
+    ///
+    /// Decodes the `Crypto` oneof and routes to the matching handler:
+    /// `GetConfigRequest` reads the current `CryptoRotation` out of
+    /// `Configuration`; `SetConfigRequest` applies a partial update
+    /// (only present fields mutate), persists to `config.yaml`, and
+    /// returns the updated state in `SetConfigResponse.applied`.
+    pub fn rpc(data: Vec<u8>, _user_id: Vec<u8>, request_id: String) {
+        use qaul_proto::qaul_rpc_crypto as proto_rpc;
+
+        match proto_rpc::Crypto::decode(&data[..]) {
+            Ok(msg) => match msg.message {
+                Some(proto_rpc::crypto::Message::GetConfigRequest(_req)) => {
+                    Self::handle_get_config(request_id);
+                }
+                Some(proto_rpc::crypto::Message::SetConfigRequest(req)) => {
+                    Self::handle_set_config(req, request_id);
+                }
+                Some(proto_rpc::crypto::Message::GetConfigResponse(_))
+                | Some(proto_rpc::crypto::Message::SetConfigResponse(_)) => {
+                    // Responses are libqaul -> client only; clients
+                    // that echo them back are ignored.
+                    log::warn!("Crypto RPC received a response message from client; dropping");
+                }
+                None => log::error!("Crypto RPC message from client was empty"),
+            },
+            Err(e) => log::error!("Crypto RPC decode error: {}", e),
+        }
+    }
+
+    fn handle_get_config(request_id: String) {
+        use qaul_proto::qaul_rpc_crypto as proto_rpc;
+        let snapshot = Self::snapshot_config();
+        let out = proto_rpc::Crypto {
+            message: Some(proto_rpc::crypto::Message::GetConfigResponse(snapshot)),
+        };
+        crate::rpc::Rpc::send_message(
+            out.encode_to_vec(),
+            crate::rpc::proto::Modules::Crypto.into(),
+            request_id,
+            Vec::new(),
+        );
+    }
+
+    fn handle_set_config(
+        req: qaul_proto::qaul_rpc_crypto::SetConfigRequest,
+        request_id: String,
+    ) {
+        use qaul_proto::qaul_rpc_crypto as proto_rpc;
+
+        // Validate: every numeric field, when present, must be > 0.
+        // Accepting zero would mean "rotate immediately on every
+        // message" (period) or "retire draining on first message"
+        // (grace) — almost certainly a client mistake.
+        let validation_error = [
+            ("period_seconds", req.period_seconds),
+            ("volume_messages", req.volume_messages),
+            ("grace_period_seconds", req.grace_period_seconds),
+            ("grace_volume_messages", req.grace_volume_messages),
+        ]
+        .into_iter()
+        .find_map(|(name, value)| match value {
+            Some(0) => Some(format!("{} must be > 0", name)),
+            _ => None,
+        });
+
+        if let Some(err) = validation_error {
+            let applied = Self::snapshot_config();
+            let resp = proto_rpc::Crypto {
+                message: Some(proto_rpc::crypto::Message::SetConfigResponse(
+                    proto_rpc::SetConfigResponse {
+                        success: false,
+                        error: err,
+                        applied: Some(applied),
+                    },
+                )),
+            };
+            crate::rpc::Rpc::send_message(
+                resp.encode_to_vec(),
+                crate::rpc::proto::Modules::Crypto.into(),
+                request_id,
+                Vec::new(),
+            );
+            return;
+        }
+
+        // Apply the partial update.
+        {
+            let mut cfg = Configuration::get_mut();
+            if let Some(v) = req.enabled {
+                cfg.crypto_rotation.enabled = v;
+            }
+            if let Some(v) = req.period_seconds {
+                cfg.crypto_rotation.period_seconds = v;
+            }
+            if let Some(v) = req.volume_messages {
+                cfg.crypto_rotation.volume_messages = v;
+            }
+            if let Some(v) = req.grace_period_seconds {
+                cfg.crypto_rotation.grace_period_seconds = v;
+            }
+            if let Some(v) = req.grace_volume_messages {
+                cfg.crypto_rotation.grace_volume_messages = v;
+            }
+        }
+
+        // Persist to disk (skipped under cfg(test): the test fixture
+        // installs a config directly and never invokes the Storage
+        // path).
+        #[cfg(not(test))]
+        Configuration::save();
+
+        let applied = Self::snapshot_config();
+        let resp = proto_rpc::Crypto {
+            message: Some(proto_rpc::crypto::Message::SetConfigResponse(
+                proto_rpc::SetConfigResponse {
+                    success: true,
+                    error: String::new(),
+                    applied: Some(applied),
+                },
+            )),
+        };
+        crate::rpc::Rpc::send_message(
+            resp.encode_to_vec(),
+            crate::rpc::proto::Modules::Crypto.into(),
+            request_id,
+            Vec::new(),
+        );
+    }
+
+    /// Snapshot the current `CryptoRotation` into a proto response.
+    fn snapshot_config() -> qaul_proto::qaul_rpc_crypto::GetConfigResponse {
+        let cfg = Configuration::get();
+        qaul_proto::qaul_rpc_crypto::GetConfigResponse {
+            enabled: cfg.crypto_rotation.enabled,
+            period_seconds: cfg.crypto_rotation.period_seconds,
+            volume_messages: cfg.crypto_rotation.volume_messages,
+            grace_period_seconds: cfg.crypto_rotation.grace_period_seconds,
+            grace_volume_messages: cfg.crypto_rotation.grace_volume_messages,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -780,7 +927,7 @@ mod phase2_tests {
     /// pulls values out of the `DEFCONFIGS` global which is only set
     /// by `Libqaul::new`. Build the struct literally from the
     /// sub-module `::default()`s that *are* self-contained.
-    fn install_test_config() {
+    pub(super) fn install_test_config() {
         use crate::storage::configuration::{
             DebugOption, Internet, Lan, Node, RoutingOptions,
         };
@@ -983,5 +1130,171 @@ mod phase2_tests {
 
         let meta = acct.get_rotation_meta(remote).unwrap();
         assert_eq!(meta, original);
+    }
+}
+
+#[cfg(test)]
+mod phase3_tests {
+    //! Phase 3 unit tests — exercise `Crypto::rpc` against installed
+    //! test configuration and a live RPC channel.
+    //!
+    //! The RPC-config mutation tests share process-global state
+    //! (`CONFIG`, `EXTERN_RECEIVE`) with Phase 2 tests, so all
+    //! mutating tests take a module-scoped `CONFIG_LOCK` and revert
+    //! their changes before releasing it.
+
+    use super::phase2_tests::install_test_config;
+    use super::*;
+    use crate::rpc::Rpc;
+    use qaul_proto::qaul_rpc_crypto as proto_rpc;
+    use std::sync::{Mutex, Once};
+
+    /// Serialise RPC-config tests so one test's SetConfigRequest
+    /// doesn't race another test's GetConfigRequest assertion.
+    static CONFIG_LOCK: Mutex<()> = Mutex::new(());
+    static RPC_INIT: Once = Once::new();
+
+    fn install_rpc_for_tests() {
+        RPC_INIT.call_once(|| {
+            let _ = Rpc::init();
+        });
+    }
+
+    /// Drop every pending libqaul->extern message so the test's
+    /// own response is the first thing we pick up.
+    fn drain_rpc_channel() {
+        while Rpc::receive_from_libqaul().is_ok() {}
+    }
+
+    /// Invoke `Crypto::rpc` with an encoded Crypto RPC container and
+    /// read back the one response it emits, decoded as
+    /// `proto_rpc::Crypto`.
+    fn rpc_round_trip(req: proto_rpc::Crypto) -> proto_rpc::Crypto {
+        drain_rpc_channel();
+        Crypto::rpc(req.encode_to_vec(), Vec::new(), "test-req".into());
+        let raw = Rpc::receive_from_libqaul().expect("no RPC response was produced");
+        let envelope = crate::rpc::proto::QaulRpc::decode(&raw[..]).expect("QaulRpc decode");
+        assert_eq!(
+            envelope.module,
+            crate::rpc::proto::Modules::Crypto as i32,
+            "response module should be Crypto"
+        );
+        assert_eq!(envelope.request_id, "test-req");
+        proto_rpc::Crypto::decode(&envelope.data[..]).expect("Crypto decode")
+    }
+
+    /// `GetConfigRequest` must round-trip back the currently-installed
+    /// `CryptoRotation` values.
+    #[test]
+    fn rpc_get_config_returns_installed_config() {
+        let _g = CONFIG_LOCK.lock().unwrap();
+        install_test_config();
+        install_rpc_for_tests();
+
+        let req = proto_rpc::Crypto {
+            message: Some(proto_rpc::crypto::Message::GetConfigRequest(
+                proto_rpc::GetConfigRequest {},
+            )),
+        };
+        let resp = rpc_round_trip(req);
+        let body = match resp.message {
+            Some(proto_rpc::crypto::Message::GetConfigResponse(r)) => r,
+            other => panic!("expected GetConfigResponse, got {:?}", other.is_some()),
+        };
+
+        // Fields should match whatever `install_test_config` baked in:
+        // volume/period/grace values from the shared fixture.
+        assert!(body.enabled);
+        assert_eq!(body.period_seconds, 7 * 24 * 3600);
+        assert_eq!(body.volume_messages, 1_000_000);
+        assert_eq!(body.grace_period_seconds, 3600);
+        assert_eq!(body.grace_volume_messages, 256);
+    }
+
+    /// A `SetConfigRequest` with only `period_seconds` set must leave
+    /// every other field untouched and report the new value via
+    /// `SetConfigResponse.applied`. The test restores the original
+    /// period before releasing the lock so it doesn't pollute any
+    /// subsequent test that also reads the config.
+    #[test]
+    fn rpc_set_config_partial_update_preserves_other_fields() {
+        let _g = CONFIG_LOCK.lock().unwrap();
+        install_test_config();
+        install_rpc_for_tests();
+
+        // snapshot prior state so we can revert after.
+        let original_period = Configuration::get().crypto_rotation.period_seconds;
+
+        let new_period = original_period.saturating_add(123);
+        let set_req = proto_rpc::Crypto {
+            message: Some(proto_rpc::crypto::Message::SetConfigRequest(
+                proto_rpc::SetConfigRequest {
+                    enabled: None,
+                    period_seconds: Some(new_period),
+                    volume_messages: None,
+                    grace_period_seconds: None,
+                    grace_volume_messages: None,
+                },
+            )),
+        };
+        let resp = rpc_round_trip(set_req);
+        let body = match resp.message {
+            Some(proto_rpc::crypto::Message::SetConfigResponse(r)) => r,
+            other => panic!("expected SetConfigResponse, got {:?}", other.is_some()),
+        };
+        assert!(body.success, "expected success, got error: {}", body.error);
+        let applied = body.applied.expect("applied config should be populated");
+        assert_eq!(applied.period_seconds, new_period);
+        assert_eq!(applied.volume_messages, 1_000_000, "untouched");
+        assert_eq!(applied.grace_period_seconds, 3600, "untouched");
+        assert!(applied.enabled, "untouched");
+
+        // revert for isolation.
+        let revert = proto_rpc::Crypto {
+            message: Some(proto_rpc::crypto::Message::SetConfigRequest(
+                proto_rpc::SetConfigRequest {
+                    period_seconds: Some(original_period),
+                    ..Default::default()
+                },
+            )),
+        };
+        let _ = rpc_round_trip(revert);
+    }
+
+    /// Zero-valued numeric fields are a near-certain client mistake
+    /// (rotate immediately on every message, retire draining on
+    /// first message). The handler rejects them and echoes the
+    /// unchanged config back in `applied`.
+    #[test]
+    fn rpc_set_config_rejects_zero_fields() {
+        let _g = CONFIG_LOCK.lock().unwrap();
+        install_test_config();
+        install_rpc_for_tests();
+
+        let original = Configuration::get().crypto_rotation.clone();
+
+        let req = proto_rpc::Crypto {
+            message: Some(proto_rpc::crypto::Message::SetConfigRequest(
+                proto_rpc::SetConfigRequest {
+                    period_seconds: Some(0),
+                    ..Default::default()
+                },
+            )),
+        };
+        let resp = rpc_round_trip(req);
+        let body = match resp.message {
+            Some(proto_rpc::crypto::Message::SetConfigResponse(r)) => r,
+            _ => panic!("expected SetConfigResponse"),
+        };
+        assert!(!body.success);
+        assert!(
+            body.error.contains("period_seconds"),
+            "error should mention the offending field, got: {}",
+            body.error
+        );
+        let applied = body.applied.unwrap();
+        // Unchanged — the handler must not have mutated the config.
+        assert_eq!(applied.period_seconds, original.period_seconds);
+        assert_eq!(applied.volume_messages, original.volume_messages);
     }
 }

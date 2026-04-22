@@ -74,6 +74,11 @@ pub enum Modules {
     Subscribe = 16,
     /// Transport management (list, enable, disable)
     Transports = 17,
+    /// End-to-end crypto configuration
+    ///
+    /// read / write the Noise session rotation config and (future)
+    /// query rotation events.
+    Crypto = 18,
 }
 impl Modules {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -100,6 +105,7 @@ impl Modules {
             Self::Auth => "AUTH",
             Self::Subscribe => "SUBSCRIBE",
             Self::Transports => "TRANSPORTS",
+            Self::Crypto => "CRYPTO",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
@@ -123,6 +129,7 @@ impl Modules {
             "AUTH" => Some(Self::Auth),
             "SUBSCRIBE" => Some(Self::Subscribe),
             "TRANSPORTS" => Some(Self::Transports),
+            "CRYPTO" => Some(Self::Crypto),
             _ => None,
         }
     }

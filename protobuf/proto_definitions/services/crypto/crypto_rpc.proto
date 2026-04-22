@@ -1,0 +1,77 @@
+syntax = "proto3";
+package qaul.rpc.crypto;
+
+// Crypto service RPC message container
+//
+// Carries every request and response for the Crypto module. Clients
+// produce messages of this type; libqaul replies with the matching
+// `*Response` variant.
+message Crypto {
+    oneof message {
+        // Read the current CryptoRotation configuration for this node.
+        GetConfigRequest get_config_request = 1;
+        // Current CryptoRotation configuration.
+        GetConfigResponse get_config_response = 2;
+        // Update one or more CryptoRotation fields. Unset fields are
+        // left untouched (partial update semantics).
+        SetConfigRequest set_config_request = 3;
+        // Outcome of a SetConfigRequest.
+        SetConfigResponse set_config_response = 4;
+    }
+}
+
+// Ask libqaul for the current CryptoRotation config.
+message GetConfigRequest {}
+
+// Current CryptoRotation configuration.
+//
+// Mirrors `libqaul::storage::configuration::CryptoRotation`.
+message GetConfigResponse {
+    // master switch — when false, no rotation triggers fire and no
+    // RotateHandshakeFirst frames are sent.
+    bool enabled = 1;
+    // time-based trigger: rotate when a session is older than this
+    // many seconds.
+    uint64 period_seconds = 2;
+    // outbound volume trigger: rotate once this many messages have
+    // been encrypted under the session.
+    uint64 volume_messages = 3;
+    // grace period during which the old (draining) session is still
+    // accepted for incoming messages after a rotation.
+    uint64 grace_period_seconds = 4;
+    // additional messages accepted on the draining session before it
+    // is retired, regardless of `grace_period_seconds`.
+    uint64 grace_volume_messages = 5;
+}
+
+// Update one or more CryptoRotation fields.
+//
+// Each field is wrapped in an optional-presence message so the caller
+// can send a partial update (e.g. flip `enabled` without restating
+// the period / volume thresholds). Unset fields are left untouched.
+message SetConfigRequest {
+    // set master switch
+    optional bool enabled = 1;
+    // set time-based trigger in seconds
+    optional uint64 period_seconds = 2;
+    // set outbound-volume trigger in message count
+    optional uint64 volume_messages = 3;
+    // set grace period in seconds
+    optional uint64 grace_period_seconds = 4;
+    // set grace volume in message count
+    optional uint64 grace_volume_messages = 5;
+}
+
+// Result of a SetConfigRequest.
+message SetConfigResponse {
+    // true when the update was accepted and persisted to
+    // config.yaml; false when validation failed or the disk write
+    // could not be completed.
+    bool success = 1;
+    // human-readable reason when success=false; empty otherwise.
+    string error = 2;
+    // the CryptoRotation state as it stands after the update. Lets
+    // the client refresh its cached view without a follow-up
+    // GetConfigRequest round-trip.
+    GetConfigResponse applied = 3;
+}
