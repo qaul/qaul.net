@@ -2,11 +2,4 @@ executor: flutter
 steps:
   - checkout-project
   - install-flutter-deps
-  - run:
-      name: Install widgetbook dependencies
-      command: |
-        cd packages/qaul_components
-        flutter pub get
-        cd widgetbook_workspace
-        flutter pub get
   - run: flutter analyze

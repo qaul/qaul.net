@@ -2,6 +2,8 @@
 
 This folder contains the Flutter UI of the qaul app.
 
+For Flutter dependency/test helper commands, see `docs/qaul/flutter/dependencies-and-tests.md`.
+
 ## l10n: Adding a new language support:
 
 1. Create a new arb file over `lib/l10n/app_<LANG_CODE>.arb`

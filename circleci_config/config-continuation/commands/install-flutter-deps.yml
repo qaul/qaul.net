@@ -17,7 +17,7 @@ steps:
       key: pub-cache-v4-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
   - run:
       name: Install Flutter Dependencies
-      command: flutter pub get
+      command: ./bin/fluttergetall.sh
   - save_cache:
       name: Save Flutter pub cache
       key: pub-cache-v4-{{ arch }}-{{ .Environment.CIRCLE_WORKING_DIRECTORY }}-{{ checksum "pubspec.rev" }}
