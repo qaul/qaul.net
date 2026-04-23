@@ -28,7 +28,8 @@ impl Crypto {
     /// - `config grace <secs>`     — set `grace_period_seconds`.
     /// - `config grace-volume <n>` — set `grace_volume_messages`.
     /// - `events [limit]`          — print recent rotation events.
-    pub fn cli(command: &str) {
+    /// - `rotate <peer-id>`        — force a rotation with a specific peer.
+    pub fn cli(state: &super::CliState, command: &str) {
         let command = command.trim();
 
         // `events` — print the event log and return.
@@ -39,7 +40,18 @@ impl Crypto {
                 .filter(|s| !s.is_empty())
                 .and_then(|s| s.parse::<u32>().ok())
                 .unwrap_or(0);
-            Self::get_events(limit);
+            Self::get_events(state, limit);
+            return;
+        }
+
+        // `rotate <peer-id>` — force a rotation, bypassing triggers.
+        if let Some(rest) = command.strip_prefix("rotate") {
+            let arg = rest.trim();
+            if arg.is_empty() {
+                log::error!("usage: crypto rotate <peer-id>");
+                return;
+            }
+            Self::trigger_rotation(state, arg);
             return;
         }
 
@@ -53,7 +65,7 @@ impl Crypto {
         };
 
         if rest.is_empty() {
-            Self::get_config();
+            Self::get_config(state);
             return;
         }
 
@@ -64,13 +76,19 @@ impl Crypto {
         };
 
         match (verb, arg) {
-            ("enable", None) => Self::set_partial(|req| req.enabled = Some(true)),
-            ("disable", None) => Self::set_partial(|req| req.enabled = Some(false)),
-            ("period", Some(a)) => Self::set_u64(a, |req, v| req.period_seconds = Some(v)),
-            ("volume", Some(a)) => Self::set_u64(a, |req, v| req.volume_messages = Some(v)),
-            ("grace", Some(a)) => Self::set_u64(a, |req, v| req.grace_period_seconds = Some(v)),
+            ("enable", None) => Self::set_partial(state, |req| req.enabled = Some(true)),
+            ("disable", None) => Self::set_partial(state, |req| req.enabled = Some(false)),
+            ("period", Some(a)) => {
+                Self::set_u64(state, a, |req, v| req.period_seconds = Some(v))
+            }
+            ("volume", Some(a)) => {
+                Self::set_u64(state, a, |req, v| req.volume_messages = Some(v))
+            }
+            ("grace", Some(a)) => {
+                Self::set_u64(state, a, |req, v| req.grace_period_seconds = Some(v))
+            }
             ("grace-volume", Some(a)) => {
-                Self::set_u64(a, |req, v| req.grace_volume_messages = Some(v))
+                Self::set_u64(state, a, |req, v| req.grace_volume_messages = Some(v))
             }
             _ => {
                 log::error!(
@@ -82,8 +100,27 @@ impl Crypto {
         }
     }
 
+    /// Fire a `TriggerRotationRequest` for the given peer id (base58
+    /// libp2p PeerId). Rejects malformed inputs locally rather than
+    /// round-tripping a bad request.
+    fn trigger_rotation(state: &super::CliState, peer_id_str: &str) {
+        let remote_id = match bs58::decode(peer_id_str).into_vec() {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("invalid peer-id '{}': {}", peer_id_str, e);
+                return;
+            }
+        };
+        let msg = proto::Crypto {
+            message: Some(proto::crypto::Message::TriggerRotationRequest(
+                proto::TriggerRotationRequest { remote_id },
+            )),
+        };
+        Self::send(state, msg);
+    }
+
     /// Fire a `GetRotationEventsRequest`.
-    fn get_events(limit: u32) {
+    fn get_events(state: &super::CliState, limit: u32) {
         let msg = proto::Crypto {
             message: Some(proto::crypto::Message::GetEventsRequest(
                 proto::GetRotationEventsRequest {
@@ -92,22 +129,22 @@ impl Crypto {
                 },
             )),
         };
-        Self::send(msg);
+        Self::send(state, msg);
     }
 
     /// Fire a `GetConfigRequest`.
-    fn get_config() {
+    fn get_config(state: &super::CliState) {
         let msg = proto::Crypto {
             message: Some(proto::crypto::Message::GetConfigRequest(
                 proto::GetConfigRequest {},
             )),
         };
-        Self::send(msg);
+        Self::send(state, msg);
     }
 
     /// Build a `SetConfigRequest` with every field `None`, let the
     /// caller flip exactly the fields they want, and send.
-    fn set_partial(f: impl FnOnce(&mut proto::SetConfigRequest)) {
+    fn set_partial(state: &super::CliState, f: impl FnOnce(&mut proto::SetConfigRequest)) {
         let mut req = proto::SetConfigRequest {
             enabled: None,
             period_seconds: None,
@@ -119,21 +156,26 @@ impl Crypto {
         let msg = proto::Crypto {
             message: Some(proto::crypto::Message::SetConfigRequest(req)),
         };
-        Self::send(msg);
+        Self::send(state, msg);
     }
 
     /// Parse a `u64` from CLI input and fire a partial `SetConfigRequest`.
-    fn set_u64(raw: &str, f: impl FnOnce(&mut proto::SetConfigRequest, u64)) {
+    fn set_u64(
+        state: &super::CliState,
+        raw: &str,
+        f: impl FnOnce(&mut proto::SetConfigRequest, u64),
+    ) {
         match raw.parse::<u64>() {
-            Ok(v) => Self::set_partial(|req| f(req, v)),
+            Ok(v) => Self::set_partial(state, |req| f(req, v)),
             Err(e) => log::error!("expected a non-negative integer, got '{}': {}", raw, e),
         }
     }
 
-    fn send(msg: proto::Crypto) {
+    fn send(state: &super::CliState, msg: proto::Crypto) {
         let mut buf = Vec::with_capacity(msg.encoded_len());
         msg.encode(&mut buf).expect("encoding cannot fail");
         Rpc::send_message(
+            state,
             buf,
             super::rpc::proto::Modules::Crypto.into(),
             "".to_string(),
@@ -161,9 +203,20 @@ impl Crypto {
                 Some(proto::crypto::Message::GetEventsResponse(resp)) => {
                     Self::print_events(&resp);
                 }
+                Some(proto::crypto::Message::TriggerRotationResponse(resp)) => {
+                    if resp.success {
+                        println!(
+                            "rotation triggered: previous_session={} new_session={}",
+                            resp.previous_session_id, resp.new_session_id
+                        );
+                    } else {
+                        println!("rotation trigger FAILED: {}", resp.error);
+                    }
+                }
                 Some(proto::crypto::Message::GetConfigRequest(_))
                 | Some(proto::crypto::Message::SetConfigRequest(_))
-                | Some(proto::crypto::Message::GetEventsRequest(_)) => {
+                | Some(proto::crypto::Message::GetEventsRequest(_))
+                | Some(proto::crypto::Message::TriggerRotationRequest(_)) => {
                     // client should never see its own requests echoed back
                 }
                 None => log::warn!("empty crypto RPC response"),

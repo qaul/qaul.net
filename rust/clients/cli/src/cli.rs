@@ -81,7 +81,7 @@ impl Cli {
             }
             // crypto functions (session rotation config)
             cmd if cmd.starts_with("crypto ") => {
-                Crypto::cli(cmd.strip_prefix("crypto ").unwrap());
+                Crypto::cli(state, cmd.strip_prefix("crypto ").unwrap());
             }
             // unknown command
             _ => log::error!("unknown command"),

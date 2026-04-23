@@ -254,6 +254,7 @@ impl Rpc {
                     Ok(Modules::Crypto) => {
                         log::trace!("Message Modules::Crypto received");
                         crate::services::crypto::Crypto::rpc(
+                            state,
                             message.data,
                             message.user_id,
                             message.request_id,
