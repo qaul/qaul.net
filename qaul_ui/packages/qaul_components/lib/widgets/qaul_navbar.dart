@@ -1,6 +1,5 @@
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart' hide Badge;
-import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../styles/qaul_color_sheet.dart';
 
@@ -100,7 +99,7 @@ const double _kNavBarVerticalMaxWidth = 1000.0;
 const double _kNavBarVerticalDefaultWidth = 80.0;
 /// Splash/hover radius (small so the ring does not dominate the bar).
 const double _kNavBarMenuVisualSplashRadius = 8.0;
-/// Circular tap target; kept modest so painted/hit overflow minimally vs. neighbors.
+/// Circular tap/hover target for the overflow menu ([InkWell] inside [SizedBox]).
 const double _kNavBarMenuHitDiameter = 40.0;
 const double _kNavBarBadgeFontSize = 10.0;
 const double _kNavBarBadgePositionOffset = 8.0;
@@ -437,41 +436,64 @@ class _QaulNavBarHorizontalLayout extends StatelessWidget {
               padding: const EdgeInsets.symmetric(
                 horizontal: _kNavBarHorizontalPadding,
               ),
+              // Equal-width columns for tabs + fixed menu slot: avoids either
+              // spaceBetween-with-tiny-last-slot quirks or a custom hit-test
+              // RenderObject. The menu keeps a real d×d box (full InkWell hits).
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  _NavBarItem(
-                    tab: TabType.account,
-                    isSelected: selectedTab == TabType.account,
-                    onTap: () => onTabSelected(TabType.account),
-                    avatarChild: avatarChild,
-                    tooltip: tooltips[TabType.account] ?? '',
+                  Expanded(
+                    child: Center(
+                      child: _NavBarItem(
+                        tab: TabType.account,
+                        isSelected: selectedTab == TabType.account,
+                        onTap: () => onTabSelected(TabType.account),
+                        avatarChild: avatarChild,
+                        tooltip: tooltips[TabType.account] ?? '',
+                      ),
+                    ),
                   ),
-                  _NavBarItem(
-                    tab: TabType.public,
-                    isSelected: selectedTab == TabType.public,
-                    onTap: () => onTabSelected(TabType.public),
-                    tooltip: tooltips[TabType.public] ?? '',
-                    badgeCount: publicNotificationCount,
+                  Expanded(
+                    child: Center(
+                      child: _NavBarItem(
+                        tab: TabType.public,
+                        isSelected: selectedTab == TabType.public,
+                        onTap: () => onTabSelected(TabType.public),
+                        tooltip: tooltips[TabType.public] ?? '',
+                        badgeCount: publicNotificationCount,
+                      ),
+                    ),
                   ),
-                  _NavBarItem(
-                    tab: TabType.users,
-                    isSelected: selectedTab == TabType.users,
-                    onTap: () => onTabSelected(TabType.users),
-                    tooltip: tooltips[TabType.users] ?? '',
+                  Expanded(
+                    child: Center(
+                      child: _NavBarItem(
+                        tab: TabType.users,
+                        isSelected: selectedTab == TabType.users,
+                        onTap: () => onTabSelected(TabType.users),
+                        tooltip: tooltips[TabType.users] ?? '',
+                      ),
+                    ),
                   ),
-                  _NavBarItem(
-                    tab: TabType.chat,
-                    isSelected: selectedTab == TabType.chat,
-                    onTap: () => onTabSelected(TabType.chat),
-                    tooltip: tooltips[TabType.chat] ?? '',
-                    badgeCount: chatNotificationCount,
+                  Expanded(
+                    child: Center(
+                      child: _NavBarItem(
+                        tab: TabType.chat,
+                        isSelected: selectedTab == TabType.chat,
+                        onTap: () => onTabSelected(TabType.chat),
+                        tooltip: tooltips[TabType.chat] ?? '',
+                        badgeCount: chatNotificationCount,
+                      ),
+                    ),
                   ),
-                  _NavBarItem(
-                    tab: TabType.network,
-                    isSelected: selectedTab == TabType.network,
-                    onTap: () => onTabSelected(TabType.network),
-                    tooltip: tooltips[TabType.network] ?? '',
+                  Expanded(
+                    child: Center(
+                      child: _NavBarItem(
+                        tab: TabType.network,
+                        isSelected: selectedTab == TabType.network,
+                        onTap: () => onTabSelected(TabType.network),
+                        tooltip: tooltips[TabType.network] ?? '',
+                      ),
+                    ),
                   ),
                   menuButton,
                 ],
@@ -525,125 +547,6 @@ Widget _buildVerticalMenuButton({
   );
 }
 
-class _OverflowHitMenuSlot extends SingleChildRenderObjectWidget {
-  const _OverflowHitMenuSlot({
-    required this.layoutSize,
-    required this.childOffset,
-    required super.child,
-  });
-
-  final Size layoutSize;
-  final Offset childOffset;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _RenderOverflowHitMenuSlot(
-      layoutSize: layoutSize,
-      childOffset: childOffset,
-    );
-  }
-
-  @override
-  void updateRenderObject(
-    BuildContext context,
-    covariant _RenderOverflowHitMenuSlot renderObject,
-  ) {
-    renderObject
-      ..layoutSize = layoutSize
-      ..childOffset = childOffset;
-  }
-}
-
-class _RenderOverflowHitMenuSlot extends RenderBox
-    with RenderObjectWithChildMixin<RenderBox> {
-  _RenderOverflowHitMenuSlot({
-    required Size layoutSize,
-    required Offset childOffset,
-  })  : _layoutSize = layoutSize,
-        _childOffset = childOffset;
-
-  Size _layoutSize;
-  Size get layoutSize => _layoutSize;
-  set layoutSize(Size value) {
-    if (value == _layoutSize) return;
-    _layoutSize = value;
-    markNeedsLayout();
-  }
-
-  Offset _childOffset;
-  Offset get childOffset => _childOffset;
-  set childOffset(Offset value) {
-    if (value == _childOffset) return;
-    _childOffset = value;
-    markNeedsLayout();
-  }
-
-  @override
-  void setupParentData(RenderBox child) {
-    if (child.parentData is! BoxParentData) {
-      child.parentData = BoxParentData();
-    }
-  }
-
-  @override
-  double computeMinIntrinsicWidth(double height) => _layoutSize.width;
-
-  @override
-  double computeMaxIntrinsicWidth(double height) => _layoutSize.width;
-
-  @override
-  double computeMinIntrinsicHeight(double width) => _layoutSize.height;
-
-  @override
-  double computeMaxIntrinsicHeight(double width) => _layoutSize.height;
-
-  @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    return constraints.constrain(_layoutSize);
-  }
-
-  @override
-  void performLayout() {
-    final RenderBox? child = this.child;
-    if (child == null) {
-      size = constraints.constrain(_layoutSize);
-      return;
-    }
-    child.layout(
-      BoxConstraints.tight(
-        const Size(_kNavBarMenuHitDiameter, _kNavBarMenuHitDiameter),
-      ),
-      parentUsesSize: false,
-    );
-    (child.parentData! as BoxParentData).offset = _childOffset;
-    size = constraints.constrain(_layoutSize);
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    final RenderBox? child = this.child;
-    if (child != null) {
-      final BoxParentData childParentData = child.parentData! as BoxParentData;
-      context.paintChild(child, childParentData.offset + offset);
-    }
-  }
-
-  @override
-  bool hitTest(BoxHitTestResult result, {required Offset position}) {
-    final RenderBox? child = this.child;
-    if (child == null || !hasSize) return false;
-    final BoxParentData childParentData = child.parentData! as BoxParentData;
-    if (child.hitTest(
-      result,
-      position: position - childParentData.offset,
-    )) {
-      result.add(BoxHitTestEntry(this, position));
-      return true;
-    }
-    return false;
-  }
-}
-
 class _NavBarOverflowMenuButton extends StatelessWidget {
   _NavBarOverflowMenuButton({
     required this.overflowMenuLabels,
@@ -664,64 +567,53 @@ class _NavBarOverflowMenuButton extends StatelessWidget {
         ? Colors.white.withValues(alpha: 0.10)
         : Colors.black.withValues(alpha: 0.06);
 
-    final iconW = _kNavBarMenuIconSize.width;
-    final iconH = _kNavBarMenuIconSize.height;
     const d = _kNavBarMenuHitDiameter;
 
-    final childOffset = Offset(
-      iconW / 2 - d / 2,
-      iconH / 2 - d / 2,
-    );
+    return SizedBox(
+      key: _hitTargetKey,
+      width: d,
+      height: d,
+      child: Material(
+        color: Colors.transparent,
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          radius: _kNavBarMenuVisualSplashRadius,
+          hoverColor: hoverColor,
+          splashColor: hoverColor,
+          focusColor: Colors.transparent,
+          onTapDown: (details) async {
+            final renderBox =
+                _hitTargetKey.currentContext?.findRenderObject() as RenderBox?;
+            if (renderBox == null) return;
 
-    return _OverflowHitMenuSlot(
-      layoutSize: Size(iconW, iconH),
-      childOffset: childOffset,
-      child: SizedBox(
-        key: _hitTargetKey,
-        width: d,
-        height: d,
-        child: Material(
-          color: Colors.transparent,
-          shape: const CircleBorder(),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            customBorder: const CircleBorder(),
-            radius: _kNavBarMenuVisualSplashRadius,
-            hoverColor: hoverColor,
-            splashColor: hoverColor,
-            focusColor: Colors.transparent,
-            onTapDown: (details) async {
-              final renderBox =
-                  _hitTargetKey.currentContext?.findRenderObject() as RenderBox?;
-              if (renderBox == null) return;
+            final origin = renderBox.localToGlobal(Offset.zero);
+            final size = renderBox.size;
 
-              final origin = renderBox.localToGlobal(Offset.zero);
-              final size = renderBox.size;
+            final selected = await showMenu<NavBarOverflowOption>(
+              context: context,
+              position: RelativeRect.fromLTRB(
+                origin.dx,
+                origin.dy,
+                origin.dx + size.width,
+                origin.dy + size.height,
+              ),
+              items: NavBarOverflowOption.values
+                  .map(
+                    (option) => PopupMenuItem<NavBarOverflowOption>(
+                      value: option,
+                      child: Text(overflowMenuLabels[option]!),
+                    ),
+                  )
+                  .toList(),
+            );
 
-              final selected = await showMenu<NavBarOverflowOption>(
-                context: context,
-                position: RelativeRect.fromLTRB(
-                  origin.dx,
-                  origin.dy,
-                  origin.dx + size.width,
-                  origin.dy + size.height,
-                ),
-                items: NavBarOverflowOption.values
-                    .map(
-                      (option) => PopupMenuItem<NavBarOverflowOption>(
-                        value: option,
-                        child: Text(overflowMenuLabels[option]!),
-                      ),
-                    )
-                    .toList(),
-              );
-
-              if (selected != null) {
-                onOverflowSelected(selected);
-              }
-            },
-            child: Center(child: iconBuilder(context)),
-          ),
+            if (selected != null) {
+              onOverflowSelected(selected);
+            }
+          },
+          child: Center(child: iconBuilder(context)),
         ),
       ),
     );
