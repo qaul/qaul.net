@@ -21,6 +21,11 @@ message Crypto {
         GetRotationEventsRequest get_events_request = 5;
         // Contents of the rotation event log.
         GetRotationEventsResponse get_events_response = 6;
+        // Force a rotation with a specific peer, bypassing the
+        // time/volume triggers.
+        TriggerRotationRequest trigger_rotation_request = 7;
+        // Outcome of a TriggerRotationRequest.
+        TriggerRotationResponse trigger_rotation_response = 8;
     }
 }
 
@@ -131,4 +136,32 @@ message GetRotationEventsRequest {
 message GetRotationEventsResponse {
     // The matched events, ordered oldest → newest.
     repeated RotationEvent events = 1;
+}
+
+// Force a rotation with a specific peer, bypassing the time- and
+// volume-based triggers. Intended for operator tooling and
+// integration tests. The caller's currently-active user account is
+// used as the initiator.
+//
+// Fails with `success = false` when rotation is disabled, the
+// current user account cannot be resolved, the remote peer has no
+// existing session, a rotation is already in flight, or the
+// handshake send fails.
+message TriggerRotationRequest {
+    // libp2p PeerId bytes of the remote user to rotate with.
+    bytes remote_id = 1;
+}
+
+// Result of a TriggerRotationRequest.
+message TriggerRotationResponse {
+    // true when a RotateHandshakeFirst was emitted to the remote.
+    bool success = 1;
+    // human-readable reason when success=false; empty otherwise.
+    string error = 2;
+    // session_id of the newly-initiated (HalfOutgoing) rotation.
+    // 0 when the request failed.
+    uint32 new_session_id = 3;
+    // session_id that was primary before the rotation began. 0 when
+    // the request failed.
+    uint32 previous_session_id = 4;
 }

@@ -24,9 +24,8 @@
 //! long-term records should persist the events themselves.
 
 use libp2p::PeerId;
-use state::InitCell;
 use std::collections::VecDeque;
-use std::sync::RwLock;
+use std::sync::{OnceLock, RwLock};
 
 use crate::utilities::timestamp::Timestamp;
 
@@ -60,7 +59,11 @@ pub struct RotationEvent {
     pub timestamp_ms: u64,
 }
 
-static EVENT_LOG: InitCell<RwLock<VecDeque<RotationEvent>>> = InitCell::new();
+static EVENT_LOG: OnceLock<RwLock<VecDeque<RotationEvent>>> = OnceLock::new();
+
+fn event_log() -> &'static RwLock<VecDeque<RotationEvent>> {
+    EVENT_LOG.get_or_init(|| RwLock::new(VecDeque::with_capacity(MAX_EVENTS)))
+}
 
 /// Append one event to the log. If the log has not been initialised
 /// yet (first call in this process) it is created lazily. If the
@@ -72,11 +75,7 @@ pub fn record(mut event: RotationEvent) {
         event.timestamp_ms = Timestamp::get_timestamp();
     }
 
-    // Lazy init — `InitCell::set` returns false if already set,
-    // which we silently accept.
-    let _ = EVENT_LOG.set(RwLock::new(VecDeque::with_capacity(MAX_EVENTS)));
-
-    let mut log = EVENT_LOG.get().write().unwrap();
+    let mut log = event_log().write().unwrap();
     if log.len() >= MAX_EVENTS {
         log.pop_front();
     }
@@ -86,7 +85,7 @@ pub fn record(mut event: RotationEvent) {
 /// Return every event with `timestamp_ms >= since_ms`, capped at
 /// `limit` (0 = unlimited). Ordered oldest → newest.
 pub fn query(since_ms: u64, limit: usize) -> Vec<RotationEvent> {
-    let guard = match EVENT_LOG.try_get() {
+    let guard = match EVENT_LOG.get() {
         Some(g) => g.read().unwrap(),
         None => return Vec::new(),
     };
@@ -106,10 +105,10 @@ pub fn query(since_ms: u64, limit: usize) -> Vec<RotationEvent> {
 
 /// Test-only helper: empty the log so earlier tests' events don't
 /// leak into later tests that read the log through the shared
-/// `InitCell`.
+/// `OnceLock`.
 #[cfg(test)]
 pub fn clear_for_tests() {
-    if let Some(cell) = EVENT_LOG.try_get() {
+    if let Some(cell) = EVENT_LOG.get() {
         cell.write().unwrap().clear();
     }
 }

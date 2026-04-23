@@ -6,7 +6,7 @@
 /// `*Response` variant.
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Crypto {
-    #[prost(oneof = "crypto::Message", tags = "1, 2, 3, 4, 5, 6")]
+    #[prost(oneof = "crypto::Message", tags = "1, 2, 3, 4, 5, 6, 7, 8")]
     pub message: ::core::option::Option<crypto::Message>,
 }
 /// Nested message and enum types in `Crypto`.
@@ -32,6 +32,13 @@ pub mod crypto {
         /// Contents of the rotation event log.
         #[prost(message, tag = "6")]
         GetEventsResponse(super::GetRotationEventsResponse),
+        /// Force a rotation with a specific peer, bypassing the
+        /// time/volume triggers.
+        #[prost(message, tag = "7")]
+        TriggerRotationRequest(super::TriggerRotationRequest),
+        /// Outcome of a TriggerRotationRequest.
+        #[prost(message, tag = "8")]
+        TriggerRotationResponse(super::TriggerRotationResponse),
     }
 }
 /// Ask libqaul for the current CryptoRotation config.
@@ -146,6 +153,39 @@ pub struct GetRotationEventsResponse {
     /// The matched events, ordered oldest → newest.
     #[prost(message, repeated, tag = "1")]
     pub events: ::prost::alloc::vec::Vec<RotationEvent>,
+}
+/// Force a rotation with a specific peer, bypassing the time- and
+/// volume-based triggers. Intended for operator tooling and
+/// integration tests. The caller's currently-active user account is
+/// used as the initiator.
+///
+/// Fails with `success = false` when rotation is disabled, the
+/// current user account cannot be resolved, the remote peer has no
+/// existing session, a rotation is already in flight, or the
+/// handshake send fails.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct TriggerRotationRequest {
+    /// libp2p PeerId bytes of the remote user to rotate with.
+    #[prost(bytes = "vec", tag = "1")]
+    pub remote_id: ::prost::alloc::vec::Vec<u8>,
+}
+/// Result of a TriggerRotationRequest.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct TriggerRotationResponse {
+    /// true when a RotateHandshakeFirst was emitted to the remote.
+    #[prost(bool, tag = "1")]
+    pub success: bool,
+    /// human-readable reason when success=false; empty otherwise.
+    #[prost(string, tag = "2")]
+    pub error: ::prost::alloc::string::String,
+    /// session_id of the newly-initiated (HalfOutgoing) rotation.
+    /// 0 when the request failed.
+    #[prost(uint32, tag = "3")]
+    pub new_session_id: u32,
+    /// session_id that was primary before the rotation began. 0 when
+    /// the request failed.
+    #[prost(uint32, tag = "4")]
+    pub previous_session_id: u32,
 }
 /// Classes of rotation event emitted by libqaul.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
