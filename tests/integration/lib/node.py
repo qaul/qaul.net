@@ -149,3 +149,66 @@ class Node:
             if entry["connections"] and entry["connections"][0]["module"].lower() == "local":
                 return entry["user_id"]
         raise ValueError(f"No LOCAL user found on node {self.id}")
+
+    # ---------------- crypto session rotation ----------------
+
+    def crypto_config(self) -> dict:
+        """Return the current CryptoRotation config on this node."""
+        return self._run_json("crypto", "config")
+
+    def set_crypto_config(
+        self,
+        enabled: bool | None = None,
+        period_seconds: int | None = None,
+        volume_messages: int | None = None,
+        grace_period_seconds: int | None = None,
+        grace_volume_messages: int | None = None,
+    ) -> dict:
+        """Update one or more CryptoRotation fields.
+
+        `enabled=True/False` maps to the `enable`/`disable` subcommands; all
+        other fields are sent via `crypto set`. The response is the updated
+        config (so tests can assert success without a follow-up read)."""
+        if enabled is True:
+            return self._run_json("crypto", "enable")
+        if enabled is False:
+            return self._run_json("crypto", "disable")
+
+        args: list[str] = ["crypto", "set"]
+        if period_seconds is not None:
+            args += ["--period-seconds", str(period_seconds)]
+        if volume_messages is not None:
+            args += ["--volume-messages", str(volume_messages)]
+        if grace_period_seconds is not None:
+            args += ["--grace-period-seconds", str(grace_period_seconds)]
+        if grace_volume_messages is not None:
+            args += ["--grace-volume-messages", str(grace_volume_messages)]
+        if len(args) == 2:
+            raise ValueError("set_crypto_config: provide at least one field to update")
+        return self._run_json(*args)
+
+    def rotate_with(self, user_id: str) -> dict:
+        """Force a rotation with the peer identified by `user_id` (base58).
+
+        Returns the TriggerRotationResponse JSON. Raises AssertionError if the
+        daemon reports `success=false` so callers don't silently proceed on a
+        failed rotation."""
+        resp = self._run_json("crypto", "rotate", "--user-id", user_id)
+        if not resp.get("success", False):
+            raise AssertionError(
+                f"rotate_with({user_id}) failed on {self.id}: {resp.get('error')}"
+            )
+        return resp
+
+    def crypto_events(self, limit: int = 0, since_ms: int = 0) -> list[dict]:
+        """Return the rotation event log, ordered oldest → newest.
+
+        `limit=0` means "no cap"; `since_ms=0` means "no lower bound"."""
+        return self._run_json(
+            "crypto",
+            "events",
+            "--limit",
+            str(limit),
+            "--since-ms",
+            str(since_ms),
+        )
