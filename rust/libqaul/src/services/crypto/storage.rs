@@ -30,7 +30,7 @@ use crate::storage::database::DataBase;
 /// row) and responds to `incoming`. Otherwise this node ignores
 /// `incoming` and waits for the remote to observe our lower
 /// session id and reply with `RotateHandshakeSecond`.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct RotationMeta {
     /// The session_id that is currently used for outbound traffic.
     pub primary_session_id: u32,
@@ -49,6 +49,24 @@ pub struct RotationMeta {
     /// Counts down in the decrypt path until it hits zero. `None`
     /// outside a grace window.
     pub draining_remaining_volume: Option<u64>,
+    /// The most recent session_id whose grace window was retired
+    /// (either by the drain ticker or by budget exhaustion). Kept
+    /// so the decrypt path can tell "message arrived after grace
+    /// expired" from "brand-new unknown session".
+    ///
+    /// Only the *last* retirement is remembered; subsequent
+    /// rotations overwrite it. This is a deliberate bound on state
+    /// size — a pair of peers rotating faster than messages can be
+    /// redelivered will eventually hit a truly unknown session id,
+    /// which the decrypt path handles as a new handshake attempt.
+    #[serde(default)]
+    pub last_retired_session_id: Option<u32>,
+    /// Wall-clock timestamp (ms) at which `last_retired_session_id`
+    /// was zeroised. Used so the UI can say *when* the message
+    /// expired, and lets the decrypt-path filter bound how far back
+    /// "past grace" detection stretches.
+    #[serde(default)]
+    pub last_retired_at: Option<u64>,
 }
 
 impl RotationMeta {
@@ -61,6 +79,8 @@ impl RotationMeta {
             draining_session_id: None,
             draining_until: None,
             draining_remaining_volume: None,
+            last_retired_session_id: None,
+            last_retired_at: None,
         }
     }
 }
@@ -446,9 +466,7 @@ mod tests {
         let meta2 = RotationMeta {
             primary_session_id: 0xAAAA_BBBB,
             pending_initiated_session_id: Some(0x1111_2222),
-            draining_session_id: None,
-            draining_until: None,
-            draining_remaining_volume: None,
+            ..Default::default()
         };
         acct.save_rotation_meta(remote, &meta2);
         assert_eq!(acct.get_rotation_meta(remote), Some(meta2));
