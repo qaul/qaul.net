@@ -1184,9 +1184,7 @@ impl CryptoNoise {
             None => RotationMeta {
                 primary_session_id: primary_id,
                 pending_initiated_session_id: Some(new_session_id),
-                draining_session_id: None,
-                draining_until: None,
-                draining_remaining_volume: None,
+                ..Default::default()
             },
         };
         storage.save_rotation_meta(remote_id, &meta);
@@ -1293,12 +1291,17 @@ impl CryptoNoise {
         let grace_ms = cfg.crypto_rotation.grace_period_seconds * 1000;
         let grace_vol = cfg.crypto_rotation.grace_volume_messages;
 
+        // Preserve any prior last_retired fields so the decrypt path
+        // can still detect messages for the most recent retirement.
+        let prior = storage.get_rotation_meta(remote_id);
         let new_meta = RotationMeta {
             primary_session_id: incoming.new_session_id,
             pending_initiated_session_id: None,
             draining_session_id: Some(primary_id),
             draining_until: Some(now_ms + grace_ms),
             draining_remaining_volume: Some(grace_vol),
+            last_retired_session_id: prior.as_ref().and_then(|m| m.last_retired_session_id),
+            last_retired_at: prior.as_ref().and_then(|m| m.last_retired_at),
         };
         storage.save_rotation_meta(remote_id, &new_meta);
 
@@ -1387,8 +1390,20 @@ impl CryptoNoise {
             draining_session_id: Some(old_primary),
             draining_until: Some(now_ms + grace_ms),
             draining_remaining_volume: Some(grace_vol),
+            last_retired_session_id: old_meta.last_retired_session_id,
+            last_retired_at: old_meta.last_retired_at,
         };
         storage.save_rotation_meta(remote_id, &new_meta);
+
+        // Emit a `Rotated` event so clients can surface the state
+        // transition to the UI.
+        events::record(RotationEvent {
+            kind: RotationEventKind::Rotated,
+            remote_id,
+            primary_session_id: incoming.new_session_id,
+            draining_session_id: old_primary,
+            timestamp_ms: now_ms,
+        });
         true
     }
 
@@ -1443,9 +1458,19 @@ impl CryptoNoise {
                 draining_session_id: None,
                 draining_until: None,
                 draining_remaining_volume: None,
+                last_retired_session_id: Some(drain_id),
+                last_retired_at: Some(now_ms),
                 ..meta
             };
             storage.save_rotation_meta(remote_id, &cleared);
+
+            events::record(RotationEvent {
+                kind: RotationEventKind::GraceExpired,
+                remote_id,
+                primary_session_id: 0,
+                draining_session_id: drain_id,
+                timestamp_ms: now_ms,
+            });
         }
     }
 }
@@ -1492,10 +1517,10 @@ mod rotation_tests {
             remote,
             &RotationMeta {
                 primary_session_id: 42,
-                pending_initiated_session_id: None,
                 draining_session_id: Some(7),
                 draining_until: Some(10_000),
                 draining_remaining_volume: Some(100),
+                ..Default::default()
             },
         );
 
@@ -1518,10 +1543,10 @@ mod rotation_tests {
             remote,
             &RotationMeta {
                 primary_session_id: 42,
-                pending_initiated_session_id: None,
                 draining_session_id: Some(7),
                 draining_until: Some(10_000),
                 draining_remaining_volume: Some(100),
+                ..Default::default()
             },
         );
 
@@ -1548,10 +1573,10 @@ mod rotation_tests {
             remote,
             &RotationMeta {
                 primary_session_id: 42,
-                pending_initiated_session_id: None,
                 draining_session_id: Some(7),
                 draining_until: Some(u64::MAX),
                 draining_remaining_volume: Some(0),
+                ..Default::default()
             },
         );
 

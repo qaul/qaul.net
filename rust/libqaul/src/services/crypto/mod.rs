@@ -1126,6 +1126,9 @@ impl Crypto {
                 Some(proto_rpc::crypto::Message::TriggerRotationRequest(req)) => {
                     Self::handle_trigger_rotation(state, req, request_id);
                 }
+                Some(proto_rpc::crypto::Message::GetEventsRequest(req)) => {
+                    Self::handle_get_events(req, request_id);
+                }
                 Some(proto_rpc::crypto::Message::GetConfigResponse(_))
                 | Some(proto_rpc::crypto::Message::SetConfigResponse(_))
                 | Some(proto_rpc::crypto::Message::GetEventsResponse(_))
@@ -2357,10 +2360,10 @@ mod phase2_tests {
             remote,
             &RotationMeta {
                 primary_session_id: 100,
-                pending_initiated_session_id: None,
                 draining_session_id: Some(50),
                 draining_until: Some(u64::MAX),
                 draining_remaining_volume: Some(10),
+                ..Default::default()
             },
         );
 
@@ -2385,10 +2388,10 @@ mod phase2_tests {
             remote,
             &RotationMeta {
                 primary_session_id: 100,
-                pending_initiated_session_id: None,
                 draining_session_id: Some(50),
                 draining_until: Some(u64::MAX),
                 draining_remaining_volume: Some(0),
+                ..Default::default()
             },
         );
 
@@ -2415,10 +2418,10 @@ mod phase2_tests {
         acct.save_state(remote, 99, dummy_state(99));
         let original = RotationMeta {
             primary_session_id: 100,
-            pending_initiated_session_id: None,
             draining_session_id: Some(50),
             draining_until: Some(u64::MAX),
             draining_remaining_volume: Some(10),
+            ..Default::default()
         };
         acct.save_rotation_meta(remote, &original);
 
@@ -2449,10 +2452,10 @@ mod phase3_tests {
 
     /// Serialise RPC-config tests so one test's SetConfigRequest
     /// doesn't race another test's GetConfigRequest assertion.
-    static CONFIG_LOCK: Mutex<()> = Mutex::new(());
+    pub(super) static CONFIG_LOCK: Mutex<()> = Mutex::new(());
     static RPC_INIT: Once = Once::new();
 
-    fn install_rpc_for_tests() {
+    pub(super) fn install_rpc_for_tests() {
         RPC_INIT.call_once(|| {
             let _ = Rpc::init();
         });
@@ -2460,14 +2463,14 @@ mod phase3_tests {
 
     /// Drop every pending libqaul->extern message so the test's
     /// own response is the first thing we pick up.
-    fn drain_rpc_channel() {
+    pub(super) fn drain_rpc_channel() {
         while Rpc::receive_from_libqaul().is_ok() {}
     }
 
     /// Invoke `Crypto::rpc` with an encoded Crypto RPC container and
     /// read back the one response it emits, decoded as
     /// `proto_rpc::Crypto`.
-    fn rpc_round_trip(req: proto_rpc::Crypto) -> proto_rpc::Crypto {
+    pub(super) fn rpc_round_trip(req: proto_rpc::Crypto) -> proto_rpc::Crypto {
         drain_rpc_channel();
         Crypto::rpc(req.encode_to_vec(), Vec::new(), "test-req".into());
         let raw = Rpc::receive_from_libqaul().expect("no RPC response was produced");
@@ -2594,5 +2597,192 @@ mod phase3_tests {
         // Unchanged — the handler must not have mutated the config.
         assert_eq!(applied.period_seconds, original.period_seconds);
         assert_eq!(applied.volume_messages, original.volume_messages);
+    }
+}
+
+#[cfg(test)]
+mod phase3_events_tests {
+    //! Phase 3 event-surface unit tests — ring buffer behaviour,
+    //! drain emission, past-grace detection, and the
+    //! `GetRotationEventsRequest` round trip.
+    //!
+    //! Every test here touches the process-global event-log
+    //! `InitCell`, so they share an `EVENT_LOG_LOCK` to serialise
+    //! mutations that are observed by subsequent assertions.
+
+    use super::phase2_tests::install_test_config;
+    use super::phase3_tests;
+    use super::*;
+    use crate::services::crypto::events;
+    use libp2p::identity::Keypair;
+    use qaul_proto::qaul_rpc_crypto as proto_rpc;
+    use std::sync::Mutex;
+
+    static EVENT_LOG_LOCK: Mutex<()> = Mutex::new(());
+
+    fn fresh_peer() -> PeerId {
+        Keypair::generate_ed25519().public().to_peer_id()
+    }
+
+    // The ring buffer appends in order and caps at MAX_EVENTS,
+    // dropping the oldest.
+    #[test]
+    fn event_log_caps_at_max_events() {
+        let _g = EVENT_LOG_LOCK.lock().unwrap();
+        events::clear_for_tests();
+        let peer = fresh_peer();
+        // Stream past the cap.
+        for i in 0..(events::MAX_EVENTS + 50) {
+            events::record(events::RotationEvent {
+                kind: events::RotationEventKind::Rotated,
+                remote_id: peer,
+                primary_session_id: i as u32,
+                draining_session_id: 0,
+                timestamp_ms: 1_000_000 + i as u64,
+            });
+        }
+        let all = events::query(0, 0);
+        assert_eq!(all.len(), events::MAX_EVENTS, "log should cap at MAX_EVENTS");
+        // Oldest events dropped: the smallest primary_session_id in
+        // the survivors must equal 50 (since we pushed 0..256+50).
+        assert_eq!(all.first().unwrap().primary_session_id, 50);
+        assert_eq!(
+            all.last().unwrap().primary_session_id,
+            (events::MAX_EVENTS + 50 - 1) as u32
+        );
+    }
+
+    // `since_ms` filters events strictly older, `limit` caps to the
+    // newest `limit` entries.
+    #[test]
+    fn event_log_query_filters_and_limits() {
+        let _g = EVENT_LOG_LOCK.lock().unwrap();
+        events::clear_for_tests();
+        let peer = fresh_peer();
+        for i in 0..10 {
+            events::record(events::RotationEvent {
+                kind: events::RotationEventKind::Rotated,
+                remote_id: peer,
+                primary_session_id: i,
+                draining_session_id: 0,
+                timestamp_ms: 1_000 + i as u64,
+            });
+        }
+        // since_ms filter
+        let filtered = events::query(1_005, 0);
+        assert_eq!(filtered.len(), 5, "events at ts 1005..1009");
+        assert_eq!(filtered.first().unwrap().primary_session_id, 5);
+
+        // limit filter keeps the newest 3.
+        let limited = events::query(0, 3);
+        assert_eq!(limited.len(), 3);
+        assert_eq!(limited.first().unwrap().primary_session_id, 7);
+        assert_eq!(limited.last().unwrap().primary_session_id, 9);
+    }
+
+    // `drain_expired_rotations` emits `GraceExpired` and stamps
+    // `last_retired_*` so the decrypt path can detect past-grace
+    // messages afterwards.
+    #[test]
+    fn drain_emits_grace_expired_and_stamps_meta() {
+        let _g = EVENT_LOG_LOCK.lock().unwrap();
+        install_test_config();
+        events::clear_for_tests();
+        let acct = CryptoStorage::test_account();
+        let remote = fresh_peer();
+        acct.save_state(remote, 7, dummy_state(7));
+        acct.save_rotation_meta(
+            remote,
+            &RotationMeta {
+                primary_session_id: 42,
+                draining_session_id: Some(7),
+                draining_until: Some(10_000),
+                draining_remaining_volume: Some(100),
+                ..Default::default()
+            },
+        );
+        CryptoNoise::drain_expired_rotations(acct.clone(), 10_001);
+
+        let meta = acct.get_rotation_meta(remote).unwrap();
+        assert_eq!(meta.last_retired_session_id, Some(7));
+        assert_eq!(meta.last_retired_at, Some(10_001));
+
+        let log = events::query(0, 0);
+        assert!(
+            log.iter()
+                .any(|e| e.kind == events::RotationEventKind::GraceExpired
+                    && e.draining_session_id == 7),
+            "GraceExpired event was not emitted; log={:?}",
+            log
+        );
+    }
+
+    // Local helper: minimal CryptoState fixture (same as phase2_tests).
+    fn dummy_state(session_id: u32) -> CryptoState {
+        CryptoState {
+            session_id,
+            state: CryptoProcessState::Transport,
+            initiator: true,
+            s: vec![],
+            rs: vec![],
+            e: vec![],
+            re: None,
+            cipher_out: Some(vec![0u8; 32]),
+            index_nonce_out: 0,
+            cipher_in: Some(vec![0u8; 32]),
+            highest_index_nonce_in: 0,
+            out_of_order_indexes: false,
+            established_at: 0,
+        }
+    }
+
+    // `GetRotationEventsRequest` returns whatever the log currently
+    // holds.
+    #[test]
+    fn rpc_get_events_returns_recorded_events() {
+        // Both CONFIG_LOCK (RPC channel) and EVENT_LOG_LOCK (the
+        // event log) are held; this test needs exclusive access to
+        // each. Always acquire CONFIG_LOCK first to avoid lock-
+        // ordering inversions with tests that only take CONFIG_LOCK.
+        let _g_cfg = phase3_tests::CONFIG_LOCK.lock().unwrap();
+        let _g_log = EVENT_LOG_LOCK.lock().unwrap();
+        install_test_config();
+        phase3_tests::install_rpc_for_tests();
+        events::clear_for_tests();
+        phase3_tests::drain_rpc_channel();
+
+        let peer = fresh_peer();
+        events::record(events::RotationEvent {
+            kind: events::RotationEventKind::Rotated,
+            remote_id: peer,
+            primary_session_id: 5,
+            draining_session_id: 3,
+            timestamp_ms: 42_000,
+        });
+
+        let req = proto_rpc::Crypto {
+            message: Some(proto_rpc::crypto::Message::GetEventsRequest(
+                proto_rpc::GetRotationEventsRequest {
+                    since_ms: 0,
+                    limit: 0,
+                },
+            )),
+        };
+        let resp = phase3_tests::rpc_round_trip(req);
+        let body = match resp.message {
+            Some(proto_rpc::crypto::Message::GetEventsResponse(r)) => r,
+            _ => panic!("expected GetEventsResponse"),
+        };
+        assert!(
+            !body.events.is_empty(),
+            "expected at least one event; got {:?}",
+            body.events
+        );
+        let e = body.events.last().unwrap();
+        assert_eq!(e.timestamp_ms, 42_000);
+        assert_eq!(e.primary_session_id, 5);
+        assert_eq!(e.draining_session_id, 3);
+        assert_eq!(e.kind, proto_rpc::RotationEventKind::Rotated as i32);
+        assert_eq!(e.remote_id, peer.to_bytes());
     }
 }
