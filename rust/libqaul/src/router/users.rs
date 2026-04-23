@@ -110,6 +110,30 @@ impl Users {
         );
     }
 
+    /// Remove a user from the in-memory table and the node.db users tree.
+    ///
+    /// Called when deleting a user account.
+    pub fn remove(id: PeerId) {
+        let q8id = QaulId::to_q8id(id);
+        let mut users = USERS.get().write().unwrap();
+        users.users.remove(&q8id);
+
+        // Remove from the database.
+        // The DB key is the protobuf-encoded public key, so we iterate to find by id.
+        let tree = DbUsers::get_tree();
+        let id_bytes = id.to_bytes();
+        for entry in tree.iter() {
+            if let Ok((key, value)) = entry {
+                if let Ok(user_data) = bincode::deserialize::<UserData>(&value) {
+                    if user_data.id == id_bytes {
+                        let _ = tree.remove(&key);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     /// add a new user to the users list, and check whether the
     /// User ID matches the public key
     /// and save it to the data base

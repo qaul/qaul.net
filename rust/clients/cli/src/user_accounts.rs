@@ -109,6 +109,18 @@ impl UserAccounts {
             "status" => {
                 Self::check_auth_status();
             }
+            // export account
+            cmd if cmd.starts_with("export") => {
+                Self::handle_export(cmd.strip_prefix("export").unwrap().trim());
+            }
+            // delete account
+            cmd if cmd.starts_with("delete") => {
+                Self::handle_delete(cmd.strip_prefix("delete").unwrap().trim());
+            }
+            // restore account
+            cmd if cmd.starts_with("restore ") => {
+                Self::handle_restore(cmd.strip_prefix("restore ").unwrap().trim());
+            }
             // unknown command
             _ => log::error!("unknown account command"),
         }
@@ -355,6 +367,92 @@ impl UserAccounts {
     //     let user_accounts = USERACCOUNTS.get().read().unwrap();
     //     user_accounts.auth.session_token.clone()
     // }
+
+    /// Handle `account export [user_id] [output_path]`
+    ///
+    /// If no user_id is given, the default (current) user is used.
+    /// If no output_path is given, the current directory is used.
+    fn handle_export(args: &str) {
+        use libqaul::node::account_management::AccountManagement;
+
+        let parts: Vec<&str> = args.split_whitespace().collect();
+
+        // Resolve user_id base58 string
+        let user_id_base58 = if parts.is_empty() || parts[0].is_empty() {
+            match Self::get_my_account() {
+                Some(account) => account.id_base58.clone(),
+                None => {
+                    println!("No default user account. Usage: account export [user_id] [output_path]");
+                    return;
+                }
+            }
+        } else {
+            parts[0].to_string()
+        };
+
+        let output_path = if parts.len() >= 2 {
+            parts[1].to_string()
+        } else {
+            std::env::current_dir()
+                .map(|p| p.to_string_lossy().to_string())
+                .unwrap_or_else(|_| ".".to_string())
+        };
+
+        println!("Exporting account {} ...", user_id_base58);
+        match AccountManagement::export_account_by_id(&user_id_base58, &output_path) {
+            Ok(path) => println!("Account exported to: {}", path),
+            Err(e) => println!("Export failed: {}", e),
+        }
+    }
+
+    /// Handle `account delete [user_id]`
+    ///
+    /// If no user_id is given, the default (current) user is used.
+    fn handle_delete(args: &str) {
+        use libqaul::node::account_management::AccountManagement;
+
+        let parts: Vec<&str> = args.split_whitespace().collect();
+
+        let user_id_base58 = if parts.is_empty() || parts[0].is_empty() {
+            match Self::get_my_account() {
+                Some(account) => account.id_base58.clone(),
+                None => {
+                    println!("No default user account. Usage: account delete [user_id]");
+                    return;
+                }
+            }
+        } else {
+            parts[0].to_string()
+        };
+
+        println!("Deleting account {} ...", user_id_base58);
+        match AccountManagement::delete_account_by_id(&user_id_base58) {
+            Ok(()) => println!("Account deleted successfully."),
+            Err(e) => println!("Delete failed: {}", e),
+        }
+    }
+
+    /// Handle `account restore <archive_path>`
+    fn handle_restore(args: &str) {
+        use libqaul::node::account_management::AccountManagement;
+
+        let archive_path = args.trim();
+        if archive_path.is_empty() {
+            println!("Usage: account restore <archive_path>");
+            return;
+        }
+
+        if !std::path::Path::new(archive_path).exists() {
+            println!("Archive not found: {}", archive_path);
+            return;
+        }
+
+        println!("Restoring account from {} ...", archive_path);
+        match AccountManagement::restore_account_from(archive_path) {
+            Ok(user_id) => println!("Account restored: {}", user_id),
+            Err(e) => println!("Restore failed: {}", e),
+        }
+    }
 
     /// Process received RPC message
     ///

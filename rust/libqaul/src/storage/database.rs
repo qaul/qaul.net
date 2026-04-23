@@ -134,6 +134,21 @@ impl DataBase {
         }
     }
 
+    /// Flush and close a user's sled database by removing it from the open handles.
+    ///
+    /// This must be called before copying or deleting the user directory.
+    /// All cached sled::Tree handles for this user (in ChatStorage, GroupStorage, etc.)
+    /// must be released before calling this method.
+    pub fn close_user_db(account_id: PeerId) {
+        let mut database = DATABASE.get().write().unwrap();
+        if let Some(db) = database.users.remove(&account_id.to_bytes()) {
+            if let Err(e) = db.flush() {
+                log::error!("Error flushing user db before close: {}", e);
+            }
+            // db is dropped here, releasing file locks
+        }
+    }
+
     /// check if user account data base has already been opened
     fn user_db_opened(account_id: PeerId) -> Option<sled::Db> {
         // get data base structure

@@ -145,6 +145,15 @@ impl ConnectionTable {
         routing_table.table.insert(user_q8id, routing_user_entry);
     }
 
+    /// Remove a local user from the LOCAL routing table.
+    ///
+    /// Called when deleting a user account.
+    pub fn remove_local_user(user_id: PeerId) {
+        let q8id = QaulId::to_q8id(user_id);
+        let mut routing_table = LOCAL.get().write().unwrap();
+        routing_table.table.remove(&q8id);
+    }
+
     /// process received routing info table
     /// enter it into all modules where we are connected to
     pub fn process_received_routing_info(

@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 mod crypto25519;
 mod noise;
 pub mod sessionmanager;
-mod storage;
+pub mod storage;
 
 use super::messaging;
 use crate::node::user_accounts::UserAccount;

@@ -84,6 +84,15 @@ impl GroupStorage {
         Self::maybe_flush_tree(&db_ref.invited, FlushMode::Immediate, "Error invited flush");
     }
 
+    /// Remove cached sled::Tree handles for a user account.
+    ///
+    /// This must be called before closing the user's sled database
+    /// so that all Arc references to the Db are released.
+    pub fn remove_account(account_id: PeerId) {
+        let mut group_storage = GROUPSTORAGE.get().write().unwrap();
+        group_storage.db_ref.remove(&account_id.to_bytes());
+    }
+
     /// create group account db entry when it does not exist
     fn create_groupaccountdb(account_id: PeerId) -> GroupAccountDb {
         // get user data base
