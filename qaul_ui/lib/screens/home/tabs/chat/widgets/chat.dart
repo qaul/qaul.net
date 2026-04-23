@@ -18,6 +18,7 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart'
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:mime/mime.dart';
 import 'package:open_filex/open_filex.dart';
@@ -183,6 +184,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   final Map<String, String> _overflowMenuOptions = {};
+  Map<String, QaulChatBubbleDisplayItem> _bubbleDisplayItems = {};
 
   void _handleClick(String value) {
     switch (value) {
@@ -300,10 +302,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       body: CronTaskDecorator(
         callback: () => refreshCurrentRoom(),
         schedule: const Duration(milliseconds: 300),
-        child: Chat(
-          showUserAvatars: true,
+        child: SafeArea(
+          bottom: false,
+          child: Chat(
+          showUserAvatars: false,
           showUserNames: room.isGroupChatRoom,
           user: user.toInternalUser(),
+          useTopSafeAreaInset: false,
+          dateHeaderThreshold: const Duration(days: 365).inMilliseconds,
+          groupMessagesThreshold: const Duration(days: 365).inMilliseconds,
           messages: messages(room, l10n: l10n) ?? [],
           onSendPressed: sendMessage,
           inputOptions: const InputOptions(
@@ -537,11 +544,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               isDefaultUser: message.author.id == user.idBase58,
             );
           },
+          customDateHeaderText: (dt) =>
+              DateFormat('EEEE, MMMM d, yyyy', 'en').format(dt.toLocal()),
           theme: DefaultChatTheme(
             userAvatarNameColors: [
-              colorGenerationStrategy(directPeer?.idBase58 ?? room.idBase58),
+              colorGenerationStrategy(
+                directPeer?.idBase58 ?? otherUser?.idBase58 ?? room.idBase58,
+              ),
             ],
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            messageInsetsVertical: 0,
+            messageInsetsHorizontal: 0,
+            dateDividerTextStyle: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w300,
+              height: 1.2,
+              color: Colors.white,
+            ),
+            bubbleMargin: EdgeInsets.zero,
             sentMessageBodyTextStyle: const TextStyle(
               fontSize: 17,
               color: Colors.white,
@@ -551,6 +571,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               color: Colors.black,
             ),
           ),
+        ),
         ),
       ),
     );
@@ -567,17 +588,70 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     ChatRoom room, {
     required AppLocalizations l10n,
   }) {
-    return room.messages
-        ?.sorted()
-        .map(
-          (e) => e.toInternalMessage(
-            _author(e, l10n),
-            ref,
-            l10n: l10n,
-            room: room,
+    final domainMessages = room.messages?.sorted();
+    if (domainMessages == null) return null;
+
+    final internalMessages = <types.Message>[];
+    final textMessages = <Message>[];
+
+    for (final m in domainMessages) {
+      final author = _author(m, l10n);
+      final internal = m.toInternalMessage(
+        author,
+        ref,
+        l10n: l10n,
+        room: room,
+      );
+
+      if (m.content is TextMessageContent && internal is types.TextMessage) {
+        // Status + ticks live in [QaulChatBubble]; hide flutter_chat_ui's
+        // trailing status slot (avoids Row crossAxisAlignment.end shift).
+        internalMessages.add(
+          internal.copyWith(
+            status: null,
+            showStatus: false,
           ),
-        )
-        .toList();
+        );
+        textMessages.add(m);
+      } else {
+        internalMessages.add(internal);
+      }
+    }
+
+    final bubbleSources = [...textMessages]
+      ..sort((a, b) => a.sentAt.compareTo(b.sentAt));
+
+    final bubbleMessages = <QaulChatBubbleMessage>[];
+    final bubbleIds = <String>[];
+
+    for (final m in bubbleSources) {
+      final isMe = m.senderId.equals(user.id);
+      bubbleMessages.add(
+        QaulChatBubbleMessage(
+          content: (m.content as TextMessageContent).content,
+          sentAt: m.sentAt,
+          receivedAt: m.receivedAt,
+          status: m.status == MessageState.sent
+              ? MessageStatus.sent
+              : (m.status == MessageState.confirmed ||
+                      m.status == MessageState.confirmedByAll
+                  ? MessageStatus.read
+                  : MessageStatus.notSent),
+          messageType: isMe ? MessageType.primary : MessageType.secondary,
+          edges: const [],
+        ),
+      );
+      bubbleIds.add(m.messageIdBase58);
+    }
+
+    final displayItems = computeChatBubbleDisplayItems(bubbleMessages);
+    final map = <String, QaulChatBubbleDisplayItem>{};
+    for (var i = 0; i < bubbleIds.length; i++) {
+      map[bubbleIds[i]] = displayItems[i];
+    }
+    _bubbleDisplayItems = map;
+
+    return internalMessages;
   }
 
   Widget _bubbleBuilder(
@@ -595,6 +669,37 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           borderRadius: const BorderRadius.all(Radius.circular(20)),
         ),
         child: child,
+      );
+    }
+
+    if (message is types.TextMessage) {
+      final currentRoom = ref.read(currentOpenChatRoom);
+      final roomMessages = currentRoom?.messages;
+      if (roomMessages == null) return child;
+
+      final domainMessage = roomMessages
+          .firstWhereOrNull((m) => m.messageIdBase58 == message.id);
+      if (domainMessage == null) return child;
+
+      final display = _bubbleDisplayItems[domainMessage.messageIdBase58];
+      if (display == null) return child;
+
+      final clock = DateTime.now();
+      final isPrimary = display.message.messageType == MessageType.primary;
+
+      // Symmetric inset from screen edges (Notion / PR review): leading 16 for
+      // received bubbles, trailing 16 for sent (primary). RTL-safe.
+      return Padding(
+        padding: EdgeInsetsDirectional.only(
+          top: display.marginTop,
+          start: isPrimary ? 0 : 16,
+          end: isPrimary ? 16 : 0,
+        ),
+        child: QaulChatBubble(
+          message: display.message,
+          clock: clock,
+          showTimestamp: display.showTimestamp,
+        ),
       );
     }
 
@@ -616,8 +721,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           nip: nextMessageInGroup
               ? BubbleNip.no
               : user.toInternalUser().id != message.author.id
-              ? BubbleNip.leftBottom
-              : BubbleNip.rightBottom,
+                  ? BubbleNip.leftBottom
+                  : BubbleNip.rightBottom,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: child,
