@@ -462,6 +462,7 @@ impl Crypto {
             }
             None => return Err("no session with peer".to_string()),
         };
+        let new_session_id = rotate_first.new_session_id;
 
         let rotate_first =
             match CryptoNoise::rotate_initiate::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
@@ -1127,7 +1128,10 @@ impl Crypto {
                     Self::handle_trigger_rotation(state, req, request_id);
                 }
                 Some(proto_rpc::crypto::Message::GetEventsRequest(req)) => {
-                    Self::handle_get_events(req, request_id);
+                    Self::handle_get_events(state, req, request_id);
+                }
+                Some(proto_rpc::crypto::Message::TriggerRotationRequest(req)) => {
+                    Self::handle_trigger_rotation(state, req, request_id);
                 }
                 Some(proto_rpc::crypto::Message::GetConfigResponse(_))
                 | Some(proto_rpc::crypto::Message::SetConfigResponse(_))
@@ -2217,51 +2221,25 @@ mod phase2_tests {
     use crate::services::crypto::storage::{CryptoStorage, RotationMeta};
     use crate::storage::configuration::{Configuration, CryptoRotation};
     use libp2p::identity::Keypair;
-    use std::sync::Once;
+    use std::sync::Arc;
 
-    static CONFIG_INIT: Once = Once::new();
-
-    /// Install a test `Configuration` with rotation enabled once per
-    /// process. Idempotent.
-    ///
-    /// We can't use `Configuration::default()` here: `Internet::default`
-    /// pulls values out of the `DEFCONFIGS` global which is only set
-    /// by `Libqaul::new`. Build the struct literally from the
-    /// sub-module `::default()`s that *are* self-contained.
-    pub(super) fn install_test_config() {
-        use crate::storage::configuration::{
-            DebugOption, Internet, Lan, Node, RoutingOptions,
-        };
-        CONFIG_INIT.call_once(|| {
-            let cfg = Configuration {
-                node: Node {
-                    initialized: 0,
-                    id: String::new(),
-                    keys: String::new(),
-                },
-                lan: Lan {
-                    active: false,
-                    listen: Vec::new(),
-                },
-                internet: Internet {
-                    active: false,
-                    peers: Vec::new(),
-                    do_listen: false,
-                    listen: Vec::new(),
-                },
-                user_accounts: Vec::new(),
-                debug: DebugOption { log: false },
-                routing: RoutingOptions::default(),
-                crypto_rotation: CryptoRotation {
-                    enabled: true,
-                    period_seconds: 7 * 24 * 3600,
-                    volume_messages: 1_000_000,
-                    grace_period_seconds: 3600,
-                    grace_volume_messages: 256,
-                },
+    /// Build a fresh `QaulState` for tests with crypto rotation
+    /// enabled. Each call returns an independent state — tests own
+    /// their config, so we don't need cross-test locking on the
+    /// configuration like the pre-instance-based codebase did.
+    pub(super) fn make_test_state() -> Arc<crate::QaulState> {
+        let state = Arc::new(crate::QaulState::new_for_simulation());
+        {
+            let mut cfg = state.config.inner.write().unwrap();
+            cfg.crypto_rotation = CryptoRotation {
+                enabled: true,
+                period_seconds: 7 * 24 * 3600,
+                volume_messages: 1_000_000,
+                grace_period_seconds: 3600,
+                grace_volume_messages: 256,
             };
-            Configuration::init_for_tests(cfg);
-        });
+        }
+        state
     }
 
     fn fresh_peer() -> PeerId {
@@ -2351,7 +2329,7 @@ mod phase2_tests {
     // remaining-volume budget.
     #[test]
     fn after_decrypt_decrements_draining_volume() {
-        install_test_config();
+        let state = make_test_state();
         let acct = CryptoStorage::test_account();
         let user_account = dummy_user_account();
         let remote = fresh_peer();
@@ -2367,7 +2345,7 @@ mod phase2_tests {
             },
         );
 
-        Crypto::after_decrypt_rotation(&user_account, &acct, remote, 50);
+        Crypto::after_decrypt_rotation(&state, &user_account, &acct, remote, 50);
 
         let meta = acct.get_rotation_meta(remote).unwrap();
         assert_eq!(meta.draining_remaining_volume, Some(9));
@@ -2379,7 +2357,7 @@ mod phase2_tests {
     // Decrementing a budget already at zero saturates (no underflow).
     #[test]
     fn after_decrypt_saturates_at_zero() {
-        install_test_config();
+        let state = make_test_state();
         let acct = CryptoStorage::test_account();
         let user_account = dummy_user_account();
         let remote = fresh_peer();
@@ -2395,23 +2373,17 @@ mod phase2_tests {
             },
         );
 
-        Crypto::after_decrypt_rotation(&user_account, &acct, remote, 50);
+        Crypto::after_decrypt_rotation(&state, &user_account, &acct, remote, 50);
 
         let meta = acct.get_rotation_meta(remote).unwrap();
         assert_eq!(meta.draining_remaining_volume, Some(0));
     }
 
-    // When rotation is disabled in config, the draining branch never
-    // runs — nothing mutates. We can only exercise this when the
-    // shared `install_test_config` *hasn't* run; use a fresh account
-    // without calling `install_test_config`. But because the InitCell
-    // is process-wide, once a previous test installs the enabled
-    // config it stays enabled. Instead, assert behaviour under the
-    // normal enabled path when session_id doesn't match any role:
-    // no mutation should happen.
+    // When session_id matches neither primary nor draining, no
+    // mutation should happen even with rotation enabled in config.
     #[test]
     fn after_decrypt_noop_on_unrelated_session() {
-        install_test_config();
+        let state = make_test_state();
         let acct = CryptoStorage::test_account();
         let user_account = dummy_user_account();
         let remote = fresh_peer();
@@ -2427,7 +2399,7 @@ mod phase2_tests {
 
         // session_id 99 matches neither primary (100) nor draining
         // (50) → no mutation.
-        Crypto::after_decrypt_rotation(&user_account, &acct, remote, 99);
+        Crypto::after_decrypt_rotation(&state, &user_account, &acct, remote, 99);
 
         let meta = acct.get_rotation_meta(remote).unwrap();
         assert_eq!(meta, original);
@@ -2436,44 +2408,34 @@ mod phase2_tests {
 
 #[cfg(test)]
 mod phase3_tests {
-    //! Phase 3 unit tests — exercise `Crypto::rpc` against installed
-    //! test configuration and a live RPC channel.
+    //! Phase 3 unit tests — exercise `Crypto::rpc` against a per-test
+    //! `QaulState` plus its embedded RPC channel.
     //!
-    //! The RPC-config mutation tests share process-global state
-    //! (`CONFIG`, `EXTERN_RECEIVE`) with Phase 2 tests, so all
-    //! mutating tests take a module-scoped `CONFIG_LOCK` and revert
-    //! their changes before releasing it.
+    //! Each test owns its own `QaulState` (built by
+    //! `phase2_tests::make_test_state`), so config and RPC channels
+    //! are isolated — no cross-test locking needed.
 
-    use super::phase2_tests::install_test_config;
+    use super::phase2_tests::make_test_state;
     use super::*;
     use crate::rpc::Rpc;
     use qaul_proto::qaul_rpc_crypto as proto_rpc;
-    use std::sync::{Mutex, Once};
 
-    /// Serialise RPC-config tests so one test's SetConfigRequest
-    /// doesn't race another test's GetConfigRequest assertion.
-    pub(super) static CONFIG_LOCK: Mutex<()> = Mutex::new(());
-    static RPC_INIT: Once = Once::new();
-
-    pub(super) fn install_rpc_for_tests() {
-        RPC_INIT.call_once(|| {
-            let _ = Rpc::init();
-        });
-    }
-
-    /// Drop every pending libqaul->extern message so the test's
-    /// own response is the first thing we pick up.
-    pub(super) fn drain_rpc_channel() {
-        while Rpc::receive_from_libqaul().is_ok() {}
+    /// Drop every pending libqaul->extern message on `state` so the
+    /// test's own response is the first thing we pick up.
+    pub(super) fn drain_rpc_channel(state: &crate::QaulState) {
+        while Rpc::receive_from_libqaul(state).is_ok() {}
     }
 
     /// Invoke `Crypto::rpc` with an encoded Crypto RPC container and
     /// read back the one response it emits, decoded as
     /// `proto_rpc::Crypto`.
-    pub(super) fn rpc_round_trip(req: proto_rpc::Crypto) -> proto_rpc::Crypto {
-        drain_rpc_channel();
-        Crypto::rpc(req.encode_to_vec(), Vec::new(), "test-req".into());
-        let raw = Rpc::receive_from_libqaul().expect("no RPC response was produced");
+    pub(super) fn rpc_round_trip(
+        state: &crate::QaulState,
+        req: proto_rpc::Crypto,
+    ) -> proto_rpc::Crypto {
+        drain_rpc_channel(state);
+        Crypto::rpc(state, req.encode_to_vec(), Vec::new(), "test-req".into());
+        let raw = Rpc::receive_from_libqaul(state).expect("no RPC response was produced");
         let envelope = crate::rpc::proto::QaulRpc::decode(&raw[..]).expect("QaulRpc decode");
         assert_eq!(
             envelope.module,
@@ -2488,22 +2450,20 @@ mod phase3_tests {
     /// `CryptoRotation` values.
     #[test]
     fn rpc_get_config_returns_installed_config() {
-        let _g = CONFIG_LOCK.lock().unwrap();
-        install_test_config();
-        install_rpc_for_tests();
+        let state = make_test_state();
 
         let req = proto_rpc::Crypto {
             message: Some(proto_rpc::crypto::Message::GetConfigRequest(
                 proto_rpc::GetConfigRequest {},
             )),
         };
-        let resp = rpc_round_trip(req);
+        let resp = rpc_round_trip(&state, req);
         let body = match resp.message {
             Some(proto_rpc::crypto::Message::GetConfigResponse(r)) => r,
             other => panic!("expected GetConfigResponse, got {:?}", other.is_some()),
         };
 
-        // Fields should match whatever `install_test_config` baked in:
+        // Fields should match whatever `make_test_state` baked in:
         // volume/period/grace values from the shared fixture.
         assert!(body.enabled);
         assert_eq!(body.period_seconds, 7 * 24 * 3600);
@@ -2514,17 +2474,13 @@ mod phase3_tests {
 
     /// A `SetConfigRequest` with only `period_seconds` set must leave
     /// every other field untouched and report the new value via
-    /// `SetConfigResponse.applied`. The test restores the original
-    /// period before releasing the lock so it doesn't pollute any
-    /// subsequent test that also reads the config.
+    /// `SetConfigResponse.applied`.
     #[test]
     fn rpc_set_config_partial_update_preserves_other_fields() {
-        let _g = CONFIG_LOCK.lock().unwrap();
-        install_test_config();
-        install_rpc_for_tests();
+        let state = make_test_state();
 
-        // snapshot prior state so we can revert after.
-        let original_period = Configuration::get().crypto_rotation.period_seconds;
+        // snapshot prior state.
+        let original_period = Configuration::get(&state).crypto_rotation.period_seconds;
 
         let new_period = original_period.saturating_add(123);
         let set_req = proto_rpc::Crypto {
@@ -2538,7 +2494,7 @@ mod phase3_tests {
                 },
             )),
         };
-        let resp = rpc_round_trip(set_req);
+        let resp = rpc_round_trip(&state, set_req);
         let body = match resp.message {
             Some(proto_rpc::crypto::Message::SetConfigResponse(r)) => r,
             other => panic!("expected SetConfigResponse, got {:?}", other.is_some()),
@@ -2549,17 +2505,6 @@ mod phase3_tests {
         assert_eq!(applied.volume_messages, 1_000_000, "untouched");
         assert_eq!(applied.grace_period_seconds, 3600, "untouched");
         assert!(applied.enabled, "untouched");
-
-        // revert for isolation.
-        let revert = proto_rpc::Crypto {
-            message: Some(proto_rpc::crypto::Message::SetConfigRequest(
-                proto_rpc::SetConfigRequest {
-                    period_seconds: Some(original_period),
-                    ..Default::default()
-                },
-            )),
-        };
-        let _ = rpc_round_trip(revert);
     }
 
     /// Zero-valued numeric fields are a near-certain client mistake
@@ -2568,11 +2513,9 @@ mod phase3_tests {
     /// unchanged config back in `applied`.
     #[test]
     fn rpc_set_config_rejects_zero_fields() {
-        let _g = CONFIG_LOCK.lock().unwrap();
-        install_test_config();
-        install_rpc_for_tests();
+        let state = make_test_state();
 
-        let original = Configuration::get().crypto_rotation.clone();
+        let original = Configuration::get(&state).crypto_rotation.clone();
 
         let req = proto_rpc::Crypto {
             message: Some(proto_rpc::crypto::Message::SetConfigRequest(
@@ -2582,7 +2525,7 @@ mod phase3_tests {
                 },
             )),
         };
-        let resp = rpc_round_trip(req);
+        let resp = rpc_round_trip(&state, req);
         let body = match resp.message {
             Some(proto_rpc::crypto::Message::SetConfigResponse(r)) => r,
             _ => panic!("expected SetConfigResponse"),
@@ -2598,6 +2541,76 @@ mod phase3_tests {
         assert_eq!(applied.period_seconds, original.period_seconds);
         assert_eq!(applied.volume_messages, original.volume_messages);
     }
+
+    /// `TriggerRotationRequest` must fail with a descriptive error
+    /// when rotation is disabled.
+    #[test]
+    fn rpc_trigger_rotation_rejected_when_disabled() {
+        let state = make_test_state();
+
+        // flip off
+        let disable = proto_rpc::Crypto {
+            message: Some(proto_rpc::crypto::Message::SetConfigRequest(
+                proto_rpc::SetConfigRequest {
+                    enabled: Some(false),
+                    ..Default::default()
+                },
+            )),
+        };
+        let _ = rpc_round_trip(&state, disable);
+
+        // any peer id will do — the handler must short-circuit on
+        // the disabled check before touching the id.
+        let peer_bytes = libp2p::identity::Keypair::generate_ed25519()
+            .public()
+            .to_peer_id()
+            .to_bytes();
+        let req = proto_rpc::Crypto {
+            message: Some(proto_rpc::crypto::Message::TriggerRotationRequest(
+                proto_rpc::TriggerRotationRequest {
+                    remote_id: peer_bytes,
+                },
+            )),
+        };
+        let resp = rpc_round_trip(&state, req);
+        let body = match resp.message {
+            Some(proto_rpc::crypto::Message::TriggerRotationResponse(r)) => r,
+            _ => panic!("expected TriggerRotationResponse"),
+        };
+        assert!(!body.success);
+        assert!(
+            body.error.contains("disabled"),
+            "error should mention disabled, got: {}",
+            body.error
+        );
+    }
+
+    /// Malformed `remote_id` bytes must be rejected before reaching
+    /// the session lookup.
+    #[test]
+    fn rpc_trigger_rotation_rejects_invalid_peer_bytes() {
+        let state = make_test_state();
+
+        let req = proto_rpc::Crypto {
+            message: Some(proto_rpc::crypto::Message::TriggerRotationRequest(
+                proto_rpc::TriggerRotationRequest {
+                    // not a libp2p multihash
+                    remote_id: vec![0xFF, 0xAA, 0x00, 0x11],
+                },
+            )),
+        };
+        let resp = rpc_round_trip(&state, req);
+        let body = match resp.message {
+            Some(proto_rpc::crypto::Message::TriggerRotationResponse(r)) => r,
+            _ => panic!("expected TriggerRotationResponse"),
+        };
+        assert!(!body.success);
+        assert!(
+            body.error.contains("invalid remote_id"),
+            "error should mention remote_id, got: {}",
+            body.error
+        );
+    }
 }
 
 #[cfg(test)]
@@ -2610,7 +2623,7 @@ mod phase3_events_tests {
     //! `InitCell`, so they share an `EVENT_LOG_LOCK` to serialise
     //! mutations that are observed by subsequent assertions.
 
-    use super::phase2_tests::install_test_config;
+    use super::phase2_tests::make_test_state;
     use super::phase3_tests;
     use super::*;
     use crate::services::crypto::events;
@@ -2618,6 +2631,10 @@ mod phase3_events_tests {
     use qaul_proto::qaul_rpc_crypto as proto_rpc;
     use std::sync::Mutex;
 
+    /// The event log itself is still process-global (`OnceLock` ring
+    /// buffer), so tests that observe it across emission/query
+    /// boundaries must serialise through this lock. Per-test
+    /// `QaulState` does not isolate the event log.
     static EVENT_LOG_LOCK: Mutex<()> = Mutex::new(());
 
     fn fresh_peer() -> PeerId {
@@ -2686,7 +2703,7 @@ mod phase3_events_tests {
     #[test]
     fn drain_emits_grace_expired_and_stamps_meta() {
         let _g = EVENT_LOG_LOCK.lock().unwrap();
-        install_test_config();
+        let _state = make_test_state();
         events::clear_for_tests();
         let acct = CryptoStorage::test_account();
         let remote = fresh_peer();
@@ -2740,16 +2757,13 @@ mod phase3_events_tests {
     // holds.
     #[test]
     fn rpc_get_events_returns_recorded_events() {
-        // Both CONFIG_LOCK (RPC channel) and EVENT_LOG_LOCK (the
-        // event log) are held; this test needs exclusive access to
-        // each. Always acquire CONFIG_LOCK first to avoid lock-
-        // ordering inversions with tests that only take CONFIG_LOCK.
-        let _g_cfg = phase3_tests::CONFIG_LOCK.lock().unwrap();
+        // The event log is process-global so this test serialises
+        // against other event-log tests. Per-test `QaulState` gives
+        // us an isolated RPC channel without an extra lock.
         let _g_log = EVENT_LOG_LOCK.lock().unwrap();
-        install_test_config();
-        phase3_tests::install_rpc_for_tests();
+        let state = make_test_state();
         events::clear_for_tests();
-        phase3_tests::drain_rpc_channel();
+        phase3_tests::drain_rpc_channel(&state);
 
         let peer = fresh_peer();
         events::record(events::RotationEvent {
@@ -2768,7 +2782,7 @@ mod phase3_events_tests {
                 },
             )),
         };
-        let resp = phase3_tests::rpc_round_trip(req);
+        let resp = phase3_tests::rpc_round_trip(&state, req);
         let body = match resp.message {
             Some(proto_rpc::crypto::Message::GetEventsResponse(r)) => r,
             _ => panic!("expected GetEventsResponse"),
