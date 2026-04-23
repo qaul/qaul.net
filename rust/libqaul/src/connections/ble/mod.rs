@@ -174,73 +174,98 @@ impl Ble {
 
     /// info request received
     fn info_received(message: proto::BleInfoResponse) {
-        //ble.devices.extend(message.device);
+        // collect all devices from both the deprecated field and the new repeated field
+        #[allow(deprecated)]
+        let mut all_devices: Vec<proto::BleDeviceInfo> = message.devices;
+        #[allow(deprecated)]
         if let Some(device) = message.device {
-            // log received info
-            log::info!("=========================");
-            log::info!("BLE info received");
-            log::info!("-------------------------");
-            log::info!("This Devices ID");
-            let node_id = Node::get_id();
-            log::info!("- Node ID: {}", node_id.to_base58());
-            log::info!("- Small Node ID: {:?}", QaulId::to_q8id(node_id));
-            log::info!("-------------------------");
-            log::info!("BLE Supported: {}", device.ble_support);
-            log::info!("ID: {}", device.id);
-            log::info!("Name: {}", device.name);
-            log::info!("Bluetooth Enabled: {}", device.bluetooth_on);
-            log::info!("Advertisement Extended: {}", device.adv_extended);
-            if device.adv_extended {
-                log::info!("    bytes: {}", device.adv_extended_bytes);
-            }
-            log::info!("2M supported: {}", device.le_2m);
-            log::info!("LE coded supported: {}", device.le_coded);
-            log::info!("LE audio supported: {}", device.le_audio);
-            log::info!(
-                "LE periodic advertisement supported: {}",
-                device.le_periodic_adv_support
-            );
-            log::info!(
-                "LE multiple advertisement supported: {}",
-                device.le_multiple_adv_support
-            );
-            log::info!(
-                "offload filter supported: {}",
-                device.offload_filter_support
-            );
-            log::info!(
-                "offload scan batching supported: {}",
-                device.offload_scan_batching_support
-            );
-            log::info!("=========================");
-
-            // save to state
-            {
-                let mut ble = BLE.get().write().unwrap();
-                ble.devices.push(device);
-            }
-
-            // start module
-            Self::module_start();
-        } else {
-            log::error!("No Bluetooth device available.");
+            log::info!("BLE info received via deprecated 'device' field:");
+            Self::log_device_info(&device);
+            all_devices.push(device);
         }
+
+        if all_devices.is_empty() {
+            log::error!("No Bluetooth device available.");
+            return;
+        }
+
+        log::info!("=========================");
+        log::info!("BLE info received");
+        log::info!("-------------------------");
+        log::info!("This Devices ID");
+        let node_id = Node::get_id();
+        log::info!("- Node ID: {}", node_id.to_base58());
+        log::info!("- Small Node ID: {:?}", QaulId::to_q8id(node_id));
+        log::info!("-------------------------");
+        log::info!("Total BLE devices found: {}", all_devices.len());
+
+        for (i, device) in all_devices.iter().enumerate() {
+            log::info!("--- Device {} ---", i + 1);
+            Self::log_device_info(device);
+        }
+        log::info!("=========================");
+
+        // save to state
+        {
+            let mut ble = BLE.get().write().unwrap();
+            ble.devices.extend(all_devices);
+        }
+
+        // start module
+        Self::module_start();
+    }
+
+    /// Log the details of a single BLE device
+    fn log_device_info(device: &proto::BleDeviceInfo) {
+        log::info!("BLE Supported: {}", device.ble_support);
+        log::info!("ID: {}", device.id);
+        log::info!("Name: {}", device.name);
+        log::info!("Bluetooth Enabled: {}", device.bluetooth_on);
+        log::info!("Advertisement Extended: {}", device.adv_extended);
+        if device.adv_extended {
+            log::info!("    bytes: {}", device.adv_extended_bytes);
+        }
+        log::info!("2M supported: {}", device.le_2m);
+        log::info!("LE coded supported: {}", device.le_coded);
+        log::info!("LE audio supported: {}", device.le_audio);
+        log::info!(
+            "LE periodic advertisement supported: {}",
+            device.le_periodic_adv_support
+        );
+        log::info!(
+            "LE multiple advertisement supported: {}",
+            device.le_multiple_adv_support
+        );
+        log::info!(
+            "offload filter supported: {}",
+            device.offload_filter_support
+        );
+        log::info!(
+            "offload scan batching supported: {}",
+            device.offload_scan_batching_support
+        );
     }
 
     /// start module
     pub fn module_start() {
         log::info!("BLE send start request");
 
-        let qaul_id;
+        let (qaul_id, device_id);
         {
             let ble = BLE.get().write().unwrap();
             qaul_id = ble.ble_id.clone();
+            device_id = ble
+                .devices
+                .first()
+                .map(|d| d.id.clone())
+                .unwrap_or_default();
         }
 
         // create message
         let start_request = proto::BleStartRequest {
             qaul_id,
             power_setting: proto::BlePowerSetting::LowLatency.into(),
+            device_id,
         };
         let message = proto::Ble {
             message: Some(proto::ble::Message::StartRequest(start_request)),
@@ -755,7 +780,9 @@ impl Ble {
                 }
                 #[cfg(not(feature = "ble-encryption"))]
                 Some(proto_net::ble_message::Message::Handshake(_)) => {
-                    log::warn!("BLE handshake message dropped: feature `ble-encryption` is disabled");
+                    log::warn!(
+                        "BLE handshake message dropped: feature `ble-encryption` is disabled"
+                    );
                 }
                 Some(proto_net::ble_message::Message::Info(data)) => {
                     log::info!("BLE routing info received");
