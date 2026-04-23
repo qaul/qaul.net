@@ -567,7 +567,7 @@ impl ChatFile {
         // TODO: start in new async thread here
 
         // copy file
-        if let Err(e) = fs::copy(&path_name, file_path) {
+        if let Err(e) = fs::copy(&path_name, &file_path) {
             log::error!("copy file error {}", e);
         }
 
@@ -654,7 +654,40 @@ impl ChatFile {
         );
 
         // 2. file data message
-        // read file contents and create and send FileData messages
+        // read file contents and create and send FileData messages in a blocking thread
+
+        let user_account_clone = user_account.clone();
+
+        tokio::task::spawn_blocking(move || {
+            if let Err(e) = Self::send_file_chunks_blocking(
+                user_account_clone,
+                group,
+                message_id,
+                file_id,
+                timestamp,
+                path_name,
+                size,
+                mesage_count,
+            ) {
+                log::error!("File send failed: {}", e);
+            }
+        });
+
+        Ok(true)
+    }
+
+    fn send_file_chunks_blocking(
+        user_account: UserAccount,
+        group: Group,
+        message_id: Vec<u8>,
+        file_id: u64,
+        timestamp: u64,
+        path_name: String,
+        size: u32,
+        message_count: u32,
+    ) -> Result<(), String> {
+        let mut file = File::open(path_name).map_err(|e| e.to_string())?;
+
         let mut buffer: [u8; DEF_PACKAGE_SIZE as usize] = [0; DEF_PACKAGE_SIZE as usize];
         let mut left_size = size;
         let mut chunk_index: u32 = 0;
@@ -664,7 +697,7 @@ impl ChatFile {
             if left_size > DEF_PACKAGE_SIZE {
                 read_size = DEF_PACKAGE_SIZE;
             };
-            left_size -= read_size;
+            left_size = left_size - read_size;
 
             if let Err(e) = file.read(&mut buffer) {
                 return Err(e.to_string());
@@ -676,15 +709,14 @@ impl ChatFile {
                     proto_net::ChatFileData {
                         file_id,
                         start_index: chunk_index,
-                        message_count: mesage_count,
-                        data: buffer[0..(read_size as usize)].to_vec(),
+                        message_count,
+                        data: buffer[0..(read_size as usize)].iter().cloned().collect(),
                     },
                 )),
             };
 
-            // send message to all group members
             Self::send_filecontainer_to_group(
-                user_account,
+                &user_account,
                 &group,
                 &message_id,
                 timestamp,
@@ -701,7 +733,7 @@ impl ChatFile {
             super::rpc_proto::MessageStatus::Sent,
         );
 
-        Ok(true)
+        Ok(())
     }
 
     /// Save File Message in Chat Conversation
