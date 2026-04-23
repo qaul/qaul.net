@@ -17,6 +17,10 @@ message Crypto {
         SetConfigRequest set_config_request = 3;
         // Outcome of a SetConfigRequest.
         SetConfigResponse set_config_response = 4;
+        // Read the in-memory rotation event log.
+        GetRotationEventsRequest get_events_request = 5;
+        // Contents of the rotation event log.
+        GetRotationEventsResponse get_events_response = 6;
     }
 }
 
@@ -74,4 +78,57 @@ message SetConfigResponse {
     // the client refresh its cached view without a follow-up
     // GetConfigRequest round-trip.
     GetConfigResponse applied = 3;
+}
+
+// Classes of rotation event emitted by libqaul.
+enum RotationEventKind {
+    // default / unknown
+    ROTATION_EVENT_UNSPECIFIED = 0;
+    // A rotation successfully finalised on this node: the new
+    // session_id is now primary, the old session_id is now draining.
+    ROTATED = 1;
+    // A draining session's grace window elapsed and its cipher
+    // material was zeroised.
+    GRACE_EXPIRED = 2;
+    // A message arrived under a session_id whose grace window had
+    // already been retired, so we could not decrypt it. The UI
+    // should surface this as "message expired, ask the sender to
+    // resend" rather than "decryption failure".
+    MESSAGE_DROPPED_PAST_GRACE = 3;
+}
+
+// A single rotation-related event.
+message RotationEvent {
+    // Wall-clock timestamp (ms since epoch) at emission time.
+    uint64 timestamp_ms = 1;
+    // The event class.
+    RotationEventKind kind = 2;
+    // The remote peer the event concerns. libp2p PeerId bytes.
+    bytes remote_id = 3;
+    // The session id that became primary (for ROTATED) or the one
+    // that was retired / dropped (for GRACE_EXPIRED /
+    // MESSAGE_DROPPED_PAST_GRACE). 0 when not applicable.
+    uint32 primary_session_id = 4;
+    // The session id that moved from primary to draining (for
+    // ROTATED) or was retired (for GRACE_EXPIRED). 0 when not
+    // applicable.
+    uint32 draining_session_id = 5;
+}
+
+// Ask libqaul for the recent rotation events.
+//
+// The event log is an in-memory ring buffer; events before the node
+// last started are not available.
+message GetRotationEventsRequest {
+    // Only return events at or after this wall-clock timestamp (ms).
+    // 0 means "no lower bound".
+    uint64 since_ms = 1;
+    // Cap the number of events in the response. 0 means "no cap".
+    uint32 limit = 2;
+}
+
+// Contents of the rotation event log.
+message GetRotationEventsResponse {
+    // The matched events, ordered oldest → newest.
+    repeated RotationEvent events = 1;
 }

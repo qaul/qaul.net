@@ -4,14 +4,14 @@
 /// Carries every request and response for the Crypto module. Clients
 /// produce messages of this type; libqaul replies with the matching
 /// `*Response` variant.
-#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Crypto {
-    #[prost(oneof = "crypto::Message", tags = "1, 2, 3, 4")]
+    #[prost(oneof = "crypto::Message", tags = "1, 2, 3, 4, 5, 6")]
     pub message: ::core::option::Option<crypto::Message>,
 }
 /// Nested message and enum types in `Crypto`.
 pub mod crypto {
-    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Oneof)]
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Message {
         /// Read the current CryptoRotation configuration for this node.
         #[prost(message, tag = "1")]
@@ -26,6 +26,12 @@ pub mod crypto {
         /// Outcome of a SetConfigRequest.
         #[prost(message, tag = "4")]
         SetConfigResponse(super::SetConfigResponse),
+        /// Read the in-memory rotation event log.
+        #[prost(message, tag = "5")]
+        GetEventsRequest(super::GetRotationEventsRequest),
+        /// Contents of the rotation event log.
+        #[prost(message, tag = "6")]
+        GetEventsResponse(super::GetRotationEventsResponse),
     }
 }
 /// Ask libqaul for the current CryptoRotation config.
@@ -96,4 +102,90 @@ pub struct SetConfigResponse {
     /// GetConfigRequest round-trip.
     #[prost(message, optional, tag = "3")]
     pub applied: ::core::option::Option<GetConfigResponse>,
+}
+/// A single rotation-related event.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RotationEvent {
+    /// Wall-clock timestamp (ms since epoch) at emission time.
+    #[prost(uint64, tag = "1")]
+    pub timestamp_ms: u64,
+    /// The event class.
+    #[prost(enumeration = "RotationEventKind", tag = "2")]
+    pub kind: i32,
+    /// The remote peer the event concerns. libp2p PeerId bytes.
+    #[prost(bytes = "vec", tag = "3")]
+    pub remote_id: ::prost::alloc::vec::Vec<u8>,
+    /// The session id that became primary (for ROTATED) or the one
+    /// that was retired / dropped (for GRACE_EXPIRED /
+    /// MESSAGE_DROPPED_PAST_GRACE). 0 when not applicable.
+    #[prost(uint32, tag = "4")]
+    pub primary_session_id: u32,
+    /// The session id that moved from primary to draining (for
+    /// ROTATED) or was retired (for GRACE_EXPIRED). 0 when not
+    /// applicable.
+    #[prost(uint32, tag = "5")]
+    pub draining_session_id: u32,
+}
+/// Ask libqaul for the recent rotation events.
+///
+/// The event log is an in-memory ring buffer; events before the node
+/// last started are not available.
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct GetRotationEventsRequest {
+    /// Only return events at or after this wall-clock timestamp (ms).
+    /// 0 means "no lower bound".
+    #[prost(uint64, tag = "1")]
+    pub since_ms: u64,
+    /// Cap the number of events in the response. 0 means "no cap".
+    #[prost(uint32, tag = "2")]
+    pub limit: u32,
+}
+/// Contents of the rotation event log.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetRotationEventsResponse {
+    /// The matched events, ordered oldest → newest.
+    #[prost(message, repeated, tag = "1")]
+    pub events: ::prost::alloc::vec::Vec<RotationEvent>,
+}
+/// Classes of rotation event emitted by libqaul.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum RotationEventKind {
+    /// default / unknown
+    RotationEventUnspecified = 0,
+    /// A rotation successfully finalised on this node: the new
+    /// session_id is now primary, the old session_id is now draining.
+    Rotated = 1,
+    /// A draining session's grace window elapsed and its cipher
+    /// material was zeroised.
+    GraceExpired = 2,
+    /// A message arrived under a session_id whose grace window had
+    /// already been retired, so we could not decrypt it. The UI
+    /// should surface this as "message expired, ask the sender to
+    /// resend" rather than "decryption failure".
+    MessageDroppedPastGrace = 3,
+}
+impl RotationEventKind {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            Self::RotationEventUnspecified => "ROTATION_EVENT_UNSPECIFIED",
+            Self::Rotated => "ROTATED",
+            Self::GraceExpired => "GRACE_EXPIRED",
+            Self::MessageDroppedPastGrace => "MESSAGE_DROPPED_PAST_GRACE",
+        }
+    }
+    /// Creates an enum from field names used in the ProtoBuf definition.
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "ROTATION_EVENT_UNSPECIFIED" => Some(Self::RotationEventUnspecified),
+            "ROTATED" => Some(Self::Rotated),
+            "GRACE_EXPIRED" => Some(Self::GraceExpired),
+            "MESSAGE_DROPPED_PAST_GRACE" => Some(Self::MessageDroppedPastGrace),
+            _ => None,
+        }
+    }
 }
