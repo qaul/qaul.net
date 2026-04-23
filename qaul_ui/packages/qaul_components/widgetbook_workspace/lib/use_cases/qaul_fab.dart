@@ -22,38 +22,26 @@ class _QaulFabUseCase extends StatefulWidget {
 }
 
 class _QaulFabUseCaseState extends State<_QaulFabUseCase> {
-  var _darkMode = false;
   var _pressCount = 0;
 
   @override
   Widget build(BuildContext context) {
-    final theme = _darkMode ? ThemeData.dark() : ThemeData.light();
-
-    return Theme(
-      data: theme,
-      child: Material(
-        child: SizedBox.expand(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SwitchListTile(
-                value: _darkMode,
-                onChanged: (value) => setState(() => _darkMode = value),
-                title: const Text('Dark mode'),
-              ),
-              const SizedBox(height: 24),
-              QaulFAB(
-                size: widget.size,
-                svgAsset: 'assets/icons/public-filled.svg',
-                package: 'qaul_components',
-                heroTag: 'fabUseCase',
-                tooltip: 'Create public post',
-                onPressed: () => setState(() => _pressCount++),
-              ),
-              const SizedBox(height: 16),
-              Text('Pressed $_pressCount times'),
-            ],
-          ),
+    return Material(
+      child: SizedBox.expand(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            QaulFAB(
+              size: widget.size,
+              svgAsset: 'assets/icons/public-filled.svg',
+              package: 'qaul_components',
+              heroTag: 'fabUseCase',
+              tooltip: 'Create public post',
+              onPressed: () => setState(() => _pressCount++),
+            ),
+            const SizedBox(height: 16),
+            Text('Pressed $_pressCount times'),
+          ],
         ),
       ),
     );

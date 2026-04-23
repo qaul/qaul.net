@@ -10,6 +10,8 @@
 // **************************************************************************
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:qaul_components_widgetbook/use_cases/chat_header.dart'
+    as _qaul_components_widgetbook_use_cases_chat_header;
 import 'package:qaul_components_widgetbook/use_cases/qaul_color_sheet.dart'
     as _qaul_components_widgetbook_use_cases_qaul_color_sheet;
 import 'package:qaul_components_widgetbook/use_cases/qaul_chat_bubble.dart'
@@ -39,6 +41,26 @@ final directories = <_widgetbook.WidgetbookNode>[
   _widgetbook.WidgetbookFolder(
     name: 'widgets',
     children: [
+      _widgetbook.WidgetbookComponent(
+        name: 'ChatHeader',
+        useCases: [
+          _widgetbook.WidgetbookUseCase(
+            name: 'Direct — last seen',
+            builder: _qaul_components_widgetbook_use_cases_chat_header
+                .buildChatHeaderDirectLastSeenUseCase,
+          ),
+          _widgetbook.WidgetbookUseCase(
+            name: 'Direct — online',
+            builder: _qaul_components_widgetbook_use_cases_chat_header
+                .buildChatHeaderDirectOnlineUseCase,
+          ),
+          _widgetbook.WidgetbookUseCase(
+            name: 'Group',
+            builder: _qaul_components_widgetbook_use_cases_chat_header
+                .buildChatHeaderGroupUseCase,
+          ),
+        ],
+      ),
       _widgetbook.WidgetbookComponent(
         name: 'QaulChatBubble',
         useCases: [
