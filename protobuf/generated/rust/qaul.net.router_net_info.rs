@@ -89,6 +89,12 @@ pub struct UserInfo {
     /// user name
     #[prost(string, tag = "3")]
     pub name: ::prost::alloc::string::String,
+    /// advertised feature-capability bitset. Bit 0 (0x1) = supports
+    /// Noise KK session rotation (`CryptoserviceContainer::rotate_*`).
+    /// Absent / 0 from a legacy peer means "no advertised caps"; code
+    /// that requires a capability must check the bit before acting.
+    #[prost(uint32, tag = "4")]
+    pub capabilities: u32,
 }
 /// List of feed ID's
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
