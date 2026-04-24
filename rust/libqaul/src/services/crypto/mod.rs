@@ -2614,6 +2614,96 @@ mod phase3_tests {
 }
 
 #[cfg(test)]
+mod phase5_tests {
+    //! Phase 5 unit tests — capability-gate enforcement. A peer
+    //! that has not advertised `Capabilities::ROTATION` must not
+    //! be rotated with, even when rotation is enabled locally and
+    //! a session exists. The check runs before any state mutation
+    //! so a legacy peer keeps the existing session intact.
+
+    use super::phase2_tests::make_test_state;
+    use super::*;
+    use crate::node::user_accounts::UserAccount;
+    use crate::router::users::{Capabilities, Users};
+    use libp2p::identity::Keypair;
+
+    fn dummy_user_account() -> UserAccount {
+        let keys = Keypair::generate_ed25519();
+        let id = keys.public().to_peer_id();
+        UserAccount {
+            id,
+            keys,
+            name: "test".into(),
+            password_hash: None,
+            password_salt: None,
+        }
+    }
+
+    /// Unknown peer: `get_capabilities` returns 0 → gate must reject.
+    #[test]
+    fn perform_rotation_rejects_peer_without_caps() {
+        let state = make_test_state();
+        let acct = CryptoStorage::test_account();
+        let user = dummy_user_account();
+        let remote = Keypair::generate_ed25519().public().to_peer_id();
+
+        // No set_capabilities_for_tests → caps stay at 0.
+        let err = Crypto::perform_rotation(&state, &user, &acct, remote)
+            .expect_err("gate should refuse peer without ROTATION cap");
+        assert!(
+            err.contains("capability"),
+            "unexpected error from gate: {err}"
+        );
+    }
+
+    /// A peer whose caps bitset has the `ROTATION` bit set should
+    /// pass the gate and fail further down (no session exists).
+    /// That latter failure proves the gate let us through.
+    #[test]
+    fn perform_rotation_allows_peer_with_caps() {
+        let state = make_test_state();
+        let acct = CryptoStorage::test_account();
+        let user = dummy_user_account();
+        let remote = Keypair::generate_ed25519().public().to_peer_id();
+
+        let rs = state.get_router();
+        Users::set_capabilities_for_tests(&rs, &remote, Capabilities::ROTATION);
+
+        let err = Crypto::perform_rotation(&state, &user, &acct, remote)
+            .expect_err("no session should fail after the gate");
+        assert!(
+            !err.contains("capability"),
+            "gate should have accepted ROTATION-capable peer, got: {err}"
+        );
+        assert!(
+            err.contains("no session") || err.contains("no Transport"),
+            "expected downstream no-session error, got: {err}"
+        );
+    }
+
+    /// Wrong bits set but ROTATION absent must still be rejected —
+    /// tests the bitmask semantics rather than a simple non-zero
+    /// check.
+    #[test]
+    fn perform_rotation_rejects_unrelated_caps() {
+        let state = make_test_state();
+        let acct = CryptoStorage::test_account();
+        let user = dummy_user_account();
+        let remote = Keypair::generate_ed25519().public().to_peer_id();
+
+        // Pretend a future hypothetical capability bit is advertised
+        // but rotation is not. The gate must still reject.
+        let unrelated = !Capabilities::ROTATION;
+        let rs = state.get_router();
+        Users::set_capabilities_for_tests(&rs, &remote, unrelated);
+
+        let err = Crypto::perform_rotation(&state, &user, &acct, remote)
+            .expect_err("gate should ignore unrelated caps");
+        assert!(err.contains("capability"), "got: {err}");
+    }
+}
+
+#[cfg(test)]
 mod phase3_events_tests {
     //! Phase 3 event-surface unit tests — ring buffer behaviour,
     //! drain emission, past-grace detection, and the

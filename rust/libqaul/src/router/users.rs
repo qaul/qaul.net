@@ -762,6 +762,64 @@ impl Users {
         }
     }
 
+    /// return the last advertised capabilities bitset for `user_id`,
+    /// or 0 when the peer is unknown or has not yet advertised.
+    pub fn get_capabilities(router: &super::RouterState, user_id: &PeerId) -> u32 {
+        let id_bytes = user_id.to_bytes();
+        let q8id = QaulId::bytes_as_q8id(&id_bytes);
+        let store = router.users.inner.read().unwrap();
+        store.users.get(q8id).map(|u| u.capabilities).unwrap_or(0)
+    }
+
+    /// record (or overwrite) advertised caps for `user_id`. Test
+    /// hook — lets unit tests simulate having received a `UserInfo`
+    /// without running the full routing stack.
+    #[cfg(test)]
+    pub fn set_capabilities_for_tests(
+        router: &super::RouterState,
+        user_id: &PeerId,
+        caps: u32,
+    ) {
+        let id_bytes = user_id.to_bytes();
+        let q8id_vec = QaulId::bytes_to_q8id(id_bytes);
+        let mut store = router.users.inner.write().unwrap();
+        // We insert a placeholder User when the peer isn't known yet
+        // so the caps actually land — production code builds the
+        // entry from an actual UserInfo, but tests only care about
+        // the caps field.
+        let entry = store.users.entry(q8id_vec).or_insert_with(|| User {
+            id: *user_id,
+            key: libp2p::identity::Keypair::generate_ed25519().public(),
+            name: String::new(),
+            verified: false,
+            blocked: false,
+            capabilities: 0,
+        });
+        entry.capabilities = caps;
+    }
+
+    /// record the local user's capabilities so outbound
+    /// `UserInfoTable` entries carry them. Called once at startup
+    /// after `Users::init_with_state` and the local `UserAccount`
+    /// are both available.
+    pub fn set_local_capabilities(
+        router: &super::RouterState,
+        user_id: &PeerId,
+        capabilities: u32,
+    ) {
+        let id_bytes = user_id.to_bytes();
+        let q8id_vec = QaulId::bytes_to_q8id(id_bytes);
+        let mut store = router.users.inner.write().unwrap();
+        if let Some(user) = store.users.get_mut(&q8id_vec) {
+            user.capabilities = capabilities;
+        } else {
+            log::warn!(
+                "set_local_capabilities: local user {} not in users table",
+                user_id.to_base58()
+            );
+        }
+    }
+
     fn compare(a: &[u8], b: &[u8]) -> Ordering {
         for (ai, bi) in a.iter().zip(b.iter()) {
             match ai.cmp(&bi) {
