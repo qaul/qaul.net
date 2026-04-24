@@ -386,10 +386,10 @@ impl Feed {
         state.services.feed.save_message(container.signature.clone(), msg);
 
         if let Some(lan) = lan {
-            lan.publish_floodsub(Node::get_topic(), buf.clone());
+            lan.publish_floodsub(state, Node::get_topic(state), buf.clone());
         }
         if let Some(internet) = internet {
-            internet.publish_floodsub(Node::get_topic(), buf.clone());
+            internet.publish_floodsub(state, Node::get_topic(state), buf.clone());
         }
         crate::connections::ble::Ble::send_feed_message(state, Node::get_topic(state), buf);
     }

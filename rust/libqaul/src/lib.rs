@@ -764,10 +764,10 @@ impl Libqaul {
                 let mut flooder = router.flooder.inner.write().unwrap();
                 while let Some(msg) = flooder.to_send.pop_front() {
                     if !matches!(msg.incoming_via, ConnectionModule::Lan) {
-                        lan.publish_floodsub(msg.topic.clone(), msg.message.clone());
+                        lan.publish_floodsub(&*self.state, msg.topic.clone(), msg.message.clone());
                     }
                     if !matches!(msg.incoming_via, ConnectionModule::Internet) {
-                        internet.publish_floodsub(msg.topic.clone(), msg.message.clone());
+                        internet.publish_floodsub(&*self.state, msg.topic.clone(), msg.message.clone());
                     }
                     if !matches!(msg.incoming_via, ConnectionModule::Ble) {
                         Ble::send_feed_message(&*self.state, msg.topic, msg.message);
@@ -883,6 +883,7 @@ impl Libqaul {
                         data,
                         lan,
                         internet,
+                        ble,
                     );
                 }
             }
@@ -913,10 +914,10 @@ impl Libqaul {
                     );
                     match connection_module {
                         ConnectionModule::Lan => {
-                            lan.send_qaul_messaging_message(neighbour_id, data);
+                            lan.send_qaul_messaging_message(&*self.state, neighbour_id, data);
                         }
                         ConnectionModule::Internet => {
-                            internet.send_qaul_messaging_message(neighbour_id, data);
+                            internet.send_qaul_messaging_message(&*self.state, neighbour_id, data);
                         }
                         ConnectionModule::Ble => {
                             Ble::send_messaging_message(&*self.state, neighbour_id, data);
@@ -952,11 +953,9 @@ impl Libqaul {
         ble: &mut BleTransport,
     ) {
         match connection_module {
-            ConnectionModule::Lan => lan.send_qaul_info_message(neighbour_id, data),
-            ConnectionModule::Internet => internet.send_qaul_info_message(neighbour_id, data),
-            ConnectionModule::Ble => {
-                Ble::send_routing_info(state, neighbour_id, data);
-            }
+            ConnectionModule::Lan => lan.send_qaul_info_message(state, neighbour_id, data),
+            ConnectionModule::Internet => internet.send_qaul_info_message(state, neighbour_id, data),
+            ConnectionModule::Ble => ble.send_qaul_info_message(state, neighbour_id, data),
             ConnectionModule::Local => {}
             ConnectionModule::None => {}
         }

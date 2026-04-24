@@ -358,7 +358,7 @@ impl Transport for Internet {
         &self.status
     }
 
-    fn stop(&mut self) -> Result<(), TransportError> {
+    fn stop(&mut self, state: &crate::QaulState) -> Result<(), TransportError> {
         if self.status == TransportStatus::Disabled {
             return Ok(());
         }
@@ -373,22 +373,22 @@ impl Transport for Internet {
         }
 
         {
-            let mut config = Configuration::get_mut();
+            let mut config = Configuration::get_mut(state);
             config.internet.active = false;
         }
-        Configuration::save();
+        Configuration::save(state);
 
         self.status = TransportStatus::Disabled;
         log::info!("Internet transport stopped");
         Ok(())
     }
 
-    fn start(&mut self) -> Result<(), TransportError> {
+    fn start(&mut self, state: &crate::QaulState) -> Result<(), TransportError> {
         if self.status == TransportStatus::Running {
             return Ok(());
         }
 
-        let config = Configuration::get();
+        let config = Configuration::get(state);
 
         if config.internet.do_listen {
             for listen in &config.internet.listen {
@@ -412,17 +412,17 @@ impl Transport for Internet {
         drop(config);
 
         {
-            let mut config = Configuration::get_mut();
+            let mut config = Configuration::get_mut(state);
             config.internet.active = true;
         }
-        Configuration::save();
+        Configuration::save(state);
 
         self.status = TransportStatus::Running;
         log::info!("Internet transport started");
         Ok(())
     }
 
-    fn send_qaul_info_message(&mut self, peer_id: PeerId, data: Vec<u8>) {
+    fn send_qaul_info_message(&mut self, _state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>) {
         if !self.is_enabled() {
             return;
         }
@@ -432,7 +432,7 @@ impl Transport for Internet {
             .send_qaul_info_message(peer_id, data);
     }
 
-    fn send_qaul_messaging_message(&mut self, peer_id: PeerId, data: Vec<u8>) {
+    fn send_qaul_messaging_message(&mut self, _state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>) {
         if !self.is_enabled() {
             return;
         }
@@ -442,7 +442,7 @@ impl Transport for Internet {
             .send_qaul_messaging_message(peer_id, data);
     }
 
-    fn publish_floodsub(&mut self, topic: floodsub::Topic, data: Vec<u8>) {
+    fn publish_floodsub(&mut self, _state: &crate::QaulState, topic: floodsub::Topic, data: Vec<u8>) {
         if !self.is_enabled() {
             return;
         }
@@ -514,6 +514,7 @@ impl Internet {
         // connect swarm to the listening interfaces defined in
         // the configuration array config.internet.listen
         let config = Configuration::get(state);
+        let active = config.internet.active;
 
         let mut listener_ids = Vec::new();
         if active {

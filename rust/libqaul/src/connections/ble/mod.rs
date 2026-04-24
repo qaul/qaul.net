@@ -1135,45 +1135,45 @@ impl Transport for BleTransport {
         &self.status
     }
 
-    fn stop(&mut self) -> Result<(), TransportError> {
+    fn stop(&mut self, state: &crate::QaulState) -> Result<(), TransportError> {
         if self.status == TransportStatus::Disabled {
             return Ok(());
         }
-        Ble::module_stop();
+        Ble::module_stop(state);
         self.status = TransportStatus::Disabled;
         log::info!("BLE transport stopped");
         Ok(())
     }
 
-    fn start(&mut self) -> Result<(), TransportError> {
+    fn start(&mut self, state: &crate::QaulState) -> Result<(), TransportError> {
         if self.status == TransportStatus::Running {
             return Ok(());
         }
-        Ble::module_start();
+        Ble::module_start(state);
         self.status = TransportStatus::Running;
         log::info!("BLE transport started");
         Ok(())
     }
 
-    fn send_qaul_info_message(&mut self, peer_id: PeerId, data: Vec<u8>) {
+    fn send_qaul_info_message(&mut self, state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>) {
         if !self.is_enabled() {
             return;
         }
-        Ble::send_routing_info(peer_id, data);
+        Ble::send_routing_info(state, peer_id, data);
     }
 
-    fn send_qaul_messaging_message(&mut self, peer_id: PeerId, data: Vec<u8>) {
+    fn send_qaul_messaging_message(&mut self, state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>) {
         if !self.is_enabled() {
             return;
         }
-        Ble::send_messaging_message(peer_id, data);
+        Ble::send_messaging_message(state, peer_id, data);
     }
 
-    fn publish_floodsub(&mut self, topic: floodsub::Topic, data: Vec<u8>) {
+    fn publish_floodsub(&mut self, state: &crate::QaulState, topic: floodsub::Topic, data: Vec<u8>) {
         if !self.is_enabled() {
             return;
         }
-        Ble::send_feed_message(topic, data);
+        Ble::send_feed_message(state, topic, data);
     }
 
     fn listeners(&self) -> Vec<Multiaddr> {
