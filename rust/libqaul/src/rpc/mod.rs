@@ -173,8 +173,9 @@ impl Rpc {
             Ok(message) => {
                 match Modules::try_from(message.module) {
                     Ok(Modules::Node) => {
-                        Self::increase_message_counter();
+                        Self::increase_message_counter(state);
                         Node::rpc(
+                            state,
                             message.data,
                             lan.map(|l| l as &mut dyn Transport),
                             internet.map(|i| i as &mut dyn Transport),
@@ -259,6 +260,7 @@ impl Rpc {
                     }
                     Ok(Modules::Transports) => {
                         Connections::transports_rpc(
+                            state,
                             message.data,
                             lan,
                             internet,

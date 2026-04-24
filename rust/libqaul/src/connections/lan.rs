@@ -190,7 +190,7 @@ impl Transport for Lan {
         &self.status
     }
 
-    fn stop(&mut self) -> Result<(), TransportError> {
+    fn stop(&mut self, state: &crate::QaulState) -> Result<(), TransportError> {
         if self.status == TransportStatus::Disabled {
             return Ok(());
         }
@@ -206,22 +206,22 @@ impl Transport for Lan {
 
         // persist to config
         {
-            let mut config = Configuration::get_mut();
+            let mut config = Configuration::get_mut(state);
             config.lan.active = false;
         }
-        Configuration::save();
+        Configuration::save(state);
 
         self.status = TransportStatus::Disabled;
         log::info!("LAN transport stopped");
         Ok(())
     }
 
-    fn start(&mut self) -> Result<(), TransportError> {
+    fn start(&mut self, state: &crate::QaulState) -> Result<(), TransportError> {
         if self.status == TransportStatus::Running {
             return Ok(());
         }
 
-        let config = Configuration::get();
+        let config = Configuration::get(state);
         for listen in &config.lan.listen {
             match listen.parse() {
                 Ok(addr) => match Swarm::listen_on(&mut self.swarm, addr) {
@@ -241,17 +241,17 @@ impl Transport for Lan {
 
         // persist to config
         {
-            let mut config = Configuration::get_mut();
+            let mut config = Configuration::get_mut(state);
             config.lan.active = true;
         }
-        Configuration::save();
+        Configuration::save(state);
 
         self.status = TransportStatus::Running;
         log::info!("LAN transport started");
         Ok(())
     }
 
-    fn send_qaul_info_message(&mut self, peer_id: PeerId, data: Vec<u8>) {
+    fn send_qaul_info_message(&mut self, _state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>) {
         if !self.is_enabled() {
             return;
         }
@@ -261,7 +261,7 @@ impl Transport for Lan {
             .send_qaul_info_message(peer_id, data);
     }
 
-    fn send_qaul_messaging_message(&mut self, peer_id: PeerId, data: Vec<u8>) {
+    fn send_qaul_messaging_message(&mut self, _state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>) {
         if !self.is_enabled() {
             return;
         }
@@ -271,7 +271,7 @@ impl Transport for Lan {
             .send_qaul_messaging_message(peer_id, data);
     }
 
-    fn publish_floodsub(&mut self, topic: floodsub::Topic, data: Vec<u8>) {
+    fn publish_floodsub(&mut self, _state: &crate::QaulState, topic: floodsub::Topic, data: Vec<u8>) {
         if !self.is_enabled() {
             return;
         }
@@ -346,6 +346,7 @@ impl Lan {
         // connect swarm to the defined listening interfaces in
         // the configuration array config.lan.listen
         let config = Configuration::get(state);
+        let active = config.lan.active;
 
         // only listen if transport is configured as active
         let mut listener_ids = Vec::new();

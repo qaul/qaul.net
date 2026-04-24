@@ -63,16 +63,16 @@ pub trait Transport {
 
     /// Stop the transport: close listeners, disconnect peers.
     /// Safe to call when already stopped (returns Ok).
-    fn stop(&mut self) -> Result<(), TransportError>;
+    fn stop(&mut self, state: &crate::QaulState) -> Result<(), TransportError>;
 
     /// Start the transport: open listeners on the configured addresses,
     /// reconnect peers where applicable.
     /// Safe to call when already running (returns Ok).
-    fn start(&mut self) -> Result<(), TransportError>;
+    fn start(&mut self, state: &crate::QaulState) -> Result<(), TransportError>;
 
-    fn send_qaul_info_message(&mut self, peer_id: PeerId, data: Vec<u8>);
-    fn send_qaul_messaging_message(&mut self, peer_id: PeerId, data: Vec<u8>);
-    fn publish_floodsub(&mut self, topic: floodsub::Topic, data: Vec<u8>);
+    fn send_qaul_info_message(&mut self, state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>);
+    fn send_qaul_messaging_message(&mut self, state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>);
+    fn publish_floodsub(&mut self, state: &crate::QaulState, topic: floodsub::Topic, data: Vec<u8>);
 
     fn listeners(&self) -> Vec<Multiaddr>;
     fn external_addresses(&self) -> Vec<Multiaddr>;
