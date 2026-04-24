@@ -116,7 +116,9 @@ impl QaulState {
     pub fn new_for_simulation() -> Self {
         let config = storage::configuration::Configuration::default();
         Self {
-            router: std::sync::RwLock::new(Arc::new(router::RouterState::new(config.routing.clone()))),
+            router: std::sync::RwLock::new(Arc::new(router::RouterState::new(
+                config.routing.clone(),
+            ))),
             services: services::ServicesState::new(),
             user_accounts: node::user_accounts::UserAccountsState::new(),
             auth: AuthenticationState::new(),
@@ -362,7 +364,10 @@ impl Libqaul {
     }
 
     /// Initialize the logger with appropriate configuration for the platform
-    fn init_logger(storage_path: &str, log_config: Arc<std::sync::RwLock<utilities::filelogger::FileLoggerConfig>>) {
+    fn init_logger(
+        storage_path: &str,
+        log_config: Arc<std::sync::RwLock<utilities::filelogger::FileLoggerConfig>>,
+    ) {
         let path = Path::new(storage_path);
         let log_path = path.join("logs");
 
@@ -472,7 +477,10 @@ impl Libqaul {
                 log_config.clone(),
             );
             // Ignore error if global logger was already set (e.g. multi-instance tests).
-            let _ = multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info);
+            let _ = multi_log::MultiLogger::init(
+                vec![env_logger, Box::new(w_logger)],
+                log::Level::Info,
+            );
         }
     }
 
@@ -734,12 +742,23 @@ impl Libqaul {
         match event {
             EventType::Rpc => {
                 if let Ok(rpc_message) = self.rpc_receiver.try_recv() {
-                    Rpc::process_received_message(&*self.state, rpc_message, Some(lan), Some(internet)).await;
+                    Rpc::process_received_message(
+                        &*self.state,
+                        rpc_message,
+                        Some(lan),
+                        Some(internet),
+                    )
+                    .await;
                 }
             }
             EventType::Sys => {
                 if let Ok(sys_message) = self.sys_receiver.try_recv() {
-                    Sys::process_received_message(&*self.state, sys_message, Some(lan), Some(internet));
+                    Sys::process_received_message(
+                        &*self.state,
+                        sys_message,
+                        Some(lan),
+                        Some(internet),
+                    );
                 }
             }
             EventType::Flooding => {
@@ -752,20 +771,14 @@ impl Libqaul {
                         internet.publish_floodsub(msg.topic.clone(), msg.message.clone());
                     }
                     if !matches!(msg.incoming_via, ConnectionModule::Ble) {
-<<<<<<< HEAD
                         Ble::send_feed_message(&*self.state, msg.topic, msg.message);
-=======
-                        ble.publish_floodsub(msg.topic, msg.message);
->>>>>>> 4d119ff2 (feat(qaul): ble migration and other changes)
                     }
                 }
             }
             EventType::FeedRequest => {
-                let mut feed_requester =
-                    router.feed_requester.inner.write().unwrap();
+                let mut feed_requester = router.feed_requester.inner.write().unwrap();
                 while let Some(request) = feed_requester.to_send.pop_front() {
-                    let connection_module =
-                        router.neighbours.is_neighbour(&request.neighbour_id);
+                    let connection_module = router.neighbours.is_neighbour(&request.neighbour_id);
                     if connection_module == ConnectionModule::None {
                         log::error!(
                             "sending feed requests, node is not a neighbour anymore: {:?}",
@@ -786,11 +799,9 @@ impl Libqaul {
                 }
             }
             EventType::FeedResponse => {
-                let mut feed_responser =
-                    router.feed_responser.inner.write().unwrap();
+                let mut feed_responser = router.feed_responser.inner.write().unwrap();
                 while let Some(request) = feed_responser.to_send.pop_front() {
-                    let connection_module =
-                        router.neighbours.is_neighbour(&request.neighbour_id);
+                    let connection_module = router.neighbours.is_neighbour(&request.neighbour_id);
                     if connection_module == ConnectionModule::None {
                         log::error!(
                             "sending feed requests, node is not a neighbour anymore: {:?}",
@@ -811,11 +822,9 @@ impl Libqaul {
                 }
             }
             EventType::UserRequest => {
-                let mut user_requester =
-                    router.user_requester.inner.write().unwrap();
+                let mut user_requester = router.user_requester.inner.write().unwrap();
                 while let Some(request) = user_requester.to_send.pop_front() {
-                    let connection_module =
-                        router.neighbours.is_neighbour(&request.neighbour_id);
+                    let connection_module = router.neighbours.is_neighbour(&request.neighbour_id);
                     if connection_module == ConnectionModule::None {
                         log::error!(
                             "sending feed requests, node is not a neighbour anymore: {:?}",
@@ -836,11 +845,9 @@ impl Libqaul {
                 }
             }
             EventType::UserResponse => {
-                let mut user_responser =
-                    router.user_responser.inner.write().unwrap();
+                let mut user_responser = router.user_responser.inner.write().unwrap();
                 while let Some(request) = user_responser.to_send.pop_front() {
-                    let connection_module =
-                        router.neighbours.is_neighbour(&request.neighbour_id);
+                    let connection_module = router.neighbours.is_neighbour(&request.neighbour_id);
                     if connection_module == ConnectionModule::None {
                         log::error!(
                             "sending feed requests, node is not a neighbour anymore: {:?}",
@@ -861,7 +868,8 @@ impl Libqaul {
                 }
             }
             EventType::RoutingInfo => {
-                if let Some((neighbour_id, connection_module, data)) = RouterInfo::check_scheduler(&*self.state, &router)
+                if let Some((neighbour_id, connection_module, data)) =
+                    RouterInfo::check_scheduler(&*self.state, &router)
                 {
                     log::trace!(
                         "sending routing information via {:?} to {:?}, {:?}",
@@ -869,11 +877,14 @@ impl Libqaul {
                         neighbour_id,
                         Timestamp::get_timestamp()
                     );
-<<<<<<< HEAD
-                    Self::send_via_module(&*self.state, connection_module, neighbour_id, data, lan, internet);
-=======
-                    Self::send_via_module(connection_module, neighbour_id, data, lan, internet, ble);
->>>>>>> 4d119ff2 (feat(qaul): ble migration and other changes)
+                    Self::send_via_module(
+                        &*self.state,
+                        connection_module,
+                        neighbour_id,
+                        data,
+                        lan,
+                        internet,
+                    );
                 }
             }
             EventType::ReConnecting => {
@@ -890,11 +901,11 @@ impl Libqaul {
                 router.routing_table.set(table);
             }
             EventType::Messaging => {
-                if let Some((neighbour_id, connection_module, data)) =
-                    self.state
-                        .services
-                        .messaging
-                        .check_scheduler(&router.routing_table)
+                if let Some((neighbour_id, connection_module, data)) = self
+                    .state
+                    .services
+                    .messaging
+                    .check_scheduler(&router.routing_table)
                 {
                     log::trace!(
                         "sending messaging message via {:?} to {}",
@@ -909,11 +920,7 @@ impl Libqaul {
                             internet.send_qaul_messaging_message(neighbour_id, data);
                         }
                         ConnectionModule::Ble => {
-<<<<<<< HEAD
                             Ble::send_messaging_message(&*self.state, neighbour_id, data);
-=======
-                            ble.send_qaul_messaging_message(neighbour_id, data);
->>>>>>> 4d119ff2 (feat(qaul): ble migration and other changes)
                         }
                         ConnectionModule::Local => {
                             let message = qaul_messaging::types::QaulMessagingReceived {
@@ -949,11 +956,7 @@ impl Libqaul {
             ConnectionModule::Lan => lan.send_qaul_info_message(neighbour_id, data),
             ConnectionModule::Internet => internet.send_qaul_info_message(neighbour_id, data),
             ConnectionModule::Ble => {
-<<<<<<< HEAD
                 Ble::send_routing_info(state, neighbour_id, data);
-=======
-                ble.send_qaul_info_message(neighbour_id, data);
->>>>>>> 4d119ff2 (feat(qaul): ble migration and other changes)
             }
             ConnectionModule::Local => {}
             ConnectionModule::None => {}
