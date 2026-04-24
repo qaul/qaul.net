@@ -486,6 +486,7 @@ impl Connections {
 
     /// Handle Transports RPC messages (list, enable/disable).
     pub fn transports_rpc(
+        state: &crate::QaulState,
         data: Vec<u8>,
         lan: Option<&mut Lan>,
         internet: Option<&mut Internet>,
@@ -494,10 +495,10 @@ impl Connections {
         match transports_proto::Transports::decode(&data[..]) {
             Ok(msg) => match msg.message {
                 Some(transports_proto::transports::Message::ListRequest(_)) => {
-                    Self::transports_rpc_list(lan, internet, request_id);
+                    Self::transports_rpc_list(state, lan, internet, request_id);
                 }
                 Some(transports_proto::transports::Message::SetEnabled(req)) => {
-                    Self::transports_rpc_set_enabled(req, lan, internet, request_id);
+                    Self::transports_rpc_set_enabled(state, req, lan, internet, request_id);
                 }
                 _ => {
                     log::error!("Unhandled Transports RPC message");
@@ -527,6 +528,7 @@ impl Connections {
     }
 
     fn transports_rpc_list(
+        state: &crate::QaulState,
         lan: Option<&mut Lan>,
         internet: Option<&mut Internet>,
         request_id: String,
@@ -551,14 +553,16 @@ impl Connections {
             .expect("Vec<u8> provides capacity as needed");
 
         Rpc::send_message(
+            state,
             buf,
-            super::rpc::proto::Modules::Transports.into(),
+            super::rpc::proto::Modules::Transports as i32,
             request_id,
             Vec::new(),
         );
     }
 
     fn transports_rpc_set_enabled(
+        state: &crate::QaulState,
         req: transports_proto::TransportSetEnabled,
         lan: Option<&mut Lan>,
         internet: Option<&mut Internet>,
@@ -567,7 +571,7 @@ impl Connections {
         let (success, error) = match req.id.as_str() {
             "lan" => {
                 if let Some(l) = lan {
-                    let result = if req.enabled { l.start() } else { l.stop() };
+                    let result = if req.enabled { l.start(state) } else { l.stop(state) };
                     match result {
                         Ok(()) => (true, String::new()),
                         Err(e) => (false, e.to_string()),
@@ -578,7 +582,7 @@ impl Connections {
             }
             "internet" => {
                 if let Some(i) = internet {
-                    let result = if req.enabled { i.start() } else { i.stop() };
+                    let result = if req.enabled { i.start(state) } else { i.stop(state) };
                     match result {
                         Ok(()) => (true, String::new()),
                         Err(e) => (false, e.to_string()),
@@ -606,8 +610,9 @@ impl Connections {
             .expect("Vec<u8> provides capacity as needed");
 
         Rpc::send_message(
+            state,
             buf,
-            super::rpc::proto::Modules::Transports.into(),
+            super::rpc::proto::Modules::Transports as i32,
             request_id,
             Vec::new(),
         );
