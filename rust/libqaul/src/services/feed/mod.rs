@@ -313,8 +313,20 @@ impl Feed {
     pub fn init(state: &crate::QaulState) {
         // get database and initialize tree
         let db = DataBase::get_node_db(state);
-        let tree: sled::Tree = db.open_tree("feed").unwrap();
-        let tree_ids: sled::Tree = db.open_tree("feed_id").unwrap();
+        let tree: sled::Tree = match db.open_tree("feed") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("Failed to open feed tree: {}", e);
+                return;
+            }
+        };
+        let tree_ids: sled::Tree = match db.open_tree("feed_id") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("Failed to open feed_id tree: {}", e);
+                return;
+            }
+        };
 
         // get last key
         let last_message: u64;
@@ -385,6 +397,8 @@ impl Feed {
         // save message in feed store
         state.services.feed.save_message(container.signature.clone(), msg);
 
+        // flood via floodsub through the Transport trait so LAN, Internet,
+        // and BLE all route through the same call.
         if let Some(lan) = lan {
             lan.publish_floodsub(state, Node::get_topic(state), buf.clone());
         }
@@ -479,7 +493,13 @@ impl Feed {
     /// Sign a message with the private key
     /// The signature can be validated with the corresponding public key.
     pub fn sign_message(buf: &[u8], keys: &Keypair) -> Vec<u8> {
-        keys.sign(buf).unwrap()
+        match keys.sign(buf) {
+            Ok(sig) => sig,
+            Err(e) => {
+                log::error!("Failed to sign feed message: {}", e);
+                Vec::new()
+            }
+        }
     }
 
     /// validate a message via the public key of the sender
@@ -627,7 +647,13 @@ fn build_feed_list_from(tree: &sled::Tree, offset: u32, limit: u32) -> proto::Fe
     for res in iter {
         match res {
             Ok((_key, message_bytes)) => {
-                let message: FeedMessageData = bincode::deserialize(&message_bytes).unwrap();
+                let message: FeedMessageData = match bincode::deserialize(&message_bytes) {
+                    Ok(m) => m,
+                    Err(e) => {
+                        log::error!("Failed to deserialize feed message: {}", e);
+                        continue;
+                    }
+                };
 
                 let sender_id_base58 = bs58::encode(&message.sender_id).into_string();
 
