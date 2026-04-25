@@ -275,9 +275,10 @@ impl MessagingProcess {
 
         // verify sign
         let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
-        envelope
-            .encode(&mut envelope_buf)
-            .expect("Vec<u8> provides capacity as needed");
+        if let Err(e) = envelope.encode(&mut envelope_buf) {
+            log::error!("Failed to re-encode envelope for verification: {}", e);
+            return;
+        }
         if !key.verify(&envelope_buf, &container.signature) {
             log::error!("verification failed");
             return;

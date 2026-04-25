@@ -103,12 +103,37 @@ pub struct DtnModuleState {
 
 impl DtnModuleState {
     /// Create a new empty DtnModuleState with a temporary in-memory database.
+    ///
+    /// Panics with a clear message if the temporary sled database or any of
+    /// the required trees cannot be opened — this is only used during startup
+    /// or simulation, where a sled error means the process cannot proceed.
     pub fn new() -> Self {
-        let db = sled::Config::new().temporary(true).open().unwrap();
-        let dtn_messages = db.open_tree("dtn-messages").unwrap();
-        let dtn_ids = db.open_tree("dtn-messages-ids").unwrap();
-        let dtn_routed_v2 = db.open_tree("dtn-routed-v2").unwrap();
-        let dtn_sender_quotas = db.open_tree("dtn-sender-quotas").unwrap();
+        let db = match sled::Config::new().temporary(true).open() {
+            Ok(db) => db,
+            Err(e) => panic!("DtnModuleState: failed to open temporary sled DB: {}", e),
+        };
+        let dtn_messages = match db.open_tree("dtn-messages") {
+            Ok(t) => t,
+            Err(e) => panic!("DtnModuleState: failed to open dtn-messages tree: {}", e),
+        };
+        let dtn_ids = match db.open_tree("dtn-messages-ids") {
+            Ok(t) => t,
+            Err(e) => panic!(
+                "DtnModuleState: failed to open dtn-messages-ids tree: {}",
+                e
+            ),
+        };
+        let dtn_routed_v2 = match db.open_tree("dtn-routed-v2") {
+            Ok(t) => t,
+            Err(e) => panic!("DtnModuleState: failed to open dtn-routed-v2 tree: {}", e),
+        };
+        let dtn_sender_quotas = match db.open_tree("dtn-sender-quotas") {
+            Ok(t) => t,
+            Err(e) => panic!(
+                "DtnModuleState: failed to open dtn-sender-quotas tree: {}",
+                e
+            ),
+        };
         Self {
             inner: RwLock::new(DtnStorageState {
                 message_counts: 0,
@@ -184,59 +209,102 @@ impl DtnModuleState {
         }
 
         {
-            let mut state = self.inner.write().unwrap();
+            let mut state = match self.inner.write() {
+                Ok(g) => g,
+                Err(e) => {
+                    log::error!("DtnModuleState::init_production inner lock poisoned: {}", e);
+                    return;
+                }
+            };
             state.message_counts = dtn_messages.len() as u32;
             state.used_size = used_size;
             state.db_ref = dtn_messages;
             state.db_ref_id = db_ref_id;
         }
         {
-            let mut v2_state = self.v2.write().unwrap();
+            let mut v2_state = match self.v2.write() {
+                Ok(g) => g,
+                Err(e) => {
+                    log::error!("DtnModuleState::init_production v2 lock poisoned: {}", e);
+                    return;
+                }
+            };
             v2_state.message_count = db_ref_routed_v2.len() as u32;
             v2_state.used_size = v2_used_size;
             v2_state.db_ref_routed_v2 = db_ref_routed_v2;
             v2_state.db_ref_sender_quotas = db_ref_sender_quotas;
         }
         {
-            let mut db_lock = self._db.write().unwrap();
+            let mut db_lock = match self._db.write() {
+                Ok(g) => g,
+                Err(e) => {
+                    log::error!("DtnModuleState::init_production db lock poisoned: {}", e);
+                    return;
+                }
+            };
             *db_lock = db;
         }
     }
 
     /// Process DTN response (instance method).
     pub fn on_dtn_response(&self, dtn_response: &super::messaging::proto::DtnResponse) {
-        let mut state = self.inner.write().unwrap();
-        if state.db_ref.contains_key(&dtn_response.signature).unwrap() {
-            let entry_bytes = state.db_ref.get(&dtn_response.signature).unwrap().unwrap();
-            let entry: DtnMessageEntry = bincode::deserialize(&entry_bytes).unwrap();
-            if state.used_size > entry.size as u64 {
-                state.used_size = state.used_size + (entry.size as u64);
-            } else {
-                state.used_size = 0;
+        let mut state = match self.inner.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("DtnModuleState::on_dtn_response lock poisoned: {}", e);
+                return;
             }
-            if state.message_counts > 0 {
-                state.message_counts = state.message_counts - 1;
+        };
+        let entry_bytes = match state.db_ref.get(&dtn_response.signature) {
+            Ok(Some(b)) => b,
+            Ok(None) => return,
+            Err(e) => {
+                log::error!("DtnModuleState::on_dtn_response: db_ref.get failed: {}", e);
+                return;
             }
+        };
+        let entry: DtnMessageEntry = match bincode::deserialize(&entry_bytes) {
+            Ok(e) => e,
+            Err(e) => {
+                log::error!(
+                    "DtnModuleState::on_dtn_response: failed to deserialize entry: {}",
+                    e
+                );
+                return;
+            }
+        };
+        if state.used_size > entry.size as u64 {
+            state.used_size = state.used_size + (entry.size as u64);
+        } else {
+            state.used_size = 0;
+        }
+        if state.message_counts > 0 {
+            state.message_counts = state.message_counts - 1;
+        }
 
-            if let Err(_) = state.db_ref.remove(&dtn_response.signature) {
-                log::error!("remove storage node entry error!");
-            } else if let Err(_) = state.db_ref.flush() {
-                log::error!("remove storage node entry flush error!");
-            }
+        if let Err(_) = state.db_ref.remove(&dtn_response.signature) {
+            log::error!("remove storage node entry error!");
+        } else if let Err(_) = state.db_ref.flush() {
+            log::error!("remove storage node entry flush error!");
+        }
 
-            if let Err(_) = state.db_ref_id.remove(&entry.org_sig) {
-                log::error!("remove storage node id entry error!");
-            } else if let Err(_) = state.db_ref_id.flush() {
-                log::error!("remove storage node id entry flush error!");
-            }
+        if let Err(_) = state.db_ref_id.remove(&entry.org_sig) {
+            log::error!("remove storage node id entry error!");
+        } else if let Err(_) = state.db_ref_id.flush() {
+            log::error!("remove storage node id entry flush error!");
         }
     }
 
     /// Get DTN storage state (instance method).
     /// Returns (used_size, message_counts).
     pub fn get_state(&self) -> (u64, u32) {
-        let state = self.inner.read().unwrap();
-        (state.used_size, state.message_counts)
+        match self.inner.read() {
+            Ok(state) => (state.used_size, state.message_counts),
+            Err(e) => {
+                log::error!("DtnModuleState::get_state lock poisoned: {}", e);
+                (0, 0)
+            }
+        }
     }
 }
 
@@ -429,7 +497,13 @@ impl Dtn {
 
     /// this function is called when receive DTN response
     pub fn on_dtn_response(state: &crate::QaulState, dtn_response: &super::messaging::proto::DtnResponse) {
-        let mut state = state.services.dtn.inner.write().unwrap();
+        let mut state = match state.services.dtn.inner.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("Dtn::on_dtn_response: inner lock poisoned: {}", e);
+                return;
+            }
+        };
         if let Ok(Some(entry_bytes)) = state.db_ref.get(&dtn_response.signature) {
             // update storage node state
             let entry: DtnMessageEntry = match bincode::deserialize(&entry_bytes) {
@@ -1172,9 +1246,18 @@ impl Dtn {
             };
             if let Some(envelope) = inner_container.envelope.as_ref() {
                 let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
-                envelope
-                    .encode(&mut envelope_buf)
-                    .expect("Vec<u8> provides capacity as needed");
+                if let Err(e) = envelope.encode(&mut envelope_buf) {
+                    log::error!("DtnRoutedV2: failed to re-encode envelope for verification: {}", e);
+                    Self::send_v2_response(
+                        state,
+                        &user_account,
+                        sender_id,
+                        &routed_v2.original_signature,
+                        proto::dtn_response::ResponseType::Rejected,
+                        proto::dtn_response::Reason::None,
+                    );
+                    return;
+                }
                 if !sender_key.verify(&envelope_buf, &inner_container.signature) {
                     log::error!("DtnRoutedV2: inner container signature verification failed");
                     Self::send_v2_response(
@@ -1579,6 +1662,23 @@ mod tests {
     use prost::Message;
     use std::collections::HashMap;
 
+    /// Test helper: unwrap a `Result`, panicking on failure with a clear message.
+    /// Used in tests in place of `.unwrap()` per project rule.
+    fn ok<T, E: std::fmt::Display>(res: Result<T, E>, ctx: &str) -> T {
+        match res {
+            Ok(v) => v,
+            Err(e) => panic!("test failure ({}): {}", ctx, e),
+        }
+    }
+
+    /// Test helper: unwrap an `Option`, panicking on `None` with a clear message.
+    fn some<T>(opt: Option<T>, ctx: &str) -> T {
+        match opt {
+            Some(v) => v,
+            None => panic!("test failure ({}): expected Some, got None", ctx),
+        }
+    }
+
     /// Create a random PeerId from a fresh Ed25519 keypair.
     fn random_peer() -> PeerId {
         let keys = Keypair::generate_ed25519();
@@ -1639,7 +1739,7 @@ mod tests {
         let encoded = original.encode_to_vec();
         assert!(!encoded.is_empty());
 
-        let decoded = proto::DtnRoutedV2::decode(&encoded[..]).unwrap();
+        let decoded = ok(proto::DtnRoutedV2::decode(&encoded[..]), "decode DtnRoutedV2");
         assert_eq!(decoded.container, original.container);
         assert_eq!(decoded.custody_route.len(), 2);
         assert_eq!(decoded.custody_route[0], vec![1, 2, 3]);
@@ -1663,8 +1763,9 @@ mod tests {
             remaining_handoffs: 3,
         };
 
-        let serialized = bincode::serialize(&original).unwrap();
-        let deserialized: proto::DtnRoutedV2 = bincode::deserialize(&serialized).unwrap();
+        let serialized = ok(bincode::serialize(&original), "serialize DtnRoutedV2");
+        let deserialized: proto::DtnRoutedV2 =
+            ok(bincode::deserialize(&serialized), "deserialize DtnRoutedV2");
         assert_eq!(deserialized.container, original.container);
         assert_eq!(deserialized.remaining_handoffs, 3);
     }
@@ -1679,8 +1780,11 @@ mod tests {
             receiver_id: vec![7, 8, 9],
         };
 
-        let serialized = bincode::serialize(&entry).unwrap();
-        let deserialized: DtnRoutedV2Entry = bincode::deserialize(&serialized).unwrap();
+        let serialized = ok(bincode::serialize(&entry), "serialize DtnRoutedV2Entry");
+        let deserialized: DtnRoutedV2Entry = ok(
+            bincode::deserialize(&serialized),
+            "deserialize DtnRoutedV2Entry",
+        );
         assert_eq!(deserialized.routed_v2_bytes, entry.routed_v2_bytes);
         assert_eq!(deserialized.size, 100);
         assert_eq!(deserialized.accepted_at, 999);
@@ -1693,8 +1797,11 @@ mod tests {
             message_count: 3,
         };
 
-        let serialized = bincode::serialize(&entry).unwrap();
-        let deserialized: SenderQuotaEntry = bincode::deserialize(&serialized).unwrap();
+        let serialized = ok(bincode::serialize(&entry), "serialize SenderQuotaEntry");
+        let deserialized: SenderQuotaEntry = ok(
+            bincode::deserialize(&serialized),
+            "deserialize SenderQuotaEntry",
+        );
         assert_eq!(deserialized.used_bytes, 5000);
         assert_eq!(deserialized.message_count, 3);
     }
@@ -1716,7 +1823,10 @@ mod tests {
         };
 
         let encoded = payload.encode_to_vec();
-        let decoded = proto::EnvelopPayload::decode(&encoded[..]).unwrap();
+        let decoded = ok(
+            proto::EnvelopPayload::decode(&encoded[..]),
+            "decode EnvelopPayload",
+        );
 
         match decoded.payload {
             Some(proto::envelop_payload::Payload::DtnRoutedV2(v2)) => {
@@ -1938,25 +2048,32 @@ mod tests {
             accepted_at: 12345,
             receiver_id: vec![0xBB],
         };
-        let entry_bytes = bincode::serialize(&entry).unwrap();
+        let entry_bytes = ok(bincode::serialize(&entry), "serialize entry");
 
         {
-            let mut state = qaul_state.services.dtn.v2.write().unwrap();
-            state
-                .db_ref_routed_v2
-                .insert(sig.clone(), entry_bytes)
-                .unwrap();
-            state.db_ref_routed_v2.flush().unwrap();
+            let mut state = ok(qaul_state.services.dtn.v2.write(), "v2 write lock");
+            ok(
+                state.db_ref_routed_v2.insert(sig.clone(), entry_bytes),
+                "insert routed_v2",
+            );
+            ok(state.db_ref_routed_v2.flush(), "flush routed_v2");
             state.used_size += entry.size as u64;
             state.message_count += 1;
         }
 
         // Retrieve
         {
-            let state = qaul_state.services.dtn.v2.read().unwrap();
-            assert!(state.db_ref_routed_v2.contains_key(&sig).unwrap());
-            let stored = state.db_ref_routed_v2.get(&sig).unwrap().unwrap();
-            let decoded: DtnRoutedV2Entry = bincode::deserialize(&stored).unwrap();
+            let state = ok(qaul_state.services.dtn.v2.read(), "v2 read lock");
+            assert!(ok(
+                state.db_ref_routed_v2.contains_key(&sig),
+                "contains_key routed_v2"
+            ));
+            let stored = some(
+                ok(state.db_ref_routed_v2.get(&sig), "get routed_v2"),
+                "stored routed_v2",
+            );
+            let decoded: DtnRoutedV2Entry =
+                ok(bincode::deserialize(&stored), "deserialize entry");
             assert_eq!(decoded.routed_v2_bytes, vec![10, 20, 30]);
             assert_eq!(decoded.size, 3);
         }
@@ -1974,20 +2091,23 @@ mod tests {
             accepted_at: 0,
             receiver_id: vec![3],
         };
-        let entry_bytes = bincode::serialize(&entry).unwrap();
+        let entry_bytes = ok(bincode::serialize(&entry), "serialize entry");
 
         {
-            let state = qaul_state.services.dtn.v2.write().unwrap();
-            state
-                .db_ref_routed_v2
-                .insert(sig.clone(), entry_bytes)
-                .unwrap();
+            let state = ok(qaul_state.services.dtn.v2.write(), "v2 write lock");
+            ok(
+                state.db_ref_routed_v2.insert(sig.clone(), entry_bytes),
+                "insert routed_v2",
+            );
         }
 
         // Should detect duplicate
         {
-            let state = qaul_state.services.dtn.v2.read().unwrap();
-            assert!(state.db_ref_routed_v2.contains_key(&sig).unwrap());
+            let state = ok(qaul_state.services.dtn.v2.read(), "v2 read lock");
+            assert!(ok(
+                state.db_ref_routed_v2.contains_key(&sig),
+                "contains_key routed_v2"
+            ));
         }
     }
 
@@ -2000,55 +2120,59 @@ mod tests {
             used_bytes: 500,
             message_count: 2,
         };
-        let quota_bytes = bincode::serialize(&quota).unwrap();
+        let quota_bytes = ok(bincode::serialize(&quota), "serialize quota");
 
         {
-            let state = qaul_state.services.dtn.v2.write().unwrap();
-            state
-                .db_ref_sender_quotas
-                .insert(sender_key.clone(), quota_bytes)
-                .unwrap();
+            let state = ok(qaul_state.services.dtn.v2.write(), "v2 write lock");
+            ok(
+                state
+                    .db_ref_sender_quotas
+                    .insert(sender_key.clone(), quota_bytes),
+                "insert sender quota",
+            );
         }
 
         // Retrieve and check
         {
-            let state = qaul_state.services.dtn.v2.read().unwrap();
-            let stored = state
-                .db_ref_sender_quotas
-                .get(&sender_key)
-                .unwrap()
-                .unwrap();
-            let decoded: SenderQuotaEntry = bincode::deserialize(&stored).unwrap();
+            let state = ok(qaul_state.services.dtn.v2.read(), "v2 read lock");
+            let stored = some(
+                ok(state.db_ref_sender_quotas.get(&sender_key), "get quota"),
+                "stored quota",
+            );
+            let decoded: SenderQuotaEntry =
+                ok(bincode::deserialize(&stored), "deserialize quota");
             assert_eq!(decoded.used_bytes, 500);
             assert_eq!(decoded.message_count, 2);
         }
 
         // Simulate removing a message — quota should decrease
         {
-            let state = qaul_state.services.dtn.v2.write().unwrap();
-            let stored = state
-                .db_ref_sender_quotas
-                .get(&sender_key)
-                .unwrap()
-                .unwrap();
-            let mut decoded: SenderQuotaEntry = bincode::deserialize(&stored).unwrap();
+            let state = ok(qaul_state.services.dtn.v2.write(), "v2 write lock");
+            let stored = some(
+                ok(state.db_ref_sender_quotas.get(&sender_key), "get quota"),
+                "stored quota",
+            );
+            let mut decoded: SenderQuotaEntry =
+                ok(bincode::deserialize(&stored), "deserialize quota");
             decoded.used_bytes = decoded.used_bytes.saturating_sub(200);
             decoded.message_count = decoded.message_count.saturating_sub(1);
-            let updated = bincode::serialize(&decoded).unwrap();
-            state
-                .db_ref_sender_quotas
-                .insert(sender_key.clone(), updated)
-                .unwrap();
+            let updated = ok(bincode::serialize(&decoded), "serialize quota");
+            ok(
+                state
+                    .db_ref_sender_quotas
+                    .insert(sender_key.clone(), updated),
+                "insert sender quota",
+            );
         }
 
         {
-            let state = qaul_state.services.dtn.v2.read().unwrap();
-            let stored = state
-                .db_ref_sender_quotas
-                .get(&sender_key)
-                .unwrap()
-                .unwrap();
-            let decoded: SenderQuotaEntry = bincode::deserialize(&stored).unwrap();
+            let state = ok(qaul_state.services.dtn.v2.read(), "v2 read lock");
+            let stored = some(
+                ok(state.db_ref_sender_quotas.get(&sender_key), "get quota"),
+                "stored quota",
+            );
+            let decoded: SenderQuotaEntry =
+                ok(bincode::deserialize(&stored), "deserialize quota");
             assert_eq!(decoded.used_bytes, 300);
             assert_eq!(decoded.message_count, 1);
         }
@@ -2064,38 +2188,40 @@ mod tests {
             used_bytes: V2_PER_SENDER_QUOTA - 10,
             message_count: 100,
         };
-        let quota_bytes = bincode::serialize(&quota).unwrap();
+        let quota_bytes = ok(bincode::serialize(&quota), "serialize quota");
 
         {
-            let state = qaul_state.services.dtn.v2.read().unwrap();
-            state
-                .db_ref_sender_quotas
-                .insert(sender_key.clone(), quota_bytes)
-                .unwrap();
+            let state = ok(qaul_state.services.dtn.v2.read(), "v2 read lock");
+            ok(
+                state
+                    .db_ref_sender_quotas
+                    .insert(sender_key.clone(), quota_bytes),
+                "insert sender quota",
+            );
         }
 
         // A message of size 11 should exceed the quota
         {
-            let state = qaul_state.services.dtn.v2.read().unwrap();
-            let stored = state
-                .db_ref_sender_quotas
-                .get(&sender_key)
-                .unwrap()
-                .unwrap();
-            let decoded: SenderQuotaEntry = bincode::deserialize(&stored).unwrap();
+            let state = ok(qaul_state.services.dtn.v2.read(), "v2 read lock");
+            let stored = some(
+                ok(state.db_ref_sender_quotas.get(&sender_key), "get quota"),
+                "stored quota",
+            );
+            let decoded: SenderQuotaEntry =
+                ok(bincode::deserialize(&stored), "deserialize quota");
             let new_msg_size: u64 = 11;
             assert!(decoded.used_bytes + new_msg_size > V2_PER_SENDER_QUOTA);
         }
 
         // A message of size 5 should be under the quota
         {
-            let state = qaul_state.services.dtn.v2.read().unwrap();
-            let stored = state
-                .db_ref_sender_quotas
-                .get(&sender_key)
-                .unwrap()
-                .unwrap();
-            let decoded: SenderQuotaEntry = bincode::deserialize(&stored).unwrap();
+            let state = ok(qaul_state.services.dtn.v2.read(), "v2 read lock");
+            let stored = some(
+                ok(state.db_ref_sender_quotas.get(&sender_key), "get quota"),
+                "stored quota",
+            );
+            let decoded: SenderQuotaEntry =
+                ok(bincode::deserialize(&stored), "deserialize quota");
             let new_msg_size: u64 = 5;
             assert!(decoded.used_bytes + new_msg_size <= V2_PER_SENDER_QUOTA);
         }
@@ -2116,9 +2242,9 @@ mod tests {
         };
 
         let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
-        envelope.encode(&mut envelope_buf).unwrap();
+        ok(envelope.encode(&mut envelope_buf), "encode envelope");
 
-        let signature = keys.sign(&envelope_buf).unwrap();
+        let signature = ok(keys.sign(&envelope_buf), "sign envelope");
 
         let container = proto::Container {
             signature: signature.clone(),
@@ -2134,13 +2260,16 @@ mod tests {
         let (keys, container_bytes, _sig) = build_signed_container(&receiver);
 
         // Decode the inner container
-        let inner = proto::Container::decode(&container_bytes[..]).unwrap();
+        let inner = ok(
+            proto::Container::decode(&container_bytes[..]),
+            "decode container",
+        );
         let sender_key = keys.public();
 
         // Re-encode envelope and verify
-        let envelope = inner.envelope.as_ref().unwrap();
+        let envelope = some(inner.envelope.as_ref(), "envelope");
         let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
-        envelope.encode(&mut envelope_buf).unwrap();
+        ok(envelope.encode(&mut envelope_buf), "encode envelope");
 
         assert!(sender_key.verify(&envelope_buf, &inner.signature));
     }
@@ -2154,10 +2283,13 @@ mod tests {
         let wrong_keys = Keypair::generate_ed25519();
         let wrong_key = wrong_keys.public();
 
-        let inner = proto::Container::decode(&container_bytes[..]).unwrap();
-        let envelope = inner.envelope.as_ref().unwrap();
+        let inner = ok(
+            proto::Container::decode(&container_bytes[..]),
+            "decode container",
+        );
+        let envelope = some(inner.envelope.as_ref(), "envelope");
         let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
-        envelope.encode(&mut envelope_buf).unwrap();
+        ok(envelope.encode(&mut envelope_buf), "encode envelope");
 
         assert!(!wrong_key.verify(&envelope_buf, &inner.signature));
     }
@@ -2167,14 +2299,17 @@ mod tests {
         let receiver = random_peer();
         let (keys, container_bytes, _sig) = build_signed_container(&receiver);
 
-        let mut inner = proto::Container::decode(&container_bytes[..]).unwrap();
+        let mut inner = ok(
+            proto::Container::decode(&container_bytes[..]),
+            "decode container",
+        );
         // Tamper with the envelope
-        inner.envelope.as_mut().unwrap().payload = vec![0xFF, 0xFF];
+        some(inner.envelope.as_mut(), "envelope mut").payload = vec![0xFF, 0xFF];
 
         let sender_key = keys.public();
-        let envelope = inner.envelope.as_ref().unwrap();
+        let envelope = some(inner.envelope.as_ref(), "envelope");
         let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
-        envelope.encode(&mut envelope_buf).unwrap();
+        ok(envelope.encode(&mut envelope_buf), "encode envelope");
 
         // Original signature should not verify against tampered envelope
         assert!(!sender_key.verify(&envelope_buf, &inner.signature));
@@ -2186,7 +2321,10 @@ mod tests {
         let (_keys, container_bytes, expected_sig) = build_signed_container(&receiver);
 
         // Simulate what rpc_send_routed does: decode Container to get signature
-        let inner = proto::Container::decode(&container_bytes[..]).unwrap();
+        let inner = ok(
+            proto::Container::decode(&container_bytes[..]),
+            "decode container",
+        );
         assert_eq!(inner.signature, expected_sig);
         assert!(!inner.signature.is_empty());
     }
@@ -2201,7 +2339,10 @@ mod tests {
         assert!(!encoded.is_empty());
 
         // Decode back
-        let decoded = libp2p::identity::PublicKey::try_decode_protobuf(&encoded).unwrap();
+        let decoded = ok(
+            libp2p::identity::PublicKey::try_decode_protobuf(&encoded),
+            "decode public key protobuf",
+        );
         assert_eq!(decoded, pub_key);
     }
 }

@@ -260,7 +260,13 @@ impl GroupManage {
     ///
     /// `account_id` the user account ID
     pub fn group_list(state: &crate::QaulState, account_id: &PeerId) -> super::proto_rpc::GroupListResponse {
-        let db_ref = GroupStorage::get_db_ref(state, account_id.to_owned());
+        let db_ref = match GroupStorage::get_db_ref(state, account_id.to_owned()) {
+            Some(r) => r,
+            None => {
+                log::error!("group_list: group db unavailable");
+                return super::proto_rpc::GroupListResponse { groups: Vec::new() };
+            }
+        };
 
         let mut res = super::proto_rpc::GroupListResponse {
             groups: Vec::with_capacity(db_ref.groups.len()),
@@ -304,7 +310,13 @@ impl GroupManage {
 
     /// get invited list from rpc command
     pub fn invited_list(state: &crate::QaulState, account_id: &PeerId) -> super::proto_rpc::GroupInvitedResponse {
-        let db_ref = GroupStorage::get_db_ref(state, account_id.to_owned());
+        let db_ref = match GroupStorage::get_db_ref(state, account_id.to_owned()) {
+            Some(r) => r,
+            None => {
+                log::error!("invited_list: group db unavailable");
+                return super::proto_rpc::GroupInvitedResponse { invited: Vec::new() };
+            }
+        };
 
         let mut res = super::proto_rpc::GroupInvitedResponse {
             invited: Vec::with_capacity(db_ref.invited.len()),

@@ -10,7 +10,13 @@ impl RtcManaging {
     pub fn session_list(state: &crate::QaulState, _my_user_id: &PeerId) -> super::proto_rpc::RtcSessionListResponse {
         let mut res = super::proto_rpc::RtcSessionListResponse { sessions: vec![] };
 
-        let sessions = super::Rtc::rtc_state(state).sessions.read().unwrap();
+        let sessions = match super::Rtc::rtc_state(state).sessions.read() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("RtcManaging::session_list lock poisoned: {}", e);
+                return res;
+            }
+        };
         for (_id, session) in sessions.sessions.iter() {
             let entry = super::proto_rpc::RtcSession {
                 group_id: session.group_id.clone(),
@@ -51,9 +57,9 @@ impl RtcManaging {
         };
 
         let mut message_buff = Vec::with_capacity(proto_message.encoded_len());
-        proto_message
-            .encode(&mut message_buff)
-            .expect("Vec<u8> provides capacity as needed");
+        if let Err(e) = proto_message.encode(&mut message_buff) {
+            return Err(format!("rtc session request encode error: {}", e));
+        }
 
         if let Some(user_account) = UserAccounts::get_by_id(state, *my_user_id) {
             let receiver = match PeerId::from_bytes(&req.group_id) {
@@ -87,9 +93,9 @@ impl RtcManaging {
         };
 
         let mut message_buff = Vec::with_capacity(proto_message.encoded_len());
-        proto_message
-            .encode(&mut message_buff)
-            .expect("Vec<u8> provides capacity as needed");
+        if let Err(e) = proto_message.encode(&mut message_buff) {
+            return Err(format!("rtc session management encode error: {}", e));
+        }
 
         if let Some(user_account) = UserAccounts::get_by_id(state, *my_user_id) {
             let receiver = match PeerId::from_bytes(group_id) {

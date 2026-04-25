@@ -93,9 +93,10 @@ impl RtcMessaging {
 
                 // encode message
                 let mut buf = Vec::with_capacity(proto_message.encoded_len());
-                proto_message
-                    .encode(&mut buf)
-                    .expect("Vec<u8> provides capacity as needed");
+                if let Err(e) = proto_message.encode(&mut buf) {
+                    log::error!("Failed to encode rtc incoming message: {}", e);
+                    return;
+                }
 
                 // send message
                 Rpc::send_message(

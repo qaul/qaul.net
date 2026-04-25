@@ -123,7 +123,16 @@ impl MessagingRetransmit {
                                 unconfirmed_message.retry = new_retry;
                                 unconfirmed_message.last_sent = cur_time;
                                 let unconfirmed_message_todb =
-                                    bincode::serialize(&unconfirmed_message).unwrap();
+                                    match bincode::serialize(&unconfirmed_message) {
+                                        Ok(b) => b,
+                                        Err(e) => {
+                                            log::error!(
+                                                "retransmit: serialize unconfirmed entry error: {}",
+                                                e
+                                            );
+                                            continue;
+                                        }
+                                    };
                                 if let Err(_e) = unconfirmed
                                     .unconfirmed
                                     .insert(signature, unconfirmed_message_todb)

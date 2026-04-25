@@ -103,11 +103,16 @@ impl Crypto25519 {
 
             // generate Montgomery form
             // x25519_dalek::PublicKey internal is private, we have to go via bytes
-            let montgomery_bytes = curve25519_dalek::edwards::CompressedEdwardsY(dalek_pub_bytes)
+            let edwards = match curve25519_dalek::edwards::CompressedEdwardsY(dalek_pub_bytes)
                 .decompress()
-                .expect("An Ed25519 public key is a valid point by construction.")
-                .to_montgomery()
-                .0;
+            {
+                Some(p) => p,
+                None => {
+                    log::error!("Ed25519 public key decompression failed (should be unreachable)");
+                    return None;
+                }
+            };
+            let montgomery_bytes = edwards.to_montgomery().0;
 
             return Some(x25519_dalek::PublicKey::from(montgomery_bytes));
         }

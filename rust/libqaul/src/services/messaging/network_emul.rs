@@ -10,7 +10,13 @@ pub struct NetworkEmulator {}
 
 impl NetworkEmulator {
     pub fn init(state: &crate::QaulState) {
-        let mut emul = state.services.messaging.network_emul.write().unwrap();
+        let mut emul = match state.services.messaging.network_emul.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("NetworkEmulator::init lock poisoned: {}", e);
+                return;
+            }
+        };
         emul.loss_rate = 5;
         emul.total_message = 0;
         emul.total_drop = 0;

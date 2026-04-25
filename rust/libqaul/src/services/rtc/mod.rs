@@ -77,7 +77,13 @@ impl Rtc {
 
     /// get session from session_id
     pub fn get_session_from_id(state: &crate::QaulState, group_id: &Vec<u8>) -> Option<RtcSession> {
-        let sessions = Self::rtc_state(state).sessions.read().unwrap();
+        let sessions = match Self::rtc_state(state).sessions.read() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("Rtc::get_session_from_id lock poisoned: {}", e);
+                return None;
+            }
+        };
         if let Some(session) = sessions.sessions.get(group_id) {
             return Some(session.clone());
         }
@@ -86,13 +92,25 @@ impl Rtc {
 
     /// get session from session_id
     pub fn update_session(state: &crate::QaulState, session: RtcSession) {
-        let mut sessions = Self::rtc_state(state).sessions.write().unwrap();
+        let mut sessions = match Self::rtc_state(state).sessions.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("Rtc::update_session lock poisoned: {}", e);
+                return;
+            }
+        };
         sessions.sessions.insert(session.group_id.clone(), session);
     }
 
     /// remove session on the storage
     pub fn remove_session(state: &crate::QaulState, session_id: &Vec<u8>) {
-        let mut sessions = Self::rtc_state(state).sessions.write().unwrap();
+        let mut sessions = match Self::rtc_state(state).sessions.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("Rtc::remove_session lock poisoned: {}", e);
+                return;
+            }
+        };
         sessions.sessions.remove(session_id);
     }
 
@@ -238,9 +256,10 @@ impl Rtc {
 
                                 // encode message
                                 let mut buf = Vec::with_capacity(proto_message.encoded_len());
-                                proto_message
-                                    .encode(&mut buf)
-                                    .expect("Vec<u8> provides capacity as needed");
+                                if let Err(e) = proto_message.encode(&mut buf) {
+                                    log::error!("Failed to encode rtc session response: {}", e);
+                                    return;
+                                }
 
                                 // send message
                                 Rpc::send_message(
@@ -274,9 +293,10 @@ impl Rtc {
 
                         // encode message
                         let mut buf = Vec::with_capacity(proto_message.encoded_len());
-                        proto_message
-                            .encode(&mut buf)
-                            .expect("Vec<u8> provides capacity as needed");
+                        if let Err(e) = proto_message.encode(&mut buf) {
+                            log::error!("Failed to encode rtc session list response: {}", e);
+                            return;
+                        }
 
                         // send message
                         Rpc::send_message(

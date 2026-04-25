@@ -89,9 +89,10 @@ impl Chat {
 
                         // encode message
                         let mut buf = Vec::with_capacity(proto_message.encoded_len());
-                        proto_message
-                            .encode(&mut buf)
-                            .expect("Vec<u8> provides capacity as needed");
+                        if let Err(e) = proto_message.encode(&mut buf) {
+                            log::error!("encode Chat ConversationList failed: {}", e);
+                            return;
+                        }
                         Rpc::send_message(
                             state,
                             buf,

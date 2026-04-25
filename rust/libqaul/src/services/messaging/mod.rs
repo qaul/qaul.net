@@ -122,9 +122,19 @@ pub struct MessagingState {
 
 impl MessagingState {
     /// Create a new empty MessagingState with a temporary in-memory database.
+    ///
+    /// Panics with a clear message if the temporary sled database or its
+    /// `unconfirmed` tree cannot be opened — used only during startup or
+    /// simulation, where a sled error means we cannot proceed.
     pub fn new() -> Self {
-        let db = sled::Config::new().temporary(true).open().unwrap();
-        let unconfirmed_tree = db.open_tree("unconfirmed").unwrap();
+        let db = match sled::Config::new().temporary(true).open() {
+            Ok(db) => db,
+            Err(e) => panic!("MessagingState: failed to open temporary sled DB: {}", e),
+        };
+        let unconfirmed_tree = match db.open_tree("unconfirmed") {
+            Ok(t) => t,
+            Err(e) => panic!("MessagingState: failed to open unconfirmed tree: {}", e),
+        };
         Self {
             messaging: RwLock::new(Messaging {
                 to_send: VecDeque::new(),
@@ -143,8 +153,16 @@ impl MessagingState {
     }
 
     /// Create a MessagingState backed by a production sled database.
+    ///
+    /// Panics if the `unconfirmed` tree cannot be opened.
     pub fn from_production(db: sled::Db) -> Self {
-        let unconfirmed_tree = db.open_tree("unconfirmed").unwrap();
+        let unconfirmed_tree = match db.open_tree("unconfirmed") {
+            Ok(t) => t,
+            Err(e) => panic!(
+                "MessagingState::from_production: failed to open unconfirmed tree: {}",
+                e
+            ),
+        };
         Self {
             messaging: RwLock::new(Messaging {
                 to_send: VecDeque::new(),
@@ -166,13 +184,37 @@ impl MessagingState {
     /// Replaces the temporary in-memory DB and unconfirmed tree with
     /// production-backed ones. Called from `Messaging::init()`.
     pub fn init_production(&self, db: sled::Db) {
-        let unconfirmed_tree = db.open_tree("unconfirmed").unwrap();
+        let unconfirmed_tree = match db.open_tree("unconfirmed") {
+            Ok(t) => t,
+            Err(e) => {
+                log::error!(
+                    "MessagingState::init_production: failed to open unconfirmed tree: {}",
+                    e
+                );
+                return;
+            }
+        };
         {
-            let mut unconfirmed = self.unconfirmed.write().unwrap();
+            let mut unconfirmed = match self.unconfirmed.write() {
+                Ok(g) => g,
+                Err(e) => {
+                    log::error!(
+                        "MessagingState::init_production: unconfirmed lock poisoned: {}",
+                        e
+                    );
+                    return;
+                }
+            };
             unconfirmed.unconfirmed = unconfirmed_tree;
         }
         {
-            let mut db_lock = self._db.write().unwrap();
+            let mut db_lock = match self._db.write() {
+                Ok(g) => g,
+                Err(e) => {
+                    log::error!("MessagingState::init_production: db lock poisoned: {}", e);
+                    return;
+                }
+            };
             *db_lock = db;
         }
     }
@@ -196,7 +238,13 @@ impl MessagingState {
             is_dtn,
         };
 
-        let mut messaging = self.messaging.write().unwrap();
+        let mut messaging = match self.messaging.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("MessagingState::schedule_message lock poisoned: {}", e);
+                return;
+            }
+        };
         messaging.to_send.push_back(msg);
     }
 
@@ -208,7 +256,13 @@ impl MessagingState {
     ) -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
         let message_item: Option<ScheduledMessage>;
         {
-            let mut messaging = self.messaging.write().unwrap();
+            let mut messaging = match self.messaging.write() {
+                Ok(g) => g,
+                Err(e) => {
+                    log::error!("MessagingState::check_scheduler lock poisoned: {}", e);
+                    return None;
+                }
+            };
             message_item = messaging.to_send.pop_front();
         }
 
@@ -250,7 +304,13 @@ impl MessagingState {
                 return;
             }
         };
-        let unconfirmed = self.unconfirmed.write().unwrap();
+        let unconfirmed = match self.unconfirmed.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("MessagingState::save_unconfirmed_message lock poisoned: {}", e);
+                return;
+            }
+        };
         if let Err(e) = unconfirmed.unconfirmed.insert(container.signature.clone(), entry_bytes) {
             log::error!("{}", e);
         }
@@ -261,7 +321,13 @@ impl MessagingState {
 
     /// Process confirmation message (instance method).
     pub fn on_confirmed_message(&self, signature: &[u8]) {
-        let unconfirmed = self.unconfirmed.write().unwrap();
+        let unconfirmed = match self.unconfirmed.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("MessagingState::on_confirmed_message lock poisoned: {}", e);
+                return;
+            }
+        };
         match unconfirmed.unconfirmed.remove(signature) {
             Ok(_v) => {
                 if let Err(e) = unconfirmed.unconfirmed.flush() {
@@ -284,16 +350,39 @@ impl MessagingState {
 
     /// Shared helper: load an unconfirmed message, apply a mutation, persist it back.
     fn mark_unconfirmed(&self, signature: &[u8], mutate: impl FnOnce(&mut UnConfirmedMessage)) {
-        let unconfirmed = self.unconfirmed.write().unwrap();
-        let Some(bytes) = unconfirmed.unconfirmed.get(signature).unwrap() else {
-            return;
+        let unconfirmed = match self.unconfirmed.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("MessagingState::mark_unconfirmed lock poisoned: {}", e);
+                return;
+            }
         };
-        let mut msg: UnConfirmedMessage = bincode::deserialize(&bytes).unwrap();
+        let bytes = match unconfirmed.unconfirmed.get(signature) {
+            Ok(Some(b)) => b,
+            Ok(None) => return,
+            Err(e) => {
+                log::error!("Failed to read unconfirmed entry: {}", e);
+                return;
+            }
+        };
+        let mut msg: UnConfirmedMessage = match bincode::deserialize(&bytes) {
+            Ok(m) => m,
+            Err(e) => {
+                log::error!("Failed to deserialize unconfirmed entry: {}", e);
+                return;
+            }
+        };
         if msg.scheduled {
             return;
         }
         mutate(&mut msg);
-        let serialized = bincode::serialize(&msg).unwrap();
+        let serialized = match bincode::serialize(&msg) {
+            Ok(s) => s,
+            Err(e) => {
+                log::error!("Failed to serialize unconfirmed entry: {}", e);
+                return;
+            }
+        };
         if let Err(_e) = unconfirmed.unconfirmed.insert(signature.to_vec(), serialized) {
             log::error!("error updating unconfirmed table");
         } else if let Err(_e) = unconfirmed.unconfirmed.flush() {
@@ -329,7 +418,13 @@ impl Messaging {
             bs58::encode(signature).into_string()
         );
 
-        let unconfirmed = state.services.messaging.unconfirmed.write().unwrap();
+        let unconfirmed = match state.services.messaging.unconfirmed.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("Messaging::on_confirmed_message lock poisoned: {}", e);
+                return;
+            }
+        };
 
         // check and remove unconfirmed from DB
         match unconfirmed.unconfirmed.remove(signature) {
@@ -485,9 +580,9 @@ impl Messaging {
 
         // encode envelope
         let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
-        envelope
-            .encode(&mut envelope_buf)
-            .expect("Vec<u8> provides capacity as needed");
+        if let Err(e) = envelope.encode(&mut envelope_buf) {
+            return Err(format!("envelope encode error: {}", e));
+        }
 
         // sign message
         if let Ok(signature) = user_account.keys.sign(&envelope_buf) {
@@ -657,7 +752,13 @@ impl Messaging {
         };
 
         // add it to sending queue
-        let mut messaging = state.services.messaging.messaging.write().unwrap();
+        let mut messaging = match state.services.messaging.messaging.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("Messaging::schedule_message lock poisoned: {}", e);
+                return;
+            }
+        };
         const MAX_QUEUE_SIZE: usize = 10_000;
         if messaging.to_send.len() >= MAX_QUEUE_SIZE {
             log::warn!(
@@ -678,7 +779,13 @@ impl Messaging {
 
         // get scheduled messaging buffer
         {
-            let mut messaging = state.services.messaging.messaging.write().unwrap();
+            let mut messaging = match state.services.messaging.messaging.write() {
+                Ok(g) => g,
+                Err(e) => {
+                    log::error!("Messaging::check_scheduler lock poisoned: {}", e);
+                    return None;
+                }
+            };
             message_item = messaging.to_send.pop_front();
         }
 
@@ -764,9 +871,9 @@ impl Messaging {
 
             // encode chat message
             let mut message_buf = Vec::with_capacity(send_message.encoded_len());
-            send_message
-                .encode(&mut message_buf)
-                .expect("Vec<u8> provides capacity as needed");
+            if let Err(e) = send_message.encode(&mut message_buf) {
+                return Err(format!("confirmation message encode error: {}", e));
+            }
 
             // send message via messaging
             Self::pack_and_send_message(
