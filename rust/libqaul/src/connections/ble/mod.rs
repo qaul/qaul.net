@@ -10,11 +10,14 @@
 //! * Android
 //! * iOS
 
-use libp2p::{floodsub::Topic, PeerId};
+use libp2p::{floodsub, floodsub::Topic, Multiaddr, PeerId};
 use prost::Message;
 use std::{collections::BTreeMap, fmt, sync::RwLock, sync::Mutex};
 use uuid::Uuid;
 
+use crate::connections::transport::{
+    Transport, TransportCapabilities, TransportError, TransportStatus,
+};
 use crate::connections::ConnectionModule;
 use crate::node::Node;
 use crate::router::neighbours::Neighbours;
@@ -1087,5 +1090,97 @@ impl Ble {
                 log::error!("{:?}", error);
             }
         }
+    }
+}
+
+/// Wrapper that adapts the static `Ble` module to the `Transport` trait.
+///
+/// BLE does not use a libp2p swarm — it communicates with the OS BLE stack
+/// via SYS messages. This wrapper delegates to the existing static methods
+/// and tracks enabled/disabled state locally.
+pub struct BleTransport {
+    status: TransportStatus,
+}
+
+impl BleTransport {
+    pub fn new() -> Self {
+        Self {
+            status: TransportStatus::Running,
+        }
+    }
+}
+
+impl Transport for BleTransport {
+    fn id(&self) -> &'static str {
+        "ble"
+    }
+
+    fn label(&self) -> &'static str {
+        "Bluetooth LE"
+    }
+
+    fn module(&self) -> ConnectionModule {
+        ConnectionModule::Ble
+    }
+
+    fn capabilities(&self) -> TransportCapabilities {
+        TransportCapabilities {
+            supports_runtime_toggle: true,
+            supports_peer_list: false,
+            is_local_only: true,
+        }
+    }
+
+    fn status(&self) -> &TransportStatus {
+        &self.status
+    }
+
+    fn stop(&mut self, state: &crate::QaulState) -> Result<(), TransportError> {
+        if self.status == TransportStatus::Disabled {
+            return Ok(());
+        }
+        Ble::module_stop(state);
+        self.status = TransportStatus::Disabled;
+        log::info!("BLE transport stopped");
+        Ok(())
+    }
+
+    fn start(&mut self, state: &crate::QaulState) -> Result<(), TransportError> {
+        if self.status == TransportStatus::Running {
+            return Ok(());
+        }
+        Ble::module_start(state);
+        self.status = TransportStatus::Running;
+        log::info!("BLE transport started");
+        Ok(())
+    }
+
+    fn send_qaul_info_message(&mut self, state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>) {
+        if !self.is_enabled() {
+            return;
+        }
+        Ble::send_routing_info(state, peer_id, data);
+    }
+
+    fn send_qaul_messaging_message(&mut self, state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>) {
+        if !self.is_enabled() {
+            return;
+        }
+        Ble::send_messaging_message(state, peer_id, data);
+    }
+
+    fn publish_floodsub(&mut self, state: &crate::QaulState, topic: floodsub::Topic, data: Vec<u8>) {
+        if !self.is_enabled() {
+            return;
+        }
+        Ble::send_feed_message(state, topic, data);
+    }
+
+    fn listeners(&self) -> Vec<Multiaddr> {
+        Vec::new()
+    }
+
+    fn external_addresses(&self) -> Vec<Multiaddr> {
+        Vec::new()
     }
 }

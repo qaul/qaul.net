@@ -32,7 +32,12 @@ pub mod services;
 pub mod storage;
 pub mod utilities;
 
-use connections::{ble::Ble, internet::Internet, ConnectionModule, Connections, ConnectionsModule};
+use connections::{
+    ble::{Ble, BleTransport},
+    internet::Internet,
+    transport::Transport,
+    ConnectionModule, Connections, ConnectionsModule,
+};
 use node::{Node, NodeModule};
 use router::{info::RouterInfo, Router, RouterModule};
 use rpc::sys::Sys;
@@ -110,7 +115,9 @@ impl QaulState {
     pub fn new_for_simulation() -> Self {
         let config = storage::configuration::Configuration::default();
         Self {
-            router: std::sync::RwLock::new(Arc::new(router::RouterState::new(config.routing.clone()))),
+            router: std::sync::RwLock::new(Arc::new(router::RouterState::new(
+                config.routing.clone(),
+            ))),
             services: services::ServicesState::new(),
             user_accounts: node::user_accounts::UserAccountsState::new(),
             auth: AuthenticationState::new(),
@@ -356,7 +363,10 @@ impl Libqaul {
     }
 
     /// Initialize the logger with appropriate configuration for the platform
-    fn init_logger(storage_path: &str, log_config: Arc<std::sync::RwLock<utilities::filelogger::FileLoggerConfig>>) {
+    fn init_logger(
+        storage_path: &str,
+        log_config: Arc<std::sync::RwLock<utilities::filelogger::FileLoggerConfig>>,
+    ) {
         let path = Path::new(storage_path);
         let log_path = path.join("logs");
 
@@ -466,7 +476,10 @@ impl Libqaul {
                 log_config.clone(),
             );
             // Ignore error if global logger was already set (e.g. multi-instance tests).
-            let _ = multi_log::MultiLogger::init(vec![env_logger, Box::new(w_logger)], log::Level::Info);
+            let _ = multi_log::MultiLogger::init(
+                vec![env_logger, Box::new(w_logger)],
+                log::Level::Info,
+            );
         }
     }
 
@@ -525,6 +538,15 @@ impl Libqaul {
         let mut internet = conn.internet.unwrap();
         let mut lan = conn.lan.unwrap();
 
+        // build BLE transport wrapper
+        let mut ble_transport = BleTransport::new();
+
+        // build transport registry
+        let mut registry = connections::TransportRegistry::new();
+        registry.register(&lan as &dyn Transport);
+        registry.register(&internet as &dyn Transport);
+        registry.register(&ble_transport as &dyn Transport);
+
         // Set up all the tickers for periodic tasks
         let mut rpc_ticker = Ticker::new(Duration::from_millis(10));
         let mut sys_ticker = Ticker::new(Duration::from_millis(10));
@@ -549,6 +571,7 @@ impl Libqaul {
         self.event_loop(
             &mut lan,
             &mut internet,
+            &mut ble_transport,
             &mut rpc_ticker,
             &mut sys_ticker,
             &mut flooding_ticker,
@@ -571,6 +594,7 @@ impl Libqaul {
         &self,
         lan: &mut connections::lan::Lan,
         internet: &mut connections::internet::Internet,
+        ble: &mut BleTransport,
         rpc_ticker: &mut Ticker,
         sys_ticker: &mut Ticker,
         flooding_ticker: &mut Ticker,
@@ -699,7 +723,7 @@ impl Libqaul {
             };
 
             if let Some(event) = evt {
-                self.handle_event(event, lan, internet).await;
+                self.handle_event(event, lan, internet, ble).await;
             }
         }
     }
@@ -710,35 +734,40 @@ impl Libqaul {
         event: EventType,
         lan: &mut connections::lan::Lan,
         internet: &mut connections::internet::Internet,
+        ble: &mut BleTransport,
     ) {
         // Reuse the router snapshot taken in event_loop() instead of cloning the Arc again.
         let router = self.state.get_router();
         match event {
             EventType::Rpc => {
                 if let Ok(rpc_message) = self.rpc_receiver.try_recv() {
-                    Rpc::process_received_message(&*self.state, rpc_message, Some(lan), Some(internet)).await;
+                    Rpc::process_received_message(
+                        &*self.state,
+                        rpc_message,
+                        Some(lan),
+                        Some(internet),
+                    )
+                    .await;
                 }
             }
             EventType::Sys => {
                 if let Ok(sys_message) = self.sys_receiver.try_recv() {
-                    Sys::process_received_message(&*self.state, sys_message, Some(lan), Some(internet));
+                    Sys::process_received_message(
+                        &*self.state,
+                        sys_message,
+                        Some(lan),
+                        Some(internet),
+                    );
                 }
             }
             EventType::Flooding => {
                 let mut flooder = router.flooder.inner.write().unwrap();
                 while let Some(msg) = flooder.to_send.pop_front() {
                     if !matches!(msg.incoming_via, ConnectionModule::Lan) {
-                        lan.swarm
-                            .behaviour_mut()
-                            .floodsub
-                            .publish(msg.topic.clone(), msg.message.clone());
+                        lan.publish_floodsub(&*self.state, msg.topic.clone(), msg.message.clone());
                     }
                     if !matches!(msg.incoming_via, ConnectionModule::Internet) {
-                        internet
-                            .swarm
-                            .behaviour_mut()
-                            .floodsub
-                            .publish(msg.topic.clone(), msg.message.clone());
+                        internet.publish_floodsub(&*self.state, msg.topic.clone(), msg.message.clone());
                     }
                     if !matches!(msg.incoming_via, ConnectionModule::Ble) {
                         Ble::send_feed_message(&*self.state, msg.topic, msg.message);
@@ -746,11 +775,9 @@ impl Libqaul {
                 }
             }
             EventType::FeedRequest => {
-                let mut feed_requester =
-                    router.feed_requester.inner.write().unwrap();
+                let mut feed_requester = router.feed_requester.inner.write().unwrap();
                 while let Some(request) = feed_requester.to_send.pop_front() {
-                    let connection_module =
-                        router.neighbours.is_neighbour(&request.neighbour_id);
+                    let connection_module = router.neighbours.is_neighbour(&request.neighbour_id);
                     if connection_module == ConnectionModule::None {
                         log::error!(
                             "sending feed requests, node is not a neighbour anymore: {:?}",
@@ -766,15 +793,14 @@ impl Libqaul {
                         data,
                         lan,
                         internet,
+                        ble,
                     );
                 }
             }
             EventType::FeedResponse => {
-                let mut feed_responser =
-                    router.feed_responser.inner.write().unwrap();
+                let mut feed_responser = router.feed_responser.inner.write().unwrap();
                 while let Some(request) = feed_responser.to_send.pop_front() {
-                    let connection_module =
-                        router.neighbours.is_neighbour(&request.neighbour_id);
+                    let connection_module = router.neighbours.is_neighbour(&request.neighbour_id);
                     if connection_module == ConnectionModule::None {
                         log::error!(
                             "sending feed requests, node is not a neighbour anymore: {:?}",
@@ -790,15 +816,14 @@ impl Libqaul {
                         data,
                         lan,
                         internet,
+                        ble,
                     );
                 }
             }
             EventType::UserRequest => {
-                let mut user_requester =
-                    router.user_requester.inner.write().unwrap();
+                let mut user_requester = router.user_requester.inner.write().unwrap();
                 while let Some(request) = user_requester.to_send.pop_front() {
-                    let connection_module =
-                        router.neighbours.is_neighbour(&request.neighbour_id);
+                    let connection_module = router.neighbours.is_neighbour(&request.neighbour_id);
                     if connection_module == ConnectionModule::None {
                         log::error!(
                             "sending feed requests, node is not a neighbour anymore: {:?}",
@@ -814,15 +839,14 @@ impl Libqaul {
                         data,
                         lan,
                         internet,
+                        ble,
                     );
                 }
             }
             EventType::UserResponse => {
-                let mut user_responser =
-                    router.user_responser.inner.write().unwrap();
+                let mut user_responser = router.user_responser.inner.write().unwrap();
                 while let Some(request) = user_responser.to_send.pop_front() {
-                    let connection_module =
-                        router.neighbours.is_neighbour(&request.neighbour_id);
+                    let connection_module = router.neighbours.is_neighbour(&request.neighbour_id);
                     if connection_module == ConnectionModule::None {
                         log::error!(
                             "sending feed requests, node is not a neighbour anymore: {:?}",
@@ -838,11 +862,13 @@ impl Libqaul {
                         data,
                         lan,
                         internet,
+                        ble,
                     );
                 }
             }
             EventType::RoutingInfo => {
-                if let Some((neighbour_id, connection_module, data)) = RouterInfo::check_scheduler(&*self.state, &router)
+                if let Some((neighbour_id, connection_module, data)) =
+                    RouterInfo::check_scheduler(&*self.state, &router)
                 {
                     log::trace!(
                         "sending routing information via {:?} to {:?}, {:?}",
@@ -850,7 +876,15 @@ impl Libqaul {
                         neighbour_id,
                         Timestamp::get_timestamp()
                     );
-                    Self::send_via_module(&*self.state, connection_module, neighbour_id, data, lan, internet);
+                    Self::send_via_module(
+                        &*self.state,
+                        connection_module,
+                        neighbour_id,
+                        data,
+                        lan,
+                        internet,
+                        ble,
+                    );
                 }
             }
             EventType::ReConnecting => {
@@ -867,11 +901,11 @@ impl Libqaul {
                 router.routing_table.set(table);
             }
             EventType::Messaging => {
-                if let Some((neighbour_id, connection_module, data)) =
-                    self.state
-                        .services
-                        .messaging
-                        .check_scheduler(&router.routing_table)
+                if let Some((neighbour_id, connection_module, data)) = self
+                    .state
+                    .services
+                    .messaging
+                    .check_scheduler(&router.routing_table)
                 {
                     log::trace!(
                         "sending messaging message via {:?} to {}",
@@ -880,17 +914,10 @@ impl Libqaul {
                     );
                     match connection_module {
                         ConnectionModule::Lan => {
-                            lan.swarm
-                                .behaviour_mut()
-                                .qaul_messaging
-                                .send_qaul_messaging_message(neighbour_id, data);
+                            lan.send_qaul_messaging_message(&*self.state, neighbour_id, data);
                         }
                         ConnectionModule::Internet => {
-                            internet
-                                .swarm
-                                .behaviour_mut()
-                                .qaul_messaging
-                                .send_qaul_messaging_message(neighbour_id, data);
+                            internet.send_qaul_messaging_message(&*self.state, neighbour_id, data);
                         }
                         ConnectionModule::Ble => {
                             Ble::send_messaging_message(&*self.state, neighbour_id, data);
@@ -923,21 +950,12 @@ impl Libqaul {
         data: Vec<u8>,
         lan: &mut connections::lan::Lan,
         internet: &mut connections::internet::Internet,
+        ble: &mut BleTransport,
     ) {
         match connection_module {
-            ConnectionModule::Lan => lan
-                .swarm
-                .behaviour_mut()
-                .qaul_info
-                .send_qaul_info_message(neighbour_id, data),
-            ConnectionModule::Internet => internet
-                .swarm
-                .behaviour_mut()
-                .qaul_info
-                .send_qaul_info_message(neighbour_id, data),
-            ConnectionModule::Ble => {
-                Ble::send_routing_info(state, neighbour_id, data);
-            }
+            ConnectionModule::Lan => lan.send_qaul_info_message(state, neighbour_id, data),
+            ConnectionModule::Internet => internet.send_qaul_info_message(state, neighbour_id, data),
+            ConnectionModule::Ble => ble.send_qaul_info_message(state, neighbour_id, data),
             ConnectionModule::Local => {}
             ConnectionModule::None => {}
         }

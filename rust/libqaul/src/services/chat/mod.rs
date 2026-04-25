@@ -12,7 +12,7 @@ pub mod file;
 pub mod message;
 pub mod storage;
 
-use crate::connections::{internet::Internet, lan::Lan};
+use crate::connections::transport::Transport;
 use crate::node::user_accounts::UserAccounts;
 use crate::rpc::Rpc;
 pub use file::ChatFile;
@@ -60,8 +60,8 @@ impl Chat {
         state: &crate::QaulState,
         data: Vec<u8>,
         user_id: Vec<u8>,
-        _lan: Option<&mut Lan>,
-        _internet: Option<&mut Internet>,
+        _lan: Option<&mut dyn Transport>,
+        _internet: Option<&mut dyn Transport>,
         request_id: String,
     ) {
         let account_id = PeerId::from_bytes(&user_id).unwrap();
