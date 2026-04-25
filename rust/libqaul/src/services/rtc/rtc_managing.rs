@@ -56,7 +56,12 @@ impl RtcManaging {
             .expect("Vec<u8> provides capacity as needed");
 
         if let Some(user_account) = UserAccounts::get_by_id(state, *my_user_id) {
-            let receiver = PeerId::from_bytes(&req.group_id).unwrap();
+            let receiver = match PeerId::from_bytes(&req.group_id) {
+                Ok(id) => id,
+                Err(e) => {
+                    return Err(format!("Error parsing PeerId from group_id: {}", e));
+                }
+            };
             super::Rtc::send_rtc_message_through_message(state, &user_account, receiver, &message_buff);
         } else {
             return Err("user account has problem".to_string());
@@ -87,7 +92,12 @@ impl RtcManaging {
             .expect("Vec<u8> provides capacity as needed");
 
         if let Some(user_account) = UserAccounts::get_by_id(state, *my_user_id) {
-            let receiver = PeerId::from_bytes(group_id).unwrap();
+            let receiver = match PeerId::from_bytes(group_id) {
+                Ok(id) => id,
+                Err(e) => {
+                    return Err(format!("Error parsing PeerId from group_id: {}", e));
+                }
+            };
             super::Rtc::send_rtc_message_through_message(state, &user_account, receiver, &message_buff);
         } else {
             return Err("user account has problem".to_string());

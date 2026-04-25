@@ -23,10 +23,22 @@ impl ParsedGroupMessageId {
             return Err("invalid group message id".to_string());
         }
 
+        let group_crc = message_id[0..8]
+            .try_into()
+            .map(u64::from_be_bytes)
+            .map_err(|_| "invalid group_crc slice".to_string())?;
+        let sender_crc = message_id[8..16]
+            .try_into()
+            .map(u64::from_be_bytes)
+            .map_err(|_| "invalid sender_crc slice".to_string())?;
+        let sender_msg_index = message_id[16..20]
+            .try_into()
+            .map(u32::from_be_bytes)
+            .map_err(|_| "invalid sender_msg_index slice".to_string())?;
         Ok(Self {
-            group_crc: u64::from_be_bytes(message_id[0..8].try_into().unwrap()),
-            sender_crc: u64::from_be_bytes(message_id[8..16].try_into().unwrap()),
-            sender_msg_index: u32::from_be_bytes(message_id[16..20].try_into().unwrap()),
+            group_crc,
+            sender_crc,
+            sender_msg_index,
         })
     }
 

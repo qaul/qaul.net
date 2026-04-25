@@ -105,11 +105,9 @@ impl GroupManage {
             account_id.to_bytes(),
             super::GroupMember {
                 user_id: account_id.to_bytes(),
-                role: super::proto_rpc::GroupMemberRole::Admin.try_into().unwrap(),
+                role: super::proto_rpc::GroupMemberRole::Admin as i32,
                 joined_at: Timestamp::get_timestamp(),
-                state: super::proto_rpc::GroupMemberState::Activated
-                    .try_into()
-                    .unwrap(),
+                state: super::proto_rpc::GroupMemberState::Activated as i32,
                 last_message_index: 0,
             },
         );
@@ -117,11 +115,9 @@ impl GroupManage {
             user_id.to_bytes(),
             super::GroupMember {
                 user_id: user_id.to_bytes(),
-                role: super::proto_rpc::GroupMemberRole::Admin.try_into().unwrap(),
+                role: super::proto_rpc::GroupMemberRole::Admin as i32,
                 joined_at: Timestamp::get_timestamp(),
-                state: super::proto_rpc::GroupMemberState::Activated
-                    .try_into()
-                    .unwrap(),
+                state: super::proto_rpc::GroupMemberState::Activated as i32,
                 last_message_index: 0,
             },
         );
@@ -145,7 +141,7 @@ impl GroupManage {
             account_id.to_bytes(),
             super::GroupMember {
                 user_id: account_id.to_bytes(),
-                role: super::proto_rpc::GroupMemberRole::Admin.try_into().unwrap(),
+                role: super::proto_rpc::GroupMemberRole::Admin as i32,
                 joined_at: Timestamp::get_timestamp(),
                 state: super::proto_rpc::GroupMemberState::Activated as i32,
                 last_message_index: 0,
@@ -167,10 +163,17 @@ impl GroupManage {
             )),
         };
 
+        let group_id = match GroupId::from_bytes(&group.id) {
+            Ok(id) => id,
+            Err(e) => {
+                log::error!("failed to parse group id: {}", e);
+                return group.id;
+            }
+        };
         ChatStorage::save_message(
             state,
             account_id,
-            &GroupId::from_bytes(&group.id).unwrap(),
+            &group_id,
             account_id,
             &Vec::new(),
             Timestamp::get_timestamp(),
@@ -266,7 +269,13 @@ impl GroupManage {
         for entry in db_ref.groups.iter() {
             match entry {
                 Ok((_, group_bytes)) => {
-                    let group: Group = bincode::deserialize(&group_bytes).unwrap();
+                    let group: Group = match bincode::deserialize(&group_bytes) {
+                        Ok(v) => v,
+                        Err(e) => {
+                            log::error!("failed to deserialize group in list: {}", e);
+                            continue;
+                        }
+                    };
                     let mut members = Vec::with_capacity(group.members.len());
                     for m in group.members.values() {
                         members.push(Self::to_rpc_group_member(m));
@@ -304,7 +313,13 @@ impl GroupManage {
         for entry in db_ref.invited.iter() {
             match entry {
                 Ok((_, invite_bytes)) => {
-                    let invite: GroupInvited = bincode::deserialize(&invite_bytes).unwrap();
+                    let invite: GroupInvited = match bincode::deserialize(&invite_bytes) {
+                        Ok(v) => v,
+                        Err(e) => {
+                            log::error!("failed to deserialize group invite in list: {}", e);
+                            continue;
+                        }
+                    };
                     let mut members = Vec::with_capacity(invite.group.members.len());
                     for (_, member) in invite.group.members {
                         members.push(Self::to_rpc_group_member(&member));

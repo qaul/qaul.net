@@ -243,7 +243,13 @@ impl MessagingState {
             scheduled_dtn: false,
             is_dtn,
         };
-        let entry_bytes = bincode::serialize(&new_entry).unwrap();
+        let entry_bytes = match bincode::serialize(&new_entry) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("Failed to serialize unconfirmed entry: {}", e);
+                return;
+            }
+        };
         let unconfirmed = self.unconfirmed.write().unwrap();
         if let Err(e) = unconfirmed.unconfirmed.insert(container.signature.clone(), entry_bytes) {
             log::error!("{}", e);
@@ -334,8 +340,13 @@ impl Messaging {
 
                 match v {
                     Some(unconfirmed_bytes) => {
-                        let unconfirmed: UnConfirmedMessage =
-                            bincode::deserialize(&unconfirmed_bytes).unwrap();
+                        let unconfirmed: UnConfirmedMessage = match bincode::deserialize(&unconfirmed_bytes) {
+                            Ok(u) => u,
+                            Err(e) => {
+                                log::error!("Failed to deserialize unconfirmed message: {}", e);
+                                return;
+                            }
+                        };
 
                         // check message and decide what to do
                         match unconfirmed.message_type {
@@ -566,6 +577,52 @@ impl Messaging {
         }
     }
 
+    /// Pack, sign and schedule a DtnRoutedV2 message for sending
+    pub fn send_dtn_routed_v2_message(
+        state: &crate::QaulState,
+        user_account: &UserAccount,
+        target_id: &PeerId,
+        routed_v2: proto::DtnRoutedV2,
+    ) -> Result<Vec<u8>, String> {
+        // Create envelope payload with DtnRoutedV2
+        let dtn_payload = proto::EnvelopPayload {
+            payload: Some(proto::envelop_payload::Payload::DtnRoutedV2(routed_v2)),
+        };
+        let envelope = proto::Envelope {
+            sender_id: user_account.id.to_bytes(),
+            receiver_id: target_id.to_bytes(),
+            payload: dtn_payload.encode_to_vec(),
+        };
+
+        if let Ok(signature) = user_account.keys.sign(&envelope.encode_to_vec()) {
+            let container = proto::Container {
+                signature: signature.clone(),
+                envelope: Some(envelope),
+            };
+
+            state.services.messaging.save_unconfirmed_message(
+                MessagingServiceType::DtnStored,
+                &[],
+                target_id,
+                &container,
+                true,
+            );
+
+            state.services.messaging.schedule_message(
+                target_id.clone(),
+                container,
+                true,
+                false,
+                true,
+                true,
+            );
+
+            Ok(signature)
+        } else {
+            Err("dtn v2 messaging signing error".to_string())
+        }
+    }
+
     /// schedule a message
     ///
     /// schedule a message for sending.
@@ -645,24 +702,28 @@ impl Messaging {
                     && message.is_common
                 {
                     // get storage node id
-                    if let Ok(my_user_id) =
-                        PeerId::from_bytes(&message.container.envelope.as_ref().unwrap().sender_id)
-                    {
-                        if let Some(storage_node_id) =
-                            super::dtn::Dtn::get_storage_user(state, &my_user_id)
-                        {
-                            if let Some(user_account) = UserAccounts::get_by_id(state,my_user_id) {
-                                if let Err(_e) = Self::send_dtn_message(
-                                    state,
-                                    &user_account,
-                                    &storage_node_id,
-                                    &message.container,
-                                ) {
-                                    log::error!("DTN scheduling error!");
-                                } else {
-                                    log::error!("DTN scheduled...");
-                                    // update unconfirmed table
-                                    state.services.messaging.on_scheduled_as_dtn_message(&message.container.signature);
+                    if let Some(envelope) = message.container.envelope.as_ref() {
+                        if let Ok(my_user_id) = PeerId::from_bytes(&envelope.sender_id) {
+                            if let Some(storage_node_id) =
+                                super::dtn::Dtn::get_storage_user(state, &my_user_id)
+                            {
+                                if let Some(user_account) =
+                                    UserAccounts::get_by_id(state, my_user_id)
+                                {
+                                    if let Err(_e) = Self::send_dtn_message(
+                                        state,
+                                        &user_account,
+                                        &storage_node_id,
+                                        &message.container,
+                                    ) {
+                                        log::error!("DTN scheduling error!");
+                                    } else {
+                                        log::error!("DTN scheduled...");
+                                        // update unconfirmed table
+                                        state.services.messaging.on_scheduled_as_dtn_message(
+                                            &message.container.signature,
+                                        );
+                                    }
                                 }
                             }
                         }

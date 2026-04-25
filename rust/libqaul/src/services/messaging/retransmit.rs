@@ -9,6 +9,7 @@ use libp2p::PeerId;
 use prost::Message;
 
 use super::UnConfirmedMessage;
+use crate::services::dtn;
 use crate::utilities::qaul_id::QaulId;
 use crate::utilities::timestamp::Timestamp;
 
@@ -19,7 +20,13 @@ impl MessagingRetransmit {
     /// process retransmission
     pub fn process(state: &crate::QaulState) {
         // get unconfirmed table
-        let unconfirmed = state.services.messaging.unconfirmed.write().unwrap();
+        let unconfirmed = match state.services.messaging.unconfirmed.write() {
+            Ok(u) => u,
+            Err(e) => {
+                log::error!("Failed to acquire unconfirmed write lock: {}", e);
+                return;
+            }
+        };
         if unconfirmed.unconfirmed.len() == 0 {
             // there are no message to retransmit
             return;
@@ -34,7 +41,13 @@ impl MessagingRetransmit {
         for entry in unconfirmed.unconfirmed.iter() {
             if let Ok((signature, unconfirmed_message_bytes)) = entry {
                 let mut unconfirmed_message: UnConfirmedMessage =
-                    bincode::deserialize(&unconfirmed_message_bytes).unwrap();
+                    match bincode::deserialize(&unconfirmed_message_bytes) {
+                        Ok(u) => u,
+                        Err(e) => {
+                            log::error!("Failed to deserialize unconfirmed message: {}", e);
+                            continue;
+                        }
+                    };
 
                 // let's assume message transmit in 3 seconds
                 if cur_time < (unconfirmed_message.last_sent + 3000) {
@@ -73,8 +86,13 @@ impl MessagingRetransmit {
                         if let Ok(container) =
                             super::proto::Container::decode(&unconfirmed_message.container[..])
                         {
-                            let receiver =
-                                PeerId::from_bytes(&unconfirmed_message.receiver_id).unwrap();
+                            let receiver = match PeerId::from_bytes(&unconfirmed_message.receiver_id) {
+                                Ok(r) => r,
+                                Err(e) => {
+                                    log::error!("Failed to parse receiver PeerId: {}", e);
+                                    continue;
+                                }
+                            };
 
                             log::trace!(
                                 "retrans message, signature: {}",
@@ -126,5 +144,8 @@ impl MessagingRetransmit {
                 log::error!("updating unconfirmed table error!");
             }
         }
+
+        // Process V2 DTN routed messages
+        dtn::Dtn::process_retransmit_v2(state);
     }
 }

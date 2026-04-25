@@ -78,8 +78,8 @@ impl Rtc {
     /// get session from session_id
     pub fn get_session_from_id(state: &crate::QaulState, group_id: &Vec<u8>) -> Option<RtcSession> {
         let sessions = Self::rtc_state(state).sessions.read().unwrap();
-        if sessions.sessions.contains_key(group_id) {
-            return Some(sessions.sessions.get(group_id).unwrap().clone());
+        if let Some(session) = sessions.sessions.get(group_id) {
+            return Some(session.clone());
         }
         None
     }
@@ -210,7 +210,13 @@ impl Rtc {
 
     /// Process incoming RPC request messages
     pub fn rpc(state: &crate::QaulState, data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
-        let my_user_id = PeerId::from_bytes(&user_id).unwrap();
+        let my_user_id = match PeerId::from_bytes(&user_id) {
+            Ok(id) => id,
+            Err(e) => {
+                log::error!("Error parsing PeerId from bytes in RTC rpc: {}", e);
+                return;
+            }
+        };
 
         match proto_rpc::RtcRpc::decode(&data[..]) {
             Ok(rtc_rpc) => {

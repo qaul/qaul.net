@@ -131,7 +131,13 @@ impl ChatStorage {
         chat_message: &rpc_proto::ChatMessage,
         flush_mode: FlushMode,
     ) {
-        let chat_message_bytes = bincode::serialize(chat_message).unwrap();
+        let chat_message_bytes = match bincode::serialize(chat_message) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("Error serializing chat message: {}", e);
+                return;
+            }
+        };
         if let Err(e) = db_ref.messages.insert(db_key, chat_message_bytes) {
             log::error!("Error saving chat message to data base: {}", e);
             return;
@@ -164,15 +170,33 @@ impl ChatStorage {
         flush_mode: FlushMode,
         mutate: impl FnOnce(&mut rpc_proto::ChatMessage),
     ) {
-        let Some(key) = db_ref.message_ids.get(message_id).unwrap() else {
+        let Some(key) = (match db_ref.message_ids.get(message_id) {
+            Ok(v) => v,
+            Err(e) => {
+                log::error!("Error getting message id from data base: {}", e);
+                return;
+            }
+        }) else {
             return;
         };
-        let Some(chat_msg_fromdb) = db_ref.messages.get(&key).unwrap() else {
+        let Some(chat_msg_fromdb) = (match db_ref.messages.get(&key) {
+            Ok(v) => v,
+            Err(e) => {
+                log::error!("Error getting chat message from data base: {}", e);
+                return;
+            }
+        }) else {
             return;
         };
 
         let mut chat_message: rpc_proto::ChatMessage =
-            bincode::deserialize(&chat_msg_fromdb).unwrap();
+            match bincode::deserialize(&chat_msg_fromdb) {
+                Ok(v) => v,
+                Err(e) => {
+                    log::error!("Error deserializing chat message: {}", e);
+                    return;
+                }
+            };
         mutate(&mut chat_message);
 
         Self::save_chat_message_record(db_ref, &key, &chat_message, flush_mode);
@@ -184,7 +208,7 @@ impl ChatStorage {
         // get data base of user account
         let db_ref = Self::get_db_ref(state, user_id.clone());
         for id in message_ids {
-            if !db_ref.message_ids.contains_key(id).unwrap() {
+            if !db_ref.message_ids.contains_key(id).unwrap_or(false) {
                 return false;
             }
         }
@@ -300,7 +324,7 @@ impl ChatStorage {
         // check if message_id already exists
         // this protects the double saving of incoming messages
         if !message_id.is_empty() {
-            if db_ref.message_ids.contains_key(message_id).unwrap() {
+            if db_ref.message_ids.contains_key(message_id).unwrap_or(false) {
                 log::warn!("chat message already exists");
                 return;
             }
@@ -478,7 +502,13 @@ impl ChatStorage {
                 match res {
                     Ok((_id, message_bytes)) => {
                         let message: rpc_proto::ChatMessage =
-                            bincode::deserialize(&message_bytes).unwrap();
+                            match bincode::deserialize(&message_bytes) {
+                                Ok(v) => v,
+                                Err(e) => {
+                                    log::error!("Error deserializing chat message: {}", e);
+                                    continue;
+                                }
+                            };
                         message_list.push(message);
                     }
                     Err(e) => {
@@ -524,7 +554,13 @@ impl ChatStorage {
         let result = db_ref.messages.get_lt(search_key);
         if let Ok(Some((_key, value))) = result {
             // check if result is really of the same group
-            let chat_message: rpc_proto::ChatMessage = bincode::deserialize(&value).unwrap();
+            let chat_message: rpc_proto::ChatMessage = match bincode::deserialize(&value) {
+                Ok(v) => v,
+                Err(e) => {
+                    log::error!("Error deserializing chat message for index lookup: {}", e);
+                    return 0;
+                }
+            };
             if group_id == chat_message.group_id.as_slice() {
                 return chat_message.index + 1;
             }
@@ -565,8 +601,26 @@ impl ChatStorage {
         let db = DataBase::get_user_db(state, account_id);
 
         // open trees
-        let messages: sled::Tree = db.open_tree("chat_messages").unwrap();
-        let message_ids: sled::Tree = db.open_tree("chat_message_ids").unwrap();
+        let messages: sled::Tree = match db.open_tree("chat_messages") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("Error opening chat_messages tree: {}", e);
+                return ChatAccountDb {
+                    messages: db.open_tree("__fallback_chat_messages").expect("fallback tree"),
+                    message_ids: db.open_tree("__fallback_chat_message_ids").expect("fallback tree"),
+                };
+            }
+        };
+        let message_ids: sled::Tree = match db.open_tree("chat_message_ids") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("Error opening chat_message_ids tree: {}", e);
+                return ChatAccountDb {
+                    messages,
+                    message_ids: db.open_tree("__fallback_chat_message_ids").expect("fallback tree"),
+                };
+            }
+        };
 
         let chat_user = ChatAccountDb {
             messages,

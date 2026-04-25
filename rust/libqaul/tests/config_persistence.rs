@@ -207,6 +207,7 @@ fn test_config_user_accounts_persistence() {
         storage: StorageOptions {
             users: vec!["friend1".to_string(), "friend2".to_string()],
             size_total: 2048,
+            dtn_v2_custody_enabled: false,
         },
     };
     config.user_accounts.push(user);

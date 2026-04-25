@@ -64,7 +64,13 @@ impl Chat {
         _internet: Option<&mut Internet>,
         request_id: String,
     ) {
-        let account_id = PeerId::from_bytes(&user_id).unwrap();
+        let account_id = match PeerId::from_bytes(&user_id) {
+            Ok(id) => id,
+            Err(e) => {
+                log::error!("Error parsing user id: {:?}", e);
+                return;
+            }
+        };
 
         match rpc_proto::Chat::decode(&data[..]) {
             Ok(chat) => {
