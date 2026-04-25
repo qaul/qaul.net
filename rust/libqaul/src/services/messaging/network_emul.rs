@@ -17,7 +17,13 @@ impl NetworkEmulator {
     }
 
     pub fn is_lost(state: &crate::QaulState) -> bool {
-        let mut emul = state.services.messaging.network_emul.write().unwrap();
+        let mut emul = match state.services.messaging.network_emul.write() {
+            Ok(s) => s,
+            Err(e) => {
+                log::error!("Error writing network emulator state lock: {}", e);
+                return false;
+            }
+        };
         emul.total_message = emul.total_message + 1;
 
         let lost_rate = emul.total_drop * 100 / emul.total_message;

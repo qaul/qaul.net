@@ -196,11 +196,9 @@ impl GroupManage {
             account_id.to_bytes(),
             super::GroupMember {
                 user_id: account_id.to_bytes(),
-                role: super::proto_rpc::GroupMemberRole::Admin.try_into().unwrap(),
+                role: super::proto_rpc::GroupMemberRole::Admin as i32,
                 joined_at: Timestamp::get_timestamp(),
-                state: super::proto_rpc::GroupMemberState::Activated
-                    .try_into()
-                    .unwrap(),
+                state: super::proto_rpc::GroupMemberState::Activated as i32,
                 last_message_index: 0,
             },
         );
@@ -208,11 +206,9 @@ impl GroupManage {
             user_id.to_bytes(),
             super::GroupMember {
                 user_id: user_id.to_bytes(),
-                role: super::proto_rpc::GroupMemberRole::Admin.try_into().unwrap(),
+                role: super::proto_rpc::GroupMemberRole::Admin as i32,
                 joined_at: Timestamp::get_timestamp(),
-                state: super::proto_rpc::GroupMemberState::Activated
-                    .try_into()
-                    .unwrap(),
+                state: super::proto_rpc::GroupMemberState::Activated as i32,
                 last_message_index: 0,
             },
         );
@@ -236,7 +232,7 @@ impl GroupManage {
             account_id.to_bytes(),
             super::GroupMember {
                 user_id: account_id.to_bytes(),
-                role: super::proto_rpc::GroupMemberRole::Admin.try_into().unwrap(),
+                role: super::proto_rpc::GroupMemberRole::Admin as i32,
                 joined_at: Timestamp::get_timestamp(),
                 state: super::proto_rpc::GroupMemberState::Activated as i32,
                 last_message_index: 0,
@@ -258,10 +254,17 @@ impl GroupManage {
             )),
         };
 
+        let group_id = match GroupId::from_bytes(&group.id) {
+            Ok(id) => id,
+            Err(e) => {
+                log::error!("failed to parse group id: {}", e);
+                return group.id;
+            }
+        };
         ChatStorage::save_message(
             state,
             account_id,
-            &GroupId::from_bytes(&group.id).unwrap(),
+            &group_id,
             account_id,
             &Vec::new(),
             Timestamp::get_timestamp(),

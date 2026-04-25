@@ -93,7 +93,13 @@ impl UserFiles {
     /// save file history
     pub fn save_filehistory(&self, file_id: u64, file_history: FileHistory) {
         // save file history into data base
-        let file_history_bytes = bincode::serialize(&file_history).unwrap();
+        let file_history_bytes = match bincode::serialize(&file_history) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("Error serializing file history: {}", e);
+                return;
+            }
+        };
         if let Err(e) = self
             .histories
             .insert(file_id.to_be_bytes(), file_history_bytes)
@@ -363,8 +369,26 @@ impl ChatFile {
         let db = DataBase::get_user_db(state, user_id.clone());
 
         // open trees
-        let histories: sled::Tree = db.open_tree("chat_file").unwrap();
-        let file_chunks: sled::Tree = db.open_tree("file_chunks").unwrap();
+        let histories: sled::Tree = match db.open_tree("chat_file") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("Error opening chat_file tree: {}", e);
+                return UserFiles {
+                    histories: db.open_tree("__fallback_chat_file").expect("fallback tree"),
+                    file_chunks: db.open_tree("__fallback_file_chunks").expect("fallback tree"),
+                };
+            }
+        };
+        let file_chunks: sled::Tree = match db.open_tree("file_chunks") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("Error opening file_chunks tree: {}", e);
+                return UserFiles {
+                    histories,
+                    file_chunks: db.open_tree("__fallback_file_chunks").expect("fallback tree"),
+                };
+            }
+        };
 
         let user_files = UserFiles {
             histories,
@@ -520,7 +544,13 @@ impl ChatFile {
                     }
 
                     // check if we collect the result
-                    let file_history: FileHistory = bincode::deserialize(&message).unwrap();
+                    let file_history: FileHistory = match bincode::deserialize(&message) {
+                        Ok(v) => v,
+                        Err(e) => {
+                            log::error!("Error deserializing file history: {}", e);
+                            continue;
+                        }
+                    };
                     if counter >= history_req.offset {
                         histories.push(file_history);
                     }
@@ -590,7 +620,12 @@ impl ChatFile {
             }
         };
 
-        let size = file.metadata().unwrap().len() as u32;
+        let size = match file.metadata() {
+            Ok(m) => m.len() as u32,
+            Err(e) => {
+                return Err(format!("file metadata error: {}", e));
+            }
+        };
         if size == 0 {
             return Err("file size is zero".to_string());
         }
@@ -599,13 +634,18 @@ impl ChatFile {
         let path = Path::new(path_name.as_str());
         let mut extension = "".to_string();
 
-        if let Some(ext) =
-            Self::get_extension_from_filename(path.file_name().unwrap().to_str().unwrap())
-        {
+        let path_file_name = match path.file_name().and_then(|f| f.to_str()) {
+            Some(name) => name,
+            None => {
+                return Err("unable to get file name from path".to_string());
+            }
+        };
+
+        if let Some(ext) = Self::get_extension_from_filename(path_file_name) {
             extension = ext.to_string();
         }
 
-        let file_name = path.file_name().unwrap().to_str().unwrap().to_string();
+        let file_name = path_file_name.to_string();
 
         // create file id
         let user_id_bytes = user_account.id.to_bytes();
@@ -659,7 +699,13 @@ impl ChatFile {
         );
 
         // create group ID object
-        let groupid = GroupId::from_bytes(group_id).unwrap();
+        let groupid = match GroupId::from_bytes(group_id) {
+            Ok(id) => id,
+            Err(e) => {
+                log::error!("Error parsing group id: {}", e);
+                return Err("invalid group id".to_string());
+            }
+        };
 
         // save file state to data base
         let file_history = FileHistory {
@@ -683,7 +729,13 @@ impl ChatFile {
         let db_ref = Self::get_db_ref(state, &user_account.id);
 
         // save file history to data base
-        let file_history_bytes = bincode::serialize(&file_history).unwrap();
+        let file_history_bytes = match bincode::serialize(&file_history) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("Error serializing file history: {}", e);
+                return Err("failed to serialize file history".to_string());
+            }
+        };
         if let Err(e) = db_ref
             .histories
             .insert(&file_id.to_be_bytes(), file_history_bytes)
@@ -1071,13 +1123,25 @@ impl ChatFile {
 
     /// Process incoming RPC request messages for file sharing module
     pub async fn rpc(state: &crate::QaulState, data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
-        let account_id = PeerId::from_bytes(&user_id).unwrap();
+        let account_id = match PeerId::from_bytes(&user_id) {
+            Ok(id) => id,
+            Err(e) => {
+                log::error!("Error parsing user id: {:?}", e);
+                return;
+            }
+        };
 
         match proto_rpc::ChatFile::decode(&data[..]) {
             Ok(chatfile) => {
                 match chatfile.message {
                     Some(proto_rpc::chat_file::Message::SendFileRequest(send_req)) => {
-                        let user_account = UserAccounts::get_by_id(state,account_id).unwrap();
+                        let user_account = match UserAccounts::get_by_id(state, account_id) {
+                            Some(account) => account,
+                            None => {
+                                log::error!("user account not found for file send");
+                                return;
+                            }
+                        };
 
                         if let Err(e) = Self::send(
                             state,

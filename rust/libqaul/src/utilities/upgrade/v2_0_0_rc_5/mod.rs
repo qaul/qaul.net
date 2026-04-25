@@ -114,6 +114,7 @@ impl VersionUpgrade {
                     storage: crate::storage::configuration::StorageOptions {
                         users: user.storage.users.clone(),
                         size_total: user.storage.size_total,
+                        dtn_v2_custody_enabled: false,
                     },
                 });
             }
