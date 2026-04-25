@@ -83,7 +83,13 @@ impl CryptoAccount {
             match result {
                 Ok((_key, crypto_state_bytes)) => {
                     let crypto_state: CryptoState =
-                        bincode::deserialize(&crypto_state_bytes).unwrap();
+                        match bincode::deserialize(&crypto_state_bytes) {
+                            Ok(v) => v,
+                            Err(e) => {
+                                log::error!("Error deserializing crypto state: {}", e);
+                                continue;
+                            }
+                        };
                     match crypto_state.state {
                         super::CryptoProcessState::HalfOutgoing => {
                             state_option = Some(crypto_state)
@@ -107,7 +113,13 @@ impl CryptoAccount {
         // get result from data base
         match self.state.get(key) {
             Ok(Some(crypto_state_bytes)) => {
-                let crypto_state: CryptoState = bincode::deserialize(&crypto_state_bytes).unwrap();
+                let crypto_state: CryptoState = match bincode::deserialize(&crypto_state_bytes) {
+                    Ok(v) => v,
+                    Err(e) => {
+                        log::error!("Error deserializing crypto state by id: {}", e);
+                        return None;
+                    }
+                };
                 return Some(crypto_state);
             }
             Ok(None) => return None,
@@ -123,7 +135,13 @@ impl CryptoAccount {
         let key = Self::create_state_key(remote_id, session_id);
 
         // save message in data base
-        let crypto_state_bytes = bincode::serialize(&crypto_state).unwrap();
+        let crypto_state_bytes = match bincode::serialize(&crypto_state) {
+            Ok(v) => v,
+            Err(e) => {
+                log::error!("Error serializing crypto state: {}", e);
+                return;
+            }
+        };
         if let Err(e) = self.state.insert(key, crypto_state_bytes) {
             log::error!("Error handshake to db: {}", e);
         }
@@ -146,7 +164,13 @@ impl CryptoAccount {
         let key = Self::create_cache_key(remote_id, session_id, nonce);
 
         // save message in data base
-        let message_bytes = bincode::serialize(&message).unwrap();
+        let message_bytes = match bincode::serialize(&message) {
+            Ok(v) => v,
+            Err(e) => {
+                log::error!("Error serializing cache message: {}", e);
+                return;
+            }
+        };
         if let Err(e) = self.cache.insert(key, message_bytes) {
             log::error!("Error handshake to db: {}", e);
         }
@@ -186,14 +210,23 @@ impl CryptoStorageState {
 
     /// Get DB refs for user account (instance method).
     /// Takes an explicit `sled::Db` instead of calling `DataBase::get_user_db()`.
-    pub fn get_db_ref(&self, account_id: PeerId, db: &sled::Db) -> CryptoAccount {
+    ///
+    /// Returns `None` if the underlying sled trees cannot be opened —
+    /// callers should log and skip gracefully.
+    pub fn get_db_ref(&self, account_id: PeerId, db: &sled::Db) -> Option<CryptoAccount> {
         {
-            let crypto_storage = self.inner.read().unwrap();
+            let crypto_storage = match self.inner.read() {
+                Ok(g) => g,
+                Err(e) => {
+                    log::error!("CryptoStorageState::get_db_ref read lock poisoned: {}", e);
+                    return None;
+                }
+            };
             if let Some(crypto_account_db) = crypto_storage.db_ref.get(&account_id.to_bytes()) {
-                return CryptoAccount {
+                return Some(CryptoAccount {
                     state: crypto_account_db.state.clone(),
                     cache: crypto_account_db.cache.clone(),
-                };
+                });
             }
         }
 
@@ -201,18 +234,45 @@ impl CryptoStorageState {
     }
 
     /// Create crypto account db entry when it does not exist (instance method).
-    fn create_cryptoaccountdb(&self, account_id: PeerId, db: &sled::Db) -> CryptoAccount {
-        let state: sled::Tree = db.open_tree("crypto_state").unwrap();
-        let cache: sled::Tree = db.open_tree("crypto_cache").unwrap();
+    fn create_cryptoaccountdb(&self, account_id: PeerId, db: &sled::Db) -> Option<CryptoAccount> {
+        let state: sled::Tree = match db.open_tree("crypto_state") {
+            Ok(t) => t,
+            Err(e) => {
+                log::error!(
+                    "CryptoStorageState::create_cryptoaccountdb: failed to open crypto_state tree: {}",
+                    e
+                );
+                return None;
+            }
+        };
+        let cache: sled::Tree = match db.open_tree("crypto_cache") {
+            Ok(t) => t,
+            Err(e) => {
+                log::error!(
+                    "CryptoStorageState::create_cryptoaccountdb: failed to open crypto_cache tree: {}",
+                    e
+                );
+                return None;
+            }
+        };
 
         let crypto_account = CryptoAccount { state, cache };
 
-        let mut crypto_storage = self.inner.write().unwrap();
+        let mut crypto_storage = match self.inner.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!(
+                    "CryptoStorageState::create_cryptoaccountdb write lock poisoned: {}",
+                    e
+                );
+                return None;
+            }
+        };
         crypto_storage
             .db_ref
             .insert(account_id.to_bytes(), crypto_account.clone());
 
-        crypto_account
+        Some(crypto_account)
     }
 }
 
@@ -225,41 +285,65 @@ impl CryptoStorage {
     }
 
     /// get DB refs for user account
-    pub fn get_db_ref(state: &crate::QaulState, account_id: PeerId) -> CryptoAccount {
+    ///
+    /// Returns `None` if the underlying sled trees cannot be opened —
+    /// callers should log and skip gracefully.
+    pub fn get_db_ref(state: &crate::QaulState, account_id: PeerId) -> Option<CryptoAccount> {
         // check if user account data exists
         {
             // get crypto state
-            let crypto_storage = state.services.crypto.inner.read().unwrap();
+            let crypto_storage = match state.services.crypto.inner.read() {
+                Ok(g) => g,
+                Err(e) => {
+                    log::error!("CryptoStorage::get_db_ref read lock poisoned: {}", e);
+                    return None;
+                }
+            };
 
             // check if user account ID is in map
             if let Some(crypto_account_db) = crypto_storage.db_ref.get(&account_id.to_bytes()) {
-                return CryptoAccount {
+                return Some(CryptoAccount {
                     state: crypto_account_db.state.clone(),
                     cache: crypto_account_db.cache.clone(),
-                };
+                });
             }
         }
 
         // create crypto account db entry if it does not exist
-        let crypto_account = Self::create_groupaccountdb(state, account_id);
-
-        // return crypto_account_db structure
-        crypto_account.clone()
+        Self::create_groupaccountdb(state, account_id)
     }
 
     /// create group account db entry when it does not exist
-    fn create_groupaccountdb(state: &crate::QaulState, account_id: PeerId) -> CryptoAccount {
+    fn create_groupaccountdb(state: &crate::QaulState, account_id: PeerId) -> Option<CryptoAccount> {
         // get user data base
         let db = DataBase::get_user_db(state, account_id);
 
         // open trees
-        let state_tree: sled::Tree = db.open_tree("crypto_state").unwrap();
-        let cache: sled::Tree = db.open_tree("crypto_cache").unwrap();
+        let state_tree: sled::Tree = match db.open_tree("crypto_state") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("failed to open crypto_state tree: {}", e);
+                return None;
+            }
+        };
+        let cache: sled::Tree = match db.open_tree("crypto_cache") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("failed to open crypto_cache tree: {}", e);
+                return None;
+            }
+        };
 
         let crypto_account = CryptoAccount { state: state_tree, cache };
 
         // get crypto storage for writing
-        let mut crypto_storage = state.services.crypto.inner.write().unwrap();
+        let mut crypto_storage = match state.services.crypto.inner.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("CryptoStorage::create_groupaccountdb write lock poisoned: {}", e);
+                return None;
+            }
+        };
 
         // add user to state
         crypto_storage
@@ -267,6 +351,6 @@ impl CryptoStorage {
             .insert(account_id.to_bytes(), crypto_account.clone());
 
         // return structure
-        crypto_account
+        Some(crypto_account)
     }
 }

@@ -64,7 +64,13 @@ impl Chat {
         _internet: Option<&mut Internet>,
         request_id: String,
     ) {
-        let account_id = PeerId::from_bytes(&user_id).unwrap();
+        let account_id = match PeerId::from_bytes(&user_id) {
+            Ok(id) => id,
+            Err(e) => {
+                log::error!("Error parsing user id: {:?}", e);
+                return;
+            }
+        };
 
         match rpc_proto::Chat::decode(&data[..]) {
             Ok(chat) => {
@@ -83,9 +89,10 @@ impl Chat {
 
                         // encode message
                         let mut buf = Vec::with_capacity(proto_message.encoded_len());
-                        proto_message
-                            .encode(&mut buf)
-                            .expect("Vec<u8> provides capacity as needed");
+                        if let Err(e) = proto_message.encode(&mut buf) {
+                            log::error!("encode Chat ConversationList failed: {}", e);
+                            return;
+                        }
                         Rpc::send_message(
                             state,
                             buf,

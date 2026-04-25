@@ -165,7 +165,13 @@ impl Group {
         error_context: &str,
     ) {
         for member in group.members.values() {
-            let receiver = PeerId::from_bytes(&member.user_id).unwrap();
+            let receiver = match PeerId::from_bytes(&member.user_id) {
+                Ok(id) => id,
+                Err(e) => {
+                    log::error!("failed to parse member peer id: {}", e);
+                    continue;
+                }
+            };
             if receiver == user_account.id {
                 continue;
             }
@@ -391,7 +397,13 @@ impl Group {
 
     /// Process incoming RPC request messages for group chat module
     pub fn rpc(state: &crate::QaulState, data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
-        let my_user_id = PeerId::from_bytes(&user_id).unwrap();
+        let my_user_id = match PeerId::from_bytes(&user_id) {
+            Ok(id) => id,
+            Err(e) => {
+                log::error!("failed to parse user id in group rpc: {}", e);
+                return;
+            }
+        };
 
         match proto_rpc::Group::decode(&data[..]) {
             Ok(group) => {
@@ -515,11 +527,18 @@ impl Group {
                     Some(proto_rpc::group::Message::GroupInviteMemberRequest(invite_req)) => {
                         let mut status = true;
                         let mut message: String = "".to_string();
+                        let invite_user_id = match PeerId::from_bytes(&invite_req.user_id) {
+                            Ok(id) => id,
+                            Err(e) => {
+                                log::error!("failed to parse invite user id: {}", e);
+                                return;
+                            }
+                        };
                         if let Err(err) = Member::invite(
                             state,
                             &my_user_id,
                             &invite_req.group_id,
-                            &PeerId::from_bytes(&invite_req.user_id).unwrap(),
+                            &invite_user_id,
                         ) {
                             status = false;
                             message = err.clone();
@@ -577,11 +596,18 @@ impl Group {
                         let mut status = true;
                         let mut message: String = "".to_string();
 
+                        let remove_user_id = match PeerId::from_bytes(&remove_req.user_id) {
+                            Ok(id) => id,
+                            Err(e) => {
+                                log::error!("failed to parse remove user id: {}", e);
+                                return;
+                            }
+                        };
                         if let Err(err) = Member::remove(
                             state,
                             &my_user_id,
                             &remove_req.group_id,
-                            &PeerId::from_bytes(&remove_req.user_id).unwrap(),
+                            &remove_user_id,
                         ) {
                             status = false;
                             message = err.clone();
