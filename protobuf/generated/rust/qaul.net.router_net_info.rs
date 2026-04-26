@@ -73,9 +73,12 @@ pub struct UserIdTable {
 /// User information table
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserInfoTable {
-    /// user info
+    /// legacy user info (unsigned)
     #[prost(message, repeated, tag = "1")]
     pub info: ::prost::alloc::vec::Vec<UserInfo>,
+    /// signed user profiles (preferred when available)
+    #[prost(message, repeated, tag = "2")]
+    pub signed_profiles: ::prost::alloc::vec::Vec<SignedUserProfile>,
 }
 /// User info structure for sending to the neighbours
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
@@ -89,6 +92,45 @@ pub struct UserInfo {
     /// user name
     #[prost(string, tag = "3")]
     pub name: ::prost::alloc::string::String,
+}
+/// Extended user profile, signed by the user's own key
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct UserProfile {
+    /// user id (38 byte PeerId)
+    #[prost(bytes = "vec", tag = "1")]
+    pub id: ::prost::alloc::vec::Vec<u8>,
+    /// protobuf-encoded Ed25519 public key
+    #[prost(bytes = "vec", tag = "2")]
+    pub key: ::prost::alloc::vec::Vec<u8>,
+    /// display name
+    #[prost(string, tag = "3")]
+    pub name: ::prost::alloc::string::String,
+    /// small avatar image (max ~32KB)
+    #[prost(bytes = "vec", tag = "4")]
+    pub avatar: ::prost::alloc::vec::Vec<u8>,
+    /// bio / status text
+    #[prost(string, tag = "5")]
+    pub bio: ::prost::alloc::string::String,
+    /// monotonically increasing version counter
+    #[prost(uint64, tag = "6")]
+    pub version: u64,
+    /// timestamp in milliseconds since epoch
+    #[prost(uint64, tag = "7")]
+    pub updated_at: u64,
+    /// preferred custody route for DTN V2 delivery when this user is offline.
+    /// each entry is a PeerId (38 bytes) of a trusted custodian, in priority order.
+    #[prost(bytes = "vec", repeated, tag = "8")]
+    pub preferred_custody_route: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
+}
+/// Self-signed user profile wrapper
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct SignedUserProfile {
+    /// protobuf-encoded UserProfile bytes
+    #[prost(bytes = "vec", tag = "1")]
+    pub profile: ::prost::alloc::vec::Vec<u8>,
+    /// Ed25519 signature over profile bytes, signed by the user's own key
+    #[prost(bytes = "vec", tag = "2")]
+    pub signature: ::prost::alloc::vec::Vec<u8>,
 }
 /// List of feed ID's
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
