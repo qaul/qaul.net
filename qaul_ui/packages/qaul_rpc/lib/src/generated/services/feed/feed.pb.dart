@@ -17,7 +17,7 @@ import 'package:protobuf/protobuf.dart' as $pb;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
-enum Feed_Message { received, send, request, notSet }
+enum Feed_Message { received, send, request, sendResponse, notSet }
 
 /// Feed service RPC message container
 class Feed extends $pb.GeneratedMessage {
@@ -25,11 +25,13 @@ class Feed extends $pb.GeneratedMessage {
     FeedMessageList? received,
     SendMessage? send,
     FeedMessageRequest? request,
+    SendMessageResponse? sendResponse,
   }) {
     final result = create();
     if (received != null) result.received = received;
     if (send != null) result.send = send;
     if (request != null) result.request = request;
+    if (sendResponse != null) result.sendResponse = sendResponse;
     return result;
   }
 
@@ -46,19 +48,22 @@ class Feed extends $pb.GeneratedMessage {
     1: Feed_Message.received,
     2: Feed_Message.send,
     3: Feed_Message.request,
+    4: Feed_Message.sendResponse,
     0: Feed_Message.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Feed',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.feed'),
       createEmptyInstance: create)
-    ..oo(0, [1, 2, 3])
+    ..oo(0, [1, 2, 3, 4])
     ..aOM<FeedMessageList>(1, _omitFieldNames ? '' : 'received',
         subBuilder: FeedMessageList.create)
     ..aOM<SendMessage>(2, _omitFieldNames ? '' : 'send',
         subBuilder: SendMessage.create)
     ..aOM<FeedMessageRequest>(3, _omitFieldNames ? '' : 'request',
         subBuilder: FeedMessageRequest.create)
+    ..aOM<SendMessageResponse>(4, _omitFieldNames ? '' : 'sendResponse',
+        subBuilder: SendMessageResponse.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -82,10 +87,12 @@ class Feed extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   @$pb.TagNumber(2)
   @$pb.TagNumber(3)
+  @$pb.TagNumber(4)
   Feed_Message whichMessage() => _Feed_MessageByTag[$_whichOneof(0)]!;
   @$pb.TagNumber(1)
   @$pb.TagNumber(2)
   @$pb.TagNumber(3)
+  @$pb.TagNumber(4)
   void clearMessage() => $_clearField($_whichOneof(0));
 
   /// received messages
@@ -123,6 +130,19 @@ class Feed extends $pb.GeneratedMessage {
   void clearRequest() => $_clearField(3);
   @$pb.TagNumber(3)
   FeedMessageRequest ensureRequest() => $_ensure(2);
+
+  /// acknowledgment of a SendMessage request, echoed back to the caller
+  /// so a future-based client can resolve the pending request
+  @$pb.TagNumber(4)
+  SendMessageResponse get sendResponse => $_getN(3);
+  @$pb.TagNumber(4)
+  set sendResponse(SendMessageResponse value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasSendResponse() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearSendResponse() => $_clearField(4);
+  @$pb.TagNumber(4)
+  SendMessageResponse ensureSendResponse() => $_ensure(3);
 }
 
 /// request feed messages
@@ -616,6 +636,73 @@ class SendMessage extends $pb.GeneratedMessage {
   $core.bool hasContent() => $_has(0);
   @$pb.TagNumber(1)
   void clearContent() => $_clearField(1);
+}
+
+/// acknowledgment for a SendMessage request
+class SendMessageResponse extends $pb.GeneratedMessage {
+  factory SendMessageResponse({
+    $core.bool? success,
+    $core.String? error,
+  }) {
+    final result = create();
+    if (success != null) result.success = success;
+    if (error != null) result.error = error;
+    return result;
+  }
+
+  SendMessageResponse._();
+
+  factory SendMessageResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SendMessageResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SendMessageResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.feed'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'success')
+    ..aOS(2, _omitFieldNames ? '' : 'error')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SendMessageResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SendMessageResponse copyWith(void Function(SendMessageResponse) updates) =>
+      super.copyWith((message) => updates(message as SendMessageResponse))
+          as SendMessageResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static SendMessageResponse create() => SendMessageResponse._();
+  @$core.override
+  SendMessageResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static SendMessageResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SendMessageResponse>(create);
+  static SendMessageResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get error => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set error($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasError() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearError() => $_clearField(2);
 }
 
 const $core.bool _omitFieldNames =
