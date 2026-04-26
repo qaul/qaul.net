@@ -241,9 +241,26 @@ impl UserAccounts {
         }
         Configuration::save(state);
 
-        // add it to users list
+        // build initial user with a signed profile
         let rs = state.get_router();
-        crate::router::users::Users::add(state, &rs, id, keys_ed25519.public(), name.clone(), false, false);
+        let mut initial_user = crate::router::users::User {
+            id,
+            key: keys_ed25519.public(),
+            name: name.clone(),
+            verified: false,
+            blocked: false,
+            bio: String::new(),
+            avatar: Vec::new(),
+            version: 1,
+            updated_at: crate::utilities::timestamp::Timestamp::get_timestamp(),
+            signed_profile_bytes: Vec::new(),
+            signed_profile_signature: Vec::new(),
+            preferred_custody_route: Vec::new(),
+        };
+        let signed = crate::router::users::Users::create_signed_profile(&initial_user, &keys_ed25519);
+        initial_user.signed_profile_bytes = signed.profile;
+        initial_user.signed_profile_signature = signed.signature;
+        crate::router::users::Users::add(state, &rs, initial_user);
 
         // add user to routing table / connections table
         let node_id = crate::node::Node::get_id(state);
@@ -328,6 +345,13 @@ impl UserAccounts {
                 name: user.name.clone(),
                 verified: false,
                 blocked: false,
+                bio: String::new(),
+                avatar: Vec::new(),
+                version: 0,
+                updated_at: 0,
+                signed_profile_bytes: Vec::new(),
+                signed_profile_signature: Vec::new(),
+                preferred_custody_route: Vec::new(),
             });
         }
 
@@ -494,6 +518,66 @@ impl UserAccounts {
                             }
                         }
                     }
+                    Some(proto::user_accounts::Message::UpdateProfileRequest(update_req)) => {
+                        let user_peer_id = match PeerId::from_bytes(&user_id) {
+                            Ok(id) => id,
+                            Err(_) => {
+                                Self::send_update_profile_response(state, false, "invalid user id".to_string(), 0, request_id);
+                                return;
+                            }
+                        };
+
+                        let account = match Self::get_by_id(state, user_peer_id) {
+                            Some(a) => a,
+                            None => {
+                                Self::send_update_profile_response(state, false, "user account not found".to_string(), 0, request_id);
+                                return;
+                            }
+                        };
+
+                        let id_bytes = user_peer_id.to_bytes();
+                        let q8id = id_bytes[6..14].to_vec();
+
+                        let rs = state.get_router();
+                        let updated_user = match router::users::Users::get_user_snapshot(&rs, &q8id) {
+                            Some(user) => {
+                                let new_name = if update_req.name.is_empty() { user.name.clone() } else { update_req.name.clone() };
+                                let new_bio = if update_req.bio.is_empty() { user.bio.clone() } else { update_req.bio.clone() };
+                                let new_avatar = if update_req.avatar.is_empty() { user.avatar.clone() } else { update_req.avatar.clone() };
+                                let new_custody_route = if update_req.preferred_custody_route.is_empty() { user.preferred_custody_route.clone() } else { update_req.preferred_custody_route.clone() };
+                                let new_version = user.version + 1;
+                                let new_updated_at = crate::utilities::timestamp::Timestamp::get_timestamp();
+
+                                router::users::User {
+                                    id: user.id,
+                                    key: user.key,
+                                    name: new_name,
+                                    verified: user.verified,
+                                    blocked: user.blocked,
+                                    bio: new_bio,
+                                    avatar: new_avatar,
+                                    version: new_version,
+                                    updated_at: new_updated_at,
+                                    signed_profile_bytes: Vec::new(),
+                                    signed_profile_signature: Vec::new(),
+                                    preferred_custody_route: new_custody_route,
+                                }
+                            }
+                            None => {
+                                Self::send_update_profile_response(state, false, "user not found in users table".to_string(), 0, request_id);
+                                return;
+                            }
+                        };
+
+                        let signed = router::users::Users::create_signed_profile(&updated_user, &account.keys);
+                        let new_version = updated_user.version;
+                        let mut user_to_store = updated_user;
+                        user_to_store.signed_profile_bytes = signed.profile;
+                        user_to_store.signed_profile_signature = signed.signature;
+                        router::users::Users::add(state, &rs, user_to_store);
+
+                        Self::send_update_profile_response(state, true, String::new(), new_version, request_id);
+                    }
                     _ => {}
                 }
             }
@@ -501,6 +585,31 @@ impl UserAccounts {
                 log::error!("{:?}", error);
             }
         }
+    }
+
+    /// send update profile response to client
+    fn send_update_profile_response(state: &crate::QaulState, success: bool, error_message: String, new_version: u64, request_id: String) {
+        let proto_message = proto::UserAccounts {
+            message: Some(proto::user_accounts::Message::UpdateProfileResponse(
+                proto::UpdateProfileResponse {
+                    success,
+                    error_message,
+                    new_version,
+                },
+            )),
+        };
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        if let Err(e) = proto_message.encode(&mut buf) {
+            log::error!("encode UpdateProfileResponse failed: {}", e);
+            return;
+        }
+        Rpc::send_message(
+            state,
+            buf,
+            crate::rpc::proto::Modules::Useraccounts as i32,
+            request_id,
+            Vec::new(),
+        );
     }
 
     /// send password operation response ot client

@@ -31,6 +31,11 @@ fn send_user_update(
             verified,
             blocked,
             connections: vec![],
+            bio: String::new(),
+            avatar: Vec::new(),
+            profile_version: 0,
+            profile_updated_at: 0,
+            preferred_custody_route: Vec::new(),
         })),
     };
 

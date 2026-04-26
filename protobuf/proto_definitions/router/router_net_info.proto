@@ -74,8 +74,10 @@ message UserIdTable {
 
 // User information table
 message UserInfoTable {
-    // user info
+    // legacy user info (unsigned)
     repeated UserInfo info = 1;
+    // signed user profiles (preferred when available)
+    repeated SignedUserProfile signed_profiles = 2;
 }
 
 // User info structure for sending to the neighbours
@@ -86,6 +88,35 @@ message UserInfo {
     bytes key = 2;
     // user name
     string name = 3;
+}
+
+// Extended user profile, signed by the user's own key
+message UserProfile {
+    // user id (38 byte PeerId)
+    bytes id = 1;
+    // protobuf-encoded Ed25519 public key
+    bytes key = 2;
+    // display name
+    string name = 3;
+    // small avatar image (max ~32KB)
+    bytes avatar = 4;
+    // bio / status text
+    string bio = 5;
+    // monotonically increasing version counter
+    uint64 version = 6;
+    // timestamp in milliseconds since epoch
+    uint64 updated_at = 7;
+    // preferred custody route for DTN V2 delivery when this user is offline.
+    // each entry is a PeerId (38 bytes) of a trusted custodian, in priority order.
+    repeated bytes preferred_custody_route = 8;
+}
+
+// Self-signed user profile wrapper
+message SignedUserProfile {
+    // protobuf-encoded UserProfile bytes
+    bytes profile = 1;
+    // Ed25519 signature over profile bytes, signed by the user's own key
+    bytes signature = 2;
 }
 
 // List of feed ID's
