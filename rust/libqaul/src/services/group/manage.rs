@@ -11,18 +11,109 @@ use super::{Group, GroupInvited, GroupStorage};
 use crate::services::chat::{self, Chat, ChatStorage};
 use crate::utilities::timestamp::Timestamp;
 
+fn to_rpc_group_member(member: &super::GroupMember) -> super::proto_rpc::GroupMember {
+    super::proto_rpc::GroupMember {
+        user_id: member.user_id.clone(),
+        role: member.role,
+        joined_at: member.joined_at,
+        state: member.state,
+        last_message_index: member.last_message_index,
+    }
+}
+
+fn build_group_list_response(
+    mut groups: Vec<Group>,
+    offset: u32,
+    limit: u32,
+) -> super::proto_rpc::GroupListResponse {
+    groups.sort_unstable_by(|a, b| b.last_message_at.cmp(&a.last_message_at));
+    let total = groups.len() as u32;
+    let take = if limit == 0 { usize::MAX } else { limit as usize };
+    let page: Vec<_> = groups.into_iter().skip(offset as usize).take(take).collect();
+
+    let groups_proto: Vec<_> = page
+        .into_iter()
+        .map(|group| {
+            let members = group.members.values().map(to_rpc_group_member).collect();
+            super::proto_rpc::GroupInfo {
+                group_id: group.id,
+                group_name: group.name,
+                created_at: group.created_at,
+                status: group.status,
+                revision: group.revision,
+                is_direct_chat: group.is_direct_chat,
+                members,
+                unread_messages: group.unread_messages,
+                last_message_at: group.last_message_at,
+                last_message: group.last_message_data,
+                last_message_sender_id: group.last_message_sender_id,
+            }
+        })
+        .collect();
+
+    let has_more = limit > 0 && offset.saturating_add(limit) < total;
+
+    super::proto_rpc::GroupListResponse {
+        groups: groups_proto,
+        pagination: Some(super::proto_rpc::PaginationMetadata {
+            has_more,
+            total,
+            offset,
+            limit,
+        }),
+    }
+}
+
+fn build_invited_list_response(
+    mut invites: Vec<GroupInvited>,
+    offset: u32,
+    limit: u32,
+) -> super::proto_rpc::GroupInvitedResponse {
+    invites.sort_unstable_by(|a, b| b.received_at.cmp(&a.received_at));
+    let total = invites.len() as u32;
+    let take = if limit == 0 { usize::MAX } else { limit as usize };
+    let page: Vec<_> = invites.into_iter().skip(offset as usize).take(take).collect();
+
+    let invited_proto: Vec<_> = page
+        .into_iter()
+        .map(|invite| {
+            let members = invite.group.members.values().map(to_rpc_group_member).collect();
+            super::proto_rpc::GroupInvited {
+                sender_id: invite.sender_id.clone(),
+                received_at: invite.received_at,
+                group: Some(super::proto_rpc::GroupInfo {
+                    group_id: invite.group.id,
+                    group_name: invite.group.name,
+                    created_at: invite.group.created_at,
+                    status: invite.group.status,
+                    revision: invite.group.revision,
+                    is_direct_chat: invite.group.is_direct_chat,
+                    members,
+                    unread_messages: 0,
+                    last_message_at: 0,
+                    last_message: Vec::new(),
+                    last_message_sender_id: Vec::new(),
+                }),
+            }
+        })
+        .collect();
+
+    let has_more = limit > 0 && offset.saturating_add(limit) < total;
+
+    super::proto_rpc::GroupInvitedResponse {
+        invited: invited_proto,
+        pagination: Some(super::proto_rpc::PaginationMetadata {
+            has_more,
+            total,
+            offset,
+            limit,
+        }),
+    }
+}
+
 /// Group Manage Structure
 pub struct GroupManage {}
 impl GroupManage {
-    fn to_rpc_group_member(member: &super::GroupMember) -> super::proto_rpc::GroupMember {
-        super::proto_rpc::GroupMember {
-            user_id: member.user_id.clone(),
-            role: member.role,
-            joined_at: member.joined_at,
-            state: member.state,
-            last_message_index: member.last_message_index,
-        }
-    }
 
     fn group_event_message(
         event_type: chat::rpc_proto::GroupEventType,
@@ -234,7 +325,7 @@ impl GroupManage {
 
         let mut members = Vec::with_capacity(group.members.len());
         for m in group.members.values() {
-            members.push(Self::to_rpc_group_member(m));
+            members.push(to_rpc_group_member(m));
         }
 
         let res = super::proto_rpc::GroupInfo {
@@ -256,84 +347,37 @@ impl GroupManage {
     /// get group list from rpc command
     ///
     /// `account_id` the user account ID
-    pub fn group_list(state: &crate::QaulState, account_id: &PeerId) -> super::proto_rpc::GroupListResponse {
+    pub fn group_list(
+        state: &crate::QaulState,
+        account_id: &PeerId,
+        offset: u32,
+        limit: u32,
+    ) -> super::proto_rpc::GroupListResponse {
         let db_ref = GroupStorage::get_db_ref(state, account_id.to_owned());
-
-        let mut res = super::proto_rpc::GroupListResponse {
-            groups: Vec::with_capacity(db_ref.groups.len()),
-        };
-
-        for entry in db_ref.groups.iter() {
-            match entry {
-                Ok((_, group_bytes)) => {
-                    let group: Group = bincode::deserialize(&group_bytes).unwrap();
-                    let mut members = Vec::with_capacity(group.members.len());
-                    for m in group.members.values() {
-                        members.push(Self::to_rpc_group_member(m));
-                    }
-
-                    let grp = super::proto_rpc::GroupInfo {
-                        group_id: group.id,
-                        group_name: group.name,
-                        created_at: group.created_at,
-                        status: group.status,
-                        revision: group.revision,
-                        is_direct_chat: group.is_direct_chat,
-                        members,
-                        unread_messages: group.unread_messages,
-                        last_message_at: group.last_message_at,
-                        last_message: group.last_message_data,
-                        last_message_sender_id: group.last_message_sender_id,
-                    };
-                    res.groups.push(grp);
-                }
-                _ => {}
-            }
-        }
-        res
+        let groups: Vec<Group> = db_ref
+            .groups
+            .iter()
+            .filter_map(|entry| entry.ok())
+            .filter_map(|(_, bytes)| bincode::deserialize(&bytes).ok())
+            .collect();
+        build_group_list_response(groups, offset, limit)
     }
 
     /// get invited list from rpc command
-    pub fn invited_list(state: &crate::QaulState, account_id: &PeerId) -> super::proto_rpc::GroupInvitedResponse {
+    pub fn invited_list(
+        state: &crate::QaulState,
+        account_id: &PeerId,
+        offset: u32,
+        limit: u32,
+    ) -> super::proto_rpc::GroupInvitedResponse {
         let db_ref = GroupStorage::get_db_ref(state, account_id.to_owned());
-
-        let mut res = super::proto_rpc::GroupInvitedResponse {
-            invited: Vec::with_capacity(db_ref.invited.len()),
-        };
-
-        for entry in db_ref.invited.iter() {
-            match entry {
-                Ok((_, invite_bytes)) => {
-                    let invite: GroupInvited = bincode::deserialize(&invite_bytes).unwrap();
-                    let mut members = Vec::with_capacity(invite.group.members.len());
-                    for (_, member) in invite.group.members {
-                        members.push(Self::to_rpc_group_member(&member));
-                    }
-
-                    let invited = super::proto_rpc::GroupInvited {
-                        sender_id: invite.sender_id.clone(),
-                        received_at: invite.received_at,
-                        group: Some(super::proto_rpc::GroupInfo {
-                            group_id: invite.group.id,
-                            group_name: invite.group.name,
-                            created_at: invite.group.created_at,
-                            status: invite.group.status,
-                            revision: invite.group.revision,
-                            is_direct_chat: invite.group.is_direct_chat,
-                            members,
-                            unread_messages: 0,
-                            last_message_at: 0,
-                            last_message: Vec::new(),
-                            last_message_sender_id: Vec::new(),
-                        }),
-                    };
-
-                    res.invited.push(invited);
-                }
-                _ => {}
-            }
-        }
-        res
+        let invites: Vec<GroupInvited> = db_ref
+            .invited
+            .iter()
+            .filter_map(|entry| entry.ok())
+            .filter_map(|(_, bytes)| bincode::deserialize(&bytes).ok())
+            .collect();
+        build_invited_list_response(invites, offset, limit)
     }
 
     /// process group notify message from network
@@ -476,5 +520,148 @@ impl GroupManage {
             ChatStorage::flush_account(state, &account_id);
             GroupStorage::flush_account(state, &account_id);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::super::{Group, GroupInvited};
+    use super::{build_group_list_response, build_invited_list_response};
+    use std::collections::BTreeMap;
+
+    fn make_group(last_message_at: u64) -> Group {
+        Group {
+            id: last_message_at.to_le_bytes().to_vec(),
+            name: format!("group_{}", last_message_at),
+            is_direct_chat: false,
+            created_at: 0,
+            status: 0,
+            revision: 0,
+            members: BTreeMap::new(),
+            unread_messages: 0,
+            last_message_at,
+            last_message_data: Vec::new(),
+            last_message_sender_id: Vec::new(),
+        }
+    }
+
+    fn make_invite(received_at: u64) -> GroupInvited {
+        GroupInvited {
+            sender_id: received_at.to_le_bytes().to_vec(),
+            received_at,
+            group: make_group(0),
+        }
+    }
+
+    fn groups(timestamps: &[u64]) -> Vec<Group> {
+        timestamps.iter().copied().map(make_group).collect()
+    }
+
+    fn invites(timestamps: &[u64]) -> Vec<GroupInvited> {
+        timestamps.iter().copied().map(make_invite).collect()
+    }
+
+    // --- group_list tests ---
+
+    #[test]
+    fn group_no_pagination_backwards_compat() {
+        let list = build_group_list_response(groups(&[1, 2, 3, 4, 5]), 0, 0);
+        assert_eq!(list.groups.len(), 5);
+        let p = list.pagination.unwrap();
+        assert!(!p.has_more);
+        assert_eq!(p.total, 5);
+    }
+
+    #[test]
+    fn group_first_page() {
+        let list = build_group_list_response(groups(&[1, 2, 3, 4, 5]), 0, 2);
+        assert_eq!(list.groups.len(), 2);
+        let p = list.pagination.unwrap();
+        assert!(p.has_more);
+        assert_eq!(p.total, 5);
+    }
+
+    #[test]
+    fn group_middle_page() {
+        let list = build_group_list_response(groups(&[1, 2, 3, 4, 5]), 2, 2);
+        assert_eq!(list.groups.len(), 2);
+        let p = list.pagination.unwrap();
+        assert!(p.has_more);
+        assert_eq!(p.total, 5);
+    }
+
+    #[test]
+    fn group_last_page_partial() {
+        let list = build_group_list_response(groups(&[1, 2, 3, 4, 5]), 4, 2);
+        assert_eq!(list.groups.len(), 1);
+        let p = list.pagination.unwrap();
+        assert!(!p.has_more);
+    }
+
+    #[test]
+    fn group_offset_beyond_total() {
+        let list = build_group_list_response(groups(&[1, 2, 3, 4, 5]), 10, 2);
+        assert_eq!(list.groups.len(), 0);
+        let p = list.pagination.unwrap();
+        assert!(!p.has_more);
+    }
+
+    #[test]
+    fn group_sort_order_newest_first() {
+        let list = build_group_list_response(groups(&[3, 1, 5, 2, 4]), 0, 5);
+        let timestamps: Vec<u64> = list.groups.iter().map(|g| g.last_message_at).collect();
+        assert_eq!(timestamps, vec![5, 4, 3, 2, 1]);
+    }
+
+    // --- invited_list tests ---
+
+    #[test]
+    fn invite_no_pagination_backwards_compat() {
+        let list = build_invited_list_response(invites(&[1, 2, 3, 4, 5]), 0, 0);
+        assert_eq!(list.invited.len(), 5);
+        let p = list.pagination.unwrap();
+        assert!(!p.has_more);
+        assert_eq!(p.total, 5);
+    }
+
+    #[test]
+    fn invite_first_page() {
+        let list = build_invited_list_response(invites(&[1, 2, 3, 4, 5]), 0, 2);
+        assert_eq!(list.invited.len(), 2);
+        let p = list.pagination.unwrap();
+        assert!(p.has_more);
+        assert_eq!(p.total, 5);
+    }
+
+    #[test]
+    fn invite_middle_page() {
+        let list = build_invited_list_response(invites(&[1, 2, 3, 4, 5]), 2, 2);
+        assert_eq!(list.invited.len(), 2);
+        let p = list.pagination.unwrap();
+        assert!(p.has_more);
+        assert_eq!(p.total, 5);
+    }
+
+    #[test]
+    fn invite_last_page_partial() {
+        let list = build_invited_list_response(invites(&[1, 2, 3, 4, 5]), 4, 2);
+        assert_eq!(list.invited.len(), 1);
+        let p = list.pagination.unwrap();
+        assert!(!p.has_more);
+    }
+
+    #[test]
+    fn invite_offset_beyond_total() {
+        let list = build_invited_list_response(invites(&[1, 2, 3, 4, 5]), 10, 2);
+        assert_eq!(list.invited.len(), 0);
+        let p = list.pagination.unwrap();
+        assert!(!p.has_more);
+    }
+
+    #[test]
+    fn invite_sort_order_newest_first() {
+        let list = build_invited_list_response(invites(&[3, 1, 5, 2, 4]), 0, 5);
+        let timestamps: Vec<u64> = list.invited.iter().map(|i| i.received_at).collect();
+        assert_eq!(timestamps, vec![5, 4, 3, 2, 1]);
     }
 }
