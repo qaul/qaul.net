@@ -46,6 +46,15 @@ const Feed$json = {
       '9': 0,
       '10': 'request'
     },
+    {
+      '1': 'send_response',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.feed.SendMessageResponse',
+      '9': 0,
+      '10': 'sendResponse'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -57,7 +66,8 @@ final $typed_data.Uint8List feedDescriptor = $convert.base64Decode(
     'CgRGZWVkEjwKCHJlY2VpdmVkGAEgASgLMh4ucWF1bC5ycGMuZmVlZC5GZWVkTWVzc2FnZUxpc3'
     'RIAFIIcmVjZWl2ZWQSMAoEc2VuZBgCIAEoCzIaLnFhdWwucnBjLmZlZWQuU2VuZE1lc3NhZ2VI'
     'AFIEc2VuZBI9CgdyZXF1ZXN0GAMgASgLMiEucWF1bC5ycGMuZmVlZC5GZWVkTWVzc2FnZVJlcX'
-    'Vlc3RIAFIHcmVxdWVzdEIJCgdtZXNzYWdl');
+    'Vlc3RIAFIHcmVxdWVzdBJJCg1zZW5kX3Jlc3BvbnNlGAQgASgLMiIucWF1bC5ycGMuZmVlZC5T'
+    'ZW5kTWVzc2FnZVJlc3BvbnNlSABSDHNlbmRSZXNwb25zZUIJCgdtZXNzYWdl');
 
 @$core.Deprecated('Use feedMessageRequestDescriptor instead')
 const FeedMessageRequest$json = {
@@ -166,3 +176,17 @@ const SendMessage$json = {
 /// Descriptor for `SendMessage`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List sendMessageDescriptor = $convert
     .base64Decode('CgtTZW5kTWVzc2FnZRIYCgdjb250ZW50GAEgASgJUgdjb250ZW50');
+
+@$core.Deprecated('Use sendMessageResponseDescriptor instead')
+const SendMessageResponse$json = {
+  '1': 'SendMessageResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+    {'1': 'error', '3': 2, '4': 1, '5': 9, '10': 'error'},
+  ],
+};
+
+/// Descriptor for `SendMessageResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List sendMessageResponseDescriptor = $convert.base64Decode(
+    'ChNTZW5kTWVzc2FnZVJlc3BvbnNlEhgKB3N1Y2Nlc3MYASABKAhSB3N1Y2Nlc3MSFAoFZXJyb3'
+    'IYAiABKAlSBWVycm9y');
