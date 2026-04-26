@@ -48,12 +48,17 @@ impl Crypto25519 {
 
                 // make sure the transformation was correct and we have the correct secret key
                 {
-                    let retransformed_ed25519_keypair = libp2p::identity::ed25519::Keypair::from(
-                        libp2p::identity::ed25519::SecretKey::try_from_bytes(
-                            ed25519_dalek_secret_bytes,
-                        )
-                        .unwrap(),
-                    );
+                    let secret_key = match libp2p::identity::ed25519::SecretKey::try_from_bytes(
+                        ed25519_dalek_secret_bytes,
+                    ) {
+                        Ok(k) => k,
+                        Err(e) => {
+                            log::error!("Failed to reconstruct secret key from bytes: {}", e);
+                            return None;
+                        }
+                    };
+                    let retransformed_ed25519_keypair =
+                        libp2p::identity::ed25519::Keypair::from(secret_key);
                     assert!(
                         ed25519_dalek_keypair_bytes == retransformed_ed25519_keypair.to_bytes(),
                         "secret key transformation failed"
@@ -98,11 +103,16 @@ impl Crypto25519 {
 
             // generate Montgomery form
             // x25519_dalek::PublicKey internal is private, we have to go via bytes
-            let montgomery_bytes = curve25519_dalek::edwards::CompressedEdwardsY(dalek_pub_bytes)
+            let edwards = match curve25519_dalek::edwards::CompressedEdwardsY(dalek_pub_bytes)
                 .decompress()
-                .expect("An Ed25519 public key is a valid point by construction.")
-                .to_montgomery()
-                .0;
+            {
+                Some(p) => p,
+                None => {
+                    log::error!("Ed25519 public key decompression failed (should be unreachable)");
+                    return None;
+                }
+            };
+            let montgomery_bytes = edwards.to_montgomery().0;
 
             return Some(x25519_dalek::PublicKey::from(montgomery_bytes));
         }

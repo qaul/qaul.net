@@ -63,14 +63,22 @@ impl ChatState {
 
     /// Get DB refs for user account (instance method).
     /// Takes an explicit `sled::Db` instead of calling `DataBase::get_user_db()`.
-    pub fn get_db_ref(&self, account_id: PeerId, db: &sled::Db) -> ChatAccountDb {
+    ///
+    /// Returns `None` if the underlying sled trees cannot be opened.
+    pub fn get_db_ref(&self, account_id: PeerId, db: &sled::Db) -> Option<ChatAccountDb> {
         {
-            let chat = self.inner.read().unwrap();
+            let chat = match self.inner.read() {
+                Ok(g) => g,
+                Err(e) => {
+                    log::error!("ChatState::get_db_ref read lock poisoned: {}", e);
+                    return None;
+                }
+            };
             if let Some(chat_user) = chat.db_ref.get(&account_id.to_bytes()) {
-                return ChatAccountDb {
+                return Some(ChatAccountDb {
                     messages: chat_user.messages.clone(),
                     message_ids: chat_user.message_ids.clone(),
-                };
+                });
             }
         }
 
@@ -78,19 +86,40 @@ impl ChatState {
     }
 
     /// Create user data when it does not exist (instance method).
-    fn create_chatuser(&self, account_id: PeerId, db: &sled::Db) -> ChatAccountDb {
-        let messages: sled::Tree = db.open_tree("chat_messages").unwrap();
-        let message_ids: sled::Tree = db.open_tree("chat_message_ids").unwrap();
+    fn create_chatuser(&self, account_id: PeerId, db: &sled::Db) -> Option<ChatAccountDb> {
+        let messages: sled::Tree = match db.open_tree("chat_messages") {
+            Ok(t) => t,
+            Err(e) => {
+                log::error!("ChatState::create_chatuser: failed to open chat_messages tree: {}", e);
+                return None;
+            }
+        };
+        let message_ids: sled::Tree = match db.open_tree("chat_message_ids") {
+            Ok(t) => t,
+            Err(e) => {
+                log::error!(
+                    "ChatState::create_chatuser: failed to open chat_message_ids tree: {}",
+                    e
+                );
+                return None;
+            }
+        };
 
         let chat_user = ChatAccountDb {
             messages,
             message_ids,
         };
 
-        let mut chat = self.inner.write().unwrap();
+        let mut chat = match self.inner.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("ChatState::create_chatuser write lock poisoned: {}", e);
+                return None;
+            }
+        };
         chat.db_ref.insert(account_id.to_bytes(), chat_user.clone());
 
-        chat_user
+        Some(chat_user)
     }
 }
 
@@ -102,7 +131,13 @@ impl ChatStorage {
 
     /// Flush all chat-related trees for an account.
     pub fn flush_account(state: &crate::QaulState, account_id: &PeerId) {
-        let db_ref = Self::get_db_ref(state, account_id.to_owned());
+        let db_ref = match Self::get_db_ref(state, account_id.to_owned()) {
+            Some(r) => r,
+            None => {
+                log::error!("flush_account: chat db unavailable");
+                return;
+            }
+        };
         Self::maybe_flush_tree(
             &db_ref.messages,
             FlushMode::Immediate,
@@ -131,7 +166,13 @@ impl ChatStorage {
         chat_message: &rpc_proto::ChatMessage,
         flush_mode: FlushMode,
     ) {
-        let chat_message_bytes = bincode::serialize(chat_message).unwrap();
+        let chat_message_bytes = match bincode::serialize(chat_message) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("Error serializing chat message: {}", e);
+                return;
+            }
+        };
         if let Err(e) = db_ref.messages.insert(db_key, chat_message_bytes) {
             log::error!("Error saving chat message to data base: {}", e);
             return;
@@ -164,15 +205,33 @@ impl ChatStorage {
         flush_mode: FlushMode,
         mutate: impl FnOnce(&mut rpc_proto::ChatMessage),
     ) {
-        let Some(key) = db_ref.message_ids.get(message_id).unwrap() else {
+        let Some(key) = (match db_ref.message_ids.get(message_id) {
+            Ok(v) => v,
+            Err(e) => {
+                log::error!("Error getting message id from data base: {}", e);
+                return;
+            }
+        }) else {
             return;
         };
-        let Some(chat_msg_fromdb) = db_ref.messages.get(&key).unwrap() else {
+        let Some(chat_msg_fromdb) = (match db_ref.messages.get(&key) {
+            Ok(v) => v,
+            Err(e) => {
+                log::error!("Error getting chat message from data base: {}", e);
+                return;
+            }
+        }) else {
             return;
         };
 
         let mut chat_message: rpc_proto::ChatMessage =
-            bincode::deserialize(&chat_msg_fromdb).unwrap();
+            match bincode::deserialize(&chat_msg_fromdb) {
+                Ok(v) => v,
+                Err(e) => {
+                    log::error!("Error deserializing chat message: {}", e);
+                    return;
+                }
+            };
         mutate(&mut chat_message);
 
         Self::save_chat_message_record(db_ref, &key, &chat_message, flush_mode);
@@ -182,9 +241,15 @@ impl ChatStorage {
     #[allow(dead_code)]
     pub fn messages_exist(state: &crate::QaulState, user_id: &PeerId, message_ids: &Vec<Vec<u8>>) -> bool {
         // get data base of user account
-        let db_ref = Self::get_db_ref(state, user_id.clone());
+        let db_ref = match Self::get_db_ref(state, user_id.clone()) {
+            Some(r) => r,
+            None => {
+                log::error!("messages_exist: chat db unavailable");
+                return false;
+            }
+        };
         for id in message_ids {
-            if !db_ref.message_ids.contains_key(id).unwrap() {
+            if !db_ref.message_ids.contains_key(id).unwrap_or(false) {
                 return false;
             }
         }
@@ -194,7 +259,13 @@ impl ChatStorage {
     /// remove messages by ids
     #[allow(dead_code)]
     pub fn remove_messages(state: &crate::QaulState, user_id: &PeerId, message_ids: &Vec<Vec<u8>>) {
-        let db_ref = Self::get_db_ref(state, user_id.clone());
+        let db_ref = match Self::get_db_ref(state, user_id.clone()) {
+            Some(r) => r,
+            None => {
+                log::error!("remove_messages: chat db unavailable");
+                return;
+            }
+        };
         for id in message_ids {
             match db_ref.message_ids.get(id) {
                 Ok(opt_key) => {
@@ -295,12 +366,18 @@ impl ChatStorage {
         log::trace!("chat save_message");
 
         // get data base of user account
-        let db_ref = Self::get_db_ref(state, account_id.clone());
+        let db_ref = match Self::get_db_ref(state, account_id.clone()) {
+            Some(r) => r,
+            None => {
+                log::error!("save_message_with_mode: chat db unavailable");
+                return;
+            }
+        };
 
         // check if message_id already exists
         // this protects the double saving of incoming messages
         if !message_id.is_empty() {
-            if db_ref.message_ids.contains_key(message_id).unwrap() {
+            if db_ref.message_ids.contains_key(message_id).unwrap_or(false) {
                 log::warn!("chat message already exists");
                 return;
             }
@@ -404,7 +481,13 @@ impl ChatStorage {
         received_at: u64,
         flush_mode: FlushMode,
     ) {
-        let db_ref = Self::get_db_ref(state, account_id);
+        let db_ref = match Self::get_db_ref(state, account_id) {
+            Some(r) => r,
+            None => {
+                log::error!("update_confirmation_with_mode: chat db unavailable");
+                return;
+            }
+        };
         let receiver_id_bytes = receiver_id.to_bytes();
 
         Self::mutate_chat_message_by_id(&db_ref, message_id, flush_mode, |chat_msg| {
@@ -452,7 +535,13 @@ impl ChatStorage {
         status: super::rpc_proto::MessageStatus,
         flush_mode: FlushMode,
     ) {
-        let db_ref = Self::get_db_ref(state, account_id.to_owned());
+        let db_ref = match Self::get_db_ref(state, account_id.to_owned()) {
+            Some(r) => r,
+            None => {
+                log::error!("udate_status_with_mode: chat db unavailable");
+                return;
+            }
+        };
         Self::mutate_chat_message_by_id(&db_ref, message_id, flush_mode, |chat_msg| {
             chat_msg.status = status as i32;
         });
@@ -465,7 +554,16 @@ impl ChatStorage {
 
         if let Ok(group_id_typed) = GroupId::from_bytes(&group_id) {
             // get database references for this user account
-            let db_ref = Self::get_db_ref(state, account_id);
+            let db_ref = match Self::get_db_ref(state, account_id) {
+                Some(r) => r,
+                None => {
+                    log::error!("get_messages: chat db unavailable");
+                    return rpc_proto::ChatConversationList {
+                        group_id,
+                        message_list,
+                    };
+                }
+            };
 
             // create message keys
             let (first_key, last_key) = Self::get_db_key_range(group_id_typed.as_slice());
@@ -478,7 +576,13 @@ impl ChatStorage {
                 match res {
                     Ok((_id, message_bytes)) => {
                         let message: rpc_proto::ChatMessage =
-                            bincode::deserialize(&message_bytes).unwrap();
+                            match bincode::deserialize(&message_bytes) {
+                                Ok(v) => v,
+                                Err(e) => {
+                                    log::error!("Error deserializing chat message: {}", e);
+                                    continue;
+                                }
+                            };
                         message_list.push(message);
                     }
                     Err(e) => {
@@ -524,7 +628,13 @@ impl ChatStorage {
         let result = db_ref.messages.get_lt(search_key);
         if let Ok(Some((_key, value))) = result {
             // check if result is really of the same group
-            let chat_message: rpc_proto::ChatMessage = bincode::deserialize(&value).unwrap();
+            let chat_message: rpc_proto::ChatMessage = match bincode::deserialize(&value) {
+                Ok(v) => v,
+                Err(e) => {
+                    log::error!("Error deserializing chat message for index lookup: {}", e);
+                    return 0;
+                }
+            };
             if group_id == chat_message.group_id.as_slice() {
                 return chat_message.index + 1;
             }
@@ -534,39 +644,53 @@ impl ChatStorage {
     }
 
     /// get user account data base tree references
-    fn get_db_ref(state: &crate::QaulState, account_id: PeerId) -> ChatAccountDb {
+    ///
+    /// Returns `None` if the underlying sled trees cannot be opened.
+    fn get_db_ref(state: &crate::QaulState, account_id: PeerId) -> Option<ChatAccountDb> {
         // check if user account data exists
         {
             // get chat state
-            let chat = state.services.chat.inner.read().unwrap();
+            let chat = match state.services.chat.inner.read() {
+                Ok(g) => g,
+                Err(e) => {
+                    log::error!("ChatStorage::get_db_ref read lock poisoned: {}", e);
+                    return None;
+                }
+            };
 
             // check if user account ID is in map
             if let Some(chat_user) = chat.db_ref.get(&account_id.to_bytes()) {
-                return ChatAccountDb {
+                return Some(ChatAccountDb {
                     messages: chat_user.messages.clone(),
                     message_ids: chat_user.message_ids.clone(),
-                };
+                });
             }
         }
 
         // create user data if it does not exist
-        let chat_user = Self::create_chatuser(state, account_id);
-
-        // return chat_user structure
-        ChatAccountDb {
-            messages: chat_user.messages.clone(),
-            message_ids: chat_user.message_ids.clone(),
-        }
+        Self::create_chatuser(state, account_id)
     }
 
     /// create user data when it does not exist
-    fn create_chatuser(state: &crate::QaulState, account_id: PeerId) -> ChatAccountDb {
+    fn create_chatuser(state: &crate::QaulState, account_id: PeerId) -> Option<ChatAccountDb> {
         // get user data base
         let db = DataBase::get_user_db(state, account_id);
 
         // open trees
-        let messages: sled::Tree = db.open_tree("chat_messages").unwrap();
-        let message_ids: sled::Tree = db.open_tree("chat_message_ids").unwrap();
+        let messages: sled::Tree = match db.open_tree("chat_messages") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("Error opening chat_messages tree: {}", e);
+                return None;
+            }
+        };
+        let message_ids: sled::Tree = match db.open_tree("chat_message_ids") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("Error opening chat_message_ids tree: {}", e);
+                return None;
+            }
+        };
 
         let chat_user = ChatAccountDb {
             messages,
@@ -574,12 +698,18 @@ impl ChatStorage {
         };
 
         // get chat state for writing
-        let mut chat = state.services.chat.inner.write().unwrap();
+        let mut chat = match state.services.chat.inner.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("ChatStorage::create_chatuser write lock poisoned: {}", e);
+                return None;
+            }
+        };
 
         // add user to state
         chat.db_ref.insert(account_id.to_bytes(), chat_user.clone());
 
         // return structure
-        chat_user
+        Some(chat_user)
     }
 }

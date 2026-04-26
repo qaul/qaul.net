@@ -36,7 +36,12 @@ impl RtcMessaging {
 
                 let message_id: Vec<u8> = Vec::new();
                 if let Some(user_account) = UserAccounts::get_by_id(state, *my_user_id) {
-                    let receiver = PeerId::from_bytes(&req.group_id).unwrap();
+                    let receiver = match PeerId::from_bytes(&req.group_id) {
+                        Ok(id) => id,
+                        Err(e) => {
+                            return Err(format!("Error parsing PeerId from group_id: {}", e));
+                        }
+                    };
                     if let Err(e) = messaging::Messaging::pack_and_send_message(
                         state,
                         &user_account,
@@ -88,9 +93,10 @@ impl RtcMessaging {
 
                 // encode message
                 let mut buf = Vec::with_capacity(proto_message.encoded_len());
-                proto_message
-                    .encode(&mut buf)
-                    .expect("Vec<u8> provides capacity as needed");
+                if let Err(e) = proto_message.encode(&mut buf) {
+                    log::error!("Failed to encode rtc incoming message: {}", e);
+                    return;
+                }
 
                 // send message
                 Rpc::send_message(

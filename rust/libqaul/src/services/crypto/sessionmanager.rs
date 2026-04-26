@@ -102,9 +102,10 @@ impl CryptoSessionManager {
 
         // encode binary message
         let mut cryptoservice_buf = Vec::with_capacity(proto_cryptoservice_message.encoded_len());
-        proto_cryptoservice_message
-            .encode(&mut cryptoservice_buf)
-            .expect("Vec<u8> provides capacity as needed");
+        if let Err(e) = proto_cryptoservice_message.encode(&mut cryptoservice_buf) {
+            log::error!("encode second-handshake cryptoservice failed: {}", e);
+            return Vec::new();
+        }
 
         // create messaging message
         let proto_messaging_message = messaging::proto::Messaging {
@@ -117,9 +118,10 @@ impl CryptoSessionManager {
 
         // encode messaging message
         let mut messaging_buf = Vec::with_capacity(proto_messaging_message.encoded_len());
-        proto_messaging_message
-            .encode(&mut messaging_buf)
-            .expect("Vec<u8> provides capacity as needed");
+        if let Err(e) = proto_messaging_message.encode(&mut messaging_buf) {
+            log::error!("encode second-handshake messaging failed: {}", e);
+            return Vec::new();
+        }
 
         messaging_buf
     }
