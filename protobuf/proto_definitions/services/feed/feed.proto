@@ -12,6 +12,9 @@ message Feed {
         SendMessage send = 2;
         // request received messages
         FeedMessageRequest request = 3;
+        // acknowledgment of a SendMessage request, echoed back to the caller
+        // so a future-based client can resolve the pending request
+        SendMessageResponse send_response = 4;
     }
 }
 
@@ -72,4 +75,10 @@ message FeedMessage {
 // send feed message
 message SendMessage {
     string content = 1;
+}
+
+// acknowledgment for a SendMessage request
+message SendMessageResponse {
+    bool success = 1;
+    string error = 2;
 }

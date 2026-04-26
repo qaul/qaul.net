@@ -3,7 +3,7 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Feed {
     /// message type
-    #[prost(oneof = "feed::Message", tags = "1, 2, 3")]
+    #[prost(oneof = "feed::Message", tags = "1, 2, 3, 4")]
     pub message: ::core::option::Option<feed::Message>,
 }
 /// Nested message and enum types in `Feed`.
@@ -20,6 +20,10 @@ pub mod feed {
         /// request received messages
         #[prost(message, tag = "3")]
         Request(super::FeedMessageRequest),
+        /// acknowledgment of a SendMessage request, echoed back to the caller
+        /// so a future-based client can resolve the pending request
+        #[prost(message, tag = "4")]
+        SendResponse(super::SendMessageResponse),
     }
 }
 /// request feed messages
@@ -101,4 +105,12 @@ pub struct FeedMessage {
 pub struct SendMessage {
     #[prost(string, tag = "1")]
     pub content: ::prost::alloc::string::String,
+}
+/// acknowledgment for a SendMessage request
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct SendMessageResponse {
+    #[prost(bool, tag = "1")]
+    pub success: bool,
+    #[prost(string, tag = "2")]
+    pub error: ::prost::alloc::string::String,
 }
