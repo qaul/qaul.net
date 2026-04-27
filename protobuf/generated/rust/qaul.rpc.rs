@@ -66,6 +66,11 @@ pub enum Modules {
     Dtn = 14,
     /// Authentication
     Auth = 15,
+    /// End-to-end crypto configuration
+    ///
+    /// read / write the Noise session rotation config and (future)
+    /// query rotation events.
+    Crypto = 16,
 }
 impl Modules {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -90,6 +95,7 @@ impl Modules {
             Self::Rtc => "RTC",
             Self::Dtn => "DTN",
             Self::Auth => "AUTH",
+            Self::Crypto => "CRYPTO",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
@@ -111,6 +117,7 @@ impl Modules {
             "RTC" => Some(Self::Rtc),
             "DTN" => Some(Self::Dtn),
             "AUTH" => Some(Self::Auth),
+            "CRYPTO" => Some(Self::Crypto),
             _ => None,
         }
     }

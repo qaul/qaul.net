@@ -9,6 +9,7 @@ use std::fmt;
 mod authentication;
 mod chat;
 mod chatfile;
+mod crypto;
 mod feed;
 mod group;
 mod node;

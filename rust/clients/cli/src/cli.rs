@@ -9,6 +9,7 @@ use super::ble::Ble;
 use super::chat::Chat;
 use super::chatfile::ChatFile;
 use super::connections::Connections;
+use super::crypto::Crypto;
 use super::debug::Debug;
 use super::dtn::Dtn;
 use super::feed::Feed;
@@ -77,6 +78,10 @@ impl Cli {
             // dtn functions
             cmd if cmd.starts_with("dtn ") => {
                 Dtn::cli(state, cmd.strip_prefix("dtn ").unwrap());
+            }
+            // crypto functions (session rotation config)
+            cmd if cmd.starts_with("crypto ") => {
+                Crypto::cli(state, cmd.strip_prefix("crypto ").unwrap());
             }
             // unknown command
             _ => log::error!("unknown command"),

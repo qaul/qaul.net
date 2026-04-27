@@ -102,3 +102,7 @@ pub mod qaul_net_ble {
 pub mod qaul_net_crypto {
     include!("../../../protobuf/generated/rust/qaul.net.crypto.rs");
 }
+#[allow(clippy::all)]
+pub mod qaul_rpc_crypto {
+    include!("../../../protobuf/generated/rust/qaul.rpc.crypto.rs");
+}

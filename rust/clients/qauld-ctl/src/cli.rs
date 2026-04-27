@@ -41,6 +41,9 @@ pub enum Commands {
     File(ChatFileArgs),
     /// Router information
     Router(RouterArgs),
+    /// Noise session rotation: read/write CryptoRotation config, trigger
+    /// rotation with a specific peer, inspect the rotation event log.
+    Crypto(CryptoArgs),
 }
 
 #[derive(Args, Debug)]
@@ -263,6 +266,52 @@ pub enum RouterSubcmd {
     Neighbours,
     /// request and display connections table, with all known connections per connection module.
     Connections,
+}
+
+#[derive(Args, Debug)]
+pub struct CryptoArgs {
+    #[command(subcommand)]
+    pub command: CryptoSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum CryptoSubcmd {
+    /// display the current CryptoRotation config
+    Config,
+    /// enable the master rotation switch
+    Enable,
+    /// disable the master rotation switch
+    Disable,
+    /// update one or more CryptoRotation fields
+    Set {
+        /// set period_seconds (time-based trigger)
+        #[arg(long)]
+        period_seconds: Option<u64>,
+        /// set volume_messages (outbound-volume trigger)
+        #[arg(long)]
+        volume_messages: Option<u64>,
+        /// set grace_period_seconds (draining window)
+        #[arg(long)]
+        grace_period_seconds: Option<u64>,
+        /// set grace_volume_messages (draining message count)
+        #[arg(long)]
+        grace_volume_messages: Option<u64>,
+    },
+    /// force a rotation with a specific peer (bypasses triggers)
+    Rotate {
+        /// libp2p PeerId (base58) of the remote user
+        #[arg(short = 'u', long)]
+        user_id: String,
+    },
+    /// print the rotation event log
+    Events {
+        /// cap the number of events returned
+        #[arg(short, long, default_value = "0")]
+        limit: u32,
+        /// only include events at or after this wall-clock ms
+        #[arg(long, default_value = "0")]
+        since_ms: u64,
+    },
 }
 
 #[derive(Args, Debug)]

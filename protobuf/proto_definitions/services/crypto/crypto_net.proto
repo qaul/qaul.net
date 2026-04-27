@@ -6,6 +6,12 @@ message CryptoserviceContainer {
     oneof message {
         // Second Handshake Message
         SecondHandshake second_handshake = 1;
+        // First rotation handshake (initiator -> responder), encrypted
+        // under the currently-primary session.
+        RotateHandshakeFirst rotate_first = 2;
+        // Second rotation handshake (responder -> initiator), encrypted
+        // under the currently-primary session.
+        RotateHandshakeSecond rotate_second = 3;
     }
 }
 
@@ -15,4 +21,39 @@ message SecondHandshake {
     bytes signature = 1;
     // received at timestamp
     uint64 received_at = 2;
+}
+
+// First rotation handshake message.
+//
+// Sent by the initiator under the currently-primary session once a
+// rotation trigger fires. Carries the fresh session_id and the new
+// Noise ephemeral public key that the new KK session will use.
+message RotateHandshakeFirst {
+    // The session id the initiator has chosen for the new session.
+    // Collisions between simultaneous rotations are resolved by
+    // "lower new_session_id wins".
+    uint32 new_session_id = 1;
+    // Initiator's fresh Noise ephemeral public key for the new session.
+    bytes noise_e = 2;
+    // Anti-replay nonce binding this rotation to a specific challenge.
+    bytes nonce = 3;
+    // Initiator's local timestamp (ms).
+    uint64 initiated_at = 4;
+}
+
+// Second rotation handshake message.
+//
+// Sent by the responder under the currently-primary session once a
+// valid RotateHandshakeFirst arrives. Completes the KK step 2 under
+// the rotated session_id.
+message RotateHandshakeSecond {
+    // Echoed from RotateHandshakeFirst.new_session_id; ties the
+    // response to a specific initiation.
+    uint32 new_session_id = 1;
+    // Responder's fresh Noise ephemeral public key for the new session.
+    bytes noise_e = 2;
+    // Echoed from RotateHandshakeFirst.nonce.
+    bytes nonce = 3;
+    // Responder's local timestamp (ms).
+    uint64 received_at = 4;
 }

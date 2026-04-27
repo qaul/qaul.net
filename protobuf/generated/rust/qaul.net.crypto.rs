@@ -2,7 +2,7 @@
 /// Cryptoservice sending container
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct CryptoserviceContainer {
-    #[prost(oneof = "cryptoservice_container::Message", tags = "1")]
+    #[prost(oneof = "cryptoservice_container::Message", tags = "1, 2, 3")]
     pub message: ::core::option::Option<cryptoservice_container::Message>,
 }
 /// Nested message and enum types in `CryptoserviceContainer`.
@@ -12,6 +12,14 @@ pub mod cryptoservice_container {
         /// Second Handshake Message
         #[prost(message, tag = "1")]
         SecondHandshake(super::SecondHandshake),
+        /// First rotation handshake (initiator -> responder), encrypted
+        /// under the currently-primary session.
+        #[prost(message, tag = "2")]
+        RotateFirst(super::RotateHandshakeFirst),
+        /// Second rotation handshake (responder -> initiator), encrypted
+        /// under the currently-primary session.
+        #[prost(message, tag = "3")]
+        RotateSecond(super::RotateHandshakeSecond),
     }
 }
 /// Second Handshake Message
@@ -22,5 +30,48 @@ pub struct SecondHandshake {
     pub signature: ::prost::alloc::vec::Vec<u8>,
     /// received at timestamp
     #[prost(uint64, tag = "2")]
+    pub received_at: u64,
+}
+/// First rotation handshake message.
+///
+/// Sent by the initiator under the currently-primary session once a
+/// rotation trigger fires. Carries the fresh session_id and the new
+/// Noise ephemeral public key that the new KK session will use.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RotateHandshakeFirst {
+    /// The session id the initiator has chosen for the new session.
+    /// Collisions between simultaneous rotations are resolved by
+    /// "lower new_session_id wins".
+    #[prost(uint32, tag = "1")]
+    pub new_session_id: u32,
+    /// Initiator's fresh Noise ephemeral public key for the new session.
+    #[prost(bytes = "vec", tag = "2")]
+    pub noise_e: ::prost::alloc::vec::Vec<u8>,
+    /// Anti-replay nonce binding this rotation to a specific challenge.
+    #[prost(bytes = "vec", tag = "3")]
+    pub nonce: ::prost::alloc::vec::Vec<u8>,
+    /// Initiator's local timestamp (ms).
+    #[prost(uint64, tag = "4")]
+    pub initiated_at: u64,
+}
+/// Second rotation handshake message.
+///
+/// Sent by the responder under the currently-primary session once a
+/// valid RotateHandshakeFirst arrives. Completes the KK step 2 under
+/// the rotated session_id.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RotateHandshakeSecond {
+    /// Echoed from RotateHandshakeFirst.new_session_id; ties the
+    /// response to a specific initiation.
+    #[prost(uint32, tag = "1")]
+    pub new_session_id: u32,
+    /// Responder's fresh Noise ephemeral public key for the new session.
+    #[prost(bytes = "vec", tag = "2")]
+    pub noise_e: ::prost::alloc::vec::Vec<u8>,
+    /// Echoed from RotateHandshakeFirst.nonce.
+    #[prost(bytes = "vec", tag = "3")]
+    pub nonce: ::prost::alloc::vec::Vec<u8>,
+    /// Responder's local timestamp (ms).
+    #[prost(uint64, tag = "4")]
     pub received_at: u64,
 }

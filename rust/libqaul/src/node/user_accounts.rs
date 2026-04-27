@@ -241,9 +241,19 @@ impl UserAccounts {
         }
         Configuration::save(state);
 
-        // add it to users list
+        // add it to users list with the capability bitset this
+        // binary advertises to remote peers.
         let rs = state.get_router();
-        crate::router::users::Users::add(state, &rs, id, keys_ed25519.public(), name.clone(), false, false);
+        crate::router::users::Users::add_with_caps(
+            state,
+            &rs,
+            id,
+            keys_ed25519.public(),
+            name.clone(),
+            false,
+            false,
+            crate::router::users::Capabilities::LOCAL,
+        );
 
         // add user to routing table / connections table
         let node_id = crate::node::Node::get_id(state);
@@ -328,6 +338,7 @@ impl UserAccounts {
                 name: user.name.clone(),
                 verified: false,
                 blocked: false,
+                capabilities: router::users::Capabilities::LOCAL,
             });
         }
 

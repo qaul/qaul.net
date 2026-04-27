@@ -62,4 +62,9 @@ enum Modules {
     DTN = 14;
     // Authentication
     AUTH = 15;
+    // End-to-end crypto configuration
+    //
+    // read / write the Noise session rotation config and (future)
+    // query rotation events.
+    CRYPTO = 16;
 }

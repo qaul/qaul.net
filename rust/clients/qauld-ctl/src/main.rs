@@ -93,6 +93,7 @@ where
         Commands::Chat(c) => Box::new(c.command) as Box<dyn RpcCommand>,
         Commands::File(f) => Box::new(f.command) as Box<dyn RpcCommand>,
         Commands::Router(r) => Box::new(r.command) as Box<dyn RpcCommand>,
+        Commands::Crypto(c) => Box::new(c.command) as Box<dyn RpcCommand>,
     };
 
     let (data, module) = rpc_command.encode_request()?;
