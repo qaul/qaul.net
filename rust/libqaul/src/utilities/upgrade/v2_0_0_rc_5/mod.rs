@@ -139,6 +139,10 @@ impl VersionUpgrade {
                 user_accounts,
                 debug,
                 routing,
+                // upgrade path: handshake_extras did not exist in
+                // older configs, so seed with conservative defaults.
+                handshake_extras:
+                    crate::storage::configuration::HandshakeExtras::default(),
             };
 
             // save new configuration to file

@@ -231,6 +231,53 @@ impl Default for StorageOptions {
     }
 }
 
+/// Handshake-extras configuration.
+///
+/// Controls whether the initiator may queue extra encrypted chat
+/// payloads on top of KK msg 1 while the responder is still offline,
+/// and the bounds on that queue. See
+/// `docs/proposals/Handshake-Extras-During-Session-Creation.md`.
+///
+/// Defaults are conservative: `enabled = false`, so a node that
+/// upgrades to a build containing this code keeps producing exactly
+/// one ciphertext per handshake leg until an operator opts in.
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct HandshakeExtras {
+    /// Master switch. When false the initiator's `HalfOutgoing`
+    /// branch falls back to its pre-feature behaviour and frames of
+    /// type `HandshakeExtraPayload` are silently dropped on receive.
+    pub enabled: bool,
+    /// Maximum number of pre-completion frames a single session may
+    /// carry. Bounds responder-side bitmap size and protects
+    /// against a sender flooding a stuck handshake.
+    pub max_pre_messages: u32,
+    /// Maximum aggregate ciphertext bytes a single session may
+    /// accumulate under extras. Soft cap; the initiator falls back
+    /// to opening a fresh session once exceeded.
+    pub max_pre_bytes: u64,
+    /// How long an orphan extra (one whose matching KK msg 1 has
+    /// not yet been seen) may sit in the responder's orphan buffer
+    /// before being dropped.
+    pub orphan_ttl_seconds: u64,
+    /// How long the initiator will keep a `HalfOutgoing` session
+    /// alive waiting for KK msg 2 to arrive. After this, the
+    /// session and any queued extras are zeroised.
+    pub pre_completion_deadline_seconds: u64,
+}
+
+impl Default for HandshakeExtras {
+    fn default() -> Self {
+        // Defaults match the proposal's "Limits" section.
+        HandshakeExtras {
+            enabled: false,
+            max_pre_messages: 64,
+            max_pre_bytes: 1 << 20, // 1 MiB
+            orphan_ttl_seconds: 24 * 3600,
+            pre_completion_deadline_seconds: 7 * 24 * 3600,
+        }
+    }
+}
+
 /// Configuration Structure of libqaul
 ///
 /// This structure contains the entire configuration of libqaul.
@@ -242,6 +289,11 @@ pub struct Configuration {
     pub user_accounts: Vec<UserAccount>,
     pub debug: DebugOption,
     pub routing: RoutingOptions,
+    /// Handshake-extras feature config. Marked `#[serde(default)]`
+    /// so existing `config.yaml` files (which predate this section)
+    /// continue to load with the conservative defaults.
+    #[serde(default)]
+    pub handshake_extras: HandshakeExtras,
 }
 
 impl Default for Configuration {
@@ -253,6 +305,7 @@ impl Default for Configuration {
             user_accounts: Vec::new(),
             debug: DebugOption::default(),
             routing: RoutingOptions::default(),
+            handshake_extras: HandshakeExtras::default(),
         }
     }
 }
