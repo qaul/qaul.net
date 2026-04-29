@@ -248,6 +248,22 @@ impl CryptoStorage {
         // State already exists in QaulState.services.crypto
     }
 
+    /// Build a `CryptoAccount` backed by anonymous in-memory sled
+    /// databases. Tests use this to exercise the storage-shaped APIs
+    /// (`save_state`, `get_state`, `get_state_by_id`) without
+    /// touching the daemon's `QaulState.database` and without any
+    /// disk I/O. Each call returns an independent account.
+    #[cfg(test)]
+    pub fn test_account() -> CryptoAccount {
+        use sled::Config;
+        let state_db = Config::new().temporary(true).open().unwrap();
+        let cache_db = Config::new().temporary(true).open().unwrap();
+        CryptoAccount {
+            state: state_db.open_tree("crypto_state").unwrap(),
+            cache: cache_db.open_tree("crypto_cache").unwrap(),
+        }
+    }
+
     /// get DB refs for user account
     pub fn get_db_ref(state: &crate::QaulState, account_id: PeerId) -> CryptoAccount {
         // check if user account data exists
