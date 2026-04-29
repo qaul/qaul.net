@@ -501,6 +501,16 @@ impl CryptoNoise {
             cipher_in: None,
             highest_index_nonce_in: 0,
             out_of_order_indexes: false,
+            // Pre-completion (handshake-extras) fields default to
+            // empty / zero. They get populated only after KK msg 1
+            // is written / read; see persist-cipher-snapshot work in
+            // encrypt_noise_kk_handshake_1 / decrypt_noise_kk_handshake_1.
+            pre_cipher_out: None,
+            pre_index_out: 0,
+            pre_cipher_in: None,
+            pre_index_in_highest: 0,
+            pre_index_in_seen: Vec::new(),
+            pre_bytes_accounted: 0,
         };
 
         Some(state)

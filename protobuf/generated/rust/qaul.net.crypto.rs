@@ -2,7 +2,7 @@
 /// Cryptoservice sending container
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct CryptoserviceContainer {
-    #[prost(oneof = "cryptoservice_container::Message", tags = "1")]
+    #[prost(oneof = "cryptoservice_container::Message", tags = "1, 2")]
     pub message: ::core::option::Option<cryptoservice_container::Message>,
 }
 /// Nested message and enum types in `CryptoserviceContainer`.
@@ -12,6 +12,12 @@ pub mod cryptoservice_container {
         /// Second Handshake Message
         #[prost(message, tag = "1")]
         SecondHandshake(super::SecondHandshake),
+        /// An additional encrypted payload sent under the partial-
+        /// handshake CipherState, before the responder has completed
+        /// KK step 2. See the proposal at
+        /// docs/proposals/Handshake-Extras-During-Session-Creation.md.
+        #[prost(message, tag = "2")]
+        HandshakeExtra(super::HandshakeExtraPayload),
     }
 }
 /// Second Handshake Message
@@ -23,4 +29,35 @@ pub struct SecondHandshake {
     /// received at timestamp
     #[prost(uint64, tag = "2")]
     pub received_at: u64,
+}
+/// Encrypted chat payload queued by the initiator while the responder
+/// is still offline / has not yet sent KK step 2.
+///
+/// Encrypted under a CipherState derived from `HandshakeState::split()`
+/// applied to the chaining key after msg 1; both sides reach the same
+/// `ck` after msg 1 so the responder can decrypt. The post-msg-2 split
+/// produces a different key pair, so transport messages and extras
+/// never share a cipher.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct HandshakeExtraPayload {
+    /// Session id of the in-flight first handshake; binds this frame
+    /// to a specific KK negotiation. Required because the initiator
+    /// may have re-handshaken with a fresh session_id (e.g. after a
+    /// limit was hit) and an old extra must not be decrypted under a
+    /// newer session's keys.
+    #[prost(uint32, tag = "1")]
+    pub session_id: u32,
+    /// Strictly increasing per session on the initiator side; serves
+    /// as the AEAD nonce for the pre-completion CipherState. The
+    /// responder rejects duplicates and tolerates gaps via a bitmap.
+    #[prost(uint64, tag = "2")]
+    pub pre_index: u64,
+    /// AEAD ciphertext.
+    #[prost(bytes = "vec", tag = "3")]
+    pub ciphertext: ::prost::alloc::vec::Vec<u8>,
+    /// Wall-clock ms at the moment the initiator built this frame.
+    /// Lets the responder bound how long an orphan (an extra arriving
+    /// before its msg 1) may sit in the orphan buffer.
+    #[prost(uint64, tag = "4")]
+    pub created_at: u64,
 }

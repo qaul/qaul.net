@@ -70,6 +70,40 @@ pub struct CryptoState {
     /// can synchronize all messages and actively query for
     /// all missing messages.
     pub out_of_order_indexes: bool,
+    /// Initiator-side cipher key derived from `HandshakeState::split()`
+    /// applied to the chaining key after KK msg 1. Used to encrypt
+    /// `HandshakeExtraPayload` frames while the session is in
+    /// `HalfOutgoing`. Cleared on transition to `Transport` once every
+    /// queued extra has been drained from the messaging layer.
+    /// `#[serde(default)]` because pre-existing on-disk rows
+    /// were serialized without this field and bincode would
+    /// otherwise refuse to decode them.
+    #[serde(default)]
+    pub pre_cipher_out: Option<Vec<u8>>,
+    /// Strictly-increasing per-session counter used as the AEAD nonce
+    /// for outbound extras and stamped onto each
+    /// `HandshakeExtraPayload.pre_index`. Defaults to 0.
+    #[serde(default)]
+    pub pre_index_out: u64,
+    /// Responder-side cipher key matching `pre_cipher_out` on the
+    /// initiator. Stashed when KK msg 1 is processed so queued extras
+    /// arriving across a daemon restart still decrypt.
+    #[serde(default)]
+    pub pre_cipher_in: Option<Vec<u8>>,
+    /// Highest `pre_index` ever accepted on this session. Used in
+    /// combination with `pre_index_in_seen` to detect duplicates.
+    #[serde(default)]
+    pub pre_index_in_highest: u64,
+    /// Bitmap of seen `pre_index` values, length bounded by
+    /// `HandshakeExtras::max_pre_messages`. Bit `i` set means we
+    /// have already accepted (and forwarded) the extra with
+    /// `pre_index = i`.
+    #[serde(default)]
+    pub pre_index_in_seen: Vec<u8>,
+    /// Aggregate ciphertext bytes accepted on this session under
+    /// extras. Used to enforce `HandshakeExtras::max_pre_bytes`.
+    #[serde(default)]
+    pub pre_bytes_accounted: u64,
 }
 
 /// The State of Noise Protocol Handshake
