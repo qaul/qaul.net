@@ -42,7 +42,21 @@ impl CryptoSessionManager {
                 Some(proto_net::cryptoservice_container::Message::SecondHandshake(
                     second_handshake,
                 )) => {
-                    Self::process_second_handshake(state, &user_account, sender_id, second_handshake);
+                    Self::process_second_handshake(
+                        state,
+                        &user_account,
+                        sender_id,
+                        second_handshake,
+                    );
+                }
+                Some(proto_net::cryptoservice_container::Message::HandshakeExtra(_extra)) => {
+                    // Handler is wired in Phase 2 (receive path). For
+                    // now we acknowledge the variant exists so old
+                    // peers can already see the new wire shape.
+                    log::trace!(
+                        "received HandshakeExtra from {} (handler not yet wired)",
+                        sender_id.to_base58()
+                    );
                 }
                 Some(proto_net::cryptoservice_container::Message::RotateFirst(rotate_first)) => {
                     Self::process_rotate_first(state, &user_account, sender_id, rotate_first);
@@ -215,10 +229,7 @@ impl CryptoSessionManager {
             &message_id,
             true,
         ) {
-            Ok(_) => log::trace!(
-                "sent RotateHandshakeSecond to {}",
-                sender_id.to_base58()
-            ),
+            Ok(_) => log::trace!("sent RotateHandshakeSecond to {}", sender_id.to_base58()),
             Err(e) => log::error!("failed sending rotate_second: {}", e),
         }
     }
@@ -235,21 +246,22 @@ impl CryptoSessionManager {
         rotate_second: proto_net::RotateHandshakeSecond,
     ) {
         let crypto_account = CryptoStorage::get_db_ref(state, user_account.id.clone());
-        let mut rotate_final =
-            match CryptoNoise::rotate_finalize_initiator::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
-                crypto_account.clone(),
-                *sender_id,
-                rotate_second,
-            ) {
-                Some(rf) => rf,
-                None => {
-                    log::warn!(
-                        "rotate_finalize_initiator failed for {}",
-                        sender_id.to_base58()
-                    );
-                    return;
-                }
-            };
+        let mut rotate_final = match CryptoNoise::rotate_finalize_initiator::<
+            X25519,
+            ChaCha20Poly1305,
+            Sha256,
+            &[u8],
+        >(crypto_account.clone(), *sender_id, rotate_second)
+        {
+            Some(rf) => rf,
+            None => {
+                log::warn!(
+                    "rotate_finalize_initiator failed for {}",
+                    sender_id.to_base58()
+                );
+                return;
+            }
+        };
         log::trace!(
             "rotation finalised: new primary session for {}",
             sender_id.to_base58()

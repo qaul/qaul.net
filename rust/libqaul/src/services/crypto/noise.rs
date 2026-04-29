@@ -137,13 +137,16 @@ impl CryptoNoise {
             Some(U8Array::from_slice(state.s.clone().as_slice())),
             Some(e),
             Some(U8Array::from_slice(state.rs.clone().as_slice())),
-            Some(U8Array::from_slice(match state.re.clone() {
-                Some(re) => re,
-                None => {
-                    log::error!("Missing remote ephemeral key in crypto state");
-                    return (None, 0);
+            Some(U8Array::from_slice(
+                match state.re.clone() {
+                    Some(re) => re,
+                    None => {
+                        log::error!("Missing remote ephemeral key in crypto state");
+                        return (None, 0);
+                    }
                 }
-            }.as_slice())),
+                .as_slice(),
+            )),
         );
 
         // set message index
@@ -208,8 +211,7 @@ impl CryptoNoise {
                 return (None, 0);
             }
         };
-        let mut cipher: CipherState<C> =
-            CipherState::new(cipher_out.as_slice(), nonce);
+        let mut cipher: CipherState<C> = CipherState::new(cipher_out.as_slice(), nonce);
 
         // encrypt message
         message = Some(cipher.encrypt_vec(data.as_slice()));
@@ -431,8 +433,7 @@ impl CryptoNoise {
                 return None;
             }
         };
-        let mut cipher: CipherState<C> =
-            CipherState::new(cipher_in.as_slice(), nonce);
+        let mut cipher: CipherState<C> = CipherState::new(cipher_in.as_slice(), nonce);
 
         // decrypt message
         match cipher.decrypt_vec(data.as_slice()) {
@@ -509,6 +510,16 @@ impl CryptoNoise {
             cipher_in: None,
             highest_index_nonce_in: 0,
             out_of_order_indexes: false,
+            // Pre-completion (handshake-extras) fields default to
+            // empty / zero. They get populated only after KK msg 1
+            // is written / read; see persist-cipher-snapshot work in
+            // encrypt_noise_kk_handshake_1 / decrypt_noise_kk_handshake_1.
+            pre_cipher_out: None,
+            pre_index_out: 0,
+            pre_cipher_in: None,
+            pre_index_in_highest: 0,
+            pre_index_in_seen: Vec::new(),
+            pre_bytes_accounted: 0,
             established_at: 0,
         };
 
@@ -570,14 +581,13 @@ impl CryptoNoise {
         // CryptoState with a fresh random session_id in `HalfOutgoing`,
         // saves it under {remote_id, new_session_id}, and returns the
         // Noise write_message output (ephemeral + encrypted payload).
-        let (noise_e, _msg_nonce, new_session_id) =
-            Self::encrypt_noise_kk_handshake_1::<D, C, H, P>(
-                state,
-                nonce.clone(),
-                user_account,
-                storage.clone(),
-                remote_id,
-            );
+        let (noise_e, _msg_nonce, new_session_id) = Self::encrypt_noise_kk_handshake_1::<D, C, H, P>(
+            state,
+            nonce.clone(),
+            user_account,
+            storage.clone(),
+            remote_id,
+        );
         let noise_e = noise_e?;
 
         // Record the in-flight initiation on the rotation meta so the
