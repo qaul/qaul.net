@@ -76,6 +76,40 @@ pub struct CryptoState {
     /// can synchronize all messages and actively query for
     /// all missing messages.
     pub out_of_order_indexes: bool,
+    /// Initiator-side cipher key derived from `HandshakeState::split()`
+    /// applied to the chaining key after KK msg 1. Used to encrypt
+    /// `HandshakeExtraPayload` frames while the session is in
+    /// `HalfOutgoing`. Cleared on transition to `Transport` once every
+    /// queued extra has been drained from the messaging layer.
+    /// `#[serde(default)]` because pre-existing on-disk rows
+    /// were serialized without this field and bincode would
+    /// otherwise refuse to decode them.
+    #[serde(default)]
+    pub pre_cipher_out: Option<Vec<u8>>,
+    /// Strictly-increasing per-session counter used as the AEAD nonce
+    /// for outbound extras and stamped onto each
+    /// `HandshakeExtraPayload.pre_index`. Defaults to 0.
+    #[serde(default)]
+    pub pre_index_out: u64,
+    /// Responder-side cipher key matching `pre_cipher_out` on the
+    /// initiator. Stashed when KK msg 1 is processed so queued extras
+    /// arriving across a daemon restart still decrypt.
+    #[serde(default)]
+    pub pre_cipher_in: Option<Vec<u8>>,
+    /// Highest `pre_index` ever accepted on this session. Used in
+    /// combination with `pre_index_in_seen` to detect duplicates.
+    #[serde(default)]
+    pub pre_index_in_highest: u64,
+    /// Bitmap of seen `pre_index` values, length bounded by
+    /// `HandshakeExtras::max_pre_messages`. Bit `i` set means we
+    /// have already accepted (and forwarded) the extra with
+    /// `pre_index = i`.
+    #[serde(default)]
+    pub pre_index_in_seen: Vec<u8>,
+    /// Aggregate ciphertext bytes accepted on this session under
+    /// extras. Used to enforce `HandshakeExtras::max_pre_bytes`.
+    #[serde(default)]
+    pub pre_bytes_accounted: u64,
     /// Wall-clock timestamp (ms since epoch) at which this session
     /// transitioned to `Transport`. Diagnostic / display only — no
     /// protocol decision depends on it, since rotation is clock-free.
@@ -423,16 +457,16 @@ impl Crypto {
             None => return Err("no session with peer".to_string()),
         };
 
-        let rotate_first = match CryptoNoise::rotate_initiate::<
-            X25519,
-            ChaCha20Poly1305,
-            Sha256,
-            &[u8],
-        >(state, user_account.clone(), crypto_account.clone(), remote_id)
-        {
-            Some(rf) => rf,
-            None => return Err("rotate_initiate returned None".to_string()),
-        };
+        let rotate_first =
+            match CryptoNoise::rotate_initiate::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
+                state,
+                user_account.clone(),
+                crypto_account.clone(),
+                remote_id,
+            ) {
+                Some(rf) => rf,
+                None => return Err("rotate_initiate returned None".to_string()),
+            };
         let new_session_id = rotate_first.new_session_id;
 
         // Build the Messaging::CryptoService payload carrying the
@@ -445,15 +479,11 @@ impl Crypto {
             Some(s) if matches!(s.state, CryptoProcessState::Transport) => s,
             _ => return Err("lost primary Transport mid-rotation".to_string()),
         };
-        let (encrypted_option, msg_nonce, sess_id, proc_state) = match Self::encrypt_with_state(
-            payload,
-            remote_id,
-            crypto_account.clone(),
-            primary,
-        ) {
-            Some(v) => v,
-            None => return Err("failed to encrypt rotate_first".to_string()),
-        };
+        let (encrypted_option, msg_nonce, sess_id, proc_state) =
+            match Self::encrypt_with_state(payload, remote_id, crypto_account.clone(), primary) {
+                Some(v) => v,
+                None => return Err("failed to encrypt rotate_first".to_string()),
+            };
         let encrypted_bytes = match encrypted_option {
             Some(b) => b,
             None => return Err("encrypt_with_state produced no ciphertext".to_string()),
@@ -531,8 +561,8 @@ impl Crypto {
         // rotation we initiated is still in flight (so the in-flight
         // tail is already covered when the drain target arrives).
         let is_draining = Some(session_id) == meta.draining_session_id;
-        let is_predrain = meta.pending_initiated_session_id.is_some()
-            && session_id == meta.primary_session_id;
+        let is_predrain =
+            meta.pending_initiated_session_id.is_some() && session_id == meta.primary_session_id;
         if is_draining || is_predrain {
             CryptoNoise::record_drain_received(crypto_account, remote_id, nonce);
             // Inbound progressed; the old session may now be fully
@@ -603,11 +633,7 @@ impl Crypto {
     /// `remote_id` was confirmed. Called from the messaging
     /// confirmation path so a session waiting only on outbound
     /// confirmation is retired promptly once the last ack arrives.
-    pub fn on_outbound_confirmed(
-        state: &crate::QaulState,
-        account_id: PeerId,
-        remote_id: PeerId,
-    ) {
+    pub fn on_outbound_confirmed(state: &crate::QaulState, account_id: PeerId, remote_id: PeerId) {
         let crypto_account = CryptoStorage::get_db_ref(state, account_id);
         Self::try_retire_drain(state, &crypto_account, remote_id);
     }
@@ -893,7 +919,8 @@ impl Crypto {
                                 // supersedes it so we stop using the old
                                 // session for outbound. A no-op for genuine
                                 // first contact.
-                                let acct = CryptoStorage::get_db_ref(state, user_account.id.clone());
+                                let acct =
+                                    CryptoStorage::get_db_ref(state, user_account.id.clone());
                                 Self::supersede_with_cold_session(
                                     &acct,
                                     remote_id,
@@ -932,7 +959,12 @@ impl Crypto {
                                 message.session_id,
                                 remote_id.to_base58()
                             );
-                            Self::initiate_cold_rekey(state, &user_account, &crypto_account, remote_id);
+                            Self::initiate_cold_rekey(
+                                state,
+                                &user_account,
+                                &crypto_account,
+                                remote_id,
+                            );
                         } else {
                             log::trace!(
                                 "decrypt: stale traffic on unknown session {} from {} (have a current session) — dropping",
@@ -1007,7 +1039,10 @@ impl Crypto {
             &message_id,
             true,
         ) {
-            Ok(_) => log::trace!("cold re-key: sent first handshake to {}", remote_id.to_base58()),
+            Ok(_) => log::trace!(
+                "cold re-key: sent first handshake to {}",
+                remote_id.to_base58()
+            ),
             Err(e) => log::error!("cold re-key: failed sending first handshake: {}", e),
         }
     }
@@ -1037,7 +1072,8 @@ impl Crypto {
             // Brand-new first contact (no prior session) — nothing to
             // supersede. Still record the primary so resolve_primary_state
             // is unambiguous.
-            crypto_account.save_rotation_meta(remote_id, &RotationMeta::primary_only(new_session_id));
+            crypto_account
+                .save_rotation_meta(remote_id, &RotationMeta::primary_only(new_session_id));
             return;
         }
         for sid in stale {
@@ -1064,12 +1100,7 @@ impl Crypto {
     /// `Configuration`; `SetConfigRequest` applies a partial update
     /// (only present fields mutate), persists to `config.yaml`, and
     /// returns the updated state in `SetConfigResponse.applied`.
-    pub fn rpc(
-        state: &crate::QaulState,
-        data: Vec<u8>,
-        _user_id: Vec<u8>,
-        request_id: String,
-    ) {
+    pub fn rpc(state: &crate::QaulState, data: Vec<u8>, _user_id: Vec<u8>, request_id: String) {
         use qaul_proto::qaul_rpc_crypto as proto_rpc;
 
         match proto_rpc::Crypto::decode(&data[..]) {
@@ -1310,9 +1341,7 @@ impl Crypto {
     }
 
     /// Snapshot the current `CryptoRotation` into a proto response.
-    fn snapshot_config(
-        state: &crate::QaulState,
-    ) -> qaul_proto::qaul_rpc_crypto::GetConfigResponse {
+    fn snapshot_config(state: &crate::QaulState) -> qaul_proto::qaul_rpc_crypto::GetConfigResponse {
         let cfg = Configuration::get(state);
         qaul_proto::qaul_rpc_crypto::GetConfigResponse {
             enabled: cfg.crypto_rotation.enabled,
@@ -1524,7 +1553,9 @@ mod phase2_tests {
             "retires once inbound drained AND outbound confirmed"
         );
         assert_eq!(
-            acct.get_rotation_meta(remote).unwrap().last_retired_session_id,
+            acct.get_rotation_meta(remote)
+                .unwrap()
+                .last_retired_session_id,
             Some(7)
         );
     }
@@ -1634,8 +1665,14 @@ mod phase2_tests {
 
         Crypto::supersede_with_cold_session(&acct, remote, 20);
 
-        assert!(acct.get_state_by_id(remote, 10).is_none(), "old session deleted");
-        assert!(acct.get_state_by_id(remote, 20).is_some(), "new session kept");
+        assert!(
+            acct.get_state_by_id(remote, 10).is_none(),
+            "old session deleted"
+        );
+        assert!(
+            acct.get_state_by_id(remote, 20).is_some(),
+            "new session kept"
+        );
         let meta = acct.get_rotation_meta(remote).unwrap();
         assert_eq!(meta.primary_session_id, 20, "new session is primary");
         assert_eq!(meta.draining_session_id, None);
@@ -1991,7 +2028,11 @@ mod phase3_events_tests {
             });
         }
         let all = events::query(0, 0);
-        assert_eq!(all.len(), events::MAX_EVENTS, "log should cap at MAX_EVENTS");
+        assert_eq!(
+            all.len(),
+            events::MAX_EVENTS,
+            "log should cap at MAX_EVENTS"
+        );
         // Oldest events dropped: the smallest primary_session_id in
         // the survivors must equal 50 (since we pushed 0..256+50).
         assert_eq!(all.first().unwrap().primary_session_id, 50);

@@ -6,18 +6,23 @@ message CryptoserviceContainer {
     oneof message {
         // Second Handshake Message
         SecondHandshake second_handshake = 1;
+        // An additional encrypted payload sent under the partial-
+        // handshake CipherState, before the responder has completed
+        // KK step 2. See the proposal at
+        // docs/proposals/Handshake-Extras-During-Session-Creation.md.
+        HandshakeExtraPayload handshake_extra = 2;
         // First rotation handshake (initiator -> responder), encrypted
         // under the currently-primary session.
-        RotateHandshakeFirst rotate_first = 2;
+        RotateHandshakeFirst rotate_first = 3;
         // Second rotation handshake (responder -> initiator), encrypted
         // under the currently-primary session.
-        RotateHandshakeSecond rotate_second = 3;
+        RotateHandshakeSecond rotate_second = 4;
         // Third rotation handshake (initiator -> responder), the
         // cut-over ACK. Declares the initiator's final A->B nonce on
         // the old session so the responder can drain it by nonce.
         // (tag 5 is intentionally left free for the future cold
         // re-key / state-healing frame, landing in a separate change.)
-        RotateHandshakeFinal rotate_final = 4;
+        RotateHandshakeFinal rotate_final = 5;
     }
 }
 
@@ -27,6 +32,33 @@ message SecondHandshake {
     bytes signature = 1;
     // received at timestamp
     uint64 received_at = 2;
+}
+
+// Encrypted chat payload queued by the initiator while the responder
+// is still offline / has not yet sent KK step 2.
+//
+// Encrypted under a CipherState derived from `HandshakeState::split()`
+// applied to the chaining key after msg 1; both sides reach the same
+// `ck` after msg 1 so the responder can decrypt. The post-msg-2 split
+// produces a different key pair, so transport messages and extras
+// never share a cipher.
+message HandshakeExtraPayload {
+    // Session id of the in-flight first handshake; binds this frame
+    // to a specific KK negotiation. Required because the initiator
+    // may have re-handshaken with a fresh session_id (e.g. after a
+    // limit was hit) and an old extra must not be decrypted under a
+    // newer session's keys.
+    uint32 session_id = 1;
+    // Strictly increasing per session on the initiator side; serves
+    // as the AEAD nonce for the pre-completion CipherState. The
+    // responder rejects duplicates and tolerates gaps via a bitmap.
+    uint64 pre_index = 2;
+    // AEAD ciphertext.
+    bytes ciphertext = 3;
+    // Wall-clock ms at the moment the initiator built this frame.
+    // Lets the responder bound how long an orphan (an extra arriving
+    // before its msg 1) may sit in the orphan buffer.
+    uint64 created_at = 4;
 }
 
 // First rotation handshake message.
