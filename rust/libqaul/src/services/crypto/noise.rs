@@ -1616,3 +1616,32 @@ mod handshake_extras_primitive_tests {
         assert!(result.is_none());
     }
 }
+
+// ---------------------------------------------------------------
+// Pre-completion (handshake-extras) seen-bitmap helpers.
+//
+// `CryptoState::pre_index_in_seen` is a packed bitmap of accepted
+// `pre_index` values (bit `i` set means we already decrypted the
+// extra at index `i`). Length grows on demand and is bounded at the
+// caller by `HandshakeExtras::max_pre_messages`, so the byte index
+// arithmetic is checked range there rather than here.
+// ---------------------------------------------------------------
+
+/// Return whether bit `idx` is set in the bitmap.
+fn bitmap_test(bitmap: &[u8], idx: u64) -> bool {
+    let byte = (idx / 8) as usize;
+    if byte >= bitmap.len() {
+        return false;
+    }
+    let mask = 1u8 << (idx % 8) as u8;
+    bitmap[byte] & mask != 0
+}
+
+/// Set bit `idx` in the bitmap, growing it with zero bytes as needed.
+fn bitmap_set(bitmap: &mut Vec<u8>, idx: u64) {
+    let byte = (idx / 8) as usize;
+    while bitmap.len() <= byte {
+        bitmap.push(0);
+    }
+    bitmap[byte] |= 1u8 << (idx % 8) as u8;
+}
