@@ -35,6 +35,7 @@ mod tests {
             user_accounts: Vec::new(),
             debug: DebugOption::default(),
             routing: RoutingOptions::default(),
+            handshake_extras: HandshakeExtras::default(),
         }
     }
 
