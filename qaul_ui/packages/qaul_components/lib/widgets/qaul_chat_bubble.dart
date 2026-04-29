@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qaul_components/widgets/chat_message.dart';
 
 // ---------------------------------------------------------------------------
 // Enums
@@ -54,14 +55,17 @@ class ChatBubbleStyle {
 // QaulChatBubbleMessage
 // ---------------------------------------------------------------------------
 
-class QaulChatBubbleMessage {
+class QaulChatBubbleMessage extends ChatMessage {
   const QaulChatBubbleMessage({
+    super.key,
     required this.content,
     required this.sentAt,
     required this.receivedAt,
     required this.status,
     required this.messageType,
     required this.edges,
+    this.clock,
+    this.showTimestamp = true,
   });
 
   final String content;
@@ -70,22 +74,39 @@ class QaulChatBubbleMessage {
   final MessageStatus status;
   final MessageType messageType;
   final List<TailEdge> edges;
+  final DateTime? clock;
+  final bool showTimestamp;
 
   QaulChatBubbleMessage copyWith({
+    Key? key,
     String? content,
     DateTime? sentAt,
     DateTime? receivedAt,
     MessageStatus? status,
     MessageType? messageType,
     List<TailEdge>? edges,
+    DateTime? clock,
+    bool? showTimestamp,
   }) {
     return QaulChatBubbleMessage(
+      key: key ?? this.key,
       content: content ?? this.content,
       sentAt: sentAt ?? this.sentAt,
       receivedAt: receivedAt ?? this.receivedAt,
       status: status ?? this.status,
       messageType: messageType ?? this.messageType,
       edges: edges ?? this.edges,
+      clock: clock ?? this.clock,
+      showTimestamp: showTimestamp ?? this.showTimestamp,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return QaulChatBubble(
+      message: this,
+      clock: clock ?? DateTime.now(),
+      showTimestamp: showTimestamp,
     );
   }
 }
@@ -182,8 +203,7 @@ class QaulChatBubble extends StatelessWidget {
     final maxBubbleWidth = isMobile
         ? ChatBubbleStyle.maxBubbleWidthMobile
         : ChatBubbleStyle.maxBubbleWidthExtended;
-    final maxTextWidth =
-        maxBubbleWidth - ChatBubbleStyle.horizontalPadding * 2;
+    final maxTextWidth = maxBubbleWidth - ChatBubbleStyle.horizontalPadding * 2;
 
     final backgroundColor = isPrimary
         ? ChatBubbleStyle.primaryColor
@@ -246,21 +266,25 @@ class QaulChatBubble extends StatelessWidget {
                     textDirection: TextDirection.ltr,
                   );
                   timeLabelPainter.layout();
-                  var timeBlockWidth = timeLabelPainter.width +
+                  var timeBlockWidth =
+                      timeLabelPainter.width +
                       ChatBubbleStyle.gapBetweenTimeAndStatusIcon;
                   if (isPrimary && statusIcon != null) {
                     timeBlockWidth += 14.0;
                   }
                   final maxMessageWidth =
-                      (constraints.maxWidth - gap - timeBlockWidth)
-                          .clamp(0.0, double.infinity);
+                      (constraints.maxWidth - gap - timeBlockWidth).clamp(
+                        0.0,
+                        double.infinity,
+                      );
 
                   final painter = TextPainter(
                     text: messageSpan,
                     textDirection: TextDirection.ltr,
                   );
                   painter.layout(maxWidth: maxMessageWidth);
-                  final lineHeight = ChatBubbleStyle.textStyle.fontSize! *
+                  final lineHeight =
+                      ChatBubbleStyle.textStyle.fontSize! *
                       (ChatBubbleStyle.textStyle.height ?? 1.2);
                   final fitsOnOneLine = painter.height <= lineHeight * 1.1;
 
@@ -270,8 +294,8 @@ class QaulChatBubble extends StatelessWidget {
                     children: [
                       Text(timeLabel, style: ChatBubbleStyle.timeStyle),
                       const SizedBox(
-                          width:
-                              ChatBubbleStyle.gapBetweenTimeAndStatusIcon),
+                        width: ChatBubbleStyle.gapBetweenTimeAndStatusIcon,
+                      ),
                       if (isPrimary && statusIcon != null) statusIcon,
                     ],
                   );
