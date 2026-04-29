@@ -28,6 +28,8 @@ class FeedTranslator extends RpcModuleTranslator {
           type,
           PaginatedPosts(posts: posts, pagination: pagination),
         );
+      case Feed_Message.sendResponse:
+        return RpcTranslatorResponse(type, message.ensureSendResponse());
       default:
         return super.decodeMessageBytes(data, ref);
     }

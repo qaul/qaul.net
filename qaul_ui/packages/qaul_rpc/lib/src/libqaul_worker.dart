@@ -87,7 +87,13 @@ class LibqaulWorker {
       module: Modules.FEED,
       data: msg,
       adapter: (res) {
-        if (res.data is PaginatedPosts) return true;
+        if (res.data is SendMessageResponse) {
+          final response = res.data as SendMessageResponse;
+          if (!response.success && response.error.isNotEmpty) {
+            _log.warning('Failed to send public message: ${response.error}');
+          }
+          return response.success;
+        }
         return null;
       },
     );
@@ -439,7 +445,7 @@ class LibqaulWorker {
     required String description,
   }) async {
     var file = File(pathName);
-    final maxUncompressedSizeKB = 150 * 1000;
+    const maxUncompressedSizeKB = 150 * 1000;
     if (isImage(file.path) && file.statSync().size >= maxUncompressedSizeKB) {
       final compressed = await processImage(file);
       if (compressed != null) file = compressed;
