@@ -41,6 +41,15 @@ impl CryptoSessionManager {
                 )) => {
                     Self::process_second_handshake(state, &user_account, sender_id, second_handshake);
                 }
+                Some(proto_net::cryptoservice_container::Message::HandshakeExtra(_extra)) => {
+                    // Handler is wired in Phase 2 (receive path). For
+                    // now we acknowledge the variant exists so old
+                    // peers can already see the new wire shape.
+                    log::trace!(
+                        "received HandshakeExtra from {} (handler not yet wired)",
+                        sender_id.to_base58()
+                    );
+                }
                 None => {
                     log::error!(
                         "Cryptoservice message from {} was empty",
