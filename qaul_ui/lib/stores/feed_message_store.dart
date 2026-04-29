@@ -28,7 +28,7 @@ class FeedMessageStore extends Notifier<List<FeedMessage>> {
 
   @override
   List<FeedMessage> build() {
-    ref.listen(usersStoreProvider, (_, __) {
+    ref.listen(usersStoreProvider, (_, _) {
       Future.microtask(_rebuildFeedMessages);
     });
     return [];
