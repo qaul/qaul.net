@@ -12,9 +12,20 @@ The following things are configured in the configuration file:
   * User ID
   * User Keys
 * LAN Connection Module
+  * `active` — persisted enable/disable flag (see below)
   * addresses and port to listen to
 * Internet Connection Module
+  * `active` — persisted enable/disable flag
   * addresses and port to listen to
+* BLE Connection Module
+  * `active` — persisted enable/disable flag
+
+Each transport carries an `active` flag that is the source of truth for
+whether the transport runs at all. The flag is read at startup (an
+inactive transport is not started) and is rewritten whenever the
+runtime toggles a transport on or off through the Transports RPC or the
+`transports enable` / `transports disable` CLI commands. See
+[`transports.md`](transports.md) for the runtime side.
 
 ## Example Configuration
 
@@ -54,6 +65,14 @@ internet:
   # 0.0.0.0 - the module is listening on all addresses.
   # 9229 - the port number 9229 zero means the module listens on port 9229 for incoming connections
   listen: [/ip4/0.0.0.0/udp/9229/quic-v1, /ip6/::/udp/9229/quic-v1]
+
+# BLE Connection Module Configuration
+# Mirrors the `active` flag on lan and internet. When false, the
+# BLE transport stays dormant on boot and the qaul UI / CLI need
+# to call `transports enable ble` to turn it back on. Persisted
+# automatically when the runtime toggle is used.
+ble:
+  active: true
 
 # User Accounts Configuration
 # It contains a list with all the user accounts registered on this node
