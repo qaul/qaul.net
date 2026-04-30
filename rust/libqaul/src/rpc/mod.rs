@@ -15,7 +15,7 @@ use std::sync::RwLock;
 
 use prost::Message;
 
-use crate::connections::ble::Ble;
+use crate::connections::ble::{Ble, BleTransport};
 use crate::connections::transport::Transport;
 use crate::connections::Connections;
 use crate::connections::{internet::Internet, lan::Lan};
@@ -166,6 +166,7 @@ impl Rpc {
         data: Vec<u8>,
         lan: Option<&mut Lan>,
         internet: Option<&mut Internet>,
+        ble: Option<&mut BleTransport>,
     ) {
         Self::increase_message_counter(state);
 
@@ -264,6 +265,7 @@ impl Rpc {
                             message.data,
                             lan,
                             internet,
+                            ble,
                             message.request_id,
                         );
                     }
