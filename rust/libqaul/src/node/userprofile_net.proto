@@ -1,0 +1,38 @@
+syntax = "proto3";
+package qaul.net.userprofile;
+
+// User Profile Container
+message UserProfileContainer {
+    // signature
+    bytes signature = 1;
+    // user profile content
+    bytes profile = 2;
+}
+
+// User Profile
+message UserProfile {
+    // user profile version
+    uint32 version = 1;
+    // user id ??? do we need this here ???
+    bytes id = 2;
+    // public key
+    bytes public_key = 3;
+    // user name
+    string name = 4;
+    // user description
+    string description = 5;
+    // DTN routes
+    repeated DtnRoute dtn_routes = 6;
+}
+
+// DTN Route
+//
+// DTN routes are used to send messages to users that are not directly connected
+// to the sender. The routes are listed from highest to lowest priority. The
+// user ID's that store and transport the messages are listed from sender to
+// receiver (without sender and receiver ID).
+message DtnRoute {
+    // a list of user ids from receiver to sender (without sender and
+    // receiver id)
+    repeated bytes user_id = 1;
+}
