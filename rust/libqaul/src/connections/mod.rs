@@ -19,7 +19,7 @@ use crate::node::Node;
 use crate::rpc::Rpc;
 use crate::storage::configuration::Configuration;
 use crate::storage::configuration::InternetPeer;
-use ble::Ble;
+use ble::{Ble, BleTransport};
 use internet::Internet;
 use lan::Lan;
 pub use transport::Transport;
@@ -490,15 +490,16 @@ impl Connections {
         data: Vec<u8>,
         lan: Option<&mut Lan>,
         internet: Option<&mut Internet>,
+        ble: Option<&mut BleTransport>,
         request_id: String,
     ) {
         match transports_proto::Transports::decode(&data[..]) {
             Ok(msg) => match msg.message {
                 Some(transports_proto::transports::Message::ListRequest(_)) => {
-                    Self::transports_rpc_list(state, lan, internet, request_id);
+                    Self::transports_rpc_list(state, lan, internet, ble, request_id);
                 }
                 Some(transports_proto::transports::Message::SetEnabled(req)) => {
-                    Self::transports_rpc_set_enabled(state, req, lan, internet, request_id);
+                    Self::transports_rpc_set_enabled(state, req, lan, internet, ble, request_id);
                 }
                 _ => {
                     log::error!("Unhandled Transports RPC message");
@@ -531,6 +532,7 @@ impl Connections {
         state: &crate::QaulState,
         lan: Option<&mut Lan>,
         internet: Option<&mut Internet>,
+        ble: Option<&mut BleTransport>,
         request_id: String,
     ) {
         let mut transports = Vec::new();
@@ -539,6 +541,9 @@ impl Connections {
         }
         if let Some(i) = internet {
             transports.push(Self::transport_info_from(i as &dyn Transport));
+        }
+        if let Some(b) = ble {
+            transports.push(Self::transport_info_from(b as &dyn Transport));
         }
 
         let response = transports_proto::Transports {
@@ -566,6 +571,7 @@ impl Connections {
         req: transports_proto::TransportSetEnabled,
         lan: Option<&mut Lan>,
         internet: Option<&mut Internet>,
+        ble: Option<&mut BleTransport>,
         request_id: String,
     ) {
         let (success, error) = match req.id.as_str() {
@@ -589,6 +595,17 @@ impl Connections {
                     }
                 } else {
                     (false, "Internet transport not available".to_string())
+                }
+            }
+            "ble" => {
+                if let Some(b) = ble {
+                    let result = if req.enabled { b.start(state) } else { b.stop(state) };
+                    match result {
+                        Ok(()) => (true, String::new()),
+                        Err(e) => (false, e.to_string()),
+                    }
+                } else {
+                    (false, "BLE transport not available".to_string())
                 }
             }
             _ => (false, format!("unknown transport: {}", req.id)),

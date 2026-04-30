@@ -748,6 +748,7 @@ impl Libqaul {
                         rpc_message,
                         Some(lan),
                         Some(internet),
+                        Some(ble),
                     )
                     .await;
                 }
