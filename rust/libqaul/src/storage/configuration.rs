@@ -164,6 +164,24 @@ impl Default for UserAccount {
     }
 }
 
+/// BLE Connection Module
+///
+/// `active` mirrors `lan.active` and `internet.active`: it is the
+/// persisted enabled/disabled flag for the BLE transport. Changes
+/// made through the Transports RPC (or the `qaul-cli transports`
+/// commands) write back to this field so the choice survives a
+/// daemon restart.
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct Ble {
+    pub active: bool,
+}
+
+impl Default for Ble {
+    fn default() -> Self {
+        Ble { active: true }
+    }
+}
+
 /// Debugging Configuration Options
 ///
 /// The following options can be configured:
@@ -239,6 +257,12 @@ pub struct Configuration {
     pub node: Node,
     pub lan: Lan,
     pub internet: Internet,
+    /// BLE transport configuration. `#[serde(default)]` so existing
+    /// `config.yaml` files (which predate this section) load with
+    /// the conservative default of `active: true` rather than failing
+    /// to deserialize.
+    #[serde(default)]
+    pub ble: Ble,
     pub user_accounts: Vec<UserAccount>,
     pub debug: DebugOption,
     pub routing: RoutingOptions,
@@ -250,6 +274,7 @@ impl Default for Configuration {
             node: Node::default(),
             lan: Lan::default(),
             internet: Internet::default(),
+            ble: Ble::default(),
             user_accounts: Vec::new(),
             debug: DebugOption::default(),
             routing: RoutingOptions::default(),
