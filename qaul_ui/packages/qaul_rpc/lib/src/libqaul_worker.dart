@@ -264,17 +264,23 @@ class LibqaulWorker {
     await _sendMessage(Modules.USERACCOUNTS, msg);
   }
 
-  Future<List<ChatRoom>> getAllChatRooms() async {
-    final msg = Group(groupListRequest: GroupListRequest());
-    final result = await _sendRequest<List<ChatRoom>>(
+  Future<PaginatedChatRooms?> getAllChatRooms({int? offset, int? limit}) async {
+    final request = GroupListRequest();
+    if (offset != null) request.offset = offset;
+    if (limit != null) request.limit = limit;
+
+    final msg = Group(groupListRequest: request);
+    final result = await _sendRequest<PaginatedChatRooms>(
       module: Modules.GROUP,
       data: msg,
       adapter: (res) {
-        if (res.data is List<ChatRoom>) return res.data as List<ChatRoom>;
+        if (res.data is PaginatedChatRooms) {
+          return res.data as PaginatedChatRooms;
+        }
         return null;
       },
     );
-    return result ?? [];
+    return result;
   }
 
   Future<ChatConversationList?> getChatRoomMessages(Uint8List chatId,
@@ -321,19 +327,26 @@ class LibqaulWorker {
     return result;
   }
 
-  Future<List<GroupInvite>> getGroupInvitesReceived() async {
-    final msg = Group(groupInvitedRequest: GroupInvitedRequest());
-    final result = await _sendRequest<List<GroupInvite>>(
+  Future<PaginatedGroupInvites?> getGroupInvitesReceived({
+    int? offset,
+    int? limit,
+  }) async {
+    final request = GroupInvitedRequest();
+    if (offset != null) request.offset = offset;
+    if (limit != null) request.limit = limit;
+
+    final msg = Group(groupInvitedRequest: request);
+    final result = await _sendRequest<PaginatedGroupInvites>(
       module: Modules.GROUP,
       data: msg,
       adapter: (res) {
-        if (res.data is List<GroupInvite>) {
-          return res.data as List<GroupInvite>;
+        if (res.data is PaginatedGroupInvites) {
+          return res.data as PaginatedGroupInvites;
         }
         return null;
       },
     );
-    return result ?? [];
+    return result;
   }
 
   Future<bool> createGroup(String name) async {

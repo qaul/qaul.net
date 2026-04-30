@@ -4,6 +4,16 @@ class ChatRoomListNotifier extends Notifier<List<ChatRoom>> {
   @override
   List<ChatRoom> build() => [];
 
+  void setAll(List<ChatRoom> rooms) => state = [...rooms];
+
+  void append(List<ChatRoom> rooms) {
+    final existingIds = state.map((r) => r.idBase58).toSet();
+    final newRooms =
+        rooms.where((r) => !existingIds.contains(r.idBase58)).toList();
+    if (newRooms.isEmpty) return;
+    state = [...state, ...newRooms];
+  }
+
   void add(ChatRoom room) => state = [room, ...state];
 
   void update(ChatRoom room) {

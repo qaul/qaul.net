@@ -36,9 +36,29 @@ class GroupInvite extends Equatable {
   List<Object?> get props => [senderIdBase58, groupDetails.idBase58];
 }
 
+class PaginatedGroupInvites {
+  PaginatedGroupInvites({
+    required this.invites,
+    this.pagination,
+  });
+
+  final List<GroupInvite> invites;
+  final PaginationState? pagination;
+}
+
 class GroupInviteListNotifier extends Notifier<List<GroupInvite>> {
   @override
   List<GroupInvite> build() => [];
+
+  void setAll(List<GroupInvite> invites) => state = [...invites];
+
+  void append(List<GroupInvite> invites) {
+    final existing = state.toSet();
+    final fresh =
+        invites.where((invite) => !existing.contains(invite)).toList();
+    if (fresh.isEmpty) return;
+    state = [...state, ...fresh];
+  }
 
   void add(GroupInvite invite) => state = [invite, ...state];
 
