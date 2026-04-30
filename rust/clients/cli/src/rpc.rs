@@ -113,7 +113,7 @@ impl Rpc {
                         super::authentication::Auth::rpc(state, message.data);
                     }
                     Ok(proto::Modules::Transports) => {
-                        log::trace!("Transports RPC response received");
+                        super::transports::Transports::rpc(message.data);
                     }
                     Ok(proto::Modules::None) => {}
                     Err(_) => {}
