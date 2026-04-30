@@ -258,8 +258,16 @@ impl Ble {
                 ble.devices.push(device);
             }
 
-            // start module
-            Self::module_start(state);
+            // Honour the persisted enabled/disabled flag — if BLE was
+            // turned off in a previous session the module should stay
+            // dormant on boot until an operator re-enables it via the
+            // Transports RPC.
+            let active = crate::storage::configuration::Configuration::get(state).ble.active;
+            if active {
+                Self::module_start(state);
+            } else {
+                log::info!("BLE transport disabled by configuration");
+            }
         } else {
             log::error!("No Bluetooth device available.");
         }
@@ -1103,9 +1111,19 @@ pub struct BleTransport {
 }
 
 impl BleTransport {
-    pub fn new() -> Self {
+    /// Build a `BleTransport` whose initial status reflects the
+    /// persisted `config.ble.active` flag. Mirrors how `Lan::init`
+    /// and `Internet::init` choose their initial `TransportStatus`
+    /// from the per-transport config flag.
+    pub fn new(state: &crate::QaulState) -> Self {
+        let active =
+            crate::storage::configuration::Configuration::get(state).ble.active;
         Self {
-            status: TransportStatus::Running,
+            status: if active {
+                TransportStatus::Running
+            } else {
+                TransportStatus::Disabled
+            },
         }
     }
 }
@@ -1140,6 +1158,15 @@ impl Transport for BleTransport {
             return Ok(());
         }
         Ble::module_stop(state);
+
+        // Persist active flag, mirroring the LAN / Internet transports.
+        {
+            let mut config =
+                crate::storage::configuration::Configuration::get_mut(state);
+            config.ble.active = false;
+        }
+        crate::storage::configuration::Configuration::save(state);
+
         self.status = TransportStatus::Disabled;
         log::info!("BLE transport stopped");
         Ok(())
@@ -1150,6 +1177,14 @@ impl Transport for BleTransport {
             return Ok(());
         }
         Ble::module_start(state);
+
+        {
+            let mut config =
+                crate::storage::configuration::Configuration::get_mut(state);
+            config.ble.active = true;
+        }
+        crate::storage::configuration::Configuration::save(state);
+
         self.status = TransportStatus::Running;
         log::info!("BLE transport started");
         Ok(())
