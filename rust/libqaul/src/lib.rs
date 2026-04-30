@@ -539,8 +539,9 @@ impl Libqaul {
         let mut internet = conn.internet.unwrap();
         let mut lan = conn.lan.unwrap();
 
-        // build BLE transport wrapper
-        let mut ble_transport = BleTransport::new();
+        // build BLE transport wrapper, honouring the persisted
+        // config.ble.active flag for its initial status.
+        let mut ble_transport = BleTransport::new(&self.state);
 
         // build transport registry
         let mut registry = connections::TransportRegistry::new();
