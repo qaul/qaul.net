@@ -21,19 +21,50 @@ class FeedMessage extends PublicPost {
 }
 
 class FeedMessageStore extends Notifier<List<FeedMessage>> {
-  PaginationState? get pagination =>
-      ref.read(publicMessagesProvider.notifier).pagination;
+  List<PublicPost> _posts = [];
+  PaginationState? _pagination;
+
+  PaginationState? get pagination => _pagination;
 
   @override
-  build() {
-    ref.listen(publicMessagesProvider, (_, _) => _asyncInit());
-    ref.listen(usersStoreProvider, (_, _) => _asyncInit());
-    _asyncInit();
+  List<FeedMessage> build() {
+    ref.listen(usersStoreProvider, (_, _) {
+      Future.microtask(_rebuildFeedMessages);
+    });
     return [];
   }
 
-  void _asyncInit() async {
-    final messages = ref.read(publicMessagesProvider);
+  /// Applies a feed RPC response: merges [data.posts] into [_posts] and
+  /// rebuilds [state] with resolved authors.
+  Future<void> applyPaginatedPosts(PaginatedPosts data) async {
+    final posts = data.posts;
+    final pagination = data.pagination;
+    if (pagination != null) {
+      _pagination = pagination;
+      if (pagination.offset == 0) {
+        _posts = List<PublicPost>.from(posts);
+      } else {
+        final existingIds = _posts.map((m) => m.messageIdBase58).toSet();
+        final newPosts = posts
+            .where((p) => !existingIds.contains(p.messageIdBase58))
+            .toList();
+        if (newPosts.isNotEmpty) {
+          _posts = [..._posts, ...newPosts];
+        }
+      }
+    } else {
+      final existingIds = _posts.map((m) => m.messageIdBase58).toSet();
+      final newPosts = posts
+          .where((p) => !existingIds.contains(p.messageIdBase58))
+          .toList();
+      if (newPosts.isNotEmpty) {
+        _posts = [...newPosts, ..._posts];
+      }
+    }
+    await _rebuildFeedMessages();
+  }
+
+  Future<void> _rebuildFeedMessages() async {
     final knownUsers = ref.read(usersStoreProvider);
     final authorById = <String, User>{
       for (final u in knownUsers) u.idBase58: u,
@@ -41,7 +72,7 @@ class FeedMessageStore extends Notifier<List<FeedMessage>> {
     final usersStore = ref.read(usersStoreProvider.notifier);
     final feedMessages = <FeedMessage>[];
 
-    for (final m in messages) {
+    for (final m in _posts) {
       if (m.senderIdBase58 == null) continue;
       User? author = authorById[m.senderIdBase58];
       if (author == null) {
@@ -61,20 +92,21 @@ class FeedMessageStore extends Notifier<List<FeedMessage>> {
   Future<void> refreshPublic() async {
     final worker = ref.read(qaulWorkerProvider);
     final indexes = state.map((e) => e.index ?? 1);
-    await worker.requestPublicMessages(
+    final result = await worker.requestPublicMessages(
       lastIndex: indexes.isEmpty ? null : indexes.reduce(math.max),
     );
+    if (result != null) await applyPaginatedPosts(result);
   }
 
   Future<PaginatedPosts?> loadMore(int offset, {int limit = 50}) async {
     final worker = ref.read(qaulWorkerProvider);
-    return await worker.requestPublicMessages(offset: offset, limit: limit);
+    final result = await worker.requestPublicMessages(offset: offset, limit: limit);
+    if (result != null) await applyPaginatedPosts(result);
+    return result;
   }
 
-  Future<void> sendMessage(String messageText) async {
+  Future<bool> sendMessage(String messageText) async {
     final worker = ref.read(qaulWorkerProvider);
-    await worker.sendPublicMessage(messageText);
+    return worker.sendPublicMessage(messageText);
   }
 }
-
-// 

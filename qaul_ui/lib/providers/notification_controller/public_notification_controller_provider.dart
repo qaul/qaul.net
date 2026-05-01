@@ -4,8 +4,8 @@ final publicNotificationControllerProvider =
     Provider((ref) => PublicNotificationController(ref));
 
 class PublicNotificationController
-    extends NotificationController<List<PublicPost>>
-    with DataProcessingStrategy<PublicPost> {
+    extends NotificationController<List<FeedMessage>>
+    with DataProcessingStrategy<FeedMessage> {
   // ignore: use_super_parameters
   PublicNotificationController(Ref ref) : super(ref);
 
@@ -17,8 +17,8 @@ class PublicNotificationController
   String get cacheKey => 'publicNotificationControllerLastPostIndexDataKey';
 
   @override
-  MapEntry<dynamic, void Function(List<PublicPost>?, List<PublicPost>)>
-      get strategy => MapEntry(publicMessagesProvider, execute);
+  MapEntry<dynamic, void Function(List<FeedMessage>?, List<FeedMessage>)>
+      get strategy => MapEntry(feedMessageStoreProvider, execute);
 
   @override
   Future<void> initialize() async {
@@ -26,7 +26,12 @@ class PublicNotificationController
     if (preferences.containsKey(cacheKey)) {
       _lastIndex = preferences.getInt(cacheKey)!;
     }
-    ref.read(qaulWorkerProvider).requestPublicMessages(offset: 0, limit: 50);
+    final result = await ref
+        .read(qaulWorkerProvider)
+        .requestPublicMessages(offset: 0, limit: 50);
+    if (result != null) {
+      await ref.read(feedMessageStoreProvider.notifier).applyPaginatedPosts(result);
+    }
     _log.config('Initialized:\n\t· Last Post Index: $_lastIndex');
   }
 
@@ -34,10 +39,10 @@ class PublicNotificationController
   void updatePersistentCachedData() => preferences.setInt(cacheKey, _lastIndex);
 
   // ***************************************************************************
-  // DataProcessingStrategy<PublicPost> Mixin
+  // DataProcessingStrategy<FeedMessage> Mixin
   // ***************************************************************************
   @override
-  Iterable<PublicPost> entriesToBeProcessed(List<PublicPost> values) {
+  Iterable<FeedMessage> entriesToBeProcessed(List<FeedMessage> values) {
     var newPosts = values.where((f) => (f.index ?? 1) > _lastIndex).toList();
     if (UserPrefsHelper.instance.notifyOnlyForVerifiedUsers) {
       final verifiedIds = ref
@@ -56,7 +61,7 @@ class PublicNotificationController
     return newPosts;
   }
 
-  void _updateCachedIndex(List<PublicPost> newPosts) {
+  void _updateCachedIndex(List<FeedMessage> newPosts) {
     var maxIndex = newPosts.map((e) => e.index ?? 0).reduce(max);
     if (maxIndex > _lastIndex) {
       _log.finer('updating last public post index to $maxIndex');
@@ -66,7 +71,7 @@ class PublicNotificationController
   }
 
   @override
-  LocalNotification? process(PublicPost value) {
+  LocalNotification? process(FeedMessage value) {
     if (currentVisibleHomeTab == TabType.public) {
       _log.finer('currently in Public tab, filtering notifications');
       return null;
@@ -87,7 +92,7 @@ class PublicNotificationController
     );
   }
 
-  bool _lastMessageIsFromLocalUser(PublicPost post) =>
+  bool _lastMessageIsFromLocalUser(FeedMessage post) =>
       post.senderId != null && post.senderId!.equals(localUser.id);
 
   @override
