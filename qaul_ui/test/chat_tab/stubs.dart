@@ -37,15 +37,18 @@ class StubLibqaulWorker implements LibqaulWorker {
   }
 
   @override
-  Future<List<ChatRoom>> getAllChatRooms() async {
+  Future<PaginatedChatRooms?> getAllChatRooms({int? offset, int? limit}) async {
     _logger.info('requested all Chat rooms fetch; ignoring...');
-    return [];
+    return PaginatedChatRooms(rooms: []);
   }
 
   @override
-  Future<List<GroupInvite>> getGroupInvitesReceived() async {
+  Future<PaginatedGroupInvites?> getGroupInvitesReceived({
+    int? offset,
+    int? limit,
+  }) async {
     _logger.info('requested group invites fetch; ignoring...');
-    return [];
+    return PaginatedGroupInvites(invites: []);
   }
 
   static const int _mockTotalUsers = 125;
