@@ -93,12 +93,13 @@ class GroupTranslator extends RpcModuleTranslator {
     if (res.data is PaginatedChatRooms) {
       final paginated = res.data as PaginatedChatRooms;
       final pagination = paginated.pagination;
-      if (pagination != null) {
-        if (pagination.offset == 0) {
-          state.setAll(paginated.rooms);
-        } else {
-          state.append(paginated.rooms);
-        }
+      // offset > 0 → user scrolled to load more; append the new page.
+      // offset == 0 (or no pagination metadata) → first-page fetch from initial
+      // load, pull-to-refresh, or polling. Merge instead of replacing so any
+      // already-loaded later pages survive. Pull-to-refresh resets state
+      // explicitly via the notifier's clear() before fetching.
+      if (pagination != null && pagination.offset > 0) {
+        state.append(paginated.rooms);
         return;
       }
       for (final room in paginated.rooms) {
@@ -119,15 +120,10 @@ class GroupTranslator extends RpcModuleTranslator {
       final paginated = res.data as PaginatedGroupInvites;
       final invites = ref.read(groupInvitesProvider.notifier);
       final pagination = paginated.pagination;
-      if (pagination != null) {
-        if (pagination.offset == 0) {
-          invites.setAll(paginated.invites);
-        } else {
-          invites.append(paginated.invites);
-        }
+      if (pagination != null && pagination.offset > 0) {
+        invites.append(paginated.invites);
         return;
       }
-
       for (final invite in paginated.invites) {
         if (!invites.contains(invite)) {
           invites.add(invite);
@@ -135,7 +131,17 @@ class GroupTranslator extends RpcModuleTranslator {
           invites.update(invite);
         }
       }
-      invites.filterInvitesNotIn(paginated.invites);
+      // Prune stale invites (e.g. one the user just accepted/declined) only
+      // when the response is the complete set: legacy unpaginated path, or a
+      // single first page with no further pages. With multi-page lists we
+      // can't tell whether a "missing" invite was removed on the backend or
+      // simply lives on a later page, so we leave state alone and rely on
+      // pull-to-refresh.
+      final isCompleteList =
+          pagination == null || (pagination.offset == 0 && !pagination.hasMore);
+      if (isCompleteList) {
+        invites.retainAll(paginated.invites);
+      }
     }
   }
 }

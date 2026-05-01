@@ -4,9 +4,6 @@ final chatRoomsStoreProvider = NotifierProvider<ChatRoomsStore, void>(
   ChatRoomsStore.new,
 );
 
-@Deprecated('Use chatRoomsStoreProvider instead.')
-final groupStoreProvider = chatRoomsStoreProvider;
-
 class ChatRoomsStore extends Notifier<void> {
   static const defaultPageSize = 50;
 
@@ -35,13 +32,6 @@ class ChatRoomsStore extends Notifier<void> {
     );
   }
 
-  Future<PaginatedChatRooms?> getMoreChatRooms(
-    int offset, {
-    int limit = defaultPageSize,
-  }) async {
-    return getChatRooms(offset: offset, limit: limit);
-  }
-
   Future<PaginatedGroupInvites?> getGroupInvites({
     int offset = 0,
     int limit = defaultPageSize,
@@ -63,11 +53,11 @@ class ChatRoomsStore extends Notifier<void> {
     );
   }
 
-  Future<PaginatedGroupInvites?> getMoreGroupInvites(
-    int offset, {
-    int limit = defaultPageSize,
-  }) async {
-    return getGroupInvites(offset: offset, limit: limit);
+  Future<void> pollChatRoomsAndInvites() async {
+    await Future.wait([
+      getChatRooms(offset: 0, limit: defaultPageSize),
+      getGroupInvites(offset: 0, limit: defaultPageSize),
+    ]);
   }
 
   Future<List<ChatRoom>> refreshChatRooms({int limit = defaultPageSize}) async {
