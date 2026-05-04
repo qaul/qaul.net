@@ -12,14 +12,18 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:qaul_components_widgetbook/use_cases/chat_header.dart'
     as _qaul_components_widgetbook_use_cases_chat_header;
-import 'package:qaul_components_widgetbook/use_cases/qaul_color_sheet.dart'
-    as _qaul_components_widgetbook_use_cases_qaul_color_sheet;
+import 'package:qaul_components_widgetbook/use_cases/chat_room.dart'
+    as _qaul_components_widgetbook_use_cases_chat_room;
 import 'package:qaul_components_widgetbook/use_cases/qaul_chat_bubble.dart'
     as _qaul_components_widgetbook_use_cases_qaul_chat_bubble;
+import 'package:qaul_components_widgetbook/use_cases/qaul_color_sheet.dart'
+    as _qaul_components_widgetbook_use_cases_qaul_color_sheet;
 import 'package:qaul_components_widgetbook/use_cases/qaul_fab.dart'
     as _qaul_components_widgetbook_use_cases_qaul_fab;
 import 'package:qaul_components_widgetbook/use_cases/qaul_navbar.dart'
     as _qaul_components_widgetbook_use_cases_qaul_navbar;
+import 'package:qaul_components_widgetbook/use_cases/room_meta_message.dart'
+    as _qaul_components_widgetbook_use_cases_room_meta_message;
 import 'package:widgetbook/widgetbook.dart' as _widgetbook;
 
 final directories = <_widgetbook.WidgetbookNode>[
@@ -62,6 +66,16 @@ final directories = <_widgetbook.WidgetbookNode>[
         ],
       ),
       _widgetbook.WidgetbookComponent(
+        name: 'ChatRoom',
+        useCases: [
+          _widgetbook.WidgetbookUseCase(
+            name: 'Preview',
+            builder: _qaul_components_widgetbook_use_cases_chat_room
+                .buildChatRoomPreviewUseCase,
+          ),
+        ],
+      ),
+      _widgetbook.WidgetbookComponent(
         name: 'QaulChatBubble',
         useCases: [
           _widgetbook.WidgetbookUseCase(
@@ -98,6 +112,16 @@ final directories = <_widgetbook.WidgetbookNode>[
             name: 'Vertical (tablet/desktop)',
             builder: _qaul_components_widgetbook_use_cases_qaul_navbar
                 .buildNavBarVerticalUseCase,
+          ),
+        ],
+      ),
+      _widgetbook.WidgetbookComponent(
+        name: 'RoomMetaMessage',
+        useCases: [
+          _widgetbook.WidgetbookUseCase(
+            name: 'Date',
+            builder: _qaul_components_widgetbook_use_cases_room_meta_message
+                .buildRoomMetaMessageDateUseCase,
           ),
         ],
       ),

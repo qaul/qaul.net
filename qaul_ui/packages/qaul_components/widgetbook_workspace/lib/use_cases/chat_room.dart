@@ -1,18 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:qaul_components/qaul_components.dart';
+import 'package:qaul_components/widgets/chat_message.dart';
+import 'package:qaul_components/widgets/chat_room.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
 final _previewClock = DateTime(2026, 4, 12, 14, 30);
 
-@widgetbook.UseCase(name: 'Conversation preview', type: QaulChatBubble)
-Widget buildChatBubbleConversationUseCase(BuildContext context) {
-  const dateLabels = ['Friday, April 11, 2026 ', 'Saturday, April 12, 2026 '];
+/// Date headers in Widgetbook only: vertical space above/below so they clear
+/// nearby bubble timestamps (app spacing unchanged).
+class _WidgetbookPaddedDateMeta extends ChatMessage {
+  const _WidgetbookPaddedDateMeta({required this.date});
 
+  final DateTime date;
+
+  static const _padding = EdgeInsets.symmetric(vertical: 16);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: _padding,
+      child: RoomMetaMessage.date(date: date),
+    );
+  }
+}
+
+List<ChatMessage> _buildPreviewMessages() {
   final clock = _previewClock;
   final today = DateTime(clock.year, clock.month, clock.day);
   final yesterday = today.subtract(const Duration(days: 1));
 
-  final rawMessages = [
+  return [
+    _WidgetbookPaddedDateMeta(date: yesterday),
     QaulChatBubbleMessage(
       content: 'Hello in 16px 300 font',
       sentAt: yesterday.copyWith(hour: 16, minute: 13),
@@ -78,16 +96,7 @@ Widget buildChatBubbleConversationUseCase(BuildContext context) {
       messageType: MessageType.secondary,
       edges: const [],
     ),
-    QaulChatBubbleMessage(
-      content: 'Message with delay',
-      sentAt: today
-          .subtract(const Duration(days: 4))
-          .copyWith(hour: 12, minute: 14),
-      receivedAt: today.copyWith(hour: 12, minute: 30),
-      status: MessageStatus.read,
-      messageType: MessageType.primary,
-      edges: const [],
-    ),
+    _WidgetbookPaddedDateMeta(date: today),
     QaulChatBubbleMessage(
       content: 'Out and delivered',
       sentAt: clock.subtract(const Duration(minutes: 12)),
@@ -113,76 +122,15 @@ Widget buildChatBubbleConversationUseCase(BuildContext context) {
       edges: const [],
     ),
   ];
+}
 
-  final items = computeChatBubbleDisplayItems(rawMessages);
-
-  var dateLabelIndex = 0;
-  final children = <Widget>[
-    const SizedBox(height: 16),
-  ];
-
-  for (final item in items) {
-    var addedSeparator = false;
-    if (dateLabelIndex == 0) {
-      children.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Center(
-            child: Text(
-              dateLabels[dateLabelIndex++],
-              style: TextStyle(
-                fontSize: 12,
-                height: 1.2,
-                color: Colors.white.withValues(alpha: 0.7),
-              ),
-            ),
-          ),
-        ),
-      );
-      addedSeparator = true;
-    } else if (item.message.content == 'Out and delivered' &&
-        dateLabelIndex == 1) {
-      children.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Center(
-            child: Text(
-              dateLabels[dateLabelIndex++],
-              style: TextStyle(
-                fontSize: 12,
-                height: 1.2,
-                color: Colors.white.withValues(alpha: 0.7),
-              ),
-            ),
-          ),
-        ),
-      );
-      addedSeparator = true;
-    }
-
-    children.add(
-      Padding(
-        padding: EdgeInsets.only(top: addedSeparator ? 0 : item.marginTop),
-        child: QaulChatBubble(
-          message: item.message,
-          clock: clock,
-          showTimestamp: item.showTimestamp,
-        ),
-      ),
-    );
-  }
-
+@widgetbook.UseCase(name: 'Preview', type: ChatRoom)
+Widget buildChatRoomPreviewUseCase(BuildContext context) {
   return Container(
     color: Colors.black,
-    padding: const EdgeInsets.all(16),
-    child: Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 500),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: children,
-        ),
-      ),
+    child: ChatRoom(
+      messages: _buildPreviewMessages(),
+      clock: _previewClock,
     ),
   );
 }

@@ -4,3 +4,4 @@ export 'widgets/qaul_chat_bubble.dart';
 export 'widgets/qaul_fab.dart';
 export 'widgets/qaul_loading_indicator.dart';
 export 'widgets/qaul_navbar.dart';
+export 'widgets/room_meta_message.dart';
