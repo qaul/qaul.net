@@ -69,14 +69,9 @@ final directories = <_widgetbook.WidgetbookNode>[
         name: 'ChatRoom',
         useCases: [
           _widgetbook.WidgetbookUseCase(
-            name: 'Landscape',
+            name: 'Preview',
             builder: _qaul_components_widgetbook_use_cases_chat_room
-                .buildChatRoomLandscapeUseCase,
-          ),
-          _widgetbook.WidgetbookUseCase(
-            name: 'Portrait',
-            builder: _qaul_components_widgetbook_use_cases_chat_room
-                .buildChatRoomPortraitUseCase,
+                .buildChatRoomPreviewUseCase,
           ),
         ],
       ),

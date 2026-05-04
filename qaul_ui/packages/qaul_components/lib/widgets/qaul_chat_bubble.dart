@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:qaul_components/widgets/chat_message.dart';
+
+import 'chat_message.dart';
 
 // ---------------------------------------------------------------------------
 // Enums
@@ -257,7 +258,7 @@ class QaulChatBubble extends StatelessWidget {
                     style: ChatBubbleStyle.textStyle,
                     text: content,
                   );
-                  final gap = ChatBubbleStyle.gapBetweenTextAndDate;
+                  const gap = ChatBubbleStyle.gapBetweenTextAndDate;
                   final timeLabelPainter = TextPainter(
                     text: TextSpan(
                       text: timeLabel,
@@ -320,7 +321,7 @@ class QaulChatBubble extends StatelessWidget {
                             text: messageSpan,
                           ),
                         ),
-                        SizedBox(width: gap),
+                        const SizedBox(width: gap),
                         timeRow,
                       ],
                     );
@@ -338,7 +339,7 @@ class QaulChatBubble extends StatelessWidget {
                         text: messageSpan,
                       ),
                       Padding(
-                        padding: EdgeInsets.only(top: gap),
+                        padding: const EdgeInsets.only(top: gap),
                         child: timeRow,
                       ),
                     ],

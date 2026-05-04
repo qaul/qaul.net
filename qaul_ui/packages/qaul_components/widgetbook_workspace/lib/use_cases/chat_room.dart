@@ -9,7 +9,7 @@ final _previewClock = DateTime(2026, 4, 12, 14, 30);
 /// Date headers in Widgetbook only: vertical space above/below so they clear
 /// nearby bubble timestamps (app spacing unchanged).
 class _WidgetbookPaddedDateMeta extends ChatMessage {
-  const _WidgetbookPaddedDateMeta({super.key, required this.date});
+  const _WidgetbookPaddedDateMeta({required this.date});
 
   final DateTime date;
 
@@ -124,27 +124,13 @@ List<ChatMessage> _buildPreviewMessages() {
   ];
 }
 
-Widget _buildScaffoldedRoom({required double maxWidth}) {
+@widgetbook.UseCase(name: 'Preview', type: ChatRoom)
+Widget buildChatRoomPreviewUseCase(BuildContext context) {
   return Container(
     color: Colors.black,
-    child: Center(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: maxWidth),
-        child: ChatRoom(
-          messages: _buildPreviewMessages(),
-          clock: _previewClock,
-        ),
-      ),
+    child: ChatRoom(
+      messages: _buildPreviewMessages(),
+      clock: _previewClock,
     ),
   );
-}
-
-@widgetbook.UseCase(name: 'Portrait', type: ChatRoom)
-Widget buildChatRoomPortraitUseCase(BuildContext context) {
-  return _buildScaffoldedRoom(maxWidth: 402);
-}
-
-@widgetbook.UseCase(name: 'Landscape', type: ChatRoom)
-Widget buildChatRoomLandscapeUseCase(BuildContext context) {
-  return _buildScaffoldedRoom(maxWidth: 900);
 }
