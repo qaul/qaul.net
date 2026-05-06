@@ -403,13 +403,10 @@ class QaulChatBubble extends StatelessWidget {
 // Display item & layout constants
 // ---------------------------------------------------------------------------
 
-/// Vertical gap between bubbles in the same merged run (same minute, same side).
 const double kChatBubbleLinkedGap = 4.0;
 
-/// Vertical gap when the previous bubble is **not** linked (different time burst) — 1:1.
 const double kChatBubbleSeparatedGap = 12.0;
 
-/// Same as [kChatBubbleSeparatedGap] but for group rooms (tighter list rhythm).
 const double kGroupChatBubbleSeparatedGap = 4.0;
 
 class QaulChatBubbleDisplayItem {
@@ -428,10 +425,6 @@ class QaulChatBubbleDisplayItem {
 // Public helpers
 // ---------------------------------------------------------------------------
 
-/// Bubbles share a merged run (connected tails) when they are on the same side
-/// and fall in the same calendar **minute** (sender ids must match when both
-/// present). Same rule for 1:1 and group; spacing between **unlinked** rows is
-/// the only difference — see [computeChatBubbleDisplayItems].
 bool directChatBubblesShareMinute(QaulChatBubbleMessage a, QaulChatBubbleMessage b) {
   if (a.messageType != b.messageType) return false;
 
@@ -455,57 +448,11 @@ bool directChatBubblesShareMinute(QaulChatBubbleMessage a, QaulChatBubbleMessage
 bool isChatBubbleLinked(QaulChatBubbleMessage a, QaulChatBubbleMessage b) =>
     directChatBubblesShareMinute(a, b);
 
-List<QaulChatBubbleDisplayItem> computeChatBubbleDisplayItems(
-  List<QaulChatBubbleMessage> messages, {
-  ChatRenderMode layoutMode = ChatRenderMode.direct,
-}) {
-  if (messages.isEmpty) return [];
-
-  final separatedGap = layoutMode == ChatRenderMode.group
-      ? kGroupChatBubbleSeparatedGap
-      : kChatBubbleSeparatedGap;
-
-  final result = <QaulChatBubbleDisplayItem>[];
-
-  for (var i = 0; i < messages.length; i++) {
-    final prev = i > 0 ? messages[i - 1] : null;
-    final curr = messages[i];
-    final next = i < messages.length - 1 ? messages[i + 1] : null;
-
-    final prevLinked =
-        prev != null && directChatBubblesShareMinute(prev, curr);
-    final nextLinked =
-        next != null && directChatBubblesShareMinute(curr, next);
-
-    final isPrimary = curr.messageType == MessageType.primary;
-
-    final edges = isPrimary
-        ? _edgesForPrimary(prevLinked, nextLinked)
-        : _edgesForSecondary(prevLinked, nextLinked);
-
-    final showTimestamp = !nextLinked;
-
-    final marginTop = i == 0
-        ? 0.0
-        : (prevLinked ? kChatBubbleLinkedGap : separatedGap);
-
-    result.add(
-      QaulChatBubbleDisplayItem(
-        message: curr.copyWith(edges: edges),
-        showTimestamp: showTimestamp,
-        marginTop: marginTop,
-      ),
-    );
-  }
-
-  return result;
-}
-
 // ---------------------------------------------------------------------------
 // Private helpers
 // ---------------------------------------------------------------------------
 
-List<TailEdge> _edgesForPrimary(bool hasPreviousLinked, bool hasNextLinked) {
+List<TailEdge> tailEdgesForPrimary(bool hasPreviousLinked, bool hasNextLinked) {
   if (!hasPreviousLinked && !hasNextLinked) return const [TailEdge.bottomEnd];
 
   if (hasPreviousLinked && hasNextLinked) {
@@ -517,7 +464,7 @@ List<TailEdge> _edgesForPrimary(bool hasPreviousLinked, bool hasNextLinked) {
   return const [TailEdge.topEnd];
 }
 
-List<TailEdge> _edgesForSecondary(bool hasPreviousLinked, bool hasNextLinked) {
+List<TailEdge> tailEdgesForSecondary(bool hasPreviousLinked, bool hasNextLinked) {
   if (!hasPreviousLinked && !hasNextLinked) {
     return const [TailEdge.bottomStart];
   }

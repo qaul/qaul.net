@@ -116,8 +116,8 @@ void main() {
     });
 
     test(
-        'group layout: edges and timestamps match direct; only separated '
-        'vertical gap is tighter (4 vs 12)', () {
+        'group layout: edges/timestamps match direct; 4px vertical only for same '
+            'participant streak, 12px when switching me vs others', () {
       final base = DateTime(2026, 4, 19, 19, 23);
 
       final messages = [
@@ -163,8 +163,8 @@ void main() {
 
       expect(directItems[1].marginTop, kChatBubbleSeparatedGap);
       expect(directItems[2].marginTop, kChatBubbleSeparatedGap);
-      expect(groupItems[1].marginTop, kGroupChatBubbleSeparatedGap);
-      expect(groupItems[2].marginTop, kGroupChatBubbleSeparatedGap);
+      expect(groupItems[1].marginTop, kChatBubbleLinkedGap);
+      expect(groupItems[2].marginTop, kChatBubbleSeparatedGap);
     });
   });
 

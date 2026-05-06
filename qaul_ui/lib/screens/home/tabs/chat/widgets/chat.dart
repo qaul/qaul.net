@@ -53,13 +53,12 @@ part 'group_settings.dart';
 
 part 'image_message_widget.dart';
 
+part 'chat_timeline_projection.dart';
+
 typedef OnSendPressed = void Function(String rawText);
 
 ChatRenderMode resolveChatRenderMode(ChatRoom room) =>
     room.isGroupChatRoom ? ChatRenderMode.group : ChatRenderMode.direct;
-
-bool _sameLocalCalendarDay(DateTime a, DateTime b) =>
-    a.year == b.year && a.month == b.month && a.day == b.day;
 
 const _kChatRouteName = '/chat';
 
@@ -593,117 +592,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     required AppLocalizations l10n,
     required ChatRenderMode renderMode,
   }) {
-    final domainMessages = room.messages?.sorted();
-    if (domainMessages == null) return null;
-
-    final internalMessages = <types.Message>[];
-    final textMessages = <Message>[];
-
-    for (final m in domainMessages) {
-      final author = _author(m, l10n);
-      final internal = m.toInternalMessage(
-        author,
-        ref,
-        l10n: l10n,
-        room: room,
-      );
-
-      if (m.content is TextMessageContent && internal is types.TextMessage) {
-        // Status + ticks live in [QaulChatBubble]; hide flutter_chat_ui's
-        // trailing status slot (avoids Row crossAxisAlignment.end shift).
-        internalMessages.add(
-          internal.copyWith(
-            status: null,
-            showStatus: false,
-          ),
-        );
-        textMessages.add(m);
-      } else {
-        internalMessages.add(internal);
-      }
-    }
-
-    final bubbleSources = [...textMessages]
-      ..sort((a, b) => a.sentAt.compareTo(b.sentAt));
-
-    final bubbleMessages = <QaulChatBubbleMessage>[];
-    final bubbleIds = <String>[];
-
-    for (final m in bubbleSources) {
-      final isMe = m.senderId.equals(user.id);
-      bubbleMessages.add(
-        QaulChatBubbleMessage(
-          content: (m.content as TextMessageContent).content,
-          sentAt: m.sentAt,
-          receivedAt: m.receivedAt,
-          status: m.status == MessageState.sent
-              ? MessageStatus.sent
-              : (m.status == MessageState.confirmed ||
-                      m.status == MessageState.confirmedByAll
-                  ? MessageStatus.read
-                  : MessageStatus.notSent),
-          messageType: isMe ? MessageType.primary : MessageType.secondary,
-          edges: const [],
-          senderIdBase58: m.senderIdBase58,
-        ),
-      );
-      bubbleIds.add(m.messageIdBase58);
-    }
-
-    final displayItems = computeChatBubbleDisplayItems(
-      bubbleMessages,
-      layoutMode: renderMode,
+    final projection = buildChatTimelineProjection(
+      room: room,
+      signedInUser: user,
+      l10n: l10n,
+      renderMode: renderMode,
+      ref: ref,
+      resolveAuthor: _author,
     );
-    final map = <String, QaulChatBubbleDisplayItem>{};
-    for (var i = 0; i < bubbleIds.length; i++) {
-      map[bubbleIds[i]] = displayItems[i];
-    }
-    final ordered = [...domainMessages]..sort((a, b) => a.sentAt.compareTo(b.sentAt));
-    final presentations = <String, MessagePresentation>{};
-    for (var i = 0; i < ordered.length; i++) {
-      final m = ordered[i];
-      final isPrimary = m.senderId.equals(user.id);
-      final isGroupIncoming = renderMode == ChatRenderMode.group && !isPrimary;
-      final authorForGroup = isGroupIncoming ? _author(m, l10n) : null;
-      final groupSender = authorForGroup == null
-          ? null
-          : QaulGroupMessageSender(
-              idBase58: authorForGroup.idBase58,
-              name: authorForGroup.name,
-              isConnected: authorForGroup.isConnected,
-            );
-      final prev = i > 0 ? ordered[i - 1] : null;
-      final next = i < ordered.length - 1 ? ordered[i + 1] : null;
-      final prevSameSender = prev != null && prev.senderIdBase58 == m.senderIdBase58;
-      final nextSameSender = next != null && next.senderIdBase58 == m.senderIdBase58;
-      final hasNextFromSameSenderOnSameCalendarDay = next != null &&
-          nextSameSender &&
-          _sameLocalCalendarDay(m.sentAt, next.sentAt);
-
-      final textDisplay = map[m.messageIdBase58];
-      final incomingFlags = isGroupIncoming
-          ? GroupIncomingBubbleFlags.fromSequentialMessages(
-              textDisplay: textDisplay,
-              prevSameSender: prevSameSender,
-              nextSameSender: nextSameSender,
-              hasNextFromSameSenderOnSameCalendarDay:
-                  hasNextFromSameSenderOnSameCalendarDay,
-              layoutMode: renderMode,
-            )
-          : null;
-
-      presentations[m.messageIdBase58] = MessagePresentation(
-        messageId: m.messageIdBase58,
-        isPrimary: isPrimary,
-        sender: groupSender,
-        showSenderName: incomingFlags?.showSenderName ?? false,
-        showSenderAvatar: incomingFlags?.showSenderAvatar ?? false,
-        bubbleDisplay: textDisplay,
-      );
-    }
-    _messagePresentations = presentations;
-
-    return internalMessages;
+    if (projection == null) return null;
+    _messagePresentations = projection.presentations;
+    return projection.internalMessages;
   }
 
   Widget _bubbleBuilder(
@@ -735,7 +634,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       );
     }
 
-    final legacyBubble = _buildLegacyBubble(child, message, nextMessageInGroup);
+    final legacyBubble = _buildLegacyBubble(
+      child,
+      message,
+      legacyClustersWithFollowing:
+          presentation.meta.legacyBubbleClustersWithNext,
+    );
     return ChatMessageRenderer.wrapNonText(
       child: legacyBubble,
       presentation: presentation,
@@ -745,9 +649,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   Widget _buildLegacyBubble(
     Widget child,
-    types.Message message,
-    bool nextMessageInGroup,
-  ) {
+    types.Message message, {
+    required bool legacyClustersWithFollowing,
+  }) {
     const radius = 20.0;
     return Builder(
       builder: (context) {
@@ -762,7 +666,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           color: user.toInternalUser().id != message.author.id
               ? Colors.grey.shade200
               : Colors.lightBlue.shade700,
-          nip: nextMessageInGroup
+          nip: legacyClustersWithFollowing
               ? BubbleNip.no
               : user.toInternalUser().id != message.author.id
                   ? BubbleNip.leftBottom

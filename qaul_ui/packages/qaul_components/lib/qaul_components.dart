@@ -1,6 +1,8 @@
 export 'styles/qaul_color_sheet.dart';
 export 'widgets/chat_header.dart';
+export 'widgets/compute_message_presentation.dart';
 export 'widgets/group_chat_messages.dart';
+export 'widgets/message_presentation_meta.dart';
 export 'widgets/qaul_chat_bubble.dart';
 export 'widgets/qaul_fab.dart';
 export 'widgets/qaul_loading_indicator.dart';

@@ -128,23 +128,23 @@ const _previewSenders = <String, QaulGroupMessageSender>{
 };
 
 Widget _groupPreviewTextRow({
-  required List<QaulChatBubbleDisplayItem> items,
+  required Map<String, MessagePresentationComputation> computed,
+  required List<QaulChatBubbleMessage> raw,
   required int index,
   required DateTime clock,
 }) {
-  final item = items[index];
-  final isPrimary = item.message.messageType == MessageType.primary;
-  final senderId = item.message.senderIdBase58;
+  final id = 'preview-$index';
+  final m = raw[index];
+  final isPrimary = m.messageType == MessageType.primary;
+  final senderId = m.senderIdBase58;
   final sender =
       isPrimary ? null : (senderId == null ? null : _previewSenders[senderId]);
 
   return ChatMessageRenderer.renderText(
-    presentation: MessagePresentation.forSequentialTextBubble(
-      item: item,
-      index: index,
-      items: items,
-      isPrimary: isPrimary,
+    presentation: MessagePresentation.fromComputation(
+      messageId: id,
       sender: sender,
+      computation: computed[id]!,
     ),
     mode: ChatRenderMode.group,
     clock: clock,
@@ -155,24 +155,45 @@ class GroupChatPreview extends StatelessWidget {
   const GroupChatPreview({
     super.key,
     required this.clock,
-    this.padding = const EdgeInsets.fromLTRB(16, 16, 16, 24),
+    this.padding = EdgeInsets.zero,
+    this.surfaceColor,
+    this.dateLabelColor,
   });
 
   final DateTime clock;
   final EdgeInsets padding;
 
+  /// When set (e.g. Widgetbook), replaces theme-based chat background.
+  final Color? surfaceColor;
+
+  /// When set, replaces theme-based date divider text color.
+  final Color? dateLabelColor;
+
   @override
   Widget build(BuildContext context) {
     final messages = buildGroupPreviewRawMessages(clock);
-    final items = computeChatBubbleDisplayItems(
-      messages,
+    final ascendingRows = <ChatTimelinePresentationRow>[
+      for (var i = 0; i < messages.length; i++)
+        ChatTimelinePresentationRow(
+          messageIdBase58: 'preview-$i',
+          senderIdBase58: messages[i].senderIdBase58 ?? '',
+          sentAt: messages[i].sentAt,
+          isText: true,
+          isOutgoing: messages[i].messageType == MessageType.primary,
+          qaulBubbleBaseWithoutLayout: messages[i].copyWith(edges: const []),
+        ),
+    ];
+    final computed = computeChatMessagePresentation(
+      ascendingTimeline: ascendingRows,
       layoutMode: ChatRenderMode.group,
     );
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final background = isDark
-        ? Colors.black
-        : Theme.of(context).colorScheme.surfaceContainerHighest;
-    final dateColor = isDark ? Colors.white70 : Colors.black54;
+    final background = surfaceColor ??
+        (isDark
+            ? Colors.black
+            : Theme.of(context).colorScheme.surfaceContainerHighest);
+    final dateColor = dateLabelColor ??
+        (isDark ? Colors.white70 : Colors.black54);
 
     return ColoredBox(
       color: background,
@@ -181,8 +202,9 @@ class GroupChatPreview extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            for (var i = 0; i < items.length; i++) ...[
-              if (items[i].message.content == 'Written in the morning')
+            const SizedBox(height: 16),
+            for (var i = 0; i < messages.length; i++) ...[
+              if (messages[i].content == 'Written in the morning')
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Center(
@@ -197,7 +219,8 @@ class GroupChatPreview extends StatelessWidget {
                   ),
                 ),
               _groupPreviewTextRow(
-                items: items,
+                computed: computed,
+                raw: messages,
                 index: i,
                 clock: clock,
               ),

@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:utils/utils.dart';
 
+import 'message_presentation_meta.dart';
 import 'qaul_chat_bubble.dart';
 
-bool _sameLocalCalendarDay(DateTime a, DateTime b) =>
-    a.year == b.year && a.month == b.month && a.day == b.day;
-
-/// Lightweight sender snapshot for group chat UI (decouples from RPC `User`).
 @immutable
 class QaulGroupMessageSender {
   const QaulGroupMessageSender({
@@ -18,47 +15,7 @@ class QaulGroupMessageSender {
   final String idBase58;
   final String name;
 
-  /// When true, [GroupSenderAvatar] shows the online indicator.
   final bool isConnected;
-}
-
-/// Name + avatar visibility for an incoming group text bubble, given run context.
-@immutable
-class GroupIncomingBubbleFlags {
-  const GroupIncomingBubbleFlags({
-    required this.showSenderName,
-    required this.showSenderAvatar,
-  });
-
-  final bool showSenderName;
-  final bool showSenderAvatar;
-
-  static GroupIncomingBubbleFlags fromSequentialMessages({
-    required QaulChatBubbleDisplayItem? textDisplay,
-    required bool prevSameSender,
-    required bool nextSameSender,
-    /// Next timeline message is the same sender and same **local calendar day**
-    /// (run continues; hide avatar). If the next message is the next day, this
-    /// is false so the avatar shows on the last bubble before a date boundary.
-    required bool hasNextFromSameSenderOnSameCalendarDay,
-    required ChatRenderMode layoutMode,
-  }) {
-    final showSenderName = textDisplay != null
-        ? textDisplay.message.edges.contains(TailEdge.bottomStart) &&
-            !textDisplay.message.edges.contains(TailEdge.topStart)
-        : !prevSameSender;
-    // Group: avatar on the last bubble of each per-day streak from a sender
-    // (new calendar day starts a new “group”). 1:1 keeps minute-cluster alignment.
-    final showSenderAvatar = layoutMode == ChatRenderMode.group
-        ? !hasNextFromSameSenderOnSameCalendarDay
-        : (textDisplay != null
-            ? textDisplay.showTimestamp
-            : !nextSameSender);
-    return GroupIncomingBubbleFlags(
-      showSenderName: showSenderName,
-      showSenderAvatar: showSenderAvatar,
-    );
-  }
 }
 
 @immutable
@@ -67,61 +24,28 @@ class MessagePresentation {
     required this.messageId,
     required this.isPrimary,
     required this.sender,
-    required this.showSenderName,
-    required this.showSenderAvatar,
+    required this.meta,
     required this.bubbleDisplay,
   });
 
-  /// Same grouping rules as the chat screen, for flat lists (e.g. Widgetbook
-  /// previews) so [ChatMessageRenderer.renderText] is the single render path.
-  factory MessagePresentation.forSequentialTextBubble({
-    required QaulChatBubbleDisplayItem item,
-    required int index,
-    required List<QaulChatBubbleDisplayItem> items,
-    required bool isPrimary,
+  factory MessagePresentation.fromComputation({
+    required String messageId,
     required QaulGroupMessageSender? sender,
+    required MessagePresentationComputation computation,
   }) {
-    if (isPrimary) {
-      return MessagePresentation(
-        messageId: 'seq-$index',
-        isPrimary: true,
-        sender: null,
-        showSenderName: false,
-        showSenderAvatar: false,
-        bubbleDisplay: item,
-      );
-    }
-    final prev = index > 0 ? items[index - 1] : null;
-    final next = index < items.length - 1 ? items[index + 1] : null;
-    final prevSame = prev != null &&
-        prev.message.senderIdBase58 == item.message.senderIdBase58;
-    final nextSame = next != null &&
-        next.message.senderIdBase58 == item.message.senderIdBase58;
-    final hasNextSameSenderSameDay = next != null &&
-        nextSame &&
-        _sameLocalCalendarDay(item.message.sentAt, next.message.sentAt);
-    final flags = GroupIncomingBubbleFlags.fromSequentialMessages(
-      textDisplay: item,
-      prevSameSender: prevSame,
-      nextSameSender: nextSame,
-      hasNextFromSameSenderOnSameCalendarDay: hasNextSameSenderSameDay,
-      layoutMode: ChatRenderMode.group,
-    );
     return MessagePresentation(
-      messageId: 'seq-$index',
-      isPrimary: false,
+      messageId: messageId,
+      isPrimary: computation.isPrimary,
       sender: sender,
-      showSenderName: flags.showSenderName,
-      showSenderAvatar: flags.showSenderAvatar,
-      bubbleDisplay: item,
+      meta: computation.meta,
+      bubbleDisplay: computation.textDisplay,
     );
   }
 
   final String messageId;
   final bool isPrimary;
   final QaulGroupMessageSender? sender;
-  final bool showSenderName;
-  final bool showSenderAvatar;
+  final MessagePresentationMeta meta;
   final QaulChatBubbleDisplayItem? bubbleDisplay;
 }
 
@@ -136,17 +60,15 @@ class ChatMessageRenderer {
 
     if (mode == ChatRenderMode.group && !presentation.isPrimary) {
       return GroupTextMessageItem(
-        display: display,
+        presentation: presentation,
         clock: clock,
-        sender: presentation.sender,
-        showSenderName: presentation.showSenderName,
-        showSenderAvatar: presentation.showSenderAvatar,
       );
     }
 
     return DirectTextMessageItem(
-      display: display,
+      presentation: presentation,
       clock: clock,
+      layoutMode: mode,
     );
   }
 
@@ -160,10 +82,10 @@ class ChatMessageRenderer {
     }
 
     return GroupMessageShell(
-      marginTop: presentation.bubbleDisplay?.marginTop ?? 0,
+      marginTop: presentation.meta.topSpacing,
       sender: presentation.sender,
-      showSenderName: false,
-      showSenderAvatar: presentation.showSenderAvatar,
+      showSenderName: presentation.meta.showSenderName,
+      showSenderAvatar: presentation.meta.showAvatar,
       child: child,
     );
   }
@@ -172,26 +94,30 @@ class ChatMessageRenderer {
 class DirectTextMessageItem extends StatelessWidget {
   const DirectTextMessageItem({
     super.key,
-    required this.display,
+    required this.presentation,
     required this.clock,
+    this.layoutMode = ChatRenderMode.direct,
   });
 
-  final QaulChatBubbleDisplayItem display;
+  final MessagePresentation presentation;
   final DateTime clock;
+  final ChatRenderMode layoutMode;
 
   @override
   Widget build(BuildContext context) {
-    final isPrimary = display.message.messageType == MessageType.primary;
+    final display = presentation.bubbleDisplay!;
+    final isPrimary = presentation.isPrimary;
+    final horizontalGutter = layoutMode == ChatRenderMode.direct;
     return Padding(
       padding: EdgeInsetsDirectional.only(
-        top: display.marginTop,
-        start: isPrimary ? 0 : 16,
-        end: isPrimary ? 16 : 0,
+        top: presentation.meta.topSpacing,
+        start: horizontalGutter && !isPrimary ? 16 : 0,
+        end: horizontalGutter && isPrimary ? 16 : 0,
       ),
       child: QaulChatBubble(
         message: display.message,
         clock: clock,
-        showTimestamp: display.showTimestamp,
+        showTimestamp: presentation.meta.showTimestamp,
       ),
     );
   }
@@ -200,39 +126,35 @@ class DirectTextMessageItem extends StatelessWidget {
 class GroupTextMessageItem extends StatelessWidget {
   const GroupTextMessageItem({
     super.key,
-    required this.display,
+    required this.presentation,
     required this.clock,
-    required this.sender,
-    required this.showSenderName,
-    required this.showSenderAvatar,
   });
 
-  final QaulChatBubbleDisplayItem display;
+  final MessagePresentation presentation;
   final DateTime clock;
-  final QaulGroupMessageSender? sender;
-  final bool showSenderName;
-  final bool showSenderAvatar;
 
   @override
   Widget build(BuildContext context) {
+    final display = presentation.bubbleDisplay!;
+    final sender = presentation.sender;
     final senderNameColor =
-        sender == null ? null : colorGenerationStrategy(sender!.idBase58);
-    final bubbleMessage = showSenderName && sender != null
+        sender == null ? null : colorGenerationStrategy(sender.idBase58);
+    final bubbleMessage = presentation.meta.showSenderName && sender != null
         ? display.message.copyWith(
-            senderDisplayName: sender!.name,
+            senderDisplayName: sender.name,
             senderDisplayNameColor: senderNameColor,
           )
         : display.message;
 
     return GroupMessageShell(
-      marginTop: display.marginTop,
+      marginTop: presentation.meta.topSpacing,
       sender: sender,
       showSenderName: false,
-      showSenderAvatar: showSenderAvatar,
+      showSenderAvatar: presentation.meta.showAvatar,
       child: QaulChatBubble(
         message: bubbleMessage,
         clock: clock,
-        showTimestamp: display.showTimestamp,
+        showTimestamp: presentation.meta.showTimestamp,
       ),
     );
   }
@@ -259,11 +181,7 @@ class GroupMessageShell extends StatelessWidget {
     final senderNameColor =
         sender == null ? null : colorGenerationStrategy(sender!.idBase58);
     return Padding(
-      padding: EdgeInsetsDirectional.only(
-        top: marginTop,
-        start: 16,
-        end: 0,
-      ),
+      padding: EdgeInsetsDirectional.only(top: marginTop),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
