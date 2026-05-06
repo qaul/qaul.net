@@ -58,6 +58,9 @@ typedef OnSendPressed = void Function(String rawText);
 ChatRenderMode resolveChatRenderMode(ChatRoom room) =>
     room.isGroupChatRoom ? ChatRenderMode.group : ChatRenderMode.direct;
 
+bool _sameLocalCalendarDay(DateTime a, DateTime b) =>
+    a.year == b.year && a.month == b.month && a.day == b.day;
+
 const _kChatRouteName = '/chat';
 
 Future<void> openChat(
@@ -647,7 +650,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       bubbleIds.add(m.messageIdBase58);
     }
 
-    final displayItems = computeChatBubbleDisplayItems(bubbleMessages);
+    final displayItems = computeChatBubbleDisplayItems(
+      bubbleMessages,
+      layoutMode: renderMode,
+    );
     final map = <String, QaulChatBubbleDisplayItem>{};
     for (var i = 0; i < bubbleIds.length; i++) {
       map[bubbleIds[i]] = displayItems[i];
@@ -670,6 +676,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       final next = i < ordered.length - 1 ? ordered[i + 1] : null;
       final prevSameSender = prev != null && prev.senderIdBase58 == m.senderIdBase58;
       final nextSameSender = next != null && next.senderIdBase58 == m.senderIdBase58;
+      final hasNextFromSameSenderOnSameCalendarDay = next != null &&
+          nextSameSender &&
+          _sameLocalCalendarDay(m.sentAt, next.sentAt);
 
       final textDisplay = map[m.messageIdBase58];
       final incomingFlags = isGroupIncoming
@@ -677,6 +686,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               textDisplay: textDisplay,
               prevSameSender: prevSameSender,
               nextSameSender: nextSameSender,
+              hasNextFromSameSenderOnSameCalendarDay:
+                  hasNextFromSameSenderOnSameCalendarDay,
+              layoutMode: renderMode,
             )
           : null;
 

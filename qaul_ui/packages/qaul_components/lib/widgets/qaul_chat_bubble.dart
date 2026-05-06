@@ -12,6 +12,11 @@ enum MessageStatus { notSent, sent, read }
 
 enum MessageType { primary, secondary }
 
+/// Selects vertical spacing between **non-linked** bubbles only.
+/// Tail shapes, timestamps, and “linked minute” rules are identical for both
+/// modes — see [directChatBubblesShareMinute].
+enum ChatRenderMode { direct, group }
+
 // ---------------------------------------------------------------------------
 // Public constants & style
 // ---------------------------------------------------------------------------
@@ -398,8 +403,14 @@ class QaulChatBubble extends StatelessWidget {
 // Display item & layout constants
 // ---------------------------------------------------------------------------
 
+/// Vertical gap between bubbles in the same merged run (same minute, same side).
 const double kChatBubbleLinkedGap = 4.0;
+
+/// Vertical gap when the previous bubble is **not** linked (different time burst) — 1:1.
 const double kChatBubbleSeparatedGap = 12.0;
+
+/// Same as [kChatBubbleSeparatedGap] but for group rooms (tighter list rhythm).
+const double kGroupChatBubbleSeparatedGap = 4.0;
 
 class QaulChatBubbleDisplayItem {
   const QaulChatBubbleDisplayItem({
@@ -417,11 +428,13 @@ class QaulChatBubbleDisplayItem {
 // Public helpers
 // ---------------------------------------------------------------------------
 
-bool isChatBubbleLinked(QaulChatBubbleMessage a, QaulChatBubbleMessage b) {
+/// Bubbles share a merged run (connected tails) when they are on the same side
+/// and fall in the same calendar **minute** (sender ids must match when both
+/// present). Same rule for 1:1 and group; spacing between **unlinked** rows is
+/// the only difference — see [computeChatBubbleDisplayItems].
+bool directChatBubblesShareMinute(QaulChatBubbleMessage a, QaulChatBubbleMessage b) {
   if (a.messageType != b.messageType) return false;
 
-  // When sender information is available, only link bubbles from the
-  // same sender; this is important for group chats.
   if (a.senderIdBase58 != null &&
       b.senderIdBase58 != null &&
       a.senderIdBase58 != b.senderIdBase58) {
@@ -438,10 +451,19 @@ bool isChatBubbleLinked(QaulChatBubbleMessage a, QaulChatBubbleMessage b) {
       ta.minute == tb.minute;
 }
 
+/// Alias for [directChatBubblesShareMinute] (historical name).
+bool isChatBubbleLinked(QaulChatBubbleMessage a, QaulChatBubbleMessage b) =>
+    directChatBubblesShareMinute(a, b);
+
 List<QaulChatBubbleDisplayItem> computeChatBubbleDisplayItems(
-  List<QaulChatBubbleMessage> messages,
-) {
+  List<QaulChatBubbleMessage> messages, {
+  ChatRenderMode layoutMode = ChatRenderMode.direct,
+}) {
   if (messages.isEmpty) return [];
+
+  final separatedGap = layoutMode == ChatRenderMode.group
+      ? kGroupChatBubbleSeparatedGap
+      : kChatBubbleSeparatedGap;
 
   final result = <QaulChatBubbleDisplayItem>[];
 
@@ -450,8 +472,10 @@ List<QaulChatBubbleDisplayItem> computeChatBubbleDisplayItems(
     final curr = messages[i];
     final next = i < messages.length - 1 ? messages[i + 1] : null;
 
-    final prevLinked = prev != null && isChatBubbleLinked(prev, curr);
-    final nextLinked = next != null && isChatBubbleLinked(curr, next);
+    final prevLinked =
+        prev != null && directChatBubblesShareMinute(prev, curr);
+    final nextLinked =
+        next != null && directChatBubblesShareMinute(curr, next);
 
     final isPrimary = curr.messageType == MessageType.primary;
 
@@ -463,7 +487,7 @@ List<QaulChatBubbleDisplayItem> computeChatBubbleDisplayItems(
 
     final marginTop = i == 0
         ? 0.0
-        : (prevLinked ? kChatBubbleLinkedGap : kChatBubbleSeparatedGap);
+        : (prevLinked ? kChatBubbleLinkedGap : separatedGap);
 
     result.add(
       QaulChatBubbleDisplayItem(

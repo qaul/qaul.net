@@ -164,7 +164,10 @@ class GroupChatPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final messages = buildGroupPreviewRawMessages(clock);
-    final items = computeChatBubbleDisplayItems(messages);
+    final items = computeChatBubbleDisplayItems(
+      messages,
+      layoutMode: ChatRenderMode.group,
+    );
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background = isDark
         ? Colors.black

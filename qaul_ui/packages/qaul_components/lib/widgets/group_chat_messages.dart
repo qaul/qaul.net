@@ -3,6 +3,9 @@ import 'package:utils/utils.dart';
 
 import 'qaul_chat_bubble.dart';
 
+bool _sameLocalCalendarDay(DateTime a, DateTime b) =>
+    a.year == b.year && a.month == b.month && a.day == b.day;
+
 /// Lightweight sender snapshot for group chat UI (decouples from RPC `User`).
 @immutable
 class QaulGroupMessageSender {
@@ -19,8 +22,6 @@ class QaulGroupMessageSender {
   final bool isConnected;
 }
 
-enum ChatRenderMode { direct, group }
-
 /// Name + avatar visibility for an incoming group text bubble, given run context.
 @immutable
 class GroupIncomingBubbleFlags {
@@ -36,14 +37,23 @@ class GroupIncomingBubbleFlags {
     required QaulChatBubbleDisplayItem? textDisplay,
     required bool prevSameSender,
     required bool nextSameSender,
+    /// Next timeline message is the same sender and same **local calendar day**
+    /// (run continues; hide avatar). If the next message is the next day, this
+    /// is false so the avatar shows on the last bubble before a date boundary.
+    required bool hasNextFromSameSenderOnSameCalendarDay,
+    required ChatRenderMode layoutMode,
   }) {
     final showSenderName = textDisplay != null
         ? textDisplay.message.edges.contains(TailEdge.bottomStart) &&
             !textDisplay.message.edges.contains(TailEdge.topStart)
         : !prevSameSender;
-    final showSenderAvatar = textDisplay != null
-        ? textDisplay.showTimestamp
-        : !nextSameSender;
+    // Group: avatar on the last bubble of each per-day streak from a sender
+    // (new calendar day starts a new “group”). 1:1 keeps minute-cluster alignment.
+    final showSenderAvatar = layoutMode == ChatRenderMode.group
+        ? !hasNextFromSameSenderOnSameCalendarDay
+        : (textDisplay != null
+            ? textDisplay.showTimestamp
+            : !nextSameSender);
     return GroupIncomingBubbleFlags(
       showSenderName: showSenderName,
       showSenderAvatar: showSenderAvatar,
@@ -87,10 +97,15 @@ class MessagePresentation {
         prev.message.senderIdBase58 == item.message.senderIdBase58;
     final nextSame = next != null &&
         next.message.senderIdBase58 == item.message.senderIdBase58;
+    final hasNextSameSenderSameDay = next != null &&
+        nextSame &&
+        _sameLocalCalendarDay(item.message.sentAt, next.message.sentAt);
     final flags = GroupIncomingBubbleFlags.fromSequentialMessages(
       textDisplay: item,
       prevSameSender: prevSame,
       nextSameSender: nextSame,
+      hasNextFromSameSenderOnSameCalendarDay: hasNextSameSenderSameDay,
+      layoutMode: ChatRenderMode.group,
     );
     return MessagePresentation(
       messageId: 'seq-$index',
