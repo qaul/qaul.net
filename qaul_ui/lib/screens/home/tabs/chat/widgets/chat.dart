@@ -55,6 +55,9 @@ part 'image_message_widget.dart';
 
 typedef OnSendPressed = void Function(String rawText);
 
+ChatRenderMode resolveChatRenderMode(ChatRoom room) =>
+    room.isGroupChatRoom ? ChatRenderMode.group : ChatRenderMode.direct;
+
 const _kChatRouteName = '/chat';
 
 Future<void> openChat(
@@ -176,7 +179,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   User? get otherUser => widget.otherUser;
 
   User? _directChatPeer(ChatRoom forRoom) {
-    if (forRoom.isGroupChatRoom) return null;
+    if (resolveChatRenderMode(forRoom) == ChatRenderMode.group) return null;
     if (otherUser != null) return otherUser;
     return ref
         .read(usersStoreProvider.notifier)
@@ -184,7 +187,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   final Map<String, String> _overflowMenuOptions = {};
-  Map<String, QaulChatBubbleDisplayItem> _bubbleDisplayItems = {};
+  Map<String, MessagePresentation> _messagePresentations = {};
+  ChatRenderMode _chatRenderMode = ChatRenderMode.direct;
 
   void _handleClick(String value) {
     switch (value) {
@@ -216,6 +220,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _chatRenderMode = resolveChatRenderMode(room);
     _updateMenuOptionsBasedOnRoomType();
   }
 
@@ -223,6 +228,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void didUpdateWidget(covariant ChatScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.room == room) return;
+    _chatRenderMode = resolveChatRenderMode(room);
     _updateMenuOptionsBasedOnRoomType();
     _scheduleUpdateCurrentOpenChat();
   }
@@ -260,6 +266,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     final l10n = AppLocalizations.of(context)!;
     final directPeer = _directChatPeer(room);
+    _chatRenderMode = resolveChatRenderMode(room);
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -267,7 +275,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            (room.isGroupChatRoom)
+            (_chatRenderMode == ChatRenderMode.group)
                 ? QaulAvatar.groupSmall()
                 : QaulAvatar.small(user: directPeer),
             const SizedBox(width: 12),
@@ -306,12 +314,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           bottom: false,
           child: Chat(
           showUserAvatars: false,
-          showUserNames: room.isGroupChatRoom,
+          showUserNames: false,
           user: user.toInternalUser(),
           useTopSafeAreaInset: false,
           dateHeaderThreshold: const Duration(days: 365).inMilliseconds,
           groupMessagesThreshold: const Duration(days: 365).inMilliseconds,
-          messages: messages(room, l10n: l10n) ?? [],
+          messages: messages(
+                room,
+                l10n: l10n,
+                renderMode: _chatRenderMode,
+              ) ??
+              [],
           onSendPressed: sendMessage,
           inputOptions: const InputOptions(
             sendButtonVisibilityMode: SendButtonVisibilityMode.always,
@@ -331,7 +344,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 ? null
                 : 'Please wait for the admin to confirm your acceptance to send messages',
             sendButtonVisibilityMode: SendButtonVisibilityMode.editing,
-            hintText: room.isGroupChatRoom
+            hintText: _chatRenderMode == ChatRenderMode.group
                 ? l10n.groupChatMessageHint
                 : l10n.securePrivateMessageHint,
             onSendPressed: sendMessage,
@@ -483,23 +496,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           },
           textMessageBuilder:
               (message, {required int messageWidth, required bool showName}) {
-                final msgIdx = room.messages!.indexWhere(
-                  (element) => element.messageIdBase58 == message.id,
-                );
-
-                var prevMsgWasFromSamePerson = false;
-                if (msgIdx > 0) {
-                  final prevMsg = room.messages![msgIdx - 1];
-                  prevMsgWasFromSamePerson =
-                      prevMsg.content is TextMessageContent &&
-                      prevMsg.senderIdBase58 == message.author.id;
-                }
-
                 return TextMessage(
                   message: message,
                   usePreviewData: true,
                   hideBackgroundOnEmojiMessages: true,
-                  showName: showName && !prevMsgWasFromSamePerson,
+                  showName: false,
                   emojiEnlargementBehavior: EmojiEnlargementBehavior.multi,
                   nameBuilder: (usr) {
                     var user = room.members.firstWhereOrNull(
@@ -587,6 +588,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   List<types.Message>? messages(
     ChatRoom room, {
     required AppLocalizations l10n,
+    required ChatRenderMode renderMode,
   }) {
     final domainMessages = room.messages?.sorted();
     if (domainMessages == null) return null;
@@ -639,6 +641,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   : MessageStatus.notSent),
           messageType: isMe ? MessageType.primary : MessageType.secondary,
           edges: const [],
+          senderIdBase58: m.senderIdBase58,
         ),
       );
       bubbleIds.add(m.messageIdBase58);
@@ -649,7 +652,44 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     for (var i = 0; i < bubbleIds.length; i++) {
       map[bubbleIds[i]] = displayItems[i];
     }
-    _bubbleDisplayItems = map;
+    final ordered = [...domainMessages]..sort((a, b) => a.sentAt.compareTo(b.sentAt));
+    final presentations = <String, MessagePresentation>{};
+    for (var i = 0; i < ordered.length; i++) {
+      final m = ordered[i];
+      final isPrimary = m.senderId.equals(user.id);
+      final isGroupIncoming = renderMode == ChatRenderMode.group && !isPrimary;
+      final authorForGroup = isGroupIncoming ? _author(m, l10n) : null;
+      final groupSender = authorForGroup == null
+          ? null
+          : QaulGroupMessageSender(
+              idBase58: authorForGroup.idBase58,
+              name: authorForGroup.name,
+              isConnected: authorForGroup.isConnected,
+            );
+      final prev = i > 0 ? ordered[i - 1] : null;
+      final next = i < ordered.length - 1 ? ordered[i + 1] : null;
+      final prevSameSender = prev != null && prev.senderIdBase58 == m.senderIdBase58;
+      final nextSameSender = next != null && next.senderIdBase58 == m.senderIdBase58;
+
+      final textDisplay = map[m.messageIdBase58];
+      final incomingFlags = isGroupIncoming
+          ? GroupIncomingBubbleFlags.fromSequentialMessages(
+              textDisplay: textDisplay,
+              prevSameSender: prevSameSender,
+              nextSameSender: nextSameSender,
+            )
+          : null;
+
+      presentations[m.messageIdBase58] = MessagePresentation(
+        messageId: m.messageIdBase58,
+        isPrimary: isPrimary,
+        sender: groupSender,
+        showSenderName: incomingFlags?.showSenderName ?? false,
+        showSenderAvatar: incomingFlags?.showSenderAvatar ?? false,
+        bubbleDisplay: textDisplay,
+      );
+    }
+    _messagePresentations = presentations;
 
     return internalMessages;
   }
@@ -672,39 +712,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       );
     }
 
+    final presentation = _messagePresentations[message.id];
+    if (presentation == null) return child;
+
     if (message is types.TextMessage) {
-      final currentRoom = ref.read(currentOpenChatRoom);
-      final roomMessages = currentRoom?.messages;
-      if (roomMessages == null) return child;
-
-      final domainMessage = roomMessages
-          .firstWhereOrNull((m) => m.messageIdBase58 == message.id);
-      if (domainMessage == null) return child;
-
-      final display = _bubbleDisplayItems[domainMessage.messageIdBase58];
-      if (display == null) return child;
-
-      final clock = DateTime.now();
-      final isPrimary = display.message.messageType == MessageType.primary;
-
-      // Symmetric inset from screen edges (Notion / PR review): leading 16 for
-      // received bubbles, trailing 16 for sent (primary). RTL-safe.
-      return Padding(
-        padding: EdgeInsetsDirectional.only(
-          top: display.marginTop,
-          start: isPrimary ? 0 : 16,
-          end: isPrimary ? 16 : 0,
-        ),
-        child: QaulChatBubble(
-          message: display.message,
-          clock: clock,
-          showTimestamp: display.showTimestamp,
-        ),
+      return ChatMessageRenderer.renderText(
+        presentation: presentation,
+        mode: _chatRenderMode,
+        clock: DateTime.now(),
       );
     }
 
-    const radius = 20.0;
+    final legacyBubble = _buildLegacyBubble(child, message, nextMessageInGroup);
+    return ChatMessageRenderer.wrapNonText(
+      child: legacyBubble,
+      presentation: presentation,
+      mode: _chatRenderMode,
+    );
+  }
 
+  Widget _buildLegacyBubble(
+    Widget child,
+    types.Message message,
+    bool nextMessageInGroup,
+  ) {
+    const radius = 20.0;
     return Builder(
       builder: (context) {
         return Bubble(
@@ -743,10 +775,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   void _updateMenuOptionsBasedOnRoomType() {
     var l10n = AppLocalizations.of(context)!;
-    if (room.isGroupChatRoom && _overflowMenuOptions.isEmpty) {
+    if (_chatRenderMode == ChatRenderMode.group &&
+        _overflowMenuOptions.isEmpty) {
       _overflowMenuOptions.addAll({'groupSettings': l10n.groupSettings});
     }
-    if (room.isDirectChat && _overflowMenuOptions.isNotEmpty) {
+    if (_chatRenderMode == ChatRenderMode.direct &&
+        _overflowMenuOptions.isNotEmpty) {
       _overflowMenuOptions.clear();
     }
   }

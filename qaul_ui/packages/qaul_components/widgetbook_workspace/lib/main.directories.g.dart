@@ -14,6 +14,8 @@ import 'package:qaul_components_widgetbook/use_cases/chat_header.dart'
     as _qaul_components_widgetbook_use_cases_chat_header;
 import 'package:qaul_components_widgetbook/use_cases/chat_room.dart'
     as _qaul_components_widgetbook_use_cases_chat_room;
+import 'package:qaul_components_widgetbook/use_cases/group_chat.dart'
+    as _qaul_components_widgetbook_use_cases_group_chat;
 import 'package:qaul_components_widgetbook/use_cases/qaul_chat_bubble.dart'
     as _qaul_components_widgetbook_use_cases_qaul_chat_bubble;
 import 'package:qaul_components_widgetbook/use_cases/qaul_color_sheet.dart'
@@ -82,6 +84,11 @@ final directories = <_widgetbook.WidgetbookNode>[
             name: 'Conversation preview',
             builder: _qaul_components_widgetbook_use_cases_qaul_chat_bubble
                 .buildChatBubbleConversationUseCase,
+          ),
+          _widgetbook.WidgetbookUseCase(
+            name: 'Group Chat',
+            builder: _qaul_components_widgetbook_use_cases_group_chat
+                .buildGroupChatUseCase,
           ),
         ],
       ),

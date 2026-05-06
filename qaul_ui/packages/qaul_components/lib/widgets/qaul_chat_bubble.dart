@@ -67,6 +67,9 @@ class QaulChatBubbleMessage extends ChatMessage {
     required this.edges,
     this.clock,
     this.showTimestamp = true,
+    this.senderIdBase58,
+    this.senderDisplayName,
+    this.senderDisplayNameColor,
   });
 
   final String content;
@@ -77,6 +80,9 @@ class QaulChatBubbleMessage extends ChatMessage {
   final List<TailEdge> edges;
   final DateTime? clock;
   final bool showTimestamp;
+  final String? senderIdBase58;
+  final String? senderDisplayName;
+  final Color? senderDisplayNameColor;
 
   QaulChatBubbleMessage copyWith({
     Key? key,
@@ -88,6 +94,9 @@ class QaulChatBubbleMessage extends ChatMessage {
     List<TailEdge>? edges,
     DateTime? clock,
     bool? showTimestamp,
+    String? senderIdBase58,
+    String? senderDisplayName,
+    Color? senderDisplayNameColor,
   }) {
     return QaulChatBubbleMessage(
       key: key ?? this.key,
@@ -99,6 +108,10 @@ class QaulChatBubbleMessage extends ChatMessage {
       edges: edges ?? this.edges,
       clock: clock ?? this.clock,
       showTimestamp: showTimestamp ?? this.showTimestamp,
+      senderIdBase58: senderIdBase58 ?? this.senderIdBase58,
+      senderDisplayName: senderDisplayName ?? this.senderDisplayName,
+      senderDisplayNameColor:
+          senderDisplayNameColor ?? this.senderDisplayNameColor,
     );
   }
 
@@ -301,16 +314,15 @@ class QaulChatBubble extends StatelessWidget {
                     ],
                   );
 
+                  Widget messageContent;
                   if (!showTimestamp) {
-                    return RichText(
+                    messageContent = RichText(
                       textAlign: TextAlign.left,
                       textWidthBasis: TextWidthBasis.longestLine,
                       text: messageSpan,
                     );
-                  }
-
-                  if (fitsOnOneLine) {
-                    return Row(
+                  } else if (fitsOnOneLine) {
+                    messageContent = Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -325,23 +337,51 @@ class QaulChatBubble extends StatelessWidget {
                         timeRow,
                       ],
                     );
+                  } else {
+                    messageContent = Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: isPrimary
+                          ? CrossAxisAlignment.end
+                          : CrossAxisAlignment.start,
+                      children: [
+                        RichText(
+                          textAlign: TextAlign.left,
+                          textWidthBasis: TextWidthBasis.longestLine,
+                          text: messageSpan,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: gap),
+                          child: timeRow,
+                        ),
+                      ],
+                    );
+                  }
+
+                  if (message.senderDisplayName == null ||
+                      message.senderDisplayName!.isEmpty) {
+                    return messageContent;
                   }
 
                   return Column(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: isPrimary
-                        ? CrossAxisAlignment.end
-                        : CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      RichText(
-                        textAlign: TextAlign.left,
-                        textWidthBasis: TextWidthBasis.longestLine,
-                        text: messageSpan,
-                      ),
                       Padding(
-                        padding: const EdgeInsets.only(top: gap),
-                        child: timeRow,
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          message.senderDisplayName!,
+                          style: TextStyle(
+                            fontFamily: 'Roboto',
+                            fontSize: 11,
+                            fontWeight: FontWeight.w400,
+                            height: 1.25,
+                            letterSpacing: 0.5,
+                            color: message.senderDisplayNameColor ??
+                                Colors.white.withValues(alpha: 0.85),
+                          ),
+                        ),
                       ),
+                      messageContent,
                     ],
                   );
                 },
@@ -379,6 +419,14 @@ class QaulChatBubbleDisplayItem {
 
 bool isChatBubbleLinked(QaulChatBubbleMessage a, QaulChatBubbleMessage b) {
   if (a.messageType != b.messageType) return false;
+
+  // When sender information is available, only link bubbles from the
+  // same sender; this is important for group chats.
+  if (a.senderIdBase58 != null &&
+      b.senderIdBase58 != null &&
+      a.senderIdBase58 != b.senderIdBase58) {
+    return false;
+  }
 
   final ta = a.sentAt;
   final tb = b.sentAt;

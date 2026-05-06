@@ -20,6 +20,7 @@ Widget buildChatBubbleConversationUseCase(BuildContext context) {
       status: MessageStatus.read,
       messageType: MessageType.primary,
       edges: const [],
+      senderIdBase58: 'me',
     ),
     QaulChatBubbleMessage(
       content:
@@ -29,6 +30,7 @@ Widget buildChatBubbleConversationUseCase(BuildContext context) {
       status: MessageStatus.sent,
       messageType: MessageType.primary,
       edges: const [],
+      senderIdBase58: 'me',
     ),
     QaulChatBubbleMessage(
       content: 'This one is it',
@@ -37,6 +39,7 @@ Widget buildChatBubbleConversationUseCase(BuildContext context) {
       status: MessageStatus.read,
       messageType: MessageType.primary,
       edges: const [],
+      senderIdBase58: 'me',
     ),
     QaulChatBubbleMessage(
       content: 'Chatpartner is answering',
@@ -45,6 +48,7 @@ Widget buildChatBubbleConversationUseCase(BuildContext context) {
       status: MessageStatus.sent,
       messageType: MessageType.secondary,
       edges: const [],
+      senderIdBase58: 'user-gm',
     ),
     QaulChatBubbleMessage(
       content: 'Another answer',
@@ -53,6 +57,7 @@ Widget buildChatBubbleConversationUseCase(BuildContext context) {
       status: MessageStatus.sent,
       messageType: MessageType.secondary,
       edges: const [],
+      senderIdBase58: 'user-g2',
     ),
     QaulChatBubbleMessage(
       content: 'Message',
@@ -61,6 +66,7 @@ Widget buildChatBubbleConversationUseCase(BuildContext context) {
       status: MessageStatus.read,
       messageType: MessageType.primary,
       edges: const [],
+      senderIdBase58: 'me',
     ),
     QaulChatBubbleMessage(
       content: 'Longer message from the chatpartner',
@@ -69,6 +75,7 @@ Widget buildChatBubbleConversationUseCase(BuildContext context) {
       status: MessageStatus.sent,
       messageType: MessageType.secondary,
       edges: const [],
+      senderIdBase58: 'user-gm',
     ),
     QaulChatBubbleMessage(
       content: 'followed by one with time',
@@ -77,6 +84,7 @@ Widget buildChatBubbleConversationUseCase(BuildContext context) {
       status: MessageStatus.sent,
       messageType: MessageType.secondary,
       edges: const [],
+      senderIdBase58: 'user-gm',
     ),
     QaulChatBubbleMessage(
       content: 'Message with delay',
@@ -87,6 +95,7 @@ Widget buildChatBubbleConversationUseCase(BuildContext context) {
       status: MessageStatus.read,
       messageType: MessageType.primary,
       edges: const [],
+      senderIdBase58: 'me',
     ),
     QaulChatBubbleMessage(
       content: 'Out and delivered',
@@ -95,6 +104,7 @@ Widget buildChatBubbleConversationUseCase(BuildContext context) {
       status: MessageStatus.read,
       messageType: MessageType.primary,
       edges: const [],
+      senderIdBase58: 'me',
     ),
     QaulChatBubbleMessage(
       content: 'Out but not delivered yet',
@@ -103,6 +113,7 @@ Widget buildChatBubbleConversationUseCase(BuildContext context) {
       status: MessageStatus.sent,
       messageType: MessageType.primary,
       edges: const [],
+      senderIdBase58: 'me',
     ),
     QaulChatBubbleMessage(
       content: 'New Message not out',
@@ -111,6 +122,7 @@ Widget buildChatBubbleConversationUseCase(BuildContext context) {
       status: MessageStatus.notSent,
       messageType: MessageType.primary,
       edges: const [],
+      senderIdBase58: 'me',
     ),
   ];
 
