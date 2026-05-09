@@ -13,7 +13,7 @@ enum MessageStatus { notSent, sent, read }
 enum MessageType { primary, secondary }
 
 /// Selects vertical spacing between **non-linked** bubbles only.
-/// Tail shapes, timestamps, and “linked minute” rules are identical for both
+/// Tail shapes, timestamps, and "linked minute" rules are identical for both
 /// modes — see [directChatBubblesShareMinute].
 enum ChatRenderMode { direct, group }
 
