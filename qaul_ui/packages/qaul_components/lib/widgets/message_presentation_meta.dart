@@ -40,7 +40,7 @@ class MessagePresentationMeta {
     required this.showTimestamp,
     required this.tailEdges,
     required this.topSpacing,
-    required this.legacyBubbleClustersWithNext,
+    required this.nonTextClustersWithNext,
   });
 
   final bool linksToPrevious;
@@ -57,7 +57,11 @@ class MessagePresentationMeta {
 
   final double topSpacing;
 
-  final bool legacyBubbleClustersWithNext;
+  /// True when the next timeline neighbor belongs to the same participant
+  /// streak. The non-text bubble path uses this to suppress its tail nip when
+  /// clustered. Distinct from flutter-chat-ui's old `nextMessageInGroup`
+  /// (which keyed on author + minute, not streak).
+  final bool nonTextClustersWithNext;
 }
 
 @immutable

@@ -1,6 +1,10 @@
 import 'message_presentation_meta.dart';
 import 'qaul_chat_bubble.dart';
 
+// Returns false for incoming neighbors when either senderIdBase58 is empty.
+// Callers without senderIds (e.g. the legacy `computeChatBubbleDisplayItems`
+// path used by widget tests) therefore never cluster incoming messages in
+// group mode — only the timeline-aware path supplies senderIds.
 bool _sameParticipantStreakNeighbor(
   ChatTimelinePresentationRow a,
   ChatTimelinePresentationRow b,
@@ -55,16 +59,18 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
     if (prevTimeline == null) {
       topSpacing = 0;
     } else if (layoutMode == ChatRenderMode.group) {
-      final compactParticipantStreakDay =
+      final isSameStreakSameDay =
           _sameParticipantStreakNeighbor(prevTimeline, row) &&
           samePresentationLocalCalendarDay(prevTimeline.sentAt, row.sentAt);
-      topSpacing = compactParticipantStreakDay
-          ? kChatBubbleLinkedGap
-          : kChatBubbleSeparatedGap;
+      if (isSameStreakSameDay) {
+        topSpacing = kChatBubbleLinkedGap;
+      } else {
+        topSpacing = kChatBubbleSeparatedGap;
+      }
+    } else if (linksToPrevious) {
+      topSpacing = kChatBubbleLinkedGap;
     } else {
-      topSpacing = linksToPrevious
-          ? kChatBubbleLinkedGap
-          : kChatBubbleSeparatedGap;
+      topSpacing = kChatBubbleSeparatedGap;
     }
 
     final showTimestamp = !linksToNext;
@@ -84,7 +90,7 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
       showAvatar = !continuesAfter;
     }
 
-    final legacyBubbleClustersWithNext = nextTimeline != null &&
+    final nonTextClustersWithNext = nextTimeline != null &&
         _sameParticipantStreakNeighbor(row, nextTimeline);
 
     final meta = MessagePresentationMeta(
@@ -95,7 +101,7 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
       showTimestamp: showTimestamp,
       tailEdges: tailEdges,
       topSpacing: topSpacing,
-      legacyBubbleClustersWithNext: legacyBubbleClustersWithNext,
+      nonTextClustersWithNext: nonTextClustersWithNext,
     );
 
     final messageWithTail = bubble.copyWith(edges: tailEdges);
@@ -138,16 +144,18 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
       showAvatar = !continuesAfter;
 
       if (prevTimeline != null) {
-        final compactParticipantStreakDay =
+        final isSameStreakSameDay =
             _sameParticipantStreakNeighbor(prevTimeline, row) &&
                 samePresentationLocalCalendarDay(prevTimeline.sentAt, row.sentAt);
-        topSpacing = compactParticipantStreakDay
-            ? kChatBubbleLinkedGap
-            : kChatBubbleSeparatedGap;
+        if (isSameStreakSameDay) {
+          topSpacing = kChatBubbleLinkedGap;
+        } else {
+          topSpacing = kChatBubbleSeparatedGap;
+        }
       }
     }
 
-    final legacyBubbleClustersWithNext = nextTimeline != null &&
+    final nonTextClustersWithNext = nextTimeline != null &&
         _sameParticipantStreakNeighbor(row, nextTimeline);
 
     final meta = MessagePresentationMeta(
@@ -158,7 +166,7 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
       showTimestamp: false,
       tailEdges: const [],
       topSpacing: topSpacing,
-      legacyBubbleClustersWithNext: legacyBubbleClustersWithNext,
+      nonTextClustersWithNext: nonTextClustersWithNext,
     );
 
     return MessagePresentationComputation(

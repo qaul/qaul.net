@@ -68,7 +68,7 @@ class ChatMessageRenderer {
     return DirectTextMessageItem(
       presentation: presentation,
       clock: clock,
-      layoutMode: mode,
+      horizontalGutter: mode == ChatRenderMode.direct,
     );
   }
 
@@ -96,18 +96,21 @@ class DirectTextMessageItem extends StatelessWidget {
     super.key,
     required this.presentation,
     required this.clock,
-    this.layoutMode = ChatRenderMode.direct,
+    this.horizontalGutter = true,
   });
 
   final MessagePresentation presentation;
   final DateTime clock;
-  final ChatRenderMode layoutMode;
+
+  /// When true, applies a 16px gutter on the trailing edge for primary
+  /// (outgoing) bubbles and on the leading edge for secondary (incoming).
+  /// Set to false for group-mode outgoing bubbles, which render flush.
+  final bool horizontalGutter;
 
   @override
   Widget build(BuildContext context) {
     final display = presentation.bubbleDisplay!;
     final isPrimary = presentation.isPrimary;
-    final horizontalGutter = layoutMode == ChatRenderMode.direct;
     return Padding(
       padding: EdgeInsetsDirectional.only(
         top: presentation.meta.topSpacing,
@@ -205,12 +208,7 @@ class GroupMessageShell extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Text(
                       sender!.name,
-                      style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 11,
-                        fontWeight: FontWeight.w400,
-                        height: 1.25,
-                        letterSpacing: 0.5,
+                      style: kGroupSenderNameTextStyle.copyWith(
                         color: senderNameColor,
                       ),
                     ),

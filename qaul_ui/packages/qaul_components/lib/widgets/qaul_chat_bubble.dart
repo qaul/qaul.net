@@ -375,12 +375,7 @@ class QaulChatBubble extends StatelessWidget {
                         padding: const EdgeInsets.only(bottom: 4),
                         child: Text(
                           message.senderDisplayName!,
-                          style: TextStyle(
-                            fontFamily: 'Roboto',
-                            fontSize: 11,
-                            fontWeight: FontWeight.w400,
-                            height: 1.25,
-                            letterSpacing: 0.5,
+                          style: kGroupSenderNameTextStyle.copyWith(
                             color: message.senderDisplayNameColor ??
                                 Colors.white.withValues(alpha: 0.85),
                           ),
@@ -408,6 +403,14 @@ const double kChatBubbleLinkedGap = 4.0;
 const double kChatBubbleSeparatedGap = 12.0;
 
 const double kGroupChatBubbleSeparatedGap = 4.0;
+
+const TextStyle kGroupSenderNameTextStyle = TextStyle(
+  fontFamily: 'Roboto',
+  fontSize: 11,
+  fontWeight: FontWeight.w400,
+  height: 1.25,
+  letterSpacing: 0.5,
+);
 
 class QaulChatBubbleDisplayItem {
   const QaulChatBubbleDisplayItem({

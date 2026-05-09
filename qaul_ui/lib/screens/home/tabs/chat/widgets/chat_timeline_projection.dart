@@ -46,13 +46,10 @@ ChatTimelineProjection? buildChatTimelineProjection({
     }
   }
 
-  final bubbleSources = [...textMessages]
-    ..sort((a, b) => a.sentAt.compareTo(b.sentAt));
-
   final bubbleMessages = <QaulChatBubbleMessage>[];
   final bubbleIds = <String>[];
 
-  for (final m in bubbleSources) {
+  for (final m in textMessages) {
     final isMe = m.senderId.equals(signedInUser.id);
     bubbleMessages.add(
       QaulChatBubbleMessage(
@@ -78,9 +75,8 @@ ChatTimelineProjection? buildChatTimelineProjection({
     bubbleBaseById[bubbleIds[i]] = bubbleMessages[i];
   }
 
-  final ordered = [...domainMessages]..sort((a, b) => a.sentAt.compareTo(b.sentAt));
   final ascendingRows = <ChatTimelinePresentationRow>[
-    for (final m in ordered)
+    for (final m in domainMessages)
       ChatTimelinePresentationRow(
         messageIdBase58: m.messageIdBase58,
         senderIdBase58: m.senderIdBase58,
@@ -98,7 +94,7 @@ ChatTimelineProjection? buildChatTimelineProjection({
   );
 
   final presentations = <String, MessagePresentation>{};
-  for (final m in ordered) {
+  for (final m in domainMessages) {
     final slice = computed[m.messageIdBase58]!;
     final incomingGroup = renderMode == ChatRenderMode.group && !slice.isPrimary;
 

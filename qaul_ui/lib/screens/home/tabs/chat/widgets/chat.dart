@@ -222,16 +222,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _chatRenderMode = resolveChatRenderMode(room);
-    _updateMenuOptionsBasedOnRoomType();
+    _updateMenuOptionsBasedOnRoomType(resolveChatRenderMode(room));
   }
 
   @override
   void didUpdateWidget(covariant ChatScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.room == room) return;
-    _chatRenderMode = resolveChatRenderMode(room);
-    _updateMenuOptionsBasedOnRoomType();
+    _updateMenuOptionsBasedOnRoomType(resolveChatRenderMode(room));
     _scheduleUpdateCurrentOpenChat();
   }
 
@@ -504,24 +502,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   hideBackgroundOnEmojiMessages: true,
                   showName: false,
                   emojiEnlargementBehavior: EmojiEnlargementBehavior.multi,
-                  nameBuilder: (usr) {
-                    var user = room.members.firstWhereOrNull(
-                      (u) => usr.id == u.idBase58,
-                    );
-                    if (user == null) return const SizedBox();
-                    final color = colorGenerationStrategy(user.idBase58);
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 4.0),
-                      child: Text(
-                        user.name,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: color,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    );
-                  },
                 );
               },
           fileMessageBuilder: (message, {required int messageWidth}) {
@@ -634,23 +614,22 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       );
     }
 
-    final legacyBubble = _buildLegacyBubble(
+    final nonTextBubble = _buildNonTextBubble(
       child,
       message,
-      legacyClustersWithFollowing:
-          presentation.meta.legacyBubbleClustersWithNext,
+      clustersWithNext: presentation.meta.nonTextClustersWithNext,
     );
     return ChatMessageRenderer.wrapNonText(
-      child: legacyBubble,
+      child: nonTextBubble,
       presentation: presentation,
       mode: _chatRenderMode,
     );
   }
 
-  Widget _buildLegacyBubble(
+  Widget _buildNonTextBubble(
     Widget child,
     types.Message message, {
-    required bool legacyClustersWithFollowing,
+    required bool clustersWithNext,
   }) {
     const radius = 20.0;
     return Builder(
@@ -666,7 +645,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           color: user.toInternalUser().id != message.author.id
               ? Colors.grey.shade200
               : Colors.lightBlue.shade700,
-          nip: legacyClustersWithFollowing
+          nip: clustersWithNext
               ? BubbleNip.no
               : user.toInternalUser().id != message.author.id
                   ? BubbleNip.leftBottom
@@ -689,14 +668,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return isReceiving;
   }
 
-  void _updateMenuOptionsBasedOnRoomType() {
+  void _updateMenuOptionsBasedOnRoomType(ChatRenderMode mode) {
     var l10n = AppLocalizations.of(context)!;
-    if (_chatRenderMode == ChatRenderMode.group &&
-        _overflowMenuOptions.isEmpty) {
+    if (mode == ChatRenderMode.group && _overflowMenuOptions.isEmpty) {
       _overflowMenuOptions.addAll({'groupSettings': l10n.groupSettings});
     }
-    if (_chatRenderMode == ChatRenderMode.direct &&
-        _overflowMenuOptions.isNotEmpty) {
+    if (mode == ChatRenderMode.direct && _overflowMenuOptions.isNotEmpty) {
       _overflowMenuOptions.clear();
     }
   }
