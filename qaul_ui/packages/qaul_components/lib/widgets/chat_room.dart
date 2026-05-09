@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'chat_message.dart';
+import 'compute_message_presentation.dart';
 import 'qaul_chat_bubble.dart';
 
 class ChatRoom extends StatelessWidget {
@@ -9,11 +10,13 @@ class ChatRoom extends StatelessWidget {
     required this.messages,
     this.clock,
     this.padding = const EdgeInsets.all(16),
+    this.bubbleLayoutMode = ChatRenderMode.direct,
   });
 
   final List<ChatMessage> messages;
   final DateTime? clock;
   final EdgeInsetsGeometry padding;
+  final ChatRenderMode bubbleLayoutMode;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +27,10 @@ class ChatRoom extends StatelessWidget {
     void flushBubbleRun() {
       if (pendingBubbleRun.isEmpty) return;
 
-      final displayItems = computeChatBubbleDisplayItems(pendingBubbleRun);
+      final displayItems = computeChatBubbleDisplayItems(
+        pendingBubbleRun,
+        layoutMode: bubbleLayoutMode,
+      );
       for (final item in displayItems) {
         children.add(
           Padding(

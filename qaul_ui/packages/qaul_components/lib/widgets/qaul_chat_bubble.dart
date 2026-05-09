@@ -12,6 +12,11 @@ enum MessageStatus { notSent, sent, read }
 
 enum MessageType { primary, secondary }
 
+/// Selects vertical spacing between **non-linked** bubbles only.
+/// Tail shapes, timestamps, and “linked minute” rules are identical for both
+/// modes — see [directChatBubblesShareMinute].
+enum ChatRenderMode { direct, group }
+
 // ---------------------------------------------------------------------------
 // Public constants & style
 // ---------------------------------------------------------------------------
@@ -67,6 +72,9 @@ class QaulChatBubbleMessage extends ChatMessage {
     required this.edges,
     this.clock,
     this.showTimestamp = true,
+    this.senderIdBase58,
+    this.senderDisplayName,
+    this.senderDisplayNameColor,
   });
 
   final String content;
@@ -77,6 +85,9 @@ class QaulChatBubbleMessage extends ChatMessage {
   final List<TailEdge> edges;
   final DateTime? clock;
   final bool showTimestamp;
+  final String? senderIdBase58;
+  final String? senderDisplayName;
+  final Color? senderDisplayNameColor;
 
   QaulChatBubbleMessage copyWith({
     Key? key,
@@ -88,6 +99,9 @@ class QaulChatBubbleMessage extends ChatMessage {
     List<TailEdge>? edges,
     DateTime? clock,
     bool? showTimestamp,
+    String? senderIdBase58,
+    String? senderDisplayName,
+    Color? senderDisplayNameColor,
   }) {
     return QaulChatBubbleMessage(
       key: key ?? this.key,
@@ -99,6 +113,10 @@ class QaulChatBubbleMessage extends ChatMessage {
       edges: edges ?? this.edges,
       clock: clock ?? this.clock,
       showTimestamp: showTimestamp ?? this.showTimestamp,
+      senderIdBase58: senderIdBase58 ?? this.senderIdBase58,
+      senderDisplayName: senderDisplayName ?? this.senderDisplayName,
+      senderDisplayNameColor:
+          senderDisplayNameColor ?? this.senderDisplayNameColor,
     );
   }
 
@@ -301,16 +319,15 @@ class QaulChatBubble extends StatelessWidget {
                     ],
                   );
 
+                  Widget messageContent;
                   if (!showTimestamp) {
-                    return RichText(
+                    messageContent = RichText(
                       textAlign: TextAlign.left,
                       textWidthBasis: TextWidthBasis.longestLine,
                       text: messageSpan,
                     );
-                  }
-
-                  if (fitsOnOneLine) {
-                    return Row(
+                  } else if (fitsOnOneLine) {
+                    messageContent = Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -325,23 +342,46 @@ class QaulChatBubble extends StatelessWidget {
                         timeRow,
                       ],
                     );
+                  } else {
+                    messageContent = Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: isPrimary
+                          ? CrossAxisAlignment.end
+                          : CrossAxisAlignment.start,
+                      children: [
+                        RichText(
+                          textAlign: TextAlign.left,
+                          textWidthBasis: TextWidthBasis.longestLine,
+                          text: messageSpan,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: gap),
+                          child: timeRow,
+                        ),
+                      ],
+                    );
+                  }
+
+                  if (message.senderDisplayName == null ||
+                      message.senderDisplayName!.isEmpty) {
+                    return messageContent;
                   }
 
                   return Column(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: isPrimary
-                        ? CrossAxisAlignment.end
-                        : CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      RichText(
-                        textAlign: TextAlign.left,
-                        textWidthBasis: TextWidthBasis.longestLine,
-                        text: messageSpan,
-                      ),
                       Padding(
-                        padding: const EdgeInsets.only(top: gap),
-                        child: timeRow,
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          message.senderDisplayName!,
+                          style: kGroupSenderNameTextStyle.copyWith(
+                            color: message.senderDisplayNameColor ??
+                                Colors.white.withValues(alpha: 0.85),
+                          ),
+                        ),
                       ),
+                      messageContent,
                     ],
                   );
                 },
@@ -359,7 +399,18 @@ class QaulChatBubble extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 const double kChatBubbleLinkedGap = 4.0;
+
 const double kChatBubbleSeparatedGap = 12.0;
+
+const double kGroupChatBubbleSeparatedGap = 4.0;
+
+const TextStyle kGroupSenderNameTextStyle = TextStyle(
+  fontFamily: 'Roboto',
+  fontSize: 11,
+  fontWeight: FontWeight.w400,
+  height: 1.25,
+  letterSpacing: 0.5,
+);
 
 class QaulChatBubbleDisplayItem {
   const QaulChatBubbleDisplayItem({
@@ -377,8 +428,14 @@ class QaulChatBubbleDisplayItem {
 // Public helpers
 // ---------------------------------------------------------------------------
 
-bool isChatBubbleLinked(QaulChatBubbleMessage a, QaulChatBubbleMessage b) {
+bool directChatBubblesShareMinute(QaulChatBubbleMessage a, QaulChatBubbleMessage b) {
   if (a.messageType != b.messageType) return false;
+
+  if (a.senderIdBase58 != null &&
+      b.senderIdBase58 != null &&
+      a.senderIdBase58 != b.senderIdBase58) {
+    return false;
+  }
 
   final ta = a.sentAt;
   final tb = b.sentAt;
@@ -390,50 +447,15 @@ bool isChatBubbleLinked(QaulChatBubbleMessage a, QaulChatBubbleMessage b) {
       ta.minute == tb.minute;
 }
 
-List<QaulChatBubbleDisplayItem> computeChatBubbleDisplayItems(
-  List<QaulChatBubbleMessage> messages,
-) {
-  if (messages.isEmpty) return [];
-
-  final result = <QaulChatBubbleDisplayItem>[];
-
-  for (var i = 0; i < messages.length; i++) {
-    final prev = i > 0 ? messages[i - 1] : null;
-    final curr = messages[i];
-    final next = i < messages.length - 1 ? messages[i + 1] : null;
-
-    final prevLinked = prev != null && isChatBubbleLinked(prev, curr);
-    final nextLinked = next != null && isChatBubbleLinked(curr, next);
-
-    final isPrimary = curr.messageType == MessageType.primary;
-
-    final edges = isPrimary
-        ? _edgesForPrimary(prevLinked, nextLinked)
-        : _edgesForSecondary(prevLinked, nextLinked);
-
-    final showTimestamp = !nextLinked;
-
-    final marginTop = i == 0
-        ? 0.0
-        : (prevLinked ? kChatBubbleLinkedGap : kChatBubbleSeparatedGap);
-
-    result.add(
-      QaulChatBubbleDisplayItem(
-        message: curr.copyWith(edges: edges),
-        showTimestamp: showTimestamp,
-        marginTop: marginTop,
-      ),
-    );
-  }
-
-  return result;
-}
+/// Alias for [directChatBubblesShareMinute] (historical name).
+bool isChatBubbleLinked(QaulChatBubbleMessage a, QaulChatBubbleMessage b) =>
+    directChatBubblesShareMinute(a, b);
 
 // ---------------------------------------------------------------------------
 // Private helpers
 // ---------------------------------------------------------------------------
 
-List<TailEdge> _edgesForPrimary(bool hasPreviousLinked, bool hasNextLinked) {
+List<TailEdge> tailEdgesForPrimary(bool hasPreviousLinked, bool hasNextLinked) {
   if (!hasPreviousLinked && !hasNextLinked) return const [TailEdge.bottomEnd];
 
   if (hasPreviousLinked && hasNextLinked) {
@@ -445,7 +467,7 @@ List<TailEdge> _edgesForPrimary(bool hasPreviousLinked, bool hasNextLinked) {
   return const [TailEdge.topEnd];
 }
 
-List<TailEdge> _edgesForSecondary(bool hasPreviousLinked, bool hasNextLinked) {
+List<TailEdge> tailEdgesForSecondary(bool hasPreviousLinked, bool hasNextLinked) {
   if (!hasPreviousLinked && !hasNextLinked) {
     return const [TailEdge.bottomStart];
   }
