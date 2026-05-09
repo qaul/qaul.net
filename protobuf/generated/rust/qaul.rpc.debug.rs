@@ -3,7 +3,7 @@
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Debug {
     /// message type
-    #[prost(oneof = "debug::Message", tags = "1, 2, 3, 4, 5, 6, 7")]
+    #[prost(oneof = "debug::Message", tags = "1, 2, 3, 4, 5, 6, 7, 8, 9")]
     pub message: ::core::option::Option<debug::Message>,
 }
 /// Nested message and enum types in `Debug`.
@@ -32,6 +32,12 @@ pub mod debug {
         /// Request for library to delete logs
         #[prost(message, tag = "7")]
         DeleteLibqaulLogsRequest(super::DeleteLibqaulLogsRequest),
+        /// Acknowledgement response
+        #[prost(message, tag = "8")]
+        Ack(crate::qaul_common::Ack),
+        /// RPC error response
+        #[prost(message, tag = "9")]
+        Error(crate::qaul_common::RpcError),
     }
 }
 /// Request a Heartbeat from Libqaul
@@ -84,3 +90,84 @@ pub struct StoragePathResponse {
 /// Requests for the log folder to be wiped clean
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct DeleteLibqaulLogsRequest {}
+pub trait DebugService<S> {
+    fn heartbeat(
+        state: &S,
+        req: HeartbeatRequest,
+    ) -> Result<HeartbeatResponse, crate::qaul_common::RpcError>;
+    fn trigger_panic(
+        state: &S,
+        req: Panic,
+    ) -> Result<crate::qaul_common::Ack, crate::qaul_common::RpcError>;
+    fn set_log_to_file(
+        state: &S,
+        req: LogToFile,
+    ) -> Result<crate::qaul_common::Ack, crate::qaul_common::RpcError>;
+    fn storage_path(
+        state: &S,
+        req: StoragePathRequest,
+    ) -> Result<StoragePathResponse, crate::qaul_common::RpcError>;
+    fn delete_libqaul_logs(
+        state: &S,
+        req: DeleteLibqaulLogsRequest,
+    ) -> Result<crate::qaul_common::Ack, crate::qaul_common::RpcError>;
+}
+pub fn dispatch<S, T: DebugService<S>>(state: &S, data: Vec<u8>) -> Vec<u8> {
+    use prost::Message;
+    let response_oneof = match Debug::decode(&data[..]) {
+        Ok(envelope) => {
+            match envelope.message {
+                Some(debug::Message::HeartbeatRequest(req)) => {
+                    match T::heartbeat(state, req) {
+                        Ok(resp) => debug::Message::HeartbeatResponse(resp),
+                        Err(e) => debug::Message::Error(e),
+                    }
+                }
+                Some(debug::Message::Panic(req)) => {
+                    match T::trigger_panic(state, req) {
+                        Ok(resp) => debug::Message::Ack(resp),
+                        Err(e) => debug::Message::Error(e),
+                    }
+                }
+                Some(debug::Message::LogToFile(req)) => {
+                    match T::set_log_to_file(state, req) {
+                        Ok(resp) => debug::Message::Ack(resp),
+                        Err(e) => debug::Message::Error(e),
+                    }
+                }
+                Some(debug::Message::StoragePathRequest(req)) => {
+                    match T::storage_path(state, req) {
+                        Ok(resp) => debug::Message::StoragePathResponse(resp),
+                        Err(e) => debug::Message::Error(e),
+                    }
+                }
+                Some(debug::Message::DeleteLibqaulLogsRequest(req)) => {
+                    match T::delete_libqaul_logs(state, req) {
+                        Ok(resp) => debug::Message::Ack(resp),
+                        Err(e) => debug::Message::Error(e),
+                    }
+                }
+                _ => {
+                    debug::Message::Error(crate::qaul_common::RpcError {
+                        code: 1,
+                        message: "unexpected or unset Debug oneof variant".into(),
+                        details: String::new(),
+                    })
+                }
+            }
+        }
+        Err(e) => {
+            debug::Message::Error(crate::qaul_common::RpcError {
+                code: 1,
+                message: format!("decode failure: {}", e),
+                details: String::new(),
+            })
+        }
+    };
+    let envelope = Debug {
+        message: Some(response_oneof),
+    };
+    let mut out = Vec::with_capacity(envelope.encoded_len());
+    envelope.encode(&mut out).expect("Vec<u8> provides capacity as needed");
+    out
+}

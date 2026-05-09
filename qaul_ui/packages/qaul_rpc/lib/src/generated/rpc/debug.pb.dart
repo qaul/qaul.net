@@ -10,9 +10,12 @@
 // ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
 // ignore_for_file: non_constant_identifier_names, prefer_relative_imports
 
+import 'dart:async' as $async;
 import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
+
+import '../common/common.pb.dart' as $0;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
@@ -24,6 +27,8 @@ enum Debug_Message {
   storagePathRequest,
   storagePathResponse,
   deleteLibqaulLogsRequest,
+  ack,
+  error,
   notSet
 }
 
@@ -37,6 +42,8 @@ class Debug extends $pb.GeneratedMessage {
     StoragePathRequest? storagePathRequest,
     StoragePathResponse? storagePathResponse,
     DeleteLibqaulLogsRequest? deleteLibqaulLogsRequest,
+    $0.Ack? ack,
+    $0.RpcError? error,
   }) {
     final result = create();
     if (heartbeatRequest != null) result.heartbeatRequest = heartbeatRequest;
@@ -49,6 +56,8 @@ class Debug extends $pb.GeneratedMessage {
       result.storagePathResponse = storagePathResponse;
     if (deleteLibqaulLogsRequest != null)
       result.deleteLibqaulLogsRequest = deleteLibqaulLogsRequest;
+    if (ack != null) result.ack = ack;
+    if (error != null) result.error = error;
     return result;
   }
 
@@ -69,13 +78,15 @@ class Debug extends $pb.GeneratedMessage {
     5: Debug_Message.storagePathRequest,
     6: Debug_Message.storagePathResponse,
     7: Debug_Message.deleteLibqaulLogsRequest,
+    8: Debug_Message.ack,
+    9: Debug_Message.error,
     0: Debug_Message.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Debug',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.debug'),
       createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4, 5, 6, 7])
+    ..oo(0, [1, 2, 3, 4, 5, 6, 7, 8, 9])
     ..aOM<HeartbeatRequest>(1, _omitFieldNames ? '' : 'heartbeatRequest',
         subBuilder: HeartbeatRequest.create)
     ..aOM<HeartbeatResponse>(2, _omitFieldNames ? '' : 'heartbeatResponse',
@@ -90,6 +101,9 @@ class Debug extends $pb.GeneratedMessage {
     ..aOM<DeleteLibqaulLogsRequest>(
         7, _omitFieldNames ? '' : 'deleteLibqaulLogsRequest',
         subBuilder: DeleteLibqaulLogsRequest.create)
+    ..aOM<$0.Ack>(8, _omitFieldNames ? '' : 'ack', subBuilder: $0.Ack.create)
+    ..aOM<$0.RpcError>(9, _omitFieldNames ? '' : 'error',
+        subBuilder: $0.RpcError.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -117,6 +131,8 @@ class Debug extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   @$pb.TagNumber(6)
   @$pb.TagNumber(7)
+  @$pb.TagNumber(8)
+  @$pb.TagNumber(9)
   Debug_Message whichMessage() => _Debug_MessageByTag[$_whichOneof(0)]!;
   @$pb.TagNumber(1)
   @$pb.TagNumber(2)
@@ -125,6 +141,8 @@ class Debug extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   @$pb.TagNumber(6)
   @$pb.TagNumber(7)
+  @$pb.TagNumber(8)
+  @$pb.TagNumber(9)
   void clearMessage() => $_clearField($_whichOneof(0));
 
   /// request a heartbeat
@@ -211,6 +229,30 @@ class Debug extends $pb.GeneratedMessage {
   void clearDeleteLibqaulLogsRequest() => $_clearField(7);
   @$pb.TagNumber(7)
   DeleteLibqaulLogsRequest ensureDeleteLibqaulLogsRequest() => $_ensure(6);
+
+  /// Acknowledgement response
+  @$pb.TagNumber(8)
+  $0.Ack get ack => $_getN(7);
+  @$pb.TagNumber(8)
+  set ack($0.Ack value) => $_setField(8, value);
+  @$pb.TagNumber(8)
+  $core.bool hasAck() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearAck() => $_clearField(8);
+  @$pb.TagNumber(8)
+  $0.Ack ensureAck() => $_ensure(7);
+
+  /// RPC error response
+  @$pb.TagNumber(9)
+  $0.RpcError get error => $_getN(8);
+  @$pb.TagNumber(9)
+  set error($0.RpcError value) => $_setField(9, value);
+  @$pb.TagNumber(9)
+  $core.bool hasError() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearError() => $_clearField(9);
+  @$pb.TagNumber(9)
+  $0.RpcError ensureError() => $_ensure(8);
 }
 
 /// Request a Heartbeat from Libqaul
@@ -535,6 +577,32 @@ class DeleteLibqaulLogsRequest extends $pb.GeneratedMessage {
   static DeleteLibqaulLogsRequest getDefault() => _defaultInstance ??=
       $pb.GeneratedMessage.$_defaultFor<DeleteLibqaulLogsRequest>(create);
   static DeleteLibqaulLogsRequest? _defaultInstance;
+}
+
+class DebugServiceApi {
+  final $pb.RpcClient _client;
+
+  DebugServiceApi(this._client);
+
+  $async.Future<HeartbeatResponse> heartbeat(
+          $pb.ClientContext? ctx, HeartbeatRequest request) =>
+      _client.invoke<HeartbeatResponse>(
+          ctx, 'DebugService', 'Heartbeat', request, HeartbeatResponse());
+  $async.Future<$0.Ack> triggerPanic($pb.ClientContext? ctx, Panic request) =>
+      _client.invoke<$0.Ack>(
+          ctx, 'DebugService', 'TriggerPanic', request, $0.Ack());
+  $async.Future<$0.Ack> setLogToFile(
+          $pb.ClientContext? ctx, LogToFile request) =>
+      _client.invoke<$0.Ack>(
+          ctx, 'DebugService', 'SetLogToFile', request, $0.Ack());
+  $async.Future<StoragePathResponse> storagePath(
+          $pb.ClientContext? ctx, StoragePathRequest request) =>
+      _client.invoke<StoragePathResponse>(
+          ctx, 'DebugService', 'StoragePath', request, StoragePathResponse());
+  $async.Future<$0.Ack> deleteLibqaulLogs(
+          $pb.ClientContext? ctx, DeleteLibqaulLogsRequest request) =>
+      _client.invoke<$0.Ack>(
+          ctx, 'DebugService', 'DeleteLibqaulLogs', request, $0.Ack());
 }
 
 const $core.bool _omitFieldNames =

@@ -1,3 +1,4 @@
+common/common.proto
 rpc/qaul_rpc.proto
 rpc/debug.proto
 connections/connections.proto
