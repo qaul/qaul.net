@@ -1,8 +1,8 @@
-export 'styles/qaul_color_sheet.dart';
-export 'widgets/chat_header.dart';
-export 'widgets/compute_message_presentation.dart'
+export 'design_components/chat/chat_header.dart';
+export 'design_components/chat/chat_timeline.dart';
+export 'design_components/chat/compute_message_presentation.dart'
     show computeChatMessagePresentation, computeChatBubbleDisplayItems;
-export 'widgets/group_chat_messages.dart'
+export 'design_components/chat/group_chat_messages.dart'
     show
         ChatMessageRenderer,
         DirectTextMessageItem,
@@ -11,13 +11,16 @@ export 'widgets/group_chat_messages.dart'
         GroupTextMessageItem,
         MessagePresentation,
         QaulGroupMessageSender;
-export 'widgets/message_presentation_meta.dart'
+export 'design_components/chat/message_presentation_meta.dart'
     show
         ChatTimelinePresentationRow,
         MessagePresentationComputation,
         MessagePresentationMeta;
-export 'widgets/qaul_chat_bubble.dart';
-export 'widgets/qaul_fab.dart';
-export 'widgets/qaul_loading_indicator.dart';
-export 'widgets/qaul_navbar.dart';
-export 'widgets/room_meta_message.dart';
+export 'design_components/chat/qaul_chat_bubble.dart';
+export 'design_components/chat/room_meta_message.dart';
+export 'design_components/shell/qaul_fab.dart';
+export 'design_components/shell/qaul_loading_indicator.dart';
+export 'design_components/shell/qaul_navbar.dart';
+export 'models/chat_message.dart';
+export 'models/chat_user.dart';
+export 'styles/qaul_color_sheet.dart';
