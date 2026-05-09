@@ -197,6 +197,17 @@ impl Debug {
                         // printout path
                         println!("Storage Path: {}", storage_path_response.storage_path);
                     }
+                    Some(proto::debug::Message::Ack(_)) => {
+                        println!("Acknowledged");
+                    }
+                    Some(proto::debug::Message::Error(err)) => {
+                        log::error!(
+                            "RPC error response: code={} message={} details={}",
+                            err.code,
+                            err.message,
+                            err.details
+                        );
+                    }
                     _ => {
                         log::error!("unprocessable RPC debug message");
                     }

@@ -6,12 +6,44 @@
 //! Compiles all .proto files and copies the generated Rust code
 //! to the shared generated/rust/ folder.
 
+mod service_generator;
+use service_generator::QaulServiceGenerator;
+
 use std::env;
 use std::fs;
 use std::path::Path;
 
 fn main() {
+    let out_dir = env::var_os("OUT_DIR").unwrap();
+    let to = Path::new("../../protobuf/generated/rust");
+    let proto_root = &["../../protobuf/proto_definitions"];
+
+    // --- Pass 1: compile common.proto by itself so qaul.common.rs is generated ---
+    match prost_build::Config::new().compile_protos(
+        &["common/common.proto"],
+        proto_root,
+    ) {
+        Ok(_) => {
+            fs::copy(
+                Path::new(&out_dir).join("qaul.common.rs"),
+                to.join("qaul.common.rs"),
+            )
+            .unwrap();
+        }
+        Err(err) => {
+            println!(
+                "cargo::warning=common.proto was not compiled. Reason: {}",
+                err
+            );
+        }
+    }
+
+    // --- Pass 2: compile all RPC protos with extern_path for common types ---
     let mut prost_build = prost_build::Config::new();
+    prost_build.service_generator(Box::new(QaulServiceGenerator));
+    // Map qaul.common proto types to the crate::qaul_common Rust module so
+    // generated references use the correct absolute path instead of relative supers.
+    prost_build.extern_path(".qaul.common", "crate::qaul_common");
 
     // make chat messages serializable
     // in order to save them in the data base
@@ -61,6 +93,7 @@ fn main() {
     // compile these protobuf files
     match prost_build.compile_protos(
         &[
+            "common/common.proto",
             "rpc/qaul_rpc.proto",
             "rpc/authentication.proto",
             "rpc/debug.proto",
@@ -86,13 +119,12 @@ fn main() {
             "services/dtn/dtn_rpc.proto",
             "services/crypto/crypto_net.proto",
         ],
-        &["../../protobuf/proto_definitions"],
+        proto_root,
     ) {
         Ok(_) => {
             // copy generated protobuf files to the shared folder
-            let out_dir = env::var_os("OUT_DIR").unwrap();
-            let to = Path::new("../../protobuf/generated/rust");
-
+            // Note: qaul.common.rs is copied in Pass 1 above; it is not produced here
+            // because extern_path tells prost not to generate it.
             let files = [
                 "qaul.rpc.rs",
                 "qaul.rpc.authentication.rs",

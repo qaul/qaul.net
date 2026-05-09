@@ -15,6 +15,8 @@ import 'dart:convert' as $convert;
 import 'dart:core' as $core;
 import 'dart:typed_data' as $typed_data;
 
+import '../common/common.pbjson.dart' as $0;
+
 @$core.Deprecated('Use debugDescriptor instead')
 const Debug$json = {
   '1': 'Debug',
@@ -82,6 +84,24 @@ const Debug$json = {
       '9': 0,
       '10': 'deleteLibqaulLogsRequest'
     },
+    {
+      '1': 'ack',
+      '3': 8,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.common.Ack',
+      '9': 0,
+      '10': 'ack'
+    },
+    {
+      '1': 'error',
+      '3': 9,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.common.RpcError',
+      '9': 0,
+      '10': 'error'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -100,7 +120,8 @@ final $typed_data.Uint8List debugDescriptor = $convert.base64Decode(
     'BvbnNlGAYgASgLMiMucWF1bC5ycGMuZGVidWcuU3RvcmFnZVBhdGhSZXNwb25zZUgAUhNzdG9y'
     'YWdlUGF0aFJlc3BvbnNlEmkKG2RlbGV0ZV9saWJxYXVsX2xvZ3NfcmVxdWVzdBgHIAEoCzIoLn'
     'FhdWwucnBjLmRlYnVnLkRlbGV0ZUxpYnFhdWxMb2dzUmVxdWVzdEgAUhhkZWxldGVMaWJxYXVs'
-    'TG9nc1JlcXVlc3RCCQoHbWVzc2FnZQ==');
+    'TG9nc1JlcXVlc3QSJAoDYWNrGAggASgLMhAucWF1bC5jb21tb24uQWNrSABSA2FjaxItCgVlcn'
+    'JvchgJIAEoCzIVLnFhdWwuY29tbW9uLlJwY0Vycm9ySABSBWVycm9yQgkKB21lc3NhZ2U=');
 
 @$core.Deprecated('Use heartbeatRequestDescriptor instead')
 const HeartbeatRequest$json = {
@@ -171,3 +192,57 @@ const DeleteLibqaulLogsRequest$json = {
 /// Descriptor for `DeleteLibqaulLogsRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List deleteLibqaulLogsRequestDescriptor =
     $convert.base64Decode('ChhEZWxldGVMaWJxYXVsTG9nc1JlcXVlc3Q=');
+
+const $core.Map<$core.String, $core.dynamic> DebugServiceBase$json = {
+  '1': 'DebugService',
+  '2': [
+    {
+      '1': 'Heartbeat',
+      '2': '.qaul.rpc.debug.HeartbeatRequest',
+      '3': '.qaul.rpc.debug.HeartbeatResponse'
+    },
+    {
+      '1': 'TriggerPanic',
+      '2': '.qaul.rpc.debug.Panic',
+      '3': '.qaul.common.Ack'
+    },
+    {
+      '1': 'SetLogToFile',
+      '2': '.qaul.rpc.debug.LogToFile',
+      '3': '.qaul.common.Ack'
+    },
+    {
+      '1': 'StoragePath',
+      '2': '.qaul.rpc.debug.StoragePathRequest',
+      '3': '.qaul.rpc.debug.StoragePathResponse'
+    },
+    {
+      '1': 'DeleteLibqaulLogs',
+      '2': '.qaul.rpc.debug.DeleteLibqaulLogsRequest',
+      '3': '.qaul.common.Ack'
+    },
+  ],
+};
+
+@$core.Deprecated('Use debugServiceDescriptor instead')
+const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
+    DebugServiceBase$messageJson = {
+  '.qaul.rpc.debug.HeartbeatRequest': HeartbeatRequest$json,
+  '.qaul.rpc.debug.HeartbeatResponse': HeartbeatResponse$json,
+  '.qaul.rpc.debug.Panic': Panic$json,
+  '.qaul.common.Ack': $0.Ack$json,
+  '.qaul.rpc.debug.LogToFile': LogToFile$json,
+  '.qaul.rpc.debug.StoragePathRequest': StoragePathRequest$json,
+  '.qaul.rpc.debug.StoragePathResponse': StoragePathResponse$json,
+  '.qaul.rpc.debug.DeleteLibqaulLogsRequest': DeleteLibqaulLogsRequest$json,
+};
+
+/// Descriptor for `DebugService`. Decode as a `google.protobuf.ServiceDescriptorProto`.
+final $typed_data.Uint8List debugServiceDescriptor = $convert.base64Decode(
+    'CgxEZWJ1Z1NlcnZpY2USUAoJSGVhcnRiZWF0EiAucWF1bC5ycGMuZGVidWcuSGVhcnRiZWF0Um'
+    'VxdWVzdBohLnFhdWwucnBjLmRlYnVnLkhlYXJ0YmVhdFJlc3BvbnNlEjcKDFRyaWdnZXJQYW5p'
+    'YxIVLnFhdWwucnBjLmRlYnVnLlBhbmljGhAucWF1bC5jb21tb24uQWNrEjsKDFNldExvZ1RvRm'
+    'lsZRIZLnFhdWwucnBjLmRlYnVnLkxvZ1RvRmlsZRoQLnFhdWwuY29tbW9uLkFjaxJWCgtTdG9y'
+    'YWdlUGF0aBIiLnFhdWwucnBjLmRlYnVnLlN0b3JhZ2VQYXRoUmVxdWVzdBojLnFhdWwucnBjLm'
+    'RlYnVnLlN0b3JhZ2VQYXRoUmVzcG9uc2USTwoRRGVsZXRlTGlicWF1bExvZ3MSKC5xYXVsLnJw'
+    'Yy5kZWJ1Zy5EZWxldGVMaWJxYXVsTG9nc1JlcXVlc3QaEC5xYXVsLmNvbW1vbi5BY2s=');
