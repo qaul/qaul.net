@@ -102,13 +102,7 @@ class GroupTranslator extends RpcModuleTranslator {
         state.append(paginated.rooms);
         return;
       }
-      for (final room in paginated.rooms) {
-        if (!state.contains(room)) {
-          state.add(room);
-        } else {
-          state.update(room);
-        }
-      }
+      state.mergeOrderedFromBackend(paginated.rooms);
       return;
     } else if (res.data is ChatRoom) {
       if (!state.contains(res.data)) {
