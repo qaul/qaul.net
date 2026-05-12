@@ -21,36 +21,34 @@ const double _kIconWidth = 15;
 const double _kIconHeight = 20;
 const double _kSendIconSize = 20;
 const double _kPlusCircleSize = 28;
+const double _kPlusAssetSize = 24;
 const double _kAttachmentIconSpacing = 24;
 
-List<BoxShadow> _chatFooterShadows(Brightness brightness) {
-  if (brightness == Brightness.dark) {
-    return const [
-      BoxShadow(
-        offset: Offset(0, 0),
-        blurRadius: 5,
-        color: Color(0x66000000),
-      ),
-      BoxShadow(
-        offset: Offset(0, -10),
-        blurRadius: 7,
-        color: Color(0x99000000),
-      ),
-    ];
-  }
-  return const [
-    BoxShadow(
-      offset: Offset(0, 0),
-      blurRadius: 5,
-      color: Color(0x33000000),
-    ),
-    BoxShadow(
-      offset: Offset(0, -10),
-      blurRadius: 7,
-      color: Color(0x66000000),
-    ),
-  ];
-}
+const List<BoxShadow> _kFooterShadowsDark = [
+  BoxShadow(
+    offset: Offset(0, 0),
+    blurRadius: 5,
+    color: Color(0x66000000),
+  ),
+  BoxShadow(
+    offset: Offset(0, -10),
+    blurRadius: 7,
+    color: Color(0x99000000),
+  ),
+];
+
+const List<BoxShadow> _kFooterShadowsLight = [
+  BoxShadow(
+    offset: Offset(0, 0),
+    blurRadius: 5,
+    color: Color(0x33000000),
+  ),
+  BoxShadow(
+    offset: Offset(0, -10),
+    blurRadius: 7,
+    color: Color(0x66000000),
+  ),
+];
 
 Color _inputFillColor(Brightness brightness, Color shell) {
   if (brightness == Brightness.dark) {
@@ -59,26 +57,31 @@ Color _inputFillColor(Brightness brightness, Color shell) {
   return shell;
 }
 
-TextStyle _placeholderStyle(ThemeData theme) {
-  return TextStyle(
+/// Shared typography for the composer field (colors differ for hint vs value).
+TextStyle _fieldBaseTextStyle() {
+  return const TextStyle(
     fontFamily: 'Roboto',
     fontSize: _kFieldFontSize,
     fontWeight: FontWeight.w400,
     height: 1.25,
+  );
+}
+
+TextStyle _fieldValueStyle(ThemeData theme) {
+  return _fieldBaseTextStyle().copyWith(color: theme.colorScheme.onSurface);
+}
+
+TextStyle _fieldHintStyle(ThemeData theme) {
+  return _fieldBaseTextStyle().copyWith(
     color: theme.brightness == Brightness.dark
         ? const Color(0xFF8E8E93)
         : const Color(0xFF9E9E9E),
   );
 }
 
-TextStyle _inputStyle(ThemeData theme) {
-  return TextStyle(
-    fontFamily: 'Roboto',
-    fontSize: _kFieldFontSize,
-    fontWeight: FontWeight.w400,
-    height: 1.25,
-    color: theme.colorScheme.onSurface,
-  );
+Widget _wrapTooltip(String? message, Widget child) {
+  if (message == null || message.isEmpty) return child;
+  return Tooltip(message: message, child: child);
 }
 
 /// Bottom chat composer: pill field, attachment shortcuts when empty, send when
@@ -121,7 +124,6 @@ class ChatFooter extends StatefulWidget {
 
 class _ChatFooterState extends State<ChatFooter> {
   late final TextEditingController _ownedController;
-  TextEditingController? _listened;
 
   TextEditingController get _effectiveController =>
       widget.controller ?? _ownedController;
@@ -130,35 +132,15 @@ class _ChatFooterState extends State<ChatFooter> {
   void initState() {
     super.initState();
     _ownedController = TextEditingController();
-    _attachTextListener();
-  }
-
-  @override
-  void didUpdateWidget(covariant ChatFooter oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) {
-      _attachTextListener();
-    }
-  }
-
-  void _attachTextListener() {
-    _listened?.removeListener(_onTextChanged);
-    _listened = widget.controller ?? _ownedController;
-    _listened!.addListener(_onTextChanged);
   }
 
   @override
   void dispose() {
-    _listened?.removeListener(_onTextChanged);
     if (widget.controller == null) {
       _ownedController.dispose();
     }
     super.dispose();
   }
-
-  void _onTextChanged() => setState(() {});
-
-  bool get _hasText => _effectiveController.text.trim().isNotEmpty;
 
   void _handleSend() {
     final text = _effectiveController.text.trim();
@@ -172,8 +154,58 @@ class _ChatFooterState extends State<ChatFooter> {
     final sheet = QaulColorSheet(theme.brightness);
     final shell = sheet.background;
     final fillColor = _inputFillColor(theme.brightness, shell);
+    final shadows = theme.brightness == Brightness.dark
+        ? _kFooterShadowsDark
+        : _kFooterShadowsLight;
 
-    final field = DecoratedBox(
+    final inner = Padding(
+      padding: const EdgeInsets.fromLTRB(
+        _kHorizontalPadding,
+        _kTopPadding,
+        _kHorizontalPadding,
+        _kBottomPadding,
+      ),
+      child: _ComposerPill(
+        footer: widget,
+        theme: theme,
+        fillColor: fillColor,
+        controller: _effectiveController,
+        onSendPressed: _handleSend,
+      ),
+    );
+
+    return DecoratedBox(
+      decoration: BoxDecoration(color: shell, boxShadow: shadows),
+      child: Material(
+        color: Colors.transparent,
+        child: widget.applyBottomSafeArea
+            ? SafeArea(top: false, child: inner)
+            : inner,
+      ),
+    );
+  }
+}
+
+/// Pill + [TextField]; trailing actions depend on text and listen to [controller]
+/// without rebuilding the whole footer.
+class _ComposerPill extends StatelessWidget {
+  const _ComposerPill({
+    required this.footer,
+    required this.theme,
+    required this.fillColor,
+    required this.controller,
+    required this.onSendPressed,
+  });
+
+  final ChatFooter footer;
+  final ThemeData theme;
+  final Color fillColor;
+  final TextEditingController controller;
+  final VoidCallback onSendPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: fillColor,
         borderRadius: BorderRadius.circular(_kInputBorderRadius),
@@ -185,20 +217,20 @@ class _ChatFooterState extends State<ChatFooter> {
           children: [
             Expanded(
               child: TextField(
-                controller: _effectiveController,
+                controller: controller,
                 minLines: 1,
                 maxLines: 5,
-                style: _inputStyle(theme),
+                style: _fieldValueStyle(theme),
                 decoration: InputDecoration(
                   isDense: true,
                   hint: SizedBox(
                     width: double.infinity,
                     child: Text(
-                      widget.placeholder,
+                      footer.placeholder,
                       maxLines: 1,
                       softWrap: false,
                       overflow: TextOverflow.ellipsis,
-                      style: _placeholderStyle(theme),
+                      style: _fieldHintStyle(theme),
                     ),
                   ),
                   border: InputBorder.none,
@@ -216,49 +248,30 @@ class _ChatFooterState extends State<ChatFooter> {
                 textInputAction: TextInputAction.newline,
               ),
             ),
-            if (_hasText)
-              _SendButton(
-                onPressed: _handleSend,
-                tooltip: widget.sendTooltip,
-              )
-            else
-              _AttachmentActions(
-                onVoice: widget.onVoicePressed,
-                onCamera: widget.onCameraPressed,
-                onMore: widget.onMoreAttachmentsPressed,
-                voiceTooltip: widget.voiceTooltip,
-                cameraTooltip: widget.cameraTooltip,
-                attachmentsTooltip: widget.attachmentsTooltip,
-              ),
+            ListenableBuilder(
+              listenable: controller,
+              builder: (context, _) {
+                final hasText = controller.text.trim().isNotEmpty;
+                if (hasText) {
+                  return _SendButton(
+                    onPressed: onSendPressed,
+                    tooltip: footer.sendTooltip,
+                  );
+                }
+                return _AttachmentActions(
+                  onVoice: footer.onVoicePressed,
+                  onCamera: footer.onCameraPressed,
+                  onMore: footer.onMoreAttachmentsPressed,
+                  voiceTooltip: footer.voiceTooltip,
+                  cameraTooltip: footer.cameraTooltip,
+                  attachmentsTooltip: footer.attachmentsTooltip,
+                );
+              },
+            ),
           ],
         ),
       ),
     );
-
-    final inner = Padding(
-      padding: const EdgeInsets.fromLTRB(
-        _kHorizontalPadding,
-        _kTopPadding,
-        _kHorizontalPadding,
-        _kBottomPadding,
-      ),
-      child: field,
-    );
-
-    final content = DecoratedBox(
-      decoration: BoxDecoration(
-        color: shell,
-        boxShadow: _chatFooterShadows(theme.brightness),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: widget.applyBottomSafeArea
-            ? SafeArea(top: false, child: inner)
-            : inner,
-      ),
-    );
-
-    return content;
   }
 }
 
@@ -270,20 +283,20 @@ class _SendButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final button = IconButton(
-      onPressed: onPressed,
-      icon: const Icon(
-        Icons.send_rounded,
-        size: _kSendIconSize,
-        color: _kActionIconColor,
+    return _wrapTooltip(
+      tooltip,
+      IconButton(
+        onPressed: onPressed,
+        icon: const Icon(
+          Icons.send_rounded,
+          size: _kSendIconSize,
+          color: _kActionIconColor,
+        ),
+        padding: const EdgeInsets.only(left: 8, right: 16),
+        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+        visualDensity: VisualDensity.compact,
       ),
-      padding: const EdgeInsets.only(left: 8, right: 16),
-      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-      visualDensity: VisualDensity.compact,
     );
-    final t = tooltip;
-    if (t == null || t.isEmpty) return button;
-    return Tooltip(message: t, child: button);
   }
 }
 
@@ -307,7 +320,7 @@ class _AttachmentActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(right: 16),
+      padding: const EdgeInsets.only(right: _kHorizontalPadding),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -337,31 +350,37 @@ class _AttachmentActions extends StatelessWidget {
     required VoidCallback? onPressed,
     String? tooltip,
   }) {
-    final child = IconButton(
-      onPressed: onPressed,
-      icon: _ChatFooterSvgIcon(asset: asset),
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-      visualDensity: VisualDensity.compact,
+    return _wrapTooltip(
+      tooltip,
+      IconButton(
+        onPressed: onPressed,
+        icon: _ChatFooterSvgIcon(asset: asset),
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+        visualDensity: VisualDensity.compact,
+      ),
     );
-    final t = tooltip;
-    if (t == null || t.isEmpty) return child;
-    return Tooltip(message: t, child: child);
   }
 }
 
 class _ChatFooterSvgIcon extends StatelessWidget {
-  const _ChatFooterSvgIcon({required this.asset});
+  const _ChatFooterSvgIcon({
+    required this.asset,
+    this.width = _kIconWidth,
+    this.height = _kIconHeight,
+  });
 
   final String asset;
+  final double width;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
     return SvgPicture.asset(
       asset,
       package: _kComponentsPackage,
-      width: _kIconWidth,
-      height: _kIconHeight,
+      width: width,
+      height: height,
       colorFilter: const ColorFilter.mode(
         _kActionIconColor,
         BlendMode.srcIn,
@@ -378,28 +397,26 @@ class _PlusInCircleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final inner = Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        customBorder: const CircleBorder(),
-        child: SizedBox(
-          width: _kPlusCircleSize,
-          height: _kPlusCircleSize,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: _kActionIconColor, width: 1.2),
-            ),
-            child: const Center(
-              child: _ChatFooterSvgIcon(asset: _kPlusSvg),
+    return _wrapTooltip(
+      tooltip,
+      Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          customBorder: const CircleBorder(),
+          child: const SizedBox(
+            width: _kPlusCircleSize,
+            height: _kPlusCircleSize,
+            child: Center(
+              child: _ChatFooterSvgIcon(
+                asset: _kPlusSvg,
+                width: _kPlusAssetSize,
+                height: _kPlusAssetSize,
+              ),
             ),
           ),
         ),
       ),
     );
-    final t = tooltip;
-    if (t == null || t.isEmpty) return inner;
-    return Tooltip(message: t, child: inner);
   }
 }
