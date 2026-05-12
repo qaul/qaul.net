@@ -1,3 +1,4 @@
+export 'design_components/chat/chat_footer.dart';
 export 'design_components/chat/chat_header.dart';
 export 'design_components/chat/chat_timeline.dart';
 export 'design_components/chat/compute_message_presentation.dart'
