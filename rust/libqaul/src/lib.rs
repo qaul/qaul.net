@@ -65,6 +65,10 @@ pub struct QaulState {
     pub rpc: RpcState,
     /// SYS RPC channel state (external ↔ libqaul SYS channels)
     pub sys: SysRpcState,
+    /// Active event subscribers (request_id → subscriber info). Populated
+    /// by the long-running Subscribe RPC; events are pushed via
+    /// `crate::rpc::subscribe::Subscribe::fire`.
+    pub subscriptions: rpc::subscribe::SubscriptionState,
     /// Connection states (Internet reconnections, BLE)
     pub connections: connections::ConnectionsState,
     /// Node identity (PeerId, Keypair, topic)
@@ -117,6 +121,7 @@ impl QaulState {
             auth: AuthenticationState::new(),
             rpc: RpcState::new(),
             sys: SysRpcState::new(),
+            subscriptions: rpc::subscribe::SubscriptionState::new(),
             connections: connections::ConnectionsState::new(),
             node: std::sync::RwLock::new(Arc::new(node::NodeIdentity::generate())),
             config: storage::configuration::ConfigurationState::from_config(config),
@@ -145,6 +150,7 @@ impl QaulState {
             auth: AuthenticationState::new(),
             rpc: RpcState::new(),
             sys: SysRpcState::new(),
+            subscriptions: rpc::subscribe::SubscriptionState::new(),
             connections: connections::ConnectionsState::new(),
             node: std::sync::RwLock::new(node_identity),
             config: storage::configuration::ConfigurationState::new(),

@@ -8,6 +8,7 @@
 
 pub mod authentication;
 pub mod debug;
+pub mod subscribe;
 pub mod sys;
 
 use crossbeam_channel::{unbounded, Receiver, Sender, TryRecvError};
@@ -251,6 +252,15 @@ impl Rpc {
                             message.request_id,
                         );
                     }
+                    Ok(Modules::Subscribe) => {
+                        log::trace!("Subscribe message received");
+                        subscribe::Subscribe::rpc(
+                            state,
+                            message.data,
+                            message.user_id,
+                            message.request_id,
+                        );
+                    }
                     Ok(Modules::None) => {
                         log::error!("Message Modules::None received");
                     }
@@ -262,6 +272,22 @@ impl Rpc {
             Err(error) => {
                 log::error!("{:?}", error);
             }
+        }
+    }
+
+    /// Notify libqaul that an external client (qauld socket peer) has
+    /// disconnected. Cleans up any long-running RPC state — currently
+    /// just `SubscriptionState`, but other streaming RPCs added later
+    /// should clean up here too.
+    ///
+    /// `request_ids` is the set of request_ids the client had in flight
+    /// at disconnect time. Unknown ids are silently ignored.
+    pub fn client_disconnected(state: &crate::QaulState, request_ids: &[String]) {
+        if request_ids.is_empty() {
+            return;
+        }
+        for id in request_ids {
+            state.subscriptions.unsubscribe(id);
         }
     }
 
