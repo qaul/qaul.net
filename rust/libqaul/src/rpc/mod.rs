@@ -8,6 +8,7 @@
 
 pub mod authentication;
 pub mod debug;
+pub mod subscribe;
 pub mod sys;
 
 use crossbeam_channel::{unbounded, Receiver, Sender, TryRecvError};
@@ -72,7 +73,6 @@ impl RpcState {
             libqaul_receive,
         }
     }
-
 }
 
 /// RPC Module - wrapper for instance-based RPC channel management
@@ -192,7 +192,13 @@ impl Rpc {
                     }
                     Ok(Modules::Users) => {
                         let rs = state.get_router();
-                        Users::rpc(state, &rs, message.data, message.user_id, message.request_id);
+                        Users::rpc(
+                            state,
+                            &rs,
+                            message.data,
+                            message.user_id,
+                            message.request_id,
+                        );
                     }
                     Ok(Modules::Router) => {
                         let rs = state.get_router();
@@ -229,7 +235,8 @@ impl Rpc {
                     }
                     Ok(Modules::Chatfile) => {
                         log::trace!("Message Modules::Chatfile received");
-                        ChatFile::rpc(state, message.data, message.user_id, message.request_id).await;
+                        ChatFile::rpc(state, message.data, message.user_id, message.request_id)
+                            .await;
                     }
                     Ok(Modules::Group) => {
                         log::trace!("Message Modules::Group received");
@@ -253,6 +260,15 @@ impl Rpc {
                     Ok(Modules::Auth) => {
                         log::trace!("Auth message received in CLI");
                         authentication::Authentication::rpc(
+                            state,
+                            message.data,
+                            message.user_id,
+                            message.request_id,
+                        );
+                    }
+                    Ok(Modules::Subscribe) => {
+                        log::trace!("Subscribe message received");
+                        subscribe::Subscribe::rpc(
                             state,
                             message.data,
                             message.user_id,
@@ -283,8 +299,30 @@ impl Rpc {
         }
     }
 
+    /// Notify libqaul that an external client (qauld socket peer) has
+    /// disconnected. Cleans up any long-running RPC state — currently
+    /// just `SubscriptionState`, but other streaming RPCs added later
+    /// should clean up here too.
+    ///
+    /// `request_ids` is the set of request_ids the client had in flight
+    /// at disconnect time. Unknown ids are silently ignored.
+    pub fn client_disconnected(state: &crate::QaulState, request_ids: &[String]) {
+        if request_ids.is_empty() {
+            return;
+        }
+        for id in request_ids {
+            state.subscriptions.unsubscribe(id);
+        }
+    }
+
     /// sends an RPC message to the outside
-    pub fn send_message(state: &crate::QaulState, data: Vec<u8>, module: i32, request_id: String, user_id: Vec<u8>) {
+    pub fn send_message(
+        state: &crate::QaulState,
+        data: Vec<u8>,
+        module: i32,
+        request_id: String,
+        user_id: Vec<u8>,
+    ) {
         let buf = build_rpc_message(data, module, request_id, user_id);
         Self::send_to_extern(state, buf);
     }

@@ -424,7 +424,7 @@ impl Ble {
             Ok(node_id) => {
                 log::info!("    Node ID: {}", node_id.to_base58());
                 let rs = state.get_router();
-                Neighbours::update_node(&rs, ConnectionModule::Ble, node_id, 50);
+                Neighbours::update_node(state, &rs, ConnectionModule::Ble, node_id, 50);
             }
             Err(e) => {
                 log::error!("{}", e);
