@@ -62,6 +62,12 @@ enum Modules {
     DTN = 14;
     // Authentication
     AUTH = 15;
+    // Event subscription
+    //
+    // Long-running RPC: the client sends one SubscribeRequest, libqaul
+    // pushes back any number of Event messages tagged with the same
+    // request_id until the client disconnects.
+    SUBSCRIBE = 16;
     // Transport management (list, enable, disable)
-    TRANSPORTS = 16;
+    TRANSPORTS = 17;
 }

@@ -66,8 +66,14 @@ pub enum Modules {
     Dtn = 14,
     /// Authentication
     Auth = 15,
+    /// Event subscription
+    ///
+    /// Long-running RPC: the client sends one SubscribeRequest, libqaul
+    /// pushes back any number of Event messages tagged with the same
+    /// request_id until the client disconnects.
+    Subscribe = 16,
     /// Transport management (list, enable, disable)
-    Transports = 16,
+    Transports = 17,
 }
 impl Modules {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -92,6 +98,7 @@ impl Modules {
             Self::Rtc => "RTC",
             Self::Dtn => "DTN",
             Self::Auth => "AUTH",
+            Self::Subscribe => "SUBSCRIBE",
             Self::Transports => "TRANSPORTS",
         }
     }
@@ -114,6 +121,7 @@ impl Modules {
             "RTC" => Some(Self::Rtc),
             "DTN" => Some(Self::Dtn),
             "AUTH" => Some(Self::Auth),
+            "SUBSCRIBE" => Some(Self::Subscribe),
             "TRANSPORTS" => Some(Self::Transports),
             _ => None,
         }
