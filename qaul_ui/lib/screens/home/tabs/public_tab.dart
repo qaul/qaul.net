@@ -104,8 +104,7 @@ class _PublicTabViewState extends ConsumerState<_PublicTabView> {
   @override
   Widget build(BuildContext context) {
     ref.listen(feedMessageStoreProvider, (_, _) {
-      final pagination =
-          ref.read(publicMessagesProvider.notifier).pagination;
+      final pagination = ref.read(feedMessageStoreProvider.notifier).pagination;
       if (pagination != null && !pagination.hasMore) {
         setState(() => _hasMore = false);
       }

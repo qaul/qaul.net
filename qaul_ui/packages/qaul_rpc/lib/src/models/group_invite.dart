@@ -36,9 +36,29 @@ class GroupInvite extends Equatable {
   List<Object?> get props => [senderIdBase58, groupDetails.idBase58];
 }
 
+class PaginatedGroupInvites {
+  PaginatedGroupInvites({
+    required this.invites,
+    this.pagination,
+  });
+
+  final List<GroupInvite> invites;
+  final PaginationState? pagination;
+}
+
 class GroupInviteListNotifier extends Notifier<List<GroupInvite>> {
   @override
   List<GroupInvite> build() => [];
+
+  void clear() => state = [];
+
+  void append(List<GroupInvite> invites) {
+    final existing = state.toSet();
+    final fresh =
+        invites.where((invite) => !existing.contains(invite)).toList();
+    if (fresh.isEmpty) return;
+    state = [...state, ...fresh];
+  }
 
   void add(GroupInvite invite) => state = [invite, ...state];
 
@@ -50,7 +70,12 @@ class GroupInviteListNotifier extends Notifier<List<GroupInvite>> {
 
   bool contains(GroupInvite invite) => state.contains(invite);
 
-  void filterInvitesNotIn(List<GroupInvite> list) {
-    state = [...state.where((invite) => list.contains(invite))];
+  /// Drops invites not present in [keep]. Used to prune invites the user has
+  /// already accepted/declined when we receive an authoritative complete list.
+  void retainAll(List<GroupInvite> keep) {
+    final keepSet = keep.toSet();
+    final retained = state.where(keepSet.contains).toList();
+    if (retained.length == state.length) return;
+    state = retained;
   }
 }

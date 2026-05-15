@@ -231,12 +231,16 @@ message GroupInfo {
 }
 
 // Group list request
-message GroupListRequest {}
+message GroupListRequest {
+    uint32 offset = 10;
+    uint32 limit  = 20;
+}
 
 // Group info response
 message GroupListResponse {
     // group list
-    repeated GroupInfo groups = 1;
+    repeated GroupInfo     groups     = 1;
+    PaginationMetadata     pagination = 2;
 }
 
 message GroupInvited {
@@ -248,11 +252,22 @@ message GroupInvited {
     GroupInfo group = 3;
 }
 
-// Group list request
-message GroupInvitedRequest {}
+message PaginationMetadata {
+    bool   has_more = 10;
+    uint32 total    = 20;
+    uint32 offset   = 30;
+    uint32 limit    = 40;
+}
 
-// Group info response
+// Group invited list request
+message GroupInvitedRequest {
+    uint32 offset = 10;
+    uint32 limit  = 20;
+}
+
+// Group invited response
 message GroupInvitedResponse {
     // invited list
-    repeated GroupInvited invited = 1;
+    repeated GroupInvited  invited    = 1;
+    PaginationMetadata     pagination = 2;
 }

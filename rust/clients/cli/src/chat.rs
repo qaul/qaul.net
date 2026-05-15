@@ -113,6 +113,15 @@ impl Chat {
                     }
                 }
             }
+            // search chat messages
+            cmd if cmd.starts_with("search ") => {
+                let query = cmd.strip_prefix("search ").unwrap().trim();
+                if query.is_empty() {
+                    log::error!("usage: chat search <query>");
+                    return;
+                }
+                Self::send_search_request(state, query.to_string());
+            }
             // unknown command
             _ => log::error!("unknown chat command"),
         }
@@ -185,6 +194,22 @@ impl Chat {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
+        Rpc::send_message(state, buf, super::rpc::proto::Modules::Chat.into(), "".to_string());
+    }
+
+    /// Send a search request via rpc
+    fn send_search_request(state: &super::CliState, query: String) {
+        let proto_message = proto::Chat {
+            message: Some(proto::chat::Message::SearchRequest(
+                proto::ChatSearchRequest { query },
+            )),
+        };
+
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
+
         Rpc::send_message(state, buf, super::rpc::proto::Modules::Chat.into(), "".to_string());
     }
 
@@ -301,6 +326,31 @@ impl Chat {
                                 for s in ss {
                                     println!("\t{}", s);
                                 }
+                                println!("");
+                            }
+                        }
+                    }
+
+                    Some(proto::chat::Message::SearchResult(results)) => {
+                        println!("");
+                        println!("Search results for \"{}\":", results.query);
+                        println!("");
+                        if results.items.is_empty() {
+                            println!("  (no results)");
+                        } else {
+                            for item in results.items {
+                                let group_id_str = match uuid::Uuid::from_slice(&item.group_id) {
+                                    Ok(id) => id.to_string(),
+                                    Err(_) => bs58::encode(&item.group_id).into_string(),
+                                };
+                                println!(
+                                    "  [{}] group:{} from:{} at:{}",
+                                    bs58::encode(&item.message_id).into_string(),
+                                    group_id_str,
+                                    bs58::encode(&item.sender_id).into_string(),
+                                    item.sent_at,
+                                );
+                                println!("    {}", item.content);
                                 println!("");
                             }
                         }

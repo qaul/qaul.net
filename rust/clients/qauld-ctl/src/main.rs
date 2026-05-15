@@ -25,6 +25,8 @@ pub use qaul_proto::qaul_rpc as proto;
 
 mod cli;
 mod commands;
+mod shell;
+mod subscribe;
 
 /// Default TCP address used for windows
 #[cfg(windows)]
@@ -71,7 +73,45 @@ where
     Ok(user_id_bytes)
 }
 
-async fn run<T>(client: T, cli: Cli) -> Result<(), Box<dyn std::error::Error>>
+/// Connect to a running qauld daemon, picking the right transport per platform.
+///
+/// On Unix, uses the explicit `--socket` path, then `--dir/qauld.sock`, then
+/// `qauld.sock` in the current directory. On Windows, uses `--socket` (a
+/// `host:port` address) or `DEFAULT_TCP_ADDR`.
+#[cfg(unix)]
+pub(crate) async fn connect_to_qauld(
+    cli: &Cli,
+) -> Result<(UnixStream, String), Box<dyn std::error::Error>> {
+    let qauld_sock = if let Some(socket) = &cli.socket {
+        socket.clone()
+    } else if let Some(socket_dir) = &cli.dir {
+        let path = PathBuf::from(socket_dir).join("qauld.sock");
+        path.to_str()
+            .expect("failed to get name of dir")
+            .to_string()
+    } else {
+        "qauld.sock".to_string()
+    };
+
+    let client = UnixStream::connect(&qauld_sock).await?;
+    Ok((client, qauld_sock))
+}
+
+#[cfg(windows)]
+pub(crate) async fn connect_to_qauld(
+    cli: &Cli,
+) -> Result<(TcpStream, String), Box<dyn std::error::Error>> {
+    let addr = if let Some(socket) = &cli.socket {
+        socket.clone()
+    } else {
+        DEFAULT_TCP_ADDR.to_string()
+    };
+
+    let client = TcpStream::connect(&addr).await?;
+    Ok((client, addr))
+}
+
+pub(crate) async fn run<T>(client: T, cli: Cli) -> Result<(), Box<dyn std::error::Error>>
 where
     T: AsyncRead + AsyncWrite + Unpin,
 {
@@ -93,6 +133,13 @@ where
         Commands::Chat(c) => Box::new(c.command) as Box<dyn RpcCommand>,
         Commands::File(f) => Box::new(f.command) as Box<dyn RpcCommand>,
         Commands::Router(r) => Box::new(r.command) as Box<dyn RpcCommand>,
+        Commands::Debug(d) => Box::new(d.command) as Box<dyn RpcCommand>,
+        Commands::Connections(c) => Box::new(c.command) as Box<dyn RpcCommand>,
+        Commands::Dtn(d) => Box::new(d.command) as Box<dyn RpcCommand>,
+        // Shell and Subscribe modes are dispatched in `main` before reaching
+        // `run`, so these arms are unreachable. The match is kept exhaustive
+        // for clarity.
+        Commands::Shell(_) | Commands::Subscribe(_) => return Ok(()),
     };
 
     let (data, module) = rpc_command.encode_request()?;
@@ -129,36 +176,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     pretty_env_logger::init();
     let cli = Cli::parse();
 
-    #[cfg(unix)]
-    {
-        let qauld_sock = if let Some(socket) = &cli.socket {
-            socket.clone()
-        } else if let Some(socket_dir) = &cli.dir {
-            let path = PathBuf::from(socket_dir).join("qauld.sock");
-            path.to_str()
-                .expect("failed to get name of dir")
-                .to_string()
-        } else {
-            "qauld.sock".to_string()
-        };
-
-        let client = UnixStream::connect(&qauld_sock).await?;
-        println!("qauld-ctl connected to qauld daemon at: {qauld_sock}");
-        run(client, cli).await?;
+    // Shell mode runs its own loop and opens sockets per command, so it
+    // bypasses the single-shot connect-and-run path below.
+    if matches!(cli.command, Commands::Shell(_)) {
+        return shell::run(cli).await;
+    }
+    // Subscribe mode is a long-running RPC that streams events back; it
+    // can't reuse the single-shot path either.
+    if matches!(cli.command, Commands::Subscribe(_)) {
+        return subscribe::run(cli).await;
     }
 
-    #[cfg(windows)]
-    {
-        let addr = if let Some(socket) = &cli.socket {
-            socket.clone()
-        } else {
-            DEFAULT_TCP_ADDR.to_string()
-        };
-
-        let client = TcpStream::connect(&addr).await?;
-        println!("qauld-ctl connected to qauld daemon at: {addr}");
-        run(client, cli).await?;
-    }
+    let (client, addr) = connect_to_qauld(&cli).await?;
+    println!("qauld-ctl connected to qauld daemon at: {addr}");
+    run(client, cli).await?;
 
     Ok(())
 }

@@ -65,10 +65,12 @@ The following commands are available:
     * `feed page {offset} {limit}` - displays feed messages starting at {offset}, returning at most {limit} messages
 * group
   * `group create {Group Name}` - creates a new group
-  * `group list` - list all available groups
+  * `group list` - list all available groups (returns all groups)
+    * `group list {offset} {limit}` - list groups with pagination; skips {offset} groups and returns at most {limit} groups
   * `group info {Group ID}` - shows the group information
   * `group invite {Group ID} {User ID}` - invite a user to a group
-    * `group invited` - list received pending invitations
+    * `group invited` - list received pending invitations (returns all invitations)
+    * `group invited {offset} {limit}` - list pending invitations with pagination
     * `group accept {Group ID}` - accept group invitation
     * `group decline {Group ID}` - decline group invitation
   * `group remove {Group ID} {User ID}` - remove a group member from the group
@@ -76,6 +78,7 @@ The following commands are available:
 * chat
   * `chat send {Group ID} {Chat Message}` - sends the {Chat Message} to the user with the ID {Group ID}
   * `chat conversation {Group ID}` - displays all messages of the conversation with the ID {Group ID}
+  * `chat search {query}` - searches chat messages matching {query} across all conversations
 * chat files
   * `file send {Group ID} {File Path} {File Description}` - sends a file to the user with the ID {Group ID} and a {File Description} text.
   * `file history [{offset} {limit}]` - displays a paginated file history
