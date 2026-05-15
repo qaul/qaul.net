@@ -57,6 +57,11 @@ pub enum Commands {
     /// routed DTN (custody routing) is a separate feature on the
     /// `feat/dtn-custody-routing` branch and is not in this build.
     Dtn(DtnArgs),
+    /// Manage network transports (LAN, Internet, BLE)
+    ///
+    /// Toggles are persisted to `config.yaml` by libqaul and survive
+    /// restart. Ported from the `qaul-cli` `transports` subcommands.
+    Transports(TransportsArgs),
     /// Start an interactive shell session
     ///
     /// Reads commands from stdin in a REPL loop and dispatches them through
@@ -464,5 +469,29 @@ pub enum ChatFileSubcmd {
         /// page offset
         #[arg(short, long, default_value = "10")]
         limit: u32,
+    },
+}
+
+#[derive(Args, Debug)]
+pub struct TransportsArgs {
+    #[command(subcommand)]
+    pub command: TransportsSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum TransportsSubcmd {
+    /// list every registered transport with its current status
+    List,
+    /// start the transport (lan, internet, ble)
+    Enable {
+        /// transport id (`lan`, `internet`, or `ble`)
+        #[arg(short, long)]
+        id: String,
+    },
+    /// stop the transport
+    Disable {
+        /// transport id (`lan`, `internet`, or `ble`)
+        #[arg(short, long)]
+        id: String,
     },
 }
