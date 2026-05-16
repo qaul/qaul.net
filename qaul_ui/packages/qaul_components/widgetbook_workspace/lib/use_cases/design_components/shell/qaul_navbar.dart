@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:qaul_components/qaul_components.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
+import '../../../support/widgetbook_nav_bar_labels.dart';
+
 @widgetbook.UseCase(name: 'Horizontal (mobile)', type: QaulNavBar)
 Widget buildNavBarHorizontalUseCase(BuildContext context) {
   return const _NavBarUseCase(vertical: false);
@@ -38,11 +40,11 @@ class _NavBarUseCaseState extends State<_NavBarUseCase> {
   Widget build(BuildContext context) {
     final bar = QaulNavBar(
       vertical: widget.vertical,
-      overflowMenuLabels: navBarOverflowMenuLabelsDefault(),
+      overflowMenuLabels: widgetbookNavBarOverflowLabels(context),
       onOverflowSelected: (_) {},
       selectedTab: _selectedTab,
       onTabSelected: (tab) => setState(() => _selectedTab = tab),
-      tabTooltips: QaulNavBar.defaultTabTooltips(),
+      tabTooltips: widgetbookNavBarTabTooltips(context),
       publicNotificationCount: widget.vertical ? 1 : 2,
       chatNotificationCount: widget.vertical ? 2 : 3,
     );
