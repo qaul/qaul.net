@@ -10,6 +10,8 @@
 // **************************************************************************
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_footer.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_header.dart'
     as _qaul_components_widgetbook_use_cases_design_components_chat_chat_header;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_timeline.dart'
@@ -33,6 +35,29 @@ final directories = <_widgetbook.WidgetbookNode>[
       _widgetbook.WidgetbookFolder(
         name: 'chat',
         children: [
+          _widgetbook.WidgetbookComponent(
+            name: 'ChatFooter',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Empty — attachment actions',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
+                        .buildChatFooterEmptyUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Long draft (multiline)',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
+                        .buildChatFooterLongDraftUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'With text — send action',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
+                        .buildChatFooterWithTextUseCase,
+              ),
+            ],
+          ),
           _widgetbook.WidgetbookComponent(
             name: 'ChatHeader',
             useCases: [
