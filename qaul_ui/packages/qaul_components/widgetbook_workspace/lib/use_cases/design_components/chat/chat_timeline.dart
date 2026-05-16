@@ -4,6 +4,16 @@ import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
 final _previewClock = DateTime(2026, 4, 12, 14, 30);
 
+/// Fills the Widgetbook viewport (black, top-aligned, scrolls when needed).
+Widget _fullScreenChatPreview(Widget timeline) {
+  return SizedBox.expand(
+    child: ColoredBox(
+      color: Colors.black,
+      child: SingleChildScrollView(child: timeline),
+    ),
+  );
+}
+
 List<TextChatMessage> _buildDirectMessages() {
   final clock = _previewClock;
   final today = DateTime(clock.year, clock.month, clock.day);
@@ -109,17 +119,11 @@ List<TextChatMessage> _buildDirectMessages() {
 Widget buildChatRoomPreviewUseCase(BuildContext context) {
   const me = ChatUser(id: 'me', name: 'Me');
 
-  return SizedBox.expand(
-    child: ColoredBox(
-      color: Colors.black,
-      child: SingleChildScrollView(
-        reverse: true,
-        child: ChatTimeline.direct(
-          currentUser: me,
-          messages: _buildDirectMessages(),
-          clock: _previewClock,
-        ),
-      ),
+  return _fullScreenChatPreview(
+    ChatTimeline.direct(
+      currentUser: me,
+      messages: _buildDirectMessages(),
+      clock: _previewClock,
     ),
   );
 }
@@ -237,17 +241,11 @@ List<ChatMessage> _buildGroupMessages() {
 Widget buildGroupChatUseCase(BuildContext context) {
   const me = ChatUser(id: 'me', name: 'Me');
 
-  return SizedBox.expand(
-    child: ColoredBox(
-      color: Colors.black,
-      child: SingleChildScrollView(
-        reverse: true,
-        child: ChatTimeline.group(
-          currentUser: me,
-          messages: _buildGroupMessages(),
-          clock: _groupPreviewClock,
-        ),
-      ),
+  return _fullScreenChatPreview(
+    ChatTimeline.group(
+      currentUser: me,
+      messages: _buildGroupMessages(),
+      clock: _groupPreviewClock,
     ),
   );
 }
