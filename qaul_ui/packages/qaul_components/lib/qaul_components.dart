@@ -23,4 +23,5 @@ export 'design_components/shell/qaul_loading_indicator.dart';
 export 'design_components/shell/qaul_navbar.dart';
 export 'models/chat_message.dart';
 export 'models/chat_user.dart';
+export 'styles/qaul_app_theme.dart';
 export 'styles/qaul_color_sheet.dart';

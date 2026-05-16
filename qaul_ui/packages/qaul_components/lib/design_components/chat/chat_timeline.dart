@@ -150,17 +150,21 @@ class ChatTimeline extends StatelessWidget {
 
         case _MetaEntry(:final message):
           final topPad = isFirst ? 0.0 : kChatBubbleSeparatedGap;
+          final metaStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontSize: 12,
+                height: 1.2,
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.55),
+              );
           children.add(
             Padding(
               padding: EdgeInsets.only(top: topPad),
               child: Center(
                 child: Text(
                   message.label,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    height: 1.2,
-                    color: Colors.grey,
-                  ),
+                  style: metaStyle,
                 ),
               ),
             ),

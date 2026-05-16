@@ -26,19 +26,25 @@ class QaulFAB extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final iconColor = theme.iconTheme.color ?? theme.colorScheme.onSurface;
+    final fillColor = theme.brightness == Brightness.dark
+        ? theme.colorScheme.surface
+        : Colors.white;
+
     return FloatingActionButton.large(
       elevation: 0,
       heroTag: heroTag,
-      backgroundColor: Colors.white,
+      backgroundColor: fillColor,
       tooltip: tooltip,
-      shape: const CircleBorder(side: BorderSide(color: Colors.black)),
+      shape: CircleBorder(side: BorderSide(color: iconColor)),
       onPressed: onPressed,
       child: SvgPicture.asset(
         svgAsset,
         package: package,
         width: 48,
         height: 48,
-        colorFilter: ColorFilter.mode(Colors.grey.shade600, BlendMode.srcATop),
+        colorFilter: ColorFilter.mode(iconColor, BlendMode.srcATop),
       ),
     );
   }

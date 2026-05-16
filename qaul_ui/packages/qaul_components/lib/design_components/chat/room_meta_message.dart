@@ -13,10 +13,15 @@ class RoomMetaMessage extends ChatMessage {
 
   @override
   Widget build(BuildContext context) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Center(
       child: Text(
         label,
-        style: const TextStyle(fontSize: 12, height: 1.2, color: Colors.grey),
+        style: TextStyle(
+          fontSize: 12,
+          height: 1.2,
+          color: onSurface.withValues(alpha: 0.55),
+        ),
       ),
     );
   }

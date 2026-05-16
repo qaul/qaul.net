@@ -2,20 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qaul_components/qaul_components.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
-Widget _frameHeader(BuildContext context, Widget child) {
-  final surface = Theme.of(context).scaffoldBackgroundColor;
-  return Material(
-    child: ColoredBox(
-      color: surface,
-      child: Column(
-        children: [
-          child,
-          const Expanded(child: SizedBox.expand()),
-        ],
-      ),
-    ),
-  );
-}
+import '../../../support/widgetbook_preview.dart';
 
 Widget _demoAvatar({required String initials}) {
   return CircleAvatar(
@@ -34,7 +21,7 @@ Widget _demoAvatar({required String initials}) {
 
 @widgetbook.UseCase(name: 'Direct — online', type: ChatHeader)
 Widget buildChatHeaderDirectOnlineUseCase(BuildContext context) {
-  return _frameHeader(
+  return widgetbookTopChromeFrame(
     context,
     ChatHeader(
       onBackPressed: () {},
@@ -55,7 +42,7 @@ Widget buildChatHeaderDirectOnlineUseCase(BuildContext context) {
 
 @widgetbook.UseCase(name: 'Direct — last seen', type: ChatHeader)
 Widget buildChatHeaderDirectLastSeenUseCase(BuildContext context) {
-  return _frameHeader(
+  return widgetbookTopChromeFrame(
     context,
     ChatHeader(
       onBackPressed: () {},
@@ -73,7 +60,7 @@ Widget buildChatHeaderDirectLastSeenUseCase(BuildContext context) {
 
 @widgetbook.UseCase(name: 'Group', type: ChatHeader)
 Widget buildChatHeaderGroupUseCase(BuildContext context) {
-  return _frameHeader(
+  return widgetbookTopChromeFrame(
     context,
     ChatHeader.group(
       onBackPressed: () {},

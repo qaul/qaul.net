@@ -2,17 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:qaul_components/qaul_components.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
-final _previewClock = DateTime(2026, 4, 12, 14, 30);
+import '../../../support/widgetbook_preview.dart';
 
-/// Fills the Widgetbook viewport (black, top-aligned, scrolls when needed).
-Widget _fullScreenChatPreview(Widget timeline) {
-  return SizedBox.expand(
-    child: ColoredBox(
-      color: Colors.black,
-      child: SingleChildScrollView(child: timeline),
-    ),
-  );
-}
+final _previewClock = DateTime(2026, 4, 12, 14, 30);
 
 List<TextChatMessage> _buildDirectMessages() {
   final clock = _previewClock;
@@ -119,7 +111,8 @@ List<TextChatMessage> _buildDirectMessages() {
 Widget buildChatRoomPreviewUseCase(BuildContext context) {
   const me = ChatUser(id: 'me', name: 'Me');
 
-  return _fullScreenChatPreview(
+  return widgetbookFullScreenChatPreview(
+    context,
     ChatTimeline.direct(
       currentUser: me,
       messages: _buildDirectMessages(),
@@ -241,7 +234,8 @@ List<ChatMessage> _buildGroupMessages() {
 Widget buildGroupChatUseCase(BuildContext context) {
   const me = ChatUser(id: 'me', name: 'Me');
 
-  return _fullScreenChatPreview(
+  return widgetbookFullScreenChatPreview(
+    context,
     ChatTimeline.group(
       currentUser: me,
       messages: _buildGroupMessages(),

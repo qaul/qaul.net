@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qaul_components/qaul_components.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
@@ -68,27 +69,8 @@ class WidgetbookApp extends StatelessWidget {
         ),
         MaterialThemeAddon(
           themes: [
-            WidgetbookTheme(
-              name: 'Light',
-              data: ThemeData(
-                useMaterial3: true,
-                brightness: Brightness.light,
-                colorScheme: ColorScheme.fromSeed(
-                  seedColor: Colors.lightBlue,
-                ),
-              ),
-            ),
-            WidgetbookTheme(
-              name: 'Dark',
-              data: ThemeData(
-                useMaterial3: true,
-                brightness: Brightness.dark,
-                colorScheme: ColorScheme.fromSeed(
-                  seedColor: Colors.lightBlue,
-                  brightness: Brightness.dark,
-                ),
-              ),
-            ),
+            WidgetbookTheme(name: 'Light', data: QaulAppTheme.light),
+            WidgetbookTheme(name: 'Dark', data: QaulAppTheme.dark),
           ],
         ),
       ],
