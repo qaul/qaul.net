@@ -214,8 +214,14 @@ impl Search {
     /// Multi-word queries require ALL words to match: `"hello world"` only returns documents
     /// containing both `"hello"` and `"world"`. Each word individually matches via prefix OR fuzzy.
     ///
-    /// Returns up to 20 results, deduplicated by document ID.
-    pub fn search<T, F>(&self, query: &str, reconstruct: F) -> Result<Vec<T>, SearchError>
+    /// Returns up to `limit` results, deduplicated by document ID.
+    /// If `limit` is `None`, up to 20 results are returned.
+    pub fn search<T, F>(
+        &self,
+        query: &str,
+        limit: Option<usize>,
+        reconstruct: F,
+    ) -> Result<Vec<T>, SearchError>
     where
         F: Fn(&str) -> Option<T>,
     {
@@ -263,7 +269,7 @@ impl Search {
         }
 
         let combined = BooleanQuery::new(word_queries);
-        let top_docs = searcher.search(&combined, &TopDocs::with_limit(20))?;
+        let top_docs = searcher.search(&combined, &TopDocs::with_limit(limit.unwrap_or(20)))?;
 
         // Collect results, deduplicating by stored ID (not by DocAddress,
         // which is a tantivy-internal segment address that could theoretically
@@ -370,7 +376,7 @@ mod tests {
         index_and_commit(&mut search, &[msg("msg-1", "hello world")]);
 
         let results: Vec<String> = search
-            .search("hello", |id| Some(id.to_string()))
+            .search("hello", None, |id| Some(id.to_string()))
             .expect("search failed");
 
         assert_eq!(results, vec!["msg-1"]);
@@ -391,7 +397,7 @@ mod tests {
         );
 
         let mut results: Vec<String> = search
-            .search("creat", |id| Some(id.to_string()))
+            .search("creat", None, |id| Some(id.to_string()))
             .expect("search failed");
         results.sort(); // sort for deterministic assertion
 
@@ -407,7 +413,7 @@ mod tests {
 
         // "creativness" is one character short — distance 1 from "creativeness"
         let results: Vec<String> = search
-            .search("creativness", |id| Some(id.to_string()))
+            .search("creativness", None, |id| Some(id.to_string()))
             .expect("search failed");
 
         assert!(
@@ -428,10 +434,10 @@ mod tests {
 
         // Only one document should exist for this ID.
         let old_results: Vec<String> = search
-            .search("initial", |id| Some(id.to_string()))
+            .search("initial", None, |id| Some(id.to_string()))
             .expect("search failed");
         let new_results: Vec<String> = search
-            .search("updated", |id| Some(id.to_string()))
+            .search("updated", None, |id| Some(id.to_string()))
             .expect("search failed");
 
         assert!(
@@ -463,7 +469,7 @@ mod tests {
         let live_store: HashMap<&str, &str> = [("msg-exists", "hello world")].into();
 
         let results: Vec<String> = search
-            .search("hello", |id| {
+            .search("hello", None, |id| {
                 live_store.get(id).map(|text| text.to_string())
             })
             .expect("search failed");
@@ -478,7 +484,7 @@ mod tests {
         index_and_commit(&mut search, &[msg("msg-1", "hello world")]);
 
         let results: Vec<String> = search
-            .search("zzznomatch", |id| Some(id.to_string()))
+            .search("zzznomatch", None, |id| Some(id.to_string()))
             .expect("search failed");
 
         assert!(results.is_empty());
@@ -490,7 +496,7 @@ mod tests {
         let (search, _dir) = make_search();
 
         let results: Vec<String> = search
-            .search("anything", |id| Some(id.to_string()))
+            .search("anything", None, |id| Some(id.to_string()))
             .expect("search failed");
 
         assert!(results.is_empty());
@@ -511,7 +517,7 @@ mod tests {
         index_and_commit(&mut search, &messages);
 
         let mut results: Vec<String> = search
-            .search("message", |id| Some(id.to_string()))
+            .search("message", None, |id| Some(id.to_string()))
             .expect("search failed");
         results.sort();
 
@@ -531,7 +537,7 @@ mod tests {
         search.reload().expect("reload failed");
 
         let results: Vec<String> = search
-            .search("hello", |id| Some(id.to_string()))
+            .search("hello", None, |id| Some(id.to_string()))
             .expect("search failed");
 
         assert_eq!(results, vec!["msg-2"]);
@@ -553,23 +559,23 @@ mod tests {
 
         // None of these should error, regardless of metacharacters in the query
         search
-            .search("hel.o", |id| Some(id.to_string()))
+            .search("hel.o", None, |id| Some(id.to_string()))
             .expect("search with '.' should not error");
         search
-            .search("a|b", |id| Some(id.to_string()))
+            .search("a|b", None, |id| Some(id.to_string()))
             .expect("search with '|' should not error");
         search
-            .search("(hello", |id| Some(id.to_string()))
+            .search("(hello", None, |id| Some(id.to_string()))
             .expect("search with '(' should not error");
         search
-            .search("test[", |id| Some(id.to_string()))
+            .search("test[", None, |id| Some(id.to_string()))
             .expect("search with '[' should not error");
 
         // Without escaping, "zzz(.+)zzz" would be a valid regex capture group.
         // With escaping, it's a literal that matches nothing in our index.
         // It's also too distant from any indexed token for fuzzy to match.
         let regex_results: Vec<String> = search
-            .search("zzz(.+)zzz", |id| Some(id.to_string()))
+            .search("zzz(.+)zzz", None, |id| Some(id.to_string()))
             .expect("search with regex group syntax should not error");
         assert!(
             regex_results.is_empty(),
@@ -589,7 +595,7 @@ mod tests {
         search.reload().expect("reload failed");
 
         let results: Vec<String> = search
-            .search("anything", |id| Some(id.to_string()))
+            .search("anything", None, |id| Some(id.to_string()))
             .expect("search failed");
         assert!(results.is_empty());
     }
@@ -601,7 +607,7 @@ mod tests {
         index_and_commit(&mut search, &[msg("msg-1", "Hello World")]);
 
         let results: Vec<String> = search
-            .search("HELLO", |id| Some(id.to_string()))
+            .search("HELLO", None, |id| Some(id.to_string()))
             .expect("search failed");
         assert_eq!(results, vec!["msg-1"]);
     }
@@ -622,7 +628,7 @@ mod tests {
 
         // "hello world" should only match msg-1 (both words present)
         let results: Vec<String> = search
-            .search("hello world", |id| Some(id.to_string()))
+            .search("hello world", None, |id| Some(id.to_string()))
             .expect("search failed");
         assert_eq!(results, vec!["msg-1"]);
     }
@@ -635,7 +641,7 @@ mod tests {
         index_and_commit(&mut search, &[msg("msg-1", "hello world")]);
 
         let results: Vec<String> = search
-            .search("helo wrld", |id| Some(id.to_string()))
+            .search("helo wrld", None, |id| Some(id.to_string()))
             .expect("search failed");
         assert_eq!(results, vec!["msg-1"]);
     }
@@ -648,7 +654,7 @@ mod tests {
 
         // "hello zzzzz" — first word matches, second doesn't
         let results: Vec<String> = search
-            .search("hello zzzzz", |id| Some(id.to_string()))
+            .search("hello zzzzz", None, |id| Some(id.to_string()))
             .expect("search failed");
         assert!(results.is_empty());
     }

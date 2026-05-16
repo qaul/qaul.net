@@ -122,6 +122,15 @@ const Users$json = {
       '9': 0,
       '10': 'getUserByIdResponse'
     },
+    {
+      '1': 'user_search_request',
+      '3': 9,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.users.UserSearchRequest',
+      '9': 0,
+      '10': 'userSearchRequest'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -141,8 +150,9 @@ final $typed_data.Uint8List usersDescriptor = $convert.base64Decode(
     'b25zZUgAUhZzZWN1cml0eU51bWJlclJlc3BvbnNlElgKFmdldF91c2VyX2J5X2lkX3JlcXVlc3'
     'QYByABKAsyIi5xYXVsLnJwYy51c2Vycy5HZXRVc2VyQnlJRFJlcXVlc3RIAFISZ2V0VXNlckJ5'
     'SWRSZXF1ZXN0ElsKF2dldF91c2VyX2J5X2lkX3Jlc3BvbnNlGAggASgLMiMucWF1bC5ycGMudX'
-    'NlcnMuR2V0VXNlckJ5SURSZXNwb25zZUgAUhNnZXRVc2VyQnlJZFJlc3BvbnNlQgkKB21lc3Nh'
-    'Z2U=');
+    'NlcnMuR2V0VXNlckJ5SURSZXNwb25zZUgAUhNnZXRVc2VyQnlJZFJlc3BvbnNlElMKE3VzZXJf'
+    'c2VhcmNoX3JlcXVlc3QYCSABKAsyIS5xYXVsLnJwYy51c2Vycy5Vc2VyU2VhcmNoUmVxdWVzdE'
+    'gAUhF1c2VyU2VhcmNoUmVxdWVzdEIJCgdtZXNzYWdl');
 
 @$core.Deprecated('Use userRequestDescriptor instead')
 const UserRequest$json = {
@@ -171,6 +181,23 @@ const UserOnlineRequest$json = {
 final $typed_data.Uint8List userOnlineRequestDescriptor = $convert.base64Decode(
     'ChFVc2VyT25saW5lUmVxdWVzdBIWCgZvZmZzZXQYCiABKA1SBm9mZnNldBIUCgVsaW1pdBgUIA'
     'EoDVIFbGltaXQ=');
+
+@$core.Deprecated('Use userSearchRequestDescriptor instead')
+const UserSearchRequest$json = {
+  '1': 'UserSearchRequest',
+  '2': [
+    {'1': 'query', '3': 1, '4': 1, '5': 9, '10': 'query'},
+    {'1': 'online_only', '3': 2, '4': 1, '5': 8, '10': 'onlineOnly'},
+    {'1': 'offset', '3': 10, '4': 1, '5': 13, '10': 'offset'},
+    {'1': 'limit', '3': 20, '4': 1, '5': 13, '10': 'limit'},
+  ],
+};
+
+/// Descriptor for `UserSearchRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List userSearchRequestDescriptor = $convert.base64Decode(
+    'ChFVc2VyU2VhcmNoUmVxdWVzdBIUCgVxdWVyeRgBIAEoCVIFcXVlcnkSHwoLb25saW5lX29ubH'
+    'kYAiABKAhSCm9ubGluZU9ubHkSFgoGb2Zmc2V0GAogASgNUgZvZmZzZXQSFAoFbGltaXQYFCAB'
+    'KA1SBWxpbWl0');
 
 @$core.Deprecated('Use paginationMetadataDescriptor instead')
 const PaginationMetadata$json = {

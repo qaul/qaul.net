@@ -2,7 +2,7 @@
 /// users rpc message container
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Users {
-    #[prost(oneof = "users::Message", tags = "1, 2, 3, 4, 5, 6, 7, 8")]
+    #[prost(oneof = "users::Message", tags = "1, 2, 3, 4, 5, 6, 7, 8, 9")]
     pub message: ::core::option::Option<users::Message>,
 }
 /// Nested message and enum types in `Users`.
@@ -63,6 +63,9 @@ pub mod users {
         /// Message output for a GetUserByIDRequest
         #[prost(message, tag = "8")]
         GetUserByIdResponse(super::GetUserByIdResponse),
+        /// User Search Request returns a user list matching a name query.
+        #[prost(message, tag = "9")]
+        UserSearchRequest(super::UserSearchRequest),
     }
 }
 /// UI request for some users
@@ -76,6 +79,18 @@ pub struct UserRequest {
 /// UI request for some online users
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct UserOnlineRequest {
+    #[prost(uint32, tag = "10")]
+    pub offset: u32,
+    #[prost(uint32, tag = "20")]
+    pub limit: u32,
+}
+/// UI request for searching users by name
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct UserSearchRequest {
+    #[prost(string, tag = "1")]
+    pub query: ::prost::alloc::string::String,
+    #[prost(bool, tag = "2")]
+    pub online_only: bool,
     #[prost(uint32, tag = "10")]
     pub offset: u32,
     #[prost(uint32, tag = "20")]

@@ -29,6 +29,22 @@ impl Users {
             cmd if cmd.starts_with("online") => {
                 Self::request_online_user_list(state);
             }
+            // search users by name
+            cmd if cmd == "search" => {
+                Self::request_user_search(state, "", false);
+            }
+            cmd if cmd == "search online" => {
+                Self::request_user_search(state, "", true);
+            }
+            cmd if cmd.starts_with("search ") => {
+                if let Some(query) = cmd.strip_prefix("search online ") {
+                    Self::request_user_search(state, query, true);
+                } else if let Some(query) = cmd.strip_prefix("search ") {
+                    Self::request_user_search(state, query, false);
+                } else {
+                    log::error!("search command incorrectly formatted");
+                }
+            }
             // verify a user
             cmd if cmd.starts_with("verify ") => {
                 if let Some(user_id) = cmd.strip_prefix("verify ") {
@@ -74,6 +90,35 @@ impl Users {
                 offset: 0,
                 limit: 0,
             })),
+        };
+
+        // encode message
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
+
+        // send message
+        Rpc::send_message(
+            state,
+            buf,
+            super::rpc::proto::Modules::Users.into(),
+            "".to_string(),
+        );
+    }
+
+    /// create rpc request for user search
+    fn request_user_search(state: &super::CliState, query: &str, online_only: bool) {
+        // create request message
+        let proto_message = proto::Users {
+            message: Some(proto::users::Message::UserSearchRequest(
+                proto::UserSearchRequest {
+                    query: query.trim().to_string(),
+                    online_only,
+                    offset: 0,
+                    limit: 0,
+                },
+            )),
         };
 
         // encode message
