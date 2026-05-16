@@ -7,15 +7,43 @@ import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 import 'l10n/app_localizations.dart';
 import 'main.directories.g.dart';
 
-const String _kIphone16 = 'iPhone 16';
-const String _kIphone16Pro = 'iPhone 16 Pro';
-
-const List<({String name, double width, double height})> _kDesignerViewports = [
-  (name: _kIphone16, width: 393, height: 852),
-  (name: _kIphone16Pro, width: 402, height: 874),
-  (name: 'Laptop', width: 1366, height: 768),
-  (name: 'MacBook', width: 1440, height: 900),
-  (name: 'Full HD', width: 1920, height: 1080),
+/// Penpot / designer breakpoints only (no preset device catalog).
+const List<ViewportData> _kDesignerViewports = [
+  ViewportData(
+    name: 'iPhone SE',
+    width: 375,
+    height: 667,
+    pixelRatio: 2,
+    platform: TargetPlatform.iOS,
+  ),
+  ViewportData(
+    name: 'iPhone 16',
+    width: 393,
+    height: 852,
+    pixelRatio: 3,
+    platform: TargetPlatform.iOS,
+  ),
+  ViewportData(
+    name: 'MIUI',
+    width: 393,
+    height: 851,
+    pixelRatio: 3,
+    platform: TargetPlatform.android,
+  ),
+  ViewportData(
+    name: 'Google Pixel 9 Pro',
+    width: 427,
+    height: 952,
+    pixelRatio: 3,
+    platform: TargetPlatform.android,
+  ),
+  ViewportData(
+    name: 'Laptop screen black',
+    width: 1366,
+    height: 768,
+    pixelRatio: 2,
+    platform: TargetPlatform.linux,
+  ),
 ];
 
 void main() {
@@ -35,32 +63,8 @@ class WidgetbookApp extends StatelessWidget {
       directories: directories,
       addons: [
         ViewportAddon([
-          const ViewportData(
-            name: _kIphone16,
-            width: 393,
-            height: 852,
-            pixelRatio: 2.0,
-            platform: TargetPlatform.iOS,
-          ),
           Viewports.none,
-          ..._kDesignerViewports
-              .where((v) => v.name != _kIphone16)
-              .map(
-                (v) => ViewportData(
-                  name: v.name,
-                  width: v.width,
-                  height: v.height,
-                  pixelRatio: 2.0,
-                  platform: v.name == _kIphone16Pro
-                      ? TargetPlatform.iOS
-                      : TargetPlatform.linux,
-                ),
-              ),
-          ...IosViewports.phones,
-          ...IosViewports.tablets,
-          AndroidViewports.samsungGalaxyS20,
-          AndroidViewports.samsungGalaxyNote20,
-          LinuxViewports.desktop,
+          ..._kDesignerViewports,
         ]),
         LocalizationAddon(
           locales: AppLocalizations.supportedLocales,
