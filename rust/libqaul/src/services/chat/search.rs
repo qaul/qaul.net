@@ -196,7 +196,7 @@ impl ChatSearch {
         // The reconstruct closure looks up the full message from ChatStorage
         // using the message_id (stored as base58 in the search index).
         let account_id_owned = account_id.to_owned();
-        match search.search(query, |message_id_b58| {
+        match search.search(query, None, |message_id_b58| {
             Self::reconstruct_result(state, &account_id_owned, message_id_b58)
         }) {
             Ok(results) => results,

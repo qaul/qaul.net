@@ -50,6 +50,8 @@ message Users {
         //
         // Message output for a GetUserByIDRequest
         GetUserByIDResponse get_user_by_id_response = 8;
+        // User Search Request returns a user list matching a name query.
+        UserSearchRequest user_search_request = 9;
     }
 }
 
@@ -61,6 +63,14 @@ message UserRequest {
 
 // UI request for some online users
 message UserOnlineRequest {
+    uint32 offset = 10;
+    uint32 limit = 20;
+}
+
+// UI request for searching users by name
+message UserSearchRequest {
+    string query = 1;
+    bool online_only = 2;
     uint32 offset = 10;
     uint32 limit = 20;
 }

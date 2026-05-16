@@ -17,8 +17,10 @@ use super::router_net_proto;
 use super::table::RoutingTable;
 use crate::node::user_accounts::UserAccounts;
 use crate::rpc::Rpc;
+use crate::search::{Search, Searchable};
 use crate::services::group::group_id::GroupId;
 use crate::storage::database::DbUsers;
+use crate::storage::Storage;
 use crate::utilities::qaul_id::QaulId;
 
 /// Import protobuf users RPC message definition
@@ -33,6 +35,7 @@ pub struct Users {
 /// Instance-based users state for multi-instance / simulation use.
 pub struct UsersState {
     pub inner: RwLock<Users>,
+    pub search: RwLock<Option<Search>>,
 }
 
 impl UsersState {
@@ -41,6 +44,7 @@ impl UsersState {
             inner: RwLock::new(Users {
                 users: BTreeMap::new(),
             }),
+            search: RwLock::new(None),
         }
     }
 }
@@ -50,8 +54,17 @@ impl Users {
     /// Loads users from the database into the provided RouterState users table.
     pub fn init_with_state(state: &crate::QaulState, router: &super::RouterState) {
         let tree = DbUsers::get_tree(state);
-        let mut users = router.users.inner.write().unwrap();
-        Self::init_from_tree(&mut users, &tree);
+        let searchable_users = {
+            let mut users = router.users.inner.write().unwrap();
+            Self::init_from_tree(&mut users, &tree);
+            users
+                .users
+                .values()
+                .map(UserSearchable::from_user)
+                .collect::<Vec<_>>()
+        };
+
+        Self::init_search(state, router, &searchable_users);
     }
 
     /// Load users from a database tree into the users table.
@@ -97,23 +110,130 @@ impl Users {
         });
 
         // add user to the users table
-        let mut users = router.users.inner.write().unwrap();
-        if users.users.len() >= 100_000 {
-            log::warn!(
-                "users table has reached {} entries; possible resource exhaustion",
-                users.users.len()
-            );
-        }
-        users.users.insert(
-            q8id,
-            User {
+        let searchable_user = {
+            let mut users = router.users.inner.write().unwrap();
+            if users.users.len() >= 100_000 {
+                log::warn!(
+                    "users table has reached {} entries; possible resource exhaustion",
+                    users.users.len()
+                );
+            }
+            let user = User {
                 id,
                 key,
                 name,
                 verified,
                 blocked,
-            },
-        );
+            };
+            let searchable_user = UserSearchable::from_user(&user);
+            users.users.insert(q8id, user);
+            searchable_user
+        };
+
+        Self::index_user(router, &searchable_user);
+    }
+
+    /// Open the node-global users search index and backfill it if it is new.
+    fn init_search(
+        state: &crate::QaulState,
+        router: &super::RouterState,
+        users: &[UserSearchable],
+    ) {
+        let storage_path = Storage::get_path(state);
+        let index_path = std::path::Path::new(&storage_path)
+            .join("search")
+            .join("users");
+        let Some(path_str) = index_path.to_str() else {
+            log::error!("failed to create users search index: invalid path");
+            return;
+        };
+
+        match Search::new(path_str) {
+            Ok(mut search) => {
+                if search.is_fresh() && !users.is_empty() {
+                    if let Err(e) = search.index_many(users) {
+                        log::error!("users search batch index error: {}", e);
+                    } else if let Err(e) = search.commit() {
+                        log::error!("users search batch commit error: {}", e);
+                    }
+                }
+
+                *router.users.search.write().unwrap() = Some(search);
+            }
+            Err(e) => log::error!("failed to create users search index: {}", e),
+        }
+    }
+
+    /// Index one user and commit immediately. Search errors must not block user discovery.
+    fn index_user(router: &super::RouterState, user: &UserSearchable) {
+        let mut search = router.users.search.write().unwrap();
+        if let Some(search) = search.as_mut() {
+            if let Err(e) = search.index(user) {
+                log::error!("users search index error: {}", e);
+                return;
+            }
+            if let Err(e) = search.commit() {
+                log::error!("users search commit error: {}", e);
+            }
+        }
+    }
+
+    /// Reconstruct a user by the full PeerId base58 string stored in the search index.
+    fn reconstruct_search_user(
+        router: &super::RouterState,
+        peer_id_b58: &str,
+    ) -> Option<(Vec<u8>, User)> {
+        let peer_id = PeerId::from_bytes(&bs58::decode(peer_id_b58).into_vec().ok()?).ok()?;
+        let peer_id_bytes = peer_id.to_bytes();
+        let q8id = QaulId::bytes_as_q8id(&peer_id_bytes);
+        let users = router.users.inner.read().unwrap();
+        users
+            .users
+            .get(q8id)
+            .cloned()
+            .map(|user| (q8id.to_vec(), user))
+    }
+
+    /// Build a paginated search result list from Tantivy relevance ordered matches.
+    fn build_user_search_list(
+        router: &super::RouterState,
+        query: &str,
+        online_only: bool,
+        offset: u32,
+        limit: u32,
+        account_id: &PeerId,
+    ) -> proto::UserList {
+        let users_len = router.users.inner.read().unwrap().users.len();
+        let search = router.users.search.read().unwrap();
+        let Some(search) = search.as_ref() else {
+            return empty_user_list(offset, limit);
+        };
+
+        let results = match search.search(query, Some(users_len), |peer_id_b58| {
+            Self::reconstruct_search_user(router, peer_id_b58)
+        }) {
+            Ok(results) => results,
+            Err(e) => {
+                log::error!("users search error: {}", e);
+                return empty_user_list(offset, limit);
+            }
+        };
+
+        let online_users = RoutingTable::get_online_users_info(router);
+        let mut entries = Vec::new();
+        for (q8id, user) in results {
+            if online_only && !online_users.contains_key(&q8id) {
+                continue;
+            }
+            entries.push(build_user_entry(
+                &user,
+                &online_users,
+                &Some(account_id.clone()),
+                &q8id,
+            ));
+        }
+
+        paginate_user_entries(entries, offset, limit)
     }
 
     /// add a new user to the users list, and check whether the
@@ -298,6 +418,34 @@ impl Users {
                             request_id,
                         );
                     }
+                    Some(proto::users::Message::UserSearchRequest(user_search_request)) => {
+                        let filter = if user_search_request.online_only {
+                            UserFilter::OnlineOnly
+                        } else {
+                            UserFilter::All
+                        };
+
+                        if user_search_request.query.trim().is_empty() {
+                            Self::build_user_list(
+                                state,
+                                router,
+                                filter,
+                                user_search_request.offset,
+                                user_search_request.limit,
+                                request_id,
+                            );
+                        } else {
+                            Self::build_user_search(
+                                state,
+                                router,
+                                &user_search_request.query,
+                                user_search_request.online_only,
+                                user_search_request.offset,
+                                user_search_request.limit,
+                                request_id,
+                            );
+                        }
+                    }
                     Some(proto::users::Message::UserUpdate(updated_user)) => {
                         log::trace!("UserUpdate protobuf RPC message");
                         // attempt to find the user with the associated id
@@ -447,7 +595,33 @@ impl Users {
             }
         };
 
-        send_users_rpc_message(state, proto::users::Message::UserList(user_list), request_id);
+        send_users_rpc_message(
+            state,
+            proto::users::Message::UserList(user_list),
+            request_id,
+        );
+    }
+
+    fn build_user_search(
+        state: &crate::QaulState,
+        router: &super::RouterState,
+        query: &str,
+        online_only: bool,
+        offset: u32,
+        limit: u32,
+        request_id: String,
+    ) {
+        let user_list = if let Some(account) = UserAccounts::get_default_user(state) {
+            Self::build_user_search_list(router, query, online_only, offset, limit, &account.id)
+        } else {
+            empty_user_list(offset, limit)
+        };
+
+        send_users_rpc_message(
+            state,
+            proto::users::Message::UserList(user_list),
+            request_id,
+        );
     }
 }
 
@@ -461,12 +635,37 @@ enum UserFilter {
 }
 
 /// user structure
+#[derive(Clone)]
 pub struct User {
     pub id: PeerId,
     pub key: PublicKey,
     pub name: String,
     pub verified: bool,
     pub blocked: bool,
+}
+
+struct UserSearchable {
+    id: String,
+    content: String,
+}
+
+impl UserSearchable {
+    fn from_user(user: &User) -> Self {
+        Self {
+            id: user.id.to_base58(),
+            content: user.name.clone(),
+        }
+    }
+}
+
+impl Searchable for UserSearchable {
+    fn id(&self) -> &str {
+        &self.id
+    }
+
+    fn content(&self) -> &str {
+        &self.content
+    }
 }
 
 /// user structure for storing it in the data base
@@ -608,6 +807,43 @@ fn build_user_list_from(
     });
 
     user_list
+}
+
+fn empty_user_list(offset: u32, limit: u32) -> proto::UserList {
+    proto::UserList {
+        user: Vec::new(),
+        pagination: Some(proto::PaginationMetadata {
+            has_more: false,
+            total: 0,
+            offset,
+            limit,
+        }),
+    }
+}
+
+fn paginate_user_entries(
+    entries: Vec<proto::UserEntry>,
+    offset: u32,
+    limit: u32,
+) -> proto::UserList {
+    let total = entries.len() as u32;
+    let start = (offset as usize).min(entries.len());
+    let end = if limit == 0 {
+        entries.len()
+    } else {
+        start.saturating_add(limit as usize).min(entries.len())
+    };
+    let has_more = limit > 0 && offset.saturating_add(limit) < total;
+
+    proto::UserList {
+        user: entries[start..end].to_vec(),
+        pagination: Some(proto::PaginationMetadata {
+            has_more,
+            total,
+            offset,
+            limit,
+        }),
+    }
 }
 
 #[cfg(test)]
