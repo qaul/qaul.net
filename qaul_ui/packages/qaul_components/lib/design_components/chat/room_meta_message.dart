@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'chat_message.dart';
 
 class RoomMetaMessage extends ChatMessage {
-  const RoomMetaMessage._({super.key, required this.label});
+  const RoomMetaMessage._({super.key, this.label, this.date})
+      : assert(label != null || date != null);
 
-  final String label;
+  final String? label;
+  final DateTime? date;
 
   factory RoomMetaMessage.date({Key? key, required DateTime date}) {
-    return RoomMetaMessage._(key: key, label: _formatDateLabel(date));
+    return RoomMetaMessage._(key: key, date: date);
   }
 
   @override
   Widget build(BuildContext context) {
+    final text = label ?? _formatDateLabel(context, date!);
     final onSurface = Theme.of(context).colorScheme.onSurface;
     return Center(
       child: Text(
-        label,
+        text,
         style: TextStyle(
           fontSize: 12,
           height: 1.2,
@@ -27,33 +31,7 @@ class RoomMetaMessage extends ChatMessage {
   }
 }
 
-const _weekdays = [
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-  'Sunday',
-];
-
-const _months = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
-
-String _formatDateLabel(DateTime date) {
-  final weekday = _weekdays[date.weekday - 1];
-  final month = _months[date.month - 1];
-  return '$weekday, $month ${date.day}, ${date.year}';
+String _formatDateLabel(BuildContext context, DateTime date) {
+  final locale = Localizations.localeOf(context).toString();
+  return DateFormat.yMMMMEEEEd(locale).format(date);
 }

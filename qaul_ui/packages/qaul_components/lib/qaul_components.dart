@@ -1,3 +1,5 @@
+export 'l10n/qaul_components_localizations.dart';
+export 'l10n/qaul_components_l10n_ext.dart';
 export 'design_components/chat/chat_header.dart';
 export 'design_components/chat/chat_timeline.dart';
 export 'design_components/chat/compute_message_presentation.dart'

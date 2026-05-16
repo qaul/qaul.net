@@ -4,8 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
-import 'l10n/app_localizations.dart';
 import 'main.directories.g.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 /// Penpot / designer breakpoints only (no preset device catalog).
 const List<ViewportData> _kDesignerViewports = [
@@ -67,8 +67,13 @@ class WidgetbookApp extends StatelessWidget {
           ..._kDesignerViewports,
         ]),
         LocalizationAddon(
-          locales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          locales: QaulComponentsLocalizations.supportedLocales,
+          localizationsDelegates: const [
+            QaulComponentsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
           initialLocale: const Locale('en'),
         ),
         MaterialThemeAddon(

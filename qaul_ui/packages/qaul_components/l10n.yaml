@@ -1,0 +1,5 @@
+arb-dir: lib/l10n
+template-arb-file: qaul_components_en.arb
+output-localization-file: qaul_components_localizations.dart
+output-class: QaulComponentsLocalizations
+untranslated-messages-file: missing_translations.txt

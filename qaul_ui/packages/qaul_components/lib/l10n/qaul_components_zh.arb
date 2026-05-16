@@ -1,0 +1,15 @@
+{
+  "@@locale": "zh",
+  "navTabAccountTooltip": "您的账号",
+  "navTabPublicTooltip": "公开",
+  "navTabUsersTooltip": "用户",
+  "navTabChatTooltip": "聊天",
+  "navTabNetworkTooltip": "网络",
+  "navOverflowSettings": "设置",
+  "navOverflowAbout": "关于",
+  "navOverflowLicense": "AGPL License",
+  "navOverflowSupport": "帮助与支持",
+  "navOverflowRoutingTable": "路由表",
+  "navOverflowFileHistory": "File history",
+  "membersCount": "{count, plural, other{{count} 位成员}}"
+}

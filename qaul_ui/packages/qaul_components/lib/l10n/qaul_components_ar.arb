@@ -1,0 +1,15 @@
+{
+  "@@locale": "ar",
+  "navTabAccountTooltip": "حسابك",
+  "navTabPublicTooltip": "عام",
+  "navTabUsersTooltip": "المستخدمين",
+  "navTabChatTooltip": "دردشة",
+  "navTabNetworkTooltip": "الشبكة",
+  "navOverflowSettings": "الإعدادات",
+  "navOverflowAbout": "عن",
+  "navOverflowLicense": "AGPL License",
+  "navOverflowSupport": "الدعم",
+  "navOverflowRoutingTable": "جدول بيانات التوجيه",
+  "navOverflowFileHistory": "تاريخ الملف",
+  "membersCount": "{count, plural, =1{عضو واحد} other{{count} أعضاء}}"
+}

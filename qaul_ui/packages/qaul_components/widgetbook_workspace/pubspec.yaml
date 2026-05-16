@@ -10,7 +10,6 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  intl: any
 
   qaul_components:
     path: ..
@@ -25,4 +24,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  generate: true
