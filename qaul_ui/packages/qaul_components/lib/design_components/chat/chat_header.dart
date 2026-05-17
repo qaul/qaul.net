@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+
+import '../../l10n/qaul_components_l10n_ext.dart';
 import '../../styles/qaul_color_sheet.dart';
 
 const Color _kChatHeaderControlColor = Color(0xFF999999);
+const Color _kChatHeaderDividerColor = Color(0xFF9E9E9E);
+const double _kChatHeaderDividerWidth = 0.5;
 const Color _kOnlineColor = Color(0xFF34C759);
 
 const double kChatHeaderToolbarHeight = kToolbarHeight;
@@ -143,12 +147,9 @@ class ChatHeader extends StatelessWidget {
   final List<ChatHeaderMenuEntry> menuEntries;
   final ValueChanged<String>? onMenuSelected;
 
-  static String _defaultMembersCountLabel(int count) =>
-      count == 1 ? '1 member' : '$count members';
-
-  String get _subtitle {
+  String _subtitle(BuildContext context) {
     if (_isGroup) {
-      return (_formatMembersCount ?? _defaultMembersCountLabel)(
+      return (_formatMembersCount ?? (c) => qaulChatHeaderMembersCountLabel(context, c))(
         _membersCount!,
       );
     }
@@ -216,7 +217,7 @@ class ChatHeader extends StatelessWidget {
                   ),
                   const SizedBox(height: _kTitleSubtitleGap),
                   Text(
-                    _subtitle,
+                    _subtitle(context),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: secondaryStyle,
@@ -237,6 +238,12 @@ class ChatHeader extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: _chatHeaderShellColor(theme),
+        border: const Border(
+          bottom: BorderSide(
+            color: _kChatHeaderDividerColor,
+            width: _kChatHeaderDividerWidth,
+          ),
+        ),
         boxShadow: [_chatHeaderShadow(theme)],
       ),
       child: Material(

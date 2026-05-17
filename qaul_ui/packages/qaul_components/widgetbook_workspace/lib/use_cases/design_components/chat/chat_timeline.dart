@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:qaul_components/qaul_components.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
+import '../../../support/widgetbook_preview.dart';
+
 final _previewClock = DateTime(2026, 4, 12, 14, 30);
 
 List<TextChatMessage> _buildDirectMessages() {
@@ -109,17 +111,12 @@ List<TextChatMessage> _buildDirectMessages() {
 Widget buildChatRoomPreviewUseCase(BuildContext context) {
   const me = ChatUser(id: 'me', name: 'Me');
 
-  return SizedBox.expand(
-    child: ColoredBox(
-      color: Colors.black,
-      child: SingleChildScrollView(
-        reverse: true,
-        child: ChatTimeline.direct(
-          currentUser: me,
-          messages: _buildDirectMessages(),
-          clock: _previewClock,
-        ),
-      ),
+  return widgetbookFullScreenChatPreview(
+    context,
+    ChatTimeline.direct(
+      currentUser: me,
+      messages: _buildDirectMessages(),
+      clock: _previewClock,
     ),
   );
 }
@@ -237,17 +234,12 @@ List<ChatMessage> _buildGroupMessages() {
 Widget buildGroupChatUseCase(BuildContext context) {
   const me = ChatUser(id: 'me', name: 'Me');
 
-  return SizedBox.expand(
-    child: ColoredBox(
-      color: Colors.black,
-      child: SingleChildScrollView(
-        reverse: true,
-        child: ChatTimeline.group(
-          currentUser: me,
-          messages: _buildGroupMessages(),
-          clock: _groupPreviewClock,
-        ),
-      ),
+  return widgetbookFullScreenChatPreview(
+    context,
+    ChatTimeline.group(
+      currentUser: me,
+      messages: _buildGroupMessages(),
+      clock: _groupPreviewClock,
     ),
   );
 }

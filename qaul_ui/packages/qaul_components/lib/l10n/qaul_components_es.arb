@@ -1,0 +1,15 @@
+{
+  "@@locale": "es",
+  "navTabAccountTooltip": "Tu cuenta",
+  "navTabPublicTooltip": "Público",
+  "navTabUsersTooltip": "Usuarios",
+  "navTabChatTooltip": "Chat",
+  "navTabNetworkTooltip": "Red",
+  "navOverflowSettings": "Configuración",
+  "navOverflowAbout": "Acerca de",
+  "navOverflowLicense": "AGPL License",
+  "navOverflowSupport": "Soporte",
+  "navOverflowRoutingTable": "Tabla de datos de enrutamiento",
+  "navOverflowFileHistory": "Historial del archivo",
+  "membersCount": "{count, plural, =1{1 miembro} other{{count} miembros}}"
+}

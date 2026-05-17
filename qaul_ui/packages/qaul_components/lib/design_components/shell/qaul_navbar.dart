@@ -1,6 +1,8 @@
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_svg/flutter_svg.dart';
+
+import '../../l10n/qaul_components_l10n_ext.dart';
 import '../../styles/qaul_color_sheet.dart';
 
 // ---------------------------------------------------------------------------
@@ -31,9 +33,6 @@ const TextStyle kNavBarAvatarTextStyle = TextStyle(
   fontWeight: FontWeight.w300,
   color: Color(0xFFFFFFFF),
 );
-
-Map<NavBarOverflowOption, String> navBarOverflowMenuLabelsDefault() =>
-    Map.from(_kNavBarOverflowMenuLabelsEn);
 
 // ---------------------------------------------------------------------------
 // Private constants & helpers
@@ -156,15 +155,6 @@ _NavBarVerticalMetrics _navBarVerticalMetricsForHeight(double maxHeight) {
   );
 }
 
-const Map<NavBarOverflowOption, String> _kNavBarOverflowMenuLabelsEn = {
-  NavBarOverflowOption.settings: 'Settings',
-  NavBarOverflowOption.about: 'About',
-  NavBarOverflowOption.license: 'AGPL License',
-  NavBarOverflowOption.support: 'Support',
-  NavBarOverflowOption.oldNetwork: 'Routing table',
-  NavBarOverflowOption.files: 'File history',
-};
-
 Color _navBarShellBackgroundColor(ThemeData theme) {
   final barTheme = theme.appBarTheme;
   return theme.brightness == Brightness.dark
@@ -191,7 +181,7 @@ class QaulNavBar extends StatelessWidget {
   const QaulNavBar({
     super.key,
     required this.vertical,
-    required this.overflowMenuLabels,
+    this.overflowMenuLabels,
     required this.onOverflowSelected,
     required this.selectedTab,
     required this.onTabSelected,
@@ -202,7 +192,7 @@ class QaulNavBar extends StatelessWidget {
   });
 
   final bool vertical;
-  final Map<NavBarOverflowOption, String> overflowMenuLabels;
+  final Map<NavBarOverflowOption, String>? overflowMenuLabels;
   final void Function(NavBarOverflowOption) onOverflowSelected;
   final TabType selectedTab;
   final void Function(TabType) onTabSelected;
@@ -211,19 +201,13 @@ class QaulNavBar extends StatelessWidget {
   final int? chatNotificationCount;
   final Map<TabType, String>? tabTooltips;
 
-  static Map<TabType, String> defaultTabTooltips() => {
-    TabType.account: 'Account',
-    TabType.public: 'Public',
-    TabType.users: 'Users',
-    TabType.chat: 'Chat',
-    TabType.network: 'Network',
-  };
-
   @override
   Widget build(BuildContext context) {
+    final overflowLabels =
+        overflowMenuLabels ?? qaulNavBarOverflowMenuLabels(context);
     if (vertical) {
       return _QaulNavBarVerticalLayout(
-        overflowMenuLabels: overflowMenuLabels,
+        overflowMenuLabels: overflowLabels,
         onOverflowSelected: onOverflowSelected,
         selectedTab: selectedTab,
         onTabSelected: onTabSelected,
@@ -234,7 +218,7 @@ class QaulNavBar extends StatelessWidget {
       );
     }
     return _QaulNavBarHorizontalLayout(
-      overflowMenuLabels: overflowMenuLabels,
+      overflowMenuLabels: overflowLabels,
       onOverflowSelected: onOverflowSelected,
       selectedTab: selectedTab,
       onTabSelected: onTabSelected,
@@ -248,7 +232,7 @@ class QaulNavBar extends StatelessWidget {
 
 class _QaulNavBarVerticalLayout extends StatelessWidget {
   const _QaulNavBarVerticalLayout({
-    required this.overflowMenuLabels,
+    this.overflowMenuLabels,
     required this.onOverflowSelected,
     required this.selectedTab,
     required this.onTabSelected,
@@ -258,7 +242,7 @@ class _QaulNavBarVerticalLayout extends StatelessWidget {
     required this.tabTooltips,
   });
 
-  final Map<NavBarOverflowOption, String> overflowMenuLabels;
+  final Map<NavBarOverflowOption, String>? overflowMenuLabels;
   final void Function(NavBarOverflowOption) onOverflowSelected;
   final TabType selectedTab;
   final void Function(TabType) onTabSelected;
@@ -269,9 +253,11 @@ class _QaulNavBarVerticalLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tooltips = tabTooltips ?? QaulNavBar.defaultTabTooltips();
+    final overflowLabels =
+        overflowMenuLabels ?? qaulNavBarOverflowMenuLabels(context);
+    final tooltips = tabTooltips ?? qaulNavBarDefaultTabTooltips(context);
     final menuButton = _buildVerticalMenuButton(
-      overflowMenuLabels: overflowMenuLabels,
+      overflowMenuLabels: overflowLabels,
       onOverflowSelected: onOverflowSelected,
     );
 
@@ -394,7 +380,7 @@ class _QaulNavBarVerticalLayout extends StatelessWidget {
 
 class _QaulNavBarHorizontalLayout extends StatelessWidget {
   const _QaulNavBarHorizontalLayout({
-    required this.overflowMenuLabels,
+    this.overflowMenuLabels,
     required this.onOverflowSelected,
     required this.selectedTab,
     required this.onTabSelected,
@@ -404,7 +390,7 @@ class _QaulNavBarHorizontalLayout extends StatelessWidget {
     required this.tabTooltips,
   });
 
-  final Map<NavBarOverflowOption, String> overflowMenuLabels;
+  final Map<NavBarOverflowOption, String>? overflowMenuLabels;
   final void Function(NavBarOverflowOption) onOverflowSelected;
   final TabType selectedTab;
   final void Function(TabType) onTabSelected;
@@ -415,9 +401,11 @@ class _QaulNavBarHorizontalLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tooltips = tabTooltips ?? QaulNavBar.defaultTabTooltips();
+    final overflowLabels =
+        overflowMenuLabels ?? qaulNavBarOverflowMenuLabels(context);
+    final tooltips = tabTooltips ?? qaulNavBarDefaultTabTooltips(context);
     final menuButton = _buildHorizontalMenuButton(
-      overflowMenuLabels: overflowMenuLabels,
+      overflowMenuLabels: overflowLabels,
       onOverflowSelected: onOverflowSelected,
     );
 
@@ -549,12 +537,12 @@ Widget _buildVerticalMenuButton({
 
 class _NavBarOverflowMenuButton extends StatelessWidget {
   _NavBarOverflowMenuButton({
-    required this.overflowMenuLabels,
+    this.overflowMenuLabels,
     required this.onOverflowSelected,
     required this.iconBuilder,
   });
 
-  final Map<NavBarOverflowOption, String> overflowMenuLabels;
+  final Map<NavBarOverflowOption, String>? overflowMenuLabels;
   final void Function(NavBarOverflowOption) onOverflowSelected;
   final Widget Function(BuildContext context) iconBuilder;
 
@@ -562,6 +550,8 @@ class _NavBarOverflowMenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final labels =
+        overflowMenuLabels ?? qaulNavBarOverflowMenuLabels(context);
     final theme = Theme.of(context);
     final hoverColor = theme.brightness == Brightness.dark
         ? Colors.white.withValues(alpha: 0.10)
@@ -603,7 +593,7 @@ class _NavBarOverflowMenuButton extends StatelessWidget {
                   .map(
                     (option) => PopupMenuItem<NavBarOverflowOption>(
                       value: option,
-                      child: Text(overflowMenuLabels[option]!),
+                      child: Text(labels[option]!),
                     ),
                   )
                   .toList(),

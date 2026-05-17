@@ -1,0 +1,15 @@
+{
+  "@@locale": "de",
+  "navTabAccountTooltip": "Dein Profil",
+  "navTabPublicTooltip": "Öffentlich",
+  "navTabUsersTooltip": "Kontakte",
+  "navTabChatTooltip": "Chat",
+  "navTabNetworkTooltip": "Netzwerk",
+  "navOverflowSettings": "Einstellungen",
+  "navOverflowAbout": "Über",
+  "navOverflowLicense": "AGPL Lizenz",
+  "navOverflowSupport": "Support",
+  "navOverflowRoutingTable": "Routing-Tabelle",
+  "navOverflowFileHistory": "Alle Chat-Dateien",
+  "membersCount": "{count, plural, =1{1 Mitglied} other{{count} Mitglieder}}"
+}

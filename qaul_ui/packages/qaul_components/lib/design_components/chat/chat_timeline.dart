@@ -20,6 +20,7 @@ class ChatTimeline extends StatelessWidget {
     required this.currentUser,
     required this.messages,
     this.clock,
+    this.padding = const EdgeInsets.all(16),
   }) : _mode = ChatRenderMode.direct;
 
   /// Creates a group chat timeline. Sender identity is derived from each
@@ -29,6 +30,7 @@ class ChatTimeline extends StatelessWidget {
     required this.currentUser,
     required this.messages,
     this.clock,
+    this.padding = const EdgeInsets.all(16),
   }) : _mode = ChatRenderMode.group;
 
   final ChatUser currentUser;
@@ -37,6 +39,9 @@ class ChatTimeline extends StatelessWidget {
   /// Reference instant used for relative time labels ("Now", "N min").
   /// Defaults to [DateTime.now] if not provided.
   final DateTime? clock;
+
+  /// Outer inset around the timeline column (matches legacy [ChatRoom]).
+  final EdgeInsetsGeometry padding;
 
   final ChatRenderMode _mode;
 
@@ -135,24 +140,31 @@ class ChatTimeline extends StatelessWidget {
           children.add(
             Padding(
               padding: EdgeInsets.only(top: topPad),
-              child: RoomMetaMessage.date(date: date),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: RoomMetaMessage.date(date: date),
+              ),
             ),
           );
           isFirst = false;
 
         case _MetaEntry(:final message):
           final topPad = isFirst ? 0.0 : kChatBubbleSeparatedGap;
+          final metaStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontSize: 12,
+                height: 1.2,
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.55),
+              );
           children.add(
             Padding(
               padding: EdgeInsets.only(top: topPad),
               child: Center(
                 child: Text(
                   message.label,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    height: 1.2,
-                    color: Colors.grey,
-                  ),
+                  style: metaStyle,
                 ),
               ),
             ),
@@ -187,10 +199,13 @@ class ChatTimeline extends StatelessWidget {
       }
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      children: children,
+    return Padding(
+      padding: padding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: children,
+      ),
     );
   }
 }

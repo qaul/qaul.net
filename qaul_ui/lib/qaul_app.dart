@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:qaul_components/qaul_components.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import 'helpers/navigation_helper.dart';
@@ -132,7 +133,10 @@ class QaulApp extends PlatformAwareBuilder {
                   initialRoute: NavigationHelper.initial,
                   onGenerateRoute: NavigationHelper.onGenerateRoute,
                   locale: currentLocale,
-                  localizationsDelegates: AppLocalizations.localizationsDelegates,
+                  localizationsDelegates: [
+                    ...AppLocalizations.localizationsDelegates,
+                    QaulComponentsLocalizations.delegate,
+                  ],
                   supportedLocales: AppLocalizations.supportedLocales,
                   localeResolutionCallback: (locale, supportedLocales) {
                     if (currentLocale != null) {
