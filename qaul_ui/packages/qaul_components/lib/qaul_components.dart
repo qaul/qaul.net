@@ -1,5 +1,3 @@
-export 'l10n/qaul_components_localizations.dart';
-export 'l10n/qaul_components_l10n_ext.dart';
 export 'design_components/chat/chat_header.dart';
 export 'design_components/chat/chat_timeline.dart';
 export 'design_components/chat/compute_message_presentation.dart'
@@ -23,6 +21,8 @@ export 'design_components/chat/room_meta_message.dart';
 export 'design_components/shell/qaul_fab.dart';
 export 'design_components/shell/qaul_loading_indicator.dart';
 export 'design_components/shell/qaul_navbar.dart';
+export 'l10n/qaul_components_l10n_ext.dart';
+export 'l10n/qaul_components_localizations.dart';
 export 'models/chat_message.dart';
 export 'models/chat_user.dart';
 export 'styles/qaul_app_theme.dart';

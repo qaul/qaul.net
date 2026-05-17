@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
-import 'qaul_components_localizations.dart';
 import '../design_components/shell/qaul_navbar.dart';
+import 'qaul_components_localizations.dart';
 
 /// Localized default labels for [QaulNavBar] overflow menu entries.
 Map<NavBarOverflowOption, String> qaulNavBarOverflowMenuLabels(
