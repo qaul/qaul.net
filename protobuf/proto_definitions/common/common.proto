@@ -1,0 +1,9 @@
+syntax = "proto3";
+package qaul.common;
+
+message Ack {}
+message RpcError {
+    uint32 code = 1;
+    string message = 2;
+    string details = 3;
+}

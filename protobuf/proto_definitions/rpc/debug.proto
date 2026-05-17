@@ -1,6 +1,7 @@
 syntax = "proto3";
 package qaul.rpc.debug;
 
+import "common/common.proto";
 
 // Libqaul RPC Debug Messages
 message Debug {
@@ -24,7 +25,20 @@ message Debug {
 
         // Request for library to delete logs
         DeleteLibqaulLogsRequest delete_libqaul_logs_request = 7;
+
+        // Acknowledgement response
+        qaul.common.Ack ack = 8;
+        // RPC error response
+        qaul.common.RpcError error = 9;
     }
+}
+
+service DebugService {
+    rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+    rpc TriggerPanic(Panic) returns (qaul.common.Ack);
+    rpc SetLogToFile(LogToFile) returns (qaul.common.Ack);
+    rpc StoragePath(StoragePathRequest) returns (StoragePathResponse);
+    rpc DeleteLibqaulLogs(DeleteLibqaulLogsRequest) returns (qaul.common.Ack);
 }
 
 // Request a Heartbeat from Libqaul

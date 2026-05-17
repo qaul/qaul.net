@@ -7,6 +7,10 @@
 //! All proto files are compiled here and exposed as public modules.
 
 #[allow(clippy::all)]
+pub mod qaul_common {
+    include!("../../../protobuf/generated/rust/qaul.common.rs");
+}
+#[allow(clippy::all)]
 pub mod qaul_rpc {
     include!("../../../protobuf/generated/rust/qaul.rpc.rs");
 }
