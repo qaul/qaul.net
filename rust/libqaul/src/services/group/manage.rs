@@ -196,11 +196,9 @@ impl GroupManage {
             account_id.to_bytes(),
             super::GroupMember {
                 user_id: account_id.to_bytes(),
-                role: super::proto_rpc::GroupMemberRole::Admin.try_into().unwrap(),
+                role: super::proto_rpc::GroupMemberRole::Admin as i32,
                 joined_at: Timestamp::get_timestamp(),
-                state: super::proto_rpc::GroupMemberState::Activated
-                    .try_into()
-                    .unwrap(),
+                state: super::proto_rpc::GroupMemberState::Activated as i32,
                 last_message_index: 0,
             },
         );
@@ -208,11 +206,9 @@ impl GroupManage {
             user_id.to_bytes(),
             super::GroupMember {
                 user_id: user_id.to_bytes(),
-                role: super::proto_rpc::GroupMemberRole::Admin.try_into().unwrap(),
+                role: super::proto_rpc::GroupMemberRole::Admin as i32,
                 joined_at: Timestamp::get_timestamp(),
-                state: super::proto_rpc::GroupMemberState::Activated
-                    .try_into()
-                    .unwrap(),
+                state: super::proto_rpc::GroupMemberState::Activated as i32,
                 last_message_index: 0,
             },
         );
@@ -236,7 +232,7 @@ impl GroupManage {
             account_id.to_bytes(),
             super::GroupMember {
                 user_id: account_id.to_bytes(),
-                role: super::proto_rpc::GroupMemberRole::Admin.try_into().unwrap(),
+                role: super::proto_rpc::GroupMemberRole::Admin as i32,
                 joined_at: Timestamp::get_timestamp(),
                 state: super::proto_rpc::GroupMemberState::Activated as i32,
                 last_message_index: 0,
@@ -258,10 +254,17 @@ impl GroupManage {
             )),
         };
 
+        let group_id = match GroupId::from_bytes(&group.id) {
+            Ok(id) => id,
+            Err(e) => {
+                log::error!("failed to parse group id: {}", e);
+                return group.id;
+            }
+        };
         ChatStorage::save_message(
             state,
             account_id,
-            &GroupId::from_bytes(&group.id).unwrap(),
+            &group_id,
             account_id,
             &Vec::new(),
             Timestamp::get_timestamp(),
@@ -353,7 +356,15 @@ impl GroupManage {
         offset: u32,
         limit: u32,
     ) -> super::proto_rpc::GroupListResponse {
-        let db_ref = GroupStorage::get_db_ref(state, account_id.to_owned());
+        // get_db_ref returns Option since the user-info refactor; bail out
+        // with an empty response if the per-user db isn't available.
+        let db_ref = match GroupStorage::get_db_ref(state, account_id.to_owned()) {
+            Some(r) => r,
+            None => {
+                log::error!("group_list: group db unavailable");
+                return build_group_list_response(Vec::new(), offset, limit);
+            }
+        };
         let groups: Vec<Group> = db_ref
             .groups
             .iter()
@@ -370,7 +381,13 @@ impl GroupManage {
         offset: u32,
         limit: u32,
     ) -> super::proto_rpc::GroupInvitedResponse {
-        let db_ref = GroupStorage::get_db_ref(state, account_id.to_owned());
+        let db_ref = match GroupStorage::get_db_ref(state, account_id.to_owned()) {
+            Some(r) => r,
+            None => {
+                log::error!("invited_list: group db unavailable");
+                return build_invited_list_response(Vec::new(), offset, limit);
+            }
+        };
         let invites: Vec<GroupInvited> = db_ref
             .invited
             .iter()

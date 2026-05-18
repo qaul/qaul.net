@@ -5,7 +5,11 @@ use crate::{cli::AccountSubcmd, commands::RpcCommand, proto::Modules};
 /// protobuf RPC definition
 use qaul_proto::qaul_rpc_user_accounts as proto;
 
-use proto::{user_accounts, CreateUserAccount, SetPasswordRequest, UserAccounts};
+use proto::{
+    user_accounts, CreateUserAccount, SetPasswordRequest, UpdateProfileRequest, UserAccounts,
+};
+
+use super::id_string_to_bin;
 
 /// Decodes a `GetDefaultUserAccount` response payload and returns the user's raw id bytes.
 /// Returns an empty Vec if the account doesn't exist or decoding fails.
@@ -83,6 +87,45 @@ impl RpcCommand for AccountSubcmd {
                 proto_message.encode(&mut buf).unwrap();
                 Ok((buf, Modules::Useraccounts))
             }
+            AccountSubcmd::Update {
+                name,
+                bio,
+                avatar,
+                custody_route,
+            } => {
+                let avatar_bytes = match avatar {
+                    Some(path) => std::fs::read(path)?,
+                    None => Vec::new(),
+                };
+                let custody_bytes = match custody_route {
+                    Some(items) => {
+                        // Special-case `clear` to send a single empty bytes
+                        // entry — the proto spec's signal for "wipe".
+                        if items.len() == 1 && items[0] == "clear" {
+                            vec![Vec::new()]
+                        } else {
+                            items
+                                .iter()
+                                .map(|id| id_string_to_bin(id.clone()))
+                                .collect::<Result<Vec<_>, _>>()?
+                        }
+                    }
+                    None => Vec::new(),
+                };
+                let proto_message = UserAccounts {
+                    message: Some(user_accounts::Message::UpdateProfileRequest(
+                        UpdateProfileRequest {
+                            name: name.clone().unwrap_or_default(),
+                            bio: bio.clone().unwrap_or_default(),
+                            avatar: avatar_bytes,
+                            preferred_custody_route: custody_bytes,
+                        },
+                    )),
+                };
+                let mut buf = Vec::with_capacity(proto_message.encoded_len());
+                proto_message.encode(&mut buf)?;
+                Ok((buf, Modules::Useraccounts))
+            }
             _ => {
                 todo!()
             }
@@ -156,6 +199,25 @@ impl RpcCommand for AccountSubcmd {
                     println!(" Password updated");
                 } else {
                     println!("{}", response.error_message);
+                }
+            }
+            Some(user_accounts::Message::UpdateProfileResponse(response)) => {
+                if json {
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&serde_json::json!({
+                            "success": response.success,
+                            "error": response.error_message,
+                            "new_version": response.new_version,
+                        }))?
+                    );
+                } else if response.success {
+                    println!(
+                        "Profile updated; new version: {}",
+                        response.new_version
+                    );
+                } else {
+                    println!("Profile update FAILED: {}", response.error_message);
                 }
             }
             _ => {

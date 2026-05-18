@@ -8,6 +8,7 @@
 
 pub mod authentication;
 pub mod debug;
+pub mod subscribe;
 pub mod sys;
 
 use crossbeam_channel::{unbounded, Receiver, Sender, TryRecvError};
@@ -15,7 +16,8 @@ use std::sync::RwLock;
 
 use prost::Message;
 
-use crate::connections::ble::Ble;
+use crate::connections::ble::{Ble, BleTransport};
+use crate::connections::transport::Transport;
 use crate::connections::Connections;
 use crate::connections::{internet::Internet, lan::Lan};
 use crate::node::user_accounts::UserAccounts;
@@ -165,6 +167,7 @@ impl Rpc {
         data: Vec<u8>,
         lan: Option<&mut Lan>,
         internet: Option<&mut Internet>,
+        ble: Option<&mut BleTransport>,
     ) {
         Self::increase_message_counter(state);
 
@@ -173,7 +176,13 @@ impl Rpc {
                 match Modules::try_from(message.module) {
                     Ok(Modules::Node) => {
                         Self::increase_message_counter(state);
-                        Node::rpc(state, message.data, lan, internet, message.request_id);
+                        Node::rpc(
+                            state,
+                            message.data,
+                            lan.map(|l| l as &mut dyn Transport),
+                            internet.map(|i| i as &mut dyn Transport),
+                            message.request_id,
+                        );
                     }
                     Ok(Modules::Rpc) => {
                         log::trace!("Message Modules::Rpc received");
@@ -195,8 +204,8 @@ impl Rpc {
                             state,
                             message.data,
                             message.user_id,
-                            lan,
-                            internet,
+                            lan.map(|l| l as &mut dyn Transport),
+                            internet.map(|i| i as &mut dyn Transport),
                             message.request_id,
                         );
                     }
@@ -214,8 +223,8 @@ impl Rpc {
                             state,
                             message.data,
                             message.user_id,
-                            lan,
-                            internet,
+                            lan.map(|l| l as &mut dyn Transport),
+                            internet.map(|i| i as &mut dyn Transport),
                             message.request_id,
                         );
                     }
@@ -251,6 +260,25 @@ impl Rpc {
                             message.request_id,
                         );
                     }
+                    Ok(Modules::Transports) => {
+                        Connections::transports_rpc(
+                            state,
+                            message.data,
+                            lan,
+                            internet,
+                            ble,
+                            message.request_id,
+                        );
+                    }
+                    Ok(Modules::Subscribe) => {
+                        log::trace!("Subscribe message received");
+                        subscribe::Subscribe::rpc(
+                            state,
+                            message.data,
+                            message.user_id,
+                            message.request_id,
+                        );
+                    }
                     Ok(Modules::None) => {
                         log::error!("Message Modules::None received");
                     }
@@ -262,6 +290,22 @@ impl Rpc {
             Err(error) => {
                 log::error!("{:?}", error);
             }
+        }
+    }
+
+    /// Notify libqaul that an external client (qauld socket peer) has
+    /// disconnected. Cleans up any long-running RPC state — currently
+    /// just `SubscriptionState`, but other streaming RPCs added later
+    /// should clean up here too.
+    ///
+    /// `request_ids` is the set of request_ids the client had in flight
+    /// at disconnect time. Unknown ids are silently ignored.
+    pub fn client_disconnected(state: &crate::QaulState, request_ids: &[String]) {
+        if request_ids.is_empty() {
+            return;
+        }
+        for id in request_ids {
+            state.subscriptions.unsubscribe(id);
         }
     }
 

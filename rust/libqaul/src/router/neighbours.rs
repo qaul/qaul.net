@@ -194,7 +194,7 @@ impl Neighbours {
     ///
     /// If the node already exists, it updates it's rtt value.
     /// If the node does not yet exist, it creates it.
-    pub fn update_node(router: &super::RouterState, module: ConnectionModule, node_id: PeerId, rtt: u32) {
+    pub fn update_node(state: &crate::QaulState, router: &super::RouterState, module: ConnectionModule, node_id: PeerId, rtt: u32) {
         log::trace!("update_node node {:?}", node_id);
         let ns = &router.neighbours;
         let table_lock = match ns.get_table(&module) {
@@ -204,10 +204,12 @@ impl Neighbours {
 
         let mut neighbours = table_lock.write().unwrap();
         let node_option = neighbours.nodes.get_mut(&node_id);
+        let mut newly_seen = false;
         if let Some(node) = node_option {
             node.rtt = Self::calculate_rtt(node.rtt, rtt);
             node.updated_at = Timestamp::get_timestamp();
         } else {
+            newly_seen = true;
             if neighbours.nodes.len() >= 100_000 {
                 log::warn!(
                     "neighbours table has reached {} entries; possible resource exhaustion",
@@ -241,6 +243,12 @@ impl Neighbours {
                     log::error!("Error when flushing data base to disk: {}", e);
                 }
             }
+        }
+        // Drop the table lock before firing the event so subscribers
+        // observing the connection don't block writes here.
+        drop(neighbours);
+        if newly_seen {
+            crate::rpc::subscribe::emit_peer_connected(state, &node_id, module);
         }
     }
 
