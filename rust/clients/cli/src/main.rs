@@ -21,6 +21,7 @@ mod chat;
 mod chatfile;
 mod cli;
 mod connections;
+mod crypto;
 mod debug;
 mod dtn;
 mod feed;
@@ -29,6 +30,7 @@ mod node;
 mod router;
 mod rpc;
 mod rtc;
+mod transports;
 mod user_accounts;
 mod users;
 

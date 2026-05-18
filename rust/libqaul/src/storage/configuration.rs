@@ -164,6 +164,24 @@ impl Default for UserAccount {
     }
 }
 
+/// BLE Connection Module
+///
+/// `active` mirrors `lan.active` and `internet.active`: it is the
+/// persisted enabled/disabled flag for the BLE transport. Changes
+/// made through the Transports RPC (or the `qaul-cli transports`
+/// commands) write back to this field so the choice survives a
+/// daemon restart.
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct Ble {
+    pub active: bool,
+}
+
+impl Default for Ble {
+    fn default() -> Self {
+        Ble { active: true }
+    }
+}
+
 /// Debugging Configuration Options
 ///
 /// The following options can be configured:
@@ -209,6 +227,47 @@ impl Default for RoutingOptions {
     }
 }
 
+/// Crypto session rotation configuration.
+///
+/// Controls when qaul re-runs the Noise KK handshake between two
+/// peers and how long the previous session remains accepted for
+/// incoming messages after a rotation starts.
+///
+/// Defaults are `enabled: false` — rotation ships dormant and is
+/// opted in per node. All durations are in seconds; volumes are in
+/// message counts.
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct CryptoRotation {
+    /// Master switch. When `false` no rotation triggers fire and
+    /// no `RotateHandshakeFirst` frames are sent. Phase 1 leaves
+    /// this `false`.
+    pub enabled: bool,
+    /// Time-based trigger: rotate when the session is older than
+    /// this many seconds.
+    pub period_seconds: u64,
+    /// Outbound volume trigger: rotate once this many messages have
+    /// been encrypted under the session.
+    pub volume_messages: u64,
+    /// Grace period during which the old (draining) session is
+    /// still accepted for incoming messages after a rotation.
+    pub grace_period_seconds: u64,
+    /// Grace volume: additional messages accepted on the draining
+    /// session before it is retired, regardless of grace_period.
+    pub grace_volume_messages: u64,
+}
+
+impl Default for CryptoRotation {
+    fn default() -> Self {
+        CryptoRotation {
+            enabled: false,
+            period_seconds: 7 * 24 * 3600, // 7 days
+            volume_messages: 1 << 20,      // 2^20 ≈ 1,048,576
+            grace_period_seconds: 3600,    // 1 hour
+            grace_volume_messages: 256,
+        }
+    }
+}
+
 /// Storage Configuration Options
 ///
 /// The following options can be configured:
@@ -239,9 +298,17 @@ pub struct Configuration {
     pub node: Node,
     pub lan: Lan,
     pub internet: Internet,
+    /// BLE transport configuration. `#[serde(default)]` so existing
+    /// `config.yaml` files (which predate this section) load with
+    /// the conservative default of `active: true` rather than failing
+    /// to deserialize.
+    #[serde(default)]
+    pub ble: Ble,
     pub user_accounts: Vec<UserAccount>,
     pub debug: DebugOption,
     pub routing: RoutingOptions,
+    #[serde(default)]
+    pub crypto_rotation: CryptoRotation,
 }
 
 impl Default for Configuration {
@@ -250,9 +317,11 @@ impl Default for Configuration {
             node: Node::default(),
             lan: Lan::default(),
             internet: Internet::default(),
+            ble: Ble::default(),
             user_accounts: Vec::new(),
             debug: DebugOption::default(),
             routing: RoutingOptions::default(),
+            crypto_rotation: CryptoRotation::default(),
         }
     }
 }
@@ -311,6 +380,13 @@ impl Configuration {
         *cfg = config;
     }
 
+    /// Install an arbitrary `Configuration` for tests that need
+    /// `Configuration::get()` to return something deterministic
+    /// without touching the filesystem.
+    ///
+    /// The `InitCell` is write-once: subsequent calls are no-ops and
+    /// the first-installed config stays. Returns `true` when this
+    /// call was the one that installed the config.
     /// Load a configuration file for upgrading purposes
     ///
     /// This function is only to be used for the upgrading procedure.

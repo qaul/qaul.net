@@ -62,4 +62,17 @@ enum Modules {
     DTN = 14;
     // Authentication
     AUTH = 15;
+    // End-to-end crypto configuration
+    //
+    // read / write the Noise session rotation config and (future)
+    // query rotation events.
+    CRYPTO = 16;
+    // Transport management (list, enable, disable)
+    TRANSPORTS = 17;
+    // Event subscription
+    //
+    // Long-running RPC: the client sends one SubscribeRequest, libqaul
+    // pushes back any number of Event messages tagged with the same
+    // request_id until the client disconnects.
+    SUBSCRIBE = 18;
 }

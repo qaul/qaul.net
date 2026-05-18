@@ -17,7 +17,7 @@ use libp2p::{floodsub::Topic, identity::Keypair, PeerId};
 use prost::Message;
 use std::sync::{Arc, RwLock};
 
-use crate::connections::{internet::Internet, lan::Lan};
+use crate::connections::transport::Transport;
 use crate::rpc::Rpc;
 use crate::storage::configuration::Configuration;
 use crate::utilities::qaul_id::QaulId;
@@ -189,8 +189,8 @@ impl Node {
     pub fn rpc(
         state: &crate::QaulState,
         data: Vec<u8>,
-        lan: Option<&mut Lan>,
-        internet: Option<&mut Internet>,
+        lan: Option<&mut dyn Transport>,
+        internet: Option<&mut dyn Transport>,
         request_id: String,
     ) {
         match proto::Node::decode(&data[..]) {
@@ -199,24 +199,19 @@ impl Node {
                     Some(proto::node::Message::GetNodeInfo(_)) => {
                         Rpc::increase_message_counter(state);
 
-                        // create address list
                         let mut addresses: Vec<String> = Vec::new();
-                        if let Some(internet_connection) = internet {
-                            // listener addresses
-                            for address in internet_connection.swarm.listeners() {
+                        if let Some(transport) = internet {
+                            for address in transport.listeners() {
                                 addresses.push(address.to_string());
                             }
-                            // external addresses
-                            for address in internet_connection.swarm.external_addresses() {
+                            for address in transport.external_addresses() {
                                 addresses.push(address.to_string());
                             }
-                        } else if let Some(lan_connection) = lan {
-                            // listener addresses
-                            for address in lan_connection.swarm.listeners() {
+                        } else if let Some(transport) = lan {
+                            for address in transport.listeners() {
                                 addresses.push(address.to_string());
                             }
-                            // external addresses
-                            for address in lan_connection.swarm.external_addresses() {
+                            for address in transport.external_addresses() {
                                 addresses.push(address.to_string());
                             }
                         } else {

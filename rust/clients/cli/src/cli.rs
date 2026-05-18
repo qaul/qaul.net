@@ -9,6 +9,7 @@ use super::ble::Ble;
 use super::chat::Chat;
 use super::chatfile::ChatFile;
 use super::connections::Connections;
+use super::crypto::Crypto;
 use super::debug::Debug;
 use super::dtn::Dtn;
 use super::feed::Feed;
@@ -16,6 +17,7 @@ use super::group::Group;
 use super::node::Node;
 use super::router::Router;
 use super::rtc::Rtc;
+use super::transports::Transports;
 use super::user_accounts::UserAccounts;
 use super::users::Users;
 
@@ -77,6 +79,14 @@ impl Cli {
             // dtn functions
             cmd if cmd.starts_with("dtn ") => {
                 Dtn::cli(state, cmd.strip_prefix("dtn ").unwrap());
+            }
+            // crypto functions (session rotation config)
+            cmd if cmd.starts_with("crypto ") => {
+                Crypto::cli(state, cmd.strip_prefix("crypto ").unwrap());
+            }
+            // dynamic transports (LAN / Internet / BLE) on/off
+            cmd if cmd.starts_with("transports ") => {
+                Transports::cli(state, cmd.strip_prefix("transports ").unwrap());
             }
             // unknown command
             _ => log::error!("unknown command"),

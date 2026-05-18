@@ -50,8 +50,19 @@ impl Users {
     /// Loads users from the database into the provided RouterState users table.
     pub fn init_with_state(state: &crate::QaulState, router: &super::RouterState) {
         let tree = DbUsers::get_tree(state);
-        let mut users = router.users.inner.write().unwrap();
-        Self::init_from_tree(&mut users, &tree);
+        {
+            let mut users = router.users.inner.write().unwrap();
+            Self::init_from_tree(&mut users, &tree);
+        }
+
+        // Stamp our local accounts with the feature bitset this
+        // binary supports. Remote caps are learned from incoming
+        // `UserInfo`, so this only runs for local accounts —
+        // `UserAccounts::init` has populated that list by the time
+        // `Router::init` reaches here.
+        for account in UserAccounts::get_all_users(state) {
+            Self::set_local_capabilities(router, &account.id, Capabilities::LOCAL);
+        }
     }
 
     /// Load users from a database tree into the users table.
@@ -74,27 +85,57 @@ impl Users {
                         name: user.name,
                         verified: user.verified,
                         blocked: user.blocked,
+                        // caps are not persisted; they'll be
+                        // (re)learned from the next UserInfo
+                        // advertisement.
+                        capabilities: 0,
                     },
                 );
             }
         }
     }
 
-    /// add a new user
-    ///
-    /// This user will be added to the users list in memory and to the data base
-    pub fn add(state: &crate::QaulState, router: &super::RouterState, id: PeerId, key: PublicKey, name: String, verified: bool, blocked: bool) {
+    /// add a new user with no advertised capabilities. Thin wrapper
+    /// over [`add_with_caps`] for callers that don't have caps yet
+    /// (e.g. local-account creation defers cap stamping to
+    /// `set_local_capabilities`).
+    pub fn add(
+        state: &crate::QaulState,
+        router: &super::RouterState,
+        id: PeerId,
+        key: PublicKey,
+        name: String,
+        verified: bool,
+        blocked: bool,
+    ) {
+        Self::add_with_caps(state, router, id, key, name, verified, blocked, 0)
+    }
+
+    /// add a new user with an explicit capability bitset.
+    pub fn add_with_caps(
+        state: &crate::QaulState,
+        router: &super::RouterState,
+        id: PeerId,
+        key: PublicKey,
+        name: String,
+        verified: bool,
+        blocked: bool,
+        capabilities: u32,
+    ) {
         let id_bytes = id.to_bytes();
         let q8id = QaulId::bytes_to_q8id(id_bytes.clone());
 
         // save user to the data base
-        DbUsers::add_user(state, UserData {
-            id: id_bytes,
-            key: key.encode_protobuf(),
-            name: name.clone(),
-            verified,
-            blocked,
-        });
+        DbUsers::add_user(
+            state,
+            UserData {
+                id: id_bytes,
+                key: key.encode_protobuf(),
+                name: name.clone(),
+                verified,
+                blocked,
+            },
+        );
 
         // add user to the users table
         let mut users = router.users.inner.write().unwrap();
@@ -112,33 +153,63 @@ impl Users {
                 name,
                 verified,
                 blocked,
+                capabilities,
             },
         );
     }
 
     /// add a new user to the users list, and check whether the
-    /// User ID matches the public key
-    /// and save it to the data base
-    pub fn add_with_check(state: &crate::QaulState, router: &super::RouterState, id: PeerId, key: PublicKey, name: String) {
+    /// User ID matches the public key. Wrapper for callers without
+    /// advertised caps; prefer [`add_with_check_caps`] when a peer's
+    /// `UserInfo.capabilities` has been received.
+    pub fn add_with_check(
+        state: &crate::QaulState,
+        router: &super::RouterState,
+        id: PeerId,
+        key: PublicKey,
+        name: String,
+    ) {
+        Self::add_with_check_caps(state, router, id, key, name, 0)
+    }
+
+    /// add-or-update variant that also records advertised capabilities.
+    ///
+    /// When the user already exists we update caps in place — a
+    /// rolling peer upgrade should start reflecting the new bits as
+    /// soon as their next `UserInfo` arrives, without waiting for the
+    /// entry to age out.
+    pub fn add_with_check_caps(
+        state: &crate::QaulState,
+        router: &super::RouterState,
+        id: PeerId,
+        key: PublicKey,
+        name: String,
+        capabilities: u32,
+    ) {
         // check if user is valid
         if id != key.to_peer_id() {
             log::error!("user id & key do not match {}", id.to_base58());
             return;
         }
 
-        // check if user already exists
-        {
-            let id_bytes = id.to_bytes();
-            let q8id = QaulId::bytes_as_q8id(&id_bytes);
-            let users = router.users.inner.read().unwrap();
+        let id_bytes = id.to_bytes();
+        let q8id_vec = QaulId::bytes_to_q8id(id_bytes);
 
-            // check if user already exists
-            if users.users.contains_key(q8id) {
-                return;
+        // update caps if the user already exists, otherwise add.
+        let already_present = {
+            let mut users = router.users.inner.write().unwrap();
+            match users.users.get_mut(&q8id_vec) {
+                Some(existing) => {
+                    existing.capabilities = capabilities;
+                    true
+                }
+                None => false,
             }
+        };
+        if already_present {
+            return;
         }
-        // add user
-        Self::add(state, router, id, key, name, false, false);
+        Self::add_with_caps(state, router, id, key, name, false, false, capabilities);
     }
 
     /// check missed users from ids
@@ -203,6 +274,7 @@ impl Users {
                     id: value.id.to_bytes(),
                     key: value.key.encode_protobuf(),
                     name: value.name.clone(),
+                    capabilities: value.capabilities,
                 };
                 users.info.push(user_info);
             }
@@ -218,8 +290,73 @@ impl Users {
             let key_result = PublicKey::try_decode_protobuf(&value.key);
 
             if let (Ok(id), Ok(key)) = (id_result, key_result) {
-                Self::add_with_check(state, router, id, key, value.name.clone());
+                Self::add_with_check_caps(
+                    state,
+                    router,
+                    id,
+                    key,
+                    value.name.clone(),
+                    value.capabilities,
+                );
             }
+        }
+    }
+
+    /// return the last advertised capabilities bitset for `user_id`,
+    /// or 0 when the peer is unknown or has not yet advertised.
+    pub fn get_capabilities(router: &super::RouterState, user_id: &PeerId) -> u32 {
+        let id_bytes = user_id.to_bytes();
+        let q8id = QaulId::bytes_as_q8id(&id_bytes);
+        let store = router.users.inner.read().unwrap();
+        store.users.get(q8id).map(|u| u.capabilities).unwrap_or(0)
+    }
+
+    /// record (or overwrite) advertised caps for `user_id`. Test
+    /// hook — lets unit tests simulate having received a `UserInfo`
+    /// without running the full routing stack.
+    #[cfg(test)]
+    pub fn set_capabilities_for_tests(
+        router: &super::RouterState,
+        user_id: &PeerId,
+        caps: u32,
+    ) {
+        let id_bytes = user_id.to_bytes();
+        let q8id_vec = QaulId::bytes_to_q8id(id_bytes);
+        let mut store = router.users.inner.write().unwrap();
+        // We insert a placeholder User when the peer isn't known yet
+        // so the caps actually land — production code builds the
+        // entry from an actual UserInfo, but tests only care about
+        // the caps field.
+        let entry = store.users.entry(q8id_vec).or_insert_with(|| User {
+            id: *user_id,
+            key: libp2p::identity::Keypair::generate_ed25519().public(),
+            name: String::new(),
+            verified: false,
+            blocked: false,
+            capabilities: 0,
+        });
+        entry.capabilities = caps;
+    }
+
+    /// record the local user's capabilities so outbound
+    /// `UserInfoTable` entries carry them. Called once at startup
+    /// after `Users::init_with_state` and the local `UserAccount`
+    /// are both available.
+    pub fn set_local_capabilities(
+        router: &super::RouterState,
+        user_id: &PeerId,
+        capabilities: u32,
+    ) {
+        let id_bytes = user_id.to_bytes();
+        let q8id_vec = QaulId::bytes_to_q8id(id_bytes);
+        let mut store = router.users.inner.write().unwrap();
+        if let Some(user) = store.users.get_mut(&q8id_vec) {
+            user.capabilities = capabilities;
+        } else {
+            log::warn!(
+                "set_local_capabilities: local user {} not in users table",
+                user_id.to_base58()
+            );
         }
     }
 
@@ -467,6 +604,37 @@ pub struct User {
     pub name: String,
     pub verified: bool,
     pub blocked: bool,
+    /// Advertised feature-capability bitset from the last `UserInfo`
+    /// we received for this peer. See [`Capabilities`]. Default 0
+    /// (legacy peer, no advertised caps). Not persisted — relearned
+    /// on every `add_user_info_table` and reset to 0 on restart.
+    pub capabilities: u32,
+}
+
+/// Feature-capability bitset advertised inside `UserInfo.capabilities`.
+///
+/// Bits are stable across versions. A peer running an older binary
+/// will send `capabilities = 0` (or will not include the field at all,
+/// which decodes to 0), so code that needs a capability must check
+/// the bit explicitly and fall back to legacy behaviour when absent.
+pub struct Capabilities;
+
+impl Capabilities {
+    /// Supports `CryptoserviceContainer::rotate_first` /
+    /// `rotate_second` and the surrounding session-rotation state.
+    /// Absence means the peer will silently drop rotation frames and
+    /// initiators should not attempt to rotate with them.
+    pub const ROTATION: u32 = 1 << 0;
+
+    /// Everything this binary can handle — advertised by the local
+    /// user to its peers. Kept small; new bits are `|=`'d here as
+    /// features land.
+    pub const LOCAL: u32 = Self::ROTATION;
+
+    /// Convenience: does `caps` advertise every bit in `required`?
+    pub fn supports(caps: u32, required: u32) -> bool {
+        caps & required == required
+    }
 }
 
 /// user structure for storing it in the data base
@@ -641,6 +809,7 @@ mod tests {
                     name: format!("user_{}", i),
                     verified: false,
                     blocked: false,
+                    capabilities: 0,
                 },
             );
             ids.push(id);

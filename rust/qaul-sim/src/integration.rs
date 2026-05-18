@@ -31,9 +31,11 @@ mod tests {
                 do_listen: false,
                 listen: vec![],
             },
+            ble: Ble::default(),
             user_accounts: Vec::new(),
             debug: DebugOption::default(),
             routing: RoutingOptions::default(),
+            crypto_rotation: CryptoRotation::default(),
         }
     }
 
