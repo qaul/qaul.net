@@ -3,7 +3,10 @@
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Dtn {
     /// message type
-    #[prost(oneof = "dtn::Message", tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10")]
+    #[prost(
+        oneof = "dtn::Message",
+        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14"
+    )]
     pub message: ::core::option::Option<dtn::Message>,
 }
 /// Nested message and enum types in `DTN`.
@@ -41,6 +44,18 @@ pub mod dtn {
         /// dtn set total size response
         #[prost(message, tag = "10")]
         DtnSetTotalSizeResponse(super::DtnSetTotalSizeResponse),
+        /// dtn send routed request
+        #[prost(message, tag = "11")]
+        DtnSendRoutedRequest(super::DtnSendRoutedRequest),
+        /// dtn send routed response
+        #[prost(message, tag = "12")]
+        DtnSendRoutedResponse(super::DtnSendRoutedResponse),
+        /// dtn set custody enabled request
+        #[prost(message, tag = "13")]
+        DtnSetCustodyEnabledRequest(super::DtnSetCustodyEnabledRequest),
+        /// dtn set custody enabled response
+        #[prost(message, tag = "14")]
+        DtnSetCustodyEnabledResponse(super::DtnSetCustodyEnabledResponse),
     }
 }
 /// Dtn State Request
@@ -120,6 +135,52 @@ pub struct DtnSetTotalSizeResponse {
     #[prost(bool, tag = "1")]
     pub status: bool,
     /// users
+    #[prost(string, tag = "2")]
+    pub message: ::prost::alloc::string::String,
+}
+/// Request to send a DTN source routed message
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DtnSendRoutedRequest {
+    /// the receiver user ID
+    #[prost(bytes = "vec", tag = "1")]
+    pub receiver_id: ::prost::alloc::vec::Vec<u8>,
+    /// the message data to send (signed Container bytes)
+    #[prost(bytes = "vec", tag = "2")]
+    pub data: ::prost::alloc::vec::Vec<u8>,
+    /// ordered list of custody user IDs
+    #[prost(bytes = "vec", repeated, tag = "3")]
+    pub custody_route: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
+    /// how many seconds until the message expires (0 = no expiry)
+    #[prost(uint64, tag = "4")]
+    pub expiry_seconds: u64,
+    /// maximum number of custody handoffs allowed
+    #[prost(uint32, tag = "5")]
+    pub max_handoffs: u32,
+}
+/// Response to a directed custody routed DTN send request
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DtnSendRoutedResponse {
+    /// whether the request was accepted
+    #[prost(bool, tag = "1")]
+    pub status: bool,
+    /// error or status message
+    #[prost(string, tag = "2")]
+    pub message: ::prost::alloc::string::String,
+}
+/// Request to enable or disable DTN V2 custody acceptance
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DtnSetCustodyEnabledRequest {
+    /// whether to enable custody acceptance
+    #[prost(bool, tag = "1")]
+    pub enabled: bool,
+}
+/// Response to custody enable/disable request
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DtnSetCustodyEnabledResponse {
+    /// whether the request was successful
+    #[prost(bool, tag = "1")]
+    pub status: bool,
+    /// error or status message
     #[prost(string, tag = "2")]
     pub message: ::prost::alloc::string::String,
 }

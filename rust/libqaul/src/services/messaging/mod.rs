@@ -122,9 +122,19 @@ pub struct MessagingState {
 
 impl MessagingState {
     /// Create a new empty MessagingState with a temporary in-memory database.
+    ///
+    /// Panics with a clear message if the temporary sled database or its
+    /// `unconfirmed` tree cannot be opened — used only during startup or
+    /// simulation, where a sled error means we cannot proceed.
     pub fn new() -> Self {
-        let db = sled::Config::new().temporary(true).open().unwrap();
-        let unconfirmed_tree = db.open_tree("unconfirmed").unwrap();
+        let db = match sled::Config::new().temporary(true).open() {
+            Ok(db) => db,
+            Err(e) => panic!("MessagingState: failed to open temporary sled DB: {}", e),
+        };
+        let unconfirmed_tree = match db.open_tree("unconfirmed") {
+            Ok(t) => t,
+            Err(e) => panic!("MessagingState: failed to open unconfirmed tree: {}", e),
+        };
         Self {
             messaging: RwLock::new(Messaging {
                 to_send: VecDeque::new(),
@@ -143,8 +153,16 @@ impl MessagingState {
     }
 
     /// Create a MessagingState backed by a production sled database.
+    ///
+    /// Panics if the `unconfirmed` tree cannot be opened.
     pub fn from_production(db: sled::Db) -> Self {
-        let unconfirmed_tree = db.open_tree("unconfirmed").unwrap();
+        let unconfirmed_tree = match db.open_tree("unconfirmed") {
+            Ok(t) => t,
+            Err(e) => panic!(
+                "MessagingState::from_production: failed to open unconfirmed tree: {}",
+                e
+            ),
+        };
         Self {
             messaging: RwLock::new(Messaging {
                 to_send: VecDeque::new(),
@@ -166,13 +184,37 @@ impl MessagingState {
     /// Replaces the temporary in-memory DB and unconfirmed tree with
     /// production-backed ones. Called from `Messaging::init()`.
     pub fn init_production(&self, db: sled::Db) {
-        let unconfirmed_tree = db.open_tree("unconfirmed").unwrap();
+        let unconfirmed_tree = match db.open_tree("unconfirmed") {
+            Ok(t) => t,
+            Err(e) => {
+                log::error!(
+                    "MessagingState::init_production: failed to open unconfirmed tree: {}",
+                    e
+                );
+                return;
+            }
+        };
         {
-            let mut unconfirmed = self.unconfirmed.write().unwrap();
+            let mut unconfirmed = match self.unconfirmed.write() {
+                Ok(g) => g,
+                Err(e) => {
+                    log::error!(
+                        "MessagingState::init_production: unconfirmed lock poisoned: {}",
+                        e
+                    );
+                    return;
+                }
+            };
             unconfirmed.unconfirmed = unconfirmed_tree;
         }
         {
-            let mut db_lock = self._db.write().unwrap();
+            let mut db_lock = match self._db.write() {
+                Ok(g) => g,
+                Err(e) => {
+                    log::error!("MessagingState::init_production: db lock poisoned: {}", e);
+                    return;
+                }
+            };
             *db_lock = db;
         }
     }
@@ -196,7 +238,13 @@ impl MessagingState {
             is_dtn,
         };
 
-        let mut messaging = self.messaging.write().unwrap();
+        let mut messaging = match self.messaging.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("MessagingState::schedule_message lock poisoned: {}", e);
+                return;
+            }
+        };
         messaging.to_send.push_back(msg);
     }
 
@@ -208,7 +256,13 @@ impl MessagingState {
     ) -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
         let message_item: Option<ScheduledMessage>;
         {
-            let mut messaging = self.messaging.write().unwrap();
+            let mut messaging = match self.messaging.write() {
+                Ok(g) => g,
+                Err(e) => {
+                    log::error!("MessagingState::check_scheduler lock poisoned: {}", e);
+                    return None;
+                }
+            };
             message_item = messaging.to_send.pop_front();
         }
 
@@ -243,8 +297,20 @@ impl MessagingState {
             scheduled_dtn: false,
             is_dtn,
         };
-        let entry_bytes = bincode::serialize(&new_entry).unwrap();
-        let unconfirmed = self.unconfirmed.write().unwrap();
+        let entry_bytes = match bincode::serialize(&new_entry) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("Failed to serialize unconfirmed entry: {}", e);
+                return;
+            }
+        };
+        let unconfirmed = match self.unconfirmed.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("MessagingState::save_unconfirmed_message lock poisoned: {}", e);
+                return;
+            }
+        };
         if let Err(e) = unconfirmed.unconfirmed.insert(container.signature.clone(), entry_bytes) {
             log::error!("{}", e);
         }
@@ -255,7 +321,13 @@ impl MessagingState {
 
     /// Process confirmation message (instance method).
     pub fn on_confirmed_message(&self, signature: &[u8]) {
-        let unconfirmed = self.unconfirmed.write().unwrap();
+        let unconfirmed = match self.unconfirmed.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("MessagingState::on_confirmed_message lock poisoned: {}", e);
+                return;
+            }
+        };
         match unconfirmed.unconfirmed.remove(signature) {
             Ok(_v) => {
                 if let Err(e) = unconfirmed.unconfirmed.flush() {
@@ -278,16 +350,39 @@ impl MessagingState {
 
     /// Shared helper: load an unconfirmed message, apply a mutation, persist it back.
     fn mark_unconfirmed(&self, signature: &[u8], mutate: impl FnOnce(&mut UnConfirmedMessage)) {
-        let unconfirmed = self.unconfirmed.write().unwrap();
-        let Some(bytes) = unconfirmed.unconfirmed.get(signature).unwrap() else {
-            return;
+        let unconfirmed = match self.unconfirmed.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("MessagingState::mark_unconfirmed lock poisoned: {}", e);
+                return;
+            }
         };
-        let mut msg: UnConfirmedMessage = bincode::deserialize(&bytes).unwrap();
+        let bytes = match unconfirmed.unconfirmed.get(signature) {
+            Ok(Some(b)) => b,
+            Ok(None) => return,
+            Err(e) => {
+                log::error!("Failed to read unconfirmed entry: {}", e);
+                return;
+            }
+        };
+        let mut msg: UnConfirmedMessage = match bincode::deserialize(&bytes) {
+            Ok(m) => m,
+            Err(e) => {
+                log::error!("Failed to deserialize unconfirmed entry: {}", e);
+                return;
+            }
+        };
         if msg.scheduled {
             return;
         }
         mutate(&mut msg);
-        let serialized = bincode::serialize(&msg).unwrap();
+        let serialized = match bincode::serialize(&msg) {
+            Ok(s) => s,
+            Err(e) => {
+                log::error!("Failed to serialize unconfirmed entry: {}", e);
+                return;
+            }
+        };
         if let Err(_e) = unconfirmed.unconfirmed.insert(signature.to_vec(), serialized) {
             log::error!("error updating unconfirmed table");
         } else if let Err(_e) = unconfirmed.unconfirmed.flush() {
@@ -323,7 +418,13 @@ impl Messaging {
             bs58::encode(signature).into_string()
         );
 
-        let unconfirmed = state.services.messaging.unconfirmed.write().unwrap();
+        let unconfirmed = match state.services.messaging.unconfirmed.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("Messaging::on_confirmed_message lock poisoned: {}", e);
+                return;
+            }
+        };
 
         // check and remove unconfirmed from DB
         match unconfirmed.unconfirmed.remove(signature) {
@@ -334,8 +435,13 @@ impl Messaging {
 
                 match v {
                     Some(unconfirmed_bytes) => {
-                        let unconfirmed: UnConfirmedMessage =
-                            bincode::deserialize(&unconfirmed_bytes).unwrap();
+                        let unconfirmed: UnConfirmedMessage = match bincode::deserialize(&unconfirmed_bytes) {
+                            Ok(u) => u,
+                            Err(e) => {
+                                log::error!("Failed to deserialize unconfirmed message: {}", e);
+                                return;
+                            }
+                        };
 
                         // check message and decide what to do
                         match unconfirmed.message_type {
@@ -474,9 +580,9 @@ impl Messaging {
 
         // encode envelope
         let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
-        envelope
-            .encode(&mut envelope_buf)
-            .expect("Vec<u8> provides capacity as needed");
+        if let Err(e) = envelope.encode(&mut envelope_buf) {
+            return Err(format!("envelope encode error: {}", e));
+        }
 
         // sign message
         if let Ok(signature) = user_account.keys.sign(&envelope_buf) {
@@ -566,6 +672,52 @@ impl Messaging {
         }
     }
 
+    /// Pack, sign and schedule a DtnRoutedV2 message for sending
+    pub fn send_dtn_routed_v2_message(
+        state: &crate::QaulState,
+        user_account: &UserAccount,
+        target_id: &PeerId,
+        routed_v2: proto::DtnRoutedV2,
+    ) -> Result<Vec<u8>, String> {
+        // Create envelope payload with DtnRoutedV2
+        let dtn_payload = proto::EnvelopPayload {
+            payload: Some(proto::envelop_payload::Payload::DtnRoutedV2(routed_v2)),
+        };
+        let envelope = proto::Envelope {
+            sender_id: user_account.id.to_bytes(),
+            receiver_id: target_id.to_bytes(),
+            payload: dtn_payload.encode_to_vec(),
+        };
+
+        if let Ok(signature) = user_account.keys.sign(&envelope.encode_to_vec()) {
+            let container = proto::Container {
+                signature: signature.clone(),
+                envelope: Some(envelope),
+            };
+
+            state.services.messaging.save_unconfirmed_message(
+                MessagingServiceType::DtnStored,
+                &[],
+                target_id,
+                &container,
+                true,
+            );
+
+            state.services.messaging.schedule_message(
+                target_id.clone(),
+                container,
+                true,
+                false,
+                true,
+                true,
+            );
+
+            Ok(signature)
+        } else {
+            Err("dtn v2 messaging signing error".to_string())
+        }
+    }
+
     /// schedule a message
     ///
     /// schedule a message for sending.
@@ -600,7 +752,13 @@ impl Messaging {
         };
 
         // add it to sending queue
-        let mut messaging = state.services.messaging.messaging.write().unwrap();
+        let mut messaging = match state.services.messaging.messaging.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("Messaging::schedule_message lock poisoned: {}", e);
+                return;
+            }
+        };
         const MAX_QUEUE_SIZE: usize = 10_000;
         if messaging.to_send.len() >= MAX_QUEUE_SIZE {
             log::warn!(
@@ -621,7 +779,13 @@ impl Messaging {
 
         // get scheduled messaging buffer
         {
-            let mut messaging = state.services.messaging.messaging.write().unwrap();
+            let mut messaging = match state.services.messaging.messaging.write() {
+                Ok(g) => g,
+                Err(e) => {
+                    log::error!("Messaging::check_scheduler lock poisoned: {}", e);
+                    return None;
+                }
+            };
             message_item = messaging.to_send.pop_front();
         }
 
@@ -645,24 +809,28 @@ impl Messaging {
                     && message.is_common
                 {
                     // get storage node id
-                    if let Ok(my_user_id) =
-                        PeerId::from_bytes(&message.container.envelope.as_ref().unwrap().sender_id)
-                    {
-                        if let Some(storage_node_id) =
-                            super::dtn::Dtn::get_storage_user(state, &my_user_id)
-                        {
-                            if let Some(user_account) = UserAccounts::get_by_id(state,my_user_id) {
-                                if let Err(_e) = Self::send_dtn_message(
-                                    state,
-                                    &user_account,
-                                    &storage_node_id,
-                                    &message.container,
-                                ) {
-                                    log::error!("DTN scheduling error!");
-                                } else {
-                                    log::error!("DTN scheduled...");
-                                    // update unconfirmed table
-                                    state.services.messaging.on_scheduled_as_dtn_message(&message.container.signature);
+                    if let Some(envelope) = message.container.envelope.as_ref() {
+                        if let Ok(my_user_id) = PeerId::from_bytes(&envelope.sender_id) {
+                            if let Some(storage_node_id) =
+                                super::dtn::Dtn::get_storage_user(state, &my_user_id)
+                            {
+                                if let Some(user_account) =
+                                    UserAccounts::get_by_id(state, my_user_id)
+                                {
+                                    if let Err(_e) = Self::send_dtn_message(
+                                        state,
+                                        &user_account,
+                                        &storage_node_id,
+                                        &message.container,
+                                    ) {
+                                        log::error!("DTN scheduling error!");
+                                    } else {
+                                        log::error!("DTN scheduled...");
+                                        // update unconfirmed table
+                                        state.services.messaging.on_scheduled_as_dtn_message(
+                                            &message.container.signature,
+                                        );
+                                    }
                                 }
                             }
                         }
@@ -703,9 +871,9 @@ impl Messaging {
 
             // encode chat message
             let mut message_buf = Vec::with_capacity(send_message.encoded_len());
-            send_message
-                .encode(&mut message_buf)
-                .expect("Vec<u8> provides capacity as needed");
+            if let Err(e) = send_message.encode(&mut message_buf) {
+                return Err(format!("confirmation message encode error: {}", e));
+            }
 
             // send message via messaging
             Self::pack_and_send_message(

@@ -57,15 +57,23 @@ impl GroupStorageState {
 
     /// Get DB refs for user account (instance method).
     /// Takes an explicit `sled::Db` instead of calling `DataBase::get_user_db()`.
-    pub fn get_db_ref(&self, account_id: PeerId, db: &sled::Db) -> GroupAccountDb {
+    ///
+    /// Returns `None` if the underlying sled trees cannot be opened.
+    pub fn get_db_ref(&self, account_id: PeerId, db: &sled::Db) -> Option<GroupAccountDb> {
         // check if user account data already exists
         {
-            let group_storage = self.inner.read().unwrap();
+            let group_storage = match self.inner.read() {
+                Ok(g) => g,
+                Err(e) => {
+                    log::error!("GroupStorageState::get_db_ref read lock poisoned: {}", e);
+                    return None;
+                }
+            };
             if let Some(group_account_db) = group_storage.db_ref.get(&account_id.to_bytes()) {
-                return GroupAccountDb {
+                return Some(GroupAccountDb {
                     groups: group_account_db.groups.clone(),
                     invited: group_account_db.invited.clone(),
-                };
+                });
             }
         }
 
@@ -74,18 +82,45 @@ impl GroupStorageState {
     }
 
     /// Create group account db entry when it does not exist (instance method).
-    fn create_groupaccountdb(&self, account_id: PeerId, db: &sled::Db) -> GroupAccountDb {
-        let groups: sled::Tree = db.open_tree("groups").unwrap();
-        let invited: sled::Tree = db.open_tree("invited").unwrap();
+    fn create_groupaccountdb(&self, account_id: PeerId, db: &sled::Db) -> Option<GroupAccountDb> {
+        let groups: sled::Tree = match db.open_tree("groups") {
+            Ok(t) => t,
+            Err(e) => {
+                log::error!(
+                    "GroupStorageState::create_groupaccountdb: failed to open groups tree: {}",
+                    e
+                );
+                return None;
+            }
+        };
+        let invited: sled::Tree = match db.open_tree("invited") {
+            Ok(t) => t,
+            Err(e) => {
+                log::error!(
+                    "GroupStorageState::create_groupaccountdb: failed to open invited tree: {}",
+                    e
+                );
+                return None;
+            }
+        };
 
         let group_account_db = GroupAccountDb { groups, invited };
 
-        let mut group_storage = self.inner.write().unwrap();
+        let mut group_storage = match self.inner.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!(
+                    "GroupStorageState::create_groupaccountdb write lock poisoned: {}",
+                    e
+                );
+                return None;
+            }
+        };
         group_storage
             .db_ref
             .insert(account_id.to_bytes(), group_account_db.clone());
 
-        group_account_db
+        Some(group_account_db)
     }
 }
 
@@ -98,51 +133,77 @@ impl GroupStorage {
     }
 
     /// get DB refs for user account
-    pub fn get_db_ref(state: &crate::QaulState, account_id: PeerId) -> GroupAccountDb {
+    ///
+    /// Returns `None` if the underlying sled trees cannot be opened.
+    pub fn get_db_ref(state: &crate::QaulState, account_id: PeerId) -> Option<GroupAccountDb> {
         // check if user account data exists
         {
             // get group state
-            let group_storage = state.services.groups.inner.read().unwrap();
+            let group_storage = match state.services.groups.inner.read() {
+                Ok(g) => g,
+                Err(e) => {
+                    log::error!("GroupStorage::get_db_ref read lock poisoned: {}", e);
+                    return None;
+                }
+            };
 
             // check if user account ID is in map
             if let Some(group_account_db) = group_storage.db_ref.get(&account_id.to_bytes()) {
-                return GroupAccountDb {
+                return Some(GroupAccountDb {
                     groups: group_account_db.groups.clone(),
                     invited: group_account_db.invited.clone(),
-                };
+                });
             }
         }
 
         // create group account db entry if it does not exist
-        let group_account_db = Self::create_groupaccountdb(state, account_id);
-
-        // return group_account_db structure
-        GroupAccountDb {
-            groups: group_account_db.groups.clone(),
-            invited: group_account_db.invited.clone(),
-        }
+        Self::create_groupaccountdb(state, account_id)
     }
 
     /// Flush all group-related trees for an account.
     pub fn flush_account(state: &crate::QaulState, account_id: &PeerId) {
-        let db_ref = Self::get_db_ref(state, account_id.to_owned());
+        let db_ref = match Self::get_db_ref(state, account_id.to_owned()) {
+            Some(r) => r,
+            None => {
+                log::error!("flush_account: group db unavailable");
+                return;
+            }
+        };
         Self::maybe_flush_tree(&db_ref.groups, FlushMode::Immediate, "Error groups flush");
         Self::maybe_flush_tree(&db_ref.invited, FlushMode::Immediate, "Error invited flush");
     }
 
     /// create group account db entry when it does not exist
-    fn create_groupaccountdb(state: &crate::QaulState, account_id: PeerId) -> GroupAccountDb {
+    fn create_groupaccountdb(state: &crate::QaulState, account_id: PeerId) -> Option<GroupAccountDb> {
         // get user data base
         let db = DataBase::get_user_db(state, account_id);
 
         // open trees
-        let groups: sled::Tree = db.open_tree("groups").unwrap();
-        let invited: sled::Tree = db.open_tree("invited").unwrap();
+        let groups: sled::Tree = match db.open_tree("groups") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("failed to open groups tree: {}", e);
+                return None;
+            }
+        };
+        let invited: sled::Tree = match db.open_tree("invited") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("failed to open invited tree: {}", e);
+                return None;
+            }
+        };
 
         let group_account_db = GroupAccountDb { groups, invited };
 
         // get group storage for writing
-        let mut group_storage = state.services.groups.inner.write().unwrap();
+        let mut group_storage = match state.services.groups.inner.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("GroupStorage::create_groupaccountdb write lock poisoned: {}", e);
+                return None;
+            }
+        };
 
         // add user to state
         group_storage
@@ -150,18 +211,30 @@ impl GroupStorage {
             .insert(account_id.to_bytes(), group_account_db.clone());
 
         // return structure
-        group_account_db
+        Some(group_account_db)
     }
 
     /// get a group from data base
     pub fn get_group(state: &crate::QaulState, account_id: PeerId, group_id: &[u8]) -> Option<Group> {
         // get DB ref
-        let db_ref = Self::get_db_ref(state, account_id);
+        let db_ref = match Self::get_db_ref(state, account_id) {
+            Some(r) => r,
+            None => {
+                log::error!("get_group: group db unavailable");
+                return None;
+            }
+        };
 
         // get group
         match db_ref.groups.get(group_id) {
             Ok(Some(group_bytes)) => {
-                let group: Group = bincode::deserialize(&group_bytes).unwrap();
+                let group: Group = match bincode::deserialize(&group_bytes) {
+                    Ok(v) => v,
+                    Err(e) => {
+                        log::error!("failed to deserialize group: {}", e);
+                        return None;
+                    }
+                };
                 return Some(group);
             }
             Ok(None) => return None,
@@ -206,7 +279,13 @@ impl GroupStorage {
     #[allow(dead_code)]
     pub fn group_exists(state: &crate::QaulState, account_id: PeerId, group_id: &[u8]) -> bool {
         // get DB ref
-        let db_ref = Self::get_db_ref(state, account_id);
+        let db_ref = match Self::get_db_ref(state, account_id) {
+            Some(r) => r,
+            None => {
+                log::error!("group_exists: group db unavailable");
+                return false;
+            }
+        };
 
         // check id group exists
         match db_ref.groups.contains_key(group_id) {
@@ -237,10 +316,22 @@ impl GroupStorage {
 
     fn save_group_with_mode(state: &crate::QaulState, account_id: PeerId, group: Group, flush_mode: FlushMode) {
         // get DB ref
-        let db_ref = Self::get_db_ref(state, account_id);
+        let db_ref = match Self::get_db_ref(state, account_id) {
+            Some(r) => r,
+            None => {
+                log::error!("save_group_with_mode: group db unavailable");
+                return;
+            }
+        };
 
         // save group in data base
-        let group_bytes = bincode::serialize(&group).unwrap();
+        let group_bytes = match bincode::serialize(&group) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("failed to serialize group: {}", e);
+                return;
+            }
+        };
         if let Err(e) = db_ref.groups.insert(group.id.clone(), group_bytes) {
             log::error!("Error saving group to data base: {}", e);
         }
@@ -331,12 +422,24 @@ impl GroupStorage {
     /// get invite
     pub fn get_invite(state: &crate::QaulState, account_id: PeerId, group_id: &[u8]) -> Option<GroupInvited> {
         // get DB ref
-        let db_ref = Self::get_db_ref(state, account_id);
+        let db_ref = match Self::get_db_ref(state, account_id) {
+            Some(r) => r,
+            None => {
+                log::error!("get_invite: group db unavailable");
+                return None;
+            }
+        };
 
         // get invite
         match db_ref.invited.get(group_id) {
             Ok(Some(invite_bytes)) => {
-                let invite: GroupInvited = bincode::deserialize(&invite_bytes).unwrap();
+                let invite: GroupInvited = match bincode::deserialize(&invite_bytes) {
+                    Ok(v) => v,
+                    Err(e) => {
+                        log::error!("failed to deserialize group invite: {}", e);
+                        return None;
+                    }
+                };
                 return Some(invite);
             }
             Ok(None) => return None,
@@ -362,10 +465,22 @@ impl GroupStorage {
 
     fn save_invite_with_mode(state: &crate::QaulState, account_id: PeerId, invite: GroupInvited, flush_mode: FlushMode) {
         // get DB ref
-        let db_ref = Self::get_db_ref(state, account_id);
+        let db_ref = match Self::get_db_ref(state, account_id) {
+            Some(r) => r,
+            None => {
+                log::error!("save_invite_with_mode: group db unavailable");
+                return;
+            }
+        };
 
         // save group invite in data base
-        let invite_bytes = bincode::serialize(&invite).unwrap();
+        let invite_bytes = match bincode::serialize(&invite) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("failed to serialize group invite: {}", e);
+                return;
+            }
+        };
         if let Err(e) = db_ref.invited.insert(invite.group.id.clone(), invite_bytes) {
             log::error!("Error saving group invite to data base: {}", e);
         }
@@ -387,7 +502,13 @@ impl GroupStorage {
 
     fn remove_invite_with_mode(state: &crate::QaulState, account_id: PeerId, group_id: &[u8], flush_mode: FlushMode) {
         // get DB ref
-        let db_ref = Self::get_db_ref(state, account_id);
+        let db_ref = match Self::get_db_ref(state, account_id) {
+            Some(r) => r,
+            None => {
+                log::error!("remove_invite_with_mode: group db unavailable");
+                return;
+            }
+        };
 
         // remove group invite from data base
         if let Err(e) = db_ref.invited.remove(group_id) {

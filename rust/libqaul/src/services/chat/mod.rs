@@ -13,7 +13,7 @@ pub mod message;
 pub mod search;
 pub mod storage;
 
-use crate::connections::{internet::Internet, lan::Lan};
+use crate::connections::transport::Transport;
 use crate::node::user_accounts::UserAccounts;
 use crate::rpc::Rpc;
 pub use file::ChatFile;
@@ -62,11 +62,17 @@ impl Chat {
         state: &crate::QaulState,
         data: Vec<u8>,
         user_id: Vec<u8>,
-        _lan: Option<&mut Lan>,
-        _internet: Option<&mut Internet>,
+        _lan: Option<&mut dyn Transport>,
+        _internet: Option<&mut dyn Transport>,
         request_id: String,
     ) {
-        let account_id = PeerId::from_bytes(&user_id).unwrap();
+        let account_id = match PeerId::from_bytes(&user_id) {
+            Ok(id) => id,
+            Err(e) => {
+                log::error!("Error parsing user id: {:?}", e);
+                return;
+            }
+        };
 
         match rpc_proto::Chat::decode(&data[..]) {
             Ok(chat) => {
@@ -85,9 +91,10 @@ impl Chat {
 
                         // encode message
                         let mut buf = Vec::with_capacity(proto_message.encoded_len());
-                        proto_message
-                            .encode(&mut buf)
-                            .expect("Vec<u8> provides capacity as needed");
+                        if let Err(e) = proto_message.encode(&mut buf) {
+                            log::error!("encode Chat ConversationList failed: {}", e);
+                            return;
+                        }
                         Rpc::send_message(
                             state,
                             buf,

@@ -58,13 +58,21 @@ fn main() {
     );
     prost_build.type_attribute("Data", "#[derive(serde::Serialize, serde::Deserialize)]");
 
+    // make DTN V2 messages serializable for sled storage
+    prost_build.type_attribute(
+        "DtnRoutedV2",
+        "#[derive(serde::Serialize, serde::Deserialize)]",
+    );
+
     // compile these protobuf files
     match prost_build.compile_protos(
         &[
             "rpc/qaul_rpc.proto",
             "rpc/authentication.proto",
             "rpc/debug.proto",
+            "rpc/subscribe.proto",
             "connections/connections.proto",
+            "connections/transports.proto",
             "node/node.proto",
             "node/user_accounts.proto",
             "router/users.proto",
@@ -97,7 +105,9 @@ fn main() {
                 "qaul.rpc.rs",
                 "qaul.rpc.authentication.rs",
                 "qaul.rpc.debug.rs",
+                "qaul.rpc.subscribe.rs",
                 "qaul.rpc.connections.rs",
+                "qaul.rpc.transports.rs",
                 "qaul.rpc.node.rs",
                 "qaul.rpc.user_accounts.rs",
                 "qaul.rpc.users.rs",

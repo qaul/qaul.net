@@ -11,8 +11,8 @@
 //! we construct Configuration instances manually in these tests.
 
 use libqaul::storage::configuration::{
-    Configuration, DebugOption, Internet, InternetPeer, Lan, Node, RoutingOptions, StorageOptions,
-    UserAccount,
+    Ble, Configuration, DebugOption, Internet, InternetPeer, Lan, Node, RoutingOptions,
+    StorageOptions, UserAccount,
 };
 use tempfile::TempDir;
 
@@ -52,6 +52,7 @@ fn create_test_config() -> Configuration {
             hop_count_penalty: 10,
             maintain_period_limit: 300,
         },
+        ble: Ble::default(),
     }
 }
 
@@ -207,6 +208,7 @@ fn test_config_user_accounts_persistence() {
         storage: StorageOptions {
             users: vec!["friend1".to_string(), "friend2".to_string()],
             size_total: 2048,
+            dtn_v2_custody_enabled: false,
         },
     };
     config.user_accounts.push(user);

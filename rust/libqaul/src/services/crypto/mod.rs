@@ -121,7 +121,13 @@ impl Crypto {
         let process_state: messaging::proto::CryptoState;
 
         // get data base object
-        let crypto_account = CryptoStorage::get_db_ref(state, user_account.id.clone());
+        let crypto_account = match CryptoStorage::get_db_ref(state, user_account.id.clone()) {
+            Some(c) => c,
+            None => {
+                log::error!("Crypto::encrypt: crypto db unavailable");
+                return None;
+            }
+        };
 
         // check if there is a handshake state?
         match crypto_account.get_state(remote_id) {
@@ -270,7 +276,13 @@ impl Crypto {
         message_id: &Vec<u8>,
     ) -> Option<Vec<u8>> {
         // get data base object
-        let crypto_account = CryptoStorage::get_db_ref(state, user_account.id.clone());
+        let crypto_account = match CryptoStorage::get_db_ref(state, user_account.id.clone()) {
+            Some(c) => c,
+            None => {
+                log::error!("Crypto::decrypt: crypto db unavailable");
+                return None;
+            }
+        };
 
         log::trace!(
             "decrypt message\n\tmessage_id: {}\n\tsession_id: {}",

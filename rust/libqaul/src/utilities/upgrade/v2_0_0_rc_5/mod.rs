@@ -114,6 +114,7 @@ impl VersionUpgrade {
                     storage: crate::storage::configuration::StorageOptions {
                         users: user.storage.users.clone(),
                         size_total: user.storage.size_total,
+                        dtn_v2_custody_enabled: false,
                     },
                 });
             }
@@ -136,6 +137,10 @@ impl VersionUpgrade {
                 node,
                 lan,
                 internet,
+                // upgrade path: ble.active didn't exist before this
+                // version. Seed with the default of true so the BLE
+                // transport keeps starting on upgrade.
+                ble: crate::storage::configuration::Ble::default(),
                 user_accounts,
                 debug,
                 routing,

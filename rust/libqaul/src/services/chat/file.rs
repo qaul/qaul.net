@@ -93,7 +93,13 @@ impl UserFiles {
     /// save file history
     pub fn save_filehistory(&self, file_id: u64, file_history: FileHistory) {
         // save file history into data base
-        let file_history_bytes = bincode::serialize(&file_history).unwrap();
+        let file_history_bytes = match bincode::serialize(&file_history) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("Error serializing file history: {}", e);
+                return;
+            }
+        };
         if let Err(e) = self
             .histories
             .insert(file_id.to_be_bytes(), file_history_bytes)
@@ -289,14 +295,23 @@ impl ChatFileState {
 
     /// Get DB refs for user account (instance method).
     /// Takes an explicit `sled::Db` instead of calling `DataBase::get_user_db()`.
-    pub fn get_db_ref(&self, user_id: &PeerId, db: &sled::Db) -> UserFiles {
+    ///
+    /// Returns `None` if the sled trees cannot be opened — callers should
+    /// log and skip gracefully rather than panicking.
+    pub fn get_db_ref(&self, user_id: &PeerId, db: &sled::Db) -> Option<UserFiles> {
         {
-            let all_files = self.inner.read().unwrap();
+            let all_files = match self.inner.read() {
+                Ok(g) => g,
+                Err(e) => {
+                    log::error!("ChatFileState::get_db_ref read lock poisoned: {}", e);
+                    return None;
+                }
+            };
             if let Some(user_files) = all_files.db_ref.get(&user_id.to_bytes()) {
-                return UserFiles {
+                return Some(UserFiles {
                     histories: user_files.histories.clone(),
                     file_chunks: user_files.file_chunks.clone(),
-                };
+                });
             }
         }
 
@@ -304,21 +319,39 @@ impl ChatFileState {
     }
 
     /// Create user file data when it does not exist (instance method).
-    fn create_userfiles(&self, user_id: &PeerId, db: &sled::Db) -> UserFiles {
-        let histories: sled::Tree = db.open_tree("chat_file").unwrap();
-        let file_chunks: sled::Tree = db.open_tree("file_chunks").unwrap();
+    fn create_userfiles(&self, user_id: &PeerId, db: &sled::Db) -> Option<UserFiles> {
+        let histories: sled::Tree = match db.open_tree("chat_file") {
+            Ok(t) => t,
+            Err(e) => {
+                log::error!("ChatFileState::create_userfiles: failed to open chat_file tree: {}", e);
+                return None;
+            }
+        };
+        let file_chunks: sled::Tree = match db.open_tree("file_chunks") {
+            Ok(t) => t,
+            Err(e) => {
+                log::error!("ChatFileState::create_userfiles: failed to open file_chunks tree: {}", e);
+                return None;
+            }
+        };
 
         let user_files = UserFiles {
             histories,
             file_chunks,
         };
 
-        let mut all_files = self.inner.write().unwrap();
+        let mut all_files = match self.inner.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("ChatFileState::create_userfiles write lock poisoned: {}", e);
+                return None;
+            }
+        };
         all_files
             .db_ref
             .insert(user_id.to_bytes(), user_files.clone());
 
-        user_files
+        Some(user_files)
     }
 }
 
@@ -332,39 +365,54 @@ impl ChatFile {
 
     /// File history is stored based on the users account id.
     /// This function getting history table based on the users account id.
-    fn get_db_ref(state: &crate::QaulState, user_id: &PeerId) -> UserFiles {
+    ///
+    /// Returns `None` if the underlying sled trees cannot be opened —
+    /// callers should log and skip gracefully.
+    fn get_db_ref(state: &crate::QaulState, user_id: &PeerId) -> Option<UserFiles> {
         // check if user data exists
         {
             // get chat file state
-            let all_files = state.services.chat_files.inner.read().unwrap();
+            let all_files = match state.services.chat_files.inner.read() {
+                Ok(g) => g,
+                Err(e) => {
+                    log::error!("ChatFile::get_db_ref read lock poisoned: {}", e);
+                    return None;
+                }
+            };
 
             // check if user ID is in map
             if let Some(user_files) = all_files.db_ref.get(&user_id.to_bytes()) {
-                return UserFiles {
+                return Some(UserFiles {
                     histories: user_files.histories.clone(),
                     file_chunks: user_files.file_chunks.clone(),
-                };
+                });
             }
         }
 
         // create user data if it does not exist
-        let user_files = Self::create_userfiles(state, user_id);
-
-        // return chat_user structure
-        UserFiles {
-            histories: user_files.histories.clone(),
-            file_chunks: user_files.file_chunks.clone(),
-        }
+        Self::create_userfiles(state, user_id)
     }
 
     /// create [user => file history] when it does not exist
-    fn create_userfiles(state: &crate::QaulState, user_id: &PeerId) -> UserFiles {
+    fn create_userfiles(state: &crate::QaulState, user_id: &PeerId) -> Option<UserFiles> {
         // get user data base
         let db = DataBase::get_user_db(state, user_id.clone());
 
         // open trees
-        let histories: sled::Tree = db.open_tree("chat_file").unwrap();
-        let file_chunks: sled::Tree = db.open_tree("file_chunks").unwrap();
+        let histories: sled::Tree = match db.open_tree("chat_file") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("Error opening chat_file tree: {}", e);
+                return None;
+            }
+        };
+        let file_chunks: sled::Tree = match db.open_tree("file_chunks") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("Error opening file_chunks tree: {}", e);
+                return None;
+            }
+        };
 
         let user_files = UserFiles {
             histories,
@@ -372,7 +420,13 @@ impl ChatFile {
         };
 
         // get chat file state for writing
-        let mut all_files = state.services.chat_files.inner.write().unwrap();
+        let mut all_files = match state.services.chat_files.inner.write() {
+            Ok(g) => g,
+            Err(e) => {
+                log::error!("ChatFile::create_userfiles write lock poisoned: {}", e);
+                return None;
+            }
+        };
 
         // add user to state
         all_files
@@ -380,7 +434,7 @@ impl ChatFile {
             .insert(user_id.to_bytes(), user_files.clone());
 
         // return structure
-        user_files
+        Some(user_files)
     }
 
     /// Update file message confirmation in data base
@@ -394,7 +448,13 @@ impl ChatFile {
         log::trace!("update confirmation");
 
         // get db reference
-        let user_files = ChatFile::get_db_ref(state, &account_id);
+        let user_files = match ChatFile::get_db_ref(state, &account_id) {
+            Some(uf) => uf,
+            None => {
+                log::error!("update_confirmation: chat file db unavailable");
+                return;
+            }
+        };
 
         // get file history
         if let Some(mut file_history) = user_files.get_filehistory(file_id) {
@@ -503,7 +563,13 @@ impl ChatFile {
         history_req: &proto_rpc::FileHistoryRequest,
     ) -> Vec<FileHistory> {
         // get DB references
-        let db_ref = Self::get_db_ref(state, &user_account.id);
+        let db_ref = match Self::get_db_ref(state, &user_account.id) {
+            Some(r) => r,
+            None => {
+                log::error!("file_history: chat file db unavailable");
+                return Vec::new();
+            }
+        };
 
         let mut histories: Vec<FileHistory> = vec![];
 
@@ -520,7 +586,13 @@ impl ChatFile {
                     }
 
                     // check if we collect the result
-                    let file_history: FileHistory = bincode::deserialize(&message).unwrap();
+                    let file_history: FileHistory = match bincode::deserialize(&message) {
+                        Ok(v) => v,
+                        Err(e) => {
+                            log::error!("Error deserializing file history: {}", e);
+                            continue;
+                        }
+                    };
                     if counter >= history_req.offset {
                         histories.push(file_history);
                     }
@@ -590,7 +662,12 @@ impl ChatFile {
             }
         };
 
-        let size = file.metadata().unwrap().len() as u32;
+        let size = match file.metadata() {
+            Ok(m) => m.len() as u32,
+            Err(e) => {
+                return Err(format!("file metadata error: {}", e));
+            }
+        };
         if size == 0 {
             return Err("file size is zero".to_string());
         }
@@ -599,13 +676,18 @@ impl ChatFile {
         let path = Path::new(path_name.as_str());
         let mut extension = "".to_string();
 
-        if let Some(ext) =
-            Self::get_extension_from_filename(path.file_name().unwrap().to_str().unwrap())
-        {
+        let path_file_name = match path.file_name().and_then(|f| f.to_str()) {
+            Some(name) => name,
+            None => {
+                return Err("unable to get file name from path".to_string());
+            }
+        };
+
+        if let Some(ext) = Self::get_extension_from_filename(path_file_name) {
             extension = ext.to_string();
         }
 
-        let file_name = path.file_name().unwrap().to_str().unwrap().to_string();
+        let file_name = path_file_name.to_string();
 
         // create file id
         let user_id_bytes = user_account.id.to_bytes();
@@ -659,7 +741,13 @@ impl ChatFile {
         );
 
         // create group ID object
-        let groupid = GroupId::from_bytes(group_id).unwrap();
+        let groupid = match GroupId::from_bytes(group_id) {
+            Ok(id) => id,
+            Err(e) => {
+                log::error!("Error parsing group id: {}", e);
+                return Err("invalid group id".to_string());
+            }
+        };
 
         // save file state to data base
         let file_history = FileHistory {
@@ -680,10 +768,21 @@ impl ChatFile {
             received_at: 0,
         };
 
-        let db_ref = Self::get_db_ref(state, &user_account.id);
+        let db_ref = match Self::get_db_ref(state, &user_account.id) {
+            Some(r) => r,
+            None => {
+                return Err("chat file db unavailable".to_string());
+            }
+        };
 
         // save file history to data base
-        let file_history_bytes = bincode::serialize(&file_history).unwrap();
+        let file_history_bytes = match bincode::serialize(&file_history) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                log::error!("Error serializing file history: {}", e);
+                return Err("failed to serialize file history".to_string());
+            }
+        };
         if let Err(e) = db_ref
             .histories
             .insert(&file_id.to_be_bytes(), file_history_bytes)
@@ -928,7 +1027,13 @@ impl ChatFile {
         file_data: proto_net::ChatFileData,
     ) {
         // get DB references
-        let user_files = Self::get_db_ref(state, &user_account.id);
+        let user_files = match Self::get_db_ref(state, &user_account.id) {
+            Some(u) => u,
+            None => {
+                log::error!("process_data_message: chat file db unavailable");
+                return;
+            }
+        };
 
         // save file chunk in DB
         user_files.save_file_chunk(file_data.file_id, file_data.start_index, file_data.data);
@@ -979,7 +1084,13 @@ impl ChatFile {
         file_info: proto_net::ChatFileInfo,
     ) {
         // get db
-        let user_files = Self::get_db_ref(state, &user_account.id);
+        let user_files = match Self::get_db_ref(state, &user_account.id) {
+            Some(u) => u,
+            None => {
+                log::error!("process_info_message: chat file db unavailable");
+                return;
+            }
+        };
 
         // check if it already exists in DB
         let file_history;
@@ -1071,13 +1182,25 @@ impl ChatFile {
 
     /// Process incoming RPC request messages for file sharing module
     pub async fn rpc(state: &crate::QaulState, data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
-        let account_id = PeerId::from_bytes(&user_id).unwrap();
+        let account_id = match PeerId::from_bytes(&user_id) {
+            Ok(id) => id,
+            Err(e) => {
+                log::error!("Error parsing user id: {:?}", e);
+                return;
+            }
+        };
 
         match proto_rpc::ChatFile::decode(&data[..]) {
             Ok(chatfile) => {
                 match chatfile.message {
                     Some(proto_rpc::chat_file::Message::SendFileRequest(send_req)) => {
-                        let user_account = UserAccounts::get_by_id(state,account_id).unwrap();
+                        let user_account = match UserAccounts::get_by_id(state, account_id) {
+                            Some(account) => account,
+                            None => {
+                                log::error!("user account not found for file send");
+                                return;
+                            }
+                        };
 
                         if let Err(e) = Self::send(
                             state,
@@ -1123,9 +1246,10 @@ impl ChatFile {
 
                         // encode message
                         let mut buf = Vec::with_capacity(proto_message.encoded_len());
-                        proto_message
-                            .encode(&mut buf)
-                            .expect("Vec<u8> provides capacity as needed");
+                        if let Err(e) = proto_message.encode(&mut buf) {
+                            log::error!("Failed to encode chat file response: {}", e);
+                            return;
+                        }
 
                         // send message
                         Rpc::send_message(

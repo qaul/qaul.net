@@ -41,7 +41,208 @@ pub enum Commands {
     File(ChatFileArgs),
     /// Router information
     Router(RouterArgs),
+    /// Debug commands (libqaul-side diagnostics).
+    ///
+    /// These are intentionally low-overhead RPC round-trips used to
+    /// validate the daemon is reachable and behaving. Ported from the
+    /// legacy `qaul-cli` `debug` subcommands.
+    Debug(DebugArgs),
+    /// Manage statically-configured internet peer nodes
+    ///
+    /// Ported from the legacy `qaul-cli` `connections` subcommands.
+    Connections(ConnectionsArgs),
+    /// Delay-Tolerant Networking storage controls (V1)
+    ///
+    /// Ported from the legacy `qaul-cli` `dtn` subcommands. V2 source-
+    /// routed DTN (custody routing) is a separate feature on the
+    /// `feat/dtn-custody-routing` branch and is not in this build.
+    Dtn(DtnArgs),
+    /// Manage network transports (LAN, Internet, BLE)
+    ///
+    /// Toggles are persisted to `config.yaml` by libqaul and survive
+    /// restart. Ported from the `qaul-cli` `transports` subcommands.
+    Transports(TransportsArgs),
+    /// Start an interactive shell session
+    ///
+    /// Reads commands from stdin in a REPL loop and dispatches them through
+    /// the same RPC client used by single-shot mode. Useful for poking at a
+    /// running qauld daemon without re-launching qauld-ctl per command.
+    Shell(ShellArgs),
+    /// Subscribe to live events from qauld
+    ///
+    /// Opens a long-running RPC and prints each event (chat messages,
+    /// peers connecting/disconnecting, etc.) as it arrives. Run in a
+    /// dedicated terminal alongside the shell. Stop with Ctrl-C.
+    Subscribe(SubscribeArgs),
 }
+
+#[derive(Args, Debug)]
+pub struct ShellArgs {}
+
+#[derive(Args, Debug)]
+pub struct DebugArgs {
+    #[command(subcommand)]
+    pub command: DebugSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum DebugSubcmd {
+    /// request the storage path from libqaul
+    Path,
+    /// send a heartbeat request; libqaul replies with a Heartbeat response
+    Heartbeat,
+    /// crash libqaul on purpose (for testing crash logging). Fire-and-forget.
+    Panic,
+    /// log subcommands (toggle libqaul's file logging)
+    Log(LogArgs),
+    // NOTE: `rpc sent` and `rpc queued` from qaul-cli read libqaul-side
+    // counters in-process. They need a new Debug RPC message to work over
+    // qauld's socket — deferred to a follow-up PR.
+}
+
+#[derive(Args, Debug)]
+pub struct LogArgs {
+    #[command(subcommand)]
+    pub command: LogSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum LogSubcmd {
+    /// enable libqaul logging to file. Fire-and-forget.
+    Enable,
+    /// disable libqaul logging to file. Fire-and-forget.
+    Disable,
+}
+
+#[derive(Args, Debug)]
+pub struct ConnectionsArgs {
+    #[command(subcommand)]
+    pub command: ConnectionsSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum ConnectionsSubcmd {
+    /// node operations on the internet peer list
+    Nodes(NodesArgs),
+}
+
+#[derive(Args, Debug)]
+pub struct NodesArgs {
+    #[command(subcommand)]
+    pub command: NodesSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum NodesSubcmd {
+    /// list all statically configured internet peer nodes
+    List,
+    /// add a new internet peer node
+    Add {
+        /// libp2p multiaddress (e.g. `/ip4/144.91.74.192/udp/9229/quic-v1`)
+        #[arg(short, long)]
+        address: String,
+        /// human-readable name to attach to the node
+        #[arg(short, long)]
+        name: String,
+    },
+    /// remove an internet peer node
+    Remove {
+        /// libp2p multiaddress to remove
+        #[arg(short, long)]
+        address: String,
+    },
+    /// rename an internet peer node
+    Rename {
+        /// libp2p multiaddress of the node to rename
+        #[arg(short, long)]
+        address: String,
+        /// new name to attach
+        #[arg(short, long)]
+        name: String,
+    },
+    /// activate an internet peer node (enable outbound dialing)
+    Activate {
+        #[arg(short, long)]
+        address: String,
+    },
+    /// deactivate an internet peer node
+    Deactivate {
+        #[arg(short, long)]
+        address: String,
+    },
+}
+
+#[derive(Args, Debug)]
+pub struct DtnArgs {
+    #[command(subcommand)]
+    pub command: DtnSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum DtnSubcmd {
+    /// display DTN storage state (size used, message counts)
+    State,
+    /// display DTN configuration (max total size, allowed users)
+    Config,
+    /// add a storage user (allow this user to deposit DTN messages here)
+    Add {
+        /// base58-encoded user id
+        #[arg(short, long)]
+        user_id: String,
+    },
+    /// remove a storage user
+    Remove {
+        /// base58-encoded user id
+        #[arg(short, long)]
+        user_id: String,
+    },
+    /// set the maximum total DTN storage size in megabytes
+    Size {
+        /// max size in MB
+        #[arg(short, long)]
+        size: u32,
+    },
+    /// (DTN V2) opt this node in / out as a custodian for routed messages
+    Custody {
+        #[command(subcommand)]
+        command: DtnCustodySubcmd,
+    },
+    /// (DTN V2) send a source-routed custody message
+    ///
+    /// `data-file` must contain the bytes of an already-signed `Container`
+    /// produced by libqaul's messaging layer. Building one from scratch is
+    /// out of scope for the CLI today; in practice the Flutter UI emits
+    /// these. This command is here so an admin or test harness can replay
+    /// a previously-captured container along an explicit custody route.
+    SendRouted {
+        /// base58-encoded receiver user id
+        #[arg(short = 'r', long)]
+        receiver_id: String,
+        /// path to a file containing the pre-built signed Container bytes
+        #[arg(short = 'd', long)]
+        data_file: String,
+        /// ordered list of custodian user ids (base58, repeatable)
+        #[arg(short = 'c', long = "custody", value_delimiter = ',')]
+        custody_route: Vec<String>,
+        /// seconds until the message expires (0 = no expiry)
+        #[arg(short = 'e', long, default_value = "0")]
+        expiry_seconds: u64,
+        /// maximum number of custody handoffs (0 = libqaul default)
+        #[arg(short = 'm', long, default_value = "0")]
+        max_handoffs: u32,
+    },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum DtnCustodySubcmd {
+    /// enable custody acceptance on this node
+    Enable,
+    /// disable custody acceptance on this node
+    Disable,
+}
+
+#[derive(Args, Debug)]
+pub struct SubscribeArgs {}
 
 #[derive(Args, Debug)]
 pub struct NodeArgs {
@@ -153,6 +354,15 @@ pub enum FeedSubcmd {
         /// displays only feed messages newer than {Feed Message ID}
         #[arg(short, long)]
         feed_message_id: Option<u64>,
+    },
+    /// displays feed messages with pagination
+    Page {
+        /// page offset (0 = first page)
+        #[arg(short, long, default_value = "0")]
+        offset: u32,
+        /// maximum number of messages to return
+        #[arg(short, long, default_value = "10")]
+        limit: u32,
     },
 }
 
@@ -296,5 +506,29 @@ pub enum ChatFileSubcmd {
         /// page offset
         #[arg(short, long, default_value = "10")]
         limit: u32,
+    },
+}
+
+#[derive(Args, Debug)]
+pub struct TransportsArgs {
+    #[command(subcommand)]
+    pub command: TransportsSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum TransportsSubcmd {
+    /// list every registered transport with its current status
+    List,
+    /// start the transport (lan, internet, ble)
+    Enable {
+        /// transport id (`lan`, `internet`, or `ble`)
+        #[arg(short, long)]
+        id: String,
+    },
+    /// stop the transport
+    Disable {
+        /// transport id (`lan`, `internet`, or `ble`)
+        #[arg(short, long)]
+        id: String,
     },
 }
