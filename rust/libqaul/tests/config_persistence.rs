@@ -11,8 +11,8 @@
 //! we construct Configuration instances manually in these tests.
 
 use libqaul::storage::configuration::{
-    Configuration, DebugOption, Internet, InternetPeer, Lan, Node, RoutingOptions, StorageOptions,
-    UserAccount,
+    Ble, Configuration, DebugOption, HandshakeExtras, Internet, InternetPeer, Lan, Node,
+    RoutingOptions, StorageOptions, UserAccount,
 };
 use tempfile::TempDir;
 
@@ -52,6 +52,8 @@ fn create_test_config() -> Configuration {
             hop_count_penalty: 10,
             maintain_period_limit: 300,
         },
+        handshake_extras: HandshakeExtras::default(),
+        ble: Ble::default(),
     }
 }
 

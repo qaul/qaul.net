@@ -136,9 +136,17 @@ impl VersionUpgrade {
                 node,
                 lan,
                 internet,
+                // upgrade path: ble.active didn't exist before this
+                // version. Seed with the default of true so the BLE
+                // transport keeps starting on upgrade.
+                ble: crate::storage::configuration::Ble::default(),
                 user_accounts,
                 debug,
                 routing,
+                // upgrade path: handshake_extras did not exist in
+                // older configs, so seed with conservative defaults.
+                handshake_extras:
+                    crate::storage::configuration::HandshakeExtras::default(),
             };
 
             // save new configuration to file
