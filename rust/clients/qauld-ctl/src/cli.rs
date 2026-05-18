@@ -257,6 +257,24 @@ pub enum AccountSubcmd {
     Logout,
     /// check current authentication status (logged in/out, session info)
     Status,
+    /// update the local user's signed profile (name / bio / avatar /
+    /// preferred custody route). Each field is optional; leaving a flag
+    /// out means "no change". Bumps the profile version and re-signs.
+    Update {
+        /// new display name (omit = unchanged)
+        #[arg(short, long)]
+        name: Option<String>,
+        /// new bio / status text (omit = unchanged)
+        #[arg(short, long)]
+        bio: Option<String>,
+        /// path to new avatar image file (omit = unchanged)
+        #[arg(short, long)]
+        avatar: Option<String>,
+        /// preferred custody route: comma-separated base58 user ids.
+        /// Omit to leave unchanged. Pass `clear` to wipe the existing route.
+        #[arg(short = 'c', long = "custody-route", value_delimiter = ',')]
+        custody_route: Option<Vec<String>>,
+    },
 }
 
 #[derive(Args, Debug)]
