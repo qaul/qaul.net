@@ -11,7 +11,7 @@ use qaul_proto::qaul_rpc_chat as proto;
 
 use proto::{
     chat, chat_content_message, Chat, ChatContentMessage, ChatConversationRequest, ChatMessageSend,
-    GroupEventType, MessageStatus,
+    ChatSearchRequest, GroupEventType, MessageStatus,
 };
 
 impl ChatSubcmd {
@@ -111,6 +111,14 @@ impl RpcCommand for ChatSubcmd {
 
                 Ok((proto_message.encode_to_vec(), Modules::Chat))
             }
+            ChatSubcmd::Search { query } => {
+                let proto_message = Chat {
+                    message: Some(chat::Message::SearchRequest(ChatSearchRequest {
+                        query: query.clone(),
+                    })),
+                };
+                Ok((proto_message.encode_to_vec(), Modules::Chat))
+            }
         }
     }
 
@@ -190,6 +198,44 @@ impl RpcCommand for ChatSubcmd {
                             }
                             println!("");
                         }
+                    }
+                }
+            }
+            Some(chat::Message::SearchResult(result)) => {
+                if json {
+                    let items: Vec<serde_json::Value> = result
+                        .items
+                        .iter()
+                        .map(|it| {
+                            serde_json::json!({
+                                "message_id": bs58::encode(&it.message_id).into_string(),
+                                "group_id": bs58::encode(&it.group_id).into_string(),
+                                "sender_id": bs58::encode(&it.sender_id).into_string(),
+                                "content": it.content,
+                                "sent_at": it.sent_at,
+                            })
+                        })
+                        .collect();
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&serde_json::json!({
+                            "query": result.query,
+                            "results": items,
+                        }))?
+                    );
+                } else {
+                    println!("Search results for: {}", result.query);
+                    println!("({} match{})", result.items.len(),
+                        if result.items.len() == 1 { "" } else { "es" });
+                    println!();
+                    for it in &result.items {
+                        println!(
+                            "  [{sent}] group {grp} from {sender}",
+                            sent = it.sent_at,
+                            grp = bs58::encode(&it.group_id).into_string(),
+                            sender = bs58::encode(&it.sender_id).into_string(),
+                        );
+                        println!("    {}", it.content);
                     }
                 }
             }

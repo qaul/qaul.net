@@ -420,6 +420,16 @@ pub enum ChatSubcmd {
         #[arg(short, long, default_value = "0")]
         index: u64,
     },
+    /// search chat messages across all conversations.
+    ///
+    /// Hits the local chat-search index (built per account on first
+    /// use). Returns matching message excerpts with their group, sender,
+    /// and timestamp.
+    Search {
+        /// search query (matched against message text)
+        #[arg(short, long)]
+        query: String,
+    },
 }
 
 #[derive(Args, Debug)]
