@@ -542,11 +542,16 @@ final $typed_data.Uint8List groupInfoDescriptor = $convert.base64Decode(
 @$core.Deprecated('Use groupListRequestDescriptor instead')
 const GroupListRequest$json = {
   '1': 'GroupListRequest',
+  '2': [
+    {'1': 'offset', '3': 10, '4': 1, '5': 13, '10': 'offset'},
+    {'1': 'limit', '3': 20, '4': 1, '5': 13, '10': 'limit'},
+  ],
 };
 
 /// Descriptor for `GroupListRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List groupListRequestDescriptor =
-    $convert.base64Decode('ChBHcm91cExpc3RSZXF1ZXN0');
+final $typed_data.Uint8List groupListRequestDescriptor = $convert.base64Decode(
+    'ChBHcm91cExpc3RSZXF1ZXN0EhYKBm9mZnNldBgKIAEoDVIGb2Zmc2V0EhQKBWxpbWl0GBQgAS'
+    'gNUgVsaW1pdA==');
 
 @$core.Deprecated('Use groupListResponseDescriptor instead')
 const GroupListResponse$json = {
@@ -560,13 +565,22 @@ const GroupListResponse$json = {
       '6': '.qaul.rpc.group.GroupInfo',
       '10': 'groups'
     },
+    {
+      '1': 'pagination',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.PaginationMetadata',
+      '10': 'pagination'
+    },
   ],
 };
 
 /// Descriptor for `GroupListResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List groupListResponseDescriptor = $convert.base64Decode(
     'ChFHcm91cExpc3RSZXNwb25zZRIxCgZncm91cHMYASADKAsyGS5xYXVsLnJwYy5ncm91cC5Hcm'
-    '91cEluZm9SBmdyb3Vwcw==');
+    '91cEluZm9SBmdyb3VwcxJCCgpwYWdpbmF0aW9uGAIgASgLMiIucWF1bC5ycGMuZ3JvdXAuUGFn'
+    'aW5hdGlvbk1ldGFkYXRhUgpwYWdpbmF0aW9u');
 
 @$core.Deprecated('Use groupInvitedDescriptor instead')
 const GroupInvited$json = {
@@ -591,14 +605,36 @@ final $typed_data.Uint8List groupInvitedDescriptor = $convert.base64Decode(
     '9hdBgCIAEoBFIKcmVjZWl2ZWRBdBIvCgVncm91cBgDIAEoCzIZLnFhdWwucnBjLmdyb3VwLkdy'
     'b3VwSW5mb1IFZ3JvdXA=');
 
+@$core.Deprecated('Use paginationMetadataDescriptor instead')
+const PaginationMetadata$json = {
+  '1': 'PaginationMetadata',
+  '2': [
+    {'1': 'has_more', '3': 10, '4': 1, '5': 8, '10': 'hasMore'},
+    {'1': 'total', '3': 20, '4': 1, '5': 13, '10': 'total'},
+    {'1': 'offset', '3': 30, '4': 1, '5': 13, '10': 'offset'},
+    {'1': 'limit', '3': 40, '4': 1, '5': 13, '10': 'limit'},
+  ],
+};
+
+/// Descriptor for `PaginationMetadata`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List paginationMetadataDescriptor = $convert.base64Decode(
+    'ChJQYWdpbmF0aW9uTWV0YWRhdGESGQoIaGFzX21vcmUYCiABKAhSB2hhc01vcmUSFAoFdG90YW'
+    'wYFCABKA1SBXRvdGFsEhYKBm9mZnNldBgeIAEoDVIGb2Zmc2V0EhQKBWxpbWl0GCggASgNUgVs'
+    'aW1pdA==');
+
 @$core.Deprecated('Use groupInvitedRequestDescriptor instead')
 const GroupInvitedRequest$json = {
   '1': 'GroupInvitedRequest',
+  '2': [
+    {'1': 'offset', '3': 10, '4': 1, '5': 13, '10': 'offset'},
+    {'1': 'limit', '3': 20, '4': 1, '5': 13, '10': 'limit'},
+  ],
 };
 
 /// Descriptor for `GroupInvitedRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List groupInvitedRequestDescriptor =
-    $convert.base64Decode('ChNHcm91cEludml0ZWRSZXF1ZXN0');
+final $typed_data.Uint8List groupInvitedRequestDescriptor = $convert.base64Decode(
+    'ChNHcm91cEludml0ZWRSZXF1ZXN0EhYKBm9mZnNldBgKIAEoDVIGb2Zmc2V0EhQKBWxpbWl0GB'
+    'QgASgNUgVsaW1pdA==');
 
 @$core.Deprecated('Use groupInvitedResponseDescriptor instead')
 const GroupInvitedResponse$json = {
@@ -612,10 +648,19 @@ const GroupInvitedResponse$json = {
       '6': '.qaul.rpc.group.GroupInvited',
       '10': 'invited'
     },
+    {
+      '1': 'pagination',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.PaginationMetadata',
+      '10': 'pagination'
+    },
   ],
 };
 
 /// Descriptor for `GroupInvitedResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List groupInvitedResponseDescriptor = $convert.base64Decode(
     'ChRHcm91cEludml0ZWRSZXNwb25zZRI2CgdpbnZpdGVkGAEgAygLMhwucWF1bC5ycGMuZ3JvdX'
-    'AuR3JvdXBJbnZpdGVkUgdpbnZpdGVk');
+    'AuR3JvdXBJbnZpdGVkUgdpbnZpdGVkEkIKCnBhZ2luYXRpb24YAiABKAsyIi5xYXVsLnJwYy5n'
+    'cm91cC5QYWdpbmF0aW9uTWV0YWRhdGFSCnBhZ2luYXRpb24=');

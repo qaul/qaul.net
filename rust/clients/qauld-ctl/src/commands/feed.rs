@@ -54,6 +54,21 @@ impl RpcCommand for FeedSubcmd {
                 Some(id) => request_feed_list(*id),
                 None => request_feed_list(0),
             },
+            FeedSubcmd::Page { offset, limit } => {
+                let proto_message = Feed {
+                    message: Some(feed::Message::Request(FeedMessageRequest {
+                        last_received: Vec::new(),
+                        last_index: 0,
+                        offset: *offset,
+                        limit: *limit,
+                    })),
+                };
+                let mut buf = Vec::with_capacity(proto_message.encoded_len());
+                proto_message
+                    .encode(&mut buf)
+                    .expect("Vec<u8> provides capacity as needed");
+                Ok((buf, Modules::Feed))
+            }
         }
     }
     fn decode_response(&self, data: &[u8], json: bool) -> Result<(), Box<dyn std::error::Error>> {

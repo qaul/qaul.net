@@ -23,7 +23,7 @@ use crate::node::{
     Node,
 };
 
-use crate::connections::{internet::Internet, lan::Lan, ConnectionModule};
+use crate::connections::{transport::Transport, ConnectionModule};
 use crate::router;
 use crate::router::flooder::Flooder;
 use crate::rpc::Rpc;
@@ -500,8 +500,8 @@ impl Feed {
         state: &crate::QaulState,
         user_account: &UserAccount,
         content: String,
-        lan: Option<&mut Lan>,
-        internet: Option<&mut Internet>,
+        lan: Option<&mut dyn Transport>,
+        internet: Option<&mut dyn Transport>,
     ) {
         // create timestamp
         let timestamp = timestamp::Timestamp::get_timestamp();
@@ -539,19 +539,13 @@ impl Feed {
         // save message in feed store
         state.services.feed.save_message(container.signature.clone(), msg);
 
-        // flood via floodsub
+        // flood via floodsub through the Transport trait so LAN, Internet,
+        // and BLE all route through the same call.
         if let Some(lan) = lan {
-            lan.swarm
-                .behaviour_mut()
-                .floodsub
-                .publish(Node::get_topic(state), buf.clone());
+            lan.publish_floodsub(state, Node::get_topic(state), buf.clone());
         }
         if let Some(internet) = internet {
-            internet
-                .swarm
-                .behaviour_mut()
-                .floodsub
-                .publish(Node::get_topic(state), buf.clone());
+            internet.publish_floodsub(state, Node::get_topic(state), buf.clone());
         }
         crate::connections::ble::Ble::send_feed_message(state, Node::get_topic(state), buf);
     }
@@ -670,8 +664,8 @@ impl Feed {
         state: &crate::QaulState,
         data: Vec<u8>,
         user_id: Vec<u8>,
-        lan: Option<&mut Lan>,
-        internet: Option<&mut Internet>,
+        lan: Option<&mut dyn Transport>,
+        internet: Option<&mut dyn Transport>,
         request_id: String,
     ) {
         match proto::Feed::decode(&data[..]) {
@@ -711,29 +705,51 @@ impl Feed {
                         // print message
                         log::trace!("feed message received: {}", send_feed.content);
 
-                        // get user account from user_id
-                        let user_account;
-                        match PeerId::from_bytes(&user_id) {
+                        // resolve sender account and dispatch the message
+                        let (success, error) = match PeerId::from_bytes(&user_id) {
                             Ok(user_id_decoded) => {
-                                match UserAccounts::get_by_id(state,user_id_decoded) {
+                                match UserAccounts::get_by_id(state, user_id_decoded) {
                                     Some(account) => {
-                                        user_account = account;
-                                        // send the message
-                                        Self::send(state, &user_account, send_feed.content, lan, internet);
+                                        Self::send(state, &account, send_feed.content, lan, internet);
+                                        (true, String::new())
                                     }
                                     None => {
-                                        log::error!(
+                                        let msg = format!(
                                             "user account id not found: {:?}",
                                             user_id_decoded.to_base58()
                                         );
-                                        return;
+                                        log::error!("{}", msg);
+                                        (false, msg)
                                     }
                                 }
                             }
                             Err(e) => {
-                                log::error!("user account id could'nt be encoded: {:?}", e);
+                                let msg = format!("user account id couldn't be decoded: {:?}", e);
+                                log::error!("{}", msg);
+                                (false, msg)
                             }
-                        }
+                        };
+
+                        // echo back the request_id with a SendMessageResponse so a
+                        // future-based client can resolve its pending request
+                        let proto_message = proto::Feed {
+                            message: Some(proto::feed::Message::SendResponse(
+                                proto::SendMessageResponse { success, error },
+                            )),
+                        };
+
+                        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+                        proto_message
+                            .encode(&mut buf)
+                            .expect("Vec<u8> provides capacity as needed");
+
+                        Rpc::send_message(
+                            state,
+                            buf,
+                            crate::rpc::proto::Modules::Feed.into(),
+                            request_id,
+                            Vec::new(),
+                        );
                     }
                     _ => {
                         log::error!("Unhandled Protobuf Feed Message");
