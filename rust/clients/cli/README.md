@@ -36,6 +36,10 @@ The following commands are available:
 * users - Functions for all users known by your node
   * `users list` - display all users known to this router
   * `users online` - display all online users known to this router
+  * `users search` - send an empty search request; returns the normal all-users list
+  * `users search online` - send an empty online-only search request; returns the normal online-users list
+  * `users search {Query}` - search all known users by name
+  * `users search online {Query}` - search online users by name
   * `users verify {User ID}` - verify user with {User ID}
   * `users block {User ID}` - block user with {User ID}
   * `users secure {User ID}` - get the security number for a specific user

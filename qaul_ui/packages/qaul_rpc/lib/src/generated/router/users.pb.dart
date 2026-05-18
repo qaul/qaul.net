@@ -29,6 +29,7 @@ enum Users_Message {
   securityNumberResponse,
   getUserByIdRequest,
   getUserByIdResponse,
+  userSearchRequest,
   notSet
 }
 
@@ -43,6 +44,7 @@ class Users extends $pb.GeneratedMessage {
     SecurityNumberResponse? securityNumberResponse,
     GetUserByIDRequest? getUserByIdRequest,
     GetUserByIDResponse? getUserByIdResponse,
+    UserSearchRequest? userSearchRequest,
   }) {
     final result = create();
     if (userRequest != null) result.userRequest = userRequest;
@@ -57,6 +59,7 @@ class Users extends $pb.GeneratedMessage {
       result.getUserByIdRequest = getUserByIdRequest;
     if (getUserByIdResponse != null)
       result.getUserByIdResponse = getUserByIdResponse;
+    if (userSearchRequest != null) result.userSearchRequest = userSearchRequest;
     return result;
   }
 
@@ -78,13 +81,14 @@ class Users extends $pb.GeneratedMessage {
     6: Users_Message.securityNumberResponse,
     7: Users_Message.getUserByIdRequest,
     8: Users_Message.getUserByIdResponse,
+    9: Users_Message.userSearchRequest,
     0: Users_Message.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Users',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.users'),
       createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4, 5, 6, 7, 8])
+    ..oo(0, [1, 2, 3, 4, 5, 6, 7, 8, 9])
     ..aOM<UserRequest>(1, _omitFieldNames ? '' : 'userRequest',
         subBuilder: UserRequest.create)
     ..aOM<UserOnlineRequest>(2, _omitFieldNames ? '' : 'userOnlineRequest',
@@ -103,6 +107,8 @@ class Users extends $pb.GeneratedMessage {
         subBuilder: GetUserByIDRequest.create)
     ..aOM<GetUserByIDResponse>(8, _omitFieldNames ? '' : 'getUserByIdResponse',
         subBuilder: GetUserByIDResponse.create)
+    ..aOM<UserSearchRequest>(9, _omitFieldNames ? '' : 'userSearchRequest',
+        subBuilder: UserSearchRequest.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -131,6 +137,7 @@ class Users extends $pb.GeneratedMessage {
   @$pb.TagNumber(6)
   @$pb.TagNumber(7)
   @$pb.TagNumber(8)
+  @$pb.TagNumber(9)
   Users_Message whichMessage() => _Users_MessageByTag[$_whichOneof(0)]!;
   @$pb.TagNumber(1)
   @$pb.TagNumber(2)
@@ -140,6 +147,7 @@ class Users extends $pb.GeneratedMessage {
   @$pb.TagNumber(6)
   @$pb.TagNumber(7)
   @$pb.TagNumber(8)
+  @$pb.TagNumber(9)
   void clearMessage() => $_clearField($_whichOneof(0));
 
   /// User Request returns a user list
@@ -269,6 +277,18 @@ class Users extends $pb.GeneratedMessage {
   void clearGetUserByIdResponse() => $_clearField(8);
   @$pb.TagNumber(8)
   GetUserByIDResponse ensureGetUserByIdResponse() => $_ensure(7);
+
+  /// User Search Request returns a user list matching a name query.
+  @$pb.TagNumber(9)
+  UserSearchRequest get userSearchRequest => $_getN(8);
+  @$pb.TagNumber(9)
+  set userSearchRequest(UserSearchRequest value) => $_setField(9, value);
+  @$pb.TagNumber(9)
+  $core.bool hasUserSearchRequest() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearUserSearchRequest() => $_clearField(9);
+  @$pb.TagNumber(9)
+  UserSearchRequest ensureUserSearchRequest() => $_ensure(8);
 }
 
 /// UI request for some users
@@ -401,6 +421,97 @@ class UserOnlineRequest extends $pb.GeneratedMessage {
   set limit($core.int value) => $_setUnsignedInt32(1, value);
   @$pb.TagNumber(20)
   $core.bool hasLimit() => $_has(1);
+  @$pb.TagNumber(20)
+  void clearLimit() => $_clearField(20);
+}
+
+/// UI request for searching users by name
+class UserSearchRequest extends $pb.GeneratedMessage {
+  factory UserSearchRequest({
+    $core.String? query,
+    $core.bool? onlineOnly,
+    $core.int? offset,
+    $core.int? limit,
+  }) {
+    final result = create();
+    if (query != null) result.query = query;
+    if (onlineOnly != null) result.onlineOnly = onlineOnly;
+    if (offset != null) result.offset = offset;
+    if (limit != null) result.limit = limit;
+    return result;
+  }
+
+  UserSearchRequest._();
+
+  factory UserSearchRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory UserSearchRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'UserSearchRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.users'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'query')
+    ..aOB(2, _omitFieldNames ? '' : 'onlineOnly')
+    ..aI(10, _omitFieldNames ? '' : 'offset', fieldType: $pb.PbFieldType.OU3)
+    ..aI(20, _omitFieldNames ? '' : 'limit', fieldType: $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  UserSearchRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  UserSearchRequest copyWith(void Function(UserSearchRequest) updates) =>
+      super.copyWith((message) => updates(message as UserSearchRequest))
+          as UserSearchRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static UserSearchRequest create() => UserSearchRequest._();
+  @$core.override
+  UserSearchRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static UserSearchRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<UserSearchRequest>(create);
+  static UserSearchRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get query => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set query($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasQuery() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearQuery() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.bool get onlineOnly => $_getBF(1);
+  @$pb.TagNumber(2)
+  set onlineOnly($core.bool value) => $_setBool(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasOnlineOnly() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearOnlineOnly() => $_clearField(2);
+
+  @$pb.TagNumber(10)
+  $core.int get offset => $_getIZ(2);
+  @$pb.TagNumber(10)
+  set offset($core.int value) => $_setUnsignedInt32(2, value);
+  @$pb.TagNumber(10)
+  $core.bool hasOffset() => $_has(2);
+  @$pb.TagNumber(10)
+  void clearOffset() => $_clearField(10);
+
+  @$pb.TagNumber(20)
+  $core.int get limit => $_getIZ(3);
+  @$pb.TagNumber(20)
+  set limit($core.int value) => $_setUnsignedInt32(3, value);
+  @$pb.TagNumber(20)
+  $core.bool hasLimit() => $_has(3);
   @$pb.TagNumber(20)
   void clearLimit() => $_clearField(20);
 }
