@@ -16,10 +16,15 @@ class _NoopWorker implements LibqaulWorker {
   final Ref ref;
 
   @override
-  Future<List<ChatRoom>> getAllChatRooms() async => [];
+  Future<PaginatedChatRooms?> getAllChatRooms({int? offset, int? limit}) async =>
+      PaginatedChatRooms(rooms: []);
 
   @override
-  Future<List<GroupInvite>> getGroupInvitesReceived() async => [];
+  Future<PaginatedGroupInvites?> getGroupInvitesReceived({
+    int? offset,
+    int? limit,
+  }) async =>
+      PaginatedGroupInvites(invites: []);
 
   @override
   Future<bool> get initialized => Future.value(true);

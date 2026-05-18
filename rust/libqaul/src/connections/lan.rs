@@ -21,15 +21,19 @@
 //! ```
 
 use libp2p::{
+    core::transport::ListenerId,
     floodsub,
     identity::Keypair,
     mdns, noise, ping,
     swarm::{NetworkBehaviour, Swarm},
-    tcp, yamux, SwarmBuilder,
+    tcp, yamux, Multiaddr, PeerId, SwarmBuilder,
 };
 use prost::Message;
 use std::time::Duration;
 
+use crate::connections::transport::{
+    Transport, TransportCapabilities, TransportError, TransportStatus,
+};
 use crate::connections::{events, ConnectionModule};
 use crate::node::Node;
 use crate::services::feed::proto_net;
@@ -157,6 +161,133 @@ impl From<QaulMessagingEvent> for QaulLanEvent {
 
 pub struct Lan {
     pub swarm: Swarm<QaulLanBehaviour>,
+    status: TransportStatus,
+    listener_ids: Vec<ListenerId>,
+}
+
+impl Transport for Lan {
+    fn id(&self) -> &'static str {
+        "lan"
+    }
+
+    fn label(&self) -> &'static str {
+        "LAN"
+    }
+
+    fn module(&self) -> ConnectionModule {
+        ConnectionModule::Lan
+    }
+
+    fn capabilities(&self) -> TransportCapabilities {
+        TransportCapabilities {
+            supports_runtime_toggle: true,
+            supports_peer_list: false,
+            is_local_only: true,
+        }
+    }
+
+    fn status(&self) -> &TransportStatus {
+        &self.status
+    }
+
+    fn stop(&mut self, state: &crate::QaulState) -> Result<(), TransportError> {
+        if self.status == TransportStatus::Disabled {
+            return Ok(());
+        }
+
+        for id in self.listener_ids.drain(..) {
+            self.swarm.remove_listener(id);
+        }
+
+        let peers: Vec<PeerId> = self.swarm.connected_peers().cloned().collect();
+        for peer in peers {
+            let _ = self.swarm.disconnect_peer_id(peer);
+        }
+
+        // persist to config
+        {
+            let mut config = Configuration::get_mut(state);
+            config.lan.active = false;
+        }
+        Configuration::save(state);
+
+        self.status = TransportStatus::Disabled;
+        log::info!("LAN transport stopped");
+        Ok(())
+    }
+
+    fn start(&mut self, state: &crate::QaulState) -> Result<(), TransportError> {
+        if self.status == TransportStatus::Running {
+            return Ok(());
+        }
+
+        let config = Configuration::get(state);
+        for listen in &config.lan.listen {
+            match listen.parse() {
+                Ok(addr) => match Swarm::listen_on(&mut self.swarm, addr) {
+                    Ok(id) => {
+                        self.listener_ids.push(id);
+                    }
+                    Err(e) => {
+                        log::error!("LAN start: failed to listen on {}: {}", listen, e);
+                    }
+                },
+                Err(e) => {
+                    log::error!("LAN start: invalid address {}: {}", listen, e);
+                }
+            }
+        }
+        drop(config);
+
+        // persist to config
+        {
+            let mut config = Configuration::get_mut(state);
+            config.lan.active = true;
+        }
+        Configuration::save(state);
+
+        self.status = TransportStatus::Running;
+        log::info!("LAN transport started");
+        Ok(())
+    }
+
+    fn send_qaul_info_message(&mut self, _state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>) {
+        if !self.is_enabled() {
+            return;
+        }
+        self.swarm
+            .behaviour_mut()
+            .qaul_info
+            .send_qaul_info_message(peer_id, data);
+    }
+
+    fn send_qaul_messaging_message(&mut self, _state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>) {
+        if !self.is_enabled() {
+            return;
+        }
+        self.swarm
+            .behaviour_mut()
+            .qaul_messaging
+            .send_qaul_messaging_message(peer_id, data);
+    }
+
+    fn publish_floodsub(&mut self, _state: &crate::QaulState, topic: floodsub::Topic, data: Vec<u8>) {
+        if !self.is_enabled() {
+            return;
+        }
+        self.swarm
+            .behaviour_mut()
+            .floodsub
+            .publish(topic, data);
+    }
+
+    fn listeners(&self) -> Vec<Multiaddr> {
+        self.swarm.listeners().cloned().collect()
+    }
+
+    fn external_addresses(&self) -> Vec<Multiaddr> {
+        self.swarm.external_addresses().cloned().collect()
+    }
 }
 
 impl Lan {
@@ -215,14 +346,29 @@ impl Lan {
         // connect swarm to the defined listening interfaces in
         // the configuration array config.lan.listen
         let config = Configuration::get(state);
+        let active = config.lan.active;
 
-        for listen in &config.lan.listen {
-            Swarm::listen_on(&mut swarm, listen.parse().expect("can get a local socket"))
-                .expect("swarm can be started");
+        // only listen if transport is configured as active
+        let mut listener_ids = Vec::new();
+        if active {
+            for listen in &config.lan.listen {
+                let id =
+                    Swarm::listen_on(&mut swarm, listen.parse().expect("can get a local socket"))
+                        .expect("swarm can be started");
+                listener_ids.push(id);
+            }
+        } else {
+            log::info!("LAN transport disabled by configuration");
         }
 
-        let lan = Lan { swarm };
-
-        lan
+        Lan {
+            swarm,
+            status: if active {
+                TransportStatus::Running
+            } else {
+                TransportStatus::Disabled
+            },
+            listener_ids,
+        }
     }
 }

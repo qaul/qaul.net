@@ -46,7 +46,10 @@ void main() {
         ),
       ];
 
-      final items = computeChatBubbleDisplayItems(messages);
+      final items = computeChatBubbleDisplayItems(
+        messages,
+        layoutMode: ChatRenderMode.direct,
+      );
       expect(items, hasLength(3));
 
       expect(items[0].message.edges, const [TailEdge.bottomEnd]);
@@ -93,7 +96,10 @@ void main() {
         ),
       ];
 
-      final items = computeChatBubbleDisplayItems(messages);
+      final items = computeChatBubbleDisplayItems(
+        messages,
+        layoutMode: ChatRenderMode.direct,
+      );
       expect(items, hasLength(3));
 
       expect(items[0].message.edges, const [TailEdge.bottomEnd]);
@@ -107,6 +113,58 @@ void main() {
       expect(items[0].marginTop, 0.0);
       expect(items[1].marginTop, kChatBubbleSeparatedGap);
       expect(items[2].marginTop, kChatBubbleSeparatedGap);
+    });
+
+    test(
+        'group layout: edges/timestamps match direct; 4px vertical only for same '
+            'participant streak, 12px when switching me vs others', () {
+      final base = DateTime(2026, 4, 19, 19, 23);
+
+      final messages = [
+        QaulChatBubbleMessage(
+          content: 'primary',
+          sentAt: base,
+          receivedAt: base,
+          status: MessageStatus.sent,
+          messageType: MessageType.primary,
+          edges: const [],
+        ),
+        QaulChatBubbleMessage(
+          content: 'primary later',
+          sentAt: base.add(const Duration(minutes: 1)),
+          receivedAt: base.add(const Duration(minutes: 1)),
+          status: MessageStatus.sent,
+          messageType: MessageType.primary,
+          edges: const [],
+        ),
+        QaulChatBubbleMessage(
+          content: 'secondary same minute as second',
+          sentAt: base.add(const Duration(minutes: 1)),
+          receivedAt: base.add(const Duration(minutes: 1)),
+          status: MessageStatus.sent,
+          messageType: MessageType.secondary,
+          edges: const [],
+        ),
+      ];
+
+      final directItems = computeChatBubbleDisplayItems(
+        messages,
+        layoutMode: ChatRenderMode.direct,
+      );
+      final groupItems = computeChatBubbleDisplayItems(
+        messages,
+        layoutMode: ChatRenderMode.group,
+      );
+
+      for (var i = 0; i < 3; i++) {
+        expect(groupItems[i].message.edges, directItems[i].message.edges);
+        expect(groupItems[i].showTimestamp, directItems[i].showTimestamp);
+      }
+
+      expect(directItems[1].marginTop, kChatBubbleSeparatedGap);
+      expect(directItems[2].marginTop, kChatBubbleSeparatedGap);
+      expect(groupItems[1].marginTop, kChatBubbleLinkedGap);
+      expect(groupItems[2].marginTop, kChatBubbleSeparatedGap);
     });
   });
 

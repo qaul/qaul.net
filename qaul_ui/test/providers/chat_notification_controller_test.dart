@@ -175,7 +175,8 @@ void main() {
 /// Only [getAllChatRooms] is called during [initialize].
 class _StubWorker implements LibqaulWorker {
   @override
-  Future<List<ChatRoom>> getAllChatRooms() async => [];
+  Future<PaginatedChatRooms?> getAllChatRooms({int? offset, int? limit}) async =>
+      PaginatedChatRooms(rooms: []);
 
   @override
   dynamic noSuchMethod(Invocation invocation) =>

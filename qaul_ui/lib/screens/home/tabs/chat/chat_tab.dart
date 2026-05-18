@@ -9,12 +9,119 @@ class _Chat extends BaseTab {
 
 class _ChatState extends _BaseTabState<_Chat> {
   final _log = Logger('BaseTab.chat');
+  static const _pageSize = ChatRoomsStore.defaultPageSize;
+  late final ScrollController _scrollController;
+  bool _isLoadingMore = false;
+  bool _hasMoreChatRooms = true;
+  bool _hasMoreInvites = true;
+  int _chatRoomsOffset = 0;
+  int _invitesOffset = 0;
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ref.read(chatNotificationControllerProvider).initialize();
+      await _fetchFirstPage();
+    });
+  }
 
-    ref.read(chatNotificationControllerProvider).initialize();
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent * 0.8) {
+      _loadMore();
+    }
+  }
+
+  Future<void> _fetchFirstPage() async {
+    _chatRoomsOffset = 0;
+    _invitesOffset = 0;
+    setState(() {
+      _hasMoreChatRooms = true;
+      _hasMoreInvites = true;
+    });
+
+    final groups = ref.read(chatRoomsStoreProvider.notifier);
+    final results = await Future.wait([
+      groups.getChatRooms(offset: 0, limit: _pageSize),
+      groups.getGroupInvites(offset: 0, limit: _pageSize),
+    ]);
+    if (!mounted) return;
+
+    _updatePaginationFromRoomsResult(results.first as PaginatedChatRooms?);
+    _updatePaginationFromInvitesResult(results.last as PaginatedGroupInvites?);
+  }
+
+  Future<void> _refreshChatsAndInvites() async {
+    // Pull-to-refresh resets to a fresh first page. Clear local state so any
+    // rooms/invites that no longer exist on the backend drop out of the UI —
+    // the offset=0 translator path now merges instead of replacing.
+    ref.read(chatRoomsProvider.notifier).clear();
+    ref.read(groupInvitesProvider.notifier).clear();
+    await _fetchFirstPage();
+  }
+
+  Future<void> _loadMore() async {
+    if (_isLoadingMore || (!_hasMoreChatRooms && !_hasMoreInvites)) return;
+    setState(() => _isLoadingMore = true);
+    try {
+      final groups = ref.read(chatRoomsStoreProvider.notifier);
+      final futures = <Future<dynamic>>[];
+      if (_hasMoreChatRooms) {
+        futures.add(
+          groups.getChatRooms(offset: _chatRoomsOffset, limit: _pageSize),
+        );
+      }
+      if (_hasMoreInvites) {
+        futures.add(
+          groups.getGroupInvites(offset: _invitesOffset, limit: _pageSize),
+        );
+      }
+
+      final results = await Future.wait(futures);
+      for (final result in results) {
+        if (result == null) continue;
+        if (result is PaginatedChatRooms) {
+          _updatePaginationFromRoomsResult(result);
+        } else if (result is PaginatedGroupInvites) {
+          _updatePaginationFromInvitesResult(result);
+        }
+      }
+    } finally {
+      if (mounted) setState(() => _isLoadingMore = false);
+    }
+  }
+
+  void _updatePaginationFromRoomsResult(PaginatedChatRooms? result) {
+    final paginationState = result?.pagination;
+    if (paginationState == null) {
+      // Backend omitted pagination metadata: treat as end-of-list rather than
+      // optimistically advancing the offset (which would cause infinite empty
+      // page fetches on scroll).
+      setState(() => _hasMoreChatRooms = false);
+      return;
+    }
+    setState(() => _hasMoreChatRooms = paginationState.hasMore);
+    _chatRoomsOffset = paginationState.offset + paginationState.limit;
+  }
+
+  void _updatePaginationFromInvitesResult(PaginatedGroupInvites? result) {
+    final paginationState = result?.pagination;
+    if (paginationState == null) {
+      setState(() => _hasMoreInvites = false);
+      return;
+    }
+    setState(() => _hasMoreInvites = paginationState.hasMore);
+    _invitesOffset = paginationState.offset + paginationState.limit;
   }
 
   @override
@@ -27,30 +134,25 @@ class _ChatState extends _BaseTabState<_Chat> {
     final groupInvites = ref.watch(groupInvitesProvider);
     final currentOpenChat = ref.watch(currentOpenChatRoom);
 
-    final blockedIds =
-        users.where((u) => u.isBlocked ?? false).map((u) => u.conversationId);
+    final blockedIds = users
+        .where((u) => u.isBlocked ?? false)
+        .map((u) => u.conversationId);
     final filteredRooms = chatRooms
         .where((m) => !blockedIds.contains(m.conversationId))
-        .toList()
-      ..sort();
+        .toList();
 
-    final refreshChatsAndInvites = useCallback(() async {
-      final groups = ref.read(groupStoreProvider.notifier);
-      await Future.wait([
-        groups.refreshChatRooms(),
-        groups.refreshGroupInvites(),
-      ]);
-    }, []);
-
-    final mobile =
-        Responsiveness.isMobile(context); // MediaQuery on HookState.init throws
+    final mobile = Responsiveness.isMobile(
+      context,
+    ); // MediaQuery on HookState.init throws
     final setOpenChat = useCallback((ChatRoom room, [User? otherUser]) {
       if (mobile) {
-        openChat(room,
-            ref: ref,
-            context: context,
-            user: defaultUser,
-            otherUser: otherUser);
+        openChat(
+          room,
+          ref: ref,
+          context: context,
+          user: defaultUser,
+          otherUser: otherUser,
+        );
       } else {
         ref.read(currentOpenChatRoom.notifier).state = room;
       }
@@ -72,29 +174,72 @@ class _ChatState extends _BaseTabState<_Chat> {
     final l10n = AppLocalizations.of(context);
 
     final chatRoomsListView = CronTaskDecorator(
-      callback: () => refreshChatsAndInvites(),
-      schedule: const Duration(milliseconds: 1000),
+      schedule: const Duration(milliseconds: 2500),
+      callback: () =>
+          ref.read(chatRoomsStoreProvider.notifier).pollChatRoomsAndInvites(),
       child: RefreshIndicator(
-        onRefresh: () => refreshChatsAndInvites(),
-        child: EmptyStateTextDecorator(
-          l10n!.emptyChatsList,
-          isEmpty: groupInvites.isEmpty && filteredRooms.isEmpty,
-          child: ListView.separated(
-            controller: ScrollController(),
-            physics: const AlwaysScrollableScrollPhysics(),
-            itemCount: groupInvites.length + filteredRooms.length,
-            separatorBuilder: (_, _) => const Divider(height: 12.0),
-            itemBuilder: (_, i) {
-              var theme = Theme.of(context).textTheme;
+        onRefresh: _refreshChatsAndInvites,
+        child: LoadingDecorator(
+          isLoading: _isLoadingMore,
+          child: EmptyStateTextDecorator(
+            l10n!.emptyChatsList,
+            isEmpty: groupInvites.isEmpty && filteredRooms.isEmpty,
+            child: ListView.separated(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: groupInvites.length + filteredRooms.length,
+              separatorBuilder: (_, _) => const Divider(height: 12.0),
+              itemBuilder: (_, i) {
+                var theme = Theme.of(context).textTheme;
 
-              if (i < groupInvites.length) {
-                return _GroupInviteTile(invite: groupInvites[i]);
-              }
+                if (i < groupInvites.length) {
+                  return _GroupInviteTile(invite: groupInvites[i]);
+                }
 
-              final room = filteredRooms[i - groupInvites.length];
-              if (room.isGroupChatRoom) {
-                return QaulListTile.group(
-                  room,
+                final room = filteredRooms[i - groupInvites.length];
+                if (room.isGroupChatRoom) {
+                  return QaulListTile.group(
+                    room,
+                    unreadCount: room.unreadCount,
+                    content: _contentFromOverview(
+                      room.lastMessagePreview,
+                      theme,
+                      room: room,
+                      l10n: l10n,
+                    ),
+                    trailingMetadata: Row(
+                      children: [
+                        Text(
+                          room.lastMessageTime == null
+                              ? ''
+                              : describeFuzzyTimestamp(
+                                  room.lastMessageTime!,
+                                  locale: Locale.parse(
+                                    Intl.defaultLocale ?? 'en',
+                                  ),
+                                ),
+                          style: theme.bodySmall!.copyWith(
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                        const Icon(Icons.chevron_right),
+                      ],
+                    ),
+                    onTap: () => setOpenChat(room),
+                  );
+                }
+
+                final otherUser = ref
+                    .read(usersStoreProvider.notifier)
+                    .otherUserInDirectRoom(room, defaultUser);
+
+                if (otherUser == null) {
+                  _log.warning('single-person room with unknown otherUser');
+                  return const SizedBox.shrink();
+                }
+
+                return QaulListTile.user(
+                  otherUser,
                   unreadCount: room.unreadCount,
                   content: _contentFromOverview(
                     room.lastMessagePreview,
@@ -109,56 +254,22 @@ class _ChatState extends _BaseTabState<_Chat> {
                             ? ''
                             : describeFuzzyTimestamp(
                                 room.lastMessageTime!,
-                                locale:
-                                    Locale.parse(Intl.defaultLocale ?? 'en'),
+                                locale: Locale.parse(
+                                  Intl.defaultLocale ?? 'en',
+                                ),
                               ),
-                        style: theme.bodySmall!
-                            .copyWith(fontStyle: FontStyle.italic),
+                        style: theme.bodySmall!.copyWith(
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
                       const Icon(Icons.chevron_right),
                     ],
                   ),
-                  onTap: () => setOpenChat(room),
+                  onTap: () => setOpenChat(room, otherUser),
+                  avatarTapRoutesToDetailsScreen: false,
                 );
-              }
-
-              final otherUser = ref
-                  .read(usersStoreProvider.notifier)
-                  .otherUserInDirectRoom(room, defaultUser);
-
-              if (otherUser == null) {
-                _log.warning('single-person room with unknown otherUser');
-                return const SizedBox.shrink();
-              }
-
-              return QaulListTile.user(
-                otherUser,
-                unreadCount: room.unreadCount,
-                content: _contentFromOverview(
-                  room.lastMessagePreview,
-                  theme,
-                  room: room,
-                  l10n: l10n,
-                ),
-                trailingMetadata: Row(
-                  children: [
-                    Text(
-                      room.lastMessageTime == null
-                          ? ''
-                          : describeFuzzyTimestamp(
-                              room.lastMessageTime!,
-                              locale: Locale.parse(Intl.defaultLocale ?? 'en'),
-                            ),
-                      style:
-                          theme.bodySmall!.copyWith(fontStyle: FontStyle.italic),
-                    ),
-                    const Icon(Icons.chevron_right),
-                  ],
-                ),
-                onTap: () => setOpenChat(room, otherUser),
-                avatarTapRoutesToDetailsScreen: false,
-              );
-            },
+              },
+            ),
           ),
         ),
       ),
@@ -192,7 +303,7 @@ class _ChatState extends _BaseTabState<_Chat> {
                     padding: const EdgeInsets.all(20.0),
                     child: createChatButton,
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -238,12 +349,7 @@ class _ChatState extends _BaseTabState<_Chat> {
         overflow: TextOverflow.ellipsis,
       );
     } else if (message is GroupEventContent) {
-      return _contentFromGroupEvent(
-        message,
-        theme,
-        room: room,
-        l10n: l10n,
-      );
+      return _contentFromGroupEvent(message, theme, room: room, l10n: l10n);
     } else if (message is FileShareContent) {
       return Text(
         '${message.fileName} · ${fileSize(message.size)}',
@@ -326,13 +432,10 @@ class _ChatState extends _BaseTabState<_Chat> {
       );
     }
   }
-
 }
 
 class _GroupInviteTile extends HookConsumerWidget {
-  const _GroupInviteTile({
-    required this.invite,
-  });
+  const _GroupInviteTile({required this.invite});
 
   final GroupInvite invite;
 

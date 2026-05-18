@@ -2,9 +2,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:local_notifications/local_notifications.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_ui/providers/providers.dart';
+import 'package:qaul_ui/stores/stores.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final _stubPublicMessagesProvider = Provider<List<PublicPost>>((ref) => []);
+final _stubPublicMessagesProvider = Provider<List<FeedMessage>>((ref) => []);
 
 final _stubChatRoomsProvider = Provider<List<ChatRoom>>((ref) => []);
 
@@ -15,7 +16,7 @@ class StubPublicNotificationController extends PublicNotificationController {
   String get cacheKey => 'stub_public';
 
   @override
-  MapEntry<dynamic, void Function(List<PublicPost>?, List<PublicPost>)>
+  MapEntry<dynamic, void Function(List<FeedMessage>?, List<FeedMessage>)>
       get strategy => MapEntry(_stubPublicMessagesProvider, (_, _) {});
 
   @override
@@ -27,10 +28,10 @@ class StubPublicNotificationController extends PublicNotificationController {
   void updatePersistentCachedData() {}
 
   @override
-  Iterable<PublicPost> entriesToBeProcessed(List<PublicPost> values) => [];
+  Iterable<FeedMessage> entriesToBeProcessed(List<FeedMessage> values) => [];
 
   @override
-  LocalNotification? process(PublicPost value) => null;
+  LocalNotification? process(FeedMessage value) => null;
 
   @override
   void close() {}

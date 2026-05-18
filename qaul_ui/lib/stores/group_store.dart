@@ -1,33 +1,87 @@
 part of 'stores.dart';
 
-final groupStoreProvider = NotifierProvider<GroupStore, void>(GroupStore.new);
+final chatRoomsStoreProvider = NotifierProvider<ChatRoomsStore, void>(
+  ChatRoomsStore.new,
+);
 
-class GroupStore extends Notifier<void> {
+class ChatRoomsStore extends Notifier<void> {
+  static const defaultPageSize = 50;
+
+  PaginationState? _chatRoomsPagination;
+  PaginationState? _groupInvitesPagination;
+
+  PaginationState? get chatRoomsPagination => _chatRoomsPagination;
+  PaginationState? get groupInvitesPagination => _groupInvitesPagination;
+
   @override
   void build() {}
 
-  Future<List<ChatRoom>> refreshChatRooms() async {
+  Future<PaginatedChatRooms?> getChatRooms({
+    int offset = 0,
+    int limit = defaultPageSize,
+  }) async {
     final worker = ref.read(qaulWorkerProvider);
-    final rooms = await worker.getAllChatRooms();
-    if (!ref.mounted) return [];
-    await _resolveMissingUsersForRooms(rooms);
-    if (!ref.mounted) return [];
-    return ref.read(chatRoomsProvider);
+    final result = await worker.getAllChatRooms(offset: offset, limit: limit);
+    if (!ref.mounted || result == null) return null;
+    _chatRoomsPagination = result.pagination;
+    await _resolveMissingUsersForRooms(result.rooms);
+    if (!ref.mounted) return null;
+    return PaginatedChatRooms(
+      rooms: ref.read(chatRoomsProvider),
+      pagination: result.pagination,
+    );
   }
 
-  Future<List<GroupInvite>> refreshGroupInvites() async {
+  Future<PaginatedGroupInvites?> getGroupInvites({
+    int offset = 0,
+    int limit = defaultPageSize,
+  }) async {
     final worker = ref.read(qaulWorkerProvider);
-    final invites = await worker.getGroupInvitesReceived();
-    if (!ref.mounted) return [];
-    final rooms = invites.map((i) => i.groupDetails).toList();
+    final result = await worker.getGroupInvitesReceived(
+      offset: offset,
+      limit: limit,
+    );
+    if (!ref.mounted || result == null) return null;
+    _groupInvitesPagination = result.pagination;
+    final rooms = result.invites.map((i) => i.groupDetails).toList();
     await _resolveMissingUsersForRooms(rooms);
-    if (!ref.mounted) return [];
+    if (!ref.mounted) return null;
+    await _hydrateGroupInvitesFromKnownUsers();
+    return PaginatedGroupInvites(
+      invites: ref.read(groupInvitesProvider),
+      pagination: result.pagination,
+    );
+  }
+
+  Future<void> pollChatRoomsAndInvites() async {
+    await Future.wait([
+      getChatRooms(offset: 0, limit: defaultPageSize),
+      getGroupInvites(offset: 0, limit: defaultPageSize),
+    ]);
+  }
+
+  Future<List<ChatRoom>> refreshChatRooms({int limit = defaultPageSize}) async {
+    final result = await getChatRooms(offset: 0, limit: limit);
+    return result?.rooms ?? [];
+  }
+
+  Future<List<GroupInvite>> refreshGroupInvites({
+    int limit = defaultPageSize,
+  }) async {
+    final result = await getGroupInvites(offset: 0, limit: limit);
+    return result?.invites ?? [];
+  }
+
+  Future<void> _hydrateGroupInvitesFromKnownUsers() async {
+    if (!ref.mounted) return;
+    final invites = ref.read(groupInvitesProvider);
+    if (invites.isEmpty) return;
 
     final usersById = {
       for (final u in ref.read(usersStoreProvider)) u.idBase58: u,
     };
     final inviteState = ref.read(groupInvitesProvider.notifier);
-    for (final invite in ref.read(groupInvitesProvider)) {
+    for (final invite in invites) {
       final hydratedRoom = _hydrateRoomMembers(invite.groupDetails, usersById);
       if (hydratedRoom == invite.groupDetails) continue;
       inviteState.update(
@@ -38,11 +92,13 @@ class GroupStore extends Notifier<void> {
         ),
       );
     }
-    return ref.read(groupInvitesProvider);
   }
 
   Future<void> _resolveMissingUsersForRooms(List<ChatRoom> rooms) async {
-    final knownIds = ref.read(usersStoreProvider).map((u) => u.idBase58).toSet();
+    final knownIds = ref
+        .read(usersStoreProvider)
+        .map((u) => u.idBase58)
+        .toSet();
     final missingIds = <String>{};
 
     for (final room in rooms) {

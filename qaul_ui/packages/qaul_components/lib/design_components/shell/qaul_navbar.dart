@@ -1,7 +1,7 @@
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_svg/flutter_svg.dart';
-import '../styles/qaul_color_sheet.dart';
+import '../../styles/qaul_color_sheet.dart';
 
 // ---------------------------------------------------------------------------
 // Enums
