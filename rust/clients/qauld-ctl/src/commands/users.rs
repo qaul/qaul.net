@@ -156,6 +156,11 @@ impl RpcCommand for UsersSubcmd {
                                 "via": bs58::encode(&cnn.via).into_string(),
                             })
                         }).collect();
+                        let custody_route: Vec<String> = user
+                            .preferred_custody_route
+                            .iter()
+                            .map(|p| bs58::encode(p).into_string())
+                            .collect();
                         serde_json::json!({
                             "name": user.name,
                             "id": bs58::encode(&user.id).into_string(),
@@ -165,6 +170,11 @@ impl RpcCommand for UsersSubcmd {
                             "group_id": group_id,
                             "public_key": user.key_base58,
                             "connections": connections,
+                            "bio": user.bio,
+                            "avatar_size": user.avatar.len(),
+                            "profile_version": user.profile_version,
+                            "profile_updated_at": user.profile_updated_at,
+                            "preferred_custody_route": custody_route,
                         })
                     }).collect();
                     println!("{}", serde_json::to_string_pretty(&users_json)?);
@@ -192,7 +202,7 @@ impl RpcCommand for UsersSubcmd {
                             "{} | {} | {:?} | {} | {} | {}",
                             line,
                             user.name,
-                            bs58::encode(user.id).into_string(),
+                            bs58::encode(&user.id).into_string(),
                             verified,
                             blocked,
                             onlined
@@ -209,6 +219,7 @@ impl RpcCommand for UsersSubcmd {
                             }
                             Err(e) => log::error!("{}", e),
                         }
+                        print_extended_profile(&user.bio, &user.avatar, user.profile_version, user.profile_updated_at, &user.preferred_custody_route);
                         if user.connections.len() > 0 {
                             println!("  Connections: module | hc | rtt | via");
                             for cnn in user.connections {
@@ -248,6 +259,11 @@ impl RpcCommand for UsersSubcmd {
                                 "via": bs58::encode(&cnn.via).into_string(),
                             })
                         }).collect();
+                        let custody_route: Vec<String> = user
+                            .preferred_custody_route
+                            .iter()
+                            .map(|p| bs58::encode(p).into_string())
+                            .collect();
                         println!(
                             "{}",
                             serde_json::to_string_pretty(&serde_json::json!({
@@ -259,6 +275,11 @@ impl RpcCommand for UsersSubcmd {
                                 "group_id": group_id,
                                 "public_key": user.key_base58,
                                 "connections": connections,
+                                "bio": user.bio,
+                                "avatar_size": user.avatar.len(),
+                                "profile_version": user.profile_version,
+                                "profile_updated_at": user.profile_updated_at,
+                                "preferred_custody_route": custody_route,
                             }))?
                         );
                     } else {
@@ -275,6 +296,7 @@ impl RpcCommand for UsersSubcmd {
                         );
                         println!("Group ID: {}", group_id);
                         println!("Public Key: {}", user.key_base58);
+                        print_extended_profile(&user.bio, &user.avatar, user.profile_version, user.profile_updated_at, &user.preferred_custody_route);
 
                         if user.connections.len() > 0 {
                             println!("Connections: module | hc | rtt | via");
@@ -324,5 +346,36 @@ impl RpcCommand for UsersSubcmd {
             }
         };
         Ok(())
+    }
+}
+
+/// Render the network-visible profile fields (added on the extended-user-info
+/// branch). Lines are only emitted when the corresponding field is set, to keep
+/// listings short for users with the default profile.
+fn print_extended_profile(
+    bio: &str,
+    avatar: &[u8],
+    profile_version: u64,
+    profile_updated_at: u64,
+    preferred_custody_route: &[Vec<u8>],
+) {
+    if profile_version > 0 {
+        println!(
+            "  Profile: v{} updated_at={}",
+            profile_version, profile_updated_at
+        );
+    }
+    if !bio.is_empty() {
+        println!("  Bio: {}", bio);
+    }
+    if !avatar.is_empty() {
+        println!("  Avatar: {} bytes", avatar.len());
+    }
+    if !preferred_custody_route.is_empty() {
+        let hops: Vec<String> = preferred_custody_route
+            .iter()
+            .map(|p| bs58::encode(p).into_string())
+            .collect();
+        println!("  Custody route: {}", hops.join(" -> "));
     }
 }
