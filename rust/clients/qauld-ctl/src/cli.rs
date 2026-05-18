@@ -202,6 +202,43 @@ pub enum DtnSubcmd {
         #[arg(short, long)]
         size: u32,
     },
+    /// (DTN V2) opt this node in / out as a custodian for routed messages
+    Custody {
+        #[command(subcommand)]
+        command: DtnCustodySubcmd,
+    },
+    /// (DTN V2) send a source-routed custody message
+    ///
+    /// `data-file` must contain the bytes of an already-signed `Container`
+    /// produced by libqaul's messaging layer. Building one from scratch is
+    /// out of scope for the CLI today; in practice the Flutter UI emits
+    /// these. This command is here so an admin or test harness can replay
+    /// a previously-captured container along an explicit custody route.
+    SendRouted {
+        /// base58-encoded receiver user id
+        #[arg(short = 'r', long)]
+        receiver_id: String,
+        /// path to a file containing the pre-built signed Container bytes
+        #[arg(short = 'd', long)]
+        data_file: String,
+        /// ordered list of custodian user ids (base58, repeatable)
+        #[arg(short = 'c', long = "custody", value_delimiter = ',')]
+        custody_route: Vec<String>,
+        /// seconds until the message expires (0 = no expiry)
+        #[arg(short = 'e', long, default_value = "0")]
+        expiry_seconds: u64,
+        /// maximum number of custody handoffs (0 = libqaul default)
+        #[arg(short = 'm', long, default_value = "0")]
+        max_handoffs: u32,
+    },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum DtnCustodySubcmd {
+    /// enable custody acceptance on this node
+    Enable,
+    /// disable custody acceptance on this node
+    Disable,
 }
 
 #[derive(Args, Debug)]
