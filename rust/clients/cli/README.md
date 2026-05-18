@@ -51,6 +51,10 @@ The following commands are available:
   * `connections nodes rename {Multiaddress} {Name}` - rename an internet node.
   * `connections nodes activate {Multiaddress}` - activate an internet peering node.
   * `connections nodes deactivate {Multiaddress}` - deactivate an internet peering node.
+* transports - turn entire network transports on and off
+  * `transports list` - print every registered transport (LAN, Internet, BLE) with its current status, the runtime-toggle capability flag, and whether it is local-only.
+  * `transports enable {id}` - start a transport. `{id}` is one of `lan`, `internet`, `ble`. The choice is persisted to `config.yaml` (`lan.active`, `internet.active`, `ble.active`) so it survives a daemon restart.
+  * `transports disable {id}` - stop a transport. Same persistence as `enable`. Existing peer connections on that transport are torn down.
 * feed
   * `feed send {FeedMessage}` - sends the {FeedMessage} to the network and distributes it to all connected nodes
     * the message is signed and can be validated
@@ -61,10 +65,12 @@ The following commands are available:
     * `feed page {offset} {limit}` - displays feed messages starting at {offset}, returning at most {limit} messages
 * group
   * `group create {Group Name}` - creates a new group
-  * `group list` - list all available groups
+  * `group list` - list all available groups (returns all groups)
+    * `group list {offset} {limit}` - list groups with pagination; skips {offset} groups and returns at most {limit} groups
   * `group info {Group ID}` - shows the group information
   * `group invite {Group ID} {User ID}` - invite a user to a group
-    * `group invited` - list received pending invitations
+    * `group invited` - list received pending invitations (returns all invitations)
+    * `group invited {offset} {limit}` - list pending invitations with pagination
     * `group accept {Group ID}` - accept group invitation
     * `group decline {Group ID}` - decline group invitation
   * `group remove {Group ID} {User ID}` - remove a group member from the group

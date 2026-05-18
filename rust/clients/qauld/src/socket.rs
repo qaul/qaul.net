@@ -55,6 +55,11 @@ where
         .new_framed(stream);
     let (mut writer, mut reader) = framed_stream.split();
 
+    // Track every request_id this client has registered so we can clean
+    // up the global router register and tell libqaul about long-running
+    // subscriptions when the client disconnects.
+    let mut client_request_ids: Vec<String> = Vec::new();
+
     loop {
         tokio::select! {
             message = reader.next() => {
@@ -69,6 +74,7 @@ where
                                     let mut reg = register.lock().await;
                                     reg.insert(client_request_id.clone(), tx.clone());
                                 }
+                                client_request_ids.push(client_request_id);
                             }
                             Err(error) => {
                                 log::error!("{:?}", error);
@@ -87,6 +93,19 @@ where
                 }
             }
         };
+    }
+
+    // Client disconnected: remove its request_ids from the global
+    // register (so dead Senders don't pile up) and notify libqaul so
+    // long-running RPC state (subscriptions, etc.) tied to those ids
+    // can be released.
+    if !client_request_ids.is_empty() {
+        let mut reg = register.lock().await;
+        for id in &client_request_ids {
+            reg.remove(id);
+        }
+        drop(reg);
+        libqaul::rpc::Rpc::client_disconnected(&instance.state, &client_request_ids);
     }
 
     Ok(())

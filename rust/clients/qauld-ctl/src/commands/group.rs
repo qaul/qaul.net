@@ -120,10 +120,12 @@ impl RpcCommand for GroupSubcmd {
             }
             GroupSubcmd::List => {
                 let proto_message = Group {
-                    message: Some(group::Message::GroupListRequest(GroupListRequest {})),
+                    message: Some(group::Message::GroupListRequest(GroupListRequest {
+                        offset: 0,
+                        limit: 0,
+                    })),
                 };
 
-                // encode message
                 let mut buf = Vec::with_capacity(proto_message.encoded_len());
                 proto_message
                     .encode(&mut buf)
@@ -133,7 +135,10 @@ impl RpcCommand for GroupSubcmd {
             }
             GroupSubcmd::Invited => {
                 let proto_message = Group {
-                    message: Some(group::Message::GroupInvitedRequest(GroupInvitedRequest {})),
+                    message: Some(group::Message::GroupInvitedRequest(GroupInvitedRequest {
+                        offset: 0,
+                        limit: 0,
+                    })),
                 };
 
                 Ok((proto_message.encode_to_vec(), Modules::Group))

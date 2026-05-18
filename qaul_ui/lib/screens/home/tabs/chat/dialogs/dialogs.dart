@@ -28,9 +28,7 @@ class _CreateNewRoomDialog extends StatelessWidget {
                 onTap: () async {
                   final result = await Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => _CreateNewGroupDialog(),
-                    ),
+                    MaterialPageRoute(builder: (_) => _CreateNewGroupDialog()),
                   );
                   Navigator.pop(context, result);
                 },
@@ -75,24 +73,24 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
             const SizedBox(height: 140, width: double.maxFinite),
             QaulAvatar.groupLarge(),
             const SizedBox(height: 20),
-            LayoutBuilder(builder: (context, constraints) {
-              return SizedBox(
-                width: constraints.constrainWidth(400),
-                child: TextFormField(
-                  key: _nameKey,
-                  controller: nameCtrl,
-                  validator: (val) {
-                    if (val == null || val.isEmpty) {
-                      return l10n.fieldRequiredErrorMessage;
-                    }
-                    return null;
-                  },
-                  decoration: InputDecoration(
-                    hintText: l10n.createGroupHint,
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return SizedBox(
+                  width: constraints.constrainWidth(400),
+                  child: TextFormField(
+                    key: _nameKey,
+                    controller: nameCtrl,
+                    validator: (val) {
+                      if (val == null || val.isEmpty) {
+                        return l10n.fieldRequiredErrorMessage;
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(hintText: l10n.createGroupHint),
                   ),
-                ),
-              );
-            }),
+                );
+              },
+            ),
             const SizedBox(height: 20),
             QaulButton(
               label: l10n.createButtonHint,
@@ -108,9 +106,9 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
                     .read(chatRoomsProvider)
                     .firstWhereOrNull((g) => g.name == name);
                 if (group == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text(l10n.genericErrorMessage),
-                  ));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.genericErrorMessage)),
+                  );
                   Navigator.pop(context);
                   return;
                 }
@@ -118,8 +116,7 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
                 await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) =>
-                        InviteUsersToGroupDialog(room: group),
+                    builder: (_) => InviteUsersToGroupDialog(room: group),
                   ),
                 );
 
@@ -143,17 +140,14 @@ class _CreateNewGroupDialog extends HookConsumerWidget {
       final groups = ref.read(chatRoomsProvider);
       if (groups.where((g) => g.name == name).isNotEmpty) break;
 
-      await ref.read(groupStoreProvider.notifier).refreshChatRooms();
+      await ref.read(chatRoomsStoreProvider.notifier).refreshChatRooms();
       await Future.delayed(const Duration(milliseconds: 1000));
     }
   }
 }
 
 class InviteUsersToGroupDialog extends StatefulHookConsumerWidget {
-  const InviteUsersToGroupDialog({
-    super.key,
-    required this.room,
-  });
+  const InviteUsersToGroupDialog({super.key, required this.room});
 
   final ChatRoom room;
 
@@ -254,12 +248,8 @@ class _InviteDetailsDialog extends HookConsumerWidget {
         children: [
           Text('${l10n.groupName}: ${invite.groupDetails.name}'),
           Text('${l10n.createdAt}: ${invite.groupDetails.createdAt}'),
-          Text(
-            '${l10n.noOfMembers}: ${invite.groupDetails.members.length}',
-          ),
-          if (sender != null) ...[
-            Text('${l10n.invitedBy}: ${sender.name}'),
-          ],
+          Text('${l10n.noOfMembers}: ${invite.groupDetails.members.length}'),
+          if (sender != null) ...[Text('${l10n.invitedBy}: ${sender.name}')],
         ],
       ),
       button1Label: l10n.accept,

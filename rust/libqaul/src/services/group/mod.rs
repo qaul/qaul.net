@@ -484,8 +484,13 @@ impl Group {
                             }
                         }
                     }
-                    Some(proto_rpc::group::Message::GroupListRequest(_group_list_req)) => {
-                        let list = GroupManage::group_list(state, &my_user_id);
+                    Some(proto_rpc::group::Message::GroupListRequest(group_list_req)) => {
+                        let list = GroupManage::group_list(
+                            state,
+                            &my_user_id,
+                            group_list_req.offset,
+                            group_list_req.limit,
+                        );
                         let proto_message = proto_rpc::Group {
                             message: Some(proto_rpc::group::Message::GroupListResponse(list)),
                         };
@@ -498,8 +503,13 @@ impl Group {
                             Vec::new(),
                         );
                     }
-                    Some(proto_rpc::group::Message::GroupInvitedRequest(_group_invited_req)) => {
-                        let invited = GroupManage::invited_list(state, &my_user_id);
+                    Some(proto_rpc::group::Message::GroupInvitedRequest(group_invited_req)) => {
+                        let invited = GroupManage::invited_list(
+                            state,
+                            &my_user_id,
+                            group_invited_req.offset,
+                            group_invited_req.limit,
+                        );
                         let proto_message = proto_rpc::Group {
                             message: Some(proto_rpc::group::Message::GroupInvitedResponse(invited)),
                         };

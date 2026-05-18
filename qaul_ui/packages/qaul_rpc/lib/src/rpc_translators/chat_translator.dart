@@ -35,7 +35,9 @@ class ChatTranslator extends RpcModuleTranslator {
 
       final merged = source.copyWithMessages(res.data);
 
-      if (room != null) state.update(merged);
+      if (room != null) {
+        state.replacePreservingOrder(merged);
+      }
 
       if (isOpenRoom) {
         currentOpenRoom.state = merged;
