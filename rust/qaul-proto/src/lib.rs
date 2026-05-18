@@ -19,6 +19,10 @@ pub mod qaul_rpc_debug {
     include!("../../../protobuf/generated/rust/qaul.rpc.debug.rs");
 }
 #[allow(clippy::all)]
+pub mod qaul_rpc_subscribe {
+    include!("../../../protobuf/generated/rust/qaul.rpc.subscribe.rs");
+}
+#[allow(clippy::all)]
 pub mod qaul_rpc_node {
     include!("../../../protobuf/generated/rust/qaul.rpc.node.rs");
 }
@@ -37,6 +41,10 @@ pub mod qaul_rpc_router {
 #[allow(clippy::all)]
 pub mod qaul_rpc_connections {
     include!("../../../protobuf/generated/rust/qaul.rpc.connections.rs");
+}
+#[allow(clippy::all)]
+pub mod qaul_rpc_transports {
+    include!("../../../protobuf/generated/rust/qaul.rpc.transports.rs");
 }
 #[allow(clippy::all)]
 pub mod qaul_rpc_feed {

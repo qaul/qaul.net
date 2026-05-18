@@ -49,6 +49,8 @@ enum FlushMode {
 pub struct ChatState {
     /// Chat storage inner state.
     pub inner: RwLock<ChatStorage>,
+    /// Per-account full-text search indexes.
+    pub search: super::search::ChatSearchState,
 }
 
 impl ChatState {
@@ -58,6 +60,7 @@ impl ChatState {
             inner: RwLock::new(ChatStorage {
                 db_ref: BTreeMap::new(),
             }),
+            search: super::search::ChatSearchState::new(),
         }
     }
 
@@ -357,6 +360,13 @@ impl ChatStorage {
         if !message_id.is_empty() {
             Self::save_message_id_mapping(&db_ref, message_id, &db_key, flush_mode);
         }
+
+        // index the message for full-text search (text content only)
+        if let Some(searchable) =
+            super::search::ChatSearchableMessage::from_chat_message(&chat_message)
+        {
+            super::search::ChatSearch::index_message(state, account_id, &searchable);
+        }
     }
 
     /// updating chat message status as confirmed
@@ -456,6 +466,20 @@ impl ChatStorage {
         Self::mutate_chat_message_by_id(&db_ref, message_id, flush_mode, |chat_msg| {
             chat_msg.status = status as i32;
         });
+    }
+
+    /// Look up a single message by its message_id.
+    ///
+    /// Returns `None` if the message_id is not found.
+    pub fn get_message_by_id(
+        state: &crate::QaulState,
+        account_id: PeerId,
+        message_id: &[u8],
+    ) -> Option<rpc_proto::ChatMessage> {
+        let db_ref = Self::get_db_ref(state, account_id);
+        let db_key = db_ref.message_ids.get(message_id).ok()??;
+        let message_bytes = db_ref.messages.get(&db_key).ok()??;
+        bincode::deserialize(&message_bytes).ok()
     }
 
     /// Get chat messages of a specific conversation from data base
@@ -574,12 +598,54 @@ impl ChatStorage {
         };
 
         // get chat state for writing
-        let mut chat = state.services.chat.inner.write().unwrap();
+        {
+            let mut chat = state.services.chat.inner.write().unwrap();
+            chat.db_ref.insert(account_id.to_bytes(), chat_user.clone());
+        }
 
-        // add user to state
-        chat.db_ref.insert(account_id.to_bytes(), chat_user.clone());
+        // Initialize search index for this account.
+        // If the index is fresh, batch-index all existing messages.
+        let is_fresh = super::search::ChatSearch::get_or_create(state, &account_id);
+        if is_fresh {
+            Self::batch_index_existing_messages(state, &account_id, &chat_user);
+        }
 
         // return structure
         chat_user
+    }
+
+    /// Batch-index all existing chat messages into the search index.
+    ///
+    /// Called once when a fresh search index is created for an account
+    /// (first upgrade to a version with search, or after index deletion).
+    fn batch_index_existing_messages(
+        state: &crate::QaulState,
+        account_id: &PeerId,
+        db_ref: &ChatAccountDb,
+    ) {
+        let mut items: Vec<super::search::ChatSearchableMessage> = Vec::new();
+
+        for res in db_ref.messages.iter() {
+            match res {
+                Ok((_key, value)) => {
+                    if let Ok(msg) = bincode::deserialize::<rpc_proto::ChatMessage>(&value) {
+                        if let Some(searchable) =
+                            super::search::ChatSearchableMessage::from_chat_message(&msg)
+                        {
+                            items.push(searchable);
+                        }
+                    }
+                }
+                Err(e) => log::error!("batch index read error: {}", e),
+            }
+        }
+
+        if !items.is_empty() {
+            log::info!(
+                "batch indexing {} existing chat messages for search",
+                items.len()
+            );
+            super::search::ChatSearch::index_message_batch(state, account_id, &items);
+        }
     }
 }

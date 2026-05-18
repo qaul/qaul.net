@@ -9,11 +9,15 @@ use std::fmt;
 mod authentication;
 mod chat;
 mod chatfile;
+mod connections;
 mod crypto;
+mod debug;
+mod dtn;
 mod feed;
 mod group;
 mod node;
 mod router;
+mod transports;
 mod user_accounts;
 mod users;
 

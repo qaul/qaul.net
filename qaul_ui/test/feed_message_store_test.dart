@@ -10,14 +10,8 @@ import 'package:qaul_ui/stores/stores.dart';
 
 import 'chat_tab/chat_tab_test.dart';
 
-List<PublicPost> _testPublicMessages = [];
 List<User> _testUsersForStore = [];
 Map<String, User?> _getUserByIdByBase58 = {};
-
-class _TestPublicPostListNotifier extends PublicPostListNotifier {
-  @override
-  List<PublicPost> build() => _testPublicMessages;
-}
 
 class _TestUsersStore extends UsersStore {
   @override
@@ -34,15 +28,20 @@ class _MockWorkerForGetByUserID extends StubLibqaulWorker {
 ProviderContainer _container() => ProviderContainer(
       overrides: [
         defaultUserProvider.overrideWith((_) => defaultUser),
-        publicMessagesProvider.overrideWith(() => _TestPublicPostListNotifier()),
         usersStoreProvider.overrideWith(() => _TestUsersStore()),
         qaulWorkerProvider.overrideWith((ref) => _MockWorkerForGetByUserID(ref)),
       ],
     );
 
-Future<List<FeedMessage>> _readFeedAfterInit(ProviderContainer container) async {
+Future<List<FeedMessage>> _readFeedAfterApply(
+  ProviderContainer container,
+  List<PublicPost> posts, {
+  PaginationState? pagination,
+}) async {
   container.read(feedMessageStoreProvider);
-  await Future.delayed(const Duration(milliseconds: 50));
+  await container.read(feedMessageStoreProvider.notifier).applyPaginatedPosts(
+        PaginatedPosts(posts: posts, pagination: pagination),
+      );
   return container.read(feedMessageStoreProvider);
 }
 
@@ -74,7 +73,6 @@ void main() {
 
   setUp(() {
     Intl.defaultLocale = 'en';
-    _testPublicMessages = [];
     _testUsersForStore = [];
     _getUserByIdByBase58 = {};
   });
@@ -101,15 +99,14 @@ void main() {
 
   group('FeedMessageStore', () {
     test('empty messages → empty feed', () async {
-      _testPublicMessages = [];
       final container = _container();
       addTearDown(container.dispose);
-      final state = await _readFeedAfterInit(container);
+      final state = await _readFeedAfterApply(container, []);
       expect(state, isEmpty);
     });
 
     test('skips message when senderIdBase58 is null', () async {
-      _testPublicMessages = [
+      final posts = [
         PublicPost(
           senderId: null,
           index: 1,
@@ -123,33 +120,34 @@ void main() {
       ];
       final container = _container();
       addTearDown(container.dispose);
-      final state = await _readFeedAfterInit(container);
+      final state = await _readFeedAfterApply(container, posts);
       expect(state, isEmpty);
     });
 
     test('excludes message when getByUserID returns null', () async {
-      _testPublicMessages = [_post(senderIdBase58: 'unknown', content: 'X')];
       final container = _container();
       addTearDown(container.dispose);
-      final state = await _readFeedAfterInit(container);
+      final state = await _readFeedAfterApply(
+        container,
+        [_post(senderIdBase58: 'unknown', content: 'X')],
+      );
       expect(state, isEmpty);
     });
 
     test('all unknown senders → empty feed', () async {
-      _testPublicMessages = [
-        _post(senderIdBase58: 'u1', content: 'A'),
-        _post(senderIdBase58: 'u2', content: 'B'),
-      ];
       final container = _container();
       addTearDown(container.dispose);
-      final state = await _readFeedAfterInit(container);
+      final state = await _readFeedAfterApply(container, [
+        _post(senderIdBase58: 'u1', content: 'A'),
+        _post(senderIdBase58: 'u2', content: 'B'),
+      ]);
       expect(state, isEmpty);
     });
 
     test('resolves author from store or getByUserID and excludes unknown', () async {
       final u1 = _user('U1', 'id1');
       final u2 = _user('U2', 'id2');
-      _testPublicMessages = [
+      final posts = [
         _post(senderIdBase58: u1.idBase58, content: 'M1', index: 1),
         _post(senderIdBase58: u2.idBase58, content: 'M2', index: 2),
         _post(senderIdBase58: 'unknown', content: 'M3', index: 3),
@@ -159,7 +157,7 @@ void main() {
 
       final container = _container();
       addTearDown(container.dispose);
-      final state = await _readFeedAfterInit(container);
+      final state = await _readFeedAfterApply(container, posts);
 
       expect(state.length, 2);
       expect(state.map((e) => e.author.idBase58), containsAll([u1.idBase58, u2.idBase58]));
@@ -168,12 +166,14 @@ void main() {
 
     test('single message with author from getByUserID', () async {
       final u = _user('Single', 'single_id');
-      _testPublicMessages = [_post(senderIdBase58: u.idBase58, content: 'Only')];
       _getUserByIdByBase58 = {u.idBase58: u};
 
       final container = _container();
       addTearDown(container.dispose);
-      final state = await _readFeedAfterInit(container);
+      final state = await _readFeedAfterApply(
+        container,
+        [_post(senderIdBase58: u.idBase58, content: 'Only')],
+      );
 
       expect(state.length, 1);
       expect(state.single.author.idBase58, u.idBase58);

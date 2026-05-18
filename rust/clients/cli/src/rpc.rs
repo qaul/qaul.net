@@ -115,6 +115,12 @@ impl Rpc {
                     Ok(proto::Modules::Crypto) => {
                         super::crypto::Crypto::rpc(message.data);
                     }
+                    Ok(proto::Modules::Transports) => {
+                        super::transports::Transports::rpc(message.data);
+                    }
+                    Ok(proto::Modules::Subscribe) => {
+                        // qaul-cli doesn't subscribe to events; ignore.
+                    }
                     Ok(proto::Modules::None) => {}
                     Err(_) => {}
                 }

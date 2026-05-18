@@ -173,3 +173,13 @@ class ChatRoom with EquatableMixin implements Comparable {
 
   int maxIndex(int curr, ChatMessage c) => math.max(curr, c.index.toInt());
 }
+
+class PaginatedChatRooms {
+  PaginatedChatRooms({
+    required this.rooms,
+    this.pagination,
+  });
+
+  final List<ChatRoom> rooms;
+  final PaginationState? pagination;
+}

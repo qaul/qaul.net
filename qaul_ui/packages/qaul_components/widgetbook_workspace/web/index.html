@@ -27,10 +27,22 @@
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/x-icon" href="favicon.ico"/>
 
-  <title>widgetbook</title>
+  <title>qaul.net Components</title>
   <link rel="manifest" href="manifest.json">
+
+  <script>
+    // Widgetbook's internal MaterialApp hard-codes its title, overwriting
+    // document.title once Flutter boots. Pin the tab title to ours.
+    (function () {
+      var pinned = 'qaul.net Components';
+      var titleEl = document.querySelector('title');
+      new MutationObserver(function () {
+        if (document.title !== pinned) document.title = pinned;
+      }).observe(titleEl, { childList: true });
+    })();
+  </script>
 
   <script>
     // The value below is injected by flutter build, do not touch.
