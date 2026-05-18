@@ -5,7 +5,8 @@ class GroupTranslator extends RpcModuleTranslator {
   Modules get type => Modules.GROUP;
 
   @override
-  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Ref ref) async {
+  Future<RpcTranslatorResponse?> decodeMessageBytes(
+      List<int> data, Ref ref) async {
     final knownUsers = ref.read(userLookupProvider);
     final message = Group.fromBuffer(data);
 
@@ -32,17 +33,45 @@ class GroupTranslator extends RpcModuleTranslator {
         final replyResult = message.ensureGroupReplyInviteResponse().result;
         return _receiveGroupResultResponse(replyResult);
       case Group_Message.groupListResponse:
-        final groupsPb = message.ensureGroupListResponse().groups;
+        final groupResponse = message.ensureGroupListResponse();
+        final groupsPb = groupResponse.groups;
         final rooms = groupsPb
             .map((g) => ChatRoom.fromRpcGroupInfo(g, knownUsers))
             .toList();
-        return RpcTranslatorResponse(type, rooms);
+        PaginationState? pagination;
+        if (groupResponse.hasPagination()) {
+          final meta = groupResponse.pagination;
+          pagination = PaginationState(
+            hasMore: meta.hasMore,
+            total: meta.total,
+            offset: meta.offset,
+            limit: meta.limit,
+          );
+        }
+        return RpcTranslatorResponse(
+          type,
+          PaginatedChatRooms(rooms: rooms, pagination: pagination),
+        );
       case Group_Message.groupInvitedResponse:
-        final invited = message.ensureGroupInvitedResponse().invited;
+        final invitedResponse = message.ensureGroupInvitedResponse();
+        final invited = invitedResponse.invited;
         final invites = invited
             .map((e) => GroupInvite.fromRpcGroupInvited(e, knownUsers))
             .toList();
-        return RpcTranslatorResponse(type, invites);
+        PaginationState? pagination;
+        if (invitedResponse.hasPagination()) {
+          final meta = invitedResponse.pagination;
+          pagination = PaginationState(
+            hasMore: meta.hasMore,
+            total: meta.total,
+            offset: meta.offset,
+            limit: meta.limit,
+          );
+        }
+        return RpcTranslatorResponse(
+          type,
+          PaginatedGroupInvites(invites: invites, pagination: pagination),
+        );
       default:
         return super.decodeMessageBytes(data, ref);
     }
@@ -61,14 +90,19 @@ class GroupTranslator extends RpcModuleTranslator {
     if (res.data is bool && res.data == true) return;
 
     final state = ref.read(chatRoomsProvider.notifier);
-    if (res.data is List<ChatRoom>) {
-      for (final room in res.data) {
-        if (!state.contains(room)) {
-          state.add(room);
-        } else {
-          state.update(room);
-        }
+    if (res.data is PaginatedChatRooms) {
+      final paginated = res.data as PaginatedChatRooms;
+      final pagination = paginated.pagination;
+      // offset > 0 → user scrolled to load more; append the new page.
+      // offset == 0 (or no pagination metadata) → first-page fetch from initial
+      // load, pull-to-refresh, or polling. Merge instead of replacing so any
+      // already-loaded later pages survive. Pull-to-refresh resets state
+      // explicitly via the notifier's clear() before fetching.
+      if (pagination != null && pagination.offset > 0) {
+        state.append(paginated.rooms);
+        return;
       }
+      state.mergeOrderedFromBackend(paginated.rooms);
       return;
     } else if (res.data is ChatRoom) {
       if (!state.contains(res.data)) {
@@ -76,16 +110,32 @@ class GroupTranslator extends RpcModuleTranslator {
       } else {
         state.update(res.data);
       }
-    } else if (res.data is List<GroupInvite>) {
+    } else if (res.data is PaginatedGroupInvites) {
+      final paginated = res.data as PaginatedGroupInvites;
       final invites = ref.read(groupInvitesProvider.notifier);
-      for (final invite in res.data) {
+      final pagination = paginated.pagination;
+      if (pagination != null && pagination.offset > 0) {
+        invites.append(paginated.invites);
+        return;
+      }
+      for (final invite in paginated.invites) {
         if (!invites.contains(invite)) {
           invites.add(invite);
         } else {
           invites.update(invite);
         }
       }
-      invites.filterInvitesNotIn(res.data);
+      // Prune stale invites (e.g. one the user just accepted/declined) only
+      // when the response is the complete set: legacy unpaginated path, or a
+      // single first page with no further pages. With multi-page lists we
+      // can't tell whether a "missing" invite was removed on the backend or
+      // simply lives on a later page, so we leave state alone and rely on
+      // pull-to-refresh.
+      final isCompleteList =
+          pagination == null || (pagination.offset == 0 && !pagination.hasMore);
+      if (isCompleteList) {
+        invites.retainAll(paginated.invites);
+      }
     }
   }
 }

@@ -85,6 +85,24 @@ const Chat$json = {
       '9': 0,
       '10': 'send'
     },
+    {
+      '1': 'search_request',
+      '3': 6,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.chat.ChatSearchRequest',
+      '9': 0,
+      '10': 'searchRequest'
+    },
+    {
+      '1': 'search_result',
+      '3': 7,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.chat.ChatSearchResult',
+      '9': 0,
+      '10': 'searchResult'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -97,7 +115,10 @@ final $typed_data.Uint8List chatDescriptor = $convert.base64Decode(
     'F0Q29udmVyc2F0aW9uUmVxdWVzdEgAUhNjb252ZXJzYXRpb25SZXF1ZXN0ElIKEWNvbnZlcnNh'
     'dGlvbl9saXN0GAQgASgLMiMucWF1bC5ycGMuY2hhdC5DaGF0Q29udmVyc2F0aW9uTGlzdEgAUh'
     'Bjb252ZXJzYXRpb25MaXN0EjQKBHNlbmQYBSABKAsyHi5xYXVsLnJwYy5jaGF0LkNoYXRNZXNz'
-    'YWdlU2VuZEgAUgRzZW5kQgkKB21lc3NhZ2U=');
+    'YWdlU2VuZEgAUgRzZW5kEkkKDnNlYXJjaF9yZXF1ZXN0GAYgASgLMiAucWF1bC5ycGMuY2hhdC'
+    '5DaGF0U2VhcmNoUmVxdWVzdEgAUg1zZWFyY2hSZXF1ZXN0EkYKDXNlYXJjaF9yZXN1bHQYByAB'
+    'KAsyHy5xYXVsLnJwYy5jaGF0LkNoYXRTZWFyY2hSZXN1bHRIAFIMc2VhcmNoUmVzdWx0QgkKB2'
+    '1lc3NhZ2U=');
 
 @$core.Deprecated('Use chatConversationRequestDescriptor instead')
 const ChatConversationRequest$json = {
@@ -287,6 +308,57 @@ const GroupEvent$json = {
 final $typed_data.Uint8List groupEventDescriptor = $convert.base64Decode(
     'CgpHcm91cEV2ZW50EjwKCmV2ZW50X3R5cGUYASABKA4yHS5xYXVsLnJwYy5jaGF0Lkdyb3VwRX'
     'ZlbnRUeXBlUglldmVudFR5cGUSFwoHdXNlcl9pZBgCIAEoDFIGdXNlcklk');
+
+@$core.Deprecated('Use chatSearchRequestDescriptor instead')
+const ChatSearchRequest$json = {
+  '1': 'ChatSearchRequest',
+  '2': [
+    {'1': 'query', '3': 1, '4': 1, '5': 9, '10': 'query'},
+  ],
+};
+
+/// Descriptor for `ChatSearchRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List chatSearchRequestDescriptor = $convert
+    .base64Decode('ChFDaGF0U2VhcmNoUmVxdWVzdBIUCgVxdWVyeRgBIAEoCVIFcXVlcnk=');
+
+@$core.Deprecated('Use chatSearchResultDescriptor instead')
+const ChatSearchResult$json = {
+  '1': 'ChatSearchResult',
+  '2': [
+    {'1': 'query', '3': 1, '4': 1, '5': 9, '10': 'query'},
+    {
+      '1': 'items',
+      '3': 2,
+      '4': 3,
+      '5': 11,
+      '6': '.qaul.rpc.chat.ChatSearchResultItem',
+      '10': 'items'
+    },
+  ],
+};
+
+/// Descriptor for `ChatSearchResult`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List chatSearchResultDescriptor = $convert.base64Decode(
+    'ChBDaGF0U2VhcmNoUmVzdWx0EhQKBXF1ZXJ5GAEgASgJUgVxdWVyeRI5CgVpdGVtcxgCIAMoCz'
+    'IjLnFhdWwucnBjLmNoYXQuQ2hhdFNlYXJjaFJlc3VsdEl0ZW1SBWl0ZW1z');
+
+@$core.Deprecated('Use chatSearchResultItemDescriptor instead')
+const ChatSearchResultItem$json = {
+  '1': 'ChatSearchResultItem',
+  '2': [
+    {'1': 'message_id', '3': 1, '4': 1, '5': 12, '10': 'messageId'},
+    {'1': 'group_id', '3': 2, '4': 1, '5': 12, '10': 'groupId'},
+    {'1': 'sender_id', '3': 3, '4': 1, '5': 12, '10': 'senderId'},
+    {'1': 'content', '3': 4, '4': 1, '5': 9, '10': 'content'},
+    {'1': 'sent_at', '3': 5, '4': 1, '5': 4, '10': 'sentAt'},
+  ],
+};
+
+/// Descriptor for `ChatSearchResultItem`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List chatSearchResultItemDescriptor = $convert.base64Decode(
+    'ChRDaGF0U2VhcmNoUmVzdWx0SXRlbRIdCgptZXNzYWdlX2lkGAEgASgMUgltZXNzYWdlSWQSGQ'
+    'oIZ3JvdXBfaWQYAiABKAxSB2dyb3VwSWQSGwoJc2VuZGVyX2lkGAMgASgMUghzZW5kZXJJZBIY'
+    'Cgdjb250ZW50GAQgASgJUgdjb250ZW50EhcKB3NlbnRfYXQYBSABKARSBnNlbnRBdA==');
 
 @$core.Deprecated('Use chatMessageSendDescriptor instead')
 const ChatMessageSend$json = {

@@ -21,7 +21,14 @@ export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
 export 'chat.pbenum.dart';
 
-enum Chat_Message { conversationRequest, conversationList, send, notSet }
+enum Chat_Message {
+  conversationRequest,
+  conversationList,
+  send,
+  searchRequest,
+  searchResult,
+  notSet
+}
 
 /// Chat service RPC message container
 class Chat extends $pb.GeneratedMessage {
@@ -29,12 +36,16 @@ class Chat extends $pb.GeneratedMessage {
     ChatConversationRequest? conversationRequest,
     ChatConversationList? conversationList,
     ChatMessageSend? send,
+    ChatSearchRequest? searchRequest,
+    ChatSearchResult? searchResult,
   }) {
     final result = create();
     if (conversationRequest != null)
       result.conversationRequest = conversationRequest;
     if (conversationList != null) result.conversationList = conversationList;
     if (send != null) result.send = send;
+    if (searchRequest != null) result.searchRequest = searchRequest;
+    if (searchResult != null) result.searchResult = searchResult;
     return result;
   }
 
@@ -51,13 +62,15 @@ class Chat extends $pb.GeneratedMessage {
     3: Chat_Message.conversationRequest,
     4: Chat_Message.conversationList,
     5: Chat_Message.send,
+    6: Chat_Message.searchRequest,
+    7: Chat_Message.searchResult,
     0: Chat_Message.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Chat',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.chat'),
       createEmptyInstance: create)
-    ..oo(0, [3, 4, 5])
+    ..oo(0, [3, 4, 5, 6, 7])
     ..aOM<ChatConversationRequest>(
         3, _omitFieldNames ? '' : 'conversationRequest',
         subBuilder: ChatConversationRequest.create)
@@ -65,6 +78,10 @@ class Chat extends $pb.GeneratedMessage {
         subBuilder: ChatConversationList.create)
     ..aOM<ChatMessageSend>(5, _omitFieldNames ? '' : 'send',
         subBuilder: ChatMessageSend.create)
+    ..aOM<ChatSearchRequest>(6, _omitFieldNames ? '' : 'searchRequest',
+        subBuilder: ChatSearchRequest.create)
+    ..aOM<ChatSearchResult>(7, _omitFieldNames ? '' : 'searchResult',
+        subBuilder: ChatSearchResult.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -88,10 +105,14 @@ class Chat extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   @$pb.TagNumber(4)
   @$pb.TagNumber(5)
+  @$pb.TagNumber(6)
+  @$pb.TagNumber(7)
   Chat_Message whichMessage() => _Chat_MessageByTag[$_whichOneof(0)]!;
   @$pb.TagNumber(3)
   @$pb.TagNumber(4)
   @$pb.TagNumber(5)
+  @$pb.TagNumber(6)
+  @$pb.TagNumber(7)
   void clearMessage() => $_clearField($_whichOneof(0));
 
   /// request a specific conversation
@@ -130,6 +151,30 @@ class Chat extends $pb.GeneratedMessage {
   void clearSend() => $_clearField(5);
   @$pb.TagNumber(5)
   ChatMessageSend ensureSend() => $_ensure(2);
+
+  /// search chat messages
+  @$pb.TagNumber(6)
+  ChatSearchRequest get searchRequest => $_getN(3);
+  @$pb.TagNumber(6)
+  set searchRequest(ChatSearchRequest value) => $_setField(6, value);
+  @$pb.TagNumber(6)
+  $core.bool hasSearchRequest() => $_has(3);
+  @$pb.TagNumber(6)
+  void clearSearchRequest() => $_clearField(6);
+  @$pb.TagNumber(6)
+  ChatSearchRequest ensureSearchRequest() => $_ensure(3);
+
+  /// search results
+  @$pb.TagNumber(7)
+  ChatSearchResult get searchResult => $_getN(4);
+  @$pb.TagNumber(7)
+  set searchResult(ChatSearchResult value) => $_setField(7, value);
+  @$pb.TagNumber(7)
+  $core.bool hasSearchResult() => $_has(4);
+  @$pb.TagNumber(7)
+  void clearSearchResult() => $_clearField(7);
+  @$pb.TagNumber(7)
+  ChatSearchResult ensureSearchResult() => $_ensure(4);
 }
 
 /// request messages of a specific chat conversation
@@ -860,6 +905,238 @@ class GroupEvent extends $pb.GeneratedMessage {
   $core.bool hasUserId() => $_has(1);
   @$pb.TagNumber(2)
   void clearUserId() => $_clearField(2);
+}
+
+/// search chat messages request
+class ChatSearchRequest extends $pb.GeneratedMessage {
+  factory ChatSearchRequest({
+    $core.String? query,
+  }) {
+    final result = create();
+    if (query != null) result.query = query;
+    return result;
+  }
+
+  ChatSearchRequest._();
+
+  factory ChatSearchRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ChatSearchRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ChatSearchRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.chat'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'query')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ChatSearchRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ChatSearchRequest copyWith(void Function(ChatSearchRequest) updates) =>
+      super.copyWith((message) => updates(message as ChatSearchRequest))
+          as ChatSearchRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ChatSearchRequest create() => ChatSearchRequest._();
+  @$core.override
+  ChatSearchRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static ChatSearchRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ChatSearchRequest>(create);
+  static ChatSearchRequest? _defaultInstance;
+
+  /// search query string
+  @$pb.TagNumber(1)
+  $core.String get query => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set query($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasQuery() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearQuery() => $_clearField(1);
+}
+
+/// search results
+class ChatSearchResult extends $pb.GeneratedMessage {
+  factory ChatSearchResult({
+    $core.String? query,
+    $core.Iterable<ChatSearchResultItem>? items,
+  }) {
+    final result = create();
+    if (query != null) result.query = query;
+    if (items != null) result.items.addAll(items);
+    return result;
+  }
+
+  ChatSearchResult._();
+
+  factory ChatSearchResult.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ChatSearchResult.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ChatSearchResult',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.chat'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'query')
+    ..pPM<ChatSearchResultItem>(2, _omitFieldNames ? '' : 'items',
+        subBuilder: ChatSearchResultItem.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ChatSearchResult clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ChatSearchResult copyWith(void Function(ChatSearchResult) updates) =>
+      super.copyWith((message) => updates(message as ChatSearchResult))
+          as ChatSearchResult;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ChatSearchResult create() => ChatSearchResult._();
+  @$core.override
+  ChatSearchResult createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static ChatSearchResult getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ChatSearchResult>(create);
+  static ChatSearchResult? _defaultInstance;
+
+  /// the query that produced these results
+  @$pb.TagNumber(1)
+  $core.String get query => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set query($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasQuery() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearQuery() => $_clearField(1);
+
+  /// matching messages
+  @$pb.TagNumber(2)
+  $pb.PbList<ChatSearchResultItem> get items => $_getList(1);
+}
+
+/// a single search result item
+class ChatSearchResultItem extends $pb.GeneratedMessage {
+  factory ChatSearchResultItem({
+    $core.List<$core.int>? messageId,
+    $core.List<$core.int>? groupId,
+    $core.List<$core.int>? senderId,
+    $core.String? content,
+    $fixnum.Int64? sentAt,
+  }) {
+    final result = create();
+    if (messageId != null) result.messageId = messageId;
+    if (groupId != null) result.groupId = groupId;
+    if (senderId != null) result.senderId = senderId;
+    if (content != null) result.content = content;
+    if (sentAt != null) result.sentAt = sentAt;
+    return result;
+  }
+
+  ChatSearchResultItem._();
+
+  factory ChatSearchResultItem.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ChatSearchResultItem.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ChatSearchResultItem',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.chat'),
+      createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(
+        1, _omitFieldNames ? '' : 'messageId', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(
+        2, _omitFieldNames ? '' : 'groupId', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(
+        3, _omitFieldNames ? '' : 'senderId', $pb.PbFieldType.OY)
+    ..aOS(4, _omitFieldNames ? '' : 'content')
+    ..a<$fixnum.Int64>(5, _omitFieldNames ? '' : 'sentAt', $pb.PbFieldType.OU6,
+        defaultOrMaker: $fixnum.Int64.ZERO)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ChatSearchResultItem clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ChatSearchResultItem copyWith(void Function(ChatSearchResultItem) updates) =>
+      super.copyWith((message) => updates(message as ChatSearchResultItem))
+          as ChatSearchResultItem;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ChatSearchResultItem create() => ChatSearchResultItem._();
+  @$core.override
+  ChatSearchResultItem createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static ChatSearchResultItem getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ChatSearchResultItem>(create);
+  static ChatSearchResultItem? _defaultInstance;
+
+  /// message id
+  @$pb.TagNumber(1)
+  $core.List<$core.int> get messageId => $_getN(0);
+  @$pb.TagNumber(1)
+  set messageId($core.List<$core.int> value) => $_setBytes(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasMessageId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearMessageId() => $_clearField(1);
+
+  /// group id of the conversation
+  @$pb.TagNumber(2)
+  $core.List<$core.int> get groupId => $_getN(1);
+  @$pb.TagNumber(2)
+  set groupId($core.List<$core.int> value) => $_setBytes(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasGroupId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearGroupId() => $_clearField(2);
+
+  /// sender id
+  @$pb.TagNumber(3)
+  $core.List<$core.int> get senderId => $_getN(2);
+  @$pb.TagNumber(3)
+  set senderId($core.List<$core.int> value) => $_setBytes(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasSenderId() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearSenderId() => $_clearField(3);
+
+  /// message text content
+  @$pb.TagNumber(4)
+  $core.String get content => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set content($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasContent() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearContent() => $_clearField(4);
+
+  /// time when the message was sent
+  @$pb.TagNumber(5)
+  $fixnum.Int64 get sentAt => $_getI64(4);
+  @$pb.TagNumber(5)
+  set sentAt($fixnum.Int64 value) => $_setInt64(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasSentAt() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearSentAt() => $_clearField(5);
 }
 
 /// send chat message

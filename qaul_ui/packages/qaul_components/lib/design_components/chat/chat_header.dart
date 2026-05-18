@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../styles/qaul_color_sheet.dart';
+import '../../styles/qaul_color_sheet.dart';
 
 const Color _kChatHeaderControlColor = Color(0xFF999999);
 const Color _kOnlineColor = Color(0xFF34C759);

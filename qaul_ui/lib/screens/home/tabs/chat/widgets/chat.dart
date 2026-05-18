@@ -53,7 +53,12 @@ part 'group_settings.dart';
 
 part 'image_message_widget.dart';
 
+part 'chat_timeline_projection.dart';
+
 typedef OnSendPressed = void Function(String rawText);
+
+ChatRenderMode resolveChatRenderMode(ChatRoom room) =>
+    room.isGroupChatRoom ? ChatRenderMode.group : ChatRenderMode.direct;
 
 const _kChatRouteName = '/chat';
 
@@ -176,7 +181,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   User? get otherUser => widget.otherUser;
 
   User? _directChatPeer(ChatRoom forRoom) {
-    if (forRoom.isGroupChatRoom) return null;
+    if (resolveChatRenderMode(forRoom) == ChatRenderMode.group) return null;
     if (otherUser != null) return otherUser;
     return ref
         .read(usersStoreProvider.notifier)
@@ -184,7 +189,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   final Map<String, String> _overflowMenuOptions = {};
-  Map<String, QaulChatBubbleDisplayItem> _bubbleDisplayItems = {};
+  Map<String, MessagePresentation> _messagePresentations = {};
+  ChatRenderMode _chatRenderMode = ChatRenderMode.direct;
 
   void _handleClick(String value) {
     switch (value) {
@@ -216,14 +222,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _updateMenuOptionsBasedOnRoomType();
+    _updateMenuOptionsBasedOnRoomType(resolveChatRenderMode(room));
   }
 
   @override
   void didUpdateWidget(covariant ChatScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.room == room) return;
-    _updateMenuOptionsBasedOnRoomType();
+    _updateMenuOptionsBasedOnRoomType(resolveChatRenderMode(room));
     _scheduleUpdateCurrentOpenChat();
   }
 
@@ -260,6 +266,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     final l10n = AppLocalizations.of(context)!;
     final directPeer = _directChatPeer(room);
+    _chatRenderMode = resolveChatRenderMode(room);
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -267,7 +275,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            (room.isGroupChatRoom)
+            (_chatRenderMode == ChatRenderMode.group)
                 ? QaulAvatar.groupSmall()
                 : QaulAvatar.small(user: directPeer),
             const SizedBox(width: 12),
@@ -306,12 +314,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           bottom: false,
           child: Chat(
           showUserAvatars: false,
-          showUserNames: room.isGroupChatRoom,
+          showUserNames: false,
           user: user.toInternalUser(),
           useTopSafeAreaInset: false,
           dateHeaderThreshold: const Duration(days: 365).inMilliseconds,
           groupMessagesThreshold: const Duration(days: 365).inMilliseconds,
-          messages: messages(room, l10n: l10n) ?? [],
+          messages: messages(
+                room,
+                l10n: l10n,
+                renderMode: _chatRenderMode,
+              ) ??
+              [],
           onSendPressed: sendMessage,
           inputOptions: const InputOptions(
             sendButtonVisibilityMode: SendButtonVisibilityMode.always,
@@ -331,7 +344,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 ? null
                 : 'Please wait for the admin to confirm your acceptance to send messages',
             sendButtonVisibilityMode: SendButtonVisibilityMode.editing,
-            hintText: room.isGroupChatRoom
+            hintText: _chatRenderMode == ChatRenderMode.group
                 ? l10n.groupChatMessageHint
                 : l10n.securePrivateMessageHint,
             onSendPressed: sendMessage,
@@ -483,42 +496,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           },
           textMessageBuilder:
               (message, {required int messageWidth, required bool showName}) {
-                final msgIdx = room.messages!.indexWhere(
-                  (element) => element.messageIdBase58 == message.id,
-                );
-
-                var prevMsgWasFromSamePerson = false;
-                if (msgIdx > 0) {
-                  final prevMsg = room.messages![msgIdx - 1];
-                  prevMsgWasFromSamePerson =
-                      prevMsg.content is TextMessageContent &&
-                      prevMsg.senderIdBase58 == message.author.id;
-                }
-
                 return TextMessage(
                   message: message,
                   usePreviewData: true,
                   hideBackgroundOnEmojiMessages: true,
-                  showName: showName && !prevMsgWasFromSamePerson,
+                  showName: false,
                   emojiEnlargementBehavior: EmojiEnlargementBehavior.multi,
-                  nameBuilder: (usr) {
-                    var user = room.members.firstWhereOrNull(
-                      (u) => usr.id == u.idBase58,
-                    );
-                    if (user == null) return const SizedBox();
-                    final color = colorGenerationStrategy(user.idBase58);
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 4.0),
-                      child: Text(
-                        user.name,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: color,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    );
-                  },
                 );
               },
           fileMessageBuilder: (message, {required int messageWidth}) {
@@ -587,71 +570,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   List<types.Message>? messages(
     ChatRoom room, {
     required AppLocalizations l10n,
+    required ChatRenderMode renderMode,
   }) {
-    final domainMessages = room.messages?.sorted();
-    if (domainMessages == null) return null;
-
-    final internalMessages = <types.Message>[];
-    final textMessages = <Message>[];
-
-    for (final m in domainMessages) {
-      final author = _author(m, l10n);
-      final internal = m.toInternalMessage(
-        author,
-        ref,
-        l10n: l10n,
-        room: room,
-      );
-
-      if (m.content is TextMessageContent && internal is types.TextMessage) {
-        // Status + ticks live in [QaulChatBubble]; hide flutter_chat_ui's
-        // trailing status slot (avoids Row crossAxisAlignment.end shift).
-        internalMessages.add(
-          internal.copyWith(
-            status: null,
-            showStatus: false,
-          ),
-        );
-        textMessages.add(m);
-      } else {
-        internalMessages.add(internal);
-      }
-    }
-
-    final bubbleSources = [...textMessages]
-      ..sort((a, b) => a.sentAt.compareTo(b.sentAt));
-
-    final bubbleMessages = <QaulChatBubbleMessage>[];
-    final bubbleIds = <String>[];
-
-    for (final m in bubbleSources) {
-      final isMe = m.senderId.equals(user.id);
-      bubbleMessages.add(
-        QaulChatBubbleMessage(
-          content: (m.content as TextMessageContent).content,
-          sentAt: m.sentAt,
-          receivedAt: m.receivedAt,
-          status: m.status == MessageState.sent
-              ? MessageStatus.sent
-              : (m.status == MessageState.confirmed ||
-                      m.status == MessageState.confirmedByAll
-                  ? MessageStatus.read
-                  : MessageStatus.notSent),
-          messageType: isMe ? MessageType.primary : MessageType.secondary,
-          edges: const [],
-        ),
-      );
-      bubbleIds.add(m.messageIdBase58);
-    }
-
-    final displayItems = computeChatBubbleDisplayItems(bubbleMessages);
-    final map = <String, QaulChatBubbleDisplayItem>{};
-    for (var i = 0; i < bubbleIds.length; i++) {
-      map[bubbleIds[i]] = displayItems[i];
-    }
-    _bubbleDisplayItems = map;
-
-    return internalMessages;
+    final projection = buildChatTimelineProjection(
+      room: room,
+      signedInUser: user,
+      l10n: l10n,
+      renderMode: renderMode,
+      ref: ref,
+      resolveAuthor: _author,
+    );
+    if (projection == null) return null;
+    _messagePresentations = projection.presentations;
+    return projection.internalMessages;
   }
 
   Widget _bubbleBuilder(
@@ -672,39 +603,35 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       );
     }
 
+    final presentation = _messagePresentations[message.id];
+    if (presentation == null) return child;
+
     if (message is types.TextMessage) {
-      final currentRoom = ref.read(currentOpenChatRoom);
-      final roomMessages = currentRoom?.messages;
-      if (roomMessages == null) return child;
-
-      final domainMessage = roomMessages
-          .firstWhereOrNull((m) => m.messageIdBase58 == message.id);
-      if (domainMessage == null) return child;
-
-      final display = _bubbleDisplayItems[domainMessage.messageIdBase58];
-      if (display == null) return child;
-
-      final clock = DateTime.now();
-      final isPrimary = display.message.messageType == MessageType.primary;
-
-      // Symmetric inset from screen edges (Notion / PR review): leading 16 for
-      // received bubbles, trailing 16 for sent (primary). RTL-safe.
-      return Padding(
-        padding: EdgeInsetsDirectional.only(
-          top: display.marginTop,
-          start: isPrimary ? 0 : 16,
-          end: isPrimary ? 16 : 0,
-        ),
-        child: QaulChatBubble(
-          message: display.message,
-          clock: clock,
-          showTimestamp: display.showTimestamp,
-        ),
+      return ChatMessageRenderer.renderText(
+        presentation: presentation,
+        mode: _chatRenderMode,
+        clock: DateTime.now(),
       );
     }
 
-    const radius = 20.0;
+    final nonTextBubble = _buildNonTextBubble(
+      child,
+      message,
+      clustersWithNext: presentation.meta.nonTextClustersWithNext,
+    );
+    return ChatMessageRenderer.wrapNonText(
+      child: nonTextBubble,
+      presentation: presentation,
+      mode: _chatRenderMode,
+    );
+  }
 
+  Widget _buildNonTextBubble(
+    Widget child,
+    types.Message message, {
+    required bool clustersWithNext,
+  }) {
+    const radius = 20.0;
     return Builder(
       builder: (context) {
         return Bubble(
@@ -718,7 +645,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           color: user.toInternalUser().id != message.author.id
               ? Colors.grey.shade200
               : Colors.lightBlue.shade700,
-          nip: nextMessageInGroup
+          nip: clustersWithNext
               ? BubbleNip.no
               : user.toInternalUser().id != message.author.id
                   ? BubbleNip.leftBottom
@@ -741,12 +668,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return isReceiving;
   }
 
-  void _updateMenuOptionsBasedOnRoomType() {
+  void _updateMenuOptionsBasedOnRoomType(ChatRenderMode mode) {
     var l10n = AppLocalizations.of(context)!;
-    if (room.isGroupChatRoom && _overflowMenuOptions.isEmpty) {
+    if (mode == ChatRenderMode.group && _overflowMenuOptions.isEmpty) {
       _overflowMenuOptions.addAll({'groupSettings': l10n.groupSettings});
     }
-    if (room.isDirectChat && _overflowMenuOptions.isNotEmpty) {
+    if (mode == ChatRenderMode.direct && _overflowMenuOptions.isNotEmpty) {
       _overflowMenuOptions.clear();
     }
   }

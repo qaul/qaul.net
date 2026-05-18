@@ -8,11 +8,7 @@
 // For information on using the generated types, please see the documentation:
 //   https://github.com/apple/swift-protobuf/
 
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
 import Foundation
-#endif
 import SwiftProtobuf
 
 // If the compiler emits an error on this type, it is because this file
@@ -692,6 +688,10 @@ struct Qaul_Rpc_Group_GroupListRequest: Sendable {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  var offset: UInt32 = 0
+
+  var limit: UInt32 = 0
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -706,9 +706,20 @@ struct Qaul_Rpc_Group_GroupListResponse: Sendable {
   /// group list
   var groups: [Qaul_Rpc_Group_GroupInfo] = []
 
+  var pagination: Qaul_Rpc_Group_PaginationMetadata {
+    get {_pagination ?? Qaul_Rpc_Group_PaginationMetadata()}
+    set {_pagination = newValue}
+  }
+  /// Returns true if `pagination` has been explicitly set.
+  var hasPagination: Bool {self._pagination != nil}
+  /// Clears the value of `pagination`. Subsequent reads from it will return its default value.
+  mutating func clearPagination() {self._pagination = nil}
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
+
+  fileprivate var _pagination: Qaul_Rpc_Group_PaginationMetadata? = nil
 }
 
 struct Qaul_Rpc_Group_GroupInvited: Sendable {
@@ -739,18 +750,40 @@ struct Qaul_Rpc_Group_GroupInvited: Sendable {
   fileprivate var _group: Qaul_Rpc_Group_GroupInfo? = nil
 }
 
-/// Group list request
-struct Qaul_Rpc_Group_GroupInvitedRequest: Sendable {
+struct Qaul_Rpc_Group_PaginationMetadata: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
+
+  var hasMore_p: Bool = false
+
+  var total: UInt32 = 0
+
+  var offset: UInt32 = 0
+
+  var limit: UInt32 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 }
 
-/// Group info response
+/// Group invited list request
+struct Qaul_Rpc_Group_GroupInvitedRequest: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var offset: UInt32 = 0
+
+  var limit: UInt32 = 0
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+/// Group invited response
 struct Qaul_Rpc_Group_GroupInvitedResponse: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -759,9 +792,20 @@ struct Qaul_Rpc_Group_GroupInvitedResponse: Sendable {
   /// invited list
   var invited: [Qaul_Rpc_Group_GroupInvited] = []
 
+  var pagination: Qaul_Rpc_Group_PaginationMetadata {
+    get {_pagination ?? Qaul_Rpc_Group_PaginationMetadata()}
+    set {_pagination = newValue}
+  }
+  /// Returns true if `pagination` has been explicitly set.
+  var hasPagination: Bool {self._pagination != nil}
+  /// Clears the value of `pagination`. Subsequent reads from it will return its default value.
+  mutating func clearPagination() {self._pagination = nil}
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
+
+  fileprivate var _pagination: Qaul_Rpc_Group_PaginationMetadata? = nil
 }
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -1662,18 +1706,34 @@ extension Qaul_Rpc_Group_GroupInfo: SwiftProtobuf.Message, SwiftProtobuf._Messag
 
 extension Qaul_Rpc_Group_GroupListRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".GroupListRequest"
-  static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\u{a}offset\0\u{2}\u{a}limit\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    // Load everything into unknown fields
-    while try decoder.nextFieldNumber() != nil {}
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 10: try { try decoder.decodeSingularUInt32Field(value: &self.offset) }()
+      case 20: try { try decoder.decodeSingularUInt32Field(value: &self.limit) }()
+      default: break
+      }
+    }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.offset != 0 {
+      try visitor.visitSingularUInt32Field(value: self.offset, fieldNumber: 10)
+    }
+    if self.limit != 0 {
+      try visitor.visitSingularUInt32Field(value: self.limit, fieldNumber: 20)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Qaul_Rpc_Group_GroupListRequest, rhs: Qaul_Rpc_Group_GroupListRequest) -> Bool {
+    if lhs.offset != rhs.offset {return false}
+    if lhs.limit != rhs.limit {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1681,7 +1741,7 @@ extension Qaul_Rpc_Group_GroupListRequest: SwiftProtobuf.Message, SwiftProtobuf.
 
 extension Qaul_Rpc_Group_GroupListResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".GroupListResponse"
-  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}groups\0")
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}groups\0\u{1}pagination\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1690,20 +1750,29 @@ extension Qaul_Rpc_Group_GroupListResponse: SwiftProtobuf.Message, SwiftProtobuf
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeRepeatedMessageField(value: &self.groups) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._pagination) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
     if !self.groups.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.groups, fieldNumber: 1)
     }
+    try { if let v = self._pagination {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Qaul_Rpc_Group_GroupListResponse, rhs: Qaul_Rpc_Group_GroupListResponse) -> Bool {
     if lhs.groups != rhs.groups {return false}
+    if lhs._pagination != rhs._pagination {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1753,20 +1822,81 @@ extension Qaul_Rpc_Group_GroupInvited: SwiftProtobuf.Message, SwiftProtobuf._Mes
   }
 }
 
-extension Qaul_Rpc_Group_GroupInvitedRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".GroupInvitedRequest"
-  static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+extension Qaul_Rpc_Group_PaginationMetadata: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".PaginationMetadata"
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{4}\u{a}has_more\0\u{2}\u{a}total\0\u{2}\u{a}offset\0\u{2}\u{a}limit\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    // Load everything into unknown fields
-    while try decoder.nextFieldNumber() != nil {}
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 10: try { try decoder.decodeSingularBoolField(value: &self.hasMore_p) }()
+      case 20: try { try decoder.decodeSingularUInt32Field(value: &self.total) }()
+      case 30: try { try decoder.decodeSingularUInt32Field(value: &self.offset) }()
+      case 40: try { try decoder.decodeSingularUInt32Field(value: &self.limit) }()
+      default: break
+      }
+    }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.hasMore_p != false {
+      try visitor.visitSingularBoolField(value: self.hasMore_p, fieldNumber: 10)
+    }
+    if self.total != 0 {
+      try visitor.visitSingularUInt32Field(value: self.total, fieldNumber: 20)
+    }
+    if self.offset != 0 {
+      try visitor.visitSingularUInt32Field(value: self.offset, fieldNumber: 30)
+    }
+    if self.limit != 0 {
+      try visitor.visitSingularUInt32Field(value: self.limit, fieldNumber: 40)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Qaul_Rpc_Group_PaginationMetadata, rhs: Qaul_Rpc_Group_PaginationMetadata) -> Bool {
+    if lhs.hasMore_p != rhs.hasMore_p {return false}
+    if lhs.total != rhs.total {return false}
+    if lhs.offset != rhs.offset {return false}
+    if lhs.limit != rhs.limit {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Qaul_Rpc_Group_GroupInvitedRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".GroupInvitedRequest"
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\u{a}offset\0\u{2}\u{a}limit\0")
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 10: try { try decoder.decodeSingularUInt32Field(value: &self.offset) }()
+      case 20: try { try decoder.decodeSingularUInt32Field(value: &self.limit) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.offset != 0 {
+      try visitor.visitSingularUInt32Field(value: self.offset, fieldNumber: 10)
+    }
+    if self.limit != 0 {
+      try visitor.visitSingularUInt32Field(value: self.limit, fieldNumber: 20)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Qaul_Rpc_Group_GroupInvitedRequest, rhs: Qaul_Rpc_Group_GroupInvitedRequest) -> Bool {
+    if lhs.offset != rhs.offset {return false}
+    if lhs.limit != rhs.limit {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1774,7 +1904,7 @@ extension Qaul_Rpc_Group_GroupInvitedRequest: SwiftProtobuf.Message, SwiftProtob
 
 extension Qaul_Rpc_Group_GroupInvitedResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".GroupInvitedResponse"
-  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}invited\0")
+  static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}invited\0\u{1}pagination\0")
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1783,20 +1913,29 @@ extension Qaul_Rpc_Group_GroupInvitedResponse: SwiftProtobuf.Message, SwiftProto
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeRepeatedMessageField(value: &self.invited) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._pagination) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
     if !self.invited.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.invited, fieldNumber: 1)
     }
+    try { if let v = self._pagination {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Qaul_Rpc_Group_GroupInvitedResponse, rhs: Qaul_Rpc_Group_GroupInvitedResponse) -> Bool {
     if lhs.invited != rhs.invited {return false}
+    if lhs._pagination != rhs._pagination {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

@@ -10,19 +10,158 @@
 // **************************************************************************
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:qaul_components_widgetbook/use_cases/chat_header.dart'
-    as _qaul_components_widgetbook_use_cases_chat_header;
-import 'package:qaul_components_widgetbook/use_cases/qaul_color_sheet.dart'
-    as _qaul_components_widgetbook_use_cases_qaul_color_sheet;
-import 'package:qaul_components_widgetbook/use_cases/qaul_chat_bubble.dart'
-    as _qaul_components_widgetbook_use_cases_qaul_chat_bubble;
-import 'package:qaul_components_widgetbook/use_cases/qaul_fab.dart'
-    as _qaul_components_widgetbook_use_cases_qaul_fab;
-import 'package:qaul_components_widgetbook/use_cases/qaul_navbar.dart'
-    as _qaul_components_widgetbook_use_cases_qaul_navbar;
+import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_header.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_chat_chat_header;
+import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_timeline.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_chat_chat_timeline;
+import 'package:qaul_components_widgetbook/use_cases/design_components/qaul_color_sheet.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_qaul_color_sheet;
+import 'package:qaul_components_widgetbook/use_cases/design_components/shell/qaul_fab.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_shell_qaul_fab;
+import 'package:qaul_components_widgetbook/use_cases/design_components/shell/qaul_navbar.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_shell_qaul_navbar;
+import 'package:qaul_components_widgetbook/use_cases/special_forms/qaul_chat_bubble.dart'
+    as _qaul_components_widgetbook_use_cases_special_forms_qaul_chat_bubble;
+import 'package:qaul_components_widgetbook/use_cases/special_forms/room_meta_message.dart'
+    as _qaul_components_widgetbook_use_cases_special_forms_room_meta_message;
 import 'package:widgetbook/widgetbook.dart' as _widgetbook;
 
 final directories = <_widgetbook.WidgetbookNode>[
+  _widgetbook.WidgetbookFolder(
+    name: 'design_components',
+    children: [
+      _widgetbook.WidgetbookFolder(
+        name: 'chat',
+        children: [
+          _widgetbook.WidgetbookComponent(
+            name: 'ChatHeader',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Direct — last seen',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_header
+                        .buildChatHeaderDirectLastSeenUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Direct — online',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_header
+                        .buildChatHeaderDirectOnlineUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Group',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_header
+                        .buildChatHeaderGroupUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookComponent(
+            name: 'ChatTimeline',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Direct chat preview',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_timeline
+                        .buildChatRoomPreviewUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Group chat preview',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_timeline
+                        .buildGroupChatUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookComponent(
+            name: 'QaulChatBubble',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Incoming — long',
+                builder:
+                    _qaul_components_widgetbook_use_cases_special_forms_qaul_chat_bubble
+                        .buildIncomingLongUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Incoming — short',
+                builder:
+                    _qaul_components_widgetbook_use_cases_special_forms_qaul_chat_bubble
+                        .buildIncomingShortUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Outgoing — not sent',
+                builder:
+                    _qaul_components_widgetbook_use_cases_special_forms_qaul_chat_bubble
+                        .buildOutgoingNotSentUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Outgoing — read',
+                builder:
+                    _qaul_components_widgetbook_use_cases_special_forms_qaul_chat_bubble
+                        .buildOutgoingReadUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Outgoing — sent',
+                builder:
+                    _qaul_components_widgetbook_use_cases_special_forms_qaul_chat_bubble
+                        .buildOutgoingSentUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookComponent(
+            name: 'RoomMetaMessage',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Date',
+                builder:
+                    _qaul_components_widgetbook_use_cases_special_forms_room_meta_message
+                        .buildRoomMetaMessageDateUseCase,
+              ),
+            ],
+          ),
+        ],
+      ),
+      _widgetbook.WidgetbookFolder(
+        name: 'shell',
+        children: [
+          _widgetbook.WidgetbookComponent(
+            name: 'QaulFAB',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Default',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_shell_qaul_fab
+                        .buildQaulFabDefaultUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Small (chat)',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_shell_qaul_fab
+                        .buildQaulFabSmallUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookComponent(
+            name: 'QaulNavBar',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Horizontal (mobile)',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_shell_qaul_navbar
+                        .buildNavBarHorizontalUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Vertical (tablet/desktop)',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_shell_qaul_navbar
+                        .buildNavBarVerticalUseCase,
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+  ),
   _widgetbook.WidgetbookFolder(
     name: 'styles',
     children: [
@@ -31,73 +170,9 @@ final directories = <_widgetbook.WidgetbookNode>[
         useCases: [
           _widgetbook.WidgetbookUseCase(
             name: 'Palette',
-            builder: _qaul_components_widgetbook_use_cases_qaul_color_sheet
-                .buildColorSheetPaletteUseCase,
-          ),
-        ],
-      ),
-    ],
-  ),
-  _widgetbook.WidgetbookFolder(
-    name: 'widgets',
-    children: [
-      _widgetbook.WidgetbookComponent(
-        name: 'ChatHeader',
-        useCases: [
-          _widgetbook.WidgetbookUseCase(
-            name: 'Direct — last seen',
-            builder: _qaul_components_widgetbook_use_cases_chat_header
-                .buildChatHeaderDirectLastSeenUseCase,
-          ),
-          _widgetbook.WidgetbookUseCase(
-            name: 'Direct — online',
-            builder: _qaul_components_widgetbook_use_cases_chat_header
-                .buildChatHeaderDirectOnlineUseCase,
-          ),
-          _widgetbook.WidgetbookUseCase(
-            name: 'Group',
-            builder: _qaul_components_widgetbook_use_cases_chat_header
-                .buildChatHeaderGroupUseCase,
-          ),
-        ],
-      ),
-      _widgetbook.WidgetbookComponent(
-        name: 'QaulChatBubble',
-        useCases: [
-          _widgetbook.WidgetbookUseCase(
-            name: 'Conversation preview',
-            builder: _qaul_components_widgetbook_use_cases_qaul_chat_bubble
-                .buildChatBubbleConversationUseCase,
-          ),
-        ],
-      ),
-      _widgetbook.WidgetbookComponent(
-        name: 'QaulFAB',
-        useCases: [
-          _widgetbook.WidgetbookUseCase(
-            name: 'Default',
-            builder: _qaul_components_widgetbook_use_cases_qaul_fab
-                .buildQaulFabDefaultUseCase,
-          ),
-          _widgetbook.WidgetbookUseCase(
-            name: 'Small (chat)',
-            builder: _qaul_components_widgetbook_use_cases_qaul_fab
-                .buildQaulFabSmallUseCase,
-          ),
-        ],
-      ),
-      _widgetbook.WidgetbookComponent(
-        name: 'QaulNavBar',
-        useCases: [
-          _widgetbook.WidgetbookUseCase(
-            name: 'Horizontal (mobile)',
-            builder: _qaul_components_widgetbook_use_cases_qaul_navbar
-                .buildNavBarHorizontalUseCase,
-          ),
-          _widgetbook.WidgetbookUseCase(
-            name: 'Vertical (tablet/desktop)',
-            builder: _qaul_components_widgetbook_use_cases_qaul_navbar
-                .buildNavBarVerticalUseCase,
+            builder:
+                _qaul_components_widgetbook_use_cases_design_components_qaul_color_sheet
+                    .buildColorSheetPaletteUseCase,
           ),
         ],
       ),
