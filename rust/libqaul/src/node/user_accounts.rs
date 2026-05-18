@@ -301,6 +301,43 @@ impl UserAccounts {
         Ok(())
     }
 
+    /// Update the local account label (the `name` field on the saved
+    /// UserAccount) so `GetDefaultUserAccount` reflects a profile rename.
+    /// Returns true when both the in-memory state and the on-disk config
+    /// were updated.
+    fn update_account_name(state: &crate::QaulState, user_id: PeerId, new_name: &str) -> bool {
+        let mut changed = false;
+        {
+            let mut users = match state.user_accounts.inner.write() {
+                Ok(u) => u,
+                Err(e) => {
+                    log::error!("update_account_name lock poisoned: {}", e);
+                    return false;
+                }
+            };
+            if let Some(user) = users.users.iter_mut().find(|u| u.id == user_id) {
+                if user.name != new_name {
+                    user.name = new_name.to_string();
+                    changed = true;
+                }
+            }
+        }
+        if changed {
+            {
+                let mut config = Configuration::get_mut(state);
+                if let Some(user_cfg) = config
+                    .user_accounts
+                    .iter_mut()
+                    .find(|u| u.id == user_id.to_string())
+                {
+                    user_cfg.name = new_name.to_string();
+                }
+            }
+            Configuration::save(state);
+        }
+        changed
+    }
+
     /// verify password for user
     pub fn verify_password(state: &crate::QaulState, user_id: PeerId, password: String) -> Result<bool, String> {
         let accounts = state.user_accounts.inner.read().unwrap();
@@ -544,7 +581,19 @@ impl UserAccounts {
                                 let new_name = if update_req.name.is_empty() { user.name.clone() } else { update_req.name.clone() };
                                 let new_bio = if update_req.bio.is_empty() { user.bio.clone() } else { update_req.bio.clone() };
                                 let new_avatar = if update_req.avatar.is_empty() { user.avatar.clone() } else { update_req.avatar.clone() };
-                                let new_custody_route = if update_req.preferred_custody_route.is_empty() { user.preferred_custody_route.clone() } else { update_req.preferred_custody_route.clone() };
+                                // Proto spec (user_accounts.proto:51):
+                                //   empty Vec     -> no change
+                                //   [Vec::new()]  -> clear (wipe sentinel)
+                                //   otherwise     -> set to provided hops
+                                let new_custody_route = if update_req.preferred_custody_route.is_empty() {
+                                    user.preferred_custody_route.clone()
+                                } else if update_req.preferred_custody_route.len() == 1
+                                    && update_req.preferred_custody_route[0].is_empty()
+                                {
+                                    Vec::new()
+                                } else {
+                                    update_req.preferred_custody_route.clone()
+                                };
                                 let new_version = user.version + 1;
                                 let new_updated_at = crate::utilities::timestamp::Timestamp::get_timestamp();
 
@@ -571,10 +620,19 @@ impl UserAccounts {
 
                         let signed = router::users::Users::create_signed_profile(&updated_user, &account.keys);
                         let new_version = updated_user.version;
+                        let new_name_for_account = updated_user.name.clone();
                         let mut user_to_store = updated_user;
                         user_to_store.signed_profile_bytes = signed.profile;
                         user_to_store.signed_profile_signature = signed.signature;
                         router::users::Users::add(state, &rs, user_to_store);
+
+                        // Mirror the rename into the local account label so
+                        // `GetDefaultUserAccount` reflects it. Only the `name`
+                        // is shared between the two tables; bio/avatar/etc.
+                        // live solely in the network-visible record.
+                        if !update_req.name.is_empty() {
+                            Self::update_account_name(state, user_peer_id, &new_name_for_account);
+                        }
 
                         Self::send_update_profile_response(state, true, String::new(), new_version, request_id);
                     }
