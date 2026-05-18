@@ -10,7 +10,11 @@
 use prost::Message;
 use serde_json::json;
 
-use crate::{cli::DtnSubcmd, commands::RpcCommand, proto::Modules};
+use crate::{
+    cli::{DtnCustodySubcmd, DtnSubcmd},
+    commands::RpcCommand,
+    proto::Modules,
+};
 
 use super::id_string_to_bin;
 
@@ -49,6 +53,38 @@ impl RpcCommand for DtnSubcmd {
                     proto::DtnSetTotalSizeRequest { total_size: *size },
                 )),
             },
+            DtnSubcmd::Custody { command } => proto::Dtn {
+                message: Some(proto::dtn::Message::DtnSetCustodyEnabledRequest(
+                    proto::DtnSetCustodyEnabledRequest {
+                        enabled: matches!(command, DtnCustodySubcmd::Enable),
+                    },
+                )),
+            },
+            DtnSubcmd::SendRouted {
+                receiver_id,
+                data_file,
+                custody_route,
+                expiry_seconds,
+                max_handoffs,
+            } => {
+                let receiver = id_string_to_bin(receiver_id.clone())?;
+                let custody = custody_route
+                    .iter()
+                    .map(|id| id_string_to_bin(id.clone()))
+                    .collect::<Result<Vec<_>, _>>()?;
+                let data = std::fs::read(data_file)?;
+                proto::Dtn {
+                    message: Some(proto::dtn::Message::DtnSendRoutedRequest(
+                        proto::DtnSendRoutedRequest {
+                            receiver_id: receiver,
+                            data,
+                            custody_route: custody,
+                            expiry_seconds: *expiry_seconds,
+                            max_handoffs: *max_handoffs,
+                        },
+                    )),
+                }
+            }
         };
 
         Ok((proto_message.encode_to_vec(), Modules::Dtn))
@@ -103,6 +139,12 @@ impl RpcCommand for DtnSubcmd {
                 }
                 Some(proto::dtn::Message::DtnSetTotalSizeResponse(r)) => {
                     print_status(json, "DTN Set Total Size", r.status, &r.message)?;
+                }
+                Some(proto::dtn::Message::DtnSetCustodyEnabledResponse(r)) => {
+                    print_status(json, "DTN Set Custody Enabled", r.status, &r.message)?;
+                }
+                Some(proto::dtn::Message::DtnSendRoutedResponse(r)) => {
+                    print_status(json, "DTN Send Routed", r.status, &r.message)?;
                 }
                 other => {
                     log::warn!("dtn: unexpected response variant: {other:?}");
