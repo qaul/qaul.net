@@ -84,6 +84,16 @@ impl MessagingProcess {
                 // update DTN state
                 state.services.dtn.on_dtn_response(&dtn_response);
 
+                // Fan the response out to any active event subscribers
+                // before it gets folded into the unconfirmed-table update,
+                // so the event always fires regardless of whether the
+                // signature was still tracked locally.
+                crate::rpc::subscribe::emit_dtn_delivery_response(
+                    state,
+                    sender_id,
+                    &dtn_response,
+                );
+
                 // update unconfirmed table
                 super::Messaging::on_confirmed_message(
                     state,
@@ -164,6 +174,17 @@ impl MessagingProcess {
                             common.sent_at,
                             content_message,
                             chat::rpc_proto::MessageStatus::Received,
+                        );
+
+                        // Fan the message out to any active event subscribers.
+                        crate::rpc::subscribe::emit_chat_message(
+                            state,
+                            &user_account.id,
+                            sender_id,
+                            &group_id,
+                            &common.message_id,
+                            common.sent_at,
+                            &chat_message.content,
                         );
                     }
                     Some(super::proto::common_message::Payload::FileMessage(ref file_message)) => {
