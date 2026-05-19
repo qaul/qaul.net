@@ -47,6 +47,7 @@ class UsersSearchStore extends Notifier<UsersSearchState> {
 
   Timer? _debounceTimer;
   int _requestGeneration = 0;
+  bool _loadMoreInFlight = false;
 
   @override
   UsersSearchState build() => const UsersSearchState();
@@ -58,6 +59,8 @@ class UsersSearchStore extends Notifier<UsersSearchState> {
       return;
     }
 
+    // Invalidate in-flight search/loadMore before debounce fires.
+    _requestGeneration++;
     state = state.copyWith(query: query, isLoading: true);
     _debounceTimer = Timer(_debounceDuration, () => _search(offset: 0, replace: true));
   }
@@ -69,13 +72,24 @@ class UsersSearchStore extends Notifier<UsersSearchState> {
   }
 
   Future<void> loadMore() async {
-    if (!state.isActive || state.isLoading || !state.hasMore) return;
+    if (_loadMoreInFlight ||
+        !state.isActive ||
+        state.isLoading ||
+        !state.hasMore) {
+      return;
+    }
     final pagination = state.pagination;
     if (pagination == null) return;
-    await _search(
-      offset: pagination.offset + pagination.limit,
-      replace: false,
-    );
+
+    _loadMoreInFlight = true;
+    try {
+      await _search(
+        offset: pagination.offset + pagination.limit,
+        replace: false,
+      );
+    } finally {
+      _loadMoreInFlight = false;
+    }
   }
 
   Future<void> refresh() async {
@@ -84,23 +98,31 @@ class UsersSearchStore extends Notifier<UsersSearchState> {
     await _search(offset: 0, replace: true);
   }
 
+  bool _isCurrentSearch(int generation, String requestedQuery) {
+    return ref.mounted &&
+        generation == _requestGeneration &&
+        requestedQuery == state.query.trim();
+  }
+
   Future<void> _search({required int offset, required bool replace}) async {
-    final query = state.query.trim();
-    if (query.isEmpty) return;
+    final requestedQuery = state.query.trim();
+    if (requestedQuery.isEmpty) return;
 
     final generation = ++_requestGeneration;
     state = state.copyWith(isLoading: true);
 
     final result = await ref.read(qaulWorkerProvider).searchUsers(
-          query: query,
+          query: requestedQuery,
           offset: offset,
           limit: _pageSize,
         );
 
-    if (!ref.mounted || generation != _requestGeneration) return;
+    if (!_isCurrentSearch(generation, requestedQuery)) return;
 
     if (result == null) {
-      state = state.copyWith(isLoading: false);
+      if (_isCurrentSearch(generation, requestedQuery)) {
+        state = state.copyWith(isLoading: false);
+      }
       return;
     }
 
@@ -112,6 +134,8 @@ class UsersSearchStore extends Notifier<UsersSearchState> {
               !(u.isBlocked ?? false),
         )
         .toList();
+
+    if (!_isCurrentSearch(generation, requestedQuery)) return;
 
     state = UsersSearchState(
       query: state.query,
