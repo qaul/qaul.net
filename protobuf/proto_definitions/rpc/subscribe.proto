@@ -1,0 +1,92 @@
+syntax = "proto3";
+package qaul.rpc.subscribe;
+
+// Subscribe RPC envelope.
+//
+// A subscribe call is a long-running RPC: the client sends a single
+// `SubscribeRequest`, then libqaul pushes back any number of `Event`
+// messages over the same socket, all tagged with the same `request_id`,
+// until the client disconnects.
+//
+// In this initial version every subscriber receives every event kind.
+// Per-topic filtering can be added later by populating
+// `SubscribeRequest.topics`; libqaul currently ignores it.
+message Subscribe {
+    oneof message {
+        SubscribeRequest request = 1;
+        Event event = 2;
+    }
+}
+
+// Client → libqaul: open a subscription.
+message SubscribeRequest {
+    // Optional list of topic filters. Empty = subscribe to all topics.
+    // Reserved for a future PR; libqaul currently ignores this field.
+    repeated string topics = 1;
+}
+
+// libqaul → client: a single event.
+//
+// `topic` is a dotted lowercase string identifying the event kind
+// (e.g. "chat.message"). `payload` is opaque bytes whose decoding is
+// determined by the topic — clients ignore topics they don't recognise.
+// `timestamp` is the libqaul-side wall-clock time the event was emitted,
+// in milliseconds since the Unix epoch.
+message Event {
+    string topic = 1;
+    bytes payload = 2;
+    uint64 timestamp = 3;
+}
+
+// Payload for `topic = "dtn.delivery_response"`.
+//
+// Emitted whenever this node (acting as the original sender of a
+// DTN-stored message) receives a `DtnResponse` back from a storage node.
+// `response_type` mirrors `qaul.net.messaging.dtn_response.ResponseType`:
+//   0 = None, 1 = Accepted, 2 = Rejected.
+// `reason` mirrors `qaul.net.messaging.dtn_response.Reason`.
+// Clients that only care about success can filter on response_type == 1.
+message DtnDeliveryResponseEvent {
+    // signature of the original DTN-stored message this response is for
+    bytes signature = 1;
+    // PeerId of the storage node sending the response
+    bytes storage_node = 2;
+    uint32 response_type = 3;
+    uint32 reason = 4;
+}
+
+// Payload for `topic = "peers.connected"`.
+//
+// Emitted the first time a peer becomes a routing neighbour on a given
+// transport. Subsequent pings on the same transport do not refire.
+//
+// `module` mirrors `qaul.connections.ConnectionModule`:
+// 0 = Local, 1 = Lan, 2 = Internet, 3 = Ble, 4 = None.
+//
+// A `peers.disconnected` companion topic is reserved for a future PR
+// once libqaul actually prunes stale neighbours from the routing table.
+message PeerEvent {
+    bytes peer_id = 1;
+    uint32 module = 2;
+}
+
+// Payload for `topic = "chat.message"`.
+//
+// Emitted whenever a chat message is saved to local storage as the
+// receiving side of a delivery. Sender-side echoes do not fire this event.
+message ChatMessageEvent {
+    // Receiver (this node's local user) the message was delivered to.
+    bytes receiver_id = 1;
+    // Sender's PeerId.
+    bytes sender_id = 2;
+    // Group / conversation id the message belongs to.
+    bytes group_id = 3;
+    // Per-message id assigned by the sender.
+    bytes message_id = 4;
+    // Sender-side wall-clock time when the message was created.
+    uint64 sent_at = 5;
+    // Receiver-side wall-clock time when the message was saved locally.
+    uint64 received_at = 6;
+    // Plain-text content. Empty for non-text payloads (file message, etc.).
+    string content = 7;
+}
