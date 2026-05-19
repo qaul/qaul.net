@@ -4,6 +4,7 @@
 //! # qauld-ctl - CLI client for controlling a running qauld daemon instance via Unix socket
 
 use std::path::PathBuf;
+use std::time::Duration;
 
 use clap::Parser;
 use cli::{Cli, Commands};
@@ -35,6 +36,7 @@ const DEFAULT_TCP_ADDR: &str = "127.0.0.1:9199";
 /// A Pre flight requesst to get the user ID before executing any command
 async fn preflight_request<T>(
     client: &mut Framed<T, LengthDelimitedCodec>,
+    timeout: Duration,
 ) -> Result<Vec<u8>, Box<dyn std::error::Error>>
 where
     T: AsyncRead + AsyncWrite + Unpin,
@@ -56,7 +58,11 @@ where
         .expect("Vec<u8> provides capacity as needed");
     client.send(rpc_msg.into()).await?;
 
-    let user_id_bytes = if let Some(Ok(data)) = client.next().await {
+    let next = tokio::time::timeout(timeout, client.next())
+        .await
+        .map_err(|_| "preflight: timed out waiting for daemon response")?;
+
+    let user_id_bytes = if let Some(Ok(data)) = next {
         match proto::QaulRpc::decode(&data[..]) {
             Ok(msg) => commands::decode_default_user(&msg.data),
             _ => {
@@ -121,8 +127,9 @@ where
         .length_adjustment(0)
         .new_framed(client);
 
+    let timeout = Duration::from_secs(cli.timeout);
     let request_id = Uuid::new_v4().to_string();
-    let user_id = preflight_request(&mut framed_client).await?;
+    let user_id = preflight_request(&mut framed_client, timeout).await?;
 
     let rpc_command: Box<dyn RpcCommand> = match cli.command {
         Commands::Node(c) => Box::new(c.command) as Box<dyn RpcCommand>,
@@ -161,11 +168,16 @@ where
     framed_client.send(rpc_msg.into()).await?;
 
     if rpc_command.expects_response() {
-        if let Some(Ok(data)) = framed_client.next().await {
-            match proto::QaulRpc::decode(&data[..]) {
+        let next = tokio::time::timeout(timeout, framed_client.next())
+            .await
+            .map_err(|_| "timed out waiting for daemon response")?;
+        match next {
+            Some(Ok(data)) => match proto::QaulRpc::decode(&data[..]) {
                 Ok(msg) => rpc_command.decode_response(&msg.data[..], cli.json)?,
-                _ => {}
-            }
+                Err(e) => return Err(format!("malformed RPC envelope: {e}").into()),
+            },
+            Some(Err(e)) => return Err(format!("socket read error: {e}").into()),
+            None => return Err("daemon closed the connection without responding".into()),
         }
     }
 
@@ -189,7 +201,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let (client, addr) = connect_to_qauld(&cli).await?;
-    println!("qauld-ctl connected to qauld daemon at: {addr}");
+    if cli.verbose {
+        eprintln!("qauld-ctl connected to qauld daemon at: {addr}");
+    }
     run(client, cli).await?;
 
     Ok(())

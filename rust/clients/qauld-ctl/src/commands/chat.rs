@@ -194,7 +194,7 @@ impl RpcCommand for ChatSubcmd {
                 }
             }
             _ => {
-                log::error!("unprocessable RPC chat message");
+                return Err("unprocessable RPC chat message".into());
             }
         };
         Ok(())
