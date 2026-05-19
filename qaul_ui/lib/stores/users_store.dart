@@ -4,6 +4,124 @@ final usersStoreProvider = NotifierProvider<UsersStore, List<User>>(
   UsersStore.new,
 );
 
+final usersSearchProvider =
+    NotifierProvider<UsersSearchStore, UsersSearchState>(
+  UsersSearchStore.new,
+);
+
+class UsersSearchState {
+  const UsersSearchState({
+    this.query = '',
+    this.results = const [],
+    this.pagination,
+    this.isLoading = false,
+  });
+
+  final String query;
+  final List<User> results;
+  final PaginationState? pagination;
+  final bool isLoading;
+
+  bool get isActive => query.trim().isNotEmpty;
+
+  bool get hasMore => pagination?.hasMore ?? false;
+
+  UsersSearchState copyWith({
+    String? query,
+    List<User>? results,
+    PaginationState? pagination,
+    bool? isLoading,
+  }) {
+    return UsersSearchState(
+      query: query ?? this.query,
+      results: results ?? this.results,
+      pagination: pagination ?? this.pagination,
+      isLoading: isLoading ?? this.isLoading,
+    );
+  }
+}
+
+class UsersSearchStore extends Notifier<UsersSearchState> {
+  static const _debounceDuration = Duration(milliseconds: 250);
+  static const _pageSize = 20;
+
+  Timer? _debounceTimer;
+  int _requestGeneration = 0;
+
+  @override
+  UsersSearchState build() => const UsersSearchState();
+
+  void setQuery(String query) {
+    _debounceTimer?.cancel();
+    if (query.trim().isEmpty) {
+      clear();
+      return;
+    }
+
+    state = state.copyWith(query: query, isLoading: true);
+    _debounceTimer = Timer(_debounceDuration, () => _search(offset: 0, replace: true));
+  }
+
+  void clear() {
+    _debounceTimer?.cancel();
+    _requestGeneration++;
+    state = const UsersSearchState();
+  }
+
+  Future<void> loadMore() async {
+    if (!state.isActive || state.isLoading || !state.hasMore) return;
+    final pagination = state.pagination;
+    if (pagination == null) return;
+    await _search(
+      offset: pagination.offset + pagination.limit,
+      replace: false,
+    );
+  }
+
+  Future<void> refresh() async {
+    if (!state.isActive) return;
+    _debounceTimer?.cancel();
+    await _search(offset: 0, replace: true);
+  }
+
+  Future<void> _search({required int offset, required bool replace}) async {
+    final query = state.query.trim();
+    if (query.isEmpty) return;
+
+    final generation = ++_requestGeneration;
+    state = state.copyWith(isLoading: true);
+
+    final result = await ref.read(qaulWorkerProvider).searchUsers(
+          query: query,
+          offset: offset,
+          limit: _pageSize,
+        );
+
+    if (!ref.mounted || generation != _requestGeneration) return;
+
+    if (result == null) {
+      state = state.copyWith(isLoading: false);
+      return;
+    }
+
+    final defaultUser = ref.read(defaultUserProvider);
+    final filtered = result.users
+        .where(
+          (u) =>
+              (defaultUser == null || !u.id.equals(defaultUser.id)) &&
+              !(u.isBlocked ?? false),
+        )
+        .toList();
+
+    state = UsersSearchState(
+      query: state.query,
+      results: replace ? filtered : [...state.results, ...filtered],
+      pagination: result.pagination,
+      isLoading: false,
+    );
+  }
+}
+
 class UsersStore extends Notifier<List<User>> {
   PaginationState? _pagination;
   PaginationState? get pagination => _pagination;

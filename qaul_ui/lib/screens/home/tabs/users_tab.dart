@@ -32,9 +32,27 @@ class _UsersState extends _BaseTabState<_Users> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >=
+    if (_scrollController.position.pixels <
         _scrollController.position.maxScrollExtent * 0.8) {
+      return;
+    }
+    final search = ref.read(usersSearchProvider);
+    if (search.isActive) {
+      _loadMoreSearchResults();
+    } else {
       _loadMoreUsers();
+    }
+  }
+
+  Future<void> _loadMoreSearchResults() async {
+    final search = ref.read(usersSearchProvider);
+    if (_isLoadingMore || !search.hasMore || search.isLoading) return;
+
+    setState(() => _isLoadingMore = true);
+    try {
+      await ref.read(usersSearchProvider.notifier).loadMore();
+    } finally {
+      if (mounted) setState(() => _isLoadingMore = false);
     }
   }
 
@@ -82,12 +100,22 @@ class _UsersState extends _BaseTabState<_Users> {
       }
     });
 
+    final search = ref.watch(usersSearchProvider);
+    final isLoading = _isLoadingMore ||
+        (search.isActive && search.isLoading && search.results.isEmpty);
+
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: LoadingDecorator(
-        isLoading: _isLoadingMore,
+        isLoading: isLoading,
         child: RefreshIndicator(
-          onRefresh: () async => await _refreshUsers(),
+          onRefresh: () async {
+            if (ref.read(usersSearchProvider).isActive) {
+              await ref.read(usersSearchProvider.notifier).refresh();
+            } else {
+              await _refreshUsers();
+            }
+          },
           child: SearchUserDecorator(builder: (_, users) {
             return EmptyStateTextDecorator(
               l10n.emptyUsersList,
