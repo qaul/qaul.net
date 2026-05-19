@@ -317,7 +317,8 @@ impl RpcCommand for UsersSubcmd {
                     }
                 }
                 None => {
-                    println!("User not found.");
+                    eprintln!("User not found.");
+                    return Err("user not found".into());
                 }
             },
             Some(users::Message::SecurityNumberResponse(resp)) => {
@@ -342,7 +343,7 @@ impl RpcCommand for UsersSubcmd {
                 }
             }
             _ => {
-                log::error!("unprocessable RPC users message");
+                return Err("unprocessable RPC users message".into());
             }
         };
         Ok(())

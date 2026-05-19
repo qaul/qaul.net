@@ -19,6 +19,16 @@ pub struct Cli {
     #[arg(short, long, default_value = "false")]
     pub json: bool,
 
+    /// Print informational diagnostics (connection banner, etc.) to stderr.
+    /// Default is silent for script-friendliness.
+    #[arg(short, long, default_value = "false")]
+    pub verbose: bool,
+
+    /// How long to wait (seconds) for a response before giving up.
+    /// Applies to both the preflight request and the actual command.
+    #[arg(short, long, default_value = "10")]
+    pub timeout: u64,
+
     #[command(subcommand)]
     pub command: Commands,
 }

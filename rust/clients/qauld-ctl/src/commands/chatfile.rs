@@ -99,7 +99,7 @@ impl RpcCommand for ChatFileSubcmd {
                 }
             }
             _ => {
-                log::error!("unprocessable RPC file message");
+                return Err("unprocessable RPC file message".into());
             }
         };
         Ok(())
