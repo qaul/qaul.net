@@ -100,18 +100,18 @@ impl RpcCommand for TransportsSubcmd {
                     } else if r.success {
                         println!("transport '{}' updated", r.id);
                     } else {
-                        println!("transport '{}' update FAILED: {}", r.id, r.error);
+                        eprintln!("transport '{}' update FAILED: {}", r.id, r.error);
+                        return Err(format!("transport '{}' update failed: {}", r.id, r.error).into());
                     }
                 }
                 Some(proto::transports::Message::ListRequest(_))
                 | Some(proto::transports::Message::SetEnabled(_)) => {
                     // requests echoed back; nothing to render
                 }
-                None => log::warn!("empty transports RPC response"),
+                None => return Err("empty transports RPC response".into()),
             },
             Err(e) => {
-                eprintln!("{:?}", e);
-                log::error!("failed to decode transports RPC response: {}", e);
+                return Err(format!("transports: failed to decode response: {e}").into());
             }
         }
         Ok(())
