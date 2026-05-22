@@ -21,6 +21,16 @@ ChatTimelineProjection? buildChatTimelineProjection({
   final domainMessages = room.messages?.sorted();
   if (domainMessages == null) return null;
 
+  final duplicateUsernameNotifications =
+      renderMode == ChatRenderMode.group
+          ? duplicateUsernameNotificationsForRoom(
+              room: room,
+              messages: domainMessages,
+              resolveAuthor: resolveAuthor,
+              l10n: l10n,
+            )
+          : const <DuplicateUsernameOnJoinNotification>[];
+
   final internalMessages = <types.Message>[];
   final textMessages = <Message>[];
 
@@ -43,6 +53,18 @@ ChatTimelineProjection? buildChatTimelineProjection({
       textMessages.add(m);
     } else {
       internalMessages.add(internal);
+      final duplicateNotification = duplicateUsernameNotificationAfter(
+        messageIdBase58: m.messageIdBase58,
+        notifications: duplicateUsernameNotifications,
+      );
+      if (duplicateNotification != null) {
+        internalMessages.add(
+          duplicateUsernameCustomMessage(
+            notification: duplicateNotification,
+            l10n: l10n,
+          ),
+        );
+      }
     }
   }
 

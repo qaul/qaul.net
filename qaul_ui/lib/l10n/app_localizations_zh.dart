@@ -404,6 +404,18 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get groupEventJoinedSuffix => ' joined the group';
+
+  @override
+  String get groupMemberRenamedOnJoinPreamble => 'Group member ';
+
+  @override
+  String get groupMemberRenamedOnJoinMiddle => ' is renamed ';
+
+  @override
+  String get editGroupUserNames => 'Edit user names';
+
+  @override
   String groupEventLeft(String username) {
     return '\"$username\" 已 退出 该群组';
   }
@@ -747,6 +759,18 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String groupEventJoined(String username) {
     return '\"$username\" 有 已加入 該群組';
   }
+
+  @override
+  String get groupEventJoinedSuffix => ' joined the group';
+
+  @override
+  String get groupMemberRenamedOnJoinPreamble => 'Group member ';
+
+  @override
+  String get groupMemberRenamedOnJoinMiddle => ' is renamed ';
+
+  @override
+  String get editGroupUserNames => 'Edit user names';
 
   @override
   String groupEventLeft(String username) {

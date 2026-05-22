@@ -6,6 +6,8 @@ import 'compute_message_presentation.dart';
 import 'group_chat_messages.dart';
 import 'message_presentation_meta.dart';
 import 'qaul_chat_bubble.dart';
+import 'duplicate_username_meta_message.dart';
+import 'group_join_meta_message.dart';
 import 'room_meta_message.dart';
 
 /// A design-system-friendly chat timeline widget.
@@ -79,6 +81,10 @@ class ChatTimeline extends StatelessWidget {
         entries.add(_TextEntry(message: msg));
       } else if (msg is model.MetaChatMessage) {
         entries.add(_MetaEntry(message: msg));
+      } else if (msg is model.GroupJoinMetaChatMessage) {
+        entries.add(_GroupJoinMetaEntry(message: msg));
+      } else if (msg is model.DuplicateUsernameMetaChatMessage) {
+        entries.add(_DuplicateUsernameMetaEntry(message: msg));
       }
     }
 
@@ -164,6 +170,35 @@ class ChatTimeline extends StatelessWidget {
           );
           isFirst = false;
 
+        case _GroupJoinMetaEntry(:final message):
+          final topPad = isFirst ? 0.0 : kChatBubbleSeparatedGap;
+          children.add(
+            Padding(
+              padding: EdgeInsets.only(top: topPad),
+              child: GroupJoinMetaMessage(
+                userName: message.userName,
+                joinedSuffix: message.joinedSuffix,
+              ),
+            ),
+          );
+          isFirst = false;
+
+        case _DuplicateUsernameMetaEntry(:final message):
+          final topPad = isFirst ? 0.0 : kChatBubbleSeparatedGap;
+          children.add(
+            Padding(
+              padding: EdgeInsets.only(top: topPad),
+              child: DuplicateUsernameMetaMessage(
+                preamble: message.preamble,
+                baseName: message.baseName,
+                middle: message.middle,
+                disambiguatedName: message.disambiguatedName,
+                actionLabel: message.actionLabel,
+              ),
+            ),
+          );
+          isFirst = false;
+
         case _TextEntry(:final message):
           final computation = computedMap[message.id];
           if (computation == null) break;
@@ -219,6 +254,16 @@ class _TextEntry extends _TimelineEntry {
 class _MetaEntry extends _TimelineEntry {
   const _MetaEntry({required this.message});
   final model.MetaChatMessage message;
+}
+
+class _GroupJoinMetaEntry extends _TimelineEntry {
+  const _GroupJoinMetaEntry({required this.message});
+  final model.GroupJoinMetaChatMessage message;
+}
+
+class _DuplicateUsernameMetaEntry extends _TimelineEntry {
+  const _DuplicateUsernameMetaEntry({required this.message});
+  final model.DuplicateUsernameMetaChatMessage message;
 }
 
 class _DateDividerEntry extends _TimelineEntry {

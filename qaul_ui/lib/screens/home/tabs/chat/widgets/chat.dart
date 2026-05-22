@@ -55,6 +55,8 @@ part 'image_message_widget.dart';
 
 part 'chat_timeline_projection.dart';
 
+part 'group_timeline_expansion.dart';
+
 typedef OnSendPressed = void Function(String rawText);
 
 ChatRenderMode resolveChatRenderMode(ChatRoom room) =>
@@ -338,6 +340,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           },
           emptyState: Center(child: Text(l10n.chatEmptyState)),
           bubbleBuilder: _bubbleBuilder,
+          customMessageBuilder: (message, {required messageWidth}) =>
+              _buildCustomMessage(message, l10n: l10n),
           customBottomWidget: _CustomInput(
             isDisabled: room.status != ChatRoomStatus.active,
             disabledMessage: room.status != ChatRoomStatus.inviteAccepted
@@ -585,11 +589,44 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return projection.internalMessages;
   }
 
+  Widget _buildCustomMessage(
+    types.Message message, {
+    required AppLocalizations l10n,
+  }) {
+    if (message is! types.CustomMessage) return const SizedBox.shrink();
+
+    final metadata = message.metadata;
+    if (metadata == null || metadata['kind'] != _kDuplicateUsernameMetaKind) {
+      return const SizedBox.shrink();
+    }
+
+    return DuplicateUsernameMetaMessage(
+      preamble: metadata['preamble'] as String? ?? l10n.groupMemberRenamedOnJoinPreamble,
+      baseName: metadata['baseName'] as String? ?? '',
+      middle: metadata['middle'] as String? ?? l10n.groupMemberRenamedOnJoinMiddle,
+      disambiguatedName: metadata['disambiguatedName'] as String? ?? '',
+      actionLabel: metadata['actionLabel'] as String? ?? l10n.editGroupUserNames,
+      onEditUserNames: _chatRenderMode == ChatRenderMode.group
+          ? () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => _GroupSettingsPage(room),
+                ),
+              )
+          : null,
+    );
+  }
+
   Widget _bubbleBuilder(
     Widget child, {
     required types.Message message,
     required bool nextMessageInGroup,
   }) {
+    if (message is types.CustomMessage &&
+        message.metadata?['kind'] == _kDuplicateUsernameMetaKind) {
+      return child;
+    }
+
     if (message.type == types.MessageType.custom) {
       return Container(
         alignment: Alignment.center,
