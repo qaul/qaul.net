@@ -7,6 +7,7 @@ use crate::proto;
 use std::fmt;
 
 mod authentication;
+mod ble;
 mod chat;
 mod chatfile;
 mod connections;
@@ -16,6 +17,8 @@ mod feed;
 mod group;
 mod node;
 mod router;
+#[cfg(feature = "rtc")]
+mod rtc;
 mod transports;
 mod user_accounts;
 mod users;
