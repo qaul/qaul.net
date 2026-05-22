@@ -124,26 +124,26 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
-  app_badge_plus: 32b6022e2a8585454d6c2a99aa65f8f31f06752a
-  app_links: a754cbec3c255bd4bbb4d236ecc06f28cd9a7ce8
-  audioplayers_darwin: 4f9ca89d92d3d21cec7ec580e78ca888e5fb68bd
-  device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
+  app_badge_plus: d13997a69d78ae6cafd6353b17d4033897b54f4c
+  app_links: 6d01271b3907b0ee7325c5297c75d697c4226c4d
+  audioplayers_darwin: 4027b33a8f471d996c13f71cb77f0b1583b5d923
+  device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
-  file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
+  file_picker: b159e0c068aef54932bb15dc9fd1571818edaf49
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  flutter_email_sender: aa1e9772696691d02cd91fea829856c11efb8e58
-  flutter_local_notifications: 395056b3175ba4f08480a7c5de30cd36d69827e4
-  image_picker_ios: e0ece4aa2a75771a7de3fa735d26d90817041326
-  integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
-  open_filex: 432f3cd11432da3e39f47fcc0df2b1603854eff1
-  package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
-  record_ios: f75fa1d57f840012775c0e93a38a7f3ceea1a374
+  flutter_email_sender: e03bdda7637bcd3539bfe718fddd980e9508efaa
+  flutter_local_notifications: df98d66e515e1ca797af436137b4459b160ad8c9
+  image_picker_ios: 4f2f91b01abdb52842a8e277617df877e40f905b
+  integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
+  open_filex: 6e26e659846ec990262224a12ef1c528bb4edbe4
+  package_info_plus: c0502532a26c7662a62a356cebe2692ec5fe4ec4
+  record_ios: 840d21cce013c5a3b2168b74a54ebdb4136359e2
   SDWebImage: 73c6079366fea25fa4bb9640d5fb58f0893facd8
-  shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
+  shared_preferences_foundation: 5086985c1d43c5ba4d5e69a4e8083a389e2909e6
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
-  url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
+  url_launcher_ios: bb13df5870e8c4234ca12609d04010a21be43dfa
 
 PODFILE CHECKSUM: 0dbd5a87e0ace00c9610d2037ac22083a01f861d
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.16.1

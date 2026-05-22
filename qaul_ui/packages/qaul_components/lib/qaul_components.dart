@@ -18,7 +18,10 @@ export 'design_components/chat/message_presentation_meta.dart'
         MessagePresentationComputation,
         MessagePresentationMeta;
 export 'design_components/chat/qaul_chat_bubble.dart';
+export 'design_components/chat/duplicate_username_meta_message.dart';
+export 'design_components/chat/group_join_meta_message.dart';
 export 'design_components/chat/room_meta_message.dart';
+export 'domain/duplicate_username_on_join.dart';
 export 'design_components/shell/qaul_fab.dart';
 export 'design_components/shell/qaul_loading_indicator.dart';
 export 'design_components/shell/qaul_navbar.dart';
