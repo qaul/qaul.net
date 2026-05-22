@@ -15,6 +15,10 @@ repository = "https://github.com/qaul/qaul.net"
 default = []
 # Compile RTC (voice/video) subcommands. Mirrors libqaul's `rtc` feature.
 rtc = []
+# Build a self-contained binary that links libqaul directly and dispatches
+# RPC calls in-process instead of over a socket. Useful for scripted tests
+# (meshnet-lab) and the legacy `qaul-cli` one-binary workflow.
+embedded = []
 
 [dependencies]
 libqaul = { path = "../../libqaul" }
@@ -30,3 +34,4 @@ uuid = { version = "1.13", features = ["v4"] }
 bs58 = "0.5"
 serde = {version = "1.0", features = ["derive"] }
 serde_json = "1.0.140"
+async-trait = "0.1"
