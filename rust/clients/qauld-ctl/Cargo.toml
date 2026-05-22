@@ -11,6 +11,11 @@ repository = "https://github.com/qaul/qaul.net"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+default = []
+# Compile RTC (voice/video) subcommands. Mirrors libqaul's `rtc` feature.
+rtc = []
+
 [dependencies]
 libqaul = { path = "../../libqaul" }
 qaul-proto = { path = "../../qaul-proto" }
