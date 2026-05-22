@@ -2,7 +2,7 @@
 // This software is published under the AGPLv3 license.
 //! CLI template for qauld-ctl
 
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 
 /// qauld-ctl CLI: Control a running qauld daemon instance
 #[derive(Debug, Parser)]
@@ -97,10 +97,55 @@ pub enum Commands {
     /// peers connecting/disconnecting, etc.) as it arrives. Run in a
     /// dedicated terminal alongside the shell. Stop with Ctrl-C.
     Subscribe(SubscribeArgs),
+    /// Print a shell-completion script to stdout
+    ///
+    /// Pipe to the right file for your shell, e.g.
+    /// `qauld-ctl completions bash > ~/.local/share/bash-completion/completions/qauld-ctl`.
+    Completions {
+        /// shell to generate completions for
+        #[arg(value_enum)]
+        shell: ShellKind,
+    },
+    /// Supervise a qauld daemon: spawn it if not already running,
+    /// stream its output, and shut it down on Ctrl-C.
+    ///
+    /// Useful for dev iteration — `qauld-ctl run` in one window,
+    /// any number of `qauld-ctl <cmd>` invocations in another.
+    Run(RunArgs),
 }
 
 #[derive(Args, Debug)]
 pub struct ShellArgs {}
+
+#[derive(Args, Debug)]
+pub struct RunArgs {
+    /// Path to the qauld binary. Defaults to looking up `qauld` on PATH.
+    #[arg(long)]
+    pub qauld_path: Option<String>,
+}
+
+/// Supported shells for `completions`. Wraps `clap_complete::Shell`
+/// so we can derive `ValueEnum` for clap.
+#[derive(Copy, Clone, Debug, ValueEnum)]
+pub enum ShellKind {
+    Bash,
+    Zsh,
+    Fish,
+    PowerShell,
+    Elvish,
+}
+
+impl From<ShellKind> for clap_complete::Shell {
+    fn from(s: ShellKind) -> Self {
+        match s {
+            ShellKind::Bash => clap_complete::Shell::Bash,
+            ShellKind::Zsh => clap_complete::Shell::Zsh,
+            ShellKind::Fish => clap_complete::Shell::Fish,
+            ShellKind::PowerShell => clap_complete::Shell::PowerShell,
+            ShellKind::Elvish => clap_complete::Shell::Elvish,
+        }
+    }
+}
 
 #[derive(Args, Debug)]
 pub struct DebugArgs {

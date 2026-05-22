@@ -5,7 +5,7 @@
 
 use std::time::Duration;
 
-use clap::Parser;
+use clap::{CommandFactory, Parser};
 use cli::{Cli, Commands};
 use uuid::Uuid;
 
@@ -19,6 +19,7 @@ mod cli;
 mod commands;
 mod shell;
 mod subscribe;
+mod supervise;
 mod transport;
 
 /// A pre-flight request to get the user ID before executing any command.
@@ -110,7 +111,10 @@ pub(crate) async fn run(
         // Shell and Subscribe modes are dispatched in `main` before reaching
         // `run`, so these arms are unreachable. The match is kept exhaustive
         // for clarity.
-        Commands::Shell(_) | Commands::Subscribe(_) => return Ok(()),
+        Commands::Shell(_)
+        | Commands::Subscribe(_)
+        | Commands::Completions { .. }
+        | Commands::Run(_) => return Ok(()),
     };
 
     let (data, module) = rpc_command.encode_request()?;
@@ -135,6 +139,24 @@ pub(crate) async fn run(
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     pretty_env_logger::init();
     let cli = Cli::parse();
+
+    // Completion generation never touches the daemon.
+    if let Commands::Completions { shell } = cli.command {
+        let mut cmd = Cli::command();
+        let name = cmd.get_name().to_string();
+        clap_complete::generate(
+            clap_complete::Shell::from(shell),
+            &mut cmd,
+            name,
+            &mut std::io::stdout(),
+        );
+        return Ok(());
+    }
+
+    // Supervised daemon mode bypasses the transport entirely.
+    if matches!(cli.command, Commands::Run(_)) {
+        return supervise::run(cli).await;
+    }
 
     // Shell mode runs its own loop and opens sockets per command (uses
     // SocketTransport internally via the helpers in this module).
