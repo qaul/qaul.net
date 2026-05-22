@@ -145,6 +145,10 @@ where
         Commands::Connections(c) => Box::new(c.command) as Box<dyn RpcCommand>,
         Commands::Dtn(d) => Box::new(d.command) as Box<dyn RpcCommand>,
         Commands::Transports(t) => Box::new(t.command) as Box<dyn RpcCommand>,
+        Commands::Ble(b) => Box::new(b.command) as Box<dyn RpcCommand>,
+        Commands::Auth(a) => Box::new(a.command) as Box<dyn RpcCommand>,
+        #[cfg(feature = "rtc")]
+        Commands::Rtc(r) => Box::new(r.command) as Box<dyn RpcCommand>,
         // Shell and Subscribe modes are dispatched in `main` before reaching
         // `run`, so these arms are unreachable. The match is kept exhaustive
         // for clarity.

@@ -75,6 +75,19 @@ pub enum Commands {
     /// Toggles are persisted to `config.yaml` by libqaul and survive
     /// restart. Ported from the `qaul-cli` `transports` subcommands.
     Transports(TransportsArgs),
+    /// Bluetooth Low Energy module: status, start/stop, discovered peers.
+    ///
+    /// Direct controls for the BLE transport (separate from the
+    /// `transports` toggles, which only enable/disable the wrapper).
+    Ble(BleArgs),
+    /// WebRTC voice/video calls and signalling (requires the `rtc`
+    /// feature; libqaul must be built with `--features rtc`).
+    #[cfg(feature = "rtc")]
+    Rtc(RtcArgs),
+    /// Authentication / session management (legacy username+password flow).
+    ///
+    /// Ported from the legacy `qaul-cli` `auth` subcommands.
+    Auth(AuthArgs),
     /// Start an interactive shell session
     ///
     /// Reads commands from stdin in a REPL loop and dispatches them through
@@ -599,4 +612,78 @@ pub enum TransportsSubcmd {
         #[arg(short, long)]
         id: String,
     },
+}
+
+#[derive(Args, Debug)]
+pub struct BleArgs {
+    #[command(subcommand)]
+    pub command: BleSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum BleSubcmd {
+    /// request module status and device capabilities
+    Info,
+    /// start the BLE module (no effect if already running)
+    Start,
+    /// stop the BLE module (no effect if already stopped)
+    Stop,
+    /// request counts from the discovered-nodes table
+    Discovered,
+}
+
+#[cfg(feature = "rtc")]
+#[derive(Args, Debug)]
+pub struct RtcArgs {
+    #[command(subcommand)]
+    pub command: RtcSubcmd,
+}
+
+#[cfg(feature = "rtc")]
+#[derive(Debug, Subcommand)]
+pub enum RtcSubcmd {
+    /// list active RTC sessions
+    List,
+    /// request a new RTC session targeted at a group id (16-byte UUID)
+    Request {
+        /// group id (uuid string)
+        #[arg(short, long)]
+        group_id: String,
+    },
+    /// accept a pending RTC session by group id
+    Accept {
+        #[arg(short, long)]
+        group_id: String,
+    },
+    /// decline a pending RTC session by group id
+    Decline {
+        #[arg(short, long)]
+        group_id: String,
+    },
+    /// end an active RTC session by group id
+    End {
+        #[arg(short, long)]
+        group_id: String,
+    },
+}
+
+#[derive(Args, Debug)]
+pub struct AuthArgs {
+    #[command(subcommand)]
+    pub command: AuthSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum AuthSubcmd {
+    /// log in with username + password; daemon issues a session token
+    Login {
+        #[arg(short, long)]
+        username: String,
+        #[arg(short, long)]
+        password: String,
+    },
+    /// log out of the current session
+    Logout,
+    /// show current session status (logged-in user, expiry)
+    Status,
 }
