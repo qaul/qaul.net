@@ -3,23 +3,14 @@
 
 //! # qauld-ctl - CLI client for controlling a running qauld daemon instance via Unix socket
 
-use std::path::PathBuf;
 use std::time::Duration;
 
 use clap::Parser;
 use cli::{Cli, Commands};
-use futures::{SinkExt, StreamExt};
-use prost::Message;
-use tokio::io::{AsyncRead, AsyncWrite};
-use tokio_util::codec::{Framed, LengthDelimitedCodec};
 use uuid::Uuid;
 
-#[cfg(windows)]
-use tokio::net::TcpStream;
-#[cfg(unix)]
-use tokio::net::UnixStream;
-
 use crate::commands::RpcCommand;
+use crate::transport::RpcTransport;
 
 /// protobuf RPC definition
 pub use qaul_proto::qaul_rpc as proto;
@@ -28,108 +19,76 @@ mod cli;
 mod commands;
 mod shell;
 mod subscribe;
+mod transport;
 
-/// Default TCP address used for windows
-#[cfg(windows)]
-const DEFAULT_TCP_ADDR: &str = "127.0.0.1:9199";
-
-/// A Pre flight requesst to get the user ID before executing any command
-async fn preflight_request<T>(
-    client: &mut Framed<T, LengthDelimitedCodec>,
+/// A pre-flight request to get the user ID before executing any command.
+async fn preflight_request(
+    transport: &mut dyn RpcTransport,
     timeout: Duration,
-) -> Result<Vec<u8>, Box<dyn std::error::Error>>
-where
-    T: AsyncRead + AsyncWrite + Unpin,
-{
+) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
     log::info!("executing preflight request");
     let (data, module) = commands::default_user_proto_message();
-    let request_id = Uuid::new_v4().to_string();
-
-    let proto_message = proto::QaulRpc {
+    let envelope = proto::QaulRpc {
         module: module.into(),
-        request_id,
+        request_id: Uuid::new_v4().to_string(),
         user_id: Vec::new(),
         data,
     };
 
-    let mut rpc_msg = Vec::with_capacity(proto_message.encoded_len());
-    proto_message
-        .encode(&mut rpc_msg)
-        .expect("Vec<u8> provides capacity as needed");
-    client.send(rpc_msg.into()).await?;
-
-    let next = tokio::time::timeout(timeout, client.next())
-        .await
-        .map_err(|_| "preflight: timed out waiting for daemon response")?;
-
-    let user_id_bytes = if let Some(Ok(data)) = next {
-        match proto::QaulRpc::decode(&data[..]) {
-            Ok(msg) => commands::decode_default_user(&msg.data),
-            _ => {
-                log::warn!("preflight: failed to decode RPC envelope");
-                Vec::new()
-            }
+    let user_id_bytes = match transport.request(envelope, timeout, true).await? {
+        Some(resp) => commands::decode_default_user(&resp.data),
+        None => {
+            log::warn!("preflight: no response received");
+            Vec::new()
         }
-    } else {
-        log::warn!("preflight: no response received");
-        Vec::new()
     };
 
     log::info!("preflight request completed");
     Ok(user_id_bytes)
 }
 
-/// Connect to a running qauld daemon, picking the right transport per platform.
-///
-/// On Unix, uses the explicit `--socket` path, then `--dir/qauld.sock`, then
-/// `qauld.sock` in the current directory. On Windows, uses `--socket` (a
-/// `host:port` address) or `DEFAULT_TCP_ADDR`.
+/// Open a transport to qauld and connect; pure socket-mode entry point.
+/// Kept so shell-mode + subscribe-mode (which need raw stream access)
+/// can keep using it directly. Embedded mode goes through `run` via
+/// `EmbeddedTransport` instead.
 #[cfg(unix)]
 pub(crate) async fn connect_to_qauld(
     cli: &Cli,
-) -> Result<(UnixStream, String), Box<dyn std::error::Error>> {
-    let qauld_sock = if let Some(socket) = &cli.socket {
+) -> Result<(tokio::net::UnixStream, String), Box<dyn std::error::Error>> {
+    use std::path::PathBuf;
+    let path = if let Some(socket) = &cli.socket {
         socket.clone()
-    } else if let Some(socket_dir) = &cli.dir {
-        let path = PathBuf::from(socket_dir).join("qauld.sock");
-        path.to_str()
-            .expect("failed to get name of dir")
-            .to_string()
+    } else if let Some(dir) = &cli.dir {
+        PathBuf::from(dir)
+            .join("qauld.sock")
+            .to_string_lossy()
+            .into_owned()
     } else {
         "qauld.sock".to_string()
     };
-
-    let client = UnixStream::connect(&qauld_sock).await?;
-    Ok((client, qauld_sock))
+    let stream = tokio::net::UnixStream::connect(&path).await?;
+    Ok((stream, path))
 }
 
 #[cfg(windows)]
 pub(crate) async fn connect_to_qauld(
     cli: &Cli,
-) -> Result<(TcpStream, String), Box<dyn std::error::Error>> {
-    let addr = if let Some(socket) = &cli.socket {
-        socket.clone()
-    } else {
-        DEFAULT_TCP_ADDR.to_string()
-    };
-
-    let client = TcpStream::connect(&addr).await?;
-    Ok((client, addr))
+) -> Result<(tokio::net::TcpStream, String), Box<dyn std::error::Error>> {
+    let addr = cli
+        .socket
+        .clone()
+        .unwrap_or_else(|| "127.0.0.1:9199".to_string());
+    let stream = tokio::net::TcpStream::connect(&addr).await?;
+    Ok((stream, addr))
 }
 
-pub(crate) async fn run<T>(client: T, cli: Cli) -> Result<(), Box<dyn std::error::Error>>
-where
-    T: AsyncRead + AsyncWrite + Unpin,
-{
-    let mut framed_client = LengthDelimitedCodec::builder()
-        .length_field_offset(0)
-        .length_field_type::<u16>()
-        .length_adjustment(0)
-        .new_framed(client);
-
+/// Dispatch a single command through any transport.
+pub(crate) async fn run(
+    transport: &mut dyn RpcTransport,
+    cli: Cli,
+) -> Result<(), Box<dyn std::error::Error>> {
     let timeout = Duration::from_secs(cli.timeout);
-    let request_id = Uuid::new_v4().to_string();
-    let user_id = preflight_request(&mut framed_client, timeout).await?;
+    let user_id = preflight_request(transport, timeout).await?;
 
     let rpc_command: Box<dyn RpcCommand> = match cli.command {
         Commands::Node(c) => Box::new(c.command) as Box<dyn RpcCommand>,
@@ -156,34 +115,18 @@ where
     };
 
     let (data, module) = rpc_command.encode_request()?;
-
-    // Create RPC message container
-    let proto_message = proto::QaulRpc {
+    let envelope = proto::QaulRpc {
         module: module.into(),
-        request_id,
+        request_id: Uuid::new_v4().to_string(),
         user_id,
         data,
     };
 
-    let mut rpc_msg = Vec::with_capacity(proto_message.encoded_len());
-    proto_message
-        .encode(&mut rpc_msg)
-        .expect("Vec<u8> provides capacity as needed");
-
-    framed_client.send(rpc_msg.into()).await?;
-
-    if rpc_command.expects_response() {
-        let next = tokio::time::timeout(timeout, framed_client.next())
-            .await
-            .map_err(|_| "timed out waiting for daemon response")?;
-        match next {
-            Some(Ok(data)) => match proto::QaulRpc::decode(&data[..]) {
-                Ok(msg) => rpc_command.decode_response(&msg.data[..], cli.json)?,
-                Err(e) => return Err(format!("malformed RPC envelope: {e}").into()),
-            },
-            Some(Err(e)) => return Err(format!("socket read error: {e}").into()),
-            None => return Err("daemon closed the connection without responding".into()),
-        }
+    let response = transport
+        .request(envelope, timeout, rpc_command.expects_response())
+        .await?;
+    if let Some(resp) = response {
+        rpc_command.decode_response(&resp.data[..], cli.json)?;
     }
 
     Ok(())
@@ -194,22 +137,33 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     pretty_env_logger::init();
     let cli = Cli::parse();
 
-    // Shell mode runs its own loop and opens sockets per command, so it
-    // bypasses the single-shot connect-and-run path below.
+    // Shell mode runs its own loop and opens sockets per command (uses
+    // SocketTransport internally via the helpers in this module).
     if matches!(cli.command, Commands::Shell(_)) {
         return shell::run(cli).await;
     }
-    // Subscribe mode is a long-running RPC that streams events back; it
-    // can't reuse the single-shot path either.
+    // Subscribe mode is a long-running RPC that streams events back;
+    // it can't reuse the single-shot path.
     if matches!(cli.command, Commands::Subscribe(_)) {
         return subscribe::run(cli).await;
     }
 
-    let (client, addr) = connect_to_qauld(&cli).await?;
-    if cli.verbose {
-        eprintln!("qauld-ctl connected to qauld daemon at: {addr}");
+    #[cfg(feature = "embedded")]
+    {
+        let mut transport = transport::EmbeddedTransport::start(&cli).await?;
+        if cli.verbose {
+            eprintln!("qauld-ctl running with embedded libqaul");
+        }
+        run(&mut transport, cli).await?;
     }
-    run(client, cli).await?;
+    #[cfg(not(feature = "embedded"))]
+    {
+        let mut transport = transport::SocketTransport::connect(&cli).await?;
+        if cli.verbose {
+            eprintln!("qauld-ctl connected to qauld daemon at: {}", transport.addr);
+        }
+        run(&mut transport, cli).await?;
+    }
 
     Ok(())
 }
