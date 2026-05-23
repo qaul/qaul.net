@@ -21,16 +21,12 @@ pub use qaul_proto::qaul_rpc_subscribe as proto_sub;
 
 /// Run the subscribe command: connect, send SubscribeRequest, print events.
 pub async fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
-    let (client, addr) = crate::connect_to_qauld(&cli).await?;
+    let transport =
+        qauld_rpc::SocketTransport::connect(&crate::connect_info(&cli)).await?;
     if cli.verbose {
-        eprintln!("qauld-ctl subscribed via: {addr}");
+        eprintln!("qauld-ctl subscribed via: {}", transport.addr);
     }
-
-    let mut framed = LengthDelimitedCodec::builder()
-        .length_field_offset(0)
-        .length_field_type::<u16>()
-        .length_adjustment(0)
-        .new_framed(client);
+    let mut framed = transport.into_framed();
 
     let request_id = Uuid::new_v4().to_string();
     send_subscribe_request(&mut framed, &request_id).await?;
@@ -79,12 +75,9 @@ pub async fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
 pub(crate) async fn spawn_event_listener(
     cli: &Cli,
 ) -> Result<mpsc::UnboundedReceiver<String>, Box<dyn std::error::Error>> {
-    let (client, _addr) = crate::connect_to_qauld(cli).await?;
-    let mut framed = LengthDelimitedCodec::builder()
-        .length_field_offset(0)
-        .length_field_type::<u16>()
-        .length_adjustment(0)
-        .new_framed(client);
+    let transport =
+        qauld_rpc::SocketTransport::connect(&crate::connect_info(cli)).await?;
+    let mut framed = transport.into_framed();
 
     let request_id = Uuid::new_v4().to_string();
     send_subscribe_request(&mut framed, &request_id).await?;

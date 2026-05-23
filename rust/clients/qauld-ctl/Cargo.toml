@@ -18,10 +18,10 @@ rtc = []
 # Build a self-contained binary that links libqaul directly and dispatches
 # RPC calls in-process instead of over a socket. Useful for scripted tests
 # (meshnet-lab) and the legacy `qaul-cli` one-binary workflow.
-embedded = []
+embedded = ["qauld-rpc/embedded"]
 
 [dependencies]
-libqaul = { path = "../../libqaul" }
+qauld-rpc = { path = "../../qauld-rpc" }
 qaul-proto = { path = "../../qaul-proto" }
 tokio = { version = "1", features = ["full"] }
 futures = "0.3"

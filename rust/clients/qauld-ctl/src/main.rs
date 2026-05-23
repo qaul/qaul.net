@@ -9,18 +9,27 @@ use clap::{CommandFactory, Parser};
 use cli::{Cli, Commands};
 use uuid::Uuid;
 
+use qauld_rpc::transport::{ConnectInfo, SocketTransport};
+use qauld_rpc::RpcTransport;
+
 use crate::commands::RpcCommand;
-use crate::transport::RpcTransport;
 
 /// protobuf RPC definition
-pub use qaul_proto::qaul_rpc as proto;
+pub use qauld_rpc::proto;
 
 mod cli;
 mod commands;
 mod shell;
 mod subscribe;
 mod supervise;
-mod transport;
+
+/// Build a `ConnectInfo` from the parsed CLI flags.
+pub(crate) fn connect_info(cli: &Cli) -> ConnectInfo {
+    ConnectInfo {
+        socket: cli.socket.clone(),
+        dir: cli.dir.clone(),
+    }
+}
 
 /// A pre-flight request to get the user ID before executing any command.
 async fn preflight_request(
@@ -48,41 +57,6 @@ async fn preflight_request(
     Ok(user_id_bytes)
 }
 
-/// Open a transport to qauld and connect; pure socket-mode entry point.
-/// Kept so shell-mode + subscribe-mode (which need raw stream access)
-/// can keep using it directly. Embedded mode goes through `run` via
-/// `EmbeddedTransport` instead.
-#[cfg(unix)]
-pub(crate) async fn connect_to_qauld(
-    cli: &Cli,
-) -> Result<(tokio::net::UnixStream, String), Box<dyn std::error::Error>> {
-    use std::path::PathBuf;
-    let path = if let Some(socket) = &cli.socket {
-        socket.clone()
-    } else if let Some(dir) = &cli.dir {
-        PathBuf::from(dir)
-            .join("qauld.sock")
-            .to_string_lossy()
-            .into_owned()
-    } else {
-        "qauld.sock".to_string()
-    };
-    let stream = tokio::net::UnixStream::connect(&path).await?;
-    Ok((stream, path))
-}
-
-#[cfg(windows)]
-pub(crate) async fn connect_to_qauld(
-    cli: &Cli,
-) -> Result<(tokio::net::TcpStream, String), Box<dyn std::error::Error>> {
-    let addr = cli
-        .socket
-        .clone()
-        .unwrap_or_else(|| "127.0.0.1:9199".to_string());
-    let stream = tokio::net::TcpStream::connect(&addr).await?;
-    Ok((stream, addr))
-}
-
 /// Dispatch a single command through any transport.
 pub(crate) async fn run(
     transport: &mut dyn RpcTransport,
@@ -108,9 +82,9 @@ pub(crate) async fn run(
         Commands::Auth(a) => Box::new(a.command) as Box<dyn RpcCommand>,
         #[cfg(feature = "rtc")]
         Commands::Rtc(r) => Box::new(r.command) as Box<dyn RpcCommand>,
-        // Shell and Subscribe modes are dispatched in `main` before reaching
-        // `run`, so these arms are unreachable. The match is kept exhaustive
-        // for clarity.
+        // Shell, Subscribe, Completions, Run modes are dispatched in
+        // `main` before reaching `run`. Match is kept exhaustive for
+        // clarity.
         Commands::Shell(_)
         | Commands::Subscribe(_)
         | Commands::Completions { .. }
@@ -158,20 +132,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         return supervise::run(cli).await;
     }
 
-    // Shell mode runs its own loop and opens sockets per command (uses
-    // SocketTransport internally via the helpers in this module).
+    // Shell mode runs its own loop and opens sockets per command.
     if matches!(cli.command, Commands::Shell(_)) {
         return shell::run(cli).await;
     }
-    // Subscribe mode is a long-running RPC that streams events back;
-    // it can't reuse the single-shot path.
+    // Subscribe mode is a long-running RPC that streams events back.
     if matches!(cli.command, Commands::Subscribe(_)) {
         return subscribe::run(cli).await;
     }
 
     #[cfg(feature = "embedded")]
     {
-        let mut transport = transport::EmbeddedTransport::start(&cli).await?;
+        let storage_path = cli
+            .dir
+            .clone()
+            .unwrap_or_else(|| std::env::current_dir().unwrap().to_string_lossy().into_owned());
+        let mut transport = qauld_rpc::EmbeddedTransport::start(storage_path).await?;
         if cli.verbose {
             eprintln!("qauld-ctl running with embedded libqaul");
         }
@@ -179,7 +155,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     #[cfg(not(feature = "embedded"))]
     {
-        let mut transport = transport::SocketTransport::connect(&cli).await?;
+        let mut transport = SocketTransport::connect(&connect_info(&cli)).await?;
         if cli.verbose {
             eprintln!("qauld-ctl connected to qauld daemon at: {}", transport.addr);
         }

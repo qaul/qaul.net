@@ -146,7 +146,7 @@ pub async fn run(shell_cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
             command: parsed.command,
         };
 
-        let mut transport = match crate::transport::SocketTransport::connect(&shell_cli).await {
+        let mut transport = match qauld_rpc::SocketTransport::connect(&crate::connect_info(&shell_cli)).await {
             Ok(t) => t,
             Err(e) => {
                 eprintln!("connection failed: {e}");
