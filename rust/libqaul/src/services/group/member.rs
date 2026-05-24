@@ -11,7 +11,7 @@ use prost::Message;
 
 use super::chat::{self, ChatStorage};
 use super::group_id::GroupId;
-use super::{Group, GroupMember, GroupStorage};
+use super::{Group, GroupMember, GroupSaveReason, GroupStorage};
 use crate::utilities::timestamp::Timestamp;
 use crate::{node::user_accounts::UserAccounts, utilities::timestamp};
 
@@ -144,7 +144,7 @@ impl Member {
 
             group.members.insert(user_id_bytes, member);
 
-            GroupStorage::save_group(state, user_account.id, group);
+            GroupStorage::save_group(state, user_account.id, group, GroupSaveReason::MembershipChanged);
         } else {
             return Err("user account problem".to_string());
         }
@@ -194,7 +194,7 @@ impl Member {
         // save group into data base if invite was accepted
         if accept {
             // save group to data base
-            GroupStorage::save_group_deferred(state, account_id.to_owned(), invite.group);
+            GroupStorage::save_group_deferred(state, account_id.to_owned(), invite.group, GroupSaveReason::MembershipChanged);
         }
         GroupStorage::flush_account(state, account_id);
 
@@ -254,7 +254,7 @@ impl Member {
             group.revision += 1;
 
             // save to data base
-            GroupStorage::save_group(state, account_id.to_owned(), group);
+            GroupStorage::save_group(state, account_id.to_owned(), group, GroupSaveReason::MembershipChanged);
         } else {
             return Err("this user is not member of this group".to_string());
         }
@@ -355,7 +355,7 @@ impl Member {
 
         // save group
         let group_id = GroupId::from_bytes(&group.id).unwrap();
-        GroupStorage::save_group(state, account_id.to_owned(), group);
+        GroupStorage::save_group(state, account_id.to_owned(), group, GroupSaveReason::MembershipChanged);
 
         // save event
         Self::save_group_event_message(
@@ -400,7 +400,7 @@ impl Member {
         }
 
         group.members.remove(&sender_id_bytes);
-        GroupStorage::save_group(state, account_id.to_owned(), group);
+        GroupStorage::save_group(state, account_id.to_owned(), group, GroupSaveReason::MembershipChanged);
 
         Ok(true)
     }
@@ -461,7 +461,7 @@ impl Member {
 
         // save group
         let group_id = GroupId::from_bytes(&group.id).unwrap();
-        GroupStorage::save_group(state, account_id.to_owned(), group);
+        GroupStorage::save_group(state, account_id.to_owned(), group, GroupSaveReason::StatusChanged);
 
         // save event
         Self::save_group_event_message(
