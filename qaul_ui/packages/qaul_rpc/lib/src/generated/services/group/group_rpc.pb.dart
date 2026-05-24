@@ -38,6 +38,7 @@ enum Group_Message {
   groupListResponse,
   groupInvitedRequest,
   groupInvitedResponse,
+  groupSearchRequest,
   notSet
 }
 
@@ -60,6 +61,7 @@ class Group extends $pb.GeneratedMessage {
     GroupListResponse? groupListResponse,
     GroupInvitedRequest? groupInvitedRequest,
     GroupInvitedResponse? groupInvitedResponse,
+    GroupSearchRequest? groupSearchRequest,
   }) {
     final result = create();
     if (groupCreateRequest != null)
@@ -90,6 +92,8 @@ class Group extends $pb.GeneratedMessage {
       result.groupInvitedRequest = groupInvitedRequest;
     if (groupInvitedResponse != null)
       result.groupInvitedResponse = groupInvitedResponse;
+    if (groupSearchRequest != null)
+      result.groupSearchRequest = groupSearchRequest;
     return result;
   }
 
@@ -119,13 +123,14 @@ class Group extends $pb.GeneratedMessage {
     14: Group_Message.groupListResponse,
     15: Group_Message.groupInvitedRequest,
     16: Group_Message.groupInvitedResponse,
+    17: Group_Message.groupSearchRequest,
     0: Group_Message.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Group',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.group'),
       createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16])
+    ..oo(0, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17])
     ..aOM<GroupCreateRequest>(1, _omitFieldNames ? '' : 'groupCreateRequest',
         subBuilder: GroupCreateRequest.create)
     ..aOM<GroupCreateResponse>(2, _omitFieldNames ? '' : 'groupCreateResponse',
@@ -165,6 +170,8 @@ class Group extends $pb.GeneratedMessage {
     ..aOM<GroupInvitedResponse>(
         16, _omitFieldNames ? '' : 'groupInvitedResponse',
         subBuilder: GroupInvitedResponse.create)
+    ..aOM<GroupSearchRequest>(17, _omitFieldNames ? '' : 'groupSearchRequest',
+        subBuilder: GroupSearchRequest.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -201,6 +208,7 @@ class Group extends $pb.GeneratedMessage {
   @$pb.TagNumber(14)
   @$pb.TagNumber(15)
   @$pb.TagNumber(16)
+  @$pb.TagNumber(17)
   Group_Message whichMessage() => _Group_MessageByTag[$_whichOneof(0)]!;
   @$pb.TagNumber(1)
   @$pb.TagNumber(2)
@@ -218,6 +226,7 @@ class Group extends $pb.GeneratedMessage {
   @$pb.TagNumber(14)
   @$pb.TagNumber(15)
   @$pb.TagNumber(16)
+  @$pb.TagNumber(17)
   void clearMessage() => $_clearField($_whichOneof(0));
 
   /// group create request
@@ -417,6 +426,22 @@ class Group extends $pb.GeneratedMessage {
   void clearGroupInvitedResponse() => $_clearField(16);
   @$pb.TagNumber(16)
   GroupInvitedResponse ensureGroupInvitedResponse() => $_ensure(15);
+
+  /// group search request
+  ///
+  /// Searches groups/rooms by name (direct chats match the partner's
+  /// username) and returns a GroupListResponse ranked by relevance, with
+  /// more recently active rooms breaking ties.
+  @$pb.TagNumber(17)
+  GroupSearchRequest get groupSearchRequest => $_getN(16);
+  @$pb.TagNumber(17)
+  set groupSearchRequest(GroupSearchRequest value) => $_setField(17, value);
+  @$pb.TagNumber(17)
+  $core.bool hasGroupSearchRequest() => $_has(16);
+  @$pb.TagNumber(17)
+  void clearGroupSearchRequest() => $_clearField(17);
+  @$pb.TagNumber(17)
+  GroupSearchRequest ensureGroupSearchRequest() => $_ensure(16);
 }
 
 /// Group Result
@@ -1668,6 +1693,88 @@ class GroupListRequest extends $pb.GeneratedMessage {
   set limit($core.int value) => $_setUnsignedInt32(1, value);
   @$pb.TagNumber(20)
   $core.bool hasLimit() => $_has(1);
+  @$pb.TagNumber(20)
+  void clearLimit() => $_clearField(20);
+}
+
+/// Group search request
+///
+/// Returns a GroupListResponse. An empty/whitespace query falls back to the
+/// recency-sorted full group list.
+class GroupSearchRequest extends $pb.GeneratedMessage {
+  factory GroupSearchRequest({
+    $core.String? query,
+    $core.int? offset,
+    $core.int? limit,
+  }) {
+    final result = create();
+    if (query != null) result.query = query;
+    if (offset != null) result.offset = offset;
+    if (limit != null) result.limit = limit;
+    return result;
+  }
+
+  GroupSearchRequest._();
+
+  factory GroupSearchRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GroupSearchRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GroupSearchRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.group'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'query')
+    ..aI(10, _omitFieldNames ? '' : 'offset', fieldType: $pb.PbFieldType.OU3)
+    ..aI(20, _omitFieldNames ? '' : 'limit', fieldType: $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GroupSearchRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GroupSearchRequest copyWith(void Function(GroupSearchRequest) updates) =>
+      super.copyWith((message) => updates(message as GroupSearchRequest))
+          as GroupSearchRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GroupSearchRequest create() => GroupSearchRequest._();
+  @$core.override
+  GroupSearchRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GroupSearchRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GroupSearchRequest>(create);
+  static GroupSearchRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get query => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set query($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasQuery() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearQuery() => $_clearField(1);
+
+  @$pb.TagNumber(10)
+  $core.int get offset => $_getIZ(1);
+  @$pb.TagNumber(10)
+  set offset($core.int value) => $_setUnsignedInt32(1, value);
+  @$pb.TagNumber(10)
+  $core.bool hasOffset() => $_has(1);
+  @$pb.TagNumber(10)
+  void clearOffset() => $_clearField(10);
+
+  @$pb.TagNumber(20)
+  $core.int get limit => $_getIZ(2);
+  @$pb.TagNumber(20)
+  set limit($core.int value) => $_setUnsignedInt32(2, value);
+  @$pb.TagNumber(20)
+  $core.bool hasLimit() => $_has(2);
   @$pb.TagNumber(20)
   void clearLimit() => $_clearField(20);
 }

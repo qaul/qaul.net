@@ -204,6 +204,15 @@ const Group$json = {
       '9': 0,
       '10': 'groupInvitedResponse'
     },
+    {
+      '1': 'group_search_request',
+      '3': 17,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.group.GroupSearchRequest',
+      '9': 0,
+      '10': 'groupSearchRequest'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -239,7 +248,9 @@ final $typed_data.Uint8List groupDescriptor = $convert.base64Decode(
     'b25zZRJZChVncm91cF9pbnZpdGVkX3JlcXVlc3QYDyABKAsyIy5xYXVsLnJwYy5ncm91cC5Hcm'
     '91cEludml0ZWRSZXF1ZXN0SABSE2dyb3VwSW52aXRlZFJlcXVlc3QSXAoWZ3JvdXBfaW52aXRl'
     'ZF9yZXNwb25zZRgQIAEoCzIkLnFhdWwucnBjLmdyb3VwLkdyb3VwSW52aXRlZFJlc3BvbnNlSA'
-    'BSFGdyb3VwSW52aXRlZFJlc3BvbnNlQgkKB21lc3NhZ2U=');
+    'BSFGdyb3VwSW52aXRlZFJlc3BvbnNlElYKFGdyb3VwX3NlYXJjaF9yZXF1ZXN0GBEgASgLMiIu'
+    'cWF1bC5ycGMuZ3JvdXAuR3JvdXBTZWFyY2hSZXF1ZXN0SABSEmdyb3VwU2VhcmNoUmVxdWVzdE'
+    'IJCgdtZXNzYWdl');
 
 @$core.Deprecated('Use groupResultDescriptor instead')
 const GroupResult$json = {
@@ -552,6 +563,21 @@ const GroupListRequest$json = {
 final $typed_data.Uint8List groupListRequestDescriptor = $convert.base64Decode(
     'ChBHcm91cExpc3RSZXF1ZXN0EhYKBm9mZnNldBgKIAEoDVIGb2Zmc2V0EhQKBWxpbWl0GBQgAS'
     'gNUgVsaW1pdA==');
+
+@$core.Deprecated('Use groupSearchRequestDescriptor instead')
+const GroupSearchRequest$json = {
+  '1': 'GroupSearchRequest',
+  '2': [
+    {'1': 'query', '3': 1, '4': 1, '5': 9, '10': 'query'},
+    {'1': 'offset', '3': 10, '4': 1, '5': 13, '10': 'offset'},
+    {'1': 'limit', '3': 20, '4': 1, '5': 13, '10': 'limit'},
+  ],
+};
+
+/// Descriptor for `GroupSearchRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List groupSearchRequestDescriptor = $convert.base64Decode(
+    'ChJHcm91cFNlYXJjaFJlcXVlc3QSFAoFcXVlcnkYASABKAlSBXF1ZXJ5EhYKBm9mZnNldBgKIA'
+    'EoDVIGb2Zmc2V0EhQKBWxpbWl0GBQgASgNUgVsaW1pdA==');
 
 @$core.Deprecated('Use groupListResponseDescriptor instead')
 const GroupListResponse$json = {
