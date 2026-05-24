@@ -40,7 +40,10 @@ class _QaulFabUseCaseState extends State<_QaulFabUseCase> {
               onPressed: () => setState(() => _pressCount++),
             ),
             const SizedBox(height: 16),
-            Text('Pressed $_pressCount times'),
+            Text(
+              'Pressed $_pressCount times',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ],
         ),
       ),

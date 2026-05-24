@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:qaul_components/qaul_components.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
+import '../../../support/widgetbook_preview.dart';
+
 @widgetbook.UseCase(name: 'Horizontal (mobile)', type: QaulNavBar)
 Widget buildNavBarHorizontalUseCase(BuildContext context) {
   return const _NavBarUseCase(vertical: false);
@@ -30,31 +32,43 @@ class _NavBarUseCaseState extends State<_NavBarUseCase> {
     _selectedTab = widget.vertical ? TabType.chat : TabType.public;
   }
 
-  Widget _buildContentArea() {
-    return const Center(child: Text('Content preview area'));
+  Widget _buildContentArea(BuildContext context) {
+    final theme = Theme.of(context);
+    return ColoredBox(
+      color: widgetbookChatSurfaceColor(context),
+      child: Center(
+        child: Text(
+          'Content preview area',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final bar = QaulNavBar(
       vertical: widget.vertical,
-      overflowMenuLabels: navBarOverflowMenuLabelsDefault(),
       onOverflowSelected: (_) {},
       selectedTab: _selectedTab,
       onTabSelected: (tab) => setState(() => _selectedTab = tab),
-      tabTooltips: QaulNavBar.defaultTabTooltips(),
       publicNotificationCount: widget.vertical ? 1 : 2,
       chatNotificationCount: widget.vertical ? 2 : 3,
     );
 
+    final sheet = widgetbookColorSheet(context);
+
     if (widget.vertical) {
       return Material(
+        color: sheet.background,
         child: SizedBox.expand(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               bar,
-              Expanded(child: _buildContentArea()),
+              Expanded(child: _buildContentArea(context)),
             ],
           ),
         ),
@@ -62,11 +76,12 @@ class _NavBarUseCaseState extends State<_NavBarUseCase> {
     }
 
     return Material(
+      color: sheet.background,
       child: SizedBox.expand(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Expanded(child: _buildContentArea()),
+            Expanded(child: _buildContentArea(context)),
             bar,
           ],
         ),

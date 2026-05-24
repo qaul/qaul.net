@@ -4,9 +4,9 @@ import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
 @widgetbook.UseCase(name: 'Palette', type: QaulColorSheet)
 Widget buildColorSheetPaletteUseCase(BuildContext context) {
-  final colorSheet = QaulColorSheet(Theme.of(context).brightness);
-  final isDark = colorSheet.brightness == Brightness.dark;
-  final textColor = isDark ? Colors.white : Colors.black;
+  final theme = Theme.of(context);
+  final colorSheet = QaulColorSheet(theme.brightness);
+  final textColor = theme.colorScheme.onSurface;
 
   String hex(Color color) =>
       color.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase();
@@ -22,7 +22,7 @@ Widget buildColorSheetPaletteUseCase(BuildContext context) {
             label: 'surfaceContainer',
             color: colorSheet.surfaceContainer,
             textColor: textColor,
-            borderColor: isDark ? Colors.white24 : Colors.black12,
+            borderColor: textColor.withValues(alpha: 0.2),
             hex: hex,
           ),
         ],
@@ -64,16 +64,10 @@ class _ColorSwatch extends StatelessWidget {
           children: [
             Text(
               label,
-              style: TextStyle(
-                color: textColor,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 4),
-            Text(
-              '0x${hex(color)}',
-              style: TextStyle(color: textColor),
-            ),
+            Text('0x${hex(color)}', style: TextStyle(color: textColor)),
           ],
         ),
       ),

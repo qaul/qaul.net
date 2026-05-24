@@ -2,28 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:qaul_components/design_components/chat/qaul_chat_bubble.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
-final _clock = DateTime(2026, 4, 12, 14, 30);
+import '../../support/widgetbook_preview.dart';
 
-Widget _bubbleScaffold(Widget child) {
-  return Container(
-    color: Colors.black,
-    padding: const EdgeInsets.all(16),
-    child: Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 500),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: child,
-        ),
-      ),
-    ),
-  );
-}
+final _clock = DateTime(2026, 4, 12, 14, 30);
 
 @widgetbook.UseCase(name: 'Outgoing — sent', type: QaulChatBubble)
 Widget buildOutgoingSentUseCase(BuildContext context) {
-  return _bubbleScaffold(
-    QaulChatBubble(
+  return widgetbookChatComponentFrame(
+    context,
+    alignment: Alignment.centerLeft,
+    child: QaulChatBubble(
       message: QaulChatBubbleMessage(
         content: 'Out but not delivered yet',
         sentAt: _clock.subtract(const Duration(minutes: 1)),
@@ -41,8 +29,10 @@ Widget buildOutgoingSentUseCase(BuildContext context) {
 
 @widgetbook.UseCase(name: 'Outgoing — read', type: QaulChatBubble)
 Widget buildOutgoingReadUseCase(BuildContext context) {
-  return _bubbleScaffold(
-    QaulChatBubble(
+  return widgetbookChatComponentFrame(
+    context,
+    alignment: Alignment.centerLeft,
+    child: QaulChatBubble(
       message: QaulChatBubbleMessage(
         content: 'Out and delivered',
         sentAt: _clock.subtract(const Duration(minutes: 12)),
@@ -60,8 +50,10 @@ Widget buildOutgoingReadUseCase(BuildContext context) {
 
 @widgetbook.UseCase(name: 'Outgoing — not sent', type: QaulChatBubble)
 Widget buildOutgoingNotSentUseCase(BuildContext context) {
-  return _bubbleScaffold(
-    QaulChatBubble(
+  return widgetbookChatComponentFrame(
+    context,
+    alignment: Alignment.centerLeft,
+    child: QaulChatBubble(
       message: QaulChatBubbleMessage(
         content: 'New Message not out',
         sentAt: _clock,
@@ -79,8 +71,10 @@ Widget buildOutgoingNotSentUseCase(BuildContext context) {
 
 @widgetbook.UseCase(name: 'Incoming — short', type: QaulChatBubble)
 Widget buildIncomingShortUseCase(BuildContext context) {
-  return _bubbleScaffold(
-    QaulChatBubble(
+  return widgetbookChatComponentFrame(
+    context,
+    alignment: Alignment.centerLeft,
+    child: QaulChatBubble(
       message: QaulChatBubbleMessage(
         content: 'Hi!',
         sentAt: _clock.subtract(const Duration(minutes: 5)),
@@ -98,8 +92,10 @@ Widget buildIncomingShortUseCase(BuildContext context) {
 
 @widgetbook.UseCase(name: 'Incoming — long', type: QaulChatBubble)
 Widget buildIncomingLongUseCase(BuildContext context) {
-  return _bubbleScaffold(
-    QaulChatBubble(
+  return widgetbookChatComponentFrame(
+    context,
+    alignment: Alignment.centerLeft,
+    child: QaulChatBubble(
       message: QaulChatBubbleMessage(
         content:
             'This is a longer incoming message from the chat partner that wraps across multiple lines so the designer can validate line height, padding, and timestamp placement.',

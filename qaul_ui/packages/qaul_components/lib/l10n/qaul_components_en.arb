@@ -1,0 +1,22 @@
+{
+  "@@locale": "en",
+  "navTabAccountTooltip": "Your account",
+  "navTabPublicTooltip": "Public",
+  "navTabUsersTooltip": "Users",
+  "navTabChatTooltip": "Chat",
+  "navTabNetworkTooltip": "Network",
+  "navOverflowSettings": "Settings",
+  "navOverflowAbout": "About",
+  "navOverflowLicense": "AGPL License",
+  "navOverflowSupport": "Support",
+  "navOverflowRoutingTable": "Routing Data Table",
+  "navOverflowFileHistory": "File history",
+  "membersCount": "{count, plural, =1{1 member} other{{count} members}}",
+  "@membersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "@@locale": "ru",
+  "navTabAccountTooltip": "Ваша учетная запись",
+  "navTabPublicTooltip": "Общедоступный",
+  "navTabUsersTooltip": "Пользователи",
+  "navTabChatTooltip": "Чат",
+  "navTabNetworkTooltip": "Сеть",
+  "navOverflowSettings": "Настройки",
+  "navOverflowAbout": "О программе",
+  "navOverflowLicense": "AGPL License",
+  "navOverflowSupport": "Служба поддержки",
+  "navOverflowRoutingTable": "Таблица данных маршрутизации",
+  "navOverflowFileHistory": "История файлов",
+  "membersCount": "{count, plural, =1{1 участник} few{{count} участника} many{{count} участников} other{{count} участника}}"
+}
