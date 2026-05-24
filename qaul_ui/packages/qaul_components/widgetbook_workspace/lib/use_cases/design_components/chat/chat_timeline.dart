@@ -207,10 +207,7 @@ List<ChatMessage> _buildGroupMessages() {
       receivedAt: today.copyWith(hour: 12, minute: 30),
       status: MessageStatus.read,
     ),
-    const MetaChatMessage(
-      id: 'meta-1',
-      label: 'Group Member joined the group',
-    ),
+    const MetaChatMessage(id: 'meta-1', label: 'Group Member joined the group'),
     TextChatMessage(
       id: 'gmsg-10',
       sender: thirdMember,

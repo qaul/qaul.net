@@ -11,8 +11,7 @@ Widget buildOutgoingSentUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(
     context,
     alignment: Alignment.centerLeft,
-    child:
-    QaulChatBubble(
+    child: QaulChatBubble(
       message: QaulChatBubbleMessage(
         content: 'Out but not delivered yet',
         sentAt: _clock.subtract(const Duration(minutes: 1)),
@@ -33,8 +32,7 @@ Widget buildOutgoingReadUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(
     context,
     alignment: Alignment.centerLeft,
-    child:
-    QaulChatBubble(
+    child: QaulChatBubble(
       message: QaulChatBubbleMessage(
         content: 'Out and delivered',
         sentAt: _clock.subtract(const Duration(minutes: 12)),
@@ -55,8 +53,7 @@ Widget buildOutgoingNotSentUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(
     context,
     alignment: Alignment.centerLeft,
-    child:
-    QaulChatBubble(
+    child: QaulChatBubble(
       message: QaulChatBubbleMessage(
         content: 'New Message not out',
         sentAt: _clock,
@@ -77,8 +74,7 @@ Widget buildIncomingShortUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(
     context,
     alignment: Alignment.centerLeft,
-    child:
-    QaulChatBubble(
+    child: QaulChatBubble(
       message: QaulChatBubbleMessage(
         content: 'Hi!',
         sentAt: _clock.subtract(const Duration(minutes: 5)),
@@ -99,8 +95,7 @@ Widget buildIncomingLongUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(
     context,
     alignment: Alignment.centerLeft,
-    child:
-    QaulChatBubble(
+    child: QaulChatBubble(
       message: QaulChatBubbleMessage(
         content:
             'This is a longer incoming message from the chat partner that wraps across multiple lines so the designer can validate line height, padding, and timestamp placement.',

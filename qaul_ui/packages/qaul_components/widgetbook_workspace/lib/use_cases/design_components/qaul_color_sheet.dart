@@ -64,16 +64,10 @@ class _ColorSwatch extends StatelessWidget {
           children: [
             Text(
               label,
-              style: TextStyle(
-                color: textColor,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 4),
-            Text(
-              '0x${hex(color)}',
-              style: TextStyle(color: textColor),
-            ),
+            Text('0x${hex(color)}', style: TextStyle(color: textColor)),
           ],
         ),
       ),

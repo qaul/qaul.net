@@ -5,7 +5,7 @@ import 'chat_message.dart';
 
 class RoomMetaMessage extends ChatMessage {
   const RoomMetaMessage._({super.key, this.label, this.date})
-      : assert(label != null || date != null);
+    : assert(label != null || date != null);
 
   final String? label;
   final DateTime? date;

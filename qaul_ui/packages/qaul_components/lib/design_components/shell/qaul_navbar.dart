@@ -96,8 +96,10 @@ const double _kNavBarLabelTopPadding = 4.0;
 const double _kNavBarVerticalWidthPercentage = 0.1;
 const double _kNavBarVerticalMaxWidth = 1000.0;
 const double _kNavBarVerticalDefaultWidth = 80.0;
+
 /// Splash/hover radius (small so the ring does not dominate the bar).
 const double _kNavBarMenuVisualSplashRadius = 8.0;
+
 /// Circular tap/hover target for the overflow menu ([InkWell] inside [SizedBox]).
 const double _kNavBarMenuHitDiameter = 40.0;
 const double _kNavBarBadgeFontSize = 10.0;
@@ -145,9 +147,11 @@ _NavBarVerticalMetrics _navBarVerticalMetricsForHeight(double maxHeight) {
     );
   }
   final t =
-      ((maxHeight - _kNavBarHeightCompact) / (_kNavBarHeightLoose - _kNavBarHeightCompact))
+      ((maxHeight - _kNavBarHeightCompact) /
+              (_kNavBarHeightLoose - _kNavBarHeightCompact))
           .clamp(0.0, 1.0);
-  double lerpLoose(double compact, double loose) => compact + (loose - compact) * t;
+  double lerpLoose(double compact, double loose) =>
+      compact + (loose - compact) * t;
   return (
     topPadding: lerpLoose(_kNavBarCompactGap, _kNavBarVerticalTopSpacing),
     gap: lerpLoose(_kNavBarCompactGap, _kNavBarVerticalSpacing),
@@ -344,18 +348,12 @@ class _QaulNavBarVerticalLayout extends StatelessWidget {
               )
             : Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  tabList,
-                  menuSection,
-                ],
+                children: [tabList, menuSection],
               );
 
         return ConstrainedBox(
           constraints: BoxConstraints(maxWidth: width),
-          child: _BarBackground(
-            vertical: true,
-            child: barChild,
-          ),
+          child: _BarBackground(vertical: true, child: barChild),
         );
       },
     );
@@ -550,8 +548,7 @@ class _NavBarOverflowMenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final labels =
-        overflowMenuLabels ?? qaulNavBarOverflowMenuLabels(context);
+    final labels = overflowMenuLabels ?? qaulNavBarOverflowMenuLabels(context);
     final theme = Theme.of(context);
     final hoverColor = theme.brightness == Brightness.dark
         ? Colors.white.withValues(alpha: 0.10)
@@ -686,7 +683,8 @@ class _NavBarItem extends StatelessWidget {
             focusColor: Colors.transparent,
             highlightColor: Colors.transparent,
             borderRadius: BorderRadius.circular(kNavBarAccountSize / 2),
-            child: avatarChild ??
+            child:
+                avatarChild ??
                 CircleAvatar(
                   radius: kNavBarAccountSize / 2,
                   backgroundColor: Colors.grey.shade700,

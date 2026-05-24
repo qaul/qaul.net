@@ -62,10 +62,7 @@ class WidgetbookApp extends StatelessWidget {
     return Widgetbook.material(
       directories: directories,
       addons: [
-        ViewportAddon([
-          Viewports.none,
-          ..._kDesignerViewports,
-        ]),
+        ViewportAddon([Viewports.none, ..._kDesignerViewports]),
         LocalizationAddon(
           locales: QaulComponentsLocalizations.supportedLocales,
           localizationsDelegates: const [

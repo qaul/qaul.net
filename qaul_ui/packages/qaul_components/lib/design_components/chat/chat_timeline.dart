@@ -70,8 +70,7 @@ class ChatTimeline extends StatelessWidget {
 
     for (final msg in messages) {
       if (msg is model.TextChatMessage) {
-        final day =
-            DateTime(msg.sentAt.year, msg.sentAt.month, msg.sentAt.day);
+        final day = DateTime(msg.sentAt.year, msg.sentAt.month, msg.sentAt.day);
 
         if (lastTextDay == null || !_sameDay(lastTextDay, day)) {
           entries.add(_DateDividerEntry(date: day));
@@ -151,22 +150,16 @@ class ChatTimeline extends StatelessWidget {
         case _MetaEntry(:final message):
           final topPad = isFirst ? 0.0 : kChatBubbleSeparatedGap;
           final metaStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontSize: 12,
-                height: 1.2,
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.55),
-              );
+            fontSize: 12,
+            height: 1.2,
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.55),
+          );
           children.add(
             Padding(
               padding: EdgeInsets.only(top: topPad),
-              child: Center(
-                child: Text(
-                  message.label,
-                  style: metaStyle,
-                ),
-              ),
+              child: Center(child: Text(message.label, style: metaStyle)),
             ),
           );
           isFirst = false;

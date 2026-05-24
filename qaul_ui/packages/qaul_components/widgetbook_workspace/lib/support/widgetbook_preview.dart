@@ -22,10 +22,7 @@ TextStyle widgetbookMetaLabelStyle(BuildContext context) {
 }
 
 /// Fills the Widgetbook viewport with themed chat canvas; scrolls when needed.
-Widget widgetbookFullScreenChatPreview(
-  BuildContext context,
-  Widget timeline,
-) {
+Widget widgetbookFullScreenChatPreview(BuildContext context, Widget timeline) {
   return SizedBox.expand(
     child: ColoredBox(
       color: widgetbookChatCanvasColor(context),
