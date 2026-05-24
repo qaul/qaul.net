@@ -19,8 +19,8 @@ use std::path::Path;
 
 use tantivy::collector::TopDocs;
 use tantivy::query::{BooleanQuery, FuzzyTermQuery, Occur, RegexQuery};
-use tantivy::schema::{Field, Schema, Term, Value, STORED, STRING, TEXT};
-use tantivy::{doc, Index, IndexReader, IndexWriter, ReloadPolicy, TantivyDocument};
+use tantivy::schema::{Field, Schema, Term, Value, FAST, STORED, STRING, TEXT};
+use tantivy::{DocAddress, Index, IndexReader, IndexWriter, ReloadPolicy, Score, TantivyDocument};
 use thiserror::Error;
 
 /// Errors returned by [`Search`] operations.
@@ -57,6 +57,66 @@ pub enum SearchError {
 pub trait Searchable {
     fn id(&self) -> &str;
     fn content(&self) -> &str;
+
+    /// Optional ranking key, used only by indexes built with [`SearchConfig::ranked`].
+    ///
+    /// When the index is ranked, this value is stored in the `ranking` fast field
+    /// and breaks ties between documents of (near-)equal text relevance — higher wins.
+    /// Text-only indexes ignore this entirely, so the default of `None` (stored as `0`)
+    /// is correct for any type that does not opt into ranking.
+    fn ranking_key(&self) -> Option<u64> {
+        None
+    }
+}
+
+/// Selects the on-disk schema and the scoring strategy for a [`Search`] instance.
+#[derive(Clone, Copy)]
+pub struct SearchConfig {
+    ranked: bool,
+}
+
+impl SearchConfig {
+    /// The resulting index will be a two-field text schema:
+    /// `id` (`STRING | STORED`) and `content` (`TEXT | STORED`).
+    /// Results are ordered by text relevance alone.
+    pub fn text_only() -> Self {
+        Self { ranked: false }
+    }
+
+    /// The text schema plus a third `ranking` field (`u64`, `FAST`) used to
+    /// break relevance ties by recency. Items should return their recency from
+    /// [`Searchable::ranking_key`].
+    pub fn ranked() -> Self {
+        Self { ranked: true }
+    }
+}
+
+/// Builds the tantivy schema for a given config and returns the field handles.
+///
+/// **The field add-order is part of the on-disk contract.** When opening an existing
+/// index, tantivy validates against the schema stored on disk, and we reuse the `Field`
+/// handles produced here (which are positional). `id` (0) and `content` (1) must keep
+/// their positions across both configs, so the optional `ranking` (2) is only
+/// ever appended last. Changing this order silently corrupts every existing index.
+fn build_schema(config: &SearchConfig) -> (Schema, Field, Field, Option<Field>) {
+    let mut schema_builder = Schema::builder();
+    // STRING: indexed as-is (no tokenization), stored. Suitable for IDs.
+    let id_field = schema_builder.add_text_field("id", STRING | STORED);
+    // TEXT: tokenized and normalized for full-text search.
+    let content_field = schema_builder.add_text_field("content", TEXT | STORED);
+    // FAST: column-oriented storage, readable per-segment during scoring.
+    let ranking_field = if config.ranked {
+        Some(schema_builder.add_u64_field("ranking", FAST))
+    } else {
+        None
+    };
+
+    (
+        schema_builder.build(),
+        id_field,
+        content_field,
+        ranking_field,
+    )
 }
 
 /// A full-text search index backed by tantivy.
@@ -72,6 +132,10 @@ pub struct Search {
     id_field: Field,
     content_field: Field,
 
+    // Present only for indexes built with `SearchConfig::ranked`. When set, documents
+    // carry a recency value in this fast field and `search()` uses the ranked code path.
+    ranking_field: Option<Field>,
+
     // True if this index was freshly created (not opened from an existing directory).
     // Callers use this to decide whether a batch backfill of existing data is needed.
     is_fresh: bool,
@@ -80,18 +144,14 @@ pub struct Search {
 impl Search {
     /// Creates a new `Search` instance, building or reopening the tantivy index at `path`.
     ///
+    /// `config` selects the schema and scoring strategy. When reopening an existing index,
+    /// the config must match the one the index was created with (the schema is validated
+    /// against the on-disk copy).
+    ///
     /// The directory is created if it does not already exist.
-    pub fn new(path: &str) -> Result<Self, SearchError> {
+    pub fn new(path: &str, config: SearchConfig) -> Result<Self, SearchError> {
         // create Schema by defining each index search field and build it
-        let mut schema_builder = Schema::builder();
-
-        // Field indexing strategies:
-        //   STRING: indexed as-is (no tokenization), stored. Suitable for IDs.
-        let id_field = schema_builder.add_text_field("id", STRING | STORED);
-        //   TEXT: tokenized and normalized for full-text search.
-        let content_field = schema_builder.add_text_field("content", TEXT | STORED);
-
-        let schema = schema_builder.build();
+        let (schema, id_field, content_field, ranking_field) = build_schema(&config);
         let index_path = Path::new(path);
 
         // Tantivy expects the directory to already exist — create it if it doesn't.
@@ -128,6 +188,7 @@ impl Search {
             reader,
             id_field,
             content_field,
+            ranking_field,
             is_fresh,
         })
     }
@@ -148,11 +209,18 @@ impl Search {
         // `delete_term` stages the deletion — it also doesn't take effect until commit.
         self.delete_id(item.id());
 
-        // add documents using tantivy's doc macro, using each Field handle
-        self.writer.add_document(doc!(
-            self.id_field => item.id(),
-            self.content_field => item.content(),
-        ))?;
+        // Build the document by hand so the ranking field is only attached when this
+        // index is ranked. On a text-only index `ranking_field` is `None` and the
+        // recency value is never written.
+        let mut document = TantivyDocument::default();
+        document.add_text(self.id_field, item.id());
+        document.add_text(self.content_field, item.content());
+        if let Some(ranking_field) = self.ranking_field {
+            // A ranked item without a ranking key sorts as least-recent (0).
+            document.add_u64(ranking_field, item.ranking_key().unwrap_or(0));
+        }
+
+        self.writer.add_document(document)?;
 
         Ok(())
     }
@@ -214,8 +282,19 @@ impl Search {
     /// Multi-word queries require ALL words to match: `"hello world"` only returns documents
     /// containing both `"hello"` and `"world"`. Each word individually matches via prefix OR fuzzy.
     ///
-    /// Returns up to `limit` results, deduplicated by document ID.
-    /// If `limit` is `None`, up to 20 results are returned.
+    /// Returns up to `limit` results (defaulting to 20 when `None`), deduplicated by document ID.
+    ///
+    /// ## Ordering
+    ///
+    /// - **Text-only** indexes order purely by tantivy's text relevance score.
+    /// - **Ranked** indexes order by a composite `(relevance, recency)` key: relevance is
+    ///   primary, recency (the `ranking` fast field) only breaks ties.
+    ///
+    ///   In practice the matcher combines a regex-prefix query with a fuzzy query, and both
+    ///   produce coarse, near-constant relevance scores across the matching set. So while the
+    ///   ordering is nominally relevance-primary, observed behaviour for typical short queries
+    ///   collapses toward pure recency — which is the desired UX for "most recently active
+    ///   room first".
     pub fn search<T, F>(
         &self,
         query: &str,
@@ -228,6 +307,13 @@ impl Search {
         // For each search operation, we acquire a new Searcher, a very cheap operation
         // in which we receive an instance of Searcher that "points to a snapshotted, immutable version of the index."
         let searcher = self.reader.searcher();
+
+        // `TopDocs::with_limit` panics on a zero limit, and callers legitimately pass the
+        // live collection size (which may be 0). Treat "room for nothing" as no results.
+        let limit = limit.unwrap_or(20);
+        if limit == 0 {
+            return Ok(vec![]);
+        }
 
         // Normalize the query to match the TEXT tokenizer's lowercasing.
         let query_lower = query.to_lowercase();
@@ -269,7 +355,12 @@ impl Search {
         }
 
         let combined = BooleanQuery::new(word_queries);
-        let top_docs = searcher.search(&combined, &TopDocs::with_limit(limit.unwrap_or(20)))?;
+        // Run the query through the collector appropriate to this index's config.
+        // Both paths yield doc addresses already in final display order.
+        let doc_addresses = match self.ranking_field {
+            Some(_) => self.search_ranked(&searcher, &combined, limit)?,
+            None => self.search_by_relevance(&searcher, &combined, limit)?,
+        };
 
         // Collect results, deduplicating by stored ID (not by DocAddress,
         // which is a tantivy-internal segment address that could theoretically
@@ -277,7 +368,7 @@ impl Search {
         let mut seen: HashSet<String> = HashSet::new();
         let mut results = Vec::new();
 
-        for (_score, doc_address) in &top_docs {
+        for doc_address in &doc_addresses {
             let retrieved: TantivyDocument = searcher.doc(*doc_address)?;
 
             // Extract the stored ID string, then delegate reconstruction to the caller.
@@ -291,6 +382,46 @@ impl Search {
         }
 
         Ok(results)
+    }
+
+    /// Text-only collector: order purely by tantivy's relevance score.
+    fn search_by_relevance(
+        &self,
+        searcher: &tantivy::Searcher,
+        query: &BooleanQuery,
+        limit: usize,
+    ) -> Result<Vec<DocAddress>, SearchError> {
+        let top_docs = searcher.search(query, &TopDocs::with_limit(limit))?;
+        Ok(top_docs.into_iter().map(|(_score, addr)| addr).collect())
+    }
+
+    /// Ranked collector: order by a composite `(relevance, recency)` sort key.
+    ///
+    /// `(f32, u64)` is `PartialOrd`, which is all `tweak_score` requires, and tuple
+    /// ordering is lexicographic.
+    fn search_ranked(
+        &self,
+        searcher: &tantivy::Searcher,
+        query: &BooleanQuery,
+        limit: usize,
+    ) -> Result<Vec<DocAddress>, SearchError> {
+        let collector = TopDocs::with_limit(limit).tweak_score(
+            move |segment_reader: &tantivy::SegmentReader| {
+                let recency_reader = segment_reader
+                    .fast_fields()
+                    .u64("ranking")
+                    .expect("ranked index must declare the 'ranking' fast field")
+                    .first_or_default_col(0);
+
+                move |doc: tantivy::DocId, original_score: Score| {
+                    let recency: u64 = recency_reader.get_val(doc);
+                    (original_score, recency)
+                }
+            },
+        );
+
+        let top_docs: Vec<((Score, u64), DocAddress)> = searcher.search(query, &collector)?;
+        Ok(top_docs.into_iter().map(|(_key, addr)| addr).collect())
     }
 
     // `reload` is used by unit tests to bypass the `OnCommitWithDelay` constraint, as it uses a background thread
@@ -329,6 +460,123 @@ mod tests {
         }
     }
 
+    // A ranked domain type carrying a recency key, used to exercise the ranked path.
+    struct Room {
+        id: String,
+        name: String,
+        last_message_at: u64,
+    }
+
+    impl Searchable for Room {
+        fn id(&self) -> &str {
+            &self.id
+        }
+        fn content(&self) -> &str {
+            &self.name
+        }
+        fn ranking_key(&self) -> Option<u64> {
+            Some(self.last_message_at)
+        }
+    }
+
+    fn room(id: &str, name: &str, last_message_at: u64) -> Room {
+        Room {
+            id: id.to_string(),
+            name: name.to_string(),
+            last_message_at,
+        }
+    }
+
+    fn make_ranked_search() -> (Search, TempDir) {
+        let dir = tempfile::tempdir().expect("failed to create temp dir");
+        let search = Search::new(dir.path().to_str().unwrap(), SearchConfig::ranked())
+            .expect("failed to create ranked Search");
+        (search, dir)
+    }
+
+    // -------------------------------------------------------------------------
+    // Schema-compatibility pins
+    //
+    // The on-disk chat and users indexes were created with the text-only schema.
+    // Its field set and add-order are an on-disk contract: tantivy reuses positional
+    // field handles when reopening, so any drift here silently corrupts those indexes.
+    // These tests fail loudly if the schema shape ever changes.
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn test_text_only_schema_is_stable() {
+        let (schema, id_field, content_field, ranking_field) =
+            build_schema(&SearchConfig::text_only());
+        assert!(
+            ranking_field.is_none(),
+            "text-only must not add a ranking field"
+        );
+
+        let fields: Vec<_> = schema.fields().collect();
+        assert_eq!(
+            fields.len(),
+            2,
+            "text-only schema must be exactly id + content"
+        );
+
+        let (f0, e0) = &fields[0];
+        let (f1, e1) = &fields[1];
+        assert_eq!(*f0, id_field);
+        assert_eq!(*f1, content_field);
+        assert_eq!(e0.name(), "id");
+        assert_eq!(e1.name(), "content");
+
+        // id: STRING | STORED -> stored, indexed with the non-tokenizing "raw" tokenizer.
+        match e0.field_type() {
+            tantivy::schema::FieldType::Str(opts) => {
+                assert!(opts.is_stored(), "id must be stored");
+                let indexing = opts.get_indexing_options().expect("id must be indexed");
+                assert_eq!(indexing.tokenizer(), "raw", "id must use the raw tokenizer");
+            }
+            other => panic!("id field type changed: {:?}", other),
+        }
+
+        // content: TEXT | STORED -> stored, indexed with the "default" tokenizer.
+        match e1.field_type() {
+            tantivy::schema::FieldType::Str(opts) => {
+                assert!(opts.is_stored(), "content must be stored");
+                let indexing = opts
+                    .get_indexing_options()
+                    .expect("content must be indexed");
+                assert_eq!(
+                    indexing.tokenizer(),
+                    "default",
+                    "content must use the default tokenizer"
+                );
+            }
+            other => panic!("content field type changed: {:?}", other),
+        }
+    }
+
+    #[test]
+    fn test_ranked_schema_appends_recency_fast_field() {
+        let (schema, _id_field, _content_field, ranking_field) =
+            build_schema(&SearchConfig::ranked());
+        assert!(ranking_field.is_some(), "ranked must add a ranking field");
+
+        let fields: Vec<_> = schema.fields().collect();
+        assert_eq!(
+            fields.len(),
+            3,
+            "ranked schema must be id + content + ranking"
+        );
+
+        // The ranking field must come *last* so id/content keep positions 0 and 1.
+        let (_f2, e2) = &fields[2];
+        assert_eq!(e2.name(), "ranking");
+        match e2.field_type() {
+            tantivy::schema::FieldType::U64(opts) => {
+                assert!(opts.is_fast(), "ranking must be a FAST field");
+            }
+            other => panic!("ranking field type changed: {:?}", other),
+        }
+    }
+
     // -------------------------------------------------------------------------
     // Test helpers
     //
@@ -355,7 +603,8 @@ mod tests {
 
     fn make_search() -> (Search, TempDir) {
         let dir = tempfile::tempdir().expect("failed to create temp dir");
-        let search = Search::new(dir.path().to_str().unwrap()).expect("failed to create Search");
+        let search = Search::new(dir.path().to_str().unwrap(), SearchConfig::text_only())
+            .expect("failed to create Search");
         (search, dir)
     }
 
@@ -657,5 +906,62 @@ mod tests {
             .search("hello zzzzz", None, |id| Some(id.to_string()))
             .expect("search failed");
         assert!(results.is_empty());
+    }
+
+    // -------------------------------------------------------------------------
+    // Ranked-path tests
+    // -------------------------------------------------------------------------
+
+    /// On a ranked index, documents of equal text relevance must be ordered by recency,
+    /// most-recent first. Three rooms share the same name (so relevance is identical),
+    /// and only `last_message_at` distinguishes them.
+    #[test]
+    fn test_ranked_orders_by_relevance_then_recency() {
+        let (mut search, _dir) = make_ranked_search();
+        index_and_commit(
+            &mut search,
+            &[
+                room("room-old", "weekend plans", 100),
+                room("room-new", "weekend plans", 300),
+                room("room-mid", "weekend plans", 200),
+            ],
+        );
+
+        // Preserve search order (do NOT sort) — that order is what we are asserting.
+        let results: Vec<String> = search
+            .search("weekend", None, |id| Some(id.to_string()))
+            .expect("search failed");
+
+        assert_eq!(
+            results,
+            vec!["room-new", "room-mid", "room-old"],
+            "equal-relevance rooms must be ordered newest-first by last_message_at"
+        );
+    }
+
+    /// A stronger text match must still beat a more recent but weaker match, proving
+    /// relevance stays the primary key and recency is only the tiebreak.
+    #[test]
+    fn test_ranked_relevance_outranks_recency() {
+        let (mut search, _dir) = make_ranked_search();
+        index_and_commit(
+            &mut search,
+            &[
+                // Exact match for "alpha", but old.
+                room("room-exact", "alpha", 1),
+                // Only a fuzzy/prefix-distance match for the query, but very recent.
+                room("room-fuzzy", "alpine", 9_999),
+            ],
+        );
+
+        let results: Vec<String> = search
+            .search("alpha", None, |id| Some(id.to_string()))
+            .expect("search failed");
+
+        assert_eq!(
+            results.first().map(String::as_str),
+            Some("room-exact"),
+            "the exact text match must rank first despite being far less recent"
+        );
     }
 }
