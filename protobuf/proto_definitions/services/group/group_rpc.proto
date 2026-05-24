@@ -42,6 +42,13 @@ message Group {
         GroupInvitedRequest group_invited_request = 15;
         // group invited response
         GroupInvitedResponse group_invited_response = 16;
+
+        // group search request
+        //
+        // Searches groups/rooms by name (direct chats match the partner's
+        // username) and returns a GroupListResponse ranked by relevance, with
+        // more recently active rooms breaking ties.
+        GroupSearchRequest group_search_request = 17;
     }
 }
 
@@ -232,6 +239,16 @@ message GroupInfo {
 
 // Group list request
 message GroupListRequest {
+    uint32 offset = 10;
+    uint32 limit  = 20;
+}
+
+// Group search request
+//
+// Returns a GroupListResponse. An empty/whitespace query falls back to the
+// recency-sorted full group list.
+message GroupSearchRequest {
+    string query  = 1;
     uint32 offset = 10;
     uint32 limit  = 20;
 }

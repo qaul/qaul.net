@@ -7,7 +7,7 @@ use libp2p::PeerId;
 use std::collections::BTreeMap;
 
 use super::group_id::GroupId;
-use super::{Group, GroupInvited, GroupStorage};
+use super::{Group, GroupInvited, GroupSaveReason, GroupSearch, GroupStorage};
 use crate::services::chat::{self, Chat, ChatStorage};
 use crate::utilities::timestamp::Timestamp;
 
@@ -21,40 +21,41 @@ fn to_rpc_group_member(member: &super::GroupMember) -> super::proto_rpc::GroupMe
     }
 }
 
-fn build_group_list_response(
-    mut groups: Vec<Group>,
+/// Map a stored [`Group`] to its `GroupInfo` proto.
+pub(crate) fn group_to_info(group: Group) -> super::proto_rpc::GroupInfo {
+    let members = group.members.values().map(to_rpc_group_member).collect();
+    super::proto_rpc::GroupInfo {
+        group_id: group.id,
+        group_name: group.name,
+        created_at: group.created_at,
+        status: group.status,
+        revision: group.revision,
+        is_direct_chat: group.is_direct_chat,
+        members,
+        unread_messages: group.unread_messages,
+        last_message_at: group.last_message_at,
+        last_message: group.last_message_data,
+        last_message_sender_id: group.last_message_sender_id,
+    }
+}
+
+/// Paginate a list of `GroupInfo` into a `GroupListResponse`.
+///
+/// The input order is preserved as-is (no sorting). `limit == 0` means "take all",
+/// matching the list/invited convention.
+pub(crate) fn paginate_group_infos(
+    groups: Vec<super::proto_rpc::GroupInfo>,
     offset: u32,
     limit: u32,
 ) -> super::proto_rpc::GroupListResponse {
-    groups.sort_unstable_by(|a, b| b.last_message_at.cmp(&a.last_message_at));
     let total = groups.len() as u32;
     let take = if limit == 0 { usize::MAX } else { limit as usize };
     let page: Vec<_> = groups.into_iter().skip(offset as usize).take(take).collect();
 
-    let groups_proto: Vec<_> = page
-        .into_iter()
-        .map(|group| {
-            let members = group.members.values().map(to_rpc_group_member).collect();
-            super::proto_rpc::GroupInfo {
-                group_id: group.id,
-                group_name: group.name,
-                created_at: group.created_at,
-                status: group.status,
-                revision: group.revision,
-                is_direct_chat: group.is_direct_chat,
-                members,
-                unread_messages: group.unread_messages,
-                last_message_at: group.last_message_at,
-                last_message: group.last_message_data,
-                last_message_sender_id: group.last_message_sender_id,
-            }
-        })
-        .collect();
-
     let has_more = limit > 0 && offset.saturating_add(limit) < total;
 
     super::proto_rpc::GroupListResponse {
-        groups: groups_proto,
+        groups: page,
         pagination: Some(super::proto_rpc::PaginationMetadata {
             has_more,
             total,
@@ -62,6 +63,17 @@ fn build_group_list_response(
             limit,
         }),
     }
+}
+
+/// Given a list of `Group`, returns a recency-sorted GroupListResponse
+fn build_group_list_response(
+    mut groups: Vec<Group>,
+    offset: u32,
+    limit: u32,
+) -> super::proto_rpc::GroupListResponse {
+    groups.sort_unstable_by(|a, b| b.last_message_at.cmp(&a.last_message_at));
+    let groups_proto: Vec<_> = groups.into_iter().map(group_to_info).collect();
+    paginate_group_infos(groups_proto, offset, limit)
 }
 
 fn build_invited_list_response(
@@ -217,7 +229,7 @@ impl GroupManage {
         group.is_direct_chat = true;
 
         // save group to data base
-        GroupStorage::save_group(state, account_id.to_owned(), group.clone());
+        GroupStorage::save_group(state, account_id.to_owned(), group.clone(), GroupSaveReason::Created);
 
         group
     }
@@ -242,7 +254,7 @@ impl GroupManage {
         group.name = name;
 
         // save group
-        GroupStorage::save_group(state, account_id.to_owned(), group.clone());
+        GroupStorage::save_group(state, account_id.to_owned(), group.clone(), GroupSaveReason::Created);
 
         // save group created event
         let event = chat::rpc_proto::ChatContentMessage {
@@ -279,7 +291,7 @@ impl GroupManage {
     ///
     /// `account_id` the user account ID
     pub fn rename_group(state: &crate::QaulState, account_id: &PeerId, group_id: &[u8], name: String) -> Result<(), String> {
-        match GroupStorage::try_with_group_mut(state, account_id, group_id, |group| {
+        match GroupStorage::try_with_group_mut(state, account_id, group_id, GroupSaveReason::Renamed, |group| {
             // check if administrator
             if let Some(member) = group.get_member(&account_id.to_bytes()) {
                 if member.role != 255 {
@@ -301,7 +313,7 @@ impl GroupManage {
 
     /// get a new message ID
     pub fn get_new_message_id(state: &crate::QaulState, account_id: &PeerId, group_id: &[u8]) -> Vec<u8> {
-        match GroupStorage::try_with_group_mut(state, account_id, group_id, |group| {
+        match GroupStorage::try_with_group_mut(state, account_id, group_id, GroupSaveReason::MessageIndexBumped, |group| {
             let account_id_bytes = account_id.to_bytes();
             let member = group.members.get_mut(&account_id_bytes).ok_or(())?;
             member.last_message_index += 1;
@@ -364,6 +376,27 @@ impl GroupManage {
             .filter_map(|(_, bytes)| bincode::deserialize(&bytes).ok())
             .collect();
         build_group_list_response(groups, offset, limit)
+    }
+
+    /// search groups by name
+    ///
+    /// `account_id` is the user account ID
+    ///
+    /// Returns paginated matches ranked by relevance (recency breaks ties).
+    pub fn group_search(
+        state: &crate::QaulState,
+        account_id: &PeerId,
+        query: &str,
+        offset: u32,
+        limit: u32,
+    ) -> super::proto_rpc::GroupListResponse {
+        // Bound the tantivy result set by the live group count so we get every match,
+        // then paginate over the reconstructed list.
+        let db_ref = GroupStorage::get_db_ref(state, account_id.to_owned());
+        let group_count = db_ref.groups.len();
+
+        let matches = GroupSearch::search(state, account_id, query, Some(group_count));
+        paginate_group_infos(matches, offset, limit)
     }
 
     /// get invited list from rpc command
@@ -478,8 +511,8 @@ impl GroupManage {
             group.status = super::proto_rpc::GroupStatus::Active as i32;
         }
 
-        // save group
-        GroupStorage::save_group(state, account_id, group);
+        // save group (name + members updated from a remote group-info notify)
+        GroupStorage::save_group(state, account_id, group, GroupSaveReason::Renamed);
 
         // save events
         let mut wrote_group_events = false;

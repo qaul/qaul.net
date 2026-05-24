@@ -10,7 +10,7 @@ use sled;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
 
-use super::{Group, GroupInvited};
+use super::{Group, GroupInvited, GroupSearch, GroupSearchable};
 use crate::storage::database::DataBase;
 
 /// Group DB links for user account
@@ -38,11 +38,60 @@ enum FlushMode {
     Deferred,
 }
 
+/// Why a group is being saved.
+///
+/// Every group write funnels through [`GroupStorage::save_group_with_mode`], and the reason
+/// is what lets an invoking of that function decide whether the search index needs updating.
+///
+/// The set is closed and the indexing match is exhaustive ([`GroupSaveReason::triggers_reindex`]),
+/// so adding a new reason forces an explicit "does this affect search?" decision.
+#[derive(Clone, Copy)]
+pub enum GroupSaveReason {
+    /// A brand new group or direct chat was created.
+    Created,
+    /// The group name changed (local rename or a remote group-info update).
+    Renamed,
+    /// A new chat message updated `last_message_at` (and possibly the unread count).
+    NewMessage,
+    /// The unread-message counter was reset.
+    UnreadCleared,
+    /// Members were added, removed, or had their state/role changed.
+    MembershipChanged,
+    /// The group's lifecycle status changed (e.g. deactivated after removal).
+    StatusChanged,
+    /// A member's `last_message_index` was bumped as message-send bookkeeping.
+    MessageIndexBumped,
+}
+
+impl GroupSaveReason {
+    /// Whether a save for this reason changes a room's searchable text or recency ranking,
+    /// and therefore requires the search index to be updated.
+    ///
+    /// The match is exhaustive on purpose: a newly added reason will fail to compile until
+    /// its indexing behaviour is decided here.
+    fn triggers_reindex(self) -> bool {
+        match self {
+            // Searchable text (name / direct-chat partner) or recency changed.
+            GroupSaveReason::Created | GroupSaveReason::Renamed | GroupSaveReason::NewMessage => true,
+            // Neither the indexed text nor the recency key is affected.
+            GroupSaveReason::UnreadCleared
+            | GroupSaveReason::MembershipChanged
+            | GroupSaveReason::StatusChanged
+            | GroupSaveReason::MessageIndexBumped => false,
+        }
+    }
+}
+
 /// Instance-based group storage state.
 /// Replaces the global GROUPSTORAGE static for multi-instance use.
 pub struct GroupStorageState {
     /// Group storage inner state.
     pub inner: RwLock<GroupStorage>,
+    /// Per-account full-text search indexes for group/room names.
+    ///
+    /// Mirrors `ChatState.search`: one ranked [`Search`](crate::search::Search) index per
+    /// user account, keyed by the account's PeerId bytes, lazily opened on first use.
+    pub search: RwLock<BTreeMap<Vec<u8>, crate::search::Search>>,
 }
 
 impl GroupStorageState {
@@ -52,6 +101,7 @@ impl GroupStorageState {
             inner: RwLock::new(GroupStorage {
                 db_ref: BTreeMap::new(),
             }),
+            search: RwLock::new(BTreeMap::new()),
         }
     }
 
@@ -128,6 +178,8 @@ impl GroupStorage {
         let db_ref = Self::get_db_ref(state, account_id.to_owned());
         Self::maybe_flush_tree(&db_ref.groups, FlushMode::Immediate, "Error groups flush");
         Self::maybe_flush_tree(&db_ref.invited, FlushMode::Immediate, "Error invited flush");
+        // Commit any group-index changes staged by deferred saves.
+        GroupSearch::commit(state, account_id);
     }
 
     /// Remove cached sled::Tree handles for a user account.
@@ -162,16 +214,50 @@ impl GroupStorage {
 
         let group_account_db = GroupAccountDb { groups, invited };
 
-        // get group storage for writing
-        let mut group_storage = state.services.groups.inner.write().unwrap();
+        // add account to state (scope the write lock so it is released before search init)
+        {
+            let mut group_storage = state.services.groups.inner.write().unwrap();
+            group_storage
+                .db_ref
+                .insert(account_id.to_bytes(), group_account_db.clone());
+        }
 
-        // add user to state
-        group_storage
-            .db_ref
-            .insert(account_id.to_bytes(), group_account_db.clone());
+        // Initialize the search index for this account. If the index is fresh
+        // (first run with search, or after index deletion), backfill existing groups.
+        let is_fresh = GroupSearch::get_or_create(state, &account_id);
+        if is_fresh {
+            Self::batch_index_existing_groups(state, &account_id, &group_account_db);
+        }
 
         // return structure
         group_account_db
+    }
+
+    /// Batch-index all existing groups into the search index.
+    ///
+    /// Called once when a fresh search index is created for an account.
+    fn batch_index_existing_groups(
+        state: &crate::QaulState,
+        account_id: &PeerId,
+        db_ref: &GroupAccountDb,
+    ) {
+        let mut items: Vec<GroupSearchable> = Vec::new();
+
+        for res in db_ref.groups.iter() {
+            match res {
+                Ok((_key, value)) => {
+                    if let Ok(group) = bincode::deserialize::<Group>(&value) {
+                        items.push(GroupSearchable::from_group(state, account_id, &group));
+                    }
+                }
+                Err(e) => log::error!("group batch index read error: {}", e),
+            }
+        }
+
+        if !items.is_empty() {
+            log::info!("batch indexing {} existing groups for search", items.len());
+            GroupSearch::index_group_batch(state, account_id, &items);
+        }
     }
 
     /// get a group from data base
@@ -205,11 +291,12 @@ impl GroupStorage {
         state: &crate::QaulState,
         account_id: &PeerId,
         group_id: &[u8],
+        reason: GroupSaveReason,
         mutate: impl FnOnce(&mut Group) -> R,
     ) -> Option<R> {
         let mut group = Self::get_group(state, account_id.to_owned(), group_id)?;
         let result = mutate(&mut group);
-        Self::save_group(state, account_id.to_owned(), group);
+        Self::save_group(state, account_id.to_owned(), group, reason);
         Some(result)
     }
 
@@ -218,6 +305,7 @@ impl GroupStorage {
         state: &crate::QaulState,
         account_id: &PeerId,
         group_id: &[u8],
+        reason: GroupSaveReason,
         mutate: impl FnOnce(&mut Group) -> Result<R, E>,
     ) -> Result<Option<R>, E> {
         let Some(mut group) = Self::get_group(state, account_id.to_owned(), group_id) else {
@@ -225,7 +313,7 @@ impl GroupStorage {
         };
 
         let result = mutate(&mut group)?;
-        Self::save_group(state, account_id.to_owned(), group);
+        Self::save_group(state, account_id.to_owned(), group, reason);
         Ok(Some(result))
     }
 
@@ -249,20 +337,26 @@ impl GroupStorage {
     /// Save a group into the data base
     ///
     /// This function overwrites an already existing group entry or
-    /// creates a new one.
-    pub fn save_group(state: &crate::QaulState, account_id: PeerId, group: Group) {
-        Self::save_group_with_mode(state, account_id, group, FlushMode::Immediate);
+    /// creates a new one. `reason` drives whether the search index is updated.
+    pub fn save_group(state: &crate::QaulState, account_id: PeerId, group: Group, reason: GroupSaveReason) {
+        Self::save_group_with_mode(state, account_id, group, FlushMode::Immediate, reason);
     }
 
     /// Save a group without flushing.
     ///
     /// Useful when batching several writes in one operation.
     #[allow(dead_code)]
-    pub fn save_group_deferred(state: &crate::QaulState, account_id: PeerId, group: Group) {
-        Self::save_group_with_mode(state, account_id, group, FlushMode::Deferred);
+    pub fn save_group_deferred(state: &crate::QaulState, account_id: PeerId, group: Group, reason: GroupSaveReason) {
+        Self::save_group_with_mode(state, account_id, group, FlushMode::Deferred, reason);
     }
 
-    fn save_group_with_mode(state: &crate::QaulState, account_id: PeerId, group: Group, flush_mode: FlushMode) {
+    fn save_group_with_mode(
+        state: &crate::QaulState,
+        account_id: PeerId,
+        group: Group,
+        flush_mode: FlushMode,
+        reason: GroupSaveReason,
+    ) {
         // get DB ref
         let db_ref = Self::get_db_ref(state, account_id);
 
@@ -279,6 +373,17 @@ impl GroupStorage {
         }
 
         Self::maybe_flush_tree(&db_ref.groups, flush_mode, "Error groups flush");
+
+        // Re-index for search when the change affects searchable text or recency.
+        if reason.triggers_reindex() {
+            let item = GroupSearchable::from_group(state, &account_id, &group);
+            GroupSearch::stage(state, &account_id, &item);
+            // Mirror the DB flush policy: commit now for Immediate, otherwise leave the
+            // change staged for the next flush_account / Immediate save to commit.
+            if matches!(flush_mode, FlushMode::Immediate) {
+                GroupSearch::commit(state, &account_id);
+            }
+        }
     }
 
     /// Update Last Chat Message sent to this Group
@@ -342,7 +447,7 @@ impl GroupStorage {
             if sender_id != account_id {
                 group.unread_messages += 1;
             }
-            Self::save_group_with_mode(state, account_id, group, flush_mode);
+            Self::save_group_with_mode(state, account_id, group, flush_mode, GroupSaveReason::NewMessage);
         } else {
             log::error!("group_update_last_chat group not found");
         }
@@ -352,7 +457,7 @@ impl GroupStorage {
     pub fn group_clear_unread(state: &crate::QaulState, account_id: PeerId, group_id: Vec<u8>) {
         log::debug!("group_clear_unread");
 
-        if Self::with_group_mut(state, &account_id, &group_id, |group| {
+        if Self::with_group_mut(state, &account_id, &group_id, GroupSaveReason::UnreadCleared, |group| {
             group.unread_messages = 0;
         })
         .is_none()
