@@ -20,7 +20,7 @@ abstract final class QaulAppTheme {
       foregroundColor: Colors.white,
     ),
     tooltipTheme: const TooltipThemeData(waitDuration: Duration(seconds: 1)),
-    iconTheme: IconThemeData(color: Colors.grey),
+    iconTheme: const IconThemeData(color: Colors.grey),
     appBarTheme: AppBarTheme(
       toolbarHeight: 72,
       backgroundColor: Colors.transparent,
@@ -33,9 +33,7 @@ abstract final class QaulAppTheme {
       ),
       iconTheme: IconThemeData(color: Colors.grey.shade600),
       actionsIconTheme: IconThemeData(color: Colors.grey.shade600),
-      shape: BorderDirectional(
-        bottom: BorderSide(color: Colors.grey.shade300),
-      ),
+      shape: BorderDirectional(bottom: BorderSide(color: Colors.grey.shade300)),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
@@ -102,8 +100,6 @@ abstract final class QaulAppTheme {
         borderSide: BorderSide(color: Colors.white),
       ),
     ),
-    textSelectionTheme: const TextSelectionThemeData(
-      cursorColor: Colors.white,
-    ),
+    textSelectionTheme: const TextSelectionThemeData(cursorColor: Colors.white),
   );
 }

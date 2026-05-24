@@ -30,6 +30,14 @@ Color _chatHeaderShellColor(ThemeData theme) {
   return sheet.background;
 }
 
+/// The bottom divider is a dark-mode affordance. In light mode it blends into
+/// the header background so it reads as invisible.
+Color _chatHeaderDividerColor(ThemeData theme) {
+  return theme.brightness == Brightness.dark
+      ? _kChatHeaderDividerColor
+      : _chatHeaderShellColor(theme);
+}
+
 Color _chatHeaderTextColor(ThemeData theme) => theme.colorScheme.onSurface;
 
 TextStyle _chatHeaderLineStyle(
@@ -54,10 +62,7 @@ BoxShadow _chatHeaderShadow(ThemeData theme) {
           blurRadius: 7,
           color: Color(0x66000000),
         )
-      : const BoxShadow(
-          blurRadius: 5,
-          color: Color(0x33000000),
-        );
+      : const BoxShadow(blurRadius: 5, color: Color(0x33000000));
 }
 
 class _ChatHeaderOverflowMenuButton extends StatelessWidget {
@@ -76,10 +81,7 @@ class _ChatHeaderOverflowMenuButton extends StatelessWidget {
       onSelected: onSelected,
       itemBuilder: (context) => [
         for (final entry in entries)
-          PopupMenuItem<String>(
-            value: entry.id,
-            child: Text(entry.label),
-          ),
+          PopupMenuItem<String>(value: entry.id, child: Text(entry.label)),
       ],
       icon: const Icon(
         Icons.more_vert,
@@ -105,10 +107,10 @@ class ChatHeader extends StatelessWidget {
     this.extraTopPadding = 0,
     this.menuEntries = const [],
     this.onMenuSelected,
-  })  : _isGroup = false,
-        _primaryTitle = displayName,
-        _membersCount = null,
-        _formatMembersCount = null;
+  }) : _isGroup = false,
+       _primaryTitle = displayName,
+       _membersCount = null,
+       _formatMembersCount = null;
 
   const ChatHeader.group({
     super.key,
@@ -122,14 +124,14 @@ class ChatHeader extends StatelessWidget {
     this.extraTopPadding = 0,
     this.menuEntries = const [],
     this.onMenuSelected,
-  })  : _isGroup = true,
-        _primaryTitle = groupName,
-        _membersCount = membersCount,
-        _formatMembersCount = formatMembersCount,
-        isOnline = false,
-        onlineLabel = '',
-        lastSeenLabel = '',
-        showOnlineIndicatorWhenOnline = false;
+  }) : _isGroup = true,
+       _primaryTitle = groupName,
+       _membersCount = membersCount,
+       _formatMembersCount = formatMembersCount,
+       isOnline = false,
+       onlineLabel = '',
+       lastSeenLabel = '',
+       showOnlineIndicatorWhenOnline = false;
 
   final VoidCallback onBackPressed;
   final String? backButtonTooltip;
@@ -149,9 +151,10 @@ class ChatHeader extends StatelessWidget {
 
   String _subtitle(BuildContext context) {
     if (_isGroup) {
-      return (_formatMembersCount ?? (c) => qaulChatHeaderMembersCountLabel(context, c))(
-        _membersCount!,
-      );
+      final formatMembersCount =
+          _formatMembersCount ??
+          (count) => qaulChatHeaderMembersCountLabel(context, count);
+      return formatMembersCount(_membersCount!);
     }
     return isOnline ? onlineLabel : lastSeenLabel;
   }
@@ -187,7 +190,9 @@ class ChatHeader extends StatelessWidget {
         child: Row(
           children: [
             IconButton(
-              tooltip: backButtonTooltip ?? MaterialLocalizations.of(context).backButtonTooltip,
+              tooltip:
+                  backButtonTooltip ??
+                  MaterialLocalizations.of(context).backButtonTooltip,
               onPressed: onBackPressed,
               icon: const Icon(
                 Icons.arrow_back_rounded,
@@ -238,9 +243,9 @@ class ChatHeader extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: _chatHeaderShellColor(theme),
-        border: const Border(
+        border: Border(
           bottom: BorderSide(
-            color: _kChatHeaderDividerColor,
+            color: _chatHeaderDividerColor(theme),
             width: _kChatHeaderDividerWidth,
           ),
         ),
@@ -258,10 +263,7 @@ class ChatHeader extends StatelessWidget {
 }
 
 class _AvatarWithOnlineBadge extends StatelessWidget {
-  const _AvatarWithOnlineBadge({
-    required this.showOnline,
-    required this.child,
-  });
+  const _AvatarWithOnlineBadge({required this.showOnline, required this.child});
 
   final bool showOnline;
   final Widget child;
@@ -283,10 +285,7 @@ class _AvatarWithOnlineBadge extends StatelessWidget {
             decoration: BoxDecoration(
               color: _kOnlineColor,
               shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.white,
-                width: _kOnlineDotBorder,
-              ),
+              border: Border.all(color: Colors.white, width: _kOnlineDotBorder),
             ),
           ),
         ),
