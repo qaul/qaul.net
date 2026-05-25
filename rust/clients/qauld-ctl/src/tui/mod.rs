@@ -48,12 +48,15 @@ pub async fn run(cli: Cli, refresh_secs: u64) -> Result<(), Box<dyn std::error::
     }
 
     // Subscribe stream (bg task pushes events into a channel).
-    let (event_tx, mut event_rx) = tokio::sync::mpsc::unbounded_channel::<String>();
+    let (event_tx, mut event_rx) = tokio::sync::mpsc::unbounded_channel::<data::EventLine>();
     {
         let connect = connect.clone();
         tokio::spawn(async move {
             if let Err(e) = data::spawn_subscribe(connect, event_tx.clone()).await {
-                let _ = event_tx.send(format!("subscribe stream ended: {e}"));
+                let _ = event_tx.send(data::EventLine {
+                    topic: "tui.internal".into(),
+                    text: format!("subscribe stream ended: {e}"),
+                });
             }
         });
     }
@@ -87,7 +90,7 @@ pub async fn run(cli: Cli, refresh_secs: u64) -> Result<(), Box<dyn std::error::
                 None => break Ok(()),
             },
             line = event_rx.recv() => if let Some(line) = line {
-                app.push_event(line);
+                app.push_event_line(line);
             },
             _ = tick => {
                 refresh(&mut app, &connect, timeout).await;
@@ -185,5 +188,16 @@ async fn refresh(
     match data::fetch_feed(connect, timeout).await {
         Ok(feed) => app.feed = feed,
         Err(e) => app.push_event(format!("feed fetch failed: {e}")),
+    }
+    match data::fetch_dtn_state(connect, timeout).await {
+        Ok(state) => {
+            app.record_unconfirmed(state.unconfirmed_count);
+            app.dtn_state = Some(state);
+        }
+        Err(e) => app.push_event(format!("dtn state fetch failed: {e}")),
+    }
+    match data::fetch_dtn_config(connect, timeout).await {
+        Ok(cfg) => app.dtn_config = Some(cfg),
+        Err(e) => app.push_event(format!("dtn config fetch failed: {e}")),
     }
 }

@@ -5,12 +5,18 @@
 
 use std::collections::VecDeque;
 
+use crate::data::{DtnConfig, DtnState, EventLine};
+
 const MAX_EVENTS: usize = 200;
+const MAX_DTN_EVENTS: usize = 100;
+/// Width of the unconfirmed-count sparkline (number of samples kept).
+pub const UNCONFIRMED_HISTORY: usize = 60;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Tab {
     Users,
     Feed,
+    Dtn,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -47,6 +53,12 @@ pub struct App {
     pub users: Vec<UserRow>,
     pub feed: Vec<FeedRow>,
     pub events: VecDeque<String>,
+    pub dtn_state: Option<DtnState>,
+    pub dtn_config: Option<DtnConfig>,
+    pub dtn_events: VecDeque<String>,
+    /// Rolling samples of `unconfirmed_count` taken once per refresh,
+    /// oldest → newest. Capped at [`UNCONFIRMED_HISTORY`].
+    pub dtn_unconfirmed_history: VecDeque<u64>,
     tab: Tab,
     pub cursor: usize,
     pub input_mode: InputMode,
@@ -61,6 +73,10 @@ impl App {
             users: Vec::new(),
             feed: Vec::new(),
             events: VecDeque::new(),
+            dtn_state: None,
+            dtn_config: None,
+            dtn_events: VecDeque::new(),
+            dtn_unconfirmed_history: VecDeque::new(),
             tab: Tab::Users,
             cursor: 0,
             input_mode: InputMode::Normal,
@@ -75,13 +91,19 @@ impl App {
     pub fn next_tab(&mut self) {
         self.tab = match self.tab {
             Tab::Users => Tab::Feed,
-            Tab::Feed => Tab::Users,
+            Tab::Feed => Tab::Dtn,
+            Tab::Dtn => Tab::Users,
         };
         self.cursor = 0;
     }
 
     pub fn prev_tab(&mut self) {
-        self.next_tab(); // only two tabs, same as next
+        self.tab = match self.tab {
+            Tab::Users => Tab::Dtn,
+            Tab::Feed => Tab::Users,
+            Tab::Dtn => Tab::Feed,
+        };
+        self.cursor = 0;
     }
 
     pub fn cursor_down(&mut self) {
@@ -103,6 +125,21 @@ impl App {
         match self.tab {
             Tab::Users => self.users.len(),
             Tab::Feed => self.feed.len(),
+            Tab::Dtn => self.dtn_config.as_ref().map(|c| c.users.len()).unwrap_or(0),
+        }
+    }
+
+    /// Route a structured event from the subscribe stream. DTN
+    /// delivery responses get their own deque (rendered on the DTN
+    /// tab); everything else lands in the general events panel.
+    pub fn push_event_line(&mut self, line: EventLine) {
+        if line.topic == "dtn.delivery_response" {
+            if self.dtn_events.len() >= MAX_DTN_EVENTS {
+                self.dtn_events.pop_front();
+            }
+            self.dtn_events.push_back(line.text);
+        } else {
+            self.push_event(line.text);
         }
     }
 
@@ -111,5 +148,12 @@ impl App {
             self.events.pop_front();
         }
         self.events.push_back(line);
+    }
+
+    pub fn record_unconfirmed(&mut self, n: u32) {
+        if self.dtn_unconfirmed_history.len() >= UNCONFIRMED_HISTORY {
+            self.dtn_unconfirmed_history.pop_front();
+        }
+        self.dtn_unconfirmed_history.push_back(n as u64);
     }
 }
