@@ -17,10 +17,20 @@ use uuid::Uuid;
 
 use super::app::{FeedRow, UserRow};
 
+use qaul_proto::qaul_rpc_dtn as dtn_proto;
 use qaul_proto::qaul_rpc_feed as feed_proto;
 use qaul_proto::qaul_rpc_subscribe as sub_proto;
 use qaul_proto::qaul_rpc_user_accounts as ua_proto;
 use qaul_proto::qaul_rpc_users as users_proto;
+
+/// One event line pushed onto the UI's deque, tagged so the UI can
+/// route DTN events to the DTN tab and everything else to the
+/// generic events panel.
+#[derive(Debug, Clone)]
+pub struct EventLine {
+    pub topic: String,
+    pub text: String,
+}
 
 async fn open(connect: &ConnectInfo) -> Result<SocketTransport, Box<dyn std::error::Error>> {
     SocketTransport::connect(connect).await
@@ -114,6 +124,66 @@ pub async fn fetch_users(
     Ok(rows)
 }
 
+#[derive(Debug, Clone, Default)]
+pub struct DtnState {
+    pub used_size: u64,
+    pub message_count: u32,
+    pub unconfirmed_count: u32,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct DtnConfig {
+    pub total_size: u32,
+    pub users: Vec<String>,
+}
+
+pub async fn fetch_dtn_state(
+    connect: &ConnectInfo,
+    timeout: Duration,
+) -> Result<DtnState, Box<dyn std::error::Error>> {
+    let req = dtn_proto::Dtn {
+        message: Some(dtn_proto::dtn::Message::DtnStateRequest(
+            dtn_proto::DtnStateRequest {},
+        )),
+    };
+    let mut t = open(connect).await?;
+    let resp = round_trip(&mut t, proto::Modules::Dtn, req.encode_to_vec(), timeout).await?;
+    let parsed = dtn_proto::Dtn::decode(&resp.data[..])?;
+    if let Some(dtn_proto::dtn::Message::DtnStateResponse(s)) = parsed.message {
+        return Ok(DtnState {
+            used_size: s.used_size,
+            message_count: s.dtn_message_count,
+            unconfirmed_count: s.unconfirmed_count,
+        });
+    }
+    Err("unexpected DTN state response".into())
+}
+
+pub async fn fetch_dtn_config(
+    connect: &ConnectInfo,
+    timeout: Duration,
+) -> Result<DtnConfig, Box<dyn std::error::Error>> {
+    let req = dtn_proto::Dtn {
+        message: Some(dtn_proto::dtn::Message::DtnConfigRequest(
+            dtn_proto::DtnConfigRequest {},
+        )),
+    };
+    let mut t = open(connect).await?;
+    let resp = round_trip(&mut t, proto::Modules::Dtn, req.encode_to_vec(), timeout).await?;
+    let parsed = dtn_proto::Dtn::decode(&resp.data[..])?;
+    if let Some(dtn_proto::dtn::Message::DtnConfigResponse(c)) = parsed.message {
+        return Ok(DtnConfig {
+            total_size: c.total_size,
+            users: c
+                .users
+                .iter()
+                .map(|u| bs58::encode(u).into_string())
+                .collect(),
+        });
+    }
+    Err("unexpected DTN config response".into())
+}
+
 pub async fn fetch_feed(
     connect: &ConnectInfo,
     timeout: Duration,
@@ -178,7 +248,7 @@ pub async fn send_feed(
 /// until the connection drops.
 pub async fn spawn_subscribe(
     connect: ConnectInfo,
-    tx: UnboundedSender<String>,
+    tx: UnboundedSender<EventLine>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let transport = SocketTransport::connect(&connect).await?;
     let mut framed = transport.into_framed();
@@ -210,13 +280,14 @@ pub async fn spawn_subscribe(
     Ok(())
 }
 
-fn format_event(data: &[u8]) -> Option<String> {
+fn format_event(data: &[u8]) -> Option<EventLine> {
     let env = sub_proto::Subscribe::decode(data).ok()?;
     let event = match env.message? {
         sub_proto::subscribe::Message::Event(e) => e,
         _ => return None,
     };
-    Some(match event.topic.as_str() {
+    let topic = event.topic.clone();
+    let text = match event.topic.as_str() {
         "chat.message" => match sub_proto::ChatMessageEvent::decode(&event.payload[..]) {
             Ok(m) => format!(
                 "[{}] chat.message {}…: {}",
@@ -234,13 +305,39 @@ fn format_event(data: &[u8]) -> Option<String> {
             ),
             Err(_) => format!("[{}] peers.connected <decode failed>", event.timestamp),
         },
+        "dtn.delivery_response" => {
+            match sub_proto::DtnDeliveryResponseEvent::decode(&event.payload[..]) {
+                Ok(d) => {
+                    let status = match d.response_type {
+                        1 => "accepted",
+                        2 => "rejected",
+                        _ => "unknown",
+                    };
+                    let reason = if d.reason != 0 {
+                        format!(" reason={}", d.reason)
+                    } else {
+                        String::new()
+                    };
+                    format!(
+                        "[{}] delivery {} via {}…  sig {}…{}",
+                        event.timestamp,
+                        status,
+                        &bs58::encode(&d.storage_node).into_string()[..10],
+                        &bs58::encode(&d.signature).into_string()[..8],
+                        reason,
+                    )
+                }
+                Err(_) => format!("[{}] dtn.delivery_response <decode failed>", event.timestamp),
+            }
+        }
         other => format!(
             "[{}] {} ({} bytes)",
             event.timestamp,
             other,
             event.payload.len()
         ),
-    })
+    };
+    Some(EventLine { topic, text })
 }
 
 // Unused helpers from the framing codec; kept to compile if needed.
