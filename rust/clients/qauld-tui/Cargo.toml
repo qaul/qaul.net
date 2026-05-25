@@ -1,0 +1,24 @@
+[package]
+name = "qauld-tui"
+version = "2.0.0-rc.5"
+authors = ["qaul community <contact@qaul.net>"]
+edition = "2021"
+description = "qauld-tui: terminal UI for the qauld daemon"
+license = "AGPL-3.0"
+homepage = "https://qaul.net"
+repository = "https://github.com/qaul/qaul.net"
+
+[dependencies]
+qauld-rpc = { path = "../../qauld-rpc" }
+qaul-proto = { path = "../../qaul-proto" }
+tokio = { version = "1", features = ["full"] }
+futures = "0.3"
+tokio-util = { version = "0.7", features = ["codec"] }
+ratatui = "0.29"
+crossterm = { version = "0.28", features = ["event-stream"] }
+prost = "0.14"
+clap = { version = "4.5", features = ["derive", "env"] }
+log = "0.4"
+pretty_env_logger = "0.5"
+uuid = { version = "1.13", features = ["v4"] }
+bs58 = "0.5"
