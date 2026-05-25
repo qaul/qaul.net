@@ -7,7 +7,7 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, Borders, Cell, Clear, Paragraph, Row, Table, Tabs, Wrap},
+    widgets::{Block, Borders, Cell, Clear, Paragraph, Row, Sparkline, Table, Tabs, Wrap},
     Frame,
 };
 
@@ -29,6 +29,7 @@ pub fn draw(frame: &mut Frame, app: &App) {
     match app.current_tab() {
         Tab::Users => draw_users(frame, chunks[1], app),
         Tab::Feed => draw_feed(frame, chunks[1], app),
+        Tab::Dtn => draw_dtn(frame, chunks[1], app),
     }
     draw_events(frame, chunks[2], app);
     draw_help(frame, chunks[3], app);
@@ -44,13 +45,14 @@ fn draw_header(frame: &mut Frame, area: Rect, app: &App) {
         .constraints([Constraint::Min(20), Constraint::Length(40)])
         .split(area);
 
-    let titles: Vec<Line> = vec!["Users", "Feed"]
+    let titles: Vec<Line> = vec!["Users", "Feed", "DTN"]
         .into_iter()
         .map(|t| Line::from(Span::raw(t)))
         .collect();
     let idx = match app.current_tab() {
         Tab::Users => 0,
         Tab::Feed => 1,
+        Tab::Dtn => 2,
     };
     let tabs = Tabs::new(titles)
         .select(idx)
@@ -146,6 +148,146 @@ fn draw_feed(frame: &mut Frame, area: Rect, app: &App) {
     frame.render_widget(table, area);
 }
 
+fn draw_dtn(frame: &mut Frame, area: Rect, app: &App) {
+    let vertical = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Length(7),  // stats + sparkline
+            Constraint::Length(8),  // custodian users
+            Constraint::Min(4),     // delivery events
+        ])
+        .split(area);
+
+    // Stats row split into KPI cards on the left and sparkline on the right.
+    let top = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([Constraint::Length(38), Constraint::Min(20)])
+        .split(vertical[0]);
+    draw_dtn_kpis(frame, top[0], app);
+    draw_unconfirmed_sparkline(frame, top[1], app);
+
+    // Configured custodian users
+    draw_dtn_custodians(frame, vertical[1], app);
+
+    // Delivery-response event log
+    draw_dtn_delivery_events(frame, vertical[2], app);
+}
+
+fn draw_dtn_kpis(frame: &mut Frame, area: Rect, app: &App) {
+    let lines: Vec<Line> = match &app.dtn_state {
+        Some(s) => {
+            let limit = app
+                .dtn_config
+                .as_ref()
+                .map(|c| format!("/{} MB cap", c.total_size))
+                .unwrap_or_default();
+            vec![
+                Line::from(vec![
+                    Span::raw("used:        "),
+                    Span::styled(
+                        format!("{} MB{}", s.used_size, limit),
+                        Style::default().fg(Color::Cyan),
+                    ),
+                ]),
+                Line::from(vec![
+                    Span::raw("messages:    "),
+                    Span::styled(
+                        s.message_count.to_string(),
+                        Style::default().fg(Color::Cyan),
+                    ),
+                ]),
+                Line::from(vec![
+                    Span::raw("unconfirmed: "),
+                    Span::styled(
+                        s.unconfirmed_count.to_string(),
+                        Style::default()
+                            .fg(if s.unconfirmed_count > 0 {
+                                Color::Yellow
+                            } else {
+                                Color::Green
+                            })
+                            .add_modifier(Modifier::BOLD),
+                    ),
+                ]),
+            ]
+        }
+        None => vec![Line::from(Span::raw("(no DTN state yet)"))],
+    };
+    let p = Paragraph::new(lines).block(
+        Block::default()
+            .borders(Borders::ALL)
+            .title("DTN state"),
+    );
+    frame.render_widget(p, area);
+}
+
+fn draw_unconfirmed_sparkline(frame: &mut Frame, area: Rect, app: &App) {
+    let samples: Vec<u64> = app.dtn_unconfirmed_history.iter().copied().collect();
+    let sparkline = Sparkline::default()
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title("Unconfirmed (rolling)"),
+        )
+        .data(&samples)
+        .style(Style::default().fg(Color::Magenta));
+    frame.render_widget(sparkline, area);
+}
+
+fn draw_dtn_custodians(frame: &mut Frame, area: Rect, app: &App) {
+    let rows: Vec<Row> = match &app.dtn_config {
+        Some(cfg) => cfg
+            .users
+            .iter()
+            .enumerate()
+            .map(|(i, u)| {
+                let style = if i == app.cursor {
+                    Style::default().bg(Color::DarkGray)
+                } else {
+                    Style::default()
+                };
+                Row::new(vec![Cell::from(short_id(u))]).style(style)
+            })
+            .collect(),
+        None => Vec::new(),
+    };
+    let widths = [Constraint::Min(20)];
+    let count = app.dtn_config.as_ref().map(|c| c.users.len()).unwrap_or(0);
+    let table = Table::new(rows, widths)
+        .header(
+            Row::new(vec!["Configured custodian users"])
+                .style(Style::default().add_modifier(Modifier::BOLD)),
+        )
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title(format!("Allowed custodians ({})", count)),
+        );
+    frame.render_widget(table, area);
+}
+
+fn draw_dtn_delivery_events(frame: &mut Frame, area: Rect, app: &App) {
+    let lines: Vec<Line> = app
+        .dtn_events
+        .iter()
+        .rev()
+        .take(area.height.saturating_sub(2) as usize)
+        .rev()
+        .map(|e| Line::from(Span::raw(e.clone())))
+        .collect();
+    let p = Paragraph::new(lines)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title(format!(
+                    "Delivery responses (live, {} buffered)",
+                    app.dtn_events.len()
+                )),
+        )
+        .wrap(Wrap { trim: false });
+    frame.render_widget(p, area);
+}
+
 fn draw_events(frame: &mut Frame, area: Rect, app: &App) {
     let lines: Vec<Line> = app
         .events
@@ -171,6 +313,7 @@ fn draw_help(frame: &mut Frame, area: Rect, app: &App) {
         InputMode::Normal => match app.current_tab() {
             Tab::Users => "[Tab] switch  [↑/↓] move  [r] refresh  [q] quit",
             Tab::Feed => "[Tab] switch  [↑/↓] move  [s] send  [r] refresh  [q] quit",
+            Tab::Dtn => "[Tab] switch  [↑/↓] move  [r] refresh  [q] quit",
         },
     };
     frame.render_widget(
