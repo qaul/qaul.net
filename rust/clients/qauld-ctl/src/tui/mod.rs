@@ -151,6 +151,40 @@ async fn handle_key(
         return None;
     }
 
+    if app.input_mode == InputMode::Filtering {
+        match key.code {
+            KeyCode::Esc => {
+                app.input_mode = InputMode::Normal;
+                app.filter.clear();
+                app.cursor = 0;
+            }
+            KeyCode::Enter => {
+                // Accept the filter; stay in Normal mode so the
+                // user can navigate the filtered list.
+                app.input_mode = InputMode::Normal;
+            }
+            KeyCode::Backspace => {
+                app.filter.pop();
+                app.cursor = 0;
+            }
+            KeyCode::Char(c) => {
+                app.filter.push(c);
+                app.cursor = 0;
+            }
+            _ => {}
+        }
+        return None;
+    }
+
+    if app.input_mode == InputMode::Viewing {
+        // Any key dismisses the detail modal. Esc is the obvious
+        // one; Enter feels natural too.
+        if matches!(key.code, KeyCode::Esc | KeyCode::Enter | KeyCode::Char('q')) {
+            app.input_mode = InputMode::Normal;
+        }
+        return None;
+    }
+
     match key.code {
         KeyCode::Char('q') => return Some(Ok(())),
         KeyCode::Char('c') if key.modifiers.contains(KeyModifiers::CONTROL) => {
@@ -159,6 +193,16 @@ async fn handle_key(
         KeyCode::Tab => app.next_tab(),
         KeyCode::BackTab => app.prev_tab(),
         KeyCode::Char('r') => refresh(app, connect, timeout).await,
+        KeyCode::Char('/') => {
+            app.input_mode = InputMode::Filtering;
+            app.filter.clear();
+            app.cursor = 0;
+        }
+        KeyCode::Enter => {
+            if app.selected_detail().is_some() {
+                app.input_mode = InputMode::Viewing;
+            }
+        }
         KeyCode::Char('s') if app.current_tab() == Tab::Feed => {
             app.input_mode = InputMode::Composing;
             app.compose_buffer.clear();
