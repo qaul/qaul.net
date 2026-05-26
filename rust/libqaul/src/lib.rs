@@ -989,6 +989,7 @@ impl Libqaul {
                             account.id.clone(),
                         );
                         services::crypto::CryptoNoise::drain_expired_rotations(
+                            Some(&*self.state),
                             crypto_account,
                             now_ms,
                         );

@@ -2808,7 +2808,7 @@ mod phase3_events_tests {
                 ..Default::default()
             },
         );
-        CryptoNoise::drain_expired_rotations(acct.clone(), 10_001);
+        CryptoNoise::drain_expired_rotations(None, acct.clone(), 10_001);
 
         let meta = acct.get_rotation_meta(remote).unwrap();
         assert_eq!(meta.last_retired_session_id, Some(7));
