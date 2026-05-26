@@ -200,4 +200,11 @@ async fn refresh(
         Ok(cfg) => app.dtn_config = Some(cfg),
         Err(e) => app.push_event(format!("dtn config fetch failed: {e}")),
     }
+    match data::fetch_network(connect, timeout).await {
+        Ok(snapshot) => {
+            app.record_network(&snapshot);
+            app.network = Some(snapshot);
+        }
+        Err(e) => app.push_event(format!("network fetch failed: {e}")),
+    }
 }
