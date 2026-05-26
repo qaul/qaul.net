@@ -222,6 +222,12 @@ pub const TOPIC_PEERS_DISCONNECTED: &str = "peers.disconnected";
 /// has accepted or rejected one of our DTN-stored messages).
 pub const TOPIC_DTN_DELIVERY_RESPONSE: &str = "dtn.delivery_response";
 
+/// Topic name for Noise session rotation events. Payload is the same
+/// `qaul.rpc.crypto.RotationEvent` proto already used by the
+/// `GetRotationEventsRequest` poll path; clients can reuse the
+/// existing decoder.
+pub const TOPIC_CRYPTO_ROTATION: &str = "crypto.rotation";
+
 /// Emit a `DtnDeliveryResponseEvent` to all active subscribers.
 ///
 /// Fired from the sender's side when a storage node returns a
@@ -271,6 +277,27 @@ pub fn emit_peer_disconnected(
     module: crate::connections::ConnectionModule,
 ) {
     emit_peer_event(state, TOPIC_PEERS_DISCONNECTED, peer_id, module);
+}
+
+/// Emit a `RotationEvent` (already in `qaul.rpc.crypto` proto shape)
+/// to all active subscribers on the `crypto.rotation` topic.
+///
+/// Mirrors what's recorded in the in-memory rotation event log —
+/// poll-based clients use `GetRotationEventsRequest`, push-based
+/// clients (e.g. qauld-tui's Crypto tab) bind this topic.
+pub fn emit_crypto_rotation(
+    state: &crate::QaulState,
+    event: &qaul_proto::qaul_rpc_crypto::RotationEvent,
+) {
+    if state.subscriptions.len() == 0 {
+        return;
+    }
+    let mut payload = Vec::with_capacity(event.encoded_len());
+    if let Err(e) = event.encode(&mut payload) {
+        log::error!("emit_crypto_rotation: encode failed: {e}");
+        return;
+    }
+    Subscribe::fire(state, TOPIC_CRYPTO_ROTATION, payload);
 }
 
 fn emit_peer_event(
@@ -470,6 +497,55 @@ mod tests {
         let payload = proto::PeerEvent::decode(&event.payload[..]).expect("PeerEvent decodes");
         assert_eq!(payload.peer_id, peer.to_bytes());
         assert_eq!(payload.module, ConnectionModule::Internet.as_int() as u32);
+    }
+
+    /// `emit_crypto_rotation` produces a frame on the libqaul→client
+    /// RPC channel for every active subscriber, carrying a
+    /// `crypto.rotation` topic and a `qaul.rpc.crypto.RotationEvent`
+    /// payload. Push parity for the poll-based event log.
+    #[test]
+    fn crypto_rotation_event_is_delivered_to_subscribers() {
+        let state = crate::QaulState::new_for_simulation();
+
+        let req = proto::Subscribe {
+            message: Some(proto::subscribe::Message::Request(
+                proto::SubscribeRequest { topics: Vec::new() },
+            )),
+        };
+        let mut data = Vec::new();
+        req.encode(&mut data).unwrap();
+        Subscribe::rpc(&state, data, Vec::new(), "sub-1".to_string());
+
+        let peer = libp2p::PeerId::from(libp2p::identity::Keypair::generate_ed25519().public());
+        let event = qaul_proto::qaul_rpc_crypto::RotationEvent {
+            kind: qaul_proto::qaul_rpc_crypto::RotationEventKind::Rotated as i32,
+            remote_id: peer.to_bytes(),
+            primary_session_id: 42,
+            draining_session_id: 41,
+            timestamp_ms: 123_456,
+        };
+        emit_crypto_rotation(&state, &event);
+
+        let frame = match Rpc::receive_from_libqaul(&state) {
+            Ok(f) => f,
+            Err(e) => panic!("expected one frame, got {e:?}"),
+        };
+        let qrpc = rpc_proto::QaulRpc::decode(&frame[..]).expect("QaulRpc decodes");
+        assert_eq!(qrpc.module, rpc_proto::Modules::Subscribe as i32);
+        assert_eq!(qrpc.request_id, "sub-1");
+
+        let envelope = proto::Subscribe::decode(&qrpc.data[..]).expect("Subscribe decodes");
+        let ev = match envelope.message {
+            Some(proto::subscribe::Message::Event(e)) => e,
+            other => panic!("expected Event, got {other:?}"),
+        };
+        assert_eq!(ev.topic, TOPIC_CRYPTO_ROTATION);
+
+        let payload = qaul_proto::qaul_rpc_crypto::RotationEvent::decode(&ev.payload[..])
+            .expect("RotationEvent decodes");
+        assert_eq!(payload.primary_session_id, 42);
+        assert_eq!(payload.draining_session_id, 41);
+        assert_eq!(payload.timestamp_ms, 123_456);
     }
 
     /// `emit_dtn_delivery_response` produces a frame on the libqaul→client

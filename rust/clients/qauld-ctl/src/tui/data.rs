@@ -18,6 +18,7 @@ use uuid::Uuid;
 use super::app::{FeedRow, UserRow};
 
 use qaul_proto::qaul_rpc_crypto as crypto_proto;
+use qaul_proto::qaul_rpc_crypto::RotationEventKind;
 use qaul_proto::qaul_rpc_dtn as dtn_proto;
 use qaul_proto::qaul_rpc_feed as feed_proto;
 use qaul_proto::qaul_rpc_router as router_proto;
@@ -28,10 +29,25 @@ use qaul_proto::qaul_rpc_users as users_proto;
 /// One event line pushed onto the UI's deque, tagged so the UI can
 /// route DTN events to the DTN tab and everything else to the
 /// generic events panel.
+///
+/// Some topics carry structured payloads the UI wants to merge
+/// into a typed buffer rather than render as a string — that's
+/// what `parsed` is for.
 #[derive(Debug, Clone)]
 pub struct EventLine {
     pub topic: String,
     pub text: String,
+    pub parsed: ParsedEvent,
+}
+
+/// Structured payloads broken out for tabs that maintain their own
+/// typed buffers (e.g. the Crypto tab merges these into its
+/// `crypto_events` list so push and poll converge on the same view).
+#[derive(Debug, Clone, Default)]
+pub enum ParsedEvent {
+    #[default]
+    None,
+    CryptoRotation(CryptoRotationEvent),
 }
 
 async fn open(connect: &ConnectInfo) -> Result<SocketTransport, Box<dyn std::error::Error>> {
@@ -320,25 +336,7 @@ pub async fn fetch_crypto_events(
     let resp = round_trip(&mut t, proto::Modules::Crypto, req.encode_to_vec(), timeout).await?;
     let parsed = crypto_proto::Crypto::decode(&resp.data[..])?;
     if let Some(crypto_proto::crypto::Message::GetEventsResponse(r)) = parsed.message {
-        let mut out = Vec::with_capacity(r.events.len());
-        for ev in r.events {
-            let kind = match crypto_proto::RotationEventKind::try_from(ev.kind) {
-                Ok(crypto_proto::RotationEventKind::Rotated) => "rotated",
-                Ok(crypto_proto::RotationEventKind::GraceExpired) => "grace_expired",
-                Ok(crypto_proto::RotationEventKind::MessageDroppedPastGrace) => "msg_dropped_past_grace",
-                _ => "unspecified",
-            };
-            out.push(CryptoRotationEvent {
-                timestamp_ms: ev.timestamp_ms,
-                kind,
-                remote_id: bs58::encode(&ev.remote_id).into_string(),
-                primary_session_id: ev.primary_session_id,
-                draining_session_id: ev.draining_session_id,
-            });
-        }
-        // Caller asked for since_ms, so dedupe just in case the
-        // daemon returned events at exactly that timestamp twice.
-        return Ok(out);
+        return Ok(r.events.iter().map(rotation_event_to_row).collect());
     }
     Err("unexpected crypto events response".into())
 }
@@ -446,6 +444,7 @@ fn format_event(data: &[u8]) -> Option<EventLine> {
         _ => return None,
     };
     let topic = event.topic.clone();
+    let mut parsed = ParsedEvent::None;
     let text = match event.topic.as_str() {
         "chat.message" => match sub_proto::ChatMessageEvent::decode(&event.payload[..]) {
             Ok(m) => format!(
@@ -489,6 +488,22 @@ fn format_event(data: &[u8]) -> Option<EventLine> {
                 Err(_) => format!("[{}] dtn.delivery_response <decode failed>", event.timestamp),
             }
         }
+        "crypto.rotation" => match crypto_proto::RotationEvent::decode(&event.payload[..]) {
+            Ok(r) => {
+                let row = rotation_event_to_row(&r);
+                let line = format!(
+                    "[{}] crypto.rotation {} remote={}… p={} d={}",
+                    event.timestamp,
+                    row.kind,
+                    &row.remote_id[..8.min(row.remote_id.len())],
+                    row.primary_session_id,
+                    row.draining_session_id,
+                );
+                parsed = ParsedEvent::CryptoRotation(row);
+                line
+            }
+            Err(_) => format!("[{}] crypto.rotation <decode failed>", event.timestamp),
+        },
         other => format!(
             "[{}] {} ({} bytes)",
             event.timestamp,
@@ -496,7 +511,23 @@ fn format_event(data: &[u8]) -> Option<EventLine> {
             event.payload.len()
         ),
     };
-    Some(EventLine { topic, text })
+    Some(EventLine { topic, text, parsed })
+}
+
+fn rotation_event_to_row(ev: &crypto_proto::RotationEvent) -> CryptoRotationEvent {
+    let kind = match RotationEventKind::try_from(ev.kind) {
+        Ok(RotationEventKind::Rotated) => "rotated",
+        Ok(RotationEventKind::GraceExpired) => "grace_expired",
+        Ok(RotationEventKind::MessageDroppedPastGrace) => "msg_dropped_past_grace",
+        _ => "unspecified",
+    };
+    CryptoRotationEvent {
+        timestamp_ms: ev.timestamp_ms,
+        kind,
+        remote_id: bs58::encode(&ev.remote_id).into_string(),
+        primary_session_id: ev.primary_session_id,
+        draining_session_id: ev.draining_session_id,
+    }
 }
 
 // Unused helpers from the framing codec; kept to compile if needed.

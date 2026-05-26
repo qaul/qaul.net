@@ -751,13 +751,16 @@ impl Crypto {
                             message.session_id,
                             remote_id.to_base58()
                         );
-                        events::record(events::RotationEvent {
-                            kind: events::RotationEventKind::MessageDroppedPastGrace,
-                            remote_id,
-                            primary_session_id: 0,
-                            draining_session_id: message.session_id,
-                            timestamp_ms: 0,
-                        });
+                        events::record_and_emit(
+                            Some(state),
+                            events::RotationEvent {
+                                kind: events::RotationEventKind::MessageDroppedPastGrace,
+                                remote_id,
+                                primary_session_id: 0,
+                                draining_session_id: message.session_id,
+                                timestamp_ms: 0,
+                            },
+                        );
                         return None;
                     }
                 }
@@ -1743,7 +1746,7 @@ mod phase3_events_tests {
                 ..Default::default()
             },
         );
-        CryptoNoise::drain_expired_rotations(acct.clone(), 10_001);
+        CryptoNoise::drain_expired_rotations(None, acct.clone(), 10_001);
 
         let meta = acct.get_rotation_meta(remote).unwrap();
         assert_eq!(meta.last_retired_session_id, Some(7));
