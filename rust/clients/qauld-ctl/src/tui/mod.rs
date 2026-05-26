@@ -207,4 +207,21 @@ async fn refresh(
         }
         Err(e) => app.push_event(format!("network fetch failed: {e}")),
     }
+    match data::fetch_crypto_config(connect, timeout).await {
+        Ok(cfg) => app.crypto_config = Some(cfg),
+        Err(e) => app.push_event(format!("crypto config fetch failed: {e}")),
+    }
+    let since = app.crypto_event_floor_ms;
+    match data::fetch_crypto_events(connect, timeout, since).await {
+        Ok(events) => {
+            // The `since_ms` filter is inclusive on the daemon side, so
+            // drop anything we've already buffered.
+            let fresh: Vec<_> = events
+                .into_iter()
+                .filter(|e| since == 0 || e.timestamp_ms > since)
+                .collect();
+            app.append_crypto_events(fresh);
+        }
+        Err(e) => app.push_event(format!("crypto events fetch failed: {e}")),
+    }
 }
