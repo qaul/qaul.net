@@ -30,7 +30,12 @@ pub enum Tab {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InputMode {
     Normal,
+    /// Typing a feed message into the compose modal.
     Composing,
+    /// Typing into the per-tab filter input.
+    Filtering,
+    /// A modal is open showing the selected row's untruncated detail.
+    Viewing,
 }
 
 #[derive(Debug, Clone)]
@@ -83,6 +88,9 @@ pub struct App {
     pub cursor: usize,
     pub input_mode: InputMode,
     pub compose_buffer: String,
+    /// Per-session filter text. Applies to the active tab and is
+    /// cleared on tab switch so each tab starts fresh.
+    pub filter: String,
 }
 
 #[derive(Default)]
@@ -114,6 +122,7 @@ impl App {
             cursor: 0,
             input_mode: InputMode::Normal,
             compose_buffer: String::new(),
+            filter: String::new(),
         }
     }
 
@@ -130,6 +139,7 @@ impl App {
             Tab::Crypto => Tab::Users,
         };
         self.cursor = 0;
+        self.filter.clear();
     }
 
     pub fn prev_tab(&mut self) {
@@ -141,10 +151,11 @@ impl App {
             Tab::Crypto => Tab::Network,
         };
         self.cursor = 0;
+        self.filter.clear();
     }
 
     pub fn cursor_down(&mut self) {
-        let len = self.list_len();
+        let len = self.filtered_len();
         if len == 0 {
             self.cursor = 0;
         } else if self.cursor + 1 < len {
@@ -158,17 +169,136 @@ impl App {
         }
     }
 
-    fn list_len(&self) -> usize {
+    /// Number of rows currently visible on the active tab (after
+    /// filter). Used by the cursor + the title bar of each table.
+    pub fn filtered_len(&self) -> usize {
         match self.tab {
-            Tab::Users => self.users.len(),
-            Tab::Feed => self.feed.len(),
-            Tab::Dtn => self.dtn_config.as_ref().map(|c| c.users.len()).unwrap_or(0),
-            Tab::Network => self
-                .network
-                .as_ref()
-                .map(|n| n.peers.len())
-                .unwrap_or(0),
-            Tab::Crypto => self.crypto_events.len(),
+            Tab::Users => self.filtered_users().count(),
+            Tab::Feed => self.filtered_feed().count(),
+            Tab::Dtn => self.filtered_dtn_custodians().count(),
+            Tab::Network => self.filtered_peers().count(),
+            Tab::Crypto => self.filtered_crypto_events().count(),
+        }
+    }
+
+    /// Substring match against the active filter; empty filter
+    /// passes everything. Lower-cased on both sides.
+    fn matches_filter(&self, hay: &str) -> bool {
+        if self.filter.is_empty() {
+            return true;
+        }
+        let needle = self.filter.to_ascii_lowercase();
+        hay.to_ascii_lowercase().contains(&needle)
+    }
+
+    pub fn filtered_users(&self) -> impl Iterator<Item = &UserRow> {
+        self.users.iter().filter(move |u| {
+            self.matches_filter(&format!(
+                "{} {} {} {}",
+                u.name, u.id, u.connectivity, u.bio
+            ))
+        })
+    }
+
+    pub fn filtered_feed(&self) -> impl Iterator<Item = &FeedRow> {
+        self.feed.iter().filter(move |m| {
+            self.matches_filter(&format!(
+                "{} {} {} {}",
+                m.index, m.sender, m.content, m.time_sent
+            ))
+        })
+    }
+
+    pub fn filtered_peers(&self) -> impl Iterator<Item = &crate::data::PeerRow> {
+        self.network.iter().flat_map(move |n| {
+            n.peers.iter().filter(move |p| {
+                self.matches_filter(&format!("{} {} h{} rtt{}", p.module, p.user_id, p.hops, p.rtt_ms))
+            })
+        })
+    }
+
+    pub fn filtered_dtn_custodians(&self) -> impl Iterator<Item = &String> {
+        self.dtn_config
+            .iter()
+            .flat_map(move |cfg| cfg.users.iter().filter(move |u| self.matches_filter(u)))
+    }
+
+    pub fn filtered_crypto_events(&self) -> impl Iterator<Item = &CryptoRotationEvent> {
+        self.crypto_events.iter().filter(move |e| {
+            self.matches_filter(&format!(
+                "{} {} {} {} {}",
+                e.timestamp_ms, e.kind, e.remote_id, e.primary_session_id, e.draining_session_id
+            ))
+        })
+    }
+
+    /// Returns labelled (key, value) pairs for the currently selected
+    /// row on the active tab. `None` when nothing is selected
+    /// (e.g. empty table after filter). Used by the detail modal.
+    pub fn selected_detail(&self) -> Option<(String, Vec<(String, String)>)> {
+        match self.tab {
+            Tab::Users => {
+                let u = self.filtered_users().nth(self.cursor)?;
+                Some((
+                    format!("User: {}", u.name),
+                    vec![
+                        ("name".into(), u.name.clone()),
+                        ("id".into(), u.id.clone()),
+                        ("connectivity".into(), u.connectivity.clone()),
+                        ("profile version".into(), u.profile_version.to_string()),
+                        ("bio".into(), u.bio.clone()),
+                    ],
+                ))
+            }
+            Tab::Feed => {
+                let m = self.filtered_feed().nth(self.cursor)?;
+                Some((
+                    format!("Feed message #{}", m.index),
+                    vec![
+                        ("index".into(), m.index.to_string()),
+                        ("sender".into(), m.sender.clone()),
+                        ("time sent".into(), m.time_sent.clone()),
+                        ("content".into(), m.content.clone()),
+                    ],
+                ))
+            }
+            Tab::Dtn => {
+                let id = self.filtered_dtn_custodians().nth(self.cursor)?;
+                Some((
+                    "Custodian".to_string(),
+                    vec![("peer id".into(), id.clone())],
+                ))
+            }
+            Tab::Network => {
+                let p = self.filtered_peers().nth(self.cursor)?;
+                Some((
+                    format!("Peer via {}", p.module),
+                    vec![
+                        ("module".into(), p.module.to_string()),
+                        ("peer id".into(), p.user_id.clone()),
+                        ("hops".into(), p.hops.to_string()),
+                        ("rtt".into(), format!("{} ms", p.rtt_ms)),
+                    ],
+                ))
+            }
+            Tab::Crypto => {
+                // Filtered events are reversed (newest-first) for
+                // display; selected_detail must match the rendered
+                // order so the cursor lines up with what the user
+                // sees.
+                let events: Vec<_> = self.filtered_crypto_events().collect();
+                let e = events.iter().rev().nth(self.cursor)?;
+                Some((
+                    format!("Rotation event: {}", e.kind),
+                    vec![
+                        ("timestamp (ms)".into(), e.timestamp_ms.to_string()),
+                        ("kind".into(), e.kind.to_string()),
+                        ("remote peer".into(), e.remote_id.clone()),
+                        ("primary session".into(), e.primary_session_id.to_string()),
+                        ("draining session".into(), e.draining_session_id.to_string()),
+                    ],
+                ))
+            }
         }
     }
 
