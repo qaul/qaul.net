@@ -19,6 +19,7 @@ use super::app::{FeedRow, UserRow};
 
 use qaul_proto::qaul_rpc_dtn as dtn_proto;
 use qaul_proto::qaul_rpc_feed as feed_proto;
+use qaul_proto::qaul_rpc_router as router_proto;
 use qaul_proto::qaul_rpc_subscribe as sub_proto;
 use qaul_proto::qaul_rpc_user_accounts as ua_proto;
 use qaul_proto::qaul_rpc_users as users_proto;
@@ -182,6 +183,81 @@ pub async fn fetch_dtn_config(
         });
     }
     Err("unexpected DTN config response".into())
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct NetworkSnapshot {
+    pub lan_peers: u32,
+    pub internet_peers: u32,
+    pub ble_peers: u32,
+    pub local_peers: u32,
+    /// Flat per-peer view: (module, user_id_base58, hop_count, rtt_ms).
+    /// One row per (peer × module) so the same peer reachable via two
+    /// transports gets two rows — matches what the router actually
+    /// tracks.
+    pub peers: Vec<PeerRow>,
+}
+
+#[derive(Debug, Clone)]
+pub struct PeerRow {
+    pub module: &'static str,
+    pub user_id: String,
+    pub hops: u32,
+    pub rtt_ms: u32,
+}
+
+pub async fn fetch_network(
+    connect: &ConnectInfo,
+    timeout: Duration,
+) -> Result<NetworkSnapshot, Box<dyn std::error::Error>> {
+    let req = router_proto::Router {
+        message: Some(router_proto::router::Message::ConnectionsRequest(
+            router_proto::ConnectionsRequest {},
+        )),
+    };
+    let mut t = open(connect).await?;
+    let resp = round_trip(&mut t, proto::Modules::Router, req.encode_to_vec(), timeout).await?;
+    let parsed = router_proto::Router::decode(&resp.data[..])?;
+    let mut snap = NetworkSnapshot::default();
+    if let Some(router_proto::router::Message::ConnectionsList(list)) = parsed.message {
+        snap.lan_peers = list.lan.len() as u32;
+        snap.internet_peers = list.internet.len() as u32;
+        snap.ble_peers = list.ble.len() as u32;
+        snap.local_peers = list.local.len() as u32;
+        push_peers(&mut snap.peers, "LAN", &list.lan);
+        push_peers(&mut snap.peers, "Internet", &list.internet);
+        push_peers(&mut snap.peers, "BLE", &list.ble);
+        push_peers(&mut snap.peers, "Local", &list.local);
+    }
+    Ok(snap)
+}
+
+fn push_peers(
+    rows: &mut Vec<PeerRow>,
+    module: &'static str,
+    entries: &[router_proto::ConnectionsUserEntry],
+) {
+    for entry in entries {
+        let best = entry
+            .connections
+            .iter()
+            .min_by_key(|c| (c.hop_count, c.rtt));
+        if let Some(c) = best {
+            rows.push(PeerRow {
+                module,
+                user_id: bs58::encode(&entry.user_id).into_string(),
+                hops: c.hop_count,
+                rtt_ms: c.rtt,
+            });
+        } else {
+            rows.push(PeerRow {
+                module,
+                user_id: bs58::encode(&entry.user_id).into_string(),
+                hops: 0,
+                rtt_ms: 0,
+            });
+        }
+    }
 }
 
 pub async fn fetch_feed(

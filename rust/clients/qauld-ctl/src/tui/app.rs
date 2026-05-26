@@ -5,18 +5,22 @@
 
 use std::collections::VecDeque;
 
-use crate::data::{DtnConfig, DtnState, EventLine};
+use crate::data::{DtnConfig, DtnState, EventLine, NetworkSnapshot};
 
 const MAX_EVENTS: usize = 200;
 const MAX_DTN_EVENTS: usize = 100;
+const MAX_NETWORK_EVENTS: usize = 100;
 /// Width of the unconfirmed-count sparkline (number of samples kept).
 pub const UNCONFIRMED_HISTORY: usize = 60;
+/// Width of the per-module-total sparklines on the Network tab.
+pub const NETWORK_HISTORY: usize = 60;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Tab {
     Users,
     Feed,
     Dtn,
+    Network,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -59,10 +63,23 @@ pub struct App {
     /// Rolling samples of `unconfirmed_count` taken once per refresh,
     /// oldest → newest. Capped at [`UNCONFIRMED_HISTORY`].
     pub dtn_unconfirmed_history: VecDeque<u64>,
+    pub network: Option<NetworkSnapshot>,
+    pub network_events: VecDeque<String>,
+    /// Rolling per-module connection counts (LAN, Internet, BLE),
+    /// taken once per refresh. Each `Vec` is capped at
+    /// [`NETWORK_HISTORY`].
+    pub network_history: NetworkHistory,
     tab: Tab,
     pub cursor: usize,
     pub input_mode: InputMode,
     pub compose_buffer: String,
+}
+
+#[derive(Default)]
+pub struct NetworkHistory {
+    pub lan: VecDeque<u64>,
+    pub internet: VecDeque<u64>,
+    pub ble: VecDeque<u64>,
 }
 
 impl App {
@@ -77,6 +94,9 @@ impl App {
             dtn_config: None,
             dtn_events: VecDeque::new(),
             dtn_unconfirmed_history: VecDeque::new(),
+            network: None,
+            network_events: VecDeque::new(),
+            network_history: NetworkHistory::default(),
             tab: Tab::Users,
             cursor: 0,
             input_mode: InputMode::Normal,
@@ -92,16 +112,18 @@ impl App {
         self.tab = match self.tab {
             Tab::Users => Tab::Feed,
             Tab::Feed => Tab::Dtn,
-            Tab::Dtn => Tab::Users,
+            Tab::Dtn => Tab::Network,
+            Tab::Network => Tab::Users,
         };
         self.cursor = 0;
     }
 
     pub fn prev_tab(&mut self) {
         self.tab = match self.tab {
-            Tab::Users => Tab::Dtn,
+            Tab::Users => Tab::Network,
             Tab::Feed => Tab::Users,
             Tab::Dtn => Tab::Feed,
+            Tab::Network => Tab::Dtn,
         };
         self.cursor = 0;
     }
@@ -126,20 +148,32 @@ impl App {
             Tab::Users => self.users.len(),
             Tab::Feed => self.feed.len(),
             Tab::Dtn => self.dtn_config.as_ref().map(|c| c.users.len()).unwrap_or(0),
+            Tab::Network => self
+                .network
+                .as_ref()
+                .map(|n| n.peers.len())
+                .unwrap_or(0),
         }
     }
 
     /// Route a structured event from the subscribe stream. DTN
-    /// delivery responses get their own deque (rendered on the DTN
-    /// tab); everything else lands in the general events panel.
+    /// delivery responses go to the DTN tab, peer events go to the
+    /// Network tab, everything else lands in the general events panel.
     pub fn push_event_line(&mut self, line: EventLine) {
-        if line.topic == "dtn.delivery_response" {
-            if self.dtn_events.len() >= MAX_DTN_EVENTS {
-                self.dtn_events.pop_front();
+        match line.topic.as_str() {
+            "dtn.delivery_response" => {
+                if self.dtn_events.len() >= MAX_DTN_EVENTS {
+                    self.dtn_events.pop_front();
+                }
+                self.dtn_events.push_back(line.text);
             }
-            self.dtn_events.push_back(line.text);
-        } else {
-            self.push_event(line.text);
+            "peers.connected" | "peers.disconnected" => {
+                if self.network_events.len() >= MAX_NETWORK_EVENTS {
+                    self.network_events.pop_front();
+                }
+                self.network_events.push_back(line.text);
+            }
+            _ => self.push_event(line.text),
         }
     }
 
@@ -156,4 +190,20 @@ impl App {
         }
         self.dtn_unconfirmed_history.push_back(n as u64);
     }
+
+    pub fn record_network(&mut self, snapshot: &NetworkSnapshot) {
+        push_capped(&mut self.network_history.lan, snapshot.lan_peers as u64);
+        push_capped(
+            &mut self.network_history.internet,
+            snapshot.internet_peers as u64,
+        );
+        push_capped(&mut self.network_history.ble, snapshot.ble_peers as u64);
+    }
+}
+
+fn push_capped(buf: &mut VecDeque<u64>, value: u64) {
+    if buf.len() >= NETWORK_HISTORY {
+        buf.pop_front();
+    }
+    buf.push_back(value);
 }
