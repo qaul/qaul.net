@@ -630,7 +630,7 @@ impl Crypto {
         if !Self::outbound_confirmed_on_session(state, remote_id, drain_id) {
             return; // unconfirmed outbound still references the old session
         }
-        CryptoNoise::retire_drain(crypto_account, remote_id, meta);
+        CryptoNoise::retire_drain(Some(state), crypto_account, remote_id, meta);
     }
 
     /// Re-check drain retirement after one of our outbound messages to
@@ -833,13 +833,16 @@ impl Crypto {
                             message.session_id,
                             remote_id.to_base58()
                         );
-                        events::record(events::RotationEvent {
-                            kind: events::RotationEventKind::MessageDroppedPostDrain,
-                            remote_id,
-                            primary_session_id: 0,
-                            draining_session_id: message.session_id,
-                            timestamp_ms: 0,
-                        });
+                        events::record_and_emit(
+                            Some(state),
+                            events::RotationEvent {
+                                kind: events::RotationEventKind::MessageDroppedPostDrain,
+                                remote_id,
+                                primary_session_id: 0,
+                                draining_session_id: message.session_id,
+                                timestamp_ms: 0,
+                            },
+                        );
                         return None;
                     }
                 }

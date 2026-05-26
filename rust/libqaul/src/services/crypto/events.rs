@@ -84,6 +84,52 @@ pub fn record(mut event: RotationEvent) {
     log.push_back(event);
 }
 
+/// Record the event in the in-memory log AND push it onto the
+/// `crypto.rotation` subscribe topic. Production call sites should
+/// use this so push-based clients (qauld-tui's Crypto tab) see
+/// rotations within ms instead of waiting for the next 3-second
+/// poll tick. `state` is `Option` so unit tests that exercise the
+/// rotation primitives without a full `QaulState` can keep calling
+/// `events::record` directly via `None` here.
+pub fn record_and_emit(state: Option<&crate::QaulState>, event: RotationEvent) {
+    // Stamp the timestamp before cloning so both the log and the
+    // emitted proto carry the same wall-clock value.
+    let stamped = if event.timestamp_ms == 0 {
+        RotationEvent {
+            timestamp_ms: Timestamp::get_timestamp(),
+            ..event
+        }
+    } else {
+        event
+    };
+
+    if let Some(s) = state {
+        let proto_event = to_proto(&stamped);
+        crate::rpc::subscribe::emit_crypto_rotation(s, &proto_event);
+    }
+    record(stamped);
+}
+
+fn to_proto(
+    event: &RotationEvent,
+) -> qaul_proto::qaul_rpc_crypto::RotationEvent {
+    use qaul_proto::qaul_rpc_crypto as proto;
+    let kind = match event.kind {
+        RotationEventKind::Rotated => proto::RotationEventKind::Rotated,
+        RotationEventKind::DrainCompleted => proto::RotationEventKind::DrainCompleted,
+        RotationEventKind::MessageDroppedPostDrain => {
+            proto::RotationEventKind::MessageDroppedPostDrain
+        }
+    };
+    proto::RotationEvent {
+        kind: kind as i32,
+        remote_id: event.remote_id.to_bytes(),
+        primary_session_id: event.primary_session_id,
+        draining_session_id: event.draining_session_id,
+        timestamp_ms: event.timestamp_ms,
+    }
+}
+
 /// Return every event with `timestamp_ms >= since_ms`, capped at
 /// `limit` (0 = unlimited). Ordered oldest → newest.
 pub fn query(since_ms: u64, limit: usize) -> Vec<RotationEvent> {
