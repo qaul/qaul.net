@@ -39,6 +39,9 @@ pub fn draw(frame: &mut Frame, app: &App) {
     if app.input_mode == InputMode::Composing {
         draw_compose_modal(frame, area, app);
     }
+    if app.input_mode == InputMode::Viewing {
+        draw_detail_modal(frame, area, app);
+    }
 }
 
 fn draw_header(frame: &mut Frame, area: Rect, app: &App) {
@@ -73,8 +76,9 @@ fn draw_header(frame: &mut Frame, area: Rect, app: &App) {
 }
 
 fn draw_users(frame: &mut Frame, area: Rect, app: &App) {
-    let rows: Vec<Row> = app
-        .users
+    let visible: Vec<_> = app.filtered_users().collect();
+    let total = app.users.len();
+    let rows: Vec<Row> = visible
         .iter()
         .enumerate()
         .map(|(i, u)| {
@@ -108,14 +112,25 @@ fn draw_users(frame: &mut Frame, area: Rect, app: &App) {
         .block(
             Block::default()
                 .borders(Borders::ALL)
-                .title(format!("Users ({})", app.users.len())),
+                .title(filtered_title("Users", visible.len(), total, &app.filter)),
         );
     frame.render_widget(table, area);
 }
 
+/// Returns "<label> (filtered <n>/<total> for "<filter>")" when a
+/// filter is active, otherwise "<label> (<total>)".
+fn filtered_title(label: &str, visible: usize, total: usize, filter: &str) -> String {
+    if filter.is_empty() {
+        format!("{} ({})", label, total)
+    } else {
+        format!("{} (filtered {}/{} for \"{}\")", label, visible, total, filter)
+    }
+}
+
 fn draw_feed(frame: &mut Frame, area: Rect, app: &App) {
-    let rows: Vec<Row> = app
-        .feed
+    let visible: Vec<_> = app.filtered_feed().collect();
+    let total = app.feed.len();
+    let rows: Vec<Row> = visible
         .iter()
         .enumerate()
         .map(|(i, m)| {
@@ -147,7 +162,7 @@ fn draw_feed(frame: &mut Frame, area: Rect, app: &App) {
         .block(
             Block::default()
                 .borders(Borders::ALL)
-                .title(format!("Feed ({})", app.feed.len())),
+                .title(filtered_title("Feed", visible.len(), total, &app.filter)),
         );
     frame.render_widget(table, area);
 }
@@ -239,24 +254,21 @@ fn draw_unconfirmed_sparkline(frame: &mut Frame, area: Rect, app: &App) {
 }
 
 fn draw_dtn_custodians(frame: &mut Frame, area: Rect, app: &App) {
-    let rows: Vec<Row> = match &app.dtn_config {
-        Some(cfg) => cfg
-            .users
-            .iter()
-            .enumerate()
-            .map(|(i, u)| {
-                let style = if i == app.cursor {
-                    Style::default().bg(Color::DarkGray)
-                } else {
-                    Style::default()
-                };
-                Row::new(vec![Cell::from(short_id(u))]).style(style)
-            })
-            .collect(),
-        None => Vec::new(),
-    };
+    let visible: Vec<_> = app.filtered_dtn_custodians().collect();
+    let total = app.dtn_config.as_ref().map(|c| c.users.len()).unwrap_or(0);
+    let rows: Vec<Row> = visible
+        .iter()
+        .enumerate()
+        .map(|(i, u)| {
+            let style = if i == app.cursor {
+                Style::default().bg(Color::DarkGray)
+            } else {
+                Style::default()
+            };
+            Row::new(vec![Cell::from(short_id(u))]).style(style)
+        })
+        .collect();
     let widths = [Constraint::Min(20)];
-    let count = app.dtn_config.as_ref().map(|c| c.users.len()).unwrap_or(0);
     let table = Table::new(rows, widths)
         .header(
             Row::new(vec!["Configured custodian users"])
@@ -265,7 +277,7 @@ fn draw_dtn_custodians(frame: &mut Frame, area: Rect, app: &App) {
         .block(
             Block::default()
                 .borders(Borders::ALL)
-                .title(format!("Allowed custodians ({})", count)),
+                .title(filtered_title("Allowed custodians", visible.len(), total, &app.filter)),
         );
     frame.render_widget(table, area);
 }
@@ -394,12 +406,9 @@ fn draw_module_card(
 }
 
 fn draw_network_peers(frame: &mut Frame, area: Rect, app: &App) {
-    let peers: Vec<_> = app
-        .network
-        .as_ref()
-        .map(|n| n.peers.clone())
-        .unwrap_or_default();
-    let rows: Vec<Row> = peers
+    let visible: Vec<_> = app.filtered_peers().collect();
+    let total = app.network.as_ref().map(|n| n.peers.len()).unwrap_or(0);
+    let rows: Vec<Row> = visible
         .iter()
         .enumerate()
         .map(|(i, p)| {
@@ -431,7 +440,7 @@ fn draw_network_peers(frame: &mut Frame, area: Rect, app: &App) {
         .block(
             Block::default()
                 .borders(Borders::ALL)
-                .title(format!("Peers ({})", peers.len())),
+                .title(filtered_title("Peers", visible.len(), total, &app.filter)),
         );
     frame.render_widget(table, area);
 }
@@ -535,9 +544,12 @@ fn draw_crypto_counts(frame: &mut Frame, area: Rect, app: &App) {
 }
 
 fn draw_crypto_events(frame: &mut Frame, area: Rect, app: &App) {
+    let total = app.crypto_events.len();
+    // Filtered events rendered newest-first to match selected_detail.
     let visible: Vec<_> = app
-        .crypto_events
-        .iter()
+        .filtered_crypto_events()
+        .collect::<Vec<_>>()
+        .into_iter()
         .rev()
         .take(area.height.saturating_sub(3) as usize)
         .collect();
@@ -571,19 +583,22 @@ fn draw_crypto_events(frame: &mut Frame, area: Rect, app: &App) {
         Constraint::Length(20),
         Constraint::Min(8),
     ];
+    let title = if app.filter.is_empty() {
+        format!("Rotation events ({} buffered, newest first)", total)
+    } else {
+        format!(
+            "Rotation events (filtered {}/{} for \"{}\", newest first)",
+            visible.len(),
+            total,
+            app.filter
+        )
+    };
     let table = Table::new(rows, widths)
         .header(
             Row::new(vec!["Time (ms)", "Kind", "Remote peer", "Sessions"])
                 .style(Style::default().add_modifier(Modifier::BOLD)),
         )
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .title(format!(
-                    "Rotation events ({} buffered, newest first)",
-                    app.crypto_events.len()
-                )),
-        );
+        .block(Block::default().borders(Borders::ALL).title(title));
     frame.render_widget(table, area);
 }
 
@@ -607,20 +622,62 @@ fn draw_events(frame: &mut Frame, area: Rect, app: &App) {
 }
 
 fn draw_help(frame: &mut Frame, area: Rect, app: &App) {
-    let msg = match app.input_mode {
-        InputMode::Composing => "Enter: send  Esc: cancel",
-        InputMode::Normal => match app.current_tab() {
-            Tab::Users => "[Tab] switch  [↑/↓] move  [r] refresh  [q] quit",
-            Tab::Feed => "[Tab] switch  [↑/↓] move  [s] send  [r] refresh  [q] quit",
-            Tab::Dtn => "[Tab] switch  [↑/↓] move  [r] refresh  [q] quit",
-            Tab::Network => "[Tab] switch  [↑/↓] move  [r] refresh  [q] quit",
-            Tab::Crypto => "[Tab] switch  [↑/↓] move  [r] refresh  [q] quit",
-        },
+    let msg: String = match app.input_mode {
+        InputMode::Composing => "Enter: send  Esc: cancel".into(),
+        InputMode::Filtering => format!("filter: /{}_   Enter: accept  Esc: clear", app.filter),
+        InputMode::Viewing => "Esc/Enter: close detail".into(),
+        InputMode::Normal => {
+            let send = matches!(app.current_tab(), Tab::Feed);
+            let mut parts =
+                vec!["[Tab] switch", "[↑/↓] move", "[Enter] detail", "[/] filter"];
+            if send {
+                parts.push("[s] send");
+            }
+            parts.push("[r] refresh");
+            parts.push("[q] quit");
+            parts.join("  ")
+        }
     };
     frame.render_widget(
         Paragraph::new(msg).style(Style::default().fg(Color::DarkGray)),
         area,
     );
+}
+
+fn draw_detail_modal(frame: &mut Frame, area: Rect, app: &App) {
+    let (title, fields) = match app.selected_detail() {
+        Some(d) => d,
+        None => ("(no selection)".to_string(), Vec::new()),
+    };
+    let width = area.width.saturating_sub(8).min(120);
+    let height = ((fields.len() as u16) * 2 + 4).min(area.height.saturating_sub(4));
+    let modal = Rect {
+        x: (area.width.saturating_sub(width)) / 2,
+        y: (area.height.saturating_sub(height)) / 2,
+        width,
+        height,
+    };
+    frame.render_widget(Clear, modal);
+
+    // One Line per field: bold label, then the value wrapped on the
+    // next line so untruncated ids don't blow out the column.
+    let mut lines: Vec<Line> = Vec::with_capacity(fields.len() * 2);
+    for (label, value) in &fields {
+        lines.push(Line::from(Span::styled(
+            format!("{label}:"),
+            Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD),
+        )));
+        lines.push(Line::from(Span::raw(value.clone())));
+    }
+    let p = Paragraph::new(lines)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title(title)
+                .style(Style::default().fg(Color::Yellow)),
+        )
+        .wrap(Wrap { trim: false });
+    frame.render_widget(p, modal);
 }
 
 fn draw_compose_modal(frame: &mut Frame, area: Rect, app: &App) {
