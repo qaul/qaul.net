@@ -965,6 +965,7 @@ impl CryptoNoise {
     /// the ACK's `final_nonce_out` at send time and sends it under the
     /// old (draining) session.
     pub fn rotate_finalize_initiator<D, C, H, P>(
+        state: Option<&crate::QaulState>,
         storage: CryptoAccount,
         remote_id: PeerId,
         incoming: proto_net::RotateHandshakeSecond,
@@ -1038,15 +1039,18 @@ impl CryptoNoise {
         };
         storage.save_rotation_meta(remote_id, &new_meta);
 
-        // Emit a `Rotated` event so clients can surface the state
-        // transition to the UI.
-        events::record(RotationEvent {
-            kind: RotationEventKind::Rotated,
-            remote_id,
-            primary_session_id: incoming.new_session_id,
-            draining_session_id: old_primary,
-            timestamp_ms: now_ms,
-        });
+        // Emit a `Rotated` event (record + push to crypto.rotation
+        // subscribers) so clients can surface the transition to the UI.
+        events::record_and_emit(
+            state,
+            RotationEvent {
+                kind: RotationEventKind::Rotated,
+                remote_id,
+                primary_session_id: incoming.new_session_id,
+                draining_session_id: old_primary,
+                timestamp_ms: now_ms,
+            },
+        );
 
         // `final_nonce_out` (our last A->B nonce on the old session) is
         // filled in by the caller at send time.
@@ -1078,7 +1082,12 @@ impl CryptoNoise {
     /// draining fields on the meta, and emit `DrainCompleted`. The
     /// caller is responsible for having checked both the inbound drain
     /// (`RotationMeta::drain_complete`) and outbound confirmation.
-    pub fn retire_drain(storage: &CryptoAccount, remote_id: PeerId, mut meta: RotationMeta) {
+    pub fn retire_drain(
+        state: Option<&crate::QaulState>,
+        storage: &CryptoAccount,
+        remote_id: PeerId,
+        mut meta: RotationMeta,
+    ) {
         let drain_id = match meta.draining_session_id {
             Some(id) => id,
             None => return,
@@ -1086,13 +1095,18 @@ impl CryptoNoise {
         storage.delete_state(remote_id, drain_id);
         meta.clear_drain(drain_id);
         storage.save_rotation_meta(remote_id, &meta);
-        events::record(RotationEvent {
-            kind: RotationEventKind::DrainCompleted,
-            remote_id,
-            primary_session_id: 0,
-            draining_session_id: drain_id,
-            timestamp_ms: 0,
-        });
+        // record + push to crypto.rotation subscribers (the TUI Crypto
+        // analytics tab). `state` is None only in unit tests.
+        events::record_and_emit(
+            state,
+            RotationEvent {
+                kind: RotationEventKind::DrainCompleted,
+                remote_id,
+                primary_session_id: 0,
+                draining_session_id: drain_id,
+                timestamp_ms: 0,
+            },
+        );
     }
 }
 
@@ -1205,7 +1219,7 @@ mod rotation_tests {
         };
         acct.save_rotation_meta(remote, &meta);
 
-        CryptoNoise::retire_drain(&acct, remote, meta);
+        CryptoNoise::retire_drain(None, &acct, remote, meta);
 
         assert!(acct.get_state_by_id(remote, 7).is_none());
         let after = acct.get_rotation_meta(remote).unwrap();

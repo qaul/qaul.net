@@ -56,6 +56,7 @@ pub async fn run(cli: Cli, refresh_secs: u64) -> Result<(), Box<dyn std::error::
                 let _ = event_tx.send(data::EventLine {
                     topic: "tui.internal".into(),
                     text: format!("subscribe stream ended: {e}"),
+                    parsed: data::ParsedEvent::None,
                 });
             }
         });
