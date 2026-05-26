@@ -804,13 +804,16 @@ impl CryptoNoise {
 
         // Emit a `Rotated` event so clients can surface the state
         // transition to the UI.
-        events::record(RotationEvent {
-            kind: RotationEventKind::Rotated,
-            remote_id,
-            primary_session_id: incoming.new_session_id,
-            draining_session_id: old_primary,
-            timestamp_ms: now_ms,
-        });
+        events::record_and_emit(
+            Some(state),
+            RotationEvent {
+                kind: RotationEventKind::Rotated,
+                remote_id,
+                primary_session_id: incoming.new_session_id,
+                draining_session_id: old_primary,
+                timestamp_ms: now_ms,
+            },
+        );
         true
     }
 
@@ -825,7 +828,18 @@ impl CryptoNoise {
     ///
     /// Intended to be called from a periodic task in Phase 2; exposed
     /// here so Phase 1 unit tests can exercise it directly.
-    pub fn drain_expired_rotations(storage: CryptoAccount, now_ms: u64) {
+    ///
+    /// `state` is `Option` so internal unit tests that exercise the
+    /// rotation primitives without a full `QaulState` can pass
+    /// `None`. The production caller (the libqaul rotation ticker)
+    /// always passes `Some(state)`, which lets the
+    /// `crypto.rotation` subscribe topic fire for every retired
+    /// session.
+    pub fn drain_expired_rotations(
+        state: Option<&crate::QaulState>,
+        storage: CryptoAccount,
+        now_ms: u64,
+    ) {
         for result in storage.rotation_meta.iter() {
             let (key, value) = match result {
                 Ok(kv) => kv,
@@ -871,13 +885,16 @@ impl CryptoNoise {
             };
             storage.save_rotation_meta(remote_id, &cleared);
 
-            events::record(RotationEvent {
-                kind: RotationEventKind::GraceExpired,
-                remote_id,
-                primary_session_id: 0,
-                draining_session_id: drain_id,
-                timestamp_ms: now_ms,
-            });
+            events::record_and_emit(
+                state,
+                RotationEvent {
+                    kind: RotationEventKind::GraceExpired,
+                    remote_id,
+                    primary_session_id: 0,
+                    draining_session_id: drain_id,
+                    timestamp_ms: now_ms,
+                },
+            );
         }
     }
 }
@@ -932,7 +949,7 @@ mod rotation_tests {
         );
 
         // now < until, volume > 0 → not expired
-        CryptoNoise::drain_expired_rotations(acct.clone(), 5_000);
+        CryptoNoise::drain_expired_rotations(None, acct.clone(), 5_000);
 
         assert!(acct.get_state_by_id(remote, 7).is_some());
         let meta = acct.get_rotation_meta(remote).unwrap();
@@ -957,7 +974,7 @@ mod rotation_tests {
             },
         );
 
-        CryptoNoise::drain_expired_rotations(acct.clone(), 10_000);
+        CryptoNoise::drain_expired_rotations(None, acct.clone(), 10_000);
 
         assert!(
             acct.get_state_by_id(remote, 7).is_none(),
@@ -987,7 +1004,7 @@ mod rotation_tests {
             },
         );
 
-        CryptoNoise::drain_expired_rotations(acct.clone(), 1);
+        CryptoNoise::drain_expired_rotations(None, acct.clone(), 1);
 
         assert!(acct.get_state_by_id(remote, 7).is_none());
         let meta = acct.get_rotation_meta(remote).unwrap();
@@ -1002,7 +1019,7 @@ mod rotation_tests {
         acct.save_state(remote, 1, dummy_state(1));
         acct.save_rotation_meta(remote, &RotationMeta::primary_only(1));
 
-        CryptoNoise::drain_expired_rotations(acct.clone(), u64::MAX);
+        CryptoNoise::drain_expired_rotations(None, acct.clone(), u64::MAX);
 
         assert!(acct.get_state_by_id(remote, 1).is_some());
         let meta = acct.get_rotation_meta(remote).unwrap();

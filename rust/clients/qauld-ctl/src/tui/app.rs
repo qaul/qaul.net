@@ -5,7 +5,10 @@
 
 use std::collections::VecDeque;
 
-use crate::data::{CryptoConfig, CryptoRotationEvent, DtnConfig, DtnState, EventLine, NetworkSnapshot};
+use crate::data::{
+    CryptoConfig, CryptoRotationEvent, DtnConfig, DtnState, EventLine, NetworkSnapshot,
+    ParsedEvent,
+};
 
 const MAX_EVENTS: usize = 200;
 const MAX_DTN_EVENTS: usize = 100;
@@ -191,8 +194,15 @@ impl App {
 
     /// Route a structured event from the subscribe stream. DTN
     /// delivery responses go to the DTN tab, peer events go to the
-    /// Network tab, everything else lands in the general events panel.
+    /// Network tab, crypto rotations go to the Crypto tab's typed
+    /// buffer (deduped against poll-based fetches), and anything
+    /// else lands in the general events panel.
     pub fn push_event_line(&mut self, line: EventLine) {
+        // Merge typed payloads first so the typed buffers stay in
+        // sync regardless of which buffer the text line lands in.
+        if let ParsedEvent::CryptoRotation(ref ev) = line.parsed {
+            self.merge_crypto_event(ev.clone());
+        }
         match line.topic.as_str() {
             "dtn.delivery_response" => {
                 if self.dtn_events.len() >= MAX_DTN_EVENTS {
@@ -206,8 +216,31 @@ impl App {
                 }
                 self.network_events.push_back(line.text);
             }
+            "crypto.rotation" => {
+                // Already merged into crypto_events above; don't
+                // also clutter the general events panel.
+            }
             _ => self.push_event(line.text),
         }
+    }
+
+    /// Merge a rotation event from the push channel, deduping
+    /// against anything the poll path already buffered. Same
+    /// (timestamp_ms, kind, primary, draining) tuple ⇒ same event.
+    fn merge_crypto_event(&mut self, ev: CryptoRotationEvent) {
+        let duplicate = self.crypto_events.iter().any(|existing| {
+            existing.timestamp_ms == ev.timestamp_ms
+                && existing.kind == ev.kind
+                && existing.primary_session_id == ev.primary_session_id
+                && existing.draining_session_id == ev.draining_session_id
+        });
+        if duplicate {
+            return;
+        }
+        if ev.timestamp_ms > self.crypto_event_floor_ms {
+            self.crypto_event_floor_ms = ev.timestamp_ms;
+        }
+        self.crypto_events.push(ev);
     }
 
     pub fn push_event(&mut self, line: String) {
