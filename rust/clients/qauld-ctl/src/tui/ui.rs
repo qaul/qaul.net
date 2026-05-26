@@ -31,6 +31,7 @@ pub fn draw(frame: &mut Frame, app: &App) {
         Tab::Feed => draw_feed(frame, chunks[1], app),
         Tab::Dtn => draw_dtn(frame, chunks[1], app),
         Tab::Network => draw_network(frame, chunks[1], app),
+        Tab::Crypto => draw_crypto(frame, chunks[1], app),
     }
     draw_events(frame, chunks[2], app);
     draw_help(frame, chunks[3], app);
@@ -46,7 +47,7 @@ fn draw_header(frame: &mut Frame, area: Rect, app: &App) {
         .constraints([Constraint::Min(20), Constraint::Length(40)])
         .split(area);
 
-    let titles: Vec<Line> = vec!["Users", "Feed", "DTN", "Network"]
+    let titles: Vec<Line> = vec!["Users", "Feed", "DTN", "Network", "Crypto"]
         .into_iter()
         .map(|t| Line::from(Span::raw(t)))
         .collect();
@@ -55,6 +56,7 @@ fn draw_header(frame: &mut Frame, area: Rect, app: &App) {
         Tab::Feed => 1,
         Tab::Dtn => 2,
         Tab::Network => 3,
+        Tab::Crypto => 4,
     };
     let tabs = Tabs::new(titles)
         .select(idx)
@@ -456,6 +458,135 @@ fn draw_network_events(frame: &mut Frame, area: Rect, app: &App) {
     frame.render_widget(p, area);
 }
 
+fn draw_crypto(frame: &mut Frame, area: Rect, app: &App) {
+    let vertical = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Length(8),  // config card
+            Constraint::Length(4),  // counts strip
+            Constraint::Min(4),     // rotation events table
+        ])
+        .split(area);
+
+    draw_crypto_config(frame, vertical[0], app);
+    draw_crypto_counts(frame, vertical[1], app);
+    draw_crypto_events(frame, vertical[2], app);
+}
+
+fn draw_crypto_config(frame: &mut Frame, area: Rect, app: &App) {
+    let lines: Vec<Line> = match &app.crypto_config {
+        Some(c) => vec![
+            Line::from(vec![
+                Span::raw("master switch:        "),
+                Span::styled(
+                    if c.enabled { "enabled" } else { "disabled" },
+                    Style::default()
+                        .fg(if c.enabled { Color::Green } else { Color::Red })
+                        .add_modifier(Modifier::BOLD),
+                ),
+            ]),
+            Line::from(format!("period (s):           {}", c.period_seconds)),
+            Line::from(format!("volume (msgs):        {}", c.volume_messages)),
+            Line::from(format!("grace period (s):     {}", c.grace_period_seconds)),
+            Line::from(format!("grace volume (msgs):  {}", c.grace_volume_messages)),
+        ],
+        None => vec![Line::from(Span::raw("(no config yet)"))],
+    };
+    let p = Paragraph::new(lines).block(
+        Block::default()
+            .borders(Borders::ALL)
+            .title("Noise rotation config"),
+    );
+    frame.render_widget(p, area);
+}
+
+fn draw_crypto_counts(frame: &mut Frame, area: Rect, app: &App) {
+    let mut rotated = 0u32;
+    let mut grace_expired = 0u32;
+    let mut dropped = 0u32;
+    for e in &app.crypto_events {
+        match e.kind {
+            "rotated" => rotated += 1,
+            "grace_expired" => grace_expired += 1,
+            "msg_dropped_past_grace" => dropped += 1,
+            _ => {}
+        }
+    }
+    let line = Line::from(vec![
+        Span::raw("buffered events: "),
+        Span::styled(
+            format!("rotated={rotated}"),
+            Style::default().fg(Color::Green),
+        ),
+        Span::raw("  "),
+        Span::styled(
+            format!("grace_expired={grace_expired}"),
+            Style::default().fg(Color::Yellow),
+        ),
+        Span::raw("  "),
+        Span::styled(
+            format!("dropped_past_grace={dropped}"),
+            Style::default().fg(if dropped > 0 { Color::Red } else { Color::Gray }),
+        ),
+    ]);
+    let p = Paragraph::new(vec![line])
+        .block(Block::default().borders(Borders::ALL).title("Counts"));
+    frame.render_widget(p, area);
+}
+
+fn draw_crypto_events(frame: &mut Frame, area: Rect, app: &App) {
+    let visible: Vec<_> = app
+        .crypto_events
+        .iter()
+        .rev()
+        .take(area.height.saturating_sub(3) as usize)
+        .collect();
+    let rows: Vec<Row> = visible
+        .iter()
+        .enumerate()
+        .map(|(i, e)| {
+            let style = if i == app.cursor {
+                Style::default().bg(Color::DarkGray)
+            } else {
+                Style::default()
+            };
+            let kind_color = match e.kind {
+                "rotated" => Color::Green,
+                "grace_expired" => Color::Yellow,
+                "msg_dropped_past_grace" => Color::Red,
+                _ => Color::Gray,
+            };
+            Row::new(vec![
+                Cell::from(e.timestamp_ms.to_string()),
+                Cell::from(Span::styled(e.kind.to_string(), Style::default().fg(kind_color))),
+                Cell::from(short_id(&e.remote_id)),
+                Cell::from(format!("p={} d={}", e.primary_session_id, e.draining_session_id)),
+            ])
+            .style(style)
+        })
+        .collect();
+    let widths = [
+        Constraint::Length(14),
+        Constraint::Length(22),
+        Constraint::Length(20),
+        Constraint::Min(8),
+    ];
+    let table = Table::new(rows, widths)
+        .header(
+            Row::new(vec!["Time (ms)", "Kind", "Remote peer", "Sessions"])
+                .style(Style::default().add_modifier(Modifier::BOLD)),
+        )
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title(format!(
+                    "Rotation events ({} buffered, newest first)",
+                    app.crypto_events.len()
+                )),
+        );
+    frame.render_widget(table, area);
+}
+
 fn draw_events(frame: &mut Frame, area: Rect, app: &App) {
     let lines: Vec<Line> = app
         .events
@@ -483,6 +614,7 @@ fn draw_help(frame: &mut Frame, area: Rect, app: &App) {
             Tab::Feed => "[Tab] switch  [↑/↓] move  [s] send  [r] refresh  [q] quit",
             Tab::Dtn => "[Tab] switch  [↑/↓] move  [r] refresh  [q] quit",
             Tab::Network => "[Tab] switch  [↑/↓] move  [r] refresh  [q] quit",
+            Tab::Crypto => "[Tab] switch  [↑/↓] move  [r] refresh  [q] quit",
         },
     };
     frame.render_widget(

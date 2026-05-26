@@ -17,6 +17,7 @@ use uuid::Uuid;
 
 use super::app::{FeedRow, UserRow};
 
+use qaul_proto::qaul_rpc_crypto as crypto_proto;
 use qaul_proto::qaul_rpc_dtn as dtn_proto;
 use qaul_proto::qaul_rpc_feed as feed_proto;
 use qaul_proto::qaul_rpc_router as router_proto;
@@ -258,6 +259,88 @@ fn push_peers(
             });
         }
     }
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct CryptoConfig {
+    pub enabled: bool,
+    pub period_seconds: u64,
+    pub volume_messages: u64,
+    pub grace_period_seconds: u64,
+    pub grace_volume_messages: u64,
+}
+
+#[derive(Debug, Clone)]
+pub struct CryptoRotationEvent {
+    pub timestamp_ms: u64,
+    pub kind: &'static str,
+    pub remote_id: String,
+    pub primary_session_id: u32,
+    pub draining_session_id: u32,
+}
+
+pub async fn fetch_crypto_config(
+    connect: &ConnectInfo,
+    timeout: Duration,
+) -> Result<CryptoConfig, Box<dyn std::error::Error>> {
+    let req = crypto_proto::Crypto {
+        message: Some(crypto_proto::crypto::Message::GetConfigRequest(
+            crypto_proto::GetConfigRequest {},
+        )),
+    };
+    let mut t = open(connect).await?;
+    let resp = round_trip(&mut t, proto::Modules::Crypto, req.encode_to_vec(), timeout).await?;
+    let parsed = crypto_proto::Crypto::decode(&resp.data[..])?;
+    if let Some(crypto_proto::crypto::Message::GetConfigResponse(c)) = parsed.message {
+        return Ok(CryptoConfig {
+            enabled: c.enabled,
+            period_seconds: c.period_seconds,
+            volume_messages: c.volume_messages,
+            grace_period_seconds: c.grace_period_seconds,
+            grace_volume_messages: c.grace_volume_messages,
+        });
+    }
+    Err("unexpected crypto config response".into())
+}
+
+pub async fn fetch_crypto_events(
+    connect: &ConnectInfo,
+    timeout: Duration,
+    since_ms: u64,
+) -> Result<Vec<CryptoRotationEvent>, Box<dyn std::error::Error>> {
+    let req = crypto_proto::Crypto {
+        message: Some(crypto_proto::crypto::Message::GetEventsRequest(
+            crypto_proto::GetRotationEventsRequest {
+                since_ms,
+                limit: 0,
+            },
+        )),
+    };
+    let mut t = open(connect).await?;
+    let resp = round_trip(&mut t, proto::Modules::Crypto, req.encode_to_vec(), timeout).await?;
+    let parsed = crypto_proto::Crypto::decode(&resp.data[..])?;
+    if let Some(crypto_proto::crypto::Message::GetEventsResponse(r)) = parsed.message {
+        let mut out = Vec::with_capacity(r.events.len());
+        for ev in r.events {
+            let kind = match crypto_proto::RotationEventKind::try_from(ev.kind) {
+                Ok(crypto_proto::RotationEventKind::Rotated) => "rotated",
+                Ok(crypto_proto::RotationEventKind::GraceExpired) => "grace_expired",
+                Ok(crypto_proto::RotationEventKind::MessageDroppedPastGrace) => "msg_dropped_past_grace",
+                _ => "unspecified",
+            };
+            out.push(CryptoRotationEvent {
+                timestamp_ms: ev.timestamp_ms,
+                kind,
+                remote_id: bs58::encode(&ev.remote_id).into_string(),
+                primary_session_id: ev.primary_session_id,
+                draining_session_id: ev.draining_session_id,
+            });
+        }
+        // Caller asked for since_ms, so dedupe just in case the
+        // daemon returned events at exactly that timestamp twice.
+        return Ok(out);
+    }
+    Err("unexpected crypto events response".into())
 }
 
 pub async fn fetch_feed(
