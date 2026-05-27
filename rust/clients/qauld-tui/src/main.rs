@@ -137,7 +137,8 @@ async fn handle_key(
                 let body = std::mem::take(&mut app.compose_buffer);
                 app.input_mode = InputMode::Normal;
                 if !body.trim().is_empty() {
-                    match data::send_feed(connect, &body, timeout).await {
+                    let user_id = app.default_user_id.clone();
+                    match data::send_feed(connect, &body, &user_id, timeout).await {
                         Ok(()) => app.push_event(format!("feed sent: {body}")),
                         Err(e) => app.push_event(format!("feed send FAILED: {e}")),
                     }
@@ -180,7 +181,10 @@ async fn refresh(
     timeout: Duration,
 ) {
     match data::fetch_default_user(connect, timeout).await {
-        Ok(name) => app.node_name = name,
+        Ok(d) => {
+            app.node_name = d.label;
+            app.default_user_id = d.id_bytes;
+        }
         Err(e) => app.push_event(format!("default user fetch failed: {e}")),
     }
     match data::fetch_users(connect, timeout).await {
