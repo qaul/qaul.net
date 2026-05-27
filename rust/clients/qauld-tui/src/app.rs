@@ -38,6 +38,12 @@ pub struct FeedRow {
 
 pub struct App {
     pub node_name: String,
+    /// Raw PeerId bytes of the daemon's default user account. Cached
+    /// from each `fetch_default_user` call so mutating commands
+    /// (e.g. feed send) can populate the `user_id` field on their
+    /// RPC envelopes — libqaul rejects requests with an empty
+    /// user_id ("InvalidMultihash(UnexpectedEof)").
+    pub default_user_id: Vec<u8>,
     pub users: Vec<UserRow>,
     pub feed: Vec<FeedRow>,
     pub events: VecDeque<String>,
@@ -51,6 +57,7 @@ impl App {
     pub fn new() -> Self {
         Self {
             node_name: String::from("(loading…)"),
+            default_user_id: Vec::new(),
             users: Vec::new(),
             feed: Vec::new(),
             events: VecDeque::new(),

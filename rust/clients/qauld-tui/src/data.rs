@@ -44,10 +44,20 @@ async fn round_trip(
         .ok_or_else(|| "no response".into())
 }
 
+/// Display string + raw PeerId bytes for the daemon's default
+/// account. The bytes are required as the `user_id` field on every
+/// command envelope sent to libqaul — sending `Vec::new()` makes
+/// libqaul fail to decode the multihash and reject the request.
+#[derive(Debug, Clone, Default)]
+pub struct DefaultUser {
+    pub label: String,
+    pub id_bytes: Vec<u8>,
+}
+
 pub async fn fetch_default_user(
     connect: &ConnectInfo,
     timeout: Duration,
-) -> Result<String, Box<dyn std::error::Error>> {
+) -> Result<DefaultUser, Box<dyn std::error::Error>> {
     let req = ua_proto::UserAccounts {
         message: Some(ua_proto::user_accounts::Message::GetDefaultUserAccount(true)),
     };
@@ -56,10 +66,21 @@ pub async fn fetch_default_user(
     let parsed = ua_proto::UserAccounts::decode(&resp.data[..])?;
     if let Some(ua_proto::user_accounts::Message::DefaultUserAccount(d)) = parsed.message {
         if let Some(acct) = d.my_user_account {
-            return Ok(format!("{} ({}…)", acct.name, &acct.id_base58[..12.min(acct.id_base58.len())]));
+            let label = format!(
+                "{} ({}…)",
+                acct.name,
+                &acct.id_base58[..12.min(acct.id_base58.len())]
+            );
+            return Ok(DefaultUser {
+                label,
+                id_bytes: acct.id,
+            });
         }
     }
-    Ok("(no default user)".to_string())
+    Ok(DefaultUser {
+        label: "(no default user)".to_string(),
+        id_bytes: Vec::new(),
+    })
 }
 
 pub async fn fetch_users(
@@ -127,8 +148,16 @@ pub async fn fetch_feed(
 pub async fn send_feed(
     connect: &ConnectInfo,
     body: &str,
+    user_id: &[u8],
     timeout: Duration,
 ) -> Result<(), Box<dyn std::error::Error>> {
+    if user_id.is_empty() {
+        return Err(
+            "cannot send feed message: no default user account on this node \
+             (create one with `qauld-ctl account create`)"
+                .into(),
+        );
+    }
     let req = feed_proto::Feed {
         message: Some(feed_proto::feed::Message::Send(feed_proto::SendMessage {
             content: body.to_string(),
@@ -137,7 +166,7 @@ pub async fn send_feed(
     let envelope = proto::QaulRpc {
         module: proto::Modules::Feed.into(),
         request_id: Uuid::new_v4().to_string(),
-        user_id: Vec::new(),
+        user_id: user_id.to_vec(),
         data: req.encode_to_vec(),
     };
     let mut t = open(connect).await?;
