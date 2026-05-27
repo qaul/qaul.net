@@ -248,3 +248,28 @@ fn format_event(data: &[u8]) -> Option<String> {
 fn _codec_dummy() -> LengthDelimitedCodec {
     LengthDelimitedCodec::new()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Regression test for the InvalidMultihash(UnexpectedEof) error
+    /// libqaul logged when the TUI sent a feed message with an empty
+    /// `user_id` on the QaulRpc envelope. The fix refuses to issue
+    /// the request and returns a clear error to the UI instead.
+    #[tokio::test]
+    async fn send_feed_refuses_empty_user_id() {
+        let connect = ConnectInfo {
+            socket: Some("/nonexistent/should-never-be-opened".into()),
+            dir: None,
+        };
+        // Empty user_id must short-circuit before any socket I/O.
+        let res = send_feed(&connect, "hello", &[], Duration::from_secs(1)).await;
+        let err = res.expect_err("expected Err for empty user_id");
+        let msg = err.to_string();
+        assert!(
+            msg.contains("no default user account"),
+            "error message should reference the missing account, got: {msg}"
+        );
+    }
+}
