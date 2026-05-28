@@ -5,7 +5,7 @@
 
 use std::collections::VecDeque;
 
-use crate::data::{
+use super::data::{
     CryptoConfig, CryptoRotationEvent, DtnConfig, DtnState, EventLine, NetworkSnapshot,
     ParsedEvent,
 };
@@ -209,7 +209,7 @@ impl App {
         })
     }
 
-    pub fn filtered_peers(&self) -> impl Iterator<Item = &crate::data::PeerRow> {
+    pub fn filtered_peers(&self) -> impl Iterator<Item = &super::data::PeerRow> {
         self.network.iter().flat_map(move |n| {
             n.peers.iter().filter(move |p| {
                 self.matches_filter(&format!("{} {} h{} rtt{}", p.module, p.user_id, p.hops, p.rtt_ms))
