@@ -22,6 +22,8 @@ mod commands;
 mod shell;
 mod subscribe;
 mod supervise;
+#[cfg(feature = "tui")]
+mod tui;
 
 /// Build a `ConnectInfo` from the parsed CLI flags.
 pub(crate) fn connect_info(cli: &Cli) -> ConnectInfo {
@@ -90,6 +92,8 @@ pub(crate) async fn run(
         | Commands::Subscribe(_)
         | Commands::Completions { .. }
         | Commands::Run(_) => return Ok(()),
+        #[cfg(feature = "tui")]
+        Commands::Tui(_) => return Ok(()),
     };
 
     let (data, module) = rpc_command.encode_request()?;
@@ -140,6 +144,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Subscribe mode is a long-running RPC that streams events back.
     if matches!(cli.command, Commands::Subscribe(_)) {
         return subscribe::run(cli).await;
+    }
+    // TUI takes over the terminal; it owns its own event loop.
+    #[cfg(feature = "tui")]
+    if let Commands::Tui(args) = &cli.command {
+        let refresh = args.refresh;
+        return tui::run(cli, refresh).await;
     }
 
     #[cfg(feature = "embedded")]
