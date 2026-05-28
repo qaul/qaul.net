@@ -115,10 +115,25 @@ pub enum Commands {
     /// Useful for dev iteration — `qauld-ctl run` in one window,
     /// any number of `qauld-ctl <cmd>` invocations in another.
     Run(RunArgs),
+    /// Launch the terminal UI (ratatui-based).
+    ///
+    /// Connects to the daemon using the same --socket / --dir / --timeout
+    /// flags as the single-shot commands. Requires the binary to have been
+    /// built with the `tui` cargo feature (on by default).
+    #[cfg(feature = "tui")]
+    Tui(TuiArgs),
 }
 
 #[derive(Args, Debug)]
 pub struct ShellArgs {}
+
+#[cfg(feature = "tui")]
+#[derive(Args, Debug)]
+pub struct TuiArgs {
+    /// Auto-refresh interval (seconds) for the TUI's polled views.
+    #[arg(long, default_value = "3")]
+    pub refresh: u64,
+}
 
 #[derive(Args, Debug)]
 pub struct RunArgs {

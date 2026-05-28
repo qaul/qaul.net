@@ -14,7 +14,6 @@ members = [
     "clients/cli",
     "clients/qauld",
     "clients/qauld-ctl",
-    "clients/qauld-tui",
 
     # libp2p modules
     "libp2p_modules/qaul_info",

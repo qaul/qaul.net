@@ -15,7 +15,7 @@ use tokio::sync::mpsc::UnboundedSender;
 use tokio_util::codec::LengthDelimitedCodec;
 use uuid::Uuid;
 
-use crate::app::{FeedRow, UserRow};
+use super::app::{FeedRow, UserRow};
 
 use qaul_proto::qaul_rpc_feed as feed_proto;
 use qaul_proto::qaul_rpc_subscribe as sub_proto;
