@@ -11,7 +11,7 @@ use ratatui::{
     Frame,
 };
 
-use crate::app::{App, InputMode, Tab};
+use super::app::{App, InputMode, Tab};
 
 pub fn draw(frame: &mut Frame, app: &App) {
     let area = frame.area();

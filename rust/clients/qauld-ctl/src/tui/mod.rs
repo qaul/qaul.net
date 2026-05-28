@@ -1,19 +1,26 @@
 // Copyright (c) 2021 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! qauld-tui — terminal UI for the qauld daemon.
+//! Terminal UI for the qauld daemon, surfaced as the `qauld-ctl tui`
+//! subcommand. The implementation lives under this module so a
+//! scripts-only build can drop the `tui` cargo feature and avoid the
+//! ratatui / crossterm deps entirely.
 
 use std::io;
 use std::time::{Duration, Instant};
 
-use clap::Parser;
 use crossterm::{
-    event::{DisableMouseCapture, EnableMouseCapture, Event as CtEvent, EventStream, KeyCode, KeyEvent, KeyEventKind, KeyModifiers},
+    event::{
+        DisableMouseCapture, EnableMouseCapture, Event as CtEvent, EventStream, KeyCode,
+        KeyEvent, KeyEventKind, KeyModifiers,
+    },
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use futures::StreamExt;
 use ratatui::{backend::CrosstermBackend, Terminal};
+
+use crate::cli::Cli;
 
 mod app;
 mod data;
@@ -21,38 +28,22 @@ mod ui;
 
 use app::{App, InputMode, Tab};
 
-#[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
-struct Cli {
-    /// Explicit qauld socket path.
-    #[arg(short, long, env = "QAULD_SOCKET")]
-    socket: Option<String>,
-    /// Directory containing `qauld.sock`.
-    #[arg(short, long)]
-    dir: Option<String>,
-    /// How long to wait for a single RPC response (seconds).
-    #[arg(short, long, default_value = "5")]
-    timeout: u64,
-    /// Auto-refresh interval (seconds).
-    #[arg(long, default_value = "3")]
-    refresh: u64,
-}
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    pretty_env_logger::init();
-    let cli = Cli::parse();
-
-    let connect = qauld_rpc::transport::ConnectInfo {
-        socket: cli.socket.clone(),
-        dir: cli.dir.clone(),
-    };
+/// Entry point invoked from `main` when the user runs `qauld-ctl tui`.
+///
+/// `refresh_secs` is the auto-refresh interval; the rest of the
+/// connection info (socket / dir / timeout) is read from the parent
+/// `Cli` so the TUI honours the same connection flags as every other
+/// subcommand.
+pub async fn run(cli: Cli, refresh_secs: u64) -> Result<(), Box<dyn std::error::Error>> {
+    let connect = crate::connect_info(&cli);
     let timeout = Duration::from_secs(cli.timeout);
 
-    // Verify the daemon is reachable before tearing the screen.
+    // Verify the daemon is reachable before tearing the screen so the
+    // failure mode is a one-line message, not a partially-initialised
+    // alt-screen.
     if let Err(e) = qauld_rpc::SocketTransport::connect(&connect).await {
-        eprintln!("qauld-tui: cannot reach qauld: {e}");
-        eprintln!("       hint: start it with `qauld` or `qauld-ctl run`.");
+        eprintln!("qauld-ctl tui: cannot reach qauld: {e}");
+        eprintln!("        hint: start it with `qauld` or `qauld-ctl run`.");
         std::process::exit(1);
     }
 
@@ -78,7 +69,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     refresh(&mut app, &connect, timeout).await;
 
     let mut term_events = EventStream::new();
-    let mut next_refresh = Instant::now() + Duration::from_secs(cli.refresh);
+    let mut next_refresh = Instant::now() + Duration::from_secs(refresh_secs);
     let result = loop {
         terminal.draw(|f| ui::draw(f, &app))?;
 
@@ -100,7 +91,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             },
             _ = tick => {
                 refresh(&mut app, &connect, timeout).await;
-                next_refresh = Instant::now() + Duration::from_secs(cli.refresh);
+                next_refresh = Instant::now() + Duration::from_secs(refresh_secs);
             }
         }
     };
@@ -114,7 +105,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     terminal.show_cursor()?;
 
     if let Err(e) = result {
-        eprintln!("qauld-tui error: {e}");
+        eprintln!("qauld-ctl tui error: {e}");
         return Err(e);
     }
     Ok(())
