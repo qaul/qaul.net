@@ -13,7 +13,7 @@ use std::sync::RwLock;
 
 use super::rpc_proto;
 use super::ChatStorage;
-use crate::search::{Search, Searchable};
+use crate::search::{Search, SearchConfig, Searchable};
 use crate::storage::Storage;
 use crate::QaulState;
 
@@ -116,7 +116,7 @@ impl ChatSearch {
         let index_path = account_path.join("search").join("chat");
         let path_str = index_path.to_str().unwrap();
 
-        match Search::new(path_str) {
+        match Search::new(path_str, SearchConfig::text_only()) {
             Ok(search) => {
                 let is_fresh = search.is_fresh();
 
@@ -196,7 +196,7 @@ impl ChatSearch {
         // The reconstruct closure looks up the full message from ChatStorage
         // using the message_id (stored as base58 in the search index).
         let account_id_owned = account_id.to_owned();
-        match search.search(query, |message_id_b58| {
+        match search.search(query, None, |message_id_b58| {
             Self::reconstruct_result(state, &account_id_owned, message_id_b58)
         }) {
             Ok(results) => results,

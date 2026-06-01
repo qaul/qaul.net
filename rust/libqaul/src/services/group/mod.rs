@@ -24,13 +24,15 @@ pub mod group_id;
 mod manage;
 mod member;
 mod message;
+pub mod search;
 pub mod storage;
 
 pub use group_id::GroupId;
 pub use manage::GroupManage;
 use member::Member;
 pub use message::GroupMessage;
-pub use storage::GroupStorage;
+pub use search::{GroupSearch, GroupSearchable};
+pub use storage::{GroupSaveReason, GroupStorage};
 
 pub use qaul_proto::qaul_net_group as proto_net;
 /// Import protobuf message definition
@@ -149,7 +151,7 @@ impl Group {
 
     /// update group member
     pub fn update_group_member(state: &crate::QaulState, account_id: &PeerId, group_id: &[u8], member: &GroupMember) {
-        GroupStorage::with_group_mut(state, account_id, group_id, |group| {
+        GroupStorage::with_group_mut(state, account_id, group_id, GroupSaveReason::MembershipChanged, |group| {
             group.members.insert(member.user_id.clone(), member.clone());
         });
     }
@@ -491,6 +493,36 @@ impl Group {
                             group_list_req.offset,
                             group_list_req.limit,
                         );
+                        let proto_message = proto_rpc::Group {
+                            message: Some(proto_rpc::group::Message::GroupListResponse(list)),
+                        };
+                        // send message
+                        Rpc::send_message(
+                            state,
+                            proto_message.encode_to_vec(),
+                            crate::rpc::proto::Modules::Group.into(),
+                            request_id,
+                            Vec::new(),
+                        );
+                    }
+                    Some(proto_rpc::group::Message::GroupSearchRequest(group_search_req)) => {
+                        // Empty query: fall back to the recency-sorted full list
+                        let list = if group_search_req.query.trim().is_empty() {
+                            GroupManage::group_list(
+                                state,
+                                &my_user_id,
+                                group_search_req.offset,
+                                group_search_req.limit,
+                            )
+                        } else {
+                            GroupManage::group_search(
+                                state,
+                                &my_user_id,
+                                &group_search_req.query,
+                                group_search_req.offset,
+                                group_search_req.limit,
+                            )
+                        };
                         let proto_message = proto_rpc::Group {
                             message: Some(proto_rpc::group::Message::GroupListResponse(list)),
                         };

@@ -175,6 +175,16 @@ impl Users {
         store.users.get(q8id).map(|user| user.id)
     }
 
+    /// get the display name of a known user by its q8id
+    ///
+    /// Used by group search to label direct-chat rooms with the partner's name
+    /// (direct chats carry no group name of their own).
+    pub fn get_name_by_q8id(router: &super::RouterState, q8id: &[u8]) -> Option<String> {
+        let store = router.users.inner.read().unwrap();
+
+        store.users.get(q8id).map(|user| user.name.clone())
+    }
+
     /// create and send the user info table for the
     /// RouterInfo message which is sent regularly to neighbours
     ///

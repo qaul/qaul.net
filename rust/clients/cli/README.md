@@ -67,6 +67,7 @@ The following commands are available:
   * `group create {Group Name}` - creates a new group
   * `group list` - list all available groups (returns all groups)
     * `group list {offset} {limit}` - list groups with pagination; skips {offset} groups and returns at most {limit} groups
+  * `group search {Query}` - search groups by name (direct chats match the partner's name), ranked by relevance then recency; an empty query returns the full list
   * `group info {Group ID}` - shows the group information
   * `group invite {Group ID} {User ID}` - invite a user to a group
     * `group invited` - list received pending invitations (returns all invitations)

@@ -105,6 +105,11 @@ impl Group {
                 let (offset, limit) = Self::parse_pagination(rest);
                 Self::group_list(state, offset, limit);
             }
+            // group search by name (empty query falls back to the full list)
+            cmd if cmd.starts_with("search") => {
+                let query = cmd.strip_prefix("search").unwrap_or("").trim();
+                Self::group_search(state, query.to_string());
+            }
             // group invited
             cmd if cmd.starts_with("invited") => {
                 let rest = cmd.strip_prefix("invited").unwrap_or("").trim();
@@ -357,6 +362,33 @@ impl Group {
         let proto_message = proto::Group {
             message: Some(proto::group::Message::GroupListRequest(
                 proto::GroupListRequest { offset, limit },
+            )),
+        };
+
+        let mut buf = Vec::with_capacity(proto_message.encoded_len());
+        proto_message
+            .encode(&mut buf)
+            .expect("Vec<u8> provides capacity as needed");
+
+        Rpc::send_message(
+            state,
+            buf,
+            super::rpc::proto::Modules::Group.into(),
+            "".to_string(),
+        );
+    }
+
+    /// group search by name
+    ///
+    /// The response is a GroupListResponse, displayed by the existing handler.
+    fn group_search(state: &super::CliState, query: String) {
+        let proto_message = proto::Group {
+            message: Some(proto::group::Message::GroupSearchRequest(
+                proto::GroupSearchRequest {
+                    query: query.trim().to_string(),
+                    offset: 0,
+                    limit: 0,
+                },
             )),
         };
 
