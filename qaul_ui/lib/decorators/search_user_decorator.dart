@@ -30,9 +30,10 @@ class SearchUserDecorator extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = useTextEditingController();
+    final searchNotifier = ref.read(usersSearchProvider.notifier);
 
     useEffect(() {
-      return () => ref.read(usersSearchProvider.notifier).clear();
+      return searchNotifier.clear;
     }, const []);
 
     final search = ref.watch(usersSearchProvider);
@@ -44,10 +45,10 @@ class SearchUserDecorator extends HookConsumerWidget {
       leading: title == null ? null : const IconButtonFactory(),
       searchHint: l10n.searchUser,
       controller: controller,
-      onQueryChanged: ref.read(usersSearchProvider.notifier).setQuery,
+      onQueryChanged: searchNotifier.setQuery,
       onClear: () {
         controller.clear();
-        ref.read(usersSearchProvider.notifier).clear();
+        searchNotifier.clear();
       },
       body: builder(context, users),
     );
