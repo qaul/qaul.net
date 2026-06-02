@@ -685,6 +685,12 @@ abstract class AppLocalizations {
   /// **'Search user...'**
   String get searchUser;
 
+  /// No description provided for @searchChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Search chats...'**
+  String get searchChat;
+
   /// No description provided for @storageUsers.
   ///
   /// In en, this message translates to:

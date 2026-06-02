@@ -300,6 +300,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get searchUser => 'Cari pengguna...';
 
   @override
+  String get searchChat => 'Search chats...';
+
+  @override
   String get storageUsers => 'Pengguna Penyimpanan';
 
   @override

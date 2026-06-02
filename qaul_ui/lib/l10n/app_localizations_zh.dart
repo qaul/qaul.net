@@ -291,6 +291,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get searchUser => '搜索用户...';
 
   @override
+  String get searchChat => 'Search chats...';
+
+  @override
   String get storageUsers => 'Storage Users';
 
   @override

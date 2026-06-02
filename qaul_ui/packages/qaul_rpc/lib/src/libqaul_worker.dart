@@ -452,6 +452,28 @@ class LibqaulWorker {
     return result;
   }
 
+  Future<PaginatedChatRooms?> searchChatRooms({
+    required String query,
+    int offset = 0,
+    int limit = 50,
+  }) async {
+    final request = GroupSearchRequest(query: query)
+      ..offset = offset
+      ..limit = limit;
+    final msg = Group(groupSearchRequest: request);
+    final result = await _sendRequest<PaginatedChatRooms>(
+      module: Modules.GROUP,
+      data: msg,
+      adapter: (res) {
+        if (res.data is PaginatedChatRooms) {
+          return res.data as PaginatedChatRooms;
+        }
+        return null;
+      },
+    );
+    return result;
+  }
+
   Future<ChatConversationList?> getChatRoomMessages(Uint8List chatId,
       {int lastIndex = 0}) async {
     final msg = Chat(

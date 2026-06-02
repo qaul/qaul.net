@@ -296,6 +296,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get searchUser => 'بحث عن مستخدم ...';
 
   @override
+  String get searchChat => 'Search chats...';
+
+  @override
   String get storageUsers => 'عقد DTN';
 
   @override

@@ -300,6 +300,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get searchUser => 'Поиск пользователя...';
 
   @override
+  String get searchChat => 'Search chats...';
+
+  @override
   String get storageUsers => 'Пользователи хранилища';
 
   @override

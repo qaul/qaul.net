@@ -300,6 +300,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get searchUser => 'In Kontakten suchen...';
 
   @override
+  String get searchChat => 'Search chats...';
+
+  @override
   String get storageUsers => 'Benutzer zur Zwischenspeicherung von Nachrichten';
 
   @override

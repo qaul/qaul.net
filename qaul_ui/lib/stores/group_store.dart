@@ -4,6 +4,167 @@ final chatRoomsStoreProvider = NotifierProvider<ChatRoomsStore, void>(
   ChatRoomsStore.new,
 );
 
+final chatRoomsSearchProvider =
+    NotifierProvider<ChatRoomsSearchStore, ChatRoomsSearchState>(
+  ChatRoomsSearchStore.new,
+);
+
+class ChatRoomsSearchState {
+  const ChatRoomsSearchState({
+    this.query = '',
+    this.results = const [],
+    this.pagination,
+    this.isLoading = false,
+  });
+
+  final String query;
+  final List<ChatRoom> results;
+  final PaginationState? pagination;
+  final bool isLoading;
+
+  bool get isActive => query.trim().isNotEmpty;
+
+  bool get hasMore => pagination?.hasMore ?? false;
+
+  ChatRoomsSearchState copyWith({
+    String? query,
+    List<ChatRoom>? results,
+    PaginationState? pagination,
+    bool? isLoading,
+  }) {
+    return ChatRoomsSearchState(
+      query: query ?? this.query,
+      results: results ?? this.results,
+      pagination: pagination ?? this.pagination,
+      isLoading: isLoading ?? this.isLoading,
+    );
+  }
+}
+
+class ChatRoomsSearchStore extends Notifier<ChatRoomsSearchState> {
+  static const _debounceDuration = Duration(milliseconds: 250);
+  static const _pageSize = ChatRoomsStore.defaultPageSize;
+
+  Timer? _debounceTimer;
+  int _requestGeneration = 0;
+  bool _loadMoreInFlight = false;
+
+  @override
+  ChatRoomsSearchState build() => const ChatRoomsSearchState();
+
+  void setQuery(String query) {
+    _debounceTimer?.cancel();
+    if (query.trim().isEmpty) {
+      clear();
+      return;
+    }
+
+    _requestGeneration++;
+    state = state.copyWith(query: query, isLoading: true);
+    _debounceTimer = Timer(
+      _debounceDuration,
+      () => _search(offset: 0, replace: true),
+    );
+  }
+
+  void clear() {
+    _debounceTimer?.cancel();
+    _requestGeneration++;
+    state = const ChatRoomsSearchState();
+  }
+
+  Future<void> loadMore() async {
+    if (_loadMoreInFlight ||
+        !state.isActive ||
+        state.isLoading ||
+        !state.hasMore) {
+      return;
+    }
+    final pagination = state.pagination;
+    if (pagination == null) return;
+
+    _loadMoreInFlight = true;
+    try {
+      await _search(
+        offset: pagination.offset + pagination.limit,
+        replace: false,
+      );
+    } finally {
+      _loadMoreInFlight = false;
+    }
+  }
+
+  Future<void> refresh() async {
+    if (!state.isActive) return;
+    _debounceTimer?.cancel();
+    await _search(offset: 0, replace: true);
+  }
+
+  bool _isCurrentSearch(int generation, String requestedQuery) {
+    return ref.mounted &&
+        generation == _requestGeneration &&
+        requestedQuery == state.query.trim();
+  }
+
+  Future<void> _search({required int offset, required bool replace}) async {
+    final requestedQuery = state.query.trim();
+    if (requestedQuery.isEmpty) return;
+
+    final generation = ++_requestGeneration;
+    state = state.copyWith(isLoading: true);
+
+    final result = await ref.read(qaulWorkerProvider).searchChatRooms(
+          query: requestedQuery,
+          offset: offset,
+          limit: _pageSize,
+        );
+
+    if (!_isCurrentSearch(generation, requestedQuery)) return;
+
+    if (result == null) {
+      if (_isCurrentSearch(generation, requestedQuery)) {
+        state = state.copyWith(isLoading: false);
+      }
+      return;
+    }
+
+    final roomsStore = ref.read(chatRoomsStoreProvider.notifier);
+    await roomsStore.resolveUsersForRooms(result.rooms);
+    if (!_isCurrentSearch(generation, requestedQuery)) return;
+
+    final hydrated = _hydrateFromGlobalState(result.rooms);
+    final filtered = _withoutBlockedRooms(hydrated);
+
+    if (!_isCurrentSearch(generation, requestedQuery)) return;
+
+    state = ChatRoomsSearchState(
+      query: state.query,
+      results: replace ? filtered : [...state.results, ...filtered],
+      pagination: result.pagination,
+      isLoading: false,
+    );
+  }
+
+  List<ChatRoom> _hydrateFromGlobalState(List<ChatRoom> rooms) {
+    final byId = {
+      for (final r in ref.read(chatRoomsProvider)) r.idBase58: r,
+    };
+    return rooms
+        .map((r) => byId[r.idBase58] ?? r)
+        .toList(growable: false);
+  }
+
+  List<ChatRoom> _withoutBlockedRooms(List<ChatRoom> rooms) {
+    final blockedIds = ref
+        .read(usersStoreProvider)
+        .where((u) => u.isBlocked ?? false)
+        .map((u) => u.conversationId);
+    return rooms
+        .where((m) => !blockedIds.contains(m.conversationId))
+        .toList(growable: false);
+  }
+}
+
 class ChatRoomsStore extends Notifier<void> {
   static const defaultPageSize = 50;
 
@@ -31,7 +192,7 @@ class ChatRoomsStore extends Notifier<void> {
     } else {
       state.mergeOrderedFromBackend(result.rooms);
     }
-    await _resolveMissingUsersForRooms(result.rooms);
+    await resolveUsersForRooms(result.rooms);
     if (!ref.mounted) return null;
     return PaginatedChatRooms(
       rooms: ref.read(chatRoomsProvider),
@@ -69,7 +230,7 @@ class ChatRoomsStore extends Notifier<void> {
       }
     }
     final rooms = result.invites.map((i) => i.groupDetails).toList();
-    await _resolveMissingUsersForRooms(rooms);
+    await resolveUsersForRooms(rooms);
     if (!ref.mounted) return null;
     await _hydrateGroupInvitesFromKnownUsers();
     return PaginatedGroupInvites(
@@ -95,6 +256,10 @@ class ChatRoomsStore extends Notifier<void> {
   }) async {
     final result = await getGroupInvites(offset: 0, limit: limit);
     return result?.invites ?? [];
+  }
+
+  Future<void> resolveUsersForRooms(List<ChatRoom> rooms) async {
+    await _resolveMissingUsersForRooms(rooms);
   }
 
   Future<void> _hydrateGroupInvitesFromKnownUsers() async {

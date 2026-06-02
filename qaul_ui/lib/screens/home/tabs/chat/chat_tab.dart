@@ -36,9 +36,27 @@ class _ChatState extends _BaseTabState<_Chat> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >=
+    if (_scrollController.position.pixels <
         _scrollController.position.maxScrollExtent * 0.8) {
+      return;
+    }
+    final search = ref.read(chatRoomsSearchProvider);
+    if (search.isActive) {
+      _loadMoreSearchResults();
+    } else {
       _loadMore();
+    }
+  }
+
+  Future<void> _loadMoreSearchResults() async {
+    final search = ref.read(chatRoomsSearchProvider);
+    if (_isLoadingMore || !search.hasMore || search.isLoading) return;
+
+    setState(() => _isLoadingMore = true);
+    try {
+      await ref.read(chatRoomsSearchProvider.notifier).loadMore();
+    } finally {
+      if (mounted) setState(() => _isLoadingMore = false);
     }
   }
 
@@ -62,6 +80,10 @@ class _ChatState extends _BaseTabState<_Chat> {
   }
 
   Future<void> _refreshChatsAndInvites() async {
+    if (ref.read(chatRoomsSearchProvider).isActive) {
+      await ref.read(chatRoomsSearchProvider.notifier).refresh();
+      return;
+    }
     // Pull-to-refresh resets to a fresh first page. Clear local state so any
     // rooms/invites that no longer exist on the backend drop out of the UI —
     // the offset=0 translator path now merges instead of replacing.
@@ -128,10 +150,16 @@ class _ChatState extends _BaseTabState<_Chat> {
   Widget build(BuildContext context) {
     super.build(context);
 
+    final searchController = useTextEditingController();
+    useEffect(() {
+      return () => ref.read(chatRoomsSearchProvider.notifier).clear();
+    }, const []);
+
     final defaultUser = ref.watch(defaultUserProvider)!;
     final users = ref.watch(usersStoreProvider);
     final chatRooms = ref.watch(chatRoomsProvider);
     final groupInvites = ref.watch(groupInvitesProvider);
+    final roomSearch = ref.watch(chatRoomsSearchProvider);
     final currentOpenChat = ref.watch(currentOpenChatRoom);
 
     final blockedIds = users
@@ -140,6 +168,15 @@ class _ChatState extends _BaseTabState<_Chat> {
     final filteredRooms = chatRooms
         .where((m) => !blockedIds.contains(m.conversationId))
         .toList();
+    final displayRooms =
+        roomSearch.isActive ? roomSearch.results : filteredRooms;
+    final showInvites = !roomSearch.isActive;
+    final listItemCount =
+        (showInvites ? groupInvites.length : 0) + displayRooms.length;
+    final isListLoading = _isLoadingMore ||
+        (roomSearch.isActive &&
+            roomSearch.isLoading &&
+            roomSearch.results.isEmpty);
 
     final mobile = Responsiveness.isMobile(
       context,
@@ -175,102 +212,106 @@ class _ChatState extends _BaseTabState<_Chat> {
 
     final chatRoomsListView = CronTaskDecorator(
       schedule: const Duration(milliseconds: 2500),
-      callback: () =>
-          ref.read(chatRoomsStoreProvider.notifier).pollChatRoomsAndInvites(),
-      child: RefreshIndicator(
-        onRefresh: _refreshChatsAndInvites,
-        child: LoadingDecorator(
-          isLoading: _isLoadingMore,
-          child: EmptyStateTextDecorator(
-            l10n!.emptyChatsList,
-            isEmpty: groupInvites.isEmpty && filteredRooms.isEmpty,
-            child: ListView.separated(
-              controller: _scrollController,
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: groupInvites.length + filteredRooms.length,
-              separatorBuilder: (_, _) => const Divider(height: 12.0),
-              itemBuilder: (_, i) {
-                var theme = Theme.of(context).textTheme;
+      callback: () {
+        if (ref.read(chatRoomsSearchProvider).isActive) return;
+        ref.read(chatRoomsStoreProvider.notifier).pollChatRoomsAndInvites();
+      },
+      child: LoadingDecorator(
+        isLoading: isListLoading,
+        child: ChatRoomList(
+          scrollController: _scrollController,
+          searchHint: l10n!.searchChat,
+          searchController: searchController,
+          onQueryChanged: ref.read(chatRoomsSearchProvider.notifier).setQuery,
+          onClear: () {
+            searchController.clear();
+            ref.read(chatRoomsSearchProvider.notifier).clear();
+          },
+          onRefresh: _refreshChatsAndInvites,
+          isEmpty: listItemCount == 0,
+          emptyMessage: l10n.emptyChatsList,
+          itemCount: listItemCount,
+          itemBuilder: (_, i) {
+            final theme = Theme.of(context).textTheme;
 
-                if (i < groupInvites.length) {
-                  return _GroupInviteTile(invite: groupInvites[i]);
-                }
+            if (showInvites && i < groupInvites.length) {
+              return _GroupInviteTile(invite: groupInvites[i]);
+            }
 
-                final room = filteredRooms[i - groupInvites.length];
-                if (room.isGroupChatRoom) {
-                  return QaulListTile.group(
-                    room,
-                    unreadCount: room.unreadCount,
-                    content: _contentFromOverview(
-                      room.lastMessagePreview,
-                      theme,
-                      room: room,
-                      l10n: l10n,
-                    ),
-                    trailingMetadata: Row(
-                      children: [
-                        Text(
-                          room.lastMessageTime == null
-                              ? ''
-                              : describeFuzzyTimestamp(
-                                  room.lastMessageTime!,
-                                  locale: Locale.parse(
-                                    Intl.defaultLocale ?? 'en',
-                                  ),
-                                ),
-                          style: theme.bodySmall!.copyWith(
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                        const Icon(Icons.chevron_right),
-                      ],
-                    ),
-                    onTap: () => setOpenChat(room),
-                  );
-                }
-
-                final otherUser = ref
-                    .read(usersStoreProvider.notifier)
-                    .otherUserInDirectRoom(room, defaultUser);
-
-                if (otherUser == null) {
-                  _log.warning('single-person room with unknown otherUser');
-                  return const SizedBox.shrink();
-                }
-
-                return QaulListTile.user(
-                  otherUser,
-                  unreadCount: room.unreadCount,
-                  content: _contentFromOverview(
-                    room.lastMessagePreview,
-                    theme,
-                    room: room,
-                    l10n: l10n,
-                  ),
-                  trailingMetadata: Row(
-                    children: [
-                      Text(
-                        room.lastMessageTime == null
-                            ? ''
-                            : describeFuzzyTimestamp(
-                                room.lastMessageTime!,
-                                locale: Locale.parse(
-                                  Intl.defaultLocale ?? 'en',
-                                ),
+            final roomIndex = showInvites ? i - groupInvites.length : i;
+            final room = displayRooms[roomIndex];
+            if (room.isGroupChatRoom) {
+              return QaulListTile.group(
+                room,
+                unreadCount: room.unreadCount,
+                content: _contentFromOverview(
+                  room.lastMessagePreview,
+                  theme,
+                  room: room,
+                  l10n: l10n,
+                ),
+                trailingMetadata: Row(
+                  children: [
+                    Text(
+                      room.lastMessageTime == null
+                          ? ''
+                          : describeFuzzyTimestamp(
+                              room.lastMessageTime!,
+                              locale: Locale.parse(
+                                Intl.defaultLocale ?? 'en',
                               ),
-                        style: theme.bodySmall!.copyWith(
-                          fontStyle: FontStyle.italic,
-                        ),
+                            ),
+                      style: theme.bodySmall!.copyWith(
+                        fontStyle: FontStyle.italic,
                       ),
-                      const Icon(Icons.chevron_right),
-                    ],
+                    ),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+                onTap: () => setOpenChat(room),
+              );
+            }
+
+            final otherUser = ref
+                .read(usersStoreProvider.notifier)
+                .otherUserInDirectRoom(room, defaultUser);
+
+            if (otherUser == null) {
+              _log.warning('single-person room with unknown otherUser');
+              return const SizedBox.shrink();
+            }
+
+            return QaulListTile.user(
+              otherUser,
+              unreadCount: room.unreadCount,
+              content: _contentFromOverview(
+                room.lastMessagePreview,
+                theme,
+                room: room,
+                l10n: l10n,
+              ),
+              trailingMetadata: Row(
+                children: [
+                  Text(
+                    room.lastMessageTime == null
+                        ? ''
+                        : describeFuzzyTimestamp(
+                            room.lastMessageTime!,
+                            locale: Locale.parse(
+                              Intl.defaultLocale ?? 'en',
+                            ),
+                          ),
+                    style: theme.bodySmall!.copyWith(
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
-                  onTap: () => setOpenChat(room, otherUser),
-                  avatarTapRoutesToDetailsScreen: false,
-                );
-              },
-            ),
-          ),
+                  const Icon(Icons.chevron_right),
+                ],
+              ),
+              onTap: () => setOpenChat(room, otherUser),
+              avatarTapRoutesToDetailsScreen: false,
+            );
+          },
         ),
       ),
     );
