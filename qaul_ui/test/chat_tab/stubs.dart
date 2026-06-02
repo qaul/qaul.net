@@ -86,6 +86,24 @@ class StubLibqaulWorker implements LibqaulWorker {
     return PaginatedUsers(users: mockUsers, pagination: pagination);
   }
 
+  @override
+  Future<PaginatedUsers?> searchUsers({
+    required String query,
+    int offset = 0,
+    int limit = 20,
+    bool onlineOnly = false,
+  }) async {
+    final page = await getUsers(offset: offset, limit: limit);
+    if (page == null) return null;
+
+    return PaginatedUsers(
+      users: page.users
+          .where((user) => user.name.toLowerCase().contains(query.toLowerCase()))
+          .toList(),
+      pagination: page.pagination,
+    );
+  }
+
   // -------------------------------------------
   // Unimplemented methods
   // -------------------------------------------
