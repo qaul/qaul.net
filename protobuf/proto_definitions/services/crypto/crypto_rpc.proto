@@ -1,0 +1,167 @@
+syntax = "proto3";
+package qaul.rpc.crypto;
+
+// Crypto service RPC message container
+//
+// Carries every request and response for the Crypto module. Clients
+// produce messages of this type; libqaul replies with the matching
+// `*Response` variant.
+message Crypto {
+    oneof message {
+        // Read the current CryptoRotation configuration for this node.
+        GetConfigRequest get_config_request = 1;
+        // Current CryptoRotation configuration.
+        GetConfigResponse get_config_response = 2;
+        // Update one or more CryptoRotation fields. Unset fields are
+        // left untouched (partial update semantics).
+        SetConfigRequest set_config_request = 3;
+        // Outcome of a SetConfigRequest.
+        SetConfigResponse set_config_response = 4;
+        // Read the in-memory rotation event log.
+        GetRotationEventsRequest get_events_request = 5;
+        // Contents of the rotation event log.
+        GetRotationEventsResponse get_events_response = 6;
+        // Force a rotation with a specific peer, bypassing the
+        // time/volume triggers.
+        TriggerRotationRequest trigger_rotation_request = 7;
+        // Outcome of a TriggerRotationRequest.
+        TriggerRotationResponse trigger_rotation_response = 8;
+    }
+}
+
+// Ask libqaul for the current CryptoRotation config.
+message GetConfigRequest {}
+
+// Current CryptoRotation configuration.
+//
+// Mirrors `libqaul::storage::configuration::CryptoRotation`.
+message GetConfigResponse {
+    // master switch — when false, no rotation triggers fire and no
+    // RotateHandshakeFirst frames are sent.
+    bool enabled = 1;
+    // time-based trigger: rotate when a session is older than this
+    // many seconds.
+    uint64 period_seconds = 2;
+    // outbound volume trigger: rotate once this many messages have
+    // been encrypted under the session.
+    uint64 volume_messages = 3;
+    // grace period during which the old (draining) session is still
+    // accepted for incoming messages after a rotation.
+    uint64 grace_period_seconds = 4;
+    // additional messages accepted on the draining session before it
+    // is retired, regardless of `grace_period_seconds`.
+    uint64 grace_volume_messages = 5;
+}
+
+// Update one or more CryptoRotation fields.
+//
+// Each field is wrapped in an optional-presence message so the caller
+// can send a partial update (e.g. flip `enabled` without restating
+// the period / volume thresholds). Unset fields are left untouched.
+message SetConfigRequest {
+    // set master switch
+    optional bool enabled = 1;
+    // set time-based trigger in seconds
+    optional uint64 period_seconds = 2;
+    // set outbound-volume trigger in message count
+    optional uint64 volume_messages = 3;
+    // set grace period in seconds
+    optional uint64 grace_period_seconds = 4;
+    // set grace volume in message count
+    optional uint64 grace_volume_messages = 5;
+}
+
+// Result of a SetConfigRequest.
+message SetConfigResponse {
+    // true when the update was accepted and persisted to
+    // config.yaml; false when validation failed or the disk write
+    // could not be completed.
+    bool success = 1;
+    // human-readable reason when success=false; empty otherwise.
+    string error = 2;
+    // the CryptoRotation state as it stands after the update. Lets
+    // the client refresh its cached view without a follow-up
+    // GetConfigRequest round-trip.
+    GetConfigResponse applied = 3;
+}
+
+// Classes of rotation event emitted by libqaul.
+enum RotationEventKind {
+    // default / unknown
+    ROTATION_EVENT_UNSPECIFIED = 0;
+    // A rotation successfully finalised on this node: the new
+    // session_id is now primary, the old session_id is now draining.
+    ROTATED = 1;
+    // A draining session's grace window elapsed and its cipher
+    // material was zeroised.
+    GRACE_EXPIRED = 2;
+    // A message arrived under a session_id whose grace window had
+    // already been retired, so we could not decrypt it. The UI
+    // should surface this as "message expired, ask the sender to
+    // resend" rather than "decryption failure".
+    MESSAGE_DROPPED_PAST_GRACE = 3;
+}
+
+// A single rotation-related event.
+message RotationEvent {
+    // Wall-clock timestamp (ms since epoch) at emission time.
+    uint64 timestamp_ms = 1;
+    // The event class.
+    RotationEventKind kind = 2;
+    // The remote peer the event concerns. libp2p PeerId bytes.
+    bytes remote_id = 3;
+    // The session id that became primary (for ROTATED) or the one
+    // that was retired / dropped (for GRACE_EXPIRED /
+    // MESSAGE_DROPPED_PAST_GRACE). 0 when not applicable.
+    uint32 primary_session_id = 4;
+    // The session id that moved from primary to draining (for
+    // ROTATED) or was retired (for GRACE_EXPIRED). 0 when not
+    // applicable.
+    uint32 draining_session_id = 5;
+}
+
+// Ask libqaul for the recent rotation events.
+//
+// The event log is an in-memory ring buffer; events before the node
+// last started are not available.
+message GetRotationEventsRequest {
+    // Only return events at or after this wall-clock timestamp (ms).
+    // 0 means "no lower bound".
+    uint64 since_ms = 1;
+    // Cap the number of events in the response. 0 means "no cap".
+    uint32 limit = 2;
+}
+
+// Contents of the rotation event log.
+message GetRotationEventsResponse {
+    // The matched events, ordered oldest → newest.
+    repeated RotationEvent events = 1;
+}
+
+// Force a rotation with a specific peer, bypassing the time- and
+// volume-based triggers. Intended for operator tooling and
+// integration tests. The caller's currently-active user account is
+// used as the initiator.
+//
+// Fails with `success = false` when rotation is disabled, the
+// current user account cannot be resolved, the remote peer has no
+// existing session, a rotation is already in flight, or the
+// handshake send fails.
+message TriggerRotationRequest {
+    // libp2p PeerId bytes of the remote user to rotate with.
+    bytes remote_id = 1;
+}
+
+// Result of a TriggerRotationRequest.
+message TriggerRotationResponse {
+    // true when a RotateHandshakeFirst was emitted to the remote.
+    bool success = 1;
+    // human-readable reason when success=false; empty otherwise.
+    string error = 2;
+    // session_id of the newly-initiated (HalfOutgoing) rotation.
+    // 0 when the request failed.
+    uint32 new_session_id = 3;
+    // session_id that was primary before the rotation began. 0 when
+    // the request failed.
+    uint32 previous_session_id = 4;
+}

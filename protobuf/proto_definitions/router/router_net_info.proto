@@ -86,6 +86,11 @@ message UserInfo {
     bytes key = 2;
     // user name
     string name = 3;
+    // advertised feature-capability bitset. Bit 0 (0x1) = supports
+    // Noise KK session rotation (`CryptoserviceContainer::rotate_*`).
+    // Absent / 0 from a legacy peer means "no advertised caps"; code
+    // that requires a capability must check the bit before acting.
+    uint32 capabilities = 4;
 }
 
 // List of feed ID's
