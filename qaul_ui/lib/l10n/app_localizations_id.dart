@@ -9,7 +9,7 @@ class AppLocalizationsId extends AppLocalizations {
   AppLocalizationsId([String locale = 'id']) : super(locale);
 
   @override
-  String get okDialogButton => 'OKE';
+  String get okDialogButton => 'OK';
 
   @override
   String get cancelDialogButton => 'BATAL';
@@ -21,13 +21,13 @@ class AppLocalizationsId extends AppLocalizations {
   String get sendTooltip => 'Kirim';
 
   @override
-  String get sendFileTooltip => 'Kirim Berkas';
+  String get sendFileTooltip => 'Kirim File';
 
   @override
   String get sendAudioTooltip => 'Rekam pesan audio';
 
   @override
-  String get start => 'Mulailah';
+  String get start => 'Mulai';
 
   @override
   String get createUserAccount => 'Buat profil pengguna';
@@ -39,40 +39,38 @@ class AppLocalizationsId extends AppLocalizations {
   String get userAccountNavButtonTooltip => 'Akun Anda';
 
   @override
-  String get publicNavButtonTooltip => 'Umpan';
+  String get publicNavButtonTooltip => 'Publik';
 
   @override
   String get usersNavButtonTooltip => 'Pengguna';
 
   @override
-  String get chatNavButtonTooltip => 'Mengobrol';
+  String get chatNavButtonTooltip => 'Obrolan';
 
   @override
   String get network => 'Jaringan';
 
   @override
-  String get createPublicPostTooltip => 'Buat unggahan';
+  String get createPublicPostTooltip => 'Buat postingan';
 
   @override
   String get submitPostTooltip => 'Kirim';
 
   @override
-  String get newChatTooltip => 'Obrolan Baru';
+  String get newChatTooltip => 'Obrolan';
 
   @override
   String get createGroupHint => 'Nama grup';
 
   @override
-  String get publicNotificationsEnabled =>
-      'Aktifkan/Nonaktifkan Pemberitahuan Umpan:';
+  String get publicNotificationsEnabled => 'Postingan Publik';
 
   @override
-  String get chatNotificationsEnabled =>
-      'Aktifkan/Nonaktifkan Notifikasi Obrolan:';
+  String get chatNotificationsEnabled => 'Pesan Obrolan';
 
   @override
   String get notifyOnlyForVerifiedUsers =>
-      'Hanya Tampilkan Notifikasi Terverifikasi:';
+      'Hanya Tampilkan Notifikasi dari Pengguna Terverifikasi';
 
   @override
   String get settings => 'Pengaturan';
@@ -90,7 +88,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get darkTheme => 'Tema Gelap';
 
   @override
-  String get internetNodes => 'Simpul Internet';
+  String get internetNodes => 'Node Internet';
 
   @override
   String get address => 'Alamat';
@@ -99,13 +97,13 @@ class AppLocalizationsId extends AppLocalizations {
   String get name => 'Nama';
 
   @override
-  String get options => 'Options';
+  String get options => 'Opsi';
 
   @override
-  String get useIpv6 => 'Use IPv6';
+  String get useIpv6 => 'Gunakan IPv6';
 
   @override
-  String get useQuic => 'Use Quic Protocol';
+  String get useQuic => 'Gunakan Protokol QUIC';
 
   @override
   String get connections => 'Koneksi';
@@ -117,16 +115,16 @@ class AppLocalizationsId extends AppLocalizations {
   String get ping => 'Ping';
 
   @override
-  String get hopCount => 'Jumlah Loncatan';
+  String get hopCount => 'Jumlah Hop';
 
   @override
   String get via => 'Melalui';
 
   @override
-  String get language => 'Bahasa Indonesia';
+  String get language => 'Bahasa';
 
   @override
-  String get username => 'Nama Pengguna';
+  String get username => 'Nama pengguna';
 
   @override
   String get userID => 'ID Pengguna';
@@ -135,7 +133,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get publicKey => 'Kunci Publik';
 
   @override
-  String get unknown => 'Tidak Dikenal';
+  String get unknown => 'Tidak diketahui';
 
   @override
   String get verify => 'Verifikasi';
@@ -150,22 +148,22 @@ class AppLocalizationsId extends AppLocalizations {
   String get unblockUser => 'Buka blokir Pengguna';
 
   @override
-  String get addNodeCTA => 'Tambahkan simpul Internet';
+  String get addNodeCTA => 'Tambahkan node internet';
 
   @override
   String get chatEmptyMessageHint => 'Pesan Anda...';
 
   @override
-  String get emptyPublicList => 'Belum ada umpan pesan';
+  String get emptyPublicList => 'Belum ada pesan publik';
 
   @override
-  String get emptyUsersList => 'Belum ada pengguna ditambahkan';
+  String get emptyUsersList => 'Belum ada pengguna yang ditambahkan';
 
   @override
-  String get emptyChatsList => 'Belum ada ruang ngobrol';
+  String get emptyChatsList => 'Belum ada ruang obrolan';
 
   @override
-  String get genericEmptyState => 'Belum ada apa-apa di sini';
+  String get genericEmptyState => 'Belum ada apa pun di sini';
 
   @override
   String get verifyUserConfirmationMessage =>
@@ -173,7 +171,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get unverifyUserConfirmationMessage =>
-      'Apakah Anda ingin menghapus status terverifikasi pengguna ini?';
+      'Apakah Anda ingin menghapus status terverifikasi dari pengguna ini?';
 
   @override
   String get blockUserConfirmationMessage =>
@@ -184,41 +182,41 @@ class AppLocalizationsId extends AppLocalizations {
       'Apakah Anda ingin membuka blokir pengguna ini?';
 
   @override
-  String get useSystemDefaultMessage => 'Gunakan sistem bawaan';
+  String get useSystemDefaultMessage => 'Gunakan bawaan sistem';
 
   @override
-  String get genericErrorMessage => 'Ada masalah';
+  String get genericErrorMessage => 'Terjadi kesalahan';
 
   @override
-  String get fieldRequiredErrorMessage => 'Diperlukan bidang.';
+  String get fieldRequiredErrorMessage => 'Kolom wajib diisi.';
 
   @override
-  String get timeoutErrorMessage => 'Waktu Habis';
+  String get timeoutErrorMessage => 'Waktu habis';
 
   @override
-  String get notFoundErrorMessage => 'Tidak Ditemukan';
+  String get notFoundErrorMessage => 'tidak ditemukan';
 
   @override
-  String get noneAvailableMessage => 'Tidak Ada yang Tersedia';
+  String get noneAvailableMessage => 'Tidak ada yang tersedia';
 
   @override
-  String get invalidIPMessage => 'IP Salah';
+  String get invalidIPMessage => 'IP tidak valid';
 
   @override
-  String get invalidPortMessage => 'Portal Salah';
+  String get invalidPortMessage => 'Port tidak valid';
 
   @override
   String get usernameLengthMessage =>
-      'Nama pengguna harus memiliki minimal 2 karakter.';
+      'Nama pengguna harus terdiri dari minimal 2 karakter.';
 
   @override
   String get pleaseRestartApp => 'Silakan mulai ulang aplikasi';
 
   @override
-  String get gotoSupport => 'Pergi untuk mendukung';
+  String get gotoSupport => 'Buka dukungan';
 
   @override
-  String get continueDialogButton => 'Melanjutkan';
+  String get continueDialogButton => 'Lanjutkan';
 
   @override
   String get removeUser => 'Hapus pengguna';
@@ -228,19 +226,20 @@ class AppLocalizationsId extends AppLocalizations {
       'Apakah Anda yakin ingin menghapus pengguna ini dari grup?';
 
   @override
-  String get support => 'Mendukung';
+  String get support => 'Dukungan';
 
   @override
-  String get enableLogging => 'Aktifkan Pencatatan:';
+  String get enableLogging => 'Aktifkan Logging:';
 
   @override
-  String get totalLogsSize => 'Ukuran total log:';
+  String get totalLogsSize => 'Total ukuran log:';
 
   @override
   String get deleteLogs => 'Hapus log';
 
   @override
-  String get logsDescription1 => 'Setiap kali terjadi kesalahan, log dibuat.';
+  String get logsDescription1 =>
+      'Setiap kali terjadi kesalahan, log akan dibuat.';
 
   @override
   String get logsDescription2 =>
@@ -250,10 +249,10 @@ class AppLocalizationsId extends AppLocalizations {
   String get sendLogs => 'Kirim Log';
 
   @override
-  String get noLogsAvailable => 'Tidak Ada Log yang Tersedia';
+  String get noLogsAvailable => 'Tidak Ada Log Tersedia';
 
   @override
-  String get routingDataTable => 'Tabel Data Perutean';
+  String get routingDataTable => 'Tabel Data Routing';
 
   @override
   String get knownAddresses => 'Alamat yang Diketahui';
@@ -268,13 +267,13 @@ class AppLocalizationsId extends AppLocalizations {
   String get createNewGroup => 'Buat grup baru';
 
   @override
-  String get invite => 'Mengundang';
+  String get invite => 'Undang';
 
   @override
-  String get groupName => 'Nama grup';
+  String get groupName => 'Nama Grup';
 
   @override
-  String get createdAt => 'Dibuat di';
+  String get createdAt => 'Dibuat pada';
 
   @override
   String get noOfMembers => 'Jumlah anggota';
@@ -283,10 +282,10 @@ class AppLocalizationsId extends AppLocalizations {
   String get invitedBy => 'Diundang oleh';
 
   @override
-  String get accept => 'Menerima';
+  String get accept => 'Terima';
 
   @override
-  String get decline => 'Menolak';
+  String get decline => 'Tolak';
 
   @override
   String get groupSettings => 'Pengaturan Grup';
@@ -295,32 +294,32 @@ class AppLocalizationsId extends AppLocalizations {
   String get members => 'Anggota';
 
   @override
-  String get showAllFiles => 'Tampilkan semua file';
+  String get showAllFiles => 'Tampilkan Semua File';
 
   @override
   String get searchUser => 'Cari pengguna...';
 
   @override
-  String get storageUsers => 'Node DTN';
+  String get storageUsers => 'Pengguna Penyimpanan';
 
   @override
-  String get addStorageUser => 'Tambahkan simpul pengguna';
+  String get addStorageUser => 'Tambahkan pengguna penyimpanan';
 
   @override
   String get publicNoteHintText => 'Catatan publik';
 
   @override
-  String get createButtonHint => 'Membuat';
+  String get createButtonHint => 'Buat';
 
   @override
   String get chatEmptyState => 'Belum ada pesan di sini';
 
   @override
-  String get securityNumber => 'Nomor keamanan';
+  String get securityNumber => 'Nomor Keamanan';
 
   @override
   String get securityNumberDialogDesc =>
-      'Harap pastikan bahwa orang yang Anda coba verifikasi melihat nomor keamanan yang sama di layar mereka saat mencoba memverifikasi Anda.';
+      'Pastikan orang yang ingin Anda verifikasi melihat nomor keamanan yang sama di layar mereka saat mencoba memverifikasi Anda.';
 
   @override
   String get groupStateEventCreated => 'Grup telah dibuat';
@@ -330,88 +329,88 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String groupEventInvited(String username) {
-    return '\"$username\" has been invited to the group';
+    return '\"$username\" telah diundang ke grup';
   }
 
   @override
-  String get aboutBackgroundExecution => 'About the background execution';
+  String get aboutBackgroundExecution => 'Tentang eksekusi di latar belakang';
 
   @override
-  String get agplLicense => 'AGPL License';
+  String get agplLicense => 'Lisensi AGPL';
 
   @override
-  String get androidOptions => 'Android options';
+  String get androidOptions => 'Opsi Android';
 
   @override
-  String get androidPrivacyPolicy => 'Privacy Policy';
+  String get androidPrivacyPolicy => 'Kebijakan Privasi';
 
   @override
   String get backgroundExecutionDialog1 =>
-      'This app uses background execution to receive and send messages when the app is running in the background.';
+      'Aplikasi ini menggunakan eksekusi latar belakang untuk menerima dan mengirim pesan saat aplikasi berjalan di latar belakang.';
 
   @override
   String get backgroundExecutionDialog2 =>
-      'On older Android devices, we ask location permissions and background location permission in order to communicate via Bluetooth Low Energy. This is due to a missing separation between bluetooth permissions and location permissions. Only bluetooth is used, the location is not used by the app at all.';
+      'Pada perangkat Android yang lebih lama, kami meminta izin lokasi dan izin lokasi latar belakang agar dapat berkomunikasi melalui Bluetooth Low Energy. Hal ini disebabkan belum adanya pemisahan antara izin bluetooth dan izin lokasi. Aplikasi ini hanya menggunakan bluetooth, dan sama sekali tidak menggunakan lokasi.';
 
   @override
   String get backgroundExecutionDialog3 =>
-      'This is completely optional, and you can disable this behavior at any time through the Android settings.';
+      'Ini sepenuhnya opsional, dan Anda dapat menonaktifkan perilaku ini kapan saja melalui pengaturan Android.';
 
   @override
-  String get backgroundExecutionDialogConfirmButton => 'I understand';
+  String get backgroundExecutionDialogConfirmButton => 'Saya mengerti';
 
   @override
   String get createAccountHeading => 'Pilih nama pengguna';
 
   @override
-  String get currentVersion => 'currently installed version:';
+  String get currentVersion => 'versi yang saat ini terpasang:';
 
   @override
   String get emptyNodeName => 'Tanpa nama';
 
   @override
-  String get fileHistory => 'Riwayat berkas';
+  String get fileHistory => 'Riwayat file';
 
   @override
   String get forceUpdateConfirmationDialog =>
-      'All your existing data will be deleted.';
+      'Semua data yang sudah ada akan dihapus.';
 
   @override
-  String get forceUpdateCreateAccount => 'Create new account';
+  String get forceUpdateCreateAccount => 'Buat akun baru';
 
   @override
   String get forceUpdateDescription1 =>
-      'info: qaul has a new database format. Users of qaul 2.0.0-beta.17 and earlier who wish to keep their existing account need to migrate their data to the new format.';
+      'info: qaul memiliki format database baru. Pengguna qaul 2.0.0-beta.17 dan versi sebelumnya yang ingin tetap mempertahankan akun yang ada perlu memigrasikan data mereka ke format baru.';
 
   @override
   String get forceUpdateDescription2 =>
-      'To migrate an existing database, download qaul 2.0.0-beta.18 and run it';
+      'Untuk memigrasikan database yang sudah ada, unduh qaul 2.0.0-beta.18 lalu jalankan';
 
   @override
   String get forceUpdateDescription3 =>
-      'If you don\'t wish to keep your existing data base';
+      'Jika Anda tidak ingin mempertahankan database yang ada';
 
   @override
   String get forceUpdateDisclaimer =>
-      '(you will lose all your data and accounts)';
+      '(Anda akan kehilangan semua data dan akun Anda)';
 
   @override
-  String get forceUpdateDownloadQaul18 => 'Download qaul 2.0.0-beta.18';
+  String get forceUpdateDownloadQaul18 => 'Unduh qaul 2.0.0-beta.18';
 
   @override
-  String get forceUpdateRequired => 'Upgrade Required';
+  String get forceUpdateRequired => 'Pembaruan Diperlukan';
 
   @override
   String get groupChatMessageHint => 'Pesan obrolan grup';
 
   @override
   String groupEventInviteAccepted(String username) {
-    return '\"$username\" accepted the invite to the group';
+    return '\"$username\" menerima undangan ke grup';
   }
 
   @override
   String groupEventJoined(String username) {
-    return '\"$username\" has joined the group';
+    return '\"$username\" telah bergabung ke grup';
   }
 
   @override
@@ -428,12 +427,12 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String groupEventLeft(String username) {
-    return '\"$username\" has left the group';
+    return '\"$username\" telah keluar dari grup';
   }
 
   @override
   String groupEventRemoved(String username) {
-    return '\"$username\" was removed from the group';
+    return '\"$username\" telah dihapus dari grup';
   }
 
   @override
@@ -443,14 +442,14 @@ class AppLocalizationsId extends AppLocalizations {
   String get languageName => 'Bahasa Indonesia';
 
   @override
-  String get notifications => 'Pemberitahuan';
+  String get notifications => 'Notifikasi';
 
   @override
-  String get previousVersion => 'formerly installed version:';
+  String get previousVersion => 'versi yang sebelumnya terpasang:';
 
   @override
-  String get securePrivateMessageHint => 'Pesan pribadi yang aman';
+  String get securePrivateMessageHint => 'Pesan pribadi aman';
 
   @override
-  String get userDocumentation => 'User Documentation';
+  String get userDocumentation => 'Dokumentasi Pengguna';
 }
