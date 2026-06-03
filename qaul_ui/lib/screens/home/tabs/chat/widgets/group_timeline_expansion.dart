@@ -54,7 +54,8 @@ List<GroupJoinEventSnapshot> groupJoinSnapshotsFromMessages({
   return joins;
 }
 
-List<DuplicateUsernameOnJoinNotification> duplicateUsernameNotificationsForRoom({
+List<DuplicateUsernameOnJoinNotification>
+duplicateUsernameNotificationsForRoom({
   required ChatRoom room,
   required Iterable<Message> messages,
   required User Function(Message m, AppLocalizations l10n) resolveAuthor,
@@ -85,14 +86,14 @@ DuplicateUsernameOnJoinNotification? duplicateUsernameNotificationAfter({
   return null;
 }
 
-types.CustomMessage duplicateUsernameCustomMessage({
+types.SystemMessage duplicateUsernameSystemMessage({
   required DuplicateUsernameOnJoinNotification notification,
   required AppLocalizations l10n,
 }) {
-  return types.CustomMessage(
+  return types.SystemMessage(
     id: notification.syntheticMessageIdBase58,
-    author: const types.User(id: 'system'),
     createdAt: notification.receivedAt.millisecondsSinceEpoch,
+    text: '',
     metadata: {
       'kind': _kDuplicateUsernameMetaKind,
       'baseName': notification.baseName,
