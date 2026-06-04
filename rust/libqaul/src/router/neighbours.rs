@@ -66,7 +66,7 @@ impl NeighboursState {
         match module {
             ConnectionModule::Internet => Some(&self.internet),
             ConnectionModule::Lan => Some(&self.lan),
-            ConnectionModule::Ble => Some(&self.ble),
+            ConnectionModule::Ble1m | ConnectionModule::BleCoded => Some(&self.ble),
             _ => None,
         }
     }
@@ -90,6 +90,7 @@ impl NeighboursState {
                 Neighbour {
                     rtt,
                     updated_at: Timestamp::get_timestamp(),
+                    rssi_dbm: None
                 },
             );
         }
@@ -135,7 +136,7 @@ impl NeighboursState {
         {
             let ble = self.ble.read().unwrap();
             if ble.nodes.contains_key(node_id) {
-                return ConnectionModule::Ble;
+                return ConnectionModule::Ble1m;
             }
         }
         ConnectionModule::None
@@ -179,6 +180,10 @@ pub struct Neighbour {
     rtt: u32,
     /// when was this node last seen
     updated_at: u64,
+    /// Received Signal Strength Indication (RSSI).
+    /// router_v2 uses it to calc the quality penalty for BLE transports. 
+    /// Refer to Section 5.1 in the spec.
+    rssi_dbm: Option<i8>
 }
 
 impl Neighbours {
@@ -194,7 +199,7 @@ impl Neighbours {
     ///
     /// If the node already exists, it updates it's rtt value.
     /// If the node does not yet exist, it creates it.
-    pub fn update_node(state: &crate::QaulState, router: &super::RouterState, module: ConnectionModule, node_id: PeerId, rtt: u32) {
+    pub fn update_node(state: &crate::QaulState, router: &super::RouterState, module: ConnectionModule, node_id: PeerId, rtt: u32, rssi: Option<i8>) {
         log::trace!("update_node node {:?}", node_id);
         let ns = &router.neighbours;
         let table_lock = match ns.get_table(&module) {
@@ -208,6 +213,7 @@ impl Neighbours {
         if let Some(node) = node_option {
             node.rtt = Self::calculate_rtt(node.rtt, rtt);
             node.updated_at = Timestamp::get_timestamp();
+            node.rssi_dbm = rssi.or(node.rssi_dbm);
         } else {
             newly_seen = true;
             if neighbours.nodes.len() >= 100_000 {
@@ -222,6 +228,7 @@ impl Neighbours {
                 Neighbour {
                     rtt,
                     updated_at: Timestamp::get_timestamp(),
+                    rssi_dbm: rssi
                 },
             );
 
