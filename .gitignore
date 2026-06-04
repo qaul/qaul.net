@@ -8,6 +8,7 @@ logs/
 version
 .vscode/
 **/search/users/
+**/implementation.md
 
 # generated SBOM files
 *.cdx.json

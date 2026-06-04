@@ -12,7 +12,7 @@
 
 use libp2p::{floodsub, floodsub::Topic, Multiaddr, PeerId};
 use prost::Message;
-use std::{collections::BTreeMap, fmt, sync::RwLock, sync::Mutex};
+use std::{collections::BTreeMap, fmt, sync::Mutex, sync::RwLock};
 use uuid::Uuid;
 
 use crate::connections::transport::{
@@ -262,7 +262,9 @@ impl Ble {
             // turned off in a previous session the module should stay
             // dormant on boot until an operator re-enables it via the
             // Transports RPC.
-            let active = crate::storage::configuration::Configuration::get(state).ble.active;
+            let active = crate::storage::configuration::Configuration::get(state)
+                .ble
+                .active;
             if active {
                 Self::module_start(state);
             } else {
@@ -401,7 +403,12 @@ impl Ble {
     ///
     /// * BLE translation table
     /// * BLE Neighbours list
-    fn node_discovered(state: &crate::QaulState, q8id: Vec<u8>, node_id: Vec<u8>) {
+    fn node_discovered(
+        state: &crate::QaulState,
+        q8id: Vec<u8>,
+        node_id: Vec<u8>,
+        rssi: Option<i8>,
+    ) {
         log::info!("BLE node discovered");
 
         // create node entry
@@ -424,7 +431,7 @@ impl Ble {
             Ok(node_id) => {
                 log::info!("    Node ID: {}", node_id.to_base58());
                 let rs = state.get_router();
-                Neighbours::update_node(state, &rs, ConnectionModule::Ble, node_id, 50);
+                Neighbours::update_node(state, &rs, ConnectionModule::Ble1m, node_id, 50, rssi);
             }
             Err(e) => {
                 log::error!("{}", e);
@@ -483,7 +490,7 @@ impl Ble {
                 QaulId::bytes_to_log_string(&node.id)
             );
             // add it to translation table
-            Self::node_discovered(state, message.qaul_id, node.id);
+            Self::node_discovered(state, message.qaul_id, node.id, Some(message.rssi as i8));
         } else {
             log::info!("BLE discovered Node ID unknown");
             // confirm node
@@ -511,7 +518,7 @@ impl Ble {
             match PeerId::from_bytes(&ble_node.id) {
                 Ok(node_id) => {
                     let rs = state.get_router();
-                    rs.neighbours.delete(ConnectionModule::Ble, node_id);
+                    rs.neighbours.delete(ConnectionModule::Ble1m, node_id);
                 }
                 Err(e) => {
                     log::error!("{}", e);
@@ -530,7 +537,11 @@ impl Ble {
     /// Identification Received
     ///
     /// Received identity information from another node
-    fn identification_received(state: &crate::QaulState, q8id: Vec<u8>, identification: proto_net::Identification) {
+    fn identification_received(
+        state: &crate::QaulState,
+        q8id: Vec<u8>,
+        identification: proto_net::Identification,
+    ) {
         log::info!("BLE identification received from {:?}", q8id.clone());
 
         // add node id
@@ -554,7 +565,7 @@ impl Ble {
             };
 
             // add node to discovered lists
-            Self::node_discovered(state, q8id.clone(), node.id);
+            Self::node_discovered(state, q8id.clone(), node.id, None);
 
             // check if to send a response
             if identification.request {
@@ -571,7 +582,11 @@ impl Ble {
 
     /// Send a handshake message to a peer
     #[cfg(feature = "ble-encryption")]
-    fn send_handshake_message(state: &crate::QaulState, receiver_small_id: Vec<u8>, handshake: proto_net::NoiseHandshake) {
+    fn send_handshake_message(
+        state: &crate::QaulState,
+        receiver_small_id: Vec<u8>,
+        handshake: proto_net::NoiseHandshake,
+    ) {
         log::info!(
             "BLE sending handshake message {} to {:?}",
             handshake.message_number,
@@ -609,7 +624,12 @@ impl Ble {
     /// * receiver_id: the small qaul id of the receiving node
     /// * sender_id: the small qaul id of the sending node (this node)
     /// * data: the binary data of the message to send
-    pub fn message_send(state: &crate::QaulState, receiver_id: Vec<u8>, sender_id: Vec<u8>, data: Vec<u8>) {
+    pub fn message_send(
+        state: &crate::QaulState,
+        receiver_id: Vec<u8>,
+        sender_id: Vec<u8>,
+        data: Vec<u8>,
+    ) {
         log::info!("BLE send message to {:x?}", receiver_id.clone());
         // create a random UUID as message id
         let message_id = Uuid::new_v4().as_bytes().to_vec();
@@ -684,7 +704,11 @@ impl Ble {
     ///
     /// If no encrypted session is established, the message is sent unencrypted.
     #[cfg(feature = "ble-encryption")]
-    fn create_send_message(state: &crate::QaulState, receiver_q8id: Vec<u8>, message: proto_net::ble_message::Message) {
+    fn create_send_message(
+        state: &crate::QaulState,
+        receiver_q8id: Vec<u8>,
+        message: proto_net::ble_message::Message,
+    ) {
         // Check if encrypted session is established
         if BleCrypto::is_session_established(state, &receiver_q8id) {
             // Encode inner message
@@ -717,14 +741,22 @@ impl Ble {
 
     /// Send a message without transport encryption.
     #[cfg(not(feature = "ble-encryption"))]
-    fn create_send_message(state: &crate::QaulState, receiver_q8id: Vec<u8>, message: proto_net::ble_message::Message) {
+    fn create_send_message(
+        state: &crate::QaulState,
+        receiver_q8id: Vec<u8>,
+        message: proto_net::ble_message::Message,
+    ) {
         Self::create_send_message_raw(state, receiver_q8id, message);
     }
 
     /// Send a message without encryption
     ///
     /// This is used for handshake messages and as fallback when encryption fails.
-    fn create_send_message_raw(state: &crate::QaulState, receiver_q8id: Vec<u8>, message: proto_net::ble_message::Message) {
+    fn create_send_message_raw(
+        state: &crate::QaulState,
+        receiver_q8id: Vec<u8>,
+        message: proto_net::ble_message::Message,
+    ) {
         // get small qaul id of this node
         let sender_id = Node::get_q8id(state);
 
@@ -781,7 +813,12 @@ impl Ble {
                             // Decode and process inner message
                             match proto_net::BleMessage::decode(&plaintext[..]) {
                                 Ok(inner) => {
-                                    Self::process_decrypted_message(state, message.from, node_id, inner);
+                                    Self::process_decrypted_message(
+                                        state,
+                                        message.from,
+                                        node_id,
+                                        inner,
+                                    );
                                 }
                                 Err(e) => {
                                     log::error!("BLE inner message decoding error: {}", e);
@@ -807,7 +844,9 @@ impl Ble {
                 }
                 #[cfg(not(feature = "ble-encryption"))]
                 Some(proto_net::ble_message::Message::Handshake(_)) => {
-                    log::warn!("BLE handshake message dropped: feature `ble-encryption` is disabled");
+                    log::warn!(
+                        "BLE handshake message dropped: feature `ble-encryption` is disabled"
+                    );
                 }
                 Some(proto_net::ble_message::Message::Info(data)) => {
                     log::info!("BLE routing info received");
@@ -822,7 +861,12 @@ impl Ble {
                     log::info!("BLE public message received");
                     match feed::proto_net::FeedContainer::decode(&data[..]) {
                         Ok(feed_container) => {
-                            feed::Feed::received(state, ConnectionModule::Ble, node_id, feed_container);
+                            feed::Feed::received(
+                                state,
+                                ConnectionModule::Ble1m,
+                                node_id,
+                                feed_container,
+                            );
                         }
                         Err(e) => {
                             log::error!("BleMessage feed decoding error: {}", e);
@@ -873,7 +917,12 @@ impl Ble {
                 log::info!("BLE public message received (decrypted)");
                 match feed::proto_net::FeedContainer::decode(&data[..]) {
                     Ok(feed_container) => {
-                        feed::Feed::received(state, ConnectionModule::Ble, node_id, feed_container);
+                        feed::Feed::received(
+                            state,
+                            ConnectionModule::Ble1m,
+                            node_id,
+                            feed_container,
+                        );
                     }
                     Err(e) => {
                         log::error!("BleMessage feed decoding error: {}", e);
@@ -900,7 +949,12 @@ impl Ble {
 
     /// Handle incoming handshake messages
     #[cfg(feature = "ble-encryption")]
-    fn handle_handshake(state: &crate::QaulState, from: Vec<u8>, remote_id: PeerId, handshake: proto_net::NoiseHandshake) {
+    fn handle_handshake(
+        state: &crate::QaulState,
+        from: Vec<u8>,
+        remote_id: PeerId,
+        handshake: proto_net::NoiseHandshake,
+    ) {
         match handshake.message_number {
             1 => {
                 // Check for simultaneous handshake initiation (race condition).
@@ -1116,8 +1170,9 @@ impl BleTransport {
     /// and `Internet::init` choose their initial `TransportStatus`
     /// from the per-transport config flag.
     pub fn new(state: &crate::QaulState) -> Self {
-        let active =
-            crate::storage::configuration::Configuration::get(state).ble.active;
+        let active = crate::storage::configuration::Configuration::get(state)
+            .ble
+            .active;
         Self {
             status: if active {
                 TransportStatus::Running
@@ -1138,7 +1193,7 @@ impl Transport for BleTransport {
     }
 
     fn module(&self) -> ConnectionModule {
-        ConnectionModule::Ble
+        ConnectionModule::Ble1m
     }
 
     fn capabilities(&self) -> TransportCapabilities {
@@ -1161,8 +1216,7 @@ impl Transport for BleTransport {
 
         // Persist active flag, mirroring the LAN / Internet transports.
         {
-            let mut config =
-                crate::storage::configuration::Configuration::get_mut(state);
+            let mut config = crate::storage::configuration::Configuration::get_mut(state);
             config.ble.active = false;
         }
         crate::storage::configuration::Configuration::save(state);
@@ -1179,8 +1233,7 @@ impl Transport for BleTransport {
         Ble::module_start(state);
 
         {
-            let mut config =
-                crate::storage::configuration::Configuration::get_mut(state);
+            let mut config = crate::storage::configuration::Configuration::get_mut(state);
             config.ble.active = true;
         }
         crate::storage::configuration::Configuration::save(state);
@@ -1197,14 +1250,24 @@ impl Transport for BleTransport {
         Ble::send_routing_info(state, peer_id, data);
     }
 
-    fn send_qaul_messaging_message(&mut self, state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>) {
+    fn send_qaul_messaging_message(
+        &mut self,
+        state: &crate::QaulState,
+        peer_id: PeerId,
+        data: Vec<u8>,
+    ) {
         if !self.is_enabled() {
             return;
         }
         Ble::send_messaging_message(state, peer_id, data);
     }
 
-    fn publish_floodsub(&mut self, state: &crate::QaulState, topic: floodsub::Topic, data: Vec<u8>) {
+    fn publish_floodsub(
+        &mut self,
+        state: &crate::QaulState,
+        topic: floodsub::Topic,
+        data: Vec<u8>,
+    ) {
         if !self.is_enabled() {
             return;
         }
