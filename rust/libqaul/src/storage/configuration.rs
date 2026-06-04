@@ -259,6 +259,51 @@ impl Default for CryptoRotation {
     }
 }
 
+/// Routing Configuration Options for new router
+///
+/// The following options can be configured:
+/// All time units are in seconds
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct NewRoutingOptions {
+    /// time for each node's own self-entry origin update
+    pub origin_interval_time: u64,
+    /// interval at which a node batches updates to its neighbours
+    pub relay_interval: u64,
+    ///tTime without a fresh-seq update before a routing entry is removed and its index released
+    route_expiry_time: u64,
+    /// time after an index slot is released before the allocator rebinds it to a different target
+    pub idx_cooldown_ms: u64,
+    /// circcular distance above which an incoming seq num is treated as a reboot instead of
+    /// normal advance
+    pub reboot_for_seq_num: u16,
+    /// absolute expiry on a delegation entry
+    pub delegation_ttl: u64,
+    /// interval at which a delegating user re-issues a fresh delegation entry
+    pub delegation_referesh_ms: u64,
+    /// min interval between manifest emissions from a gatewat
+    pub manifest_rate_limit: u64,
+    pub manifest_resync_ms: u64,
+    /// no of consecutive delta emissions before a full NODE_MANIFEST is forced as a periodic re-sync
+    pub manifest_resync_count: u32,
+}
+
+impl Default for NewRoutingOptions {
+    fn default() -> Self {
+        NewRoutingOptions {
+            origin_interval_time: 60,
+            relay_interval: 1,
+            route_expiry_time: 35,
+            idx_cooldown_ms: 60,
+            reboot_for_seq_num: 100,
+            delegation_ttl: 21600,
+            manifest_rate_limit: 60,
+            manifest_resync_ms: 3600,
+            manifest_resync_count: 10,
+            delegation_referesh_ms: 800,
+        }
+    }
+}
+
 /// Storage Configuration Options
 ///
 /// The following options can be configured:
