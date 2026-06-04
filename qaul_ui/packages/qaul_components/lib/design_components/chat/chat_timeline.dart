@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import '../../models/chat_message.dart' as model;
 import '../../models/chat_user.dart';
 import 'compute_message_presentation.dart';
+import 'duplicate_username_meta_message.dart';
 import 'group_chat_messages.dart';
+import 'group_join_meta_message.dart';
 import 'message_presentation_meta.dart';
 import 'qaul_chat_bubble.dart';
-import 'duplicate_username_meta_message.dart';
-import 'group_join_meta_message.dart';
 import 'room_meta_message.dart';
 
 /// A design-system-friendly chat timeline widget.
