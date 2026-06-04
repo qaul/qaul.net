@@ -41,7 +41,7 @@ impl Link {
             jitter_us: 0,
             loss: 0.0,
             active: true,
-            module: ConnectionModule::Ble,
+            module: ConnectionModule::Ble1m,
         }
     }
 

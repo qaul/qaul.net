@@ -40,8 +40,12 @@ pub enum ConnectionModule {
     Lan,
     /// Connect statically to remote nodes.
     Internet,
-    /// BLE module
-    Ble,
+    /// Bluetooth Low Energy on the 1 Mbps physical layer.
+    /// For now, we using this as default until we're able to differentiate
+    /// between both forms of Ble from the physical later
+    Ble1m,
+    /// Bluetooth Low Energy on the Coded physical layer
+    BleCoded,
     /// no connection module known for this
     None,
 }
@@ -57,7 +61,7 @@ impl ConnectionModule {
             ConnectionModule::None => "NONE",
             ConnectionModule::Lan => "LAN",
             ConnectionModule::Internet => "INTERNET",
-            ConnectionModule::Ble => "BLE",
+            ConnectionModule::Ble1m | ConnectionModule::BleCoded => "BLE",
             ConnectionModule::Local => "LOCAL",
         }
     }
@@ -67,9 +71,13 @@ impl ConnectionModule {
             ConnectionModule::None => 0,
             ConnectionModule::Lan => 1,
             ConnectionModule::Internet => 2,
-            ConnectionModule::Ble => 3,
+            ConnectionModule::Ble1m | ConnectionModule::BleCoded => 3,
             ConnectionModule::Local => 4,
         }
+    }
+
+    pub fn is_ble(&self) -> bool {
+        matches!(&self, ConnectionModule::Ble1m) | matches!(&self, ConnectionModule::BleCoded)
     }
 }
 
@@ -129,7 +137,8 @@ impl ConnectionModule {
         match id {
             "lan" => ConnectionModule::Lan,
             "internet" => ConnectionModule::Internet,
-            "ble" => ConnectionModule::Ble,
+            "ble" => ConnectionModule::Ble1m,
+            "ble_coded" => ConnectionModule::BleCoded,
             _ => ConnectionModule::None,
         }
     }
@@ -210,7 +219,12 @@ impl Connections {
     }
 
     /// Process incoming RPC request messages
-    pub fn rpc(state: &crate::QaulState, data: Vec<u8>, internet_opt: Option<&mut Internet>, request_id: String) {
+    pub fn rpc(
+        state: &crate::QaulState,
+        data: Vec<u8>,
+        internet_opt: Option<&mut Internet>,
+        request_id: String,
+    ) {
         match proto::Connections::decode(&data[..]) {
             Ok(connections) => {
                 match connections.message {
@@ -246,7 +260,8 @@ impl Connections {
                                     if let Some(internet) = internet_opt {
                                         let mut connected = false;
                                         // if we already have connection history, check if there is connected
-                                        if let Some(peer_id) = Internet::peerid_from_address(state,
+                                        if let Some(peer_id) = Internet::peerid_from_address(
+                                            state,
                                             nodes_entry.address.clone(),
                                         ) {
                                             connected = internet.swarm.is_connected(&peer_id);
@@ -392,9 +407,10 @@ impl Connections {
                             let internet = internet_opt.unwrap();
                             // already has connection history, we simply handle banned peer list
                             if nodes_entry.enabled == false {
-                                if let Some(peer_id) =
-                                    Internet::peerid_from_address(state, nodes_entry.address.clone())
-                                {
+                                if let Some(peer_id) = Internet::peerid_from_address(
+                                    state,
+                                    nodes_entry.address.clone(),
+                                ) {
                                     if internet.swarm.is_connected(&peer_id) {
                                         if let Err(_) = internet.swarm.disconnect_peer_id(peer_id) {
                                         }
@@ -402,9 +418,10 @@ impl Connections {
                                 }
                             } else {
                                 let mut connected = false;
-                                if let Some(peer_id) =
-                                    Internet::peerid_from_address(state, nodes_entry.address.clone())
-                                {
+                                if let Some(peer_id) = Internet::peerid_from_address(
+                                    state,
+                                    nodes_entry.address.clone(),
+                                ) {
                                     connected = internet.swarm.is_connected(&peer_id);
                                 }
                                 if connected == false {
@@ -417,7 +434,11 @@ impl Connections {
                                             Internet::peer_dial(address, &mut internet.swarm);
                                         }
                                         Err(e) => {
-                                            log::error!("failed to parse multiaddr '{}': {}", nodes_entry.address, e);
+                                            log::error!(
+                                                "failed to parse multiaddr '{}': {}",
+                                                nodes_entry.address,
+                                                e
+                                            );
                                         }
                                     }
                                 }
@@ -577,7 +598,11 @@ impl Connections {
         let (success, error) = match req.id.as_str() {
             "lan" => {
                 if let Some(l) = lan {
-                    let result = if req.enabled { l.start(state) } else { l.stop(state) };
+                    let result = if req.enabled {
+                        l.start(state)
+                    } else {
+                        l.stop(state)
+                    };
                     match result {
                         Ok(()) => (true, String::new()),
                         Err(e) => (false, e.to_string()),
@@ -588,7 +613,11 @@ impl Connections {
             }
             "internet" => {
                 if let Some(i) = internet {
-                    let result = if req.enabled { i.start(state) } else { i.stop(state) };
+                    let result = if req.enabled {
+                        i.start(state)
+                    } else {
+                        i.stop(state)
+                    };
                     match result {
                         Ok(()) => (true, String::new()),
                         Err(e) => (false, e.to_string()),
@@ -599,7 +628,11 @@ impl Connections {
             }
             "ble" => {
                 if let Some(b) = ble {
-                    let result = if req.enabled { b.start(state) } else { b.stop(state) };
+                    let result = if req.enabled {
+                        b.start(state)
+                    } else {
+                        b.stop(state)
+                    };
                     match result {
                         Ok(()) => (true, String::new()),
                         Err(e) => (false, e.to_string()),
