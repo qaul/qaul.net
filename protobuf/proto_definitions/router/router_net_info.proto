@@ -102,8 +102,10 @@ message UserProfile {
     bytes avatar = 4;
     // bio / status text
     string bio = 5;
-    // monotonically increasing version counter
-    uint64 version = 6;
+    // monotonically increasing profile version counter.
+    // MUST be uint32 — wire-compatible with the new routing protocol's
+    // per-user version field. u64 is intentionally NOT used here.
+    uint32 version = 6;
     // timestamp in milliseconds since epoch
     uint64 updated_at = 7;
     // preferred custody route for DTN V2 delivery when this user is offline.

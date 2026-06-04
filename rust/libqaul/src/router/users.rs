@@ -884,7 +884,9 @@ pub struct User {
     pub blocked: bool,
     pub bio: String,
     pub avatar: Vec<u8>,
-    pub version: u64,
+    /// Monotonic profile version. Mirrors `UserProfile.version` on the
+    /// wire (`uint32` in the new routing protocol); MUST stay `u32`.
+    pub version: u32,
     pub updated_at: u64,
     pub signed_profile_bytes: Vec<u8>,
     pub signed_profile_signature: Vec<u8>,
@@ -937,7 +939,9 @@ pub struct UserData {
     pub blocked: bool,
     pub bio: String,
     pub avatar: Vec<u8>,
-    pub version: u64,
+    /// Monotonic profile version. Mirrors `UserProfile.version` on the
+    /// wire (`uint32` in the new routing protocol); MUST stay `u32`.
+    pub version: u32,
     pub updated_at: u64,
     pub signed_profile_bytes: Vec<u8>,
     pub signed_profile_signature: Vec<u8>,

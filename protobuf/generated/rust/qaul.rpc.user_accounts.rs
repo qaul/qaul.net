@@ -83,9 +83,10 @@ pub struct UpdateProfileResponse {
     /// error message if failed
     #[prost(string, tag = "2")]
     pub error_message: ::prost::alloc::string::String,
-    /// the new profile version after update
-    #[prost(uint64, tag = "3")]
-    pub new_version: u64,
+    /// the new profile version after update — MUST mirror
+    /// UserProfile.version (uint32).
+    #[prost(uint32, tag = "3")]
+    pub new_version: u32,
 }
 /// Information about my user
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]

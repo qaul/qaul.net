@@ -355,7 +355,7 @@ impl RpcCommand for UsersSubcmd {
 fn print_extended_profile(
     bio: &str,
     avatar: &[u8],
-    profile_version: u64,
+    profile_version: u32,
     profile_updated_at: u64,
     preferred_custody_route: &[Vec<u8>],
 ) {

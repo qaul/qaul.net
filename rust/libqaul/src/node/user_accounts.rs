@@ -646,7 +646,7 @@ impl UserAccounts {
     }
 
     /// send update profile response to client
-    fn send_update_profile_response(state: &crate::QaulState, success: bool, error_message: String, new_version: u64, request_id: String) {
+    fn send_update_profile_response(state: &crate::QaulState, success: bool, error_message: String, new_version: u32, request_id: String) {
         let proto_message = proto::UserAccounts {
             message: Some(proto::user_accounts::Message::UpdateProfileResponse(
                 proto::UpdateProfileResponse {

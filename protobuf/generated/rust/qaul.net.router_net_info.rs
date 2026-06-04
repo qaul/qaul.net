@@ -111,9 +111,11 @@ pub struct UserProfile {
     /// bio / status text
     #[prost(string, tag = "5")]
     pub bio: ::prost::alloc::string::String,
-    /// monotonically increasing version counter
-    #[prost(uint64, tag = "6")]
-    pub version: u64,
+    /// monotonically increasing profile version counter.
+    /// MUST be uint32 — wire-compatible with the new routing protocol's
+    /// per-user version field. u64 is intentionally NOT used here.
+    #[prost(uint32, tag = "6")]
+    pub version: u32,
     /// timestamp in milliseconds since epoch
     #[prost(uint64, tag = "7")]
     pub updated_at: u64,
