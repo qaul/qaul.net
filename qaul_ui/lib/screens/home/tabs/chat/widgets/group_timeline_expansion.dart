@@ -86,6 +86,16 @@ DuplicateUsernameOnJoinNotification? duplicateUsernameNotificationAfter({
   return null;
 }
 
+/// Maps joining member ids to their locally disambiguated display labels.
+Map<String, String> disambiguatedGroupDisplayNames(
+  Iterable<DuplicateUsernameOnJoinNotification> notifications,
+) {
+  return {
+    for (final notification in notifications)
+      notification.joiningUserIdBase58: notification.disambiguatedName,
+  };
+}
+
 types.SystemMessage duplicateUsernameSystemMessage({
   required DuplicateUsernameOnJoinNotification notification,
   required AppLocalizations l10n,
