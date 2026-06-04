@@ -58,8 +58,9 @@ message UpdateProfileResponse {
     bool success = 1;
     // error message if failed
     string error_message = 2;
-    // the new profile version after update
-    uint64 new_version = 3;
+    // the new profile version after update — MUST mirror
+    // UserProfile.version (uint32).
+    uint32 new_version = 3;
 }
 
 // Information about my user

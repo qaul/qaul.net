@@ -151,9 +151,9 @@ pub struct UserEntry {
     /// avatar bytes (small image)
     #[prost(bytes = "vec", tag = "13")]
     pub avatar: ::prost::alloc::vec::Vec<u8>,
-    /// profile version number
-    #[prost(uint64, tag = "14")]
-    pub profile_version: u64,
+    /// profile version number — MUST mirror UserProfile.version (uint32).
+    #[prost(uint32, tag = "14")]
+    pub profile_version: u32,
     /// profile last updated timestamp (ms since epoch)
     #[prost(uint64, tag = "15")]
     pub profile_updated_at: u64,
