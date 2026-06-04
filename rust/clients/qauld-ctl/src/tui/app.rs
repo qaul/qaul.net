@@ -25,7 +25,7 @@ pub struct UserRow {
     pub id: String,
     pub connectivity: String,
     pub bio: String,
-    pub profile_version: u64,
+    pub profile_version: u32,
 }
 
 #[derive(Debug, Clone)]
