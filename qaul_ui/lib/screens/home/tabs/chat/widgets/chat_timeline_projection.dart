@@ -30,6 +30,9 @@ ChatTimelineProjection? buildChatTimelineProjection({
           l10n: l10n,
         )
       : const <DuplicateUsernameOnJoinNotification>[];
+  final disambiguatedNamesByUserId = renderMode == ChatRenderMode.group
+      ? disambiguatedGroupDisplayNames(duplicateUsernameNotifications)
+      : const <String, String>{};
 
   final internalMessages = <types.Message>[];
   final textMessages = <Message>[];
@@ -116,7 +119,9 @@ ChatTimelineProjection? buildChatTimelineProjection({
       final author = resolveAuthor(m, l10n);
       groupSender = QaulGroupMessageSender(
         idBase58: author.idBase58,
-        name: author.name,
+        name:
+            disambiguatedNamesByUserId[author.idBase58] ??
+            author.name,
         isConnected: author.isConnected,
       );
     }
