@@ -200,7 +200,7 @@ impl RpcCommand for RouterSubcmd {
                 }
             }
             _ => {
-                log::error!("unprocessable RPC router message");
+                return Err("unprocessable RPC router message".into());
             }
         };
         Ok(())
