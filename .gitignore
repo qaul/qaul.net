@@ -8,6 +8,7 @@ logs/
 version
 .vscode/
 **/search/users/
+**/implementation.md
 
 # runtime full-text search indexes (tantivy)
 **/search/groups/
