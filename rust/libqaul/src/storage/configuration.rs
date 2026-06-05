@@ -264,7 +264,7 @@ impl Default for CryptoRotation {
 /// The following options can be configured:
 /// All time units are in seconds
 #[derive(Debug, Deserialize, Clone, Serialize)]
-pub struct NewRoutingOptions {
+pub struct RoutingV2Options {
     /// time for each node's own self-entry origin update
     pub origin_interval_time: u64,
     /// interval at which a node batches updates to its neighbours
@@ -272,34 +272,34 @@ pub struct NewRoutingOptions {
     ///tTime without a fresh-seq update before a routing entry is removed and its index released
     route_expiry_time: u64,
     /// time after an index slot is released before the allocator rebinds it to a different target
-    pub idx_cooldown_ms: u64,
+    pub idx_cooldown: u64,
     /// circcular distance above which an incoming seq num is treated as a reboot instead of
     /// normal advance
     pub reboot_for_seq_num: u16,
     /// absolute expiry on a delegation entry
     pub delegation_ttl: u64,
     /// interval at which a delegating user re-issues a fresh delegation entry
-    pub delegation_referesh_ms: u64,
+    pub delegation_referesh: u64,
     /// min interval between manifest emissions from a gatewat
     pub manifest_rate_limit: u64,
-    pub manifest_resync_ms: u64,
+    pub manifest_resync: u64,
     /// no of consecutive delta emissions before a full NODE_MANIFEST is forced as a periodic re-sync
     pub manifest_resync_count: u32,
 }
 
-impl Default for NewRoutingOptions {
+impl Default for RoutingV2Options {
     fn default() -> Self {
-        NewRoutingOptions {
+        RoutingV2Options {
             origin_interval_time: 60,
             relay_interval: 1,
             route_expiry_time: 35,
-            idx_cooldown_ms: 60,
+            idx_cooldown: 60,
             reboot_for_seq_num: 100,
             delegation_ttl: 21600,
             manifest_rate_limit: 60,
-            manifest_resync_ms: 3600,
+            manifest_resync: 3600,
             manifest_resync_count: 10,
-            delegation_referesh_ms: 800,
+            delegation_referesh: 800,
         }
     }
 }
@@ -394,6 +394,7 @@ pub struct Configuration {
     pub user_accounts: Vec<UserAccount>,
     pub debug: DebugOption,
     pub routing: RoutingOptions,
+<<<<<<< HEAD
     /// Handshake-extras feature config. Marked `#[serde(default)]`
     /// so existing `config.yaml` files (which predate this section)
     /// continue to load with the conservative defaults.
@@ -401,6 +402,9 @@ pub struct Configuration {
     pub handshake_extras: HandshakeExtras,
     #[serde(default)]
     pub crypto_rotation: CryptoRotation,
+=======
+    pub v2_routing: RoutingV2Options,
+>>>>>>> dc1c281b (test(app): #880 added unit tests])
 }
 
 impl Default for Configuration {
@@ -413,8 +417,12 @@ impl Default for Configuration {
             user_accounts: Vec::new(),
             debug: DebugOption::default(),
             routing: RoutingOptions::default(),
+<<<<<<< HEAD
             handshake_extras: HandshakeExtras::default(),
             crypto_rotation: CryptoRotation::default(),
+=======
+            v2_routing: RoutingV2Options::default()
+>>>>>>> dc1c281b (test(app): #880 added unit tests])
         }
     }
 }
