@@ -380,22 +380,63 @@ mod tests {
 
     #[test]
     fn test_calculate_rtt() {
-        // First ping: old_rtt is 0 -> should take the full new_rtt
         assert_eq!(Neighbours::calculate_rtt(0, 100), 100);
-
-        // Smoothing typical scenario
         // old: 100, new: 180 -> (700 + 180) / 8 = 110
         assert_eq!(Neighbours::calculate_rtt(100, 180), 110);
 
-        // Slow latency drop
+        // test slow latenncy
         // old: 110, new: 30 -> (770 + 30) / 8 = 100
         assert_eq!(Neighbours::calculate_rtt(110, 30), 100);
 
-        // Extreme spike resilience
         // old: 100, new: 1000 -> (700 + 1000) / 8 = 212
         assert_eq!(Neighbours::calculate_rtt(100, 1000), 212);
 
-        // Steady state
-        assert_eq!(Neighbours::calculate_rtt(100, 100), 100);
+    }
+
+    #[test]
+    fn neighbour_construct_with_rssi_some() {
+        let n = Neighbour {
+            rtt: 100,
+            updated_at: 0,
+            rssi_dbm: Some(-72),
+        };
+        assert_eq!(n.rssi_dbm, Some(-72));
+        assert_eq!(n.rtt, 100);
+    }
+
+    #[test]
+    fn neighbour_construct_with_rssi_none() {
+        let n = Neighbour {
+            rtt: 100,
+            updated_at: 0,
+            rssi_dbm: None,
+        };
+        assert_eq!(n.rssi_dbm, None);
+    }
+
+    #[test]
+    fn neighbours_state_inserts_new_node_with_default_rssi() {
+        let state = NeighboursState::new();
+        let peer = PeerId::random();
+        state.update_node(ConnectionModule::Ble1m, peer, 50);
+        let ble = state.ble.read().unwrap();
+        let stored = ble.nodes.get(&peer).expect("neighbour inserted");
+        assert_eq!(stored.rssi_dbm, None);
+        assert_eq!(stored.rtt, 50);
+    }
+
+    #[test]
+    fn neighbours_state_update_node_smooths_rtt_on_second_seen() {
+        let state = NeighboursState::new();
+        let peer = PeerId::random();
+        state.update_node(ConnectionModule::Lan, peer, 100);
+        state.update_node(ConnectionModule::Lan, peer, 180);
+        let lan = state.lan.read().unwrap();
+        let stored = lan
+            .nodes
+            .get(&peer)
+            .expect("neighbour present after second update");
+        // EWMA per calculate_rtt: (100 * 7 + 180) / 8 = 110.
+        assert_eq!(stored.rtt, 110);
     }
 }

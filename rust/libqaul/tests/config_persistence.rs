@@ -11,8 +11,12 @@
 //! we construct Configuration instances manually in these tests.
 
 use libqaul::storage::configuration::{
+<<<<<<< HEAD
     Ble, Configuration, CryptoRotation, DebugOption, HandshakeExtras, Internet, InternetPeer, Lan,
     Node, RoutingOptions, StorageOptions, UserAccount,
+=======
+    Ble, Configuration, DebugOption, Internet, InternetPeer, Lan, RoutingV2Options, Node, RoutingOptions, StorageOptions, UserAccount
+>>>>>>> dc1c281b (test(app): #880 added unit tests])
 };
 use tempfile::TempDir;
 
@@ -52,8 +56,12 @@ fn create_test_config() -> Configuration {
             hop_count_penalty: 10,
             maintain_period_limit: 300,
         },
+<<<<<<< HEAD
         crypto_rotation: CryptoRotation::default(),
         handshake_extras: HandshakeExtras::default(),
+=======
+        v2_routing: RoutingV2Options::default(),
+>>>>>>> dc1c281b (test(app): #880 added unit tests])
         ble: Ble::default(),
     }
 }
