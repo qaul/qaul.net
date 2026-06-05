@@ -15,6 +15,8 @@ use std::path::{Path, PathBuf};
 
 pub mod old_config;
 
+use crate::storage::configuration::RoutingV2Options;
+
 use super::backup;
 
 /// # Version Upgrade Logic
@@ -144,10 +146,14 @@ impl VersionUpgrade {
                 user_accounts,
                 debug,
                 routing,
+<<<<<<< HEAD
                 // upgrade path: handshake_extras did not exist in
                 // older configs, so seed with conservative defaults.
                 handshake_extras: crate::storage::configuration::HandshakeExtras::default(),
                 crypto_rotation: crate::storage::configuration::CryptoRotation::default(),
+=======
+                v2_routing: RoutingV2Options::default()
+>>>>>>> dc1c281b (test(app): #880 added unit tests])
             };
 
             // save new configuration to file
