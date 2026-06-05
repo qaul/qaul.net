@@ -165,6 +165,248 @@ Rotation is gated by `CryptoRotation::enabled` (defaults to `false`). To disable
 
 In-flight rotations at the moment of disable complete naturally (the daemon is not interrupted mid-handshake); subsequent triggers are simply not fired.
 
+## Proposed evolution: receiver-confirmation grace
+
+> **Status:** design proposal, not yet implemented. The current implementation
+> uses the wall-clock + volume grace described above. This section is the
+> agreed direction after discussion of the DTN problem; see the open issue
+> on `feat/crypto-session-rotation` for the conversation.
+
+### Motivation
+
+The shipped grace model trades two parameters against each other:
+`grace_period_seconds` (default 1 h, hard cap 24 h) and
+`grace_volume_messages` (default 256). Both are wall-clock or counter
+bound. That fits a synchronous transport. qaul is not synchronous — DTN
+custody routing can stash a message at a custodian for days or weeks
+before delivery. With the current grace, a legitimately delayed message
+that crossed a rotation boundary gets dropped past the 24 h cap and the
+user sees `MessageDroppedPastGrace` for traffic the protocol *did*
+deliver correctly end-to-end. The signal is correct ("the cipher key is
+gone") but the situation is not an attack — it is a normal DTN delay.
+
+The right primitive in a delay-tolerant system is **delivery
+confirmation**, not wall clock. Drop the wall clock as the *primary*
+trigger for retirement; keep it only as a final upper bound that catches
+peers who have permanently gone dark.
+
+### Summary of the change
+
+- Both sides exchange their last sent and last received nonces under the
+  old session during the rotation handshake.
+- Each side retires its own inbound cipher for the old session **when it
+  has decrypted every nonce up to the peer's stated max-sent** —
+  delivery-bound, not time-bound.
+- A configurable hard upper bound (`rotation_max_stall_seconds`,
+  default ~30 days, much longer than today's 24 h cap) catches dark
+  peers; if it fires, the side gives up and zeroises the old cipher
+  anyway, emitting a `RotationStalled` event.
+- Outbound cipher for the old session is discarded at the moment of
+  switchover, exactly as today. Forward secrecy on the send path is
+  unchanged; the new mechanism only governs how long the *receive*
+  path keeps the old cipher available.
+
+### Wire changes
+
+The rotation grows from two frames to three. All three remain
+encapsulated in a `CryptoserviceContainer` and encrypted under the old
+transport session — unchanged from today's stealth and anti-MITM-drop
+properties.
+
+```protobuf
+message RotateHandshakeFirst {
+    uint32 new_session_id        = 1;
+    bytes  noise_e               = 2;
+    bytes  nonce                 = 3;   // 16-byte anti-replay, as today
+    uint64 initiated_at          = 4;
+    bytes  rotation_uuid         = 5;   // NEW: 16-byte, identifies this rotation
+}
+
+message RotateHandshakeSecond {
+    uint32 new_session_id              = 1;
+    bytes  noise_e                     = 2;
+    bytes  nonce                       = 3;   // echoed from RHF
+    bytes  signature                   = 4;
+    uint64 received_at                 = 5;
+    bytes  rotation_uuid               = 6;   // NEW: echoed from RHF
+    uint64 responder_last_sent_nonce   = 7;   // NEW: B's final outbound count under old session
+    uint64 responder_last_recv_nonce   = 8;   // NEW: highest A→B nonce B has decrypted
+}
+
+message RotateHandshakeFinal {                // NEW message
+    bytes  rotation_uuid               = 1;
+    uint64 initiator_last_sent_nonce   = 2;   // A's final outbound count under old session
+    uint64 initiator_last_recv_nonce   = 3;   // highest B→A nonce A has decrypted
+}
+```
+
+Per-side accounting:
+
+- **initiator (A)** stops sending under the old session at frame-2-receive
+  time. Its `initiator_last_sent_nonce` is the final outbound counter at
+  that instant. It transmits `RotateHandshakeFinal` (under the *new*
+  session — wrapping cost is tiny and it's the first message on the new
+  cipher) and from then onwards retires its own outbound cipher for old.
+- **responder (B)** stops sending under the old session at frame-2-send
+  time. Its `responder_last_sent_nonce` is final at that instant. It is
+  reported back to A inside `RotateHandshakeSecond`.
+
+### Retirement rules
+
+For each direction independently:
+
+- **A→B direction.** B retires its `cipher_in` for the old session once
+  it has decrypted every nonce in `(B.local_inbound_max + 1) ..=
+  A.initiator_last_sent_nonce`. A's outbound cipher for the old session
+  is discarded at frame-2-receive time and not needed again.
+- **B→A direction.** Symmetric: A retires its `cipher_in` for the old
+  session once it has decrypted every nonce in
+  `(A.local_inbound_max + 1) ..= B.responder_last_sent_nonce`. B's
+  outbound cipher for the old session is discarded at frame-2-send time.
+
+Either side may retire its old `cipher_in` immediately if the peer's
+stated max-sent equals its own max-received at handshake time (no
+in-flight gap).
+
+A `rotation_max_stall_seconds` deadline overrides both rules: if the gap
+hasn't closed by `now + rotation_max_stall_seconds` measured from
+handshake completion, the side zeroises its old `cipher_in` anyway. The
+intended default is on the order of 30 days — long enough to absorb a
+DTN journey, short enough to bound key material lifetime.
+
+### Replay and retransmits
+
+Frames RHF and RHFinal can be lost (DTN-stored, never arrive, or
+custodian retries them). Each frame carries `rotation_uuid` so:
+
+- B caches `(rotation_uuid → RHS bytes)` for the duration of the rotation
+  plus a short tail (e.g., one minute). A retransmitted RHF with a
+  known UUID triggers a re-send of the cached RHS rather than a fresh
+  rotation.
+- A caches its own outbound `rotation_uuid` until RHFinal has been
+  acknowledged (the first encrypted-under-new-session message from B is
+  acknowledgement enough — no explicit ack needed).
+- An adversary replaying an RHF observed earlier produces nothing
+  useful: B's cache no longer holds the rotation, B starts a fresh one;
+  the replayer cannot make the existing peers think a stale rotation
+  succeeded because the new session keys are bound to fresh ephemerals.
+
+### Simultaneous rotation
+
+Both sides may trigger at once and emit RHF before seeing each other's.
+The existing tie-break stays the same in spirit but moves from
+"lower `new_session_id` wins" to **"lower `min(local_peer_id,
+remote_peer_id)` wins"** — the session id is random and tells you
+nothing about which side issued it first, whereas peer ids are stable
+inputs both sides can compute. Loser drops its `HalfOutgoing` row,
+processes the winner's RHF normally, and the Phase 4 simultaneous
+rotation integration test stays valid with the new framing.
+
+### Concurrent rotations per peer
+
+A rotation in progress, plus a trigger to start another (e.g. volume
+trigger refires while waiting on a slow RHS), is **queued**, not
+chained. `rotation_meta` may hold at most one `pending_initiated`
+slot plus one `draining` slot at a time. Triggers received while the
+slot is occupied are dropped (the rotation already in flight will
+satisfy them once it lands). This keeps the state machine to two
+sessions per peer, matching today's bound.
+
+### State changes
+
+`RotationMeta` evolves:
+
+```rust
+pub struct RotationMeta {
+    primary_session_id:           u32,
+    pending_initiated_session_id: Option<u32>,
+    draining_session_id:          Option<u32>,
+    // Replaces draining_until + draining_remaining_volume:
+    peer_last_sent_under_drain:   Option<u64>,   // peer's stated final outbound count
+    my_inbound_max_under_drain:   Option<u64>,   // my own decrypted count under draining
+    rotation_uuid:                Option<Vec<u8>>,// current rotation, or last completed
+    stall_deadline_ms:            Option<u64>,   // wall-clock fallback for dark-peer case
+    last_retired_session_id:      Option<u32>,
+    last_retired_at:              Option<u64>,
+}
+```
+
+`draining_until` and `draining_remaining_volume` are removed; the
+delivery-bound check replaces them as the primary retirement signal.
+
+### Configuration changes
+
+| Field | Replaces | Default | Meaning |
+|---|---|---|---|
+| `rotation_max_stall_seconds` | `grace_period_seconds` (as a cap) | `30 * 24 * 3600` (30 d) | Hard upper bound; retire `cipher_in` for old session even if peer hasn't caught up. |
+| `rotation_min_drain_seconds` | (new) | `60` | Minimum draining window even when the nonce gap closes immediately, to avoid rotation churn under bursty traffic. |
+| `grace_volume_messages` | (deprecated) | — | Removed; nonce-based accounting replaces volume-based grace. |
+
+`enabled`, `period_seconds`, `volume_messages` stay as today.
+
+### Events
+
+- New `RotationStalled` event when `rotation_max_stall_seconds` fires —
+  the dark-peer case. UI should surface as "rotation with peer X did
+  not complete; the old session has been retired by timeout and any
+  further messages from them will fail to decrypt."
+- `MessageDroppedPastGrace` keeps the same shape but its semantics
+  become "sender's rotation stalled past the hard upper bound" rather
+  than "30-minute grace expired", which is a stronger signal of a
+  real problem.
+
+### Capability negotiation
+
+Receiver-confirmation rotation is opt-in via a new capability bit:
+
+```rust
+impl Capabilities {
+    pub const ROTATION: u32              = 1 << 0;   // current shipped rotation
+    pub const ROTATION_RECEIPT_BOUND: u32 = 1 << 1;   // new mechanism
+    pub const LOCAL: u32 = Self::ROTATION | Self::ROTATION_RECEIPT_BOUND;
+}
+```
+
+A peer that does not advertise `ROTATION_RECEIPT_BOUND` falls back to
+the wall-clock grace described in the main "Protocol" section above.
+Both code paths must coexist during rollout; the gate is checked at
+`perform_rotation` start.
+
+### Threat model deltas vs the shipped design
+
+- **MITM dropping rotation frames.** Same as the shipped design: frames
+  are encrypted under the old session, so an attacker who drops them
+  selectively must drop the surrounding regular traffic too, which is
+  itself a visible "peer went silent" signal. The receipt-bound model
+  does not change this property.
+- **Replay of `RotateHandshakeFirst`.** Mitigated by `rotation_uuid` +
+  the existing nonce echo. An old RHF with a UUID B has already
+  forgotten triggers a fresh rotation; a stale RHF with a UUID B still
+  caches triggers a cached RHS re-send. Either way, no successful
+  resurrection of a retired session.
+- **Indefinite key retention from a never-completing rotation.** Capped
+  by `rotation_max_stall_seconds`. The dark-peer case is bounded, just
+  more loosely than today's 24 h.
+- **State-loss recovery (peer wiped local key material).** Out of scope
+  for this section. Tracked separately. The candidate direction is
+  "fall back to a fresh KK session-zero handshake when the receiver
+  drops messages under an unknown `session_id`" — implicit, no
+  explicit reason token, no metadata leak about whose state was lost.
+
+### Out of scope
+
+- **State-loss recovery** — separate design follow-up. The trigger here
+  is "peer lost all keys and is sending under a new identity-signed
+  handshake-init"; the question is how the receiver decides whether to
+  accept that as a legitimate fresh handshake vs an active impersonation
+  attempt. Different threat surface from rotation grace; should not be
+  blended.
+- **Identity-key compromise** — already out of scope per the existing
+  threat-model section.
+- **Cross-version downgrade attacks** — assumed prevented by the
+  capability bit being read from authenticated `UserInfo`. Will be
+  formalised in the implementation PR.
+
 ## Related files
 
 - `rust/libqaul/src/services/crypto/mod.rs` — `Crypto::encrypt`, `Crypto::decrypt`, trigger plumbing, RPC handlers.
