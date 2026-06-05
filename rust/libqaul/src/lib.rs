@@ -17,7 +17,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 
-use crate::router_v2::NewRouterState;
+use crate::router_v2::RouterV2State;
 use crate::rpc::authentication::AuthenticationState;
 use crate::rpc::sys::SysRpcState;
 use crate::rpc::RpcState;
@@ -62,7 +62,7 @@ pub struct QaulState {
     /// Wrapped in RwLock because QaulState is created before Router::init()
     /// populates the real state.
     pub router: std::sync::RwLock<Arc<router::RouterState>>,
-    pub router_v2: Option<Arc<NewRouterState>>,
+    pub router_v2: Option<Arc<RouterV2State>>,
     /// Services state (messaging, feed, chat, crypto, groups, dtn)
     pub services: services::ServicesState,
     /// User accounts state
@@ -156,7 +156,7 @@ impl QaulState {
     ) -> Self {
         Self {
             router: std::sync::RwLock::new(router_state),
-            router_v2: Some(Arc::new(NewRouterState::new())),
+            router_v2: Some(Arc::new(RouterV2State::new())),
             services: services::ServicesState::new(),
             user_accounts,
             auth: AuthenticationState::new(),

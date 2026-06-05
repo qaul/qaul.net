@@ -15,6 +15,8 @@ use std::path::{Path, PathBuf};
 
 pub mod old_config;
 
+use crate::storage::configuration::RoutingV2Options;
+
 use super::backup;
 
 /// # Version Upgrade Logic
@@ -144,6 +146,7 @@ impl VersionUpgrade {
                 user_accounts,
                 debug,
                 routing,
+                v2_routing: RoutingV2Options::default()
             };
 
             // save new configuration to file
