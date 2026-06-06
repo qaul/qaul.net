@@ -20,7 +20,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LifecycleService
-import com.google.android.gms.location.*
 import com.google.gson.Gson
 import com.google.protobuf.ByteString
 import net.qaul.ble.AppLog
