@@ -48,12 +48,16 @@ pub async fn run(cli: Cli, refresh_secs: u64) -> Result<(), Box<dyn std::error::
     }
 
     // Subscribe stream (bg task pushes events into a channel).
-    let (event_tx, mut event_rx) = tokio::sync::mpsc::unbounded_channel::<String>();
+    let (event_tx, mut event_rx) = tokio::sync::mpsc::unbounded_channel::<data::EventLine>();
     {
         let connect = connect.clone();
         tokio::spawn(async move {
             if let Err(e) = data::spawn_subscribe(connect, event_tx.clone()).await {
-                let _ = event_tx.send(format!("subscribe stream ended: {e}"));
+                let _ = event_tx.send(data::EventLine {
+                    topic: "tui.internal".into(),
+                    text: format!("subscribe stream ended: {e}"),
+                    parsed: data::ParsedEvent::None,
+                });
             }
         });
     }
@@ -87,7 +91,7 @@ pub async fn run(cli: Cli, refresh_secs: u64) -> Result<(), Box<dyn std::error::
                 None => break Ok(()),
             },
             line = event_rx.recv() => if let Some(line) = line {
-                app.push_event(line);
+                app.push_event_line(line);
             },
             _ = tick => {
                 refresh(&mut app, &connect, timeout).await;
@@ -147,6 +151,40 @@ async fn handle_key(
         return None;
     }
 
+    if app.input_mode == InputMode::Filtering {
+        match key.code {
+            KeyCode::Esc => {
+                app.input_mode = InputMode::Normal;
+                app.filter.clear();
+                app.cursor = 0;
+            }
+            KeyCode::Enter => {
+                // Accept the filter; stay in Normal mode so the
+                // user can navigate the filtered list.
+                app.input_mode = InputMode::Normal;
+            }
+            KeyCode::Backspace => {
+                app.filter.pop();
+                app.cursor = 0;
+            }
+            KeyCode::Char(c) => {
+                app.filter.push(c);
+                app.cursor = 0;
+            }
+            _ => {}
+        }
+        return None;
+    }
+
+    if app.input_mode == InputMode::Viewing {
+        // Any key dismisses the detail modal. Esc is the obvious
+        // one; Enter feels natural too.
+        if matches!(key.code, KeyCode::Esc | KeyCode::Enter | KeyCode::Char('q')) {
+            app.input_mode = InputMode::Normal;
+        }
+        return None;
+    }
+
     match key.code {
         KeyCode::Char('q') => return Some(Ok(())),
         KeyCode::Char('c') if key.modifiers.contains(KeyModifiers::CONTROL) => {
@@ -155,6 +193,16 @@ async fn handle_key(
         KeyCode::Tab => app.next_tab(),
         KeyCode::BackTab => app.prev_tab(),
         KeyCode::Char('r') => refresh(app, connect, timeout).await,
+        KeyCode::Char('/') => {
+            app.input_mode = InputMode::Filtering;
+            app.filter.clear();
+            app.cursor = 0;
+        }
+        KeyCode::Enter => {
+            if app.selected_detail().is_some() {
+                app.input_mode = InputMode::Viewing;
+            }
+        }
         KeyCode::Char('s') if app.current_tab() == Tab::Feed => {
             app.input_mode = InputMode::Composing;
             app.compose_buffer.clear();
@@ -185,5 +233,40 @@ async fn refresh(
     match data::fetch_feed(connect, timeout).await {
         Ok(feed) => app.feed = feed,
         Err(e) => app.push_event(format!("feed fetch failed: {e}")),
+    }
+    match data::fetch_dtn_state(connect, timeout).await {
+        Ok(state) => {
+            app.record_unconfirmed(state.unconfirmed_count);
+            app.dtn_state = Some(state);
+        }
+        Err(e) => app.push_event(format!("dtn state fetch failed: {e}")),
+    }
+    match data::fetch_dtn_config(connect, timeout).await {
+        Ok(cfg) => app.dtn_config = Some(cfg),
+        Err(e) => app.push_event(format!("dtn config fetch failed: {e}")),
+    }
+    match data::fetch_network(connect, timeout).await {
+        Ok(snapshot) => {
+            app.record_network(&snapshot);
+            app.network = Some(snapshot);
+        }
+        Err(e) => app.push_event(format!("network fetch failed: {e}")),
+    }
+    match data::fetch_crypto_config(connect, timeout).await {
+        Ok(cfg) => app.crypto_config = Some(cfg),
+        Err(e) => app.push_event(format!("crypto config fetch failed: {e}")),
+    }
+    let since = app.crypto_event_floor_ms;
+    match data::fetch_crypto_events(connect, timeout, since).await {
+        Ok(events) => {
+            // The `since_ms` filter is inclusive on the daemon side, so
+            // drop anything we've already buffered.
+            let fresh: Vec<_> = events
+                .into_iter()
+                .filter(|e| since == 0 || e.timestamp_ms > since)
+                .collect();
+            app.append_crypto_events(fresh);
+        }
+        Err(e) => app.push_event(format!("crypto events fetch failed: {e}")),
     }
 }

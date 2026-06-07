@@ -69,16 +69,24 @@ pub struct DtnDeliveryResponseEvent {
     #[prost(uint32, tag = "4")]
     pub reason: u32,
 }
-/// Payload for `topic = "peers.connected"`.
+/// Payload for `topic = "peers.connected"` and `topic =
+/// "peers.disconnected"`.
 ///
-/// Emitted the first time a peer becomes a routing neighbour on a given
-/// transport. Subsequent pings on the same transport do not refire.
+/// `peers.connected` is emitted the first time a peer becomes a
+/// routing neighbour on a given transport. Subsequent pings on the
+/// same transport do not refire.
+///
+/// `peers.disconnected` is emitted when a previously-known neighbour
+/// is dropped from a transport's neighbour set (staleness prune or
+/// explicit `ConnectionClosed`). NOTE: the topic + emitter exist as
+/// of this revision but libqaul does not yet call the emitter from
+/// any prune site — the prune-policy decision (staleness threshold,
+/// per-transport vs global) is still pending. Subscribers may bind
+/// the topic now; they'll start receiving events as soon as the
+/// prune call sites land.
 ///
 /// `module` mirrors `qaul.connections.ConnectionModule`:
 /// 0 = Local, 1 = Lan, 2 = Internet, 3 = Ble, 4 = None.
-///
-/// A `peers.disconnected` companion topic is reserved for a future PR
-/// once libqaul actually prunes stale neighbours from the routing table.
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct PeerEvent {
     #[prost(bytes = "vec", tag = "1")]
