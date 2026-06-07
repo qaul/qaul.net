@@ -137,22 +137,23 @@ pub async fn run(shell_cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
             continue;
         }
 
-        let (client, _addr) = match crate::connect_to_qauld(&shell_cli).await {
-            Ok(c) => c,
+        let merged = Cli {
+            socket: shell_cli.socket.clone(),
+            dir: shell_cli.dir.clone(),
+            json: parsed.json,
+            verbose: shell_cli.verbose,
+            timeout: shell_cli.timeout,
+            command: parsed.command,
+        };
+
+        let mut transport = match qauld_rpc::SocketTransport::connect(&crate::connect_info(&shell_cli)).await {
+            Ok(t) => t,
             Err(e) => {
                 eprintln!("connection failed: {e}");
                 continue;
             }
         };
-
-        let merged = Cli {
-            socket: shell_cli.socket.clone(),
-            dir: shell_cli.dir.clone(),
-            json: parsed.json,
-            command: parsed.command,
-        };
-
-        if let Err(e) = crate::run(client, merged).await {
+        if let Err(e) = crate::run(&mut transport, merged).await {
             eprintln!("error: {e}");
         }
     }

@@ -10,9 +10,16 @@ use libp2p::PeerId;
 use noise_protocol::{Cipher, CipherState, HandshakeState, Hash, U8Array, DH};
 use rand::Rng;
 
+use super::events::{self, RotationEvent, RotationEventKind};
+use super::storage::RotationMeta;
 use super::{Crypto25519, CryptoAccount, CryptoProcessState, CryptoState};
 use crate::node::user_accounts::UserAccount;
 use crate::router::users::Users;
+use crate::storage::configuration::Configuration;
+use crate::utilities::timestamp::Timestamp;
+
+/// Protobuf message definitions for the CryptoService.
+pub use qaul_proto::qaul_net_crypto as proto_net;
 
 pub struct CryptoNoise {}
 
@@ -91,6 +98,24 @@ impl CryptoNoise {
             }
         }
 
+        // Capture the post-msg-1 partial cipher for handshake extras.
+        //
+        // `HandshakeState::get_ciphers` calls `SymmetricState::split`,
+        // which is a pure HKDF derivation off the current chaining
+        // key. After `write_message_vec` for KK msg 1 the initiator
+        // has applied `MixKey(es)` and `MixKey(ss)`; the responder
+        // arrives at the same `ck` once it processes msg 1, so both
+        // sides derive the same `(c1, c2)` here. We use `c1` (the
+        // initiator-to-responder direction by Noise convention) for
+        // pre-completion frames sent under this session.
+        //
+        // The post-msg-2 split (in `encrypt_noise_kk_handshake_2`)
+        // operates on a different `ck` and produces a different key
+        // pair, so transport messages and extras never share keys.
+        let (c1, _c2) = handshake.get_ciphers();
+        let (pre_key, _pre_nonce) = c1.extract();
+        state.pre_cipher_out = Some(pre_key.as_slice().to_vec());
+
         // save state to data base
         state.e = e.as_slice().to_vec();
         //Self::save_handshake_state(user_account, remote_id, state);
@@ -165,6 +190,7 @@ impl CryptoNoise {
         state.highest_index_nonce_in = 0;
         state.cipher_out = Some(key_out.as_slice().to_vec());
         state.index_nonce_out = 0;
+        state.established_at = Timestamp::get_timestamp();
 
         // save crypto state to data base
         storage.save_state(remote_id, state.session_id, state);
@@ -308,6 +334,18 @@ impl CryptoNoise {
             }
         }
 
+        // Capture the post-msg-1 partial cipher for handshake extras.
+        //
+        // Mirrors the initiator side in `encrypt_noise_kk_handshake_1`:
+        // both parties call `split` on the same `ck` after msg 1 is
+        // processed, so the responder lands on the same `(c1, c2)` and
+        // can decrypt extras the initiator emitted under `c1`. Stored
+        // here so a daemon restart between msg 1 and msg 2 does not
+        // lose the ability to decrypt queued extras.
+        let (c1, _c2) = handshake.get_ciphers();
+        let (pre_key, _pre_nonce) = c1.extract();
+        state.pre_cipher_in = Some(pre_key.as_slice().to_vec());
+
         Some((message, state))
     }
 
@@ -387,6 +425,7 @@ impl CryptoNoise {
         state.highest_index_nonce_in = 0;
         state.cipher_out = Some(key_out.as_slice().to_vec());
         state.index_nonce_out = 0;
+        state.established_at = Timestamp::get_timestamp();
 
         // save state to data base
         storage.save_state(remote_id, state.session_id, state);
@@ -441,6 +480,169 @@ impl CryptoNoise {
         }
 
         message
+    }
+
+    /// Encrypt a pre-completion (handshake-extras) payload on the
+    /// initiator side.
+    ///
+    /// The session must be in `HalfOutgoing`; this is the branch that
+    /// would otherwise fail with "Can't send further messages after
+    /// handshake". We instead reuse the partial CipherState captured
+    /// at KK msg 1 and produce a `HandshakeExtraPayload`-shaped
+    /// ciphertext indexed by `pre_index_out`.
+    ///
+    /// Returns `(ciphertext, pre_index)` on success. On failure
+    /// (missing pre-cipher key, no extras feature, limit hit) returns
+    /// `None`; the caller is responsible for surfacing the failure
+    /// (UI "queued limit reached" / "fall back to fresh session").
+    pub fn encrypt_noise_kk_handshake_extra<D, C, H, P>(
+        _qaul_state: &crate::QaulState,
+        data: Vec<u8>,
+        storage: CryptoAccount,
+        mut crypto_state: CryptoState,
+        remote_id: PeerId,
+    ) -> Option<(Vec<u8>, u64)>
+    where
+        D: DH,
+        C: Cipher,
+        H: Hash,
+        P: AsRef<[u8]>,
+    {
+        // Pre-cipher must have been captured at KK msg 1 time.
+        let key = match crypto_state.pre_cipher_out.as_ref() {
+            Some(k) => k.clone(),
+            None => {
+                log::error!(
+                    "encrypt_noise_kk_handshake_extra: missing pre_cipher_out for session {}",
+                    crypto_state.session_id
+                );
+                return None;
+            }
+        };
+
+        let pre_index = crypto_state.pre_index_out;
+
+        // Catastrophic but theoretical: 2^64 - 1 extras on a single
+        // stuck handshake. Refuse to roll over rather than reuse a
+        // nonce.
+        if pre_index >= u64::MAX - 1 {
+            log::error!(
+                "pre_index overflow for session {}: refusing to encrypt further extras",
+                crypto_state.session_id
+            );
+            return None;
+        }
+
+        let mut cipher: CipherState<C> = CipherState::new(key.as_slice(), pre_index);
+        let ciphertext = cipher.encrypt_vec(data.as_slice());
+
+        crypto_state.pre_index_out = pre_index + 1;
+        // pre_bytes_accounted is symmetric on both sides for limit
+        // enforcement; the responder uses it for `max_pre_bytes`.
+        // The initiator tracks its own outbound aggregate too so the
+        // send path can abandon the session once the limit is hit.
+        crypto_state.pre_bytes_accounted = crypto_state
+            .pre_bytes_accounted
+            .saturating_add(ciphertext.len() as u64);
+        storage.save_state(remote_id, crypto_state.session_id, crypto_state);
+
+        Some((ciphertext, pre_index))
+    }
+
+    /// Decrypt a pre-completion (handshake-extras) payload on the
+    /// responder side.
+    ///
+    /// `pre_index` is the value carried by the inbound
+    /// `HandshakeExtraPayload`; the responder uses it as the AEAD
+    /// nonce. Returns `None` on:
+    ///
+    /// - missing `pre_cipher_in` (msg 1 was never processed for this
+    ///   session — caller buffers in the orphan store),
+    /// - `pre_index >= max_pre_messages` (out-of-range),
+    /// - duplicate `pre_index` already in `pre_index_in_seen`,
+    /// - AEAD authentication failure.
+    ///
+    /// On success, the bitmap and accounting fields on
+    /// `CryptoState` are updated and persisted before returning.
+    pub fn decrypt_noise_kk_handshake_extra<D, C, H, P>(
+        qaul_state: &crate::QaulState,
+        ciphertext: Vec<u8>,
+        pre_index: u64,
+        storage: CryptoAccount,
+        mut crypto_state: CryptoState,
+        remote_id: PeerId,
+    ) -> Option<Vec<u8>>
+    where
+        D: DH,
+        C: Cipher,
+        H: Hash,
+        P: AsRef<[u8]>,
+    {
+        let key = match crypto_state.pre_cipher_in.as_ref() {
+            Some(k) => k.clone(),
+            None => {
+                log::trace!(
+                    "decrypt_noise_kk_handshake_extra: pre_cipher_in not set for session {} — orphan",
+                    crypto_state.session_id
+                );
+                return None;
+            }
+        };
+
+        // Range bound — keeps `pre_index_in_seen` from growing
+        // without bound when an attacker stamps a pathological index.
+        let max_pre_messages = {
+            let cfg = crate::storage::configuration::Configuration::get(qaul_state);
+            cfg.handshake_extras.max_pre_messages
+        };
+        if pre_index >= max_pre_messages as u64 {
+            log::warn!(
+                "decrypt_noise_kk_handshake_extra: pre_index {} >= max_pre_messages {} for session {}",
+                pre_index,
+                max_pre_messages,
+                crypto_state.session_id
+            );
+            return None;
+        }
+
+        // Duplicate check via the seen-bitmap. A duplicate pre_index
+        // would otherwise reuse an AEAD nonce on decrypt — the
+        // CipherState is fresh per call so the actual decryption
+        // would still authenticate, but we drop deliberately to
+        // satisfy the "ordering rules: duplicates dropped" spec.
+        if bitmap_test(&crypto_state.pre_index_in_seen, pre_index) {
+            log::trace!(
+                "decrypt_noise_kk_handshake_extra: dropping duplicate pre_index {} for session {}",
+                pre_index,
+                crypto_state.session_id
+            );
+            return None;
+        }
+
+        let mut cipher: CipherState<C> = CipherState::new(key.as_slice(), pre_index);
+        let plaintext = match cipher.decrypt_vec(ciphertext.as_slice()) {
+            Ok(p) => p,
+            Err(_) => {
+                log::error!(
+                    "decrypt_noise_kk_handshake_extra: AEAD authentication failed for session {} pre_index {}",
+                    crypto_state.session_id,
+                    pre_index
+                );
+                return None;
+            }
+        };
+
+        // Bookkeeping. Bitmap set, highest tracking, byte accounting.
+        bitmap_set(&mut crypto_state.pre_index_in_seen, pre_index);
+        if pre_index > crypto_state.pre_index_in_highest {
+            crypto_state.pre_index_in_highest = pre_index;
+        }
+        crypto_state.pre_bytes_accounted = crypto_state
+            .pre_bytes_accounted
+            .saturating_add(ciphertext.len() as u64);
+        storage.save_state(remote_id, crypto_state.session_id, crypto_state);
+
+        Some(plaintext)
     }
 
     /// Create CryptoState during handshake phase
@@ -501,8 +703,909 @@ impl CryptoNoise {
             cipher_in: None,
             highest_index_nonce_in: 0,
             out_of_order_indexes: false,
+            // Pre-completion (handshake-extras) fields default to
+            // empty / zero. They get populated only after KK msg 1
+            // is written / read; see persist-cipher-snapshot work in
+            // encrypt_noise_kk_handshake_1 / decrypt_noise_kk_handshake_1.
+            pre_cipher_out: None,
+            pre_index_out: 0,
+            pre_cipher_in: None,
+            pre_index_in_highest: 0,
+            pre_index_in_seen: Vec::new(),
+            pre_bytes_accounted: 0,
+            established_at: 0,
         };
 
         Some(state)
+    }
+}
+
+// ---------------------------------------------------------------
+// Pre-completion (handshake-extras) seen-bitmap helpers.
+//
+// `CryptoState::pre_index_in_seen` is a packed bitmap of accepted
+// `pre_index` values (bit `i` set means we already decrypted the
+// extra at index `i`). Length grows on demand and is bounded at the
+// caller by `HandshakeExtras::max_pre_messages`, so the byte index
+// arithmetic is checked range there rather than here.
+// ---------------------------------------------------------------
+
+/// Return whether bit `idx` is set in the bitmap.
+fn bitmap_test(bitmap: &[u8], idx: u64) -> bool {
+    let byte = (idx / 8) as usize;
+    if byte >= bitmap.len() {
+        return false;
+    }
+    let mask = 1u8 << (idx % 8) as u8;
+    bitmap[byte] & mask != 0
+}
+
+/// Set bit `idx` in the bitmap, growing it with zero bytes as needed.
+fn bitmap_set(bitmap: &mut Vec<u8>, idx: u64) {
+    let byte = (idx / 8) as usize;
+    while bitmap.len() <= byte {
+        bitmap.push(0);
+    }
+    bitmap[byte] |= 1u8 << (idx % 8) as u8;
+}
+
+#[cfg(test)]
+mod handshake_extras_primitive_tests {
+    //! Phase 1 unit tests for the handshake-extras encrypt/decrypt
+    //! primitives. These do **not** drive a full Noise handshake; they
+    //! exercise the primitives in isolation by hand-installing a
+    //! shared `pre_cipher_*` key into a `CryptoState`. End-to-end
+    //! coverage (real KK msg 1 → extras → KK msg 2) lands in Phase 2
+    //! once the send/receive paths are wired into `Crypto::encrypt`
+    //! and `Crypto::decrypt`.
+    //!
+    //! Each test owns its own `QaulState` (via
+    //! `QaulState::new_for_simulation`), so config / RPC channels do
+    //! not leak between tests.
+    use super::super::CryptoProcessState;
+    use super::*;
+    use crate::services::crypto::{CryptoState, CryptoStorage};
+    use libp2p::identity::Keypair;
+    use noise_rust_crypto::{ChaCha20Poly1305, Sha256, X25519};
+    use std::sync::Arc;
+
+    fn fresh_peer() -> PeerId {
+        Keypair::generate_ed25519().public().to_peer_id()
+    }
+
+    /// 32 fixed bytes — adequate as a CipherState key for tests.
+    /// In production this comes from `HandshakeState::get_ciphers`;
+    /// the tests don't need that derivation, just *some* key both
+    /// sides agree on.
+    fn fixed_key() -> Vec<u8> {
+        (0u8..32).collect()
+    }
+
+    /// Build a CryptoState in HalfOutgoing with the extras pre-cipher
+    /// already installed on both sides. Other fields are zeroed.
+    fn dummy_halfoutgoing(session_id: u32, key: &[u8]) -> CryptoState {
+        CryptoState {
+            session_id,
+            state: CryptoProcessState::HalfOutgoing,
+            initiator: true,
+            s: vec![],
+            rs: vec![],
+            e: vec![],
+            re: None,
+            cipher_out: None,
+            index_nonce_out: 0,
+            cipher_in: None,
+            highest_index_nonce_in: 0,
+            out_of_order_indexes: false,
+            pre_cipher_out: Some(key.to_vec()),
+            pre_index_out: 0,
+            pre_cipher_in: Some(key.to_vec()),
+            pre_index_in_highest: 0,
+            pre_index_in_seen: Vec::new(),
+            pre_bytes_accounted: 0,
+            established_at: 0,
+        }
+    }
+
+    fn make_state() -> Arc<crate::QaulState> {
+        Arc::new(crate::QaulState::new_for_simulation())
+    }
+
+    /// Round-trip: encrypt one extra on initiator side, decrypt it
+    /// on responder side. The ciphertext must authenticate; the
+    /// plaintext must come back unchanged.
+    #[test]
+    fn extras_round_trip_single() {
+        let state = make_state();
+        let acct = CryptoStorage::test_account();
+        let remote = fresh_peer();
+        let key = fixed_key();
+        let session_id = 42;
+
+        let send_state = dummy_halfoutgoing(session_id, &key);
+        acct.save_state(remote, session_id, send_state.clone());
+
+        let plaintext = b"hello extras".to_vec();
+        let (ciphertext, pre_index) =
+            CryptoNoise::encrypt_noise_kk_handshake_extra::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
+                &state,
+                plaintext.clone(),
+                acct.clone(),
+                send_state,
+                remote,
+            )
+            .expect("encrypt should succeed when pre_cipher_out is set");
+        assert_eq!(pre_index, 0, "first extra carries pre_index 0");
+
+        // Pre-index advanced and bytes accounted on the saved state.
+        let after_send = acct.get_state_by_id(remote, session_id).unwrap();
+        assert_eq!(after_send.pre_index_out, 1);
+        assert_eq!(after_send.pre_bytes_accounted as usize, ciphertext.len());
+
+        // Set up an independent receiver side with the same shared key.
+        let recv_state = dummy_halfoutgoing(session_id, &key);
+        let decrypted =
+            CryptoNoise::decrypt_noise_kk_handshake_extra::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
+                &state,
+                ciphertext,
+                pre_index,
+                acct.clone(),
+                recv_state,
+                remote,
+            )
+            .expect("decrypt should succeed for matching pre_cipher_in");
+        assert_eq!(decrypted, plaintext);
+    }
+
+    /// Two extras out of order on the wire (index 1 arrives before
+    /// index 0). Both must decrypt; the seen-bitmap reflects both.
+    #[test]
+    fn extras_decrypt_out_of_order() {
+        let state = make_state();
+        let acct = CryptoStorage::test_account();
+        let remote = fresh_peer();
+        let key = fixed_key();
+        let session_id = 7;
+
+        let mut send_state = dummy_halfoutgoing(session_id, &key);
+        acct.save_state(remote, session_id, send_state.clone());
+
+        // Produce two extras.
+        let p0 = b"zero".to_vec();
+        let p1 = b"one".to_vec();
+        let (c0, idx0) =
+            CryptoNoise::encrypt_noise_kk_handshake_extra::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
+                &state,
+                p0.clone(),
+                acct.clone(),
+                send_state.clone(),
+                remote,
+            )
+            .unwrap();
+        // Refresh send_state (encrypt persists, so reload).
+        send_state = acct.get_state_by_id(remote, session_id).unwrap();
+        let (c1, idx1) =
+            CryptoNoise::encrypt_noise_kk_handshake_extra::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
+                &state,
+                p1.clone(),
+                acct.clone(),
+                send_state,
+                remote,
+            )
+            .unwrap();
+        assert_eq!((idx0, idx1), (0, 1));
+
+        // Receiver side: deliver index 1 first, then index 0.
+        let recv_state = dummy_halfoutgoing(session_id, &key);
+        acct.save_state(remote, session_id, recv_state);
+        let r1 = CryptoNoise::decrypt_noise_kk_handshake_extra::<
+            X25519,
+            ChaCha20Poly1305,
+            Sha256,
+            &[u8],
+        >(
+            &state,
+            c1,
+            idx1,
+            acct.clone(),
+            acct.get_state_by_id(remote, session_id).unwrap(),
+            remote,
+        )
+        .expect("idx1 should decrypt");
+        assert_eq!(r1, p1);
+
+        let r0 = CryptoNoise::decrypt_noise_kk_handshake_extra::<
+            X25519,
+            ChaCha20Poly1305,
+            Sha256,
+            &[u8],
+        >(
+            &state,
+            c0,
+            idx0,
+            acct.clone(),
+            acct.get_state_by_id(remote, session_id).unwrap(),
+            remote,
+        )
+        .expect("idx0 should decrypt after idx1");
+        assert_eq!(r0, p0);
+
+        let final_state = acct.get_state_by_id(remote, session_id).unwrap();
+        assert_eq!(
+            final_state.pre_index_in_highest, 1,
+            "highest must reflect the larger of the seen indices"
+        );
+        assert!(bitmap_test(&final_state.pre_index_in_seen, 0));
+        assert!(bitmap_test(&final_state.pre_index_in_seen, 1));
+    }
+
+    /// A duplicate `pre_index` on the receiver side must be dropped
+    /// rather than re-decrypted (the AEAD would actually authenticate
+    /// fine, but our spec says duplicates are dropped to satisfy
+    /// "ordering rules").
+    #[test]
+    fn extras_decrypt_drops_duplicate_pre_index() {
+        let state = make_state();
+        let acct = CryptoStorage::test_account();
+        let remote = fresh_peer();
+        let key = fixed_key();
+        let session_id = 100;
+
+        let send_state = dummy_halfoutgoing(session_id, &key);
+        acct.save_state(remote, session_id, send_state.clone());
+        let (ciphertext, pre_index) =
+            CryptoNoise::encrypt_noise_kk_handshake_extra::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
+                &state,
+                b"once".to_vec(),
+                acct.clone(),
+                send_state,
+                remote,
+            )
+            .unwrap();
+
+        let recv_state = dummy_halfoutgoing(session_id, &key);
+        acct.save_state(remote, session_id, recv_state);
+
+        // First decrypt: success.
+        assert!(CryptoNoise::decrypt_noise_kk_handshake_extra::<
+            X25519,
+            ChaCha20Poly1305,
+            Sha256,
+            &[u8],
+        >(
+            &state,
+            ciphertext.clone(),
+            pre_index,
+            acct.clone(),
+            acct.get_state_by_id(remote, session_id).unwrap(),
+            remote,
+        )
+        .is_some());
+
+        // Second decrypt at the same index: dropped.
+        assert!(CryptoNoise::decrypt_noise_kk_handshake_extra::<
+            X25519,
+            ChaCha20Poly1305,
+            Sha256,
+            &[u8],
+        >(
+            &state,
+            ciphertext,
+            pre_index,
+            acct.clone(),
+            acct.get_state_by_id(remote, session_id).unwrap(),
+            remote,
+        )
+        .is_none());
+    }
+
+    /// `pre_index >= max_pre_messages` is rejected before the AEAD
+    /// runs, so the bitmap can't be made to grow without bound by an
+    /// attacker who stamps a pathological index on the wire.
+    #[test]
+    fn extras_decrypt_rejects_index_above_cap() {
+        let state = make_state();
+        let acct = CryptoStorage::test_account();
+        let remote = fresh_peer();
+        let key = fixed_key();
+        let session_id = 9;
+
+        let recv_state = dummy_halfoutgoing(session_id, &key);
+        acct.save_state(remote, session_id, recv_state);
+
+        let cap = crate::storage::configuration::Configuration::get(&state)
+            .handshake_extras
+            .max_pre_messages as u64;
+        // The cap is HandshakeExtras::default().max_pre_messages = 64;
+        // we pass an index well above it. The contents are irrelevant
+        // because the cap check fires before AEAD.
+        let bogus = vec![0u8; 16];
+        let result =
+            CryptoNoise::decrypt_noise_kk_handshake_extra::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
+                &state,
+                bogus,
+                cap, // exactly at the cap → rejected (bound is exclusive)
+                acct.clone(),
+                acct.get_state_by_id(remote, session_id).unwrap(),
+                remote,
+            );
+        assert!(result.is_none());
+
+        // Bitmap untouched — the early-return must come before any
+        // `bitmap_set` call.
+        let st = acct.get_state_by_id(remote, session_id).unwrap();
+        assert!(st.pre_index_in_seen.is_empty());
+    }
+
+    /// Decrypt with no `pre_cipher_in` set returns `None` (orphan
+    /// case: msg 1 was never processed for this session). Phase 2's
+    /// receive path will buffer the frame in an orphan store and
+    /// retry once msg 1 lands; the primitive itself stays passive.
+    #[test]
+    fn extras_decrypt_returns_none_when_pre_cipher_in_missing() {
+        let state = make_state();
+        let acct = CryptoStorage::test_account();
+        let remote = fresh_peer();
+        let key = fixed_key();
+        let session_id = 1;
+
+        let mut recv_state = dummy_halfoutgoing(session_id, &key);
+        recv_state.pre_cipher_in = None;
+        acct.save_state(remote, session_id, recv_state.clone());
+
+        let result =
+            CryptoNoise::decrypt_noise_kk_handshake_extra::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
+                &state,
+                vec![0u8; 16],
+                0,
+                acct,
+                recv_state,
+                remote,
+            );
+        assert!(result.is_none());
+    }
+
+    /// Encrypt with no `pre_cipher_out` set returns `None` (the
+    /// caller forgot to capture the snapshot at msg 1 — should not
+    /// happen in production but the primitive guards against it).
+    #[test]
+    fn extras_encrypt_returns_none_when_pre_cipher_out_missing() {
+        let state = make_state();
+        let acct = CryptoStorage::test_account();
+        let remote = fresh_peer();
+        let key = fixed_key();
+        let session_id = 2;
+
+        let mut send_state = dummy_halfoutgoing(session_id, &key);
+        send_state.pre_cipher_out = None;
+        acct.save_state(remote, session_id, send_state.clone());
+
+        let result =
+            CryptoNoise::encrypt_noise_kk_handshake_extra::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
+                &state,
+                b"x".to_vec(),
+                acct,
+                send_state,
+                remote,
+            );
+        assert!(result.is_none());
+    }
+}
+
+// ------------------------------------------------------------------
+//                    Phase-1 session rotation primitives
+// ------------------------------------------------------------------
+//
+// These functions re-run the Noise KK handshake under a fresh
+// `session_id` while the previous session remains usable for
+// *receiving* messages until its grace window expires.
+//
+// The rotation-handshake bytes produced here are meant to be carried
+// in a `CryptoserviceContainer { rotate_first | rotate_second }` that
+// the messaging layer will send encrypted under the *currently
+// primary* session. Phase 1 only exposes the primitives; trigger
+// wiring (periodic task, volume counter) is Phase 2.
+
+impl CryptoNoise {
+    /// Anti-replay nonce size for rotation handshakes.
+    const ROTATION_NONCE_LEN: usize = 16;
+
+    /// Start a session rotation as the initiator.
+    ///
+    /// Generates a fresh `new_session_id`, runs KK step 1 with new
+    /// ephemerals (a brand-new `CryptoState` saved in `HalfOutgoing`),
+    /// and records a `pending_initiated_session_id` on this peer's
+    /// `RotationMeta`. The returned `RotateHandshakeFirst` is intended
+    /// to be sent to the remote inside a `CryptoserviceContainer` on
+    /// the currently-primary session.
+    ///
+    /// Returns `None` when no primary session exists for `remote_id`,
+    /// or the underlying KK step-1 fails.
+    pub fn rotate_initiate<D, C, H, P>(
+        state: &crate::QaulState,
+        user_account: UserAccount,
+        storage: CryptoAccount,
+        remote_id: PeerId,
+    ) -> Option<proto_net::RotateHandshakeFirst>
+    where
+        D: DH,
+        C: Cipher,
+        H: Hash,
+        P: AsRef<[u8]>,
+    {
+        // Precondition: must have an existing primary session to rotate from.
+        let primary = storage.get_state(remote_id)?;
+        let primary_id = primary.session_id;
+
+        // Anti-replay nonce embedded in the KK payload and echoed by the
+        // responder; binds a specific rotation to a specific challenge so
+        // a replayed handshake cannot resurrect a retired session.
+        let mut rng = rand::rng();
+        let mut nonce = vec![0u8; Self::ROTATION_NONCE_LEN];
+        rng.fill(&mut nonce[..]);
+
+        // Reuse the existing KK step-1 writer. This creates a new
+        // CryptoState with a fresh random session_id in `HalfOutgoing`,
+        // saves it under {remote_id, new_session_id}, and returns the
+        // Noise write_message output (ephemeral + encrypted payload).
+        let (noise_e, _msg_nonce, new_session_id) =
+            Self::encrypt_noise_kk_handshake_1::<D, C, H, P>(
+                state,
+                nonce.clone(),
+                user_account,
+                storage.clone(),
+                remote_id,
+            );
+        let noise_e = noise_e?;
+
+        // Record the in-flight initiation on the rotation meta so the
+        // collision-resolution rule can detect simultaneous rotations.
+        let meta = match storage.get_rotation_meta(remote_id) {
+            Some(mut m) => {
+                m.pending_initiated_session_id = Some(new_session_id);
+                m
+            }
+            None => RotationMeta {
+                primary_session_id: primary_id,
+                pending_initiated_session_id: Some(new_session_id),
+                ..Default::default()
+            },
+        };
+        storage.save_rotation_meta(remote_id, &meta);
+
+        Some(proto_net::RotateHandshakeFirst {
+            new_session_id,
+            noise_e,
+            nonce,
+            initiated_at: Timestamp::get_timestamp(),
+        })
+    }
+
+    /// Respond to an incoming `RotateHandshakeFirst`.
+    ///
+    /// Runs the KK step-2 under the incoming `new_session_id`, persists
+    /// the new `CryptoState` in `Transport`, moves the previous
+    /// primary into the grace window (draining), and returns the
+    /// `RotateHandshakeSecond` to send back under the current session.
+    ///
+    /// Collision rule: if this node already has a pending initiation
+    /// with `mine` and receives an incoming rotate_first with
+    /// `incoming.new_session_id`, the numerically smaller session_id
+    /// wins. If `incoming` wins, `mine`'s `HalfOutgoing` state is
+    /// deleted and this node processes `incoming`. If `mine` wins,
+    /// `None` is returned (incoming is ignored; this node's own
+    /// rotation will continue).
+    pub fn rotate_complete_responder<D, C, H, P>(
+        state: &crate::QaulState,
+        user_account: UserAccount,
+        storage: CryptoAccount,
+        remote_id: PeerId,
+        incoming: proto_net::RotateHandshakeFirst,
+    ) -> Option<proto_net::RotateHandshakeSecond>
+    where
+        D: DH,
+        C: Cipher,
+        H: Hash,
+        P: AsRef<[u8]>,
+    {
+        // Need an existing primary to move into draining.
+        let primary_state = storage.get_state(remote_id)?;
+        let primary_id = primary_state.session_id;
+
+        // Simultaneous-rotation collision resolution.
+        let existing_meta = storage.get_rotation_meta(remote_id);
+        if let Some(meta) = &existing_meta {
+            if let Some(mine) = meta.pending_initiated_session_id {
+                if mine <= incoming.new_session_id {
+                    // mine wins (or tie — defensively prefer ours). Ignore.
+                    log::trace!(
+                        "rotation collision: ours ({}) wins over theirs ({})",
+                        mine,
+                        incoming.new_session_id
+                    );
+                    return None;
+                } else {
+                    // incoming wins. Abandon our pending state.
+                    log::trace!(
+                        "rotation collision: theirs ({}) wins, abandoning ours ({})",
+                        incoming.new_session_id,
+                        mine
+                    );
+                    storage.delete_state(remote_id, mine);
+                    // Fall through to run responder path.
+                }
+            }
+        }
+
+        // Decode the KK step-1 input — produces a CryptoState in
+        // HalfIncoming with `re` populated, carrying the decrypted
+        // payload (which must equal the nonce for anti-replay).
+        let (payload, crypto_state) = Self::decrypt_noise_kk_handshake_1::<D, C, H, P>(
+            state,
+            incoming.noise_e.clone(),
+            storage.clone(),
+            remote_id,
+            user_account,
+            incoming.new_session_id,
+        )?;
+
+        // Verify nonce echoed back in the KK payload.
+        if payload != incoming.nonce {
+            log::warn!(
+                "rotate_complete_responder: nonce mismatch from {}",
+                remote_id.to_base58()
+            );
+            storage.delete_state(remote_id, incoming.new_session_id);
+            return None;
+        }
+
+        // Run KK step-2 to produce the rotate_second bytes. Also
+        // transitions the new state to Transport and saves it.
+        let (noise_e_out, _) = Self::encrypt_noise_kk_handshake_2::<D, C, H, P>(
+            incoming.nonce.clone(),
+            storage.clone(),
+            crypto_state,
+            remote_id,
+        );
+        let noise_e_out = noise_e_out?;
+
+        // Flip meta: old primary -> draining, incoming -> primary.
+        let now_ms = Timestamp::get_timestamp();
+        let cfg = Configuration::get(state);
+        let grace_ms = cfg.crypto_rotation.grace_period_seconds * 1000;
+        let grace_vol = cfg.crypto_rotation.grace_volume_messages;
+
+        // Preserve any prior last_retired fields so the decrypt path
+        // can still detect messages for the most recent retirement.
+        let prior = storage.get_rotation_meta(remote_id);
+        let new_meta = RotationMeta {
+            primary_session_id: incoming.new_session_id,
+            pending_initiated_session_id: None,
+            draining_session_id: Some(primary_id),
+            draining_until: Some(now_ms + grace_ms),
+            draining_remaining_volume: Some(grace_vol),
+            last_retired_session_id: prior.as_ref().and_then(|m| m.last_retired_session_id),
+            last_retired_at: prior.as_ref().and_then(|m| m.last_retired_at),
+        };
+        storage.save_rotation_meta(remote_id, &new_meta);
+
+        Some(proto_net::RotateHandshakeSecond {
+            new_session_id: incoming.new_session_id,
+            noise_e: noise_e_out,
+            nonce: incoming.nonce,
+            received_at: now_ms,
+        })
+    }
+
+    /// Finalise a rotation on the initiator side.
+    ///
+    /// Called when a `RotateHandshakeSecond` arrives whose
+    /// `new_session_id` matches `pending_initiated_session_id` on this
+    /// peer's rotation meta. Completes KK step-2 on the pending
+    /// `HalfOutgoing` `CryptoState`, flips primary to the new session
+    /// id, and moves the old primary into the grace window.
+    ///
+    /// Returns `true` on success, `false` on any mismatch (unknown
+    /// session_id, bad nonce, pending state absent/wrong kind).
+    pub fn rotate_finalize_initiator<D, C, H, P>(
+        state: &crate::QaulState,
+        storage: CryptoAccount,
+        remote_id: PeerId,
+        incoming: proto_net::RotateHandshakeSecond,
+    ) -> bool
+    where
+        D: DH,
+        C: Cipher,
+        H: Hash,
+        P: AsRef<[u8]>,
+    {
+        let pending_state = match storage.get_state_by_id(remote_id, incoming.new_session_id) {
+            Some(s) => s,
+            None => {
+                log::warn!(
+                    "rotate_finalize_initiator: no pending state for session {}",
+                    incoming.new_session_id
+                );
+                return false;
+            }
+        };
+        if !matches!(pending_state.state, CryptoProcessState::HalfOutgoing) {
+            log::warn!(
+                "rotate_finalize_initiator: pending state for session {} is not HalfOutgoing",
+                incoming.new_session_id
+            );
+            return false;
+        }
+
+        let decrypted = match Self::decrypt_noise_kk_handshake_2::<D, C, H, P>(
+            incoming.noise_e,
+            pending_state,
+            storage.clone(),
+            remote_id,
+        ) {
+            Some(p) => p,
+            None => {
+                log::warn!("rotate_finalize_initiator: KK step-2 decrypt failed");
+                return false;
+            }
+        };
+        if decrypted != incoming.nonce {
+            log::warn!("rotate_finalize_initiator: nonce mismatch");
+            return false;
+        }
+
+        // Flip meta: pending -> primary, old primary -> draining.
+        let old_meta = match storage.get_rotation_meta(remote_id) {
+            Some(m) => m,
+            None => {
+                log::warn!("rotate_finalize_initiator: no rotation meta");
+                return false;
+            }
+        };
+        let old_primary = old_meta.primary_session_id;
+        let now_ms = Timestamp::get_timestamp();
+        let cfg = Configuration::get(state);
+        let grace_ms = cfg.crypto_rotation.grace_period_seconds * 1000;
+        let grace_vol = cfg.crypto_rotation.grace_volume_messages;
+
+        let new_meta = RotationMeta {
+            primary_session_id: incoming.new_session_id,
+            pending_initiated_session_id: None,
+            draining_session_id: Some(old_primary),
+            draining_until: Some(now_ms + grace_ms),
+            draining_remaining_volume: Some(grace_vol),
+            last_retired_session_id: old_meta.last_retired_session_id,
+            last_retired_at: old_meta.last_retired_at,
+        };
+        storage.save_rotation_meta(remote_id, &new_meta);
+
+        // Emit a `Rotated` event so clients can surface the state
+        // transition to the UI.
+        events::record_and_emit(
+            Some(state),
+            RotationEvent {
+                kind: RotationEventKind::Rotated,
+                remote_id,
+                primary_session_id: incoming.new_session_id,
+                draining_session_id: old_primary,
+                timestamp_ms: now_ms,
+            },
+        );
+        true
+    }
+
+    /// Retire any draining sessions whose grace window has elapsed.
+    ///
+    /// Scans the `rotation_meta` tree and, for every entry whose
+    /// `draining_until <= now_ms` or whose `draining_remaining_volume`
+    /// has hit zero, deletes the draining `CryptoState` row (sled
+    /// drop zeroizes its bincode bytes — the in-memory ciphers from a
+    /// `Some(Vec<u8>)` are also dropped) and clears the draining
+    /// fields on the meta row.
+    ///
+    /// Intended to be called from a periodic task in Phase 2; exposed
+    /// here so Phase 1 unit tests can exercise it directly.
+    ///
+    /// `state` is `Option` so internal unit tests that exercise the
+    /// rotation primitives without a full `QaulState` can pass
+    /// `None`. The production caller (the libqaul rotation ticker)
+    /// always passes `Some(state)`, which lets the
+    /// `crypto.rotation` subscribe topic fire for every retired
+    /// session.
+    pub fn drain_expired_rotations(
+        state: Option<&crate::QaulState>,
+        storage: CryptoAccount,
+        now_ms: u64,
+    ) {
+        for result in storage.rotation_meta.iter() {
+            let (key, value) = match result {
+                Ok(kv) => kv,
+                Err(e) => {
+                    log::error!("drain_expired_rotations iter: {}", e);
+                    continue;
+                }
+            };
+            let meta: RotationMeta = match bincode::deserialize(&value) {
+                Ok(m) => m,
+                Err(e) => {
+                    log::error!("drain_expired_rotations deserialize: {}", e);
+                    continue;
+                }
+            };
+            let expired = match (meta.draining_until, meta.draining_remaining_volume) {
+                (Some(until), _) if now_ms >= until => true,
+                (_, Some(0)) => true,
+                _ => false,
+            };
+            if !expired {
+                continue;
+            }
+            let drain_id = match meta.draining_session_id {
+                Some(id) => id,
+                None => continue,
+            };
+            let remote_id = match PeerId::from_bytes(&key) {
+                Ok(p) => p,
+                Err(e) => {
+                    log::error!("drain_expired_rotations key decode: {}", e);
+                    continue;
+                }
+            };
+            storage.delete_state(remote_id, drain_id);
+            let cleared = RotationMeta {
+                draining_session_id: None,
+                draining_until: None,
+                draining_remaining_volume: None,
+                last_retired_session_id: Some(drain_id),
+                last_retired_at: Some(now_ms),
+                ..meta
+            };
+            storage.save_rotation_meta(remote_id, &cleared);
+
+            events::record_and_emit(
+                state,
+                RotationEvent {
+                    kind: RotationEventKind::GraceExpired,
+                    remote_id,
+                    primary_session_id: 0,
+                    draining_session_id: drain_id,
+                    timestamp_ms: now_ms,
+                },
+            );
+        }
+    }
+}
+
+#[cfg(test)]
+mod rotation_tests {
+    use super::*;
+    use crate::services::crypto::storage::CryptoStorage;
+    use libp2p::identity::Keypair;
+
+    fn fresh_peer() -> PeerId {
+        Keypair::generate_ed25519().public().to_peer_id()
+    }
+
+    /// Build a dummy `CryptoState` for tests. Values are stand-ins
+    /// — these tests do not exercise any Noise code paths, only the
+    /// lifecycle of the `rotation_meta` <-> `crypto_state` tree pair
+    /// that `drain_expired_rotations` scans.
+    fn dummy_state(session_id: u32) -> CryptoState {
+        CryptoState {
+            session_id,
+            state: CryptoProcessState::Transport,
+            initiator: true,
+            s: vec![],
+            rs: vec![],
+            e: vec![],
+            re: None,
+            cipher_out: Some(vec![0u8; 32]),
+            index_nonce_out: 0,
+            cipher_in: Some(vec![0u8; 32]),
+            highest_index_nonce_in: 0,
+            out_of_order_indexes: false,
+            pre_cipher_out: None,
+            pre_index_out: 0,
+            pre_cipher_in: None,
+            pre_index_in_highest: 0,
+            pre_index_in_seen: Vec::new(),
+            pre_bytes_accounted: 0,
+            established_at: 0,
+        }
+    }
+
+    // Meta with a non-expired draining session must be left untouched.
+    #[test]
+    fn drain_leaves_unexpired() {
+        let acct = CryptoStorage::test_account();
+        let remote = fresh_peer();
+        acct.save_state(remote, 7, dummy_state(7));
+        acct.save_rotation_meta(
+            remote,
+            &RotationMeta {
+                primary_session_id: 42,
+                draining_session_id: Some(7),
+                draining_until: Some(10_000),
+                draining_remaining_volume: Some(100),
+                ..Default::default()
+            },
+        );
+
+        // now < until, volume > 0 → not expired
+        CryptoNoise::drain_expired_rotations(None, acct.clone(), 5_000);
+
+        assert!(acct.get_state_by_id(remote, 7).is_some());
+        let meta = acct.get_rotation_meta(remote).unwrap();
+        assert_eq!(meta.draining_session_id, Some(7));
+        assert_eq!(meta.draining_until, Some(10_000));
+    }
+
+    // Past `draining_until` → draining state deleted, meta cleared.
+    #[test]
+    fn drain_retires_time_expired() {
+        let acct = CryptoStorage::test_account();
+        let remote = fresh_peer();
+        acct.save_state(remote, 7, dummy_state(7));
+        acct.save_rotation_meta(
+            remote,
+            &RotationMeta {
+                primary_session_id: 42,
+                draining_session_id: Some(7),
+                draining_until: Some(10_000),
+                draining_remaining_volume: Some(100),
+                ..Default::default()
+            },
+        );
+
+        CryptoNoise::drain_expired_rotations(None, acct.clone(), 10_000);
+
+        assert!(
+            acct.get_state_by_id(remote, 7).is_none(),
+            "draining state row should be deleted"
+        );
+        let meta = acct.get_rotation_meta(remote).unwrap();
+        assert_eq!(meta.primary_session_id, 42);
+        assert_eq!(meta.draining_session_id, None);
+        assert_eq!(meta.draining_until, None);
+        assert_eq!(meta.draining_remaining_volume, None);
+    }
+
+    // `draining_remaining_volume == 0` is equivalent to expiry.
+    #[test]
+    fn drain_retires_volume_exhausted() {
+        let acct = CryptoStorage::test_account();
+        let remote = fresh_peer();
+        acct.save_state(remote, 7, dummy_state(7));
+        acct.save_rotation_meta(
+            remote,
+            &RotationMeta {
+                primary_session_id: 42,
+                draining_session_id: Some(7),
+                draining_until: Some(u64::MAX),
+                draining_remaining_volume: Some(0),
+                ..Default::default()
+            },
+        );
+
+        CryptoNoise::drain_expired_rotations(None, acct.clone(), 1);
+
+        assert!(acct.get_state_by_id(remote, 7).is_none());
+        let meta = acct.get_rotation_meta(remote).unwrap();
+        assert_eq!(meta.draining_session_id, None);
+    }
+
+    // A meta row with no draining fields is a no-op.
+    #[test]
+    fn drain_noop_on_primary_only_meta() {
+        let acct = CryptoStorage::test_account();
+        let remote = fresh_peer();
+        acct.save_state(remote, 1, dummy_state(1));
+        acct.save_rotation_meta(remote, &RotationMeta::primary_only(1));
+
+        CryptoNoise::drain_expired_rotations(None, acct.clone(), u64::MAX);
+
+        assert!(acct.get_state_by_id(remote, 1).is_some());
+        let meta = acct.get_rotation_meta(remote).unwrap();
+        assert_eq!(meta.primary_session_id, 1);
     }
 }

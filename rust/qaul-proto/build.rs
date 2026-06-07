@@ -126,6 +126,7 @@ fn main() {
             "services/messaging/messaging.proto",
             "services/dtn/dtn_rpc.proto",
             "services/crypto/crypto_net.proto",
+            "services/crypto/crypto_rpc.proto",
         ],
         proto_root,
     ) {
@@ -160,6 +161,7 @@ fn main() {
                 "qaul.net.rtc.rs",
                 "qaul.net.ble.rs",
                 "qaul.net.crypto.rs",
+                "qaul.rpc.crypto.rs",
             ];
 
             for file in &files {

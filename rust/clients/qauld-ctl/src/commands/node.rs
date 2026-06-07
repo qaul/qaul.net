@@ -42,8 +42,7 @@ impl RpcCommand for NodeSubcmd {
                 }
             }
             Err(error) => {
-                eprintln!("{:?}", error);
-                log::error!("{:?}", error);
+                return Err(format!("node: failed to decode response: {error:?}").into());
             }
         };
         Ok(())

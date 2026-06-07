@@ -11,8 +11,20 @@ repository = "https://github.com/qaul/qaul.net"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+default = ["tui"]
+# Compile the `qauld-ctl tui` subcommand (ratatui-based terminal UI).
+# Drop this feature for a slimmer scripts-only binary.
+tui = ["dep:ratatui", "dep:crossterm"]
+# Compile RTC (voice/video) subcommands. Mirrors libqaul's `rtc` feature.
+rtc = []
+# Build a self-contained binary that links libqaul directly and dispatches
+# RPC calls in-process instead of over a socket. Useful for scripted tests
+# (meshnet-lab) and the legacy `qaul-cli` one-binary workflow.
+embedded = ["qauld-rpc/embedded"]
+
 [dependencies]
-libqaul = { path = "../../libqaul" }
+qauld-rpc = { path = "../../qauld-rpc" }
 qaul-proto = { path = "../../qaul-proto" }
 tokio = { version = "1", features = ["full"] }
 futures = "0.3"
@@ -20,8 +32,15 @@ log = "0.4"
 pretty_env_logger = "0.5"
 prost = "0.14"
 clap = { version = "4.5", features = ["derive", "env"]}
+clap_complete = "4.5"
 tokio-util = { version = "0.7.18", features = ["codec"] }
 uuid = { version = "1.13", features = ["v4"] }
 bs58 = "0.5"
 serde = {version = "1.0", features = ["derive"] }
 serde_json = "1.0.140"
+async-trait = "0.1"
+ratatui = { version = "0.29", optional = true }
+crossterm = { version = "0.28", features = ["event-stream"], optional = true }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"

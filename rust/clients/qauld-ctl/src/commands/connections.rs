@@ -87,7 +87,8 @@ impl RpcCommand for ConnectionsSubcmd {
         match proto::Connections::decode(data) {
             Ok(connections) => match connections.message {
                 Some(proto::connections::Message::InternetNodesList(list)) => {
-                    let info_label = match proto::Info::try_from(list.info) {
+                    let info = proto::Info::try_from(list.info);
+                    let info_label = match info {
                         Ok(proto::Info::Request) => "",
                         Ok(proto::Info::AddSuccess) => {
                             "Address successfully added to 'Internet Peer Nodes List'"
@@ -106,6 +107,10 @@ impl RpcCommand for ConnectionsSubcmd {
                         }
                         Err(_) => "Unknown Reason for 'Internet Peer Nodes List' response",
                     };
+                    let is_error = matches!(
+                        info,
+                        Ok(proto::Info::AddErrorInvalid) | Ok(proto::Info::RemoveErrorNotFound)
+                    );
 
                     if json {
                         let nodes: Vec<_> = list
@@ -121,9 +126,12 @@ impl RpcCommand for ConnectionsSubcmd {
                             .collect();
                         let obj = json!({
                             "info": info_label,
+                            "success": !is_error,
                             "nodes": nodes,
                         });
                         println!("{}", serde_json::to_string_pretty(&obj)?);
+                    } else if is_error {
+                        eprintln!("{info_label}");
                     } else {
                         println!();
                         if !info_label.is_empty() {
@@ -143,14 +151,16 @@ impl RpcCommand for ConnectionsSubcmd {
                         }
                         println!();
                     }
+                    if is_error {
+                        return Err(info_label.into());
+                    }
                 }
                 other => {
-                    log::warn!("connections: unexpected response variant: {other:?}");
+                    return Err(format!("connections: unexpected response variant: {other:?}").into());
                 }
             },
             Err(error) => {
-                eprintln!("{:?}", error);
-                log::error!("{:?}", error);
+                return Err(format!("connections: failed to decode response: {error:?}").into());
             }
         }
         Ok(())

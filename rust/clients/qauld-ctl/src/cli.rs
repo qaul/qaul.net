@@ -2,7 +2,7 @@
 // This software is published under the AGPLv3 license.
 //! CLI template for qauld-ctl
 
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 
 /// qauld-ctl CLI: Control a running qauld daemon instance
 #[derive(Debug, Parser)]
@@ -18,6 +18,16 @@ pub struct Cli {
     /// Specify if the output should be in JSON
     #[arg(short, long, default_value = "false")]
     pub json: bool,
+
+    /// Print informational diagnostics (connection banner, etc.) to stderr.
+    /// Default is silent for script-friendliness.
+    #[arg(short, long, default_value = "false")]
+    pub verbose: bool,
+
+    /// How long to wait (seconds) for a response before giving up.
+    /// Applies to both the preflight request and the actual command.
+    #[arg(short, long, default_value = "10")]
+    pub timeout: u64,
 
     #[command(subcommand)]
     pub command: Commands,
@@ -41,6 +51,9 @@ pub enum Commands {
     File(ChatFileArgs),
     /// Router information
     Router(RouterArgs),
+    /// Noise session rotation: read/write CryptoRotation config, trigger
+    /// rotation with a specific peer, inspect the rotation event log.
+    Crypto(CryptoArgs),
     /// Debug commands (libqaul-side diagnostics).
     ///
     /// These are intentionally low-overhead RPC round-trips used to
@@ -62,6 +75,19 @@ pub enum Commands {
     /// Toggles are persisted to `config.yaml` by libqaul and survive
     /// restart. Ported from the `qaul-cli` `transports` subcommands.
     Transports(TransportsArgs),
+    /// Bluetooth Low Energy module: status, start/stop, discovered peers.
+    ///
+    /// Direct controls for the BLE transport (separate from the
+    /// `transports` toggles, which only enable/disable the wrapper).
+    Ble(BleArgs),
+    /// WebRTC voice/video calls and signalling (requires the `rtc`
+    /// feature; libqaul must be built with `--features rtc`).
+    #[cfg(feature = "rtc")]
+    Rtc(RtcArgs),
+    /// Authentication / session management (legacy username+password flow).
+    ///
+    /// Ported from the legacy `qaul-cli` `auth` subcommands.
+    Auth(AuthArgs),
     /// Start an interactive shell session
     ///
     /// Reads commands from stdin in a REPL loop and dispatches them through
@@ -74,10 +100,70 @@ pub enum Commands {
     /// peers connecting/disconnecting, etc.) as it arrives. Run in a
     /// dedicated terminal alongside the shell. Stop with Ctrl-C.
     Subscribe(SubscribeArgs),
+    /// Print a shell-completion script to stdout
+    ///
+    /// Pipe to the right file for your shell, e.g.
+    /// `qauld-ctl completions bash > ~/.local/share/bash-completion/completions/qauld-ctl`.
+    Completions {
+        /// shell to generate completions for
+        #[arg(value_enum)]
+        shell: ShellKind,
+    },
+    /// Supervise a qauld daemon: spawn it if not already running,
+    /// stream its output, and shut it down on Ctrl-C.
+    ///
+    /// Useful for dev iteration — `qauld-ctl run` in one window,
+    /// any number of `qauld-ctl <cmd>` invocations in another.
+    Run(RunArgs),
+    /// Launch the terminal UI (ratatui-based).
+    ///
+    /// Connects to the daemon using the same --socket / --dir / --timeout
+    /// flags as the single-shot commands. Requires the binary to have been
+    /// built with the `tui` cargo feature (on by default).
+    #[cfg(feature = "tui")]
+    Tui(TuiArgs),
 }
 
 #[derive(Args, Debug)]
 pub struct ShellArgs {}
+
+#[cfg(feature = "tui")]
+#[derive(Args, Debug)]
+pub struct TuiArgs {
+    /// Auto-refresh interval (seconds) for the TUI's polled views.
+    #[arg(long, default_value = "3")]
+    pub refresh: u64,
+}
+
+#[derive(Args, Debug)]
+pub struct RunArgs {
+    /// Path to the qauld binary. Defaults to looking up `qauld` on PATH.
+    #[arg(long)]
+    pub qauld_path: Option<String>,
+}
+
+/// Supported shells for `completions`. Wraps `clap_complete::Shell`
+/// so we can derive `ValueEnum` for clap.
+#[derive(Copy, Clone, Debug, ValueEnum)]
+pub enum ShellKind {
+    Bash,
+    Zsh,
+    Fish,
+    PowerShell,
+    Elvish,
+}
+
+impl From<ShellKind> for clap_complete::Shell {
+    fn from(s: ShellKind) -> Self {
+        match s {
+            ShellKind::Bash => clap_complete::Shell::Bash,
+            ShellKind::Zsh => clap_complete::Shell::Zsh,
+            ShellKind::Fish => clap_complete::Shell::Fish,
+            ShellKind::PowerShell => clap_complete::Shell::PowerShell,
+            ShellKind::Elvish => clap_complete::Shell::Elvish,
+        }
+    }
+}
 
 #[derive(Args, Debug)]
 pub struct DebugArgs {
@@ -494,6 +580,52 @@ pub enum RouterSubcmd {
 }
 
 #[derive(Args, Debug)]
+pub struct CryptoArgs {
+    #[command(subcommand)]
+    pub command: CryptoSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum CryptoSubcmd {
+    /// display the current CryptoRotation config
+    Config,
+    /// enable the master rotation switch
+    Enable,
+    /// disable the master rotation switch
+    Disable,
+    /// update one or more CryptoRotation fields
+    Set {
+        /// set period_seconds (time-based trigger)
+        #[arg(long)]
+        period_seconds: Option<u64>,
+        /// set volume_messages (outbound-volume trigger)
+        #[arg(long)]
+        volume_messages: Option<u64>,
+        /// set grace_period_seconds (draining window)
+        #[arg(long)]
+        grace_period_seconds: Option<u64>,
+        /// set grace_volume_messages (draining message count)
+        #[arg(long)]
+        grace_volume_messages: Option<u64>,
+    },
+    /// force a rotation with a specific peer (bypasses triggers)
+    Rotate {
+        /// libp2p PeerId (base58) of the remote user
+        #[arg(short = 'u', long)]
+        user_id: String,
+    },
+    /// print the rotation event log
+    Events {
+        /// cap the number of events returned
+        #[arg(short, long, default_value = "0")]
+        limit: u32,
+        /// only include events at or after this wall-clock ms
+        #[arg(long, default_value = "0")]
+        since_ms: u64,
+    },
+}
+
+#[derive(Args, Debug)]
 pub struct ChatFileArgs {
     #[command(subcommand)]
     pub command: ChatFileSubcmd,
@@ -549,4 +681,78 @@ pub enum TransportsSubcmd {
         #[arg(short, long)]
         id: String,
     },
+}
+
+#[derive(Args, Debug)]
+pub struct BleArgs {
+    #[command(subcommand)]
+    pub command: BleSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum BleSubcmd {
+    /// request module status and device capabilities
+    Info,
+    /// start the BLE module (no effect if already running)
+    Start,
+    /// stop the BLE module (no effect if already stopped)
+    Stop,
+    /// request counts from the discovered-nodes table
+    Discovered,
+}
+
+#[cfg(feature = "rtc")]
+#[derive(Args, Debug)]
+pub struct RtcArgs {
+    #[command(subcommand)]
+    pub command: RtcSubcmd,
+}
+
+#[cfg(feature = "rtc")]
+#[derive(Debug, Subcommand)]
+pub enum RtcSubcmd {
+    /// list active RTC sessions
+    List,
+    /// request a new RTC session targeted at a group id (16-byte UUID)
+    Request {
+        /// group id (uuid string)
+        #[arg(short, long)]
+        group_id: String,
+    },
+    /// accept a pending RTC session by group id
+    Accept {
+        #[arg(short, long)]
+        group_id: String,
+    },
+    /// decline a pending RTC session by group id
+    Decline {
+        #[arg(short, long)]
+        group_id: String,
+    },
+    /// end an active RTC session by group id
+    End {
+        #[arg(short, long)]
+        group_id: String,
+    },
+}
+
+#[derive(Args, Debug)]
+pub struct AuthArgs {
+    #[command(subcommand)]
+    pub command: AuthSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum AuthSubcmd {
+    /// log in with username + password; daemon issues a session token
+    Login {
+        #[arg(short, long)]
+        username: String,
+        #[arg(short, long)]
+        password: String,
+    },
+    /// log out of the current session
+    Logout,
+    /// show current session status (logged-in user, expiry)
+    Status,
 }
