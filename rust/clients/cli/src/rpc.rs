@@ -118,6 +118,9 @@ impl Rpc {
                     Ok(proto::Modules::Transports) => {
                         super::transports::Transports::rpc(message.data);
                     }
+                    Ok(proto::Modules::Crypto) => {
+                        super::crypto::Crypto::rpc(message.data);
+                    }
                     Ok(proto::Modules::None) => {}
                     Err(_) => {}
                 }

@@ -15,6 +15,7 @@ mod ble;
 mod chat;
 mod chatfile;
 mod connections;
+mod crypto;
 mod debug;
 mod dtn;
 mod feed;

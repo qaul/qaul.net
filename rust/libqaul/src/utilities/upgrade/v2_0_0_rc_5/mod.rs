@@ -144,6 +144,7 @@ impl VersionUpgrade {
                 user_accounts,
                 debug,
                 routing,
+                crypto_rotation: crate::storage::configuration::CryptoRotation::default(),
             };
 
             // save new configuration to file
