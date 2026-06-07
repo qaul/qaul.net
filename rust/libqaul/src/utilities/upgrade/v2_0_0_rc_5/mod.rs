@@ -148,6 +148,7 @@ impl VersionUpgrade {
                 // older configs, so seed with conservative defaults.
                 handshake_extras:
                     crate::storage::configuration::HandshakeExtras::default(),
+                crypto_rotation: crate::storage::configuration::CryptoRotation::default(),
             };
 
             // save new configuration to file

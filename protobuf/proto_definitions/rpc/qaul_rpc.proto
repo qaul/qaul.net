@@ -70,4 +70,9 @@ enum Modules {
     SUBSCRIBE = 16;
     // Transport management (list, enable, disable)
     TRANSPORTS = 17;
+    // End-to-end crypto configuration
+    //
+    // read / write the Noise session rotation config and (future)
+    // query rotation events.
+    CRYPTO = 18;
 }

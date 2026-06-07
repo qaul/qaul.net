@@ -241,7 +241,9 @@ impl UserAccounts {
         }
         Configuration::save(state);
 
-        // build initial user with a signed profile
+        // build initial user with a signed profile, stamping the local
+        // capability bitset so peers learn what we can do from the first
+        // UserInfo advertisement.
         let rs = state.get_router();
         let mut initial_user = crate::router::users::User {
             id,
@@ -256,6 +258,7 @@ impl UserAccounts {
             signed_profile_bytes: Vec::new(),
             signed_profile_signature: Vec::new(),
             preferred_custody_route: Vec::new(),
+            capabilities: crate::router::users::Capabilities::LOCAL,
         };
         let signed = crate::router::users::Users::create_signed_profile(&initial_user, &keys_ed25519);
         initial_user.signed_profile_bytes = signed.profile;
@@ -389,6 +392,7 @@ impl UserAccounts {
                 signed_profile_bytes: Vec::new(),
                 signed_profile_signature: Vec::new(),
                 preferred_custody_route: Vec::new(),
+                capabilities: router::users::Capabilities::LOCAL,
             });
         }
 
@@ -610,6 +614,7 @@ impl UserAccounts {
                                     signed_profile_bytes: Vec::new(),
                                     signed_profile_signature: Vec::new(),
                                     preferred_custody_route: new_custody_route,
+                                    capabilities: user.capabilities,
                                 }
                             }
                             None => {
