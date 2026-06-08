@@ -1,5 +1,22 @@
 use crate::connections::ConnectionModule;
 
+pub mod identity;
+
+#[derive(Debug, thiserror::Error)]
+pub enum RoutingV2Error {
+    MultikeyErrror(#[from] libp2p::identity::DecodingError)
+}
+
+impl std::fmt::Display for RoutingV2Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RoutingV2Error::MultikeyErrror(e) => write!(f, "{e}"),
+        }
+    }
+}
+
+pub type Result<T> = std::result::Result<T, RoutingV2Error>;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Sphere {
     Local,
