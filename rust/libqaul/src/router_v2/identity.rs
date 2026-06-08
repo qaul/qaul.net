@@ -1,7 +1,7 @@
 use libp2p::identity::PublicKey;
 use sha2::{Digest, Sha256};
 
-use crate::router_v2::Result;
+use crate::{QaulState, node::{Node, user_accounts::UserAccount}, router_v2::Result};
 
 #[derive(Debug)]
 pub struct Multikey(PublicKey);
@@ -76,6 +76,44 @@ impl<'a> ChunkSigningCtx<'a> {
         buf.extend_from_slice(&self.canonical_entries);
         buf
     }
+}
+
+impl UserAccount {
+    pub fn multikey(&self) -> Multikey {
+        let pk = &self.keys.clone();
+        pk.public().into()
+    }
+
+    pub fn routing_user_id(&self) -> [u8; 8] {
+        self.multikey().to_id()
+    }
+
+    pub fn sign_with_user(&self, buf: &[u8]) -> [u8; 64] {
+        let pk = &self.keys.clone();
+        pk
+            .sign(buf)
+            .expect("ed25519 sign")
+            .try_into()
+            .expect("ed25519 signatures are 64 bytes")
+    }
+}
+
+pub fn get_host_multikey(state: &QaulState) -> Multikey {
+    let keys = Node::get_keys(state);
+    keys.public().into()
+}
+
+pub fn get_host_id(state: &QaulState) -> [u8; 8] {
+    get_host_multikey(state).to_id()
+}
+
+pub fn sign_with_host(state: &QaulState, buf: &[u8]) -> [u8; 64] {
+    let keypair = Node::get_keys(state);
+    keypair
+        .sign(buf)
+        .expect("ed25519 sign")
+        .try_into()
+        .expect("ed25519 signatures are 64 bytes")
 }
 
 #[cfg(test)]
@@ -188,7 +226,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn delegation_sign_verify_roundtrip() {
         let user_kp = Keypair::generate_ed25519();
@@ -247,7 +284,6 @@ mod tests {
             "altering host multikey after signing must invalidate the signature"
         );
     }
-
 
     struct ChunkFixture {
         host_mk: Vec<u8>,
