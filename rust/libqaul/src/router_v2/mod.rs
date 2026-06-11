@@ -1,6 +1,7 @@
 use crate::connections::ConnectionModule;
 
 pub mod identity;
+pub mod index;
 
 #[derive(Debug, thiserror::Error)]
 pub enum RoutingV2Error {
