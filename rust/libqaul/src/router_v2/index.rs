@@ -1,6 +1,6 @@
 use bitvec::prelude::*;
 use std::{
-    collections::{HashMap, VecDeque},
+    collections::{HashMap, HashSet, VecDeque},
     time::{Duration, Instant},
 };
 
@@ -87,6 +87,12 @@ pub struct IndexDictionary {
     reverse_dir: HashMap<[u8; 8], u16>,
 }
 
+/// mirror exists so we can decode incoming indexes on the wire codec from a particular neighbour
+#[derive(Debug, Default)]
+pub struct MirrorIndexDictionary {
+    forward_dir: HashMap<u16, [u8; 8]>,
+}
+
 impl IndexDictionary {
     /// if an id is passed, bind that id to the RESERVED_INDEX
     pub fn new(self_id: Option<[u8; 8]>) -> Self {
@@ -140,6 +146,75 @@ impl IndexDictionary {
     /// Returns the ID bound to idx
     pub fn id_of(&self, idx: u16) -> Option<[u8; 8]> {
         self.forward_dir.get(&idx).copied()
+    }
+}
+
+impl MirrorIndexDictionary {
+    pub fn bind(&mut self, idx: u16, id: [u8; 8]) {
+        self.forward_dir.insert(idx, id);
+    }
+
+    pub fn id_of(&self, idx: u16) -> Option<[u8; 8]> {
+        self.forward_dir.get(&idx).copied()
+    }
+
+    pub fn clear(&mut self) {
+        self.forward_dir.clear();
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+/// Spaces for which the introduction tracker needs to insert (chnage this comment)
+pub enum Space {
+    User,
+    Node,
+}
+
+/// Indexes that need reintroduction. Section 3.8 in spec explains when an index needs reintroduction
+#[derive(Debug)]
+pub struct ReintroductionTracker {
+    user_pending: HashSet<u16>,
+    node_pending: HashSet<u16>,
+}
+
+impl ReintroductionTracker {
+    pub fn new() -> Self {
+        Self {
+            user_pending: HashSet::new(),
+            node_pending: HashSet::new(),
+        }
+    }
+
+    fn set_for(&mut self, space: Space) -> &mut HashSet<u16> {
+        match space {
+            Space::Node => &mut self.node_pending,
+            Space::User => &mut self.user_pending,
+        }
+    }
+
+    // these three mark_* functions functionally serve the same purpose
+    // but I separated them because these are the conditions that the spec
+    // states that a reintroduction of an index is needed. so that when it is 
+    // seen in the code, an idea of ehat is happening can be had.
+
+    pub fn mark_first_time(&mut self, space: Space, idx: u16) {
+        self.set_for(space).insert(idx);
+    }
+
+    pub fn mark_rebind(&mut self, space: Space, idx: u16) {
+        self.set_for(space).insert(idx);
+    }
+
+    pub fn mark_version_bump(&mut self, space: Space, idx: u16) {
+        self.set_for(space).insert(idx);
+    }
+
+    /// get indices ready for reintroduction
+    pub fn take_pending(&mut self, space: Space) -> HashSet<u16> {
+        match space {
+            Space::Node => std::mem::take(&mut self.node_pending),
+            Space::User => std::mem::take(&mut self.user_pending)
+        }
     }
 }
 
@@ -312,7 +387,11 @@ mod tests {
         d.bind(42, id);
 
         assert_eq!(d.id_of(42), Some(id), "forward lookup returns the bound id");
-        assert_eq!(d.idx_of(&id), Some(42), "reverse lookup returns the bound idx");
+        assert_eq!(
+            d.idx_of(&id),
+            Some(42),
+            "reverse lookup returns the bound idx"
+        );
     }
 
     #[test]
@@ -372,7 +451,11 @@ mod tests {
 
         assert_eq!(d.id_of(42), Some(id_y), "forward reflects the new id");
         assert_eq!(d.idx_of(&id_y), Some(42), "reverse reflects the new id");
-        assert_eq!(d.idx_of(&id_x), None, "stale reverse entry for old id was cleaned up");
+        assert_eq!(
+            d.idx_of(&id_x),
+            None,
+            "stale reverse entry for old id was cleaned up"
+        );
     }
 
     /// Regression: binding an already-bound id at a new idx must drop
@@ -388,6 +471,10 @@ mod tests {
 
         assert_eq!(d.idx_of(&id), Some(99), "reverse reflects the new idx");
         assert_eq!(d.id_of(99), Some(id), "forward reflects the new idx");
-        assert_eq!(d.id_of(42), None, "stale forward entry for old idx was cleaned up");
+        assert_eq!(
+            d.id_of(42),
+            None,
+            "stale forward entry for old idx was cleaned up"
+        );
     }
 }
