@@ -81,9 +81,13 @@ pub struct CryptoState {
     /// `HandshakeExtraPayload` frames while the session is in
     /// `HalfOutgoing`. Cleared on transition to `Transport` once every
     /// queued extra has been drained from the messaging layer.
-    /// `#[serde(default)]` because pre-existing on-disk rows
-    /// were serialized without this field and bincode would
-    /// otherwise refuse to decode them.
+    ///
+    /// NOTE: rows are stored as bincode, which is not self-describing,
+    /// so `#[serde(default)]` does NOT make rows written before these
+    /// fields existed decode. Backward compatibility is handled by the
+    /// explicit legacy fallback in `CryptoAccount::decode_state`
+    /// (`storage.rs`); if you append fields here, extend
+    /// `LegacyCryptoState` accordingly.
     #[serde(default)]
     pub pre_cipher_out: Option<Vec<u8>>,
     /// Strictly-increasing per-session counter used as the AEAD nonce
