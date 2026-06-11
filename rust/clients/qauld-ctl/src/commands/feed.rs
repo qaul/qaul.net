@@ -112,7 +112,7 @@ impl RpcCommand for FeedSubcmd {
                 }
             }
             _ => {
-                log::error!("unprocessable RPC feed message");
+                return Err("unprocessable RPC feed message".into());
             }
         };
         Ok(())

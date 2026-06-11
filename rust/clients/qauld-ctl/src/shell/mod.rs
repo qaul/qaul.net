@@ -149,6 +149,8 @@ pub async fn run(shell_cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
             socket: shell_cli.socket.clone(),
             dir: shell_cli.dir.clone(),
             json: parsed.json,
+            verbose: shell_cli.verbose,
+            timeout: shell_cli.timeout,
             command: parsed.command,
         };
 

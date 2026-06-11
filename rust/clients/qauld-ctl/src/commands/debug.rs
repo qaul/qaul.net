@@ -70,14 +70,11 @@ impl RpcCommand for DebugSubcmd {
                     }
                 }
                 other => {
-                    log::warn!(
-                        "debug: unexpected response variant: {other:?}"
-                    );
+                    return Err(format!("debug: unexpected response variant: {other:?}").into());
                 }
             },
             Err(error) => {
-                eprintln!("{:?}", error);
-                log::error!("{:?}", error);
+                return Err(format!("debug: failed to decode response: {error:?}").into());
             }
         }
         Ok(())

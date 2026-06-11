@@ -22,7 +22,9 @@ pub use qaul_proto::qaul_rpc_subscribe as proto_sub;
 /// Run the subscribe command: connect, send SubscribeRequest, print events.
 pub async fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
     let (client, addr) = crate::connect_to_qauld(&cli).await?;
-    println!("qauld-ctl subscribed via: {addr}");
+    if cli.verbose {
+        eprintln!("qauld-ctl subscribed via: {addr}");
+    }
 
     let mut framed = LengthDelimitedCodec::builder()
         .length_field_offset(0)
@@ -32,13 +34,17 @@ pub async fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
 
     let request_id = Uuid::new_v4().to_string();
     send_subscribe_request(&mut framed, &request_id).await?;
-    println!("waiting for events (Ctrl-C to stop)");
+    if cli.verbose {
+        eprintln!("waiting for events (Ctrl-C to stop)");
+    }
 
     loop {
         tokio::select! {
             biased;
             _ = tokio::signal::ctrl_c() => {
-                println!("\nstopping subscription");
+                if cli.verbose {
+                    eprintln!("stopping subscription");
+                }
                 return Ok(());
             }
             frame = framed.next() => {
@@ -52,7 +58,9 @@ pub async fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
                         return Ok(());
                     }
                     None => {
-                        println!("daemon closed the connection");
+                        if cli.verbose {
+                            eprintln!("daemon closed the connection");
+                        }
                         return Ok(());
                     }
                 }
