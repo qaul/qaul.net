@@ -56,6 +56,7 @@ semver = "1.0"
 argon2 = "0.5.3"
 tar = "0.4"
 flate2 = "1.1"
+bitvec = "1.0.1"
 
 # Search module dependencies
 tantivy = "0.25.0"
