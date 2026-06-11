@@ -1,11 +1,13 @@
-use crate::connections::ConnectionModule;
+use std::sync::RwLock;
+
+use crate::{connections::ConnectionModule, router_v2::index::IndexDictionary};
 
 pub mod identity;
 pub mod index;
 
 #[derive(Debug, thiserror::Error)]
 pub enum RoutingV2Error {
-    MultikeyErrror(#[from] libp2p::identity::DecodingError)
+    MultikeyErrror(#[from] libp2p::identity::DecodingError),
 }
 
 impl std::fmt::Display for RoutingV2Error {
@@ -21,14 +23,14 @@ pub type Result<T> = std::result::Result<T, RoutingV2Error>;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Sphere {
     Local,
-    Internet
+    Internet,
 }
 
 impl Sphere {
     pub const fn of(module: ConnectionModule) -> Self {
         match module {
             ConnectionModule::Internet => Sphere::Internet,
-            _ => Sphere::Local
+            _ => Sphere::Local,
         }
     }
 }
@@ -37,11 +39,19 @@ impl Sphere {
 /// This is the major struct that will replace the current Router.
 /// Each `RouterState` instance is fully independent, enabling multiple
 /// nodes to run in the same process.
-pub struct RouterV2State {}
+pub struct RouterV2State {
+    /// Index space for each user this particular node knows
+    pub user_dict: RwLock<IndexDictionary>,
+    /// Index space for each node this particular node knows
+    pub node_dict: RwLock<IndexDictionary>,
+}
 
-impl RouterV2State  {
-    pub fn new() -> Self {
-        Self {  }
+impl RouterV2State {
+    pub fn new(host_node_id: [u8; 8]) -> Self {
+        Self {
+            user_dict: RwLock::new(IndexDictionary::new(None)),
+            node_dict: RwLock::new(IndexDictionary::new(Some(host_node_id))),
+        }
     }
 }
 
