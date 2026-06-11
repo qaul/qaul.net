@@ -11,7 +11,7 @@ use sled;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
 
-use super::CryptoState;
+use super::{CryptoProcessState, CryptoState};
 use crate::services::messaging::proto;
 use crate::storage::database::DataBase;
 
@@ -159,6 +159,55 @@ impl RotationMeta {
     }
 }
 
+/// On-disk shape of `CryptoState` before the handshake-extras
+/// `pre_*` fields were appended. Kept (field order and types must
+/// never change) so rows written by pre-extras builds keep decoding;
+/// see `CryptoAccount::decode_state`.
+#[derive(Serialize, Deserialize)]
+struct LegacyCryptoState {
+    session_id: u32,
+    state: CryptoProcessState,
+    initiator: bool,
+    s: Vec<u8>,
+    rs: Vec<u8>,
+    e: Vec<u8>,
+    re: Option<Vec<u8>>,
+    cipher_out: Option<Vec<u8>>,
+    index_nonce_out: u64,
+    cipher_in: Option<Vec<u8>>,
+    highest_index_nonce_in: u64,
+    out_of_order_indexes: bool,
+}
+
+impl LegacyCryptoState {
+    /// Upgrade to the current shape; the handshake-extras fields
+    /// start at their defaults (no pre-cipher captured, nothing
+    /// seen or accounted).
+    fn into_current(self) -> CryptoState {
+        CryptoState {
+            session_id: self.session_id,
+            state: self.state,
+            initiator: self.initiator,
+            s: self.s,
+            rs: self.rs,
+            e: self.e,
+            re: self.re,
+            cipher_out: self.cipher_out,
+            index_nonce_out: self.index_nonce_out,
+            cipher_in: self.cipher_in,
+            highest_index_nonce_in: self.highest_index_nonce_in,
+            out_of_order_indexes: self.out_of_order_indexes,
+            pre_cipher_out: None,
+            pre_index_out: 0,
+            pre_cipher_in: None,
+            pre_index_in_highest: 0,
+            pre_index_in_seen: Vec::new(),
+            pre_bytes_accounted: 0,
+            established_at: 0,
+        }
+    }
+}
+
 /// Group DB links for user account
 #[derive(Clone)]
 pub struct CryptoAccount {
@@ -236,6 +285,35 @@ impl CryptoAccount {
         (first_key, last_key)
     }
 
+    /// Decode a `CryptoState` row from its bincode bytes.
+    ///
+    /// Tries the current shape first. On failure, falls back to the
+    /// pre-handshake-extras shape (rows written before the `pre_*`
+    /// fields existed): bincode is not self-describing, so
+    /// `#[serde(default)]` on trailing fields does not make old rows
+    /// decode — without this fallback every session established
+    /// before the upgrade would be lost. Migrated rows get the
+    /// extras fields at their defaults and are rewritten in the new
+    /// shape on the next `save_state`.
+    fn decode_state(crypto_state_bytes: &[u8]) -> Option<CryptoState> {
+        match bincode::deserialize::<CryptoState>(crypto_state_bytes) {
+            Ok(v) => Some(v),
+            Err(current_shape_error) => {
+                match bincode::deserialize::<LegacyCryptoState>(crypto_state_bytes) {
+                    Ok(legacy) => Some(legacy.into_current()),
+                    Err(legacy_shape_error) => {
+                        log::error!(
+                            "Error deserializing crypto state: {} (legacy fallback: {})",
+                            current_shape_error,
+                            legacy_shape_error
+                        );
+                        None
+                    }
+                }
+            }
+        }
+    }
+
     /// get currently active CryptoState from db
     pub fn get_state(&self, remote_id: PeerId) -> Option<CryptoState> {
         // get key range
@@ -250,14 +328,10 @@ impl CryptoAccount {
         for result in iterator {
             match result {
                 Ok((_key, crypto_state_bytes)) => {
-                    let crypto_state: CryptoState =
-                        match bincode::deserialize(&crypto_state_bytes) {
-                            Ok(v) => v,
-                            Err(e) => {
-                                log::error!("Error deserializing crypto state: {}", e);
-                                continue;
-                            }
-                        };
+                    let crypto_state: CryptoState = match Self::decode_state(&crypto_state_bytes) {
+                        Some(v) => v,
+                        None => continue,
+                    };
                     match crypto_state.state {
                         super::CryptoProcessState::HalfOutgoing => {
                             state_option = Some(crypto_state)
@@ -281,14 +355,7 @@ impl CryptoAccount {
         // get result from data base
         match self.state.get(key) {
             Ok(Some(crypto_state_bytes)) => {
-                let crypto_state: CryptoState = match bincode::deserialize(&crypto_state_bytes) {
-                    Ok(v) => v,
-                    Err(e) => {
-                        log::error!("Error deserializing crypto state by id: {}", e);
-                        return None;
-                    }
-                };
-                return Some(crypto_state);
+                return Self::decode_state(&crypto_state_bytes);
             }
             Ok(None) => return None,
             Err(e) => log::error!("{}", e),
@@ -555,8 +622,12 @@ impl CryptoStorage {
             Err(e) => {
                 log::error!("failed to open crypto_state tree: {}", e);
                 return CryptoAccount {
-                    state: db.open_tree("__fallback_crypto_state").expect("fallback tree"),
-                    cache: db.open_tree("__fallback_crypto_cache").expect("fallback tree"),
+                    state: db
+                        .open_tree("__fallback_crypto_state")
+                        .expect("fallback tree"),
+                    cache: db
+                        .open_tree("__fallback_crypto_cache")
+                        .expect("fallback tree"),
                     rotation_meta: db
                         .open_tree("__fallback_rotation_meta")
                         .expect("fallback tree"),
@@ -569,7 +640,9 @@ impl CryptoStorage {
                 log::error!("failed to open crypto_cache tree: {}", e);
                 return CryptoAccount {
                     state: state_tree,
-                    cache: db.open_tree("__fallback_crypto_cache").expect("fallback tree"),
+                    cache: db
+                        .open_tree("__fallback_crypto_cache")
+                        .expect("fallback tree"),
                     rotation_meta: db
                         .open_tree("__fallback_rotation_meta")
                         .expect("fallback tree"),
@@ -660,5 +733,147 @@ mod tests {
             acct.get_rotation_meta(bob).map(|m| m.primary_session_id),
             Some(2)
         );
+    }
+}
+
+#[cfg(test)]
+mod legacy_state_decode_tests {
+    //! Rows written by builds that predate the handshake-extras
+    //! `pre_*` fields on `CryptoState` must still load. bincode is
+    //! not self-describing, so `#[serde(default)]` on the new
+    //! trailing fields does NOT make old rows decode — without an
+    //! explicit legacy fallback, every pre-existing session is lost
+    //! on upgrade (decode fails with "unexpected end of file").
+    use super::*;
+    use crate::services::crypto::CryptoProcessState;
+    use libp2p::identity::Keypair;
+    use serde::{Deserialize, Serialize};
+
+    /// On-disk shape of `CryptoState` before the handshake-extras
+    /// fields were appended. Serialize-only: the tests use it to
+    /// produce byte-exact legacy rows.
+    #[derive(Serialize, Deserialize)]
+    struct PreExtrasCryptoState {
+        session_id: u32,
+        state: CryptoProcessState,
+        initiator: bool,
+        s: Vec<u8>,
+        rs: Vec<u8>,
+        e: Vec<u8>,
+        re: Option<Vec<u8>>,
+        cipher_out: Option<Vec<u8>>,
+        index_nonce_out: u64,
+        cipher_in: Option<Vec<u8>>,
+        highest_index_nonce_in: u64,
+        out_of_order_indexes: bool,
+    }
+
+    fn fresh_peer() -> PeerId {
+        Keypair::generate_ed25519().public().to_peer_id()
+    }
+
+    /// Insert a legacy-shaped row directly into the state tree,
+    /// bypassing `save_state` (which would write the new shape).
+    fn insert_legacy_row(acct: &CryptoAccount, remote_id: PeerId, session_id: u32) {
+        let legacy = PreExtrasCryptoState {
+            session_id,
+            state: CryptoProcessState::Transport,
+            initiator: true,
+            s: vec![1; 32],
+            rs: vec![2; 32],
+            e: vec![3; 32],
+            re: Some(vec![4; 32]),
+            cipher_out: Some(vec![5; 32]),
+            index_nonce_out: 1000,
+            cipher_in: Some(vec![6; 32]),
+            highest_index_nonce_in: 999,
+            out_of_order_indexes: false,
+        };
+        let bytes = match bincode::serialize(&legacy) {
+            Ok(v) => v,
+            Err(e) => panic!("serializing legacy row failed: {}", e),
+        };
+        let key = CryptoAccount::create_state_key(remote_id, session_id);
+        if let Err(e) = acct.state.insert(key, bytes) {
+            panic!("inserting legacy row failed: {}", e);
+        }
+    }
+
+    /// A session stored by a pre-extras build must still be found by
+    /// `get_state_by_id`, with the extras fields at their defaults.
+    #[test]
+    fn legacy_row_loads_via_get_state_by_id() {
+        let acct = CryptoStorage::test_account();
+        let remote = fresh_peer();
+        insert_legacy_row(&acct, remote, 42);
+
+        let loaded = match acct.get_state_by_id(remote, 42) {
+            Some(v) => v,
+            None => panic!("legacy CryptoState row no longer decodes — established sessions are lost on upgrade"),
+        };
+        assert_eq!(loaded.session_id, 42);
+        assert_eq!(loaded.index_nonce_out, 1000);
+        assert_eq!(loaded.highest_index_nonce_in, 999);
+        assert_eq!(loaded.cipher_out, Some(vec![5; 32]));
+        // extras fields come up at their defaults
+        assert_eq!(loaded.pre_cipher_out, None);
+        assert_eq!(loaded.pre_index_out, 0);
+        assert_eq!(loaded.pre_cipher_in, None);
+        assert_eq!(loaded.pre_index_in_highest, 0);
+        assert!(loaded.pre_index_in_seen.is_empty());
+        assert_eq!(loaded.pre_bytes_accounted, 0);
+    }
+
+    /// Same through `get_state` (the active-session scan used by the
+    /// messaging send/receive paths).
+    #[test]
+    fn legacy_row_loads_via_get_state() {
+        let acct = CryptoStorage::test_account();
+        let remote = fresh_peer();
+        insert_legacy_row(&acct, remote, 7);
+
+        let loaded = match acct.get_state(remote) {
+            Some(v) => v,
+            None => panic!("legacy CryptoState row no longer decodes via get_state"),
+        };
+        assert_eq!(loaded.session_id, 7);
+        assert!(matches!(loaded.state, CryptoProcessState::Transport));
+    }
+
+    /// Rows written in the current shape keep decoding unchanged.
+    #[test]
+    fn current_shape_row_still_loads() {
+        let acct = CryptoStorage::test_account();
+        let remote = fresh_peer();
+        let state = CryptoState {
+            session_id: 9,
+            state: CryptoProcessState::Transport,
+            initiator: false,
+            s: vec![],
+            rs: vec![],
+            e: vec![],
+            re: None,
+            cipher_out: None,
+            index_nonce_out: 3,
+            cipher_in: None,
+            highest_index_nonce_in: 2,
+            out_of_order_indexes: false,
+            pre_cipher_out: Some(vec![7; 32]),
+            pre_index_out: 5,
+            pre_cipher_in: None,
+            pre_index_in_highest: 4,
+            pre_index_in_seen: vec![0b1011],
+            pre_bytes_accounted: 4096,
+        };
+        acct.save_state(remote, 9, state);
+
+        let loaded = match acct.get_state_by_id(remote, 9) {
+            Some(v) => v,
+            None => panic!("current-shape row failed to decode"),
+        };
+        assert_eq!(loaded.pre_cipher_out, Some(vec![7; 32]));
+        assert_eq!(loaded.pre_index_out, 5);
+        assert_eq!(loaded.pre_index_in_seen, vec![0b1011]);
+        assert_eq!(loaded.pre_bytes_accounted, 4096);
     }
 }
