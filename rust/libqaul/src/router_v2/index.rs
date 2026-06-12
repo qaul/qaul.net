@@ -477,4 +477,162 @@ mod tests {
             "stale forward entry for old idx was cleaned up"
         );
     }
+
+    // ----- MirrorIndexDictionary tests (subtask 14) -----
+
+    #[test]
+    fn mirror_round_trips() {
+        let mut m = MirrorIndexDictionary::default();
+        let id: [u8; 8] = [1, 2, 3, 4, 5, 6, 7, 8];
+
+        m.bind(42, id);
+
+        assert_eq!(m.id_of(42), Some(id));
+    }
+
+    #[test]
+    fn mirror_unbound_lookup_returns_none() {
+        let m = MirrorIndexDictionary::default();
+        assert_eq!(m.id_of(42), None);
+    }
+
+    #[test]
+    fn mirror_rebind_overwrites_without_cleanup_dance() {
+        let mut m = MirrorIndexDictionary::default();
+        let id_x: [u8; 8] = [1; 8];
+        let id_y: [u8; 8] = [2; 8];
+
+        m.bind(42, id_x);
+        m.bind(42, id_y);
+
+        assert_eq!(
+            m.id_of(42),
+            Some(id_y),
+            "rebinding an idx overwrites the stored id"
+        );
+    }
+
+    #[test]
+    fn mirror_clear_empties_all_bindings() {
+        let mut m = MirrorIndexDictionary::default();
+        m.bind(1, [1; 8]);
+        m.bind(2, [2; 8]);
+        m.bind(3, [3; 8]);
+
+        m.clear();
+
+        assert_eq!(m.id_of(1), None);
+        assert_eq!(m.id_of(2), None);
+        assert_eq!(m.id_of(3), None);
+    }
+
+    #[test]
+    fn mirrors_for_different_neighbours_stay_independent() {
+        // Two separate mirror dicts model the per-neighbour case
+        // (the registry on RouterV2State keeps one per PeerId).
+        let mut alice = MirrorIndexDictionary::default();
+        let mut bob = MirrorIndexDictionary::default();
+
+        // Same wire-level idx, different ids per neighbour.
+        alice.bind(5, [0xAA; 8]);
+        bob.bind(5, [0xBB; 8]);
+
+        assert_eq!(alice.id_of(5), Some([0xAA; 8]));
+        assert_eq!(bob.id_of(5), Some([0xBB; 8]));
+
+        // Clearing one mirror must not affect the other.
+        alice.clear();
+        assert_eq!(alice.id_of(5), None);
+        assert_eq!(bob.id_of(5), Some([0xBB; 8]));
+    }
+
+    // ----- ReintroductionTracker tests (subtask 17) -----
+
+    #[test]
+    fn tracker_mark_first_time_adds_to_correct_space() {
+        let mut t = ReintroductionTracker::new();
+        t.mark_first_time(Space::User, 42);
+
+        let user_pending = t.take_pending(Space::User);
+        assert!(user_pending.contains(&42));
+        assert_eq!(user_pending.len(), 1);
+
+        let node_pending = t.take_pending(Space::Node);
+        assert!(
+            node_pending.is_empty(),
+            "marking a user-space idx must not touch node space"
+        );
+    }
+
+    #[test]
+    fn tracker_all_three_mark_methods_are_equivalent_at_storage() {
+        // The three named methods document the spec trigger that fired,
+        // but they all add to the same per-space set.
+        let mut t = ReintroductionTracker::new();
+        t.mark_first_time(Space::Node, 1);
+        t.mark_rebind(Space::Node, 2);
+        t.mark_version_bump(Space::Node, 3);
+
+        let pending = t.take_pending(Space::Node);
+        assert!(pending.contains(&1));
+        assert!(pending.contains(&2));
+        assert!(pending.contains(&3));
+        assert_eq!(pending.len(), 3);
+    }
+
+    #[test]
+    fn tracker_take_pending_drains_the_set() {
+        let mut t = ReintroductionTracker::new();
+        t.mark_first_time(Space::User, 42);
+
+        let first = t.take_pending(Space::User);
+        let second = t.take_pending(Space::User);
+
+        assert!(first.contains(&42));
+        assert!(
+            second.is_empty(),
+            "take_pending must drain; second call returns empty"
+        );
+    }
+
+    #[test]
+    fn tracker_remark_after_take_rearms_the_idx() {
+        // After take_pending clears the set, marking the same idx again
+        // must put it back into the pending set.
+        let mut t = ReintroductionTracker::new();
+        t.mark_first_time(Space::User, 42);
+        let _ = t.take_pending(Space::User);
+
+        t.mark_first_time(Space::User, 42);
+        let pending = t.take_pending(Space::User);
+        assert!(pending.contains(&42));
+    }
+
+    #[test]
+    fn tracker_spaces_stay_independent() {
+        let mut t = ReintroductionTracker::new();
+        t.mark_first_time(Space::User, 1);
+        t.mark_first_time(Space::Node, 2);
+
+        let user = t.take_pending(Space::User);
+        // Taking user must not have drained node.
+        let node = t.take_pending(Space::Node);
+
+        assert!(user.contains(&1));
+        assert!(node.contains(&2));
+    }
+
+    #[test]
+    fn tracker_duplicate_marks_collapse() {
+        // HashSet semantics: marking the same idx twice (e.g. via two
+        // different triggers) leaves a single entry.
+        let mut t = ReintroductionTracker::new();
+        t.mark_first_time(Space::User, 42);
+        t.mark_rebind(Space::User, 42);
+        t.mark_version_bump(Space::User, 42);
+
+        let pending = t.take_pending(Space::User);
+        assert_eq!(pending.len(), 1);
+        assert!(pending.contains(&42));
+    }
 }
