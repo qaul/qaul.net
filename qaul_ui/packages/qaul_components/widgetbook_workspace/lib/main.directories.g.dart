@@ -22,6 +22,8 @@ import 'package:qaul_components_widgetbook/use_cases/design_components/shell/qau
     as _qaul_components_widgetbook_use_cases_design_components_shell_qaul_fab;
 import 'package:qaul_components_widgetbook/use_cases/design_components/shell/qaul_navbar.dart'
     as _qaul_components_widgetbook_use_cases_design_components_shell_qaul_navbar;
+import 'package:qaul_components_widgetbook/use_cases/special_forms/duplicate_username_meta_message.dart'
+    as _qaul_components_widgetbook_use_cases_special_forms_duplicate_username_meta_message;
 import 'package:qaul_components_widgetbook/use_cases/special_forms/qaul_chat_bubble.dart'
     as _qaul_components_widgetbook_use_cases_special_forms_qaul_chat_bubble;
 import 'package:qaul_components_widgetbook/use_cases/special_forms/room_meta_message.dart'
@@ -95,6 +97,17 @@ final directories = <_widgetbook.WidgetbookNode>[
                 builder:
                     _qaul_components_widgetbook_use_cases_design_components_chat_chat_timeline
                         .buildGroupChatUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookComponent(
+            name: 'DuplicateUsernameMetaMessage',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Duplicate username on join',
+                builder:
+                    _qaul_components_widgetbook_use_cases_special_forms_duplicate_username_meta_message
+                        .buildDuplicateUsernameMetaMessageUseCase,
               ),
             ],
           ),

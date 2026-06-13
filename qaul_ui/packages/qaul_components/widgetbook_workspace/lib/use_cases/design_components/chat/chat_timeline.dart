@@ -207,7 +207,19 @@ List<ChatMessage> _buildGroupMessages() {
       receivedAt: today.copyWith(hour: 12, minute: 30),
       status: MessageStatus.read,
     ),
-    const MetaChatMessage(id: 'meta-1', label: 'Group Member joined the group'),
+    GroupJoinMetaChatMessage(
+      id: 'meta-join',
+      userName: 'Nickname IFx',
+      joinedSuffix: ' joined the group',
+    ),
+    DuplicateUsernameMetaChatMessage(
+      id: 'meta-dup',
+      preamble: 'Group member ',
+      baseName: 'Nickname',
+      middle: ' is renamed ',
+      disambiguatedName: 'Nickname 3fr',
+      actionLabel: 'Edit user names',
+    ),
     TextChatMessage(
       id: 'gmsg-10',
       sender: thirdMember,

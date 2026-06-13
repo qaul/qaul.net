@@ -415,6 +415,18 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get groupEventJoinedSuffix => ' joined the group';
+
+  @override
+  String get groupMemberRenamedOnJoinPreamble => 'Group member ';
+
+  @override
+  String get groupMemberRenamedOnJoinMiddle => ' is renamed ';
+
+  @override
+  String get editGroupUserNames => 'Edit user names';
+
+  @override
   String groupEventLeft(String username) {
     return '\"$username\" a quitté le groupe';
   }

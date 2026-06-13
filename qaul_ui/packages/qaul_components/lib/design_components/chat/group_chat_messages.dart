@@ -59,16 +59,13 @@ class ChatMessageRenderer {
     if (display == null) return const SizedBox.shrink();
 
     if (mode == ChatRenderMode.group && !presentation.isPrimary) {
-      return GroupTextMessageItem(
-        presentation: presentation,
-        clock: clock,
-      );
+      return GroupTextMessageItem(presentation: presentation, clock: clock);
     }
 
     return DirectTextMessageItem(
       presentation: presentation,
       clock: clock,
-      horizontalGutter: mode == ChatRenderMode.direct,
+      horizontalGutter: true,
     );
   }
 
@@ -104,7 +101,7 @@ class DirectTextMessageItem extends StatelessWidget {
 
   /// When true, applies a 16px gutter on the trailing edge for primary
   /// (outgoing) bubbles and on the leading edge for secondary (incoming).
-  /// Set to false for group-mode outgoing bubbles, which render flush.
+  /// Set to false only for layouts that intentionally render flush.
   final bool horizontalGutter;
 
   @override
@@ -140,8 +137,9 @@ class GroupTextMessageItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final display = presentation.bubbleDisplay!;
     final sender = presentation.sender;
-    final senderNameColor =
-        sender == null ? null : colorGenerationStrategy(sender.idBase58);
+    final senderNameColor = sender == null
+        ? null
+        : colorGenerationStrategy(sender.idBase58);
     final bubbleMessage = presentation.meta.showSenderName && sender != null
         ? display.message.copyWith(
             senderDisplayName: sender.name,
@@ -181,10 +179,11 @@ class GroupMessageShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final senderNameColor =
-        sender == null ? null : colorGenerationStrategy(sender!.idBase58);
+    final senderNameColor = sender == null
+        ? null
+        : colorGenerationStrategy(sender!.idBase58);
     return Padding(
-      padding: EdgeInsetsDirectional.only(top: marginTop),
+      padding: EdgeInsetsDirectional.only(top: marginTop, start: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
