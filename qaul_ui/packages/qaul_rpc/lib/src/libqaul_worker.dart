@@ -148,6 +148,29 @@ class LibqaulWorker {
     return result;
   }
 
+  Future<PaginatedUsers?> searchUsers({
+    required String query,
+    int offset = 0,
+    int limit = 20,
+    bool onlineOnly = false,
+  }) async {
+    final request = UserSearchRequest(
+      query: query,
+      onlineOnly: onlineOnly,
+      offset: offset,
+      limit: limit,
+    );
+    final result = await _sendRequest<PaginatedUsers>(
+      module: Modules.USERS,
+      data: Users(userSearchRequest: request),
+      adapter: (res) {
+        if (res.data is PaginatedUsers) return res.data as PaginatedUsers;
+        return null;
+      },
+    );
+    return result;
+  }
+
   Future<User?> getUserById(Uint8List userId) async {
     final result = await _sendRequest<User>(
       module: Modules.USERS,
