@@ -177,6 +177,162 @@ abstract class QaulComponentsLocalizations {
   /// **'File history'**
   String get navOverflowFileHistory;
 
+  /// No description provided for @accountCreateUserProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Create user profile'**
+  String get accountCreateUserProfile;
+
+  /// No description provided for @accountRestoreAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore account'**
+  String get accountRestoreAccount;
+
+  /// No description provided for @accountLoginExistingAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Login with existing account'**
+  String get accountLoginExistingAccount;
+
+  /// No description provided for @accountLearnMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn about qaul'**
+  String get accountLearnMore;
+
+  /// No description provided for @accountManageAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage account'**
+  String get accountManageAccount;
+
+  /// No description provided for @accountPublicKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Public Key'**
+  String get accountPublicKey;
+
+  /// No description provided for @accountUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get accountUnknown;
+
+  /// No description provided for @accountLogout.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get accountLogout;
+
+  /// No description provided for @accountExportAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Account'**
+  String get accountExportAccount;
+
+  /// No description provided for @accountChangeOrRemovePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change or remove password'**
+  String get accountChangeOrRemovePassword;
+
+  /// No description provided for @accountRemoveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Account'**
+  String get accountRemoveAccount;
+
+  /// No description provided for @accountCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'CANCEL'**
+  String get accountCancel;
+
+  /// No description provided for @accountRestoreContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get accountRestoreContinue;
+
+  /// No description provided for @accountChooseExportFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose export file'**
+  String get accountChooseExportFile;
+
+  /// No description provided for @accountRestoreDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a .qaul_export archive to restore this account on this node.'**
+  String get accountRestoreDescription;
+
+  /// No description provided for @accountRestoreFilePickerDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the .qaul_export archive you want to restore on this node.'**
+  String get accountRestoreFilePickerDescription;
+
+  /// No description provided for @accountRestoreFilePickerPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'my_account.qaul_export'**
+  String get accountRestoreFilePickerPlaceholder;
+
+  /// No description provided for @accountExportDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a .qaul_export archive that can be restored later.'**
+  String get accountExportDescription;
+
+  /// No description provided for @accountDeleteExportPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like to export your account before removing it from this node?'**
+  String get accountDeleteExportPrompt;
+
+  /// No description provided for @accountExportFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Export first'**
+  String get accountExportFirst;
+
+  /// No description provided for @accountDeleteWithoutExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove without export'**
+  String get accountDeleteWithoutExport;
+
+  /// No description provided for @accountDeleteFinalWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This permanently removes the account from this node. This action cannot be undone.'**
+  String get accountDeleteFinalWarning;
+
+  /// No description provided for @accountDeletePermanently.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove permanently'**
+  String get accountDeletePermanently;
+
+  /// No description provided for @accountNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get accountNewPassword;
+
+  /// No description provided for @accountRemovePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove password'**
+  String get accountRemovePassword;
+
+  /// No description provided for @accountSetPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Set password'**
+  String get accountSetPassword;
+
   /// No description provided for @membersCount.
   ///
   /// In en, this message translates to:

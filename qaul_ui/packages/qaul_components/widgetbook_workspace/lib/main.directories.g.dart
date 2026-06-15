@@ -10,6 +10,8 @@
 // **************************************************************************
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:qaul_components_widgetbook/use_cases/design/account/account_management.dart'
+    as _qaul_components_widgetbook_use_cases_design_account_account_management;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_footer.dart'
     as _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_header.dart'
@@ -33,6 +35,27 @@ import 'package:qaul_components_widgetbook/use_cases/special_forms/room_meta_mes
 import 'package:widgetbook/widgetbook.dart' as _widgetbook;
 
 final directories = <_widgetbook.WidgetbookNode>[
+  _widgetbook.WidgetbookCategory(
+    name: 'design',
+    children: [
+      _widgetbook.WidgetbookFolder(
+        name: 'account',
+        children: [
+          _widgetbook.WidgetbookComponent(
+            name: 'QaulAccountLanding',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Account management flow',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_account_account_management
+                        .buildInteractiveAccountFlowUseCase,
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+  ),
   _widgetbook.WidgetbookFolder(
     name: 'design_components',
     children: [
