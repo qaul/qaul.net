@@ -2,20 +2,30 @@ use std::{collections::HashMap, sync::RwLock};
 
 use libp2p::PeerId;
 
-use crate::{connections::ConnectionModule, router_v2::index::{IndexDictionary, MirrorIndexDictionary}};
+use crate::{
+    connections::ConnectionModule,
+    router_v2::{
+        codec::CodecError,
+        index::{IndexDictionary, MirrorIndexDictionary},
+    },
+};
 
+pub mod codec;
 pub mod identity;
 pub mod index;
 
 #[derive(Debug, thiserror::Error)]
 pub enum RoutingV2Error {
     MultikeyErrror(#[from] libp2p::identity::DecodingError),
+    CodecError(#[from] CodecError),
 }
 
 impl std::fmt::Display for RoutingV2Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             RoutingV2Error::MultikeyErrror(e) => write!(f, "{e}"),
+            RoutingV2Error::CodecError(e) => write!(f, "{e}")
+            
         }
     }
 }
@@ -54,7 +64,7 @@ pub struct RouterV2State {
     /// Index space for each node this particular node knows
     pub node_dict: RwLock<IndexDictionary>,
     /// Two mirrors per neighbour, one per index space.
-    pub mirrors: RwLock<HashMap<PeerId, NeighbourMirrors>>
+    pub mirrors: RwLock<HashMap<PeerId, NeighbourMirrors>>,
 }
 
 impl RouterV2State {
@@ -62,7 +72,7 @@ impl RouterV2State {
         Self {
             user_dict: RwLock::new(IndexDictionary::new(None)),
             node_dict: RwLock::new(IndexDictionary::new(Some(host_node_id))),
-            mirrors: RwLock::new(HashMap::new())
+            mirrors: RwLock::new(HashMap::new()),
         }
     }
 
@@ -76,7 +86,6 @@ impl RouterV2State {
         let mut mirrors = self.mirrors.write().unwrap();
         mirrors.remove_entry(&peer);
     }
-
 }
 
 #[cfg(test)]
