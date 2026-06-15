@@ -167,7 +167,7 @@ impl RpcCommand for AccountSubcmd {
                         }))?
                     );
                 } else {
-                    println!("No user account created yet. Please create an account by running: qauld-ctl account create --help");
+                    eprintln!("No user account created yet. Please create an account by running: qauld-ctl account create --help");
                 }
             }
             Some(user_accounts::Message::MyUserAccount(acct)) => {
@@ -198,7 +198,10 @@ impl RpcCommand for AccountSubcmd {
                 } else if response.success {
                     println!(" Password updated");
                 } else {
-                    println!("{}", response.error_message);
+                    eprintln!("{}", response.error_message);
+                }
+                if !response.success {
+                    return Err(response.error_message.into());
                 }
             }
             Some(user_accounts::Message::UpdateProfileResponse(response)) => {
@@ -221,7 +224,7 @@ impl RpcCommand for AccountSubcmd {
                 }
             }
             _ => {
-                log::error!("unprocessable RPC user accounts message");
+                return Err("unprocessable RPC user accounts message".into());
             }
         };
         Ok(())

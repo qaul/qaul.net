@@ -508,7 +508,7 @@ impl RpcCommand for GroupSubcmd {
                 }
             }
             _ => {
-                log::error!("unprocessable RPC group chat message");
+                return Err("unprocessable RPC group chat message".into());
             }
         };
         Ok(())

@@ -1,0 +1,26 @@
+[package]
+name = "qauld-rpc"
+version = "2.0.0-rc.5"
+authors = ["qaul community <contact@qaul.net>"]
+edition = "2021"
+description = "Shared RPC plumbing for qauld clients (qauld-ctl, qauld-tui)"
+license = "AGPL-3.0"
+homepage = "https://qaul.net"
+repository = "https://github.com/qaul/qaul.net"
+
+[features]
+default = []
+# Compile the embedded transport (links libqaul directly).
+embedded = ["dep:libqaul"]
+
+[dependencies]
+qaul-proto = { path = "../qaul-proto" }
+libqaul = { path = "../libqaul", optional = true }
+tokio = { version = "1", features = ["macros", "rt", "io-util", "net", "time"] }
+tokio-util = { version = "0.7.18", features = ["codec"] }
+futures = "0.3"
+prost = "0.14"
+async-trait = "0.1"
+bs58 = "0.5"
+log = "0.4"
+uuid = { version = "1.13", features = ["v4"] }

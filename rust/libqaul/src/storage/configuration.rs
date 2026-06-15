@@ -227,6 +227,47 @@ impl Default for RoutingOptions {
     }
 }
 
+/// Crypto session rotation configuration.
+///
+/// Controls when qaul re-runs the Noise KK handshake between two
+/// peers and how long the previous session remains accepted for
+/// incoming messages after a rotation starts.
+///
+/// Defaults are `enabled: false` — rotation ships dormant and is
+/// opted in per node. All durations are in seconds; volumes are in
+/// message counts.
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct CryptoRotation {
+    /// Master switch. When `false` no rotation triggers fire and
+    /// no `RotateHandshakeFirst` frames are sent. Phase 1 leaves
+    /// this `false`.
+    pub enabled: bool,
+    /// Time-based trigger: rotate when the session is older than
+    /// this many seconds.
+    pub period_seconds: u64,
+    /// Outbound volume trigger: rotate once this many messages have
+    /// been encrypted under the session.
+    pub volume_messages: u64,
+    /// Grace period during which the old (draining) session is
+    /// still accepted for incoming messages after a rotation.
+    pub grace_period_seconds: u64,
+    /// Grace volume: additional messages accepted on the draining
+    /// session before it is retired, regardless of grace_period.
+    pub grace_volume_messages: u64,
+}
+
+impl Default for CryptoRotation {
+    fn default() -> Self {
+        CryptoRotation {
+            enabled: false,
+            period_seconds: 7 * 24 * 3600, // 7 days
+            volume_messages: 1 << 20,      // 2^20 ≈ 1,048,576
+            grace_period_seconds: 3600,    // 1 hour
+            grace_volume_messages: 256,
+        }
+    }
+}
+
 /// Storage Configuration Options
 ///
 /// The following options can be configured:
@@ -253,6 +294,53 @@ impl Default for StorageOptions {
     }
 }
 
+/// Handshake-extras configuration.
+///
+/// Controls whether the initiator may queue extra encrypted chat
+/// payloads on top of KK msg 1 while the responder is still offline,
+/// and the bounds on that queue. See
+/// `docs/proposals/Handshake-Extras-During-Session-Creation.md`.
+///
+/// Defaults are conservative: `enabled = false`, so a node that
+/// upgrades to a build containing this code keeps producing exactly
+/// one ciphertext per handshake leg until an operator opts in.
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct HandshakeExtras {
+    /// Master switch. When false the initiator's `HalfOutgoing`
+    /// branch falls back to its pre-feature behaviour and frames of
+    /// type `HandshakeExtraPayload` are silently dropped on receive.
+    pub enabled: bool,
+    /// Maximum number of pre-completion frames a single session may
+    /// carry. Bounds responder-side bitmap size and protects
+    /// against a sender flooding a stuck handshake.
+    pub max_pre_messages: u32,
+    /// Maximum aggregate ciphertext bytes a single session may
+    /// accumulate under extras. Soft cap; the initiator falls back
+    /// to opening a fresh session once exceeded.
+    pub max_pre_bytes: u64,
+    /// How long an orphan extra (one whose matching KK msg 1 has
+    /// not yet been seen) may sit in the responder's orphan buffer
+    /// before being dropped.
+    pub orphan_ttl_seconds: u64,
+    /// How long the initiator will keep a `HalfOutgoing` session
+    /// alive waiting for KK msg 2 to arrive. After this, the
+    /// session and any queued extras are zeroised.
+    pub pre_completion_deadline_seconds: u64,
+}
+
+impl Default for HandshakeExtras {
+    fn default() -> Self {
+        // Defaults match the proposal's "Limits" section.
+        HandshakeExtras {
+            enabled: false,
+            max_pre_messages: 64,
+            max_pre_bytes: 1 << 20, // 1 MiB
+            orphan_ttl_seconds: 24 * 3600,
+            pre_completion_deadline_seconds: 7 * 24 * 3600,
+        }
+    }
+}
+
 /// Configuration Structure of libqaul
 ///
 /// This structure contains the entire configuration of libqaul.
@@ -270,6 +358,13 @@ pub struct Configuration {
     pub user_accounts: Vec<UserAccount>,
     pub debug: DebugOption,
     pub routing: RoutingOptions,
+    /// Handshake-extras feature config. Marked `#[serde(default)]`
+    /// so existing `config.yaml` files (which predate this section)
+    /// continue to load with the conservative defaults.
+    #[serde(default)]
+    pub handshake_extras: HandshakeExtras,
+    #[serde(default)]
+    pub crypto_rotation: CryptoRotation,
 }
 
 impl Default for Configuration {
@@ -282,6 +377,8 @@ impl Default for Configuration {
             user_accounts: Vec::new(),
             debug: DebugOption::default(),
             routing: RoutingOptions::default(),
+            handshake_extras: HandshakeExtras::default(),
+            crypto_rotation: CryptoRotation::default(),
         }
     }
 }
@@ -340,6 +437,13 @@ impl Configuration {
         *cfg = config;
     }
 
+    /// Install an arbitrary `Configuration` for tests that need
+    /// `Configuration::get()` to return something deterministic
+    /// without touching the filesystem.
+    ///
+    /// The `InitCell` is write-once: subsequent calls are no-ops and
+    /// the first-installed config stays. Returns `true` when this
+    /// call was the one that installed the config.
     /// Load a configuration file for upgrading purposes
     ///
     /// This function is only to be used for the upgrading procedure.

@@ -147,12 +147,11 @@ impl RpcCommand for DtnSubcmd {
                     print_status(json, "DTN Send Routed", r.status, &r.message)?;
                 }
                 other => {
-                    log::warn!("dtn: unexpected response variant: {other:?}");
+                    return Err(format!("dtn: unexpected response variant: {other:?}").into());
                 }
             },
             Err(error) => {
-                eprintln!("{:?}", error);
-                log::error!("{:?}", error);
+                return Err(format!("dtn: failed to decode response: {error:?}").into());
             }
         }
         Ok(())
@@ -172,15 +171,18 @@ fn print_status(
             "message": message,
         });
         println!("{}", serde_json::to_string_pretty(&obj)?);
-    } else {
+    } else if status {
         println!("====================================");
         println!("{label}");
-        if status {
-            println!("\tSuccess");
-        } else {
-            println!("\tFailed");
-            println!("\t{message}");
-        }
+        println!("\tSuccess");
+    } else {
+        eprintln!("====================================");
+        eprintln!("{label}");
+        eprintln!("\tFailed");
+        eprintln!("\t{message}");
+    }
+    if !status {
+        return Err(format!("{label}: {message}").into());
     }
     Ok(())
 }

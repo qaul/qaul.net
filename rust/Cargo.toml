@@ -7,6 +7,9 @@ members = [
     # protobuf types
     "qaul-proto",
 
+    # shared RPC plumbing for qauld clients
+    "qauld-rpc",
+
     # binaries
     "clients/cli",
     "clients/qauld",
