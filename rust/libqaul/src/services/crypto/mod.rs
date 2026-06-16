@@ -819,6 +819,11 @@ impl Crypto {
                     Ok(messaging::proto::CryptoState::Handshake) => {
                         log::trace!("decrypt incoming first handshake");
 
+                        // session id this incoming handshake establishes;
+                        // used below to supersede any prior session with
+                        // this peer (cold re-key).
+                        let incoming_session_id = message.session_id;
+
                         // decrypt new handshake
                         for data in message.data {
                             if let Some((decrypted_data, crypto_state)) =
@@ -882,6 +887,19 @@ impl Crypto {
                                     log::error!("failed encrypting cryptosession 2nd handshake confirmation");
                                 }
 
+                                // Cold re-key healing: if the peer already
+                                // had a session with us, this fresh
+                                // (identity-authenticated) handshake
+                                // supersedes it so we stop using the old
+                                // session for outbound. A no-op for genuine
+                                // first contact.
+                                let acct = CryptoStorage::get_db_ref(state, user_account.id.clone());
+                                Self::supersede_with_cold_session(
+                                    &acct,
+                                    remote_id,
+                                    incoming_session_id,
+                                );
+
                                 // return decrypted first handshake message
                                 return Some(decrypted_data);
                             } else {
@@ -891,8 +909,37 @@ impl Crypto {
                         }
                     }
                     _ => {
-                        // Any other state is invalid
-                        log::error!("decrypt: incoming transport state, with missing sesssion");
+                        // A Transport message arrived for a session we
+                        // have no state for. Two cases:
+                        //
+                        // 1. We have NO session with this peer at all
+                        //    (we lost our encryption state, or never had
+                        //    one). This is the cold re-key / state-healing
+                        //    case: re-establish identity-authenticated by
+                        //    running a fresh KK handshake.
+                        // 2. We DO have a session (the peer is just
+                        //    sending stale traffic on an old session it
+                        //    hasn't stopped retransmitting). Drop it — the
+                        //    peer will converge on our current session.
+                        //
+                        // Gating cold re-key on "no session at all" is the
+                        // storm guard: once we start a handshake we have a
+                        // HalfOutgoing session, so further stale traffic
+                        // hits case 2 and never re-triggers.
+                        if crypto_account.get_state(remote_id).is_none() {
+                            log::info!(
+                                "cold re-key: traffic for unknown session {} from {} and no local session — re-handshaking",
+                                message.session_id,
+                                remote_id.to_base58()
+                            );
+                            Self::initiate_cold_rekey(state, &user_account, &crypto_account, remote_id);
+                        } else {
+                            log::trace!(
+                                "decrypt: stale traffic on unknown session {} from {} (have a current session) — dropping",
+                                message.session_id,
+                                remote_id.to_base58()
+                            );
+                        }
                         return None;
                     }
                 }
@@ -900,6 +947,110 @@ impl Crypto {
         }
 
         None
+    }
+
+    /// Initiate a cold re-key: run a fresh KK first handshake with
+    /// `remote_id` to re-establish a session after losing local state.
+    ///
+    /// Unlike rotation (which rides inside an existing session), this is
+    /// the state-healing path — there is no session to encrypt under.
+    /// The KK handshake is mutually authenticated by the peers' static
+    /// identity keys, so re-establishing this way is itself
+    /// identity-authenticated; no separate signed request is needed.
+    ///
+    /// The caller must have already checked that no session exists for
+    /// `remote_id` (the storm guard). Requires the peer's static public
+    /// key, which `encrypt_noise_kk_handshake_1` looks up from the
+    /// router users table (separate storage that survives crypto-state
+    /// loss); if the key is unknown the handshake is a no-op and the
+    /// session is re-learned once the peer is rediscovered.
+    fn initiate_cold_rekey(
+        state: &crate::QaulState,
+        user_account: &UserAccount,
+        crypto_account: &CryptoAccount,
+        remote_id: PeerId,
+    ) {
+        // Empty payload — this handshake carries no application data; it
+        // exists only to re-establish the session.
+        let (encrypted_option, nonce, session_id) =
+            CryptoNoise::encrypt_noise_kk_handshake_1::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
+                state,
+                Vec::new(),
+                user_account.clone(),
+                crypto_account.clone(),
+                remote_id,
+            );
+        let encrypted_data = match encrypted_option {
+            Some(d) => d,
+            None => {
+                log::warn!(
+                    "cold re-key: could not build handshake for {} (peer static key unknown?)",
+                    remote_id.to_base58()
+                );
+                return;
+            }
+        };
+        let encrypted_message = Self::create_encrypted_protobuf(
+            nonce,
+            session_id,
+            encrypted_data,
+            messaging::proto::CryptoState::Handshake,
+        );
+        let mut rng = rand::rng();
+        let mut message_id = vec![0u8; 16];
+        rng.fill(&mut message_id[..]);
+        match messaging::Messaging::pack_and_send_encrypted_data(
+            state,
+            user_account,
+            &remote_id,
+            encrypted_message,
+            &message_id,
+            true,
+        ) {
+            Ok(_) => log::trace!("cold re-key: sent first handshake to {}", remote_id.to_base58()),
+            Err(e) => log::error!("cold re-key: failed sending first handshake: {}", e),
+        }
+    }
+
+    /// Supersede any prior session(s) with `remote_id` after a fresh
+    /// incoming cold handshake established `new_session_id`.
+    ///
+    /// When a peer that already has a session with us re-handshakes from
+    /// scratch (because it lost its state), completing the new handshake
+    /// leaves us with two Transport sessions. Because the KK handshake
+    /// is authenticated by the peer's static identity key, a completed
+    /// new handshake provably came from the real peer, so it is safe to
+    /// promote it and drop the old session — otherwise we might keep
+    /// sending under the old session that the peer can no longer decrypt.
+    fn supersede_with_cold_session(
+        crypto_account: &CryptoAccount,
+        remote_id: PeerId,
+        new_session_id: u32,
+    ) {
+        // Delete any other Transport session for this peer.
+        let stale: Vec<u32> = crypto_account
+            .transport_session_ids(remote_id)
+            .into_iter()
+            .filter(|sid| *sid != new_session_id)
+            .collect();
+        if stale.is_empty() {
+            // Brand-new first contact (no prior session) — nothing to
+            // supersede. Still record the primary so resolve_primary_state
+            // is unambiguous.
+            crypto_account.save_rotation_meta(remote_id, &RotationMeta::primary_only(new_session_id));
+            return;
+        }
+        for sid in stale {
+            log::info!(
+                "cold re-key: superseding old session {} with {} for {}",
+                sid,
+                new_session_id,
+                remote_id.to_base58()
+            );
+            crypto_account.delete_state(remote_id, sid);
+        }
+        // Reset rotation state to just the new primary.
+        crypto_account.save_rotation_meta(remote_id, &RotationMeta::primary_only(new_session_id));
     }
 
     // ------------------------------------------------------------------
@@ -1465,6 +1616,46 @@ mod phase2_tests {
 
         let meta = acct.get_rotation_meta(remote).unwrap();
         assert_eq!(meta, original);
+    }
+
+    // Cold re-key supersede: a fresh handshake session must replace any
+    // prior Transport session(s) for the peer — the old session is
+    // deleted and the new one becomes primary — so we never keep using
+    // a session the peer (which lost its state) can no longer decrypt.
+    #[test]
+    fn cold_rekey_supersedes_prior_session() {
+        let acct = CryptoStorage::test_account();
+        let remote = fresh_peer();
+        // Prior session X=10 (what the peer lost) and the new cold
+        // handshake session Y=20.
+        acct.save_state(remote, 10, dummy_state(10));
+        acct.save_state(remote, 20, dummy_state(20));
+        acct.save_rotation_meta(remote, &RotationMeta::primary_only(10));
+
+        Crypto::supersede_with_cold_session(&acct, remote, 20);
+
+        assert!(acct.get_state_by_id(remote, 10).is_none(), "old session deleted");
+        assert!(acct.get_state_by_id(remote, 20).is_some(), "new session kept");
+        let meta = acct.get_rotation_meta(remote).unwrap();
+        assert_eq!(meta.primary_session_id, 20, "new session is primary");
+        assert_eq!(meta.draining_session_id, None);
+    }
+
+    // Supersede on genuine first contact (no prior session) is a no-op
+    // beyond recording the new primary.
+    #[test]
+    fn cold_rekey_supersede_noop_on_first_contact() {
+        let acct = CryptoStorage::test_account();
+        let remote = fresh_peer();
+        acct.save_state(remote, 20, dummy_state(20));
+
+        Crypto::supersede_with_cold_session(&acct, remote, 20);
+
+        assert!(acct.get_state_by_id(remote, 20).is_some());
+        assert_eq!(
+            acct.get_rotation_meta(remote).unwrap().primary_session_id,
+            20
+        );
     }
 }
 
