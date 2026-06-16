@@ -229,4 +229,144 @@ mod tests {
             other => panic!("BadVersion must short-circuit; got {other:?}"),
         }
     }
+
+
+    /// Helper: decode a section of `n` indexes from the front of `bytes`,
+    /// returning the resolved absolute indexes and the remaining slice.
+    fn decode_n_indexes(bytes: &[u8], n: usize) -> Result<(Vec<u16>, &[u8]), CodecError> {
+        let mut buf = bytes;
+        let mut cursor: u16 = 0;
+        let mut out = Vec::with_capacity(n);
+        for _ in 0..n {
+            out.push(decode_indexes(&mut buf, &mut cursor)?);
+        }
+        Ok((out, buf))
+    }
+
+    #[test]
+    fn delta_encode_empty_produces_no_bytes() {
+        let mut out = Vec::new();
+        encode_indexes(&[], &mut out);
+        assert!(out.is_empty());
+    }
+
+    #[test]
+    fn delta_encode_single_small_idx_is_one_byte_delta() {
+        let mut out = Vec::new();
+        encode_indexes(&[5], &mut out);
+        assert_eq!(out, vec![0x05]);
+    }
+
+    #[test]
+    fn delta_encode_first_entry_at_zero_uses_escape() {
+        let mut out = Vec::new();
+        encode_indexes(&[0], &mut out);
+        assert_eq!(out, vec![0x00, 0x00, 0x00]);
+    }
+
+    #[test]
+    fn delta_encode_first_entry_above_255_uses_escape() {
+        let mut out = Vec::new();
+        encode_indexes(&[300], &mut out);
+        // 300 = 0x012C in big-endian.
+        assert_eq!(out, vec![0x00, 0x01, 0x2C]);
+    }
+
+    #[test]
+    fn delta_encode_sequential_small_deltas() {
+        let mut out = Vec::new();
+        encode_indexes(&[5, 8, 9, 100], &mut out);
+        // Cursor starts at 0:
+        //   5 -> delta 5
+        //   8 -> delta 3
+        //   9 -> delta 1
+        //   100 -> delta 91 = 0x5B
+        assert_eq!(out, vec![0x05, 0x03, 0x01, 0x5B]);
+    }
+
+    #[test]
+    fn delta_encode_gap_over_255_uses_escape() {
+        let mut out = Vec::new();
+        encode_indexes(&[5, 300], &mut out);
+        assert_eq!(out, vec![0x05, 0x00, 0x01, 0x2C]);
+    }
+
+    #[test]
+    fn delta_decode_single_small_idx() {
+        let bytes = [0x05];
+        let (decoded, rest) = decode_n_indexes(&bytes, 1).expect("decode");
+        assert_eq!(decoded, vec![5]);
+        assert!(rest.is_empty());
+    }
+
+    #[test]
+    fn delta_decode_escape_form_resolves_absolute() {
+        let bytes = [0x00, 0x01, 0x2C];
+        let (decoded, rest) = decode_n_indexes(&bytes, 1).expect("decode");
+        assert_eq!(decoded, vec![300]);
+        assert!(rest.is_empty());
+    }
+
+    #[test]
+    fn delta_round_trip_mixed_inputs() {
+        let input: Vec<u16> = vec![0, 5, 100, 300, 1000, 65000];
+        let mut bytes = Vec::new();
+        encode_indexes(&input, &mut bytes);
+
+        let (decoded, rest) = decode_n_indexes(&bytes, input.len()).expect("decode");
+        assert_eq!(decoded, input);
+        assert!(rest.is_empty(), "no bytes left after consuming all indexes");
+    }
+
+    #[test]
+    fn delta_decode_truncation_never_panics() {
+        // Encoded form of [5, 300]: [0x05, 0x00, 0x01, 0x2C].
+        // First index reads 1 byte; second index reads 3 bytes (escape).
+        let input: Vec<u16> = vec![5, 300];
+        let mut bytes = Vec::new();
+        encode_indexes(&input, &mut bytes);
+        assert_eq!(bytes.len(), 4);
+
+        // Length 0: first read fails immediately.
+        let mut buf: &[u8] = &bytes[..0];
+        let mut cursor: u16 = 0;
+        assert!(matches!(
+            decode_indexes(&mut buf, &mut cursor),
+            Err(CodecError::Short)
+        ));
+
+        // Length 1: first read succeeds (5), second fails (escape needs 3).
+        let mut buf: &[u8] = &bytes[..1];
+        let mut cursor: u16 = 0;
+        assert_eq!(decode_indexes(&mut buf, &mut cursor).unwrap(), 5);
+        assert!(matches!(
+            decode_indexes(&mut buf, &mut cursor),
+            Err(CodecError::Short)
+        ));
+
+        // Length 2: first succeeds, second sees only 2 bytes of escape, fails.
+        let mut buf: &[u8] = &bytes[..2];
+        let mut cursor: u16 = 0;
+        assert_eq!(decode_indexes(&mut buf, &mut cursor).unwrap(), 5);
+        assert!(matches!(
+            decode_indexes(&mut buf, &mut cursor),
+            Err(CodecError::Short)
+        ));
+
+        // Length 3: same — escape needs the 0x00 plus 2 following bytes.
+        let mut buf: &[u8] = &bytes[..3];
+        let mut cursor: u16 = 0;
+        assert_eq!(decode_indexes(&mut buf, &mut cursor).unwrap(), 5);
+        assert!(matches!(
+            decode_indexes(&mut buf, &mut cursor),
+            Err(CodecError::Short)
+        ));
+
+        // Length 4 (full): both reads succeed.
+        let mut buf: &[u8] = &bytes[..4];
+        let mut cursor: u16 = 0;
+        assert_eq!(decode_indexes(&mut buf, &mut cursor).unwrap(), 5);
+        assert_eq!(decode_indexes(&mut buf, &mut cursor).unwrap(), 300);
+        assert!(buf.is_empty());
+    }
 }
