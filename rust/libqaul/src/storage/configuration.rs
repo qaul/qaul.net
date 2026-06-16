@@ -227,6 +227,38 @@ impl Default for RoutingOptions {
     }
 }
 
+/// Crypto session rotation configuration.
+///
+/// Controls when qaul re-runs the Noise KK handshake between two
+/// peers.
+///
+/// Rotation is **clock-free**: the decision to rotate is by message
+/// volume only (never wall-clock), and the previous session is
+/// retired by draining its in-flight traffic by nonce (never by a
+/// grace timer). See `docs/protocols/Noise-Session-Rotation.md`.
+///
+/// Defaults are `enabled: false` — rotation ships dormant and is
+/// opted in per node.
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct CryptoRotation {
+    /// Master switch. When `false` no rotation triggers fire and
+    /// no `RotateHandshakeFirst` frames are sent.
+    pub enabled: bool,
+    /// Volume trigger: rotate once this many messages have been
+    /// carried by the session in either direction (outbound
+    /// `index_nonce_out` or inbound `highest_index_nonce_in`).
+    pub volume_messages: u64,
+}
+
+impl Default for CryptoRotation {
+    fn default() -> Self {
+        CryptoRotation {
+            enabled: false,
+            volume_messages: 1 << 20, // 2^20 ≈ 1,048,576
+        }
+    }
+}
+
 /// Storage Configuration Options
 ///
 /// The following options can be configured:
@@ -270,6 +302,8 @@ pub struct Configuration {
     pub user_accounts: Vec<UserAccount>,
     pub debug: DebugOption,
     pub routing: RoutingOptions,
+    #[serde(default)]
+    pub crypto_rotation: CryptoRotation,
 }
 
 impl Default for Configuration {
@@ -282,6 +316,7 @@ impl Default for Configuration {
             user_accounts: Vec::new(),
             debug: DebugOption::default(),
             routing: RoutingOptions::default(),
+            crypto_rotation: CryptoRotation::default(),
         }
     }
 }
@@ -340,6 +375,13 @@ impl Configuration {
         *cfg = config;
     }
 
+    /// Install an arbitrary `Configuration` for tests that need
+    /// `Configuration::get()` to return something deterministic
+    /// without touching the filesystem.
+    ///
+    /// The `InitCell` is write-once: subsequent calls are no-ops and
+    /// the first-installed config stays. Returns `true` when this
+    /// call was the one that installed the config.
     /// Load a configuration file for upgrading purposes
     ///
     /// This function is only to be used for the upgrading procedure.

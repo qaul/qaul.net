@@ -329,6 +329,11 @@ impl Messaging {
             bs58::encode(signature).into_string()
         );
 
+        // Captured for the post-confirmation crypto-rotation hook below
+        // (the arms may consume `sender_id` / `user_account`).
+        let rotation_local_id = user_account.id.clone();
+        let rotation_remote_id = sender_id.clone();
+
         let unconfirmed = state.services.messaging.unconfirmed.write().unwrap();
 
         // check and remove unconfirmed from DB
@@ -412,6 +417,19 @@ impl Messaging {
                 log::error!("{}", e);
             }
         }
+
+        // Release the unconfirmed-table lock before the rotation hook,
+        // which takes its own read lock on the same table.
+        drop(unconfirmed);
+
+        // A confirmation may have cleared the last outbound message on
+        // a draining crypto session; let rotation retire it now if it
+        // is also fully drained inbound.
+        crate::services::crypto::Crypto::on_outbound_confirmed(
+            state,
+            rotation_local_id,
+            rotation_remote_id,
+        );
     }
 
     /// pack, sign and schedule a message for sending

@@ -6,6 +6,18 @@ message CryptoserviceContainer {
     oneof message {
         // Second Handshake Message
         SecondHandshake second_handshake = 1;
+        // First rotation handshake (initiator -> responder), encrypted
+        // under the currently-primary session.
+        RotateHandshakeFirst rotate_first = 2;
+        // Second rotation handshake (responder -> initiator), encrypted
+        // under the currently-primary session.
+        RotateHandshakeSecond rotate_second = 3;
+        // Third rotation handshake (initiator -> responder), the
+        // cut-over ACK. Declares the initiator's final A->B nonce on
+        // the old session so the responder can drain it by nonce.
+        // (tag 5 is intentionally left free for the future cold
+        // re-key / state-healing frame, landing in a separate change.)
+        RotateHandshakeFinal rotate_final = 4;
     }
 }
 
@@ -15,4 +27,67 @@ message SecondHandshake {
     bytes signature = 1;
     // received at timestamp
     uint64 received_at = 2;
+}
+
+// First rotation handshake message.
+//
+// Sent by the initiator under the currently-primary session once a
+// rotation trigger fires. Carries the fresh session_id and the new
+// Noise ephemeral public key that the new KK session will use.
+message RotateHandshakeFirst {
+    // The session id the initiator has chosen for the new session.
+    // Collisions between simultaneous rotations are resolved by
+    // "lower PeerId wins" (a fixed, symmetric tie-break that neither
+    // side's random session-id generation can influence).
+    uint32 new_session_id = 1;
+    // Initiator's fresh Noise ephemeral public key for the new session.
+    bytes noise_e = 2;
+    // Anti-replay nonce binding this rotation to a specific challenge.
+    bytes nonce = 3;
+    // Initiator's local timestamp (ms). Display/diagnostics only — no
+    // protocol decision depends on it (rotation is clock-free).
+    uint64 initiated_at = 4;
+}
+
+// Second rotation handshake message.
+//
+// Sent by the responder under the currently-primary session once a
+// valid RotateHandshakeFirst arrives. Completes the KK step 2 under
+// the rotated session_id and declares the responder's cut-over point
+// for the B->A direction.
+message RotateHandshakeSecond {
+    // Echoed from RotateHandshakeFirst.new_session_id; ties the
+    // response to a specific initiation.
+    uint32 new_session_id = 1;
+    // Responder's fresh Noise ephemeral public key for the new session.
+    bytes noise_e = 2;
+    // Echoed from RotateHandshakeFirst.nonce.
+    bytes nonce = 3;
+    // The responder's last nonce on the old session in the B->A
+    // direction (the nonce this very frame is sent with). The
+    // initiator drains the old session's inbound side until its
+    // highest received nonce reaches this value. Replaces the old
+    // wall-clock grace deadline.
+    uint64 final_nonce_out = 4;
+    // Responder's local timestamp (ms). Display/diagnostics only.
+    uint64 received_at = 5;
+}
+
+// Third rotation handshake message — the cut-over ACK.
+//
+// Sent by the initiator (-> responder) once it has finalised the new
+// session and cut over its own A->B traffic. Declares the initiator's
+// final A->B nonce on the old session so the responder can drain it
+// by nonce. Sent under the new (now primary) session.
+message RotateHandshakeFinal {
+    // Echoed new_session_id, ties this ACK to the rotation.
+    uint32 new_session_id = 1;
+    // Echoed anti-replay nonce from RotateHandshakeFirst.
+    bytes nonce = 2;
+    // The initiator's last nonce on the old session in the A->B
+    // direction (the nonce this frame is sent with on the old
+    // session, before cut-over completes). The responder drains the
+    // old session's inbound side until its highest received nonce
+    // reaches this value.
+    uint64 final_nonce_out = 3;
 }
