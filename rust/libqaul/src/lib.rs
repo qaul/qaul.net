@@ -568,6 +568,9 @@ impl Libqaul {
         let mut routing_table_ticker = Ticker::new(Duration::from_millis(1000));
         let mut messaging_ticker = Ticker::new(Duration::from_millis(10));
         let mut retransmit_ticker = Ticker::new(Duration::from_millis(1000));
+        // No rotation ticker: session rotation is clock-free. Draining
+        // sessions are retired by nonce in the decrypt path (see
+        // `after_decrypt_rotation`), not by a periodic wall-clock scan.
 
         // Mark as initialized (both on Libqaul and QaulState for API compatibility)
         self.initialized.store(true, Ordering::SeqCst);

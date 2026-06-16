@@ -2,7 +2,7 @@
 /// Cryptoservice sending container
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct CryptoserviceContainer {
-    #[prost(oneof = "cryptoservice_container::Message", tags = "1")]
+    #[prost(oneof = "cryptoservice_container::Message", tags = "1, 2, 3, 4")]
     pub message: ::core::option::Option<cryptoservice_container::Message>,
 }
 /// Nested message and enum types in `CryptoserviceContainer`.
@@ -12,6 +12,21 @@ pub mod cryptoservice_container {
         /// Second Handshake Message
         #[prost(message, tag = "1")]
         SecondHandshake(super::SecondHandshake),
+        /// First rotation handshake (initiator -> responder), encrypted
+        /// under the currently-primary session.
+        #[prost(message, tag = "2")]
+        RotateFirst(super::RotateHandshakeFirst),
+        /// Second rotation handshake (responder -> initiator), encrypted
+        /// under the currently-primary session.
+        #[prost(message, tag = "3")]
+        RotateSecond(super::RotateHandshakeSecond),
+        /// Third rotation handshake (initiator -> responder), the
+        /// cut-over ACK. Declares the initiator's final A->B nonce on
+        /// the old session so the responder can drain it by nonce.
+        /// (tag 5 is intentionally left free for the future cold
+        /// re-key / state-healing frame, landing in a separate change.)
+        #[prost(message, tag = "4")]
+        RotateFinal(super::RotateHandshakeFinal),
     }
 }
 /// Second Handshake Message
@@ -23,4 +38,79 @@ pub struct SecondHandshake {
     /// received at timestamp
     #[prost(uint64, tag = "2")]
     pub received_at: u64,
+}
+/// First rotation handshake message.
+///
+/// Sent by the initiator under the currently-primary session once a
+/// rotation trigger fires. Carries the fresh session_id and the new
+/// Noise ephemeral public key that the new KK session will use.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RotateHandshakeFirst {
+    /// The session id the initiator has chosen for the new session.
+    /// Collisions between simultaneous rotations are resolved by
+    /// "lower PeerId wins" (a fixed, symmetric tie-break that neither
+    /// side's random session-id generation can influence).
+    #[prost(uint32, tag = "1")]
+    pub new_session_id: u32,
+    /// Initiator's fresh Noise ephemeral public key for the new session.
+    #[prost(bytes = "vec", tag = "2")]
+    pub noise_e: ::prost::alloc::vec::Vec<u8>,
+    /// Anti-replay nonce binding this rotation to a specific challenge.
+    #[prost(bytes = "vec", tag = "3")]
+    pub nonce: ::prost::alloc::vec::Vec<u8>,
+    /// Initiator's local timestamp (ms). Display/diagnostics only — no
+    /// protocol decision depends on it (rotation is clock-free).
+    #[prost(uint64, tag = "4")]
+    pub initiated_at: u64,
+}
+/// Second rotation handshake message.
+///
+/// Sent by the responder under the currently-primary session once a
+/// valid RotateHandshakeFirst arrives. Completes the KK step 2 under
+/// the rotated session_id and declares the responder's cut-over point
+/// for the B->A direction.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RotateHandshakeSecond {
+    /// Echoed from RotateHandshakeFirst.new_session_id; ties the
+    /// response to a specific initiation.
+    #[prost(uint32, tag = "1")]
+    pub new_session_id: u32,
+    /// Responder's fresh Noise ephemeral public key for the new session.
+    #[prost(bytes = "vec", tag = "2")]
+    pub noise_e: ::prost::alloc::vec::Vec<u8>,
+    /// Echoed from RotateHandshakeFirst.nonce.
+    #[prost(bytes = "vec", tag = "3")]
+    pub nonce: ::prost::alloc::vec::Vec<u8>,
+    /// The responder's last nonce on the old session in the B->A
+    /// direction (the nonce this very frame is sent with). The
+    /// initiator drains the old session's inbound side until its
+    /// highest received nonce reaches this value. Replaces the old
+    /// wall-clock grace deadline.
+    #[prost(uint64, tag = "4")]
+    pub final_nonce_out: u64,
+    /// Responder's local timestamp (ms). Display/diagnostics only.
+    #[prost(uint64, tag = "5")]
+    pub received_at: u64,
+}
+/// Third rotation handshake message — the cut-over ACK.
+///
+/// Sent by the initiator (-> responder) once it has finalised the new
+/// session and cut over its own A->B traffic. Declares the initiator's
+/// final A->B nonce on the old session so the responder can drain it
+/// by nonce. Sent under the new (now primary) session.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RotateHandshakeFinal {
+    /// Echoed new_session_id, ties this ACK to the rotation.
+    #[prost(uint32, tag = "1")]
+    pub new_session_id: u32,
+    /// Echoed anti-replay nonce from RotateHandshakeFirst.
+    #[prost(bytes = "vec", tag = "2")]
+    pub nonce: ::prost::alloc::vec::Vec<u8>,
+    /// The initiator's last nonce on the old session in the A->B
+    /// direction (the nonce this frame is sent with on the old
+    /// session, before cut-over completes). The responder drains the
+    /// old session's inbound side until its highest received nonce
+    /// reaches this value.
+    #[prost(uint64, tag = "3")]
+    pub final_nonce_out: u64,
 }

@@ -10,6 +10,7 @@ mod authentication;
 mod chat;
 mod chatfile;
 mod connections;
+mod crypto;
 mod debug;
 mod dtn;
 mod feed;

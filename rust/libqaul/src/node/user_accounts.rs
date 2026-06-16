@@ -241,7 +241,8 @@ impl UserAccounts {
         }
         Configuration::save(state);
 
-        // build initial user with a signed profile
+        // build initial user with a signed profile, stamped with the
+        // capability bitset this binary advertises to remote peers.
         let rs = state.get_router();
         let mut initial_user = crate::router::users::User {
             id,
@@ -249,6 +250,7 @@ impl UserAccounts {
             name: name.clone(),
             verified: false,
             blocked: false,
+            capabilities: crate::router::users::Capabilities::LOCAL,
             bio: String::new(),
             avatar: Vec::new(),
             version: 1,
@@ -382,6 +384,7 @@ impl UserAccounts {
                 name: user.name.clone(),
                 verified: false,
                 blocked: false,
+                capabilities: router::users::Capabilities::LOCAL,
                 bio: String::new(),
                 avatar: Vec::new(),
                 version: 0,
@@ -603,6 +606,7 @@ impl UserAccounts {
                                     name: new_name,
                                     verified: user.verified,
                                     blocked: user.blocked,
+                                    capabilities: user.capabilities,
                                     bio: new_bio,
                                     avatar: new_avatar,
                                     version: new_version,
