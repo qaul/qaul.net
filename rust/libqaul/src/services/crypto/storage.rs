@@ -198,6 +198,24 @@ impl CryptoAccount {
         (first_key, last_key)
     }
 
+    /// Return the session_ids of all `Transport`-state sessions held
+    /// for `remote_id`. Used by the cold re-key path to find prior
+    /// sessions that a fresh handshake supersedes.
+    pub fn transport_session_ids(&self, remote_id: PeerId) -> Vec<u32> {
+        let (first_key, last_key) = Self::create_state_key_range(remote_id);
+        let mut out = Vec::new();
+        for result in self.state.range(first_key..last_key) {
+            if let Ok((_key, bytes)) = result {
+                if let Ok(cs) = bincode::deserialize::<CryptoState>(&bytes) {
+                    if matches!(cs.state, super::CryptoProcessState::Transport) {
+                        out.push(cs.session_id);
+                    }
+                }
+            }
+        }
+        out
+    }
+
     /// Create cache storage key
     ///
     /// The db key for the cache messages is:
