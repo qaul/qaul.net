@@ -1,5 +1,9 @@
-pub const PROTOCOL_VERSION: u8 = 0x01;
+pub mod messages;
+pub mod utils;
 
+pub type Result<T> = std::result::Result<T, CodecError>;
+
+pub const PROTOCOL_VERSION: u8 = 0x01;
 /// Routing message types
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -40,7 +44,7 @@ impl Header {
         buf.extend_from_slice(&self.payload_len.to_be_bytes());
     }
 
-    pub fn decode(buf: &[u8]) -> Result<(Header, &[u8]), CodecError> {
+    pub fn decode(buf: &[u8]) -> Result<(Header, &[u8])> {
         if buf.len() < 4 {
             return Err(CodecError::Short);
         }
@@ -71,51 +75,9 @@ impl Header {
     }
 }
 
-
-/// Each index is written as either:
-/// - a 1-byte delta `0x01..=0xFF` relative to the running cursor, or
-/// - a 3-byte escape (`0x00` + 2-byte big-endian absolute) when the gap
-///   from the cursor is zero (first entry at index `0`) or larger than 255.
-pub fn encode_indexes(sorted_idx: &[u16], res: &mut Vec<u8>) {
-    let mut cursor: u16 = 0;
-    for i in sorted_idx {
-        let gap = i.wrapping_sub(cursor);
-        if gap >= 1 && gap <= 255 {
-            res.push(gap as u8);
-            cursor = *i;
-        } else {
-            res.push(0x00);
-            res.extend_from_slice(&i.to_be_bytes());
-            cursor = *i;
-        }
-    }
-}
-
-/// Reads one delta-encoded index from the front of `buf`
-/// Advances `*buf` past the consumed bytes (1 byte for a small delta, 3
-/// for an escape) and updates `*cursor` to the resolved absolute index,
-/// which is also returned.
-pub fn decode_indexes(buf: &mut &[u8], cursor: &mut u16) -> Result<u16, CodecError> {
-    if buf.is_empty() {
-        return Err(CodecError::Short);
-    }
-
-    let initial_byte = buf[0];
-    if initial_byte == 0x00 {
-        if buf.len() < 3 {
-            return Err(CodecError::Short);
-        }
-        *cursor = u16::from_be_bytes([buf[1], buf[2]]);
-        *buf = &buf[3..];
-    } else {
-        *cursor =  cursor.wrapping_add(buf[0] as u16);
-        *buf = &buf[1..];
-    }
-    Ok(*cursor)
-}
-
 #[cfg(test)]
 mod tests {
+    use crate::router_v2::codec::utils::*;
     use super::*;
 
     #[test]
@@ -230,10 +192,9 @@ mod tests {
         }
     }
 
-
     /// Helper: decode a section of `n` indexes from the front of `bytes`,
     /// returning the resolved absolute indexes and the remaining slice.
-    fn decode_n_indexes(bytes: &[u8], n: usize) -> Result<(Vec<u16>, &[u8]), CodecError> {
+    fn decode_n_indexes(bytes: &[u8], n: usize) -> Result<(Vec<u16>, &[u8])> {
         let mut buf = bytes;
         let mut cursor: u16 = 0;
         let mut out = Vec::with_capacity(n);
