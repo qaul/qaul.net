@@ -34,6 +34,7 @@ pub struct Entry {
 }
 
 /// The ROUTING_UPDATE wire message.
+#[derive(Debug)]
 pub struct RoutingUpdate {
     pub user_mappings: Vec<Mapping>,
     pub node_mappings: Vec<Mapping>,
@@ -167,8 +168,6 @@ impl RoutingUpdate {
 mod tests {
     use super::*;
 
-    // ----- helpers (Mapping/Entry derive Debug only, so compare field-by-field) -----
-
     fn assert_mapping_eq(actual: &Mapping, expected: &Mapping) {
         assert_eq!(actual.abs_idx, expected.abs_idx, "abs_idx");
         assert_eq!(actual.target_id, expected.target_id, "target_id");
@@ -210,8 +209,6 @@ mod tests {
         }
     }
 
-    // ----- empty -----
-
     #[test]
     fn empty_routing_update_encodes_to_six_zero_bytes() {
         let ru = empty_routing_update();
@@ -234,7 +231,6 @@ mod tests {
         assert!(decoded.node_entries.is_empty());
     }
 
-    // ----- mappings -----
 
     #[test]
     fn one_user_mapping_byte_layout() {
@@ -287,8 +283,6 @@ mod tests {
         assert!(decoded.user_mappings.is_empty());
     }
 
-    // ----- entries -----
-
     #[test]
     fn one_user_entry_byte_layout() {
         let mut ru = empty_routing_update();
@@ -339,7 +333,6 @@ mod tests {
         assert_entry_eq(&decoded.node_entries[0], &ru.node_entries[0]);
     }
 
-    // ----- local_only flag bit -----
 
     #[test]
     fn local_only_true_sets_bit_7_of_hop_byte() {
@@ -379,8 +372,6 @@ mod tests {
             "bit 7 (local_only) must be clear"
         );
     }
-
-    // ----- mixed populated round-trip with escapes in every section -----
 
     #[test]
     fn mixed_round_trip_with_escapes_in_every_section() {
@@ -422,7 +413,6 @@ mod tests {
         }
     }
 
-    // ----- truncation safety -----
 
     /// Every prefix shorter than the full encoded message must surface
     /// as an error without panicking.
