@@ -42,7 +42,31 @@ final directories = <_widgetbook.WidgetbookNode>[
                 name: 'Empty — attachment actions',
                 builder:
                     _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
-                        .buildChatFooterEmptyUseCase,
+                        .buildChatFooterEmptyClosedUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Empty — submenu open',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
+                        .buildChatFooterEmptyOpenUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Light — empty actions',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
+                        .buildChatFooterLightEmptyClosedUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Light — submenu open',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
+                        .buildChatFooterLightEmptyOpenUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Light — with text',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
+                        .buildChatFooterLightWithTextUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Long draft (multiline)',
@@ -51,7 +75,7 @@ final directories = <_widgetbook.WidgetbookNode>[
                         .buildChatFooterLongDraftUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
-                name: 'With text — send action',
+                name: 'With text — plus and send',
                 builder:
                     _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
                         .buildChatFooterWithTextUseCase,
