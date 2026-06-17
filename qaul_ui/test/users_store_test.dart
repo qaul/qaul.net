@@ -80,6 +80,18 @@ class _MockWorkerForOnlineUsers extends StubLibqaulWorker {
   }
 }
 
+class _MockWorkerForSecurityNumber extends StubLibqaulWorker {
+  _MockWorkerForSecurityNumber(super.ref, {required this.securityNumber});
+  final SecurityNumber securityNumber;
+  int callCount = 0;
+
+  @override
+  Future<SecurityNumber?> getUserSecurityNumber(User u) async {
+    callCount++;
+    return securityNumber;
+  }
+}
+
 void main() {
   test('getByUserID returns author from store so feed can display message',
       () async {
@@ -511,6 +523,124 @@ void main() {
     });
   });
 
+  group('user update actions', () {
+    test('verifyUser applies returned user without refetching', () async {
+      final userId = Uint8List.fromList('verify_user'.codeUnits);
+      final original = User(
+        name: 'Verify',
+        id: userId,
+        isVerified: false,
+      );
+      final verified = User(
+        name: 'Verify',
+        id: userId,
+        isVerified: true,
+      );
+
+      late _CombinedMockWorker mockWorker;
+      final container = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith((_) => defaultUser),
+          qaulWorkerProvider.overrideWith((ref) {
+            mockWorker = _CombinedMockWorker(
+              ref,
+              seedUsers: [original],
+              onlineUsers: [],
+              verifyUserResult: verified,
+            );
+            return mockWorker;
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final store = container.read(usersStoreProvider.notifier);
+      await store.getUsers();
+
+      final result = await store.verifyUser(original);
+
+      expect(result?.isVerified, isTrue);
+      expect(mockWorker.verifyUserCallCount, 1);
+      expect(mockWorker.getUserByIdCallCount, 0);
+      expect(container.read(usersStoreProvider).first.isVerified, isTrue);
+    });
+
+    test('blockUser applies returned user directly', () async {
+      final userId = Uint8List.fromList('block_user'.codeUnits);
+      final original = User(
+        name: 'Block',
+        id: userId,
+        isBlocked: false,
+      );
+      final blocked = User(
+        name: 'Block',
+        id: userId,
+        isBlocked: true,
+      );
+
+      late _CombinedMockWorker mockWorker;
+      final container = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith((_) => defaultUser),
+          qaulWorkerProvider.overrideWith((ref) {
+            mockWorker = _CombinedMockWorker(
+              ref,
+              seedUsers: [original],
+              onlineUsers: [],
+              blockUserResult: blocked,
+            );
+            return mockWorker;
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final store = container.read(usersStoreProvider.notifier);
+      await store.getUsers();
+
+      final result = await store.blockUser(original);
+
+      expect(result?.isBlocked, isTrue);
+      expect(mockWorker.blockUserCallCount, 1);
+      expect(mockWorker.getUserByIdCallCount, 0);
+      expect(container.read(usersStoreProvider).first.isBlocked, isTrue);
+    });
+  });
+
+  test('getUserSecurityNumber stores latest response in UsersStore', () async {
+    final user = User(
+      name: 'Secure',
+      id: Uint8List.fromList('secure_user'.codeUnits),
+    );
+    final securityNumber = SecurityNumber(
+      userId: user.id,
+      securityHash: Uint8List.fromList([1, 2, 3]),
+      securityNumberBlocks: [1, 2, 3, 4, 5, 6, 7, 8],
+    );
+
+    late _MockWorkerForSecurityNumber mockWorker;
+    final container = ProviderContainer(
+      overrides: [
+        defaultUserProvider.overrideWith((_) => defaultUser),
+        qaulWorkerProvider.overrideWith((ref) {
+          mockWorker = _MockWorkerForSecurityNumber(
+            ref,
+            securityNumber: securityNumber,
+          );
+          return mockWorker;
+        }),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final store = container.read(usersStoreProvider.notifier);
+    final result = await store.getUserSecurityNumber(user);
+
+    expect(result, securityNumber);
+    expect(store.securityNumber, securityNumber);
+    expect(mockWorker.callCount, 1);
+  });
+
   group('_mergeUser', () {
     test('preserves current name when incoming has undefined name', () async {
       final userId = Uint8List.fromList('name_test'.codeUnits);
@@ -632,12 +762,18 @@ class _CombinedMockWorker extends StubLibqaulWorker {
     required this.seedUsers,
     required this.onlineUsers,
     this.getUserByIdResults = const {},
+    this.verifyUserResult,
+    this.blockUserResult,
   });
 
   final List<User> seedUsers;
   final List<User> onlineUsers;
   final Map<String, User?> getUserByIdResults;
+  final User? verifyUserResult;
+  final User? blockUserResult;
   int getUserByIdCallCount = 0;
+  int verifyUserCallCount = 0;
+  int blockUserCallCount = 0;
 
   @override
   Future<PaginatedUsers?> getUsers({int? offset, int? limit}) async {
@@ -669,5 +805,17 @@ class _CombinedMockWorker extends StubLibqaulWorker {
   Future<User?> getUserById(Uint8List userId) {
     getUserByIdCallCount++;
     return Future.value(getUserByIdResults[Base58Encode(userId)]);
+  }
+
+  @override
+  Future<User?> verifyUser(User u) {
+    verifyUserCallCount++;
+    return Future.value(verifyUserResult);
+  }
+
+  @override
+  Future<User?> blockUser(User u) {
+    blockUserCallCount++;
+    return Future.value(blockUserResult);
   }
 }

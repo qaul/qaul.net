@@ -115,7 +115,7 @@ class StubLibqaulWorker implements LibqaulWorker {
       throw UnimplementedError();
 
   @override
-  Future<void> blockUser(User u) => throw UnimplementedError();
+  Future<User?> blockUser(User u) => throw UnimplementedError();
 
   @override
   Future<bool> createGroup(String name) => throw UnimplementedError();
@@ -213,13 +213,13 @@ class StubLibqaulWorker implements LibqaulWorker {
       throw UnimplementedError();
 
   @override
-  Future<void> unblockUser(User u) => throw UnimplementedError();
+  Future<User?> unblockUser(User u) => throw UnimplementedError();
 
   @override
-  Future<void> unverifyUser(User u) => throw UnimplementedError();
+  Future<User?> unverifyUser(User u) => throw UnimplementedError();
 
   @override
-  Future<void> verifyUser(User u) => throw UnimplementedError();
+  Future<User?> verifyUser(User u) => throw UnimplementedError();
 
   @override
   Future<void> renameNode(String address, {required String name}) async {}

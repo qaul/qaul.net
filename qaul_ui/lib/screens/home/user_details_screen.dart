@@ -9,6 +9,7 @@ import 'package:utils/utils.dart';
 import '../../decorators/disabled_state_decorator.dart';
 import '../../decorators/loading_decorator.dart';
 import '../../l10n/app_localizations.dart';
+import '../../stores/stores.dart';
 import '../../widgets/qaul_dialog.dart';
 import '../../widgets/user_details_banner.dart';
 import '../../widgets/widgets.dart';
@@ -27,9 +28,8 @@ class UserDetailsScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
 
     final onVerifyUserPressed = useCallback(() async {
-      final worker = ref.read(qaulWorkerProvider);
       verified
-          ? await worker.unverifyUser(user)
+          ? await ref.read(usersStoreProvider.notifier).unverifyUser(user)
           : await _verifyUser(context, user: user);
 
       if (!context.mounted) return;
@@ -46,8 +46,8 @@ class UserDetailsScreen extends HookConsumerWidget {
 
       if (res is! bool || !res) return;
 
-      final worker = ref.read(qaulWorkerProvider);
-      blocked ? await worker.unblockUser(user) : await worker.blockUser(user);
+      final usersStore = ref.read(usersStoreProvider.notifier);
+      blocked ? await usersStore.unblockUser(user) : await usersStore.blockUser(user);
       if (!context.mounted) return;
       Navigator.pop(context);
     }, [l10n, ref, context.mounted]);
@@ -196,21 +196,22 @@ class _VerifyUserDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final securityNo = ref.watch(currentSecurityNoProvider);
-
     final isLoading = useState(false);
+    final usersStore = ref.read(usersStoreProvider.notifier);
+    final initialSecurityNo = usersStore.securityNumber;
+    final securityNo = useState(
+      initialSecurityNo?.userId.equals(user.id) ?? false
+          ? initialSecurityNo
+          : null,
+    );
 
     final fetchSecurityNo = useCallback(
       () async {
         isLoading.value = true;
-        final worker = ref.read(qaulWorkerProvider);
-        for (var i = 0; i < 60; i++) {
-          if (i % 10 == 0) worker.getUserSecurityNumber(user);
-
-          await worker.getDefaultUserAccount();
-          await Future.delayed(const Duration(milliseconds: 1000));
-          final no = ref.read(currentSecurityNoProvider);
-          if (no != null) break;
+        final no =
+            await ref.read(usersStoreProvider.notifier).getUserSecurityNumber(user);
+        if (no != null && no.userId.equals(user.id)) {
+          securityNo.value = no;
         }
         isLoading.value = false;
       },
@@ -218,7 +219,7 @@ class _VerifyUserDialog extends HookConsumerWidget {
     );
 
     useEffect(() {
-      if (!(securityNo?.userId.equals(user.id) ?? false)) fetchSecurityNo();
+      if (!(securityNo.value?.userId.equals(user.id) ?? false)) fetchSecurityNo();
       return () {};
     }, []);
 
@@ -230,8 +231,9 @@ class _VerifyUserDialog extends HookConsumerWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (securityNo != null && securityNo.userId.equals(user.id)) ...[
-              _SecurityNumberDisplay(securityNo: securityNo),
+            if (securityNo.value != null &&
+                securityNo.value!.userId.equals(user.id)) ...[
+              _SecurityNumberDisplay(securityNo: securityNo.value!),
             ],
             const SizedBox(height: 24),
             Text(
@@ -242,9 +244,9 @@ class _VerifyUserDialog extends HookConsumerWidget {
           ],
         ),
         button1Label: l10n.okDialogButton,
-        onButton1Pressed: () {
-          final worker = ref.read(qaulWorkerProvider);
-          worker.verifyUser(user);
+        onButton1Pressed: () async {
+          await ref.read(usersStoreProvider.notifier).verifyUser(user);
+          if (!context.mounted) return;
           Navigator.pop(context);
         },
         button2Label: l10n.cancelDialogButton,

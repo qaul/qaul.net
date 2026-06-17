@@ -1,7 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:hooks_riverpod/legacy.dart';
-
-final currentSecurityNoProvider = StateProvider<SecurityNumber?>((_) => null);
 
 class SecurityNumber {
   SecurityNumber({
