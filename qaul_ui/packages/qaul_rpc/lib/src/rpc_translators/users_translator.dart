@@ -5,6 +5,11 @@ class GetUserByIdResult {
   GetUserByIdResult(this.user);
 }
 
+class UserUpdateResult {
+  final User? user;
+  UserUpdateResult(this.user);
+}
+
 class UsersTranslator extends RpcModuleTranslator {
   @override
   Modules get type => Modules.USERS;
@@ -16,19 +21,7 @@ class UsersTranslator extends RpcModuleTranslator {
     switch (message.whichMessage()) {
       case Users_Message.userList:
         final userList = message.ensureUserList();
-        final users = userList
-            .user
-            .map((u) => User(
-                  name: u.name,
-                  id: Uint8List.fromList(u.id),
-                  conversationId: Uint8List.fromList(u.groupId),
-                  keyBase58: u.keyBase58,
-                  isBlocked: u.blocked,
-                  isVerified: u.verified,
-                  status: _mapFrom(u.connectivity),
-                  availableTypes: _mapFromRoutingTable(u.connections),
-                ))
-            .toList();
+        final users = userList.user.map(_userFromEntry).toList();
 
         PaginationState? pagination;
         if (userList.hasPagination()) {
@@ -57,22 +50,30 @@ class UsersTranslator extends RpcModuleTranslator {
         if (!res.hasUser()) {
           return RpcTranslatorResponse(type, GetUserByIdResult(null));
         }
-        final u = res.user;
-        final user = User(
-          name: u.name,
-          id: Uint8List.fromList(u.id),
-          conversationId: Uint8List.fromList(u.groupId),
-          keyBase58: u.keyBase58,
-          isBlocked: u.blocked,
-          isVerified: u.verified,
-          status: _mapFrom(u.connectivity),
-          availableTypes: _mapFromRoutingTable(u.connections),
-        );
-        return RpcTranslatorResponse(type, GetUserByIdResult(user));
+        return RpcTranslatorResponse(
+            type, GetUserByIdResult(_userFromEntry(res.user)));
+      case Users_Message.userUpdateResponse:
+        final res = message.ensureUserUpdateResponse();
+        if (!res.hasUser()) {
+          return RpcTranslatorResponse(type, UserUpdateResult(null));
+        }
+        return RpcTranslatorResponse(
+            type, UserUpdateResult(_userFromEntry(res.user)));
       default:
         return super.decodeMessageBytes(data, ref);
     }
   }
+
+  User _userFromEntry(UserEntry u) => User(
+        name: u.name,
+        id: Uint8List.fromList(u.id),
+        conversationId: Uint8List.fromList(u.groupId),
+        keyBase58: u.keyBase58,
+        isBlocked: u.blocked,
+        isVerified: u.verified,
+        status: _mapFrom(u.connectivity),
+        availableTypes: _mapFromRoutingTable(u.connections),
+      );
 
   ConnectionStatus _mapFrom(Connectivity c) {
     if (c == Connectivity.Online) return ConnectionStatus.online;

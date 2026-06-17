@@ -131,6 +131,15 @@ const Users$json = {
       '9': 0,
       '10': 'userSearchRequest'
     },
+    {
+      '1': 'user_update_response',
+      '3': 10,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.users.UserUpdateResponse',
+      '9': 0,
+      '10': 'userUpdateResponse'
+    },
   ],
   '8': [
     {'1': 'message'},
@@ -152,7 +161,9 @@ final $typed_data.Uint8List usersDescriptor = $convert.base64Decode(
     'SWRSZXF1ZXN0ElsKF2dldF91c2VyX2J5X2lkX3Jlc3BvbnNlGAggASgLMiMucWF1bC5ycGMudX'
     'NlcnMuR2V0VXNlckJ5SURSZXNwb25zZUgAUhNnZXRVc2VyQnlJZFJlc3BvbnNlElMKE3VzZXJf'
     'c2VhcmNoX3JlcXVlc3QYCSABKAsyIS5xYXVsLnJwYy51c2Vycy5Vc2VyU2VhcmNoUmVxdWVzdE'
-    'gAUhF1c2VyU2VhcmNoUmVxdWVzdEIJCgdtZXNzYWdl');
+    'gAUhF1c2VyU2VhcmNoUmVxdWVzdBJWChR1c2VyX3VwZGF0ZV9yZXNwb25zZRgKIAEoCzIiLnFh'
+    'dWwucnBjLnVzZXJzLlVzZXJVcGRhdGVSZXNwb25zZUgAUhJ1c2VyVXBkYXRlUmVzcG9uc2VCCQ'
+    'oHbWVzc2FnZQ==');
 
 @$core.Deprecated('Use userRequestDescriptor instead')
 const UserRequest$json = {
@@ -271,6 +282,23 @@ const UserEntry$json = {
       '6': '.qaul.rpc.users.RoutingTableConnection',
       '10': 'connections'
     },
+    {'1': 'bio', '3': 12, '4': 1, '5': 9, '10': 'bio'},
+    {'1': 'avatar', '3': 13, '4': 1, '5': 12, '10': 'avatar'},
+    {'1': 'profile_version', '3': 14, '4': 1, '5': 13, '10': 'profileVersion'},
+    {
+      '1': 'profile_updated_at',
+      '3': 15,
+      '4': 1,
+      '5': 4,
+      '10': 'profileUpdatedAt'
+    },
+    {
+      '1': 'preferred_custody_route',
+      '3': 16,
+      '4': 3,
+      '5': 12,
+      '10': 'preferredCustodyRoute'
+    },
   ],
 };
 
@@ -281,7 +309,10 @@ final $typed_data.Uint8List userEntryDescriptor = $convert.base64Decode(
     'bm5lY3Rpdml0eRgIIAEoDjIcLnFhdWwucnBjLnVzZXJzLkNvbm5lY3Rpdml0eVIMY29ubmVjdG'
     'l2aXR5EhoKCHZlcmlmaWVkGAkgASgIUgh2ZXJpZmllZBIYCgdibG9ja2VkGAogASgIUgdibG9j'
     'a2VkEkgKC2Nvbm5lY3Rpb25zGAsgAygLMiYucWF1bC5ycGMudXNlcnMuUm91dGluZ1RhYmxlQ2'
-    '9ubmVjdGlvblILY29ubmVjdGlvbnM=');
+    '9ubmVjdGlvblILY29ubmVjdGlvbnMSEAoDYmlvGAwgASgJUgNiaW8SFgoGYXZhdGFyGA0gASgM'
+    'UgZhdmF0YXISJwoPcHJvZmlsZV92ZXJzaW9uGA4gASgNUg5wcm9maWxlVmVyc2lvbhIsChJwcm'
+    '9maWxlX3VwZGF0ZWRfYXQYDyABKARSEHByb2ZpbGVVcGRhdGVkQXQSNgoXcHJlZmVycmVkX2N1'
+    'c3RvZHlfcm91dGUYECADKAxSFXByZWZlcnJlZEN1c3RvZHlSb3V0ZQ==');
 
 @$core.Deprecated('Use routingTableConnectionDescriptor instead')
 const RoutingTableConnection$json = {
@@ -374,3 +405,23 @@ const GetUserByIDResponse$json = {
 final $typed_data.Uint8List getUserByIDResponseDescriptor = $convert.base64Decode(
     'ChNHZXRVc2VyQnlJRFJlc3BvbnNlEi0KBHVzZXIYCiABKAsyGS5xYXVsLnJwYy51c2Vycy5Vc2'
     'VyRW50cnlSBHVzZXI=');
+
+@$core.Deprecated('Use userUpdateResponseDescriptor instead')
+const UserUpdateResponse$json = {
+  '1': 'UserUpdateResponse',
+  '2': [
+    {
+      '1': 'user',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.qaul.rpc.users.UserEntry',
+      '10': 'user'
+    },
+  ],
+};
+
+/// Descriptor for `UserUpdateResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List userUpdateResponseDescriptor = $convert.base64Decode(
+    'ChJVc2VyVXBkYXRlUmVzcG9uc2USLQoEdXNlchgBIAEoCzIZLnFhdWwucnBjLnVzZXJzLlVzZX'
+    'JFbnRyeVIEdXNlcg==');
