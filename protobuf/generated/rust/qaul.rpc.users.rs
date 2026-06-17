@@ -2,7 +2,7 @@
 /// users rpc message container
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Users {
-    #[prost(oneof = "users::Message", tags = "1, 2, 3, 4, 5, 6, 7, 8, 9")]
+    #[prost(oneof = "users::Message", tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10")]
     pub message: ::core::option::Option<users::Message>,
 }
 /// Nested message and enum types in `Users`.
@@ -66,6 +66,12 @@ pub mod users {
         /// User Search Request returns a user list matching a name query.
         #[prost(message, tag = "9")]
         UserSearchRequest(super::UserSearchRequest),
+        /// User Update Response
+        ///
+        /// Libqaul's acknowledgement for a 'UserUpdate', echoing back the
+        /// updated user entry.
+        #[prost(message, tag = "10")]
+        UserUpdateResponse(super::UserUpdateResponse),
     }
 }
 /// UI request for some users
@@ -208,6 +214,12 @@ pub struct GetUserByIdRequest {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetUserByIdResponse {
     #[prost(message, optional, tag = "10")]
+    pub user: ::core::option::Option<UserEntry>,
+}
+/// Acknowledgement for a UserUpdate, echoing back the updated user entry.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UserUpdateResponse {
+    #[prost(message, optional, tag = "1")]
     pub user: ::core::option::Option<UserEntry>,
 }
 /// Connection modules

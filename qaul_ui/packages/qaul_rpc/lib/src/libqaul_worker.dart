@@ -177,28 +177,34 @@ class LibqaulWorker {
     return result;
   }
 
-  Future<void> verifyUser(User u) async {
-    var entry = _baseUserEntryFrom(u);
-    entry.verified = true;
-    await _sendMessage(Modules.USERS, Users(userUpdate: entry));
+  Future<User?> verifyUser(User u) async {
+    final entry = _baseUserEntryFrom(u)..verified = true;
+    return _updateUser(entry);
   }
 
-  Future<void> unverifyUser(User u) async {
-    var entry = _baseUserEntryFrom(u);
-    entry.verified = false;
-    await _sendMessage(Modules.USERS, Users(userUpdate: entry));
+  Future<User?> unverifyUser(User u) async {
+    final entry = _baseUserEntryFrom(u)..verified = false;
+    return _updateUser(entry);
   }
 
-  Future<void> blockUser(User u) async {
-    final entry = _baseUserEntryFrom(u);
-    entry.blocked = true;
-    await _sendMessage(Modules.USERS, Users(userUpdate: entry));
+  Future<User?> blockUser(User u) async {
+    final entry = _baseUserEntryFrom(u)..blocked = true;
+    return _updateUser(entry);
   }
 
-  Future<void> unblockUser(User u) async {
-    final entry = _baseUserEntryFrom(u);
-    entry.blocked = false;
-    await _sendMessage(Modules.USERS, Users(userUpdate: entry));
+  Future<User?> unblockUser(User u) async {
+    final entry = _baseUserEntryFrom(u)..blocked = false;
+    return _updateUser(entry);
+  }
+
+  /// Sends a [UserEntry] update (verify/block) and awaits libqaul's acknowledgement
+  Future<User?> _updateUser(UserEntry entry) async {
+    return _sendRequest<User>(
+      module: Modules.USERS,
+      data: Users(userUpdate: entry),
+      adapter: (res) =>
+          res.data is UserUpdateResult ? (res.data as UserUpdateResult).user : null,
+    );
   }
 
   Future<NodeInfo?> getNodeInfo() async {
