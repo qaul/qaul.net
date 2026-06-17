@@ -12,6 +12,7 @@
 
 import 'dart:core' as $core;
 
+import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'users.pbenum.dart';
@@ -30,6 +31,7 @@ enum Users_Message {
   getUserByIdRequest,
   getUserByIdResponse,
   userSearchRequest,
+  userUpdateResponse,
   notSet
 }
 
@@ -45,6 +47,7 @@ class Users extends $pb.GeneratedMessage {
     GetUserByIDRequest? getUserByIdRequest,
     GetUserByIDResponse? getUserByIdResponse,
     UserSearchRequest? userSearchRequest,
+    UserUpdateResponse? userUpdateResponse,
   }) {
     final result = create();
     if (userRequest != null) result.userRequest = userRequest;
@@ -60,6 +63,8 @@ class Users extends $pb.GeneratedMessage {
     if (getUserByIdResponse != null)
       result.getUserByIdResponse = getUserByIdResponse;
     if (userSearchRequest != null) result.userSearchRequest = userSearchRequest;
+    if (userUpdateResponse != null)
+      result.userUpdateResponse = userUpdateResponse;
     return result;
   }
 
@@ -82,13 +87,14 @@ class Users extends $pb.GeneratedMessage {
     7: Users_Message.getUserByIdRequest,
     8: Users_Message.getUserByIdResponse,
     9: Users_Message.userSearchRequest,
+    10: Users_Message.userUpdateResponse,
     0: Users_Message.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Users',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.users'),
       createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4, 5, 6, 7, 8, 9])
+    ..oo(0, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     ..aOM<UserRequest>(1, _omitFieldNames ? '' : 'userRequest',
         subBuilder: UserRequest.create)
     ..aOM<UserOnlineRequest>(2, _omitFieldNames ? '' : 'userOnlineRequest',
@@ -109,6 +115,8 @@ class Users extends $pb.GeneratedMessage {
         subBuilder: GetUserByIDResponse.create)
     ..aOM<UserSearchRequest>(9, _omitFieldNames ? '' : 'userSearchRequest',
         subBuilder: UserSearchRequest.create)
+    ..aOM<UserUpdateResponse>(10, _omitFieldNames ? '' : 'userUpdateResponse',
+        subBuilder: UserUpdateResponse.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -138,6 +146,7 @@ class Users extends $pb.GeneratedMessage {
   @$pb.TagNumber(7)
   @$pb.TagNumber(8)
   @$pb.TagNumber(9)
+  @$pb.TagNumber(10)
   Users_Message whichMessage() => _Users_MessageByTag[$_whichOneof(0)]!;
   @$pb.TagNumber(1)
   @$pb.TagNumber(2)
@@ -148,6 +157,7 @@ class Users extends $pb.GeneratedMessage {
   @$pb.TagNumber(7)
   @$pb.TagNumber(8)
   @$pb.TagNumber(9)
+  @$pb.TagNumber(10)
   void clearMessage() => $_clearField($_whichOneof(0));
 
   /// User Request returns a user list
@@ -289,6 +299,21 @@ class Users extends $pb.GeneratedMessage {
   void clearUserSearchRequest() => $_clearField(9);
   @$pb.TagNumber(9)
   UserSearchRequest ensureUserSearchRequest() => $_ensure(8);
+
+  /// User Update Response
+  ///
+  /// Libqaul's acknowledgement for a 'UserUpdate', echoing back the
+  /// updated user entry.
+  @$pb.TagNumber(10)
+  UserUpdateResponse get userUpdateResponse => $_getN(9);
+  @$pb.TagNumber(10)
+  set userUpdateResponse(UserUpdateResponse value) => $_setField(10, value);
+  @$pb.TagNumber(10)
+  $core.bool hasUserUpdateResponse() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearUserUpdateResponse() => $_clearField(10);
+  @$pb.TagNumber(10)
+  UserUpdateResponse ensureUserUpdateResponse() => $_ensure(9);
 }
 
 /// UI request for some users
@@ -681,6 +706,11 @@ class UserEntry extends $pb.GeneratedMessage {
     $core.bool? verified,
     $core.bool? blocked,
     $core.Iterable<RoutingTableConnection>? connections,
+    $core.String? bio,
+    $core.List<$core.int>? avatar,
+    $core.int? profileVersion,
+    $fixnum.Int64? profileUpdatedAt,
+    $core.Iterable<$core.List<$core.int>>? preferredCustodyRoute,
   }) {
     final result = create();
     if (name != null) result.name = name;
@@ -691,6 +721,12 @@ class UserEntry extends $pb.GeneratedMessage {
     if (verified != null) result.verified = verified;
     if (blocked != null) result.blocked = blocked;
     if (connections != null) result.connections.addAll(connections);
+    if (bio != null) result.bio = bio;
+    if (avatar != null) result.avatar = avatar;
+    if (profileVersion != null) result.profileVersion = profileVersion;
+    if (profileUpdatedAt != null) result.profileUpdatedAt = profileUpdatedAt;
+    if (preferredCustodyRoute != null)
+      result.preferredCustodyRoute.addAll(preferredCustodyRoute);
     return result;
   }
 
@@ -719,6 +755,16 @@ class UserEntry extends $pb.GeneratedMessage {
     ..aOB(10, _omitFieldNames ? '' : 'blocked')
     ..pPM<RoutingTableConnection>(11, _omitFieldNames ? '' : 'connections',
         subBuilder: RoutingTableConnection.create)
+    ..aOS(12, _omitFieldNames ? '' : 'bio')
+    ..a<$core.List<$core.int>>(
+        13, _omitFieldNames ? '' : 'avatar', $pb.PbFieldType.OY)
+    ..aI(14, _omitFieldNames ? '' : 'profileVersion',
+        fieldType: $pb.PbFieldType.OU3)
+    ..a<$fixnum.Int64>(
+        15, _omitFieldNames ? '' : 'profileUpdatedAt', $pb.PbFieldType.OU6,
+        defaultOrMaker: $fixnum.Int64.ZERO)
+    ..p<$core.List<$core.int>>(
+        16, _omitFieldNames ? '' : 'preferredCustodyRoute', $pb.PbFieldType.PY)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -815,6 +861,50 @@ class UserEntry extends $pb.GeneratedMessage {
   /// RoutingTableConnection connections = 11;
   @$pb.TagNumber(11)
   $pb.PbList<RoutingTableConnection> get connections => $_getList(7);
+
+  /// bio / status text
+  @$pb.TagNumber(12)
+  $core.String get bio => $_getSZ(8);
+  @$pb.TagNumber(12)
+  set bio($core.String value) => $_setString(8, value);
+  @$pb.TagNumber(12)
+  $core.bool hasBio() => $_has(8);
+  @$pb.TagNumber(12)
+  void clearBio() => $_clearField(12);
+
+  /// avatar bytes (small image)
+  @$pb.TagNumber(13)
+  $core.List<$core.int> get avatar => $_getN(9);
+  @$pb.TagNumber(13)
+  set avatar($core.List<$core.int> value) => $_setBytes(9, value);
+  @$pb.TagNumber(13)
+  $core.bool hasAvatar() => $_has(9);
+  @$pb.TagNumber(13)
+  void clearAvatar() => $_clearField(13);
+
+  /// profile version number — MUST mirror UserProfile.version (uint32).
+  @$pb.TagNumber(14)
+  $core.int get profileVersion => $_getIZ(10);
+  @$pb.TagNumber(14)
+  set profileVersion($core.int value) => $_setUnsignedInt32(10, value);
+  @$pb.TagNumber(14)
+  $core.bool hasProfileVersion() => $_has(10);
+  @$pb.TagNumber(14)
+  void clearProfileVersion() => $_clearField(14);
+
+  /// profile last updated timestamp (ms since epoch)
+  @$pb.TagNumber(15)
+  $fixnum.Int64 get profileUpdatedAt => $_getI64(11);
+  @$pb.TagNumber(15)
+  set profileUpdatedAt($fixnum.Int64 value) => $_setInt64(11, value);
+  @$pb.TagNumber(15)
+  $core.bool hasProfileUpdatedAt() => $_has(11);
+  @$pb.TagNumber(15)
+  void clearProfileUpdatedAt() => $_clearField(15);
+
+  /// preferred custody route for DTN V2 delivery (ordered PeerIds)
+  @$pb.TagNumber(16)
+  $pb.PbList<$core.List<$core.int>> get preferredCustodyRoute => $_getList(12);
 }
 
 /// Routing table connection entry.
@@ -1166,6 +1256,64 @@ class GetUserByIDResponse extends $pb.GeneratedMessage {
   @$pb.TagNumber(10)
   void clearUser() => $_clearField(10);
   @$pb.TagNumber(10)
+  UserEntry ensureUser() => $_ensure(0);
+}
+
+/// Acknowledgement for a UserUpdate, echoing back the updated user entry.
+class UserUpdateResponse extends $pb.GeneratedMessage {
+  factory UserUpdateResponse({
+    UserEntry? user,
+  }) {
+    final result = create();
+    if (user != null) result.user = user;
+    return result;
+  }
+
+  UserUpdateResponse._();
+
+  factory UserUpdateResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory UserUpdateResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'UserUpdateResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'qaul.rpc.users'),
+      createEmptyInstance: create)
+    ..aOM<UserEntry>(1, _omitFieldNames ? '' : 'user',
+        subBuilder: UserEntry.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  UserUpdateResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  UserUpdateResponse copyWith(void Function(UserUpdateResponse) updates) =>
+      super.copyWith((message) => updates(message as UserUpdateResponse))
+          as UserUpdateResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static UserUpdateResponse create() => UserUpdateResponse._();
+  @$core.override
+  UserUpdateResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static UserUpdateResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<UserUpdateResponse>(create);
+  static UserUpdateResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  UserEntry get user => $_getN(0);
+  @$pb.TagNumber(1)
+  set user(UserEntry value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasUser() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUser() => $_clearField(1);
+  @$pb.TagNumber(1)
   UserEntry ensureUser() => $_ensure(0);
 }
 

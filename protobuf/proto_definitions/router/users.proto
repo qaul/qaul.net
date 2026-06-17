@@ -52,6 +52,11 @@ message Users {
         GetUserByIDResponse get_user_by_id_response = 8;
         // User Search Request returns a user list matching a name query.
         UserSearchRequest user_search_request = 9;
+        // User Update Response
+        //
+        // Libqaul's acknowledgement for a 'UserUpdate', echoing back the
+        // updated user entry.
+        UserUpdateResponse user_update_response = 10;
     }
 }
 
@@ -182,4 +187,9 @@ message GetUserByIDRequest {
 
 message GetUserByIDResponse {
     UserEntry user = 10;
+}
+
+// Acknowledgement for a UserUpdate, echoing back the updated user entry.
+message UserUpdateResponse {
+    UserEntry user = 1;
 }

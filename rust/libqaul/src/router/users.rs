@@ -794,11 +794,13 @@ impl Users {
                     }
                     Some(proto::users::Message::UserUpdate(updated_user)) => {
                         log::trace!("UserUpdate protobuf RPC message");
+                        // the authenticated account requesting the update
+                        let account_id = PeerId::from_bytes(&user_id).ok();
                         // attempt to find the user with the associated id
                         Self::with_resolved_user(
                             router,
                             &updated_user.id,
-                            |user_id, _q8id, user_result| {
+                            |user_id, q8id, user_result| {
                                 user_result.verified = updated_user.verified;
                                 user_result.blocked = updated_user.blocked;
 
@@ -817,6 +819,19 @@ impl Users {
                                     signed_profile_signature: user_result.signed_profile_signature.clone(),
                                     preferred_custody_route: user_result.preferred_custody_route.clone(),
                                 });
+
+                                // acknowledge the update by echoing back the
+                                // updated user entry (carries the request_id)
+                                let online_users = RoutingTable::get_online_users_info(router);
+                                let entry =
+                                    build_user_entry(user_result, &online_users, &account_id, q8id);
+                                send_users_rpc_message(
+                                    state,
+                                    proto::users::Message::UserUpdateResponse(
+                                        proto::UserUpdateResponse { user: Some(entry) },
+                                    ),
+                                    request_id,
+                                );
                             },
                         );
                     }
