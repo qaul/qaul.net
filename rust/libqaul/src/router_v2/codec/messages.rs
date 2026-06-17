@@ -162,3 +162,300 @@ impl RoutingUpdate {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // ----- helpers (Mapping/Entry derive Debug only, so compare field-by-field) -----
+
+    fn assert_mapping_eq(actual: &Mapping, expected: &Mapping) {
+        assert_eq!(actual.abs_idx, expected.abs_idx, "abs_idx");
+        assert_eq!(actual.target_id, expected.target_id, "target_id");
+        assert_eq!(actual.version, expected.version, "version");
+    }
+
+    fn assert_entry_eq(actual: &Entry, expected: &Entry) {
+        assert_eq!(actual.abs_idx, expected.abs_idx, "abs_idx");
+        assert_eq!(actual.seq, expected.seq, "seq");
+        assert_eq!(actual.metric, expected.metric, "metric");
+        assert_eq!(actual.hop_count, expected.hop_count, "hop_count");
+        assert_eq!(actual.local_only, expected.local_only, "local_only");
+    }
+
+    fn empty_routing_update() -> RoutingUpdate {
+        RoutingUpdate {
+            user_mappings: Vec::new(),
+            node_mappings: Vec::new(),
+            user_entries: Vec::new(),
+            node_entries: Vec::new(),
+        }
+    }
+
+    fn sample_mapping(idx: u16, id_byte: u8, version: u32) -> Mapping {
+        Mapping {
+            abs_idx: idx,
+            target_id: [id_byte; 8],
+            version,
+        }
+    }
+
+    fn sample_entry(idx: u16, seq: u16, metric: u16, hop: u8, local: bool) -> Entry {
+        Entry {
+            abs_idx: idx,
+            seq,
+            metric,
+            hop_count: hop,
+            local_only: local,
+        }
+    }
+
+    // ----- empty -----
+
+    #[test]
+    fn empty_routing_update_encodes_to_six_zero_bytes() {
+        let ru = empty_routing_update();
+        let mut buf = Vec::new();
+        ru.encode(&mut buf).expect("encode");
+        // n_user_mappings(u8) + n_node_mappings(u8)
+        // + n_user_entries(u16) + n_node_entries(u16) = 6 zero bytes.
+        assert_eq!(buf, vec![0x00; 6]);
+    }
+
+    #[test]
+    fn empty_routing_update_round_trips() {
+        let ru = empty_routing_update();
+        let mut buf = Vec::new();
+        ru.encode(&mut buf).expect("encode");
+        let decoded = RoutingUpdate::decode(&buf).expect("decode");
+        assert!(decoded.user_mappings.is_empty());
+        assert!(decoded.node_mappings.is_empty());
+        assert!(decoded.user_entries.is_empty());
+        assert!(decoded.node_entries.is_empty());
+    }
+
+    // ----- mappings -----
+
+    #[test]
+    fn one_user_mapping_byte_layout() {
+        let mut ru = empty_routing_update();
+        ru.user_mappings.push(sample_mapping(5, 0xAB, 0x12345678));
+
+        let mut buf = Vec::new();
+        ru.encode(&mut buf).expect("encode");
+
+        let expected: Vec<u8> = vec![
+            0x01, // n_user_mappings = 1
+            0x05, // delta from cursor 0 to 5
+            0xAB, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB, 0xAB, // target_id
+            0x12, 0x34, 0x56, 0x78, // version (BE)
+            0x00, // n_node_mappings = 0
+            0x00, 0x00, // n_user_entries = 0
+            0x00, 0x00, // n_node_entries = 0
+        ];
+
+        assert_eq!(buf, expected);
+    }
+
+    #[test]
+    fn one_user_mapping_round_trips() {
+        let mut ru = empty_routing_update();
+        ru.user_mappings.push(sample_mapping(5, 0xAB, 0x12345678));
+
+        let mut buf = Vec::new();
+        ru.encode(&mut buf).expect("encode");
+        let decoded = RoutingUpdate::decode(&buf).expect("decode");
+
+        assert_eq!(decoded.user_mappings.len(), 1);
+        assert_mapping_eq(&decoded.user_mappings[0], &ru.user_mappings[0]);
+        assert!(decoded.node_mappings.is_empty());
+        assert!(decoded.user_entries.is_empty());
+        assert!(decoded.node_entries.is_empty());
+    }
+
+    #[test]
+    fn one_node_mapping_round_trips() {
+        let mut ru = empty_routing_update();
+        ru.node_mappings.push(sample_mapping(7, 0xCD, 42));
+
+        let mut buf = Vec::new();
+        ru.encode(&mut buf).expect("encode");
+        let decoded = RoutingUpdate::decode(&buf).expect("decode");
+
+        assert_eq!(decoded.node_mappings.len(), 1);
+        assert_mapping_eq(&decoded.node_mappings[0], &ru.node_mappings[0]);
+        assert!(decoded.user_mappings.is_empty());
+    }
+
+    // ----- entries -----
+
+    #[test]
+    fn one_user_entry_byte_layout() {
+        let mut ru = empty_routing_update();
+        ru.user_entries.push(sample_entry(10, 100, 20, 5, true));
+
+        let mut buf = Vec::new();
+        ru.encode(&mut buf).expect("encode");
+
+        // hop_byte: bit 7 (local_only) = 1, bits 0..=5 (hop_count) = 5
+        // → 0b1000_0101 = 0x85.
+        let expected: Vec<u8> = vec![
+            0x00, // n_user_mappings
+            0x00, // n_node_mappings
+            0x00, 0x01, // n_user_entries = 1
+            0x0A, // delta 0 -> 10
+            0x00, 0x64, // seq = 100
+            0x00, 0x14, // metric = 20
+            0x85, // hop_byte
+            0x00, 0x00, // n_node_entries = 0
+        ];
+
+        assert_eq!(buf, expected);
+    }
+
+    #[test]
+    fn one_user_entry_round_trips() {
+        let mut ru = empty_routing_update();
+        ru.user_entries.push(sample_entry(10, 100, 20, 5, true));
+
+        let mut buf = Vec::new();
+        ru.encode(&mut buf).expect("encode");
+        let decoded = RoutingUpdate::decode(&buf).expect("decode");
+
+        assert_eq!(decoded.user_entries.len(), 1);
+        assert_entry_eq(&decoded.user_entries[0], &ru.user_entries[0]);
+    }
+
+    #[test]
+    fn one_node_entry_round_trips() {
+        let mut ru = empty_routing_update();
+        ru.node_entries.push(sample_entry(20, 200, 30, 10, false));
+
+        let mut buf = Vec::new();
+        ru.encode(&mut buf).expect("encode");
+        let decoded = RoutingUpdate::decode(&buf).expect("decode");
+
+        assert_eq!(decoded.node_entries.len(), 1);
+        assert_entry_eq(&decoded.node_entries[0], &ru.node_entries[0]);
+    }
+
+    // ----- local_only flag bit -----
+
+    #[test]
+    fn local_only_true_sets_bit_7_of_hop_byte() {
+        let mut ru = empty_routing_update();
+        ru.user_entries.push(sample_entry(1, 0, 0, 0, true));
+
+        let mut buf = Vec::new();
+        ru.encode(&mut buf).expect("encode");
+
+        // hop_byte sits at index 9 (see one_user_entry_byte_layout for the breakdown).
+        let hop_byte = buf[9];
+        assert_eq!(
+            hop_byte & 0b1000_0000,
+            0b1000_0000,
+            "bit 7 (local_only) must be set"
+        );
+        assert_eq!(
+            hop_byte & 0b0100_0000,
+            0,
+            "bit 6 (reserved) must be zero on encode"
+        );
+        assert_eq!(hop_byte & 0b0011_1111, 0, "hop_count bits must be zero");
+    }
+
+    #[test]
+    fn local_only_false_clears_bit_7_of_hop_byte() {
+        let mut ru = empty_routing_update();
+        ru.user_entries.push(sample_entry(1, 0, 0, 0, false));
+
+        let mut buf = Vec::new();
+        ru.encode(&mut buf).expect("encode");
+
+        let hop_byte = buf[9];
+        assert_eq!(
+            hop_byte & 0b1000_0000,
+            0,
+            "bit 7 (local_only) must be clear"
+        );
+    }
+
+    // ----- mixed populated round-trip with escapes in every section -----
+
+    #[test]
+    fn mixed_round_trip_with_escapes_in_every_section() {
+        let ru = RoutingUpdate {
+            user_mappings: vec![
+                sample_mapping(5, 0x01, 1),
+                sample_mapping(300, 0x02, 2), // gap > 255 → escape
+            ],
+            node_mappings: vec![
+                sample_mapping(0, 0x03, 3), // first-at-zero → escape
+                sample_mapping(10, 0x04, 4),
+            ],
+            user_entries: vec![
+                sample_entry(1, 100, 200, 0, false),
+                sample_entry(50_000, 300, 400, 63, true), // big gap + max hop count
+            ],
+            node_entries: vec![sample_entry(2, 500, 600, 31, false)],
+        };
+
+        let mut buf = Vec::new();
+        ru.encode(&mut buf).expect("encode");
+        let decoded = RoutingUpdate::decode(&buf).expect("decode");
+
+        assert_eq!(decoded.user_mappings.len(), ru.user_mappings.len());
+        for (a, b) in decoded.user_mappings.iter().zip(ru.user_mappings.iter()) {
+            assert_mapping_eq(a, b);
+        }
+        assert_eq!(decoded.node_mappings.len(), ru.node_mappings.len());
+        for (a, b) in decoded.node_mappings.iter().zip(ru.node_mappings.iter()) {
+            assert_mapping_eq(a, b);
+        }
+        assert_eq!(decoded.user_entries.len(), ru.user_entries.len());
+        for (a, b) in decoded.user_entries.iter().zip(ru.user_entries.iter()) {
+            assert_entry_eq(a, b);
+        }
+        assert_eq!(decoded.node_entries.len(), ru.node_entries.len());
+        for (a, b) in decoded.node_entries.iter().zip(ru.node_entries.iter()) {
+            assert_entry_eq(a, b);
+        }
+    }
+
+    // ----- truncation safety -----
+
+    /// Every prefix shorter than the full encoded message must surface
+    /// as an error without panicking.
+    #[test]
+    fn decode_truncation_never_panics() {
+        let ru = RoutingUpdate {
+            user_mappings: vec![sample_mapping(5, 0xAB, 1)],
+            node_mappings: vec![sample_mapping(7, 0xCD, 2)],
+            user_entries: vec![sample_entry(10, 100, 200, 5, true)],
+            node_entries: vec![sample_entry(20, 300, 400, 10, false)],
+        };
+        let mut full = Vec::new();
+        ru.encode(&mut full).expect("encode");
+
+        for n in 0..full.len() {
+            let prefix = &full[..n];
+            let result = RoutingUpdate::decode(prefix);
+            assert!(result.is_err(), "len {n}: expected Err, got {result:?}");
+        }
+    }
+
+    /// With the strict trailing-bytes policy in decode, a fully-valid
+    /// message followed by extra bytes must surface as Malformed.
+    #[test]
+    fn decode_trailing_bytes_returns_malformed() {
+        let ru = empty_routing_update();
+        let mut buf = Vec::new();
+        ru.encode(&mut buf).expect("encode");
+        buf.extend_from_slice(&[0xDE, 0xAD]); // junk
+
+        match RoutingUpdate::decode(&buf) {
+            Err(CodecError::Malformed) => {}
+            other => panic!("expected Malformed, got {other:?}"),
+        }
+    }
+}
