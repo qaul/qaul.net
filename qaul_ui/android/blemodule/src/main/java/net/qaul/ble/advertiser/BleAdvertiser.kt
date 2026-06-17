@@ -11,7 +11,7 @@ import android.bluetooth.le.BluetoothLeAdvertiser
 import android.content.Context
 import android.os.ParcelUuid
 import android.util.Log
-import net.qaul.ble.test.ble.BleConstants
+import net.qaul.ble.BleConstants
 
 @SuppressLint("MissingPermission")
 object BleAdvertiser {

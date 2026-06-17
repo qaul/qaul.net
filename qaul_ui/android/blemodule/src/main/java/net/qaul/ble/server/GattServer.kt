@@ -15,7 +15,7 @@ import android.bluetooth.BluetoothServerSocket
 import android.content.Context
 import android.os.Build
 import android.util.Log
-import net.qaul.ble.test.ble.BleConstants
+import net.qaul.ble.BleConstants
 import net.qaul.ble.test.ble.connection.BleRole
 import net.qaul.ble.test.ble.connection.ConnectionPool
 import net.qaul.ble.test.ble.manager.BleManager
@@ -191,6 +191,14 @@ object GattServer {
                 val existing = ConnectionPool.getByAddress(device.address)
                 when {
                     existing == null -> {
+                        if (ConnectionPool.getSize() >= BleConstants.MAX_CONNECTIONS) {
+                            Log.i(
+                                TAG,
+                                "At connection cap (${BleConstants.MAX_CONNECTIONS}), rejecting inbound ${device.address}"
+                            )
+                            gattServer?.cancelConnection(device)   // best-effort; old stacks honour it inconsistently
+                            return
+                        }
                         BleManager.connect(device, BleRole.PERIPHERAL)
                     }
                     existing.role == BleRole.PERIPHERAL -> {
