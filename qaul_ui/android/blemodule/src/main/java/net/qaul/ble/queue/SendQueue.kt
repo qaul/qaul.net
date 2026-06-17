@@ -31,8 +31,8 @@ import java.util.Queue
 import kotlin.time.TimeSource
 import kotlin.time.TimeSource.Monotonic.ValueTimeMark
 import net.qaul.ble.test.ble.metrics.BleMetrics
-import net.qaul.ble.test.ble.util.AppLog
-import net.qaul.ble.test.ble.util.BLEUtils
+import net.qaul.ble.AppLog
+import net.qaul.ble.BLEUtils
 
 
 /**

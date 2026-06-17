@@ -6,7 +6,7 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothSocket
 import android.os.Build
 import android.util.Log
-import net.qaul.ble.test.ble.BleConstants
+import net.qaul.ble.BleConstants
 import net.qaul.ble.test.ble.l2cap.L2capChannel
 import net.qaul.ble.test.ble.metrics.BleMetrics
 import net.qaul.ble.test.ble.queue.BleTaskScheduler
@@ -58,8 +58,8 @@ class BleConnection(
                 BleTaskScheduler.enableNotifications(device, BleConstants.MSG_CHAR)
                 BleTaskScheduler.setPreferredPhy(
                     device,
-                    BluetoothDevice.PHY_LE_1M_MASK,
-                    BluetoothDevice.PHY_LE_1M_MASK,
+                    BluetoothDevice.PHY_LE_2M_MASK,
+                    BluetoothDevice.PHY_LE_2M_MASK,
                     BluetoothDevice.PHY_OPTION_NO_PREFERRED
                 )
 //                BleTaskScheduler.setPreferredPhy(
@@ -233,6 +233,9 @@ class BleConnection(
         // TODO: Look into the cap at 495 bytes, the optimal ATT payload for exactly 2 DLE LL packets, does this matter?
         sendQueue.chunkSize = minOf(mtu - 3, 509)
         Log.i(TAG, "Chunk size updated to ${sendQueue.chunkSize} for ${device.address}")
+        if (role == BleRole.CENTRAL){
+            flushSendQueue()
+        }
     }
 
     /**

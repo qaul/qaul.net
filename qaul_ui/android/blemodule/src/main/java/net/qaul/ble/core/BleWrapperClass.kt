@@ -20,23 +20,19 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LifecycleService
-import com.google.gson.Gson
 import com.google.protobuf.ByteString
 import net.qaul.ble.AppLog
 import net.qaul.ble.BLEUtils
 import net.qaul.ble.RemoteLog
 import net.qaul.ble.callback.BleRequestCallback
-import net.qaul.ble.model.BLEScanDevice
-import net.qaul.ble.model.Message
-import net.qaul.ble.service.BleService
 import qaul.sys.ble.BleOuterClass
-import java.nio.charset.Charset
-
-import android.content.DialogInterface
-import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+// qaul BLE engine (transport layer). NOTE: these still declare the net.qaul.ble.test.* package
+// even though the files moved into net/qaul/ble/ — rename later and update these imports.
+import net.qaul.ble.test.ble.manager.BleManager
+import net.qaul.ble.test.ble.server.GattServer
+import net.qaul.ble.test.ble.advertiser.BleAdvertiser
+import net.qaul.ble.test.ble.scanner.BleScanner
+import net.qaul.ble.BleConstants
 
 @SuppressLint("MissingPermission")
 open class BleWrapperClass(context: Activity) {
@@ -47,6 +43,7 @@ open class BleWrapperClass(context: Activity) {
     private var bleCallback: BleRequestCallback? = null
     private var qaulId: ByteArray? = null
     private var advertMode = "low_latency"
+    private var bleStarted = false
 
     public var mHandler: Handler? = null
 
@@ -129,17 +126,22 @@ open class BleWrapperClass(context: Activity) {
                 }
 
                 BleOuterClass.Ble.MessageCase.DIRECT_SEND -> {
-                    AppLog.e(TAG, " DIRECT_SEND ")
-
                     val bleDirectSend = bleReq.directSend
-                    if (BleService().isRunning()) {
-                        BleService.bleService?.sendMessage(
-                            id = bleDirectSend.messageId.toString(Charset.defaultCharset()),
-                            to = bleDirectSend.receiverId.toByteArray(),
-                            message = bleDirectSend.data.toByteArray(),
-                            from = bleDirectSend.senderId.toByteArray()
-                        )
-                    }
+
+                    BleManager.sendMessage(
+                        bleDirectSend.receiverId.toByteArray(),
+                        bleDirectSend.data.toByteArray()
+                    )
+                    // TODO: BleManager.sendMessage is fire and forget currently (no delivery signal yet). Report
+                    //       success optimistically for now, routing re-sends at its own layer, wire a
+                    //       real result off the SendQueue ACK later, for this we need to pass messageId in the send
+                    val bleRes = BleOuterClass.Ble.newBuilder()
+                    val directSendResult = BleOuterClass.BleDirectSendResult.newBuilder()
+                    directSendResult.errorMessage = "Successfully sent"
+                    directSendResult.success = true
+                    directSendResult.id = bleDirectSend.messageId
+                    bleRes.directSendResult = directSendResult.build()
+                    sendResponse(bleRes)
                 }
                 else -> {}
             }
@@ -168,16 +170,18 @@ open class BleWrapperClass(context: Activity) {
     private fun stopService() {
         Log.i(TAG, "stopService()")
 
-        if (BleService().isRunning()) {
-            BleService.bleService?.stop()
-        } else {
-            val bleRes = BleOuterClass.Ble.newBuilder()
-            val stopResult = BleOuterClass.BleStopResult.newBuilder()
-            stopResult.success = false
-            stopResult.errorMessage = "Advertisement & Scanning is not Running"
-            bleRes.stopResult = stopResult.build()
-            sendResponse(bleRes)
-        }
+        // Tear down the engine in reverse of start order.
+        BleScanner.stop()
+        BleAdvertiser.stop()
+        GattServer.stop()
+        BleManager.stop()
+        bleStarted = false
+
+        val bleRes = BleOuterClass.Ble.newBuilder()
+        val stopResult = BleOuterClass.BleStopResult.newBuilder()
+        stopResult.success = true
+        bleRes.stopResult = stopResult.build()
+        sendResponse(bleRes)
     }
 
     /**
@@ -185,182 +189,67 @@ open class BleWrapperClass(context: Activity) {
      */
     private fun startService(context: Context) {
         Log.i(TAG, "startService()")
-        if (isBleScanConditionSatisfy()) {
-            Log.i(TAG, "startService() isBleScanConditionSatisfy")
 
-            if (!BleService().isRunning()) {
-                Log.i(TAG, "startService() is not running")
+        if (!isBleScanConditionSatisfy()) return
+        val id = qaulId ?: return
 
-                BleService().start(context = context)
-                Handler(Looper.myLooper()!!).postDelayed({
-                    startAdvertiseAndCallback()
-                    startScanAndCallback()
-                }, 500)
-            } else {
-                Log.i(TAG, "startService() is already running")
+        if(!bleStarted) {
+            bleStarted = true
+            BleConstants.LOCAL_QAUL_ID = id
+            wireBleManagerCallbacks()
 
-                if (BleService.bleService!!.isAdvertiserRunning()) {
-                    AppLog.e(TAG, "Already Started")
-                    val bleRes = BleOuterClass.Ble.newBuilder()
-                    val startResult = BleOuterClass.BleStartResult.newBuilder()
-                    startResult.success = true
-                    startResult.errorReason = BleOuterClass.BleError.UNKNOWN_ERROR
-                    startResult.errorMessage = "Advertisement already Started"
-                    bleRes.startResult = startResult.build()
-                    sendResponse(bleRes)
-                } else {
-                    startAdvertiseAndCallback()
-                }
+            val appContext = context.applicationContext
+            BleManager.start(appContext)
+            GattServer.start(appContext)
+            BleAdvertiser.start(appContext)
+            BleScanner.autoConnect = true
+            BleScanner.start(appContext)
 
-                if (BleService.bleService!!.isScanRunning()) {
-                    AppLog.e(TAG, "Scan Already Started")
-                    val bleRes = BleOuterClass.Ble.newBuilder()
-                    val startResult = BleOuterClass.BleStartResult.newBuilder()
-                    startResult.success = true
-                    startResult.errorReason = BleOuterClass.BleError.UNKNOWN_ERROR
-                    startResult.errorMessage = "Scanning already Started"
-                    bleRes.startResult = startResult.build()
-                    sendResponse(bleRes)
-                } else {
-                    startScanAndCallback()
-                }
-            }
+            val bleRes = BleOuterClass.Ble.newBuilder()
+            val startResult = BleOuterClass.BleStartResult.newBuilder()
+            startResult.success = true
+            bleRes.startResult = startResult.build()
+            sendResponse(bleRes)
+        }
+        else {
+            AppLog.e(TAG, "Already Started")
+            val bleRes = BleOuterClass.Ble.newBuilder()
+            val startResult = BleOuterClass.BleStartResult.newBuilder()
+            startResult.success = true
+            startResult.errorReason = BleOuterClass.BleError.UNKNOWN_ERROR
+            startResult.errorMessage = "Ble Module already Started"
+            bleRes.startResult = startResult.build()
+            sendResponse(bleRes)
+        }
+
+    }
+
+    private fun wireBleManagerCallbacks() {
+        BleManager.onMessageReceived = { fromQaulId, data ->
+            val bleRes = BleOuterClass.Ble.newBuilder()
+            val directReceived = BleOuterClass.BleDirectReceived.newBuilder()
+            directReceived.from = ByteString.copyFrom(fromQaulId)
+            directReceived.data = ByteString.copyFrom(data)
+            bleRes.directReceived = directReceived.build()
+            sendResponse(bleRes)
+        }
+        BleManager.onNeighbourUp = { qaulId ->
+            val bleRes = BleOuterClass.Ble.newBuilder()
+            val deviceDiscovered = BleOuterClass.BleDeviceDiscovered.newBuilder()
+            deviceDiscovered.qaulId = ByteString.copyFrom(qaulId)
+            // TODO: surface real RSSI (and transport: 1M vs Coded) once onNeighbourUp carries them.
+            deviceDiscovered.rssi = 0
+            bleRes.deviceDiscovered = deviceDiscovered.build()
+            sendResponse(bleRes)
+        }
+        BleManager.onNeighbourDown = { qaulId ->
+            val bleRes = BleOuterClass.Ble.newBuilder()
+            val deviceUnavailable = BleOuterClass.BleDeviceUnavailable.newBuilder()
+            deviceUnavailable.qaulId = ByteString.copyFrom(qaulId)
+            bleRes.deviceUnavailable = deviceUnavailable.build()
+            sendResponse(bleRes)
         }
     }
-
-    /**
-     * This Method Will Assign Callback & Data to Start Advertiser and Receive Callback
-     */
-    private fun startAdvertiseAndCallback() {
-        Log.i(TAG, "startAdvertiseAndCallback()")
-
-        if (qaulId != null) {
-            BleService.bleService?.startAdvertise(qaul_id = qaulId!!,
-                mode = advertMode,
-                object : BleService.BleAdvertiseCallback {
-                    override fun startAdvertiseRes(
-                        status: Boolean, errorText: String, unknownError: Boolean
-                    ) {
-                        val bleRes = BleOuterClass.Ble.newBuilder()
-                        val startResult = BleOuterClass.BleStartResult.newBuilder()
-                        startResult.success = status
-                        if (unknownError) {
-                            startResult.errorReason = BleOuterClass.BleError.UNKNOWN_ERROR
-                        } else {
-                            startResult.errorReason = BleOuterClass.BleError.UNRECOGNIZED
-                        }
-                        startResult.errorMessage = errorText
-                        bleRes.startResult = startResult.build()
-                        sendResponse(bleRes)
-                    }
-
-                    override fun stopAdvertiseRes(status: Boolean, errorText: String) {
-                        val bleRes = BleOuterClass.Ble.newBuilder()
-                        val stopResult = BleOuterClass.BleStopResult.newBuilder()
-                        stopResult.success = status
-                        stopResult.errorMessage = errorText
-                        bleRes.stopResult = stopResult.build()
-                        sendResponse(bleRes)
-                    }
-
-                    override fun onMessageReceived(bleDevice: BLEScanDevice, message: ByteArray) {
-                        AppLog.e(TAG, "---->onMessageReceived1---> ${message.contentToString()}")
-                        val bleRes = BleOuterClass.Ble.newBuilder()
-                        val directReceived = BleOuterClass.BleDirectReceived.newBuilder()
-                        val msgData = String(message).removeSuffix("$$").removePrefix("$$")
-                        AppLog.e(TAG, "---->onMessageReceived2---> $msgData")   
-                        
-                        val msgObject = Gson().fromJson(msgData, Message::class.java)
-                        directReceived.from = ByteString.copyFrom(bleDevice.qaulId) 
-                        directReceived.data = ByteString.copyFrom(msgObject.message)
-
-                        AppLog.e(TAG, "---->onMessageReceived3---> ${directReceived.data}")
-                        bleRes.directReceived = directReceived.build()
-                        // AppLog.e(TAG, "---->onMessageReceived msgObject $msgObject")
-                        sendResponse(bleRes)
-                    }
-                })
-        }
-    }
-
-    /**
-     * This Method Will Assign Callback & Data to Start Scan and Receive Callback
-     */
-    private fun startScanAndCallback() {
-        Log.i(TAG, "startScanAndCallback()")
-
-        BleService.bleService?.startScan(object : BleService.BleScanCallBack {
-            override fun startScanRes(
-                status: Boolean, errorText: String, unknownError: Boolean
-            ) {
-                val bleRes = BleOuterClass.Ble.newBuilder()
-                val startResult = BleOuterClass.BleStartResult.newBuilder()
-                startResult.success = status
-                if (unknownError) {
-                    startResult.errorReason = BleOuterClass.BleError.UNKNOWN_ERROR
-                } else {
-                    startResult.errorReason = BleOuterClass.BleError.UNRECOGNIZED
-                }
-                startResult.errorMessage = errorText
-                bleRes.startResult = startResult.build()
-                sendResponse(bleRes)
-            }
-
-            override fun stopScanRes(status: Boolean, errorText: String) {
-                val bleRes = BleOuterClass.Ble.newBuilder()
-                val stopResult = BleOuterClass.BleStopResult.newBuilder()
-                stopResult.success = status
-                stopResult.errorMessage = errorText
-                bleRes.stopResult = stopResult.build()
-                sendResponse(bleRes)
-            }
-
-            override fun deviceFound(bleDevice: BLEScanDevice) {
-                val bleRes = BleOuterClass.Ble.newBuilder()
-                val deviceDiscovered = BleOuterClass.BleDeviceDiscovered.newBuilder()
-                deviceDiscovered.rssi = bleDevice.deviceRSSI
-                deviceDiscovered.qaulId = ByteString.copyFrom(bleDevice.qaulId)
-                bleRes.deviceDiscovered = deviceDiscovered.build()
-                sendResponse(bleRes)
-            }
-
-            override fun deviceOutOfRange(bleDevice: BLEScanDevice) {
-                AppLog.e(TAG, "${bleDevice.macAddress} out of range")
-                val bleRes = BleOuterClass.Ble.newBuilder()
-                val deviceUnavailable = BleOuterClass.BleDeviceUnavailable.newBuilder()
-                try {
-                    bleDevice.qaulId?.let {
-                        deviceUnavailable.qaulId = ByteString.copyFrom(bleDevice.qaulId)
-                        bleRes.deviceUnavailable = deviceUnavailable.build()
-                        sendResponse(bleRes)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-
-            override fun onMessageSent(id: String, success: Boolean, data: ByteArray) {
-                val bleRes = BleOuterClass.Ble.newBuilder()
-                val directSendResult = BleOuterClass.BleDirectSendResult.newBuilder()
-                if (success) {
-                    directSendResult.errorMessage = "Successfully sent"
-                } else {
-                    directSendResult.errorMessage = "Connection not established. Please try again."
-                }
-                directSendResult.success = success
-                directSendResult.id = ByteString.copyFrom(id.toByteArray(Charset.forName("UTF-8")))
-                bleRes.directSendResult = directSendResult.build()
-                sendResponse(bleRes)
-            }
-
-            override fun restartService() {
-                BleService.bleService?.stop()
-                Handler(Looper.getMainLooper()).postDelayed({ startService(context) }, 500)
-            }
-
-        })
-    }
-
 
     /**
      * This Method Return Device Information Regarding BLE Functionality & Permissions

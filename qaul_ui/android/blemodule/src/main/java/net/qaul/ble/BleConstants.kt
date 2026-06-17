@@ -1,4 +1,4 @@
-package net.qaul.ble.test.ble
+package net.qaul.ble
 
 import java.util.UUID
 import java.security.SecureRandom
@@ -6,12 +6,12 @@ import java.security.SecureRandom
 object BleConstants {
 
     /**
-     * This device's qaul ID — 8 random bytes, generated once per app session.
-     * In production this would be the actual qual id stuff
+     * This device's qaul ID (8 bytes). Injected from the qaul START_REQUEST (the real node ID)
+     * via BleWrapperClass. Defaults to a random ID so the module still works standalone (the test
+     * app) before any START_REQUEST arrives. Read by the advertiser, the role tiebreaker, and SendQueue.
      */
-    val LOCAL_QAUL_ID: ByteArray by lazy {
-        ByteArray(8).also { SecureRandom().nextBytes(it) }
-    }
+    @Volatile
+    var LOCAL_QAUL_ID: ByteArray = ByteArray(8).also { SecureRandom().nextBytes(it) }
 
 
     // --------------------------------------------------------------------------------------------

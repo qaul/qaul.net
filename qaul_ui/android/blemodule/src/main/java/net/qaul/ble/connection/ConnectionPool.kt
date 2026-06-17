@@ -3,9 +3,10 @@ package net.qaul.ble.test.ble.connection
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
 import android.util.Log
-import net.qaul.ble.test.ble.BleConstants
+import net.qaul.ble.BleConstants
 import net.qaul.ble.test.ble.manager.ConnectionEventListener
 import net.qaul.ble.test.ble.queue.BleTaskScheduler
+import net.qaul.ble.test.ble.util.toHexString
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
@@ -38,6 +39,23 @@ object ConnectionPool {
         Thread(r, "connection-aliveness-watchdog").apply { isDaemon = true }
     }
     @Volatile private var reaperTask: ScheduledFuture<*>? = null
+    @Volatile private var snapshotTask: ScheduledFuture<*>? = null
+
+    /**
+     * Periodic one-line view of this node's connections, count
+     */
+    private fun logTopologySnapshot() {
+        try {
+            val conns = connections.values.toList()
+            val summary = if (conns.isEmpty()) "none" else conns.joinToString("  ·  ") { c ->
+                val id = c.remoteQaulId?.toHexString()?.take(6) ?: "unresolved"
+                "${c.device.address}/${c.role}/$id"
+            }
+            Log.i(TAG, "TOPOLOGY neighbours=${conns.size} up=${upNeighbours.size}: $summary")
+        } catch (e: Exception) {
+            Log.e(TAG, "snapshot failed", e)
+        }
+    }
 
     private fun reap() {
         try {
@@ -57,6 +75,10 @@ object ConnectionPool {
 
     fun start() {
         BleTaskScheduler.registerListener(connectionEventListener)
+        // Diagnostic topology snapshot every 10s — no behavioural effect, safe to remove later.
+        snapshotTask = reaper.scheduleWithFixedDelay(
+            { logTopologySnapshot() }, 10_000L, 10_000L, TimeUnit.MILLISECONDS
+        )
 //        reaperTask = reaper.scheduleWithFixedDelay(
 //            {reap()},
 //            BleConstants.LIVENESS_CHECK_INTERVAL_MS,
@@ -68,6 +90,8 @@ object ConnectionPool {
     fun stop() {
         reaperTask?.cancel(false)
         reaperTask = null
+        snapshotTask?.cancel(false)
+        snapshotTask = null
         BleTaskScheduler.unregisterListener(connectionEventListener)
         connections.values.forEach { it.disconnect() }
         connections.clear()

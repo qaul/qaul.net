@@ -11,7 +11,7 @@ import android.bluetooth.BluetoothProfile
 import android.content.Context
 import android.os.Build
 import android.util.Log
-import net.qaul.ble.test.ble.BleConstants
+import net.qaul.ble.BleConstants
 import net.qaul.ble.test.ble.manager.BleManager
 import net.qaul.ble.test.ble.manager.ConnectionEventListener
 import net.qaul.ble.test.ble.server.GattServer

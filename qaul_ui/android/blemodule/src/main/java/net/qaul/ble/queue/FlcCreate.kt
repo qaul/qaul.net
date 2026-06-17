@@ -8,8 +8,8 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.math.BigInteger
 import net.qaul.ble.test.ble.model.FlowControlMessageType
-import net.qaul.ble.test.ble.util.AppLog
-import net.qaul.ble.test.ble.util.BLEUtils
+import net.qaul.ble.AppLog
+import net.qaul.ble.BLEUtils
 
 /**
  * Helper object to create Flow Control Messages (FLC)

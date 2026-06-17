@@ -10,7 +10,7 @@ import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.os.ParcelUuid
 import android.util.Log
-import net.qaul.ble.test.ble.BleConstants
+import net.qaul.ble.BleConstants
 import net.qaul.ble.test.ble.connection.BleRole
 import net.qaul.ble.test.ble.connection.ConnectionPool
 import net.qaul.ble.test.ble.manager.BleManager
