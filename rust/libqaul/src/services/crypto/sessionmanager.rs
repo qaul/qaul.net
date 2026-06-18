@@ -67,6 +67,21 @@ impl CryptoSessionManager {
                 Some(proto_net::cryptoservice_container::Message::RotateFinal(rotate_final)) => {
                     Self::process_rotate_final(state, &user_account, sender_id, rotate_final);
                 }
+                Some(proto_net::cryptoservice_container::Message::FileKeyEnvelope(_envelope)) => {
+                    // Group-file envelope receive path is wired in a
+                    // later phase; the variant is acknowledged here so
+                    // the new wire shape already decodes.
+                    log::trace!(
+                        "received FileKeyEnvelope from {} (handler not yet wired)",
+                        sender_id.to_base58()
+                    );
+                }
+                Some(proto_net::cryptoservice_container::Message::FileKeyRelayRequest(_req)) => {
+                    log::trace!(
+                        "received FileKeyRelayRequest from {} (handler not yet wired)",
+                        sender_id.to_base58()
+                    );
+                }
                 None => {
                     log::error!(
                         "Cryptoservice message from {} was empty",
