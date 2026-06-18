@@ -58,6 +58,35 @@ pub struct UserFiles {
     /// key: file_id & chunk_index
     /// value: `Vec<u8>`
     pub file_chunks: sled::Tree,
+    /// per-file envelope content keys (group-file envelope encryption)
+    ///
+    /// Holds received `file_key`s awaiting their body, plus locally
+    /// generated keys for sent files that may need relay. Entries
+    /// expire by `GroupFiles.envelope_ttl_seconds`.
+    ///
+    /// key: file_id (u64 big-endian)
+    /// value: bincode of `FileKey`
+    pub file_keys: sled::Tree,
+}
+
+/// A stored per-file envelope content key.
+///
+/// Either received in a `FileKeyEnvelope` (awaiting the body) or
+/// generated locally for a file we sent (kept for possible relay to
+/// late joiners). `body_digest` binds the key to exactly one body.
+#[derive(Clone, Serialize, Deserialize)]
+pub struct FileKey {
+    pub file_id: u64,
+    pub group_id: Vec<u8>,
+    /// 32-byte ChaCha20-Poly1305 content key.
+    pub file_key: Vec<u8>,
+    /// SHA-256 of the encrypted body this key decrypts.
+    pub body_digest: Vec<u8>,
+    /// Wall-clock ms when this entry was stored; drives TTL expiry.
+    pub stored_at: u64,
+    /// True for keys we generated locally (sent files), which we may
+    /// relay; false for keys received from a sender.
+    pub locally_generated: bool,
 }
 
 impl AllFiles {
@@ -161,6 +190,72 @@ impl UserFiles {
         // flush trees to disk
         if let Err(e) = self.file_chunks.flush() {
             log::error!("Error file history flush: {}", e);
+        }
+    }
+
+    /// Store an envelope content key for `file_id` (received or locally
+    /// generated). Idempotent: storing the same `file_id` overwrites.
+    pub fn save_file_key(&self, key: &FileKey) {
+        let bytes = match bincode::serialize(key) {
+            Ok(b) => b,
+            Err(e) => {
+                log::error!("Error serializing file key: {}", e);
+                return;
+            }
+        };
+        if let Err(e) = self.file_keys.insert(key.file_id.to_be_bytes(), bytes) {
+            log::error!("Error saving file key: {}", e);
+            return;
+        }
+        if let Err(e) = self.file_keys.flush() {
+            log::error!("Error file_keys flush: {}", e);
+        }
+    }
+
+    /// Fetch the envelope content key for `file_id`, if present.
+    pub fn get_file_key(&self, file_id: u64) -> Option<FileKey> {
+        match self.file_keys.get(file_id.to_be_bytes()) {
+            Ok(Some(bytes)) => match bincode::deserialize(&bytes) {
+                Ok(k) => Some(k),
+                Err(e) => {
+                    log::error!("Error deserializing file key: {}", e);
+                    None
+                }
+            },
+            Ok(None) => None,
+            Err(e) => {
+                log::error!("Error reading file key: {}", e);
+                None
+            }
+        }
+    }
+
+    /// Remove (and zeroize via drop) the stored key for `file_id`,
+    /// e.g. once the body is decrypted and exposed to the user.
+    pub fn delete_file_key(&self, file_id: u64) {
+        if let Err(e) = self.file_keys.remove(file_id.to_be_bytes()) {
+            log::error!("Error removing file key: {}", e);
+        }
+        if let Err(e) = self.file_keys.flush() {
+            log::error!("Error file_keys flush: {}", e);
+        }
+    }
+
+    /// Drop any stored file keys older than `ttl_ms` (by `stored_at`).
+    /// Bounds the `file_keys` tree even when bodies never arrive.
+    pub fn prune_expired_file_keys(&self, now_ms: u64, ttl_ms: u64) {
+        let mut expired: Vec<u64> = Vec::new();
+        for item in self.file_keys.iter() {
+            if let Ok((_k, bytes)) = item {
+                if let Ok(key) = bincode::deserialize::<FileKey>(&bytes) {
+                    if now_ms.saturating_sub(key.stored_at) > ttl_ms {
+                        expired.push(key.file_id);
+                    }
+                }
+            }
+        }
+        for file_id in expired {
+            self.delete_file_key(file_id);
         }
     }
 
@@ -313,6 +408,7 @@ impl ChatFileState {
                 return UserFiles {
                     histories: user_files.histories.clone(),
                     file_chunks: user_files.file_chunks.clone(),
+                    file_keys: user_files.file_keys.clone(),
                 };
             }
         }
@@ -324,10 +420,12 @@ impl ChatFileState {
     fn create_userfiles(&self, user_id: &PeerId, db: &sled::Db) -> UserFiles {
         let histories: sled::Tree = db.open_tree("chat_file").unwrap();
         let file_chunks: sled::Tree = db.open_tree("file_chunks").unwrap();
+        let file_keys: sled::Tree = db.open_tree("file_keys").unwrap();
 
         let user_files = UserFiles {
             histories,
             file_chunks,
+            file_keys,
         };
 
         let mut all_files = self.inner.write().unwrap();
@@ -360,6 +458,7 @@ impl ChatFile {
                 return UserFiles {
                     histories: user_files.histories.clone(),
                     file_chunks: user_files.file_chunks.clone(),
+                    file_keys: user_files.file_keys.clone(),
                 };
             }
         }
@@ -371,6 +470,7 @@ impl ChatFile {
         UserFiles {
             histories: user_files.histories.clone(),
             file_chunks: user_files.file_chunks.clone(),
+            file_keys: user_files.file_keys.clone(),
         }
     }
 
@@ -387,6 +487,7 @@ impl ChatFile {
                 return UserFiles {
                     histories: db.open_tree("__fallback_chat_file").expect("fallback tree"),
                     file_chunks: db.open_tree("__fallback_file_chunks").expect("fallback tree"),
+                    file_keys: db.open_tree("__fallback_file_keys").expect("fallback tree"),
                 };
             }
         };
@@ -397,6 +498,18 @@ impl ChatFile {
                 return UserFiles {
                     histories,
                     file_chunks: db.open_tree("__fallback_file_chunks").expect("fallback tree"),
+                    file_keys: db.open_tree("__fallback_file_keys").expect("fallback tree"),
+                };
+            }
+        };
+        let file_keys: sled::Tree = match db.open_tree("file_keys") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("Error opening file_keys tree: {}", e);
+                return UserFiles {
+                    histories,
+                    file_chunks,
+                    file_keys: db.open_tree("__fallback_file_keys").expect("fallback tree"),
                 };
             }
         };
@@ -404,6 +517,7 @@ impl ChatFile {
         let user_files = UserFiles {
             histories,
             file_chunks,
+            file_keys,
         };
 
         // get chat file state for writing
@@ -1359,6 +1473,9 @@ mod tests {
             file_size: 1,
             sent_at: 0,
             received_at: 0,
+            // legacy per-recipient path — this test doesn't exercise
+            // the envelope binding
+            body_digest: Vec::new(),
         };
 
         // A confirms 1 of 2: not complete yet
@@ -1373,5 +1490,56 @@ mod tests {
         assert!(!fh.reception_confirmed(b));
         assert!(fh.reception_confirmed(b));
         assert!(matches!(fh.file_state, FileState::ConfirmedByAll));
+    }
+}
+
+#[cfg(test)]
+mod file_key_store_tests {
+    use super::{FileKey, UserFiles};
+
+    /// Build an in-memory `UserFiles` backed by temporary sled trees.
+    fn test_user_files() -> UserFiles {
+        let db = sled::Config::new().temporary(true).open().unwrap();
+        UserFiles {
+            histories: db.open_tree("chat_file").unwrap(),
+            file_chunks: db.open_tree("file_chunks").unwrap(),
+            file_keys: db.open_tree("file_keys").unwrap(),
+        }
+    }
+
+    fn key(file_id: u64, stored_at: u64) -> FileKey {
+        FileKey {
+            file_id,
+            group_id: vec![1, 2, 3],
+            file_key: vec![7u8; 32],
+            body_digest: vec![9u8; 32],
+            stored_at,
+            locally_generated: false,
+        }
+    }
+
+    #[test]
+    fn save_get_delete_roundtrip() {
+        let uf = test_user_files();
+        assert!(uf.get_file_key(42).is_none());
+        uf.save_file_key(&key(42, 1000));
+        let got = uf.get_file_key(42).expect("stored key");
+        assert_eq!(got.file_id, 42);
+        assert_eq!(got.file_key, vec![7u8; 32]);
+        assert_eq!(got.body_digest, vec![9u8; 32]);
+        uf.delete_file_key(42);
+        assert!(uf.get_file_key(42).is_none());
+    }
+
+    #[test]
+    fn prune_drops_only_expired() {
+        let uf = test_user_files();
+        uf.save_file_key(&key(1, 1_000)); // old
+        uf.save_file_key(&key(2, 9_000)); // fresh
+        // now = 10_000, ttl = 5_000 → entry 1 (age 9000) expired,
+        // entry 2 (age 1000) kept.
+        uf.prune_expired_file_keys(10_000, 5_000);
+        assert!(uf.get_file_key(1).is_none(), "expired key pruned");
+        assert!(uf.get_file_key(2).is_some(), "fresh key kept");
     }
 }
