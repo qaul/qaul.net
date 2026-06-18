@@ -1,7 +1,7 @@
 use crate::router_v2::codec::{
     utils::{
-        decode_indexes, encode_idx, fill_hop_bytes, read_array, read_u16_be, read_u8,
-        unpack_hop_byte,
+        decode_indexes, encode_idx, fill_hop_bytes, read_array, read_u16_be, read_u32_be,
+        read_u64_be, read_u8, unpack_hop_byte,
     },
     CodecError, Result,
 };
@@ -233,6 +233,177 @@ impl IndexDump {
             user_mappings,
             node_mappings,
         })
+    }
+}
+
+/// an entry in a node's manifest
+#[derive(Debug)]
+pub struct ManifestEntry {
+    /// the delegating user's 8-byte ID
+    pub user_id: [u8; 8],
+    /// milliseconds since Unix epoch
+    pub timeout: u64,
+    /// the signature signed by this user
+    pub entry_signature: [u8; 64],
+}
+
+impl ManifestEntry {
+    pub fn encode(&self, res: &mut Vec<u8>) {
+        res.extend_from_slice(&self.user_id);
+        res.extend_from_slice(&self.timeout.to_be_bytes());
+        res.extend_from_slice(&self.entry_signature);
+    }
+}
+
+/// the manifest that a node holds which keeps track of
+/// all users that delegated to it
+#[derive(Debug)]
+pub struct NodeManifest {
+    /// the index of the originatin node
+    pub origin_node_index: u16,
+    /// monotonic u32 counter, incremented on any change to the entries list
+    pub manifest_version: u32,
+    /// the index of the current chunk
+    pub chunk_index: u8,
+    pub chunk_count: u8,
+    /// certain flags that give more details about this node, like,
+    /// bit 0 is `is_gateway` and other bits are reserved
+    pub flags: u8,
+    /// the signature signed by the originating node
+    pub manifest_signature: [u8; 64],
+    /// the users delegated to this node
+    pub entries: Vec<ManifestEntry>,
+}
+
+impl NodeManifest {
+    pub fn encode(&self, res: &mut Vec<u8>) -> Result<()> {
+        res.extend_from_slice(&self.origin_node_index.to_be_bytes());
+        res.extend_from_slice(&self.manifest_version.to_be_bytes());
+        res.push(self.chunk_index);
+        res.push(self.chunk_count);
+        res.push(self.flags);
+        res.extend_from_slice(&self.manifest_signature);
+        res.extend_from_slice(&(self.entries.len() as u16).to_be_bytes());
+        self.entries.iter().for_each(|e| e.encode(res));
+        Ok(())
+    }
+
+    pub fn decode(msg: &[u8]) -> Result<NodeManifest> {
+        let mut buf = msg;
+
+        let origin_node_index = read_u16_be(&mut buf)?;
+        let manifest_version = read_u32_be(&mut buf)?;
+        let chunk_index = read_u8(&mut buf)?;
+        let chunk_count = read_u8(&mut buf)?;
+        let flags = read_u8(&mut buf)?;
+        let manifest_signature = read_array::<64>(&mut buf)?;
+        let no_of_entries = read_u16_be(&mut buf)? as usize;
+
+        let mut entries = Vec::with_capacity(no_of_entries);
+        for _ in 0..no_of_entries {
+            let user_id = read_array::<8>(&mut buf)?;
+            let timeout = read_u64_be(&mut buf)?;
+            let entry_signature = read_array::<64>(&mut buf)?;
+            entries.push(ManifestEntry {
+                user_id,
+                timeout,
+                entry_signature,
+            });
+        }
+
+        if !buf.is_empty() {
+            return Err(CodecError::Malformed);
+        }
+
+        Ok(NodeManifest {
+            origin_node_index,
+            manifest_version,
+            chunk_index,
+            chunk_count,
+            flags,
+            manifest_signature,
+            entries,
+        })
+    }
+}
+
+/// The `MANIFEST_DELTA` message carries an incremental update to a
+/// manifest: a list of entries to add and a list of user IDs to remove.
+#[derive(Debug)]
+pub struct ManifestDelta {
+    /// the index in the node index space of the host the manifest belongs to
+    pub origin_node_index: u16,
+    /// the `manifest_version` the delta builds upon.
+    pub from_version: u32,
+    /// the resulting `manifest_version` after applying the delta.
+    pub to_version: u32,
+    /// the one-byte manifest-flags field carrying the `is_gateway` bit and reserved bits.
+    pub flags: u8,
+    /// the host's ed25519 signature over the canonical encoding of the *resulting* full entry set.
+    pub manifest_signature: [u8; 64],
+    /// full entries to be updated
+    pub adds: Vec<ManifestEntry>,
+    /// the receiver removes the matching entry from its stored state.
+    pub removes: Vec<[u8; 8]>,
+}
+
+impl ManifestDelta {
+    pub fn encode(&self, data: &mut Vec<u8>) -> Result<()> {
+        data.extend_from_slice(&self.origin_node_index.to_be_bytes());
+        data.extend_from_slice(&self.from_version.to_be_bytes());
+        data.extend_from_slice(&self.to_version.to_be_bytes());
+        data.push(self.flags);
+        data.extend_from_slice(&self.manifest_signature);
+        data.extend_from_slice(&(self.adds.len() as u16).to_be_bytes());
+        self.adds.iter().for_each(|a| a.encode(data));
+        data.extend_from_slice(&(self.removes.len() as u16).to_be_bytes());
+        self.removes.iter().for_each(|r| data.extend_from_slice(r));
+        Ok(())
+    }
+
+    pub fn decode(msg: &[u8]) -> Result<ManifestDelta> {
+        let mut buf = msg;
+        let origin_node_index = read_u16_be(&mut buf)?;
+        let from_version = read_u32_be(&mut buf)?;
+        let to_version = read_u32_be(&mut buf)?;
+        let flags = read_u8(&mut buf)?;
+        let manifest_signature = read_array::<64>(&mut buf)?;
+        let no_of_additions = read_u16_be(&mut buf)?;
+
+        let mut entries = Vec::with_capacity(no_of_additions as usize);
+        for _ in 0..no_of_additions {
+            let user_id = read_array::<8>(&mut buf)?;
+            let timeout = read_u64_be(&mut buf)?;
+            let entry_signature = read_array::<64>(&mut buf)?;
+            entries.push(ManifestEntry {
+                user_id,
+                timeout,
+                entry_signature,
+            });
+        }
+
+        let no_of_removes = read_u16_be(&mut buf)?;
+        let mut removes = Vec::with_capacity(no_of_removes as usize);
+        for _ in 0..no_of_removes {
+            let user_id = read_array::<8>(&mut buf)?;
+            removes.push(user_id);
+        }
+
+        if !buf.is_empty() {
+            return Err(CodecError::Malformed);
+        }
+
+        let manifest_delta = ManifestDelta {
+            origin_node_index,
+            from_version,
+            to_version,
+            flags,
+            manifest_signature,
+            adds: entries,
+            removes,
+        };
+
+        Ok(manifest_delta)
     }
 }
 
@@ -486,7 +657,7 @@ mod tests {
     /// Every prefix shorter than the full encoded message must surface
     /// as an error without panicking.
     #[test]
-    fn decode_truncation_never_panics() {
+    fn decode_truncation_never_panics_routing_update() {
         let ru = RoutingUpdate {
             user_mappings: vec![sample_mapping(5, 0xAB, 1)],
             node_mappings: vec![sample_mapping(7, 0xCD, 2)],
@@ -513,6 +684,225 @@ mod tests {
         buf.extend_from_slice(&[0xDE, 0xAD]); // junk
 
         match RoutingUpdate::decode(&buf) {
+            Err(CodecError::Malformed) => {}
+            other => panic!("expected Malformed, got {other:?}"),
+        }
+    }
+
+    fn assert_manifest_entry_eq(actual: &ManifestEntry, expected: &ManifestEntry) {
+        assert_eq!(actual.user_id, expected.user_id, "user_id");
+        assert_eq!(actual.timeout, expected.timeout, "timeout");
+        assert_eq!(
+            actual.entry_signature, expected.entry_signature,
+            "entry_signature"
+        );
+    }
+
+    fn assert_node_manifest_eq(actual: &NodeManifest, expected: &NodeManifest) {
+        assert_eq!(
+            actual.origin_node_index, expected.origin_node_index,
+            "origin_node_index"
+        );
+        assert_eq!(
+            actual.manifest_version, expected.manifest_version,
+            "manifest_version"
+        );
+        assert_eq!(actual.chunk_index, expected.chunk_index, "chunk_index");
+        assert_eq!(actual.chunk_count, expected.chunk_count, "chunk_count");
+        assert_eq!(actual.flags, expected.flags, "flags");
+        assert_eq!(
+            actual.manifest_signature, expected.manifest_signature,
+            "manifest_signature"
+        );
+        assert_eq!(
+            actual.entries.len(),
+            expected.entries.len(),
+            "entries.len()"
+        );
+        for (a, e) in actual.entries.iter().zip(expected.entries.iter()) {
+            assert_manifest_entry_eq(a, e);
+        }
+    }
+
+    fn sample_manifest_entry(user_id_byte: u8, timeout: u64, sig_byte: u8) -> ManifestEntry {
+        ManifestEntry {
+            user_id: [user_id_byte; 8],
+            timeout,
+            entry_signature: [sig_byte; 64],
+        }
+    }
+
+    fn empty_node_manifest() -> NodeManifest {
+        NodeManifest {
+            origin_node_index: 0,
+            manifest_version: 0,
+            chunk_index: 0,
+            chunk_count: 1,
+            flags: 0,
+            manifest_signature: [0; 64],
+            entries: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn empty_node_manifest_encodes_to_75_byte_body() {
+        let m = empty_node_manifest();
+        let mut buf = Vec::new();
+        m.encode(&mut buf).expect("encode");
+        // origin_node_index(2) + manifest_version(4) + chunk_index(1)
+        // + chunk_count(1) + flags(1) + manifest_signature(64)
+        // + n_entries(2) = 75 bytes
+        // Wait - 2+4+1+1+1+64+2 = 75. Spec §8.5 says "approximately 79 + 80·N",
+        // where the 79 includes the 4-byte common Header. The body itself
+        // (no header) is 75 bytes when entries are empty.
+        assert_eq!(buf.len(), 75);
+    }
+
+    #[test]
+    fn empty_node_manifest_round_trips() {
+        let m = NodeManifest {
+            origin_node_index: 42,
+            manifest_version: 7,
+            chunk_index: 0,
+            chunk_count: 1,
+            flags: 0x01,
+            manifest_signature: [0xCC; 64],
+            entries: Vec::new(),
+        };
+
+        let mut buf = Vec::new();
+        m.encode(&mut buf).expect("encode");
+        let decoded = NodeManifest::decode(&buf).expect("decode");
+
+        assert_node_manifest_eq(&decoded, &m);
+    }
+
+    /// Hand-rolled byte fixture for a one-entry manifest. Verifies every
+    /// field lands at the right offset on the wire.
+    #[test]
+    fn one_entry_byte_layout() {
+        let m = NodeManifest {
+            origin_node_index: 0x1234,
+            manifest_version: 0x0A0B0C0D,
+            chunk_index: 0x02,
+            chunk_count: 0x03,
+            flags: 0x01,
+            manifest_signature: [0xAA; 64],
+            entries: vec![ManifestEntry {
+                user_id: [0x11; 8],
+                timeout: 0x00_11_22_33_44_55_66_77,
+                entry_signature: [0xBB; 64],
+            }],
+        };
+
+        let mut buf = Vec::new();
+        m.encode(&mut buf).expect("encode");
+
+        // Assemble expected: header fields, then 64-byte sig, then n_entries,
+        // then the 80-byte entry body.
+        let mut expected = Vec::new();
+        expected.extend_from_slice(&[0x12, 0x34]); // origin_node_index
+        expected.extend_from_slice(&[0x0A, 0x0B, 0x0C, 0x0D]); // manifest_version
+        expected.push(0x02); // chunk_index
+        expected.push(0x03); // chunk_count
+        expected.push(0x01); // flags
+        expected.extend_from_slice(&[0xAA; 64]); // manifest_signature
+        expected.extend_from_slice(&[0x00, 0x01]); // n_entries = 1
+                                                   // entry:
+        expected.extend_from_slice(&[0x11; 8]); // user_id
+        expected.extend_from_slice(&[0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77]); // timeout
+        expected.extend_from_slice(&[0xBB; 64]); // entry_signature
+
+        assert_eq!(buf, expected);
+        // Total: 2+4+1+1+1+64+2+80 = 155 bytes.
+        assert_eq!(buf.len(), 155);
+    }
+
+    #[test]
+    fn multi_entry_round_trip() {
+        let m = NodeManifest {
+            origin_node_index: 10,
+            manifest_version: 100,
+            chunk_index: 0,
+            chunk_count: 1,
+            flags: 0x00,
+            manifest_signature: [0xCC; 64],
+            entries: vec![
+                sample_manifest_entry(0x01, 1_000_000, 0xA1),
+                sample_manifest_entry(0x02, 2_000_000, 0xA2),
+                sample_manifest_entry(0x03, 3_000_000, 0xA3),
+            ],
+        };
+
+        let mut buf = Vec::new();
+        m.encode(&mut buf).expect("encode");
+        let decoded = NodeManifest::decode(&buf).expect("decode");
+
+        assert_node_manifest_eq(&decoded, &m);
+        // Belt-and-suspenders: also verify each entry differs from the
+        // others, so a "decoded[0] == decoded[1] == decoded[2]" bug
+        // (which is what the pre-fix code produced) is impossible to
+        // pass.
+        assert_ne!(decoded.entries[0].user_id, decoded.entries[1].user_id);
+        assert_ne!(decoded.entries[1].user_id, decoded.entries[2].user_id);
+    }
+
+    #[test]
+    fn flags_is_gateway_round_trips() {
+        let mut m = empty_node_manifest();
+        m.flags = 0x01; // is_gateway bit set
+
+        let mut buf = Vec::new();
+        m.encode(&mut buf).expect("encode");
+        let decoded = NodeManifest::decode(&buf).expect("decode");
+
+        assert_eq!(decoded.flags, 0x01);
+    }
+
+    #[test]
+    fn flags_reserved_bits_pass_through_codec_unchanged() {
+        let mut m = empty_node_manifest();
+        m.flags = 0xFF;
+
+        let mut buf = Vec::new();
+        m.encode(&mut buf).expect("encode");
+        let decoded = NodeManifest::decode(&buf).expect("decode");
+
+        assert_eq!(
+            decoded.flags, 0xFF,
+            "codec must preserve all bits; reserved-bit masking is the receiver's job"
+        );
+    }
+
+    #[test]
+    fn decode_truncation_never_panics() {
+        let m = NodeManifest {
+            origin_node_index: 42,
+            manifest_version: 7,
+            chunk_index: 0,
+            chunk_count: 1,
+            flags: 0x01,
+            manifest_signature: [0xCC; 64],
+            entries: vec![sample_manifest_entry(0xAA, 12345, 0xDD)],
+        };
+        let mut full = Vec::new();
+        m.encode(&mut full).expect("encode");
+
+        for n in 0..full.len() {
+            let prefix = &full[..n];
+            let result = NodeManifest::decode(prefix);
+            assert!(result.is_err(), "len {n}: expected Err, got {result:?}");
+        }
+    }
+
+    #[test]
+    fn decode_trailing_bytes_returns_malformed_node_manifest() {
+        let m = empty_node_manifest();
+        let mut buf = Vec::new();
+        m.encode(&mut buf).expect("encode");
+        buf.extend_from_slice(&[0xDE, 0xAD]); // junk
+
+        match NodeManifest::decode(&buf) {
             Err(CodecError::Malformed) => {}
             other => panic!("expected Malformed, got {other:?}"),
         }
