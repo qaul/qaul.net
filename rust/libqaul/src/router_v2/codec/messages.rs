@@ -1,7 +1,9 @@
 use crate::router_v2::codec::{
-    CodecError, Result, utils::{
-        decode_indexes, encode_idx, fill_hop_bytes, read_array, read_u8, read_u16_be, unpack_hop_byte
-    }
+    utils::{
+        decode_indexes, encode_idx, fill_hop_bytes, read_array, read_u16_be, read_u8,
+        unpack_hop_byte,
+    },
+    CodecError, Result,
 };
 
 /// User/Node mappings for the current node
@@ -40,6 +42,13 @@ pub struct RoutingUpdate {
     pub node_mappings: Vec<Mapping>,
     pub user_entries: Vec<Entry>,
     pub node_entries: Vec<Entry>,
+}
+
+/// The INDEX_DUMP wire message.
+#[derive(Debug)]
+pub struct IndexDump {
+    pub user_mappings: Vec<Mapping>,
+    pub node_mappings: Vec<Mapping>,
 }
 
 impl RoutingUpdate {
@@ -164,6 +173,69 @@ impl RoutingUpdate {
     }
 }
 
+impl IndexDump {
+    pub fn encode(&self, res: &mut Vec<u8>) -> Result<()> {
+        res.extend_from_slice(&(self.user_mappings.len() as u16).to_be_bytes());
+        let mut cursor = 0u16;
+        for m in &self.user_mappings {
+            encode_idx(m.abs_idx, &mut cursor, res);
+            res.extend_from_slice(&m.target_id);
+            res.extend_from_slice(&m.version.to_be_bytes());
+        }
+
+        res.extend_from_slice(&(self.node_mappings.len() as u16).to_be_bytes());
+        let mut cursor = 0u16;
+        for m in &self.node_mappings {
+            encode_idx(m.abs_idx, &mut cursor, res);
+            res.extend_from_slice(&m.target_id);
+            res.extend_from_slice(&m.version.to_be_bytes());
+        }
+
+        Ok(())
+    }
+
+    pub fn decode(msg: &[u8]) -> Result<IndexDump> {
+        let mut buf = msg;
+
+        let n_user = read_u16_be(&mut buf)? as usize;
+        let mut cursor = 0u16;
+        let mut user_mappings = Vec::with_capacity(n_user);
+        for _ in 0..n_user {
+            let abs_idx = decode_indexes(&mut buf, &mut cursor)?;
+            let target_id = read_array::<8>(&mut buf)?;
+            let version = u32::from_be_bytes(read_array::<4>(&mut buf)?);
+            user_mappings.push(Mapping {
+                abs_idx,
+                target_id,
+                version,
+            });
+        }
+
+        let n_node = read_u16_be(&mut buf)? as usize;
+        let mut cursor = 0u16;
+        let mut node_mappings = Vec::with_capacity(n_node);
+        for _ in 0..n_node {
+            let abs_idx = decode_indexes(&mut buf, &mut cursor)?;
+            let target_id = read_array::<8>(&mut buf)?;
+            let version = u32::from_be_bytes(read_array::<4>(&mut buf)?);
+            node_mappings.push(Mapping {
+                abs_idx,
+                target_id,
+                version,
+            });
+        }
+
+        if !buf.is_empty() {
+            return Err(CodecError::Malformed);
+        }
+
+        Ok(IndexDump {
+            user_mappings,
+            node_mappings,
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -230,7 +302,6 @@ mod tests {
         assert!(decoded.user_entries.is_empty());
         assert!(decoded.node_entries.is_empty());
     }
-
 
     #[test]
     fn one_user_mapping_byte_layout() {
@@ -333,7 +404,6 @@ mod tests {
         assert_entry_eq(&decoded.node_entries[0], &ru.node_entries[0]);
     }
 
-
     #[test]
     fn local_only_true_sets_bit_7_of_hop_byte() {
         let mut ru = empty_routing_update();
@@ -412,7 +482,6 @@ mod tests {
             assert_entry_eq(a, b);
         }
     }
-
 
     /// Every prefix shorter than the full encoded message must surface
     /// as an error without panicking.
