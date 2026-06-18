@@ -73,6 +73,26 @@ pub fn read_u16_be(buf: &mut &[u8]) -> Result<u16, CodecError> {
     Ok(v)
 }
 
+pub fn read_u32_be(buf: &mut &[u8]) -> Result<u32, CodecError> {
+    if buf.len() < 4 {
+        return Err(CodecError::Short);
+    }
+    let v = u32::from_be_bytes([buf[0], buf[1], buf[2], buf[3]]);
+    *buf = &buf[4..];
+    Ok(v)
+}
+
+pub fn read_u64_be(buf: &mut &[u8]) -> Result<u64, CodecError> {
+    if buf.len() < 8 {
+        return Err(CodecError::Short);
+    }
+    let v = u64::from_be_bytes([
+        buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7],
+    ]);
+    *buf = &buf[8..];
+    Ok(v)
+}
+
 pub fn read_array<const N: usize>(buf: &mut &[u8]) -> Result<[u8; N], CodecError> {
     if buf.len() < N {
         return Err(CodecError::Short);
@@ -84,7 +104,7 @@ pub fn read_array<const N: usize>(buf: &mut &[u8]) -> Result<[u8; N], CodecError
 }
 
 pub fn unpack_hop_byte(byte: u8) -> (u8, bool) {
-    let hop_count = byte & 0b0011_1111;  // mask bits 0..=5
+    let hop_count = byte & 0b0011_1111; // mask bits 0..=5
     let local_only = (byte & 0b1000_0000) != 0;
     // bit 6 is masked off intentionally as mentioned in the spec
     (hop_count, local_only)
