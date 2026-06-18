@@ -2,7 +2,7 @@
 /// Cryptoservice sending container
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct CryptoserviceContainer {
-    #[prost(oneof = "cryptoservice_container::Message", tags = "1")]
+    #[prost(oneof = "cryptoservice_container::Message", tags = "1, 2, 3")]
     pub message: ::core::option::Option<cryptoservice_container::Message>,
 }
 /// Nested message and enum types in `CryptoserviceContainer`.
@@ -12,6 +12,15 @@ pub mod cryptoservice_container {
         /// Second Handshake Message
         #[prost(message, tag = "1")]
         SecondHandshake(super::SecondHandshake),
+        /// Group-file envelope: distributes a per-file symmetric key to
+        /// one group member under the existing per-peer session. See
+        /// docs/proposals/Efficient-Group-File-Encryption.md.
+        #[prost(message, tag = "2")]
+        FileKeyEnvelope(super::FileKeyEnvelope),
+        /// Request from a (late-joining) member to be sent the file key
+        /// for a file whose body it already has / can fetch.
+        #[prost(message, tag = "3")]
+        FileKeyRelayRequest(super::FileKeyRelayRequest),
     }
 }
 /// Second Handshake Message
@@ -23,4 +32,42 @@ pub struct SecondHandshake {
     /// received at timestamp
     #[prost(uint64, tag = "2")]
     pub received_at: u64,
+}
+/// Per-file content key, delivered to each current group member under
+/// that member's per-peer Noise session (so it inherits session PFS).
+/// The file body itself is encrypted once under `file_key` and
+/// distributed separately; `body_digest` binds this envelope to exactly
+/// that body.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct FileKeyEnvelope {
+    /// The file this key decrypts (matches FileHistory / FileHeader id).
+    #[prost(uint64, tag = "1")]
+    pub file_id: u64,
+    /// The group the file belongs to.
+    #[prost(bytes = "vec", tag = "2")]
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
+    /// 32-byte ChaCha20-Poly1305 content key for the file body.
+    #[prost(bytes = "vec", tag = "3")]
+    pub file_key: ::prost::alloc::vec::Vec<u8>,
+    /// SHA-256 of the encrypted body; must match the distributed body
+    /// before the receiver decrypts (prevents envelope/body mismatch).
+    #[prost(bytes = "vec", tag = "4")]
+    pub body_digest: ::prost::alloc::vec::Vec<u8>,
+    /// Sender's local timestamp (ms). Display/diagnostics only.
+    #[prost(uint64, tag = "5")]
+    pub sent_at: u64,
+    /// libp2p PeerId bytes of the sender.
+    #[prost(bytes = "vec", tag = "6")]
+    pub sender_id: ::prost::alloc::vec::Vec<u8>,
+}
+/// Ask a peer (a current member that holds the key) to relay the file
+/// key for `file_id` — used by members who joined after the original
+/// send. Answered with a FileKeyEnvelope under the requester's session,
+/// gated by GroupFiles.allow_key_relay and rate-limited.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct FileKeyRelayRequest {
+    #[prost(uint64, tag = "1")]
+    pub file_id: u64,
+    #[prost(bytes = "vec", tag = "2")]
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
 }

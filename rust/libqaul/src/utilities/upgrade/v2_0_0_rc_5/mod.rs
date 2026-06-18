@@ -144,6 +144,9 @@ impl VersionUpgrade {
                 user_accounts,
                 debug,
                 routing,
+                // upgrade path: group-file envelope config didn't exist
+                // before; seed with conservative defaults (disabled).
+                group_files: crate::storage::configuration::GroupFiles::default(),
             };
 
             // save new configuration to file

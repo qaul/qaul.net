@@ -253,6 +253,42 @@ impl Default for StorageOptions {
     }
 }
 
+/// Group-file envelope-encryption configuration.
+///
+/// Controls the hybrid ("envelope") encryption of group files: encrypt
+/// the body once under a random per-file key and distribute that key to
+/// each member under their per-peer session, instead of encrypting the
+/// whole file once per recipient. See
+/// `docs/proposals/Efficient-Group-File-Encryption.md`.
+///
+/// Defaults ship with `envelope_enabled = false` so a node that upgrades
+/// keeps today's per-recipient behaviour until an operator opts in.
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct GroupFiles {
+    /// Master switch. When `false`, group files use the legacy
+    /// per-recipient body encryption.
+    pub envelope_enabled: bool,
+    /// Whether this node answers `FileKeyRelayRequest`s from members
+    /// who joined after a file was sent.
+    pub allow_key_relay: bool,
+    /// How long a received file key (awaiting its body) or a locally
+    /// held key (for relay) is retained before expiry.
+    pub envelope_ttl_seconds: u64,
+    /// Rate limit on answered relay requests, per peer.
+    pub max_relay_requests_per_minute: u32,
+}
+
+impl Default for GroupFiles {
+    fn default() -> Self {
+        GroupFiles {
+            envelope_enabled: false,
+            allow_key_relay: true,
+            envelope_ttl_seconds: 30 * 24 * 3600, // 30 days
+            max_relay_requests_per_minute: 30,
+        }
+    }
+}
+
 /// Configuration Structure of libqaul
 ///
 /// This structure contains the entire configuration of libqaul.
@@ -270,6 +306,11 @@ pub struct Configuration {
     pub user_accounts: Vec<UserAccount>,
     pub debug: DebugOption,
     pub routing: RoutingOptions,
+    /// Group-file envelope-encryption config. `#[serde(default)]` so
+    /// existing `config.yaml` files (which predate this section) load
+    /// with the conservative defaults (envelope disabled).
+    #[serde(default)]
+    pub group_files: GroupFiles,
 }
 
 impl Default for Configuration {
@@ -282,6 +323,7 @@ impl Default for Configuration {
             user_accounts: Vec::new(),
             debug: DebugOption::default(),
             routing: RoutingOptions::default(),
+            group_files: GroupFiles::default(),
         }
     }
 }
