@@ -81,6 +81,7 @@ android_logger = "0.15"
 
 [dev-dependencies]
 tempfile = "3"
+proptest = "1.11.0"
 
 # linting rules
 [lints.rust]
