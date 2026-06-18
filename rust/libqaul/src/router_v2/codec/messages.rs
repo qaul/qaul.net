@@ -908,3 +908,293 @@ mod tests {
         }
     }
 }
+
+#[cfg(test)]
+mod proptests {
+    use super::*;
+    use crate::router_v2::codec::utils::{decode_indexes, encode_indexes};
+    use proptest::prelude::*;
+
+
+    fn arb_signature() -> impl Strategy<Value = [u8; 64]> {
+        prop::collection::vec(any::<u8>(), 64..=64).prop_map(|v| {
+            let mut arr = [0u8; 64];
+            arr.copy_from_slice(&v);
+            arr
+        })
+    }
+
+    fn arb_mapping_vec(max: usize) -> impl Strategy<Value = Vec<Mapping>> {
+        prop::collection::vec((any::<u16>(), any::<[u8; 8]>(), any::<u32>()), 0..=max).prop_map(
+            |mut items| {
+                items.sort_by_key(|(idx, _, _)| *idx);
+                items.dedup_by_key(|(idx, _, _)| *idx);
+                items
+                    .into_iter()
+                    .map(|(abs_idx, target_id, version)| Mapping {
+                        abs_idx,
+                        target_id,
+                        version,
+                    })
+                    .collect()
+            },
+        )
+    }
+
+    fn arb_entry_vec(max: usize) -> impl Strategy<Value = Vec<Entry>> {
+        prop::collection::vec(
+            (
+                any::<u16>(),
+                any::<u16>(),
+                any::<u16>(),
+                any::<u8>(),
+                any::<bool>(),
+            ),
+            0..=max,
+        )
+        .prop_map(|mut items| {
+            items.sort_by_key(|(idx, _, _, _, _)| *idx);
+            items.dedup_by_key(|(idx, _, _, _, _)| *idx);
+            items
+                .into_iter()
+                .map(|(abs_idx, seq, metric, hop, local_only)| Entry {
+                    abs_idx,
+                    seq,
+                    metric,
+                    hop_count: hop & 0b0011_1111,
+                    local_only,
+                })
+                .collect()
+        })
+    }
+
+    fn arb_manifest_entry_vec(max: usize) -> impl Strategy<Value = Vec<ManifestEntry>> {
+        prop::collection::vec(
+            (any::<[u8; 8]>(), any::<u64>(), arb_signature()).prop_map(
+                |(user_id, timeout, entry_signature)| ManifestEntry {
+                    user_id,
+                    timeout,
+                    entry_signature,
+                },
+            ),
+            0..=max,
+        )
+    }
+
+    fn arb_remove_vec(max: usize) -> impl Strategy<Value = Vec<[u8; 8]>> {
+        prop::collection::vec(any::<[u8; 8]>(), 0..=max)
+    }
+
+    proptest! {
+        #[test]
+        fn delta_encode_decode_round_trips(
+            input in prop::collection::vec(any::<u16>(), 0..200)
+        ) {
+            let mut sorted = input;
+            sorted.sort();
+            sorted.dedup();
+
+            let mut bytes = Vec::new();
+            encode_indexes(&sorted, &mut bytes);
+
+            let mut buf: &[u8] = &bytes;
+            let mut cursor = 0u16;
+            let mut decoded = Vec::with_capacity(sorted.len());
+            for _ in 0..sorted.len() {
+                decoded.push(decode_indexes(&mut buf, &mut cursor).unwrap());
+            }
+
+            prop_assert_eq!(decoded, sorted);
+            prop_assert!(buf.is_empty());
+        }
+
+        #[test]
+        fn routing_update_round_trips(
+            user_mappings in arb_mapping_vec(50),
+            node_mappings in arb_mapping_vec(50),
+            user_entries in arb_entry_vec(50),
+            node_entries in arb_entry_vec(50),
+        ) {
+            let ru = RoutingUpdate { user_mappings, node_mappings, user_entries, node_entries };
+
+            let mut buf = Vec::new();
+            ru.encode(&mut buf).unwrap();
+            let decoded = RoutingUpdate::decode(&buf).unwrap();
+
+            prop_assert_eq!(decoded.user_mappings.len(), ru.user_mappings.len());
+            prop_assert_eq!(decoded.node_mappings.len(), ru.node_mappings.len());
+            prop_assert_eq!(decoded.user_entries.len(), ru.user_entries.len());
+            prop_assert_eq!(decoded.node_entries.len(), ru.node_entries.len());
+
+            for (a, b) in decoded.user_mappings.iter().zip(ru.user_mappings.iter()) {
+                prop_assert_eq!(a.abs_idx, b.abs_idx);
+                prop_assert_eq!(a.target_id, b.target_id);
+                prop_assert_eq!(a.version, b.version);
+            }
+            for (a, b) in decoded.node_mappings.iter().zip(ru.node_mappings.iter()) {
+                prop_assert_eq!(a.abs_idx, b.abs_idx);
+                prop_assert_eq!(a.target_id, b.target_id);
+                prop_assert_eq!(a.version, b.version);
+            }
+            for (a, b) in decoded.user_entries.iter().zip(ru.user_entries.iter()) {
+                prop_assert_eq!(a.abs_idx, b.abs_idx);
+                prop_assert_eq!(a.seq, b.seq);
+                prop_assert_eq!(a.metric, b.metric);
+                prop_assert_eq!(a.hop_count, b.hop_count);
+                prop_assert_eq!(a.local_only, b.local_only);
+            }
+            for (a, b) in decoded.node_entries.iter().zip(ru.node_entries.iter()) {
+                prop_assert_eq!(a.abs_idx, b.abs_idx);
+                prop_assert_eq!(a.seq, b.seq);
+                prop_assert_eq!(a.metric, b.metric);
+                prop_assert_eq!(a.hop_count, b.hop_count);
+                prop_assert_eq!(a.local_only, b.local_only);
+            }
+        }
+
+        #[test]
+        fn index_dump_round_trips(
+            user_mappings in arb_mapping_vec(200),
+            node_mappings in arb_mapping_vec(200),
+        ) {
+            let dump = IndexDump { user_mappings, node_mappings };
+            let mut buf = Vec::new();
+            dump.encode(&mut buf).unwrap();
+            let decoded = IndexDump::decode(&buf).unwrap();
+
+            prop_assert_eq!(decoded.user_mappings.len(), dump.user_mappings.len());
+            prop_assert_eq!(decoded.node_mappings.len(), dump.node_mappings.len());
+            for (a, b) in decoded.user_mappings.iter().zip(dump.user_mappings.iter()) {
+                prop_assert_eq!(a.abs_idx, b.abs_idx);
+                prop_assert_eq!(a.target_id, b.target_id);
+                prop_assert_eq!(a.version, b.version);
+            }
+            for (a, b) in decoded.node_mappings.iter().zip(dump.node_mappings.iter()) {
+                prop_assert_eq!(a.abs_idx, b.abs_idx);
+                prop_assert_eq!(a.target_id, b.target_id);
+                prop_assert_eq!(a.version, b.version);
+            }
+        }
+
+        #[test]
+        fn node_manifest_round_trips(
+            origin_node_index in any::<u16>(),
+            manifest_version in any::<u32>(),
+            chunk_index in any::<u8>(),
+            chunk_count in 1u8..=255u8,
+            flags in any::<u8>(),
+            manifest_signature in arb_signature(),
+            entries in arb_manifest_entry_vec(30),
+        ) {
+            let m = NodeManifest {
+                origin_node_index, manifest_version, chunk_index, chunk_count,
+                flags, manifest_signature, entries,
+            };
+
+            let mut buf = Vec::new();
+            m.encode(&mut buf).unwrap();
+            let decoded = NodeManifest::decode(&buf).unwrap();
+
+            prop_assert_eq!(decoded.origin_node_index, m.origin_node_index);
+            prop_assert_eq!(decoded.manifest_version, m.manifest_version);
+            prop_assert_eq!(decoded.chunk_index, m.chunk_index);
+            prop_assert_eq!(decoded.chunk_count, m.chunk_count);
+            prop_assert_eq!(decoded.flags, m.flags);
+            prop_assert_eq!(decoded.manifest_signature, m.manifest_signature);
+            prop_assert_eq!(decoded.entries.len(), m.entries.len());
+            for (a, b) in decoded.entries.iter().zip(m.entries.iter()) {
+                prop_assert_eq!(a.user_id, b.user_id);
+                prop_assert_eq!(a.timeout, b.timeout);
+                prop_assert_eq!(a.entry_signature, b.entry_signature);
+            }
+        }
+
+        #[test]
+        fn manifest_delta_round_trips(
+            origin_node_index in any::<u16>(),
+            from_version in any::<u32>(),
+            to_version in any::<u32>(),
+            flags in any::<u8>(),
+            manifest_signature in arb_signature(),
+            adds in arb_manifest_entry_vec(30),
+            removes in arb_remove_vec(30),
+        ) {
+            let d = ManifestDelta {
+                origin_node_index, from_version, to_version, flags,
+                manifest_signature, adds, removes,
+            };
+
+            let mut buf = Vec::new();
+            d.encode(&mut buf).unwrap();
+            let decoded = ManifestDelta::decode(&buf).unwrap();
+
+            prop_assert_eq!(decoded.origin_node_index, d.origin_node_index);
+            prop_assert_eq!(decoded.from_version, d.from_version);
+            prop_assert_eq!(decoded.to_version, d.to_version);
+            prop_assert_eq!(decoded.flags, d.flags);
+            prop_assert_eq!(decoded.manifest_signature, d.manifest_signature);
+            prop_assert_eq!(decoded.adds.len(), d.adds.len());
+            for (a, b) in decoded.adds.iter().zip(d.adds.iter()) {
+                prop_assert_eq!(a.user_id, b.user_id);
+                prop_assert_eq!(a.timeout, b.timeout);
+                prop_assert_eq!(a.entry_signature, b.entry_signature);
+            }
+            prop_assert_eq!(decoded.removes.len(), d.removes.len());
+            for (a, b) in decoded.removes.iter().zip(d.removes.iter()) {
+                prop_assert_eq!(a, b);
+            }
+        }
+    }
+
+
+    proptest! {
+        /// Arbitrary byte sequences must produce a CodecError or success
+        /// — NEVER panic. The load-bearing security property: routing
+        /// messages come from untrusted peers, and a panic on bad input
+        /// would crash the node.
+        #[test]
+        fn routing_update_decode_never_panics(
+            bytes in prop::collection::vec(any::<u8>(), 0..4096)
+        ) {
+            let _ = RoutingUpdate::decode(&bytes);
+        }
+
+        #[test]
+        fn index_dump_decode_never_panics(
+            bytes in prop::collection::vec(any::<u8>(), 0..4096)
+        ) {
+            let _ = IndexDump::decode(&bytes);
+        }
+
+        #[test]
+        fn node_manifest_decode_never_panics(
+            bytes in prop::collection::vec(any::<u8>(), 0..4096)
+        ) {
+            let _ = NodeManifest::decode(&bytes);
+        }
+
+        #[test]
+        fn manifest_delta_decode_never_panics(
+            bytes in prop::collection::vec(any::<u8>(), 0..4096)
+        ) {
+            let _ = ManifestDelta::decode(&bytes);
+        }
+
+        #[test]
+        fn delta_decode_indexes_never_panics(
+            bytes in prop::collection::vec(any::<u8>(), 0..1024),
+            initial_cursor in any::<u16>(),
+        ) {
+            let mut buf: &[u8] = &bytes;
+            let mut cursor = initial_cursor;
+            for _ in 0..256 {
+                if decode_indexes(&mut buf, &mut cursor).is_err() {
+                    break;
+                }
+                if buf.is_empty() {
+                    break;
+                }
+            }
+        }
+    }
+}
