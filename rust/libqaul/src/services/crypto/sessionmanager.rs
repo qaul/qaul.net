@@ -67,13 +67,12 @@ impl CryptoSessionManager {
                 Some(proto_net::cryptoservice_container::Message::RotateFinal(rotate_final)) => {
                     Self::process_rotate_final(state, &user_account, sender_id, rotate_final);
                 }
-                Some(proto_net::cryptoservice_container::Message::FileKeyEnvelope(_envelope)) => {
-                    // Group-file envelope receive path is wired in a
-                    // later phase; the variant is acknowledged here so
-                    // the new wire shape already decodes.
-                    log::trace!(
-                        "received FileKeyEnvelope from {} (handler not yet wired)",
-                        sender_id.to_base58()
+                Some(proto_net::cryptoservice_container::Message::FileKeyEnvelope(envelope)) => {
+                    crate::services::chat::file::ChatFile::process_file_key_envelope(
+                        state,
+                        &user_account,
+                        sender_id,
+                        envelope,
                     );
                 }
                 Some(proto_net::cryptoservice_container::Message::FileKeyRelayRequest(_req)) => {
@@ -466,6 +465,35 @@ impl CryptoSessionManager {
         Self::wrap_cryptoservice(container)
     }
 
+    /// Build a `Messaging { CryptoService { FileKeyEnvelope } }` byte
+    /// payload carrying a group-file content key. Sent to one member
+    /// under the per-peer session (via `pack_and_send_message`), so the
+    /// key is delivered confidentially with the session's PFS.
+    pub fn create_file_key_envelope_message(
+        file_id: u64,
+        group_id: Vec<u8>,
+        file_key: Vec<u8>,
+        body_digest: Vec<u8>,
+        sender_id: Vec<u8>,
+        sent_at: u64,
+    ) -> Vec<u8> {
+        let container = proto_net::CryptoserviceContainer {
+            message: Some(
+                proto_net::cryptoservice_container::Message::FileKeyEnvelope(
+                    proto_net::FileKeyEnvelope {
+                        file_id,
+                        group_id,
+                        file_key,
+                        body_digest,
+                        sent_at,
+                        sender_id,
+                    },
+                ),
+            ),
+        };
+        Self::wrap_cryptoservice(container)
+    }
+
     /// Encode a `CryptoserviceContainer` and wrap it in a
     /// `Messaging::CryptoService` frame ready to be encrypted and
     /// handed to `Messaging::pack_and_send_encrypted_data`.
@@ -482,7 +510,6 @@ impl CryptoSessionManager {
                 },
             )),
         };
-
         let mut out = Vec::with_capacity(messaging_message.encoded_len());
         messaging_message
             .encode(&mut out)
