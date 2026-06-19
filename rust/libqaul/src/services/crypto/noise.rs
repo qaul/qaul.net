@@ -837,13 +837,16 @@ impl CryptoNoise {
 
         // Emit a `Rotated` event so clients can surface the state
         // transition to the UI.
-        events::record(RotationEvent {
-            kind: RotationEventKind::Rotated,
-            remote_id,
-            primary_session_id: incoming.new_session_id,
-            draining_session_id: old_primary,
-            timestamp_ms: now_ms,
-        });
+        events::record(
+            &storage,
+            RotationEvent {
+                kind: RotationEventKind::Rotated,
+                remote_id,
+                primary_session_id: incoming.new_session_id,
+                draining_session_id: old_primary,
+                timestamp_ms: now_ms,
+            },
+        );
 
         // `final_nonce_out` (our last A->B nonce on the old session) is
         // filled in by the caller at send time.
@@ -883,13 +886,16 @@ impl CryptoNoise {
         storage.delete_state(remote_id, drain_id);
         meta.clear_drain(drain_id);
         storage.save_rotation_meta(remote_id, &meta);
-        events::record(RotationEvent {
-            kind: RotationEventKind::DrainCompleted,
-            remote_id,
-            primary_session_id: 0,
-            draining_session_id: drain_id,
-            timestamp_ms: 0,
-        });
+        events::record(
+            storage,
+            RotationEvent {
+                kind: RotationEventKind::DrainCompleted,
+                remote_id,
+                primary_session_id: 0,
+                draining_session_id: drain_id,
+                timestamp_ms: 0,
+            },
+        );
     }
 }
 

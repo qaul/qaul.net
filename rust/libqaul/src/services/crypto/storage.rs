@@ -176,6 +176,11 @@ pub struct CryptoAccount {
     /// key: `remote_id.to_bytes()`
     /// value: bincode of `RotationMeta`
     pub rotation_meta: sled::Tree,
+    /// persisted rotation event log (see `events.rs`)
+    ///
+    /// Single capped blob under one key; survives reboot so rotation
+    /// knowledge (e.g. post-drain drops) is not lost on restart.
+    pub events: sled::Tree,
 }
 
 impl CryptoAccount {
@@ -430,6 +435,7 @@ impl CryptoStorageState {
                     state: crypto_account_db.state.clone(),
                     cache: crypto_account_db.cache.clone(),
                     rotation_meta: crypto_account_db.rotation_meta.clone(),
+                    events: crypto_account_db.events.clone(),
                 };
             }
         }
@@ -442,11 +448,13 @@ impl CryptoStorageState {
         let state_tree: sled::Tree = db.open_tree("crypto_state").unwrap();
         let cache: sled::Tree = db.open_tree("crypto_cache").unwrap();
         let rotation_meta: sled::Tree = db.open_tree("rotation_meta").unwrap();
+        let events: sled::Tree = db.open_tree("rotation_events").unwrap();
 
         let crypto_account = CryptoAccount {
             state: state_tree,
             cache,
             rotation_meta,
+            events,
         };
 
         let mut crypto_storage = self.inner.write().unwrap();
@@ -479,6 +487,7 @@ impl CryptoStorage {
                     state: crypto_account_db.state.clone(),
                     cache: crypto_account_db.cache.clone(),
                     rotation_meta: crypto_account_db.rotation_meta.clone(),
+                    events: crypto_account_db.events.clone(),
                 };
             }
         }
@@ -503,10 +512,12 @@ impl CryptoStorage {
         let state_db = Config::new().temporary(true).open().unwrap();
         let cache_db = Config::new().temporary(true).open().unwrap();
         let meta_db = Config::new().temporary(true).open().unwrap();
+        let events_db = Config::new().temporary(true).open().unwrap();
         CryptoAccount {
             state: state_db.open_tree("crypto_state").unwrap(),
             cache: cache_db.open_tree("crypto_cache").unwrap(),
             rotation_meta: meta_db.open_tree("rotation_meta").unwrap(),
+            events: events_db.open_tree("rotation_events").unwrap(),
         }
     }
 
@@ -526,6 +537,7 @@ impl CryptoStorage {
                     rotation_meta: db
                         .open_tree("__fallback_rotation_meta")
                         .expect("fallback tree"),
+                    events: db.open_tree("__fallback_rotation_events").expect("fallback tree"),
                 };
             }
         };
@@ -539,6 +551,7 @@ impl CryptoStorage {
                     rotation_meta: db
                         .open_tree("__fallback_rotation_meta")
                         .expect("fallback tree"),
+                    events: db.open_tree("__fallback_rotation_events").expect("fallback tree"),
                 };
             }
         };
@@ -552,6 +565,19 @@ impl CryptoStorage {
                     rotation_meta: db
                         .open_tree("__fallback_rotation_meta")
                         .expect("fallback tree"),
+                    events: db.open_tree("__fallback_rotation_events").expect("fallback tree"),
+                };
+            }
+        };
+        let events: sled::Tree = match db.open_tree("rotation_events") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("failed to open rotation_events tree: {}", e);
+                return CryptoAccount {
+                    state: state_tree,
+                    cache,
+                    rotation_meta,
+                    events: db.open_tree("__fallback_rotation_events").expect("fallback tree"),
                 };
             }
         };
@@ -560,6 +586,7 @@ impl CryptoStorage {
             state: state_tree,
             cache,
             rotation_meta,
+            events,
         };
 
         // get crypto storage for writing

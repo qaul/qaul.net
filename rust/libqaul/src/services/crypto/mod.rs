@@ -803,13 +803,16 @@ impl Crypto {
                             message.session_id,
                             remote_id.to_base58()
                         );
-                        events::record(events::RotationEvent {
-                            kind: events::RotationEventKind::MessageDroppedPostDrain,
-                            remote_id,
-                            primary_session_id: 0,
-                            draining_session_id: message.session_id,
-                            timestamp_ms: 0,
-                        });
+                        events::record(
+                            &crypto_account,
+                            events::RotationEvent {
+                                kind: events::RotationEventKind::MessageDroppedPostDrain,
+                                remote_id,
+                                primary_session_id: 0,
+                                draining_session_id: message.session_id,
+                                timestamp_ms: 0,
+                            },
+                        );
                         return None;
                     }
                 }
@@ -1043,9 +1046,17 @@ impl Crypto {
         req: qaul_proto::qaul_rpc_crypto::GetRotationEventsRequest,
         request_id: String,
     ) {
+        use crate::node::user_accounts::UserAccounts;
         use qaul_proto::qaul_rpc_crypto as proto_rpc;
         let limit = req.limit as usize;
-        let events = events::query(req.since_ms, limit);
+        // Resolve the local account's persisted rotation-event log.
+        let events = match UserAccounts::get_default_user(state) {
+            Some(user_account) => {
+                let crypto_account = CryptoStorage::get_db_ref(state, user_account.id.clone());
+                events::query(&crypto_account, req.since_ms, limit)
+            }
+            None => Vec::new(),
+        };
         let proto_events: Vec<proto_rpc::RotationEvent> = events
             .into_iter()
             .map(|e| proto_rpc::RotationEvent {
@@ -1756,13 +1767,14 @@ mod phase5_tests {
 
 #[cfg(test)]
 mod phase3_events_tests {
-    //! Phase 3 event-surface unit tests — ring buffer behaviour,
-    //! drain emission, past-grace detection, and the
+    //! Phase 3 event-surface unit tests — capped-log behaviour,
+    //! drain emission, post-drain detection, and the
     //! `GetRotationEventsRequest` round trip.
     //!
-    //! Every test here touches the process-global event-log
-    //! `InitCell`, so they share an `EVENT_LOG_LOCK` to serialise
-    //! mutations that are observed by subsequent assertions.
+    //! The event log is now persisted per-account in the
+    //! `rotation_events` sled tree, so each test uses its own
+    //! `CryptoStorage::test_account()` and is naturally isolated — no
+    //! shared global lock is needed.
 
     use super::phase2_tests::make_test_state;
     use super::phase3_tests;
@@ -1770,13 +1782,6 @@ mod phase3_events_tests {
     use crate::services::crypto::events;
     use libp2p::identity::Keypair;
     use qaul_proto::qaul_rpc_crypto as proto_rpc;
-    use std::sync::Mutex;
-
-    /// The event log itself is still process-global (`OnceLock` ring
-    /// buffer), so tests that observe it across emission/query
-    /// boundaries must serialise through this lock. Per-test
-    /// `QaulState` does not isolate the event log.
-    static EVENT_LOG_LOCK: Mutex<()> = Mutex::new(());
 
     fn fresh_peer() -> PeerId {
         Keypair::generate_ed25519().public().to_peer_id()
@@ -1786,20 +1791,22 @@ mod phase3_events_tests {
     // dropping the oldest.
     #[test]
     fn event_log_caps_at_max_events() {
-        let _g = EVENT_LOG_LOCK.lock().unwrap();
-        events::clear_for_tests();
+        let acct = CryptoStorage::test_account();
         let peer = fresh_peer();
         // Stream past the cap.
         for i in 0..(events::MAX_EVENTS + 50) {
-            events::record(events::RotationEvent {
-                kind: events::RotationEventKind::Rotated,
-                remote_id: peer,
-                primary_session_id: i as u32,
-                draining_session_id: 0,
-                timestamp_ms: 1_000_000 + i as u64,
-            });
+            events::record(
+                &acct,
+                events::RotationEvent {
+                    kind: events::RotationEventKind::Rotated,
+                    remote_id: peer,
+                    primary_session_id: i as u32,
+                    draining_session_id: 0,
+                    timestamp_ms: 1_000_000 + i as u64,
+                },
+            );
         }
-        let all = events::query(0, 0);
+        let all = events::query(&acct, 0, 0);
         assert_eq!(all.len(), events::MAX_EVENTS, "log should cap at MAX_EVENTS");
         // Oldest events dropped: the smallest primary_session_id in
         // the survivors must equal 50 (since we pushed 0..256+50).
@@ -1814,25 +1821,27 @@ mod phase3_events_tests {
     // newest `limit` entries.
     #[test]
     fn event_log_query_filters_and_limits() {
-        let _g = EVENT_LOG_LOCK.lock().unwrap();
-        events::clear_for_tests();
+        let acct = CryptoStorage::test_account();
         let peer = fresh_peer();
         for i in 0..10 {
-            events::record(events::RotationEvent {
-                kind: events::RotationEventKind::Rotated,
-                remote_id: peer,
-                primary_session_id: i,
-                draining_session_id: 0,
-                timestamp_ms: 1_000 + i as u64,
-            });
+            events::record(
+                &acct,
+                events::RotationEvent {
+                    kind: events::RotationEventKind::Rotated,
+                    remote_id: peer,
+                    primary_session_id: i,
+                    draining_session_id: 0,
+                    timestamp_ms: 1_000 + i as u64,
+                },
+            );
         }
         // since_ms filter
-        let filtered = events::query(1_005, 0);
+        let filtered = events::query(&acct, 1_005, 0);
         assert_eq!(filtered.len(), 5, "events at ts 1005..1009");
         assert_eq!(filtered.first().unwrap().primary_session_id, 5);
 
         // limit filter keeps the newest 3.
-        let limited = events::query(0, 3);
+        let limited = events::query(&acct, 0, 3);
         assert_eq!(limited.len(), 3);
         assert_eq!(limited.first().unwrap().primary_session_id, 7);
         assert_eq!(limited.last().unwrap().primary_session_id, 9);
@@ -1843,9 +1852,7 @@ mod phase3_events_tests {
     // post-drain messages afterwards.
     #[test]
     fn drain_emits_drain_completed_and_stamps_meta() {
-        let _g = EVENT_LOG_LOCK.lock().unwrap();
         let state = make_test_state();
-        events::clear_for_tests();
         let acct = CryptoStorage::test_account();
         let remote = fresh_peer();
         acct.save_state(remote, 7, dummy_state(7));
@@ -1870,7 +1877,7 @@ mod phase3_events_tests {
         assert_eq!(meta.last_retired_session_id, Some(7));
         assert_eq!(meta.draining_session_id, None);
 
-        let log = events::query(0, 0);
+        let log = events::query(&acct, 0, 0);
         assert!(
             log.iter()
                 .any(|e| e.kind == events::RotationEventKind::DrainCompleted
@@ -1903,22 +1910,39 @@ mod phase3_events_tests {
     // holds.
     #[test]
     fn rpc_get_events_returns_recorded_events() {
-        // The event log is process-global so this test serialises
-        // against other event-log tests. Per-test `QaulState` gives
-        // us an isolated RPC channel without an extra lock.
-        let _g_log = EVENT_LOG_LOCK.lock().unwrap();
         let state = make_test_state();
-        events::clear_for_tests();
         phase3_tests::drain_rpc_channel(&state);
 
+        // The RPC resolves the local default user's persisted event
+        // log, so register a user and record into *its* crypto account.
+        let keys = Keypair::generate_ed25519();
+        let user = crate::node::user_accounts::UserAccount {
+            id: keys.public().to_peer_id(),
+            keys,
+            name: "test".into(),
+            password_hash: None,
+            password_salt: None,
+        };
+        state
+            .user_accounts
+            .inner
+            .write()
+            .unwrap()
+            .users
+            .push(user.clone());
+        let acct = CryptoStorage::get_db_ref(&state, user.id);
+
         let peer = fresh_peer();
-        events::record(events::RotationEvent {
-            kind: events::RotationEventKind::Rotated,
-            remote_id: peer,
-            primary_session_id: 5,
-            draining_session_id: 3,
-            timestamp_ms: 42_000,
-        });
+        events::record(
+            &acct,
+            events::RotationEvent {
+                kind: events::RotationEventKind::Rotated,
+                remote_id: peer,
+                primary_session_id: 5,
+                draining_session_id: 3,
+                timestamp_ms: 42_000,
+            },
+        );
 
         let req = proto_rpc::Crypto {
             message: Some(proto_rpc::crypto::Message::GetEventsRequest(
