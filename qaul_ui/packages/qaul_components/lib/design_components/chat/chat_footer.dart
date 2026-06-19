@@ -27,10 +27,13 @@ const double _kPlusCircleSize = 28;
 const double _kPlusAssetSize = 24;
 const double _kTextActionSpacing = 20;
 const double _kAttachmentIconSpacing = 24;
+const double _kActionButtonMinSize = 40;
 const double _kAttachmentMenuTopSpacing = 12;
 const double _kAttachmentMenuItemSize = 54;
 const double _kAttachmentMenuItemRadius = 10;
 const double _kAttachmentMenuItemSpacing = 12;
+const double _kTypedActionRowBottomPadding = 4;
+const double _kTypedActionRowRightPadding = 16;
 const int _kAttachmentMenuMaxVisibleActions = 6;
 
 const List<BoxShadow> _kFooterShadowsDark = [
@@ -144,6 +147,7 @@ class ChatFooter extends StatefulWidget {
 class _ChatFooterState extends State<ChatFooter> {
   late final TextEditingController _ownedController;
   late final FocusNode _inputFocusNode;
+  final GlobalKey _composerTextFieldKey = GlobalKey();
   late bool _isAttachmentMenuOpen;
 
   TextEditingController get _effectiveController =>
@@ -295,6 +299,7 @@ class _ChatFooterState extends State<ChatFooter> {
             fillColor: fillColor,
             controller: _effectiveController,
             focusNode: _inputFocusNode,
+            textFieldKey: _composerTextFieldKey,
             onSendPressed: _handleSend,
             onMorePressed: _handleMoreAttachmentsPressed,
           ),
@@ -327,6 +332,7 @@ class _ComposerPill extends StatelessWidget {
     required this.fillColor,
     required this.controller,
     required this.focusNode,
+    required this.textFieldKey,
     required this.onSendPressed,
     required this.onMorePressed,
   });
@@ -336,8 +342,34 @@ class _ComposerPill extends StatelessWidget {
   final Color fillColor;
   final TextEditingController controller;
   final FocusNode focusNode;
+  final GlobalKey textFieldKey;
   final VoidCallback onSendPressed;
   final VoidCallback onMorePressed;
+
+  bool _usesFullWidthTypedLayout(BuildContext context, double maxWidth) {
+    if (!maxWidth.isFinite) return true;
+    final text = controller.text;
+    if (text.contains('\n') || text.contains('\r')) return true;
+
+    final inlineActionsWidth =
+        _kPlusCircleSize +
+        _kTextActionSpacing +
+        _kActionButtonMinSize +
+        _kHorizontalPadding;
+    final inlineTextWidth = maxWidth -
+        inlineActionsWidth -
+        _kFieldInputHorizontal -
+        _kFieldInputHorizontal;
+    if (inlineTextWidth <= 0) return true;
+
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: _fieldValueStyle(theme)),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout(maxWidth: inlineTextWidth);
+
+    return painter.computeLineMetrics().length > 1;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -352,67 +384,131 @@ class _ComposerPill extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(_kInputBorderRadius),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: controller,
-                focusNode: focusNode,
-                minLines: 1,
-                maxLines: 5,
-                style: _fieldValueStyle(theme),
-                decoration: InputDecoration(
-                  isDense: true,
-                  hint: SizedBox(
-                    width: double.infinity,
-                    child: Text(
-                      footer.placeholder,
-                      maxLines: 1,
-                      softWrap: false,
-                      overflow: TextOverflow.ellipsis,
-                      style: _fieldHintStyle(theme),
-                    ),
-                  ),
-                  border: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  contentPadding: const EdgeInsets.fromLTRB(
-                    _kFieldInputHorizontal,
-                    _kFieldInputVertical,
-                    _kFieldInputHorizontal,
-                    _kFieldInputVertical,
-                  ),
-                ),
-                textCapitalization: TextCapitalization.sentences,
-                keyboardType: TextInputType.multiline,
-                textInputAction: TextInputAction.newline,
-              ),
-            ),
-            ListenableBuilder(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return ListenableBuilder(
               listenable: controller,
               builder: (context, _) {
                 final hasText = controller.text.trim().isNotEmpty;
-                if (hasText) {
-                  return _TextActions(
-                    onMore: onMorePressed,
-                    onPressed: onSendPressed,
-                    attachmentsTooltip: footer.attachmentsTooltip,
-                    tooltip: footer.sendTooltip,
+                if (hasText &&
+                    _usesFullWidthTypedLayout(context, constraints.maxWidth)) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _ComposerTextField(
+                        key: textFieldKey,
+                        footer: footer,
+                        theme: theme,
+                        controller: controller,
+                        focusNode: focusNode,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          right: _kTypedActionRowRightPadding,
+                          bottom: _kTypedActionRowBottomPadding,
+                        ),
+                        child: Align(
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: _TextActions(
+                            onMore: onMorePressed,
+                            onPressed: onSendPressed,
+                            attachmentsTooltip: footer.attachmentsTooltip,
+                            tooltip: footer.sendTooltip,
+                          ),
+                        ),
+                      ),
+                    ],
                   );
                 }
-                return _AttachmentActions(
-                  onVoice: footer.onVoicePressed,
-                  onCamera: footer.onCameraPressed,
-                  onMore: onMorePressed,
-                  voiceTooltip: footer.voiceTooltip,
-                  cameraTooltip: footer.cameraTooltip,
-                  attachmentsTooltip: footer.attachmentsTooltip,
+                return Row(
+                  children: [
+                    Expanded(
+                      child: _ComposerTextField(
+                    key: textFieldKey,
+                        footer: footer,
+                        theme: theme,
+                        controller: controller,
+                        focusNode: focusNode,
+                      ),
+                    ),
+                    if (hasText)
+                      Padding(
+                        padding: const EdgeInsets.only(right: _kHorizontalPadding),
+                        child: _TextActions(
+                          onMore: onMorePressed,
+                          onPressed: onSendPressed,
+                          attachmentsTooltip: footer.attachmentsTooltip,
+                          tooltip: footer.sendTooltip,
+                        ),
+                      )
+                    else
+                      _AttachmentActions(
+                        onVoice: footer.onVoicePressed,
+                        onCamera: footer.onCameraPressed,
+                        onMore: onMorePressed,
+                        voiceTooltip: footer.voiceTooltip,
+                        cameraTooltip: footer.cameraTooltip,
+                        attachmentsTooltip: footer.attachmentsTooltip,
+                      ),
+                  ],
                 );
               },
-            ),
-          ],
+            );
+          },
         ),
       ),
+    );
+  }
+}
+
+class _ComposerTextField extends StatelessWidget {
+  const _ComposerTextField({
+    super.key,
+    required this.footer,
+    required this.theme,
+    required this.controller,
+    required this.focusNode,
+  });
+
+  final ChatFooter footer;
+  final ThemeData theme;
+  final TextEditingController controller;
+  final FocusNode focusNode;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      focusNode: focusNode,
+      minLines: 1,
+      maxLines: 5,
+      style: _fieldValueStyle(theme),
+      decoration: InputDecoration(
+        isDense: true,
+        hint: SizedBox(
+          width: double.infinity,
+          child: Text(
+            footer.placeholder,
+            maxLines: 1,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+            style: _fieldHintStyle(theme),
+          ),
+        ),
+        border: InputBorder.none,
+        focusedBorder: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        contentPadding: const EdgeInsets.fromLTRB(
+          _kFieldInputHorizontal,
+          _kFieldInputVertical,
+          _kFieldInputHorizontal,
+          _kFieldInputVertical,
+        ),
+      ),
+      textCapitalization: TextCapitalization.sentences,
+      keyboardType: TextInputType.multiline,
+      textInputAction: TextInputAction.newline,
     );
   }
 }
@@ -432,16 +528,13 @@ class _TextActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: _kHorizontalPadding),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _PlusInCircleButton(onPressed: onMore, tooltip: attachmentsTooltip),
-          const SizedBox(width: _kTextActionSpacing),
-          _SendButton(onPressed: onPressed, tooltip: tooltip),
-        ],
-      ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _PlusInCircleButton(onPressed: onMore, tooltip: attachmentsTooltip),
+        const SizedBox(width: _kTextActionSpacing),
+        _SendButton(onPressed: onPressed, tooltip: tooltip),
+      ],
     );
   }
 }

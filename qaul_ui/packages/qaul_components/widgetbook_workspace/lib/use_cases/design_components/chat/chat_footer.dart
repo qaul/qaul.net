@@ -161,10 +161,12 @@ Widget buildChatFooterLongDraftUseCase(BuildContext context) {
       placeholder: _kPlaceholderEn,
       controller: TextEditingController(
         text:
-            'This is a longer draft to show how the pill grows vertically '
-            'before scrolling inside the field.',
+            'Start writing a message and writing more text than one single '
+            'line so the input can use the full composer width before the '
+            'plus and send actions appear on the lower row.',
       ),
       onSend: (_) {},
+      onMoreAttachmentsPressed: () {},
       sendTooltip: 'Send',
     ),
   );
