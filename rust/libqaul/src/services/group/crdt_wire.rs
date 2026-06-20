@@ -105,6 +105,22 @@ pub fn verify_and_decode(
     })
 }
 
+/// Decode a wire `GroupOp` into a core [`GroupOp`] **without** checking
+/// the signature. Only for ops already verified before storage (see
+/// `crdt_store::load_crdt`); never call this on freshly-received
+/// network data — use [`verify_and_decode`] there.
+pub fn decode_trusted(op: &proto_net::GroupOp) -> Option<GroupOp> {
+    let op_id: OpId = op.op_id.as_slice().try_into().ok()?;
+    let kind = proto_to_kind(op.op.as_ref()?)?;
+    Some(GroupOp {
+        op_id,
+        actor_id: op.actor_id.clone(),
+        lamport: op.lamport,
+        created_at: op.created_at,
+        kind,
+    })
+}
+
 /// Convert a core [`OpKind`] into the proto oneof.
 fn kind_to_proto(kind: &OpKind) -> proto_net::group_op::Op {
     match kind {

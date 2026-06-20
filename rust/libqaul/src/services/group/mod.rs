@@ -21,6 +21,7 @@ use crate::rpc::Rpc;
 use crate::utilities::timestamp::Timestamp;
 
 pub mod crdt;
+pub mod crdt_store;
 pub mod crdt_wire;
 pub mod group_id;
 mod manage;
