@@ -2,7 +2,7 @@
 /// Group network message container
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GroupContainer {
-    #[prost(oneof = "group_container::Message", tags = "1, 2, 3, 4")]
+    #[prost(oneof = "group_container::Message", tags = "1, 2, 3, 4, 5")]
     pub message: ::core::option::Option<group_container::Message>,
 }
 /// Nested message and enum types in `GroupContainer`.
@@ -21,7 +21,91 @@ pub mod group_container {
         /// member removed
         #[prost(message, tag = "4")]
         Removed(super::RemovedMember),
+        /// CRDT signed membership/metadata operation. Sent by nodes that
+        /// advertise Capabilities::GROUP_CRDT; see
+        /// docs/proposals/Group-State-CRDT.md.
+        #[prost(message, tag = "5")]
+        GroupOp(super::GroupOp),
     }
+}
+/// A single signed group CRDT operation.
+///
+/// The signature in field 9 covers the deterministic protobuf encoding
+/// of this same message with `signature` left empty — i.e. fields 1..8
+/// plus the `op` oneof — produced by the actor's identity (Ed25519) key.
+/// Verifiers look the actor's public key up by `actor_id` (a PeerId is a
+/// hash of the key) and check both the signature and that `actor_id`
+/// matches that key.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct GroupOp {
+    /// the group this op belongs to
+    #[prost(bytes = "vec", tag = "1")]
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
+    /// 16-byte random operation id (dedup key for the grow-only op set)
+    #[prost(bytes = "vec", tag = "2")]
+    pub op_id: ::prost::alloc::vec::Vec<u8>,
+    /// PeerId bytes of the signer
+    #[prost(bytes = "vec", tag = "3")]
+    pub actor_id: ::prost::alloc::vec::Vec<u8>,
+    /// group-local lamport clock value
+    #[prost(uint64, tag = "4")]
+    pub lamport: u64,
+    /// wall-clock ms at creation (display/diagnostics only)
+    #[prost(uint64, tag = "5")]
+    pub created_at: u64,
+    /// Ed25519 signature over the op with this field empty
+    #[prost(bytes = "vec", tag = "9")]
+    pub signature: ::prost::alloc::vec::Vec<u8>,
+    #[prost(oneof = "group_op::Op", tags = "6, 7, 8, 10")]
+    pub op: ::core::option::Option<group_op::Op>,
+}
+/// Nested message and enum types in `GroupOp`.
+pub mod group_op {
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Oneof)]
+    pub enum Op {
+        #[prost(message, tag = "6")]
+        Add(super::AddMemberOp),
+        #[prost(message, tag = "7")]
+        Remove(super::RemoveMemberOp),
+        #[prost(message, tag = "8")]
+        Meta(super::UpdateMetadataOp),
+        #[prost(message, tag = "10")]
+        Compact(super::CompactOp),
+    }
+}
+/// Add (or re-add, or promote) a member.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct AddMemberOp {
+    #[prost(bytes = "vec", tag = "1")]
+    pub member_id: ::prost::alloc::vec::Vec<u8>,
+    /// 0 = member, 255 = admin
+    #[prost(int32, tag = "2")]
+    pub role: i32,
+}
+/// Remove a member, tombstoning the add op_ids it has observed.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RemoveMemberOp {
+    #[prost(bytes = "vec", tag = "1")]
+    pub member_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(bytes = "vec", repeated, tag = "2")]
+    pub observed_adds: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
+}
+/// Update group metadata (only present fields are written, LWW).
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct UpdateMetadataOp {
+    #[prost(string, optional, tag = "1")]
+    pub name: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(bytes = "vec", optional, tag = "2")]
+    pub avatar: ::core::option::Option<::prost::alloc::vec::Vec<u8>>,
+}
+/// Compaction barrier: collapse tombstones below `below`, raising the
+/// epoch. Admin-issued.
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct CompactOp {
+    #[prost(uint64, tag = "1")]
+    pub epoch: u64,
+    #[prost(uint64, tag = "2")]
+    pub below: u64,
 }
 /// Invite member
 #[derive(Clone, PartialEq, ::prost::Message)]
