@@ -20,6 +20,7 @@ use crate::node::user_accounts::{UserAccount, UserAccounts};
 use crate::rpc::Rpc;
 use crate::utilities::timestamp::Timestamp;
 
+pub mod crdt;
 pub mod group_id;
 mod manage;
 mod member;
