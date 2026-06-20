@@ -21,6 +21,7 @@ use crate::rpc::Rpc;
 use crate::utilities::timestamp::Timestamp;
 
 pub mod crdt;
+pub mod crdt_wire;
 pub mod group_id;
 mod manage;
 mod member;
@@ -382,6 +383,17 @@ impl Group {
                 Some(proto_net::group_container::Message::GroupInfo(group_info)) => {
                     log::trace!("group info arrived");
                     manage::GroupManage::on_group_notify(state, *sender_id, *receiver_id, &group_info);
+                }
+                Some(proto_net::group_container::Message::GroupOp(_group_op)) => {
+                    // CRDT membership/metadata op. The receive path
+                    // (verify signature, merge into the op set, re-derive
+                    // the view) is wired in the integration slice; the
+                    // variant is acknowledged here so the new wire shape
+                    // already decodes.
+                    log::trace!(
+                        "received group CRDT op from {} (handler not yet wired)",
+                        sender_id.to_base58()
+                    );
                 }
                 None => {
                     log::error!("group message from {} was empty", sender_id.to_base58())

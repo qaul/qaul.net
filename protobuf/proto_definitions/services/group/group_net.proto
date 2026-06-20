@@ -12,7 +12,66 @@ message GroupContainer {
         GroupInfo group_info = 3;
         // member removed
         RemovedMember removed = 4;
+        // CRDT signed membership/metadata operation. Sent by nodes that
+        // advertise Capabilities::GROUP_CRDT; see
+        // docs/proposals/Group-State-CRDT.md.
+        GroupOp group_op = 5;
     }
+}
+
+// A single signed group CRDT operation.
+//
+// The signature in field 9 covers the deterministic protobuf encoding
+// of this same message with `signature` left empty — i.e. fields 1..8
+// plus the `op` oneof — produced by the actor's identity (Ed25519) key.
+// Verifiers look the actor's public key up by `actor_id` (a PeerId is a
+// hash of the key) and check both the signature and that `actor_id`
+// matches that key.
+message GroupOp {
+    // the group this op belongs to
+    bytes group_id = 1;
+    // 16-byte random operation id (dedup key for the grow-only op set)
+    bytes op_id = 2;
+    // PeerId bytes of the signer
+    bytes actor_id = 3;
+    // group-local lamport clock value
+    uint64 lamport = 4;
+    // wall-clock ms at creation (display/diagnostics only)
+    uint64 created_at = 5;
+    oneof op {
+        AddMemberOp add = 6;
+        RemoveMemberOp remove = 7;
+        UpdateMetadataOp meta = 8;
+        CompactOp compact = 10;
+    }
+    // Ed25519 signature over the op with this field empty
+    bytes signature = 9;
+}
+
+// Add (or re-add, or promote) a member.
+message AddMemberOp {
+    bytes member_id = 1;
+    // 0 = member, 255 = admin
+    int32 role = 2;
+}
+
+// Remove a member, tombstoning the add op_ids it has observed.
+message RemoveMemberOp {
+    bytes member_id = 1;
+    repeated bytes observed_adds = 2;
+}
+
+// Update group metadata (only present fields are written, LWW).
+message UpdateMetadataOp {
+    optional string name = 1;
+    optional bytes avatar = 2;
+}
+
+// Compaction barrier: collapse tombstones below `below`, raising the
+// epoch. Admin-issued.
+message CompactOp {
+    uint64 epoch = 1;
+    uint64 below = 2;
 }
 
 // Invite member
