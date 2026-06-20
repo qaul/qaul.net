@@ -204,32 +204,56 @@ impl DtnModuleState {
     }
 
     /// Process DTN response (instance method).
+    ///
+    /// A custodian receives confirmation that a stored message was
+    /// delivered, so it frees the storage that message occupied and
+    /// drops it from both index trees.
     pub fn on_dtn_response(&self, dtn_response: &super::messaging::proto::DtnResponse) {
         let mut state = self.inner.write().unwrap();
-        if state.db_ref.contains_key(&dtn_response.signature).unwrap() {
-            let entry_bytes = state.db_ref.get(&dtn_response.signature).unwrap().unwrap();
-            let entry: DtnMessageEntry = bincode::deserialize(&entry_bytes).unwrap();
-            if state.used_size > entry.size as u64 {
-                state.used_size = state.used_size + (entry.size as u64);
-            } else {
-                state.used_size = 0;
-            }
-            if state.message_counts > 0 {
-                state.message_counts = state.message_counts - 1;
-            }
 
-            if let Err(_) = state.db_ref.remove(&dtn_response.signature) {
-                log::error!("remove storage node entry error!");
-            } else if let Err(_) = state.db_ref.flush() {
-                log::error!("remove storage node entry flush error!");
+        // look up the stored entry; not finding it (or a bad row) is a
+        // no-op, never a panic
+        let entry_bytes = match state.db_ref.get(&dtn_response.signature) {
+            Ok(Some(bytes)) => bytes,
+            Ok(None) => return,
+            Err(e) => {
+                log::error!("dtn on_dtn_response db_ref get: {}", e);
+                return;
             }
+        };
+        let entry: DtnMessageEntry = match bincode::deserialize(&entry_bytes) {
+            Ok(e) => e,
+            Err(e) => {
+                log::error!("dtn on_dtn_response entry deserialize: {}", e);
+                return;
+            }
+        };
 
-            if let Err(_) = state.db_ref_id.remove(&entry.org_sig) {
-                log::error!("remove storage node id entry error!");
-            } else if let Err(_) = state.db_ref_id.flush() {
-                log::error!("remove storage node id entry flush error!");
-            }
+        // The message was delivered and is being removed, so FREE its
+        // storage (subtract). Previously this incorrectly *added* the
+        // size, so used_size grew without bound until the node started
+        // rejecting every new message as over-quota.
+        state.used_size = state.used_size.saturating_sub(entry.size as u64);
+        state.message_counts = state.message_counts.saturating_sub(1);
+
+        // remove from both index trees atomically: a crash between two
+        // separate removals would otherwise desync db_ref / db_ref_id
+        // and corrupt dedup state.
+        use sled::Transactional;
+        let sig = dtn_response.signature.clone();
+        let org_sig = entry.org_sig.clone();
+        let res: sled::transaction::TransactionResult<(), ()> =
+            (&state.db_ref, &state.db_ref_id).transaction(|(db_ref, db_ref_id)| {
+                db_ref.remove(sig.as_slice())?;
+                db_ref_id.remove(org_sig.as_slice())?;
+                Ok(())
+            });
+        if let Err(e) = res {
+            log::error!("dtn on_dtn_response tree removal transaction failed: {:?}", e);
+            return;
         }
+        let _ = state.db_ref.flush();
+        let _ = state.db_ref_id.flush();
     }
 
     /// Get DTN storage state (instance method).
@@ -361,10 +385,9 @@ impl Dtn {
         };
 
         if let Ok(signature) = user_account.keys.sign(&envelop.encode_to_vec()) {
-            // save dtn message entry
-            storage_state.message_counts = storage_state.message_counts + 1;
-            storage_state.used_size = new_size;
-
+            // (storage accounting is updated only after the entry is
+            // committed to the index trees, below, so a failed write
+            // can't inflate used_size / message_counts.)
             let message_entry = DtnMessageEntry {
                 org_sig: org_sig.clone(),
                 size: dtn_payload.len() as u32,
@@ -380,31 +403,37 @@ impl Dtn {
                 }
             };
 
-            // NOTE: The following two tree writes (db_ref and db_ref_id) are not
-            // atomic. If a crash occurs between them, the database could end up in
-            // an inconsistent state (e.g. an entry in db_ref without a corresponding
-            // entry in db_ref_id, or vice versa). A sled transaction spanning both
-            // trees would fix this but requires a larger refactor.
-            if let Err(_e) = storage_state
-                .db_ref
-                .insert(signature.clone(), message_entry_bytes)
-            {
-                log::error!("dnt entry storing error!");
-            } else {
-                if let Err(_e) = storage_state.db_ref.flush() {
-                    log::error!("dnt entry flushing error!");
+            // Write both index trees (db_ref and db_ref_id) atomically:
+            // a crash between two separate inserts would leave them
+            // desynced (an entry in one tree without its counterpart),
+            // corrupting dedup/cleanup. A sled transaction commits both
+            // or neither.
+            use sled::Transactional;
+            let sig = signature.clone();
+            let org = org_sig.clone();
+            let res: sled::transaction::TransactionResult<(), ()> = (
+                &storage_state.db_ref,
+                &storage_state.db_ref_id,
+            )
+                .transaction(|(db_ref, db_ref_id)| {
+                    db_ref.insert(sig.as_slice(), message_entry_bytes.as_slice())?;
+                    db_ref_id.insert(org.as_slice(), sig.as_slice())?;
+                    Ok(())
+                });
+            match res {
+                Ok(()) => {
+                    let _ = storage_state.db_ref.flush();
+                    let _ = storage_state.db_ref_id.flush();
+                    // entry is committed — now account for its storage
+                    storage_state.message_counts = storage_state.message_counts + 1;
+                    storage_state.used_size = new_size;
                 }
-            }
-
-            // save message id
-            if let Err(_e) = storage_state
-                .db_ref_id
-                .insert(org_sig.clone(), signature.clone())
-            {
-                log::error!("dtn id db storing error!");
-            } else {
-                if let Err(_e) = storage_state.db_ref_id.flush() {
-                    log::error!("dtn id db flushing error!");
+                Err(e) => {
+                    log::error!("dtn entry store transaction failed: {:?}", e);
+                    return (
+                        super::messaging::proto::dtn_response::ResponseType::Rejected as i32,
+                        super::messaging::proto::dtn_response::Reason::None as i32,
+                    );
                 }
             }
 
@@ -425,42 +454,6 @@ impl Dtn {
             super::messaging::proto::dtn_response::ResponseType::Accepted as i32,
             super::messaging::proto::dtn_response::Reason::None as i32,
         )
-    }
-
-    /// this function is called when receive DTN response
-    pub fn on_dtn_response(state: &crate::QaulState, dtn_response: &super::messaging::proto::DtnResponse) {
-        let mut state = state.services.dtn.inner.write().unwrap();
-        if let Ok(Some(entry_bytes)) = state.db_ref.get(&dtn_response.signature) {
-            // update storage node state
-            let entry: DtnMessageEntry = match bincode::deserialize(&entry_bytes) {
-                Ok(e) => e,
-                Err(e) => {
-                    log::error!("DTN: failed to deserialize entry: {}", e);
-                    return;
-                }
-            };
-            state.used_size = state.used_size.saturating_sub(entry.size as u64);
-            state.message_counts = state.message_counts.saturating_sub(1);
-
-            // NOTE: The following two tree removals (db_ref and db_ref_id) are not
-            // atomic. A crash between them could leave stale entries in one tree.
-            // A sled transaction spanning both trees would fix this.
-            if let Err(_) = state.db_ref.remove(&dtn_response.signature) {
-                log::error!("remove storage node entry error!");
-            } else {
-                if let Err(_) = state.db_ref.flush() {
-                    log::error!("remove storage node entry flush error!");
-                }
-            }
-
-            if let Err(_) = state.db_ref_id.remove(&entry.org_sig) {
-                log::error!("remove storage node id entry error!");
-            } else {
-                if let Err(_) = state.db_ref_id.flush() {
-                    log::error!("remove storage node id entry flush error!");
-                }
-            }
-        }
     }
 
     /// process DTN messages from network
@@ -1578,6 +1571,69 @@ mod tests {
     use libp2p::identity::Keypair;
     use prost::Message;
     use std::collections::HashMap;
+
+    // A delivered DTN message must FREE the storage it occupied (the
+    // accounting previously *added* the size, so used_size grew without
+    // bound until the custodian rejected everything as over-quota), and
+    // both index trees must be cleared together (atomic removal).
+    #[test]
+    fn dtn_response_frees_storage_and_clears_both_trees() {
+        let dtn = DtnModuleState::new();
+        let sig = vec![1u8; 16];
+        let org_sig = vec![2u8; 16];
+        let entry = DtnMessageEntry {
+            org_sig: org_sig.clone(),
+            size: 500,
+        };
+
+        // simulate one stored message occupying 500 bytes
+        {
+            let st = dtn.inner.write().unwrap();
+            st.db_ref
+                .insert(sig.as_slice(), bincode::serialize(&entry).unwrap())
+                .unwrap();
+            st.db_ref_id
+                .insert(org_sig.as_slice(), sig.as_slice())
+                .unwrap();
+        }
+        {
+            let mut st = dtn.inner.write().unwrap();
+            st.used_size = 500;
+            st.message_counts = 1;
+        }
+
+        // delivery confirmation for that message
+        let resp = proto::DtnResponse {
+            signature: sig.clone(),
+            ..Default::default()
+        };
+        dtn.on_dtn_response(&resp);
+
+        let st = dtn.inner.read().unwrap();
+        assert_eq!(st.used_size, 0, "delivered message must free its storage");
+        assert_eq!(st.message_counts, 0);
+        assert!(
+            !st.db_ref.contains_key(sig.as_slice()).unwrap(),
+            "entry removed from db_ref"
+        );
+        assert!(
+            !st.db_ref_id.contains_key(org_sig.as_slice()).unwrap(),
+            "entry removed from db_ref_id (atomic with db_ref)"
+        );
+    }
+
+    // An unknown / already-delivered signature is a harmless no-op
+    // (never a panic), even on a corrupted row.
+    #[test]
+    fn dtn_response_unknown_signature_is_noop() {
+        let dtn = DtnModuleState::new();
+        let resp = proto::DtnResponse {
+            signature: vec![9u8; 16],
+            ..Default::default()
+        };
+        dtn.on_dtn_response(&resp); // must not panic
+        assert_eq!(dtn.inner.read().unwrap().used_size, 0);
+    }
 
     /// Create a random PeerId from a fresh Ed25519 keypair.
     fn random_peer() -> PeerId {
