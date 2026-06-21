@@ -122,6 +122,9 @@ message GroupInfo {
     uint32 revision = 4;
     // updated members
     repeated GroupMember members = 5;
+    // group founder (CRDT bootstrap admin); carried so invitees learn
+    // it and can derive the membership CRDT. Empty from pre-CRDT peers.
+    bytes founder = 6;
 }
 
 // Reply to Invite

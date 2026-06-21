@@ -533,6 +533,12 @@ pub enum GroupSubcmd {
         #[arg(short, long)]
         name: String,
     },
+    /// show the derived CRDT membership/metadata view of a group
+    CrdtView {
+        /// the group id
+        #[arg(short, long)]
+        group_id: String,
+    },
 }
 
 #[derive(Args, Debug)]

@@ -227,6 +227,8 @@ impl GroupManage {
 
         group.id = group_id.clone();
         group.is_direct_chat = true;
+        // the local creator is the founder (CRDT bootstrap admin)
+        group.founder = account_id.to_bytes();
 
         // save group to data base
         GroupStorage::save_group(state, account_id.to_owned(), group.clone(), GroupSaveReason::Created);
@@ -239,6 +241,8 @@ impl GroupManage {
         let mut group = Group::new();
 
         group.id = uuid::Uuid::new_v4().as_bytes().to_vec();
+        // the local creator is the founder (CRDT bootstrap admin)
+        group.founder = account_id.to_bytes();
 
         group.members.insert(
             account_id.to_bytes(),
@@ -573,6 +577,7 @@ mod tests {
             created_at: 0,
             status: 0,
             revision: 0,
+            founder: Vec::new(),
             members: BTreeMap::new(),
             unread_messages: 0,
             last_message_at,

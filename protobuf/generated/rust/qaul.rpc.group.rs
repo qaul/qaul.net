@@ -5,7 +5,7 @@ pub struct Group {
     /// message type
     #[prost(
         oneof = "group::Message",
-        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17"
+        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19"
     )]
     pub message: ::core::option::Option<group::Message>,
 }
@@ -69,7 +69,48 @@ pub mod group {
         /// more recently active rooms breaking ties.
         #[prost(message, tag = "17")]
         GroupSearchRequest(super::GroupSearchRequest),
+        /// CRDT membership/metadata view (read the derived state)
+        #[prost(message, tag = "18")]
+        GroupCrdtViewRequest(super::GroupCrdtViewRequest),
+        #[prost(message, tag = "19")]
+        GroupCrdtViewResponse(super::GroupCrdtViewResponse),
     }
+}
+/// Read the converged CRDT view of a group's membership & metadata.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct GroupCrdtViewRequest {
+    #[prost(bytes = "vec", tag = "1")]
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
+}
+/// One member in the derived CRDT view.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct GroupCrdtMember {
+    #[prost(bytes = "vec", tag = "1")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
+    /// 0 = member, 255 = admin
+    #[prost(int32, tag = "2")]
+    pub role: i32,
+}
+/// The derived CRDT view.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GroupCrdtViewResponse {
+    #[prost(bytes = "vec", tag = "1")]
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
+    /// false when the group is unknown or predates the CRDT (no founder)
+    #[prost(bool, tag = "2")]
+    pub found: bool,
+    /// group founder (bootstrap admin)
+    #[prost(bytes = "vec", tag = "3")]
+    pub founder: ::prost::alloc::vec::Vec<u8>,
+    /// derived metadata name (empty if unset)
+    #[prost(string, tag = "4")]
+    pub name: ::prost::alloc::string::String,
+    /// number of ops retained in the op set
+    #[prost(uint32, tag = "5")]
+    pub op_count: u32,
+    /// present members with their effective role
+    #[prost(message, repeated, tag = "6")]
+    pub members: ::prost::alloc::vec::Vec<GroupCrdtMember>,
 }
 /// Group Result
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
