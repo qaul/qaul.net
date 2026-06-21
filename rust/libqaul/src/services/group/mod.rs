@@ -273,8 +273,9 @@ impl Group {
             &kind,
         )?;
 
-        // persist locally
+        // persist locally + reconcile the materialized membership
         crdt_store::save_op(&db, group_id, &wire);
+        Self::reconcile_group_from_crdt(state, account_id, group_id);
 
         // recipients: every current remote member, plus — for an Add —
         // the member being added (who is not yet in the member list, so
@@ -350,6 +351,9 @@ impl Group {
         let group_id = group_op.group_id.clone();
         let db = GroupStorage::get_db_ref(state, *account_id);
         crdt_store::save_op(&db, &group_id, &group_op);
+        // CRDT is the source of truth: reflect the op into the
+        // materialized Group membership/metadata.
+        Self::reconcile_group_from_crdt(state, account_id, &group_id);
         log::trace!(
             "stored verified group CRDT op for {} from {}",
             bs58::encode(&group_id).into_string(),
@@ -374,6 +378,77 @@ impl Group {
         let view = crdt.view();
         let count = crdt.op_count();
         Some((view, count))
+    }
+
+    /// Reconcile the materialized `Group.members` / name from the CRDT,
+    /// making the CRDT the source of truth for membership.
+    ///
+    /// The CRDT wins for every member it has an opinion about:
+    /// - members present in the derived view are inserted/updated with
+    ///   the view's role (other per-member fields preserved if already
+    ///   present, else defaulted to an activated member joining now);
+    /// - a member the CRDT has at least one `Add` op for but that is
+    ///   *not* in the view was tombstoned by a `Remove`, so it is
+    ///   dropped from `Group.members`;
+    /// - a member the CRDT is entirely silent about (no add op) is left
+    ///   untouched — this preserves members of a mixed/legacy group
+    ///   during the transition and avoids dropping a freshly-invited
+    ///   peer before its add op has arrived.
+    ///
+    /// No-op for groups with no founder recorded (pre-CRDT groups).
+    pub fn reconcile_group_from_crdt(
+        state: &crate::QaulState,
+        account_id: &PeerId,
+        group_id: &[u8],
+    ) {
+        let group = match GroupStorage::get_group(state, *account_id, group_id) {
+            Some(g) if !g.founder.is_empty() => g,
+            _ => return,
+        };
+        let db = GroupStorage::get_db_ref(state, *account_id);
+        let crdt = crdt_store::load_crdt(&db, group_id, group.founder.clone());
+        let view = crdt.view();
+
+        GroupStorage::with_group_mut(state, account_id, group_id, |group| {
+            // 1. drop members the CRDT knows about (has an add for) but
+            //    that the view no longer contains (tombstoned).
+            let to_drop: Vec<Vec<u8>> = group
+                .members
+                .keys()
+                .filter(|id| {
+                    !view.members.contains_key(*id)
+                        && !crdt.add_op_ids_for(id).is_empty()
+                })
+                .cloned()
+                .collect();
+            for id in to_drop {
+                group.members.remove(&id);
+            }
+
+            // 2. insert / update every member the view contains.
+            for (id, m) in &view.members {
+                match group.members.get_mut(id) {
+                    Some(existing) => existing.role = m.role,
+                    None => {
+                        group.members.insert(
+                            id.clone(),
+                            GroupMember {
+                                user_id: id.clone(),
+                                role: m.role,
+                                joined_at: Timestamp::get_timestamp(),
+                                state: proto_rpc::GroupMemberState::Activated as i32,
+                                last_message_index: 0,
+                            },
+                        );
+                    }
+                }
+            }
+
+            // 3. metadata name (LWW) wins when set.
+            if let Some(name) = &view.name {
+                group.name = name.clone();
+            }
+        });
     }
 
     /// Send capsuled group message through messaging service
