@@ -506,6 +506,7 @@ impl Crypto {
             user_account,
             &remote_id,
             encrypted_message,
+            messaging::MessagingServiceType::Crypto,
             &message_id,
             true,
         )
@@ -905,6 +906,7 @@ impl Crypto {
                                         &user_account,
                                         &remote_id,
                                         encrypted_message,
+                                        messaging::MessagingServiceType::Crypto,
                                         message_id,
                                         true,
                                     ) {
@@ -1043,6 +1045,7 @@ impl Crypto {
             user_account,
             &remote_id,
             encrypted_message,
+            messaging::MessagingServiceType::Crypto,
             &message_id,
             true,
         ) {

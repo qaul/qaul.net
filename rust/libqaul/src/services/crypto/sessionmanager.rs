@@ -226,6 +226,7 @@ impl CryptoSessionManager {
             user_account,
             sender_id,
             encrypted_message,
+            messaging::MessagingServiceType::Crypto,
             &message_id,
             true,
         ) {
@@ -317,6 +318,7 @@ impl CryptoSessionManager {
             user_account,
             sender_id,
             encrypted_message,
+            messaging::MessagingServiceType::Crypto,
             &message_id,
             true,
         ) {
