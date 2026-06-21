@@ -159,6 +159,25 @@ impl Crypto {
     ///
     /// The function returns the packed message on success,
     /// or none on failure.
+    ///
+    /// Returns true if the primary session for `remote_id` exists and is
+    /// still completing its handshake (`HalfOutgoing`) — i.e. `encrypt` would
+    /// currently refuse to produce a transport frame for this peer, so the
+    /// caller should queue the plaintext and retry once the session is ready.
+    /// Returns false when there is no session (where `encrypt` instead starts
+    /// a fresh handshake and succeeds) or the session is already usable.
+    pub fn session_pending_handshake(
+        state: &crate::QaulState,
+        user_account: &UserAccount,
+        remote_id: PeerId,
+    ) -> bool {
+        let crypto_account = CryptoStorage::get_db_ref(state, user_account.id.clone());
+        match Self::resolve_primary_state(&crypto_account, remote_id) {
+            Some(session) => matches!(session.state, CryptoProcessState::HalfOutgoing),
+            None => false,
+        }
+    }
+
     pub fn encrypt(
         state: &crate::QaulState,
         data: Vec<u8>,
