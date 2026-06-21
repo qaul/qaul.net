@@ -219,11 +219,11 @@ impl GroupCrdt {
     }
 
     /// Re-derive the compaction floor from authorized `Compact` ops and
-    /// prune ops that fall below it.
+    /// prune the dead history below it, **preserving the live view**.
     fn recompute_compaction(&mut self) {
-        // Derive the view first (authorization needs it), then find the
-        // highest authorized Compact.
-        let view = self.view();
+        // Derive the view + load-bearing op_ids first (authorization
+        // needs the view; pruning must keep the load-bearing ops).
+        let (view, load_bearing) = self.derive();
         let mut floor = 0u64;
         let mut epoch = 0u64;
         for op in self.ops.values() {
@@ -240,10 +240,15 @@ impl GroupCrdt {
         self.compaction_below = floor;
         self.epoch = epoch;
         if floor > 0 {
-            // prune ops strictly below the floor (keep Compact ops so
-            // the floor stays derivable)
-            self.ops.retain(|_, op| {
-                op.lamport >= floor || matches!(op.kind, OpKind::Compact { .. })
+            // Drop ops below the floor EXCEPT those still load-bearing
+            // for the current view (live member adds, winning metadata)
+            // and the Compact ops themselves (so the floor stays
+            // derivable). This collapses tombstone/dead-op bloat while
+            // leaving the derived membership & metadata unchanged.
+            self.ops.retain(|op_id, op| {
+                op.lamport >= floor
+                    || matches!(op.kind, OpKind::Compact { .. })
+                    || load_bearing.contains(op_id)
             });
         }
     }
@@ -258,6 +263,15 @@ impl GroupCrdt {
     /// op set in total `(lamport, actor_id, op_id)` order, enforcing
     /// authorization against the view built so far.
     pub fn view(&self) -> GroupView {
+        self.derive().0
+    }
+
+    /// Like [`view`](Self::view), but also returns the set of op_ids
+    /// that are *load-bearing* for the current view — the live (not
+    /// tombstoned) member adds and the winning metadata writes.
+    /// Compaction keeps these so collapsing history never changes the
+    /// derived state.
+    fn derive(&self) -> (GroupView, BTreeSet<OpId>) {
         // total order: lamport, then actor, then op_id — deterministic
         // across replicas regardless of merge/arrival order.
         let mut ordered: Vec<&GroupOp> = self.ops.values().collect();
@@ -374,6 +388,7 @@ impl GroupCrdt {
                             name_reg = Some(LwwReg {
                                 key: key.clone(),
                                 value: n.clone(),
+                                op_id: op.op_id,
                             });
                         }
                     }
@@ -382,6 +397,7 @@ impl GroupCrdt {
                             avatar_reg = Some(LwwReg {
                                 key: key.clone(),
                                 value: a.clone(),
+                                op_id: op.op_id,
                             });
                         }
                     }
@@ -392,8 +408,10 @@ impl GroupCrdt {
             }
         }
 
-        // build member view: a member is present iff it has ≥1 live add
+        // build member view: a member is present iff it has ≥1 live add.
+        // collect the load-bearing op_ids alongside.
         let mut members = BTreeMap::new();
+        let mut load_bearing: BTreeSet<OpId> = BTreeSet::new();
         for (id, adds) in &live_adds {
             if adds.is_empty() {
                 continue;
@@ -404,14 +422,27 @@ impl GroupCrdt {
                     role: effective_role(adds),
                 },
             );
+            for op_id in adds.keys() {
+                // skip the synthetic founder add (all-zero op_id)
+                if *op_id != [0u8; 16] {
+                    load_bearing.insert(*op_id);
+                }
+            }
+        }
+        if let Some(reg) = &name_reg {
+            load_bearing.insert(reg.op_id);
+        }
+        if let Some(reg) = &avatar_reg {
+            load_bearing.insert(reg.op_id);
         }
 
-        GroupView {
+        let view = GroupView {
             members,
             name: name_reg.map(|r| r.value),
             avatar: avatar_reg.map(|r| r.value),
             max_lamport,
-        }
+        };
+        (view, load_bearing)
     }
 }
 
@@ -453,6 +484,9 @@ impl LwwKey {
 struct LwwReg<T> {
     key: LwwKey,
     value: T,
+    /// op_id of the write that currently holds the register (load-bearing
+    /// for compaction so the winning metadata op is never pruned).
+    op_id: OpId,
 }
 
 impl<T> LwwReg<T> {
@@ -709,6 +743,37 @@ mod tests {
         let accepted = c.merge_op(remove(60, 1, 5, 3, &[11]));
         assert!(!accepted, "op below compaction floor is rejected");
         assert!(c.view().is_member(&id(3)), "stale remove never applied");
+    }
+
+    // compaction must collapse dead history WITHOUT dropping the live
+    // view: a member added long ago (below the floor) and a metadata
+    // name set long ago must survive a compaction; a dead tombstoned
+    // add below the floor is pruned.
+    #[test]
+    fn compaction_preserves_live_view() {
+        let mut c = GroupCrdt::new(id(1));
+        c.merge_op(add(10, 1, 1, 2, ROLE_ADMIN)); // 2 admin (old, live)
+        c.merge_op(meta(11, 1, 2, Some("name-old"))); // old metadata (live)
+        c.merge_op(add(12, 1, 3, 4, ROLE_MEMBER)); // 4 added (old)
+        c.merge_op(remove(13, 1, 4, 4, &[12])); // 4 removed (dead pair)
+        let before = c.op_count();
+
+        // founder compacts everything below lamport 100
+        c.merge_op(GroupOp {
+            op_id: oid(50),
+            actor_id: id(1),
+            lamport: 100,
+            created_at: 0,
+            kind: OpKind::Compact { epoch: 1, below: 100 },
+        });
+
+        // live view is unchanged: 2 (admin) present, name retained, 4 gone
+        let v = c.view();
+        assert!(v.is_admin(&id(2)), "old live admin survives compaction");
+        assert!(!v.is_member(&id(4)), "removed member stays gone");
+        assert_eq!(v.name.as_deref(), Some("name-old"), "old metadata survives");
+        // dead ops were collapsed (fewer ops than before + the compact)
+        assert!(c.op_count() < before + 1, "dead history pruned");
     }
 
     // a non-admin Compact does not move the floor.
