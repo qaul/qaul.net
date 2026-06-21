@@ -172,6 +172,19 @@ impl GroupCrdt {
         self.ops.len()
     }
 
+    /// All `Add` op_ids currently in the set for `member_id`. Used to
+    /// build the `observed_adds` of a `Remove` so it tombstones every
+    /// add this replica has seen for that member (OR-Set semantics).
+    pub fn add_op_ids_for(&self, member_id: &[u8]) -> Vec<OpId> {
+        self.ops
+            .values()
+            .filter_map(|op| match &op.kind {
+                OpKind::Add { member_id: m, .. } if m.as_slice() == member_id => Some(op.op_id),
+                _ => None,
+            })
+            .collect()
+    }
+
     /// Merge one op into the set. Idempotent (dedup by `op_id`) and
     /// order-independent. Returns `true` if the op was newly stored.
     ///

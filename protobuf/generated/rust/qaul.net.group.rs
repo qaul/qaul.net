@@ -153,6 +153,10 @@ pub struct GroupInfo {
     /// updated members
     #[prost(message, repeated, tag = "5")]
     pub members: ::prost::alloc::vec::Vec<GroupMember>,
+    /// group founder (CRDT bootstrap admin); carried so invitees learn
+    /// it and can derive the membership CRDT. Empty from pre-CRDT peers.
+    #[prost(bytes = "vec", tag = "6")]
+    pub founder: ::prost::alloc::vec::Vec<u8>,
 }
 /// Reply to Invite
 ///

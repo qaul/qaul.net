@@ -42,7 +42,38 @@ message Group {
         GroupInvitedRequest group_invited_request = 15;
         // group invited response
         GroupInvitedResponse group_invited_response = 16;
+
+        // CRDT membership/metadata view (read the derived state)
+        GroupCrdtViewRequest group_crdt_view_request = 17;
+        GroupCrdtViewResponse group_crdt_view_response = 18;
     }
+}
+
+// Read the converged CRDT view of a group's membership & metadata.
+message GroupCrdtViewRequest {
+    bytes group_id = 1;
+}
+
+// One member in the derived CRDT view.
+message GroupCrdtMember {
+    bytes user_id = 1;
+    // 0 = member, 255 = admin
+    int32 role = 2;
+}
+
+// The derived CRDT view.
+message GroupCrdtViewResponse {
+    bytes group_id = 1;
+    // false when the group is unknown or predates the CRDT (no founder)
+    bool found = 2;
+    // group founder (bootstrap admin)
+    bytes founder = 3;
+    // derived metadata name (empty if unset)
+    string name = 4;
+    // number of ops retained in the op set
+    uint32 op_count = 5;
+    // present members with their effective role
+    repeated GroupCrdtMember members = 6;
 }
 
 // Group Result
