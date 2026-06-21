@@ -368,7 +368,7 @@ impl Group {
         state: &crate::QaulState,
         account_id: &PeerId,
         group_id: &[u8],
-    ) -> Option<(crdt::GroupView, usize)> {
+    ) -> Option<(crdt::GroupView, usize, u64)> {
         let group = GroupStorage::get_group(state, *account_id, group_id)?;
         if group.founder.is_empty() {
             return None;
@@ -377,7 +377,52 @@ impl Group {
         let crdt = crdt_store::load_crdt(&db, group_id, group.founder.clone());
         let view = crdt.view();
         let count = crdt.op_count();
-        Some((view, count))
+        let epoch = crdt.epoch();
+        Some((view, count, epoch))
+    }
+
+    /// Trigger a CRDT compaction for a group: emit a signed `Compact`
+    /// op raising the epoch and collapsing op history below `below`.
+    /// `below = 0` means "use the current max lamport". Authorization
+    /// (admin-only) is enforced by the CRDT when the op is applied.
+    /// Returns `(epoch, op_count)` after compaction.
+    pub fn crdt_compact(
+        state: &crate::QaulState,
+        account_id: &PeerId,
+        group_id: &[u8],
+        below: u64,
+    ) -> Result<(u64, usize), String> {
+        let group = GroupStorage::get_group(state, *account_id, group_id)
+            .ok_or_else(|| "group not found".to_string())?;
+        if group.founder.is_empty() {
+            return Err("group is not CRDT-managed".to_string());
+        }
+        let db = GroupStorage::get_db_ref(state, *account_id);
+        let crdt = crdt_store::load_crdt(&db, group_id, group.founder.clone());
+
+        // default floor: the current highest lamport (collapse all
+        // history strictly older than the latest op).
+        let floor = if below == 0 {
+            crdt.view().max_lamport
+        } else {
+            below
+        };
+        let next_epoch = crdt.epoch() + 1;
+
+        Self::emit_crdt_op(
+            state,
+            account_id,
+            group_id,
+            crdt::OpKind::Compact {
+                epoch: next_epoch,
+                below: floor,
+            },
+        )
+        .ok_or_else(|| "failed to emit compact op".to_string())?;
+
+        // reload to report the post-compaction state
+        let crdt = crdt_store::load_crdt(&db, group_id, group.founder);
+        Ok((crdt.epoch(), crdt.op_count()))
     }
 
     /// Reconcile the materialized `Group.members` / name from the CRDT,
@@ -963,7 +1008,7 @@ impl Group {
                     }
                     Some(proto_rpc::group::Message::GroupCrdtViewRequest(view_req)) => {
                         let resp = match Self::crdt_view(state, &my_user_id, &view_req.group_id) {
-                            Some((view, op_count)) => proto_rpc::GroupCrdtViewResponse {
+                            Some((view, op_count, epoch)) => proto_rpc::GroupCrdtViewResponse {
                                 group_id: view_req.group_id.clone(),
                                 found: true,
                                 founder: GroupStorage::get_group(state, my_user_id, &view_req.group_id)
@@ -979,6 +1024,7 @@ impl Group {
                                         role: m.role,
                                     })
                                     .collect(),
+                                epoch,
                             },
                             None => proto_rpc::GroupCrdtViewResponse {
                                 group_id: view_req.group_id.clone(),
@@ -988,6 +1034,34 @@ impl Group {
                         };
                         let proto_message = proto_rpc::Group {
                             message: Some(proto_rpc::group::Message::GroupCrdtViewResponse(resp)),
+                        };
+                        Rpc::send_message(
+                            state,
+                            proto_message.encode_to_vec(),
+                            crate::rpc::proto::Modules::Group.into(),
+                            request_id,
+                            Vec::new(),
+                        );
+                    }
+                    Some(proto_rpc::group::Message::GroupCrdtCompactRequest(compact_req)) => {
+                        let (status, message, epoch, op_count) = match Self::crdt_compact(
+                            state,
+                            &my_user_id,
+                            &compact_req.group_id,
+                            compact_req.below,
+                        ) {
+                            Ok((epoch, op_count)) => (true, String::new(), epoch, op_count as u32),
+                            Err(e) => (false, e, 0u64, 0u32),
+                        };
+                        let proto_message = proto_rpc::Group {
+                            message: Some(proto_rpc::group::Message::GroupCrdtCompactResponse(
+                                proto_rpc::GroupCrdtCompactResponse {
+                                    group_id: compact_req.group_id.clone(),
+                                    result: Some(proto_rpc::GroupResult { status, message }),
+                                    epoch,
+                                    op_count,
+                                },
+                            )),
                         };
                         Rpc::send_message(
                             state,

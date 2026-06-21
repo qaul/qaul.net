@@ -5,7 +5,7 @@ pub struct Group {
     /// message type
     #[prost(
         oneof = "group::Message",
-        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19"
+        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20"
     )]
     pub message: ::core::option::Option<group::Message>,
 }
@@ -62,19 +62,40 @@ pub mod group {
         /// group invited response
         #[prost(message, tag = "16")]
         GroupInvitedResponse(super::GroupInvitedResponse),
-        /// group search request
-        ///
-        /// Searches groups/rooms by name (direct chats match the partner's
-        /// username) and returns a GroupListResponse ranked by relevance, with
-        /// more recently active rooms breaking ties.
-        #[prost(message, tag = "17")]
-        GroupSearchRequest(super::GroupSearchRequest),
         /// CRDT membership/metadata view (read the derived state)
-        #[prost(message, tag = "18")]
+        #[prost(message, tag = "17")]
         GroupCrdtViewRequest(super::GroupCrdtViewRequest),
-        #[prost(message, tag = "19")]
+        #[prost(message, tag = "18")]
         GroupCrdtViewResponse(super::GroupCrdtViewResponse),
+        /// CRDT compaction (admin: collapse tombstone history)
+        #[prost(message, tag = "19")]
+        GroupCrdtCompactRequest(super::GroupCrdtCompactRequest),
+        #[prost(message, tag = "20")]
+        GroupCrdtCompactResponse(super::GroupCrdtCompactResponse),
     }
+}
+/// Trigger a CRDT compaction for a group: raise the epoch and collapse
+/// op history below the floor, preserving the live view. Admin-only.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct GroupCrdtCompactRequest {
+    #[prost(bytes = "vec", tag = "1")]
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
+    /// ops strictly below this lamport are collapsed / no longer
+    /// accepted. 0 = let libqaul choose the current max lamport.
+    #[prost(uint64, tag = "2")]
+    pub below: u64,
+}
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct GroupCrdtCompactResponse {
+    #[prost(bytes = "vec", tag = "1")]
+    pub group_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(message, optional, tag = "2")]
+    pub result: ::core::option::Option<GroupResult>,
+    /// epoch and op_count after compaction
+    #[prost(uint64, tag = "3")]
+    pub epoch: u64,
+    #[prost(uint32, tag = "4")]
+    pub op_count: u32,
 }
 /// Read the converged CRDT view of a group's membership & metadata.
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
@@ -111,6 +132,9 @@ pub struct GroupCrdtViewResponse {
     /// present members with their effective role
     #[prost(message, repeated, tag = "6")]
     pub members: ::prost::alloc::vec::Vec<GroupCrdtMember>,
+    /// current compaction epoch
+    #[prost(uint64, tag = "7")]
+    pub epoch: u64,
 }
 /// Group Result
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
@@ -302,19 +326,6 @@ pub struct GroupInfo {
 /// Group list request
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct GroupListRequest {
-    #[prost(uint32, tag = "10")]
-    pub offset: u32,
-    #[prost(uint32, tag = "20")]
-    pub limit: u32,
-}
-/// Group search request
-///
-/// Returns a GroupListResponse. An empty/whitespace query falls back to the
-/// recency-sorted full group list.
-#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
-pub struct GroupSearchRequest {
-    #[prost(string, tag = "1")]
-    pub query: ::prost::alloc::string::String,
     #[prost(uint32, tag = "10")]
     pub offset: u32,
     #[prost(uint32, tag = "20")]

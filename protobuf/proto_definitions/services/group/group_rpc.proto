@@ -52,7 +52,28 @@ message Group {
         // CRDT membership/metadata view (read the derived state)
         GroupCrdtViewRequest group_crdt_view_request = 18;
         GroupCrdtViewResponse group_crdt_view_response = 19;
+
+        // CRDT compaction (admin: collapse tombstone history)
+        GroupCrdtCompactRequest group_crdt_compact_request = 20;
+        GroupCrdtCompactResponse group_crdt_compact_response = 21;
     }
+}
+
+// Trigger a CRDT compaction for a group: raise the epoch and collapse
+// op history below the floor, preserving the live view. Admin-only.
+message GroupCrdtCompactRequest {
+    bytes group_id = 1;
+    // ops strictly below this lamport are collapsed / no longer
+    // accepted. 0 = let libqaul choose the current max lamport.
+    uint64 below = 2;
+}
+
+message GroupCrdtCompactResponse {
+    bytes group_id = 1;
+    GroupResult result = 2;
+    // epoch and op_count after compaction
+    uint64 epoch = 3;
+    uint32 op_count = 4;
 }
 
 // Read the converged CRDT view of a group's membership & metadata.
@@ -80,6 +101,8 @@ message GroupCrdtViewResponse {
     uint32 op_count = 5;
     // present members with their effective role
     repeated GroupCrdtMember members = 6;
+    // current compaction epoch
+    uint64 epoch = 7;
 }
 
 // Group Result

@@ -8,10 +8,10 @@ use qaul_proto::qaul_rpc_group as proto;
 
 use prost::Message;
 use proto::{
-    group, Group, GroupCreateRequest, GroupCrdtViewRequest, GroupInfoRequest,
-    GroupInviteMemberRequest, GroupInvitedRequest, GroupListRequest, GroupMemberRole,
-    GroupMemberState, GroupRemoveMemberRequest, GroupRenameRequest, GroupReplyInviteRequest,
-    GroupStatus,
+    group, Group, GroupCreateRequest, GroupCrdtCompactRequest, GroupCrdtViewRequest,
+    GroupInfoRequest, GroupInviteMemberRequest, GroupInvitedRequest, GroupListRequest,
+    GroupMemberRole, GroupMemberState, GroupRemoveMemberRequest, GroupRenameRequest,
+    GroupReplyInviteRequest, GroupStatus,
 };
 use proto_chat::{chat_content_message, ChatContentMessage, GroupEventType};
 
@@ -187,6 +187,18 @@ impl RpcCommand for GroupSubcmd {
                     message: Some(group::Message::GroupCrdtViewRequest(GroupCrdtViewRequest {
                         group_id,
                     })),
+                };
+                Ok((proto_message.encode_to_vec(), Modules::Group))
+            }
+            GroupSubcmd::CrdtCompact { group_id, below } => {
+                let group_id = uuid_string_to_bin(group_id.to_string())?;
+                let proto_message = Group {
+                    message: Some(group::Message::GroupCrdtCompactRequest(
+                        GroupCrdtCompactRequest {
+                            group_id,
+                            below: *below,
+                        },
+                    )),
                 };
                 Ok((proto_message.encode_to_vec(), Modules::Group))
             }
@@ -551,12 +563,35 @@ impl RpcCommand for GroupSubcmd {
                     println!("==== Group CRDT view ====");
                     println!("\tfounder: {}", bs58::encode(&r.founder).into_string());
                     println!("\tname: {}", r.name);
+                    println!("\tepoch: {}", r.epoch);
                     println!("\tops: {}", r.op_count);
                     println!("\tmembers ({}):", r.members.len());
                     for m in &r.members {
                         let role = if m.role == 255 { "admin" } else { "member" };
                         println!("\t  {} [{}]", bs58::encode(&m.user_id).into_string(), role);
                     }
+                }
+            }
+            Some(group::Message::GroupCrdtCompactResponse(r)) => {
+                let ok = r.result.as_ref().map(|x| x.status).unwrap_or(false);
+                let msg = r.result.as_ref().map(|x| x.message.clone()).unwrap_or_default();
+                if json {
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&serde_json::json!({
+                            "status": ok,
+                            "message": msg,
+                            "epoch": r.epoch,
+                            "op_count": r.op_count,
+                        }))?
+                    );
+                } else if ok {
+                    println!(
+                        "CRDT compaction done: epoch={} ops={}",
+                        r.epoch, r.op_count
+                    );
+                } else {
+                    println!("CRDT compaction failed: {}", msg);
                 }
             }
             _ => {
