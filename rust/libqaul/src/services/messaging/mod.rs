@@ -620,13 +620,16 @@ impl Messaging {
                 envelope: Some(envelope),
             };
 
-            state.services.messaging.save_unconfirmed_message(
-                MessagingServiceType::DtnStored,
-                &[],
-                target_id,
-                &container,
-                true,
-            );
+            // NOTE: V2 routed messages are deliberately NOT tracked in the
+            // messaging unconfirmed table. Reliable delivery and cleanup are
+            // owned by the V2 custody store (`db_ref_routed_v2`, keyed by the
+            // stable end-to-end `original_signature`): retried by
+            // `process_retransmit_v2` and cleared by `on_dtn_response_v2`.
+            // A messaging unconfirmed entry here would be keyed by this hop's
+            // wrapper-envelope `signature`, which the end-to-end `DtnResponse`
+            // (carrying `original_signature`) can never match — so it would
+            // never be confirmed, never expire (retransmit skips DTN entries),
+            // and leak permanently, one entry per V2 message sent.
 
             state.services.messaging.schedule_message(
                 target_id.clone(),
