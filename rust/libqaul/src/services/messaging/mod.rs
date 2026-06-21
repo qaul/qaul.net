@@ -90,6 +90,33 @@ pub enum MessagingServiceType {
     Rtc,
 }
 
+/// An outbound message whose plaintext is held in memory because it could
+/// not be encrypted yet: the peer session was still completing its KK
+/// handshake (`HalfOutgoing`), so `Crypto::encrypt` refuses to produce a
+/// transport frame. The retransmit tick re-attempts it once the session
+/// reaches `Transport`.
+///
+/// Held in RAM only — deliberately never persisted — so plaintext is not
+/// written at rest; a restart simply drops anything still pending (no worse
+/// than today, where such messages were dropped outright).
+#[derive(Clone)]
+pub struct PendingPlaintext {
+    /// local sending user id (PeerId bytes)
+    pub user_id: Vec<u8>,
+    /// remote receiver id (PeerId bytes)
+    pub receiver_id: Vec<u8>,
+    /// plaintext message bytes to encrypt and send
+    pub data: Vec<u8>,
+    /// service type for the eventual unconfirmed entry
+    pub message_type: MessagingServiceType,
+    /// message id for the eventual unconfirmed entry
+    pub message_id: Vec<u8>,
+    /// whether the message expects a delivery confirmation
+    pub needs_confirmation: bool,
+    /// timestamp (ms) when first queued, used for bounded expiry
+    pub queued_at: u64,
+}
+
 /// Unconfirmed Messages Structure
 pub struct UnConfirmedMessages {
     /// signature => UnConfirmedMessage
@@ -112,6 +139,10 @@ pub struct MessagingState {
     pub messaging: RwLock<Messaging>,
     /// Unconfirmed messages tracking.
     pub unconfirmed: RwLock<UnConfirmedMessages>,
+    /// In-memory queue of outbound plaintext awaiting a usable peer session
+    /// (messages queued while a KK handshake is still in progress). Not
+    /// persisted; see [`PendingPlaintext`].
+    pub pending_plaintext: RwLock<Vec<PendingPlaintext>>,
     /// Sled database backing (kept alive for tree references).
     /// Wrapped in RwLock so `init_production` can swap it after construction.
     _db: RwLock<sled::Db>,
@@ -132,6 +163,7 @@ impl MessagingState {
             unconfirmed: RwLock::new(UnConfirmedMessages {
                 unconfirmed: unconfirmed_tree,
             }),
+            pending_plaintext: RwLock::new(Vec::new()),
             _db: RwLock::new(db),
             #[cfg(emulate)]
             network_emul: RwLock::new(network_emul::NetworkEmulatorStat {
@@ -152,6 +184,7 @@ impl MessagingState {
             unconfirmed: RwLock::new(UnConfirmedMessages {
                 unconfirmed: unconfirmed_tree,
             }),
+            pending_plaintext: RwLock::new(Vec::new()),
             _db: RwLock::new(db),
             #[cfg(emulate)]
             network_emul: RwLock::new(network_emul::NetworkEmulatorStat {
@@ -280,6 +313,43 @@ impl MessagingState {
 
     pub fn on_scheduled_as_dtn_message(&self, signature: &[u8]) {
         self.mark_unconfirmed(signature, |msg| msg.scheduled_dtn = true);
+    }
+
+    /// Queue an outbound message whose peer session is still mid-handshake,
+    /// to be re-attempted by the retransmit tick once the session is ready.
+    pub fn enqueue_pending_plaintext(&self, item: PendingPlaintext) {
+        match self.pending_plaintext.write() {
+            Ok(mut q) => q.push(item),
+            Err(e) => log::error!("pending_plaintext lock poisoned: {}", e),
+        }
+    }
+
+    /// Drop pending items older than `max_age_ms`. Returns the number dropped.
+    /// Bounds the queue so a peer that never completes its handshake cannot
+    /// make it grow without limit.
+    pub fn prune_expired_pending(&self, now: u64, max_age_ms: u64) -> usize {
+        match self.pending_plaintext.write() {
+            Ok(mut q) => {
+                let before = q.len();
+                q.retain(|p| now.saturating_sub(p.queued_at) <= max_age_ms);
+                before - q.len()
+            }
+            Err(e) => {
+                log::error!("pending_plaintext lock poisoned: {}", e);
+                0
+            }
+        }
+    }
+
+    /// Take (drain) all pending plaintext items.
+    pub fn take_pending_plaintext(&self) -> Vec<PendingPlaintext> {
+        match self.pending_plaintext.write() {
+            Ok(mut q) => std::mem::take(&mut *q),
+            Err(e) => {
+                log::error!("pending_plaintext lock poisoned: {}", e);
+                Vec::new()
+            }
+        }
     }
 
     /// Shared helper: load an unconfirmed message, apply a mutation, persist it back.
@@ -447,6 +517,30 @@ impl Messaging {
         message_needs_confirmation: bool,
     ) -> Result<Vec<u8>, String> {
         log::trace!("pack_and_send_message to {}", receiver.to_base58());
+
+        // If the peer session is still completing its KK handshake, encryption
+        // would fail and the message would be dropped. Instead, queue the
+        // plaintext in memory; the retransmit tick re-sends it once the session
+        // reaches Transport. Probing before encrypt avoids cloning `data` on
+        // the common (already-established) path — file chunks can be tens of KB.
+        if Crypto::session_pending_handshake(state, user_account, receiver.clone()) {
+            state.services.messaging.enqueue_pending_plaintext(PendingPlaintext {
+                user_id: user_account.id.to_bytes(),
+                receiver_id: receiver.to_bytes(),
+                data,
+                message_type,
+                message_id: message_id.to_vec(),
+                needs_confirmation: message_needs_confirmation,
+                queued_at: Timestamp::get_timestamp(),
+            });
+            log::debug!(
+                "queued outbound message for {} (peer handshake in progress)",
+                receiver.to_base58()
+            );
+            // Accepted (queued for retry); there is no signature yet. Callers
+            // branch only on Err vs Ok, so an empty signature is harmless.
+            return Ok(Vec::new());
+        }
 
         // encrypt data
         let encrypted_message: proto::Encrypted;
@@ -842,5 +936,57 @@ impl Messaging {
             }
             Err(e) => log::error!("Messaging container decoding error: {}", e),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn pending(queued_at: u64) -> PendingPlaintext {
+        PendingPlaintext {
+            user_id: vec![1],
+            receiver_id: vec![2],
+            data: vec![3, 4, 5],
+            message_type: MessagingServiceType::Chat,
+            message_id: vec![6],
+            needs_confirmation: true,
+            queued_at,
+        }
+    }
+
+    /// A message that cannot be encrypted yet (peer mid-handshake) is held in
+    /// the in-memory queue rather than dropped, and survives until taken.
+    /// Regression: such messages were lost (encrypt returned None and the send
+    /// path returned Err before queuing anything).
+    #[test]
+    fn pending_plaintext_is_queued_and_drained() {
+        let ms = MessagingState::new();
+        ms.enqueue_pending_plaintext(pending(1000));
+        ms.enqueue_pending_plaintext(pending(2000));
+
+        let drained = ms.take_pending_plaintext();
+        assert_eq!(drained.len(), 2);
+        // draining empties the queue
+        assert!(ms.take_pending_plaintext().is_empty());
+    }
+
+    /// The queue is bounded: items stuck longer than the max age are dropped,
+    /// so a peer that never completes its handshake can't grow it without
+    /// limit. Fresher items are retained.
+    #[test]
+    fn pending_plaintext_expires_when_too_old() {
+        let ms = MessagingState::new();
+        ms.enqueue_pending_plaintext(pending(1000)); // old
+        ms.enqueue_pending_plaintext(pending(5_000_000)); // fresh
+
+        // now = 5_001_000, max age = 1h: the 1000-stamped item is ~5_000_000ms
+        // old (> 1h) and dropped; the 5_000_000-stamped item is ~1s old, kept.
+        let dropped = ms.prune_expired_pending(5_001_000, 3_600_000);
+        assert_eq!(dropped, 1);
+
+        let remaining = ms.take_pending_plaintext();
+        assert_eq!(remaining.len(), 1);
+        assert_eq!(remaining[0].queued_at, 5_000_000);
     }
 }

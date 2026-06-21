@@ -9,6 +9,7 @@ use libp2p::PeerId;
 use prost::Message;
 
 use super::UnConfirmedMessage;
+use crate::node::user_accounts::UserAccounts;
 use crate::services::dtn;
 use crate::utilities::qaul_id::QaulId;
 use crate::utilities::timestamp::Timestamp;
@@ -145,7 +146,97 @@ impl MessagingRetransmit {
             }
         }
 
+        // Release the unconfirmed lock before the re-entrant sends below:
+        // flush_pending_plaintext calls back into the messaging send path,
+        // which itself takes the unconfirmed (and messaging) locks.
+        drop(unconfirmed);
+
+        // Re-send any messages that were queued while a peer session was
+        // still completing its handshake.
+        Self::flush_pending_plaintext(state);
+
         // Process V2 DTN routed messages
         dtn::Dtn::process_retransmit_v2(state);
+    }
+
+    /// Re-attempt sending messages that were queued because their peer
+    /// session was mid-handshake (see [`super::PendingPlaintext`]).
+    ///
+    /// Items whose session is still not ready are kept (preserving their
+    /// original queue time so they can still expire); items older than 1h are
+    /// dropped so the queue stays bounded even if a peer never completes its
+    /// handshake.
+    fn flush_pending_plaintext(state: &crate::QaulState) {
+        // Bound the queue first (drops anything stuck for over an hour).
+        let now = Timestamp::get_timestamp();
+        let dropped = state
+            .services
+            .messaging
+            .prune_expired_pending(now, 3_600_000);
+        if dropped > 0 {
+            log::warn!("retransmit: dropped {} expired pending message(s)", dropped);
+        }
+
+        let items = state.services.messaging.take_pending_plaintext();
+        if items.is_empty() {
+            return;
+        }
+
+        let mut keep = Vec::new();
+        for item in items {
+            let receiver = match PeerId::from_bytes(&item.receiver_id) {
+                Ok(r) => r,
+                Err(e) => {
+                    log::error!("pending flush: invalid receiver id: {}", e);
+                    continue;
+                }
+            };
+            let user_id = match PeerId::from_bytes(&item.user_id) {
+                Ok(u) => u,
+                Err(e) => {
+                    log::error!("pending flush: invalid user id: {}", e);
+                    continue;
+                }
+            };
+            let user_account = match UserAccounts::get_by_id(state, user_id) {
+                Some(ua) => ua,
+                None => {
+                    log::error!("pending flush: sending user account no longer exists");
+                    continue;
+                }
+            };
+
+            // Still mid-handshake? Keep it and try again next tick.
+            if crate::services::crypto::Crypto::session_pending_handshake(
+                state,
+                &user_account,
+                receiver,
+            ) {
+                keep.push(item);
+                continue;
+            }
+
+            // Session is ready (or absent, which starts a fresh handshake):
+            // send for real. On success the message enters the normal
+            // unconfirmed-table flow.
+            if let Err(e) = super::Messaging::pack_and_send_message(
+                state,
+                &user_account,
+                &receiver,
+                item.data,
+                item.message_type,
+                &item.message_id,
+                item.needs_confirmation,
+            ) {
+                log::error!("pending flush send failed: {}", e);
+            }
+        }
+
+        // Re-queue items still waiting on a handshake.
+        if !keep.is_empty() {
+            if let Ok(mut q) = state.services.messaging.pending_plaintext.write() {
+                q.extend(keep);
+            }
+        }
     }
 }
