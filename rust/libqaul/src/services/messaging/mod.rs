@@ -442,7 +442,7 @@ impl Messaging {
         user_account: &UserAccount,
         receiver: &PeerId,
         data: Vec<u8>,
-        _message_type: MessagingServiceType,
+        message_type: MessagingServiceType,
         message_id: &[u8],
         message_needs_confirmation: bool,
     ) -> Result<Vec<u8>, String> {
@@ -464,6 +464,7 @@ impl Messaging {
             user_account,
             receiver,
             encrypted_message,
+            message_type,
             message_id,
             message_needs_confirmation,
         );
@@ -478,6 +479,7 @@ impl Messaging {
         user_account: &UserAccount,
         receiver: &PeerId,
         encrypted_message: proto::Encrypted,
+        message_type: MessagingServiceType,
         message_id: &[u8],
         message_needs_confirmation: bool,
     ) -> Result<Vec<u8>, String> {
@@ -518,7 +520,7 @@ impl Messaging {
             // in common message case, save into unconfirmed table
             if message_needs_confirmation {
                 state.services.messaging.save_unconfirmed_message(
-                    MessagingServiceType::Chat,
+                    message_type,
                     message_id,
                     receiver,
                     &container,
