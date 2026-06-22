@@ -694,6 +694,7 @@ impl ChatFile {
             user_account,
             &group,
             &message_id,
+            file_id,
             timestamp,
             info.encode_to_vec(),
         );
@@ -717,7 +718,7 @@ impl ChatFile {
             message_count: file_info.message_count,
             chunk_size: DEF_PACKAGE_SIZE,
             file_state: FileState::Sending,
-            reception_tracking: BTreeMap::new(),
+            reception_tracking: Self::init_reception_tracking(&group, &user_account.id),
             file_name: file_name.clone(),
             file_description: description.clone(),
             file_extension: extension.clone(),
@@ -792,6 +793,7 @@ impl ChatFile {
                 user_account,
                 &group,
                 &message_id,
+                file_id,
                 timestamp,
                 data.encode_to_vec(),
             );
@@ -845,12 +847,47 @@ impl ChatFile {
         );
     }
 
+    /// Build the initial reception-tracking map for a file we are sending.
+    ///
+    /// One entry per remote group member (ourselves excluded); each starts
+    /// with zero confirmed packages. Without this the map would be empty and
+    /// [`FileHistory::reception_confirmed`] could never advance the file state,
+    /// so a sent file would never be marked confirmed for any recipient.
+    fn init_reception_tracking(
+        group: &Group,
+        self_id: &PeerId,
+    ) -> BTreeMap<Vec<u8>, ReceptionTracking> {
+        let mut tracking = BTreeMap::new();
+        for member in group.members.values() {
+            match PeerId::from_bytes(&member.user_id) {
+                Ok(id) => {
+                    // we don't expect a confirmation from ourselves
+                    if &id == self_id {
+                        continue;
+                    }
+                    // key by the canonical PeerId byte form, matching the key
+                    // computed in `reception_confirmed`
+                    tracking.insert(
+                        id.to_bytes(),
+                        ReceptionTracking {
+                            received: false,
+                            package_count: 0,
+                        },
+                    );
+                }
+                Err(e) => log::error!("init_reception_tracking: invalid member id: {}", e),
+            }
+        }
+        tracking
+    }
+
     /// Pack a FileContainer message and send it to all Group members
     fn send_filecontainer_to_group(
         state: &crate::QaulState,
         user_account: &UserAccount,
         group: &Group,
         message_id: &[u8],
+        file_id: u64,
         timestamp: u64,
         data: Vec<u8>,
     ) {
@@ -871,13 +908,19 @@ impl ChatFile {
         };
         let message_bytes = message.encode_to_vec();
 
+        // The unconfirmed-table entry for a file message is keyed (for
+        // confirmation routing) by the file_id rather than the group
+        // message_id: the `ChatFile` confirmation arm decodes this back into a
+        // u64 file_id to update per-recipient reception tracking. The wire
+        // `CommonMessage` above still carries the real group message_id.
+        let file_id_bytes = file_id.to_be_bytes();
         Group::send_to_remote_members(
             state,
             user_account,
             group,
             &message_bytes,
             MessagingServiceType::ChatFile,
-            message_id,
+            &file_id_bytes,
             "sending file message error",
         );
     }
@@ -1209,5 +1252,115 @@ impl ChatFile {
                 log::error!("{:?}", error);
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::services::group::GroupMember;
+    use libp2p::identity::Keypair;
+
+    fn peer() -> PeerId {
+        Keypair::generate_ed25519().public().to_peer_id()
+    }
+
+    fn member(id: &PeerId) -> GroupMember {
+        GroupMember {
+            user_id: id.to_bytes(),
+            role: 0,
+            joined_at: 0,
+            state: 0,
+            last_message_index: 0,
+        }
+    }
+
+    /// A file we send must track every *remote* group member (and not
+    /// ourselves), so confirmations can be attributed per recipient.
+    ///
+    /// Regression: `reception_tracking` was created empty, so
+    /// `reception_confirmed` always took its `None` branch and a sent file
+    /// could never be marked confirmed.
+    #[test]
+    fn init_reception_tracking_tracks_each_remote_member() {
+        let me = peer();
+        let a = peer();
+        let b = peer();
+
+        let mut group = Group::new();
+        for id in [&me, &a, &b] {
+            group.members.insert(id.to_bytes(), member(id));
+        }
+
+        let tracking = ChatFile::init_reception_tracking(&group, &me);
+
+        assert_eq!(tracking.len(), 2, "should track both remote members");
+        assert!(tracking.contains_key(&a.to_bytes()));
+        assert!(tracking.contains_key(&b.to_bytes()));
+        assert!(
+            !tracking.contains_key(&me.to_bytes()),
+            "must not track ourselves"
+        );
+        for t in tracking.values() {
+            assert_eq!(t.package_count, 0);
+            assert!(!t.received);
+        }
+    }
+
+    /// A file becomes `Confirmed` only once a recipient has confirmed *every*
+    /// chunk, and `ConfirmedByAll` only once *every* recipient has. This is the
+    /// delivery semantics the empty-map bug silently disabled.
+    #[test]
+    fn reception_confirmed_completes_per_member_then_all() {
+        let a = peer();
+        let b = peer();
+
+        let mut tracking = BTreeMap::new();
+        tracking.insert(
+            a.to_bytes(),
+            ReceptionTracking {
+                received: false,
+                package_count: 0,
+            },
+        );
+        tracking.insert(
+            b.to_bytes(),
+            ReceptionTracking {
+                received: false,
+                package_count: 0,
+            },
+        );
+
+        // message_count = 2 -> two confirmations per recipient to complete
+        let mut fh = FileHistory {
+            group_id: Vec::new(),
+            sender_id: Vec::new(),
+            file_id: 1,
+            message_id: vec![9, 9, 9],
+            start_index: 0,
+            message_count: 2,
+            chunk_size: 1,
+            file_state: FileState::Sending,
+            reception_tracking: tracking,
+            file_name: "f".to_string(),
+            file_description: String::new(),
+            file_extension: String::new(),
+            file_size: 1,
+            sent_at: 0,
+            received_at: 0,
+        };
+
+        // A confirms 1 of 2: not complete yet
+        assert!(!fh.reception_confirmed(a));
+        assert!(matches!(fh.file_state, FileState::Sending));
+
+        // A confirms 2 of 2: A is done, but not everyone
+        assert!(fh.reception_confirmed(a));
+        assert!(matches!(fh.file_state, FileState::Confirmed));
+
+        // B confirms both chunks: now confirmed by all recipients
+        assert!(!fh.reception_confirmed(b));
+        assert!(fh.reception_confirmed(b));
+        assert!(matches!(fh.file_state, FileState::ConfirmedByAll));
     }
 }

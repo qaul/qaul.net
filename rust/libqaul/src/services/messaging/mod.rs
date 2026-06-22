@@ -90,12 +90,69 @@ pub enum MessagingServiceType {
     Rtc,
 }
 
+/// An outbound message whose plaintext is held in memory because it could
+/// not be encrypted yet: the peer session was still completing its KK
+/// handshake (`HalfOutgoing`), so `Crypto::encrypt` refuses to produce a
+/// transport frame. The retransmit tick re-attempts it once the session
+/// reaches `Transport`.
+///
+/// Held in RAM only — deliberately never persisted — so plaintext is not
+/// written at rest; a restart simply drops anything still pending (no worse
+/// than today, where such messages were dropped outright).
+#[derive(Clone)]
+pub struct PendingPlaintext {
+    /// local sending user id (PeerId bytes)
+    pub user_id: Vec<u8>,
+    /// remote receiver id (PeerId bytes)
+    pub receiver_id: Vec<u8>,
+    /// plaintext message bytes to encrypt and send
+    pub data: Vec<u8>,
+    /// service type for the eventual unconfirmed entry
+    pub message_type: MessagingServiceType,
+    /// message id for the eventual unconfirmed entry
+    pub message_id: Vec<u8>,
+    /// whether the message expects a delivery confirmation
+    pub needs_confirmation: bool,
+    /// timestamp (ms) when first queued, used for bounded expiry
+    pub queued_at: u64,
+}
+
+/// Plaintext of a sent, not-yet-confirmed message, kept so a retransmit can
+/// RE-ENCRYPT it under the peer's current session when the originally-sent
+/// ciphertext can no longer be decrypted by the receiver (the peer session
+/// rotated and the old one was retired).
+///
+/// Persisted (unlike [`PendingPlaintext`], which is in-memory) so that
+/// re-encryption survives a restart-triggered cold re-key — the dominant
+/// rotation trigger. Stored on the sender's own device only; the same message
+/// content already lives in the local chat database, so this is not a new
+/// plaintext-at-rest exposure. Removed once the message is confirmed.
+#[derive(Serialize, Deserialize, Clone)]
+pub struct OutboundPlaintext {
+    /// local sending user id (PeerId bytes)
+    pub user_id: Vec<u8>,
+    /// remote receiver id (PeerId bytes)
+    pub receiver_id: Vec<u8>,
+    /// plaintext message bytes to (re-)encrypt and send
+    pub data: Vec<u8>,
+    /// service type for the unconfirmed entry
+    pub message_type: MessagingServiceType,
+    /// message id for the unconfirmed entry
+    pub message_id: Vec<u8>,
+}
+
 /// Unconfirmed Messages Structure
 pub struct UnConfirmedMessages {
     /// signature => UnConfirmedMessage
     ///
     /// value: bincode of `UnConfirmedMessage`
     pub unconfirmed: sled::Tree,
+    /// signature => bincode of [`OutboundPlaintext`]
+    ///
+    /// Sender-side plaintext for sent-but-unconfirmed messages, so retransmit
+    /// can re-encrypt across a session rotation. Kept in lock-step with
+    /// `unconfirmed` (same signature key, same write lock).
+    pub outbound_plaintext: sled::Tree,
 }
 
 /// Qaul Messaging Structure
@@ -112,6 +169,10 @@ pub struct MessagingState {
     pub messaging: RwLock<Messaging>,
     /// Unconfirmed messages tracking.
     pub unconfirmed: RwLock<UnConfirmedMessages>,
+    /// In-memory queue of outbound plaintext awaiting a usable peer session
+    /// (messages queued while a KK handshake is still in progress). Not
+    /// persisted; see [`PendingPlaintext`].
+    pub pending_plaintext: RwLock<Vec<PendingPlaintext>>,
     /// Sled database backing (kept alive for tree references).
     /// Wrapped in RwLock so `init_production` can swap it after construction.
     _db: RwLock<sled::Db>,
@@ -125,13 +186,16 @@ impl MessagingState {
     pub fn new() -> Self {
         let db = sled::Config::new().temporary(true).open().unwrap();
         let unconfirmed_tree = db.open_tree("unconfirmed").unwrap();
+        let outbound_plaintext_tree = db.open_tree("outbound_plaintext").unwrap();
         Self {
             messaging: RwLock::new(Messaging {
                 to_send: VecDeque::new(),
             }),
             unconfirmed: RwLock::new(UnConfirmedMessages {
                 unconfirmed: unconfirmed_tree,
+                outbound_plaintext: outbound_plaintext_tree,
             }),
+            pending_plaintext: RwLock::new(Vec::new()),
             _db: RwLock::new(db),
             #[cfg(emulate)]
             network_emul: RwLock::new(network_emul::NetworkEmulatorStat {
@@ -145,13 +209,16 @@ impl MessagingState {
     /// Create a MessagingState backed by a production sled database.
     pub fn from_production(db: sled::Db) -> Self {
         let unconfirmed_tree = db.open_tree("unconfirmed").unwrap();
+        let outbound_plaintext_tree = db.open_tree("outbound_plaintext").unwrap();
         Self {
             messaging: RwLock::new(Messaging {
                 to_send: VecDeque::new(),
             }),
             unconfirmed: RwLock::new(UnConfirmedMessages {
                 unconfirmed: unconfirmed_tree,
+                outbound_plaintext: outbound_plaintext_tree,
             }),
+            pending_plaintext: RwLock::new(Vec::new()),
             _db: RwLock::new(db),
             #[cfg(emulate)]
             network_emul: RwLock::new(network_emul::NetworkEmulatorStat {
@@ -167,9 +234,11 @@ impl MessagingState {
     /// production-backed ones. Called from `Messaging::init()`.
     pub fn init_production(&self, db: sled::Db) {
         let unconfirmed_tree = db.open_tree("unconfirmed").unwrap();
+        let outbound_plaintext_tree = db.open_tree("outbound_plaintext").unwrap();
         {
             let mut unconfirmed = self.unconfirmed.write().unwrap();
             unconfirmed.unconfirmed = unconfirmed_tree;
+            unconfirmed.outbound_plaintext = outbound_plaintext_tree;
         }
         {
             let mut db_lock = self._db.write().unwrap();
@@ -272,6 +341,8 @@ impl MessagingState {
                 log::error!("{}", e);
             }
         }
+        // the message is confirmed: drop its retransmit plaintext too
+        let _ = unconfirmed.outbound_plaintext.remove(signature);
     }
 
     pub(crate) fn on_scheduled_message(&self, signature: &[u8]) {
@@ -280,6 +351,80 @@ impl MessagingState {
 
     pub fn on_scheduled_as_dtn_message(&self, signature: &[u8]) {
         self.mark_unconfirmed(signature, |msg| msg.scheduled_dtn = true);
+    }
+
+    /// Queue an outbound message whose peer session is still mid-handshake,
+    /// to be re-attempted by the retransmit tick once the session is ready.
+    pub fn enqueue_pending_plaintext(&self, item: PendingPlaintext) {
+        match self.pending_plaintext.write() {
+            Ok(mut q) => q.push(item),
+            Err(e) => log::error!("pending_plaintext lock poisoned: {}", e),
+        }
+    }
+
+    /// Drop pending items older than `max_age_ms`. Returns the number dropped.
+    /// Bounds the queue so a peer that never completes its handshake cannot
+    /// make it grow without limit.
+    pub fn prune_expired_pending(&self, now: u64, max_age_ms: u64) -> usize {
+        match self.pending_plaintext.write() {
+            Ok(mut q) => {
+                let before = q.len();
+                q.retain(|p| now.saturating_sub(p.queued_at) <= max_age_ms);
+                before - q.len()
+            }
+            Err(e) => {
+                log::error!("pending_plaintext lock poisoned: {}", e);
+                0
+            }
+        }
+    }
+
+    /// Take (drain) all pending plaintext items.
+    pub fn take_pending_plaintext(&self) -> Vec<PendingPlaintext> {
+        match self.pending_plaintext.write() {
+            Ok(mut q) => std::mem::take(&mut *q),
+            Err(e) => {
+                log::error!("pending_plaintext lock poisoned: {}", e);
+                Vec::new()
+            }
+        }
+    }
+
+    /// Persist the plaintext of a sent-but-unconfirmed message, keyed by its
+    /// signature, so a retransmit can re-encrypt it across a session rotation
+    /// (see [`OutboundPlaintext`]). Stored in the same tree-group as the
+    /// unconfirmed entry; removed when the message is confirmed or expires.
+    ///
+    /// Callers must NOT already hold the `unconfirmed` lock (this acquires it).
+    pub fn save_outbound_plaintext(&self, signature: &[u8], item: OutboundPlaintext) {
+        let bytes = match bincode::serialize(&item) {
+            Ok(b) => b,
+            Err(e) => {
+                log::error!("failed to serialize outbound plaintext: {}", e);
+                return;
+            }
+        };
+        let unconfirmed = match self.unconfirmed.write() {
+            Ok(u) => u,
+            Err(e) => {
+                log::error!("unconfirmed lock poisoned: {}", e);
+                return;
+            }
+        };
+        if let Err(e) = unconfirmed.outbound_plaintext.insert(signature, bytes) {
+            log::error!("failed to store outbound plaintext: {}", e);
+        } else {
+            let _ = unconfirmed.outbound_plaintext.flush();
+        }
+    }
+
+    /// Load the stored retransmit plaintext for a message signature, if any.
+    pub fn get_outbound_plaintext(&self, signature: &[u8]) -> Option<OutboundPlaintext> {
+        let unconfirmed = self.unconfirmed.read().ok()?;
+        match unconfirmed.outbound_plaintext.get(signature) {
+            Ok(Some(bytes)) => bincode::deserialize(&bytes).ok(),
+            _ => None,
+        }
     }
 
     /// Shared helper: load an unconfirmed message, apply a mutation, persist it back.
@@ -418,6 +563,9 @@ impl Messaging {
             }
         }
 
+        // the message is confirmed: drop its retransmit plaintext too
+        let _ = unconfirmed.outbound_plaintext.remove(signature);
+
         // Release the unconfirmed-table lock before the rotation hook,
         // which takes its own read lock on the same table.
         drop(unconfirmed);
@@ -442,11 +590,46 @@ impl Messaging {
         user_account: &UserAccount,
         receiver: &PeerId,
         data: Vec<u8>,
-        _message_type: MessagingServiceType,
+        message_type: MessagingServiceType,
         message_id: &[u8],
         message_needs_confirmation: bool,
     ) -> Result<Vec<u8>, String> {
         log::trace!("pack_and_send_message to {}", receiver.to_base58());
+
+        // If the peer session is still completing its KK handshake, encryption
+        // would fail and the message would be dropped. Instead, queue the
+        // plaintext in memory; the retransmit tick re-sends it once the session
+        // reaches Transport. Probing before encrypt avoids cloning `data` on
+        // the common (already-established) path — file chunks can be tens of KB.
+        if Crypto::session_pending_handshake(state, user_account, receiver.clone()) {
+            state.services.messaging.enqueue_pending_plaintext(PendingPlaintext {
+                user_id: user_account.id.to_bytes(),
+                receiver_id: receiver.to_bytes(),
+                data,
+                message_type,
+                message_id: message_id.to_vec(),
+                needs_confirmation: message_needs_confirmation,
+                queued_at: Timestamp::get_timestamp(),
+            });
+            log::debug!(
+                "queued outbound message for {} (peer handshake in progress)",
+                receiver.to_base58()
+            );
+            // Accepted (queued for retry); there is no signature yet. Callers
+            // branch only on Err vs Ok, so an empty signature is harmless.
+            return Ok(Vec::new());
+        }
+
+        // Keep a copy of the plaintext for confirmable messages so a
+        // retransmit can re-encrypt it if the peer session rotates (and the old
+        // one is retired) before the message is confirmed — see
+        // `OutboundPlaintext`. Cloned only for confirmable messages, so
+        // confirmations and one-shot messages don't pay the cost.
+        let retry_plaintext = if message_needs_confirmation {
+            Some(data.clone())
+        } else {
+            None
+        };
 
         // encrypt data
         let encrypted_message: proto::Encrypted;
@@ -459,14 +642,34 @@ impl Messaging {
             None => return Err("Encryption error occurred".to_string()),
         }
 
-        return Self::pack_and_send_encrypted_data(
+        let result = Self::pack_and_send_encrypted_data(
             state,
             user_account,
             receiver,
             encrypted_message,
+            message_type.clone(),
             message_id,
             message_needs_confirmation,
         );
+
+        // On success, persist the plaintext keyed by the message signature, so a
+        // retransmit can re-encrypt it under the current session if the original
+        // one rotates away before confirmation. Only this path stores it; crypto
+        // handshake frames call pack_and_send_encrypted_data directly and are
+        // intentionally excluded. Removed when the message is confirmed.
+        if let (Ok(signature), Some(plaintext)) = (&result, retry_plaintext) {
+            state.services.messaging.save_outbound_plaintext(
+                signature,
+                OutboundPlaintext {
+                    user_id: user_account.id.to_bytes(),
+                    receiver_id: receiver.to_bytes(),
+                    data: plaintext,
+                    message_type,
+                    message_id: message_id.to_vec(),
+                },
+            );
+        }
+        result
     }
 
     /// pack, sign and schedule encrypted message data
@@ -478,6 +681,7 @@ impl Messaging {
         user_account: &UserAccount,
         receiver: &PeerId,
         encrypted_message: proto::Encrypted,
+        message_type: MessagingServiceType,
         message_id: &[u8],
         message_needs_confirmation: bool,
     ) -> Result<Vec<u8>, String> {
@@ -518,7 +722,7 @@ impl Messaging {
             // in common message case, save into unconfirmed table
             if message_needs_confirmation {
                 state.services.messaging.save_unconfirmed_message(
-                    MessagingServiceType::Chat,
+                    message_type,
                     message_id,
                     receiver,
                     &container,
@@ -618,13 +822,16 @@ impl Messaging {
                 envelope: Some(envelope),
             };
 
-            state.services.messaging.save_unconfirmed_message(
-                MessagingServiceType::DtnStored,
-                &[],
-                target_id,
-                &container,
-                true,
-            );
+            // NOTE: V2 routed messages are deliberately NOT tracked in the
+            // messaging unconfirmed table. Reliable delivery and cleanup are
+            // owned by the V2 custody store (`db_ref_routed_v2`, keyed by the
+            // stable end-to-end `original_signature`): retried by
+            // `process_retransmit_v2` and cleared by `on_dtn_response_v2`.
+            // A messaging unconfirmed entry here would be keyed by this hop's
+            // wrapper-envelope `signature`, which the end-to-end `DtnResponse`
+            // (carrying `original_signature`) can never match — so it would
+            // never be confirmed, never expire (retransmit skips DTN entries),
+            // and leak permanently, one entry per V2 message sent.
 
             state.services.messaging.schedule_message(
                 target_id.clone(),
@@ -837,5 +1044,85 @@ impl Messaging {
             }
             Err(e) => log::error!("Messaging container decoding error: {}", e),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn pending(queued_at: u64) -> PendingPlaintext {
+        PendingPlaintext {
+            user_id: vec![1],
+            receiver_id: vec![2],
+            data: vec![3, 4, 5],
+            message_type: MessagingServiceType::Chat,
+            message_id: vec![6],
+            needs_confirmation: true,
+            queued_at,
+        }
+    }
+
+    /// A message that cannot be encrypted yet (peer mid-handshake) is held in
+    /// the in-memory queue rather than dropped, and survives until taken.
+    /// Regression: such messages were lost (encrypt returned None and the send
+    /// path returned Err before queuing anything).
+    #[test]
+    fn pending_plaintext_is_queued_and_drained() {
+        let ms = MessagingState::new();
+        ms.enqueue_pending_plaintext(pending(1000));
+        ms.enqueue_pending_plaintext(pending(2000));
+
+        let drained = ms.take_pending_plaintext();
+        assert_eq!(drained.len(), 2);
+        // draining empties the queue
+        assert!(ms.take_pending_plaintext().is_empty());
+    }
+
+    /// The queue is bounded: items stuck longer than the max age are dropped,
+    /// so a peer that never completes its handshake can't grow it without
+    /// limit. Fresher items are retained.
+    #[test]
+    fn pending_plaintext_expires_when_too_old() {
+        let ms = MessagingState::new();
+        ms.enqueue_pending_plaintext(pending(1000)); // old
+        ms.enqueue_pending_plaintext(pending(5_000_000)); // fresh
+
+        // now = 5_001_000, max age = 1h: the 1000-stamped item is ~5_000_000ms
+        // old (> 1h) and dropped; the 5_000_000-stamped item is ~1s old, kept.
+        let dropped = ms.prune_expired_pending(5_001_000, 3_600_000);
+        assert_eq!(dropped, 1);
+
+        let remaining = ms.take_pending_plaintext();
+        assert_eq!(remaining.len(), 1);
+        assert_eq!(remaining[0].queued_at, 5_000_000);
+    }
+
+    /// A confirmable message's plaintext is persisted (so a retransmit can
+    /// re-encrypt it across a session rotation) and removed once the message
+    /// is confirmed — otherwise the store would grow without bound.
+    #[test]
+    fn outbound_plaintext_stored_and_cleared_on_confirm() {
+        let ms = MessagingState::new();
+        let sig = b"sig-1".to_vec();
+        ms.save_outbound_plaintext(
+            &sig,
+            OutboundPlaintext {
+                user_id: vec![1],
+                receiver_id: vec![2],
+                data: vec![3, 4, 5],
+                message_type: MessagingServiceType::Chat,
+                message_id: vec![6],
+            },
+        );
+        let got = ms.get_outbound_plaintext(&sig).expect("stored");
+        assert_eq!(got.data, vec![3, 4, 5]);
+
+        // confirming the message must drop its retransmit plaintext
+        ms.on_confirmed_message(&sig);
+        assert!(
+            ms.get_outbound_plaintext(&sig).is_none(),
+            "plaintext must be cleared once the message is confirmed"
+        );
     }
 }

@@ -9,6 +9,7 @@ use libp2p::PeerId;
 use prost::Message;
 
 use super::UnConfirmedMessage;
+use crate::node::user_accounts::UserAccounts;
 use crate::services::dtn;
 use crate::utilities::qaul_id::QaulId;
 use crate::utilities::timestamp::Timestamp;
@@ -19,6 +20,16 @@ pub struct MessagingRetransmit {}
 impl MessagingRetransmit {
     /// process retransmission
     pub fn process(state: &crate::QaulState) {
+        // These run on every tick regardless of the unconfirmed table, because
+        // they use separate stores and the unconfirmed-table early-return below
+        // must not skip them:
+        //  - messages queued while a peer session was completing its handshake
+        //    (pending_plaintext); after the handshake completes the unconfirmed
+        //    table may well be empty, so this must not be gated on it.
+        //  - V2 routed DTN messages, tracked in the DTN custody store.
+        Self::flush_pending_plaintext(state);
+        dtn::Dtn::process_retransmit_v2(state);
+
         // get unconfirmed table
         let unconfirmed = match state.services.messaging.unconfirmed.write() {
             Ok(u) => u,
@@ -35,6 +46,11 @@ impl MessagingRetransmit {
         // get online users from route table
         let rs = state.get_router();
         let online_users = rs.routing_table.get_online_users();
+
+        // Messages whose peer session rotated away from the one their stored
+        // ciphertext used: collected here and re-encrypted after the unconfirmed
+        // lock is released (re-encryption re-enters the messaging send path).
+        let mut to_reencrypt: Vec<super::OutboundPlaintext> = Vec::new();
 
         let mut updated = false;
         let cur_time = Timestamp::get_timestamp();
@@ -68,6 +84,7 @@ impl MessagingRetransmit {
                     if let Err(_e) = unconfirmed.unconfirmed.remove(&signature) {
                         log::error!("removing expired unconfirmed message error!");
                     }
+                    let _ = unconfirmed.outbound_plaintext.remove(&signature);
                     updated = true;
                     continue;
                 }
@@ -94,6 +111,40 @@ impl MessagingRetransmit {
                                 }
                             };
 
+                            // If this message's session has rotated away from the
+                            // one its stored ciphertext used (the receiver may
+                            // have retired that session), re-encrypt the kept
+                            // plaintext under the live session instead of
+                            // replaying ciphertext the peer can no longer decrypt.
+                            // The actual resend is deferred until the unconfirmed
+                            // lock is released, below.
+                            if let Ok(Some(pt_bytes)) =
+                                unconfirmed.outbound_plaintext.get(&signature)
+                            {
+                                if let Ok(pt) =
+                                    bincode::deserialize::<super::OutboundPlaintext>(&pt_bytes)
+                                {
+                                    let cur = PeerId::from_bytes(&pt.user_id).ok().and_then(|u| {
+                                        crate::services::crypto::Crypto::current_primary_session_id(
+                                            state, u, receiver,
+                                        )
+                                    });
+                                    let sent =
+                                        crate::services::crypto::Crypto::container_session_id(
+                                            &unconfirmed_message.container,
+                                        );
+                                    if let (Some(c), Some(s)) = (cur, sent) {
+                                        if c != s {
+                                            let _ = unconfirmed.unconfirmed.remove(&signature);
+                                            let _ = unconfirmed.outbound_plaintext.remove(&signature);
+                                            updated = true;
+                                            to_reencrypt.push(pt);
+                                            continue;
+                                        }
+                                    }
+                                }
+                            }
+
                             log::trace!(
                                 "retrans message, signature: {}",
                                 bs58::encode(&container.signature).into_string()
@@ -118,6 +169,7 @@ impl MessagingRetransmit {
                                 if let Err(_e) = unconfirmed.unconfirmed.remove(&signature) {
                                     log::error!("removing expired unconfirmed message error!");
                                 }
+                                let _ = unconfirmed.outbound_plaintext.remove(&signature);
                                 updated = true;
                             } else {
                                 unconfirmed_message.retry = new_retry;
@@ -143,9 +195,132 @@ impl MessagingRetransmit {
             if let Err(_e) = unconfirmed.unconfirmed.flush() {
                 log::error!("updating unconfirmed table error!");
             }
+            let _ = unconfirmed.outbound_plaintext.flush();
         }
 
-        // Process V2 DTN routed messages
-        dtn::Dtn::process_retransmit_v2(state);
+        // Release the unconfirmed lock before re-encrypting: pack_and_send_message
+        // re-acquires it. Re-send each rotated-away message under the peer's
+        // current session (this creates a fresh unconfirmed entry + plaintext
+        // under the new signature; the stale ones were already removed above).
+        drop(unconfirmed);
+        for pt in to_reencrypt {
+            let receiver = match PeerId::from_bytes(&pt.receiver_id) {
+                Ok(r) => r,
+                Err(e) => {
+                    log::error!("re-encrypt: invalid receiver id: {}", e);
+                    continue;
+                }
+            };
+            let user_id = match PeerId::from_bytes(&pt.user_id) {
+                Ok(u) => u,
+                Err(e) => {
+                    log::error!("re-encrypt: invalid user id: {}", e);
+                    continue;
+                }
+            };
+            let user_account = match UserAccounts::get_by_id(state, user_id) {
+                Some(ua) => ua,
+                None => {
+                    log::error!("re-encrypt: sending user account no longer exists");
+                    continue;
+                }
+            };
+            log::debug!(
+                "retransmit: re-encrypting message for {} under current session",
+                receiver.to_base58()
+            );
+            if let Err(e) = super::Messaging::pack_and_send_message(
+                state,
+                &user_account,
+                &receiver,
+                pt.data,
+                pt.message_type,
+                &pt.message_id,
+                true,
+            ) {
+                log::error!("retransmit re-encrypt resend failed: {}", e);
+            }
+        }
+    }
+
+    /// Re-attempt sending messages that were queued because their peer
+    /// session was mid-handshake (see [`super::PendingPlaintext`]).
+    ///
+    /// Items whose session is still not ready are kept (preserving their
+    /// original queue time so they can still expire); items older than 1h are
+    /// dropped so the queue stays bounded even if a peer never completes its
+    /// handshake.
+    fn flush_pending_plaintext(state: &crate::QaulState) {
+        // Bound the queue first (drops anything stuck for over an hour).
+        let now = Timestamp::get_timestamp();
+        let dropped = state
+            .services
+            .messaging
+            .prune_expired_pending(now, 3_600_000);
+        if dropped > 0 {
+            log::warn!("retransmit: dropped {} expired pending message(s)", dropped);
+        }
+
+        let items = state.services.messaging.take_pending_plaintext();
+        if items.is_empty() {
+            return;
+        }
+
+        let mut keep = Vec::new();
+        for item in items {
+            let receiver = match PeerId::from_bytes(&item.receiver_id) {
+                Ok(r) => r,
+                Err(e) => {
+                    log::error!("pending flush: invalid receiver id: {}", e);
+                    continue;
+                }
+            };
+            let user_id = match PeerId::from_bytes(&item.user_id) {
+                Ok(u) => u,
+                Err(e) => {
+                    log::error!("pending flush: invalid user id: {}", e);
+                    continue;
+                }
+            };
+            let user_account = match UserAccounts::get_by_id(state, user_id) {
+                Some(ua) => ua,
+                None => {
+                    log::error!("pending flush: sending user account no longer exists");
+                    continue;
+                }
+            };
+
+            // Still mid-handshake? Keep it and try again next tick.
+            if crate::services::crypto::Crypto::session_pending_handshake(
+                state,
+                &user_account,
+                receiver,
+            ) {
+                keep.push(item);
+                continue;
+            }
+
+            // Session is ready (or absent, which starts a fresh handshake):
+            // send for real. On success the message enters the normal
+            // unconfirmed-table flow.
+            if let Err(e) = super::Messaging::pack_and_send_message(
+                state,
+                &user_account,
+                &receiver,
+                item.data,
+                item.message_type,
+                &item.message_id,
+                item.needs_confirmation,
+            ) {
+                log::error!("pending flush send failed: {}", e);
+            }
+        }
+
+        // Re-queue items still waiting on a handshake.
+        if !keep.is_empty() {
+            if let Ok(mut q) = state.services.messaging.pending_plaintext.write() {
+                q.extend(keep);
+            }
+        }
     }
 }
