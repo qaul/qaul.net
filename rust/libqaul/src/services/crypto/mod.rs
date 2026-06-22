@@ -159,6 +159,23 @@ impl Crypto {
     ///
     /// The function returns the packed message on success,
     /// or none on failure.
+    /// Whether a Noise session with `remote_id` exists but is still in
+    /// handshake (`HalfOutgoing` / `HalfIncoming`), i.e. a transport
+    /// message cannot be encrypted yet but will be once it completes.
+    /// Used by the messaging layer to queue (not drop) a message sent
+    /// during first-contact handshake.
+    pub fn has_pending_handshake(
+        state: &crate::QaulState,
+        account_id: &PeerId,
+        remote_id: &PeerId,
+    ) -> bool {
+        let crypto_account = CryptoStorage::get_db_ref(state, *account_id);
+        match Self::resolve_primary_state(&crypto_account, *remote_id) {
+            Some(s) => !matches!(s.state, CryptoProcessState::Transport),
+            None => false,
+        }
+    }
+
     pub fn encrypt(
         state: &crate::QaulState,
         data: Vec<u8>,
@@ -730,7 +747,7 @@ impl Crypto {
 
                         // decrypt second handshake message
                         for data in message.data {
-                            let message = CryptoNoise::decrypt_noise_kk_handshake_2::<
+                            let confirmation = CryptoNoise::decrypt_noise_kk_handshake_2::<
                                 X25519,
                                 ChaCha20Poly1305,
                                 Sha256,
@@ -739,9 +756,17 @@ impl Crypto {
                                 data.data, session, crypto_account, remote_id
                             );
 
-                            // return second handshake confirmation message
+                            // the session is now in Transport — flush any
+                            // messages that were queued while the handshake
+                            // was in flight (session-tolerant delivery).
+                            messaging::Messaging::flush_pending_send(
+                                state,
+                                &user_account,
+                                &remote_id,
+                            );
 
-                            return message;
+                            // return second handshake confirmation message
+                            return confirmation;
                         }
                     }
                     (
