@@ -20,6 +20,16 @@ pub struct MessagingRetransmit {}
 impl MessagingRetransmit {
     /// process retransmission
     pub fn process(state: &crate::QaulState) {
+        // These run on every tick regardless of the unconfirmed table, because
+        // they use separate stores and the unconfirmed-table early-return below
+        // must not skip them:
+        //  - messages queued while a peer session was completing its handshake
+        //    (pending_plaintext); after the handshake completes the unconfirmed
+        //    table may well be empty, so this must not be gated on it.
+        //  - V2 routed DTN messages, tracked in the DTN custody store.
+        Self::flush_pending_plaintext(state);
+        dtn::Dtn::process_retransmit_v2(state);
+
         // get unconfirmed table
         let unconfirmed = match state.services.messaging.unconfirmed.write() {
             Ok(u) => u,
@@ -145,18 +155,6 @@ impl MessagingRetransmit {
                 log::error!("updating unconfirmed table error!");
             }
         }
-
-        // Release the unconfirmed lock before the re-entrant sends below:
-        // flush_pending_plaintext calls back into the messaging send path,
-        // which itself takes the unconfirmed (and messaging) locks.
-        drop(unconfirmed);
-
-        // Re-send any messages that were queued while a peer session was
-        // still completing its handshake.
-        Self::flush_pending_plaintext(state);
-
-        // Process V2 DTN routed messages
-        dtn::Dtn::process_retransmit_v2(state);
     }
 
     /// Re-attempt sending messages that were queued because their peer
