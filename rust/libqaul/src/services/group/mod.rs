@@ -81,9 +81,14 @@ pub struct Group {
     /// group status
     ///
     pub status: i32,
-    /// group revision number
+    /// group revision number (LEGACY).
     ///
-    /// this number increases with every revision
+    /// Monotonic counter for the old last-writer-wins membership merge.
+    /// RETIRED for CRDT-managed groups (those with a `founder`): their
+    /// membership/metadata is owned by the membership CRDT and the
+    /// rev-counter merge in `on_group_notify` is skipped. Still used for
+    /// backward-compatible GroupInfo gossip with pre-CRDT peers; kept on
+    /// the wire/struct for that and to avoid breaking stored groups.
     pub revision: u32,
     /// group founder (creator) — bootstrap admin for the membership
     /// CRDT, un-removable, and the only actor who may remove an admin.
