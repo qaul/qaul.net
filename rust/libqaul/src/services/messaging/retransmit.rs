@@ -47,6 +47,11 @@ impl MessagingRetransmit {
         let rs = state.get_router();
         let online_users = rs.routing_table.get_online_users();
 
+        // Messages whose peer session rotated away from the one their stored
+        // ciphertext used: collected here and re-encrypted after the unconfirmed
+        // lock is released (re-encryption re-enters the messaging send path).
+        let mut to_reencrypt: Vec<super::OutboundPlaintext> = Vec::new();
+
         let mut updated = false;
         let cur_time = Timestamp::get_timestamp();
         for entry in unconfirmed.unconfirmed.iter() {
@@ -79,6 +84,7 @@ impl MessagingRetransmit {
                     if let Err(_e) = unconfirmed.unconfirmed.remove(&signature) {
                         log::error!("removing expired unconfirmed message error!");
                     }
+                    let _ = unconfirmed.outbound_plaintext.remove(&signature);
                     updated = true;
                     continue;
                 }
@@ -105,6 +111,40 @@ impl MessagingRetransmit {
                                 }
                             };
 
+                            // If this message's session has rotated away from the
+                            // one its stored ciphertext used (the receiver may
+                            // have retired that session), re-encrypt the kept
+                            // plaintext under the live session instead of
+                            // replaying ciphertext the peer can no longer decrypt.
+                            // The actual resend is deferred until the unconfirmed
+                            // lock is released, below.
+                            if let Ok(Some(pt_bytes)) =
+                                unconfirmed.outbound_plaintext.get(&signature)
+                            {
+                                if let Ok(pt) =
+                                    bincode::deserialize::<super::OutboundPlaintext>(&pt_bytes)
+                                {
+                                    let cur = PeerId::from_bytes(&pt.user_id).ok().and_then(|u| {
+                                        crate::services::crypto::Crypto::current_primary_session_id(
+                                            state, u, receiver,
+                                        )
+                                    });
+                                    let sent =
+                                        crate::services::crypto::Crypto::container_session_id(
+                                            &unconfirmed_message.container,
+                                        );
+                                    if let (Some(c), Some(s)) = (cur, sent) {
+                                        if c != s {
+                                            let _ = unconfirmed.unconfirmed.remove(&signature);
+                                            let _ = unconfirmed.outbound_plaintext.remove(&signature);
+                                            updated = true;
+                                            to_reencrypt.push(pt);
+                                            continue;
+                                        }
+                                    }
+                                }
+                            }
+
                             log::trace!(
                                 "retrans message, signature: {}",
                                 bs58::encode(&container.signature).into_string()
@@ -129,6 +169,7 @@ impl MessagingRetransmit {
                                 if let Err(_e) = unconfirmed.unconfirmed.remove(&signature) {
                                     log::error!("removing expired unconfirmed message error!");
                                 }
+                                let _ = unconfirmed.outbound_plaintext.remove(&signature);
                                 updated = true;
                             } else {
                                 unconfirmed_message.retry = new_retry;
@@ -153,6 +194,51 @@ impl MessagingRetransmit {
         if updated {
             if let Err(_e) = unconfirmed.unconfirmed.flush() {
                 log::error!("updating unconfirmed table error!");
+            }
+            let _ = unconfirmed.outbound_plaintext.flush();
+        }
+
+        // Release the unconfirmed lock before re-encrypting: pack_and_send_message
+        // re-acquires it. Re-send each rotated-away message under the peer's
+        // current session (this creates a fresh unconfirmed entry + plaintext
+        // under the new signature; the stale ones were already removed above).
+        drop(unconfirmed);
+        for pt in to_reencrypt {
+            let receiver = match PeerId::from_bytes(&pt.receiver_id) {
+                Ok(r) => r,
+                Err(e) => {
+                    log::error!("re-encrypt: invalid receiver id: {}", e);
+                    continue;
+                }
+            };
+            let user_id = match PeerId::from_bytes(&pt.user_id) {
+                Ok(u) => u,
+                Err(e) => {
+                    log::error!("re-encrypt: invalid user id: {}", e);
+                    continue;
+                }
+            };
+            let user_account = match UserAccounts::get_by_id(state, user_id) {
+                Some(ua) => ua,
+                None => {
+                    log::error!("re-encrypt: sending user account no longer exists");
+                    continue;
+                }
+            };
+            log::debug!(
+                "retransmit: re-encrypting message for {} under current session",
+                receiver.to_base58()
+            );
+            if let Err(e) = super::Messaging::pack_and_send_message(
+                state,
+                &user_account,
+                &receiver,
+                pt.data,
+                pt.message_type,
+                &pt.message_id,
+                true,
+            ) {
+                log::error!("retransmit re-encrypt resend failed: {}", e);
             }
         }
     }
