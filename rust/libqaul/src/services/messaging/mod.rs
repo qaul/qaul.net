@@ -10,7 +10,7 @@ use libp2p::PeerId;
 use prost::Message;
 use serde::{Deserialize, Serialize};
 use sled;
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 use std::sync::RwLock;
 
 #[cfg(emulate)]
@@ -104,6 +104,23 @@ pub struct Messaging {
     pub to_send: VecDeque<ScheduledMessage>,
 }
 
+/// Max messages held per peer in the pending-send queue while a Noise
+/// session is still being established. Bounds memory if a peer never
+/// completes its handshake; excess enqueues drop the oldest.
+pub const MAX_PENDING_SEND_PER_PEER: usize = 256;
+
+/// A message that could not be encrypted yet because the per-peer Noise
+/// session is still in handshake (`HalfOutgoing`). Held in memory and
+/// flushed once the session reaches `Transport`. Plaintext is kept in
+/// RAM only (never persisted) and is lost on restart — the same outcome
+/// as a crash mid-send.
+struct PendingSend {
+    data: Vec<u8>,
+    service_type: MessagingServiceType,
+    message_id: Vec<u8>,
+    needs_confirmation: bool,
+}
+
 /// Instance-based messaging state owning the scheduled message queue
 /// and unconfirmed message tracking.
 /// Replaces the global MESSAGING and UNCONFIRMED statics for multi-instance use.
@@ -112,6 +129,9 @@ pub struct MessagingState {
     pub messaging: RwLock<Messaging>,
     /// Unconfirmed messages tracking.
     pub unconfirmed: RwLock<UnConfirmedMessages>,
+    /// Per-peer queue of messages awaiting session establishment.
+    /// Keyed by receiver PeerId bytes. In-memory only.
+    pending_send: RwLock<HashMap<Vec<u8>, VecDeque<PendingSend>>>,
     /// Sled database backing (kept alive for tree references).
     /// Wrapped in RwLock so `init_production` can swap it after construction.
     _db: RwLock<sled::Db>,
@@ -132,6 +152,7 @@ impl MessagingState {
             unconfirmed: RwLock::new(UnConfirmedMessages {
                 unconfirmed: unconfirmed_tree,
             }),
+            pending_send: RwLock::new(HashMap::new()),
             _db: RwLock::new(db),
             #[cfg(emulate)]
             network_emul: RwLock::new(network_emul::NetworkEmulatorStat {
@@ -152,6 +173,7 @@ impl MessagingState {
             unconfirmed: RwLock::new(UnConfirmedMessages {
                 unconfirmed: unconfirmed_tree,
             }),
+            pending_send: RwLock::new(HashMap::new()),
             _db: RwLock::new(db),
             #[cfg(emulate)]
             network_emul: RwLock::new(network_emul::NetworkEmulatorStat {
@@ -198,6 +220,43 @@ impl MessagingState {
 
         let mut messaging = self.messaging.write().unwrap();
         messaging.to_send.push_back(msg);
+    }
+
+    /// Queue a message that could not be encrypted yet because the Noise
+    /// session with `receiver` is still being established. Flushed by
+    /// [`Messaging::flush_pending_send`] once the session is up. Bounded
+    /// per peer (oldest dropped past the cap).
+    fn enqueue_pending_send(
+        &self,
+        receiver: &PeerId,
+        data: Vec<u8>,
+        service_type: MessagingServiceType,
+        message_id: Vec<u8>,
+        needs_confirmation: bool,
+    ) {
+        let mut map = self.pending_send.write().unwrap();
+        let q = map.entry(receiver.to_bytes()).or_default();
+        if q.len() >= MAX_PENDING_SEND_PER_PEER {
+            q.pop_front();
+            log::warn!(
+                "pending-send queue for {} full, dropping oldest",
+                receiver.to_base58()
+            );
+        }
+        q.push_back(PendingSend {
+            data,
+            service_type,
+            message_id,
+            needs_confirmation,
+        });
+    }
+
+    /// Take and clear the pending-send queue for `receiver`.
+    fn take_pending_send(&self, receiver: &PeerId) -> Vec<PendingSend> {
+        let mut map = self.pending_send.write().unwrap();
+        map.remove(&receiver.to_bytes())
+            .map(|q| q.into_iter().collect())
+            .unwrap_or_default()
     }
 
     /// Check scheduler for next message to send (instance method).
@@ -432,6 +491,40 @@ impl Messaging {
         );
     }
 
+    /// Flush any messages queued for `receiver` while its Noise session
+    /// was being established. Called once the session reaches
+    /// `Transport` (handshake complete). Each queued message is
+    /// re-submitted through `pack_and_send_message`, which now encrypts
+    /// successfully under the live session.
+    pub fn flush_pending_send(
+        state: &crate::QaulState,
+        user_account: &UserAccount,
+        receiver: &PeerId,
+    ) {
+        let pending = state.services.messaging.take_pending_send(receiver);
+        if pending.is_empty() {
+            return;
+        }
+        log::trace!(
+            "flushing {} queued message(s) to {}",
+            pending.len(),
+            receiver.to_base58()
+        );
+        for p in pending {
+            if let Err(e) = Self::pack_and_send_message(
+                state,
+                user_account,
+                receiver,
+                p.data,
+                p.service_type,
+                &p.message_id,
+                p.needs_confirmation,
+            ) {
+                log::error!("flushing pending message failed: {}", e);
+            }
+        }
+    }
+
     /// pack, sign and schedule a message for sending
     ///
     /// The function returns the message signature on success,
@@ -448,7 +541,8 @@ impl Messaging {
     ) -> Result<Vec<u8>, String> {
         log::trace!("pack_and_send_message to {}", receiver.to_base58());
 
-        // encrypt data
+        // encrypt data (keep a copy in case we must queue it)
+        let data_for_queue = data.clone();
         let encrypted_message: proto::Encrypted;
         let encryption_result = Crypto::encrypt(state, data, user_account.to_owned(), receiver.clone());
 
@@ -456,7 +550,28 @@ impl Messaging {
             Some(encrypted) => {
                 encrypted_message = encrypted;
             }
-            None => return Err("Encryption error occurred".to_string()),
+            None => {
+                // If the per-peer session is mid-handshake, the message
+                // can't be encrypted yet but isn't a failure — queue it
+                // and flush once the session reaches Transport. This
+                // keeps a second message sent during first contact from
+                // being dropped (session-tolerant delivery).
+                if Crypto::has_pending_handshake(state, &user_account.id, receiver) {
+                    state.services.messaging.enqueue_pending_send(
+                        receiver,
+                        data_for_queue,
+                        _message_type,
+                        message_id.to_vec(),
+                        message_needs_confirmation,
+                    );
+                    log::trace!(
+                        "queued message to {} pending session establishment",
+                        receiver.to_base58()
+                    );
+                    return Ok(Vec::new());
+                }
+                return Err("Encryption error occurred".to_string());
+            }
         }
 
         return Self::pack_and_send_encrypted_data(

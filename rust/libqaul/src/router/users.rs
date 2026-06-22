@@ -1043,10 +1043,16 @@ impl Capabilities {
     /// initiators should not attempt to rotate with them.
     pub const ROTATION: u32 = 1 << 0;
 
+    /// Supports the signed-op group membership/metadata CRDT
+    /// (`GroupContainer::group_op`). A peer without this bit keeps the
+    /// legacy invite/reply path; the CRDT layer translates while a
+    /// mixed group exists. See `docs/proposals/Group-State-CRDT.md`.
+    pub const GROUP_CRDT: u32 = 1 << 3;
+
     /// Everything this binary can handle — advertised by the local
     /// user to its peers. Kept small; new bits are `|=`'d here as
     /// features land.
-    pub const LOCAL: u32 = Self::ROTATION;
+    pub const LOCAL: u32 = Self::ROTATION | Self::GROUP_CRDT;
 
     /// Convenience: does `caps` advertise every bit in `required`?
     pub fn supports(caps: u32, required: u32) -> bool {

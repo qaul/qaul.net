@@ -215,6 +215,8 @@ impl GroupManage {
 
         group.id = group_id.clone();
         group.is_direct_chat = true;
+        // the local creator is the founder (CRDT bootstrap admin)
+        group.founder = account_id.to_bytes();
 
         // save group to data base
         GroupStorage::save_group(state, account_id.to_owned(), group.clone());
@@ -227,6 +229,8 @@ impl GroupManage {
         let mut group = Group::new();
 
         group.id = uuid::Uuid::new_v4().as_bytes().to_vec();
+        // the local creator is the founder (CRDT bootstrap admin)
+        group.founder = account_id.to_bytes();
 
         group.members.insert(
             account_id.to_bytes(),
@@ -412,8 +416,23 @@ impl GroupManage {
             Some(my_group) => {
                 group = my_group;
 
-                // check if the sent revision is higher then the one we already have
-                // return otherwise
+                // Retire the rev-counter merge for CRDT-managed groups:
+                // membership and metadata are owned by the membership
+                // CRDT (crdt.rs) and maintained by reconcile, so the
+                // legacy revision-gated GroupInfo merge must not clobber
+                // them. (Translating a legacy peer's GroupInfo changes
+                // into CRDT ops for a mixed group is separate future
+                // work; for an all-CRDT group this gossip is redundant.)
+                if !group.founder.is_empty() {
+                    log::trace!(
+                        "on_group_notify: CRDT group {} — ignoring legacy revision merge",
+                        group_id.to_string()
+                    );
+                    return;
+                }
+
+                // (legacy, non-CRDT groups) check if the sent revision
+                // is higher than the one we already have, else return
                 if group.revision >= notify.revision {
                     log::warn!("group update: got a smaller revision");
                     return;
@@ -540,6 +559,7 @@ mod tests {
             created_at: 0,
             status: 0,
             revision: 0,
+            founder: Vec::new(),
             members: BTreeMap::new(),
             unread_messages: 0,
             last_message_at,

@@ -20,6 +20,9 @@ use crate::node::user_accounts::{UserAccount, UserAccounts};
 use crate::rpc::Rpc;
 use crate::utilities::timestamp::Timestamp;
 
+pub mod crdt;
+pub mod crdt_store;
+pub mod crdt_wire;
 pub mod group_id;
 mod manage;
 mod member;
@@ -76,10 +79,21 @@ pub struct Group {
     /// group status
     ///
     pub status: i32,
-    /// group revision number
+    /// group revision number (LEGACY).
     ///
-    /// this number increases with every revision
+    /// Monotonic counter for the old last-writer-wins membership merge.
+    /// RETIRED for CRDT-managed groups (those with a `founder`): their
+    /// membership/metadata is owned by the membership CRDT and the
+    /// rev-counter merge in `on_group_notify` is skipped. Still used for
+    /// backward-compatible GroupInfo gossip with pre-CRDT peers; kept on
+    /// the wire/struct for that and to avoid breaking stored groups.
     pub revision: u32,
+    /// group founder (creator) — bootstrap admin for the membership
+    /// CRDT, un-removable, and the only actor who may remove an admin.
+    /// `#[serde(default)]` (empty) for groups stored before this field
+    /// existed; set to the creator's id for groups created since.
+    #[serde(default)]
+    pub founder: Vec<u8>,
     /// members
     pub members: BTreeMap<Vec<u8>, GroupMember>,
     /// how many unread messages are there
@@ -114,6 +128,7 @@ impl Group {
             created_at: Timestamp::get_timestamp(),
             status: 0,
             revision: 0,
+            founder: Vec::new(),
             members: BTreeMap::new(),
             unread_messages: 0,
             last_message_at: 0,
@@ -216,6 +231,274 @@ impl Group {
         }
     }
 
+    // ------------------------------------------------------------------
+    //                     Membership / metadata CRDT
+    // ------------------------------------------------------------------
+
+    /// Emit a signed CRDT op for `group_id`: stamp it with the next
+    /// lamport, sign it with the local identity key, persist it to the
+    /// op set, and broadcast it to the group's remote members.
+    ///
+    /// Additive to the legacy invite/reply path — failures here never
+    /// block the legacy operation. Returns the op_id on success.
+    pub fn emit_crdt_op(
+        state: &crate::QaulState,
+        account_id: &PeerId,
+        group_id: &[u8],
+        kind: crdt::OpKind,
+    ) -> Option<crdt::OpId> {
+        let user_account = UserAccounts::get_by_id(state, *account_id)?;
+        let group = GroupStorage::get_group(state, *account_id, group_id)?;
+        let db = GroupStorage::get_db_ref(state, *account_id);
+
+        // next lamport from the current op set
+        let founder = if group.founder.is_empty() {
+            account_id.to_bytes()
+        } else {
+            group.founder.clone()
+        };
+        let lamport = crdt_store::load_crdt(&db, group_id, founder).next_lamport();
+
+        // fresh random op_id
+        let mut op_id = [0u8; 16];
+        {
+            use rand::Rng;
+            rand::rng().fill(&mut op_id[..]);
+        }
+        let created_at = Timestamp::get_timestamp();
+
+        let wire = crdt_wire::sign_op(
+            &user_account.keys,
+            group_id,
+            op_id,
+            lamport,
+            created_at,
+            &kind,
+        )?;
+
+        // persist locally + reconcile the materialized membership
+        crdt_store::save_op(&db, group_id, &wire);
+        Self::reconcile_group_from_crdt(state, account_id, group_id);
+
+        // recipients: every current remote member, plus — for an Add —
+        // the member being added (who is not yet in the member list, so
+        // would otherwise miss the op that adds them).
+        let mut recipients: Vec<Vec<u8>> = group
+            .members
+            .keys()
+            .filter(|id| id.as_slice() != account_id.to_bytes().as_slice())
+            .cloned()
+            .collect();
+        if let crdt::OpKind::Add { member_id, .. } = &kind {
+            if !recipients.iter().any(|r| r == member_id) {
+                recipients.push(member_id.clone());
+            }
+        }
+
+        // send the op (wrapped so it routes to Group::net on receive)
+        let container = proto_net::GroupContainer {
+            message: Some(proto_net::group_container::Message::GroupOp(wire)),
+        };
+        let bytes = container.encode_to_vec();
+        for rid in recipients {
+            if let Ok(peer) = PeerId::from_bytes(&rid) {
+                Self::send_notify_message(state, &user_account, &peer, bytes.clone());
+            }
+        }
+        log::trace!(
+            "emitted group CRDT op for {} (lamport {})",
+            bs58::encode(group_id).into_string(),
+            lamport
+        );
+        Some(op_id)
+    }
+
+    /// Handle an incoming CRDT `GroupOp`: resolve the actor's public key
+    /// (a PeerId is a hash of the key), verify the signature, and
+    /// persist the op to the group's op set. Merge is unconditional —
+    /// authorization is enforced when the view is derived.
+    fn on_crdt_op(
+        state: &crate::QaulState,
+        account_id: &PeerId,
+        sender_id: &PeerId,
+        group_op: proto_net::GroupOp,
+    ) {
+        let actor_peer = match PeerId::from_bytes(&group_op.actor_id) {
+            Ok(p) => p,
+            Err(_) => {
+                log::warn!("group CRDT op from {}: invalid actor_id", sender_id.to_base58());
+                return;
+            }
+        };
+        let pubkey = {
+            let router = state.get_router();
+            crate::router::users::Users::get_pub_key(&router, &actor_peer)
+        };
+        let pubkey = match pubkey {
+            Some(k) => k,
+            None => {
+                log::warn!(
+                    "group CRDT op: unknown public key for actor {}",
+                    actor_peer.to_base58()
+                );
+                return;
+            }
+        };
+        if crdt_wire::verify_and_decode(&group_op, &pubkey).is_none() {
+            log::warn!(
+                "group CRDT op from {}: signature verification failed",
+                sender_id.to_base58()
+            );
+            return;
+        }
+        let group_id = group_op.group_id.clone();
+        let db = GroupStorage::get_db_ref(state, *account_id);
+        crdt_store::save_op(&db, &group_id, &group_op);
+        // CRDT is the source of truth: reflect the op into the
+        // materialized Group membership/metadata.
+        Self::reconcile_group_from_crdt(state, account_id, &group_id);
+        log::trace!(
+            "stored verified group CRDT op for {} from {}",
+            bs58::encode(&group_id).into_string(),
+            sender_id.to_base58()
+        );
+    }
+
+    /// Derive the converged CRDT view for a group (for inspection /
+    /// the read RPC). `None` if the group is unknown or predates CRDT
+    /// (no founder recorded).
+    pub fn crdt_view(
+        state: &crate::QaulState,
+        account_id: &PeerId,
+        group_id: &[u8],
+    ) -> Option<(crdt::GroupView, usize, u64)> {
+        let group = GroupStorage::get_group(state, *account_id, group_id)?;
+        if group.founder.is_empty() {
+            return None;
+        }
+        let db = GroupStorage::get_db_ref(state, *account_id);
+        let crdt = crdt_store::load_crdt(&db, group_id, group.founder.clone());
+        let view = crdt.view();
+        let count = crdt.op_count();
+        let epoch = crdt.epoch();
+        Some((view, count, epoch))
+    }
+
+    /// Trigger a CRDT compaction for a group: emit a signed `Compact`
+    /// op raising the epoch and collapsing op history below `below`.
+    /// `below = 0` means "use the current max lamport". Authorization
+    /// (admin-only) is enforced by the CRDT when the op is applied.
+    /// Returns `(epoch, op_count)` after compaction.
+    pub fn crdt_compact(
+        state: &crate::QaulState,
+        account_id: &PeerId,
+        group_id: &[u8],
+        below: u64,
+    ) -> Result<(u64, usize), String> {
+        let group = GroupStorage::get_group(state, *account_id, group_id)
+            .ok_or_else(|| "group not found".to_string())?;
+        if group.founder.is_empty() {
+            return Err("group is not CRDT-managed".to_string());
+        }
+        let db = GroupStorage::get_db_ref(state, *account_id);
+        let crdt = crdt_store::load_crdt(&db, group_id, group.founder.clone());
+
+        // default floor: the current highest lamport (collapse all
+        // history strictly older than the latest op).
+        let floor = if below == 0 {
+            crdt.view().max_lamport
+        } else {
+            below
+        };
+        let next_epoch = crdt.epoch() + 1;
+
+        Self::emit_crdt_op(
+            state,
+            account_id,
+            group_id,
+            crdt::OpKind::Compact {
+                epoch: next_epoch,
+                below: floor,
+            },
+        )
+        .ok_or_else(|| "failed to emit compact op".to_string())?;
+
+        // reload to report the post-compaction state
+        let crdt = crdt_store::load_crdt(&db, group_id, group.founder);
+        Ok((crdt.epoch(), crdt.op_count()))
+    }
+
+    /// Reconcile the materialized `Group.members` / name from the CRDT,
+    /// making the CRDT the source of truth for membership.
+    ///
+    /// The CRDT wins for every member it has an opinion about:
+    /// - members present in the derived view are inserted/updated with
+    ///   the view's role (other per-member fields preserved if already
+    ///   present, else defaulted to an activated member joining now);
+    /// - a member the CRDT has at least one `Add` op for but that is
+    ///   *not* in the view was tombstoned by a `Remove`, so it is
+    ///   dropped from `Group.members`;
+    /// - a member the CRDT is entirely silent about (no add op) is left
+    ///   untouched — this preserves members of a mixed/legacy group
+    ///   during the transition and avoids dropping a freshly-invited
+    ///   peer before its add op has arrived.
+    ///
+    /// No-op for groups with no founder recorded (pre-CRDT groups).
+    pub fn reconcile_group_from_crdt(
+        state: &crate::QaulState,
+        account_id: &PeerId,
+        group_id: &[u8],
+    ) {
+        let group = match GroupStorage::get_group(state, *account_id, group_id) {
+            Some(g) if !g.founder.is_empty() => g,
+            _ => return,
+        };
+        let db = GroupStorage::get_db_ref(state, *account_id);
+        let crdt = crdt_store::load_crdt(&db, group_id, group.founder.clone());
+        let view = crdt.view();
+
+        GroupStorage::with_group_mut(state, account_id, group_id, |group| {
+            // 1. drop members the CRDT knows about (has an add for) but
+            //    that the view no longer contains (tombstoned).
+            let to_drop: Vec<Vec<u8>> = group
+                .members
+                .keys()
+                .filter(|id| {
+                    !view.members.contains_key(*id)
+                        && !crdt.add_op_ids_for(id).is_empty()
+                })
+                .cloned()
+                .collect();
+            for id in to_drop {
+                group.members.remove(&id);
+            }
+
+            // 2. insert / update every member the view contains.
+            for (id, m) in &view.members {
+                match group.members.get_mut(id) {
+                    Some(existing) => existing.role = m.role,
+                    None => {
+                        group.members.insert(
+                            id.clone(),
+                            GroupMember {
+                                user_id: id.clone(),
+                                role: m.role,
+                                joined_at: Timestamp::get_timestamp(),
+                                state: proto_rpc::GroupMemberState::Activated as i32,
+                                last_message_index: 0,
+                            },
+                        );
+                    }
+                }
+            }
+
+            // 3. metadata name (LWW) wins when set.
+            if let Some(name) = &view.name {
+                group.name = name.clone();
+            }
+        });
+    }
+
     /// Send capsuled group message through messaging service
     #[allow(dead_code)]
     pub fn send_group_message(
@@ -308,6 +591,7 @@ impl Group {
             created_at: group.created_at,
             revision: group.revision,
             members,
+            founder: group.founder.clone(),
         };
 
         let container = proto_net::GroupContainer {
@@ -379,6 +663,9 @@ impl Group {
                 Some(proto_net::group_container::Message::GroupInfo(group_info)) => {
                     log::trace!("group info arrived");
                     manage::GroupManage::on_group_notify(state, *sender_id, *receiver_id, &group_info);
+                }
+                Some(proto_net::group_container::Message::GroupOp(group_op)) => {
+                    Self::on_crdt_op(state, &user.id, sender_id, group_op);
                 }
                 None => {
                     log::error!("group message from {} was empty", sender_id.to_base58())
@@ -471,6 +758,17 @@ impl Group {
                         // post updates
                         if status {
                             Self::post_group_update(state, &my_user_id, &group_rename_req.group_id);
+
+                            // shadow the rename as a CRDT metadata op
+                            Self::emit_crdt_op(
+                                state,
+                                &my_user_id,
+                                &group_rename_req.group_id,
+                                crdt::OpKind::UpdateMetadata {
+                                    name: Some(group_rename_req.group_name.clone()),
+                                    avatar: None,
+                                },
+                            );
                         }
                     }
                     Some(proto_rpc::group::Message::GroupInfoRequest(group_info_req)) => {
@@ -572,6 +870,21 @@ impl Group {
                             request_id,
                             Vec::new(),
                         );
+
+                        // additively shadow the invite as a CRDT op so
+                        // members converge on membership without the
+                        // rev-counter merge. Best-effort.
+                        if status {
+                            Self::emit_crdt_op(
+                                state,
+                                &my_user_id,
+                                &invite_req.group_id,
+                                crdt::OpKind::Add {
+                                    member_id: invite_req.user_id.clone(),
+                                    role: crdt::ROLE_MEMBER,
+                                },
+                            );
+                        }
                     }
                     Some(proto_rpc::group::Message::GroupReplyInviteRequest(reply_req)) => {
                         let mut status = true;
@@ -645,7 +958,91 @@ impl Group {
 
                         if status {
                             Self::post_group_update(state, &my_user_id, &remove_req.group_id);
+
+                            // shadow the removal as a CRDT op tombstoning
+                            // every add we have seen for that member.
+                            let db = GroupStorage::get_db_ref(state, my_user_id);
+                            let founder = GroupStorage::get_group(state, my_user_id, &remove_req.group_id)
+                                .map(|g| g.founder)
+                                .unwrap_or_default();
+                            let founder = if founder.is_empty() { my_user_id.to_bytes() } else { founder };
+                            let observed = crdt_store::load_crdt(&db, &remove_req.group_id, founder)
+                                .add_op_ids_for(&remove_req.user_id);
+                            Self::emit_crdt_op(
+                                state,
+                                &my_user_id,
+                                &remove_req.group_id,
+                                crdt::OpKind::Remove {
+                                    member_id: remove_req.user_id.clone(),
+                                    observed_adds: observed,
+                                },
+                            );
                         }
+                    }
+                    Some(proto_rpc::group::Message::GroupCrdtViewRequest(view_req)) => {
+                        let resp = match Self::crdt_view(state, &my_user_id, &view_req.group_id) {
+                            Some((view, op_count, epoch)) => proto_rpc::GroupCrdtViewResponse {
+                                group_id: view_req.group_id.clone(),
+                                found: true,
+                                founder: GroupStorage::get_group(state, my_user_id, &view_req.group_id)
+                                    .map(|g| g.founder)
+                                    .unwrap_or_default(),
+                                name: view.name.clone().unwrap_or_default(),
+                                op_count: op_count as u32,
+                                members: view
+                                    .members
+                                    .iter()
+                                    .map(|(id, m)| proto_rpc::GroupCrdtMember {
+                                        user_id: id.clone(),
+                                        role: m.role,
+                                    })
+                                    .collect(),
+                                epoch,
+                            },
+                            None => proto_rpc::GroupCrdtViewResponse {
+                                group_id: view_req.group_id.clone(),
+                                found: false,
+                                ..Default::default()
+                            },
+                        };
+                        let proto_message = proto_rpc::Group {
+                            message: Some(proto_rpc::group::Message::GroupCrdtViewResponse(resp)),
+                        };
+                        Rpc::send_message(
+                            state,
+                            proto_message.encode_to_vec(),
+                            crate::rpc::proto::Modules::Group.into(),
+                            request_id,
+                            Vec::new(),
+                        );
+                    }
+                    Some(proto_rpc::group::Message::GroupCrdtCompactRequest(compact_req)) => {
+                        let (status, message, epoch, op_count) = match Self::crdt_compact(
+                            state,
+                            &my_user_id,
+                            &compact_req.group_id,
+                            compact_req.below,
+                        ) {
+                            Ok((epoch, op_count)) => (true, String::new(), epoch, op_count as u32),
+                            Err(e) => (false, e, 0u64, 0u32),
+                        };
+                        let proto_message = proto_rpc::Group {
+                            message: Some(proto_rpc::group::Message::GroupCrdtCompactResponse(
+                                proto_rpc::GroupCrdtCompactResponse {
+                                    group_id: compact_req.group_id.clone(),
+                                    result: Some(proto_rpc::GroupResult { status, message }),
+                                    epoch,
+                                    op_count,
+                                },
+                            )),
+                        };
+                        Rpc::send_message(
+                            state,
+                            proto_message.encode_to_vec(),
+                            crate::rpc::proto::Modules::Group.into(),
+                            request_id,
+                            Vec::new(),
+                        );
                     }
                     _ => {
                         log::error!("Unhandled Protobuf Group chat message");
