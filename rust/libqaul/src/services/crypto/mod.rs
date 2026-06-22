@@ -178,6 +178,21 @@ impl Crypto {
         }
     }
 
+    /// The session_id of the current primary session for `remote_id`, if any.
+    ///
+    /// Retransmit uses this to detect when a stored message's ciphertext was
+    /// encrypted under a session that is no longer current (the peer rotated
+    /// away from it), so it can re-encrypt the plaintext under the live session
+    /// instead of replaying ciphertext the receiver may have already retired.
+    pub fn current_primary_session_id(
+        state: &crate::QaulState,
+        local_user_id: PeerId,
+        remote_id: PeerId,
+    ) -> Option<u32> {
+        let crypto_account = CryptoStorage::get_db_ref(state, local_user_id);
+        Self::resolve_primary_state(&crypto_account, remote_id).map(|s| s.session_id)
+    }
+
     pub fn encrypt(
         state: &crate::QaulState,
         data: Vec<u8>,
@@ -693,7 +708,7 @@ impl Crypto {
 
     /// Extract the `Encrypted.session_id` from an encoded messaging
     /// `Container`, if the container carries an encrypted payload.
-    fn container_session_id(container_bytes: &[u8]) -> Option<u32> {
+    pub(crate) fn container_session_id(container_bytes: &[u8]) -> Option<u32> {
         let container = messaging::proto::Container::decode(container_bytes).ok()?;
         let envelope = container.envelope?;
         let payload = messaging::proto::EnvelopPayload::decode(&envelope.payload[..]).ok()?;
