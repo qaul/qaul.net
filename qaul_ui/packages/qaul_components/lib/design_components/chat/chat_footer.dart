@@ -29,12 +29,15 @@ const double _kTextActionSpacing = 20;
 const double _kAttachmentIconSpacing = 24;
 const double _kActionButtonMinSize = 40;
 const double _kAttachmentMenuTopSpacing = 12;
-const double _kAttachmentMenuItemSize = 54;
+const double _kAttachmentMenuItemMaxSize = 45;
+const double _kAttachmentMenuItemMinSize = 35;
+const double _kAttachmentMenuArrowSize = 35;
 const double _kAttachmentMenuItemRadius = 10;
-const double _kAttachmentMenuItemSpacing = 12;
+const double _kAttachmentMenuItemSpacing = 20;
 const double _kTypedActionRowBottomPadding = 4;
 const double _kTypedActionRowRightPadding = 16;
 const int _kAttachmentMenuMaxVisibleActions = 6;
+const int _kAttachmentMenuMinPaginatedSlots = 3;
 
 const List<BoxShadow> _kFooterShadowsDark = [
   BoxShadow(offset: Offset(0, 0), blurRadius: 5, color: Color(0x66000000)),
@@ -149,6 +152,7 @@ class _ChatFooterState extends State<ChatFooter> {
   late final FocusNode _inputFocusNode;
   final GlobalKey _composerTextFieldKey = GlobalKey();
   late bool _isAttachmentMenuOpen;
+  int _attachmentMenuPageIndex = 0;
 
   TextEditingController get _effectiveController =>
       widget.controller ?? _ownedController;
@@ -174,6 +178,7 @@ class _ChatFooterState extends State<ChatFooter> {
       newController.addListener(_handleTextChanged);
       if (newController.text.trim().isNotEmpty && _isAttachmentMenuOpen) {
         _isAttachmentMenuOpen = false;
+        _attachmentMenuPageIndex = 0;
       }
     }
   }
@@ -196,6 +201,7 @@ class _ChatFooterState extends State<ChatFooter> {
     }
     setState(() {
       _isAttachmentMenuOpen = false;
+      _attachmentMenuPageIndex = 0;
     });
   }
 
@@ -212,7 +218,11 @@ class _ChatFooterState extends State<ChatFooter> {
 
   void _handleMoreAttachmentsPressed() {
     setState(() {
-      _isAttachmentMenuOpen = !_isAttachmentMenuOpen;
+      final willOpen = !_isAttachmentMenuOpen;
+      _isAttachmentMenuOpen = willOpen;
+      if (willOpen) {
+        _attachmentMenuPageIndex = 0;
+      }
     });
   }
 
@@ -220,6 +230,20 @@ class _ChatFooterState extends State<ChatFooter> {
     if (!_isAttachmentMenuOpen) return;
     setState(() {
       _isAttachmentMenuOpen = false;
+      _attachmentMenuPageIndex = 0;
+    });
+  }
+
+  void _showPreviousAttachmentMenuPage() {
+    if (_attachmentMenuPageIndex == 0) return;
+    setState(() {
+      _attachmentMenuPageIndex -= 1;
+    });
+  }
+
+  void _showNextAttachmentMenuPage() {
+    setState(() {
+      _attachmentMenuPageIndex += 1;
     });
   }
 
@@ -270,7 +294,34 @@ class _ChatFooterState extends State<ChatFooter> {
         tooltip: widget.locationTooltip,
         onPressed: () => _handleAttachmentAction(widget.onLocationPressed),
       ),
-    ].take(_kAttachmentMenuMaxVisibleActions).toList(growable: false);
+      _FooterAttachmentAction(
+        id: 'markdown-bold',
+        icon: const Icon(Icons.format_bold_rounded, color: _kActionIconColor),
+        tooltip: 'Bold',
+        onPressed: () => _handleAttachmentAction(null),
+      ),
+      _FooterAttachmentAction(
+        id: 'markdown-italic',
+        icon: const Icon(Icons.format_italic_rounded, color: _kActionIconColor),
+        tooltip: 'Italic',
+        onPressed: () => _handleAttachmentAction(null),
+      ),
+      _FooterAttachmentAction(
+        id: 'markdown-underline',
+        icon: const Icon(
+          Icons.format_underlined_rounded,
+          color: _kActionIconColor,
+        ),
+        tooltip: 'Underline',
+        onPressed: () => _handleAttachmentAction(null),
+      ),
+      _FooterAttachmentAction(
+        id: 'markdown-code',
+        icon: const Icon(Icons.code_rounded, color: _kActionIconColor),
+        tooltip: 'Code',
+        onPressed: () => _handleAttachmentAction(null),
+      ),
+    ];
   }
 
   @override
@@ -305,7 +356,13 @@ class _ChatFooterState extends State<ChatFooter> {
           ),
           if (_isAttachmentMenuOpen) ...[
             const SizedBox(height: _kAttachmentMenuTopSpacing),
-            _AttachmentSubmenu(actions: _attachmentActions(), theme: theme),
+            _AttachmentSubmenu(
+              actions: _attachmentActions(),
+              theme: theme,
+              pageIndex: _attachmentMenuPageIndex,
+              onPreviousPage: _showPreviousAttachmentMenuPage,
+              onNextPage: _showNextAttachmentMenuPage,
+            ),
           ],
         ],
       ),
@@ -630,43 +687,179 @@ class _FooterAttachmentAction {
     required this.icon,
     required this.onPressed,
     this.tooltip,
+    this.isNavigation = false,
   });
 
   final String id;
   final Widget icon;
   final VoidCallback onPressed;
   final String? tooltip;
+  final bool isNavigation;
 }
 
 class _AttachmentSubmenu extends StatelessWidget {
-  const _AttachmentSubmenu({required this.actions, required this.theme});
+  const _AttachmentSubmenu({
+    required this.actions,
+    required this.theme,
+    required this.pageIndex,
+    required this.onPreviousPage,
+    required this.onNextPage,
+  });
 
   final List<_FooterAttachmentAction> actions;
   final ThemeData theme;
+  final int pageIndex;
+  final VoidCallback onPreviousPage;
+  final VoidCallback onNextPage;
+
+  double _itemSizeForWidth(double availableWidth) {
+    if (!availableWidth.isFinite) return _kAttachmentMenuItemMaxSize;
+    final maxSlotsWidth =
+        (_kAttachmentMenuMaxVisibleActions - 1) * _kAttachmentMenuItemSpacing;
+    final sizeForSixSlots =
+        (availableWidth - maxSlotsWidth) / _kAttachmentMenuMaxVisibleActions;
+    return sizeForSixSlots.clamp(
+      _kAttachmentMenuItemMinSize,
+      _kAttachmentMenuItemMaxSize,
+    );
+  }
+
+  bool _itemsFit(int itemCount, double availableWidth, double itemSize) {
+    if (!availableWidth.isFinite) return true;
+    if (itemCount == 0) return true;
+    final requiredWidth =
+        (itemCount * itemSize) +
+        ((itemCount - 1) * _kAttachmentMenuItemSpacing);
+    return requiredWidth <= availableWidth;
+  }
+
+  int _slotsForWidth(double availableWidth, double itemSize) {
+    if (!availableWidth.isFinite) return _kAttachmentMenuMaxVisibleActions;
+    final slotWidth = itemSize + _kAttachmentMenuItemSpacing;
+    final slots = ((availableWidth + _kAttachmentMenuItemSpacing) / slotWidth)
+        .floor();
+    return slots.clamp(
+      _kAttachmentMenuMinPaginatedSlots,
+      _kAttachmentMenuMaxVisibleActions,
+    );
+  }
+
+  List<_AttachmentMenuPage> _pagesForSlots(int slotCount) {
+    if (actions.isEmpty) return [const _AttachmentMenuPage()];
+    if (actions.length <= slotCount) {
+      return [_AttachmentMenuPage(actions: actions)];
+    }
+
+    final pages = <_AttachmentMenuPage>[];
+    var actionIndex = 0;
+    var isFirstPage = true;
+
+    while (actionIndex < actions.length) {
+      final remaining = actions.length - actionIndex;
+      final isFinalPage = !isFirstPage && remaining <= slotCount - 1;
+      final hasPrevious = !isFirstPage;
+      final hasNext = !isFinalPage;
+      final reservedSlots = (hasPrevious ? 1 : 0) + (hasNext ? 1 : 0);
+      final contentSlots = (slotCount - reservedSlots).clamp(1, slotCount);
+      final visibleCount = remaining < contentSlots ? remaining : contentSlots;
+
+      pages.add(
+        _AttachmentMenuPage(
+          actions: actions
+              .skip(actionIndex)
+              .take(visibleCount)
+              .toList(growable: false),
+          hasPrevious: hasPrevious,
+          hasNext: hasNext && actionIndex + visibleCount < actions.length,
+        ),
+      );
+
+      actionIndex += visibleCount;
+      isFirstPage = false;
+    }
+
+    return pages;
+  }
+
+  _FooterAttachmentAction _arrowAction({
+    required String id,
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return _FooterAttachmentAction(
+      id: id,
+      icon: Icon(icon, color: _kActionIconColor),
+      onPressed: onPressed,
+      isNavigation: true,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: AlignmentDirectional.centerStart,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final action in actions) ...[
-              _AttachmentSubmenuButton(
-                key: ValueKey(action.id),
-                action: action,
-                theme: theme,
-              ),
-              if (action != actions.last)
-                const SizedBox(width: _kAttachmentMenuItemSpacing),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final itemSize = _itemSizeForWidth(constraints.maxWidth);
+        final showAllActions = _itemsFit(
+          actions.length,
+          constraints.maxWidth,
+          itemSize,
+        );
+        final slotCount = showAllActions
+            ? actions.length.clamp(0, _kAttachmentMenuMaxVisibleActions)
+            : _slotsForWidth(constraints.maxWidth, itemSize);
+        final pages = showAllActions
+            ? [_AttachmentMenuPage(actions: actions)]
+            : _pagesForSlots(slotCount);
+        final currentPage = pages[pageIndex.clamp(0, pages.length - 1)];
+        final visibleActions = [
+          if (currentPage.hasPrevious)
+            _arrowAction(
+              id: 'previous-page',
+              icon: Icons.chevron_left_rounded,
+              onPressed: onPreviousPage,
+            ),
+          ...currentPage.actions,
+          if (currentPage.hasNext)
+            _arrowAction(
+              id: 'next-page',
+              icon: Icons.chevron_right_rounded,
+              onPressed: onNextPage,
+            ),
+        ];
+
+        return Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var index = 0; index < visibleActions.length; index++) ...[
+                if (index > 0)
+                  const SizedBox(width: _kAttachmentMenuItemSpacing),
+                  _AttachmentSubmenuButton(
+                    key: ValueKey(visibleActions[index].id),
+                    action: visibleActions[index],
+                    theme: theme,
+                    itemSize: itemSize,
+                  ),
+              ],
             ],
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
+}
+
+class _AttachmentMenuPage {
+  const _AttachmentMenuPage({
+    this.actions = const [],
+    this.hasPrevious = false,
+    this.hasNext = false,
+  });
+
+  final List<_FooterAttachmentAction> actions;
+  final bool hasPrevious;
+  final bool hasNext;
 }
 
 class _AttachmentSubmenuButton extends StatelessWidget {
@@ -674,26 +867,36 @@ class _AttachmentSubmenuButton extends StatelessWidget {
     super.key,
     required this.action,
     required this.theme,
+    required this.itemSize,
   });
 
   final _FooterAttachmentAction action;
   final ThemeData theme;
+  final double itemSize;
 
   @override
   Widget build(BuildContext context) {
+    final size = action.isNavigation ? _kAttachmentMenuArrowSize : itemSize;
+    final borderRadius = action.isNavigation
+        ? BorderRadius.circular(_kAttachmentMenuArrowSize / 2)
+        : BorderRadius.circular(_kAttachmentMenuItemRadius);
+    final iconSize = action.isNavigation
+        ? 28.0
+        : (size * 0.62).clamp(20.0, 28.0).toDouble();
+
     return _wrapTooltip(
       action.tooltip,
       Material(
         color: _attachmentMenuItemColor(theme.brightness),
-        borderRadius: BorderRadius.circular(_kAttachmentMenuItemRadius),
+        borderRadius: borderRadius,
         child: InkWell(
           onTap: action.onPressed,
-          borderRadius: BorderRadius.circular(_kAttachmentMenuItemRadius),
+          borderRadius: borderRadius,
           child: SizedBox.square(
-            dimension: _kAttachmentMenuItemSize,
+            dimension: size,
             child: Center(
               child: IconTheme.merge(
-                data: const IconThemeData(color: _kActionIconColor, size: 28),
+                data: IconThemeData(color: _kActionIconColor, size: iconSize),
                 child: action.icon,
               ),
             ),
