@@ -38,6 +38,58 @@ const double _kTypedActionRowBottomPadding = 4;
 const double _kTypedActionRowRightPadding = 16;
 const int _kAttachmentMenuMaxVisibleActions = 6;
 const int _kAttachmentMenuMinPaginatedSlots = 3;
+const _AttachmentMenuLayoutConfig _kAttachmentMenuLayout =
+    _AttachmentMenuLayoutConfig(
+  maxVisibleSlots: _kAttachmentMenuMaxVisibleActions,
+  minPaginatedSlots: _kAttachmentMenuMinPaginatedSlots,
+  itemMaxSize: _kAttachmentMenuItemMaxSize,
+  itemMinSize: _kAttachmentMenuItemMinSize,
+  itemSpacing: _kAttachmentMenuItemSpacing,
+);
+
+class _AttachmentMenuLayoutConfig {
+  const _AttachmentMenuLayoutConfig({
+    required this.maxVisibleSlots,
+    required this.minPaginatedSlots,
+    required this.itemMaxSize,
+    required this.itemMinSize,
+    required this.itemSpacing,
+  });
+
+  final int maxVisibleSlots;
+  final int minPaginatedSlots;
+  final double itemMaxSize;
+  final double itemMinSize;
+  final double itemSpacing;
+
+  double itemSizeForWidth(double availableWidth) {
+    if (!availableWidth.isFinite) return itemMaxSize;
+    final spacingWidth = (maxVisibleSlots - 1) * itemSpacing;
+    final sizeForMaxSlots = (availableWidth - spacingWidth) / maxVisibleSlots;
+    return sizeForMaxSlots.clamp(itemMinSize, itemMaxSize);
+  }
+
+  bool itemsFit({
+    required int itemCount,
+    required double availableWidth,
+    required double itemSize,
+  }) {
+    if (!availableWidth.isFinite || itemCount == 0) return true;
+    final requiredWidth =
+        (itemCount * itemSize) + ((itemCount - 1) * itemSpacing);
+    return requiredWidth <= availableWidth;
+  }
+
+  int slotsForWidth({
+    required double availableWidth,
+    required double itemSize,
+  }) {
+    if (!availableWidth.isFinite) return maxVisibleSlots;
+    final slotWidth = itemSize + itemSpacing;
+    final slots = ((availableWidth + itemSpacing) / slotWidth).floor();
+    return slots.clamp(minPaginatedSlots, maxVisibleSlots);
+  }
+}
 
 const List<BoxShadow> _kFooterShadowsDark = [
   BoxShadow(offset: Offset(0, 0), blurRadius: 5, color: Color(0x66000000)),
@@ -152,6 +204,7 @@ class _ChatFooterState extends State<ChatFooter> {
   late final FocusNode _inputFocusNode;
   final GlobalKey _composerTextFieldKey = GlobalKey();
   late bool _isAttachmentMenuOpen;
+  late String _attachmentActionsSignature;
   int _attachmentMenuPageIndex = 0;
 
   TextEditingController get _effectiveController =>
@@ -166,6 +219,9 @@ class _ChatFooterState extends State<ChatFooter> {
         _effectiveController.text.trim().isEmpty;
     _effectiveController.addListener(_handleTextChanged);
     _inputFocusNode = FocusNode()..addListener(_handleFocusChanged);
+    _attachmentActionsSignature = _attachmentActionSignature(
+      _attachmentActions(),
+    );
   }
 
   @override
@@ -180,6 +236,14 @@ class _ChatFooterState extends State<ChatFooter> {
         _isAttachmentMenuOpen = false;
         _attachmentMenuPageIndex = 0;
       }
+    }
+
+    final newActionSignature = _attachmentActionSignature(
+      _attachmentActions(),
+    );
+    if (newActionSignature != _attachmentActionsSignature) {
+      _attachmentActionsSignature = newActionSignature;
+      _attachmentMenuPageIndex = 0;
     }
   }
 
@@ -294,6 +358,19 @@ class _ChatFooterState extends State<ChatFooter> {
         tooltip: widget.locationTooltip,
         onPressed: () => _handleAttachmentAction(widget.onLocationPressed),
       ),
+      ..._debugMarkdownPaginationActions(),
+    ];
+  }
+
+  List<_FooterAttachmentAction> _debugMarkdownPaginationActions() {
+    var includeDebugActions = false;
+    assert(() {
+      includeDebugActions = true;
+      return true;
+    }());
+    if (!includeDebugActions) return const [];
+
+    return [
       _FooterAttachmentAction(
         id: 'markdown-bold',
         icon: const Icon(Icons.format_bold_rounded, color: _kActionIconColor),
@@ -697,6 +774,63 @@ class _FooterAttachmentAction {
   final bool isNavigation;
 }
 
+List<_AttachmentMenuPage> _buildAttachmentMenuPages({
+  required List<_FooterAttachmentAction> actions,
+  required int slotCount,
+}) {
+  if (actions.isEmpty) return [const _AttachmentMenuPage()];
+  if (actions.length <= slotCount) {
+    return [_AttachmentMenuPage(actions: actions)];
+  }
+
+  final pages = <_AttachmentMenuPage>[];
+  var actionIndex = 0;
+  var isFirstPage = true;
+
+  while (actionIndex < actions.length) {
+    final remaining = actions.length - actionIndex;
+    final isFinalPage = !isFirstPage && remaining <= slotCount - 1;
+    final hasPrevious = !isFirstPage;
+    final hasNext = !isFinalPage;
+    final reservedSlots = (hasPrevious ? 1 : 0) + (hasNext ? 1 : 0);
+    final contentSlots = (slotCount - reservedSlots).clamp(1, slotCount);
+    final visibleCount = remaining < contentSlots ? remaining : contentSlots;
+
+    pages.add(
+      _AttachmentMenuPage(
+        actions: actions
+            .skip(actionIndex)
+            .take(visibleCount)
+            .toList(growable: false),
+        hasPrevious: hasPrevious,
+        hasNext: hasNext && actionIndex + visibleCount < actions.length,
+      ),
+    );
+
+    actionIndex += visibleCount;
+    isFirstPage = false;
+  }
+
+  return pages;
+}
+
+_FooterAttachmentAction _attachmentMenuArrowAction({
+  required String id,
+  required IconData icon,
+  required VoidCallback onPressed,
+}) {
+  return _FooterAttachmentAction(
+    id: id,
+    icon: Icon(icon, color: _kActionIconColor),
+    onPressed: onPressed,
+    isNavigation: true,
+  );
+}
+
+String _attachmentActionSignature(List<_FooterAttachmentAction> actions) {
+  return actions.map((action) => action.id).join('|');
+}
+
 class _AttachmentSubmenu extends StatelessWidget {
   const _AttachmentSubmenu({
     required this.actions,
@@ -712,115 +846,40 @@ class _AttachmentSubmenu extends StatelessWidget {
   final VoidCallback onPreviousPage;
   final VoidCallback onNextPage;
 
-  double _itemSizeForWidth(double availableWidth) {
-    if (!availableWidth.isFinite) return _kAttachmentMenuItemMaxSize;
-    final maxSlotsWidth =
-        (_kAttachmentMenuMaxVisibleActions - 1) * _kAttachmentMenuItemSpacing;
-    final sizeForSixSlots =
-        (availableWidth - maxSlotsWidth) / _kAttachmentMenuMaxVisibleActions;
-    return sizeForSixSlots.clamp(
-      _kAttachmentMenuItemMinSize,
-      _kAttachmentMenuItemMaxSize,
-    );
-  }
-
-  bool _itemsFit(int itemCount, double availableWidth, double itemSize) {
-    if (!availableWidth.isFinite) return true;
-    if (itemCount == 0) return true;
-    final requiredWidth =
-        (itemCount * itemSize) +
-        ((itemCount - 1) * _kAttachmentMenuItemSpacing);
-    return requiredWidth <= availableWidth;
-  }
-
-  int _slotsForWidth(double availableWidth, double itemSize) {
-    if (!availableWidth.isFinite) return _kAttachmentMenuMaxVisibleActions;
-    final slotWidth = itemSize + _kAttachmentMenuItemSpacing;
-    final slots = ((availableWidth + _kAttachmentMenuItemSpacing) / slotWidth)
-        .floor();
-    return slots.clamp(
-      _kAttachmentMenuMinPaginatedSlots,
-      _kAttachmentMenuMaxVisibleActions,
-    );
-  }
-
-  List<_AttachmentMenuPage> _pagesForSlots(int slotCount) {
-    if (actions.isEmpty) return [const _AttachmentMenuPage()];
-    if (actions.length <= slotCount) {
-      return [_AttachmentMenuPage(actions: actions)];
-    }
-
-    final pages = <_AttachmentMenuPage>[];
-    var actionIndex = 0;
-    var isFirstPage = true;
-
-    while (actionIndex < actions.length) {
-      final remaining = actions.length - actionIndex;
-      final isFinalPage = !isFirstPage && remaining <= slotCount - 1;
-      final hasPrevious = !isFirstPage;
-      final hasNext = !isFinalPage;
-      final reservedSlots = (hasPrevious ? 1 : 0) + (hasNext ? 1 : 0);
-      final contentSlots = (slotCount - reservedSlots).clamp(1, slotCount);
-      final visibleCount = remaining < contentSlots ? remaining : contentSlots;
-
-      pages.add(
-        _AttachmentMenuPage(
-          actions: actions
-              .skip(actionIndex)
-              .take(visibleCount)
-              .toList(growable: false),
-          hasPrevious: hasPrevious,
-          hasNext: hasNext && actionIndex + visibleCount < actions.length,
-        ),
-      );
-
-      actionIndex += visibleCount;
-      isFirstPage = false;
-    }
-
-    return pages;
-  }
-
-  _FooterAttachmentAction _arrowAction({
-    required String id,
-    required IconData icon,
-    required VoidCallback onPressed,
-  }) {
-    return _FooterAttachmentAction(
-      id: id,
-      icon: Icon(icon, color: _kActionIconColor),
-      onPressed: onPressed,
-      isNavigation: true,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final itemSize = _itemSizeForWidth(constraints.maxWidth);
-        final showAllActions = _itemsFit(
-          actions.length,
-          constraints.maxWidth,
-          itemSize,
+        final itemSize =
+            _kAttachmentMenuLayout.itemSizeForWidth(constraints.maxWidth);
+        final showAllActions = _kAttachmentMenuLayout.itemsFit(
+          itemCount: actions.length,
+          availableWidth: constraints.maxWidth,
+          itemSize: itemSize,
         );
         final slotCount = showAllActions
-            ? actions.length.clamp(0, _kAttachmentMenuMaxVisibleActions)
-            : _slotsForWidth(constraints.maxWidth, itemSize);
+            ? actions.length.clamp(0, _kAttachmentMenuLayout.maxVisibleSlots)
+            : _kAttachmentMenuLayout.slotsForWidth(
+                availableWidth: constraints.maxWidth,
+                itemSize: itemSize,
+              );
         final pages = showAllActions
             ? [_AttachmentMenuPage(actions: actions)]
-            : _pagesForSlots(slotCount);
+            : _buildAttachmentMenuPages(
+                actions: actions,
+                slotCount: slotCount,
+              );
         final currentPage = pages[pageIndex.clamp(0, pages.length - 1)];
         final visibleActions = [
           if (currentPage.hasPrevious)
-            _arrowAction(
+            _attachmentMenuArrowAction(
               id: 'previous-page',
               icon: Icons.chevron_left_rounded,
               onPressed: onPreviousPage,
             ),
           ...currentPage.actions,
           if (currentPage.hasNext)
-            _arrowAction(
+            _attachmentMenuArrowAction(
               id: 'next-page',
               icon: Icons.chevron_right_rounded,
               onPressed: onNextPage,
