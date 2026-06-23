@@ -280,10 +280,7 @@ fn push_peers(
 #[derive(Debug, Clone, Default)]
 pub struct CryptoConfig {
     pub enabled: bool,
-    pub period_seconds: u64,
     pub volume_messages: u64,
-    pub grace_period_seconds: u64,
-    pub grace_volume_messages: u64,
 }
 
 #[derive(Debug, Clone)]
@@ -310,10 +307,7 @@ pub async fn fetch_crypto_config(
     if let Some(crypto_proto::crypto::Message::GetConfigResponse(c)) = parsed.message {
         return Ok(CryptoConfig {
             enabled: c.enabled,
-            period_seconds: c.period_seconds,
             volume_messages: c.volume_messages,
-            grace_period_seconds: c.grace_period_seconds,
-            grace_volume_messages: c.grace_volume_messages,
         });
     }
     Err("unexpected crypto config response".into())
@@ -517,8 +511,8 @@ fn format_event(data: &[u8]) -> Option<EventLine> {
 fn rotation_event_to_row(ev: &crypto_proto::RotationEvent) -> CryptoRotationEvent {
     let kind = match RotationEventKind::try_from(ev.kind) {
         Ok(RotationEventKind::Rotated) => "rotated",
-        Ok(RotationEventKind::GraceExpired) => "grace_expired",
-        Ok(RotationEventKind::MessageDroppedPastGrace) => "msg_dropped_past_grace",
+        Ok(RotationEventKind::DrainCompleted) => "drain_completed",
+        Ok(RotationEventKind::MessageDroppedPostDrain) => "msg_dropped_post_drain",
         _ => "unspecified",
     };
     CryptoRotationEvent {
