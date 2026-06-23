@@ -129,6 +129,7 @@ impl NodeIdentity {
 }
 
 /// This Node (global state wrapper - delegates to QaulState)
+#[derive(Debug)]
 pub struct Node;
 
 impl Node {
