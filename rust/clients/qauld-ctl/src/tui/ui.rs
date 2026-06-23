@@ -494,10 +494,7 @@ fn draw_crypto_config(frame: &mut Frame, area: Rect, app: &App) {
                         .add_modifier(Modifier::BOLD),
                 ),
             ]),
-            Line::from(format!("period (s):           {}", c.period_seconds)),
             Line::from(format!("volume (msgs):        {}", c.volume_messages)),
-            Line::from(format!("grace period (s):     {}", c.grace_period_seconds)),
-            Line::from(format!("grace volume (msgs):  {}", c.grace_volume_messages)),
         ],
         None => vec![Line::from(Span::raw("(no config yet)"))],
     };
