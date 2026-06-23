@@ -1407,6 +1407,12 @@ mod phase2_tests {
             cipher_in: Some(vec![0u8; 32]),
             highest_index_nonce_in: 0,
             out_of_order_indexes: false,
+            pre_cipher_out: None,
+            pre_index_out: 0,
+            pre_cipher_in: None,
+            pre_index_in_highest: 0,
+            pre_index_in_seen: Vec::new(),
+            pre_bytes_accounted: 0,
             established_at: 0,
         }
     }
@@ -2134,6 +2140,12 @@ mod phase3_events_tests {
             cipher_in: Some(vec![0u8; 32]),
             highest_index_nonce_in: 0,
             out_of_order_indexes: false,
+            pre_cipher_out: None,
+            pre_index_out: 0,
+            pre_cipher_in: None,
+            pre_index_in_highest: 0,
+            pre_index_in_seen: Vec::new(),
+            pre_bytes_accounted: 0,
             established_at: 0,
         }
     }
