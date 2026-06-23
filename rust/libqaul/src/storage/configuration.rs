@@ -394,7 +394,6 @@ pub struct Configuration {
     pub user_accounts: Vec<UserAccount>,
     pub debug: DebugOption,
     pub routing: RoutingOptions,
-<<<<<<< HEAD
     /// Handshake-extras feature config. Marked `#[serde(default)]`
     /// so existing `config.yaml` files (which predate this section)
     /// continue to load with the conservative defaults.
@@ -402,9 +401,7 @@ pub struct Configuration {
     pub handshake_extras: HandshakeExtras,
     #[serde(default)]
     pub crypto_rotation: CryptoRotation,
-=======
     pub v2_routing: RoutingV2Options,
->>>>>>> dc1c281b (test(app): #880 added unit tests])
 }
 
 impl Default for Configuration {
@@ -417,12 +414,9 @@ impl Default for Configuration {
             user_accounts: Vec::new(),
             debug: DebugOption::default(),
             routing: RoutingOptions::default(),
-<<<<<<< HEAD
             handshake_extras: HandshakeExtras::default(),
             crypto_rotation: CryptoRotation::default(),
-=======
             v2_routing: RoutingV2Options::default()
->>>>>>> dc1c281b (test(app): #880 added unit tests])
         }
     }
 }
