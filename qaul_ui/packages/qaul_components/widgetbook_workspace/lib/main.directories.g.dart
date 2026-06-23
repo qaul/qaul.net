@@ -22,6 +22,8 @@ import 'package:qaul_components_widgetbook/use_cases/design_components/shell/qau
     as _qaul_components_widgetbook_use_cases_design_components_shell_qaul_fab;
 import 'package:qaul_components_widgetbook/use_cases/design_components/shell/qaul_navbar.dart'
     as _qaul_components_widgetbook_use_cases_design_components_shell_qaul_navbar;
+import 'package:qaul_components_widgetbook/use_cases/design/chat/chat_journey.dart'
+    as _qaul_components_widgetbook_use_cases_design_chat_chat_journey;
 import 'package:qaul_components_widgetbook/use_cases/special_forms/qaul_chat_bubble.dart'
     as _qaul_components_widgetbook_use_cases_special_forms_qaul_chat_bubble;
 import 'package:qaul_components_widgetbook/use_cases/special_forms/room_meta_message.dart'
@@ -30,7 +32,7 @@ import 'package:widgetbook/widgetbook.dart' as _widgetbook;
 
 final directories = <_widgetbook.WidgetbookNode>[
   _widgetbook.WidgetbookFolder(
-    name: 'design_components',
+    name: 'components',
     children: [
       _widgetbook.WidgetbookFolder(
         name: 'chat',
@@ -204,6 +206,50 @@ final directories = <_widgetbook.WidgetbookNode>[
                 builder:
                     _qaul_components_widgetbook_use_cases_design_components_shell_qaul_navbar
                         .buildNavBarVerticalUseCase,
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+  ),
+  _widgetbook.WidgetbookFolder(
+    name: 'design',
+    children: [
+      _widgetbook.WidgetbookFolder(
+        name: 'chat',
+        children: [
+          _widgetbook.WidgetbookComponent(
+            name: 'ChatJourneyBaselineDesignStory',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Baseline',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_chat_chat_journey
+                        .buildChatJourneyBaselineUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookComponent(
+            name: 'ChatFooterStateDesignStory',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Empty footer',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_chat_chat_journey
+                        .buildChatJourneyEmptyFooterUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Long typed text',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_chat_chat_journey
+                        .buildChatJourneyLongTextUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Plus menu / pagination',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_chat_chat_journey
+                        .buildChatJourneyPlusMenuUseCase,
               ),
             ],
           ),
