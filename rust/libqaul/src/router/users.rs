@@ -1076,7 +1076,7 @@ enum UserFilter {
 }
 
 /// user structure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct User {
     pub id: PeerId,
     pub key: PublicKey,
