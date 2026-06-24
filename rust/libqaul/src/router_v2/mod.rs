@@ -18,6 +18,7 @@ pub mod codec;
 pub mod identity;
 pub mod index;
 pub mod table;
+pub mod seq;
 
 #[derive(Debug, thiserror::Error)]
 pub enum RoutingV2Error {
