@@ -39,7 +39,11 @@ pub struct ExportManifest {
     pub user_id: String,
 }
 
-/// Serializable subset of the config UserAccount (excludes session_token).
+/// Serializable subset of the config UserAccount.
+///
+/// Includes `session_token` so that qauld server deployments can
+/// export/restore an account and keep automated clients' existing
+/// sessions working.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ExportedAccount {
     pub name: String,
@@ -47,6 +51,7 @@ pub struct ExportedAccount {
     pub keys: String,
     pub password_hash: Option<String>,
     pub password_salt: Option<String>,
+    pub session_token: Option<String>,
     pub storage: configuration::StorageOptions,
 }
 
@@ -234,7 +239,7 @@ impl AccountManagement {
                 keys: exported_account.keys.clone(),
                 password_hash: exported_account.password_hash.clone(),
                 password_salt: exported_account.password_salt.clone(),
-                session_token: None,
+                session_token: exported_account.session_token.clone(),
                 storage: exported_account.storage.clone(),
             });
         }
@@ -345,6 +350,7 @@ impl AccountManagement {
             keys: config_account.keys.clone(),
             password_hash: config_account.password_hash.clone(),
             password_salt: config_account.password_salt.clone(),
+            session_token: config_account.session_token.clone(),
             storage: config_account.storage.clone(),
         })
     }
@@ -466,5 +472,35 @@ impl AccountManagement {
             password_salt: account.password_salt.clone(),
         };
         UserAccounts::add(state, user);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// A `session_token` set on an account survives the export YAML
+    /// round-trip, so a restored account keeps automated clients'
+    /// existing sessions working (qauld deployment use case).
+    #[test]
+    fn exported_account_roundtrips_session_token() {
+        let account = ExportedAccount {
+            name: "alice".to_string(),
+            id: "12D3KooExample".to_string(),
+            keys: "base64keys".to_string(),
+            password_hash: Some("hash".to_string()),
+            password_salt: Some("salt".to_string()),
+            session_token: Some("session-abc".to_string()),
+            storage: configuration::StorageOptions::default(),
+        };
+
+        let yaml = serde_yaml_ng::to_string(&account).expect("serialize");
+        assert!(
+            yaml.contains("session-abc"),
+            "token must be written into the export archive"
+        );
+
+        let restored: ExportedAccount = serde_yaml_ng::from_str(&yaml).expect("deserialize");
+        assert_eq!(restored.session_token.as_deref(), Some("session-abc"));
     }
 }
