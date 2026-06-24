@@ -241,32 +241,11 @@ impl UserAccounts {
         }
         Configuration::save(state);
 
-        // build initial user with a signed profile, stamped with the
-        // capability bitset this binary advertises to remote peers.
+        // register the account into the router via the canonical local-user
+        // path: builds a signed profile stamped with this binary's advertised
+        // capabilities and registers it in the users + connection tables.
         let rs = state.get_router();
-        let mut initial_user = crate::router::users::User {
-            id,
-            key: keys_ed25519.public(),
-            name: name.clone(),
-            verified: false,
-            blocked: false,
-            capabilities: crate::router::users::Capabilities::LOCAL,
-            bio: String::new(),
-            avatar: Vec::new(),
-            version: 1,
-            updated_at: crate::utilities::timestamp::Timestamp::get_timestamp(),
-            signed_profile_bytes: Vec::new(),
-            signed_profile_signature: Vec::new(),
-            preferred_custody_route: Vec::new(),
-        };
-        let signed = crate::router::users::Users::create_signed_profile(&initial_user, &keys_ed25519);
-        initial_user.signed_profile_bytes = signed.profile;
-        initial_user.signed_profile_signature = signed.signature;
-        crate::router::users::Users::add(state, &rs, initial_user);
-
-        // add user to routing table / connections table
-        let node_id = crate::node::Node::get_id(state);
-        rs.connections.add_local_user(id, node_id);
+        crate::router::users::Users::register_local_user(state, &rs, name.clone(), &keys_ed25519);
 
         // display id
         log::trace!("created user account '{}' {:?}", name, id);
