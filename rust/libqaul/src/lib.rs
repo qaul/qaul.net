@@ -94,6 +94,24 @@ pub struct QaulState {
     pub initialized: AtomicBool,
 }
 
+/// Per-request RPC context threaded through the generated `dispatch::<S, T>`.
+///
+/// The generated service dispatcher forwards exactly one value (`&S`) to every
+/// handler. `RequestContext` borrows the node-wide [`QaulState`] and bundles it
+/// with the per-request fields that `QaulState` — shared and instance-scoped —
+/// structurally can't hold safely.
+///
+/// Binding `S = RequestContext` lets handlers reach both the node state and the
+/// caller's per-request identity through that one channel.
+pub struct RequestContext<'a> {
+    /// The node-wide state. Borrowed, not duplicated.
+    pub state: &'a QaulState,
+    /// Caller identity from the outer `QaulRpc` envelope.
+    pub user_id: Vec<u8>,
+    /// Correlation id from the outer `QaulRpc` envelope.
+    pub request_id: String,
+}
+
 impl QaulState {
     /// Replace the router state with the real one after initialization.
     pub fn replace_router(&self, router_state: Arc<router::RouterState>) {
