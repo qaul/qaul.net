@@ -294,6 +294,15 @@ impl Rpc {
                             message.request_id,
                         );
                     }
+                    Ok(Modules::AccountManagement) => {
+                        log::trace!("Message Modules::AccountManagement received");
+                        crate::node::account_management::AccountManagement::rpc(
+                            state,
+                            message.data,
+                            message.user_id,
+                            message.request_id,
+                        );
+                    }
                     Ok(Modules::None) => {
                         log::error!("Message Modules::None received");
                     }

@@ -121,6 +121,10 @@ impl Rpc {
                     Ok(proto::Modules::Crypto) => {
                         super::crypto::Crypto::rpc(message.data);
                     }
+                    Ok(proto::Modules::AccountManagement) => {
+                        // qaul-cli drives account management through libqaul's
+                        // node API directly, not over RPC; ignore responses.
+                    }
                     Ok(proto::Modules::None) => {}
                     Err(_) => {}
                 }

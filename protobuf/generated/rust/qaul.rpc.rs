@@ -79,6 +79,10 @@ pub enum Modules {
     /// read / write the Noise session rotation config and (future)
     /// query rotation events.
     Crypto = 18,
+    /// Account management
+    ///
+    /// export / delete / restore local user accounts
+    AccountManagement = 19,
 }
 impl Modules {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -106,6 +110,7 @@ impl Modules {
             Self::Subscribe => "SUBSCRIBE",
             Self::Transports => "TRANSPORTS",
             Self::Crypto => "CRYPTO",
+            Self::AccountManagement => "ACCOUNT_MANAGEMENT",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
@@ -130,6 +135,7 @@ impl Modules {
             "SUBSCRIBE" => Some(Self::Subscribe),
             "TRANSPORTS" => Some(Self::Transports),
             "CRYPTO" => Some(Self::Crypto),
+            "ACCOUNT_MANAGEMENT" => Some(Self::AccountManagement),
             _ => None,
         }
     }

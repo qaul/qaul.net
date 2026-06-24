@@ -35,6 +35,10 @@ pub mod qaul_rpc_user_accounts {
     include!("../../../protobuf/generated/rust/qaul.rpc.user_accounts.rs");
 }
 #[allow(clippy::all)]
+pub mod qaul_rpc_account_management {
+    include!("../../../protobuf/generated/rust/qaul.rpc.account_management.rs");
+}
+#[allow(clippy::all)]
 pub mod qaul_rpc_users {
     include!("../../../protobuf/generated/rust/qaul.rpc.users.rs");
 }
