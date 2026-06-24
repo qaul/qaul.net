@@ -35,6 +35,10 @@ const Modules$json = {
     {'1': 'RTC', '2': 13},
     {'1': 'DTN', '2': 14},
     {'1': 'AUTH', '2': 15},
+    {'1': 'SUBSCRIBE', '2': 16},
+    {'1': 'TRANSPORTS', '2': 17},
+    {'1': 'CRYPTO', '2': 18},
+    {'1': 'ACCOUNT_MANAGEMENT', '2': 19},
   ],
 };
 
@@ -43,7 +47,8 @@ final $typed_data.Uint8List modulesDescriptor = $convert.base64Decode(
     'CgdNb2R1bGVzEggKBE5PTkUQABIHCgNSUEMQARIICgROT0RFEAISEAoMVVNFUkFDQ09VTlRTEA'
     'MSCQoFVVNFUlMQBBIKCgZST1VURVIQBRIICgRGRUVEEAYSDwoLQ09OTkVDVElPTlMQBxIJCgVE'
     'RUJVRxAIEgkKBUdST1VQEAkSCAoEQ0hBVBAKEgwKCENIQVRGSUxFEAsSBwoDQkxFEAwSBwoDUl'
-    'RDEA0SBwoDRFROEA4SCAoEQVVUSBAP');
+    'RDEA0SBwoDRFROEA4SCAoEQVVUSBAPEg0KCVNVQlNDUklCRRAQEg4KClRSQU5TUE9SVFMQERIK'
+    'CgZDUllQVE8QEhIWChJBQ0NPVU5UX01BTkFHRU1FTlQQEw==');
 
 @$core.Deprecated('Use qaulRpcDescriptor instead')
 const QaulRpc$json = {

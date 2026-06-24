@@ -1,0 +1,59 @@
+syntax = "proto3";
+package qaul.rpc.account_management;
+
+import "common/common.proto";
+
+// Account management RPC message container.
+message AccountManagement {
+  oneof message {
+    ExportAccountRequest export_account_request = 1;
+    ExportAccountResponse export_account_response = 2;
+    DeleteAccountRequest delete_account_request = 3;
+    RestoreAccountRequest restore_account_request = 4;
+    RestoreAccountResponse restore_account_response = 5;
+
+    // acknowledgement response (delete success)
+    qaul.common.Ack ack = 6;
+    // RPC error response
+    qaul.common.RpcError error = 7;
+  }
+}
+
+service AccountManagementService {
+  rpc Export(ExportAccountRequest) returns (ExportAccountResponse);
+  rpc Delete(DeleteAccountRequest) returns (qaul.common.Ack);
+  rpc Restore(RestoreAccountRequest) returns (RestoreAccountResponse);
+}
+
+// Export an account to a portable `.qaul_export` archive.
+//
+// Acts on the calling account: the target identity comes from the
+// RequestContext (outer QaulRpc envelope), not the request body.
+message ExportAccountRequest {
+  // directory to write the archive into; empty = default (storage root)
+  string output_path = 1;
+}
+
+message ExportAccountResponse {
+  // path the archive was written to
+  string path = 1;
+}
+
+// Delete the calling account and all of its data from this node.
+//
+// Acts on the calling account: the target identity comes from the
+// RequestContext (outer QaulRpc envelope), so the message carries no fields.
+message DeleteAccountRequest {}
+
+// Restore an account from a `.qaul_export` archive on disk.
+message RestoreAccountRequest {
+  // path to the `.qaul_export` archive
+  string archive_path = 1;
+}
+
+message RestoreAccountResponse {
+  // binary user id of the restored account
+  bytes user_id = 1;
+  // base58 user id of the restored account
+  string user_id_base58 = 2;
+}

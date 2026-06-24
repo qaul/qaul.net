@@ -78,6 +78,30 @@ class Modules extends $pb.ProtobufEnum {
   /// Authentication
   static const Modules AUTH = Modules._(15, _omitEnumNames ? '' : 'AUTH');
 
+  /// Event subscription
+  ///
+  /// Long-running RPC: the client sends one SubscribeRequest, libqaul
+  /// pushes back any number of Event messages tagged with the same
+  /// request_id until the client disconnects.
+  static const Modules SUBSCRIBE =
+      Modules._(16, _omitEnumNames ? '' : 'SUBSCRIBE');
+
+  /// Transport management (list, enable, disable)
+  static const Modules TRANSPORTS =
+      Modules._(17, _omitEnumNames ? '' : 'TRANSPORTS');
+
+  /// End-to-end crypto configuration
+  ///
+  /// read / write the Noise session rotation config and (future)
+  /// query rotation events.
+  static const Modules CRYPTO = Modules._(18, _omitEnumNames ? '' : 'CRYPTO');
+
+  /// Account management
+  ///
+  /// export / delete / restore local user accounts
+  static const Modules ACCOUNT_MANAGEMENT =
+      Modules._(19, _omitEnumNames ? '' : 'ACCOUNT_MANAGEMENT');
+
   static const $core.List<Modules> values = <Modules>[
     NONE,
     RPC,
@@ -95,10 +119,14 @@ class Modules extends $pb.ProtobufEnum {
     RTC,
     DTN,
     AUTH,
+    SUBSCRIBE,
+    TRANSPORTS,
+    CRYPTO,
+    ACCOUNT_MANAGEMENT,
   ];
 
   static final $core.List<Modules?> _byValue =
-      $pb.ProtobufEnum.$_initByValueList(values, 15);
+      $pb.ProtobufEnum.$_initByValueList(values, 19);
   static Modules? valueOf($core.int value) =>
       value < 0 || value >= _byValue.length ? null : _byValue[value];
 

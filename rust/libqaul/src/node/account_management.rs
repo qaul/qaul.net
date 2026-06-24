@@ -29,6 +29,12 @@ use crate::storage::database::DataBase;
 use crate::storage::Storage;
 
 use super::user_accounts::UserAccounts;
+use crate::rpc::Rpc;
+
+/// Protobuf message definitions for the account-management RPC.
+pub use qaul_proto::qaul_rpc_account_management as proto;
+/// Shared RPC response / error types used by the generated service dispatch.
+use qaul_proto::qaul_common::{Ack, RpcError};
 
 /// Manifest included in every export archive.
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -472,6 +478,93 @@ impl AccountManagement {
             password_salt: account.password_salt.clone(),
         };
         UserAccounts::add(state, user);
+    }
+}
+
+impl AccountManagement {
+    /// Process incoming RPC request messages for the account-management module.
+    ///
+    /// Thin shim over the generated service dispatcher: it decodes the
+    /// `AccountManagement` envelope, routes the request to the matching
+    /// `AccountManagementService` method, and encodes the reply — then sends
+    /// it back on the ACCOUNT_MANAGEMENT module channel. All per-method logic
+    /// lives in the `AccountManagementService` impl below.
+    pub fn rpc(state: &crate::QaulState, data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
+        let ctx = crate::RequestContext {
+            state,
+            user_id,
+            request_id: request_id.clone(),
+        };
+        let response_bytes = proto::dispatch::<crate::RequestContext, AccountManagement>(&ctx, data);
+        Rpc::send_message(
+            state,
+            response_bytes,
+            crate::rpc::proto::Modules::AccountManagement.into(),
+            request_id,
+            Vec::new(),
+        );
+    }
+}
+
+/// Map a libqaul `String` error into the uniform RPC error variant.
+fn rpc_error(message: String) -> RpcError {
+    RpcError {
+        code: 2,
+        message,
+        details: String::new(),
+    }
+}
+
+/// Generated-service implementation exposing export / delete / restore over
+/// RPC. `export` and `delete` are self-scoped: they act on the calling account,
+/// taken from the [`crate::RequestContext`] (outer envelope), not from the
+/// request body — a caller can only export/delete its own account. (A by-id
+/// node-admin variant can be reintroduced behind an authorization gate if a
+/// multi-account deployment needs it.) `restore` mints a new account from an
+/// archive, so it has no caller identity to scope to.
+impl proto::AccountManagementService<crate::RequestContext<'_>> for AccountManagement {
+    fn export(
+        ctx: &crate::RequestContext<'_>,
+        req: proto::ExportAccountRequest,
+    ) -> Result<proto::ExportAccountResponse, RpcError> {
+        let state = ctx.state;
+        let peer_id = PeerId::from_bytes(&ctx.user_id)
+            .map_err(|_| rpc_error("invalid caller identity".to_string()))?;
+
+        // Empty output_path defaults to the storage root.
+        let output_dir = if req.output_path.is_empty() {
+            PathBuf::from(Storage::get_path(state))
+        } else {
+            PathBuf::from(req.output_path)
+        };
+
+        let path = Self::export_account(state, peer_id, &output_dir).map_err(rpc_error)?;
+
+        Ok(proto::ExportAccountResponse {
+            path: path.to_string_lossy().into_owned(),
+        })
+    }
+
+    fn delete(ctx: &crate::RequestContext<'_>, _req: proto::DeleteAccountRequest) -> Result<Ack, RpcError> {
+        let peer_id = PeerId::from_bytes(&ctx.user_id)
+            .map_err(|_| rpc_error("invalid caller identity".to_string()))?;
+
+        Self::delete_account(ctx.state, peer_id).map_err(rpc_error)?;
+        Ok(Ack {})
+    }
+
+    fn restore(
+        ctx: &crate::RequestContext<'_>,
+        req: proto::RestoreAccountRequest,
+    ) -> Result<proto::RestoreAccountResponse, RpcError> {
+        let state = ctx.state;
+        let peer_id =
+            Self::restore_account(state, Path::new(&req.archive_path)).map_err(rpc_error)?;
+
+        Ok(proto::RestoreAccountResponse {
+            user_id: peer_id.to_bytes(),
+            user_id_base58: peer_id.to_base58(),
+        })
     }
 }
 

@@ -1,6 +1,8 @@
 syntax = "proto3";
 package qaul.rpc.authentication;
 
+import "common/common.proto";
+
 message AuthRpc {
   oneof message {
     AuthRequest auth_request = 1;
@@ -9,7 +11,26 @@ message AuthRpc {
     AuthResult auth_result = 4;
     UsersRequest users_request = 5;
     UsersResponse users_response = 6;
+
+    // logout request (drop the daemon-side session)
+    LogoutRequest logout_request = 7;
+    // session-status ("active session") request / response
+    SessionStatusRequest session_status_request = 8;
+    SessionStatusResponse session_status_response = 9;
+
+    // acknowledgement response
+    qaul.common.Ack ack = 10;
+    // RPC error response
+    qaul.common.RpcError error = 11;
   }
+}
+
+service AuthRpcService {
+  rpc Users(UsersRequest) returns (UsersResponse);
+  rpc RequestChallenge(AuthRequest) returns (AuthChallenge);
+  rpc RespondChallenge(AuthResponse) returns (AuthResult);
+  rpc LogoutSession(LogoutRequest) returns (qaul.common.Ack);
+  rpc SessionStatus(SessionStatusRequest) returns (SessionStatusResponse);
 }
 
 message UsersRequest {
@@ -29,7 +50,7 @@ message UserInfo {
 }
 
 message AuthRequest {
-  bytes qaul_id = 1;
+  bytes user_id = 1;
 }
 
 message AuthChallenge {
@@ -39,9 +60,28 @@ message AuthChallenge {
 
 message AuthResponse {
   bytes challenge_hash = 1;
+  // caller identity. The generated service dispatch only forwards the
+  // decoded request to the handler (not the outer QaulRpc.user_id), so the
+  // challenge response must carry the user id it is answering for.
+  bytes user_id = 2;
 }
 
 message AuthResult {
   bool success = 1;
   string error_message = 2;
+}
+
+// Drop the daemon-side authenticated session for the calling user.
+// The target is the caller's identity, taken from the RequestContext (outer
+// QaulRpc envelope), so the message carries no fields — a caller can only log
+// itself out.
+message LogoutRequest {}
+
+// Query whether the calling user currently has an active authenticated
+// session. Identity comes from the RequestContext (outer envelope), so the
+// message carries no fields.
+message SessionStatusRequest {}
+
+message SessionStatusResponse {
+  bool authenticated = 1;
 }
