@@ -32,11 +32,12 @@ import net.qaul.ble.test.ble.manager.BleManager
 import net.qaul.ble.test.ble.server.GattServer
 import net.qaul.ble.test.ble.advertiser.BleAdvertiser
 import net.qaul.ble.test.ble.scanner.BleScanner
+import net.qaul.ble.test.ble.util.toHexString
 import net.qaul.ble.BleConstants
 
 @SuppressLint("MissingPermission")
 open class BleWrapperClass(context: Activity) {
-    private val TAG: String = "qaul-blemodule BleWrapperClass"
+    private val TAG: String = "BleWrapperClass"
     private val context = context
     private var errorText = ""
     private var noRights = false
@@ -107,7 +108,7 @@ open class BleWrapperClass(context: Activity) {
                 }
                 BleOuterClass.Ble.MessageCase.START_REQUEST -> {
                     qaulId = bleReq.startRequest.qaulId.toByteArray()
-                    AppLog.e(TAG, "qaulid : " + qaulId?.size)
+                    AppLog.i(TAG, "BLE starting — my q8id: ${qaulId?.toHexString()}")
                     advertMode = bleReq.startRequest.powerSetting.toString()
                     if (qaulId != null) {
                         startService(context = context)

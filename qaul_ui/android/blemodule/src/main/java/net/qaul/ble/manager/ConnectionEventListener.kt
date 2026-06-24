@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothGattCharacteristic
 
 interface ConnectionEventListener {
     fun onConnectionSetupComplete(gatt: BluetoothGatt) {}
+    fun onServicesDiscovered(device: BluetoothDevice) {}
     fun onDisconnectedFromDevice(device: BluetoothDevice) {}
     fun onCharacteristicRead(device: BluetoothDevice, characteristic: BluetoothGattCharacteristic, value: ByteArray) {}
     fun onCharacteristicWrite(device: BluetoothDevice, characteristic: BluetoothGattCharacteristic) {}

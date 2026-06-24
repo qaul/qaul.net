@@ -73,13 +73,19 @@ object BleConstants {
     const val GATT_OPERATION_TIMEOUT_MS = 5_000L
 
     /** Timeout in milliseconds for initial connection before giving up. */
-    const val CONNECTION_TIMEOUT_MS = 20_000L
+    const val CONNECTION_TIMEOUT_MS = 8_000L
 
     /** How long with no data before a connection is considered dead and force-disconnected. */
     const val LIVENESS_TIMEOUT_MS = 30_000L
 
     /** How often we check if all connections are still alive */
     const val LIVENESS_CHECK_INTERVAL_MS = 5_000L
+
+    /** How long a connection may stay unresolved (qaulId never learned) before the unresolved
+     *  reaper drops it as a stuck handshake / zombie. */
+    const val UNRESOLVED_TIMEOUT_MS = 8_000L
+
+    const val PING_INTERVAL_MS = 10_000L
 
     // --------------------------------------------------------------------------------------------
     // Reconnect / backoff settings

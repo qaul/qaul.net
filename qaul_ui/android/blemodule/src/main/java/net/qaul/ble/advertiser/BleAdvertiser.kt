@@ -22,6 +22,9 @@ object BleAdvertiser {
     var isAdvertising = false
         private set
 
+    // True while advertising is suppressed because were at the connection cap,distinct from a full stop()
+    @Volatile private var pausedForCap = false
+
     private val advertiseSettings = AdvertiseSettings.Builder()
         .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY) // TODO: Change advertising and scanning mode to be adabtable to preserve battery, currently its all on the strongest / highest battery usage modes
         .setConnectable(true)
@@ -67,7 +70,28 @@ object BleAdvertiser {
     fun stop() {
         advertiser?.stopAdvertising(advertiseCallback)
         isAdvertising = false
+        pausedForCap = false
         Log.i(TAG, "Advertising stopped")
+    }
+
+    /**
+     * Suppress advertising because we've hit the connection cap, becomes undiscoverable so other
+     * nodes stop trying to connect to us. Reversible via [resume], [stop] clears it permanently.
+     */
+    fun pause() {
+        if (!isAdvertising) return
+        advertiser?.stopAdvertising(advertiseCallback)
+        isAdvertising = false
+        pausedForCap = true
+        Log.i(TAG, "Advertising paused (at connection cap)")
+    }
+
+    // Resume advertising after dropping below the cap. it never restarts advertising after a deliberate [stop] or before the first [start].
+    fun resume() {
+        if (isAdvertising || !pausedForCap) return
+        pausedForCap = false
+        advertiser?.startAdvertising(advertiseSettings, advertiseData, advertiseCallback)
+        Log.i(TAG, "Advertising resumed (below cap)")
     }
 
     private val advertiseCallback = object : AdvertiseCallback() {

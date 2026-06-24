@@ -266,6 +266,9 @@ class ReceiveQueue {
                     // send Error if not
                 }
             }
+            FlowControlMessageType.LIVENESS_CHECK_PING.value -> {
+                AppLog.e(TAG, "incomingFlowControlMessage: LIVENESS_CHECK_PING")
+            }
             else -> {
                 AppLog.e(TAG, "incomingFlowControlMessage: unknown")
             }

@@ -77,6 +77,14 @@ object FlcCreate {
     }
 
     /**
+     * Create a Ping message, which expects no response
+     */
+    fun createPing(): ByteArray {
+        val message = byteArrayOf(FlowControlMessageType.LIVENESS_CHECK_PING.value)
+        return message
+    }
+
+    /**
      * Create ACK request message
      * @param queueIndex Index of the missing ACK
      */
