@@ -162,7 +162,7 @@ pub fn dispatch<S, T: AuthRpcService<S>>(state: &S, data: Vec<u8>) -> Vec<u8> {
                 _ => {
                     auth_rpc::Message::Error(crate::qaul_common::RpcError {
                         code: 1,
-                        message: "unexpected or unset Debug oneof variant".into(),
+                        message: "unexpected or unset AuthRpc oneof variant".into(),
                         details: String::new(),
                     })
                 }

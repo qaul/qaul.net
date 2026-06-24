@@ -206,6 +206,45 @@ impl Users {
         Self::index_user(router, &searchable_user);
     }
 
+    /// Register a local account into the router.
+    ///
+    /// Builds a [`User`] stamped with [`Capabilities::LOCAL`] and a freshly
+    /// signed profile, adds it to the users table/database, and registers it in
+    /// the local connection/routing table. This is the canonical local-user
+    /// registration path; account creation and account restore both call it so
+    /// the two stay in lockstep when the `User` shape or capability set changes.
+    ///
+    /// Returns the registered account's [`PeerId`] (derived from `keys`).
+    pub fn register_local_user(
+        state: &crate::QaulState,
+        router: &super::RouterState,
+        name: String,
+        keys: &libp2p::identity::Keypair,
+    ) -> PeerId {
+        let id = PeerId::from(keys.public());
+        let mut user = User {
+            id,
+            key: keys.public(),
+            name,
+            verified: false,
+            blocked: false,
+            capabilities: Capabilities::LOCAL,
+            bio: String::new(),
+            avatar: Vec::new(),
+            version: 1,
+            updated_at: crate::utilities::timestamp::Timestamp::get_timestamp(),
+            signed_profile_bytes: Vec::new(),
+            signed_profile_signature: Vec::new(),
+            preferred_custody_route: Vec::new(),
+        };
+        let signed = Self::create_signed_profile(&user, keys);
+        user.signed_profile_bytes = signed.profile;
+        user.signed_profile_signature = signed.signature;
+        Self::add(state, router, user);
+        super::connections::ConnectionTable::add_local_user(state, router, id);
+        id
+    }
+
     /// Open the node-global users search index and backfill it if it is new.
     fn init_search(
         state: &crate::QaulState,

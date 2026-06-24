@@ -45,22 +45,6 @@ pub struct ExportManifest {
     pub user_id: String,
 }
 
-/// Serializable subset of the config UserAccount.
-///
-/// Includes `session_token` so that qauld server deployments can
-/// export/restore an account and keep automated clients' existing
-/// sessions working.
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct ExportedAccount {
-    pub name: String,
-    pub id: String,
-    pub keys: String,
-    pub password_hash: Option<String>,
-    pub password_salt: Option<String>,
-    pub session_token: Option<String>,
-    pub storage: configuration::StorageOptions,
-}
-
 pub struct AccountManagement;
 
 impl AccountManagement {
@@ -80,23 +64,13 @@ impl AccountManagement {
         // 2. Get config entry
         let exported_account = Self::get_exported_account(state, user_id)?;
 
-        // 3. Flush cached sled::Tree handles
-        ChatStorage::flush_account(state, &user_id);
-        GroupStorage::flush_account(state, &user_id);
+        // 3. Quiesce all per-user storage so the directory can be archived.
+        Self::quiesce_user_storage(state, user_id);
 
-        // 4. Release sled::Tree handles from all caches
-        ChatStorage::remove_account(state, user_id);
-        GroupStorage::remove_account(state, user_id);
-        CryptoStorage::remove_account(state, user_id);
-        AllFiles::remove_account(state, user_id);
-
-        // 5. Close user's sled DB (flush + drop handle)
-        DataBase::close_user_db(state, user_id);
-
-        // 6. Build archive
+        // 4. Build archive
         let result = Self::build_export_archive(state, user_id, &exported_account, output_path);
 
-        // 7. Re-open is lazy — next access to DataBase::get_user_db() will reopen
+        // 5. Re-open is lazy — next access to DataBase::get_user_db() will reopen
 
         result
     }
@@ -107,34 +81,24 @@ impl AccountManagement {
         UserAccounts::get_by_id(state, user_id)
             .ok_or_else(|| format!("User {} not found", user_id.to_base58()))?;
 
-        // 2. Flush cached sled::Tree handles
-        ChatStorage::flush_account(state, &user_id);
-        GroupStorage::flush_account(state, &user_id);
+        // 2. Quiesce all per-user storage so the directory can be removed.
+        Self::quiesce_user_storage(state, user_id);
 
-        // 3. Release sled::Tree handles from all caches
-        ChatStorage::remove_account(state, user_id);
-        GroupStorage::remove_account(state, user_id);
-        CryptoStorage::remove_account(state, user_id);
-        AllFiles::remove_account(state, user_id);
-
-        // 4. Close user's sled DB
-        DataBase::close_user_db(state, user_id);
-
-        // 5. Remove from in-memory user accounts
+        // 3. Remove from in-memory user accounts
         UserAccounts::remove(state, user_id);
 
-        // 6. Remove from config and save
+        // 4. Remove from config and save
         Self::remove_from_config(state, user_id);
 
-        // 7. Remove from routing tables
+        // 5. Remove from routing tables
         let router = state.get_router();
         ConnectionTable::remove_local_user(&router, user_id);
         Users::remove(state, &router, user_id);
 
-        // 8. Remove authentication session (no-op if not logged in)
+        // 6. Remove authentication session (no-op if not logged in)
         Authentication::logout(state, user_id);
 
-        // 9. Delete user directory from disk
+        // 7. Delete user directory from disk
         let user_dir = Storage::get_account_path(state, user_id);
         if user_dir.exists() {
             fs::remove_dir_all(&user_dir).map_err(|e| {
@@ -192,7 +156,7 @@ impl AccountManagement {
         let account_path = temp_dir.join("account.yaml");
         let account_str = fs::read_to_string(&account_path)
             .map_err(|e| format!("Failed to read account.yaml: {}", e))?;
-        let exported_account: ExportedAccount = serde_yaml_ng::from_str(&account_str)
+        let exported_account: configuration::UserAccount = serde_yaml_ng::from_str(&account_str)
             .map_err(|e| format!("Failed to parse account.yaml: {}", e))?;
 
         // 4. Parse user_id and check for conflicts
@@ -236,18 +200,12 @@ impl AccountManagement {
             })?;
         }
 
-        // 6. Add to config and save
+        // 6. Add to config and save. The archive stores the config account
+        //    verbatim (including `session_token`, so qauld deployments keep
+        //    automated clients' sessions working after a restore).
         {
             let mut config = Configuration::get_mut(state);
-            config.user_accounts.push(configuration::UserAccount {
-                name: exported_account.name.clone(),
-                id: exported_account.id.clone(),
-                keys: exported_account.keys.clone(),
-                password_hash: exported_account.password_hash.clone(),
-                password_salt: exported_account.password_salt.clone(),
-                session_token: exported_account.session_token.clone(),
-                storage: exported_account.storage.clone(),
-            });
+            config.user_accounts.push(exported_account.clone());
         }
         Configuration::save(state);
 
@@ -257,33 +215,12 @@ impl AccountManagement {
         // 8. Open user's sled DB (lazy init)
         DataBase::get_user_db(state, user_id);
 
-        // 9. Add to router tables. A restored account is a local
-        //    account, so build a full `User` stamped with LOCAL
-        //    capabilities and a freshly signed profile, mirroring
-        //    `UserAccounts` registration under the new routing model.
-        //    (The old-format archive carries no profile data, so the
-        //    profile is regenerated here from the restored keypair.)
+        // 9. Register into the router via the canonical local-user path,
+        //    identical to account creation. The old-format archive carries no
+        //    profile data, so a fresh signed profile is regenerated from the
+        //    restored keypair.
         let router = state.get_router();
-        let mut restored_user = crate::router::users::User {
-            id: user_id,
-            key: keys.public(),
-            name: exported_account.name.clone(),
-            verified: false,
-            blocked: false,
-            capabilities: crate::router::users::Capabilities::LOCAL,
-            bio: String::new(),
-            avatar: Vec::new(),
-            version: 1,
-            updated_at: crate::utilities::timestamp::Timestamp::get_timestamp(),
-            signed_profile_bytes: Vec::new(),
-            signed_profile_signature: Vec::new(),
-            preferred_custody_route: Vec::new(),
-        };
-        let signed = Users::create_signed_profile(&restored_user, &keys);
-        restored_user.signed_profile_bytes = signed.profile;
-        restored_user.signed_profile_signature = signed.signature;
-        Users::add(state, &router, restored_user);
-        ConnectionTable::add_local_user(state, &router, user_id);
+        Users::register_local_user(state, &router, exported_account.name.clone(), &keys);
 
         // 10. Clean up temp directory
         let _ = fs::remove_dir_all(&temp_dir);
@@ -341,30 +278,43 @@ impl AccountManagement {
     fn get_exported_account(
         state: &crate::QaulState,
         user_id: PeerId,
-    ) -> Result<ExportedAccount, String> {
+    ) -> Result<configuration::UserAccount, String> {
         let config = Configuration::get(state);
         let user_id_str = user_id.to_string();
-        let config_account = config
+        config
             .user_accounts
             .iter()
             .find(|u| u.id == user_id_str)
-            .ok_or_else(|| format!("User {} not found in config", user_id.to_base58()))?;
+            .cloned()
+            .ok_or_else(|| format!("User {} not found in config", user_id.to_base58()))
+    }
 
-        Ok(ExportedAccount {
-            name: config_account.name.clone(),
-            id: config_account.id.clone(),
-            keys: config_account.keys.clone(),
-            password_hash: config_account.password_hash.clone(),
-            password_salt: config_account.password_salt.clone(),
-            session_token: config_account.session_token.clone(),
-            storage: config_account.storage.clone(),
-        })
+    /// Flush and release every per-user storage handle, then close the user's
+    /// sled DB, so the on-disk directory can be safely archived or removed.
+    ///
+    /// Cached `sled::Tree` handles hold `Arc`s to the DB, so they must all be
+    /// dropped before the DB can be closed and its file locks released. Any new
+    /// per-user sled cache MUST be released here too: this is the single site
+    /// both export and delete rely on to quiesce a user's on-disk state.
+    fn quiesce_user_storage(state: &crate::QaulState, user_id: PeerId) {
+        // Flush buffered writes for the caches that buffer.
+        ChatStorage::flush_account(state, &user_id);
+        GroupStorage::flush_account(state, &user_id);
+
+        // Release cached Tree handles from every per-user cache.
+        ChatStorage::remove_account(state, user_id);
+        GroupStorage::remove_account(state, user_id);
+        CryptoStorage::remove_account(state, user_id);
+        AllFiles::remove_account(state, user_id);
+
+        // Close the user's sled DB (flush + drop handle, releasing file locks).
+        DataBase::close_user_db(state, user_id);
     }
 
     fn build_export_archive(
         state: &crate::QaulState,
         user_id: PeerId,
-        exported_account: &ExportedAccount,
+        exported_account: &configuration::UserAccount,
         output_path: &Path,
     ) -> Result<PathBuf, String> {
         let storage_path = Storage::get_path(state);
@@ -468,7 +418,7 @@ impl AccountManagement {
         state: &crate::QaulState,
         user_id: PeerId,
         keys: Keypair,
-        account: &ExportedAccount,
+        account: &configuration::UserAccount,
     ) {
         let user = super::user_accounts::UserAccount {
             id: user_id,
@@ -577,7 +527,7 @@ mod tests {
     /// existing sessions working (qauld deployment use case).
     #[test]
     fn exported_account_roundtrips_session_token() {
-        let account = ExportedAccount {
+        let account = configuration::UserAccount {
             name: "alice".to_string(),
             id: "12D3KooExample".to_string(),
             keys: "base64keys".to_string(),
@@ -593,7 +543,8 @@ mod tests {
             "token must be written into the export archive"
         );
 
-        let restored: ExportedAccount = serde_yaml_ng::from_str(&yaml).expect("deserialize");
+        let restored: configuration::UserAccount =
+            serde_yaml_ng::from_str(&yaml).expect("deserialize");
         assert_eq!(restored.session_token.as_deref(), Some("session-abc"));
     }
 }

@@ -109,7 +109,8 @@ pub fn dispatch<S, T: AccountManagementService<S>>(state: &S, data: Vec<u8>) -> 
                 _ => {
                     account_management::Message::Error(crate::qaul_common::RpcError {
                         code: 1,
-                        message: "unexpected or unset Debug oneof variant".into(),
+                        message: "unexpected or unset AccountManagement oneof variant"
+                            .into(),
                         details: String::new(),
                     })
                 }
