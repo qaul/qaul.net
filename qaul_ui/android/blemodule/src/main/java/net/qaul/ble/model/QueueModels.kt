@@ -15,6 +15,7 @@ enum class FlowControlMessageType(val value: Byte) {
     ACK_SUCCESS(0x03),
     ACK_ERROR(0x04),
     MISSING_ACK_MESSAGES(0x05),
+	LIVENESS_CHECK_PING(0x06),
 }
 
 /**

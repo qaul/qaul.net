@@ -109,6 +109,7 @@ class SendQueue(qaulId: ByteArray) {
      * adds a new Message to the sending queue
      * @param message the message to add
      */
+    @Synchronized
     fun addMessage(message: ByteArray, messageId: String) {
         if (message.size <= maxPartSize) {
             // add a normal message
@@ -144,6 +145,7 @@ class SendQueue(qaulId: ByteArray) {
     /**
      * Get next Large Message Index
      */
+    @Synchronized
     fun getNextLargeMessageIndex(): Int {
         largeMessageIndex += 1
         if (largeMessageIndex > 15) {
@@ -158,6 +160,7 @@ class SendQueue(qaulId: ByteArray) {
      * @param message the message to send
      * @return a queue of message chunks
      */
+    @Synchronized
     fun getChunks(): Triple<Queue<ByteArray>, Byte?, String> {
         var chunks: Queue<ByteArray> = LinkedList()
         // send qaul ID as first message
@@ -208,6 +211,7 @@ class SendQueue(qaulId: ByteArray) {
     /**
      * schedule FLC send qaul ID message
      */
+    @Synchronized
     fun addFlcSendQaulId() {
         // create FLC send qaul ID message
         val flcSendId = FlcCreate.createSendId(qaulId)
@@ -218,6 +222,7 @@ class SendQueue(qaulId: ByteArray) {
     /**
      * schedule a FLC ACK message
      */
+    @Synchronized
     fun addFlcAck(queueIndex: Byte, success: Boolean, errorCode: Byte) {
         // create FLC ACK message
         val flcAck = FlcCreate.createAck(queueIndex, success, errorCode)
@@ -226,8 +231,20 @@ class SendQueue(qaulId: ByteArray) {
     }
 
     /**
+     * schedule a FLC PING message
+     */
+    @Synchronized
+    fun addFlcPing() {
+        // create FLC ping message
+        val flcPing = FlcCreate.createPing()
+        // add to the FLC queue
+        flcToSend.add(flcPing)
+    }
+
+    /**
      * add missing chunk index to request
      */
+    @Synchronized
     fun addMissingChunkIndexToRequest(missingChunkIndex: Int) {
         // add missing chunk to the map
         missingChunksToRequest[missingChunkIndex] = missingChunkIndex
@@ -273,6 +290,7 @@ class SendQueue(qaulId: ByteArray) {
     /**
      * add missing chunk index to send
      */
+    @Synchronized
     fun addMissingChunkIndexToSend(missingChunkIndex: Int) {
         // add missing chunk to the map
         missingChunksToSend[missingChunkIndex] = missingChunkIndex
@@ -365,6 +383,7 @@ class SendQueue(qaulId: ByteArray) {
      * @param errorCode the error code, if any
      * @return String indicating the message ID. Return empty string, if queue index is invalid or message is not found.
      */
+    @Synchronized
     fun flcAckReceived(queueIndex: Byte, success: Boolean, errorCode: Byte): String {
         // check if queue index is valid
         if (queueIndex < 1 || queueIndex > 29) {
@@ -420,6 +439,7 @@ class SendQueue(qaulId: ByteArray) {
      * TODO: I believe this message ID is not really used in BleService, only on failure
      * TODO: large messages are misrepresented by a single message ID
      */
+    @Synchronized
     fun messageSent(messageId: String) {
         // check if message is current message
         if (currentMessageId == messageId) {
@@ -443,6 +463,7 @@ class SendQueue(qaulId: ByteArray) {
      * This method is called when the connection to the device is lost.
      * @return message ID that could not be sent
      */
+    @Synchronized
     fun setConnectionLost(): String? {
         state = SendQueueState.CONNECTION_LOST
         // check state of the send queues
@@ -471,6 +492,7 @@ class SendQueue(qaulId: ByteArray) {
     /**
      * Track large Messages
      */
+    @Synchronized
     fun trackLargeMessages(largeMessageIndicator: Byte, state: SendLargeMessageState): SendLargeMessageQueue? {
         // get queue index from largeMessageIndicator Byte
         val queueIndex: Int = (largeMessageIndicator.toInt() shr 4) and 0x0F

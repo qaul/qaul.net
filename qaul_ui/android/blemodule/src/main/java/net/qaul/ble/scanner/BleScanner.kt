@@ -8,6 +8,8 @@ import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.os.ParcelUuid
 import android.util.Log
 import net.qaul.ble.BleConstants
@@ -38,6 +40,10 @@ object BleScanner {
     private const val TAG = "BleScanner"
     private const val COOLDOWN_MS = 30_000L
 
+    // After a connect attempt finishes, wait this long with no further connects before resuming the
+    // scan. Debounces a burst of connects into one pause window, as Android has a limit of ~5 startScan / 30s.
+    private const val SCAN_RESUME_DEBOUNCE_MS = 2_000L
+
     private var scanner: BluetoothLeScanner? = null
 //    private var context: Context? = null
 
@@ -54,7 +60,15 @@ object BleScanner {
     // MAC → timestamp until which auto-connect is suppressed (set after a tiebreaker drop).
     private val cooldownUntil = mutableMapOf<String, Long>()
 
+    // Pause scanning during connecting state. The BLE radio is shared between scanning and connecting, so we pause the scan around
+    // each connect attempt and resume it once the connect activity quiets.
+    private var appContext: Context? = null
+    @Volatile private var pausedForConnect = false
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val resumeRunnable = Runnable { doResume() }
+
     fun start(context: Context) {
+        appContext = context.applicationContext   // cached so the debounced resume needs no Context
         if (isScanning) return
         val adapter = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
         scanner = adapter?.bluetoothLeScanner ?: run {
@@ -81,10 +95,43 @@ object BleScanner {
     }
 
     fun stop() {
+        mainHandler.removeCallbacks(resumeRunnable)
+        pausedForConnect = false
         if (!isScanning) return
         scanner?.stopScan(scanCallback)
         isScanning = false
         Log.i(TAG, "Scanning stopped")
+    }
+
+    /**
+     * Pause scanning for the duration of a connection attempt. Reversed by
+     * [resumeAfterConnect] (debounced).
+     */
+    fun pauseForConnect() {
+        mainHandler.removeCallbacks(resumeRunnable)   // cancel any pending resume
+        if (isScanning) {
+            scanner?.stopScan(scanCallback)
+            isScanning = false
+            pausedForConnect = true
+            Log.i(TAG, "Scan paused for connect")
+        }
+    }
+
+    /**
+     * Resume scanning after a connect attempt finishes (success, failure, or timeout). Debounced:
+     * a run of back to back connects keeps the scan paused and restarts it only once activity quiets,
+     * so we never toggle the scan fast enough to hit the limit.
+     */
+    fun resumeAfterConnect() {
+        if (!pausedForConnect) return
+        mainHandler.removeCallbacks(resumeRunnable)
+        mainHandler.postDelayed(resumeRunnable, SCAN_RESUME_DEBOUNCE_MS)
+    }
+
+    private fun doResume() {
+        if (!pausedForConnect) return
+        pausedForConnect = false
+        appContext?.let { start(it) }
     }
 
     /**

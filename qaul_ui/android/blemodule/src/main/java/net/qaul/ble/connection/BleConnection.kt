@@ -23,6 +23,8 @@ class BleConnection(
     /** Populated after the central reads READ_CHAR during connection setup. */
     var remoteQaulId: ByteArray? = null
 
+    val createdAt: Long = System.currentTimeMillis()
+
     /**
      * Fired the first time we learn the remote's qaul ID from the data stream (SEND_ID FLC).
      * ConnectionPool sets this to detect duplicates across MAC addresses.
@@ -226,6 +228,18 @@ class BleConnection(
     }
 
     /**
+     * Called when the central finishes discovering the peripheral's services (MSG_CHAR is now
+     * available to write). Push our qaulId (SEND_ID) over GATT here, earlier and more reliable
+     * than [onMtuNegotiated], which doesnt seem to always fire so we backup here. The qaulIdSent guard
+     * in SendQueue makes the later MTU-time flush harmless if we already succeeded.
+     */
+    fun onServicesDiscovered() {
+        if (role == BleRole.CENTRAL) {
+            flushSendQueue()
+        }
+    }
+
+    /**
      * Called when MTU is negotiated. Updates chunk size so SendQueue
      * splits messages correctly for this connection.
      */
@@ -236,6 +250,15 @@ class BleConnection(
         if (role == BleRole.CENTRAL){
             flushSendQueue()
         }
+    }
+
+
+   /**
+    *  Queues and sends an FLC ping for this connection, used for maintaining liveness.
+    */
+    fun sendPing() {
+        sendQueue.addFlcPing()
+        flushSendQueue()
     }
 
     /**

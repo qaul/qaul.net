@@ -14,6 +14,7 @@ import android.util.Log
 import net.qaul.ble.BleConstants
 import net.qaul.ble.test.ble.manager.BleManager
 import net.qaul.ble.test.ble.manager.ConnectionEventListener
+import net.qaul.ble.test.ble.scanner.BleScanner
 import net.qaul.ble.test.ble.server.GattServer
 import net.qaul.ble.test.ble.server.GattServer.isSubscribed
 import net.qaul.ble.test.ble.util.isIndicatable
@@ -258,17 +259,22 @@ object BleTaskScheduler {
                     skipOperation()
                 } else {
                     Log.i(TAG, "Connecting to ${device.address}")
+                    // Pause scanning so the radio isn't busy scanning while we establish the link. Having both at once is known to cause trouble
+                    // for some devices as active scan can starve connectGatt (hangs / status 133). Resumed
+                    // once the connect settles (connected / error etc). TODO: Double check / Think about how much this reduces our ability to / speed of getting other connections, can it block scanning permanently
+                    BleScanner.pauseForConnect()
                     @SuppressLint("MissingPermission")
                     val gatt = device.connectGatt(ctx, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
                     if (gatt != null) {
-                        // Hold the handle immediately. connectGatt allocates a client interface that
-                        // MUST be close()'d even if the connection never completes — otherwise it
+                        // Hold the handle immediately, connectGatt allocates a client interface that
+                        // MUST be closed even if the connection never completes, otherwise it
                         // leaks, and after a few leaks all new connects fail with status 133.
-                        // Storing it now means a stuck Connect (watchdog) or a Disconnect can always
-                        // find and close it; STATE_CONNECTED below just re-confirms the same object.
+                        // Storing it now means a stuck Connect or a Disconnect can always
+                        // find and close it.
                         deviceGattMap[device] = gatt
                     } else {
                         Log.e(TAG, "connectGatt returned null for ${device.address}")
+                        BleScanner.resumeAfterConnect()   // connect never started, let the scan back
                         skipOperation()
                     }
                 }
@@ -560,6 +566,7 @@ object BleTaskScheduler {
                 try { gatt.close() } catch (_: Exception) {}
                 Log.w(TAG, "Watchdog: closed leaked GATT for ${operation.device.address}")
             }
+            BleScanner.resumeAfterConnect()   // stuck connect timed out, let the scan back
             notifyListeners { onDisconnectedFromDevice(operation.device) }
         }
     }
@@ -578,6 +585,7 @@ object BleTaskScheduler {
                     BluetoothProfile.STATE_CONNECTED -> {
                         Log.i(TAG, "Connected to $address")
                         deviceGattMap[gatt.device] = gatt
+                        BleScanner.resumeAfterConnect()   // link established, scan can resume
                         signalOperationComplete<Connect>(gatt.device)
                         // Service discovery is the first step after connecting
                     }
@@ -593,6 +601,7 @@ object BleTaskScheduler {
                 Log.e(TAG, "Connection error $status for $address")
                 deviceGattMap.remove(gatt.device)
                 gatt.close()
+                BleScanner.resumeAfterConnect()   // connect failed, let the scan back (debounced)
                 if (pendingOperation is Connect || pendingOperation is Disconnect) {
                     skipOperation()
                 }
@@ -605,6 +614,7 @@ object BleTaskScheduler {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.i(TAG, "Discovered ${gatt.services.size} services for ${gatt.device.address}")
                 gatt.printGattTable()
+                notifyListeners { onServicesDiscovered(gatt.device) }
             } else {
                 Log.e(TAG, "Service discovery failed for ${gatt.device.address}, status: $status")
                 scheduleOperation(Disconnect(gatt.device))

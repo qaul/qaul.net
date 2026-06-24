@@ -3,7 +3,9 @@ package net.qaul.ble.test.ble.connection
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
 import android.util.Log
+import net.qaul.ble.AppLog
 import net.qaul.ble.BleConstants
+import net.qaul.ble.test.ble.advertiser.BleAdvertiser
 import net.qaul.ble.test.ble.manager.ConnectionEventListener
 import net.qaul.ble.test.ble.queue.BleTaskScheduler
 import net.qaul.ble.test.ble.util.toHexString
@@ -38,8 +40,12 @@ object ConnectionPool {
     private val reaper = Executors.newSingleThreadScheduledExecutor { r ->
         Thread(r, "connection-aliveness-watchdog").apply { isDaemon = true }
     }
-    @Volatile private var reaperTask: ScheduledFuture<*>? = null
+    @Volatile private var unresolvedReaperTask: ScheduledFuture<*>? = null
+    @Volatile private var livenessReaperTask: ScheduledFuture<*>? = null
+
     @Volatile private var snapshotTask: ScheduledFuture<*>? = null
+
+    @Volatile private var pingTask: ScheduledFuture<*>? = null
 
     /**
      * Periodic one-line view of this node's connections, count
@@ -48,16 +54,17 @@ object ConnectionPool {
         try {
             val conns = connections.values.toList()
             val summary = if (conns.isEmpty()) "none" else conns.joinToString("  ·  ") { c ->
-                val id = c.remoteQaulId?.toHexString()?.take(6) ?: "unresolved"
+                val id = c.remoteQaulId?.toHexString() ?: "unresolved"
                 "${c.device.address}/${c.role}/$id"
             }
+            Log.i(TAG, "my q8id: ${BleConstants.LOCAL_QAUL_ID.toHexString()}")
             Log.i(TAG, "TOPOLOGY neighbours=${conns.size} up=${upNeighbours.size}: $summary")
         } catch (e: Exception) {
             Log.e(TAG, "snapshot failed", e)
         }
     }
 
-    private fun reap() {
+    private fun reapLiveness() {
         try {
             val now = System.currentTimeMillis()
             connections.values.toList().forEach { conn ->
@@ -73,23 +80,68 @@ object ConnectionPool {
         }
     }
 
+   /**
+     * Drops connections that never resolved a qaul ID within [BleConstants.UNRESOLVED_TIMEOUT_MS] such as stuck handshakes
+     * and zombies ( an inbound peripheral leg whose central never sent SEND_ID, or whose remote
+     * already abandoned it)
+     */
+    private fun reapUnresolved() {
+        try {
+            val now = System.currentTimeMillis()
+            connections.values.toList().forEach { conn ->
+                if (conn.remoteQaulId == null && now - conn.createdAt > BleConstants.UNRESOLVED_TIMEOUT_MS) {
+                    Log.w(TAG, "Unresolved reaper: ${conn.device.address}/${conn.role} never resolved in ${BleConstants.UNRESOLVED_TIMEOUT_MS}ms — dropping")
+                    disconnect(conn.device)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Unresolved reaper failed", e)
+        }
+    }
+
+    private fun pingAll() {
+        try {
+            connections.values.toList().forEach { it.sendPing() }
+        } catch (e: Exception) { Log.e(TAG, "pingAll failed", e) }
+    }
+
     fun start() {
         BleTaskScheduler.registerListener(connectionEventListener)
         // Diagnostic topology snapshot every 10s — no behavioural effect, safe to remove later.
         snapshotTask = reaper.scheduleWithFixedDelay(
             { logTopologySnapshot() }, 10_000L, 10_000L, TimeUnit.MILLISECONDS
         )
-//        reaperTask = reaper.scheduleWithFixedDelay(
-//            {reap()},
-//            BleConstants.LIVENESS_CHECK_INTERVAL_MS,
-//            BleConstants.LIVENESS_CHECK_INTERVAL_MS,
-//            TimeUnit.MILLISECONDS
-//        ) TODO: Enable this once ble module is plugged into qaul and routing updates are actually circulating as they act as the live connection signal
+        // Unresolved-connection reaper: ENABLED. Drops stuck/zombie handshakes (remoteQaulId == null
+        // after UNRESOLVED_TIMEOUT_MS). Safe to run always — it never targets resolved connections.
+        unresolvedReaperTask = reaper.scheduleWithFixedDelay(
+            { reapUnresolved() },
+            BleConstants.LIVENESS_CHECK_INTERVAL_MS,
+            BleConstants.LIVENESS_CHECK_INTERVAL_MS,
+            TimeUnit.MILLISECONDS
+        )
+
+        livenessReaperTask = reaper.scheduleWithFixedDelay(
+            { reapLiveness() },
+            BleConstants.LIVENESS_CHECK_INTERVAL_MS,
+            BleConstants.LIVENESS_CHECK_INTERVAL_MS,
+            TimeUnit.MILLISECONDS
+        )
+
+        pingTask = reaper.scheduleWithFixedDelay(
+            { pingAll() },
+            BleConstants.PING_INTERVAL_MS,
+            BleConstants.PING_INTERVAL_MS,
+            TimeUnit.MILLISECONDS
+        )
     }
 
     fun stop() {
-        reaperTask?.cancel(false)
-        reaperTask = null
+        unresolvedReaperTask?.cancel(false)
+        unresolvedReaperTask = null
+        livenessReaperTask?.cancel(false)
+        livenessReaperTask = null
+        pingTask?.cancel(false)
+        pingTask = null
         snapshotTask?.cancel(false)
         snapshotTask = null
         BleTaskScheduler.unregisterListener(connectionEventListener)
@@ -112,7 +164,7 @@ object ConnectionPool {
         connections[device.address] = newConnection
         newConnection.connect()
         Log.i(TAG, "Connection added for ${device.address} (${connections.size} total)")
-        onConnectionsChanged?.invoke()
+        notifyConnectionsChanged()
     }
 
     fun disconnect(device: BluetoothDevice) {
@@ -131,9 +183,20 @@ object ConnectionPool {
         Log.i(TAG, "Connection removed for ${device.address} (${connections.size} remaining)")
         // Re-evaluate after removal: only reports DOWN if no other leg still holds this qaul ID.
         refreshNeighbourDown(conn.remoteQaulId)
-        onConnectionsChanged?.invoke()
+        notifyConnectionsChanged()
     }
 
+
+
+    /**
+     * Call after any connection add/remove. Toggles advertising on the connection cap. stop
+     * advertising once full so peers stop discovering us and stop trying to connect. the GattServer
+     * rejects them at the cap anyway
+     */
+    private fun notifyConnectionsChanged() {
+        if (getSize() >= BleConstants.MAX_CONNECTIONS) BleAdvertiser.pause() else BleAdvertiser.resume()
+        onConnectionsChanged?.invoke()
+    }
 
 
     // Lookups
@@ -185,7 +248,9 @@ object ConnectionPool {
     private fun handleQaulIdResolved(device: BluetoothDevice, qaulId: ByteArray) {
         markNeighbourUp(qaulId)
 
-        val existing = getByQaulId(qaulId)
+        val existing = connections.values.firstOrNull{
+            it.remoteQaulId?.contentEquals(qaulId) == true && it.device.address != device.address
+        }
         if (existing == null || existing.device.address == device.address) return
 
         // Timing A: PERIPHERAL resolves after CENTRAL already exists
@@ -268,7 +333,7 @@ object ConnectionPool {
                 Log.i(TAG, "Unexpected disconnect cleaned up for ${device.address}")
                 refreshNeighbourDown(conn?.remoteQaulId)
             }
-            onConnectionsChanged?.invoke()
+            notifyConnectionsChanged()
         }
 
         override fun onNotificationReceived(
@@ -283,6 +348,10 @@ object ConnectionPool {
 
         override fun onMtuChanged(device: BluetoothDevice, newMtu: Int) {
             connections[device.address]?.onMtuNegotiated(newMtu)
+        }
+
+        override fun onServicesDiscovered(device: BluetoothDevice) {
+            connections[device.address]?.onServicesDiscovered()
         }
 
         override fun onCharacteristicRead(
