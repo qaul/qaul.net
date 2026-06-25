@@ -1,6 +1,7 @@
 use std::{
     collections::HashMap,
     sync::{Arc, RwLock},
+    time::Instant,
 };
 
 use libp2p::PeerId;
@@ -9,17 +10,18 @@ use crate::{
     connections::ConnectionModule,
     router_v2::{
         codec::CodecError,
-        index::{IndexDictionary, MirrorIndexDictionary},
+        index::{IndexAllocator, IndexDictionary, MirrorIndexDictionary},
         table::{Nodes, RoutingTable, Users},
     },
+    storage::configuration::RoutingV2Options,
 };
 
 pub mod codec;
 pub mod identity;
 pub mod index;
-pub mod table;
-pub mod seq;
 pub mod metric;
+pub mod seq;
+pub mod table;
 
 #[derive(Debug, thiserror::Error)]
 pub enum RoutingV2Error {
@@ -65,6 +67,8 @@ pub struct NeighbourMirrors {
 /// Each `RouterState` instance is fully independent, enabling multiple
 /// nodes to run in the same process.
 pub struct RouterV2State {
+    /// the default options
+    pub options: RoutingV2Options,
     /// Index space for each user this particular node knows
     pub user_dict: RwLock<IndexDictionary>,
     /// Index space for each node this particular node knows
@@ -77,17 +81,23 @@ pub struct RouterV2State {
     pub users: Arc<RwLock<Users>>,
     /// the routing table for this node
     pub routing_table: Arc<RwLock<RoutingTable>>,
+    /// the index allocators
+    pub users_allocator: RwLock<IndexAllocator>,
+    pub node_allocator: RwLock<IndexAllocator>,
 }
 
 impl RouterV2State {
     pub fn new(host_node_id: [u8; 8]) -> Self {
         Self {
+            options: RoutingV2Options::default(),
             user_dict: RwLock::new(IndexDictionary::new(None)),
             node_dict: RwLock::new(IndexDictionary::new(Some(host_node_id))),
             mirrors: RwLock::new(HashMap::new()),
             routing_table: Arc::new(RwLock::new(RoutingTable::new())),
             users: Arc::new(RwLock::new(Users::new())),
             nodes: Arc::new(RwLock::new(Nodes::new())),
+            users_allocator: RwLock::new(IndexAllocator::new()),
+            node_allocator: RwLock::new(IndexAllocator::new()),
         }
     }
 
@@ -163,6 +173,56 @@ impl RouterV2State {
             None
         }
     }
+
+    /// gets expired indexes
+    pub fn sweep_expired(&self, now: u64) {
+        let expiry_ms = self.options.route_expiry_ms;
+        let mut rt = self.routing_table.write().unwrap();
+
+        {
+            let mut users_dict = self.user_dict.write().unwrap();
+            let mut allocator = self.users_allocator.write().unwrap();
+            let user_entries = &mut rt.user_entries;
+
+            for idx in 0..user_entries.len() {
+                // skip empty entries
+                let Some(e) = &user_entries[idx] else {
+                    continue;
+                };
+                let expired = {
+                    let entry = e.read().unwrap();
+                    entry.last_update.saturating_add(expiry_ms) < now
+                };
+                if expired {
+                    user_entries[idx] = None;
+                    users_dict.unbind(idx as u16);
+                    allocator.release(idx as u16, Instant::now());
+                }
+            }
+        }
+
+        {
+            let mut nodes_dict = self.node_dict.write().unwrap();
+            let mut allocator = self.node_allocator.write().unwrap();
+            let node_entries = &mut rt.node_entries;
+
+            for idx in 0..node_entries.len() {
+                // skip empty entries
+                let Some(e) = &node_entries[idx] else {
+                    continue;
+                };
+                let expired = {
+                    let entry = e.read().unwrap();
+                    entry.last_update.saturating_add(expiry_ms) < now
+                };
+                if expired {
+                    node_entries[idx] = None;
+                    nodes_dict.unbind(idx as u16);
+                    allocator.release(idx as u16, Instant::now());
+                }
+            }
+        }
+    }
 }
 
 #[cfg(test)]
@@ -206,7 +266,10 @@ mod tests {
 mod next_hop_tests {
     use super::*;
     use crate::router_v2::{
-        identity::Multikey, index::Space, seq::SeqNum, table::{Node, RoutingEntry, TargetRef, User}
+        identity::Multikey,
+        index::Space,
+        seq::SeqNum,
+        table::{Node, RoutingEntry, TargetRef, User},
     };
     use libp2p::identity::Keypair;
     use std::sync::Weak;
@@ -236,11 +299,7 @@ mod next_hop_tests {
 
     /// Inserts a node into `state.nodes` and returns the live Arc so the
     /// caller can downgrade it for gateway Weak refs.
-    fn register_node(
-        state: &RouterV2State,
-        id: [u8; 8],
-        is_gateway: bool,
-    ) -> Arc<RwLock<Node>> {
+    fn register_node(state: &RouterV2State, id: [u8; 8], is_gateway: bool) -> Arc<RwLock<Node>> {
         let node = Node {
             id,
             public_key: fresh_multikey(),
@@ -432,12 +491,7 @@ mod next_hop_tests {
 
         // Build an entry but never put it in the table; the strong dies
         // immediately and the weak is dangling from the start.
-        let orphan = make_entry(
-            TargetRef::User(user.clone()),
-            0,
-            100,
-            ConnectionModule::Lan,
-        );
+        let orphan = make_entry(TargetRef::User(user.clone()), 0, 100, ConnectionModule::Lan);
         let dangling: Weak<RwLock<RoutingEntry>> = Arc::downgrade(&orphan);
         drop(orphan);
 
@@ -547,8 +601,7 @@ mod next_hop_tests {
 
         {
             let mut u = user.write().unwrap();
-            u.delegation_gateways =
-                vec![Arc::downgrade(&unreachable), Arc::downgrade(&reachable)];
+            u.delegation_gateways = vec![Arc::downgrade(&unreachable), Arc::downgrade(&reachable)];
         }
 
         assert_eq!(
@@ -565,5 +618,264 @@ mod next_hop_tests {
         bind_node(&state, 77, [7; 8]);
         assert_eq!(state.next_hop_node_id(77), Some([7; 8]));
         assert_eq!(state.next_hop_node_id(78), None);
+    }
+}
+
+#[cfg(test)]
+mod sweep_tests {
+    use super::*;
+    use crate::router_v2::{
+        identity::Multikey, index::Space, seq::SeqNum, table::{Node, RoutingEntry, TargetRef, User}
+    };
+    use libp2p::identity::Keypair;
+    use std::sync::Weak;
+
+    fn fresh_multikey() -> Multikey {
+        Multikey::from(Keypair::generate_ed25519().public())
+    }
+
+    fn fresh_state() -> RouterV2State {
+        RouterV2State::new([0; 8])
+    }
+
+    fn install_user(state: &RouterV2State, id: [u8; 8]) -> Arc<RwLock<User>> {
+        let u = User {
+            id,
+            public_key: fresh_multikey(),
+            profile_version: 0,
+            routing_entry: None,
+            delegation_gateways: Vec::new(),
+        };
+        let mut users = state.users.write().unwrap();
+        users.insert(id, u);
+        users.get(&id).unwrap()
+    }
+
+    fn install_node(state: &RouterV2State, id: [u8; 8]) -> Arc<RwLock<Node>> {
+        let n = Node {
+            id,
+            public_key: fresh_multikey(),
+            manifest_version: 0,
+            is_gateway: false,
+            delegated_users: Vec::new(),
+        };
+        let mut nodes = state.nodes.write().unwrap();
+        nodes.insert(id, n);
+        nodes.get(&id).unwrap()
+    }
+
+    /// Installs a routing entry at `(space, idx)`, binds the dictionary,
+    /// and returns a Weak to the entry so tests can verify cycle
+    /// discipline after sweep. The strong Arc is moved into the table,
+    /// so the only strong reference lives in the routing table itself.
+    fn install_entry(
+        state: &RouterV2State,
+        space: Space,
+        idx: u16,
+        target_id: [u8; 8],
+        target: TargetRef,
+        last_update: u64,
+    ) -> Weak<RwLock<RoutingEntry>> {
+        let arc = Arc::new(RwLock::new(RoutingEntry {
+            target_index: idx,
+            target,
+            seq_num: SeqNum::from(0u16),
+            metric: 0,
+            next_hop: 0,
+            transport: ConnectionModule::Lan,
+            last_update,
+            hop_count: 0,
+            local_only: false,
+        }));
+        let weak = Arc::downgrade(&arc);
+        state.routing_table.write().unwrap().set(space, idx, arc);
+        match space {
+            Space::User => state.user_dict.write().unwrap().bind(idx, target_id),
+            Space::Node => state.node_dict.write().unwrap().bind(idx, target_id),
+        }
+        weak
+    }
+
+    /// Default-config expiry threshold (ms). Cached so tests don't fight
+    /// over a magic number.
+    fn expiry_ms(state: &RouterV2State) -> u64 {
+        state.options.route_expiry_ms
+    }
+
+
+    #[test]
+    fn entry_past_threshold_is_removed() {
+        let state = fresh_state();
+        let user = install_user(&state, [1; 8]);
+        let now: u64 = 100_000;
+        // last_update + expiry = (now - expiry - 1) + expiry = now - 1, < now → expired
+        let last_update = now - expiry_ms(&state) - 1;
+        install_entry(&state, Space::User, 5, [1; 8], TargetRef::User(user), last_update);
+
+        state.sweep_expired(now);
+
+        assert!(state.routing_table.read().unwrap().get(Space::User, 5).is_none());
+    }
+
+    #[test]
+    fn entry_within_threshold_is_kept() {
+        let state = fresh_state();
+        let user = install_user(&state, [1; 8]);
+        let now: u64 = 100_000;
+        // last_update + expiry = now + 1 → not < now, kept
+        let last_update = now - expiry_ms(&state) + 1;
+        install_entry(&state, Space::User, 5, [1; 8], TargetRef::User(user), last_update);
+
+        state.sweep_expired(now);
+
+        assert!(state.routing_table.read().unwrap().get(Space::User, 5).is_some());
+    }
+
+    /// At exactly `last_update + expiry == now`, the strict `<` comparison
+    /// keeps the entry. Pins the operator against an accidental `<=`.
+    #[test]
+    fn entry_at_exact_boundary_is_kept() {
+        let state = fresh_state();
+        let user = install_user(&state, [1; 8]);
+        let now: u64 = 100_000;
+        let last_update = now - expiry_ms(&state);
+        install_entry(&state, Space::User, 5, [1; 8], TargetRef::User(user), last_update);
+
+        state.sweep_expired(now);
+
+        assert!(
+            state.routing_table.read().unwrap().get(Space::User, 5).is_some(),
+            "entry exactly at the threshold must survive (strict `<`)",
+        );
+    }
+
+
+    #[test]
+    fn expired_entry_unbinds_the_dictionary() {
+        let state = fresh_state();
+        let user = install_user(&state, [1; 8]);
+        let now: u64 = 100_000;
+        let last_update = now - expiry_ms(&state) - 1;
+        install_entry(&state, Space::User, 5, [1; 8], TargetRef::User(user), last_update);
+
+        // Sanity: dict has the binding before sweep.
+        assert_eq!(state.user_dict.read().unwrap().id_of(5), Some([1; 8]));
+
+        state.sweep_expired(now);
+
+        assert_eq!(state.user_dict.read().unwrap().id_of(5), None);
+        assert_eq!(state.user_dict.read().unwrap().idx_of(&[1; 8]), None);
+    }
+
+    #[test]
+    fn expired_entry_pushes_idx_into_allocator_cooldown() {
+        let state = fresh_state();
+        let user = install_user(&state, [1; 8]);
+        let now: u64 = 100_000;
+        let last_update = now - expiry_ms(&state) - 1;
+        install_entry(&state, Space::User, 5, [1; 8], TargetRef::User(user), last_update);
+
+        // Sanity: idx not in cooldown before sweep.
+        assert!(!state.users_allocator.read().unwrap().idx_in_cooldown(5));
+
+        state.sweep_expired(now);
+
+        assert!(
+            state.users_allocator.read().unwrap().idx_in_cooldown(5),
+            "released idx must enter cooldown so the allocator doesn't rebind it immediately",
+        );
+    }
+
+    /// Cycle discipline (spec A.3): once the table drops its Arc, the
+    /// User's back-edge Weak must resolve to None. The sweeper relies on
+    /// this so it doesn't have to mutate the User itself.
+    #[test]
+    fn expired_entry_makes_user_weak_routing_entry_dangle() {
+        let state = fresh_state();
+        let user = install_user(&state, [1; 8]);
+        let now: u64 = 100_000;
+        let last_update = now - expiry_ms(&state) - 1;
+        let weak = install_entry(
+            &state,
+            Space::User,
+            5,
+            [1; 8],
+            TargetRef::User(user.clone()),
+            last_update,
+        );
+        user.write().unwrap().routing_entry = Some(weak.clone());
+
+        assert!(weak.upgrade().is_some(), "weak must upgrade before sweep");
+
+        state.sweep_expired(now);
+
+        assert!(
+            weak.upgrade().is_none(),
+            "weak must dangle after sweep drops the table's Arc",
+        );
+        // The User's Option is still Some — the sweeper doesn't reach in
+        // and clear it; we rely on the Weak naturally resolving to None.
+        assert!(user.read().unwrap().routing_entry.is_some());
+    }
+
+
+    #[test]
+    fn node_space_expiry_is_independent_from_user_space() {
+        let state = fresh_state();
+        let node = install_node(&state, [9; 8]);
+        let now: u64 = 100_000;
+        let last_update = now - expiry_ms(&state) - 1;
+        install_entry(&state, Space::Node, 7, [9; 8], TargetRef::Node(node), last_update);
+
+        // Also install a fresh user-space entry that must survive.
+        let user = install_user(&state, [1; 8]);
+        install_entry(&state, Space::User, 3, [1; 8], TargetRef::User(user), now);
+
+        state.sweep_expired(now);
+
+        assert!(state.routing_table.read().unwrap().get(Space::Node, 7).is_none());
+        assert!(state.routing_table.read().unwrap().get(Space::User, 3).is_some());
+        assert!(state.node_allocator.read().unwrap().idx_in_cooldown(7));
+        assert!(!state.users_allocator.read().unwrap().idx_in_cooldown(3));
+    }
+
+    #[test]
+    fn mixed_entries_only_expired_are_removed() {
+        let state = fresh_state();
+        let now: u64 = 100_000;
+
+        let old_user = install_user(&state, [1; 8]);
+        let fresh_user = install_user(&state, [2; 8]);
+
+        install_entry(
+            &state,
+            Space::User,
+            10,
+            [1; 8],
+            TargetRef::User(old_user),
+            now - expiry_ms(&state) - 1,
+        );
+        install_entry(
+            &state,
+            Space::User,
+            11,
+            [2; 8],
+            TargetRef::User(fresh_user),
+            now,
+        );
+
+        state.sweep_expired(now);
+
+        let rt = state.routing_table.read().unwrap();
+        assert!(rt.get(Space::User, 10).is_none(), "stale entry removed");
+        assert!(rt.get(Space::User, 11).is_some(), "fresh entry untouched");
+    }
+
+    #[test]
+    fn sweep_on_empty_state_is_a_noop() {
+        let state = fresh_state();
+        // Just verifying it doesn't panic walking 131k empty slots.
+        state.sweep_expired(0);
+        state.sweep_expired(u64::MAX);
     }
 }
