@@ -25,7 +25,7 @@ impl IndexAllocator {
         }
     }
 
-    fn idx_in_cooldown(&self, idx: u16) -> bool {
+    pub fn idx_in_cooldown(&self, idx: u16) -> bool {
         for &(i, _) in &self.cooldown {
             if i == idx {
                 return true;
