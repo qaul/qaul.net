@@ -19,6 +19,7 @@ pub mod identity;
 pub mod index;
 pub mod table;
 pub mod seq;
+pub mod metric;
 
 #[derive(Debug, thiserror::Error)]
 pub enum RoutingV2Error {
@@ -205,9 +206,7 @@ mod tests {
 mod next_hop_tests {
     use super::*;
     use crate::router_v2::{
-        identity::Multikey,
-        index::Space,
-        table::{Node, RoutingEntry, TargetRef, User},
+        identity::Multikey, index::Space, seq::SeqNum, table::{Node, RoutingEntry, TargetRef, User}
     };
     use libp2p::identity::Keypair;
     use std::sync::Weak;
@@ -263,7 +262,7 @@ mod next_hop_tests {
         Arc::new(RwLock::new(RoutingEntry {
             target_index: 0,
             target,
-            seq_num: 0,
+            seq_num: SeqNum::from(0u16),
             metric,
             next_hop,
             transport,
