@@ -33,6 +33,12 @@ The following commands are available:
   * `account login {username} -p` - login and prompt for password
   * `account logout` - logout from the current user session
   * `account status` - check current authentication status (logged in/out, session info)
+  * `account export` - export the default user account to a `.qaul_export` archive in the current directory
+    * `account export {User ID}` - export a specific user account
+    * `account export {User ID} {output path}` - export to a specific directory
+  * `account delete` - delete the default user account from this node
+    * `account delete {User ID}` - delete a specific user account
+  * `account restore {archive path}` - restore a user account from a `.qaul_export` archive
 * users - Functions for all users known by your node
   * `users list` - display all users known to this router
   * `users online` - display all online users known to this router

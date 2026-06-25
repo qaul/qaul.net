@@ -60,6 +60,17 @@ pub struct UserFiles {
     pub file_chunks: sled::Tree,
 }
 
+impl AllFiles {
+    /// Remove cached sled::Tree handles for a user account.
+    ///
+    /// This must be called before closing the user's sled database
+    /// so that all Arc references to the Db are released.
+    pub fn remove_account(state: &crate::QaulState, account_id: PeerId) {
+        let mut all_files = state.services.chat_files.inner.write().unwrap();
+        all_files.db_ref.remove(&account_id.to_bytes());
+    }
+}
+
 impl UserFiles {
     /// get file history
     pub fn get_filehistory(&self, file_id: u64) -> Option<FileHistory> {

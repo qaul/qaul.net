@@ -34,16 +34,16 @@ impl RpcCommand for AuthSubcmd {
     fn encode_request(&self) -> Result<(Vec<u8>, Modules), Box<dyn std::error::Error>> {
         match self {
             AuthSubcmd::Login { username, .. } => {
-                // The proto's AuthRequest carries a qaul_id (peer id bytes),
+                // The proto's AuthRequest carries a user_id (peer id bytes),
                 // not a username. Until we have a username->id lookup over
                 // the wire (UsersRequest), we treat the username argument as
                 // a base58-encoded peer id.
-                let qaul_id = bs58::decode(username)
+                let user_id = bs58::decode(username)
                     .into_vec()
                     .map_err(|e| format!("auth: username must be base58 peer id: {e}"))?;
                 let envelope = proto::AuthRpc {
                     message: Some(proto::auth_rpc::Message::AuthRequest(proto::AuthRequest {
-                        qaul_id,
+                        user_id,
                     })),
                 };
                 Ok((envelope.encode_to_vec(), Modules::Auth))

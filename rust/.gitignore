@@ -4,3 +4,4 @@ Cargo.lock
 **/*.rs.bk
 bak/
 sbom.spdx.json
+**/*.qaul_export

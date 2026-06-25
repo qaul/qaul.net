@@ -21,17 +21,18 @@ use qaul_proto::qaul_common::{Ack, RpcError};
 /// RPC Debugging Module
 pub struct Debug {}
 
-impl DebugService<crate::QaulState> for Debug {
-    fn heartbeat(_state: &crate::QaulState, _req: HeartbeatRequest) -> Result<HeartbeatResponse, RpcError> {
+impl DebugService<crate::RequestContext<'_>> for Debug {
+    fn heartbeat(_ctx: &crate::RequestContext<'_>, _req: HeartbeatRequest) -> Result<HeartbeatResponse, RpcError> {
         Ok(HeartbeatResponse {})
     }
 
-    fn trigger_panic(_state: &crate::QaulState, _req: Panic) -> Result<Ack, RpcError> {
+    fn trigger_panic(_ctx: &crate::RequestContext<'_>, _req: Panic) -> Result<Ack, RpcError> {
         log::error!("Libqaul will panic");
         panic!("Libqaul panics for debugging reasons");
     }
 
-    fn set_log_to_file(state: &crate::QaulState, req: LogToFile) -> Result<Ack, RpcError> {
+    fn set_log_to_file(ctx: &crate::RequestContext<'_>, req: LogToFile) -> Result<Ack, RpcError> {
+        let state = ctx.state;
         if req.enable {
             state.filelogger.enable(true);
             if !Configuration::get_debug_log(state) {
@@ -50,13 +51,13 @@ impl DebugService<crate::QaulState> for Debug {
         Ok(Ack {})
     }
 
-    fn storage_path(state: &crate::QaulState, _req: StoragePathRequest) -> Result<StoragePathResponse, RpcError> {
+    fn storage_path(ctx: &crate::RequestContext<'_>, _req: StoragePathRequest) -> Result<StoragePathResponse, RpcError> {
         Ok(StoragePathResponse {
-            storage_path: Storage::get_path(state),
+            storage_path: Storage::get_path(ctx.state),
         })
     }
 
-    fn delete_libqaul_logs(_state: &crate::QaulState, _req: DeleteLibqaulLogsRequest) -> Result<Ack, RpcError> {
+    fn delete_libqaul_logs(_ctx: &crate::RequestContext<'_>, _req: DeleteLibqaulLogsRequest) -> Result<Ack, RpcError> {
         // TODO: implement log deletion
         Err(RpcError {
             code: 2,
@@ -68,8 +69,13 @@ impl DebugService<crate::QaulState> for Debug {
 
 impl Debug {
     /// Process incoming RPC request messages for debug module
-    pub fn rpc(state: &crate::QaulState, data: Vec<u8>, _user_id: Vec<u8>, request_id: String) {
-        let response_bytes = proto::dispatch::<crate::QaulState, Debug>(state, data);
+    pub fn rpc(state: &crate::QaulState, data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
+        let ctx = crate::RequestContext {
+            state,
+            user_id,
+            request_id: request_id.clone(),
+        };
+        let response_bytes = proto::dispatch::<crate::RequestContext, Debug>(&ctx, data);
         Rpc::send_message(
             state,
             response_bytes,

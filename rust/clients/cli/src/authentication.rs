@@ -159,6 +159,14 @@ impl Auth {
                 Some(proto::auth_rpc::Message::AuthResult(result)) => {
                     Self::handle_auth_result(state, result);
                 }
+                Some(proto::auth_rpc::Message::Error(err)) => {
+                    // Uniform error channel from the generated service dispatch:
+                    // request-side failures (e.g. user-not-found while creating a
+                    // challenge) now arrive here instead of as an AuthResult.
+                    log::error!("Authentication error: {}", err.message);
+                    println!("Authentication error: {}", err.message);
+                    UserAccounts::clear_pending_auth(state);
+                }
                 _ => {
                     log::error!("Unexpected auth RPC message");
                 }
@@ -192,7 +200,7 @@ impl Auth {
                         UserAccounts::set_pending_user_id(state, user_info.user_id.clone());
                         // request authentication challenge from node
                         let auth_request = proto::AuthRequest {
-                            qaul_id: user_info.user_id.clone(),
+                            user_id: user_info.user_id.clone(),
                         };
 
                         let proto_message = proto::AuthRpc {
@@ -257,9 +265,14 @@ impl Auth {
 
                             match argon2.hash_password(combined.as_bytes(), &salt2) {
                                 Ok(hash2) => {
-                                    // Send challenge response to server
+                                    // Send challenge response to server.
+                                    // The generated service dispatch forwards only
+                                    // the decoded request (not the outer
+                                    // QaulRpc.user_id), so the response must carry
+                                    // the id it is authenticating for.
                                     let response = proto::AuthResponse {
                                         challenge_hash: hash2.to_string().into_bytes(),
+                                        user_id: pending.user_id.clone().unwrap_or_default(),
                                     };
 
                                     let proto_message = proto::AuthRpc {

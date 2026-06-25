@@ -99,9 +99,10 @@ fn build_service_code(service: &Service) -> String {
         env_mod, common_err
     ));
     buf.push_str("                code: 1,\n");
-    buf.push_str(
-        "                message: \"unexpected or unset Debug oneof variant\".into(),\n",
-    );
+    buf.push_str(&format!(
+        "                message: \"unexpected or unset {} oneof variant\".into(),\n",
+        env
+    ));
     buf.push_str("                details: String::new(),\n");
     buf.push_str("            }),\n");
     buf.push_str("        },\n"); // close inner match

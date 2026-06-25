@@ -596,6 +596,15 @@ impl CryptoStorage {
         }
     }
 
+    /// Remove cached sled::Tree handles for a user account.
+    ///
+    /// This must be called before closing the user's sled database
+    /// so that all Arc references to the Db are released.
+    pub fn remove_account(state: &crate::QaulState, account_id: PeerId) {
+        let mut crypto_storage = state.services.crypto.inner.write().unwrap();
+        crypto_storage.db_ref.remove(&account_id.to_bytes());
+    }
+
     /// create group account db entry when it does not exist
     fn create_groupaccountdb(state: &crate::QaulState, account_id: PeerId) -> CryptoAccount {
         // get user data base

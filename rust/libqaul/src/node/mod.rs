@@ -8,6 +8,7 @@
 //! local state.
 //! Provides state information of the local node to libqaul.
 
+pub mod account_management;
 pub mod user_accounts;
 
 use base64;

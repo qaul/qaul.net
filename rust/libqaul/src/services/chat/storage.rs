@@ -128,6 +128,15 @@ impl ChatStorage {
         }
     }
 
+    /// Remove cached sled::Tree handles for a user account.
+    ///
+    /// This must be called before closing the user's sled database
+    /// so that all Arc references to the Db are released.
+    pub fn remove_account(state: &crate::QaulState, account_id: PeerId) {
+        let mut chat = state.services.chat.inner.write().unwrap();
+        chat.db_ref.remove(&account_id.to_bytes());
+    }
+
     fn save_chat_message_record(
         db_ref: &ChatAccountDb,
         db_key: &[u8],
