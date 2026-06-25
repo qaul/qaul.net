@@ -11,7 +11,7 @@
 
 use crate::{
     connections::ConnectionModule,
-    router_v2::{identity::Multikey, index::Space},
+    router_v2::{identity::Multikey, index::Space, seq::SeqNum},
 };
 use std::{
     collections::HashMap,
@@ -60,7 +60,7 @@ pub struct RoutingEntry {
     /// strong reference to the User or Node this entry describes a route to
     pub target: TargetRef,
     /// origin's current sequence number
-    pub seq_num: u16,
+    pub seq_num: SeqNum,
     pub metric: u16,
     /// neighbour's node-space index in our dictionary which is the next forwarding hop to this curent target
     pub next_hop: u16,
@@ -203,7 +203,7 @@ mod tests {
         Arc::new(RwLock::new(RoutingEntry {
             target_index: 0,
             target,
-            seq_num: 0,
+            seq_num: SeqNum::from(0u16),
             metric: 0,
             next_hop: 0,
             transport: ConnectionModule::Lan,
