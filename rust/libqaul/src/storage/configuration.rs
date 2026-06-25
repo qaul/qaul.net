@@ -270,7 +270,7 @@ pub struct RoutingV2Options {
     /// interval at which a node batches updates to its neighbours
     pub relay_interval: u64,
     ///tTime without a fresh-seq update before a routing entry is removed and its index released
-    route_expiry_time: u64,
+    pub route_expiry_ms: u64,
     /// time after an index slot is released before the allocator rebinds it to a different target
     pub idx_cooldown: u64,
     /// circcular distance above which an incoming seq num is treated as a reboot instead of
@@ -292,7 +292,7 @@ impl Default for RoutingV2Options {
         RoutingV2Options {
             origin_interval_time: 60,
             relay_interval: 1,
-            route_expiry_time: 35,
+            route_expiry_ms: 35_000,
             idx_cooldown: 60,
             reboot_for_seq_num: 100,
             delegation_ttl: 21600,
