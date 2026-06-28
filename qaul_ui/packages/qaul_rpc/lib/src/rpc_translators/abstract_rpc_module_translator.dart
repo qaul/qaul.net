@@ -9,9 +9,11 @@ import 'package:meta/meta.dart';
 
 import '../generated/connections/ble/ble_rpc.pb.dart';
 import '../generated/connections/connections.pb.dart';
+import '../generated/node/account_management.pb.dart';
 import '../generated/node/node.pb.dart';
 import '../generated/node/user_accounts.pb.dart';
 import '../generated/router/users.pb.dart';
+import '../generated/rpc/authentication.pb.dart';
 import '../generated/rpc/debug.pb.dart';
 import '../generated/rpc/qaul_rpc.pb.dart';
 import '../generated/services/chat/chat.pb.dart';
@@ -23,6 +25,10 @@ import '../internal/file_history.dart';
 import '../models/models.dart';
 
 part 'ble_translator.dart';
+
+part 'account_management_translator.dart';
+
+part 'authentication_translator.dart';
 
 part 'chat_translator.dart';
 
@@ -66,6 +72,8 @@ abstract class RpcModuleTranslator {
 
   static final _translators = [
     BleTranslator(),
+    AccountManagementTranslator(),
+    AuthenticationTranslator(),
     ChatTranslator(),
     ConnectionTranslator(),
     DebugTranslator(),
@@ -90,7 +98,8 @@ abstract class RpcModuleTranslator {
   Modules get type;
 
   @mustCallSuper
-  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Ref ref) async {
+  Future<RpcTranslatorResponse?> decodeMessageBytes(
+      List<int> data, Ref ref) async {
     _log.severe(
       'Received libqaul message from module "$type" which could not be translated',
       UnhandledRpcMessageException(type.toString()),

@@ -25,13 +25,16 @@ class StubLibqaulWorker implements LibqaulWorker {
       room == null || room.messages == null ? [] : room.messages!,
     );
     msgs.add(message);
-    ref.read(currentOpenChatRoom.notifier).state =
-        buildGroupChat(messages: msgs);
+    ref.read(currentOpenChatRoom.notifier).state = buildGroupChat(
+      messages: msgs,
+    );
   }
 
   @override
-  Future<ChatConversationList?> getChatRoomMessages(Uint8List chatId,
-      {int lastIndex = 0}) async {
+  Future<ChatConversationList?> getChatRoomMessages(
+    Uint8List chatId, {
+    int lastIndex = 0,
+  }) async {
     _logger.info('requested messages fetch; ignoring...');
     return null;
   }
@@ -66,16 +69,13 @@ class StubLibqaulWorker implements LibqaulWorker {
     final start = requestedOffset.clamp(0, _mockTotalUsers);
     final end = (requestedOffset + requestedLimit).clamp(0, _mockTotalUsers);
     final count = end - start;
-    final mockUsers = List<User>.generate(
-      count,
-      (index) {
-        final globalIndex = start + index;
-        return User(
-          name: 'Mock User ${globalIndex + 1}',
-          id: Uint8List.fromList('mock_user_$globalIndex'.codeUnits),
-        );
-      },
-    );
+    final mockUsers = List<User>.generate(count, (index) {
+      final globalIndex = start + index;
+      return User(
+        name: 'Mock User ${globalIndex + 1}',
+        id: Uint8List.fromList('mock_user_$globalIndex'.codeUnits),
+      );
+    });
     final hasMore = end < _mockTotalUsers;
     final pagination = PaginationState(
       hasMore: hasMore,
@@ -103,22 +103,29 @@ class StubLibqaulWorker implements LibqaulWorker {
   Future<bool> createGroup(String name) => throw UnimplementedError();
 
   @override
-  Future<void> createUserAccount(String name) => throw UnimplementedError();
+  Future<User?> createUserAccount(String name, {String? password}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<bool> deleteAccount({Uint8List? userId}) => throw UnimplementedError();
 
   @override
   Future<void> deleteLogs() => throw UnimplementedError();
 
   @override
-  Future<DTNConfiguration?> getDTNConfiguration() =>
-      throw UnimplementedError();
+  Future<DTNConfiguration?> getDTNConfiguration() => throw UnimplementedError();
 
   @override
   Future<User?> getDefaultUserAccount() => throw UnimplementedError();
 
   @override
-  Future<List<FileHistoryEntity>> getFileHistory(
-          {int? page, int? itemsPerPage}) =>
-      throw UnimplementedError();
+  Future<List<LocalAccount>> getLocalAccounts() => throw UnimplementedError();
+
+  @override
+  Future<List<FileHistoryEntity>> getFileHistory({
+    int? page,
+    int? itemsPerPage,
+  }) => throw UnimplementedError();
 
   @override
   Future<ChatRoom?> getGroupInfo(Uint8List id) => throw UnimplementedError();
@@ -134,6 +141,10 @@ class StubLibqaulWorker implements LibqaulWorker {
   Future<NodeInfo?> getNodeInfo() => throw UnimplementedError();
 
   @override
+  Future<bool> getSessionStatus({Uint8List? userId}) =>
+      throw UnimplementedError();
+
+  @override
   Future<SecurityNumber?> getUserSecurityNumber(User u) =>
       throw UnimplementedError();
 
@@ -143,6 +154,13 @@ class StubLibqaulWorker implements LibqaulWorker {
   @override
   Future<bool> inviteUserToGroup(User user, ChatRoom room) =>
       throw UnimplementedError();
+
+  @override
+  Future<bool> loginLocalAccount(LocalAccount account, {String? password}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<bool> logout({Uint8List? userId}) => throw UnimplementedError();
 
   @override
   Future<bool> removeDTNUser(Uint8List userId) => throw UnimplementedError();
@@ -159,9 +177,10 @@ class StubLibqaulWorker implements LibqaulWorker {
       throw UnimplementedError();
 
   @override
-  Future<bool> replyToGroupInvite(Uint8List groupId,
-          {required bool accepted}) =>
-      throw UnimplementedError();
+  Future<bool> replyToGroupInvite(
+    Uint8List groupId, {
+    required bool accepted,
+  }) => throw UnimplementedError();
 
   @override
   Future<List<InternetNode>> requestNodes() => throw UnimplementedError();
@@ -171,24 +190,27 @@ class StubLibqaulWorker implements LibqaulWorker {
     int? lastIndex,
     int? offset,
     int? limit,
-  }) =>
-      throw UnimplementedError();
+  }) => throw UnimplementedError();
 
   @override
   Future<void> sendBleInfoRequest() => throw UnimplementedError();
 
   @override
-  Future<void> sendFile(
-          {required String pathName,
-          required Uint8List conversationId,
-          required String description}) =>
-      throw UnimplementedError();
+  Future<void> sendFile({
+    required String pathName,
+    required Uint8List conversationId,
+    required String description,
+  }) => throw UnimplementedError();
 
   @override
   Future<bool> sendPublicMessage(String content) => throw UnimplementedError();
 
   @override
   Future<void> setLibqaulLogging(bool enabled) => throw UnimplementedError();
+
+  @override
+  Future<bool> setAccountPassword(String? password) =>
+      throw UnimplementedError();
 
   @override
   Future<void> setNodeState(String address, {bool active = true}) =>
@@ -205,6 +227,14 @@ class StubLibqaulWorker implements LibqaulWorker {
 
   @override
   Future<void> renameNode(String address, {required String name}) async {}
+
+  @override
+  Future<String?> exportAccount({String? outputPath, Uint8List? userId}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<RestoreAccountResult?> restoreAccount(String archivePath) =>
+      throw UnimplementedError();
 }
 
 class NullChatNotificationController implements ChatNotificationController {
@@ -250,7 +280,7 @@ class NullChatNotificationController implements ChatNotificationController {
 
   @override
   MapEntry<dynamic, void Function(List<ChatRoom>? p1, List<ChatRoom> p2)>
-      get strategy => throw UnimplementedError();
+  get strategy => throw UnimplementedError();
 
   @override
   void updatePersistentCachedData() {}
