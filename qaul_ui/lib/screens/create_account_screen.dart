@@ -31,18 +31,9 @@ class CreateAccountScreen extends HookConsumerWidget {
     // TODO(brenodt): Decrease logs from config to finer/finest once tested
     _log.config('Starting create account request...');
 
-    for (var i = 0; i < 60; i++) {
-      if (i % 10 == 0) {
-        _log.config('Attempt ${i ~/ 10} - Send createUserAccount to libqaul');
-        await worker.createUserAccount(name);
-      }
-      await worker.getDefaultUserAccount();
-      await Future.delayed(const Duration(milliseconds: 1000));
-      final user = ref.read(defaultUserProvider);
-      _log.config('\tAttempt $i - Fetch defaultUserAccount yields "$user"');
-      if (user != null) return true;
-    }
-    return false;
+    final createdUser = await worker.createUserAccount(name);
+    _log.config('Create user account result: "$createdUser"');
+    return createdUser != null;
   });
 
   @override
@@ -51,56 +42,52 @@ class CreateAccountScreen extends HookConsumerWidget {
 
     final loading = useState(false);
 
-    ref.listen(
-      _sendRequestProvider,
-      (AsyncValue<bool?>? previous, AsyncValue<bool?> data) {
-        data.whenData(
-          (created) {
-            if (created == null) return;
-            loading.value = false;
-            if (created) {
-              Navigator.pushReplacementNamed(context, NavigationHelper.home);
-              return;
-            }
-            showDialog(
-              context: context,
-              builder: (c) {
-                return AlertDialog(
-                  title:
-                      Text(AppLocalizations.of(context)!.timeoutErrorMessage),
-                  content:
-                      Text(AppLocalizations.of(context)!.genericErrorMessage),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(AppLocalizations.of(context)!.okDialogButton),
-                    ),
-                  ],
-                );
-              },
+    ref.listen(_sendRequestProvider, (
+      AsyncValue<bool?>? previous,
+      AsyncValue<bool?> data,
+    ) {
+      data.whenData((created) {
+        if (created == null) return;
+        loading.value = false;
+        if (created) {
+          Navigator.pushReplacementNamed(context, NavigationHelper.home);
+          return;
+        }
+        showDialog(
+          context: context,
+          builder: (c) {
+            return AlertDialog(
+              title: Text(AppLocalizations.of(context)!.timeoutErrorMessage),
+              content: Text(AppLocalizations.of(context)!.genericErrorMessage),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(AppLocalizations.of(context)!.okDialogButton),
+                ),
+              ],
             );
           },
         );
-      },
-    );
+      });
+    });
 
     final i10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: SizedBox.expand(
-          child: LoadingDecorator(
-            isLoading: loading.value,
-            backgroundColor: Colors.black54,
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 40, vertical: 120),
-              child: Column(
-                children: [
-                  const SizedBox(width: double.maxFinite),
-                  QaulAvatar.large(),
-                  const SizedBox(height: 28),
-                  LayoutBuilder(builder: (context, constraints) {
+      resizeToAvoidBottomInset: false,
+      body: SizedBox.expand(
+        child: LoadingDecorator(
+          isLoading: loading.value,
+          backgroundColor: Colors.black54,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 120),
+            child: Column(
+              children: [
+                const SizedBox(width: double.maxFinite),
+                QaulAvatar.large(),
+                const SizedBox(height: 28),
+                LayoutBuilder(
+                  builder: (context, constraints) {
                     return SizedBox(
                       width: constraints.constrainWidth(400),
                       child: TextFormField(
@@ -115,18 +102,20 @@ class CreateAccountScreen extends HookConsumerWidget {
                         ),
                       ),
                     );
-                  }),
-                  const SizedBox(height: 28),
-                  QaulButton(
-                    key: submitButtonKey,
-                    label: i10n.start,
-                    onPressed: () => _submitUsername(ref, nameCtrl, loading),
-                  ),
-                ],
-              ),
+                  },
+                ),
+                const SizedBox(height: 28),
+                QaulButton(
+                  key: submitButtonKey,
+                  label: i10n.start,
+                  onPressed: () => _submitUsername(ref, nameCtrl, loading),
+                ),
+              ],
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   String? _validateUserName(BuildContext context, String? value) {

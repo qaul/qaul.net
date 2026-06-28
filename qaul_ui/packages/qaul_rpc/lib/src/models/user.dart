@@ -37,6 +37,7 @@ class User with EquatableMixin implements Comparable<User> {
     required this.id,
     this.conversationId,
     this.keyBase58,
+    this.hasPassword = false,
     this.availableTypes,
     this.isBlocked,
     this.isVerified,
@@ -47,6 +48,7 @@ class User with EquatableMixin implements Comparable<User> {
   final Uint8List id;
   final Uint8List? conversationId;
   final String? keyBase58;
+  final bool hasPassword;
   final Map<ConnectionType, ConnectionInfo>? availableTypes;
   final bool? isBlocked;
   final bool? isVerified;
@@ -81,6 +83,7 @@ class User with EquatableMixin implements Comparable<User> {
       id: id,
       conversationId: conversationId,
       keyBase58: keyBase58,
+      hasPassword: hasPassword,
       availableTypes: availableTypes,
       isBlocked: isBlocked,
       isVerified: isVerified,
