@@ -5,7 +5,8 @@ class UserAccountsTranslator extends RpcModuleTranslator {
   Modules get type => Modules.USERACCOUNTS;
 
   @override
-  Future<RpcTranslatorResponse?> decodeMessageBytes(List<int> data, Ref ref) async {
+  Future<RpcTranslatorResponse?> decodeMessageBytes(
+      List<int> data, Ref ref) async {
     final message = UserAccounts.fromBuffer(data);
     switch (message.whichMessage()) {
       case UserAccounts_Message.defaultUserAccount:
@@ -16,6 +17,10 @@ class UserAccountsTranslator extends RpcModuleTranslator {
       case UserAccounts_Message.myUserAccount:
         final acc = message.ensureMyUserAccount();
         return _buildResponseWithUser(acc);
+      case UserAccounts_Message.setPasswordResponse:
+        final response = message.ensureSetPasswordResponse();
+        if (!response.success) throw RpcRequestException(response.errorMessage);
+        return RpcTranslatorResponse(type, true);
       default:
         return super.decodeMessageBytes(data, ref);
     }
@@ -27,6 +32,7 @@ class UserAccountsTranslator extends RpcModuleTranslator {
       name: account.name,
       id: Uint8List.fromList(account.id),
       keyBase58: account.keyBase58,
+      hasPassword: account.hasPassword,
     );
 
     return RpcTranslatorResponse(type, user);
