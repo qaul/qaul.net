@@ -1,3 +1,6 @@
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 //! The routing table and everything regarding routing
 //! Cycle discipline for in-memory routing state (spec A.3):
 //!
