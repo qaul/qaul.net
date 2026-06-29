@@ -36,6 +36,16 @@ import net.qaul.ble.BLEUtils
 
 
 /**
+ * A flush's chunks split by priority. Flow-control chunks (SEND_ID, ACK, ping, chunk requests) are
+ * latency sensitive and go on the scheduler's priority queue, message payload data goes on the bulk
+ * queue so a large transfer can't starve the control traffic that keeps connections resolving/alive.
+ */
+data class ChunkBatch(
+    val flcChunks: List<ByteArray>,
+    val dataChunks: List<ByteArray>
+)
+
+/**
  * send queue state
  */
 enum class SendQueueState {
@@ -161,20 +171,25 @@ class SendQueue(qaulId: ByteArray) {
      * @return a queue of message chunks
      */
     @Synchronized
-    fun getChunks(): Triple<Queue<ByteArray>, Byte?, String> {
-        var chunks: Queue<ByteArray> = LinkedList()
+    fun getChunks(): ChunkBatch {
+        // Flow control chunks, small, latency sensitive control traffic. Routed through the priority
+        // queue so they aren't starved behind a large message transfer.
+        val flcChunks: MutableList<ByteArray> = LinkedList()
         // send qaul ID as first message
         if (!qaulIdSent) {
-            chunks.add(FlcCreate.createSendId(qaulId))
+            flcChunks.add(FlcCreate.createSendId(qaulId))
             qaulIdSent = true
         }
-        // add all FLC messages to the queue
-        chunks.addAll(flcToSend)
+        // add all FLC messages (ACKs, pings, ...)
+        flcChunks.addAll(flcToSend)
         flcToSend.clear()
-        // add all missing chunks to request to the queue
-        chunks.addAll(getMissingChunksRequestFlc())
-        // add all missing chunks we were asked to resend
-        chunks.addAll(getMissingChunksToSend())
+        // add all missing chunk requests (control)
+        flcChunks.addAll(getMissingChunksRequestFlc())
+
+        // Data chunks, actual message payload (new + resent). Routed through the bulk queue.
+        val dataChunks: MutableList<ByteArray> = LinkedList()
+        // chunks we were asked to resend (payload data)
+        dataChunks.addAll(getMissingChunksToSend())
 
         // create a new message chunk
         if (messagesToSend.isNotEmpty()) {
@@ -182,7 +197,7 @@ class SendQueue(qaulId: ByteArray) {
             val messageIndex = getNextMessageIndex()
             if (messageIndex == null) {
                 AppLog.e(TAG, "getChunks: No message index available. Cannot create message.")
-                return Triple(chunks, null, "")
+                return ChunkBatch(flcChunks, dataChunks)
             }
 
             // get the first message from the queue
@@ -196,16 +211,10 @@ class SendQueue(qaulId: ByteArray) {
             trackLargeMessages(largeMessageIndicator, SendLargeMessageState.SENDING)
 
             // add the message chunks to the queue
-            chunks.addAll(sendQueueMessage.getAllChunks())
-
-            // DEBUG
-            AppLog.e(TAG, "getChunks: Total chunks in queue: ${chunks.size}")
-
-
-            return Triple(chunks, messageIndex, messageId)
+            dataChunks.addAll(sendQueueMessage.getAllChunks())
         }
 
-        return Triple(chunks, null, "")
+        return ChunkBatch(flcChunks, dataChunks)
     }
 
     /**

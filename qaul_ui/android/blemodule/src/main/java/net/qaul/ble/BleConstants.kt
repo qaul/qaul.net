@@ -54,14 +54,33 @@ object BleConstants {
     /** Maximum number of simultaneous peer connections. Android BLE is unreliable above 3. */
     const val MAX_CONNECTIONS = 3
 
+    /** Connection admission control: max outbound CENTRAL connects we'll have in flight at once (connected but not yet
+     *  qaul id resolved). Auto connect is gated on this. Prevents the scanner from piling on
+     *  connects faster than the serial GATT queue can drain, which jams the queue with hung connectGatts,
+     *  reaps connections before their READ_CHAR runs etc, and can wedge the whole BLE stack. */
+    const val MAX_CONCURRENT_CONNECTING = 1
+
+    /** Wrong role connect defer. When we discover a peer we should be PERIPHERAL to (their
+     *  advertised qaul ID < ours), wait this long for them to connect to us before we connect outbound
+     *  ourselves. Stops our outbound connect from racing their inbound one and forming a dual link that
+     *  collapses with 133 or wastes time doing tiebreakers. After the window we connect anyway as a fallback. */
+     // TODO: More testing of this, does waiting waste opportunities to form connections quicker even if they are in the wrong direction
+    const val WRONG_ROLE_DEFER_MS = 4_000L
+
     /** Company ID for the manufacturer-data block carrying the truncated qaul ID in advertisements.
      *  0xFFFF is the SIG value reserved for testing / internal use. */
     const val QAUL_MANUFACTURER_ID = 0xFFFF
 
-    /** Number of leading qaul-ID bytes advertised — a non-authoritative pre-connection hint
-     *  (the full ID is always verified post-connection). 5 bytes fits the 31-byte legacy advert
-     *  budget and is collision-overkill for disambiguating local peers. */
+    /** Number of leading qaul-ID bytes advertised, a non-authoritative pre-connection hint
+     *  (the full ID is always verified post connection anyway, this helps with pre connect decision-making). 5 bytes fits the 31-byte legacy advert
+     *  budget and is collision overkill for disambiguating local peers. */
     const val QAUL_ID_ADVERT_BYTES = 5
+
+    /** use LE Coded PHY (long range, S=8) for advertising and the connection link.
+    * Only takes effect on hardware that supports Coded PHY + extended
+     *  advertising (see the BLE CAPS startup log). non-capable devices fall back to legacy/2M so they
+     *  still work at normal range. Currently, both ends of a link must support Coded for the long range link to form. */
+    const val USE_CODED_PHY = false
 
     /** Target MTU size to negotiate after connecting. Allows larger chunks than the 23-byte default. */
     const val TARGET_MTU = 517
@@ -87,8 +106,57 @@ object BleConstants {
 
     const val PING_INTERVAL_MS = 10_000L
 
+    /** Show the on-device floating BLE stats overlay (BleDebugOverlay) while BLE is running. For debugging purposes,
+     *  set false to disable. Needs the "Draw over other apps" permission, requested on first show. */
+    const val DEBUG_OVERLAY = true
+
+    /** Pause the scan during each connect attempt. DISABLED: confirmed in field logs to restart the
+     *  scan often enough (during connect/tiebreaker churn) to trip Android's ~5-startScan/30s limit,
+     *  which silently kills the scanner (scanResults freeze at 0 while peers keep advertising).
+     *  TODO: Review whether its still worth it aslong as we enforce a limit to stay under 5 starts per second
+     *  */
+    const val SCAN_PAUSE_DURING_CONNECT = false
+
+    // --------------------------------------------------------------------------------------------
+    // Startup staging
+    // The engine comes up in stages so we don't fire connects into a half-initialised local stack.
+    // More testing needed to see whether this matters, will really only occur in testing when we start multiple phones in range at the same time.
+    // Order: GATT server (immediate) then advertiser then scanner. The scanner goes last because it drives
+    // the active connects, by the time it starts, our GATT server is registered and we're advertising.
+    // --------------------------------------------------------------------------------------------
+
+    /** Delay after engine start before the advertiser comes up, so the GATT server has finished
+     *  registering its service and we're discoverable with a complete service. */
+    const val STARTUP_ADVERTISE_DELAY_MS = 750L
+
+    /** Delay after engine start before the scanner (and thus auto-connect) begins. Jittered within
+     *  [MIN,MAX]: the floor lets the local stack settle (fixes the single-device-restart storm); the
+     *  random spread keeps several devices cold-starting together from all connecting on the same tick. */
+    const val STARTUP_SCAN_DELAY_MIN_MS = 2_000L
+    const val STARTUP_SCAN_DELAY_MAX_MS = 3_500L
+
+    // --------------------------------------------------------------------------------------------
+    // Radio health watchdog
+    // Android can silently kill a long scan/advert with no onScanFailed callback (screen-off,
+    // stack hiccup) the isScanning/isAdvertising flags stay true while the radio is dark.
+    // The watchdog watches scan result silence (ground truth) and force restarts both systems.
+    // --------------------------------------------------------------------------------------------
+
+    /** How often the radio health watchdog checks for a dark scanner. */
+    const val RADIO_HEALTH_INTERVAL_MS = 15_000L
+
+    /** No scan result for this long, assume the scan died silently and force restart the radio.
+     *  Must stay well above the restart rate so the restarts themselves never trip the scan limit. */
+    const val SCAN_SILENCE_RESTART_MS = 20_000L
+
     // --------------------------------------------------------------------------------------------
     // Reconnect / backoff settings
+
+    /** Number of consecutive connect failures to a peer that retry immediately (no backoff) before
+     *  the exponential backoff kicks in. Transient 133s are normal in a dense mesh and usually
+     *  succeed on the next try, we only want to back off a peer that keeps failing, not silence a
+     *  node for seconds over one blip. */
+    const val RECONNECT_FREE_RETRIES = 2
 
     /** Minimum delay between reconnect attempts in milliseconds. */
     const val RECONNECT_DELAY_MIN_MS = 5_000L

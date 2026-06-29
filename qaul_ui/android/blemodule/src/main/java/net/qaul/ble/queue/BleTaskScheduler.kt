@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothGattServer
 import android.bluetooth.BluetoothProfile
+import android.bluetooth.BluetoothStatusCodes
 import android.content.Context
 import android.os.Build
 import android.util.Log
@@ -54,8 +55,8 @@ object BleTaskScheduler {
     @Volatile private var watchdogTask: ScheduledFuture<*>? = null
 
     private fun isBulkOperation(op: BleOperationType): Boolean = when (op) {
-        is CharacteristicWrite -> op.characteristicUuid == BleConstants.MSG_CHAR
-        is NotifyCharacteristicChange -> op.characteristicUuid == BleConstants.MSG_CHAR
+        is CharacteristicWrite -> op.characteristicUuid == BleConstants.MSG_CHAR && !op.priority
+        is NotifyCharacteristicChange -> op.characteristicUuid == BleConstants.MSG_CHAR && !op.priority
         else -> false
     }
 
@@ -105,8 +106,26 @@ object BleTaskScheduler {
     fun connect(device: BluetoothDevice) =
         scheduleOperation(Connect(device))
 
-    fun disconnect(device: BluetoothDevice) =
+    fun disconnect(device: BluetoothDevice) {
+        // Drop any writes/reads still queued for this device first, we're tearing it down, so running
+        // them against a dead link could potentially burn a 5s watchdog timeout each and block the single
+        // execution slot.
+        purgeOperationsForDevice(device)
         scheduleOperation(Disconnect(device))
+    }
+
+    /**
+     * Remove every queued operation for [device] from both queues. Called when a device is torn down
+     * or disconnects, so stale ops to a dead link don't each stall the queue. The watchdog covers the currently pending op.
+     */
+    @Synchronized
+    private fun purgeOperationsForDevice(device: BluetoothDevice) {
+        val before = bleOperationQueue.size + bulkOperationQueue.size
+        bleOperationQueue.removeIf { it.device == device }
+        bulkOperationQueue.removeIf { it.device == device }
+        val removed = before - (bleOperationQueue.size + bulkOperationQueue.size)
+        if (removed > 0) Log.i(TAG, "Purged $removed queued op(s) for ${device.address}")
+    }
 
     fun setGattServer(server: BluetoothGattServer) {
         gattServer = server
@@ -126,7 +145,8 @@ object BleTaskScheduler {
     fun writeCharacteristic(
         device: BluetoothDevice,
         uuid: UUID,
-        payload: ByteArray
+        payload: ByteArray,
+        priority: Boolean = false
     ) {
         val gatt = deviceGattMap[device] ?: run {
             Log.e(TAG, "Cannot write to $uuid: not connected")
@@ -144,7 +164,7 @@ object BleTaskScheduler {
                 return
             }
         }
-        scheduleOperation(CharacteristicWrite(device, characteristic.uuid, writeType, payload))
+        scheduleOperation(CharacteristicWrite(device, characteristic.uuid, writeType, payload, priority))
     }
 
     fun readDescriptor(device: BluetoothDevice, descriptor: BluetoothGattDescriptor) {
@@ -186,8 +206,14 @@ object BleTaskScheduler {
         }
     }
 
-    fun notifyCharacteristicChanged(device: BluetoothDevice, uuid: UUID, confirmation: Boolean, payload: ByteArray) {
-        scheduleOperation(NotifyCharacteristicChange(device, uuid, confirmation, payload))
+    fun notifyCharacteristicChanged(
+        device: BluetoothDevice,
+        uuid: UUID,
+        confirmation: Boolean,
+        payload: ByteArray,
+        priority: Boolean = false
+    ) {
+        scheduleOperation(NotifyCharacteristicChange(device, uuid, confirmation, payload, priority))
     }
 
     /**
@@ -485,18 +511,54 @@ object BleTaskScheduler {
                 }
                 val msgChar = gattServer?.getService(BleConstants.SERVICE_UUID)
                     ?.getCharacteristic(characteristicUuid)
-                if (msgChar != null) {
+                if (msgChar == null) {
+                    skipOperation()
+                    return
+                }
+                // Check the result. If the notify isn't accepted (dead binder / client vanished —
+                // Android may drop the server-side disconnect callback, leaving a stale subscription),
+                // advance NOW instead of waiting for an onNotificationSent that will never fire — which
+                // would block the single pendingOperation slot for the full watchdog timeout (5s) per
+                // chunk, stalling priority ops too. Also drop the stale subscription so the rest of this
+                // message's chunks skip fast.
+                var clientGone = false   // true only on a definitely dead signal, not transient congestion
+                val sent = try {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         @SuppressLint("MissingPermission")
-                        gattServer?.notifyCharacteristicChanged(device, msgChar, confirmation, payload)
+                        val status = gattServer?.notifyCharacteristicChanged(device, msgChar, confirmation, payload)
+                        // Keep the subscription only on transient congestion, any thing else
+                        // means the client is gone. (There's no
+                        // public ERROR_DEVICE_NOT_CONNECTED constant, so we invert: busy = keep, else drop.)
+                        if (status != BluetoothStatusCodes.SUCCESS && status != BluetoothStatusCodes.ERROR_GATT_WRITE_REQUEST_BUSY) {
+                            clientGone = true
+                        }
+                        status == BluetoothStatusCodes.SUCCESS
                     } else {
                         @Suppress("DEPRECATION")
                         msgChar.value = payload
                         @Suppress("DEPRECATION")
                         @SuppressLint("MissingPermission")
-                        gattServer?.notifyCharacteristicChanged(device, msgChar, confirmation)
+                        val ok = gattServer?.notifyCharacteristicChanged(device, msgChar, confirmation)
+                        ok == true
                     }
-                } else skipOperation()
+                } catch (e: Exception) {
+                    // An exception here (typically DeadObjectException) is a binder failure to the
+                    // Bluetooth system service, the whole BT stack process died/restarted, not
+                    // specifically this client. So skip this op but dont drop the subscription: that
+                    // could cut off a still-fine device on a one-off. stack-wide death is the radio watchdog /
+                    // BT state receiver's job to recover.
+                    Log.e(TAG, "notify to ${device.address} threw ${e.javaClass.simpleName} (likely BT stack issue) — skipping, keeping subscription")
+                    false
+                }
+                if (!sent) {
+                    // Skip immediately either way (don't stall the slot for the 5s watchdog). Only drop
+                    // the subscription when the client is actually gone, a transient busy/congestion
+                    // error must not unsubscribe a still connected device.
+                    Log.e(TAG, "notify to ${device.address} not delivered (clientGone=$clientGone) — skipping")
+                    if (clientGone) GattServer.markClientGone(device)
+                    skipOperation()
+                    return
+                }
             }
         }
     }
@@ -566,6 +628,8 @@ object BleTaskScheduler {
                 try { gatt.close() } catch (_: Exception) {}
                 Log.w(TAG, "Watchdog: closed leaked GATT for ${operation.device.address}")
             }
+            purgeOperationsForDevice(operation.device)   // drop the now orphaned setup ops for this device
+            BleScanner.noteConnectFailure(operation.device.address)   // backoff before retrying this MAC
             BleScanner.resumeAfterConnect()   // stuck connect timed out, let the scan back
             notifyListeners { onDisconnectedFromDevice(operation.device) }
         }
@@ -585,6 +649,7 @@ object BleTaskScheduler {
                     BluetoothProfile.STATE_CONNECTED -> {
                         Log.i(TAG, "Connected to $address")
                         deviceGattMap[gatt.device] = gatt
+                        BleScanner.noteConnectSuccess(address)   // clear any reconnect backoff
                         BleScanner.resumeAfterConnect()   // link established, scan can resume
                         signalOperationComplete<Connect>(gatt.device)
                         // Service discovery is the first step after connecting
@@ -593,6 +658,7 @@ object BleTaskScheduler {
                         Log.i(TAG, "Disconnected from $address")
                         deviceGattMap.remove(gatt.device)
                         gatt.close()
+                        purgeOperationsForDevice(gatt.device)   // drop stale ops for a peer that just dropped
                         signalOperationComplete<Disconnect>(gatt.device)
                         notifyListeners { onDisconnectedFromDevice(gatt.device) }
                     }
@@ -601,6 +667,8 @@ object BleTaskScheduler {
                 Log.e(TAG, "Connection error $status for $address")
                 deviceGattMap.remove(gatt.device)
                 gatt.close()
+                purgeOperationsForDevice(gatt.device)   // drop stale ops for the now dead link
+                BleScanner.noteConnectFailure(address)   // exponential backoff before retrying this MAC
                 BleScanner.resumeAfterConnect()   // connect failed, let the scan back (debounced)
                 if (pendingOperation is Connect || pendingOperation is Disconnect) {
                     skipOperation()

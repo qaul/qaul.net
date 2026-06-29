@@ -16,6 +16,9 @@ import net.qaul.ble.BleConstants
 import net.qaul.ble.test.ble.connection.BleRole
 import net.qaul.ble.test.ble.connection.ConnectionPool
 import net.qaul.ble.test.ble.manager.BleManager
+import net.qaul.ble.test.ble.util.toHexString
+import kotlin.math.pow
+import kotlin.random.Random
 
 /**
  *
@@ -60,10 +63,14 @@ object BleScanner {
     // MAC → timestamp until which auto-connect is suppressed (set after a tiebreaker drop).
     private val cooldownUntil = mutableMapOf<String, Long>()
 
+    // Advertised qaul ID prefix (hex). First time we saw a should be peripheral peer, that's been defered to let it connect. Cleared once a connection to that peer forms.
+    private val deferredSince = mutableMapOf<String, Long>()
+
     // Pause scanning during connecting state. The BLE radio is shared between scanning and connecting, so we pause the scan around
     // each connect attempt and resume it once the connect activity quiets.
     private var appContext: Context? = null
-    @Volatile private var pausedForConnect = false
+    @Volatile var pausedForConnect = false
+        private set
     private val mainHandler = Handler(Looper.getMainLooper())
     private val resumeRunnable = Runnable { doResume() }
 
@@ -91,11 +98,13 @@ object BleScanner {
             .build()
         scanner?.startScan(listOf(filter), scanSettings, scanCallback)
         isScanning = true
+        scanStartedAt = System.currentTimeMillis()
         Log.i(TAG, "Scanning started (autoConnect=$autoConnect)")
     }
 
     fun stop() {
         mainHandler.removeCallbacks(resumeRunnable)
+        mainHandler.removeCallbacks(scanRestartRunnable)
         pausedForConnect = false
         if (!isScanning) return
         scanner?.stopScan(scanCallback)
@@ -108,6 +117,7 @@ object BleScanner {
      * [resumeAfterConnect] (debounced).
      */
     fun pauseForConnect() {
+        if (!BleConstants.SCAN_PAUSE_DURING_CONNECT) return   // disabled: see constant; keeps scan continuous
         mainHandler.removeCallbacks(resumeRunnable)   // cancel any pending resume
         if (isScanning) {
             scanner?.stopScan(scanCallback)
@@ -146,15 +156,156 @@ object BleScanner {
         }
     }
 
+    // Consecutive connect failure count per MAC, used to grow the reconnect backoff. Reset on a
+    // successful GATT connect. This backoff exists to dampen the rapid same address retry churn (133s) within a few seconds.
+    private val failureCount = mutableMapOf<String, Int>()
+
+    /**
+     * Record a failed/abandoned connect to [macAddress] (status 133, watchdog timeout, etc.) and
+     * apply an exponential backoff before auto connect is allowed to that MAC again:
+     * delay = min(MAX, MIN · MULTIPLIER^(attempts-1)) ± JITTER. Without this, a 133 just drops the
+     * connection and the very next scan result re fires the connect, hammering a peer that keeps failing.
+     * The jitter keeps several peers that fail together from all retrying on the same tick.
+     */
+    fun noteConnectFailure(macAddress: String) {
+        synchronized(lock) {
+            val attempts = (failureCount[macAddress] ?: 0) + 1
+            failureCount[macAddress] = attempts
+            // First few failures retry immediately a single transient 133 shouldn't silence the
+            // node. Only escalate once a peer keeps failing past the free retry grace.
+            if (attempts <= BleConstants.RECONNECT_FREE_RETRIES) {
+                Log.i(TAG, "Connect to $macAddress failed (attempt $attempts) — retrying without backoff")
+                return
+            }
+            val n = attempts - BleConstants.RECONNECT_FREE_RETRIES
+            val base = (BleConstants.RECONNECT_DELAY_MIN_MS *
+                    BleConstants.RECONNECT_BACKOFF_MULTIPLIER.pow(n - 1))
+                .toLong()
+                .coerceAtMost(BleConstants.RECONNECT_DELAY_MAX_MS)
+            val jitter = (base * BleConstants.RECONNECT_JITTER_FACTOR).toLong()
+            val delay = base + Random.nextLong(-jitter, jitter + 1)   // full ± jitter
+            cooldownUntil[macAddress] = System.currentTimeMillis() + delay
+            Log.i(TAG, "Connect to $macAddress failed (attempt $attempts) — backing off ${delay}ms")
+        }
+    }
+
+    @Volatile private var lastScanRestartAt = 0L
+    @Volatile private var scanStartedAt = 0L
+    // Consecutive watchdog restarts with no scan result since , grows the restart threshold so a
+    // device legitimately out of range doesn't restart every interval. Reset to 0 on any scan result.
+    @Volatile private var silentRestartCount = 0
+
+    /**
+     * Called periodically by the radio watchdog. Restarts the scan if it's been silent
+     * past a threshold, but that threshold backs off with each consecutive silent restart
+     * (base, 2x, 4x, ... cap), so:
+     *   - a scanner that died while peers are present recovers fast
+     *   - a device that's simply out of range doesn't churn every interval, restarts cap to minutes
+     *   - the first scan result resets the backoff, restoring fast recovery.
+     * Returns true if it restarted so the caller can also refresh the advertiser.
+     */
+    fun maintainScan(baseThresholdMs: Long): Boolean {
+        if (pausedForConnect) return false
+        if (appContext == null) return false
+        // Most recent positive event: a real result, our last restart, or the scan first starting
+        val lastEvent = maxOf(lastScanResultAt, lastScanRestartAt, scanStartedAt)
+        if (lastEvent == 0L) return false                       // scanner hasn't started yet
+        val threshold = baseThresholdMs shl minOf(silentRestartCount, 4)
+        val silence = System.currentTimeMillis() - lastEvent
+        if (silence < threshold) return false
+        silentRestartCount++
+        Log.w(TAG, "Watchdog: scan silent ${silence}ms — restart #$silentRestartCount (threshold ${threshold}ms)")
+        forceRestart()
+        return true
+    }
+
+    /**
+     * Force a fresh scan (stop + start) to recover from a silent scan death.
+     */
+    fun forceRestart() {
+        val ctx = appContext ?: return
+        lastScanRestartAt = System.currentTimeMillis()
+        if (isScanning) {
+            try { scanner?.stopScan(scanCallback) } catch (_: Exception) {}
+            isScanning = false
+        }
+        start(ctx)
+        Log.w(TAG, "Scan force-restarted (radio watchdog)")
+    }
+
+    /** Clear the backoff for [macAddress] after a successful GATT connect. */
+    fun noteConnectSuccess(macAddress: String) {
+        synchronized(lock) {
+            if (failureCount.remove(macAddress) != null) {
+                cooldownUntil.remove(macAddress)
+                Log.i(TAG, "Connect to $macAddress succeeded — backoff cleared")
+            }
+        }
+    }
+
+    // Scan-receive instrumentation — ground truth for "is the scanner actually delivering results"
+    // (the isScanning flag is a start-time latch and can't see a silently-killed scan). onScanResult
+    // fires on a binder thread, drainScanStats() runs on the snapshot thread, so both are guarded.
+    private val scanStatsLock = Any()
+    private var windowResultCount = 0
+    private val windowDistinctPeers = mutableSetOf<String>()
+    @Volatile private var lastScanResultAt = 0L   // 0 = no scan result has ever arrived
+
+    /** Monotonic count of every scan result this session — for the debug overlay (non-draining, so it
+     *  doesn't fight the 10s log's drainScanStats). Watching it climb = the scanner is alive. */
+    @Volatile var totalScanResults = 0L
+        private set
+
+    /** Milliseconds since the last scan result, or -1 if none ever. for the overlay. */
+    fun millisSinceLastResult(): Long =
+        if (lastScanResultAt == 0L) -1L else System.currentTimeMillis() - lastScanResultAt
+
+    /**
+     * Returns (results, distinctPeers, msSinceLastResult) accumulated since the previous call, then
+     * resets the window. msSinceLastResult is -1 if no scan result has ever arrived. Drives the
+     * RADIO snapshot line so a dead scanner (results stuck at 0 while peers are advertising) is visible.
+     */
+    fun drainScanStats(): Triple<Int, Int, Long> {
+        synchronized(scanStatsLock) {
+            val count = windowResultCount
+            val distinct = windowDistinctPeers.size
+            val since = if (lastScanResultAt == 0L) -1L else System.currentTimeMillis() - lastScanResultAt
+            windowResultCount = 0
+            windowDistinctPeers.clear()
+            return Triple(count, distinct, since)
+        }
+    }
+
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
+            synchronized(scanStatsLock) {
+                windowResultCount++
+                totalScanResults++
+                windowDistinctPeers.add(result.device.address)
+                lastScanResultAt = System.currentTimeMillis()
+            }
+            silentRestartCount = 0   // results are flowing, restore fast watchdog recovery
             onPeerDiscovered?.invoke(result)            // always announce (manual mode)
             if (autoConnect) maybeAutoConnect(result)   // autonomous mode (opt-in)
         }
 
         override fun onScanFailed(errorCode: Int) {
             Log.e(TAG, "Scan failed: $errorCode")
+            if (errorCode == ScanCallback.SCAN_FAILED_ALREADY_STARTED) return
+            // Schedule a restart so a silently-killed scan recovers instead of staying dead forever. SCANNING_TOO_FREQUENTLY needs a long wait to clear
+            // Android's ~5-startScan/30s window, other errors can retry sooner.
+            isScanning = false
+            val retryDelay =
+                if (errorCode == ScanCallback.SCAN_FAILED_SCANNING_TOO_FREQUENTLY) 35_000L else 5_000L
+            mainHandler.removeCallbacks(scanRestartRunnable)
+            mainHandler.postDelayed(scanRestartRunnable, retryDelay)
+            Log.w(TAG, "Scan restart scheduled in ${retryDelay}ms (error $errorCode)")
         }
+    }
+
+    // Restarts the scan after a failure, using the cached app context.
+    private val scanRestartRunnable = Runnable {
+        if (!isScanning && !pausedForConnect) appContext?.let { start(it) }
     }
 
     private fun maybeAutoConnect(result: ScanResult) {
@@ -162,11 +313,16 @@ object BleScanner {
             val mac = result.device.address
             if (System.currentTimeMillis() < (cooldownUntil[mac] ?: 0L)) return   // recently dropped
             if (ConnectionPool.getSize() >= BleConstants.MAX_CONNECTIONS) return  // respect the cap
+            // Admission control: don't start another connect while one is still resolving. Keeps the
+            // serial GATT queue from jamming with concurrent connectGatts during a discovery burst.
+            if (ConnectionPool.connectingCount() >= BleConstants.MAX_CONCURRENT_CONNECTING) return
 
             val prefix = result.scanRecord?.getManufacturerSpecificData(BleConstants.QAUL_MANUFACTURER_ID)
             val existing = if (prefix != null) ConnectionPool.getByQaulIdPrefix(prefix) else null
 
             if (existing != null) {
+                // Connected now: reset this peer's wrong role defer timer.
+                prefix?.toHexString()?.let { deferredSince.remove(it) }
                 // We already know this peer by qaul ID (across RPA rotation). Decide by its role:
                 when (existing.role) {
                     // Already CENTRAL → keep it. (If we "should" be peripheral, the peer fixes it by
@@ -181,6 +337,18 @@ object BleScanner {
                 // Unknown peer by qaul ID (ID not resolved yet, or no advertised ID) — fall back to
                 // address-level dedup so we don't re-connect to a peer we're mid-handshake with.
                 if (BleManager.isConnected(mac)) return
+
+                // If their advertised ID is lower than ours we should be
+                // PERIPHERAL, so don't race their inbound connect with our own outbound one. Wait WRONG_ROLE_DEFER_MS for them to connect to
+                // us, connect outbound only as a fallback if they haven't (such as if they can't see us).
+                if (prefix != null && !ConnectionPool.localShouldBeCentral(prefix)) {
+                    val key = prefix.toHexString()
+                    val firstSeen = deferredSince.getOrPut(key) { System.currentTimeMillis() }
+                    if (System.currentTimeMillis() - firstSeen < BleConstants.WRONG_ROLE_DEFER_MS) {
+                        return   // give them the chance to connect to us first (correct role)
+                    }
+                    Log.i(TAG, "Defer window lapsed for $mac — connecting outbound (asymmetric fallback)")
+                }
             }
 
             Log.i(TAG, "Auto-connecting to $mac")
