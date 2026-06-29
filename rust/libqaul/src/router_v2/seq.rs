@@ -1,3 +1,8 @@
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! Sequence Numbers and relaeted functionality
+
 /// according to the spec in section 6:
 /// A node maintains a single sequence number that applies to all routing
 /// entries originated by that node.

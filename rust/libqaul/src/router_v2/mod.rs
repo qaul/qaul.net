@@ -1,3 +1,14 @@
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! The Qaul Routing Protocol is a distance-vector routing protocol for the
+//! qaul.net mesh. It carries reachability information for users and for
+//! nodes across heterogeneous transports including LAN, Internet, and
+//! Bluetooth Low Energy. The protocol scales from village-sized deployments
+//! of a few dozen nodes to networks on the order of one hundred thousand
+//! nodes connected across many regions. It tolerates partitioned operation
+//! and supports gateway-based delegation across network boundaries.
+
 use std::{
     collections::HashMap,
     sync::{Arc, RwLock},
@@ -10,7 +21,9 @@ use crate::{
     connections::ConnectionModule,
     router_v2::{
         codec::CodecError,
-        index::{IndexAllocator, IndexDictionary, MirrorIndexDictionary},
+        index::{
+            IndexAllocator, IndexDictionary, MirrorIndexDictionary, ReintroductionTracker, Space,
+        },
         table::{Nodes, RoutingTable, Users},
     },
     storage::configuration::RoutingV2Options,
@@ -27,6 +40,8 @@ pub mod table;
 pub enum RoutingV2Error {
     MultikeyErrror(#[from] libp2p::identity::DecodingError),
     CodecError(#[from] CodecError),
+    UnknownMapping(u16),
+    AllocatorExhausted,
 }
 
 impl std::fmt::Display for RoutingV2Error {
@@ -34,6 +49,12 @@ impl std::fmt::Display for RoutingV2Error {
         match self {
             RoutingV2Error::MultikeyErrror(e) => write!(f, "{e}"),
             RoutingV2Error::CodecError(e) => write!(f, "{e}"),
+            RoutingV2Error::UnknownMapping(idx) => {
+                write!(f, "could not find a reference for index: {idx}")
+            }
+            RoutingV2Error::AllocatorExhausted => {
+                write!(f, "internal allocator has been exhausted")
+            }
         }
     }
 }
@@ -84,6 +105,8 @@ pub struct RouterV2State {
     /// the index allocators
     pub users_allocator: RwLock<IndexAllocator>,
     pub node_allocator: RwLock<IndexAllocator>,
+    /// tracks the indices that needs to be resent over the wire
+    pub reintroduction_tracker: RwLock<ReintroductionTracker>,
 }
 
 impl RouterV2State {
@@ -98,6 +121,7 @@ impl RouterV2State {
             nodes: Arc::new(RwLock::new(Nodes::new())),
             users_allocator: RwLock::new(IndexAllocator::new()),
             node_allocator: RwLock::new(IndexAllocator::new()),
+            reintroduction_tracker: RwLock::new(ReintroductionTracker::new()),
         }
     }
 
@@ -222,6 +246,98 @@ impl RouterV2State {
                 }
             }
         }
+    }
+
+    pub fn translate_incoming(
+        &self,
+        neighbour: PeerId,
+        space: Space,
+        incoming_idx: u16,
+    ) -> Result<u16> {
+        let id = {
+            let mirrors = self.mirrors.read().unwrap();
+            let mirrors_for_neighbour = mirrors
+                .get(&neighbour)
+                .ok_or(RoutingV2Error::UnknownMapping(incoming_idx))?;
+            let mirror_dict = match space {
+                Space::Node => &mirrors_for_neighbour.nodes,
+                Space::User => &mirrors_for_neighbour.users,
+            };
+            mirror_dict
+                .id_of(incoming_idx)
+                .ok_or(RoutingV2Error::UnknownMapping(incoming_idx))?
+        };
+
+        let (dict, alloc) = match space {
+            Space::Node => (&self.node_dict, &self.node_allocator),
+            Space::User => (&self.user_dict, &self.users_allocator),
+        };
+
+        let mut self_dict = dict.write().unwrap();
+        if let Some(i) = self_dict.idx_of(&id) {
+            return Ok(i);
+        }
+
+        let mut allocator = alloc.write().unwrap();
+        let mut tracker = self.reintroduction_tracker.write().unwrap();
+
+        let Some(allocated_idx) = allocator.allocate() else {
+            return Err(RoutingV2Error::AllocatorExhausted);
+        };
+        self_dict.bind(allocated_idx, id);
+        tracker.mark_first_time(space, allocated_idx);
+
+        Ok(allocated_idx)
+    }
+
+    /// get the actual indeces that needs to be reintroduced
+    pub fn pending_introductions(&self, space: Space) -> Vec<(u16, [u8; 8], u32)> {
+        let pending = {
+            let mut tracker = self.reintroduction_tracker.write().unwrap();
+            tracker.take_pending(space)
+        };
+
+        let mut res: Vec<(u16, [u8; 8], u32)> = Vec::with_capacity(pending.len());
+
+        match space {
+            Space::Node => {
+                let dict = self.node_dict.read().unwrap();
+                let nodes = self.nodes.read().unwrap();
+                for idx in &pending {
+                    let Some(id) = dict.id_of(*idx) else {
+                        tracing::warn!("orphan mark in node space: idx {idx} has no dict binding");
+                        continue;
+                    };
+
+                    let Some(arc) = nodes.get(&id) else {
+                        tracing::warn!("orphan mark in node space: id {id:?} has no node record");
+                        continue;
+                    };
+                    let version = arc.read().unwrap().manifest_version;
+                    res.push((*idx, id, version));
+                }
+            }
+            Space::User => {
+                let dict = self.user_dict.read().unwrap();
+                let users = self.users.read().unwrap();
+                for idx in &pending {
+                    let Some(id) = dict.id_of(*idx) else {
+                        tracing::warn!("orphan mark in user space: idx {idx} has no dict binding");
+                        continue;
+                    };
+
+                    let Some(arc) = users.get(&id) else {
+                        tracing::warn!("orphan mark in user space: id {id:?} has no user record");
+                        continue;
+                    };
+                    let version = arc.read().unwrap().profile_version;
+                    res.push((*idx, id, version));
+                }
+            }
+        };
+
+        res.sort_by_key(|(idx, _, _)| *idx);
+        res
     }
 }
 
@@ -625,7 +741,10 @@ mod next_hop_tests {
 mod sweep_tests {
     use super::*;
     use crate::router_v2::{
-        identity::Multikey, index::Space, seq::SeqNum, table::{Node, RoutingEntry, TargetRef, User}
+        identity::Multikey,
+        index::Space,
+        seq::SeqNum,
+        table::{Node, RoutingEntry, TargetRef, User},
     };
     use libp2p::identity::Keypair;
     use std::sync::Weak;
@@ -702,7 +821,6 @@ mod sweep_tests {
         state.options.route_expiry_ms
     }
 
-
     #[test]
     fn entry_past_threshold_is_removed() {
         let state = fresh_state();
@@ -710,11 +828,23 @@ mod sweep_tests {
         let now: u64 = 100_000;
         // last_update + expiry = (now - expiry - 1) + expiry = now - 1, < now → expired
         let last_update = now - expiry_ms(&state) - 1;
-        install_entry(&state, Space::User, 5, [1; 8], TargetRef::User(user), last_update);
+        install_entry(
+            &state,
+            Space::User,
+            5,
+            [1; 8],
+            TargetRef::User(user),
+            last_update,
+        );
 
         state.sweep_expired(now);
 
-        assert!(state.routing_table.read().unwrap().get(Space::User, 5).is_none());
+        assert!(state
+            .routing_table
+            .read()
+            .unwrap()
+            .get(Space::User, 5)
+            .is_none());
     }
 
     #[test]
@@ -724,11 +854,23 @@ mod sweep_tests {
         let now: u64 = 100_000;
         // last_update + expiry = now + 1 → not < now, kept
         let last_update = now - expiry_ms(&state) + 1;
-        install_entry(&state, Space::User, 5, [1; 8], TargetRef::User(user), last_update);
+        install_entry(
+            &state,
+            Space::User,
+            5,
+            [1; 8],
+            TargetRef::User(user),
+            last_update,
+        );
 
         state.sweep_expired(now);
 
-        assert!(state.routing_table.read().unwrap().get(Space::User, 5).is_some());
+        assert!(state
+            .routing_table
+            .read()
+            .unwrap()
+            .get(Space::User, 5)
+            .is_some());
     }
 
     /// At exactly `last_update + expiry == now`, the strict `<` comparison
@@ -739,16 +881,27 @@ mod sweep_tests {
         let user = install_user(&state, [1; 8]);
         let now: u64 = 100_000;
         let last_update = now - expiry_ms(&state);
-        install_entry(&state, Space::User, 5, [1; 8], TargetRef::User(user), last_update);
+        install_entry(
+            &state,
+            Space::User,
+            5,
+            [1; 8],
+            TargetRef::User(user),
+            last_update,
+        );
 
         state.sweep_expired(now);
 
         assert!(
-            state.routing_table.read().unwrap().get(Space::User, 5).is_some(),
+            state
+                .routing_table
+                .read()
+                .unwrap()
+                .get(Space::User, 5)
+                .is_some(),
             "entry exactly at the threshold must survive (strict `<`)",
         );
     }
-
 
     #[test]
     fn expired_entry_unbinds_the_dictionary() {
@@ -756,7 +909,14 @@ mod sweep_tests {
         let user = install_user(&state, [1; 8]);
         let now: u64 = 100_000;
         let last_update = now - expiry_ms(&state) - 1;
-        install_entry(&state, Space::User, 5, [1; 8], TargetRef::User(user), last_update);
+        install_entry(
+            &state,
+            Space::User,
+            5,
+            [1; 8],
+            TargetRef::User(user),
+            last_update,
+        );
 
         // Sanity: dict has the binding before sweep.
         assert_eq!(state.user_dict.read().unwrap().id_of(5), Some([1; 8]));
@@ -773,7 +933,14 @@ mod sweep_tests {
         let user = install_user(&state, [1; 8]);
         let now: u64 = 100_000;
         let last_update = now - expiry_ms(&state) - 1;
-        install_entry(&state, Space::User, 5, [1; 8], TargetRef::User(user), last_update);
+        install_entry(
+            &state,
+            Space::User,
+            5,
+            [1; 8],
+            TargetRef::User(user),
+            last_update,
+        );
 
         // Sanity: idx not in cooldown before sweep.
         assert!(!state.users_allocator.read().unwrap().idx_in_cooldown(5));
@@ -818,14 +985,20 @@ mod sweep_tests {
         assert!(user.read().unwrap().routing_entry.is_some());
     }
 
-
     #[test]
     fn node_space_expiry_is_independent_from_user_space() {
         let state = fresh_state();
         let node = install_node(&state, [9; 8]);
         let now: u64 = 100_000;
         let last_update = now - expiry_ms(&state) - 1;
-        install_entry(&state, Space::Node, 7, [9; 8], TargetRef::Node(node), last_update);
+        install_entry(
+            &state,
+            Space::Node,
+            7,
+            [9; 8],
+            TargetRef::Node(node),
+            last_update,
+        );
 
         // Also install a fresh user-space entry that must survive.
         let user = install_user(&state, [1; 8]);
@@ -833,8 +1006,18 @@ mod sweep_tests {
 
         state.sweep_expired(now);
 
-        assert!(state.routing_table.read().unwrap().get(Space::Node, 7).is_none());
-        assert!(state.routing_table.read().unwrap().get(Space::User, 3).is_some());
+        assert!(state
+            .routing_table
+            .read()
+            .unwrap()
+            .get(Space::Node, 7)
+            .is_none());
+        assert!(state
+            .routing_table
+            .read()
+            .unwrap()
+            .get(Space::User, 3)
+            .is_some());
         assert!(state.node_allocator.read().unwrap().idx_in_cooldown(7));
         assert!(!state.users_allocator.read().unwrap().idx_in_cooldown(3));
     }

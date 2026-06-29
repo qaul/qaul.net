@@ -1,3 +1,7 @@
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! Index allocation per space per entry on each node/user.
 use bitvec::prelude::*;
 use std::{
     collections::{HashMap, HashSet, VecDeque},
