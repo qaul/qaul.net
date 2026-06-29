@@ -1,3 +1,7 @@
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! Utility functions for reading and writing bytes to and from the wire protocol
 use crate::router_v2::codec::CodecError;
 
 // packs the hop_count and local_only flag into one single byte. bit 6 is reserved for now
