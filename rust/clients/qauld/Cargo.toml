@@ -25,6 +25,10 @@ clap = { version = "4.5", features = ["derive"]}
 tokio-util = { version = "0.7.18", features = ["codec"] }
 uuid = { version = "1.13", features = ["v4"] }
 
+# `--daemonize` support (fork into the background). Unix-only.
+[target.'cfg(unix)'.dependencies]
+daemonize = "0.5"
+
 [package.metadata.deb]
 maintainer = "Open Community Projects Association <develop@ocpa.ch>"
 copyright = "2021 Open Community Projects Association <contact@ocpa.ch>, Christoph Wachter & Mathias Jud <contact@wachter-jud.net>"
