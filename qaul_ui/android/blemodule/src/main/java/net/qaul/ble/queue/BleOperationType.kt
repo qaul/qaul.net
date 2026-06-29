@@ -19,7 +19,10 @@ data class CharacteristicWrite(
     override val device: BluetoothDevice,
     val characteristicUuid: UUID,
     val writeType: Int,
-    val payload: ByteArray
+    val payload: ByteArray,
+    // true = route through the priority queue even though it's MSG_CHAR (flow-control notifies). Not
+    // part of identity (equals/hashCode), only a routing hint.
+    val priority: Boolean = false
 ) : BleOperationType() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -102,7 +105,10 @@ data class NotifyCharacteristicChange(
     override val device: BluetoothDevice,
     val characteristicUuid: UUID,
     val confirmation: Boolean,
-    val payload: ByteArray
+    val payload: ByteArray,
+    // true = route through the priority queue even though it's MSG_CHAR (flow-control notifies). Not
+    // part of identity (equals/hashCode), only a routing hint.
+    val priority: Boolean = false
 ) : BleOperationType() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -58,18 +58,23 @@ class BleConnection(
                 BleTaskScheduler.readCharacteristic(device, BleConstants.READ_CHAR) // Gets qaul id
                 BleTaskScheduler.readCharacteristic(device, BleConstants.PSM_CHAR)  // Gets L2CAP PSM
                 BleTaskScheduler.enableNotifications(device, BleConstants.MSG_CHAR)
-                BleTaskScheduler.setPreferredPhy(
-                    device,
-                    BluetoothDevice.PHY_LE_2M_MASK,
-                    BluetoothDevice.PHY_LE_2M_MASK,
-                    BluetoothDevice.PHY_OPTION_NO_PREFERRED
-                )
-//                BleTaskScheduler.setPreferredPhy(
-//                    device,
-//                    BluetoothDevice.PHY_LE_CODED_MASK,
-//                    BluetoothDevice.PHY_LE_CODED_MASK,
-//                    BluetoothDevice.PHY_OPTION_S8
-//                )
+                // If the peer doesn't support the requested PHY the controller negotiates down, so this
+                // is a request, not a guarantee, the onPhyUpdate callback logs what was actually agreed.
+                if (BleConstants.USE_CODED_PHY) {
+                    BleTaskScheduler.setPreferredPhy(
+                        device,
+                        BluetoothDevice.PHY_LE_CODED_MASK,
+                        BluetoothDevice.PHY_LE_CODED_MASK,
+                        BluetoothDevice.PHY_OPTION_S8
+                    )
+                } else {
+                    BleTaskScheduler.setPreferredPhy(
+                        device,
+                        BluetoothDevice.PHY_LE_2M_MASK,
+                        BluetoothDevice.PHY_LE_2M_MASK,
+                        BluetoothDevice.PHY_OPTION_NO_PREFERRED
+                    )
+                }
                 // Request a tighter connection interval for faster throughput
                 // no callback, runs after all setup steps are queued
                 BleTaskScheduler.requestConnectionPriority(device, BluetoothGatt.CONNECTION_PRIORITY_HIGH)
@@ -266,13 +271,25 @@ class BleConnection(
      * and enqueues them to BleTaskScheduler.
      */
     private fun flushSendQueue() {
-        val (chunks, _, _) = sendQueue.getChunks()
+        val batch = sendQueue.getChunks()
         when (role) {
-            BleRole.CENTRAL -> chunks.forEach {
-                BleTaskScheduler.writeCharacteristic(device, BleConstants.MSG_CHAR, it)
+            BleRole.CENTRAL -> {
+                // FLC (SEND_ID, ACK, ping, chunk requests) always priority queue. Message data
+                // bulk normally
+                batch.flcChunks.forEach {
+                    BleTaskScheduler.writeCharacteristic(device, BleConstants.MSG_CHAR, it, priority = true)
+                }
+                batch.dataChunks.forEach {
+                    BleTaskScheduler.writeCharacteristic(device, BleConstants.MSG_CHAR, it, priority = false)
+                }
             }
-            BleRole.PERIPHERAL -> chunks.forEach {
-                BleTaskScheduler.notifyCharacteristicChanged(device, BleConstants.MSG_CHAR, false, it)
+            BleRole.PERIPHERAL -> {
+                batch.flcChunks.forEach {
+                    BleTaskScheduler.notifyCharacteristicChanged(device, BleConstants.MSG_CHAR, false, it, priority = true)
+                }
+                batch.dataChunks.forEach {
+                    BleTaskScheduler.notifyCharacteristicChanged(device, BleConstants.MSG_CHAR, false, it, priority = false)
+                }
             }
         }
     }

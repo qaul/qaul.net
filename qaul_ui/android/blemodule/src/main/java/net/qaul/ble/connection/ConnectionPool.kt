@@ -6,6 +6,7 @@ import android.util.Log
 import net.qaul.ble.AppLog
 import net.qaul.ble.BleConstants
 import net.qaul.ble.test.ble.advertiser.BleAdvertiser
+import net.qaul.ble.test.ble.scanner.BleScanner
 import net.qaul.ble.test.ble.manager.ConnectionEventListener
 import net.qaul.ble.test.ble.queue.BleTaskScheduler
 import net.qaul.ble.test.ble.util.toHexString
@@ -47,6 +48,8 @@ object ConnectionPool {
 
     @Volatile private var pingTask: ScheduledFuture<*>? = null
 
+    @Volatile private var radioHealthTask: ScheduledFuture<*>? = null
+
     /**
      * Periodic one-line view of this node's connections, count
      */
@@ -59,9 +62,50 @@ object ConnectionPool {
             }
             Log.i(TAG, "my q8id: ${BleConstants.LOCAL_QAUL_ID.toHexString()}")
             Log.i(TAG, "TOPOLOGY neighbours=${conns.size} up=${upNeighbours.size}: $summary")
+            // Radio health — if the mesh goes dark this line shows whether the scanner/advertiser
+            // actually stopped (scanning=false / advertising=false) vs. just being lonely.
+            val (scanResults, distinctPeers, msSinceResult) = BleScanner.drainScanStats()
+            val lastResultStr = if (msSinceResult < 0) "never" else "${msSinceResult}ms ago"
+            Log.i(
+                TAG,
+                "RADIO scanning=${BleScanner.isScanning} (pausedForConnect=${BleScanner.pausedForConnect}) " +
+                        "advertising=${BleAdvertiser.isAdvertising} (pausedForCap=${BleAdvertiser.pausedForCap}) " +
+                        "| scanResults=$scanResults distinctPeers=$distinctPeers lastResult=$lastResultStr"
+            )
         } catch (e: Exception) {
             Log.e(TAG, "snapshot failed", e)
         }
+    }
+
+    /**
+     * Status for the on device debug overlay. Reads non draining scan values so it can refresh
+     * faster than the 10s log without stealing its window.
+     */
+    fun debugStatusText(): String {
+        val conns = connections.values.toList()
+        val sb = StringBuilder()
+        sb.append("q8id ${BleConstants.LOCAL_QAUL_ID.toHexString()}\n")
+        sb.append("neighbours=${conns.size}  up=${upNeighbours.size}\n")
+        if (conns.isEmpty()) {
+            sb.append("  (no neighbours)\n")
+        } else {
+            conns.forEach { c ->
+                val id = c.remoteQaulId?.toHexString() ?: "unresolved"
+                sb.append("  ${c.role.name.take(1)} ${c.device.address}  $id\n")
+            }
+        }
+        val since = BleScanner.millisSinceLastResult()
+        val sinceStr = if (since < 0) "never" else "${since / 1000}s ago"
+        sb.append("scan=${BleScanner.isScanning} adv=${BleAdvertiser.isAdvertising} capPaused=${BleAdvertiser.pausedForCap}\n")
+        sb.append("scanResults(total)=${BleScanner.totalScanResults}  lastResult=$sinceStr")
+        return sb.toString()
+    }
+
+    /** Short one-liner for the overlay's collapsed pill. */
+    fun debugSummary(): String {
+        val s = if (BleScanner.isScanning) "S" else "s"
+        val a = if (BleAdvertiser.isAdvertising) "A" else "a"
+        return "BLE ${connections.size}n $s$a"
     }
 
     private fun reapLiveness() {
@@ -105,6 +149,19 @@ object ConnectionPool {
         } catch (e: Exception) { Log.e(TAG, "pingAll failed", e) }
     }
 
+    /**
+     * Recovers from a silently killed scanner/advertiser (Android stops them with no callback, so the
+     * flags lie). [BleScanner.maintainScan] restarts the scan only after backed-off silence, so a
+     * device out of range doesn't churn, and we refresh the advertiser whenever the scan was refreshed.
+     */
+    private fun checkRadioHealth() {
+        try {
+            if (BleScanner.maintainScan(BleConstants.SCAN_SILENCE_RESTART_MS)) {
+                BleAdvertiser.forceRestart()
+            }
+        } catch (e: Exception) { Log.e(TAG, "radio health check failed", e) }
+    }
+
     fun start() {
         BleTaskScheduler.registerListener(connectionEventListener)
         // Diagnostic topology snapshot every 10s — no behavioural effect, safe to remove later.
@@ -133,6 +190,13 @@ object ConnectionPool {
             BleConstants.PING_INTERVAL_MS,
             TimeUnit.MILLISECONDS
         )
+
+        radioHealthTask = reaper.scheduleWithFixedDelay(
+            { checkRadioHealth() },
+            BleConstants.RADIO_HEALTH_INTERVAL_MS,
+            BleConstants.RADIO_HEALTH_INTERVAL_MS,
+            TimeUnit.MILLISECONDS
+        )
     }
 
     fun stop() {
@@ -142,6 +206,8 @@ object ConnectionPool {
         livenessReaperTask = null
         pingTask?.cancel(false)
         pingTask = null
+        radioHealthTask?.cancel(false)
+        radioHealthTask = null
         snapshotTask?.cancel(false)
         snapshotTask = null
         BleTaskScheduler.unregisterListener(connectionEventListener)
@@ -208,6 +274,12 @@ object ConnectionPool {
     fun allConnections(): List<BleConnection> = connections.values.toList()
 
     fun getSize(): Int = connections.size
+
+    /** Count of outbound (CENTRAL) connections still in-flight, connected but qaul id hasn't resolved.
+     *  The scanner gates new auto-connects on this so it can't pile connects onto the serial GATT queue
+     *  faster than they resolve. Inbound peripheral legs aren't counted as we don't initiate those. */
+    fun connectingCount(): Int =
+        connections.values.count { it.role == BleRole.CENTRAL && it.remoteQaulId == null }
 
     /**
      * The active connection whose remote qaul ID begins with [prefix] (the advertised truncated

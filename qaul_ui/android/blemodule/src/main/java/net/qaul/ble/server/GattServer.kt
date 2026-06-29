@@ -128,6 +128,18 @@ object GattServer {
 
     fun getSubscribedDevices(): Set<BluetoothDevice> = subscribedDevices.toSet()
 
+    /**
+     * Drop a client we've discovered is gone, e.g. a notify hit a dead binder (DeadObjectException).
+     * The normal path is onConnectionStateChange(DISCONNECTED), but Android sometimes drops that
+     * server side callback, leaving a stale subscription that keeps failing. Removing it here makes
+     * subsequent queued notifies to this device skip fast via the isSubscribed() check.
+     */
+    fun markClientGone(device: BluetoothDevice) {
+        if (subscribedDevices.remove(device)) {
+            Log.w(TAG, "Dropped stale subscription for ${device.address} (client gone)")
+        }
+    }
+
     // Service definition
 
     private fun buildService(): BluetoothGattService {
@@ -175,6 +187,16 @@ object GattServer {
     }
 
     // GATT server callbacks
+
+    /**
+     * Wraps [BluetoothGattServer.sendResponse] and logs a failed local send. A false return means
+     * the response never reached the stack, almost always the device already disconnected, or the
+     * GATT server stack is wedged. Note: a true return means accepted locally, not that the central received it.
+     */
+    private fun respond(device: BluetoothDevice, requestId: Int, status: Int, offset: Int, value: ByteArray?) {
+        val ok = gattServer?.sendResponse(device, requestId, status, offset, value) ?: false
+        if (!ok) Log.e(TAG, "sendResponse REJECTED for ${device.address} (requestId=$requestId) — device gone or stack wedged")
+    }
 
     private val gattServerCallback = object : BluetoothGattServerCallback() {
 
@@ -240,16 +262,16 @@ object GattServer {
             when (characteristic.uuid) {
                 BleConstants.READ_CHAR -> {
                     val response = BleConstants.LOCAL_QAUL_ID
-                    gattServer?.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, response)
+                    respond(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, response)
                     Log.i(TAG, "READ_CHAR read by ${device.address}")
                 }
                 BleConstants.PSM_CHAR -> {
                     // 4-byte big-endian PSM (or -1 if L2CAP is unavailable)
                     val psmBytes = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(l2capPsm).array()
-                    gattServer?.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, psmBytes)
+                    respond(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, psmBytes)
                     Log.i(TAG, "PSM_CHAR ($l2capPsm) read by ${device.address}")
                 }
-                else -> gattServer?.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null)
+                else -> respond(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null)
             }
         }
 
@@ -267,11 +289,11 @@ object GattServer {
                 //Log.i(TAG, "Chunk received from ${device.address}: ${value.size} bytes")
                 BleManager.routeIncomingChunk(device, value)
                 if (responseNeeded) {
-                    gattServer?.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null)
+                    respond(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null)
                 }
             } else {
                 if (responseNeeded) {
-                    gattServer?.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null)
+                    respond(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null)
                 }
             }
         }
@@ -294,11 +316,11 @@ object GattServer {
                     Log.i(TAG, "${device.address} disabled notifications")
                 }
                 if (responseNeeded) {
-                    gattServer?.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null)
+                    respond(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null)
                 }
             } else {
                 if (responseNeeded) {
-                    gattServer?.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null)
+                    respond(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null)
                 }
             }
         }

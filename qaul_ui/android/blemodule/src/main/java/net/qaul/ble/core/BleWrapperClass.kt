@@ -32,8 +32,10 @@ import net.qaul.ble.test.ble.manager.BleManager
 import net.qaul.ble.test.ble.server.GattServer
 import net.qaul.ble.test.ble.advertiser.BleAdvertiser
 import net.qaul.ble.test.ble.scanner.BleScanner
+import net.qaul.ble.test.ble.debug.BleDebugOverlay
 import net.qaul.ble.test.ble.util.toHexString
 import net.qaul.ble.BleConstants
+import kotlin.random.Random
 
 @SuppressLint("MissingPermission")
 open class BleWrapperClass(context: Activity) {
@@ -172,6 +174,7 @@ open class BleWrapperClass(context: Activity) {
         Log.i(TAG, "stopService()")
 
         // Tear down the engine in reverse of start order.
+        BleDebugOverlay.hide()
         BleScanner.stop()
         BleAdvertiser.stop()
         GattServer.stop()
@@ -186,6 +189,36 @@ open class BleWrapperClass(context: Activity) {
     }
 
     /**
+     * One-time dump of this device's BLE capabilities at engine start — for the test roster and to
+     * see at a glance which phones can do long-range (Coded PHY) / extended advertising. The PHY/
+     * extended-advert flags require API 26+; older devices report them as unavailable.
+     */
+    private fun logDeviceCapabilities(context: Context) {
+        try {
+            val adapter = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
+            if (adapter == null) {
+                AppLog.i(TAG, "BLE CAPS: no BluetoothAdapter")
+                return
+            }
+            val sb = StringBuilder("BLE CAPS  ${Build.MANUFACTURER} ${Build.MODEL} / Android ${Build.VERSION.RELEASE} (SDK ${Build.VERSION.SDK_INT}) | ")
+            sb.append("q8id=${qaulId?.toHexString()} ")
+            sb.append("multiAdv=${adapter.isMultipleAdvertisementSupported} ")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                sb.append("2M=${adapter.isLe2MPhySupported} ")
+                sb.append("coded=${adapter.isLeCodedPhySupported} ")        // long range
+                sb.append("extAdv=${adapter.isLeExtendedAdvertisingSupported} ")
+                sb.append("periodicAdv=${adapter.isLePeriodicAdvertisingSupported} ")
+                sb.append("maxAdvLen=${adapter.leMaximumAdvertisingDataLength}")
+            } else {
+                sb.append("(2M/coded/extAdv require API 26+)")
+            }
+            AppLog.i(TAG, sb.toString())
+        } catch (e: Exception) {
+            AppLog.e(TAG, "BLE CAPS log failed $e")
+        }
+    }
+
+    /**
      * This Method Will Start BLEService
      */
     private fun startService(context: Context) {
@@ -197,14 +230,32 @@ open class BleWrapperClass(context: Activity) {
         if(!bleStarted) {
             bleStarted = true
             BleConstants.LOCAL_QAUL_ID = id
+            logDeviceCapabilities(context)
             wireBleManagerCallbacks()
 
             val appContext = context.applicationContext
             BleManager.start(appContext)
-            GattServer.start(appContext)
-            BleAdvertiser.start(appContext)
+            GattServer.start(appContext)          // register our service first (immediate)
             BleScanner.autoConnect = true
-            BleScanner.start(appContext)
+
+            // Stage the radio so we don't fire connectGatt into a half-initialised stack (the
+            // 133 / stuck-task storm seen for a few seconds when a device restarts into a live mesh).
+            // Advertiser comes up shortly after the GATT server, the scanner, which drives the
+            // active connects, goes last and jittered so the local stack has settled first.
+            val handler = Handler(Looper.getMainLooper())
+            handler.postDelayed(
+                { BleAdvertiser.start(appContext) },
+                BleConstants.STARTUP_ADVERTISE_DELAY_MS
+            )
+            val scanDelay = Random.nextLong(
+                BleConstants.STARTUP_SCAN_DELAY_MIN_MS,
+                BleConstants.STARTUP_SCAN_DELAY_MAX_MS
+            )
+            handler.postDelayed({ BleScanner.start(appContext) }, scanDelay)
+            AppLog.i(TAG, "BLE engine staging: advertise in ${BleConstants.STARTUP_ADVERTISE_DELAY_MS}ms, scan in ${scanDelay}ms")
+
+            // On-device debug overlay (needs the Activity context to request the overlay permission).
+            if (BleConstants.DEBUG_OVERLAY) BleDebugOverlay.show(context)
 
             val bleRes = BleOuterClass.Ble.newBuilder()
             val startResult = BleOuterClass.BleStartResult.newBuilder()
