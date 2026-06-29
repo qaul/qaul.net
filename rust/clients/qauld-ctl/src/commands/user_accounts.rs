@@ -1,6 +1,10 @@
 use prost::Message;
 
-use crate::{cli::AccountSubcmd, commands::RpcCommand, proto::Modules};
+use crate::{
+    cli::{AccountSubcmd, AuthSubcmd},
+    commands::RpcCommand,
+    proto::Modules,
+};
 
 /// protobuf RPC definition
 use qaul_proto::qaul_rpc_user_accounts as proto;
@@ -126,13 +130,31 @@ impl RpcCommand for AccountSubcmd {
                 proto_message.encode(&mut buf)?;
                 Ok((buf, Modules::Useraccounts))
             }
-            _ => {
-                todo!()
+            // Session subcommands (login / logout / status) share the legacy
+            // auth challenge-response flow; delegate to the auth command so
+            // they behave identically — and, crucially, never panic. (This
+            // arm previously `todo!()`-ed and crashed the whole process,
+            // including `qauld-ctl shell`.)
+            AccountSubcmd::Login { username, password } => AuthSubcmd::Login {
+                username: username.clone(),
+                password: password.clone(),
             }
+            .encode_request(),
+            AccountSubcmd::Logout => AuthSubcmd::Logout.encode_request(),
+            AccountSubcmd::Status => AuthSubcmd::Status.encode_request(),
         }
     }
 
     fn decode_response(&self, data: &[u8], json: bool) -> Result<(), Box<dyn std::error::Error>> {
+        // `account login` rides the auth proto (challenge-response), not the
+        // user-accounts proto — decode it through the auth implementation.
+        if let AccountSubcmd::Login { username, password } = self {
+            return AuthSubcmd::Login {
+                username: username.clone(),
+                password: password.clone(),
+            }
+            .decode_response(data, json);
+        }
         let user_accounts = UserAccounts::decode(data)?;
         match user_accounts.message {
             Some(user_accounts::Message::DefaultUserAccount(default_useraccount)) => {
@@ -228,5 +250,31 @@ impl RpcCommand for AccountSubcmd {
             }
         };
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Regression: `account login/logout/status` used to hit a `todo!()` in
+    /// `encode_request`, panicking and crashing the whole process (including
+    /// `qauld-ctl shell`). They now delegate to the auth flow and never panic.
+    #[test]
+    fn session_subcommands_do_not_panic() {
+        // Logout/Status have no wire message; they return a graceful Err.
+        assert!(AccountSubcmd::Logout.encode_request().is_err());
+        assert!(AccountSubcmd::Status.encode_request().is_err());
+
+        // Login encodes an AuthRequest routed to the Auth module.
+        let res = AccountSubcmd::Login {
+            username: "abc".to_string(), // valid base58
+            password: "pw".to_string(),
+        }
+        .encode_request();
+        assert!(res.is_ok(), "login should encode without panicking");
+        if let Ok((_, module)) = res {
+            assert_eq!(module, Modules::Auth);
+        }
     }
 }
