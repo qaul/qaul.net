@@ -1,3 +1,7 @@
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! Identifying a user/node on the protocol. Inlcuding the user/node profile.
 use libp2p::identity::PublicKey;
 use sha2::{Digest, Sha256};
 
