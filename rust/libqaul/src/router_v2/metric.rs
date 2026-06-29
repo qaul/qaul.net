@@ -41,8 +41,6 @@ pub fn hop_cost(transport: ConnectionModule, rssi_dbm: Option<i8>) -> u16 {
 mod tests {
     use super::*;
 
-    // ---------- transport_weight ----------
-
     #[test]
     fn transport_weight_matches_spec_for_every_variant() {
         assert_eq!(transport_weight(ConnectionModule::Lan), 10);
@@ -60,7 +58,6 @@ mod tests {
         assert_eq!(transport_weight(ConnectionModule::None), u16::MAX);
     }
 
-    // ---------- rssi_penalty (non-BLE shortcuts) ----------
 
     /// RSSI is a BLE concept; on wired/internet transports the value
     /// must be ignored even when supplied.
@@ -119,8 +116,6 @@ mod tests {
         assert_eq!(rssi_penalty(t, Some(-85)), 10);
         assert_eq!(rssi_penalty(t, Some(-86)), 20);
     }
-
-    // ---------- hop_cost (composition) ----------
 
     #[test]
     fn hop_cost_lan_ignores_rssi() {

@@ -1,3 +1,8 @@
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! Wire protocol message types. 
+
 pub mod messages;
 pub mod utils;
 

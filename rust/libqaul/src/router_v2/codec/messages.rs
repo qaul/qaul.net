@@ -1,3 +1,9 @@
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! This file handles decoding and encoding the message types in the 
+//! protocol.
+
 use crate::router_v2::codec::{
     utils::{
         decode_indexes, encode_idx, fill_hop_bytes, read_array, read_u16_be, read_u32_be,
