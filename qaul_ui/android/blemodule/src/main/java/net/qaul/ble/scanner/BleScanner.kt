@@ -318,6 +318,11 @@ object BleScanner {
             if (ConnectionPool.connectingCount() >= BleConstants.MAX_CONCURRENT_CONNECTING) return
 
             val prefix = result.scanRecord?.getManufacturerSpecificData(BleConstants.QAUL_MANUFACTURER_ID)
+            // Test topology: with the allowlist on, only auto-connect to designated neighbours
+            if (BleConstants.TEST_NEIGHBOUR_ALLOWLIST.isNotEmpty() &&
+                (prefix == null || !BleConstants.isAllowedNeighbour(prefix))) {
+                return
+            }
             val existing = if (prefix != null) ConnectionPool.getByQaulIdPrefix(prefix) else null
 
             if (existing != null) {

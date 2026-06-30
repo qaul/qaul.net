@@ -351,6 +351,14 @@ object ConnectionPool {
      * exactly one UP per neighbour.
      */
     private fun markNeighbourUp(qaulId: ByteArray) {
+        // Test topology:
+        if (!BleConstants.isAllowedNeighbour(qaulId)) {
+            Log.w(TAG, "Allowlist: ${qaulId.toHexString()} not a permitted neighbour — dropping")
+            connections.values.toList()
+                .filter { it.remoteQaulId?.contentEquals(qaulId) == true }
+                .forEach { disconnect(it.device) }
+            return
+        }
         if (upNeighbours.add(qaulId.toHexString())) {
             Log.i(TAG, "Neighbour up: ${qaulId.toHexString()}")
             onNeighbourUp?.invoke(qaulId)
