@@ -148,6 +148,9 @@ impl VersionUpgrade {
                 // older configs, so seed with conservative defaults.
                 handshake_extras: crate::storage::configuration::HandshakeExtras::default(),
                 crypto_rotation: crate::storage::configuration::CryptoRotation::default(),
+                // upgrade path: group-file envelope config didn't exist
+                // before; seed with conservative defaults (disabled).
+                group_files: crate::storage::configuration::GroupFiles::default(),
             };
 
             // save new configuration to file
