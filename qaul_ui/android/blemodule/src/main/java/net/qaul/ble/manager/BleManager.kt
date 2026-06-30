@@ -36,6 +36,9 @@ object BleManager : ConnectionEventListener {
         ConnectionPool.onNeighbourUp = null
         ConnectionPool.onNeighbourDown = null
         ConnectionPool.stop()
+        // Safety net: force-close any GATT client handles that ConnectionPool's disconnects didn't
+        // (queued Disconnect ops may not have run). Prevents leaked client interfaces across stop/start.
+        BleTaskScheduler.closeAllGatts()
     }
 
     fun connect(device: BluetoothDevice, role: BleRole) =

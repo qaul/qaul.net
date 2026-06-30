@@ -54,6 +54,19 @@ object BleConstants {
     /** Maximum number of simultaneous peer connections. Android BLE is unreliable above 3. */
     const val MAX_CONNECTIONS = 3
 
+    /** TEST ONLY — force a fixed topology (e.g. a line for multi-hop testing) even when every device is
+     *  in RF range. If non-empty, this device only forms/keeps connections with peers whose qaul ID
+     *  begins with one of these hex prefixes (lowercase, no separators).. Empty = normal operation. */
+    val TEST_NEIGHBOUR_ALLOWLIST: Set<String> = emptySet()
+
+    /** True if [idBytes] (an advertised prefix or a full q8id) is a permitted neighbour under the test
+     *  allowlist. Always true when the allowlist is empty. Matches by hex prefix, so a few leading bytes is enough to identify a peer. */
+    fun isAllowedNeighbour(idBytes: ByteArray): Boolean {
+        if (TEST_NEIGHBOUR_ALLOWLIST.isEmpty()) return true
+        val hex = idBytes.joinToString("") { "%02x".format(it) }
+        return TEST_NEIGHBOUR_ALLOWLIST.any { hex.startsWith(it.lowercase()) }
+    }
+
     /** Connection admission control: max outbound CENTRAL connects we'll have in flight at once (connected but not yet
      *  qaul id resolved). Auto connect is gated on this. Prevents the scanner from piling on
      *  connects faster than the serial GATT queue can drain, which jams the queue with hung connectGatts,
@@ -65,7 +78,7 @@ object BleConstants {
      *  ourselves. Stops our outbound connect from racing their inbound one and forming a dual link that
      *  collapses with 133 or wastes time doing tiebreakers. After the window we connect anyway as a fallback. */
      // TODO: More testing of this, does waiting waste opportunities to form connections quicker even if they are in the wrong direction
-    const val WRONG_ROLE_DEFER_MS = 4_000L
+    const val WRONG_ROLE_DEFER_MS = 600_000L
 
     /** Company ID for the manufacturer-data block carrying the truncated qaul ID in advertisements.
      *  0xFFFF is the SIG value reserved for testing / internal use. */
@@ -88,8 +101,13 @@ object BleConstants {
     /** Default chunk size in bytes (Android default MTU 23 - 3 bytes GATT overhead = 20). */
     const val DEFAULT_CHUNK_SIZE = 20
 
-    /** Timeout in milliseconds for a GATT operation before it is considered failed. */
-    const val GATT_OPERATION_TIMEOUT_MS = 5_000L
+    /** Watchdog timeout for fast GATT ops (reads, writes, notifies, MTU, descriptor, PHY). These
+     *  complete in well under 300ms, so a hung one is caught quickly. Kept short because a hang holds the single scheduler slot, blocking all ops. */
+    const val FAST_OP_TIMEOUT_MS = 2_500L
+
+    /** Watchdog timeout for service discovery, the one legitimately-slow non-connect op (up to ~2s, usually ~1s
+     *  more on devices with many services / slow links), so it gets a more generous window. */
+    const val SERVICE_DISCOVERY_TIMEOUT_MS = 5_000L
 
     /** Timeout in milliseconds for initial connection before giving up. */
     const val CONNECTION_TIMEOUT_MS = 8_000L

@@ -53,9 +53,12 @@ class BleConnection(
         when (role) {
             BleRole.CENTRAL -> {
                 BleTaskScheduler.connect(device)
+                // Request a tighter connection interval for faster throughput
+                // no callback
+                BleTaskScheduler.requestConnectionPriority(device, BluetoothGatt.CONNECTION_PRIORITY_HIGH)
                 BleTaskScheduler.discoverServices(device)
-                BleTaskScheduler.requestMtu(device, BleConstants.TARGET_MTU)
                 BleTaskScheduler.readCharacteristic(device, BleConstants.READ_CHAR) // Gets qaul id
+                BleTaskScheduler.requestMtu(device, BleConstants.TARGET_MTU)
                 BleTaskScheduler.readCharacteristic(device, BleConstants.PSM_CHAR)  // Gets L2CAP PSM
                 BleTaskScheduler.enableNotifications(device, BleConstants.MSG_CHAR)
                 // If the peer doesn't support the requested PHY the controller negotiates down, so this
@@ -75,9 +78,6 @@ class BleConnection(
                         BluetoothDevice.PHY_OPTION_NO_PREFERRED
                     )
                 }
-                // Request a tighter connection interval for faster throughput
-                // no callback, runs after all setup steps are queued
-                BleTaskScheduler.requestConnectionPriority(device, BluetoothGatt.CONNECTION_PRIORITY_HIGH)
             }
             BleRole.PERIPHERAL -> {
                 // If peripheral then we are connected TO so nothing should happen here

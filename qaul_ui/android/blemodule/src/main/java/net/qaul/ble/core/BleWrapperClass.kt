@@ -8,8 +8,10 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
@@ -173,12 +175,8 @@ open class BleWrapperClass(context: Activity) {
     private fun stopService() {
         Log.i(TAG, "stopService()")
 
-        // Tear down the engine in reverse of start order.
-        BleDebugOverlay.hide()
-        BleScanner.stop()
-        BleAdvertiser.stop()
-        GattServer.stop()
-        BleManager.stop()
+        unregisterBtStateReceiver()
+        stopEngine()
         bleStarted = false
 
         val bleRes = BleOuterClass.Ble.newBuilder()
@@ -186,6 +184,91 @@ open class BleWrapperClass(context: Activity) {
         stopResult.success = true
         bleRes.stopResult = stopResult.build()
         sendResponse(bleRes)
+    }
+
+    /**
+     * Bring up the BLE engine: manager, GATT server, then the staged advertiser + scanner, plus the
+     * debug overlay. Shared by startService and the Bluetooth on  path. Staged so we don't
+     * fire connectGatt into a half initialised stack.
+     */
+    private fun startEngine(appContext: Context) {
+        BleManager.start(appContext)
+        GattServer.start(appContext)          // register our service first (immediate)
+        BleScanner.autoConnect = true
+
+        val handler = Handler(Looper.getMainLooper())
+        handler.postDelayed(
+            { BleAdvertiser.start(appContext) },
+            BleConstants.STARTUP_ADVERTISE_DELAY_MS
+        )
+        val scanDelay = Random.nextLong(
+            BleConstants.STARTUP_SCAN_DELAY_MIN_MS,
+            BleConstants.STARTUP_SCAN_DELAY_MAX_MS
+        ) //TODO: This is very likely unnecessary
+        handler.postDelayed({ BleScanner.start(appContext) }, scanDelay)
+        AppLog.i(TAG, "BLE engine staging: advertise in ${BleConstants.STARTUP_ADVERTISE_DELAY_MS}ms, scan in ${scanDelay}ms")
+
+        // On device debug overlay (needs the Activity context to request the overlay permission)
+        if (BleConstants.DEBUG_OVERLAY) BleDebugOverlay.show(context)
+    }
+
+    /** Tear down the BLE engine (reverse of [startEngine]). BleManager.stop force closes all GATT
+     *  client handles, so this also releases the resources that, if leaked, eventually can block the entire bluetooth stack.
+     **/
+    private fun stopEngine() {
+        runCatching { BleDebugOverlay.hide() }
+        runCatching { BleScanner.stop() }
+        runCatching { BleAdvertiser.stop() }
+        runCatching { GattServer.stop() }
+        runCatching { BleManager.stop() }
+    }
+
+    // Bluetooth on/off recovery
+    // The app holds GATT server, advertisers, scanners and GATT client handles. If the user toggles
+    // Bluetooth (or the OS resets the stack) and we don't release them, those handles become zombies
+    // that block the stack from coming back up. So we release everything when BT goes off and re-acquire when it comes back.
+
+    private var btReceiverRegistered = false
+
+    private val btStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(ctx: Context?, intent: Intent?) {
+            if (intent?.action != BluetoothAdapter.ACTION_STATE_CHANGED) return
+            when (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)) {
+                BluetoothAdapter.STATE_TURNING_OFF, BluetoothAdapter.STATE_OFF -> {
+                    AppLog.i(TAG, "Bluetooth going off - releasing BLE resources")
+                    stopEngine()
+                }
+                BluetoothAdapter.STATE_ON -> {
+                    if (bleStarted) {
+                        AppLog.i(TAG, "Bluetooth back on - re-acquiring BLE")
+                        // Small delay so the restarted stack is ready, stopEngine first
+                        // guards against starting the engine twice.
+                        mHandler?.postDelayed({
+                            stopEngine()
+                            startEngine(context.applicationContext)
+                        }, 1_000)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun registerBtStateReceiver(ctx: Context) {
+        if (btReceiverRegistered) return
+        val filter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ctx.applicationContext.registerReceiver(btStateReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            @Suppress("UnspecifiedRegisterReceiverFlag")
+            ctx.applicationContext.registerReceiver(btStateReceiver, filter)
+        }
+        btReceiverRegistered = true
+    }
+
+    private fun unregisterBtStateReceiver() {
+        if (!btReceiverRegistered) return
+        try { context.applicationContext.unregisterReceiver(btStateReceiver) } catch (_: Exception) {}
+        btReceiverRegistered = false
     }
 
     /**
@@ -232,30 +315,8 @@ open class BleWrapperClass(context: Activity) {
             BleConstants.LOCAL_QAUL_ID = id
             logDeviceCapabilities(context)
             wireBleManagerCallbacks()
-
-            val appContext = context.applicationContext
-            BleManager.start(appContext)
-            GattServer.start(appContext)          // register our service first (immediate)
-            BleScanner.autoConnect = true
-
-            // Stage the radio so we don't fire connectGatt into a half-initialised stack (the
-            // 133 / stuck-task storm seen for a few seconds when a device restarts into a live mesh).
-            // Advertiser comes up shortly after the GATT server, the scanner, which drives the
-            // active connects, goes last and jittered so the local stack has settled first.
-            val handler = Handler(Looper.getMainLooper())
-            handler.postDelayed(
-                { BleAdvertiser.start(appContext) },
-                BleConstants.STARTUP_ADVERTISE_DELAY_MS
-            )
-            val scanDelay = Random.nextLong(
-                BleConstants.STARTUP_SCAN_DELAY_MIN_MS,
-                BleConstants.STARTUP_SCAN_DELAY_MAX_MS
-            )
-            handler.postDelayed({ BleScanner.start(appContext) }, scanDelay)
-            AppLog.i(TAG, "BLE engine staging: advertise in ${BleConstants.STARTUP_ADVERTISE_DELAY_MS}ms, scan in ${scanDelay}ms")
-
-            // On-device debug overlay (needs the Activity context to request the overlay permission).
-            if (BleConstants.DEBUG_OVERLAY) BleDebugOverlay.show(context)
+            registerBtStateReceiver(context)      // auto recover the engine across Bluetooth toggles
+            startEngine(context.applicationContext)
 
             val bleRes = BleOuterClass.Ble.newBuilder()
             val startResult = BleOuterClass.BleStartResult.newBuilder()

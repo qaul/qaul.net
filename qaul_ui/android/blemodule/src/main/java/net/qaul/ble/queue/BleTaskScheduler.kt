@@ -127,6 +127,28 @@ object BleTaskScheduler {
         if (removed > 0) Log.i(TAG, "Purged $removed queued op(s) for ${device.address}")
     }
 
+    /**
+     * Force-close every GATT client handle and reset the scheduler. The safety net for teardown/BT-off:
+     * callbacks should close handles on disconnect, but if the engine stops (or BT toggles) while
+     * connections are live or Disconnect ops are still queued, those client interfaces would leak
+     * Call on engine stop.
+     */
+    @Synchronized
+    fun closeAllGatts() {
+        @SuppressLint("MissingPermission")
+        deviceGattMap.values.forEach { gatt ->
+            try { gatt.disconnect() } catch (_: Exception) {}
+            try { gatt.close() } catch (_: Exception) {}
+        }
+        val n = deviceGattMap.size
+        deviceGattMap.clear()
+        bleOperationQueue.clear()
+        bulkOperationQueue.clear()
+        pendingOperation = null
+        disarmWatchdog()
+        Log.i(TAG, "closeAllGatts: closed $n client handle(s) and reset scheduler")
+    }
+
     fun setGattServer(server: BluetoothGattServer) {
         gattServer = server
     }
@@ -296,8 +318,12 @@ object BleTaskScheduler {
                         // MUST be closed even if the connection never completes, otherwise it
                         // leaks, and after a few leaks all new connects fail with status 133.
                         // Storing it now means a stuck Connect or a Disconnect can always
-                        // find and close it.
-                        deviceGattMap[device] = gatt
+                        // find and close it.If a stale handle is already mapped for this
+                        // device, close it before overwriting so we can never orphan a client interface.
+                        @SuppressLint("MissingPermission")
+                        deviceGattMap.put(device, gatt)?.let { old ->
+                            if (old !== gatt) { try { old.close() } catch (_: Exception) {} }
+                        }
                     } else {
                         Log.e(TAG, "connectGatt returned null for ${device.address}")
                         BleScanner.resumeAfterConnect()   // connect never started, let the scan back
@@ -584,10 +610,14 @@ object BleTaskScheduler {
         if (hasPendingOps()) executeNext() else disarmWatchdog()
     }
 
-    /** Generous per-operation timeout — must not false-trigger on a slow-but-valid operation. */
+    /**
+     * Per operation type watchdog timeout, sized to each op's real completion time so a hung op (which
+     * holds the single scheduler slot and blocks all queued ops) is caught as fast as is safe.
+     */
     private fun timeoutFor(operation: BleOperationType): Long = when (operation) {
-        is Connect, is Disconnect -> BleConstants.CONNECTION_TIMEOUT_MS   // connects can legitimately be slow
-        else -> BleConstants.GATT_OPERATION_TIMEOUT_MS                    // reads/writes/MTU/etc. are fast
+        is Connect, is Disconnect -> BleConstants.CONNECTION_TIMEOUT_MS        // connects can legitimately be slow
+        is ServiceDiscovery       -> BleConstants.SERVICE_DISCOVERY_TIMEOUT_MS // the one slow non connect op 1+ seconds
+        else                      -> BleConstants.FAST_OP_TIMEOUT_MS           // reads/writes/notify/MTU/PHY/desc - fast
     }
 
     /**
