@@ -12,7 +12,11 @@ final accountSessionProvider = FutureProvider<QaulAccountSessionState>((
   ref,
 ) async {
   if (ref.read(forceSignedOutProvider)) {
-    ref.read(forceSignedOutProvider.notifier).state = false;
+    Future.microtask(() {
+      if (ref.mounted) {
+        ref.read(forceSignedOutProvider.notifier).state = false;
+      }
+    });
     return QaulAccountSessionState.signedOut;
   }
 
