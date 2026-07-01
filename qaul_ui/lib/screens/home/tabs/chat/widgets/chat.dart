@@ -14,6 +14,7 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart'
         EmojiEnlargementBehavior,
         InputOptions,
         SendButtonVisibilityMode,
+        SystemMessage,
         TextMessage;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -54,6 +55,8 @@ part 'group_settings.dart';
 part 'image_message_widget.dart';
 
 part 'chat_timeline_projection.dart';
+
+part 'group_timeline_expansion.dart';
 
 typedef OnSendPressed = void Function(String rawText);
 
@@ -313,248 +316,250 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         child: SafeArea(
           bottom: false,
           child: Chat(
-          showUserAvatars: false,
-          showUserNames: false,
-          user: user.toInternalUser(),
-          useTopSafeAreaInset: false,
-          dateHeaderThreshold: const Duration(days: 365).inMilliseconds,
-          groupMessagesThreshold: const Duration(days: 365).inMilliseconds,
-          messages: messages(
-                room,
-                l10n: l10n,
-                renderMode: _chatRenderMode,
-              ) ??
-              [],
-          onSendPressed: sendMessage,
-          inputOptions: const InputOptions(
-            sendButtonVisibilityMode: SendButtonVisibilityMode.always,
-          ),
-          avatarBuilder: (id) {
-            var user = room.members.firstWhereOrNull(
-              (u) => id.id == u.idBase58,
-            );
-            if (user == null) return const SizedBox();
-            return QaulAvatar.small(user: user, badgeEnabled: false);
-          },
-          emptyState: Center(child: Text(l10n.chatEmptyState)),
-          bubbleBuilder: _bubbleBuilder,
-          customBottomWidget: _CustomInput(
-            isDisabled: room.status != ChatRoomStatus.active,
-            disabledMessage: room.status != ChatRoomStatus.inviteAccepted
-                ? null
-                : 'Please wait for the admin to confirm your acceptance to send messages',
-            sendButtonVisibilityMode: SendButtonVisibilityMode.editing,
-            hintText: _chatRenderMode == ChatRenderMode.group
-                ? l10n.groupChatMessageHint
-                : l10n.securePrivateMessageHint,
+            showUserAvatars: false,
+            showUserNames: false,
+            user: user.toInternalUser(),
+            useTopSafeAreaInset: false,
+            dateHeaderThreshold: const Duration(days: 365).inMilliseconds,
+            groupMessagesThreshold: const Duration(days: 365).inMilliseconds,
+            messages:
+                messages(room, l10n: l10n, renderMode: _chatRenderMode) ?? [],
             onSendPressed: sendMessage,
-            onAttachmentPressed: (room.messages?.isEmpty ?? true)
-                ? null
-                : ({types.PartialText? text}) async {
-                    FilePickerResult? result;
-                    try {
-                      result = await FilePicker.platform.pickFiles();
-                    } catch (e) {
-                      debugPrint(e.toString());
-                    }
+            inputOptions: const InputOptions(
+              sendButtonVisibilityMode: SendButtonVisibilityMode.always,
+            ),
+            avatarBuilder: (id) {
+              var user = room.members.firstWhereOrNull(
+                (u) => id.id == u.idBase58,
+              );
+              if (user == null) return const SizedBox();
+              return QaulAvatar.small(user: user, badgeEnabled: false);
+            },
+            emptyState: Center(child: Text(l10n.chatEmptyState)),
+            bubbleBuilder: _bubbleBuilder,
+            customMessageBuilder: (message, {required messageWidth}) =>
+                _buildCustomMessage(message, l10n: l10n),
+            systemMessageBuilder: (message) =>
+                _buildSystemMessage(message, l10n: l10n),
+            customBottomWidget: _CustomInput(
+              isDisabled: room.status != ChatRoomStatus.active,
+              disabledMessage: room.status != ChatRoomStatus.inviteAccepted
+                  ? null
+                  : 'Please wait for the admin to confirm your acceptance to send messages',
+              sendButtonVisibilityMode: SendButtonVisibilityMode.editing,
+              hintText: _chatRenderMode == ChatRenderMode.group
+                  ? l10n.groupChatMessageHint
+                  : l10n.securePrivateMessageHint,
+              onSendPressed: sendMessage,
+              onAttachmentPressed: (room.messages?.isEmpty ?? true)
+                  ? null
+                  : ({types.PartialText? text}) async {
+                      FilePickerResult? result;
+                      try {
+                        result = await FilePicker.platform.pickFiles();
+                      } catch (e) {
+                        debugPrint(e.toString());
+                      }
 
-                    if (result != null && result.files.single.path != null) {
-                      File file = File(result.files.single.path!);
+                      if (result != null && result.files.single.path != null) {
+                        File file = File(result.files.single.path!);
 
-                      if (!context.mounted) return;
-                      showModalBottomSheet(
-                        context: context,
-                        useSafeArea: true,
-                        isScrollControlled: true,
-                        builder: (context) {
-                          final dialog = _SendFileDialog(
-                            file,
-                            room: room,
-                            partialMessage: text?.text,
-                            onSendPressed: (description) {
-                              final worker = ref.read(qaulWorkerProvider);
-                              worker.sendFile(
-                                pathName: file.path,
-                                conversationId: room.conversationId,
-                                description: description.text,
-                              );
-                            },
-                          );
-                          if (!Platform.isIOS) {
-                            return dialog;
-                          }
+                        if (!context.mounted) return;
+                        showModalBottomSheet(
+                          context: context,
+                          useSafeArea: true,
+                          isScrollControlled: true,
+                          builder: (context) {
+                            final dialog = _SendFileDialog(
+                              file,
+                              room: room,
+                              partialMessage: text?.text,
+                              onSendPressed: (description) {
+                                final worker = ref.read(qaulWorkerProvider);
+                                worker.sendFile(
+                                  pathName: file.path,
+                                  conversationId: room.conversationId,
+                                  description: description.text,
+                                );
+                              },
+                            );
+                            if (!Platform.isIOS) {
+                              return dialog;
+                            }
 
-                          final bottomPadding = MediaQuery.of(
-                            context,
-                          ).viewInsets.bottom;
-                          return SingleChildScrollView(
-                            child: Container(
-                              padding: EdgeInsets.only(bottom: bottomPadding),
-                              child: dialog,
-                            ),
-                          );
-                        },
-                      );
-                    }
-                  },
-            onPickImagePressed: !(Platform.isAndroid || Platform.isIOS)
-                ? null
-                : (room.messages?.isEmpty ?? true)
-                ? null
-                : ({types.PartialText? text}) async {
-                    final result = await ImagePicker().pickImage(
-                      source: ImageSource.camera,
-                    );
-
-                    if (result != null) {
-                      File file = File(result.path);
-
-                      if (!context.mounted) return;
-                      showModalBottomSheet(
-                        context: context,
-                        useSafeArea: true,
-                        isScrollControlled: true,
-                        builder: (context) {
-                          final dialog = _SendFileDialog(
-                            file,
-                            room: room,
-                            partialMessage: text?.text,
-                            onSendPressed: (description) {
-                              final worker = ref.read(qaulWorkerProvider);
-                              worker.sendFile(
-                                pathName: file.path,
-                                conversationId: room.conversationId,
-                                description: description.text,
-                              );
-                            },
-                          );
-                          if (!Platform.isIOS) {
-                            return dialog;
-                          }
-
-                          final bottomPadding = MediaQuery.of(
-                            context,
-                          ).viewInsets.bottom;
-                          return SingleChildScrollView(
-                            child: Container(
-                              padding: EdgeInsets.only(bottom: bottomPadding),
-                              child: dialog,
-                            ),
-                          );
-                        },
-                      );
-                    }
-                  },
-            // the record package is not supported on Linux
-            onSendAudioPressed: Platform.isLinux
-                ? null
-                : (room.messages?.isEmpty ?? true)
-                ? null
-                : ({types.PartialText? text}) async {
-                    // ignore: use_build_context_synchronously
-                    if (!context.mounted) return;
-                    showModalBottomSheet(
-                      context: context,
-                      enableDrag: false,
-                      isDismissible: false,
-                      builder: (_) {
-                        return _RecordAudioDialog(
-                          room: room,
-                          partialMessage: text?.text,
-                          onSendPressed: (file, description) {
-                            final worker = ref.read(qaulWorkerProvider);
-                            worker.sendFile(
-                              pathName: file.path,
-                              conversationId: room.conversationId,
-                              description: description.text,
+                            final bottomPadding = MediaQuery.of(
+                              context,
+                            ).viewInsets.bottom;
+                            return SingleChildScrollView(
+                              child: Container(
+                                padding: EdgeInsets.only(bottom: bottomPadding),
+                                child: dialog,
+                              ),
                             );
                           },
                         );
-                      },
-                    );
-                  },
-          ),
-          onMessageTap: (context, message) async {
-            if (message is! types.FileMessage || _isReceivingFile(message)) {
-              return;
-            }
-            if (Platform.isIOS || Platform.isAndroid) {
-              OpenFilex.open(message.uri);
-              return;
-            }
+                      }
+                    },
+              onPickImagePressed: !(Platform.isAndroid || Platform.isIOS)
+                  ? null
+                  : (room.messages?.isEmpty ?? true)
+                  ? null
+                  : ({types.PartialText? text}) async {
+                      final result = await ImagePicker().pickImage(
+                        source: ImageSource.camera,
+                      );
 
-            final file = Uri.file(message.uri);
+                      if (result != null) {
+                        File file = File(result.path);
 
-            final parentDirectory = File.fromUri(file).parent.uri;
+                        if (!context.mounted) return;
+                        showModalBottomSheet(
+                          context: context,
+                          useSafeArea: true,
+                          isScrollControlled: true,
+                          builder: (context) {
+                            final dialog = _SendFileDialog(
+                              file,
+                              room: room,
+                              partialMessage: text?.text,
+                              onSendPressed: (description) {
+                                final worker = ref.read(qaulWorkerProvider);
+                                worker.sendFile(
+                                  pathName: file.path,
+                                  conversationId: room.conversationId,
+                                  description: description.text,
+                                );
+                              },
+                            );
+                            if (!Platform.isIOS) {
+                              return dialog;
+                            }
 
-            for (final uri in [file, parentDirectory]) {
-              if (await canLaunchUrl(uri)) {
-                launchUrl(uri);
+                            final bottomPadding = MediaQuery.of(
+                              context,
+                            ).viewInsets.bottom;
+                            return SingleChildScrollView(
+                              child: Container(
+                                padding: EdgeInsets.only(bottom: bottomPadding),
+                                child: dialog,
+                              ),
+                            );
+                          },
+                        );
+                      }
+                    },
+              // the record package is not supported on Linux
+              onSendAudioPressed: Platform.isLinux
+                  ? null
+                  : (room.messages?.isEmpty ?? true)
+                  ? null
+                  : ({types.PartialText? text}) async {
+                      // ignore: use_build_context_synchronously
+                      if (!context.mounted) return;
+                      showModalBottomSheet(
+                        context: context,
+                        enableDrag: false,
+                        isDismissible: false,
+                        builder: (_) {
+                          return _RecordAudioDialog(
+                            room: room,
+                            partialMessage: text?.text,
+                            onSendPressed: (file, description) {
+                              final worker = ref.read(qaulWorkerProvider);
+                              worker.sendFile(
+                                pathName: file.path,
+                                conversationId: room.conversationId,
+                                description: description.text,
+                              );
+                            },
+                          );
+                        },
+                      );
+                    },
+            ),
+            onMessageTap: (context, message) async {
+              if (message is! types.FileMessage || _isReceivingFile(message)) {
                 return;
               }
-            }
-          },
-          textMessageBuilder:
-              (message, {required int messageWidth, required bool showName}) {
-                return TextMessage(
+              if (Platform.isIOS || Platform.isAndroid) {
+                OpenFilex.open(message.uri);
+                return;
+              }
+
+              final file = Uri.file(message.uri);
+
+              final parentDirectory = File.fromUri(file).parent.uri;
+
+              for (final uri in [file, parentDirectory]) {
+                if (await canLaunchUrl(uri)) {
+                  launchUrl(uri);
+                  return;
+                }
+              }
+            },
+            textMessageBuilder:
+                (message, {required int messageWidth, required bool showName}) {
+                  return TextMessage(
+                    message: message,
+                    usePreviewData: true,
+                    hideBackgroundOnEmojiMessages: true,
+                    showName: false,
+                    emojiEnlargementBehavior: EmojiEnlargementBehavior.multi,
+                  );
+                },
+            fileMessageBuilder: (message, {required int messageWidth}) {
+              return SizedBox(
+                width: messageWidth.toDouble(),
+                child: FileMessageWidget(
                   message: message,
-                  usePreviewData: true,
-                  hideBackgroundOnEmojiMessages: true,
-                  showName: false,
-                  emojiEnlargementBehavior: EmojiEnlargementBehavior.multi,
-                );
-              },
-          fileMessageBuilder: (message, {required int messageWidth}) {
-            return SizedBox(
-              width: messageWidth.toDouble(),
-              child: FileMessageWidget(
+                  isDefaultUser: message.author.id == user.idBase58,
+                ),
+              );
+            },
+            imageMessageBuilder: (message, {required int messageWidth}) {
+              return ImageMessageWidget(
                 message: message,
+                messageWidth: messageWidth,
                 isDefaultUser: message.author.id == user.idBase58,
+              );
+            },
+            audioMessageBuilder: (message, {required int messageWidth}) {
+              return AudioMessageWidget(
+                message: message,
+                messageWidth: messageWidth,
+                isDefaultUser: message.author.id == user.idBase58,
+              );
+            },
+            customDateHeaderText: (dt) =>
+                DateFormat('EEEE, MMMM d, yyyy', 'en').format(dt.toLocal()),
+            theme: DefaultChatTheme(
+              userAvatarNameColors: [
+                colorGenerationStrategy(
+                  directPeer?.idBase58 ?? otherUser?.idBase58 ?? room.idBase58,
+                ),
+              ],
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              messageInsetsVertical: 0,
+              messageInsetsHorizontal: 0,
+              dateDividerTextStyle: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w300,
+                height: 1.2,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.55),
               ),
-            );
-          },
-          imageMessageBuilder: (message, {required int messageWidth}) {
-            return ImageMessageWidget(
-              message: message,
-              messageWidth: messageWidth,
-              isDefaultUser: message.author.id == user.idBase58,
-            );
-          },
-          audioMessageBuilder: (message, {required int messageWidth}) {
-            return AudioMessageWidget(
-              message: message,
-              messageWidth: messageWidth,
-              isDefaultUser: message.author.id == user.idBase58,
-            );
-          },
-          customDateHeaderText: (dt) =>
-              DateFormat('EEEE, MMMM d, yyyy', 'en').format(dt.toLocal()),
-          theme: DefaultChatTheme(
-            userAvatarNameColors: [
-              colorGenerationStrategy(
-                directPeer?.idBase58 ?? otherUser?.idBase58 ?? room.idBase58,
+              bubbleMargin: EdgeInsets.zero,
+              sentMessageBodyTextStyle: const TextStyle(
+                fontSize: 17,
+                color: Colors.white,
               ),
-            ],
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            messageInsetsVertical: 0,
-            messageInsetsHorizontal: 0,
-            dateDividerTextStyle: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w300,
-              height: 1.2,
-              color: Colors.white,
-            ),
-            bubbleMargin: EdgeInsets.zero,
-            sentMessageBodyTextStyle: const TextStyle(
-              fontSize: 17,
-              color: Colors.white,
-            ),
-            receivedMessageBodyTextStyle: const TextStyle(
-              fontSize: 17,
-              color: Colors.black,
+              receivedMessageBodyTextStyle: const TextStyle(
+                fontSize: 17,
+                color: Colors.black,
+              ),
             ),
           ),
-        ),
         ),
       ),
     );
@@ -585,11 +590,78 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return projection.internalMessages;
   }
 
+  Widget _buildCustomMessage(
+    types.Message message, {
+    required AppLocalizations l10n,
+  }) {
+    if (message is! types.CustomMessage) return const SizedBox.shrink();
+
+    final metadata = message.metadata;
+    if (metadata == null || metadata['kind'] != _kDuplicateUsernameMetaKind) {
+      return const SizedBox.shrink();
+    }
+
+    return DuplicateUsernameMetaMessage(
+      preamble:
+          metadata['preamble'] as String? ??
+          l10n.groupMemberRenamedOnJoinPreamble,
+      baseName: metadata['baseName'] as String? ?? '',
+      middle:
+          metadata['middle'] as String? ?? l10n.groupMemberRenamedOnJoinMiddle,
+      disambiguatedName: metadata['disambiguatedName'] as String? ?? '',
+      actionLabel:
+          metadata['actionLabel'] as String? ?? l10n.editGroupUserNames,
+      onEditUserNames: _chatRenderMode == ChatRenderMode.group
+          ? () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => _GroupSettingsPage(room)),
+            )
+          : null,
+    );
+  }
+
+  Widget _buildSystemMessage(
+    types.SystemMessage message, {
+    required AppLocalizations l10n,
+  }) {
+    final metadata = message.metadata;
+    if (metadata == null || metadata['kind'] != _kDuplicateUsernameMetaKind) {
+      return SystemMessage(message: message.text);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: DuplicateUsernameMetaMessage(
+        preamble:
+            metadata['preamble'] as String? ??
+            l10n.groupMemberRenamedOnJoinPreamble,
+        baseName: metadata['baseName'] as String? ?? '',
+        middle:
+            metadata['middle'] as String? ??
+            l10n.groupMemberRenamedOnJoinMiddle,
+        disambiguatedName: metadata['disambiguatedName'] as String? ?? '',
+        actionLabel:
+            metadata['actionLabel'] as String? ?? l10n.editGroupUserNames,
+        onEditUserNames: _chatRenderMode == ChatRenderMode.group
+            ? () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => _GroupSettingsPage(room)),
+              )
+            : null,
+      ),
+    );
+  }
+
   Widget _bubbleBuilder(
     Widget child, {
     required types.Message message,
     required bool nextMessageInGroup,
   }) {
+    if (message is types.CustomMessage &&
+        message.metadata?['kind'] == _kDuplicateUsernameMetaKind) {
+      return child;
+    }
+
     if (message.type == types.MessageType.custom) {
       return Container(
         alignment: Alignment.center,
@@ -648,8 +720,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           nip: clustersWithNext
               ? BubbleNip.no
               : user.toInternalUser().id != message.author.id
-                  ? BubbleNip.leftBottom
-                  : BubbleNip.rightBottom,
+              ? BubbleNip.leftBottom
+              : BubbleNip.rightBottom,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: child,

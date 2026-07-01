@@ -97,13 +97,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get name => 'Name';
 
   @override
-  String get options => 'Options';
+  String get options => 'Optionen';
 
   @override
-  String get useIpv6 => 'Use IPv6';
+  String get useIpv6 => 'IPv6';
 
   @override
-  String get useQuic => 'Use Quic Protocol';
+  String get useQuic => 'QUIC Protokoll';
 
   @override
   String get connections => 'Verbindungen';
@@ -376,29 +376,29 @@ class AppLocalizationsDe extends AppLocalizations {
       'All your existing data will be deleted.';
 
   @override
-  String get forceUpdateCreateAccount => 'Create new account';
+  String get forceUpdateCreateAccount => 'Neuen Benutzer erstellen';
 
   @override
   String get forceUpdateDescription1 =>
-      'info: qaul has a new database format. Users of qaul 2.0.0-beta.17 and earlier who wish to keep their existing account need to migrate their data to the new format.';
+      'Hinweis: qaul verfügt über ein neues Datenbankformat. Nutzer von qaul 2.0.0-beta.17 und früheren Versionen, die ihr bestehendes Konto behalten möchten, müssen ihre Daten in das neue Format migrieren.';
 
   @override
   String get forceUpdateDescription2 =>
-      'To migrate an existing database, download qaul 2.0.0-beta.18 and run it';
+      'Um die Migration durchzuführen, laden Sie qaul 2.0.0-beta.18 herunter und führen Sie das Programm aus';
 
   @override
   String get forceUpdateDescription3 =>
-      'If you don\'t wish to keep your existing data base';
+      'Wenn Sie Ihre bestehende Datenbank nicht behalten möchten';
 
   @override
   String get forceUpdateDisclaimer =>
-      '(you will lose all your data and accounts)';
+      '(Alle deine Daten und Benutzer werden gelöscht)';
 
   @override
-  String get forceUpdateDownloadQaul18 => 'Download qaul 2.0.0-beta.18';
+  String get forceUpdateDownloadQaul18 => 'qaul 2.0.0-beta.18 herunterladen';
 
   @override
-  String get forceUpdateRequired => 'Upgrade Required';
+  String get forceUpdateRequired => 'Update erforderlich';
 
   @override
   String get groupChatMessageHint => 'Gruppen-Chat-Nachricht';
@@ -412,6 +412,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String groupEventJoined(String username) {
     return '\"$username\" ist der Gruppe beigetreten';
   }
+
+  @override
+  String get groupEventJoinedSuffix => ' joined the group';
+
+  @override
+  String get groupMemberRenamedOnJoinPreamble => 'Group member ';
+
+  @override
+  String get groupMemberRenamedOnJoinMiddle => ' is renamed ';
+
+  @override
+  String get editGroupUserNames => 'Edit user names';
 
   @override
   String groupEventLeft(String username) {

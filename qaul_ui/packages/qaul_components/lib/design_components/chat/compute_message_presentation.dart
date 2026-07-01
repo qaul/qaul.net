@@ -20,9 +20,7 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
   required ChatRenderMode layoutMode,
 }) {
   final textRows = ascendingTimeline
-      .where(
-        (r) => r.isText && r.qaulBubbleBaseWithoutLayout != null,
-      )
+      .where((r) => r.isText && r.qaulBubbleBaseWithoutLayout != null)
       .toList();
 
   MessagePresentationComputation buildTextComputation(
@@ -31,23 +29,32 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
     int timelineIndex,
   ) {
     final bubble = row.qaulBubbleBaseWithoutLayout!;
-    final prevTimeline =
-        timelineIndex > 0 ? ascendingTimeline[timelineIndex - 1] : null;
+    final prevTimeline = timelineIndex > 0
+        ? ascendingTimeline[timelineIndex - 1]
+        : null;
     final nextTimeline = timelineIndex < ascendingTimeline.length - 1
         ? ascendingTimeline[timelineIndex + 1]
         : null;
 
-    final prevMinute = textIndexInSequence > 0
-        ? textRows[textIndexInSequence - 1].qaulBubbleBaseWithoutLayout
+    final prevTextRow = textIndexInSequence > 0
+        ? textRows[textIndexInSequence - 1]
         : null;
-    final nextMinute = textIndexInSequence < textRows.length - 1
-        ? textRows[textIndexInSequence + 1].qaulBubbleBaseWithoutLayout
+    final nextTextRow = textIndexInSequence < textRows.length - 1
+        ? textRows[textIndexInSequence + 1]
         : null;
+    final prevMinute = prevTextRow?.qaulBubbleBaseWithoutLayout;
+    final nextMinute = nextTextRow?.qaulBubbleBaseWithoutLayout;
 
     final linksToPrevious =
-        prevMinute != null && directChatBubblesShareMinute(prevMinute, bubble);
+        prevMinute != null &&
+        prevTextRow != null &&
+        samePresentationLocalCalendarDay(prevTextRow.sentAt, row.sentAt) &&
+        directChatBubblesShareMinute(prevMinute, bubble);
     final linksToNext =
-        nextMinute != null && directChatBubblesShareMinute(bubble, nextMinute);
+        nextMinute != null &&
+        nextTextRow != null &&
+        samePresentationLocalCalendarDay(row.sentAt, nextTextRow.sentAt) &&
+        directChatBubblesShareMinute(bubble, nextMinute);
 
     final isPrimary = row.isOutgoing;
 
@@ -79,19 +86,22 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
     var showAvatar = false;
 
     if (layoutMode == ChatRenderMode.group && row.isGroupIncomingEligible) {
-      showSenderName = prevTimeline == null ||
+      showSenderName =
+          prevTimeline == null ||
           !_sameParticipantStreakNeighbor(prevTimeline, row) ||
-          !samePresentationLocalCalendarDay(
-              prevTimeline.sentAt, row.sentAt);
+          !samePresentationLocalCalendarDay(prevTimeline.sentAt, row.sentAt);
 
-      final continuesAfter = nextTimeline != null &&
+      final continuesAfter =
+          nextTimeline != null &&
           _sameParticipantStreakNeighbor(row, nextTimeline) &&
           samePresentationLocalCalendarDay(row.sentAt, nextTimeline.sentAt);
       showAvatar = !continuesAfter;
     }
 
-    final nonTextClustersWithNext = nextTimeline != null &&
-        _sameParticipantStreakNeighbor(row, nextTimeline);
+    final nonTextClustersWithNext =
+        nextTimeline != null &&
+        _sameParticipantStreakNeighbor(row, nextTimeline) &&
+        samePresentationLocalCalendarDay(row.sentAt, nextTimeline.sentAt);
 
     final meta = MessagePresentationMeta(
       linksToPrevious: linksToPrevious,
@@ -123,8 +133,9 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
     ChatTimelinePresentationRow row,
     int timelineIndex,
   ) {
-    final prevTimeline =
-        timelineIndex > 0 ? ascendingTimeline[timelineIndex - 1] : null;
+    final prevTimeline = timelineIndex > 0
+        ? ascendingTimeline[timelineIndex - 1]
+        : null;
     final nextTimeline = timelineIndex < ascendingTimeline.length - 1
         ? ascendingTimeline[timelineIndex + 1]
         : null;
@@ -134,11 +145,13 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
     var showSenderName = false;
 
     if (layoutMode == ChatRenderMode.group && row.isGroupIncomingEligible) {
-      showSenderName = prevTimeline == null ||
+      showSenderName =
+          prevTimeline == null ||
           !_sameParticipantStreakNeighbor(prevTimeline, row) ||
           !samePresentationLocalCalendarDay(prevTimeline.sentAt, row.sentAt);
 
-      final continuesAfter = nextTimeline != null &&
+      final continuesAfter =
+          nextTimeline != null &&
           _sameParticipantStreakNeighbor(row, nextTimeline) &&
           samePresentationLocalCalendarDay(row.sentAt, nextTimeline.sentAt);
       showAvatar = !continuesAfter;
@@ -146,7 +159,7 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
       if (prevTimeline != null) {
         final isSameStreakSameDay =
             _sameParticipantStreakNeighbor(prevTimeline, row) &&
-                samePresentationLocalCalendarDay(prevTimeline.sentAt, row.sentAt);
+            samePresentationLocalCalendarDay(prevTimeline.sentAt, row.sentAt);
         if (isSameStreakSameDay) {
           topSpacing = kChatBubbleLinkedGap;
         } else {
@@ -155,8 +168,10 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
       }
     }
 
-    final nonTextClustersWithNext = nextTimeline != null &&
-        _sameParticipantStreakNeighbor(row, nextTimeline);
+    final nonTextClustersWithNext =
+        nextTimeline != null &&
+        _sameParticipantStreakNeighbor(row, nextTimeline) &&
+        samePresentationLocalCalendarDay(row.sentAt, nextTimeline.sentAt);
 
     final meta = MessagePresentationMeta(
       linksToPrevious: false,
@@ -182,8 +197,7 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
   for (var i = 0; i < ascendingTimeline.length; i++) {
     final row = ascendingTimeline[i];
     if (row.isText && row.qaulBubbleBaseWithoutLayout != null) {
-      map[row.messageIdBase58] =
-          buildTextComputation(row, textSeen, i);
+      map[row.messageIdBase58] = buildTextComputation(row, textSeen, i);
       textSeen++;
     } else {
       map[row.messageIdBase58] = emptyNonText(row, i);

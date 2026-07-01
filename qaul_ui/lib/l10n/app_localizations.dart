@@ -883,6 +883,30 @@ abstract class AppLocalizations {
   /// **'\"{username}\" has joined the group'**
   String groupEventJoined(String username);
 
+  /// No description provided for @groupEventJoinedSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' joined the group'**
+  String get groupEventJoinedSuffix;
+
+  /// No description provided for @groupMemberRenamedOnJoinPreamble.
+  ///
+  /// In en, this message translates to:
+  /// **'Group member '**
+  String get groupMemberRenamedOnJoinPreamble;
+
+  /// No description provided for @groupMemberRenamedOnJoinMiddle.
+  ///
+  /// In en, this message translates to:
+  /// **' is renamed '**
+  String get groupMemberRenamedOnJoinMiddle;
+
+  /// No description provided for @editGroupUserNames.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit user names'**
+  String get editGroupUserNames;
+
   /// No description provided for @groupEventLeft.
   ///
   /// In en, this message translates to:
