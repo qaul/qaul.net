@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:qaul_rpc/qaul_rpc.dart';
 
 import '../../decorators/qaul_navbar_decorator.dart';
 import '../../providers/providers.dart';
@@ -19,6 +20,11 @@ class HomeScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(defaultUserProvider);
+    if (user == null) {
+      return const Scaffold(body: SizedBox.shrink());
+    }
+
     final tabCtrl = ref.read(homeScreenControllerProvider.notifier);
 
     final gotoToPubTab = useCallback(() => tabCtrl.goToTab(TabType.public), []);

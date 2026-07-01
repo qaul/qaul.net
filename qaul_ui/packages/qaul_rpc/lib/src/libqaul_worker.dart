@@ -14,9 +14,11 @@ import 'package:uuid/uuid.dart';
 import '../qaul_rpc.dart';
 import 'generated/connections/ble/ble_rpc.pb.dart';
 import 'generated/connections/connections.pb.dart';
+import 'generated/node/account_management.pb.dart';
 import 'generated/node/node.pb.dart';
 import 'generated/node/user_accounts.pb.dart';
 import 'generated/router/users.pb.dart';
+import 'generated/rpc/authentication.pb.dart';
 import 'generated/rpc/debug.pb.dart';
 import 'generated/rpc/qaul_rpc.pb.dart';
 import 'generated/services/chat/chat.pb.dart';
@@ -202,8 +204,9 @@ class LibqaulWorker {
     await _sendRequest<User>(
       module: Modules.USERS,
       data: Users(userUpdate: entry),
-      adapter: (res) =>
-          res.data is UserUpdateResult ? (res.data as UserUpdateResult).user : null,
+      adapter: (res) => res.data is UserUpdateResult
+          ? (res.data as UserUpdateResult).user
+          : null,
     );
   }
 
@@ -233,7 +236,10 @@ class LibqaulWorker {
         return null;
       },
     );
-    return result ?? [];
+    final nodes = result ?? [];
+    syncConnectedInternetNodes(
+        _ref.read(connectedNodesProvider.notifier), nodes);
+    return nodes;
   }
 
   Future<void> addNode(String address, [String? name]) async =>
@@ -276,12 +282,145 @@ class LibqaulWorker {
         return null;
       },
     );
+    if (result != null) {
+      _ref.read(defaultUserProvider.notifier).state = result;
+    }
     return result;
   }
 
-  Future<void> createUserAccount(String name) async {
-    final msg = UserAccounts(createUserAccount: CreateUserAccount(name: name));
-    await _sendMessage(Modules.USERACCOUNTS, msg);
+  Future<User?> createUserAccount(String name, {String? password}) async {
+    final request = CreateUserAccount(name: name);
+    if (password != null && password.isNotEmpty) request.password = password;
+    final msg = UserAccounts(createUserAccount: request);
+    final result = await _sendRequest<User>(
+      module: Modules.USERACCOUNTS,
+      data: msg,
+      adapter: (res) {
+        if (res.data is User) return res.data as User;
+        return null;
+      },
+    );
+    if (result != null) {
+      _ref.read(defaultUserProvider.notifier).state = result;
+    }
+    return result;
+  }
+
+  Future<bool> setAccountPassword(String? password) async {
+    final request = SetPasswordRequest();
+    if (password != null && password.isNotEmpty) request.password = password;
+    final msg = UserAccounts(setPasswordRequest: request);
+    final result = await _sendRequest<bool>(
+      module: Modules.USERACCOUNTS,
+      data: msg,
+      adapter: (res) => res.data is bool ? res.data as bool : null,
+    );
+    return result ?? false;
+  }
+
+  Future<List<LocalAccount>> getLocalAccounts() async {
+    final result = await _sendRequest<List<LocalAccount>>(
+      module: Modules.AUTH,
+      data: AuthRpc(usersRequest: UsersRequest()),
+      adapter: (res) => res.data is List<LocalAccount>
+          ? res.data as List<LocalAccount>
+          : null,
+      userId: Uint8List(0),
+    );
+    return result ?? [];
+  }
+
+  Future<bool> loginLocalAccount(LocalAccount account,
+      {String? password}) async {
+    final challenge = await _sendRequest<AuthChallenge>(
+      module: Modules.AUTH,
+      data: AuthRpc(authRequest: AuthRequest(userId: account.userId)),
+      adapter: (res) =>
+          res.data is AuthChallenge ? res.data as AuthChallenge : null,
+      userId: Uint8List(0),
+    );
+    if (challenge == null) return false;
+
+    if (account.hasPassword) {
+      throw const RpcRequestException(
+        'Password-protected login needs Argon2 challenge hashing in Flutter.',
+      );
+    }
+
+    final authenticated = await _sendRequest<bool>(
+      module: Modules.AUTH,
+      data: AuthRpc(
+        authResponse: AuthResponse(
+          userId: account.userId,
+          challengeHash: const [],
+        ),
+      ),
+      adapter: (res) => res.data is bool ? res.data as bool : null,
+      userId: Uint8List(0),
+    );
+    if (authenticated == true) {
+      _ref.read(defaultUserProvider.notifier).state = User(
+        name: account.username,
+        id: account.userId,
+        hasPassword: account.hasPassword,
+      );
+    }
+    return authenticated ?? false;
+  }
+
+  Future<bool> getSessionStatus({Uint8List? userId}) async {
+    final result = await _sendRequest<bool>(
+      module: Modules.AUTH,
+      data: AuthRpc(sessionStatusRequest: SessionStatusRequest()),
+      adapter: (res) => res.data is bool ? res.data as bool : null,
+      userId: userId,
+    );
+    return result ?? false;
+  }
+
+  Future<bool> logout({Uint8List? userId}) async {
+    final result = await _sendRequest<bool>(
+      module: Modules.AUTH,
+      data: AuthRpc(logoutRequest: LogoutRequest()),
+      adapter: (res) => res.data is bool ? res.data as bool : null,
+      userId: userId,
+    );
+    return result ?? false;
+  }
+
+  Future<String?> exportAccount({String? outputPath, Uint8List? userId}) {
+    return _sendRequest<String>(
+      module: Modules.ACCOUNT_MANAGEMENT,
+      data: AccountManagement(
+        exportAccountRequest:
+            ExportAccountRequest(outputPath: outputPath ?? ''),
+      ),
+      adapter: (res) => res.data is String ? res.data as String : null,
+      userId: userId,
+    );
+  }
+
+  Future<RestoreAccountResult?> restoreAccount(String archivePath) {
+    return _sendRequest<RestoreAccountResult>(
+      module: Modules.ACCOUNT_MANAGEMENT,
+      data: AccountManagement(
+        restoreAccountRequest: RestoreAccountRequest(archivePath: archivePath),
+      ),
+      adapter: (res) => res.data is RestoreAccountResult
+          ? res.data as RestoreAccountResult
+          : null,
+      userId: Uint8List(0),
+    );
+  }
+
+  Future<bool> deleteAccount({Uint8List? userId}) async {
+    final result = await _sendRequest<bool>(
+      module: Modules.ACCOUNT_MANAGEMENT,
+      data: AccountManagement(deleteAccountRequest: DeleteAccountRequest()),
+      adapter: (res) => res.data is bool ? res.data as bool : null,
+      userId: userId,
+    );
+    return result ?? false;
   }
 
   Future<PaginatedChatRooms?> getAllChatRooms({int? offset, int? limit}) async {
@@ -584,16 +723,24 @@ class LibqaulWorker {
   // *******************************
   // Private (control) methods
   // *******************************
-  Future<void> _sendMessage(Modules module, pb.GeneratedMessage data,
-      {String? requestId}) async {
+  Future<void> _sendMessage(
+    Modules module,
+    pb.GeneratedMessage data, {
+    String? requestId,
+    Uint8List? userId,
+  }) async {
     requestId ??= const Uuid().v4();
     QaulRpc message = QaulRpc()
       ..module = module
       ..data = data.writeToBuffer()
       ..requestId = requestId;
 
-    final user = _ref.read(defaultUserProvider);
-    if (user != null) message.userId = user.id;
+    if (userId != null) {
+      message.userId = userId;
+    } else {
+      final user = _ref.read(defaultUserProvider);
+      if (user != null) message.userId = user.id;
+    }
 
     await _ref.read(libqaulProvider).sendRpc(message.writeToBuffer());
   }
@@ -603,6 +750,7 @@ class LibqaulWorker {
     required pb.GeneratedMessage data,
     required T? Function(RpcTranslatorResponse) adapter,
     Duration timeout = const Duration(seconds: 10),
+    Uint8List? userId,
   }) async {
     final requestId = const Uuid().v4();
     final completer = Completer<T?>();
@@ -621,7 +769,7 @@ class LibqaulWorker {
       timer: timer,
     );
 
-    await _sendMessage(module, data, requestId: requestId);
+    await _sendMessage(module, data, requestId: requestId, userId: userId);
 
     return completer.future;
   }
@@ -663,6 +811,7 @@ class LibqaulWorker {
           _log.warning('Error in RPC adapter for ${m.requestId}', e, st);
           pending.completer.completeError(e, st);
         }
+        return;
       }
     }
 

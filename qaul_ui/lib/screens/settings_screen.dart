@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:qaul_components/qaul_components.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:utils/utils.dart';
 
+import '../coordinators/account_management_coordinator.dart';
 import '../decorators/cron_task_decorator.dart';
 import '../dialogs/android_background_execution_dialog.dart';
 import '../helpers/user_prefs_helper.dart';
@@ -21,6 +23,7 @@ class SettingsScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final user = ref.watch(defaultUserProvider);
 
     return ResponsiveScaffold(
       title: l10n.settings,
@@ -47,6 +50,17 @@ class SettingsScreen extends HookConsumerWidget {
               child: _InternetNodesList(),
             ),
           ),
+          if (user != null) ...[
+            const SizedBox(height: 20),
+            QaulAccountSettingsSection(
+              showPasswordAction: false,
+              onExportAccount: () =>
+                  AccountManagementCoordinator.showExportFlow(context, ref),
+              onLogout: () => AccountManagementCoordinator.logout(context, ref),
+              onDeleteAccount: () =>
+                  AccountManagementCoordinator.showDeleteFlow(context, ref),
+            ),
+          ],
           if (Platform.isAndroid) ...[
             const SizedBox(height: 20),
             SettingsSection(
@@ -55,9 +69,7 @@ class SettingsScreen extends HookConsumerWidget {
               content: const _AndroidOptions(),
             ),
           ],
-          const SizedBox(
-            height: 20,
-          )
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -82,10 +94,9 @@ class _NotificationOptionsState extends State<_NotificationOptions> {
 
     return DefaultTextStyle(
       maxLines: 2,
-      style: Theme.of(context)
-          .textTheme
-          .labelLarge!
-          .copyWith(overflow: TextOverflow.ellipsis),
+      style: Theme.of(
+        context,
+      ).textTheme.labelLarge!.copyWith(overflow: TextOverflow.ellipsis),
       child: Column(
         children: [
           _buildConfigurationOption(
@@ -115,10 +126,11 @@ class _NotificationOptionsState extends State<_NotificationOptions> {
     );
   }
 
-  Widget _buildConfigurationOption(
-      {required String label,
-      required bool value,
-      required void Function(bool newValue) onValueChanged}) {
+  Widget _buildConfigurationOption({
+    required String label,
+    required bool value,
+    required void Function(bool newValue) onValueChanged,
+  }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -177,7 +189,9 @@ class _InternetNodesList extends HookConsumerWidget {
             rowCount: nodes.length,
             onAddRowPressed: () async {
               final res = await showDialog(
-                  context: context, builder: (_) => const _AddNodeDialog());
+                context: context,
+                builder: (_) => const _AddNodeDialog(),
+              );
 
               if (res is! _AddNodeDialogResponse) return;
 
@@ -195,10 +209,7 @@ class _InternetNodesList extends HookConsumerWidget {
                       : l10n.emptyNodeName,
                   style: textTheme.titleMedium,
                 ),
-                subtitle: Text(
-                  nodeAddr,
-                  style: textTheme.titleSmall,
-                ),
+                subtitle: Text(nodeAddr, style: textTheme.titleSmall),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -278,10 +289,7 @@ class _AddNodeDialog extends HookWidget {
     } else {
       address += '/tcp/$port';
     }
-    return _AddNodeDialogResponse(
-      address: address,
-      name: name,
-    );
+    return _AddNodeDialogResponse(address: address, name: name);
   }
 
   @override
@@ -323,128 +331,137 @@ class _AddNodeDialog extends HookWidget {
     );
 
     return Form(
-      child: Builder(builder: (context) {
-        return AlertDialog(
-          title: Text(l10n.addNodeCTA),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // used to force the dialog to fill the available horizontal space
-                const Row(mainAxisSize: MainAxisSize.max, children: [
-                  SizedBox(width: double.maxFinite),
-                ]),
-
-                TextField(
-                  autofocus: true,
-                  controller: nameCtrl,
-                  decoration: _decoration(l10n.name),
-                  keyboardType: TextInputType.name,
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      isIPv6.value ? '/ip6/' : '/ip4/',
-                      style: _fixedTextStyle,
-                    ),
-                    _spacer,
-                    Expanded(
-                      child: TextFormField(
-                        controller: ipCtrl,
-                        inputFormatters: [
-                          isIPv6.value
-                              ? IPv6TextInputFormatter()
-                              : IPv4TextInputFormatter()
-                        ],
-                        decoration: _decoration(
-                          'ip',
-                          hint: isIPv6.value
-                              ? '0000:0000:0000:0000:0000:0000:0000:0000'
-                              : '000.000.000.000',
-                        ),
-                        validator: (v) {
-                          if (isIPv6.value ? isValidIPv6(v) : isValidIPv4(v)) {
-                            return null;
-                          }
-                          return l10n.invalidIPMessage;
-                        },
-                        keyboardType: isIPv6.value
-                            ? TextInputType.text
-                            : const TextInputType.numberWithOptions(
-                                decimal: true),
-                        enableInteractiveSelection: false,
-                      ),
-                    ),
-                    if (orientation == Orientation.landscape) ...tcpField,
-                  ],
-                ),
-                if (orientation == Orientation.portrait) ...[
-                  const SizedBox(height: 20),
-                  Row(children: tcpField),
-                ],
-
-                const SizedBox(height: 8),
-                const Divider(),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text(l10n.options, style: ttheme.titleMedium),
-                ),
-                SwitchListTile(
-                  value: isIPv6.value,
-                  onChanged: (v) => {isIPv6.value = v},
-                  title: Text(l10n.useIpv6),
-                ),
-                SwitchListTile(
-                  value: isQuic.value,
-                  onChanged: (v) => {isQuic.value = v},
-                  title: Text(l10n.useQuic),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: Text(l10n.okDialogButton),
-              onPressed: () {
-                if (Form.of(context).validate() == false) return;
-                Navigator.pop(
-                  context,
-                  _buildIPAddress(
-                    ip: ipCtrl.text,
-                    port: portCtrl.text,
-                    name: nameCtrl.text,
-                    useIPv6: isIPv6.value,
-                    useQuic: isQuic.value,
+      child: Builder(
+        builder: (context) {
+          return AlertDialog(
+            title: Text(l10n.addNodeCTA),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // used to force the dialog to fill the available horizontal space
+                  const Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [SizedBox(width: double.maxFinite)],
                   ),
-                );
-              },
+
+                  TextField(
+                    autofocus: true,
+                    controller: nameCtrl,
+                    decoration: _decoration(l10n.name),
+                    keyboardType: TextInputType.name,
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isIPv6.value ? '/ip6/' : '/ip4/',
+                        style: _fixedTextStyle,
+                      ),
+                      _spacer,
+                      Expanded(
+                        child: TextFormField(
+                          controller: ipCtrl,
+                          inputFormatters: [
+                            isIPv6.value
+                                ? IPv6TextInputFormatter()
+                                : IPv4TextInputFormatter(),
+                          ],
+                          decoration: _decoration(
+                            'ip',
+                            hint: isIPv6.value
+                                ? '0000:0000:0000:0000:0000:0000:0000:0000'
+                                : '000.000.000.000',
+                          ),
+                          validator: (v) {
+                            if (isIPv6.value
+                                ? isValidIPv6(v)
+                                : isValidIPv4(v)) {
+                              return null;
+                            }
+                            return l10n.invalidIPMessage;
+                          },
+                          keyboardType: isIPv6.value
+                              ? TextInputType.text
+                              : const TextInputType.numberWithOptions(
+                                  decimal: true,
+                                ),
+                          enableInteractiveSelection: false,
+                        ),
+                      ),
+                      if (orientation == Orientation.landscape) ...tcpField,
+                    ],
+                  ),
+                  if (orientation == Orientation.portrait) ...[
+                    const SizedBox(height: 20),
+                    Row(children: tcpField),
+                  ],
+
+                  const SizedBox(height: 8),
+                  const Divider(),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text(l10n.options, style: ttheme.titleMedium),
+                  ),
+                  SwitchListTile(
+                    value: isIPv6.value,
+                    onChanged: (v) => {isIPv6.value = v},
+                    title: Text(l10n.useIpv6),
+                  ),
+                  SwitchListTile(
+                    value: isQuic.value,
+                    onChanged: (v) => {isQuic.value = v},
+                    title: Text(l10n.useQuic),
+                  ),
+                ],
+              ),
             ),
-            TextButton(
-              child: Text(l10n.cancelDialogButton),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
-        );
-      }),
+            actions: [
+              TextButton(
+                child: Text(l10n.okDialogButton),
+                onPressed: () {
+                  if (Form.of(context).validate() == false) return;
+                  Navigator.pop(
+                    context,
+                    _buildIPAddress(
+                      ip: ipCtrl.text,
+                      port: portCtrl.text,
+                      name: nameCtrl.text,
+                      useIPv6: isIPv6.value,
+                      useQuic: isQuic.value,
+                    ),
+                  );
+                },
+              ),
+              TextButton(
+                child: Text(l10n.cancelDialogButton),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
   SizedBox get _spacer => const SizedBox(width: 4, height: 4);
 
   TextStyle get _fixedTextStyle => TextStyle(
-      fontSize: 26, fontWeight: FontWeight.w500, color: Colors.grey.shade500);
+    fontSize: 26,
+    fontWeight: FontWeight.w500,
+    color: Colors.grey.shade500,
+  );
 
   InputDecoration _decoration(String label, {String? hint}) => InputDecoration(
-        isDense: true,
-        hintText: hint,
-        labelText: label,
-        border: const OutlineInputBorder(),
-        contentPadding: const EdgeInsets.all(12),
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-      );
+    isDense: true,
+    hintText: hint,
+    labelText: label,
+    border: const OutlineInputBorder(),
+    contentPadding: const EdgeInsets.all(12),
+    floatingLabelBehavior: FloatingLabelBehavior.always,
+  );
 }
 
 class _AndroidOptions extends StatefulWidget {
@@ -477,10 +494,9 @@ class _AndroidOptionsState extends State<_AndroidOptions> {
 
     return DefaultTextStyle(
       maxLines: 2,
-      style: Theme.of(context)
-          .textTheme
-          .labelLarge!
-          .copyWith(overflow: TextOverflow.ellipsis),
+      style: Theme.of(
+        context,
+      ).textTheme.labelLarge!.copyWith(overflow: TextOverflow.ellipsis),
       child: Column(
         children: [
           InkWell(
