@@ -33,16 +33,19 @@ import kotlin.time.TimeSource.Monotonic.ValueTimeMark
 import net.qaul.ble.test.ble.metrics.BleMetrics
 import net.qaul.ble.AppLog
 import net.qaul.ble.BLEUtils
+import net.qaul.ble.BleConstants
 
 
 /**
- * A flush's chunks split by priority. Flow-control chunks (SEND_ID, ACK, ping, chunk requests) are
- * latency sensitive and go on the scheduler's priority queue, message payload data goes on the bulk
- * queue so a large transfer can't starve the control traffic that keeps connections resolving/alive.
+ * A flush's chunks split across the three scheduler lanes:
+ *  - flcChunks   → CONTROL: flow control (SEND_ID, ACK, ping, chunk requests), latency sensitive.
+ *  - mediumChunks → MEDIUM: payload of short messages (routing updates, chat), kept ahead of files.
+ *  - bulkChunks  → BULK: payload of large messages (images/files). Goes last.
  */
 data class ChunkBatch(
     val flcChunks: List<ByteArray>,
-    val dataChunks: List<ByteArray>
+    val mediumChunks: List<ByteArray>,
+    val bulkChunks: List<ByteArray>
 )
 
 /**
@@ -186,10 +189,10 @@ class SendQueue(qaulId: ByteArray) {
         // add all missing chunk requests (control)
         flcChunks.addAll(getMissingChunksRequestFlc())
 
-        // Data chunks, actual message payload (new + resent). Routed through the bulk queue.
-        val dataChunks: MutableList<ByteArray> = LinkedList()
-        // chunks we were asked to resend (payload data)
-        dataChunks.addAll(getMissingChunksToSend())
+        val mediumChunks: MutableList<ByteArray> = LinkedList()
+        val bulkChunks: MutableList<ByteArray> = LinkedList()
+        // chunks we were asked to resend, classified by their originating message's size
+        getMissingChunksToSend(mediumChunks, bulkChunks)
 
         // create a new message chunk
         if (messagesToSend.isNotEmpty()) {
@@ -197,7 +200,7 @@ class SendQueue(qaulId: ByteArray) {
             val messageIndex = getNextMessageIndex()
             if (messageIndex == null) {
                 AppLog.e(TAG, "getChunks: No message index available. Cannot create message.")
-                return ChunkBatch(flcChunks, dataChunks)
+                return ChunkBatch(flcChunks, mediumChunks, bulkChunks)
             }
 
             // get the first message from the queue
@@ -210,11 +213,12 @@ class SendQueue(qaulId: ByteArray) {
             // change large message part state
             trackLargeMessages(largeMessageIndicator, SendLargeMessageState.SENDING)
 
-            // add the message chunks to the queue
-            dataChunks.addAll(sendQueueMessage.getAllChunks())
+            // route this message's chunks to the medium or bulk lane by its size
+            val dest = if (message.size <= BleConstants.MEDIUM_MESSAGE_MAX_BYTES) mediumChunks else bulkChunks
+            dest.addAll(sendQueueMessage.getAllChunks())
         }
 
-        return ChunkBatch(flcChunks, dataChunks)
+        return ChunkBatch(flcChunks, mediumChunks, bulkChunks)
     }
 
     /**
@@ -307,13 +311,12 @@ class SendQueue(qaulId: ByteArray) {
 
     /**
      * Get Missing Chunks to Send
-     * 
-     * Create missing chunk messages
-     * out of the missingChunksToSend map.
+     *
+     * Create missing chunk (resend) messages out of the missingChunksToSend map, routing each into
+     * [mediumChunks] or [bulkChunks] by the size of the message it belongs to (so a large file's
+     * resends stay in the bulk lane and a short message's resends stay ahead of files).
      */
-    private fun getMissingChunksToSend(): Queue<ByteArray> {
-        var missingChunksQueue: Queue<ByteArray> = LinkedList()
-
+    private fun getMissingChunksToSend(mediumChunks: MutableList<ByteArray>, bulkChunks: MutableList<ByteArray>) {
         missingChunksToSend.forEach { (key, value) ->
             // analyze request
             val queueIndex: Byte = (key shr 11).toByte()
@@ -331,15 +334,14 @@ class SendQueue(qaulId: ByteArray) {
                 sendQueueMessage.state = SendQueueMessageState.MISSING
                 AppLog.e(TAG, "getMissingChunksToSend: resending chunk $chunkIndex for queue $queueIndex")
                 val chunk = sendQueueMessage.getChunk(chunkIndex.toShort())
-                missingChunksQueue.add(chunk)
+                val dest = if (sendQueueMessage.messageSize <= BleConstants.MEDIUM_MESSAGE_MAX_BYTES) mediumChunks else bulkChunks
+                dest.add(chunk)
             } else {
                 AppLog.e(TAG, "getMissingChunksToSend: queue $queueIndex in state ${sendQueueMessage.state}, cannot resend chunk $chunkIndex")
                 return@forEach
             }
         }
         missingChunksToSend.clear()
-
-        return missingChunksQueue
     }
 
     /**

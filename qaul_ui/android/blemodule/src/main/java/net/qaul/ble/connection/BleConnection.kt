@@ -10,6 +10,7 @@ import net.qaul.ble.BleConstants
 import net.qaul.ble.test.ble.l2cap.L2capChannel
 import net.qaul.ble.test.ble.metrics.BleMetrics
 import net.qaul.ble.test.ble.queue.BleTaskScheduler
+import net.qaul.ble.test.ble.queue.OpLane
 import net.qaul.ble.test.ble.queue.ReceiveQueue
 import net.qaul.ble.test.ble.queue.SendQueue
 import net.qaul.ble.test.ble.util.toHexString
@@ -267,28 +268,33 @@ class BleConnection(
     }
 
     /**
-     * Pulls all pending chunks from SendQueue (FLC priority first, then data)
-     * and enqueues them to BleTaskScheduler.
+     * Pulls all pending chunks from SendQueue and enqueues them to BleTaskScheduler on their lane:
+     * FLC control first, then short-message payload (MEDIUM), then large-message payload (BULK), so a
+     * file transfer can't stall routing/chat traffic or connection setup.
      */
     private fun flushSendQueue() {
         val batch = sendQueue.getChunks()
         when (role) {
             BleRole.CENTRAL -> {
-                // FLC (SEND_ID, ACK, ping, chunk requests) always priority queue. Message data
-                // bulk normally
                 batch.flcChunks.forEach {
-                    BleTaskScheduler.writeCharacteristic(device, BleConstants.MSG_CHAR, it, priority = true)
+                    BleTaskScheduler.writeCharacteristic(device, BleConstants.MSG_CHAR, it, lane = OpLane.CONTROL)
                 }
-                batch.dataChunks.forEach {
-                    BleTaskScheduler.writeCharacteristic(device, BleConstants.MSG_CHAR, it, priority = false)
+                batch.mediumChunks.forEach {
+                    BleTaskScheduler.writeCharacteristic(device, BleConstants.MSG_CHAR, it, lane = OpLane.MEDIUM)
+                }
+                batch.bulkChunks.forEach {
+                    BleTaskScheduler.writeCharacteristic(device, BleConstants.MSG_CHAR, it, lane = OpLane.BULK)
                 }
             }
             BleRole.PERIPHERAL -> {
                 batch.flcChunks.forEach {
-                    BleTaskScheduler.notifyCharacteristicChanged(device, BleConstants.MSG_CHAR, false, it, priority = true)
+                    BleTaskScheduler.notifyCharacteristicChanged(device, BleConstants.MSG_CHAR, false, it, lane = OpLane.CONTROL)
                 }
-                batch.dataChunks.forEach {
-                    BleTaskScheduler.notifyCharacteristicChanged(device, BleConstants.MSG_CHAR, false, it, priority = false)
+                batch.mediumChunks.forEach {
+                    BleTaskScheduler.notifyCharacteristicChanged(device, BleConstants.MSG_CHAR, false, it, lane = OpLane.MEDIUM)
+                }
+                batch.bulkChunks.forEach {
+                    BleTaskScheduler.notifyCharacteristicChanged(device, BleConstants.MSG_CHAR, false, it, lane = OpLane.BULK)
                 }
             }
         }
