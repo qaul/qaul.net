@@ -236,7 +236,9 @@ class LibqaulWorker {
         return null;
       },
     );
-    return result ?? [];
+    final nodes = result ?? [];
+    _ref.read(connectedNodesProvider.notifier).state = nodes;
+    return nodes;
   }
 
   Future<void> addNode(String address, [String? name]) async =>
