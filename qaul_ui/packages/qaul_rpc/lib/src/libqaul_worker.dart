@@ -260,7 +260,8 @@ class LibqaulWorker {
       },
     );
     final nodes = result ?? [];
-    syncConnectedInternetNodes(_ref.read(connectedNodesProvider.notifier), nodes);
+    syncConnectedInternetNodes(
+        _ref.read(connectedNodesProvider.notifier), nodes);
     return nodes;
   }
 

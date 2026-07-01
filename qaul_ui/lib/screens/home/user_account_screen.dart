@@ -6,7 +6,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_components/qaul_components.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 
-import '../../coordinators/account_management_coordinator.dart';
 import '../../decorators/cron_task_decorator.dart';
 import '../../decorators/search_user_decorator.dart';
 import '../../l10n/app_localizations.dart';
@@ -35,20 +34,13 @@ class UserAccountScreen extends HookConsumerWidget {
           context,
         ).viewPadding.add(const EdgeInsets.fromLTRB(16, 8, 16, 8)),
         children: [
-          QaulAccountSettingsSection(
+          QaulAccountHeading(
             account: QaulAccountSummary(
               id: user.idBase58,
               name: user.name,
               publicKey: user.keyBase58,
               hasPassword: user.hasPassword,
             ),
-            onExportAccount: () =>
-                AccountManagementCoordinator.showExportFlow(context, ref),
-            onChangePassword: () =>
-                AccountManagementCoordinator.showPasswordFlow(context, ref),
-            onLogout: () => AccountManagementCoordinator.logout(context, ref),
-            onDeleteAccount: () =>
-                AccountManagementCoordinator.showDeleteFlow(context, ref),
           ),
           const SizedBox(height: 60),
           const _StorageUsersList(),
