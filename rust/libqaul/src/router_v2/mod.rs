@@ -16,15 +16,17 @@ use std::{
 };
 
 use libp2p::PeerId;
+use tracing::debug;
 
 use crate::{
     connections::ConnectionModule,
     router_v2::{
-        codec::CodecError,
+        codec::{messages::Mapping, CodecError},
         index::{
             IndexAllocator, IndexDictionary, MirrorIndexDictionary, ReintroductionTracker, Space,
         },
-        table::{Nodes, RoutingTable, Users},
+        seq::is_fresher_u32,
+        table::{Node, Nodes, RoutingTable, User, Users},
     },
     storage::configuration::RoutingV2Options,
 };
@@ -339,6 +341,128 @@ impl RouterV2State {
         res.sort_by_key(|(idx, _, _)| *idx);
         res
     }
+
+    pub fn apply_mapping(&self, neighbour: PeerId, space: Space, mapping: Mapping) -> Result<()> {
+        let mirror_id = {
+            let mirrors = self.mirrors.read().unwrap();
+            let Some(neigbour_mirrors) = mirrors.get(&neighbour) else {
+                debug!("neighbour vanished between mapping steps: {neighbour:?}");
+                return Ok(());
+            };
+            let dict = match space {
+                Space::Node => &neigbour_mirrors.nodes,
+                Space::User => &neigbour_mirrors.users,
+            };
+            dict.id_of(mapping.abs_idx)
+        };
+
+        match mirror_id {
+            Some(id) if id != mapping.target_id => {
+                let mut rt = self.routing_table.write().unwrap();
+                let (mut entry_dict, mut allocator) = match space {
+                    Space::Node => (
+                        self.node_dict.write().unwrap(),
+                        self.node_allocator.write().unwrap(),
+                    ),
+                    Space::User => (
+                        self.user_dict.write().unwrap(),
+                        self.users_allocator.write().unwrap(),
+                    ),
+                };
+
+                if let Some(idx) = entry_dict.idx_of(&id) {
+                    rt.clear(space, idx);
+                    allocator.release(idx, Instant::now());
+                    entry_dict.unbind(idx);
+                }
+            }
+            Some(_) => {}
+            None => {}
+        };
+
+        // now, we can safely bind the mapping to the correspoding neighbor
+        {
+            let mut mirrors = self.mirrors.write().unwrap();
+            let Some(neigbour_mirrors) = mirrors.get_mut(&neighbour) else {
+                return Ok(());
+            };
+            let dict = match space {
+                Space::Node => &mut neigbour_mirrors.nodes,
+                Space::User => &mut neigbour_mirrors.users,
+            };
+            dict.bind(mapping.abs_idx, mapping.target_id);
+        }
+
+        match space {
+            Space::Node => {
+                let mut nodes = self.nodes.write().unwrap();
+                match nodes.get(&mapping.target_id) {
+                    Some(node) => {
+                        let version = {
+                            let n = node.read().unwrap();
+                            n.manifest_version
+                        };
+                        if is_fresher_u32(mapping.version, version) {
+                            let mut n = node.write().unwrap();
+                            n.manifest_version = mapping.version;
+                        } else if version == mapping.version {
+                        } else {
+                            // TODO
+                            debug!(
+                                "stale profile echo from {neighbour:?}: target={:?} stored_version={version} incoming={}",
+                                mapping.target_id,
+                                mapping.version
+                            );
+                        }
+                    }
+                    None => {
+                        let n = Node {
+                            id: mapping.target_id,
+                            is_gateway: false,
+                            delegated_users: Vec::new(),
+                            manifest_version: mapping.version,
+                            public_key: None,
+                        };
+                        nodes.insert(mapping.target_id, n);
+                    }
+                };
+            }
+            Space::User => {
+                let mut users = self.users.write().unwrap();
+                match users.get(&mapping.target_id) {
+                    Some(user) => {
+                        let version = {
+                            let u = user.read().unwrap();
+                            u.profile_version
+                        };
+                        if is_fresher_u32(mapping.version, version) {
+                            let mut u = user.write().unwrap();
+                            u.profile_version = mapping.version;
+                        } else if version == mapping.version {
+                        } else {
+                            // TODO
+                            debug!(
+                                "stale profile echo from {neighbour:?}: target={:?} stored_version={version} incoming={}",
+                                mapping.target_id,
+                                mapping.version
+                            );
+                        }
+                    }
+                    None => {
+                        let u = User {
+                            id: mapping.target_id,
+                            profile_version: mapping.version,
+                            routing_entry: None,
+                            delegation_gateways: Vec::new(),
+                            public_key: None,
+                        };
+                        users.insert(mapping.target_id, u);
+                    }
+                };
+            }
+        }
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -403,7 +527,7 @@ mod next_hop_tests {
     fn register_user(state: &RouterV2State, id: [u8; 8]) -> Arc<RwLock<User>> {
         let user = User {
             id,
-            public_key: fresh_multikey(),
+            public_key: Some(fresh_multikey()),
             profile_version: 0,
             routing_entry: None,
             delegation_gateways: Vec::new(),
@@ -418,7 +542,7 @@ mod next_hop_tests {
     fn register_node(state: &RouterV2State, id: [u8; 8], is_gateway: bool) -> Arc<RwLock<Node>> {
         let node = Node {
             id,
-            public_key: fresh_multikey(),
+            public_key: Some(fresh_multikey()),
             manifest_version: 0,
             is_gateway,
             delegated_users: Vec::new(),
@@ -667,7 +791,7 @@ mod next_hop_tests {
         // Dangling gateway: build a Node, take a Weak, drop the strong.
         let orphan = Arc::new(RwLock::new(Node {
             id: [20; 8],
-            public_key: fresh_multikey(),
+            public_key: Some(fresh_multikey()),
             manifest_version: 0,
             is_gateway: true,
             delegated_users: Vec::new(),
@@ -760,7 +884,7 @@ mod sweep_tests {
     fn install_user(state: &RouterV2State, id: [u8; 8]) -> Arc<RwLock<User>> {
         let u = User {
             id,
-            public_key: fresh_multikey(),
+            public_key: Some(fresh_multikey()),
             profile_version: 0,
             routing_entry: None,
             delegation_gateways: Vec::new(),
@@ -773,7 +897,7 @@ mod sweep_tests {
     fn install_node(state: &RouterV2State, id: [u8; 8]) -> Arc<RwLock<Node>> {
         let n = Node {
             id,
-            public_key: fresh_multikey(),
+            public_key: Some(fresh_multikey()),
             manifest_version: 0,
             is_gateway: false,
             delegated_users: Vec::new(),
@@ -1103,7 +1227,7 @@ mod translate_tests {
     fn install_user(state: &RouterV2State, id: [u8; 8], profile_version: u32) {
         let u = User {
             id,
-            public_key: fresh_multikey(),
+            public_key: Some(fresh_multikey()),
             profile_version,
             routing_entry: None,
             delegation_gateways: Vec::new(),
@@ -1114,14 +1238,13 @@ mod translate_tests {
     fn install_node(state: &RouterV2State, id: [u8; 8], manifest_version: u32) {
         let n = Node {
             id,
-            public_key: fresh_multikey(),
+            public_key: Some(fresh_multikey()),
             manifest_version,
             is_gateway: false,
             delegated_users: Vec::new(),
         };
         state.nodes.write().unwrap().insert(id, n);
     }
-
 
     #[test]
     fn translate_incoming_unknown_neighbour_returns_unknown_mapping() {
@@ -1158,7 +1281,10 @@ mod translate_tests {
             .write()
             .unwrap()
             .take_pending(Space::User);
-        assert!(pending.is_empty(), "existing-binding path must not touch the tracker");
+        assert!(
+            pending.is_empty(),
+            "existing-binding path must not touch the tracker"
+        );
     }
 
     /// Fresh allocation: not in own dict yet → allocate, bind, mark.
@@ -1213,8 +1339,14 @@ mod translate_tests {
         let user_idx = state.translate_incoming(peer, Space::User, 5).unwrap();
         let node_idx = state.translate_incoming(peer, Space::Node, 5).unwrap();
 
-        assert_eq!(state.user_dict.read().unwrap().id_of(user_idx), Some(user_id));
-        assert_eq!(state.node_dict.read().unwrap().id_of(node_idx), Some(node_id));
+        assert_eq!(
+            state.user_dict.read().unwrap().id_of(user_idx),
+            Some(user_id)
+        );
+        assert_eq!(
+            state.node_dict.read().unwrap().id_of(node_idx),
+            Some(node_id)
+        );
         // Cross-checks: ids never bleed across spaces.
         assert_eq!(state.node_dict.read().unwrap().idx_of(&user_id), None);
         assert_eq!(state.user_dict.read().unwrap().idx_of(&node_id), None);
@@ -1345,7 +1477,10 @@ mod translate_tests {
             .mark_first_time(Space::User, 42);
 
         let out = state.pending_introductions(Space::User);
-        assert!(out.is_empty(), "orphan mark with no dict binding must be skipped");
+        assert!(
+            out.is_empty(),
+            "orphan mark with no dict binding must be skipped"
+        );
     }
 
     /// Mark + dict binding exist, but the users map has no User record

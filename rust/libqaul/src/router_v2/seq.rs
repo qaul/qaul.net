@@ -55,6 +55,11 @@ impl SeqNum {
     }
 }
 
+pub fn is_fresher_u32(new: u32, old: u32) -> bool {
+    let res = new.wrapping_sub(old);
+    res >= 1 && res <= 2_147_483_647
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -181,7 +186,10 @@ mod tests {
     fn seq_num_new_is_not_constant() {
         let first = SeqNum::new();
         let any_different = (0..100).any(|_| SeqNum::new() != first);
-        assert!(any_different, "SeqNum::new() returned the same value 100 times");
+        assert!(
+            any_different,
+            "SeqNum::new() returned the same value 100 times"
+        );
     }
 
     /// Verifies the From impl by exercising every method through it.
