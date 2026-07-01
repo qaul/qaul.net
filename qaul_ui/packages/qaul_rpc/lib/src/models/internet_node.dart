@@ -5,6 +5,16 @@ import '../generated/connections/connections.pb.dart';
 
 final connectedNodesProvider = StateProvider<List<InternetNode>>((ref) => []);
 
+/// Keeps [connectedNodesProvider] in sync after future-based RPC calls.
+/// Required because pending RPC responses no longer fall through to
+/// [ConnectionTranslator.processResponse].
+void syncConnectedInternetNodes(
+  StateController<List<InternetNode>> notifier,
+  List<InternetNode> nodes,
+) {
+  notifier.state = nodes;
+}
+
 class InternetNode extends Equatable {
   InternetNode(
     this.address, {

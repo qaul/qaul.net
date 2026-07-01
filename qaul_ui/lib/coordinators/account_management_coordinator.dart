@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -160,18 +162,15 @@ class AccountManagementCoordinator {
     if (user == null) return;
 
     final navigator = Navigator.of(context, rootNavigator: true);
-
-    final loggedOut = await _runWithProgress<bool>(
-      context,
-      () => ref.read(qaulWorkerProvider).logout(userId: user.id),
-    );
-    if (loggedOut != true && context.mounted) {
-      _showMessage(context, 'Session cleared locally; daemon logout may still be pending.');
-    }
-
     ref.read(forceSignedOutProvider.notifier).state = true;
     if (!navigator.mounted) return;
     _returnToInitial(navigator, ref);
+
+    unawaited(
+      ref.read(qaulWorkerProvider).logout(userId: user.id).catchError((_) {
+        return false;
+      }),
+    );
   }
 
   static Future<void> showDeleteFlow(
@@ -226,8 +225,6 @@ class AccountManagementCoordinator {
       () => ref.read(qaulWorkerProvider).setAccountPassword(password),
     );
     if (!context.mounted || changed != true) return;
-    await ref.read(qaulWorkerProvider).getDefaultUserAccount();
-    if (!context.mounted) return;
     _showMessage(context, 'Password updated');
   }
 
@@ -298,10 +295,7 @@ class AccountManagementCoordinator {
   }
 
   static void _returnToInitial(NavigatorState navigator, WidgetRef ref) {
-    navigator.pushNamedAndRemoveUntil(
-      NavigationHelper.initial,
-      (_) => false,
-    );
+    navigator.pushNamedAndRemoveUntil(NavigationHelper.initial, (_) => false);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(defaultUserProvider.notifier).state = null;
       ref.invalidate(accountSessionProvider);
