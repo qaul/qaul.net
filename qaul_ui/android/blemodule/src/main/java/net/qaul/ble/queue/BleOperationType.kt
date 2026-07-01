@@ -3,6 +3,17 @@ package net.qaul.ble.test.ble.queue
 import android.bluetooth.BluetoothDevice
 import java.util.UUID
 
+/**
+ * Which scheduler lane a MSG_CHAR payload op rides. Non-MSG_CHAR ops (connect/discover/MTU/etc)
+ * always ride CONTROL regardless of this. The scheduler drains lanes strictly in this order:
+ * all CONTROL, then all MEDIUM, then BULK, so a lower lane can never delay a higher one.
+ *   CONTROL — connection setup + flow-control (SEND_ID, ACK, ping, chunk requests). Latency critical.
+ *   MEDIUM  — short message payloads (routing updates, chat). Kept ahead of large transfers so a file
+ *             can't stall routing convergence.
+ *   BULK    — large message payloads (images/files). Yields to everything else.
+ */ //TODO: In the future we could potentially classify qaul routing messages as medium priority specifically instead of just gating by size, undecided whether this would improve
+enum class OpLane { CONTROL, MEDIUM, BULK }
+
 sealed class BleOperationType {
     abstract val device: BluetoothDevice
 }
@@ -22,7 +33,7 @@ data class CharacteristicWrite(
     val payload: ByteArray,
     // true = route through the priority queue even though it's MSG_CHAR (flow-control notifies). Not
     // part of identity (equals/hashCode), only a routing hint.
-    val priority: Boolean = false
+    val lane: OpLane = OpLane.BULK
 ) : BleOperationType() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -106,9 +117,9 @@ data class NotifyCharacteristicChange(
     val characteristicUuid: UUID,
     val confirmation: Boolean,
     val payload: ByteArray,
-    // true = route through the priority queue even though it's MSG_CHAR (flow-control notifies). Not
-    // part of identity (equals/hashCode), only a routing hint.
-    val priority: Boolean = false
+    // Which scheduler lane this MSG_CHAR notify rides (CONTROL for flow-control, MEDIUM for short
+    // messages, BULK for large transfers). Not part of identity (equals/hashCode), only a routing hint.
+    val lane: OpLane = OpLane.BULK
 ) : BleOperationType() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

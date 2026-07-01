@@ -38,10 +38,14 @@ object BleTaskScheduler {
     private const val GATT_MIN_MTU = 23
     private const val GATT_MAX_MTU = 517
 
-    // Priority queue: connection/setup ops (connect, discover, MTU, PHY, notifications, disconnect)
+    // Three queues (see OpLane). CONTROL is served fully before MEDIUM, MEDIUM fully
+    // before BULK, so a lower lane can never delay a higher one.
+    // CONTROL: connection/setup ops (connect, discover, MTU, PHY, notifications, disconnect) + flow control.
     private val bleOperationQueue = ConcurrentLinkedQueue<BleOperationType>()
-    // Low-priority queue: MSG_CHAR data ops. Pulled from only when the priority queue is empty
-    // so a large transfer never blocks connection setup to another device
+    // MEDIUM: short message payload (routing updates, chat). Ahead of large transfers so a file can't
+    // starve routing convergence, but behind connection setup / flow control.
+    private val mediumOperationQueue = ConcurrentLinkedQueue<BleOperationType>()
+    // BULK: large message payloads (images/files). Drained only when CONTROL and MEDIUM are both empty.
     private val bulkOperationQueue = ConcurrentLinkedQueue<BleOperationType>()
     @Volatile private var pendingOperation: BleOperationType? = null
 
@@ -54,14 +58,23 @@ object BleTaskScheduler {
     }
     @Volatile private var watchdogTask: ScheduledFuture<*>? = null
 
-    private fun isBulkOperation(op: BleOperationType): Boolean = when (op) {
-        is CharacteristicWrite -> op.characteristicUuid == BleConstants.MSG_CHAR && !op.priority
-        is NotifyCharacteristicChange -> op.characteristicUuid == BleConstants.MSG_CHAR && !op.priority
-        else -> false
+    /** Which lane an operation belongs in. Only MSG_CHAR payload ops have a lane everything else (connect,
+     *  discover, MTU, etc) is CONTROL. */
+    private fun queueForOperation(op: BleOperationType): ConcurrentLinkedQueue<BleOperationType> {
+        val lane = when (op) {
+            is CharacteristicWrite -> if (op.characteristicUuid == BleConstants.MSG_CHAR) op.lane else OpLane.CONTROL
+            is NotifyCharacteristicChange -> if (op.characteristicUuid == BleConstants.MSG_CHAR) op.lane else OpLane.CONTROL
+            else -> OpLane.CONTROL
+        }
+        return when (lane) {
+            OpLane.CONTROL -> bleOperationQueue
+            OpLane.MEDIUM -> mediumOperationQueue
+            OpLane.BULK -> bulkOperationQueue
+        }
     }
 
     private fun hasPendingOps(): Boolean =
-        bleOperationQueue.isNotEmpty() || bulkOperationQueue.isNotEmpty()
+        bleOperationQueue.isNotEmpty() || mediumOperationQueue.isNotEmpty() || bulkOperationQueue.isNotEmpty()
 
     // Tracks GATT connections by device. Touched from the scheduler, GATT callback threads, and
     // the watchdog thread, so it must be concurrent.
@@ -120,10 +133,11 @@ object BleTaskScheduler {
      */
     @Synchronized
     private fun purgeOperationsForDevice(device: BluetoothDevice) {
-        val before = bleOperationQueue.size + bulkOperationQueue.size
+        val before = bleOperationQueue.size + mediumOperationQueue.size + bulkOperationQueue.size
         bleOperationQueue.removeIf { it.device == device }
+        mediumOperationQueue.removeIf { it.device == device }
         bulkOperationQueue.removeIf { it.device == device }
-        val removed = before - (bleOperationQueue.size + bulkOperationQueue.size)
+        val removed = before - (bleOperationQueue.size + mediumOperationQueue.size + bulkOperationQueue.size)
         if (removed > 0) Log.i(TAG, "Purged $removed queued op(s) for ${device.address}")
     }
 
@@ -143,6 +157,7 @@ object BleTaskScheduler {
         val n = deviceGattMap.size
         deviceGattMap.clear()
         bleOperationQueue.clear()
+        mediumOperationQueue.clear()
         bulkOperationQueue.clear()
         pendingOperation = null
         disarmWatchdog()
@@ -168,7 +183,7 @@ object BleTaskScheduler {
         device: BluetoothDevice,
         uuid: UUID,
         payload: ByteArray,
-        priority: Boolean = false
+        lane: OpLane = OpLane.BULK
     ) {
         val gatt = deviceGattMap[device] ?: run {
             Log.e(TAG, "Cannot write to $uuid: not connected")
@@ -186,7 +201,7 @@ object BleTaskScheduler {
                 return
             }
         }
-        scheduleOperation(CharacteristicWrite(device, characteristic.uuid, writeType, payload, priority))
+        scheduleOperation(CharacteristicWrite(device, characteristic.uuid, writeType, payload, lane))
     }
 
     fun readDescriptor(device: BluetoothDevice, descriptor: BluetoothGattDescriptor) {
@@ -233,9 +248,9 @@ object BleTaskScheduler {
         uuid: UUID,
         confirmation: Boolean,
         payload: ByteArray,
-        priority: Boolean = false
+        lane: OpLane = OpLane.BULK
     ) {
-        scheduleOperation(NotifyCharacteristicChange(device, uuid, confirmation, payload, priority))
+        scheduleOperation(NotifyCharacteristicChange(device, uuid, confirmation, payload, lane))
     }
 
     /**
@@ -276,8 +291,7 @@ object BleTaskScheduler {
 
     @Synchronized
     private fun scheduleOperation(operation: BleOperationType) {
-        if (isBulkOperation(operation)) bulkOperationQueue.add(operation)
-        else bleOperationQueue.add(operation)
+        queueForOperation(operation).add(operation)
         if (pendingOperation == null) {
             executeNext()
         }
@@ -290,8 +304,8 @@ object BleTaskScheduler {
             return
         }
 
-        // Always pull from the priority queue first, only touch bulk data when nothing else is waiting
-        val operation = bleOperationQueue.poll() ?: bulkOperationQueue.poll() ?: run {
+        // Strict lane priority: CONTROL first, then MEDIUM (short messages), then BULK (large transfers)
+        val operation = bleOperationQueue.poll() ?: mediumOperationQueue.poll() ?: bulkOperationQueue.poll() ?: run {
             Log.d(TAG, "Queue empty")
             disarmWatchdog()
             return

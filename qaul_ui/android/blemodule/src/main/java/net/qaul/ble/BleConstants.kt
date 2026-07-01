@@ -101,6 +101,12 @@ object BleConstants {
     /** Default chunk size in bytes (Android default MTU 23 - 3 bytes GATT overhead = 20). */
     const val DEFAULT_CHUNK_SIZE = 20
 
+    /** Message-size threshold (bytes)
+     *  A message whose total size is at or below this rides the MEDIUM lane (routing updates, chat) so
+     *  it stays ahead of large transfers, anything larger (images/files) rides the BULK lane.
+     *  TODO: tune against real qaul routing-message sizes once measured */
+    const val MEDIUM_MESSAGE_MAX_BYTES = 16000
+
     /** Watchdog timeout for fast GATT ops (reads, writes, notifies, MTU, descriptor, PHY). These
      *  complete in well under 300ms, so a hung one is caught quickly. Kept short because a hang holds the single scheduler slot, blocking all ops. */
     const val FAST_OP_TIMEOUT_MS = 2_500L
