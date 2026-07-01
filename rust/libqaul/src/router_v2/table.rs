@@ -24,7 +24,7 @@ use std::{
 #[derive(Debug)]
 pub struct User {
     pub id: [u8; 8],
-    pub public_key: Multikey,
+    pub public_key: Option<Multikey>,
     pub profile_version: u32,
     pub routing_entry: Option<Weak<RwLock<RoutingEntry>>>,
     pub delegation_gateways: Vec<Weak<RwLock<Node>>>,
@@ -34,7 +34,7 @@ pub struct User {
 #[derive(Debug)]
 pub struct Node {
     pub id: [u8; 8],
-    pub public_key: Multikey,
+    pub public_key: Option<Multikey>,
     pub manifest_version: u32,
     pub is_gateway: bool,
     pub delegated_users: Vec<DelegatedUser>,
@@ -185,7 +185,7 @@ mod tests {
     fn make_user(id: [u8; 8]) -> User {
         User {
             id,
-            public_key: fresh_multikey(),
+            public_key: Some(fresh_multikey()),
             profile_version: 0,
             routing_entry: None,
             delegation_gateways: Vec::new(),
@@ -195,7 +195,7 @@ mod tests {
     fn make_node(id: [u8; 8]) -> Node {
         Node {
             id,
-            public_key: fresh_multikey(),
+            public_key: Some(fresh_multikey()),
             manifest_version: 0,
             is_gateway: false,
             delegated_users: Vec::new(),
