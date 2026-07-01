@@ -53,16 +53,9 @@ class SettingsScreen extends HookConsumerWidget {
           if (user != null) ...[
             const SizedBox(height: 20),
             QaulAccountSettingsSection(
-              account: QaulAccountSummary(
-                id: user.idBase58,
-                name: user.name,
-                publicKey: user.keyBase58,
-                hasPassword: user.hasPassword,
-              ),
+              showPasswordAction: false,
               onExportAccount: () =>
                   AccountManagementCoordinator.showExportFlow(context, ref),
-              onChangePassword: () =>
-                  AccountManagementCoordinator.showPasswordFlow(context, ref),
               onLogout: () => AccountManagementCoordinator.logout(context, ref),
               onDeleteAccount: () =>
                   AccountManagementCoordinator.showDeleteFlow(context, ref),

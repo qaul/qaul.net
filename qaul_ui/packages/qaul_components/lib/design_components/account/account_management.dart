@@ -187,20 +187,18 @@ class _LandingActions extends StatelessWidget {
 class QaulAccountSettingsSection extends StatelessWidget {
   const QaulAccountSettingsSection({
     super.key,
-    this.account,
-    this.showAccountHeading = true,
     this.onExportAccount,
     this.onChangePassword,
     this.onLogout,
     this.onDeleteAccount,
+    this.showPasswordAction = true,
   });
 
-  final QaulAccountSummary? account;
-  final bool showAccountHeading;
   final VoidCallback? onExportAccount;
   final VoidCallback? onChangePassword;
   final VoidCallback? onLogout;
   final VoidCallback? onDeleteAccount;
+  final bool showPasswordAction;
 
   @override
   Widget build(BuildContext context) {
@@ -209,10 +207,6 @@ class QaulAccountSettingsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (showAccountHeading && account != null) ...[
-          _AccountHeading(account: account!),
-          const SizedBox(height: 60),
-        ],
         _SettingsSectionHeader(
           icon: const Icon(Icons.supervisor_account_outlined),
           label: labels.accountManageAccount,
@@ -228,11 +222,12 @@ class QaulAccountSettingsSection extends StatelessWidget {
           label: labels.accountExportAccount,
           onTap: onExportAccount,
         ),
-        _AccountActionTile(
-          icon: Icons.password_outlined,
-          label: labels.accountChangeOrRemovePassword,
-          onTap: onChangePassword,
-        ),
+        if (showPasswordAction)
+          _AccountActionTile(
+            icon: Icons.password_outlined,
+            label: labels.accountChangeOrRemovePassword,
+            onTap: onChangePassword,
+          ),
         _AccountActionTile(
           icon: Icons.person_remove_outlined,
           label: labels.accountRemoveAccount,
@@ -244,8 +239,8 @@ class QaulAccountSettingsSection extends StatelessWidget {
   }
 }
 
-class _AccountHeading extends StatelessWidget {
-  const _AccountHeading({required this.account});
+class QaulAccountHeading extends StatelessWidget {
+  const QaulAccountHeading({super.key, required this.account});
 
   final QaulAccountSummary account;
 

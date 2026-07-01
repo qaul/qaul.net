@@ -165,11 +165,6 @@ class _InteractiveAccountFlowState extends State<_InteractiveAccountFlow> {
         events: _events,
         child: _AccountScreenFrame(
           child: QaulAccountSettingsSection(
-            account: const QaulAccountSummary(
-              id: 'QmQaulAccountIdBase58Preview',
-              name: 'Alice Qaul',
-              publicKey: 'QmQaulPublicKeyBase58Preview',
-            ),
             onLogout: _signOut,
             onExportAccount: _showExportDialog,
             onChangePassword: _showPasswordDialog,

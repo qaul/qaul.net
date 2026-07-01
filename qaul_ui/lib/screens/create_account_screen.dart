@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:hooks_riverpod/legacy.dart';
 import 'package:logging/logging.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 
@@ -21,55 +20,11 @@ class CreateAccountScreen extends HookConsumerWidget {
 
   static final _log = Logger('CreateAccountScreen');
 
-  static final _usernameProvider = StateProvider<String?>((ref) => null);
-
-  final _sendRequestProvider = FutureProvider<bool?>((ref) async {
-    final name = ref.watch(_usernameProvider);
-    if (name == null) return null;
-
-    final worker = ref.read(qaulWorkerProvider);
-    // TODO(brenodt): Decrease logs from config to finer/finest once tested
-    _log.config('Starting create account request...');
-
-    final createdUser = await worker.createUserAccount(name);
-    _log.config('Create user account result: "$createdUser"');
-    return createdUser != null;
-  });
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final nameCtrl = useTextEditingController();
 
     final loading = useState(false);
-
-    ref.listen(_sendRequestProvider, (
-      AsyncValue<bool?>? previous,
-      AsyncValue<bool?> data,
-    ) {
-      data.whenData((created) {
-        if (created == null) return;
-        loading.value = false;
-        if (created) {
-          Navigator.pushReplacementNamed(context, NavigationHelper.home);
-          return;
-        }
-        showDialog(
-          context: context,
-          builder: (c) {
-            return AlertDialog(
-              title: Text(AppLocalizations.of(context)!.timeoutErrorMessage),
-              content: Text(AppLocalizations.of(context)!.genericErrorMessage),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(AppLocalizations.of(context)!.okDialogButton),
-                ),
-              ],
-            );
-          },
-        );
-      });
-    });
 
     final i10n = AppLocalizations.of(context)!;
 
@@ -95,7 +50,7 @@ class CreateAccountScreen extends HookConsumerWidget {
                         controller: nameCtrl,
                         validator: (s) => _validateUserName(context, s),
                         onFieldSubmitted: (_) {
-                          _submitUsername(ref, nameCtrl, loading);
+                          _submitUsername(context, ref, nameCtrl, loading);
                         },
                         decoration: InputDecoration(
                           hintText: i10n.createAccountHeading,
@@ -108,7 +63,8 @@ class CreateAccountScreen extends HookConsumerWidget {
                 QaulButton(
                   key: submitButtonKey,
                   label: i10n.start,
-                  onPressed: () => _submitUsername(ref, nameCtrl, loading),
+                  onPressed: () =>
+                      _submitUsername(context, ref, nameCtrl, loading),
                 ),
               ],
             ),
@@ -128,15 +84,48 @@ class CreateAccountScreen extends HookConsumerWidget {
     return null;
   }
 
-  void _submitUsername(
+  Future<void> _submitUsername(
+    BuildContext context,
     WidgetRef ref,
     TextEditingController nameCtrl,
     ValueNotifier<bool> loading,
-  ) {
+  ) async {
+    if (loading.value) return;
+
     var valid = _fieldKey.currentState?.validate() ?? false;
     if (!valid) return;
 
     loading.value = true;
-    ref.read(_usernameProvider.notifier).state = nameCtrl.text;
+    // TODO(brenodt): Decrease logs from config to finer/finest once tested
+    _log.config('Starting create account request...');
+
+    final createdUser = await ref
+        .read(qaulWorkerProvider)
+        .createUserAccount(nameCtrl.text);
+    _log.config('Create user account result: "$createdUser"');
+
+    if (!context.mounted) return;
+    loading.value = false;
+
+    if (createdUser != null) {
+      Navigator.pushReplacementNamed(context, NavigationHelper.home);
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (c) {
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context)!.timeoutErrorMessage),
+          content: Text(AppLocalizations.of(context)!.genericErrorMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.okDialogButton),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
