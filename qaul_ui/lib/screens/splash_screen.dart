@@ -20,7 +20,8 @@ class SplashScreen extends ConsumerWidget {
       if (snapshot.value != QaulAccountSessionState.signedIn) return;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
-        Navigator.pushReplacementNamed(context, NavigationHelper.home);
+        Navigator.of(context, rootNavigator: true)
+            .pushReplacementNamed(NavigationHelper.home);
       });
     });
 

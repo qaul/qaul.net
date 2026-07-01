@@ -159,13 +159,19 @@ class AccountManagementCoordinator {
     final user = ref.read(defaultUserProvider);
     if (user == null) return;
 
+    final navigator = Navigator.of(context, rootNavigator: true);
+
     final loggedOut = await _runWithProgress<bool>(
       context,
       () => ref.read(qaulWorkerProvider).logout(userId: user.id),
     );
-    if (!context.mounted || loggedOut != true) return;
+    if (loggedOut != true && context.mounted) {
+      _showMessage(context, 'Session cleared locally; daemon logout may still be pending.');
+    }
 
-    _returnToInitial(context, ref);
+    ref.read(forceSignedOutProvider.notifier).state = true;
+    if (!navigator.mounted) return;
+    _returnToInitial(navigator, ref);
   }
 
   static Future<void> showDeleteFlow(
@@ -198,13 +204,16 @@ class AccountManagementCoordinator {
 
     final user = ref.read(defaultUserProvider);
     if (user == null) return;
+    final navigator = Navigator.of(context, rootNavigator: true);
     final deleted = await _runWithProgress<bool>(
       context,
       () => ref.read(qaulWorkerProvider).deleteAccount(userId: user.id),
     );
     if (!context.mounted || deleted != true) return;
 
-    _returnToInitial(context, ref);
+    ref.read(forceSignedOutProvider.notifier).state = true;
+    if (!navigator.mounted) return;
+    _returnToInitial(navigator, ref);
   }
 
   static Future<void> _setPassword(
@@ -252,11 +261,23 @@ class AccountManagementCoordinator {
     BuildContext context,
     Future<T> Function() operation,
   ) async {
+    final navigator = Navigator.of(context, rootNavigator: true);
+    var dialogShown = false;
+
     showDialog<void>(
       context: context,
+      useRootNavigator: true,
       barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
+      builder: (_) {
+        dialogShown = true;
+        return const PopScope(
+          canPop: false,
+          child: Center(child: CircularProgressIndicator()),
+        );
+      },
     );
+
+    await WidgetsBinding.instance.endOfFrame;
 
     try {
       return await operation();
@@ -264,7 +285,9 @@ class AccountManagementCoordinator {
       if (context.mounted) _showMessage(context, error.toString());
       return null;
     } finally {
-      if (context.mounted) Navigator.of(context, rootNavigator: true).pop();
+      if (dialogShown && navigator.mounted && navigator.canPop()) {
+        navigator.pop();
+      }
     }
   }
 
@@ -274,9 +297,8 @@ class AccountManagementCoordinator {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  static void _returnToInitial(BuildContext context, WidgetRef ref) {
-    Navigator.pushNamedAndRemoveUntil(
-      context,
+  static void _returnToInitial(NavigatorState navigator, WidgetRef ref) {
+    navigator.pushNamedAndRemoveUntil(
       NavigationHelper.initial,
       (_) => false,
     );
