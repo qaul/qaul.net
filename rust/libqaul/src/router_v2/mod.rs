@@ -21,12 +21,16 @@ use tracing::debug;
 use crate::{
     connections::ConnectionModule,
     router_v2::{
-        codec::{messages::Mapping, CodecError, messages::Entry},
+        codec::{
+            messages::{Entry, Mapping},
+            CodecError,
+        },
         index::{
             IndexAllocator, IndexDictionary, MirrorIndexDictionary, ReintroductionTracker, Space,
         },
-        seq::is_fresher_u32,
-        table::{Node, Nodes, RoutingTable, User, Users},
+        metric::hop_cost,
+        seq::{is_fresher_u32, Acceptance, SeqNum},
+        table::{Node, Nodes, RoutingEntry, RoutingTable, TargetRef, User, Users},
     },
     storage::configuration::RoutingV2Options,
 };
@@ -80,9 +84,20 @@ impl Sphere {
 
 /// groups one user-space and one node-space mirror per neigbour
 #[derive(Debug, Default)]
-pub struct NeighbourMirrors {
+pub struct NeighbourInfo {
+    pub node_id: [u8; 8],
     pub users: MirrorIndexDictionary,
     pub nodes: MirrorIndexDictionary,
+}
+
+impl NeighbourInfo {
+    pub fn new(node_id: [u8; 8]) -> Self {
+        NeighbourInfo {
+            node_id,
+            users: MirrorIndexDictionary::default(),
+            nodes: MirrorIndexDictionary::default(),
+        }
+    }
 }
 
 /// Instance-based router state that owns all routing sub-state.
@@ -97,7 +112,7 @@ pub struct RouterV2State {
     /// Index space for each node this particular node knows
     pub node_dict: RwLock<IndexDictionary>,
     /// Two mirrors per neighbour, one per index space.
-    pub mirrors: RwLock<HashMap<PeerId, NeighbourMirrors>>,
+    pub mirrors: RwLock<HashMap<PeerId, NeighbourInfo>>,
     /// the nodes that this node knows about
     pub nodes: Arc<RwLock<Nodes>>,
     /// the users
@@ -128,9 +143,9 @@ impl RouterV2State {
     }
 
     /// Inserts a fresh empty mirror for the neighbour, replacing any prior mirror
-    pub fn add_neighbour_mirror(&self, peer: PeerId) {
+    pub fn add_neighbour(&self, peer: PeerId, node_id: [u8; 8]) {
         let mut mirrors = self.mirrors.write().unwrap();
-        mirrors.insert(peer, NeighbourMirrors::default());
+        mirrors.insert(peer, NeighbourInfo::new(node_id));
     }
 
     pub fn remove_mirror(&self, peer: PeerId) {
@@ -468,11 +483,124 @@ impl RouterV2State {
     pub fn apply_entry(
         &self,
         neighbour: PeerId,
+        transport: ConnectionModule,
         rssi_dbm: Option<i8>,
         space: Space,
         entry: Entry,
         now: u64,
     ) -> Result<()> {
+        // the hop count has exceeded the design limit
+        if entry.hop_count >= 63 {
+            return Ok(());
+        }
+
+        let metric = entry.metric.saturating_add(hop_cost(transport, rssi_dbm));
+        let own_idx = match self.translate_incoming(neighbour, space, entry.abs_idx) {
+            Ok(idx) => idx,
+            Err(RoutingV2Error::UnknownMapping(_)) => return Ok(()),
+            Err(e) => return Err(e),
+        };
+
+        let target = {
+            match space {
+                Space::Node => {
+                    let dict = self.node_dict.read().unwrap();
+                    let Some(id) = dict.id_of(own_idx) else {
+                        debug!("receive-loop drop: own_idx {own_idx:?} has no dict binding (space={space:?})");
+                        return Ok(());
+                    };
+                    let nodes = self.nodes.read().unwrap();
+                    if let Some(node) = nodes.get(&id) {
+                        TargetRef::Node(node)
+                    } else {
+                        debug!("failed to find mapping");
+                        return Ok(());
+                    }
+                }
+                Space::User => {
+                    let dict = self.user_dict.read().unwrap();
+                    let Some(id) = dict.id_of(own_idx) else {
+                        debug!(
+                            "receive-loop drop: user own_idx {own_idx} has no user_dict binding"
+                        );
+                        return Ok(());
+                    };
+                    let users = self.users.read().unwrap();
+                    if let Some(user) = users.get(&id) {
+                        TargetRef::User(user)
+                    } else {
+                        debug!("receive-loop drop: user_id {id:?} not found in users map (own_idx={own_idx})");
+                        return Ok(());
+                    }
+                }
+            }
+        };
+
+        let (accept_entry, local_entry) = {
+            let rt = self.routing_table.read().unwrap();
+            match rt.get(space, own_idx) {
+                // that is, yhe slot is empty, so accept it.
+                None => (true, entry.local_only),
+                Some(e) => {
+                    let stored_entry = e.read().unwrap();
+                    let accept = match stored_entry.seq_num.acceptance(SeqNum::from(entry.seq)) {
+                        Acceptance::Fresher | Acceptance::Reboot => true,
+                        // that is, acceot only if the incoming metric is better
+                        Acceptance::NoChange => metric < stored_entry.metric,
+                    };
+                    (accept, stored_entry.local_only && entry.local_only)
+                }
+            }
+        };
+        if !accept_entry {
+            debug!(
+                "receive-loop drop: not better than stored (own_idx={own_idx}, incoming_seq={}, incoming_metric={metric})",
+                entry.seq,
+            );
+            return Ok(());
+        }
+
+        // get next_hop
+        let neighbour_node_id = {
+            let mirrors = self.mirrors.read().unwrap();
+            let Some(info) = mirrors.get(&neighbour) else {
+                return Ok(());
+            };
+            info.node_id
+        };
+        let next_hop_idx = {
+            let dict = self.node_dict.read().unwrap();
+            if let Some(idx) = dict.idx_of(&neighbour_node_id) {
+                idx
+            } else {
+                debug!("neighbour node_id has no node_dict entry: {neighbour_node_id:?}");
+                return Ok(());
+            }
+        };
+
+        let new_entry = Arc::new(RwLock::new(RoutingEntry {
+            target,
+            target_index: own_idx,
+            seq_num: SeqNum::from(entry.seq),
+            metric,
+            next_hop: next_hop_idx,
+            transport,
+            last_update: now,
+            hop_count: entry.hop_count.saturating_add(1),
+            local_only: local_entry,
+        }));
+
+        if let TargetRef::User(user) = &new_entry.read().unwrap().target {
+            user.write().unwrap().routing_entry = Some(Arc::downgrade(&new_entry));
+        }
+
+        self.routing_table
+            .write()
+            .unwrap()
+            .set(space, own_idx, new_entry);
+
+        // TODO: next phase
+
         Ok(())
     }
 }
