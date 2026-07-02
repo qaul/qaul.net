@@ -87,8 +87,10 @@ class SendQueue(qaulId: ByteArray) {
     // map of missing chunks to send
     // they have the third sending priority
     var missingChunksToSend: MutableMap<Int, Int> = mutableMapOf()
-    // queue of messages to send
-    // they have the fourth sending priority
+    // Queues of whole messages waiting to be chunked, split by size. getChunks drains
+    // shortMessagesToSend before messagesToSend so a short message (routing/chat) reaches the MEDIUM
+    // scheduler lane ahead of a large multi-part transfer. This mirrors the scheduler's lane priority one level up.
+    var shortMessagesToSend: Queue<Triple<ByteArray, String, Byte>> = LinkedList()
     var messagesToSend: Queue<Triple<ByteArray, String, Byte>> = LinkedList()
 
     /**
@@ -125,8 +127,10 @@ class SendQueue(qaulId: ByteArray) {
     @Synchronized
     fun addMessage(message: ByteArray, messageId: String) {
         if (message.size <= maxPartSize) {
-            // add a normal message
-            messagesToSend.add(Triple(message, messageId, 0x00))
+            // add a normal (single part) message to the short or large queue by size, so short
+            // messages are pulled ahead of a big transfer's parts (see getChunks).
+            val queue = if (message.size <= BleConstants.MEDIUM_MESSAGE_MAX_BYTES) shortMessagesToSend else messagesToSend
+            queue.add(Triple(message, messageId, 0x00))
         } else {
             // add a large message, split into parts sized for the current MTU
             val maxTransmittable = maxPartSize * 4
@@ -194,8 +198,10 @@ class SendQueue(qaulId: ByteArray) {
         // chunks we were asked to resend, classified by their originating message's size
         getMissingChunksToSend(mediumChunks, bulkChunks)
 
-        // create a new message chunk
-        if (messagesToSend.isNotEmpty()) {
+        // create a new message chunk, short messages first, so they reach the MEDIUM lane ahead of a
+        // large transfer's remaining parts sitting in messagesToSend.
+        val nextQueue = if (shortMessagesToSend.isNotEmpty()) shortMessagesToSend else messagesToSend
+        if (nextQueue.isNotEmpty()) {
             // get index
             val messageIndex = getNextMessageIndex()
             if (messageIndex == null) {
@@ -203,8 +209,8 @@ class SendQueue(qaulId: ByteArray) {
                 return ChunkBatch(flcChunks, mediumChunks, bulkChunks)
             }
 
-            // get the first message from the queue
-            val (message, messageId, largeMessageIndicator) = messagesToSend.remove()
+            // get the first message from the chosen queue
+            val (message, messageId, largeMessageIndicator) = nextQueue.remove()
             val sendQueueMessage = SendQueueMessage(qaulId, message, messageId, messageIndex, chunkSize, largeMessageIndicator)
             sendQueueMessage.state = SendQueueMessageState.SENDING
             sendQueues[messageIndex] = sendQueueMessage
@@ -470,34 +476,31 @@ class SendQueue(qaulId: ByteArray) {
     }
 
     /**
-     * set connection lost
-     * This method is called when the connection to the device is lost.
-     * @return message ID that could not be sent
+     * Connection lost. Mark every message handed to this queue but not yet  resolved
+     *  as failed, and return their distinct ids so the caller can surface a real
+     * failure result to libqaul. Covers messages mid-send (in [sendQueues], awaiting ACK) and messages still queued but not yet chunked ([messagesToSend]).
+     *
      */
     @Synchronized
-    fun setConnectionLost(): String? {
+    fun failAllPending(): Set<String> {
         state = SendQueueState.CONNECTION_LOST
-        // check state of the send queues
-        var sendQueueMessage = sendQueues.get(currentIndex)
-        if (sendQueueMessage != null &&
-            (sendQueueMessage.state == SendQueueMessageState.SENDING || 
-             sendQueueMessage.state == SendQueueMessageState.QUEUED)) {
-                // set state to ERROR
-                sendQueueMessage.state = SendQueueMessageState.ERROR
-                return sendQueueMessage.messageId
+        val failed = LinkedHashSet<String>()
+        // messages sent but not yet acked
+        sendQueues.values.forEach { m ->
+            if (m.state != SendQueueMessageState.SUCCESS &&
+                m.state != SendQueueMessageState.ERROR &&
+                m.state != SendQueueMessageState.EMPTY &&
+                m.messageId.isNotEmpty()) {
+                m.state = SendQueueMessageState.ERROR
+                failed.add(m.messageId)
+            }
         }
-        else if (messagesToSend.isNotEmpty()) {
-            // get the first message ID that could not be sent
-            val message = messagesToSend.poll()
-            val messageId = message.second
-            return messageId
-        } else {
-            return null
-        }
-        //flcToSend.clear()
-        //missingChunksToRequest.clear()
-        //messagesToSend.clear()
-        //sendQueues.clear()
+        // messages queued but not yet chunked (both lanes)
+        shortMessagesToSend.forEach { if (it.second.isNotEmpty()) failed.add(it.second) }
+        messagesToSend.forEach { if (it.second.isNotEmpty()) failed.add(it.second) }
+        shortMessagesToSend.clear()
+        messagesToSend.clear()
+        return failed
     }
 
     /**

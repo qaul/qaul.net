@@ -21,6 +21,11 @@ object BleManager : ConnectionEventListener {
     var onNeighbourUp: ((qaulId: ByteArray) -> Unit)? = null
     var onNeighbourDown: ((qaulId: ByteArray) -> Unit)? = null
 
+    /** Real per message delivery result (remote FLC ACK, or a send failure), keyed by the
+     *  message id passed into [sendMessage]. lib qaul sets this, the module invokes it to emit a
+     *  BleDirectSendResult */
+    var onMessageResult: ((messageId: String, success: Boolean) -> Unit)? = null
+
     /** Must be called once at startup. Captures the application context for connectGatt so it
      *  doesn't have to be threaded through every connect() call. */
     fun start(context: Context) {
@@ -28,6 +33,7 @@ object BleManager : ConnectionEventListener {
         // Forward ConnectionPool's qaul-ID-keyed neighbour events out to qaul.
         ConnectionPool.onNeighbourUp = { qaulId -> onNeighbourUp?.invoke(qaulId) }
         ConnectionPool.onNeighbourDown = { qaulId -> onNeighbourDown?.invoke(qaulId) }
+        ConnectionPool.onMessageResult = { messageId, success -> onMessageResult?.invoke(messageId, success) }
         ConnectionPool.start()
         BleTaskScheduler.registerListener(this)
     }
@@ -35,6 +41,7 @@ object BleManager : ConnectionEventListener {
         BleTaskScheduler.unregisterListener(this)
         ConnectionPool.onNeighbourUp = null
         ConnectionPool.onNeighbourDown = null
+        ConnectionPool.onMessageResult = null
         ConnectionPool.stop()
         // Safety net: force-close any GATT client handles that ConnectionPool's disconnects didn't
         // (queued Disconnect ops may not have run). Prevents leaked client interfaces across stop/start.
@@ -47,8 +54,8 @@ object BleManager : ConnectionEventListener {
     fun disconnect(device: BluetoothDevice) =
         ConnectionPool.disconnect(device)
 
-    fun sendMessage(qaulId: ByteArray, payload: ByteArray) =
-        ConnectionPool.sendMessage(qaulId, payload)
+    fun sendMessage(qaulId: ByteArray, payload: ByteArray, messageId: String) =
+        ConnectionPool.sendMessage(qaulId, payload, messageId)
 
     fun isConnected(device: BluetoothDevice): Boolean =
         ConnectionPool.getByAddress(device.address) != null

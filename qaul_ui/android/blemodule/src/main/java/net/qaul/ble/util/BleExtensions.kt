@@ -170,3 +170,11 @@ fun BluetoothGattCharacteristic.isNotifiable(): Boolean =
 
 fun ByteArray.toHexString(): String =
     joinToString(separator = " ", prefix = "0x") { String.format("%02X", it) }
+
+/** Compact lowercase hex.
+ *  Used to carry libqaul's byte message_id through the string keyed SendQueue so the delivery ACK
+ *  can be reported back under the same id. Distinct from [toHexString], which is for logging only. */
+fun ByteArray.toHexKey(): String = joinToString(separator = "") { String.format("%02x", it) }
+
+/** Inverse of [toHexKey]: reconstruct the original bytes from a compact hex key. */
+fun String.hexKeyToBytes(): ByteArray = chunked(2).map { it.toInt(16).toByte() }.toByteArray()

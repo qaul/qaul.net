@@ -78,7 +78,7 @@ object BleConstants {
      *  ourselves. Stops our outbound connect from racing their inbound one and forming a dual link that
      *  collapses with 133 or wastes time doing tiebreakers. After the window we connect anyway as a fallback. */
      // TODO: More testing of this, does waiting waste opportunities to form connections quicker even if they are in the wrong direction
-    const val WRONG_ROLE_DEFER_MS = 600_000L
+    const val WRONG_ROLE_DEFER_MS = 9_000L
 
     /** Company ID for the manufacturer-data block carrying the truncated qaul ID in advertisements.
      *  0xFFFF is the SIG value reserved for testing / internal use. */
