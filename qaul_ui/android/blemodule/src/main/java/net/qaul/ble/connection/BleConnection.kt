@@ -32,6 +32,14 @@ class BleConnection(
      */
     var onQaulIdResolved: ((device: BluetoothDevice, qaulId: ByteArray) -> Unit)? = null
 
+    /**
+     * Fired when a sent message reaches an outcome, the remote's FLC ACK arrived or, an error.
+     *.[messageId] is libqaul's message_id, carried through as a
+     * hex key. [success] is the remote's ACK result. Forwardeding this up to libqaul as a
+     * BleDirectSendResult.
+     */
+    var onMessageResult: ((messageId: String, success: Boolean) -> Unit)? = null
+
     private val TAG = "BleConnection"
 
     private val sendQueue = SendQueue(BleConstants.LOCAL_QAUL_ID)
@@ -170,12 +178,16 @@ class BleConnection(
      * Send a message. Transport is chosen automatically: if the L2CAP channel is up, use it
      * otherwise fall back to the GATT chunk-queue path. Callers don't need to know which is used.
      */
-    fun sendMessage(payload: ByteArray) {
+    fun sendMessage(payload: ByteArray, messageId: String = UUID.randomUUID().toString()) {
         val channel = synchronized(l2capLock) { l2capChannel }
-        if (channel != null) {
+        // large messages take the L2CAP bulk pipe, short messages take the GATT path so they keep the medium lane priority
+        // and real FLC ACK. They ride separate channels, so a file can't block a routing
+        // update. If there's no L2CAP channel, everything goes GATT and large lands in the BULK lane.
+        if (channel != null && payload.size > BleConstants.MEDIUM_MESSAGE_MAX_BYTES) {
             channel.send(payload)
+            // TODO: L2CAP has no per-message ACK. is this ok?. the socket write is the delivery signal for now.
+            onMessageResult?.invoke(messageId, true)
         } else {
-            val messageId = UUID.randomUUID().toString()
             sendQueue.addMessage(payload, messageId)
             flushSendQueue()
         }
@@ -214,9 +226,12 @@ class BleConnection(
             flushSendQueue()
         }
 
-        // Remote is acknowledging receipt of a message we sent
+        // Remote is acknowledging receipt of a message we sent. Returns the completed
+        // message's id (empty until a message, or all parts of a large one. is fully acked), which we
+        // surface up as the real delivery result
         result.flcAckReceived?.let { ack ->
-            sendQueue.flcAckReceived(ack.messageIndex, ack.success, ack.errorCode)
+            val messageId = sendQueue.flcAckReceived(ack.messageIndex, ack.success, ack.errorCode)
+            if (messageId.isNotEmpty()) onMessageResult?.invoke(messageId, ack.success)
             flushSendQueue() // Advance to the next queued message now that this one is ACK'd
         }
 
@@ -258,6 +273,16 @@ class BleConnection(
         }
     }
 
+
+   /**
+    * Connection is being torn down, fail every message still in flight to this peer so libqaul gets
+    * a real failure result.
+    */
+    fun failPendingMessages() {
+        sendQueue.failAllPending().forEach { messageId ->
+            onMessageResult?.invoke(messageId, false)
+        }
+    }
 
    /**
     *  Queues and sends an FLC ping for this connection, used for maintaining liveness.

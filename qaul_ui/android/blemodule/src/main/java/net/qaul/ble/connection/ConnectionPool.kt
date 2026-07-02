@@ -33,6 +33,9 @@ object ConnectionPool {
      * away. BleManager wires these out to its qaul facing callbacks.
      */
     var onNeighbourUp: ((qaulId: ByteArray) -> Unit)? = null
+
+    /** Fired with a sent message's terminal delivery outcome (see each BleConnection.onMessageResult) forwarded up to libqaul as a real BleDirectSendResult. */
+    var onMessageResult: ((messageId: String, success: Boolean) -> Unit)? = null
     var onNeighbourDown: ((qaulId: ByteArray) -> Unit)? = null
 
     // qaul IDs (hex) currently reachable via at least one connection — the dedup key for up/down.
@@ -227,6 +230,7 @@ object ConnectionPool {
         // here we likely put device limit
         val newConnection = BleConnection(device, role)
         newConnection.onQaulIdResolved = { dev, qaulId -> handleQaulIdResolved(dev, qaulId) }
+        newConnection.onMessageResult = { messageId, success -> onMessageResult?.invoke(messageId, success) }
         connections[device.address] = newConnection
         newConnection.connect()
         Log.i(TAG, "Connection added for ${device.address} (${connections.size} total)")
@@ -246,6 +250,7 @@ object ConnectionPool {
             pendingDisconnects.add(device.address)
         }
         conn.disconnect()
+        conn.failPendingMessages()   // report any in-flight sends to this peer as failed
         Log.i(TAG, "Connection removed for ${device.address} (${connections.size} remaining)")
         // Re-evaluate after removal: only reports DOWN if no other leg still holds this qaul ID.
         refreshNeighbourDown(conn.remoteQaulId)
@@ -383,13 +388,16 @@ object ConnectionPool {
     // Send
 
 
-    fun sendMessage(qaulId: ByteArray, payload: ByteArray) {
+    fun sendMessage(qaulId: ByteArray, payload: ByteArray, messageId: String) {
         val conn = getByQaulId(qaulId)
         if (conn != null) {
-            conn.sendMessage(payload)
+            conn.sendMessage(payload, messageId)
         }
         else {
+            // Definite failure: no BLE link to this peer. Report it immediately rather than leaving
+            // libqaul without a result.
             Log.i(TAG, "Send failed, not connected to any device with Qaul ID: $qaulId")
+            onMessageResult?.invoke(messageId, false)
         }
     }
 
@@ -410,6 +418,7 @@ object ConnectionPool {
             } else {
                 // Unexpected drop — clean up, then re-evaluate neighbour reachability
                 val conn = connections.remove(device.address)
+                conn?.failPendingMessages()   // fail in-flight sends to this peer → libqaul re-routes
                 Log.i(TAG, "Unexpected disconnect cleaned up for ${device.address}")
                 refreshNeighbourDown(conn?.remoteQaulId)
             }

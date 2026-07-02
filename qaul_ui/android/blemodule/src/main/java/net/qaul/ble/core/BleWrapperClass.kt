@@ -31,6 +31,8 @@ import qaul.sys.ble.BleOuterClass
 // qaul BLE engine (transport layer). NOTE: these still declare the net.qaul.ble.test.* package
 // even though the files moved into net/qaul/ble/ — rename later and update these imports.
 import net.qaul.ble.test.ble.manager.BleManager
+import net.qaul.ble.test.ble.util.toHexKey
+import net.qaul.ble.test.ble.util.hexKeyToBytes
 import net.qaul.ble.test.ble.server.GattServer
 import net.qaul.ble.test.ble.advertiser.BleAdvertiser
 import net.qaul.ble.test.ble.scanner.BleScanner
@@ -132,21 +134,11 @@ open class BleWrapperClass(context: Activity) {
 
                 BleOuterClass.Ble.MessageCase.DIRECT_SEND -> {
                     val bleDirectSend = bleReq.directSend
-
                     BleManager.sendMessage(
                         bleDirectSend.receiverId.toByteArray(),
-                        bleDirectSend.data.toByteArray()
+                        bleDirectSend.data.toByteArray(),
+                        bleDirectSend.messageId.toByteArray().toHexKey()
                     )
-                    // TODO: BleManager.sendMessage is fire and forget currently (no delivery signal yet). Report
-                    //       success optimistically for now, routing re-sends at its own layer, wire a
-                    //       real result off the SendQueue ACK later, for this we need to pass messageId in the send
-                    val bleRes = BleOuterClass.Ble.newBuilder()
-                    val directSendResult = BleOuterClass.BleDirectSendResult.newBuilder()
-                    directSendResult.errorMessage = "Successfully sent"
-                    directSendResult.success = true
-                    directSendResult.id = bleDirectSend.messageId
-                    bleRes.directSendResult = directSendResult.build()
-                    sendResponse(bleRes)
                 }
                 else -> {}
             }
@@ -344,6 +336,16 @@ open class BleWrapperClass(context: Activity) {
             directReceived.from = ByteString.copyFrom(fromQaulId)
             directReceived.data = ByteString.copyFrom(data)
             bleRes.directReceived = directReceived.build()
+            sendResponse(bleRes)
+        }
+        BleManager.onMessageResult = { messageId, success ->
+            val bleRes = BleOuterClass.Ble.newBuilder()
+            val directSendResult = BleOuterClass.BleDirectSendResult.newBuilder()
+            // messageId is the hex key of libqaul's original byte message_id, reconstruct the bytes.
+            directSendResult.id = ByteString.copyFrom(messageId.hexKeyToBytes())
+            directSendResult.success = success
+            directSendResult.errorMessage = if (success) "delivered" else "delivery failed"
+            bleRes.directSendResult = directSendResult.build()
             sendResponse(bleRes)
         }
         BleManager.onNeighbourUp = { qaulId ->
