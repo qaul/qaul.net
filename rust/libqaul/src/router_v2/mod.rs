@@ -1520,3 +1520,345 @@ mod translate_tests {
         assert_eq!(out, vec![(10, good_id, 7)]);
     }
 }
+
+#[cfg(test)]
+mod apply_mapping_tests {
+    use super::*;
+    use crate::router_v2::{
+        codec::messages::Mapping,
+        identity::Multikey,
+        index::Space,
+        table::{Node, RoutingEntry, TargetRef, User},
+    };
+    use libp2p::identity::Keypair;
+
+    fn fresh_multikey() -> Multikey {
+        Multikey::from(Keypair::generate_ed25519().public())
+    }
+
+    fn fresh_state() -> RouterV2State {
+        RouterV2State::new([0; 8])
+    }
+
+    fn fresh_peer() -> PeerId {
+        Keypair::generate_ed25519().public().to_peer_id()
+    }
+
+    fn add_neighbour(state: &RouterV2State) -> PeerId {
+        let peer = fresh_peer();
+        state.add_neighbour_mirror(peer);
+        peer
+    }
+
+    fn bind_mirror(state: &RouterV2State, peer: PeerId, space: Space, idx: u16, id: [u8; 8]) {
+        let mut mirrors = state.mirrors.write().unwrap();
+        let nm = mirrors.get_mut(&peer).unwrap();
+        match space {
+            Space::Node => nm.nodes.bind(idx, id),
+            Space::User => nm.users.bind(idx, id),
+        }
+    }
+
+    fn install_user(
+        state: &RouterV2State,
+        id: [u8; 8],
+        profile_version: u32,
+    ) -> Arc<RwLock<User>> {
+        let u = User {
+            id,
+            public_key: Some(fresh_multikey()),
+            profile_version,
+            routing_entry: None,
+            delegation_gateways: Vec::new(),
+        };
+        let mut users = state.users.write().unwrap();
+        users.insert(id, u);
+        users.get(&id).unwrap()
+    }
+
+    fn install_node(
+        state: &RouterV2State,
+        id: [u8; 8],
+        manifest_version: u32,
+    ) -> Arc<RwLock<Node>> {
+        let n = Node {
+            id,
+            public_key: Some(fresh_multikey()),
+            manifest_version,
+            is_gateway: false,
+            delegated_users: Vec::new(),
+        };
+        let mut nodes = state.nodes.write().unwrap();
+        nodes.insert(id, n);
+        nodes.get(&id).unwrap()
+    }
+
+    // ---------- unknown neighbour ----------
+
+    #[test]
+    fn apply_mapping_unknown_neighbour_is_noop() {
+        let state = fresh_state();
+        let peer = fresh_peer(); // never registered
+
+        let result = state.apply_mapping(
+            peer,
+            Space::User,
+            Mapping { abs_idx: 5, target_id: [1; 8], version: 42 },
+        );
+
+        assert!(result.is_ok());
+        assert_eq!(state.users.read().unwrap().len(), 0);
+        assert!(state.mirrors.read().unwrap().is_empty());
+    }
+
+    // ---------- fresh binding, first sight ----------
+
+    #[test]
+    fn apply_mapping_fresh_user_creates_stub_and_binds_mirror() {
+        let state = fresh_state();
+        let peer = add_neighbour(&state);
+
+        state
+            .apply_mapping(
+                peer,
+                Space::User,
+                Mapping { abs_idx: 5, target_id: [1; 8], version: 42 },
+            )
+            .unwrap();
+
+        let mirrors = state.mirrors.read().unwrap();
+        assert_eq!(mirrors.get(&peer).unwrap().users.id_of(5), Some([1; 8]));
+        drop(mirrors);
+
+        let users = state.users.read().unwrap();
+        let user_arc = users.get(&[1; 8]).unwrap();
+        let user = user_arc.read().unwrap();
+        assert_eq!(user.id, [1; 8]);
+        assert_eq!(user.profile_version, 42);
+        assert!(user.public_key.is_none(), "stub must not fabricate a key");
+    }
+
+    #[test]
+    fn apply_mapping_fresh_node_creates_stub_and_binds_mirror() {
+        let state = fresh_state();
+        let peer = add_neighbour(&state);
+
+        state
+            .apply_mapping(
+                peer,
+                Space::Node,
+                Mapping { abs_idx: 5, target_id: [2; 8], version: 99 },
+            )
+            .unwrap();
+
+        let mirrors = state.mirrors.read().unwrap();
+        assert_eq!(mirrors.get(&peer).unwrap().nodes.id_of(5), Some([2; 8]));
+        drop(mirrors);
+
+        let nodes = state.nodes.read().unwrap();
+        let node = nodes.get(&[2; 8]).unwrap();
+        let n = node.read().unwrap();
+        assert_eq!(n.manifest_version, 99);
+        assert!(!n.is_gateway, "stub node is not a gateway by default");
+        assert!(n.public_key.is_none());
+    }
+
+    // ---------- same-id re-mapping ----------
+
+    #[test]
+    fn apply_mapping_same_id_updates_version_only() {
+        let state = fresh_state();
+        let peer = add_neighbour(&state);
+        let id = [3; 8];
+
+        bind_mirror(&state, peer, Space::User, 5, id);
+        install_user(&state, id, 10);
+
+        state
+            .apply_mapping(peer, Space::User, Mapping { abs_idx: 5, target_id: id, version: 20 })
+            .unwrap();
+
+        let mirrors = state.mirrors.read().unwrap();
+        assert_eq!(mirrors.get(&peer).unwrap().users.id_of(5), Some(id));
+        drop(mirrors);
+
+        let users = state.users.read().unwrap();
+        assert_eq!(users.get(&id).unwrap().read().unwrap().profile_version, 20);
+    }
+
+    // ---------- rebind: different target_id at existing idx ----------
+
+    /// The critical §8.7-step-2 case: the mirror already has abs_idx bound
+    /// to an OLD target_id. Applying a NEW target_id must clear the host's
+    /// routing entry for the old target, release the old own_idx into
+    /// cooldown, unbind the own dict, then bind the new mapping.
+    #[test]
+    fn apply_mapping_rebind_clears_old_routing_state() {
+        let state = fresh_state();
+        let peer = add_neighbour(&state);
+
+        let old_id = [10; 8];
+        let new_id = [20; 8];
+        let own_idx: u16 = 7;
+
+        bind_mirror(&state, peer, Space::User, 5, old_id);
+        let old_user = install_user(&state, old_id, 1);
+        state.user_dict.write().unwrap().bind(own_idx, old_id);
+
+        let entry = Arc::new(RwLock::new(RoutingEntry {
+            target_index: own_idx,
+            target: TargetRef::User(old_user.clone()),
+            seq_num: crate::router_v2::seq::SeqNum::from(0u16),
+            metric: 5,
+            next_hop: 0,
+            transport: ConnectionModule::Lan,
+            last_update: 0,
+            hop_count: 1,
+            local_only: false,
+        }));
+        let entry_weak = Arc::downgrade(&entry);
+        state.routing_table.write().unwrap().set(Space::User, own_idx, entry);
+        old_user.write().unwrap().routing_entry = Some(entry_weak.clone());
+
+        state
+            .apply_mapping(
+                peer,
+                Space::User,
+                Mapping { abs_idx: 5, target_id: new_id, version: 1 },
+            )
+            .unwrap();
+
+        // Old routing table slot cleared; cycle-discipline Weak dangles.
+        assert!(state.routing_table.read().unwrap().get(Space::User, own_idx).is_none());
+        assert!(entry_weak.upgrade().is_none(), "old routing entry Arc must be dropped");
+
+        // Old own_idx unbound from own dict.
+        assert_eq!(state.user_dict.read().unwrap().idx_of(&old_id), None);
+        assert_eq!(state.user_dict.read().unwrap().id_of(own_idx), None);
+
+        // Old own_idx released into cooldown.
+        assert!(state.users_allocator.read().unwrap().idx_in_cooldown(own_idx));
+
+        // Mirror now bound to NEW.
+        let mirrors = state.mirrors.read().unwrap();
+        assert_eq!(mirrors.get(&peer).unwrap().users.id_of(5), Some(new_id));
+        drop(mirrors);
+
+        // NEW user stub created.
+        assert!(state.users.read().unwrap().get(&new_id).is_some());
+    }
+
+    // ---------- version comparison branches ----------
+
+    #[test]
+    fn apply_mapping_incoming_version_equal_is_noop() {
+        let state = fresh_state();
+        let peer = add_neighbour(&state);
+        let id = [4; 8];
+        install_user(&state, id, 42);
+
+        state
+            .apply_mapping(peer, Space::User, Mapping { abs_idx: 5, target_id: id, version: 42 })
+            .unwrap();
+
+        assert_eq!(
+            state
+                .users
+                .read()
+                .unwrap()
+                .get(&id)
+                .unwrap()
+                .read()
+                .unwrap()
+                .profile_version,
+            42,
+        );
+    }
+
+    #[test]
+    fn apply_mapping_incoming_version_older_preserves_stored() {
+        let state = fresh_state();
+        let peer = add_neighbour(&state);
+        let id = [5; 8];
+        install_user(&state, id, 100);
+
+        state
+            .apply_mapping(peer, Space::User, Mapping { abs_idx: 5, target_id: id, version: 50 })
+            .unwrap();
+
+        assert_eq!(
+            state
+                .users
+                .read()
+                .unwrap()
+                .get(&id)
+                .unwrap()
+                .read()
+                .unwrap()
+                .profile_version,
+            100,
+            "stale-echo path must NOT overwrite the fresher stored version",
+        );
+    }
+
+    #[test]
+    fn apply_mapping_incoming_version_fresher_updates_node() {
+        let state = fresh_state();
+        let peer = add_neighbour(&state);
+        let id = [6; 8];
+        install_node(&state, id, 5);
+
+        state
+            .apply_mapping(peer, Space::Node, Mapping { abs_idx: 5, target_id: id, version: 12 })
+            .unwrap();
+
+        assert_eq!(
+            state
+                .nodes
+                .read()
+                .unwrap()
+                .get(&id)
+                .unwrap()
+                .read()
+                .unwrap()
+                .manifest_version,
+            12,
+        );
+    }
+
+    // ---------- spaces are independent ----------
+
+    #[test]
+    fn apply_mapping_user_and_node_spaces_are_independent() {
+        let state = fresh_state();
+        let peer = add_neighbour(&state);
+        let user_id = [11; 8];
+        let node_id = [22; 8];
+
+        state
+            .apply_mapping(
+                peer,
+                Space::User,
+                Mapping { abs_idx: 5, target_id: user_id, version: 1 },
+            )
+            .unwrap();
+        state
+            .apply_mapping(
+                peer,
+                Space::Node,
+                Mapping { abs_idx: 5, target_id: node_id, version: 1 },
+            )
+            .unwrap();
+
+        let mirrors = state.mirrors.read().unwrap();
+        let nm = mirrors.get(&peer).unwrap();
+        assert_eq!(nm.users.id_of(5), Some(user_id));
+        assert_eq!(nm.nodes.id_of(5), Some(node_id));
+        drop(mirrors);
+
+        assert!(state.users.read().unwrap().get(&user_id).is_some());
+        assert!(state.users.read().unwrap().get(&node_id).is_none());
+        assert!(state.nodes.read().unwrap().get(&node_id).is_some());
+        assert!(state.nodes.read().unwrap().get(&user_id).is_none());
+    }
+}
