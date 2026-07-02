@@ -259,6 +259,51 @@ impl Default for CryptoRotation {
     }
 }
 
+/// Routing Configuration Options for new router
+///
+/// The following options can be configured:
+/// All time units are in seconds
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct RoutingV2Options {
+    /// time for each node's own self-entry origin update
+    pub origin_interval_time: u64,
+    /// interval at which a node batches updates to its neighbours
+    pub relay_interval: u64,
+    ///tTime without a fresh-seq update before a routing entry is removed and its index released
+    pub route_expiry_ms: u64,
+    /// time after an index slot is released before the allocator rebinds it to a different target
+    pub idx_cooldown: u64,
+    /// circcular distance above which an incoming seq num is treated as a reboot instead of
+    /// normal advance
+    pub reboot_for_seq_num: u16,
+    /// absolute expiry on a delegation entry
+    pub delegation_ttl: u64,
+    /// interval at which a delegating user re-issues a fresh delegation entry
+    pub delegation_referesh: u64,
+    /// min interval between manifest emissions from a gatewat
+    pub manifest_rate_limit: u64,
+    pub manifest_resync: u64,
+    /// no of consecutive delta emissions before a full NODE_MANIFEST is forced as a periodic re-sync
+    pub manifest_resync_count: u32,
+}
+
+impl Default for RoutingV2Options {
+    fn default() -> Self {
+        RoutingV2Options {
+            origin_interval_time: 60,
+            relay_interval: 1,
+            route_expiry_ms: 35_000,
+            idx_cooldown: 60,
+            reboot_for_seq_num: 100,
+            delegation_ttl: 21600,
+            manifest_rate_limit: 60,
+            manifest_resync: 3600,
+            manifest_resync_count: 10,
+            delegation_referesh: 800,
+        }
+    }
+}
+
 /// Storage Configuration Options
 ///
 /// The following options can be configured:
@@ -356,6 +401,7 @@ pub struct Configuration {
     pub handshake_extras: HandshakeExtras,
     #[serde(default)]
     pub crypto_rotation: CryptoRotation,
+    pub v2_routing: RoutingV2Options,
 }
 
 impl Default for Configuration {
@@ -370,6 +416,7 @@ impl Default for Configuration {
             routing: RoutingOptions::default(),
             handshake_extras: HandshakeExtras::default(),
             crypto_rotation: CryptoRotation::default(),
+            v2_routing: RoutingV2Options::default()
         }
     }
 }

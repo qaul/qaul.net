@@ -210,7 +210,7 @@ impl RoutingTable {
                 match connection.module {
                     ConnectionModule::Lan => module = proto::ConnectionModule::Lan as i32,
                     ConnectionModule::Internet => module = proto::ConnectionModule::Internet as i32,
-                    ConnectionModule::Ble => module = proto::ConnectionModule::Ble as i32,
+                    ConnectionModule::Ble1m => module = proto::ConnectionModule::Ble as i32,
                     ConnectionModule::Local => module = proto::ConnectionModule::Local as i32,
                     _ => module = proto::ConnectionModule::None as i32,
                 }
@@ -287,7 +287,7 @@ impl RoutingTable {
     fn rank_routing_connection(connection: &RoutingConnectionEntry) -> u8 {
         match connection.module {
             ConnectionModule::None => return 0,
-            ConnectionModule::Ble => return 1,
+            ConnectionModule::Ble1m | ConnectionModule::BleCoded => return 1,
             ConnectionModule::Internet => return 2,
             ConnectionModule::Lan => return 3,
             ConnectionModule::Local => return 4,

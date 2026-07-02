@@ -1413,7 +1413,7 @@ mod phase2_tests {
             pre_index_in_highest: 0,
             pre_index_in_seen: Vec::new(),
             pre_bytes_accounted: 0,
-            established_at: 0,
+            established_at: 0
         }
     }
 
@@ -2146,7 +2146,7 @@ mod phase3_events_tests {
             pre_index_in_highest: 0,
             pre_index_in_seen: Vec::new(),
             pre_bytes_accounted: 0,
-            established_at: 0,
+            established_at: 0
         }
     }
 

@@ -36,6 +36,8 @@ mod tests {
             debug: DebugOption::default(),
             routing: RoutingOptions::default(),
             handshake_extras: HandshakeExtras::default(),
+            v2_routing: RoutingV2Options::default(),
+            crypto_rotation: CryptoRotation::default()
         }
     }
 
@@ -110,7 +112,9 @@ mod tests {
         router2.connections.add_local_user(peer2, peer2);
 
         // Add a neighbour to router1 only
-        router1.neighbours.update_node(ConnectionModule::Lan, peer2, 5000);
+        router1
+            .neighbours
+            .update_node(ConnectionModule::Lan, peer2, 5000);
 
         // router1 should see peer2 as a LAN neighbour
         assert_eq!(
