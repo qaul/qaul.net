@@ -28,7 +28,7 @@ pub fn fresh_peer() -> PeerId {
 /// Registers a fresh neighbour mirror and returns the PeerId.
 pub fn add_neighbour(state: &RouterV2State) -> PeerId {
     let peer = fresh_peer();
-    state.add_neighbour_mirror(peer);
+    state.add_neighbour(peer, [0; 8]);
     peer
 }
 
