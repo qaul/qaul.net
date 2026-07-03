@@ -11,13 +11,16 @@ use libp2p::PeerId;
 use prost::Message;
 use serde::{Deserialize, Serialize};
 use sled;
+use std::collections::HashMap;
 use std::{fmt, sync::RwLock};
 
 use super::messaging::{proto, MessagingServiceType};
 use crate::node::user_accounts::{UserAccount, UserAccounts};
+use crate::router::users::Users;
 use crate::rpc::Rpc;
 use crate::storage::configuration::Configuration;
 use crate::storage::database::DataBase;
+use crate::utilities::qaul_id::QaulId;
 use crate::utilities::timestamp::Timestamp;
 
 /// Import protobuf message definition
@@ -89,6 +92,26 @@ pub struct DtnStorageStateV2 {
 
 /// Maximum bytes a single sender can store on this node (10 MB)
 const V2_PER_SENDER_QUOTA: u64 = 10 * 1024 * 1024;
+
+/// Maximum time a V2 custody entry is retained when the sender specified
+/// no expiry (expires_at == 0), counted from local acceptance: 7 days in
+/// milliseconds. Without this cap such entries would be stored forever
+/// if the recipient never becomes reachable.
+const V2_MAX_RETENTION_MS: u64 = 7 * 24 * 60 * 60 * 1000;
+
+/// Outcome of the stateless checks run on every incoming DtnRoutedV2
+/// before the custody acceptance pipeline.
+#[derive(Debug, PartialEq, Eq)]
+enum V2Precheck {
+    /// message expired — reject
+    Expired,
+    /// the local user is the final recipient — deliver
+    Deliver,
+    /// no handoffs left and we are not the recipient — reject
+    Exhausted,
+    /// continue with the custody acceptance pipeline
+    Continue,
+}
 
 /// Instance-based DTN state.
 /// Replaces the global STORAGESTATE static for multi-instance use.
@@ -175,12 +198,43 @@ impl DtnModuleState {
         };
 
         let mut v2_used_size: u64 = 0;
+        let mut sender_quotas: HashMap<Vec<u8>, SenderQuotaEntry> = HashMap::new();
         for entry in db_ref_routed_v2.iter() {
             if let Ok((_, entry_bytes)) = entry {
                 if let Ok(v2_entry) = bincode::deserialize::<DtnRoutedV2Entry>(&entry_bytes) {
                     v2_used_size += v2_entry.size as u64;
+                    let quota = sender_quotas
+                        .entry(v2_entry.sender_public_key.clone())
+                        .or_default();
+                    quota.used_bytes += v2_entry.size as u64;
+                    quota.message_count += 1;
                 }
             }
+        }
+
+        // Rebuild the sender-quota tree from the entry scan. The entry
+        // insert and the quota update are two non-atomic tree writes, so a
+        // crash between them leaves the quotas drifted; recomputing them
+        // here heals that on every restart.
+        match db_ref_sender_quotas.clear() {
+            Ok(()) => {
+                for (sender, quota) in &sender_quotas {
+                    match bincode::serialize(quota) {
+                        Ok(quota_bytes) => {
+                            if let Err(e) =
+                                db_ref_sender_quotas.insert(sender.clone(), quota_bytes)
+                            {
+                                log::error!("Failed to rebuild sender quota: {}", e);
+                            }
+                        }
+                        Err(e) => log::error!("Failed to serialize sender quota: {}", e),
+                    }
+                }
+                if let Err(e) = db_ref_sender_quotas.flush() {
+                    log::error!("Failed to flush rebuilt sender quotas: {}", e);
+                }
+            }
+            Err(e) => log::error!("Failed to clear dtn-sender-quotas tree: {}", e),
         }
 
         {
@@ -557,6 +611,17 @@ impl Dtn {
                         }
                     };
                     let unconfrimed_len = unconfirmed.unconfirmed.len();
+                    let (used_size_v2, dtn_message_count_v2) =
+                        match state.services.dtn.v2.read() {
+                            Ok(v2) => (v2.used_size, v2.message_count),
+                            Err(e) => {
+                                log::error!(
+                                    "DTN RPC: failed to acquire V2 read lock: {}",
+                                    e
+                                );
+                                return;
+                            }
+                        };
 
                     let proto_message = proto_rpc::Dtn {
                         message: Some(proto_rpc::dtn::Message::DtnStateResponse(
@@ -564,6 +629,8 @@ impl Dtn {
                                 used_size: dtn_state.used_size,
                                 dtn_message_count: dtn_state.message_counts,
                                 unconfirmed_count: unconfrimed_len as u32,
+                                used_size_v2,
+                                dtn_message_count_v2,
                             },
                         )),
                     };
@@ -1025,10 +1092,15 @@ impl Dtn {
             }
         };
 
-        // 1. Expiry check
-        if routed_v2.expires_at > 0 {
-            let now = Timestamp::get_timestamp();
-            if now > routed_v2.expires_at {
+        // 1. Stateless prechecks: expiry, final delivery, handoff budget
+        let envelope_receiver = Self::get_receiver_from_container(&routed_v2.container);
+        match Self::precheck_routed_v2(
+            &routed_v2,
+            envelope_receiver.as_ref(),
+            user_id,
+            Timestamp::get_timestamp(),
+        ) {
+            V2Precheck::Expired => {
                 log::warn!("DtnRoutedV2 message expired, dropping");
                 Self::send_v2_response(
                     state,
@@ -1040,23 +1112,41 @@ impl Dtn {
                 );
                 return;
             }
+            V2Precheck::Deliver => {
+                log::info!("DtnRoutedV2: I am the recipient, processing inner container");
+                if let Ok(container) = proto::Container::decode(&routed_v2.container[..]) {
+                    super::messaging::process::MessagingProcess::process_received_message(
+                        state,
+                        user_account.clone(),
+                        container,
+                    );
+                }
+                Self::send_v2_response(
+                    state,
+                    &user_account,
+                    sender_id,
+                    &routed_v2.original_signature,
+                    proto::dtn_response::ResponseType::Accepted,
+                    proto::dtn_response::Reason::None,
+                );
+                return;
+            }
+            V2Precheck::Exhausted => {
+                log::warn!("DtnRoutedV2 message has no remaining handoffs, dropping");
+                Self::send_v2_response(
+                    state,
+                    &user_account,
+                    sender_id,
+                    &routed_v2.original_signature,
+                    proto::dtn_response::ResponseType::Rejected,
+                    proto::dtn_response::Reason::None,
+                );
+                return;
+            }
+            V2Precheck::Continue => {}
         }
 
-        // 2. Handoff check
-        if routed_v2.remaining_handoffs == 0 {
-            log::warn!("DtnRoutedV2 message has no remaining handoffs, dropping");
-            Self::send_v2_response(
-                state,
-                &user_account,
-                sender_id,
-                &routed_v2.original_signature,
-                proto::dtn_response::ResponseType::Rejected,
-                proto::dtn_response::Reason::None,
-            );
-            return;
-        }
-
-        // 3. Duplicate check
+        // 2. Duplicate check
         {
             let v2 = match state.services.dtn.v2.read() {
                 Ok(s) => s,
@@ -1084,31 +1174,7 @@ impl Dtn {
             }
         }
 
-        // 4. Am I the recipient?
-        let envelope_receiver = Self::get_receiver_from_container(&routed_v2.container);
-        if let Some(recv_id) = envelope_receiver {
-            if recv_id == *user_id {
-                log::info!("DtnRoutedV2: I am the recipient, processing inner container");
-                if let Ok(container) = proto::Container::decode(&routed_v2.container[..]) {
-                    super::messaging::process::MessagingProcess::process_received_message(
-                        state,
-                        user_account.clone(),
-                        container,
-                    );
-                }
-                Self::send_v2_response(
-                    state,
-                    &user_account,
-                    sender_id,
-                    &routed_v2.original_signature,
-                    proto::dtn_response::ResponseType::Accepted,
-                    proto::dtn_response::Reason::None,
-                );
-                return;
-            }
-        }
-
-        // 5. Custody opt-in check
+        // 3. Custody opt-in check
         match Configuration::get_user(state, user_account.id.to_string()) {
             Some(user_profile) => {
                 if !user_profile.storage.dtn_v2_custody_enabled {
@@ -1138,8 +1204,8 @@ impl Dtn {
             }
         }
 
-        // 6. Sender signature verification
-        {
+        // 4. Sender signature verification
+        let sender_pub_key = {
             let inner_container = match proto::Container::decode(&routed_v2.container[..]) {
                 Ok(c) => c,
                 Err(e) => {
@@ -1199,9 +1265,34 @@ impl Dtn {
                 );
                 return;
             }
+            sender_key
+        };
+
+        // 5. Blocked-sender check: a sender this node's user has blocked
+        // must not consume custody storage
+        {
+            let sender_peer = PeerId::from_public_key(&sender_pub_key);
+            let rs = state.get_router();
+            if let Some(user) = Users::get_user_snapshot(&rs, &QaulId::to_q8id(sender_peer)) {
+                if user.blocked {
+                    log::warn!(
+                        "DtnRoutedV2: rejecting message from blocked sender {}",
+                        sender_peer.to_base58()
+                    );
+                    Self::send_v2_response(
+                        state,
+                        &user_account,
+                        sender_id,
+                        &routed_v2.original_signature,
+                        proto::dtn_response::ResponseType::Rejected,
+                        proto::dtn_response::Reason::UserNotAccepted,
+                    );
+                    return;
+                }
+            }
         }
 
-        // 7. Per-sender quota check
+        // 6. Per-sender quota check
         {
             let v2 = match state.services.dtn.v2.read() {
                 Ok(s) => s,
@@ -1420,6 +1511,30 @@ impl Dtn {
         }
     }
 
+    /// Stateless checks for an incoming DtnRoutedV2 message.
+    ///
+    /// Order matters: the recipient check runs before the handoff check —
+    /// a message that has used up all its custody handoffs must still be
+    /// delivered when it arrives at its final recipient, because delivery
+    /// is not a handoff.
+    fn precheck_routed_v2(
+        routed_v2: &proto::DtnRoutedV2,
+        envelope_receiver: Option<&PeerId>,
+        my_id: &PeerId,
+        now: u64,
+    ) -> V2Precheck {
+        if routed_v2.expires_at > 0 && now > routed_v2.expires_at {
+            return V2Precheck::Expired;
+        }
+        if envelope_receiver == Some(my_id) {
+            return V2Precheck::Deliver;
+        }
+        if routed_v2.remaining_handoffs == 0 {
+            return V2Precheck::Exhausted;
+        }
+        V2Precheck::Continue
+    }
+
     /// Extract the receiver PeerId from a serialized Container
     fn get_receiver_from_container(container_bytes: &[u8]) -> Option<PeerId> {
         if let Ok(container) = proto::Container::decode(container_bytes) {
@@ -1501,8 +1616,15 @@ impl Dtn {
                     if let Ok(routed_v2) =
                         proto::DtnRoutedV2::decode(&v2_entry.routed_v2_bytes[..])
                     {
-                        // Check expiry
-                        if routed_v2.expires_at > 0 && now > routed_v2.expires_at {
+                        // Check expiry. Entries whose sender specified no
+                        // expiry (expires_at == 0) are still bounded by the
+                        // local maximum retention, counted from acceptance.
+                        let effective_expires_at = if routed_v2.expires_at > 0 {
+                            routed_v2.expires_at
+                        } else {
+                            v2_entry.accepted_at.saturating_add(V2_MAX_RETENTION_MS)
+                        };
+                        if now > effective_expires_at {
                             to_remove.push(sig.to_vec());
                             continue;
                         }
@@ -2203,5 +2325,380 @@ mod tests {
         // Decode back
         let decoded = libp2p::identity::PublicKey::try_decode_protobuf(&encoded).unwrap();
         assert_eq!(decoded, pub_key);
+    }
+
+    // ── Release hardening: retention, quota rebuild, blocked senders ──
+
+    /// Unwrap a `Result` in a test with a panic message that names the step.
+    fn ok<T, E: std::fmt::Debug>(res: Result<T, E>, ctx: &str) -> T {
+        match res {
+            Ok(v) => v,
+            Err(e) => panic!("{}: {:?}", ctx, e),
+        }
+    }
+
+    /// Build a simulation state with one local account whose profile has
+    /// DTN V2 custody enabled. Bypasses `UserAccounts::create` because that
+    /// calls `Configuration::save`, which would write a config.yaml into
+    /// the test runner's working directory.
+    fn make_custody_state() -> (crate::QaulState, UserAccount) {
+        let state = crate::QaulState::new_for_simulation();
+        let keys = Keypair::generate_ed25519();
+        let id = PeerId::from(keys.public());
+        let account = UserAccount {
+            id,
+            keys,
+            name: "custodian".to_string(),
+            password_hash: None,
+            password_salt: None,
+        };
+        match state.user_accounts.inner.write() {
+            Ok(mut users) => users.users.push(account.clone()),
+            Err(e) => panic!("user accounts lock poisoned: {}", e),
+        }
+        match state.config.inner.write() {
+            Ok(mut cfg) => {
+                cfg.user_accounts
+                    .push(crate::storage::configuration::UserAccount {
+                        id: id.to_string(),
+                        storage: crate::storage::configuration::StorageOptions {
+                            dtn_v2_custody_enabled: true,
+                            ..Default::default()
+                        },
+                        ..Default::default()
+                    });
+            }
+            Err(e) => panic!("config lock poisoned: {}", e),
+        }
+        (state, account)
+    }
+
+    /// Build a fully valid DtnRoutedV2 around a signed container.
+    fn build_valid_routed_v2(
+        keys: &Keypair,
+        container_bytes: Vec<u8>,
+        signature: Vec<u8>,
+        expires_at: u64,
+    ) -> proto::DtnRoutedV2 {
+        proto::DtnRoutedV2 {
+            container: container_bytes,
+            custody_route: vec![random_peer().to_bytes()],
+            next_route_index: 0,
+            original_signature: signature,
+            sender_public_key: keys.public().encode_protobuf(),
+            expires_at,
+            remaining_handoffs: 5,
+        }
+    }
+
+    /// Insert a V2 entry with its quota record, as acceptance does.
+    fn store_v2_entry(
+        state: &crate::QaulState,
+        sig: &[u8],
+        entry: &DtnRoutedV2Entry,
+    ) {
+        let mut v2 = ok(state.services.dtn.v2.write(), "v2 write lock");
+        let entry_bytes = ok(bincode::serialize(entry), "serialize entry");
+        ok(
+            v2.db_ref_routed_v2.insert(sig.to_vec(), entry_bytes),
+            "insert entry",
+        );
+        v2.used_size += entry.size as u64;
+        v2.message_count += 1;
+        let quota = SenderQuotaEntry {
+            used_bytes: entry.size as u64,
+            message_count: 1,
+        };
+        let quota_bytes = ok(bincode::serialize(&quota), "serialize quota");
+        ok(
+            v2.db_ref_sender_quotas
+                .insert(entry.sender_public_key.clone(), quota_bytes),
+            "insert quota",
+        );
+    }
+
+    /// Entries whose sender specified no expiry (expires_at == 0) must
+    /// still be swept once they exceed the local maximum retention.
+    /// Without the retention cap, a custodian that never reaches the
+    /// recipient stores such messages forever.
+    #[test]
+    fn retransmit_sweeps_no_expiry_entries_after_max_retention() {
+        let (state, _account) = make_custody_state();
+        let now = Timestamp::get_timestamp();
+
+        // Stale entry: no expiry, accepted longer than max retention ago
+        let receiver = random_peer();
+        let (stale_keys, stale_container, stale_sig) = build_signed_container(&receiver);
+        let stale_v2 = build_valid_routed_v2(&stale_keys, stale_container, stale_sig.clone(), 0);
+        let stale_entry = DtnRoutedV2Entry {
+            routed_v2_bytes: stale_v2.encode_to_vec(),
+            sender_public_key: stale_v2.sender_public_key.clone(),
+            size: 100,
+            accepted_at: now.saturating_sub(V2_MAX_RETENTION_MS + 1_000),
+            receiver_id: receiver.to_bytes(),
+        };
+        store_v2_entry(&state, &stale_sig, &stale_entry);
+
+        // Fresh entry: no expiry, accepted just now — must survive
+        let (fresh_keys, fresh_container, fresh_sig) = build_signed_container(&receiver);
+        let fresh_v2 = build_valid_routed_v2(&fresh_keys, fresh_container, fresh_sig.clone(), 0);
+        let fresh_entry = DtnRoutedV2Entry {
+            routed_v2_bytes: fresh_v2.encode_to_vec(),
+            sender_public_key: fresh_v2.sender_public_key.clone(),
+            size: 40,
+            accepted_at: now,
+            receiver_id: receiver.to_bytes(),
+        };
+        store_v2_entry(&state, &fresh_sig, &fresh_entry);
+
+        Dtn::process_retransmit_v2(&state);
+
+        let v2 = ok(state.services.dtn.v2.read(), "v2 read lock");
+        assert!(
+            !ok(
+                v2.db_ref_routed_v2.contains_key(&stale_sig),
+                "contains stale"
+            ),
+            "no-expiry entry past max retention must be swept"
+        );
+        assert!(
+            ok(
+                v2.db_ref_routed_v2.contains_key(&fresh_sig),
+                "contains fresh"
+            ),
+            "fresh no-expiry entry must survive the sweep"
+        );
+        assert_eq!(v2.message_count, 1);
+        assert_eq!(v2.used_size, 40);
+
+        // The swept entry's sender quota must be released
+        let quota_bytes = ok(
+            v2.db_ref_sender_quotas.get(&stale_entry.sender_public_key),
+            "get stale quota",
+        );
+        if let Some(bytes) = quota_bytes {
+            let quota: SenderQuotaEntry =
+                ok(bincode::deserialize(&bytes), "decode stale quota");
+            assert_eq!(quota.used_bytes, 0);
+            assert_eq!(quota.message_count, 0);
+        }
+    }
+
+    /// A crash between the entry insert and the quota update leaves
+    /// dtn-sender-quotas out of sync with dtn-routed-v2. Init must
+    /// rebuild the quotas from the entries so drift heals on restart.
+    #[test]
+    fn init_production_rebuilds_sender_quotas_from_entries() {
+        let db = ok(
+            sled::Config::new().temporary(true).open(),
+            "open temp sled db",
+        );
+        let entries_tree = ok(db.open_tree("dtn-routed-v2"), "open entries tree");
+        let quotas_tree = ok(db.open_tree("dtn-sender-quotas"), "open quotas tree");
+
+        let sender_a = vec![0xAA];
+        let sender_b = vec![0xBB];
+        let sender_c = vec![0xCC];
+
+        for (sig, sender, size) in [
+            (vec![0x01], &sender_a, 100u32),
+            (vec![0x02], &sender_a, 50),
+            (vec![0x03], &sender_b, 70),
+        ] {
+            let entry = DtnRoutedV2Entry {
+                routed_v2_bytes: vec![0; size as usize],
+                sender_public_key: sender.clone(),
+                size,
+                accepted_at: 1_000,
+                receiver_id: vec![],
+            };
+            let bytes = ok(bincode::serialize(&entry), "serialize entry");
+            ok(entries_tree.insert(sig, bytes), "insert entry");
+        }
+
+        // Drifted quota records: A wildly wrong, B missing, C stale
+        let wrong_a = SenderQuotaEntry {
+            used_bytes: 999_999,
+            message_count: 42,
+        };
+        ok(
+            quotas_tree.insert(
+                sender_a.clone(),
+                ok(bincode::serialize(&wrong_a), "serialize wrong quota"),
+            ),
+            "insert wrong quota",
+        );
+        let stale_c = SenderQuotaEntry {
+            used_bytes: 10,
+            message_count: 1,
+        };
+        ok(
+            quotas_tree.insert(
+                sender_c.clone(),
+                ok(bincode::serialize(&stale_c), "serialize stale quota"),
+            ),
+            "insert stale quota",
+        );
+
+        let module_state = DtnModuleState::new();
+        module_state.init_production(db);
+
+        let v2 = ok(module_state.v2.read(), "v2 read lock");
+        assert_eq!(v2.used_size, 220);
+        assert_eq!(v2.message_count, 3);
+
+        let quota_a: SenderQuotaEntry = match ok(
+            v2.db_ref_sender_quotas.get(&sender_a),
+            "get quota A",
+        ) {
+            Some(bytes) => ok(bincode::deserialize(&bytes), "decode quota A"),
+            None => panic!("quota for sender A missing after rebuild"),
+        };
+        assert_eq!(quota_a.used_bytes, 150);
+        assert_eq!(quota_a.message_count, 2);
+
+        let quota_b: SenderQuotaEntry = match ok(
+            v2.db_ref_sender_quotas.get(&sender_b),
+            "get quota B",
+        ) {
+            Some(bytes) => ok(bincode::deserialize(&bytes), "decode quota B"),
+            None => panic!("quota for sender B missing after rebuild"),
+        };
+        assert_eq!(quota_b.used_bytes, 70);
+        assert_eq!(quota_b.message_count, 1);
+
+        assert!(
+            ok(v2.db_ref_sender_quotas.get(&sender_c), "get quota C").is_none(),
+            "stale quota record for sender with no entries must be dropped"
+        );
+    }
+
+    /// Register a remote user in the router users table.
+    fn register_user(state: &crate::QaulState, keys: &Keypair, blocked: bool) {
+        let rs = state.get_router();
+        crate::router::users::Users::add(
+            state,
+            &rs,
+            crate::router::users::User {
+                id: PeerId::from(keys.public()),
+                key: keys.public(),
+                name: "remote".to_string(),
+                verified: false,
+                blocked,
+                capabilities: 0,
+                bio: String::new(),
+                avatar: vec![],
+                version: 0,
+                updated_at: 0,
+                signed_profile_bytes: vec![],
+                signed_profile_signature: vec![],
+                preferred_custody_route: vec![],
+            },
+        );
+    }
+
+    /// A message that has consumed all custody handoffs must still be
+    /// delivered when it reaches its final recipient — delivery is not a
+    /// handoff. (Regression: the handoff check used to run before the
+    /// recipient check and rejected such messages even at the recipient.)
+    #[test]
+    fn precheck_delivers_to_recipient_with_zero_handoffs() {
+        let me = random_peer();
+        let mut v2 = build_routed_v2(vec![random_peer().to_bytes()], 0);
+        v2.remaining_handoffs = 0;
+        assert_eq!(
+            Dtn::precheck_routed_v2(&v2, Some(&me), &me, 1_000),
+            V2Precheck::Deliver
+        );
+    }
+
+    /// At a custodian (not the recipient), an exhausted handoff budget
+    /// still rejects the message.
+    #[test]
+    fn precheck_rejects_exhausted_handoffs_at_custodian() {
+        let me = random_peer();
+        let receiver = random_peer();
+        let mut v2 = build_routed_v2(vec![random_peer().to_bytes()], 0);
+        v2.remaining_handoffs = 0;
+        assert_eq!(
+            Dtn::precheck_routed_v2(&v2, Some(&receiver), &me, 1_000),
+            V2Precheck::Exhausted
+        );
+    }
+
+    /// An expired message is rejected even at its final recipient.
+    #[test]
+    fn precheck_expiry_wins_over_delivery() {
+        let me = random_peer();
+        let mut v2 = build_routed_v2(vec![random_peer().to_bytes()], 0);
+        v2.expires_at = 500;
+        assert_eq!(
+            Dtn::precheck_routed_v2(&v2, Some(&me), &me, 1_000),
+            V2Precheck::Expired
+        );
+    }
+
+    /// A custodian with handoff budget continues into the acceptance
+    /// pipeline.
+    #[test]
+    fn precheck_continues_for_custodian_with_budget() {
+        let me = random_peer();
+        let receiver = random_peer();
+        let v2 = build_routed_v2(vec![random_peer().to_bytes()], 0);
+        assert_eq!(
+            Dtn::precheck_routed_v2(&v2, Some(&receiver), &me, 1_000),
+            V2Precheck::Continue
+        );
+    }
+
+    /// A blocked sender must not be able to consume custody storage.
+    #[test]
+    fn net_routed_v2_rejects_blocked_sender() {
+        let (state, account) = make_custody_state();
+
+        let receiver = random_peer();
+        let (keys, container_bytes, signature) = build_signed_container(&receiver);
+        register_user(&state, &keys, true);
+
+        let routed_v2 = build_valid_routed_v2(&keys, container_bytes, signature.clone(), 0);
+        let sender_peer = PeerId::from(keys.public());
+        Dtn::net_routed_v2(&state, &account.id, &sender_peer, &[], routed_v2);
+
+        let v2 = ok(state.services.dtn.v2.read(), "v2 read lock");
+        assert!(
+            !ok(
+                v2.db_ref_routed_v2.contains_key(&signature),
+                "contains key"
+            ),
+            "blocked sender's message must not be stored"
+        );
+        assert_eq!(v2.message_count, 0);
+        assert_eq!(v2.used_size, 0);
+    }
+
+    /// Control for the blocked test: the identical message from a
+    /// non-blocked sender is accepted — proving the rejection above is
+    /// caused by the blocked flag, not by some other pipeline step.
+    #[test]
+    fn net_routed_v2_accepts_unblocked_sender() {
+        let (state, account) = make_custody_state();
+
+        let receiver = random_peer();
+        let (keys, container_bytes, signature) = build_signed_container(&receiver);
+        register_user(&state, &keys, false);
+
+        let routed_v2 = build_valid_routed_v2(&keys, container_bytes, signature.clone(), 0);
+        let sender_peer = PeerId::from(keys.public());
+        Dtn::net_routed_v2(&state, &account.id, &sender_peer, &[], routed_v2);
+
+        let v2 = ok(state.services.dtn.v2.read(), "v2 read lock");
+        assert!(
+            ok(
+                v2.db_ref_routed_v2.contains_key(&signature),
+                "contains key"
+            ),
+            "non-blocked sender's message must be stored"
+        );
+        assert_eq!(v2.message_count, 1);
     }
 }

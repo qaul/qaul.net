@@ -73,6 +73,12 @@ pub struct DtnStateResponse {
     /// unconfirmed count
     #[prost(uint32, tag = "3")]
     pub unconfirmed_count: u32,
+    /// used size of V2 custody storage (bytes)
+    #[prost(uint64, tag = "4")]
+    pub used_size_v2: u64,
+    /// stored V2 custody message count
+    #[prost(uint32, tag = "5")]
+    pub dtn_message_count_v2: u32,
 }
 /// Dtn Config Request
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]

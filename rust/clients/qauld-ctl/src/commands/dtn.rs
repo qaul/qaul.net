@@ -99,6 +99,8 @@ impl RpcCommand for DtnSubcmd {
                             "used_size_mb": s.used_size,
                             "dtn_message_count": s.dtn_message_count,
                             "unconfirmed_count": s.unconfirmed_count,
+                            "used_size_v2_bytes": s.used_size_v2,
+                            "dtn_message_count_v2": s.dtn_message_count_v2,
                         });
                         println!("{}", serde_json::to_string_pretty(&obj)?);
                     } else {
@@ -107,6 +109,8 @@ impl RpcCommand for DtnSubcmd {
                         println!("\tUsed Storage Size: {} MB", s.used_size);
                         println!("\tDTN Messages: {}", s.dtn_message_count);
                         println!("\tUnconfirmed Messages: {}", s.unconfirmed_count);
+                        println!("\tV2 Custody Storage Used: {} bytes", s.used_size_v2);
+                        println!("\tV2 Custody Messages: {}", s.dtn_message_count_v2);
                     }
                 }
                 Some(proto::dtn::Message::DtnConfigResponse(c)) => {

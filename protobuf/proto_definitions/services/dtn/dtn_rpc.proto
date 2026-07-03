@@ -47,6 +47,10 @@ message DtnStateResponse {
     uint32 dtn_message_count = 2;
     // unconfirmed count
     uint32 unconfirmed_count = 3;
+    // used size of V2 custody storage (bytes)
+    uint64 used_size_v2 = 4;
+    // stored V2 custody message count
+    uint32 dtn_message_count_v2 = 5;
 }
 
 // Dtn Config Request
