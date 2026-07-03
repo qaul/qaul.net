@@ -1586,8 +1586,14 @@ mod apply_entry {
         assert_eq!(stored.read().unwrap().seq_num, SeqNum::from(30u16));
     }
 
+    /// Per §6.3, any gap > 100 (including large backward-looking jumps
+    /// under wrap arithmetic) is treated as a reboot and accepted. There
+    /// is no "older, drop me" bucket — a peer with a lower seq than we
+    /// have stored is presumed to have restarted with a fresh random seed.
+    /// Pins this behaviour so a future refactor of `acceptance` doesn't
+    /// silently drift into "naive greater-than" semantics.
     #[test]
-    fn older_seq_drops_and_preserves_stored() {
+    fn backward_looking_seq_is_treated_as_reboot_and_accepted() {
         let state = fresh_state();
         let target_id = [1; 8];
         let (peer, user) = setup_user_target(&state, 5, 42, target_id);
@@ -1601,7 +1607,7 @@ mod apply_entry {
             false,
         );
 
-        // seq=40 vs stored 50: gap = 40.wrapping_sub(50) = huge → treated as older.
+        // seq=40, stored=50: forward gap under wrap = 65_526 → Reboot bucket.
         state
             .apply_entry(
                 peer,
@@ -1620,8 +1626,8 @@ mod apply_entry {
             .get(Space::User, 42)
             .unwrap();
         let e = stored.read().unwrap();
-        assert_eq!(e.seq_num, SeqNum::from(50u16), "stored seq preserved");
-        assert_eq!(e.metric, 30, "stored metric preserved");
+        assert_eq!(e.seq_num, SeqNum::from(40u16), "reboot bucket must replace");
+        assert_eq!(e.metric, 20, "new metric = 10 + hop_cost(Lan, None)=10");
     }
 
     #[test]
