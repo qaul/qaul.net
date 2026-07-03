@@ -29,12 +29,67 @@ const double _kTextActionSpacing = 20;
 const double _kAttachmentIconSpacing = 24;
 const double _kActionButtonMinSize = 40;
 const double _kAttachmentMenuTopSpacing = 12;
-const double _kAttachmentMenuItemSize = 54;
+const double _kAttachmentMenuItemMaxSize = 45;
+const double _kAttachmentMenuItemMinSize = 35;
+const double _kAttachmentMenuArrowSize = 35;
 const double _kAttachmentMenuItemRadius = 10;
-const double _kAttachmentMenuItemSpacing = 12;
+const double _kAttachmentMenuItemSpacing = 20;
 const double _kTypedActionRowBottomPadding = 4;
 const double _kTypedActionRowRightPadding = 16;
 const int _kAttachmentMenuMaxVisibleActions = 6;
+const int _kAttachmentMenuMinPaginatedSlots = 3;
+const _AttachmentMenuLayoutConfig _kAttachmentMenuLayout =
+    _AttachmentMenuLayoutConfig(
+  maxVisibleSlots: _kAttachmentMenuMaxVisibleActions,
+  minPaginatedSlots: _kAttachmentMenuMinPaginatedSlots,
+  itemMaxSize: _kAttachmentMenuItemMaxSize,
+  itemMinSize: _kAttachmentMenuItemMinSize,
+  itemSpacing: _kAttachmentMenuItemSpacing,
+);
+
+class _AttachmentMenuLayoutConfig {
+  const _AttachmentMenuLayoutConfig({
+    required this.maxVisibleSlots,
+    required this.minPaginatedSlots,
+    required this.itemMaxSize,
+    required this.itemMinSize,
+    required this.itemSpacing,
+  });
+
+  final int maxVisibleSlots;
+  final int minPaginatedSlots;
+  final double itemMaxSize;
+  final double itemMinSize;
+  final double itemSpacing;
+
+  double itemSizeForWidth(double availableWidth) {
+    if (!availableWidth.isFinite) return itemMaxSize;
+    final spacingWidth = (maxVisibleSlots - 1) * itemSpacing;
+    final sizeForMaxSlots = (availableWidth - spacingWidth) / maxVisibleSlots;
+    return sizeForMaxSlots.clamp(itemMinSize, itemMaxSize);
+  }
+
+  bool itemsFit({
+    required int itemCount,
+    required double availableWidth,
+    required double itemSize,
+  }) {
+    if (!availableWidth.isFinite || itemCount == 0) return true;
+    final requiredWidth =
+        (itemCount * itemSize) + ((itemCount - 1) * itemSpacing);
+    return requiredWidth <= availableWidth;
+  }
+
+  int slotsForWidth({
+    required double availableWidth,
+    required double itemSize,
+  }) {
+    if (!availableWidth.isFinite) return maxVisibleSlots;
+    final slotWidth = itemSize + itemSpacing;
+    final slots = ((availableWidth + itemSpacing) / slotWidth).floor();
+    return slots.clamp(minPaginatedSlots, maxVisibleSlots);
+  }
+}
 
 const List<BoxShadow> _kFooterShadowsDark = [
   BoxShadow(offset: Offset(0, 0), blurRadius: 5, color: Color(0x66000000)),
@@ -149,6 +204,8 @@ class _ChatFooterState extends State<ChatFooter> {
   late final FocusNode _inputFocusNode;
   final GlobalKey _composerTextFieldKey = GlobalKey();
   late bool _isAttachmentMenuOpen;
+  late String _attachmentActionsSignature;
+  int _attachmentMenuPageIndex = 0;
 
   TextEditingController get _effectiveController =>
       widget.controller ?? _ownedController;
@@ -162,6 +219,9 @@ class _ChatFooterState extends State<ChatFooter> {
         _effectiveController.text.trim().isEmpty;
     _effectiveController.addListener(_handleTextChanged);
     _inputFocusNode = FocusNode()..addListener(_handleFocusChanged);
+    _attachmentActionsSignature = _attachmentActionSignature(
+      _attachmentActions(),
+    );
   }
 
   @override
@@ -174,7 +234,16 @@ class _ChatFooterState extends State<ChatFooter> {
       newController.addListener(_handleTextChanged);
       if (newController.text.trim().isNotEmpty && _isAttachmentMenuOpen) {
         _isAttachmentMenuOpen = false;
+        _attachmentMenuPageIndex = 0;
       }
+    }
+
+    final newActionSignature = _attachmentActionSignature(
+      _attachmentActions(),
+    );
+    if (newActionSignature != _attachmentActionsSignature) {
+      _attachmentActionsSignature = newActionSignature;
+      _attachmentMenuPageIndex = 0;
     }
   }
 
@@ -196,6 +265,7 @@ class _ChatFooterState extends State<ChatFooter> {
     }
     setState(() {
       _isAttachmentMenuOpen = false;
+      _attachmentMenuPageIndex = 0;
     });
   }
 
@@ -212,7 +282,11 @@ class _ChatFooterState extends State<ChatFooter> {
 
   void _handleMoreAttachmentsPressed() {
     setState(() {
-      _isAttachmentMenuOpen = !_isAttachmentMenuOpen;
+      final willOpen = !_isAttachmentMenuOpen;
+      _isAttachmentMenuOpen = willOpen;
+      if (willOpen) {
+        _attachmentMenuPageIndex = 0;
+      }
     });
   }
 
@@ -220,6 +294,20 @@ class _ChatFooterState extends State<ChatFooter> {
     if (!_isAttachmentMenuOpen) return;
     setState(() {
       _isAttachmentMenuOpen = false;
+      _attachmentMenuPageIndex = 0;
+    });
+  }
+
+  void _showPreviousAttachmentMenuPage() {
+    if (_attachmentMenuPageIndex == 0) return;
+    setState(() {
+      _attachmentMenuPageIndex -= 1;
+    });
+  }
+
+  void _showNextAttachmentMenuPage() {
+    setState(() {
+      _attachmentMenuPageIndex += 1;
     });
   }
 
@@ -270,7 +358,47 @@ class _ChatFooterState extends State<ChatFooter> {
         tooltip: widget.locationTooltip,
         onPressed: () => _handleAttachmentAction(widget.onLocationPressed),
       ),
-    ].take(_kAttachmentMenuMaxVisibleActions).toList(growable: false);
+      ..._debugMarkdownPaginationActions(),
+    ];
+  }
+
+  List<_FooterAttachmentAction> _debugMarkdownPaginationActions() {
+    var includeDebugActions = false;
+    assert(() {
+      includeDebugActions = true;
+      return true;
+    }());
+    if (!includeDebugActions) return const [];
+
+    return [
+      _FooterAttachmentAction(
+        id: 'markdown-bold',
+        icon: const Icon(Icons.format_bold_rounded, color: _kActionIconColor),
+        tooltip: 'Bold',
+        onPressed: () => _handleAttachmentAction(null),
+      ),
+      _FooterAttachmentAction(
+        id: 'markdown-italic',
+        icon: const Icon(Icons.format_italic_rounded, color: _kActionIconColor),
+        tooltip: 'Italic',
+        onPressed: () => _handleAttachmentAction(null),
+      ),
+      _FooterAttachmentAction(
+        id: 'markdown-underline',
+        icon: const Icon(
+          Icons.format_underlined_rounded,
+          color: _kActionIconColor,
+        ),
+        tooltip: 'Underline',
+        onPressed: () => _handleAttachmentAction(null),
+      ),
+      _FooterAttachmentAction(
+        id: 'markdown-code',
+        icon: const Icon(Icons.code_rounded, color: _kActionIconColor),
+        tooltip: 'Code',
+        onPressed: () => _handleAttachmentAction(null),
+      ),
+    ];
   }
 
   @override
@@ -305,7 +433,13 @@ class _ChatFooterState extends State<ChatFooter> {
           ),
           if (_isAttachmentMenuOpen) ...[
             const SizedBox(height: _kAttachmentMenuTopSpacing),
-            _AttachmentSubmenu(actions: _attachmentActions(), theme: theme),
+            _AttachmentSubmenu(
+              actions: _attachmentActions(),
+              theme: theme,
+              pageIndex: _attachmentMenuPageIndex,
+              onPreviousPage: _showPreviousAttachmentMenuPage,
+              onNextPage: _showNextAttachmentMenuPage,
+            ),
           ],
         ],
       ),
@@ -630,43 +764,161 @@ class _FooterAttachmentAction {
     required this.icon,
     required this.onPressed,
     this.tooltip,
+    this.isNavigation = false,
   });
 
   final String id;
   final Widget icon;
   final VoidCallback onPressed;
   final String? tooltip;
+  final bool isNavigation;
+}
+
+List<_AttachmentMenuPage> _buildAttachmentMenuPages({
+  required List<_FooterAttachmentAction> actions,
+  required int slotCount,
+}) {
+  if (actions.isEmpty) return [const _AttachmentMenuPage()];
+  if (actions.length <= slotCount) {
+    return [_AttachmentMenuPage(actions: actions)];
+  }
+
+  final pages = <_AttachmentMenuPage>[];
+  var actionIndex = 0;
+  var isFirstPage = true;
+
+  while (actionIndex < actions.length) {
+    final remaining = actions.length - actionIndex;
+    final isFinalPage = !isFirstPage && remaining <= slotCount - 1;
+    final hasPrevious = !isFirstPage;
+    final hasNext = !isFinalPage;
+    final reservedSlots = (hasPrevious ? 1 : 0) + (hasNext ? 1 : 0);
+    final contentSlots = (slotCount - reservedSlots).clamp(1, slotCount);
+    final visibleCount = remaining < contentSlots ? remaining : contentSlots;
+
+    pages.add(
+      _AttachmentMenuPage(
+        actions: actions
+            .skip(actionIndex)
+            .take(visibleCount)
+            .toList(growable: false),
+        hasPrevious: hasPrevious,
+        hasNext: hasNext && actionIndex + visibleCount < actions.length,
+      ),
+    );
+
+    actionIndex += visibleCount;
+    isFirstPage = false;
+  }
+
+  return pages;
+}
+
+_FooterAttachmentAction _attachmentMenuArrowAction({
+  required String id,
+  required IconData icon,
+  required VoidCallback onPressed,
+}) {
+  return _FooterAttachmentAction(
+    id: id,
+    icon: Icon(icon, color: _kActionIconColor),
+    onPressed: onPressed,
+    isNavigation: true,
+  );
+}
+
+String _attachmentActionSignature(List<_FooterAttachmentAction> actions) {
+  return actions.map((action) => action.id).join('|');
 }
 
 class _AttachmentSubmenu extends StatelessWidget {
-  const _AttachmentSubmenu({required this.actions, required this.theme});
+  const _AttachmentSubmenu({
+    required this.actions,
+    required this.theme,
+    required this.pageIndex,
+    required this.onPreviousPage,
+    required this.onNextPage,
+  });
 
   final List<_FooterAttachmentAction> actions;
   final ThemeData theme;
+  final int pageIndex;
+  final VoidCallback onPreviousPage;
+  final VoidCallback onNextPage;
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: AlignmentDirectional.centerStart,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final action in actions) ...[
-              _AttachmentSubmenuButton(
-                key: ValueKey(action.id),
-                action: action,
-                theme: theme,
-              ),
-              if (action != actions.last)
-                const SizedBox(width: _kAttachmentMenuItemSpacing),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final itemSize =
+            _kAttachmentMenuLayout.itemSizeForWidth(constraints.maxWidth);
+        final showAllActions = _kAttachmentMenuLayout.itemsFit(
+          itemCount: actions.length,
+          availableWidth: constraints.maxWidth,
+          itemSize: itemSize,
+        );
+        final slotCount = showAllActions
+            ? actions.length.clamp(0, _kAttachmentMenuLayout.maxVisibleSlots)
+            : _kAttachmentMenuLayout.slotsForWidth(
+                availableWidth: constraints.maxWidth,
+                itemSize: itemSize,
+              );
+        final pages = showAllActions
+            ? [_AttachmentMenuPage(actions: actions)]
+            : _buildAttachmentMenuPages(
+                actions: actions,
+                slotCount: slotCount,
+              );
+        final currentPage = pages[pageIndex.clamp(0, pages.length - 1)];
+        final visibleActions = [
+          if (currentPage.hasPrevious)
+            _attachmentMenuArrowAction(
+              id: 'previous-page',
+              icon: Icons.chevron_left_rounded,
+              onPressed: onPreviousPage,
+            ),
+          ...currentPage.actions,
+          if (currentPage.hasNext)
+            _attachmentMenuArrowAction(
+              id: 'next-page',
+              icon: Icons.chevron_right_rounded,
+              onPressed: onNextPage,
+            ),
+        ];
+
+        return Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var index = 0; index < visibleActions.length; index++) ...[
+                if (index > 0)
+                  const SizedBox(width: _kAttachmentMenuItemSpacing),
+                  _AttachmentSubmenuButton(
+                    key: ValueKey(visibleActions[index].id),
+                    action: visibleActions[index],
+                    theme: theme,
+                    itemSize: itemSize,
+                  ),
+              ],
             ],
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
+}
+
+class _AttachmentMenuPage {
+  const _AttachmentMenuPage({
+    this.actions = const [],
+    this.hasPrevious = false,
+    this.hasNext = false,
+  });
+
+  final List<_FooterAttachmentAction> actions;
+  final bool hasPrevious;
+  final bool hasNext;
 }
 
 class _AttachmentSubmenuButton extends StatelessWidget {
@@ -674,26 +926,36 @@ class _AttachmentSubmenuButton extends StatelessWidget {
     super.key,
     required this.action,
     required this.theme,
+    required this.itemSize,
   });
 
   final _FooterAttachmentAction action;
   final ThemeData theme;
+  final double itemSize;
 
   @override
   Widget build(BuildContext context) {
+    final size = action.isNavigation ? _kAttachmentMenuArrowSize : itemSize;
+    final borderRadius = action.isNavigation
+        ? BorderRadius.circular(_kAttachmentMenuArrowSize / 2)
+        : BorderRadius.circular(_kAttachmentMenuItemRadius);
+    final iconSize = action.isNavigation
+        ? 28.0
+        : (size * 0.62).clamp(20.0, 28.0).toDouble();
+
     return _wrapTooltip(
       action.tooltip,
       Material(
         color: _attachmentMenuItemColor(theme.brightness),
-        borderRadius: BorderRadius.circular(_kAttachmentMenuItemRadius),
+        borderRadius: borderRadius,
         child: InkWell(
           onTap: action.onPressed,
-          borderRadius: BorderRadius.circular(_kAttachmentMenuItemRadius),
+          borderRadius: borderRadius,
           child: SizedBox.square(
-            dimension: _kAttachmentMenuItemSize,
+            dimension: size,
             child: Center(
               child: IconTheme.merge(
-                data: const IconThemeData(color: _kActionIconColor, size: 28),
+                data: IconThemeData(color: _kActionIconColor, size: iconSize),
                 child: action.icon,
               ),
             ),
