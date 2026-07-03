@@ -16,14 +16,14 @@ use std::{
 };
 
 use libp2p::PeerId;
-use tracing::debug;
+use tracing::{debug, error, warn};
 
 use crate::{
     connections::ConnectionModule,
     router_v2::{
         codec::{
-            messages::{Entry, Mapping},
-            CodecError,
+            messages::{Entry, Mapping, RoutingUpdate},
+            CodecError, Header, RoutingMessage,
         },
         index::{
             IndexAllocator, IndexDictionary, MirrorIndexDictionary, ReintroductionTracker, Space,
@@ -601,6 +601,98 @@ impl RouterV2State {
 
         // TODO: next phase
 
+        Ok(())
+    }
+
+    pub fn handle_routing_update(
+        &self,
+        neighbour: PeerId,
+        transport: ConnectionModule,
+        rssi_dbm: Option<i8>,
+        msg: RoutingUpdate,
+        now: u64,
+    ) -> Result<()> {
+        for mapping in msg.user_mappings {
+            match self.apply_mapping(neighbour, Space::User, mapping) {
+                Ok(_) => {}
+                Err(e) => warn!("apply_mapping user failed: {e}"),
+            };
+        }
+
+        for mapping in msg.node_mappings {
+            match self.apply_mapping(neighbour, Space::Node, mapping) {
+                Ok(_) => {}
+                Err(e) => warn!("apply_mapping node failed: {e}"),
+            };
+        }
+
+        for entry in msg.user_entries {
+            match self.apply_entry(neighbour, transport, rssi_dbm, Space::User, entry, now) {
+                Ok(_) => {}
+                Err(e) => warn!("apply_entry user failed: {e}"),
+            };
+        }
+
+        for entry in msg.node_entries {
+            match self.apply_entry(neighbour, transport, rssi_dbm, Space::Node, entry, now) {
+                Ok(_) => {}
+                Err(e) => warn!("apply_entry node failed: {e}"),
+            };
+        }
+
+        Ok(())
+    }
+
+    pub fn received(
+        &self,
+        neighbour: PeerId,
+        transport: ConnectionModule,
+        rssi_dbm: Option<i8>,
+        mut buf: &[u8],
+        now: u64,
+    ) -> Result<()> {
+        while !buf.is_empty() {
+            let (header, body_slice) = match Header::decode(buf) {
+                Ok(h) => h,
+                Err(CodecError::BadVersion { payload_len, .. }) => {
+                    let skip = 4 + payload_len;
+                    if buf.len() < skip as usize {
+                        break;
+                    }
+                    buf = &buf[skip as usize..];
+                    continue;
+                }
+                Err(e) => {
+                    warn!("failed to decode header: {e}");
+                    return Ok(());
+                }
+            };
+
+            let payload_len = header.payload_len as usize;
+            if body_slice.len() < payload_len {
+                warn!(
+                    "received: truncated body, expected {payload_len} got {}",
+                    body_slice.len()
+                );
+                return Ok(());
+            }
+            let payload = &body_slice[..payload_len];
+            buf = &body_slice[payload_len..];
+
+            match header.message_type {
+                RoutingMessage::RoutingUpdate => match RoutingUpdate::decode(payload) {
+                    Ok(msg) => {
+                        if let Err(e) =
+                            self.handle_routing_update(neighbour, transport, rssi_dbm, msg, now)
+                        {
+                            error!("handle_routing_update failed: {e}");
+                        }
+                    }
+                    Err(e) => error!("RoutingUpdate decode failed: {e}"),
+                },
+                _ => debug!("to be implemented"),
+            }
+        }
         Ok(())
     }
 }

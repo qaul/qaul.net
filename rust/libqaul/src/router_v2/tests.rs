@@ -1845,3 +1845,417 @@ mod apply_entry {
             .local_only);
     }
 }
+
+// ---------- handle_routing_update ----------
+
+mod handle_routing_update {
+    use super::*;
+    use crate::router_v2::{
+        codec::messages::{Entry, Mapping, RoutingUpdate},
+        index::Space,
+        seq::SeqNum,
+        test_utils::*,
+    };
+    use libp2p::PeerId;
+
+    const NEIGHBOUR_NODE_ID: [u8; 8] = [77; 8];
+    const NEIGHBOUR_IDX_IN_NODE_DICT: u16 = 500;
+
+    /// Adds a neighbour and binds its node_id in node_dict so that any
+    /// entry processed downstream can resolve `next_hop`.
+    fn setup_neighbour(state: &RouterV2State) -> PeerId {
+        let peer = fresh_peer();
+        state.add_neighbour(peer, NEIGHBOUR_NODE_ID);
+        bind_own_dict(state, Space::Node, NEIGHBOUR_IDX_IN_NODE_DICT, NEIGHBOUR_NODE_ID);
+        peer
+    }
+
+    fn empty_update() -> RoutingUpdate {
+        RoutingUpdate {
+            user_mappings: Vec::new(),
+            node_mappings: Vec::new(),
+            user_entries: Vec::new(),
+            node_entries: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn empty_message_is_noop() {
+        let state = fresh_state();
+        let peer = setup_neighbour(&state);
+
+        state
+            .handle_routing_update(
+                peer,
+                ConnectionModule::Lan,
+                None,
+                empty_update(),
+                1_000,
+            )
+            .unwrap();
+
+        assert_eq!(state.users.read().unwrap().len(), 0);
+        assert_eq!(state.nodes.read().unwrap().len(), 0);
+        assert!(state
+            .routing_table
+            .read()
+            .unwrap()
+            .user_entries
+            .iter()
+            .all(|s| s.is_none()));
+    }
+
+    /// The critical §8.7 ordering guarantee: a mapping and an entry for
+    /// the same target arriving in one message must both take effect.
+    /// This only works if the mapping section is processed before the
+    /// entry section (otherwise the entry would fail target lookup).
+    #[test]
+    fn mapping_then_entry_lands_full_route() {
+        let state = fresh_state();
+        let peer = setup_neighbour(&state);
+
+        let target_id = [1; 8];
+        let msg = RoutingUpdate {
+            user_mappings: vec![Mapping {
+                abs_idx: 5,
+                target_id,
+                version: 3,
+            }],
+            node_mappings: Vec::new(),
+            user_entries: vec![Entry {
+                abs_idx: 5,
+                seq: 7,
+                metric: 10,
+                hop_count: 2,
+                local_only: false,
+            }],
+            node_entries: Vec::new(),
+        };
+
+        state
+            .handle_routing_update(peer, ConnectionModule::Lan, None, msg, 5_000)
+            .unwrap();
+
+        // Mirror binding from the mapping section.
+        let mirrors = state.mirrors.read().unwrap();
+        assert_eq!(
+            mirrors.get(&peer).unwrap().users.id_of(5),
+            Some(target_id),
+        );
+        drop(mirrors);
+
+        // User stub created by the mapping section, with the carried version.
+        let users = state.users.read().unwrap();
+        let user_arc = users.get(&target_id).expect("stub must exist");
+        assert_eq!(user_arc.read().unwrap().profile_version, 3);
+        drop(users);
+
+        // Own idx allocated by translate_incoming (in the entry pass).
+        let own_idx = state
+            .user_dict
+            .read()
+            .unwrap()
+            .idx_of(&target_id)
+            .expect("target must be bound in own dict");
+
+        // Routing entry stored at the allocated own_idx.
+        let rt = state.routing_table.read().unwrap();
+        let stored = rt.get(Space::User, own_idx).expect("entry must be stored");
+        let e = stored.read().unwrap();
+        assert_eq!(e.seq_num, SeqNum::from(7u16));
+        assert_eq!(e.metric, 20); // 10 + hop_cost(Lan, None) = 20
+        assert_eq!(e.hop_count, 3);
+    }
+
+    #[test]
+    fn both_spaces_processed_independently() {
+        let state = fresh_state();
+        let peer = setup_neighbour(&state);
+
+        let user_id = [1; 8];
+        let node_id = [2; 8];
+        let msg = RoutingUpdate {
+            user_mappings: vec![Mapping {
+                abs_idx: 5,
+                target_id: user_id,
+                version: 1,
+            }],
+            node_mappings: vec![Mapping {
+                abs_idx: 6,
+                target_id: node_id,
+                version: 2,
+            }],
+            user_entries: vec![Entry {
+                abs_idx: 5,
+                seq: 1,
+                metric: 10,
+                hop_count: 1,
+                local_only: false,
+            }],
+            node_entries: vec![Entry {
+                abs_idx: 6,
+                seq: 1,
+                metric: 15,
+                hop_count: 1,
+                local_only: false,
+            }],
+        };
+
+        state
+            .handle_routing_update(peer, ConnectionModule::Lan, None, msg, 1_000)
+            .unwrap();
+
+        assert!(state.users.read().unwrap().get(&user_id).is_some());
+        assert!(state.nodes.read().unwrap().get(&node_id).is_some());
+
+        let user_idx = state.user_dict.read().unwrap().idx_of(&user_id).unwrap();
+        let node_own_idx = state.node_dict.read().unwrap().idx_of(&node_id).unwrap();
+        let rt = state.routing_table.read().unwrap();
+        assert!(rt.get(Space::User, user_idx).is_some());
+        assert!(rt.get(Space::Node, node_own_idx).is_some());
+    }
+
+    /// Unknown neighbour (mirrors doesn't have this peer). Each row's
+    /// apply_ call handles this internally with Ok; the orchestrator
+    /// finishes without side effects.
+    #[test]
+    fn unknown_neighbour_processes_without_side_effects() {
+        let state = fresh_state();
+        let peer = fresh_peer(); // never added to mirrors
+
+        let msg = RoutingUpdate {
+            user_mappings: vec![Mapping {
+                abs_idx: 5,
+                target_id: [1; 8],
+                version: 1,
+            }],
+            node_mappings: Vec::new(),
+            user_entries: Vec::new(),
+            node_entries: Vec::new(),
+        };
+
+        state
+            .handle_routing_update(peer, ConnectionModule::Lan, None, msg, 1_000)
+            .unwrap();
+
+        assert_eq!(state.users.read().unwrap().len(), 0);
+        assert!(state.mirrors.read().unwrap().get(&peer).is_none());
+    }
+}
+
+// ---------- received ----------
+
+mod received {
+    use super::*;
+    use crate::router_v2::{
+        codec::{
+            messages::{Entry, Mapping, RoutingUpdate},
+            Header, RoutingMessage, PROTOCOL_VERSION,
+        },
+        index::Space,
+        test_utils::*,
+    };
+    use libp2p::PeerId;
+
+    const NEIGHBOUR_NODE_ID: [u8; 8] = [77; 8];
+    const NEIGHBOUR_IDX_IN_NODE_DICT: u16 = 500;
+
+    fn setup_neighbour(state: &RouterV2State) -> PeerId {
+        let peer = fresh_peer();
+        state.add_neighbour(peer, NEIGHBOUR_NODE_ID);
+        bind_own_dict(state, Space::Node, NEIGHBOUR_IDX_IN_NODE_DICT, NEIGHBOUR_NODE_ID);
+        peer
+    }
+
+    /// Encode a message with the given type + body bytes into a full wire
+    /// frame (4-byte header + body).
+    fn frame(msg_type: RoutingMessage, body: &[u8]) -> Vec<u8> {
+        let header = Header {
+            version: PROTOCOL_VERSION,
+            message_type: msg_type,
+            payload_len: body.len() as u16,
+        };
+        let mut out = Vec::new();
+        header.encode(&mut out);
+        out.extend_from_slice(body);
+        out
+    }
+
+    /// Encode a full ROUTING_UPDATE message ready for `received()`.
+    fn frame_routing_update(msg: &RoutingUpdate) -> Vec<u8> {
+        let mut body = Vec::new();
+        msg.encode(&mut body).unwrap();
+        frame(RoutingMessage::RoutingUpdate, &body)
+    }
+
+    fn small_valid_update(target_id: [u8; 8]) -> RoutingUpdate {
+        RoutingUpdate {
+            user_mappings: vec![Mapping {
+                abs_idx: 5,
+                target_id,
+                version: 1,
+            }],
+            node_mappings: Vec::new(),
+            user_entries: vec![Entry {
+                abs_idx: 5,
+                seq: 1,
+                metric: 10,
+                hop_count: 1,
+                local_only: false,
+            }],
+            node_entries: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn empty_buf_is_noop() {
+        let state = fresh_state();
+        let peer = setup_neighbour(&state);
+
+        state
+            .received(peer, ConnectionModule::Lan, None, &[], 1_000)
+            .unwrap();
+
+        assert_eq!(state.users.read().unwrap().len(), 0);
+    }
+
+    #[test]
+    fn valid_routing_update_dispatches_to_orchestrator() {
+        let state = fresh_state();
+        let peer = setup_neighbour(&state);
+        let target_id = [1; 8];
+
+        let msg = small_valid_update(target_id);
+        let bytes = frame_routing_update(&msg);
+
+        state
+            .received(peer, ConnectionModule::Lan, None, &bytes, 1_000)
+            .unwrap();
+
+        // Mirror + stub + routing entry all landed via the orchestrator.
+        assert!(state.users.read().unwrap().get(&target_id).is_some());
+        let own_idx = state.user_dict.read().unwrap().idx_of(&target_id).unwrap();
+        assert!(state
+            .routing_table
+            .read()
+            .unwrap()
+            .get(Space::User, own_idx)
+            .is_some());
+    }
+
+    /// Two messages back-to-back must both be processed. This pins the
+    /// frame-advancement math (advance `buf` by `4 + payload_len`, not
+    /// just `payload_len`) — the bug that would silently corrupt the
+    /// next header.
+    #[test]
+    fn multiple_valid_messages_in_batch_are_all_processed() {
+        let state = fresh_state();
+        let peer = setup_neighbour(&state);
+        let target_a = [1; 8];
+        let target_b = [2; 8];
+
+        let mut bytes = frame_routing_update(&small_valid_update(target_a));
+        bytes.extend(frame_routing_update(&small_valid_update(target_b)));
+
+        state
+            .received(peer, ConnectionModule::Lan, None, &bytes, 1_000)
+            .unwrap();
+
+        let users = state.users.read().unwrap();
+        assert!(users.get(&target_a).is_some(), "first message applied");
+        assert!(users.get(&target_b).is_some(), "second message applied");
+    }
+
+    /// Forward-compat behaviour (§8.2): a message with an unknown version
+    /// must be skipped past (using payload_len) so that a subsequent
+    /// valid message is still processed.
+    #[test]
+    fn bad_version_skips_and_processes_subsequent_valid_message() {
+        let state = fresh_state();
+        let peer = setup_neighbour(&state);
+        let target_id = [3; 8];
+
+        // Fake message with unknown version 0xFE and payload_len 8.
+        let bad_body = [0xAAu8; 8];
+        let mut bytes = vec![0xFE, 0x01, 0x00, 0x08];
+        bytes.extend_from_slice(&bad_body);
+
+        // Then a valid RoutingUpdate.
+        bytes.extend(frame_routing_update(&small_valid_update(target_id)));
+
+        state
+            .received(peer, ConnectionModule::Lan, None, &bytes, 1_000)
+            .unwrap();
+
+        assert!(
+            state.users.read().unwrap().get(&target_id).is_some(),
+            "valid message following a BadVersion must still be processed",
+        );
+    }
+
+    /// Header says payload_len=100, but only 4 bytes of body follow.
+    /// The receive loop should log-and-return without applying anything.
+    #[test]
+    fn truncated_body_returns_without_partial_state() {
+        let state = fresh_state();
+        let peer = setup_neighbour(&state);
+
+        let mut bytes = Vec::new();
+        // Header: version=1, type=RoutingUpdate=1, payload_len=100.
+        bytes.extend_from_slice(&[PROTOCOL_VERSION, 0x01, 0x00, 0x64]);
+        // Only 4 bytes of body, not 100.
+        bytes.extend_from_slice(&[0x00; 4]);
+
+        state
+            .received(peer, ConnectionModule::Lan, None, &bytes, 1_000)
+            .unwrap();
+
+        assert_eq!(state.users.read().unwrap().len(), 0);
+    }
+
+    /// Unimplemented message types (IndexDump, NodeManifest, ManifestDelta)
+    /// must be skipped past — buf advances, next message still processes.
+    #[test]
+    fn unimplemented_message_type_is_skipped_and_next_processed() {
+        let state = fresh_state();
+        let peer = setup_neighbour(&state);
+        let target_id = [4; 8];
+
+        // Send an IndexDump with a small body, then a valid RoutingUpdate.
+        let index_dump_body = [0x00u8; 2]; // arbitrary bytes; payload isn't decoded
+        let mut bytes = frame(RoutingMessage::IndexDump, &index_dump_body);
+        bytes.extend(frame_routing_update(&small_valid_update(target_id)));
+
+        state
+            .received(peer, ConnectionModule::Lan, None, &bytes, 1_000)
+            .unwrap();
+
+        // The IndexDump was skipped, then the RoutingUpdate applied.
+        assert!(state.users.read().unwrap().get(&target_id).is_some());
+    }
+
+    #[test]
+    fn malformed_routing_update_body_does_not_corrupt_frame_alignment() {
+        let state = fresh_state();
+        let peer = setup_neighbour(&state);
+        let target_id = [5; 8];
+
+        // Header claims payload_len=4, but 4 bytes of garbage isn't a
+        // valid RoutingUpdate body — decoder fails. Frame alignment is
+        // preserved because buf was advanced before the decode attempt,
+        // so the next message still processes.
+        let mut bytes = Vec::new();
+        bytes.extend_from_slice(&[PROTOCOL_VERSION, 0x01, 0x00, 0x04]);
+        bytes.extend_from_slice(&[0xFF; 4]); // garbage body
+        bytes.extend(frame_routing_update(&small_valid_update(target_id)));
+
+        state
+            .received(peer, ConnectionModule::Lan, None, &bytes, 1_000)
+            .unwrap();
+
+        assert!(
+            state.users.read().unwrap().get(&target_id).is_some(),
+            "valid message after a body-decode failure must still be processed",
+        );
+    }
+}
