@@ -17,7 +17,7 @@ use super::router_net_proto;
 use super::table::RoutingTable;
 use crate::node::user_accounts::UserAccounts;
 use crate::rpc::Rpc;
-use crate::search::{Search, Searchable};
+use crate::search::{Search, SearchConfig, Searchable};
 use crate::services::group::group_id::GroupId;
 use crate::storage::database::DbUsers;
 use crate::storage::Storage;
@@ -260,7 +260,7 @@ impl Users {
             return;
         };
 
-        match Search::new(path_str) {
+        match Search::new(path_str, SearchConfig::text_only()) {
             Ok(mut search) => {
                 if search.is_fresh() && !users.is_empty() {
                     if let Err(e) = search.index_many(users) {
