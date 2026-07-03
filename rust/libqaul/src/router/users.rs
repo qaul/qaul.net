@@ -17,7 +17,7 @@ use super::router_net_proto;
 use super::table::RoutingTable;
 use crate::node::user_accounts::UserAccounts;
 use crate::rpc::Rpc;
-use crate::search::{Search, Searchable};
+use crate::search::{Search, SearchConfig, Searchable};
 use crate::services::group::group_id::GroupId;
 use crate::storage::database::DbUsers;
 use crate::storage::Storage;
@@ -260,7 +260,7 @@ impl Users {
             return;
         };
 
-        match Search::new(path_str) {
+        match Search::new(path_str, SearchConfig::text_only()) {
             Ok(mut search) => {
                 if search.is_fresh() && !users.is_empty() {
                     if let Err(e) = search.index_many(users) {
@@ -480,6 +480,16 @@ impl Users {
         let store = router.users.inner.read().unwrap();
 
         store.users.get(q8id).map(|user| user.id)
+    }
+
+    /// get the display name of a known user by its q8id
+    ///
+    /// Used by group search to label direct-chat rooms with the partner's name
+    /// (direct chats carry no group name of their own).
+    pub fn get_name_by_q8id(router: &super::RouterState, q8id: &[u8]) -> Option<String> {
+        let store = router.users.inner.read().unwrap();
+
+        store.users.get(q8id).map(|user| user.name.clone())
     }
 
     /// create and send the user info table for the

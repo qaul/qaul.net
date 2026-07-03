@@ -5,7 +5,7 @@ pub struct Group {
     /// message type
     #[prost(
         oneof = "group::Message",
-        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16"
+        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17"
     )]
     pub message: ::core::option::Option<group::Message>,
 }
@@ -62,6 +62,13 @@ pub mod group {
         /// group invited response
         #[prost(message, tag = "16")]
         GroupInvitedResponse(super::GroupInvitedResponse),
+        /// group search request
+        ///
+        /// Searches groups/rooms by name (direct chats match the partner's
+        /// username) and returns a GroupListResponse ranked by relevance, with
+        /// more recently active rooms breaking ties.
+        #[prost(message, tag = "17")]
+        GroupSearchRequest(super::GroupSearchRequest),
     }
 }
 /// Group Result
@@ -254,6 +261,19 @@ pub struct GroupInfo {
 /// Group list request
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct GroupListRequest {
+    #[prost(uint32, tag = "10")]
+    pub offset: u32,
+    #[prost(uint32, tag = "20")]
+    pub limit: u32,
+}
+/// Group search request
+///
+/// Returns a GroupListResponse. An empty/whitespace query falls back to the
+/// recency-sorted full group list.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct GroupSearchRequest {
+    #[prost(string, tag = "1")]
+    pub query: ::prost::alloc::string::String,
     #[prost(uint32, tag = "10")]
     pub offset: u32,
     #[prost(uint32, tag = "20")]

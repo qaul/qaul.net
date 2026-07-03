@@ -9,6 +9,9 @@ version
 .vscode/
 **/search/users/
 
+# runtime full-text search indexes (tantivy)
+**/search/groups/
+
 # generated SBOM files
 *.cdx.json
 *.spdx.json
