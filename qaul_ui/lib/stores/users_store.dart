@@ -149,6 +149,8 @@ class UsersSearchStore extends Notifier<UsersSearchState> {
 class UsersStore extends Notifier<List<User>> {
   PaginationState? _pagination;
   PaginationState? get pagination => _pagination;
+  SecurityNumber? _securityNumber;
+  SecurityNumber? get securityNumber => _securityNumber;
   final _inFlightByUserId = <String, Future<User?>>{};
 
   Timer? _pollingTimer;
@@ -252,6 +254,40 @@ class UsersStore extends Notifier<List<User>> {
     } catch (_) {
       return null;
     }
+  }
+
+  Future<SecurityNumber?> getUserSecurityNumber(User user) async {
+    final securityNumber =
+        await ref.read(qaulWorkerProvider).getUserSecurityNumber(user);
+    if (securityNumber != null) {
+      _securityNumber = securityNumber;
+    }
+    return securityNumber;
+  }
+
+  Future<User?> verifyUser(User user) {
+    return _applyUserUpdate(ref.read(qaulWorkerProvider).verifyUser(user));
+  }
+
+  Future<User?> unverifyUser(User user) {
+    return _applyUserUpdate(ref.read(qaulWorkerProvider).unverifyUser(user));
+  }
+
+  Future<User?> blockUser(User user) {
+    return _applyUserUpdate(ref.read(qaulWorkerProvider).blockUser(user));
+  }
+
+  Future<User?> unblockUser(User user) {
+    return _applyUserUpdate(ref.read(qaulWorkerProvider).unblockUser(user));
+  }
+
+  Future<User?> _applyUserUpdate(Future<User?> request) async {
+    final updatedUser = await request;
+    if (updatedUser != null) {
+      _updateMany([updatedUser]);
+      _syncLookup();
+    }
+    return updatedUser;
   }
 
   // ---------------------------------------------------------------------------

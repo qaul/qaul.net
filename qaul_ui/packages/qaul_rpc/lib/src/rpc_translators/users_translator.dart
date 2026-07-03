@@ -113,10 +113,8 @@ class UsersTranslator extends RpcModuleTranslator {
 
   @override
   Future<void> processResponse(RpcTranslatorResponse res, Ref ref) async {
-    if (res.module != type) return;
-
-    if (res.data is SecurityNumber) {
-      ref.read(currentSecurityNoProvider.notifier).state = res.data;
-    }
+    // User responses are applied via LibqaulWorker futures (UsersStore).
+    // Keep this override so the base implementation does not log a false
+    // "unprocessed response" error after the matching pending future resolves.
   }
 }

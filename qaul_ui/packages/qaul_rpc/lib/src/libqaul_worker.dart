@@ -200,29 +200,29 @@ class LibqaulWorker {
     return result;
   }
 
-  Future<void> verifyUser(User u) async {
+  Future<User?> verifyUser(User u) async {
     final entry = _baseUserEntryFrom(u)..verified = true;
-    await _updateUser(entry);
+    return _updateUser(entry);
   }
 
-  Future<void> unverifyUser(User u) async {
+  Future<User?> unverifyUser(User u) async {
     final entry = _baseUserEntryFrom(u)..verified = false;
-    await _updateUser(entry);
+    return _updateUser(entry);
   }
 
-  Future<void> blockUser(User u) async {
+  Future<User?> blockUser(User u) async {
     final entry = _baseUserEntryFrom(u)..blocked = true;
-    await _updateUser(entry);
+    return _updateUser(entry);
   }
 
-  Future<void> unblockUser(User u) async {
+  Future<User?> unblockUser(User u) async {
     final entry = _baseUserEntryFrom(u)..blocked = false;
-    await _updateUser(entry);
+    return _updateUser(entry);
   }
 
   /// Sends a [UserEntry] update (verify/block) and awaits libqaul's acknowledgement
-  Future<void> _updateUser(UserEntry entry) async {
-    await _sendRequest<User>(
+  Future<User?> _updateUser(UserEntry entry) async {
+    return _sendRequest<User>(
       module: Modules.USERS,
       data: Users(userUpdate: entry),
       adapter: (res) =>

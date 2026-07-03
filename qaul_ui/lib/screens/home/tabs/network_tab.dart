@@ -11,8 +11,7 @@ class _NetworkState extends _BaseTabState<_Network> {
   Future<void> refreshNetwork(WidgetRef ref) async {
     if (loading.value) return;
     loading.value = true;
-    final worker = ref.read(qaulWorkerProvider);
-    await worker.getUsers();
+    await ref.read(usersStoreProvider.notifier).getUsers();
     loading.value = false;
   }
 
