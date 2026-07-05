@@ -459,7 +459,13 @@ impl Group {
         let crdt = crdt_store::load_crdt(&db, group_id, group.founder.clone());
         let view = crdt.view();
 
-        GroupStorage::with_group_mut(state, account_id, group_id, |group| {
+        // A name change must reindex the room's searchable text;
+        // membership-only changes don't.
+        let reason = match &view.name {
+            Some(name) if *name != group.name => GroupSaveReason::Renamed,
+            _ => GroupSaveReason::MembershipChanged,
+        };
+        GroupStorage::with_group_mut(state, account_id, group_id, reason, |group| {
             // 1. drop members the CRDT knows about (has an add for) but
             //    that the view no longer contains (tombstoned).
             let to_drop: Vec<Vec<u8>> = group
