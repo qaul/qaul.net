@@ -240,30 +240,4 @@ impl Crypto {
             );
         }
     }
-
-    fn print_events(resp: &proto::GetRotationEventsResponse) {
-        if resp.events.is_empty() {
-            println!("(no rotation events recorded)");
-            return;
-        }
-        println!(
-            "{:<15} | {:<25} | {:<52} | {:>11} | {:>11}",
-            "timestamp_ms", "kind", "remote_id", "primary", "draining"
-        );
-        for e in &resp.events {
-            let kind = match proto::RotationEventKind::try_from(e.kind) {
-                Ok(proto::RotationEventKind::Rotated) => "Rotated",
-                Ok(proto::RotationEventKind::GraceExpired) => "GraceExpired",
-                Ok(proto::RotationEventKind::MessageDroppedPastGrace) => {
-                    "MessageDroppedPastGrace"
-                }
-                _ => "Unspecified",
-            };
-            let remote = bs58::encode(&e.remote_id).into_string();
-            println!(
-                "{:<15} | {:<25} | {:<52} | {:>11} | {:>11}",
-                e.timestamp_ms, kind, remote, e.primary_session_id, e.draining_session_id
-            );
-        }
-    }
 }
