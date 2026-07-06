@@ -15,6 +15,7 @@ dependencies:
 
   badges: ^3.1.2
   flutter_svg: ^2.2.3
+  unorm_dart: ^0.3.2
   utils: { "path": "../utils" }
 
 dev_dependencies:

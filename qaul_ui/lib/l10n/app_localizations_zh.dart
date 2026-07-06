@@ -356,6 +356,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get currentVersion => 'currently installed version:';
 
   @override
+  String get editGroupUserNames => 'Edit usernames';
+
+  @override
   String get emptyNodeName => 'No name';
 
   @override
@@ -404,6 +407,9 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get groupEventJoinedSuffix => 'has joined the group';
+
+  @override
   String groupEventLeft(String username) {
     return '\"$username\" 已 退出 该群组';
   }
@@ -411,6 +417,11 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String groupEventRemoved(String username) {
     return '\"$username\" 已 被移出 该群组';
+  }
+
+  @override
+  String groupMemberRenamedOnJoin(String name) {
+    return 'Group member $name was renamed to';
   }
 
   @override

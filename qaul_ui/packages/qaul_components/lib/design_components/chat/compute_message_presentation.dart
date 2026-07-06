@@ -15,6 +15,29 @@ bool _sameParticipantStreakNeighbor(
   return a.senderIdBase58 == b.senderIdBase58;
 }
 
+// A same-participant streak never spans a calendar day: a day boundary is a
+// hard cluster break, so the day check belongs in the predicate itself rather
+// than being re-ANDed at every call site.
+bool _sameStreakSameDay(
+  ChatTimelinePresentationRow a,
+  ChatTimelinePresentationRow b,
+) =>
+    _sameParticipantStreakNeighbor(a, b) &&
+    samePresentationLocalCalendarDay(a.sentAt, b.sentAt);
+
+// Two text rows link into the same bubble group only within the same minute
+// *and* the same calendar day (identical clock minutes on different days must
+// not link).
+bool _linksByMinute(
+  ChatTimelinePresentationRow a,
+  ChatTimelinePresentationRow b,
+) =>
+    samePresentationLocalCalendarDay(a.sentAt, b.sentAt) &&
+    directChatBubblesShareMinute(
+      a.qaulBubbleBaseWithoutLayout!,
+      b.qaulBubbleBaseWithoutLayout!,
+    );
+
 Map<String, MessagePresentationComputation> computeChatMessagePresentation({
   required List<ChatTimelinePresentationRow> ascendingTimeline,
   required ChatRenderMode layoutMode,
@@ -37,17 +60,17 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
         ? ascendingTimeline[timelineIndex + 1]
         : null;
 
-    final prevMinute = textIndexInSequence > 0
-        ? textRows[textIndexInSequence - 1].qaulBubbleBaseWithoutLayout
+    final prevTextRow = textIndexInSequence > 0
+        ? textRows[textIndexInSequence - 1]
         : null;
-    final nextMinute = textIndexInSequence < textRows.length - 1
-        ? textRows[textIndexInSequence + 1].qaulBubbleBaseWithoutLayout
+    final nextTextRow = textIndexInSequence < textRows.length - 1
+        ? textRows[textIndexInSequence + 1]
         : null;
 
     final linksToPrevious =
-        prevMinute != null && directChatBubblesShareMinute(prevMinute, bubble);
+        prevTextRow != null && _linksByMinute(prevTextRow, row);
     final linksToNext =
-        nextMinute != null && directChatBubblesShareMinute(bubble, nextMinute);
+        nextTextRow != null && _linksByMinute(row, nextTextRow);
 
     final isPrimary = row.isOutgoing;
 
@@ -59,14 +82,9 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
     if (prevTimeline == null) {
       topSpacing = 0;
     } else if (layoutMode == ChatRenderMode.group) {
-      final isSameStreakSameDay =
-          _sameParticipantStreakNeighbor(prevTimeline, row) &&
-          samePresentationLocalCalendarDay(prevTimeline.sentAt, row.sentAt);
-      if (isSameStreakSameDay) {
-        topSpacing = kChatBubbleLinkedGap;
-      } else {
-        topSpacing = kChatBubbleSeparatedGap;
-      }
+      topSpacing = _sameStreakSameDay(prevTimeline, row)
+          ? kChatBubbleLinkedGap
+          : kChatBubbleSeparatedGap;
     } else if (linksToPrevious) {
       topSpacing = kChatBubbleLinkedGap;
     } else {
@@ -79,19 +97,16 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
     var showAvatar = false;
 
     if (layoutMode == ChatRenderMode.group && row.isGroupIncomingEligible) {
-      showSenderName = prevTimeline == null ||
-          !_sameParticipantStreakNeighbor(prevTimeline, row) ||
-          !samePresentationLocalCalendarDay(
-              prevTimeline.sentAt, row.sentAt);
+      showSenderName =
+          prevTimeline == null || !_sameStreakSameDay(prevTimeline, row);
 
-      final continuesAfter = nextTimeline != null &&
-          _sameParticipantStreakNeighbor(row, nextTimeline) &&
-          samePresentationLocalCalendarDay(row.sentAt, nextTimeline.sentAt);
+      final continuesAfter =
+          nextTimeline != null && _sameStreakSameDay(row, nextTimeline);
       showAvatar = !continuesAfter;
     }
 
-    final nonTextClustersWithNext = nextTimeline != null &&
-        _sameParticipantStreakNeighbor(row, nextTimeline);
+    final nonTextClustersWithNext =
+        nextTimeline != null && _sameStreakSameDay(row, nextTimeline);
 
     final meta = MessagePresentationMeta(
       linksToPrevious: linksToPrevious,
@@ -134,29 +149,22 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
     var showSenderName = false;
 
     if (layoutMode == ChatRenderMode.group && row.isGroupIncomingEligible) {
-      showSenderName = prevTimeline == null ||
-          !_sameParticipantStreakNeighbor(prevTimeline, row) ||
-          !samePresentationLocalCalendarDay(prevTimeline.sentAt, row.sentAt);
+      showSenderName =
+          prevTimeline == null || !_sameStreakSameDay(prevTimeline, row);
 
-      final continuesAfter = nextTimeline != null &&
-          _sameParticipantStreakNeighbor(row, nextTimeline) &&
-          samePresentationLocalCalendarDay(row.sentAt, nextTimeline.sentAt);
+      final continuesAfter =
+          nextTimeline != null && _sameStreakSameDay(row, nextTimeline);
       showAvatar = !continuesAfter;
 
       if (prevTimeline != null) {
-        final isSameStreakSameDay =
-            _sameParticipantStreakNeighbor(prevTimeline, row) &&
-                samePresentationLocalCalendarDay(prevTimeline.sentAt, row.sentAt);
-        if (isSameStreakSameDay) {
-          topSpacing = kChatBubbleLinkedGap;
-        } else {
-          topSpacing = kChatBubbleSeparatedGap;
-        }
+        topSpacing = _sameStreakSameDay(prevTimeline, row)
+            ? kChatBubbleLinkedGap
+            : kChatBubbleSeparatedGap;
       }
     }
 
-    final nonTextClustersWithNext = nextTimeline != null &&
-        _sameParticipantStreakNeighbor(row, nextTimeline);
+    final nonTextClustersWithNext =
+        nextTimeline != null && _sameStreakSameDay(row, nextTimeline);
 
     final meta = MessagePresentationMeta(
       linksToPrevious: false,

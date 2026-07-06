@@ -14,6 +14,7 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart'
         EmojiEnlargementBehavior,
         InputOptions,
         SendButtonVisibilityMode,
+        SystemMessage,
         TextMessage;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -195,16 +196,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void _handleClick(String value) {
     switch (value) {
       case 'groupSettings':
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) {
-              return _GroupSettingsPage(room);
-            },
-          ),
-        );
+        _openGroupSettings();
         break;
     }
+  }
+
+  void _openGroupSettings() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => _GroupSettingsPage(room)),
+    );
   }
 
   void _scheduleUpdateCurrentOpenChat() =>
@@ -338,6 +339,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           },
           emptyState: Center(child: Text(l10n.chatEmptyState)),
           bubbleBuilder: _bubbleBuilder,
+          systemMessageBuilder: _buildSystemMessage,
           customBottomWidget: _CustomInput(
             isDisabled: room.status != ChatRoomStatus.active,
             disabledMessage: room.status != ChatRoomStatus.inviteAccepted
@@ -585,6 +587,38 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return projection.internalMessages;
   }
 
+  /// Renders group system messages. Joins and rename notices decode back to a
+  /// design-system meta model; everything else falls back to centered text.
+  Widget _buildSystemMessage(types.SystemMessage message) {
+    final Widget child;
+    switch (_decodeMetaMessage(message)) {
+      case GroupJoinMetaChatMessage(:final userName, :final joinedSuffix):
+        child = GroupJoinMetaMessage(
+          userName: userName,
+          joinedSuffix: joinedSuffix,
+        );
+      case DuplicateUsernameMetaChatMessage(
+        :final prefix,
+        :final emphasizedName,
+        :final actionLabel,
+      ):
+        child = DuplicateUsernameMetaMessage(
+          prefix: prefix,
+          emphasizedName: emphasizedName,
+          actionLabel: actionLabel,
+          onEditPressed: _chatRenderMode == ChatRenderMode.group
+              ? _openGroupSettings
+              : null,
+        );
+      default:
+        return SystemMessage(message: message.text);
+    }
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: child,
+    );
+  }
+
   Widget _bubbleBuilder(
     Widget child, {
     required types.Message message,
@@ -702,16 +736,31 @@ extension _MessageExtension on Message {
         status: mappedState,
       );
     } else if (content is GroupEventContent) {
+      final event = content as GroupEventContent;
+      final text = ChatScreen.translateGroupEventMessage(
+        event,
+        author,
+        l10n: l10n,
+        room: room,
+      );
+      // A join with a non-empty announcement gets the emphasized-name treatment
+      // (empty text means a suppressed pending-invite join).
+      final isJoin =
+          event.type == GroupEventContentType.joined && text.isNotEmpty;
       return types.SystemMessage(
         id: messageIdBase58,
-        text: ChatScreen.translateGroupEventMessage(
-          content as GroupEventContent,
-          author,
-          l10n: l10n,
-          room: room,
-        ),
+        text: text,
         createdAt: receivedAt.millisecondsSinceEpoch,
         status: mappedState,
+        metadata: isJoin
+            ? _encodeMetaMessage(
+                GroupJoinMetaChatMessage(
+                  id: messageIdBase58,
+                  userName: author.name,
+                  joinedSuffix: l10n.groupEventJoinedSuffix,
+                ),
+              )
+            : null,
       );
     } else if (content is FileShareContent) {
       var filePath = (content as FileShareContent).filePath(ref);

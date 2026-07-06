@@ -213,5 +213,60 @@ void main() {
       expect(out['id-1']!.meta.showSenderName, isFalse);
       expect(out['id-1']!.meta.showAvatar, isTrue);
     });
+
+    test('direct: same clock minute on different calendar days does not link',
+        () {
+      // Same wall-clock minute, but a day apart → must not cluster/link.
+      final d1 = DateTime(2026, 5, 8, 11, 38);
+      final d2 = DateTime(2026, 5, 9, 11, 38);
+      final m0 = QaulChatBubbleMessage(
+        content: 'a',
+        sentAt: d1,
+        receivedAt: d1,
+        status: MessageStatus.sent,
+        messageType: MessageType.primary,
+        edges: const [],
+        senderIdBase58: 'me',
+      );
+      final m1 = QaulChatBubbleMessage(
+        content: 'b',
+        sentAt: d2,
+        receivedAt: d2,
+        status: MessageStatus.sent,
+        messageType: MessageType.primary,
+        edges: const [],
+        senderIdBase58: 'me',
+      );
+      final timeline = <ChatTimelinePresentationRow>[
+        ChatTimelinePresentationRow(
+          messageIdBase58: 'id-0',
+          senderIdBase58: 'me',
+          sentAt: d1,
+          isText: true,
+          isOutgoing: true,
+          qaulBubbleBaseWithoutLayout: m0,
+        ),
+        ChatTimelinePresentationRow(
+          messageIdBase58: 'id-1',
+          senderIdBase58: 'me',
+          sentAt: d2,
+          isText: true,
+          isOutgoing: true,
+          qaulBubbleBaseWithoutLayout: m1,
+        ),
+      ];
+
+      final out = computeChatMessagePresentation(
+        ascendingTimeline: timeline,
+        layoutMode: ChatRenderMode.direct,
+      );
+
+      expect(out['id-0']!.meta.linksToNext, isFalse,
+          reason: 'a day boundary breaks the minute cluster');
+      expect(out['id-1']!.meta.linksToPrevious, isFalse,
+          reason: 'a day boundary breaks the minute cluster');
+      expect(out['id-1']!.meta.topSpacing, kChatBubbleSeparatedGap,
+          reason: 'cross-day neighbors get the separated gap');
+    });
   });
 }

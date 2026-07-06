@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'chat_message.dart';
+import 'chat_meta_text_style.dart';
 
 class RoomMetaMessage extends ChatMessage {
   const RoomMetaMessage._({super.key, this.label, this.date})
@@ -17,17 +18,7 @@ class RoomMetaMessage extends ChatMessage {
   @override
   Widget build(BuildContext context) {
     final text = label ?? _formatDateLabel(context, date!);
-    final onSurface = Theme.of(context).colorScheme.onSurface;
-    return Center(
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 12,
-          height: 1.2,
-          color: onSurface.withValues(alpha: 0.55),
-        ),
-      ),
-    );
+    return Center(child: Text(text, style: chatMetaTextStyle(context)));
   }
 }
 
