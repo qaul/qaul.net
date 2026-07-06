@@ -33,15 +33,18 @@ The core claims:
 | Expiry | none explicit | `expires_at` + 7-day local retention cap + handoff budget |
 | Opt-in | `storage.users` allow-list | `dtn_v2_custody_enabled` (default **false**) |
 
-Prerequisite PRs (all on top of `main`):
+Prerequisites:
 
-1. `fix/dtn-v2-release-hardening` — retention cap, quota self-heal,
-   blocked-sender rejection, recipient-first delivery, V2 state RPC.
-2. `feat/identity-priority` — local priority levels, priority-scaled
-   per-sender quota (base configurable via `dtn_v2_sender_quota_mb`).
-3. `feat/sender-routes` — sender-defined custody routes with the
-   resolution order: sender route → receiver's published route →
-   configured V1 storage node as single-custodian route.
+1. **merged** — DTN V2 release hardening (retention cap, quota
+   self-heal, blocked-sender rejection, recipient-first delivery,
+   V2 state RPC) and the tier-0 delivery fixes.
+2. PR #907 `feat/identity-priority` — local priority levels,
+   priority-scaled per-sender quota (base configurable via
+   `dtn_v2_sender_quota_mb`).
+3. `feat/sender-routes` (stacked on #907) — sender-defined custody
+   routes with the resolution order: sender route → receiver's
+   published route → configured V1 storage node as single-custodian
+   route.
 
 ## The DTN_V2 capability bit
 
