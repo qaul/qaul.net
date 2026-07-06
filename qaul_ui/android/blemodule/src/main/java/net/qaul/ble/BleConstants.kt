@@ -144,7 +144,7 @@ object BleConstants {
 
     /** Show the on-device floating BLE stats overlay (BleDebugOverlay) while BLE is running. For debugging purposes,
      *  set false to disable. Needs the "Draw over other apps" permission, requested on first show. */
-    const val DEBUG_OVERLAY = true
+    const val DEBUG_OVERLAY = false
 
     /** Pause the scan during each connect attempt. DISABLED: confirmed in field logs to restart the
      *  scan often enough (during connect/tiebreaker churn) to trip Android's ~5-startScan/30s limit,

@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <!-- Debug-only: floating BLE stats overlay for on-device testing (BleDebugOverlay). -->
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- Debug-only: floating BLE stats overlay for on-device testing (BleDebugOverlay).-->
+    <!-- <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /> -->
 
 </manifest>
