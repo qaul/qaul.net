@@ -354,6 +354,12 @@ object BleScanner {
                     }
                     Log.i(TAG, "Defer window lapsed for $mac — connecting outbound (asymmetric fallback)")
                 }
+
+                if (BleConstants.ANTI_ISLANDING && prefix != null &&
+                    ConnectionPool.isReserveHoldActive() && ConnectionPool.is2HopReachable(prefix)) {
+                    Log.i(TAG, "Reserving last slot: $mac reachable in 2 hops, holding for a bridge")
+                    return
+                }
             }
 
             Log.i(TAG, "Auto-connecting to $mac")

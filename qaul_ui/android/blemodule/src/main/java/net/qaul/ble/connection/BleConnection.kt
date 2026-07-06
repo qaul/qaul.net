@@ -40,16 +40,19 @@ class BleConnection(
      */
     var onMessageResult: ((messageId: String, success: Boolean) -> Unit)? = null
 
+    /** Fired when the remote sends its neighbour list (SEND_NEIGHBOURS FLC). Each entry is a
+     *  QAUL_ID_ADVERT_BYTES prefix. ConnectionPool uses it for 2 hop topology awareness. */
+    var onNeighboursReceived: ((device: BluetoothDevice, neighbours: List<ByteArray>) -> Unit)? = null
+
     private val TAG = "BleConnection"
 
     private val sendQueue = SendQueue(BleConstants.LOCAL_QAUL_ID)
     private val receiveQueue = ReceiveQueue()
 
     // High-bandwidth L2CAP data channel. Owned for BOTH roles: the CENTRAL opens it after
-    // reading the peripheral's PSM; the PERIPHERAL has its end handed in by GattServer.
-    // All access is guarded by l2capLock. `closed` prevents a late L2CAP connect — one that
-    // completes on its background thread AFTER disconnect() ran (e.g. the dual-connection
-    // tiebreaker dropped us mid-connect) — from orphaning a channel and leaking its threads.
+    // reading the peripheral's PSM, the PERIPHERAL has its end handed in by GattServer.
+    // All access is guarded by l2capLock. `closed` prevents a late L2CAP connect, one that
+    // completes on its background thread after disconnect() ran, from orphaning a channel and leaking its threads.
     private val l2capLock = Any()
     @Volatile private var closed = false
 
@@ -226,6 +229,9 @@ class BleConnection(
             flushSendQueue()
         }
 
+        // remote shared its neighbour list, hand it up for 2 hop topology tracking.
+        result.neighboursReceived?.let { onNeighboursReceived?.invoke(device, it) }
+
         // Remote is acknowledging receipt of a message we sent. Returns the completed
         // message's id (empty until a message, or all parts of a large one. is fully acked), which we
         // surface up as the real delivery result
@@ -282,6 +288,14 @@ class BleConnection(
         sendQueue.failAllPending().forEach { messageId ->
             onMessageResult?.invoke(messageId, false)
         }
+    }
+
+   /**
+    * send our current neighbour list to this peer (SEND_NEIGHBOURS FLC) for 2 hop awareness.
+    */
+    fun sendNeighbourList(prefixes: List<ByteArray>) {
+        sendQueue.addFlcNeighbours(prefixes)
+        flushSendQueue()
     }
 
    /**

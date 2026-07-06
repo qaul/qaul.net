@@ -15,6 +15,7 @@ import kotlin.time.TimeSource.Monotonic.ValueTimeMark
 import net.qaul.ble.test.ble.metrics.BleMetrics
 import net.qaul.ble.AppLog
 import net.qaul.ble.BLEUtils
+import net.qaul.ble.BleConstants
 import net.qaul.ble.test.ble.model.FlowControlMessageType
 
 
@@ -42,6 +43,9 @@ class ReceiveQueueResult {
     var flcSendAck: FlcAck? = null
     var flcRequestAck: Byte? = null
     var flcAckReceived: FlcAck? = null
+    /** Phase 0: the remote's current neighbour list (each entry a QAUL_ID_ADVERT_BYTES prefix),
+     *  set on a SEND_NEIGHBOURS FLC message. Used for 2-hop topology awareness. */
+    var neighboursReceived: List<ByteArray>? = null
     /** Non null only when a complete, deliverable message is ready (normal message or fully
      *  assembled large message). Never set to a partial large-message part. */
     var receivedMessage: ReceivedMessage? = null
@@ -268,6 +272,21 @@ class ReceiveQueue {
             }
             FlowControlMessageType.LIVENESS_CHECK_PING.value -> {
                 AppLog.e(TAG, "incomingFlowControlMessage: LIVENESS_CHECK_PING")
+            }
+            FlowControlMessageType.SEND_NEIGHBOURS.value -> {
+                // payload is N concatenated fixed length prefixes
+                val size = BleConstants.QAUL_ID_ADVERT_BYTES
+                if (payload.size % size == 0) {
+                    val list = ArrayList<ByteArray>(payload.size / size)
+                    var i = 0
+                    while (i + size <= payload.size) {
+                        list.add(payload.sliceArray(i until i + size))
+                        i += size
+                    }
+                    receiveQueueResult.neighboursReceived = list
+                } else {
+                    AppLog.e(TAG, "SEND_NEIGHBOURS payload size ${payload.size} not a multiple of $size")
+                }
             }
             else -> {
                 AppLog.e(TAG, "incomingFlowControlMessage: unknown")

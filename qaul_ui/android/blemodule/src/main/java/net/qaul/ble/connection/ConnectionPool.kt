@@ -3,13 +3,13 @@ package net.qaul.ble.test.ble.connection
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
 import android.util.Log
-import net.qaul.ble.AppLog
 import net.qaul.ble.BleConstants
 import net.qaul.ble.test.ble.advertiser.BleAdvertiser
 import net.qaul.ble.test.ble.scanner.BleScanner
 import net.qaul.ble.test.ble.manager.ConnectionEventListener
 import net.qaul.ble.test.ble.queue.BleTaskScheduler
 import net.qaul.ble.test.ble.util.toHexString
+import net.qaul.ble.test.ble.util.toHexKey
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
@@ -40,6 +40,13 @@ object ConnectionPool {
 
     // qaul IDs (hex) currently reachable via at least one connection — the dedup key for up/down.
     private val upNeighbours = mutableSetOf<String>()
+
+    // Per connection: the neighbour qaul id prefixes that peer last told us about.
+    // The union across all entries is our 2 hop reachable set. Keyed by device address.
+    private val neighbourLists = ConcurrentHashMap<String, Set<String>>()
+    // When we last reached MAX_CONNECTIONS-1 slot, The last slot is "held" for a
+    // bridge for RESERVE_SLOT_HOLD_MS after this instant.
+    @Volatile private var reachedReserveThresholdAt: Long = 0L
 
     private val reaper = Executors.newSingleThreadScheduledExecutor { r ->
         Thread(r, "connection-aliveness-watchdog").apply { isDaemon = true }
@@ -101,6 +108,12 @@ object ConnectionPool {
         val sinceStr = if (since < 0) "never" else "${since / 1000}s ago"
         sb.append("scan=${BleScanner.isScanning} adv=${BleAdvertiser.isAdvertising} capPaused=${BleAdvertiser.pausedForCap}\n")
         sb.append("scanResults(total)=${BleScanner.totalScanResults}  lastResult=$sinceStr")
+        if (BleConstants.ANTI_ISLANDING) {
+            // 2hop = distinct peers reachable via a neighbour (triangle closers we'd skip while holding
+            // the reserve slot); lists = how many neighbours have sent us their list.
+            val twoHop = neighbourLists.values.flatten().toSet().size
+            sb.append("\nP0 2hop=$twoHop  reserveHold=${isReserveHoldActive()}  lists=${neighbourLists.size}")
+        }
         return sb.toString()
     }
 
@@ -231,6 +244,7 @@ object ConnectionPool {
         val newConnection = BleConnection(device, role)
         newConnection.onQaulIdResolved = { dev, qaulId -> handleQaulIdResolved(dev, qaulId) }
         newConnection.onMessageResult = { messageId, success -> onMessageResult?.invoke(messageId, success) }
+        newConnection.onNeighboursReceived = { dev, list -> handleNeighboursReceived(dev, list) }
         connections[device.address] = newConnection
         newConnection.connect()
         Log.i(TAG, "Connection added for ${device.address} (${connections.size} total)")
@@ -251,6 +265,7 @@ object ConnectionPool {
         }
         conn.disconnect()
         conn.failPendingMessages()   // report any in-flight sends to this peer as failed
+        neighbourLists.remove(device.address)   // forget this peer's 2 hop list
         Log.i(TAG, "Connection removed for ${device.address} (${connections.size} remaining)")
         // Re-evaluate after removal: only reports DOWN if no other leg still holds this qaul ID.
         refreshNeighbourDown(conn.remoteQaulId)
@@ -266,6 +281,7 @@ object ConnectionPool {
      */
     private fun notifyConnectionsChanged() {
         if (getSize() >= BleConstants.MAX_CONNECTIONS) BleAdvertiser.pause() else BleAdvertiser.resume()
+        updateReserveThreshold()   // track when we enter/leave the reserve slot state
         onConnectionsChanged?.invoke()
     }
 
@@ -367,6 +383,7 @@ object ConnectionPool {
         if (upNeighbours.add(qaulId.toHexString())) {
             Log.i(TAG, "Neighbour up: ${qaulId.toHexString()}")
             onNeighbourUp?.invoke(qaulId)
+            broadcastNeighbourList()   // our neighbour set grew, tell everyone including the new peer
         }
     }
 
@@ -382,6 +399,51 @@ object ConnectionPool {
         if (!stillReachable && upNeighbours.remove(qaulId.toHexString())) {
             Log.i(TAG, "Neighbour down: ${qaulId.toHexString()}")
             onNeighbourDown?.invoke(qaulId)
+            broadcastNeighbourList()   // our neighbour set shrank, tell the rest
+        }
+    }
+
+    // --------------------------------------------------------------------------------------------
+    // BLE Topology Management: Anti-islanding (add-only so far).
+    // --------------------------------------------------------------------------------------------
+
+    /** Store a peer's reported neighbour list (its entries are QAUL_ID_ADVERT_BYTES prefixes). */
+    private fun handleNeighboursReceived(device: BluetoothDevice, neighbours: List<ByteArray>) {
+        neighbourLists[device.address] = neighbours.map { it.toHexKey() }.toSet()
+    }
+
+    /** Our current neighbour list: each resolved neighbour's QAUL_ID_ADVERT_BYTES. */
+    private fun currentNeighbourPrefixes(): List<ByteArray> =
+        connections.values.mapNotNull { it.remoteQaulId?.copyOf(BleConstants.QAUL_ID_ADVERT_BYTES) }
+
+    /** Push our current neighbour list to every connection (small FLC message). Called whenever our resolved neighbour set changes. */
+    private fun broadcastNeighbourList() {
+        if (!BleConstants.ANTI_ISLANDING) return
+        val prefixes = currentNeighbourPrefixes()
+        connections.values.forEach { it.sendNeighbourList(prefixes) }
+    }
+
+    /** Is [prefix] (an advertised qaul ID prefix) already reachable via one of our neighbours (2 hops)?
+     *  If true, connecting to it would just close a triangle, false, then it's a bridge to something new! */
+    fun is2HopReachable(prefix: ByteArray): Boolean {
+        val key = prefix.copyOf(BleConstants.QAUL_ID_ADVERT_BYTES).toHexKey()
+        return neighbourLists.values.any { it.contains(key) }
+    }
+
+    /** True while we're holding the last free slot for a bridge: we're at MAX-1 slots and still within
+     *  the hold window. During this window the scanner skips 2-hop-reachable (redundant) candidates. */
+    fun isReserveHoldActive(): Boolean {
+        if (getSize() < BleConstants.MAX_CONNECTIONS - 1) return false
+        val since = reachedReserveThresholdAt
+        return since != 0L && System.currentTimeMillis() - since < BleConstants.RESERVE_SLOT_HOLD_MS
+    }
+
+    /** Track when we entered the reserve state. */
+    private fun updateReserveThreshold() {
+        if (getSize() == BleConstants.MAX_CONNECTIONS - 1) {
+            if (reachedReserveThresholdAt == 0L) reachedReserveThresholdAt = System.currentTimeMillis()
+        } else {
+            reachedReserveThresholdAt = 0L
         }
     }
 
@@ -419,6 +481,7 @@ object ConnectionPool {
                 // Unexpected drop — clean up, then re-evaluate neighbour reachability
                 val conn = connections.remove(device.address)
                 conn?.failPendingMessages()   // fail in-flight sends to this peer → libqaul re-routes
+                neighbourLists.remove(device.address)   // forget this peer's 2 hop list
                 Log.i(TAG, "Unexpected disconnect cleaned up for ${device.address}")
                 refreshNeighbourDown(conn?.remoteQaulId)
             }

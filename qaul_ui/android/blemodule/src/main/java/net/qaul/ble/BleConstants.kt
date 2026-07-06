@@ -54,6 +54,17 @@ object BleConstants {
     /** Maximum number of simultaneous peer connections. Android BLE is unreliable above 3. */
     const val MAX_CONNECTIONS = 3
 
+    /** anti-islanding (ADD-ONLY). Combats cold start fracture into islands by (a) holding the
+     *  last free connection slot briefly for a "bridge" rather than filling it with a peer we can
+     *  already reach, and (b) exchanging 2 hop neighbour lists (a small FLC message) so we can tell a
+     *  bridge from a redundant triangle topology. In this 1st phase, it never drops a healthy link, so it cannot cause
+     *  connection flapping. can be disabled if it misbehaves. */
+    const val ANTI_ISLANDING = true
+
+    /** How long to hold the last free slot for a bridge (a peer not already reachable within 2 hops)
+     *  before filling it with whatever is available, so the slot is never wasted. */
+    const val RESERVE_SLOT_HOLD_MS = 10_000L
+
     /** TEST ONLY — force a fixed topology (e.g. a line for multi-hop testing) even when every device is
      *  in RF range. If non-empty, this device only forms/keeps connections with peers whose qaul ID
      *  begins with one of these hex prefixes (lowercase, no separators).. Empty = normal operation. */
@@ -92,8 +103,9 @@ object BleConstants {
     /** use LE Coded PHY (long range, S=8) for advertising and the connection link.
     * Only takes effect on hardware that supports Coded PHY + extended
      *  advertising (see the BLE CAPS startup log). non-capable devices fall back to legacy/2M so they
-     *  still work at normal range. Currently, both ends of a link must support Coded for the long range link to form. */
-    const val USE_CODED_PHY = false
+     *  still work at normal range. Currently, both ends of a link must support Coded for the long range link to form.*/
+    @Volatile
+    var USE_CODED_PHY = false
 
     /** Target MTU size to negotiate after connecting. Allows larger chunks than the 23-byte default. */
     const val TARGET_MTU = 517

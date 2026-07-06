@@ -250,6 +250,14 @@ class SendQueue(qaulId: ByteArray) {
     }
 
     /**
+     * schedule a SEND_NEIGHBOURS message carrying our current neighbour prefixes.
+     */
+    @Synchronized
+    fun addFlcNeighbours(prefixes: List<ByteArray>) {
+        flcToSend.add(FlcCreate.createSendNeighbours(prefixes))
+    }
+
+    /**
      * schedule a FLC PING message
      */
     @Synchronized

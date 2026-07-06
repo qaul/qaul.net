@@ -16,6 +16,7 @@ enum class FlowControlMessageType(val value: Byte) {
     ACK_ERROR(0x04),
     MISSING_ACK_MESSAGES(0x05),
 	LIVENESS_CHECK_PING(0x06),
+	SEND_NEIGHBOURS(0x07),
 }
 
 /**
