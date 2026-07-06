@@ -85,6 +85,17 @@ object FlcCreate {
     }
 
     /**
+     * Create a SEND_NEIGHBOURS message: our current neighbour list as concatenated fixed length
+     * qaul ID prefixes. Used for 2-hop topology awareness.
+     * Tiny, at most 10 bytes worth of prefixes, so it always fits in a single chunk.
+     */
+    fun createSendNeighbours(prefixes: List<ByteArray>): ByteArray {
+        var message = byteArrayOf(FlowControlMessageType.SEND_NEIGHBOURS.value)
+        prefixes.forEach { message += it }
+        return message
+    }
+
+    /**
      * Create ACK request message
      * @param queueIndex Index of the missing ACK
      */

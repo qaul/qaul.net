@@ -1,6 +1,7 @@
 package net.qaul.ble.test.ble.debug
 
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -19,6 +20,8 @@ import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import net.qaul.ble.BleConstants
+import net.qaul.ble.test.ble.advertiser.BleAdvertiser
 import net.qaul.ble.test.ble.connection.ConnectionPool
 
 /**
@@ -43,7 +46,12 @@ object BleDebugOverlay {
     private var pill: TextView? = null
     private var panel: LinearLayout? = null
     private var body: TextView? = null
+    private var codedButton: TextView? = null
     private var layoutParams: WindowManager.LayoutParams? = null
+
+    // Whether this device can actually do Coded PHY (long range). Computed once at build time; the
+    // toggle button is inert if false.
+    private var codedSupported = false
 
     private var expanded = false
     private val handler = Handler(Looper.getMainLooper())
@@ -130,9 +138,25 @@ object BleDebugOverlay {
                 LinearLayout.LayoutParams.MATCH_PARENT, app.dp(220)
             )
         }
+
+        // Coded-PHY (long-range) toggle. Only meaningful on capable hardware; inert otherwise.
+        codedSupported = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val adapter = (app.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager)?.adapter
+            adapter != null && adapter.isLeCodedPhySupported && adapter.isLeExtendedAdvertisingSupported
+        } else false
+        codedButton = TextView(app).apply {
+            setTextColor(Color.WHITE)
+            setPadding(app.dp(12), app.dp(8), app.dp(12), app.dp(8))
+            textSize = 11f
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            setOnClickListener { onCodedToggle() }
+        }
+
         panel = LinearLayout(app).apply {
             orientation = LinearLayout.VERTICAL
             addView(header)
+            addView(codedButton)
             addView(scroll)
         }
 
@@ -171,6 +195,7 @@ object BleDebugOverlay {
             return
         }
         render()
+        updateCodedButton()
         update()
     }
 
@@ -217,10 +242,41 @@ object BleDebugOverlay {
     private fun update() {
         if (root == null) return
         try {
-            if (expanded) body?.text = ConnectionPool.debugStatusText()
-            else pill?.text = ConnectionPool.debugSummary()
+            if (expanded) {
+                body?.text = ConnectionPool.debugStatusText()
+                updateCodedButton()
+            } else pill?.text = ConnectionPool.debugSummary()
         } catch (e: Exception) {
             Log.e(TAG, "overlay update failed", e)
+        }
+    }
+
+    /** Flip Coded PHY (long range) live and restart the advertiser so the new mode takes effect.
+     *  New connections pick up the new PHY; the scanner already reports all PHYs so it needs no change.
+     *  No-op on hardware that doesn't support Coded PHY + extended advertising. */
+    private fun onCodedToggle() {
+        if (!codedSupported) return
+        BleConstants.USE_CODED_PHY = !BleConstants.USE_CODED_PHY
+        Log.i(TAG, "Coded PHY toggled → ${BleConstants.USE_CODED_PHY}; restarting advertiser")
+        BleAdvertiser.forceRestart()   // recomputes extended/Coded advertising mode from the new flag
+        updateCodedButton()
+    }
+
+    private fun updateCodedButton() {
+        val btn = codedButton ?: return
+        when {
+            !codedSupported -> {
+                btn.text = "Coded PHY: unsupported"
+                btn.setBackgroundColor(0xFF455A64.toInt())   // grey
+            }
+            BleConstants.USE_CODED_PHY -> {
+                btn.text = "Coded PHY: ON  (tap → off)"
+                btn.setBackgroundColor(0xFF2E7D32.toInt())   // green
+            }
+            else -> {
+                btn.text = "Coded PHY: OFF  (tap → on)"
+                btn.setBackgroundColor(0xFF00695C.toInt())   // teal
+            }
         }
     }
 }
