@@ -1,4 +1,5 @@
 // Barrel file
+export 'account_management.dart';
 export 'ble_connection_status.dart';
 export 'chat_room/chat_room.dart';
 export 'dtn_configuration.dart';

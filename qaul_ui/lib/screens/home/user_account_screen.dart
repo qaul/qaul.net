@@ -3,12 +3,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:qaul_components/qaul_components.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
 
 import '../../decorators/cron_task_decorator.dart';
 import '../../decorators/search_user_decorator.dart';
 import '../../l10n/app_localizations.dart';
-import '../../widgets/user_details_banner.dart';
 import '../../widgets/widgets.dart';
 
 class UserAccountScreen extends HookConsumerWidget {
@@ -30,19 +30,29 @@ class UserAccountScreen extends HookConsumerWidget {
       schedule: const Duration(milliseconds: 1500),
       callback: refreshConnectionData,
       child: ListView(
-        padding: MediaQuery.of(context)
-            .viewPadding
-            .add(const EdgeInsets.fromLTRB(16, 8, 16, 8)),
+        padding: MediaQuery.of(
+          context,
+        ).viewPadding.add(const EdgeInsets.fromLTRB(16, 8, 16, 8)),
         children: [
-          UserDetailsHeading(user),
+          QaulAccountHeading(
+            account: QaulAccountSummary(
+              id: user.idBase58,
+              name: user.name,
+              publicKey: user.keyBase58,
+              hasPassword: user.hasPassword,
+            ),
+          ),
+          const SizedBox(height: 60),
           const _StorageUsersList(),
           const SizedBox(height: 60),
           Text('Node Info', style: theme.headlineMedium),
           const SizedBox(height: 20),
           Text('Node ID', style: theme.titleLarge),
           const SizedBox(height: 8),
-          Text(nodeInfo?.idBase58 ?? 'Unknown',
-              style: theme.bodyMedium!.copyWith(fontSize: 12)),
+          Text(
+            nodeInfo?.idBase58 ?? 'Unknown',
+            style: theme.bodyMedium!.copyWith(fontSize: 12),
+          ),
           const SizedBox(height: 20),
           Text(l10n.knownAddresses, style: theme.titleLarge),
           const SizedBox(height: 8),
@@ -54,10 +64,11 @@ class UserAccountScreen extends HookConsumerWidget {
               (index) => TableRow(
                 children: [
                   TableCell(
-                      child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(nodeInfo!.knownAddresses[index]),
-                  )),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(nodeInfo!.knownAddresses[index]),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -106,8 +117,10 @@ class _StorageUsersList extends HookConsumerWidget {
         emptyStateWidget: Text(l10n.emptyUsersList),
         rowCount: config == null ? 0 : config.users.length,
         onAddRowPressed: () async {
-          final res = await Navigator.push(context,
-              MaterialPageRoute(builder: (_) => const _AddUserDialog()));
+          final res = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const _AddUserDialog()),
+          );
           if (res is! User) return;
           addUser(res.id);
         },
@@ -136,19 +149,20 @@ class _AddUserDialog extends HookConsumerWidget {
     final config = ref.watch(dtnConfigurationProvider);
 
     return SearchUserDecorator(
-        title: 'Select user to create DTN node',
-        builder: (context, users) {
-          final eligibleUsers = users
-              .where((u) => !(config?.users.contains(u) ?? false))
-              .toList();
+      title: 'Select user to create DTN node',
+      builder: (context, users) {
+        final eligibleUsers = users
+            .where((u) => !(config?.users.contains(u) ?? false))
+            .toList();
 
-          return ListView.builder(
-            itemCount: eligibleUsers.length,
-            itemBuilder: (context, i) => QaulListTile.user(
-              eligibleUsers[i],
-              onTap: () => Navigator.pop(context, eligibleUsers[i]),
-            ),
-          );
-        });
+        return ListView.builder(
+          itemCount: eligibleUsers.length,
+          itemBuilder: (context, i) => QaulListTile.user(
+            eligibleUsers[i],
+            onTap: () => Navigator.pop(context, eligibleUsers[i]),
+          ),
+        );
+      },
+    );
   }
 }

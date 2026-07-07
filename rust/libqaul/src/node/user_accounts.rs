@@ -13,6 +13,8 @@ use crate::router;
 use crate::rpc::Rpc;
 use crate::storage::configuration;
 use crate::storage::configuration::Configuration;
+use crate::utilities::timestamp::Timestamp;
+use std::collections::BTreeMap;
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::SaltString;
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
@@ -351,6 +353,32 @@ impl UserAccounts {
         accounts.get_default_user_inner()
     }
 
+    /// Unlike `get_default_user`, this is session-aware so the UI reflects the logged account details.
+    pub fn get_authenticated_user(state: &crate::QaulState) -> Option<UserAccount> {
+        let accounts = state.user_accounts.inner.read().unwrap();
+        let authed = state.auth.authenticated_users.read().unwrap();
+        let ids: Vec<Vec<u8>> = accounts.users.iter().map(|u| u.id.to_bytes()).collect();
+        Self::default_account_index(&ids, &authed, Timestamp::get_timestamp())
+            .map(|i| accounts.users[i].clone())
+    }
+
+    /// Index of the first account with a live authenticated session, else 0
+    /// (or None when there are no accounts).
+    fn default_account_index(
+        ids: &[Vec<u8>],
+        authed: &BTreeMap<Vec<u8>, u64>,
+        now: u64,
+    ) -> Option<usize> {
+        if ids.is_empty() {
+            return None;
+        }
+        Some(
+            ids.iter()
+                .position(|id| authed.get(id).map_or(false, |&expires| now < expires))
+                .unwrap_or(0),
+        )
+    }
+
     /// to fill the routing table get all users
     pub fn get_user_info(state: &crate::QaulState) -> Vec<router::users::User> {
         let mut user_info = Vec::new();
@@ -426,7 +454,7 @@ impl UserAccounts {
                     Some(proto::user_accounts::Message::GetDefaultUserAccount(_)) => {
                         // create message
                         let proto_message;
-                        match Self::get_default_user(state) {
+                        match Self::get_authenticated_user(state) {
                             Some(user_account) => {
                                 // get RPC key values
                                 let (key_type, key_base58) =

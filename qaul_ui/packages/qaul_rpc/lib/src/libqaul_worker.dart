@@ -14,9 +14,11 @@ import 'package:uuid/uuid.dart';
 import '../qaul_rpc.dart';
 import 'generated/connections/ble/ble_rpc.pb.dart';
 import 'generated/connections/connections.pb.dart';
+import 'generated/node/account_management.pb.dart';
 import 'generated/node/node.pb.dart';
 import 'generated/node/user_accounts.pb.dart';
 import 'generated/router/users.pb.dart';
+import 'generated/rpc/authentication.pb.dart';
 import 'generated/rpc/debug.pb.dart';
 import 'generated/rpc/qaul_rpc.pb.dart';
 import 'generated/services/chat/chat.pb.dart';
@@ -225,8 +227,9 @@ class LibqaulWorker {
     return _sendRequest<User>(
       module: Modules.USERS,
       data: Users(userUpdate: entry),
-      adapter: (res) =>
-          res.data is UserUpdateResult ? (res.data as UserUpdateResult).user : null,
+      adapter: (res) => res.data is UserUpdateResult
+          ? (res.data as UserUpdateResult).user
+          : null,
     );
   }
 
@@ -249,14 +252,13 @@ class LibqaulWorker {
     final result = await _sendRequest<List<InternetNode>>(
       module: Modules.CONNECTIONS,
       data: Connections(internetNodesRequest: InternetNodesRequest()),
-      adapter: (res) {
-        if (res.data is List<InternetNode>) {
-          return res.data as List<InternetNode>;
-        }
-        return null;
-      },
+      adapter: _payload<List<InternetNode>>,
     );
-    return result ?? [];
+    final nodes = result ?? [];
+    // Future-based fetch: publish our own state (see `_setActiveUser`).
+    syncConnectedInternetNodes(
+        _ref.read(connectedNodesProvider.notifier), nodes);
+    return nodes;
   }
 
   Future<void> addNode(String address, [String? name]) async =>
@@ -289,22 +291,145 @@ class LibqaulWorker {
   }
 
   // -------------------
+  // USERACCOUNTS Requests
+  // -------------------
+  /// The worker owns [defaultUserProvider] in the future-based RPC model.
+  /// Because [_receiveResponse] resolves a pending request *before* a
+  /// translator's `processResponse` would run (see the note there), a
+  /// future-based call must publish its own session state. Route every such
+  /// write through here so there is a single, greppable owner.
+  void _setActiveUser(User user) =>
+      _ref.read(defaultUserProvider.notifier).state = user;
+
   Future<User?> getDefaultUserAccount() async {
-    final message = UserAccounts(getDefaultUserAccount: true);
     final result = await _sendRequest<User>(
       module: Modules.USERACCOUNTS,
-      data: message,
-      adapter: (res) {
-        if (res.data is User) return res.data as User;
-        return null;
-      },
+      data: UserAccounts(getDefaultUserAccount: true),
+      adapter: _payload<User>,
     );
+    if (result != null) _setActiveUser(result);
     return result;
   }
 
-  Future<void> createUserAccount(String name) async {
-    final msg = UserAccounts(createUserAccount: CreateUserAccount(name: name));
-    await _sendMessage(Modules.USERACCOUNTS, msg);
+  Future<User?> createUserAccount(String name, {String? password}) async {
+    final request = CreateUserAccount(name: name);
+    if (password != null && password.isNotEmpty) request.password = password;
+    final result = await _sendRequest<User>(
+      module: Modules.USERACCOUNTS,
+      data: UserAccounts(createUserAccount: request),
+      adapter: _payload<User>,
+    );
+    if (result != null) _setActiveUser(result);
+    return result;
+  }
+
+  Future<bool> setAccountPassword(String? password) async {
+    final request = SetPasswordRequest();
+    if (password != null && password.isNotEmpty) request.password = password;
+    final msg = UserAccounts(setPasswordRequest: request);
+    final result = await _sendRequest<bool>(
+      module: Modules.USERACCOUNTS,
+      data: msg,
+      adapter: _payload<bool>,
+    );
+    return result ?? false;
+  }
+
+  Future<List<LocalAccount>> getLocalAccounts() async {
+    final result = await _sendRequest<List<LocalAccount>>(
+      module: Modules.AUTH,
+      data: AuthRpc(usersRequest: UsersRequest()),
+      adapter: _payload<List<LocalAccount>>,
+      userId: Uint8List(0),
+    );
+    return result ?? [];
+  }
+
+  Future<bool> loginLocalAccount(LocalAccount account,
+      {String? password}) async {
+    final challenge = await _sendRequest<AuthChallenge>(
+      module: Modules.AUTH,
+      data: AuthRpc(authRequest: AuthRequest(userId: account.userId)),
+      adapter: _payload<AuthChallenge>,
+      userId: Uint8List(0),
+    );
+    if (challenge == null) return false;
+
+    if (account.hasPassword) {
+      throw const RpcRequestException(
+        'Password-protected login needs Argon2 challenge hashing in Flutter.',
+      );
+    }
+
+    final authenticated = await _sendRequest<bool>(
+      module: Modules.AUTH,
+      data: AuthRpc(
+        authResponse: AuthResponse(
+          userId: account.userId,
+          challengeHash: const [],
+        ),
+      ),
+      adapter: _payload<bool>,
+      userId: Uint8List(0),
+    );
+    if (authenticated == true) {
+      // Re-fetch the full account post-auth
+      await getDefaultUserAccount();
+    }
+    return authenticated ?? false;
+  }
+
+  Future<bool> getSessionStatus({Uint8List? userId}) async {
+    final result = await _sendRequest<bool>(
+      module: Modules.AUTH,
+      data: AuthRpc(sessionStatusRequest: SessionStatusRequest()),
+      adapter: _payload<bool>,
+      userId: userId,
+    );
+    return result ?? false;
+  }
+
+  Future<bool> logout({Uint8List? userId}) async {
+    final result = await _sendRequest<bool>(
+      module: Modules.AUTH,
+      data: AuthRpc(logoutRequest: LogoutRequest()),
+      adapter: _payload<bool>,
+      userId: userId,
+    );
+    return result ?? false;
+  }
+
+  Future<String?> exportAccount({String? outputPath, Uint8List? userId}) {
+    return _sendRequest<String>(
+      module: Modules.ACCOUNT_MANAGEMENT,
+      data: AccountManagement(
+        exportAccountRequest:
+            ExportAccountRequest(outputPath: outputPath ?? ''),
+      ),
+      adapter: _payload<String>,
+      userId: userId,
+    );
+  }
+
+  Future<RestoreAccountResult?> restoreAccount(String archivePath) {
+    return _sendRequest<RestoreAccountResult>(
+      module: Modules.ACCOUNT_MANAGEMENT,
+      data: AccountManagement(
+        restoreAccountRequest: RestoreAccountRequest(archivePath: archivePath),
+      ),
+      adapter: _payload<RestoreAccountResult>,
+      userId: Uint8List(0),
+    );
+  }
+
+  Future<bool> deleteAccount({Uint8List? userId}) async {
+    final result = await _sendRequest<bool>(
+      module: Modules.ACCOUNT_MANAGEMENT,
+      data: AccountManagement(deleteAccountRequest: DeleteAccountRequest()),
+      adapter: _payload<bool>,
+      userId: userId,
+    );
+    return result ?? false;
   }
 
   Future<PaginatedChatRooms?> getAllChatRooms({int? offset, int? limit}) async {
@@ -607,25 +732,37 @@ class LibqaulWorker {
   // *******************************
   // Private (control) methods
   // *******************************
-  Future<void> _sendMessage(Modules module, pb.GeneratedMessage data,
-      {String? requestId}) async {
+  Future<void> _sendMessage(
+    Modules module,
+    pb.GeneratedMessage data, {
+    String? requestId,
+    Uint8List? userId,
+  }) async {
     requestId ??= const Uuid().v4();
     QaulRpc message = QaulRpc()
       ..module = module
       ..data = data.writeToBuffer()
       ..requestId = requestId;
 
-    final user = _ref.read(defaultUserProvider);
-    if (user != null) message.userId = user.id;
+    if (userId != null) {
+      message.userId = userId;
+    } else {
+      final user = _ref.read(defaultUserProvider);
+      if (user != null) message.userId = user.id;
+    }
 
     await _ref.read(libqaulProvider).sendRpc(message.writeToBuffer());
   }
+
+  static T? _payload<T>(RpcTranslatorResponse res) =>
+      res.data is T ? res.data as T : null;
 
   Future<T?> _sendRequest<T>({
     required Modules module,
     required pb.GeneratedMessage data,
     required T? Function(RpcTranslatorResponse) adapter,
     Duration timeout = const Duration(seconds: 10),
+    Uint8List? userId,
   }) async {
     final requestId = const Uuid().v4();
     final completer = Completer<T?>();
@@ -644,7 +781,7 @@ class LibqaulWorker {
       timer: timer,
     );
 
-    await _sendMessage(module, data, requestId: requestId);
+    await _sendMessage(module, data, requestId: requestId, userId: userId);
 
     return completer.future;
   }
@@ -686,6 +823,10 @@ class LibqaulWorker {
           _log.warning('Error in RPC adapter for ${m.requestId}', e, st);
           pending.completer.completeError(e, st);
         }
+        // Future-based requests own their side effects: we deliberately do NOT
+        // fall through to `translator.processResponse` for them. A method moved
+        // onto _sendRequest must publish any provider state itself using _payload.
+        return;
       }
     }
 

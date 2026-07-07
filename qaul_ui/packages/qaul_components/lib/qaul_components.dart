@@ -1,3 +1,4 @@
+export 'design_components/account/account_management.dart';
 export 'design_components/chat/chat_footer.dart';
 export 'design_components/chat/chat_header.dart';
 export 'design_components/chat/chat_timeline.dart';
@@ -28,6 +29,7 @@ export 'design_components/users/user_search_scaffold.dart';
 export 'domain/duplicate_username_on_join.dart';
 export 'l10n/qaul_components_l10n_ext.dart';
 export 'l10n/qaul_components_localizations.dart';
+export 'models/account.dart';
 export 'models/chat_message.dart';
 export 'models/chat_user.dart';
 export 'styles/qaul_app_theme.dart';
