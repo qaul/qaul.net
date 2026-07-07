@@ -22,6 +22,13 @@ enum ChatRenderMode { direct, group }
 // ---------------------------------------------------------------------------
 
 const double kChatBubbleWidthBreakpoint = 500.0;
+const double kChatBubbleMaxTextScaleFactor = 1.3;
+
+TextScaler chatBubbleTextScaler(BuildContext context) {
+  return MediaQuery.textScalerOf(
+    context,
+  ).clamp(maxScaleFactor: kChatBubbleMaxTextScaleFactor);
+}
 
 class ChatBubbleStyle {
   static const maxBubbleWidthMobile = 272.0;
@@ -192,7 +199,7 @@ class QaulChatBubble extends StatelessWidget {
 
   final bool showTimestamp;
 
-  Widget? _buildStatusIcon(Color textColor) {
+  Widget? _buildStatusIcon(Color textColor, double iconSize) {
     switch (message.status) {
       case MessageStatus.notSent:
         return null;
@@ -200,14 +207,14 @@ class QaulChatBubble extends StatelessWidget {
       case MessageStatus.sent:
         return Icon(
           Icons.check,
-          size: 14,
+          size: iconSize,
           color: textColor.withValues(alpha: 0.8),
         );
 
       case MessageStatus.read:
         return Icon(
           Icons.done_all,
-          size: 14,
+          size: iconSize,
           color: textColor.withValues(alpha: 0.9),
         );
     }
@@ -248,7 +255,9 @@ class QaulChatBubble extends StatelessWidget {
     );
 
     final timeLabel = formatQaulChatBubbleTime(message, clock);
-    final statusIcon = _buildStatusIcon(textColor);
+    final textScaler = chatBubbleTextScaler(context);
+    final statusIconSize = textScaler.scale(14);
+    final statusIcon = _buildStatusIcon(textColor, statusIconSize);
 
     return Align(
       alignment: isPrimary ? Alignment.centerRight : Alignment.centerLeft,
@@ -283,13 +292,14 @@ class QaulChatBubble extends StatelessWidget {
                       style: ChatBubbleStyle.timeStyle,
                     ),
                     textDirection: TextDirection.ltr,
+                    textScaler: textScaler,
                   );
                   timeLabelPainter.layout();
                   var timeBlockWidth =
                       timeLabelPainter.width +
                       ChatBubbleStyle.gapBetweenTimeAndStatusIcon;
                   if (isPrimary && statusIcon != null) {
-                    timeBlockWidth += 14.0;
+                    timeBlockWidth += statusIconSize;
                   }
                   final maxMessageWidth =
                       (constraints.maxWidth - gap - timeBlockWidth).clamp(
@@ -300,10 +310,11 @@ class QaulChatBubble extends StatelessWidget {
                   final painter = TextPainter(
                     text: messageSpan,
                     textDirection: TextDirection.ltr,
+                    textScaler: textScaler,
                   );
                   painter.layout(maxWidth: maxMessageWidth);
                   final lineHeight =
-                      ChatBubbleStyle.textStyle.fontSize! *
+                      textScaler.scale(ChatBubbleStyle.textStyle.fontSize!) *
                       (ChatBubbleStyle.textStyle.height ?? 1.2);
                   final fitsOnOneLine = painter.height <= lineHeight * 1.1;
 
@@ -311,7 +322,11 @@ class QaulChatBubble extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Text(timeLabel, style: ChatBubbleStyle.timeStyle),
+                      Text(
+                        timeLabel,
+                        style: ChatBubbleStyle.timeStyle,
+                        textScaler: textScaler,
+                      ),
                       const SizedBox(
                         width: ChatBubbleStyle.gapBetweenTimeAndStatusIcon,
                       ),
@@ -324,6 +339,7 @@ class QaulChatBubble extends StatelessWidget {
                     messageContent = RichText(
                       textAlign: TextAlign.left,
                       textWidthBasis: TextWidthBasis.longestLine,
+                      textScaler: textScaler,
                       text: messageSpan,
                     );
                   } else if (fitsOnOneLine) {
@@ -335,6 +351,7 @@ class QaulChatBubble extends StatelessWidget {
                           child: RichText(
                             textAlign: TextAlign.left,
                             textWidthBasis: TextWidthBasis.longestLine,
+                            textScaler: textScaler,
                             text: messageSpan,
                           ),
                         ),
@@ -352,6 +369,7 @@ class QaulChatBubble extends StatelessWidget {
                         RichText(
                           textAlign: TextAlign.left,
                           textWidthBasis: TextWidthBasis.longestLine,
+                          textScaler: textScaler,
                           text: messageSpan,
                         ),
                         Padding(
@@ -376,9 +394,11 @@ class QaulChatBubble extends StatelessWidget {
                         child: Text(
                           message.senderDisplayName!,
                           style: kGroupSenderNameTextStyle.copyWith(
-                            color: message.senderDisplayNameColor ??
+                            color:
+                                message.senderDisplayNameColor ??
                                 Colors.white.withValues(alpha: 0.85),
                           ),
+                          textScaler: textScaler,
                         ),
                       ),
                       messageContent,
@@ -428,7 +448,10 @@ class QaulChatBubbleDisplayItem {
 // Public helpers
 // ---------------------------------------------------------------------------
 
-bool directChatBubblesShareMinute(QaulChatBubbleMessage a, QaulChatBubbleMessage b) {
+bool directChatBubblesShareMinute(
+  QaulChatBubbleMessage a,
+  QaulChatBubbleMessage b,
+) {
   if (a.messageType != b.messageType) return false;
 
   if (a.senderIdBase58 != null &&
@@ -467,7 +490,10 @@ List<TailEdge> tailEdgesForPrimary(bool hasPreviousLinked, bool hasNextLinked) {
   return const [TailEdge.topEnd];
 }
 
-List<TailEdge> tailEdgesForSecondary(bool hasPreviousLinked, bool hasNextLinked) {
+List<TailEdge> tailEdgesForSecondary(
+  bool hasPreviousLinked,
+  bool hasNextLinked,
+) {
   if (!hasPreviousLinked && !hasNextLinked) {
     return const [TailEdge.bottomStart];
   }
