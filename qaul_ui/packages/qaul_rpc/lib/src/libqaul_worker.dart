@@ -382,11 +382,8 @@ class LibqaulWorker {
       userId: Uint8List(0),
     );
     if (authenticated == true) {
-      _ref.read(defaultUserProvider.notifier).state = User(
-        name: account.username,
-        id: account.userId,
-        hasPassword: account.hasPassword,
-      );
+      // Re-fetch the full account post-auth
+      await getDefaultUserAccount();
     }
     return authenticated ?? false;
   }
