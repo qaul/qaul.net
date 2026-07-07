@@ -101,6 +101,11 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_start(
         }
     };
 
+    // FIX: point TMPDIR at the apps writable storage dir. Rust's std::env::temp_dir() falls back to
+    // "/tmp" when TMPDIR is unset, but "/tmp" isn't writable on many OEM builds. Any sled `temporary(true)` DB opened during init
+    // then fails with EACCES: Permission denied and panics, crashing startup on those devices
+    std::env::set_var("TMPDIR", &android_path);
+
     // start libqaul in an own thread
     super::start_android(android_path);
 }
@@ -226,7 +231,10 @@ pub extern "system" fn Java_net_qaul_libqaul_LibqaulKt_sysreceive<'local>(
         match env.byte_array_from_slice(&message) {
             Ok(byte_array) => return byte_array,
             Err(e) => {
-                log::error!("sysreceive: failed to create byte array from message: {:?}", e);
+                log::error!(
+                    "sysreceive: failed to create byte array from message: {:?}",
+                    e
+                );
             }
         }
     }
