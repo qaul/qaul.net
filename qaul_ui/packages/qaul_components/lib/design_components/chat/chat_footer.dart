@@ -485,7 +485,7 @@ class _ComposerPill extends StatelessWidget {
     final text = controller.text;
     if (text.contains('\n') || text.contains('\r')) return true;
 
-    final inlineActionsWidth =
+    const inlineActionsWidth =
         _kPlusCircleSize +
         _kTextActionSpacing +
         _kActionButtonMinSize +

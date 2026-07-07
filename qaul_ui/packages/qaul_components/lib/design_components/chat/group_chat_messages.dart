@@ -59,10 +59,7 @@ class ChatMessageRenderer {
     if (display == null) return const SizedBox.shrink();
 
     if (mode == ChatRenderMode.group && !presentation.isPrimary) {
-      return GroupTextMessageItem(
-        presentation: presentation,
-        clock: clock,
-      );
+      return GroupTextMessageItem(presentation: presentation, clock: clock);
     }
 
     return DirectTextMessageItem(
@@ -140,8 +137,9 @@ class GroupTextMessageItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final display = presentation.bubbleDisplay!;
     final sender = presentation.sender;
-    final senderNameColor =
-        sender == null ? null : colorGenerationStrategy(sender.idBase58);
+    final senderNameColor = sender == null
+        ? null
+        : colorGenerationStrategy(sender.idBase58);
     final bubbleMessage = presentation.meta.showSenderName && sender != null
         ? display.message.copyWith(
             senderDisplayName: sender.name,
@@ -181,8 +179,10 @@ class GroupMessageShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final senderNameColor =
-        sender == null ? null : colorGenerationStrategy(sender!.idBase58);
+    final textScaler = chatBubbleTextScaler(context);
+    final senderNameColor = sender == null
+        ? null
+        : colorGenerationStrategy(sender!.idBase58);
     return Padding(
       padding: EdgeInsetsDirectional.only(top: marginTop),
       child: Row(
@@ -211,6 +211,7 @@ class GroupMessageShell extends StatelessWidget {
                       style: kGroupSenderNameTextStyle.copyWith(
                         color: senderNameColor,
                       ),
+                      textScaler: textScaler,
                     ),
                   ),
                 child,
@@ -231,6 +232,7 @@ class GroupSenderAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final background = colorGenerationStrategy(sender.idBase58);
+    final textScaler = chatBubbleTextScaler(context);
 
     return SizedBox(
       width: 28,
@@ -251,6 +253,7 @@ class GroupSenderAvatar extends StatelessWidget {
                 height: 1.2,
                 letterSpacing: 0,
               ),
+              textScaler: textScaler,
             ),
           ),
           if (sender.isConnected)
