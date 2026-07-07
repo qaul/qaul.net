@@ -141,6 +141,14 @@
       }
     }
   },
+  "@groupMemberRenamedOnJoin": {
+    "description": "Prefix shown when a joining member's name collides with an existing member; followed by the disambiguated name.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "about": "About",
   "aboutBackgroundExecution": "About the background execution",
   "accept": "Accept",
@@ -176,6 +184,7 @@
   "darkTheme": "Dark Theme",
   "decline": "Decline",
   "deleteLogs": "Delete logs",
+  "editGroupUserNames": "Edit usernames",
   "emptyChatsList": "No chat rooms yet",
   "emptyNodeName": "No name",
   "emptyPublicList": "No public messages yet",
@@ -198,9 +207,11 @@
   "groupEventInviteAccepted": "\"{username}\" accepted the invite to the group",
   "groupEventInvited": "\"{username}\" has been invited to the group",
   "groupEventJoined": "\"{username}\" has joined the group",
+  "groupEventJoinedSuffix": "has joined the group",
   "groupEventLeft": "\"{username}\" has left the group",
   "groupEventRemoved": "\"{username}\" was removed from the group",
   "groupInvite": "Group Invite",
+  "groupMemberRenamedOnJoin": "Group member {name} was renamed to",
   "groupName": "Group Name",
   "groupSettings": "Group Settings",
   "groupStateEventClosed": "The group has been closed",

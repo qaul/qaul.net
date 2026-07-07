@@ -805,6 +805,12 @@ abstract class AppLocalizations {
   /// **'currently installed version:'**
   String get currentVersion;
 
+  /// No description provided for @editGroupUserNames.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit usernames'**
+  String get editGroupUserNames;
+
   /// No description provided for @emptyNodeName.
   ///
   /// In en, this message translates to:
@@ -883,6 +889,12 @@ abstract class AppLocalizations {
   /// **'\"{username}\" has joined the group'**
   String groupEventJoined(String username);
 
+  /// No description provided for @groupEventJoinedSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'has joined the group'**
+  String get groupEventJoinedSuffix;
+
   /// No description provided for @groupEventLeft.
   ///
   /// In en, this message translates to:
@@ -894,6 +906,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'\"{username}\" was removed from the group'**
   String groupEventRemoved(String username);
+
+  /// Prefix shown when a joining member's name collides with an existing member; followed by the disambiguated name.
+  ///
+  /// In en, this message translates to:
+  /// **'Group member {name} was renamed to'**
+  String groupMemberRenamedOnJoin(String name);
 
   /// No description provided for @inviteUser.
   ///

@@ -365,6 +365,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get currentVersion => 'currently installed version:';
 
   @override
+  String get editGroupUserNames => 'Edit usernames';
+
+  @override
   String get emptyNodeName => 'Sconosciuto';
 
   @override
@@ -413,6 +416,9 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
+  String get groupEventJoinedSuffix => 'has joined the group';
+
+  @override
   String groupEventLeft(String username) {
     return '\"$username\" ha lasciato il gruppo';
   }
@@ -420,6 +426,11 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String groupEventRemoved(String username) {
     return '\"$username\" è stato rimosso dal gruppo';
+  }
+
+  @override
+  String groupMemberRenamedOnJoin(String name) {
+    return 'Group member $name was renamed to';
   }
 
   @override
