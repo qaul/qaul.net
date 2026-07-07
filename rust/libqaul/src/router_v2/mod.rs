@@ -10,12 +10,13 @@
 //! and supports gateway-based delegation across network boundaries.
 
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     sync::{Arc, RwLock},
     time::Instant,
 };
 
 use libp2p::PeerId;
+use tokio::sync::mpsc;
 use tracing::{debug, error, warn};
 
 use crate::{
@@ -39,6 +40,7 @@ pub mod codec;
 pub mod identity;
 pub mod index;
 pub mod metric;
+pub mod propagation;
 pub mod seq;
 pub mod table;
 
@@ -88,16 +90,28 @@ pub struct NeighbourInfo {
     pub node_id: [u8; 8],
     pub users: MirrorIndexDictionary,
     pub nodes: MirrorIndexDictionary,
+    pub transports: HashSet<ConnectionModule>,
 }
 
 impl NeighbourInfo {
-    pub fn new(node_id: [u8; 8]) -> Self {
+    pub fn new(node_id: [u8; 8], transport: ConnectionModule) -> Self {
+        let mut transports = HashSet::new();
+        transports.insert(transport);
         NeighbourInfo {
             node_id,
             users: MirrorIndexDictionary::default(),
             nodes: MirrorIndexDictionary::default(),
+            transports,
         }
     }
+}
+
+/// the shape for a message to be sent over the wire
+#[derive(Debug, Clone)]
+pub struct OutboundMsg {
+    pub peer: PeerId,
+    pub transport: ConnectionModule,
+    pub bytes: Vec<u8>,
 }
 
 /// Instance-based router state that owns all routing sub-state.
@@ -124,11 +138,15 @@ pub struct RouterV2State {
     pub node_allocator: RwLock<IndexAllocator>,
     /// tracks the indices that needs to be resent over the wire
     pub reintroduction_tracker: RwLock<ReintroductionTracker>,
+    /// this node's sequence number
+    pub seq_num: RwLock<SeqNum>,
+    pub tx_outbound: mpsc::UnboundedSender<OutboundMsg>,
 }
 
 impl RouterV2State {
-    pub fn new(host_node_id: [u8; 8]) -> Self {
-        Self {
+    pub fn new(host_node_id: [u8; 8]) -> (Self, mpsc::UnboundedReceiver<OutboundMsg>) {
+        let (tx, rx) = mpsc::unbounded_channel::<OutboundMsg>();
+        let state = Self {
             options: RoutingV2Options::default(),
             user_dict: RwLock::new(IndexDictionary::new(None)),
             node_dict: RwLock::new(IndexDictionary::new(Some(host_node_id))),
@@ -139,18 +157,39 @@ impl RouterV2State {
             users_allocator: RwLock::new(IndexAllocator::new()),
             node_allocator: RwLock::new(IndexAllocator::new()),
             reintroduction_tracker: RwLock::new(ReintroductionTracker::new()),
+            seq_num: RwLock::new(SeqNum::new()),
+            tx_outbound: tx,
+        };
+        (state, rx)
+    }
+
+    /// Spec 4.2
+    pub fn add_neighbour_transport(
+        &self,
+        peer: PeerId,
+        node_id: [u8; 8],
+        transport: ConnectionModule,
+    ) {
+        let mut mirrors = self.mirrors.write().unwrap();
+        mirrors
+            .entry(peer)
+            .and_modify(|info| {
+                info.transports.insert(transport);
+            })
+            .or_insert_with(|| NeighbourInfo::new(node_id, transport));
+    }
+
+    pub fn remove_neighbour_transport(&self, peer: PeerId, transport: ConnectionModule) {
+        let mut mirrors = self.mirrors.write().unwrap();
+        let now_empty = if let Some(info) = mirrors.get_mut(&peer) {
+            info.transports.remove(&transport);
+            info.transports.is_empty()
+        } else {
+            false
+        };
+        if now_empty {
+            mirrors.remove(&peer);
         }
-    }
-
-    /// Inserts a fresh empty mirror for the neighbour, replacing any prior mirror
-    pub fn add_neighbour(&self, peer: PeerId, node_id: [u8; 8]) {
-        let mut mirrors = self.mirrors.write().unwrap();
-        mirrors.insert(peer, NeighbourInfo::new(node_id));
-    }
-
-    pub fn remove_mirror(&self, peer: PeerId) {
-        let mut mirrors = self.mirrors.write().unwrap();
-        mirrors.remove_entry(&peer);
     }
 
     pub fn next_hop_node_id(&self, next_hop: u16) -> Option<[u8; 8]> {

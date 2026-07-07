@@ -31,6 +31,14 @@ impl SeqNum {
         SeqNum(rand::random::<u16>())
     }
 
+    pub fn value(&self) -> u16 {
+        self.0
+    }
+
+    pub fn increment(&mut self) {
+        self.0 = self.0.wrapping_add(1);
+    }
+
     /// A sequence number `new` is fresher than `old` if and only if:
     /// (new - old) mod 65536 < 32768
     pub fn is_fresher(&self, new: SeqNum) -> bool {
