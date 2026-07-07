@@ -75,13 +75,13 @@ mod next_hop {
 
     #[test]
     fn unknown_user_returns_none() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         assert_eq!(state.next_hop_for_user([99; 8]), None);
     }
 
     #[test]
     fn known_user_with_no_routing_data_returns_none() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         install_user(&state, [1; 8], 0);
         assert_eq!(state.next_hop_for_user([1; 8]), None);
     }
@@ -90,7 +90,7 @@ mod next_hop {
     /// dictionary should produce that hop's node id and the entry's transport.
     #[test]
     fn direct_routing_entry_resolves_next_hop_and_transport() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let user = install_user(&state, [1; 8], 0);
 
         let neighbour_id = [9; 8];
@@ -121,7 +121,7 @@ mod next_hop {
     /// determine the result.
     #[test]
     fn gateway_fallback_picks_lowest_metric() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let user = install_user(&state, [1; 8], 0);
 
         let g_hi = install_node(&state, [10; 8], 0, true);
@@ -161,7 +161,7 @@ mod next_hop {
     /// even when the gateway has a lower metric.
     #[test]
     fn direct_entry_preferred_over_lower_metric_gateway() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let user = install_user(&state, [1; 8], 0);
 
         let direct_nbr = [50; 8];
@@ -208,7 +208,7 @@ mod next_hop {
 
     #[test]
     fn dangling_direct_entry_falls_through_to_gateway() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let user = install_user(&state, [1; 8], 0);
 
         let orphan = make_entry(TargetRef::User(user.clone()), 0, 100, ConnectionModule::Lan);
@@ -245,7 +245,7 @@ mod next_hop {
 
     #[test]
     fn dangling_gateway_is_skipped() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let user = install_user(&state, [1; 8], 0);
 
         let live = install_node(&state, [10; 8], 0, true);
@@ -288,7 +288,7 @@ mod next_hop {
 
     #[test]
     fn gateway_with_no_routing_entry_is_skipped() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let user = install_user(&state, [1; 8], 0);
 
         let unreachable = install_node(&state, [20; 8], 0, true);
@@ -323,7 +323,7 @@ mod next_hop {
 
     #[test]
     fn next_hop_node_id_resolves_bound_indices_and_misses_unbound() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         bind_own_dict(&state, Space::Node, 77, [7; 8]);
         assert_eq!(state.next_hop_node_id(77), Some([7; 8]));
         assert_eq!(state.next_hop_node_id(78), None);
@@ -376,7 +376,7 @@ mod sweep {
 
     #[test]
     fn entry_past_threshold_is_removed() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let user = install_user(&state, [1; 8], 0);
         let now: u64 = 100_000;
         let last_update = now - expiry_ms(&state) - 1;
@@ -401,7 +401,7 @@ mod sweep {
 
     #[test]
     fn entry_within_threshold_is_kept() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let user = install_user(&state, [1; 8], 0);
         let now: u64 = 100_000;
         let last_update = now - expiry_ms(&state) + 1;
@@ -428,7 +428,7 @@ mod sweep {
     /// keeps the entry. Pins the operator against an accidental `<=`.
     #[test]
     fn entry_at_exact_boundary_is_kept() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let user = install_user(&state, [1; 8], 0);
         let now: u64 = 100_000;
         let last_update = now - expiry_ms(&state);
@@ -456,7 +456,7 @@ mod sweep {
 
     #[test]
     fn expired_entry_unbinds_the_dictionary() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let user = install_user(&state, [1; 8], 0);
         let now: u64 = 100_000;
         let last_update = now - expiry_ms(&state) - 1;
@@ -479,7 +479,7 @@ mod sweep {
 
     #[test]
     fn expired_entry_pushes_idx_into_allocator_cooldown() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let user = install_user(&state, [1; 8], 0);
         let now: u64 = 100_000;
         let last_update = now - expiry_ms(&state) - 1;
@@ -506,7 +506,7 @@ mod sweep {
     /// User's back-edge Weak must resolve to None.
     #[test]
     fn expired_entry_makes_user_weak_routing_entry_dangle() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let user = install_user(&state, [1; 8], 0);
         let now: u64 = 100_000;
         let last_update = now - expiry_ms(&state) - 1;
@@ -533,7 +533,7 @@ mod sweep {
 
     #[test]
     fn node_space_expiry_is_independent_from_user_space() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let node = install_node(&state, [9; 8], 0, false);
         let now: u64 = 100_000;
         let last_update = now - expiry_ms(&state) - 1;
@@ -569,7 +569,7 @@ mod sweep {
 
     #[test]
     fn mixed_entries_only_expired_are_removed() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let now: u64 = 100_000;
 
         let old_user = install_user(&state, [1; 8], 0);
@@ -601,7 +601,7 @@ mod sweep {
 
     #[test]
     fn sweep_on_empty_state_is_a_noop() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         state.sweep_expired(0);
         state.sweep_expired(u64::MAX);
     }
@@ -615,7 +615,7 @@ mod translate {
 
     #[test]
     fn translate_incoming_unknown_neighbour_returns_unknown_mapping() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = fresh_peer();
         let err = state.translate_incoming(peer, Space::User, 5).unwrap_err();
         assert!(matches!(err, RoutingV2Error::UnknownMapping(5)));
@@ -623,7 +623,7 @@ mod translate {
 
     #[test]
     fn translate_incoming_known_neighbour_unknown_idx_returns_unknown_mapping() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = add_neighbour(&state);
         let err = state.translate_incoming(peer, Space::User, 5).unwrap_err();
         assert!(matches!(err, RoutingV2Error::UnknownMapping(5)));
@@ -633,7 +633,7 @@ mod translate {
     /// existing own_idx; do not allocate, do not mark the tracker.
     #[test]
     fn translate_incoming_existing_own_binding_returns_existing_idx() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = add_neighbour(&state);
         let id = [7; 8];
 
@@ -656,7 +656,7 @@ mod translate {
 
     #[test]
     fn translate_incoming_fresh_allocates_binds_and_marks_tracker() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = add_neighbour(&state);
         let id = [11; 8];
         bind_mirror(&state, peer, Space::User, 5, id);
@@ -678,7 +678,7 @@ mod translate {
 
     #[test]
     fn translate_incoming_is_idempotent_for_same_id() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = add_neighbour(&state);
         let id = [13; 8];
         bind_mirror(&state, peer, Space::User, 5, id);
@@ -690,7 +690,7 @@ mod translate {
 
     #[test]
     fn translate_incoming_spaces_are_independent() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = add_neighbour(&state);
         let user_id = [21; 8];
         let node_id = [22; 8];
@@ -717,14 +717,14 @@ mod translate {
 
     #[test]
     fn pending_introductions_empty_when_no_marks() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         assert!(state.pending_introductions(Space::User).is_empty());
         assert!(state.pending_introductions(Space::Node).is_empty());
     }
 
     #[test]
     fn pending_introductions_returns_marked_user_with_correct_version() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let id = [3; 8];
         install_user(&state, id, 42);
         state.user_dict.write().unwrap().bind(7, id);
@@ -740,7 +740,7 @@ mod translate {
 
     #[test]
     fn pending_introductions_returns_marked_node_with_correct_version() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let id = [4; 8];
         install_node(&state, id, 99, false);
         state.node_dict.write().unwrap().bind(8, id);
@@ -756,7 +756,7 @@ mod translate {
 
     #[test]
     fn pending_introductions_drains_only_requested_space() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
 
         let user_id = [1; 8];
         install_user(&state, user_id, 5);
@@ -781,7 +781,7 @@ mod translate {
 
     #[test]
     fn pending_introductions_second_call_returns_empty_after_drain() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let id = [9; 8];
         install_user(&state, id, 1);
         state.user_dict.write().unwrap().bind(3, id);
@@ -801,7 +801,7 @@ mod translate {
     /// Phase 8's delta encoder requires ascending idx order.
     #[test]
     fn pending_introductions_results_sorted_by_index() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let ids: Vec<[u8; 8]> = (1..=5).map(|i| [i as u8; 8]).collect();
         let idxs = [50u16, 10, 200, 30, 80];
 
@@ -824,7 +824,7 @@ mod translate {
 
     #[test]
     fn pending_introductions_skips_orphan_with_no_dict_binding() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         state
             .reintroduction_tracker
             .write()
@@ -840,7 +840,7 @@ mod translate {
 
     #[test]
     fn pending_introductions_skips_orphan_with_no_record() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let id = [77; 8];
         state.user_dict.write().unwrap().bind(42, id);
         state
@@ -855,7 +855,7 @@ mod translate {
 
     #[test]
     fn pending_introductions_mixed_healthy_and_orphan() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
 
         let good_id = [1; 8];
         install_user(&state, good_id, 7);
@@ -886,7 +886,7 @@ mod apply_mapping {
 
     #[test]
     fn apply_mapping_unknown_neighbour_is_noop() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = fresh_peer();
 
         let result = state.apply_mapping(
@@ -906,7 +906,7 @@ mod apply_mapping {
 
     #[test]
     fn apply_mapping_fresh_user_creates_stub_and_binds_mirror() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = add_neighbour(&state);
 
         state
@@ -935,7 +935,7 @@ mod apply_mapping {
 
     #[test]
     fn apply_mapping_fresh_node_creates_stub_and_binds_mirror() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = add_neighbour(&state);
 
         state
@@ -964,7 +964,7 @@ mod apply_mapping {
 
     #[test]
     fn apply_mapping_same_id_updates_version_only() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = add_neighbour(&state);
         let id = [3; 8];
 
@@ -996,7 +996,7 @@ mod apply_mapping {
     /// cooldown, unbind own dict, then bind new mapping.
     #[test]
     fn apply_mapping_rebind_clears_old_routing_state() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = add_neighbour(&state);
 
         let old_id = [10; 8];
@@ -1067,7 +1067,7 @@ mod apply_mapping {
 
     #[test]
     fn apply_mapping_incoming_version_equal_is_noop() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = add_neighbour(&state);
         let id = [4; 8];
         install_user(&state, id, 42);
@@ -1100,7 +1100,7 @@ mod apply_mapping {
 
     #[test]
     fn apply_mapping_incoming_version_older_preserves_stored() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = add_neighbour(&state);
         let id = [5; 8];
         install_user(&state, id, 100);
@@ -1134,7 +1134,7 @@ mod apply_mapping {
 
     #[test]
     fn apply_mapping_incoming_version_fresher_updates_node() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = add_neighbour(&state);
         let id = [6; 8];
         install_node(&state, id, 5, false);
@@ -1167,7 +1167,7 @@ mod apply_mapping {
 
     #[test]
     fn apply_mapping_user_and_node_spaces_are_independent() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = add_neighbour(&state);
         let user_id = [11; 8];
         let node_id = [22; 8];
@@ -1238,7 +1238,7 @@ mod apply_entry {
         target_id: [u8; 8],
     ) -> (PeerId, Arc<RwLock<crate::router_v2::table::User>>) {
         let peer = fresh_peer();
-        state.add_neighbour(peer, NEIGHBOUR_NODE_ID);
+        state.add_neighbour_transport(peer, NEIGHBOUR_NODE_ID, ConnectionModule::Lan);
         bind_mirror(state, peer, Space::User, abs_idx, target_id);
         bind_own_dict(state, Space::User, own_idx, target_id);
         bind_own_dict(state, Space::Node, NEIGHBOUR_IDX_IN_NODE_DICT, NEIGHBOUR_NODE_ID);
@@ -1253,7 +1253,7 @@ mod apply_entry {
         target_id: [u8; 8],
     ) -> (PeerId, Arc<RwLock<crate::router_v2::table::Node>>) {
         let peer = fresh_peer();
-        state.add_neighbour(peer, NEIGHBOUR_NODE_ID);
+        state.add_neighbour_transport(peer, NEIGHBOUR_NODE_ID, ConnectionModule::Lan);
         bind_mirror(state, peer, Space::Node, abs_idx, target_id);
         bind_own_dict(state, Space::Node, own_idx, target_id);
         bind_own_dict(state, Space::Node, NEIGHBOUR_IDX_IN_NODE_DICT, NEIGHBOUR_NODE_ID);
@@ -1306,7 +1306,7 @@ mod apply_entry {
 
     #[test]
     fn ttl_drop_when_incoming_hop_count_is_63() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let target_id = [1; 8];
         let (peer, _) = setup_user_target(&state, 5, 42, target_id);
 
@@ -1331,7 +1331,7 @@ mod apply_entry {
 
     #[test]
     fn hop_count_62_is_accepted_and_stored_as_63() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let target_id = [1; 8];
         let (peer, _) = setup_user_target(&state, 5, 42, target_id);
 
@@ -1353,9 +1353,9 @@ mod apply_entry {
 
     #[test]
     fn unknown_mapping_drops_silently() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = fresh_peer();
-        state.add_neighbour(peer, NEIGHBOUR_NODE_ID);
+        state.add_neighbour_transport(peer, NEIGHBOUR_NODE_ID, ConnectionModule::Lan);
         // Neighbour exists but has no mirror binding at abs_idx 5.
         bind_own_dict(&state, Space::Node, NEIGHBOUR_IDX_IN_NODE_DICT, NEIGHBOUR_NODE_ID);
 
@@ -1385,10 +1385,10 @@ mod apply_entry {
     /// than trigger a fabricated record.
     #[test]
     fn missing_user_target_record_drops() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = fresh_peer();
         let target_id = [1; 8];
-        state.add_neighbour(peer, NEIGHBOUR_NODE_ID);
+        state.add_neighbour_transport(peer, NEIGHBOUR_NODE_ID, ConnectionModule::Lan);
         bind_mirror(&state, peer, Space::User, 5, target_id);
         bind_own_dict(&state, Space::User, 42, target_id);
         bind_own_dict(&state, Space::Node, NEIGHBOUR_IDX_IN_NODE_DICT, NEIGHBOUR_NODE_ID);
@@ -1415,10 +1415,10 @@ mod apply_entry {
 
     #[test]
     fn neighbour_node_id_not_in_node_dict_drops() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = fresh_peer();
         let target_id = [1; 8];
-        state.add_neighbour(peer, NEIGHBOUR_NODE_ID);
+        state.add_neighbour_transport(peer, NEIGHBOUR_NODE_ID, ConnectionModule::Lan);
         bind_mirror(&state, peer, Space::User, 5, target_id);
         bind_own_dict(&state, Space::User, 42, target_id);
         install_user(&state, target_id, 0);
@@ -1450,7 +1450,7 @@ mod apply_entry {
     /// attached, and that metric composition + hop-count increment applied.
     #[test]
     fn empty_slot_accept_stores_entry_and_attaches_user_back_edge() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let target_id = [1; 8];
         let (peer, user) = setup_user_target(&state, 5, 42, target_id);
 
@@ -1487,7 +1487,7 @@ mod apply_entry {
 
     #[test]
     fn empty_slot_accept_for_node_target_stores_entry() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let target_id = [2; 8];
         let (peer, _) = setup_node_target(&state, 5, 42, target_id);
 
@@ -1513,7 +1513,7 @@ mod apply_entry {
 
     #[test]
     fn fresher_seq_replaces_stored_entry() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let target_id = [1; 8];
         let (peer, user) = setup_user_target(&state, 5, 42, target_id);
         preload_entry(
@@ -1552,7 +1552,7 @@ mod apply_entry {
     /// accepted per spec §6.3 / §7.2.
     #[test]
     fn reboot_gap_accepts_new_entry() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let target_id = [1; 8];
         let (peer, user) = setup_user_target(&state, 5, 42, target_id);
         preload_entry(
@@ -1594,7 +1594,7 @@ mod apply_entry {
     /// silently drift into "naive greater-than" semantics.
     #[test]
     fn backward_looking_seq_is_treated_as_reboot_and_accepted() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let target_id = [1; 8];
         let (peer, user) = setup_user_target(&state, 5, 42, target_id);
         preload_entry(
@@ -1632,7 +1632,7 @@ mod apply_entry {
 
     #[test]
     fn same_seq_lower_metric_replaces_stored() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let target_id = [1; 8];
         let (peer, user) = setup_user_target(&state, 5, 42, target_id);
         preload_entry(
@@ -1670,7 +1670,7 @@ mod apply_entry {
     /// not overwrite the incumbent (flapping protection).
     #[test]
     fn same_seq_equal_metric_drops() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let target_id = [1; 8];
         let (peer, user) = setup_user_target(&state, 5, 42, target_id);
         preload_entry(
@@ -1708,7 +1708,7 @@ mod apply_entry {
 
     #[test]
     fn same_seq_higher_metric_drops() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let target_id = [1; 8];
         let (peer, user) = setup_user_target(&state, 5, 42, target_id);
         preload_entry(
@@ -1751,7 +1751,7 @@ mod apply_entry {
     /// Sticky at zero: stored=false remains false even when incoming=true.
     #[test]
     fn local_only_sticky_when_stored_is_false() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let target_id = [1; 8];
         let (peer, user) = setup_user_target(&state, 5, 42, target_id);
         preload_entry(
@@ -1790,7 +1790,7 @@ mod apply_entry {
     /// Transitions to false: stored=true is overridden by incoming=false.
     #[test]
     fn local_only_transitions_to_false_when_incoming_is_false() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let target_id = [1; 8];
         let (peer, user) = setup_user_target(&state, 5, 42, target_id);
         preload_entry(&state, Space::User, 42, TargetRef::User(user), 10, 50, true);
@@ -1819,7 +1819,7 @@ mod apply_entry {
 
     #[test]
     fn local_only_empty_slot_uses_incoming_value() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let target_id = [1; 8];
         let (peer, _) = setup_user_target(&state, 5, 42, target_id);
 
@@ -1865,7 +1865,7 @@ mod handle_routing_update {
     /// entry processed downstream can resolve `next_hop`.
     fn setup_neighbour(state: &RouterV2State) -> PeerId {
         let peer = fresh_peer();
-        state.add_neighbour(peer, NEIGHBOUR_NODE_ID);
+        state.add_neighbour_transport(peer, NEIGHBOUR_NODE_ID, ConnectionModule::Lan);
         bind_own_dict(state, Space::Node, NEIGHBOUR_IDX_IN_NODE_DICT, NEIGHBOUR_NODE_ID);
         peer
     }
@@ -1881,7 +1881,7 @@ mod handle_routing_update {
 
     #[test]
     fn empty_message_is_noop() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = setup_neighbour(&state);
 
         state
@@ -1911,7 +1911,7 @@ mod handle_routing_update {
     /// entry section (otherwise the entry would fail target lookup).
     #[test]
     fn mapping_then_entry_lands_full_route() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = setup_neighbour(&state);
 
         let target_id = [1; 8];
@@ -1969,7 +1969,7 @@ mod handle_routing_update {
 
     #[test]
     fn both_spaces_processed_independently() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = setup_neighbour(&state);
 
         let user_id = [1; 8];
@@ -2020,7 +2020,7 @@ mod handle_routing_update {
     /// finishes without side effects.
     #[test]
     fn unknown_neighbour_processes_without_side_effects() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = fresh_peer(); // never added to mirrors
 
         let msg = RoutingUpdate {
@@ -2062,7 +2062,7 @@ mod received {
 
     fn setup_neighbour(state: &RouterV2State) -> PeerId {
         let peer = fresh_peer();
-        state.add_neighbour(peer, NEIGHBOUR_NODE_ID);
+        state.add_neighbour_transport(peer, NEIGHBOUR_NODE_ID, ConnectionModule::Lan);
         bind_own_dict(state, Space::Node, NEIGHBOUR_IDX_IN_NODE_DICT, NEIGHBOUR_NODE_ID);
         peer
     }
@@ -2109,7 +2109,7 @@ mod received {
 
     #[test]
     fn empty_buf_is_noop() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = setup_neighbour(&state);
 
         state
@@ -2121,7 +2121,7 @@ mod received {
 
     #[test]
     fn valid_routing_update_dispatches_to_orchestrator() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = setup_neighbour(&state);
         let target_id = [1; 8];
 
@@ -2149,7 +2149,7 @@ mod received {
     /// next header.
     #[test]
     fn multiple_valid_messages_in_batch_are_all_processed() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = setup_neighbour(&state);
         let target_a = [1; 8];
         let target_b = [2; 8];
@@ -2171,7 +2171,7 @@ mod received {
     /// valid message is still processed.
     #[test]
     fn bad_version_skips_and_processes_subsequent_valid_message() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = setup_neighbour(&state);
         let target_id = [3; 8];
 
@@ -2197,7 +2197,7 @@ mod received {
     /// The receive loop should log-and-return without applying anything.
     #[test]
     fn truncated_body_returns_without_partial_state() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = setup_neighbour(&state);
 
         let mut bytes = Vec::new();
@@ -2217,7 +2217,7 @@ mod received {
     /// must be skipped past — buf advances, next message still processes.
     #[test]
     fn unimplemented_message_type_is_skipped_and_next_processed() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = setup_neighbour(&state);
         let target_id = [4; 8];
 
@@ -2236,7 +2236,7 @@ mod received {
 
     #[test]
     fn malformed_routing_update_body_does_not_corrupt_frame_alignment() {
-        let state = fresh_state();
+        let (state, _rx) = fresh_state();
         let peer = setup_neighbour(&state);
         let target_id = [5; 8];
 
