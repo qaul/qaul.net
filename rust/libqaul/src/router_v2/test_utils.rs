@@ -4,11 +4,14 @@
 //! duplicating: fresh state/peer/key generators, mirror + dictionary
 //! wiring, and default-populated User/Node inserters.
 
-use crate::router_v2::{
-    identity::Multikey,
-    index::Space,
-    table::{Node, User},
-    RouterV2State,
+use crate::{
+    connections::ConnectionModule,
+    router_v2::{
+        identity::Multikey,
+        index::Space,
+        table::{Node, User},
+        OutboundMsg, RouterV2State,
+    },
 };
 use libp2p::{identity::Keypair, PeerId};
 use std::sync::{Arc, RwLock};
@@ -17,7 +20,7 @@ pub fn fresh_multikey() -> Multikey {
     Multikey::from(Keypair::generate_ed25519().public())
 }
 
-pub fn fresh_state() -> RouterV2State {
+pub fn fresh_state() -> (RouterV2State, tokio::sync::mpsc::UnboundedReceiver<OutboundMsg>) {
     RouterV2State::new([0; 8])
 }
 
@@ -25,10 +28,11 @@ pub fn fresh_peer() -> PeerId {
     Keypair::generate_ed25519().public().to_peer_id()
 }
 
-/// Registers a fresh neighbour mirror and returns the PeerId.
+/// Registers a fresh neighbour mirror on the LAN transport and returns
+/// the PeerId.
 pub fn add_neighbour(state: &RouterV2State) -> PeerId {
     let peer = fresh_peer();
-    state.add_neighbour(peer, [0; 8]);
+    state.add_neighbour_transport(peer, [0; 8], ConnectionModule::Lan);
     peer
 }
 
