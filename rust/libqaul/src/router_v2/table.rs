@@ -76,6 +76,22 @@ pub struct RoutingEntry {
     pub local_only: bool,
 }
 
+impl RoutingEntry {
+    pub fn target_kind(&self) -> Space {
+        match &self.target {
+            TargetRef::Node(_) => Space::Node,
+            TargetRef::User(_) => Space::User,
+        }
+    }
+
+    pub fn target_is_gateway(&self) -> bool {
+        match &self.target {
+            TargetRef::User(_) => false,
+            TargetRef::Node(n) => n.read().unwrap().is_gateway,
+        }
+    }
+}
+
 /// map of every Node identity we have routing state for keyed by 8-byte ID
 #[derive(Debug)]
 pub struct Nodes(HashMap<[u8; 8], Arc<RwLock<Node>>>);
@@ -220,7 +236,6 @@ mod tests {
         Arc::new(RwLock::new(make_user([0; 8])))
     }
 
-
     #[test]
     fn routing_table_new_pre_allocates_full_index_space() {
         let table = RoutingTable::new();
@@ -294,7 +309,6 @@ mod tests {
         assert!(table.get(Space::Node, 65_535).is_some());
     }
 
-
     #[test]
     fn nodes_new_is_empty() {
         let nodes = Nodes::new();
@@ -357,7 +371,6 @@ mod tests {
         assert!(users.get(&id).is_none());
         assert_eq!(users.len(), 0);
     }
-
 
     /// Routing entries are owned by the routing table. When the table
     /// drops its strong reference, the User's back-edge Weak must resolve

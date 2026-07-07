@@ -176,7 +176,7 @@ impl QaulState {
         let host_node_id = Multikey::from(node_identity.keys.public()).to_id();        
         Self {
             router: std::sync::RwLock::new(router_state),
-            router_v2: Some(Arc::new(RouterV2State::new(host_node_id))),
+            router_v2: Some(Arc::new(RouterV2State::new(host_node_id).0)),
             services: services::ServicesState::new(),
             user_accounts,
             auth: AuthenticationState::new(),
