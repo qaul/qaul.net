@@ -252,14 +252,10 @@ class LibqaulWorker {
     final result = await _sendRequest<List<InternetNode>>(
       module: Modules.CONNECTIONS,
       data: Connections(internetNodesRequest: InternetNodesRequest()),
-      adapter: (res) {
-        if (res.data is List<InternetNode>) {
-          return res.data as List<InternetNode>;
-        }
-        return null;
-      },
+      adapter: _payload<List<InternetNode>>,
     );
     final nodes = result ?? [];
+    // Future-based fetch: publish our own state (see `_setActiveUser`).
     syncConnectedInternetNodes(
         _ref.read(connectedNodesProvider.notifier), nodes);
     return nodes;
@@ -295,37 +291,35 @@ class LibqaulWorker {
   }
 
   // -------------------
+  // USERACCOUNTS Requests
+  // -------------------
+  /// The worker owns [defaultUserProvider] in the future-based RPC model.
+  /// Because [_receiveResponse] resolves a pending request *before* a
+  /// translator's `processResponse` would run (see the note there), a
+  /// future-based call must publish its own session state. Route every such
+  /// write through here so there is a single, greppable owner.
+  void _setActiveUser(User user) =>
+      _ref.read(defaultUserProvider.notifier).state = user;
+
   Future<User?> getDefaultUserAccount() async {
-    final message = UserAccounts(getDefaultUserAccount: true);
     final result = await _sendRequest<User>(
       module: Modules.USERACCOUNTS,
-      data: message,
-      adapter: (res) {
-        if (res.data is User) return res.data as User;
-        return null;
-      },
+      data: UserAccounts(getDefaultUserAccount: true),
+      adapter: _payload<User>,
     );
-    if (result != null) {
-      _ref.read(defaultUserProvider.notifier).state = result;
-    }
+    if (result != null) _setActiveUser(result);
     return result;
   }
 
   Future<User?> createUserAccount(String name, {String? password}) async {
     final request = CreateUserAccount(name: name);
     if (password != null && password.isNotEmpty) request.password = password;
-    final msg = UserAccounts(createUserAccount: request);
     final result = await _sendRequest<User>(
       module: Modules.USERACCOUNTS,
-      data: msg,
-      adapter: (res) {
-        if (res.data is User) return res.data as User;
-        return null;
-      },
+      data: UserAccounts(createUserAccount: request),
+      adapter: _payload<User>,
     );
-    if (result != null) {
-      _ref.read(defaultUserProvider.notifier).state = result;
-    }
+    if (result != null) _setActiveUser(result);
     return result;
   }
 
@@ -336,7 +330,7 @@ class LibqaulWorker {
     final result = await _sendRequest<bool>(
       module: Modules.USERACCOUNTS,
       data: msg,
-      adapter: (res) => res.data is bool ? res.data as bool : null,
+      adapter: _payload<bool>,
     );
     return result ?? false;
   }
@@ -345,9 +339,7 @@ class LibqaulWorker {
     final result = await _sendRequest<List<LocalAccount>>(
       module: Modules.AUTH,
       data: AuthRpc(usersRequest: UsersRequest()),
-      adapter: (res) => res.data is List<LocalAccount>
-          ? res.data as List<LocalAccount>
-          : null,
+      adapter: _payload<List<LocalAccount>>,
       userId: Uint8List(0),
     );
     return result ?? [];
@@ -358,8 +350,7 @@ class LibqaulWorker {
     final challenge = await _sendRequest<AuthChallenge>(
       module: Modules.AUTH,
       data: AuthRpc(authRequest: AuthRequest(userId: account.userId)),
-      adapter: (res) =>
-          res.data is AuthChallenge ? res.data as AuthChallenge : null,
+      adapter: _payload<AuthChallenge>,
       userId: Uint8List(0),
     );
     if (challenge == null) return false;
@@ -378,7 +369,7 @@ class LibqaulWorker {
           challengeHash: const [],
         ),
       ),
-      adapter: (res) => res.data is bool ? res.data as bool : null,
+      adapter: _payload<bool>,
       userId: Uint8List(0),
     );
     if (authenticated == true) {
@@ -392,7 +383,7 @@ class LibqaulWorker {
     final result = await _sendRequest<bool>(
       module: Modules.AUTH,
       data: AuthRpc(sessionStatusRequest: SessionStatusRequest()),
-      adapter: (res) => res.data is bool ? res.data as bool : null,
+      adapter: _payload<bool>,
       userId: userId,
     );
     return result ?? false;
@@ -402,7 +393,7 @@ class LibqaulWorker {
     final result = await _sendRequest<bool>(
       module: Modules.AUTH,
       data: AuthRpc(logoutRequest: LogoutRequest()),
-      adapter: (res) => res.data is bool ? res.data as bool : null,
+      adapter: _payload<bool>,
       userId: userId,
     );
     return result ?? false;
@@ -415,7 +406,7 @@ class LibqaulWorker {
         exportAccountRequest:
             ExportAccountRequest(outputPath: outputPath ?? ''),
       ),
-      adapter: (res) => res.data is String ? res.data as String : null,
+      adapter: _payload<String>,
       userId: userId,
     );
   }
@@ -426,9 +417,7 @@ class LibqaulWorker {
       data: AccountManagement(
         restoreAccountRequest: RestoreAccountRequest(archivePath: archivePath),
       ),
-      adapter: (res) => res.data is RestoreAccountResult
-          ? res.data as RestoreAccountResult
-          : null,
+      adapter: _payload<RestoreAccountResult>,
       userId: Uint8List(0),
     );
   }
@@ -437,7 +426,7 @@ class LibqaulWorker {
     final result = await _sendRequest<bool>(
       module: Modules.ACCOUNT_MANAGEMENT,
       data: AccountManagement(deleteAccountRequest: DeleteAccountRequest()),
-      adapter: (res) => res.data is bool ? res.data as bool : null,
+      adapter: _payload<bool>,
       userId: userId,
     );
     return result ?? false;
@@ -765,6 +754,9 @@ class LibqaulWorker {
     await _ref.read(libqaulProvider).sendRpc(message.writeToBuffer());
   }
 
+  static T? _payload<T>(RpcTranslatorResponse res) =>
+      res.data is T ? res.data as T : null;
+
   Future<T?> _sendRequest<T>({
     required Modules module,
     required pb.GeneratedMessage data,
@@ -831,6 +823,9 @@ class LibqaulWorker {
           _log.warning('Error in RPC adapter for ${m.requestId}', e, st);
           pending.completer.completeError(e, st);
         }
+        // Future-based requests own their side effects: we deliberately do NOT
+        // fall through to `translator.processResponse` for them. A method moved
+        // onto _sendRequest must publish any provider state itself using _payload.
         return;
       }
     }
