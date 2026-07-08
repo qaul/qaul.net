@@ -24,6 +24,13 @@ class ChatRoomsStore extends Notifier<void> {
     final result = await worker.getAllChatRooms(offset: offset, limit: limit);
     if (!ref.mounted || result == null) return null;
     _chatRoomsPagination = result.pagination;
+    final state = ref.read(chatRoomsProvider.notifier);
+    final pagination = result.pagination;
+    if (pagination != null && pagination.offset > 0) {
+      state.append(result.rooms);
+    } else {
+      state.mergeOrderedFromBackend(result.rooms);
+    }
     await _resolveMissingUsersForRooms(result.rooms);
     if (!ref.mounted) return null;
     return PaginatedChatRooms(
@@ -43,6 +50,24 @@ class ChatRoomsStore extends Notifier<void> {
     );
     if (!ref.mounted || result == null) return null;
     _groupInvitesPagination = result.pagination;
+    final inviteState = ref.read(groupInvitesProvider.notifier);
+    final pagination = result.pagination;
+    if (pagination != null && pagination.offset > 0) {
+      inviteState.append(result.invites);
+    } else {
+      for (final invite in result.invites) {
+        if (!inviteState.contains(invite)) {
+          inviteState.add(invite);
+        } else {
+          inviteState.update(invite);
+        }
+      }
+      final isCompleteList =
+          pagination == null || (pagination.offset == 0 && !pagination.hasMore);
+      if (isCompleteList) {
+        inviteState.retainAll(result.invites);
+      }
+    }
     final rooms = result.invites.map((i) => i.groupDetails).toList();
     await _resolveMissingUsersForRooms(rooms);
     if (!ref.mounted) return null;
