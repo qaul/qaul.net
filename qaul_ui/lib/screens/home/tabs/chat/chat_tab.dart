@@ -151,8 +151,9 @@ class _ChatState extends _BaseTabState<_Chat> {
     super.build(context);
 
     final searchController = useTextEditingController();
+    final chatRoomsSearch = ref.read(chatRoomsSearchProvider.notifier);
     useEffect(() {
-      return () => ref.read(chatRoomsSearchProvider.notifier).clear();
+      return chatRoomsSearch.clear;
     }, const []);
 
     final defaultUser = ref.watch(defaultUserProvider)!;

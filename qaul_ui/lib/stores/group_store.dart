@@ -50,7 +50,10 @@ class ChatRoomsSearchStore extends Notifier<ChatRoomsSearchState> {
   bool _loadMoreInFlight = false;
 
   @override
-  ChatRoomsSearchState build() => const ChatRoomsSearchState();
+  ChatRoomsSearchState build() {
+    ref.onDispose(() => _debounceTimer?.cancel());
+    return const ChatRoomsSearchState();
+  }
 
   void setQuery(String query) {
     _debounceTimer?.cancel();
