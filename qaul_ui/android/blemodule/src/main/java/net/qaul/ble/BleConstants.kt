@@ -107,6 +107,11 @@ object BleConstants {
     @Volatile
     var USE_CODED_PHY = false
 
+    /** Dual-PHY advertising: on capable hardware (extended advertising + Coded PHY), advertise both a
+     *  legacy 1M set (short range, discoverable by every device) and a Coded extended set (long range,
+     *  discoverable only by BLE 5+ scanners). Non-capable devices fall back to legacy automatically. */
+    const val DUAL_PHY_ADVERTISING = true
+
     /** Target MTU size to negotiate after connecting. Allows larger chunks than the 23-byte default. */
     const val TARGET_MTU = 517
 
@@ -144,7 +149,7 @@ object BleConstants {
 
     /** Show the on-device floating BLE stats overlay (BleDebugOverlay) while BLE is running. For debugging purposes,
      *  set false to disable. Needs the "Draw over other apps" permission, requested on first show. */
-    const val DEBUG_OVERLAY = false
+    const val DEBUG_OVERLAY = true
 
     /** Pause the scan during each connect attempt. DISABLED: confirmed in field logs to restart the
      *  scan often enough (during connect/tiebreaker churn) to trip Android's ~5-startScan/30s limit,

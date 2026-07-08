@@ -17,7 +17,10 @@ enum class OpLane { CONTROL, MEDIUM, BULK }
 sealed class BleOperationType {
     abstract val device: BluetoothDevice
 }
-data class Connect(override val device: BluetoothDevice) : BleOperationType()
+data class Connect(
+    override val device: BluetoothDevice,
+    val phy: Int = BluetoothDevice.PHY_LE_1M_MASK
+) : BleOperationType()
 data class Disconnect(override val device: BluetoothDevice) : BleOperationType()
 data class ServiceDiscovery(override val device: BluetoothDevice) : BleOperationType()
 

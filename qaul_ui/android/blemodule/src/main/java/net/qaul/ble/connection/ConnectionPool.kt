@@ -101,7 +101,7 @@ object ConnectionPool {
         } else {
             conns.forEach { c ->
                 val id = c.remoteQaulId?.toHexString() ?: "unresolved"
-                sb.append("  ${c.role.name.take(1)} ${c.device.address}  $id\n")
+                sb.append("  ${c.role.name.take(1)} ${c.phyLabel} ${c.device.address}  $id\n")
             }
         }
         val since = BleScanner.millisSinceLastResult()
@@ -235,13 +235,13 @@ object ConnectionPool {
 
     // Connect / Disconnect
 
-    fun createConnection(device: BluetoothDevice, role: BleRole) {
+    fun createConnection(device: BluetoothDevice, role: BleRole, phy: Int = android.bluetooth.BluetoothDevice.PHY_LE_1M_MASK) {
         if (connections.containsKey(device.address)) {
             Log.w(TAG, "Already connected to ${device.address}, ignoring")
             return
         }
         // here we likely put device limit
-        val newConnection = BleConnection(device, role)
+        val newConnection = BleConnection(device, role, phy)
         newConnection.onQaulIdResolved = { dev, qaulId -> handleQaulIdResolved(dev, qaulId) }
         newConnection.onMessageResult = { messageId, success -> onMessageResult?.invoke(messageId, success) }
         newConnection.onNeighboursReceived = { dev, list -> handleNeighboursReceived(dev, list) }
@@ -500,6 +500,15 @@ object ConnectionPool {
 
         override fun onMtuChanged(device: BluetoothDevice, newMtu: Int) {
             connections[device.address]?.onMtuNegotiated(newMtu)
+        }
+
+        override fun onPhyUpdated(device: BluetoothDevice, txPhy: Int, rxPhy: Int) {
+            connections[device.address]?.phyLabel = when (txPhy) {
+                BluetoothDevice.PHY_LE_1M -> "1M"
+                BluetoothDevice.PHY_LE_2M -> "2M"
+                BluetoothDevice.PHY_LE_CODED -> "Coded"
+                else -> "phy$txPhy"
+            }
         }
 
         override fun onServicesDiscovered(device: BluetoothDevice) {

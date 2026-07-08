@@ -30,8 +30,9 @@ object BleAdvertiser {
     @Volatile var pausedForCap = false
         private set
 
-    // Whether the current advertising uses extended advertising.
-    @Volatile private var extendedMode = false
+    // Whether this device can run the long-range Coded extended advertising set (BLE 5 hardware).
+    @Volatile private var codedCapable = false
+    private fun dualMode() = BleConstants.DUAL_PHY_ADVERTISING && codedCapable
 
     private val advertiseSettings = AdvertiseSettings.Builder()
         .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY) // TODO: Change advertising and scanning mode to be adabtable to preserve battery, currently its all on the strongest / highest battery usage modes
@@ -71,29 +72,28 @@ object BleAdvertiser {
             Log.e(TAG, "Device does not support BLE advertising")
             return
         }
-        // Use extended advertising only if enabled and the hardware supports
-        // both Coded PHY and extended advertising, otherwise fall back to 1M advertising
-        extendedMode = BleConstants.USE_CODED_PHY &&
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+        // Can this device run the long range Coded extended advertising set?
+        codedCapable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
                 adapter.isLeCodedPhySupported &&
                 adapter.isLeExtendedAdvertisingSupported
         startAdvertiser()
     }
 
     private fun startAdvertiser() {
-        if (extendedMode) {
-            Log.i(TAG, "Starting extended (Coded PHY / long range) advertising")
+        // Always advertise the legacy 1M set, short range, discoverable by EVERY device (including
+        // non-BLE-5 ones). isAdvertising tracks this primary set.
+        advertiser?.startAdvertising(advertiseSettings, advertiseData, advertiseCallback)
+        // Additionally advertise a long-range Coded set so distant BLE-5 peers can also discover us.
+        // Only when capable + enabled. failure here doesn't affect the legacy set.
+        if (dualMode()) {
+            Log.i(TAG, "Also starting long-range Coded advertising set")
             advertiser?.startAdvertisingSet(advertiseSetParameters, advertiseData, null, null, null, advertisingSetCallback)
-        } else {
-            advertiser?.startAdvertising(advertiseSettings, advertiseData, advertiseCallback)
         }
     }
 
     private fun stopAdvertiser() {
-        try {
-            if (extendedMode) advertiser?.stopAdvertisingSet(advertisingSetCallback)
-            else advertiser?.stopAdvertising(advertiseCallback)
-        } catch (_: Exception) {}
+        try { advertiser?.stopAdvertising(advertiseCallback) } catch (_: Exception) {}
+        if (dualMode()) try { advertiser?.stopAdvertisingSet(advertisingSetCallback) } catch (_: Exception) {}
     }
 
     fun stop() {
@@ -156,20 +156,19 @@ object BleAdvertiser {
         }
     }
 
+    // The Coded set is a supplementary long range advert: the legacy set (advertiseCallback) owns
+    // isAdvertising, so this callback only logs. a Coded failure must NOT mark us as not advertising.
     private val advertisingSetCallback = object : AdvertisingSetCallback() {
         override fun onAdvertisingSetStarted(advertisingSet: AdvertisingSet?, txPower: Int, status: Int) {
             if (status == AdvertisingSetCallback.ADVERTISE_SUCCESS) {
-                isAdvertising = true
-                Log.i(TAG, "Extended (Coded) advertising started, txPower=$txPower")
+                Log.i(TAG, "Long-range Coded advertising set started, txPower=$txPower")
             } else {
-                isAdvertising = false
-                Log.e(TAG, "Extended advertising failed: status=$status")
+                Log.e(TAG, "Long-range Coded advertising set failed: status=$status (legacy set unaffected)")
             }
         }
 
         override fun onAdvertisingSetStopped(advertisingSet: AdvertisingSet?) {
-            isAdvertising = false
-            Log.i(TAG, "Extended advertising stopped")
+            Log.i(TAG, "Long-range Coded advertising set stopped")
         }
     }
 }

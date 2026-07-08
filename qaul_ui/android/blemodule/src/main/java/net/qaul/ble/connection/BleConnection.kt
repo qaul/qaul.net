@@ -19,10 +19,15 @@ import java.util.UUID
 
 class BleConnection(
     val device: BluetoothDevice,
-    val role: BleRole
+    val role: BleRole,
+    private val connectPhy: Int = BluetoothDevice.PHY_LE_1M_MASK
 ) {
     /** Populated after the central reads READ_CHAR during connection setup. */
     var remoteQaulId: ByteArray? = null
+
+    /** Negotiated link PHY label ("1M" / "2M" / "Coded"), updated from onPhyUpdate. "?" until the PHY
+     *  update completes. For the debug overlay so we can see which links are long-range Coded. */
+    @Volatile var phyLabel: String = "?"
 
     val createdAt: Long = System.currentTimeMillis()
 
@@ -64,7 +69,7 @@ class BleConnection(
     fun connect() {
         when (role) {
             BleRole.CENTRAL -> {
-                BleTaskScheduler.connect(device)
+                BleTaskScheduler.connect(device, connectPhy)   // open on the discovered PHY (1M or Coded)
                 // Request a tighter connection interval for faster throughput
                 // no callback
                 BleTaskScheduler.requestConnectionPriority(device, BluetoothGatt.CONNECTION_PRIORITY_HIGH)
@@ -73,9 +78,9 @@ class BleConnection(
                 BleTaskScheduler.requestMtu(device, BleConstants.TARGET_MTU)
                 BleTaskScheduler.readCharacteristic(device, BleConstants.PSM_CHAR)  // Gets L2CAP PSM
                 BleTaskScheduler.enableNotifications(device, BleConstants.MSG_CHAR)
-                // If the peer doesn't support the requested PHY the controller negotiates down, so this
-                // is a request, not a guarantee, the onPhyUpdate callback logs what was actually agreed.
-                if (BleConstants.USE_CODED_PHY) {
+                // Keep the connection on the PHY we opened it on. This is a request, the controller negotiates down if unsupported and
+                // onPhyUpdate logs what is actually agreed
+                if (connectPhy == BluetoothDevice.PHY_LE_CODED_MASK) {
                     BleTaskScheduler.setPreferredPhy(
                         device,
                         BluetoothDevice.PHY_LE_CODED_MASK,

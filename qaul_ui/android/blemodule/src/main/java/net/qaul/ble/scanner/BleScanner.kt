@@ -1,6 +1,7 @@
 package net.qaul.ble.test.ble.scanner
 
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
@@ -8,6 +9,7 @@ import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.content.Context
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.ParcelUuid
@@ -16,6 +18,7 @@ import net.qaul.ble.BleConstants
 import net.qaul.ble.test.ble.connection.BleRole
 import net.qaul.ble.test.ble.connection.ConnectionPool
 import net.qaul.ble.test.ble.manager.BleManager
+import net.qaul.ble.test.ble.queue.BleTaskScheduler
 import net.qaul.ble.test.ble.util.toHexString
 import kotlin.math.pow
 import kotlin.random.Random
@@ -65,6 +68,12 @@ object BleScanner {
 
     // Advertised qaul ID prefix (hex). First time we saw a should be peripheral peer, that's been defered to let it connect. Cleared once a connection to that peer forms.
     private val deferredSince = mutableMapOf<String, Long>()
+
+    // last time we saw them on the 1M PHY (short range). Drives the connect PHY choice: seen on 1M recently → connect 1M (fast)
+    private val seen1MAt = mutableMapOf<String, Long>()
+
+    private val lastPhyUpgradeAt = mutableMapOf<String, Long>()   // prefix hex -> last upgrade attempt
+
 
     // Pause scanning during connecting state. The BLE radio is shared between scanning and connecting, so we pause the scan around
     // each connect attempt and resume it once the connect activity quiets.
@@ -285,6 +294,7 @@ object BleScanner {
                 lastScanResultAt = System.currentTimeMillis()
             }
             silentRestartCount = 0   // results are flowing, restore fast watchdog recovery
+            recordPhySighting(result)                   // track which PHY we saw this peer on
             onPeerDiscovered?.invoke(result)            // always announce (manual mode)
             if (autoConnect) maybeAutoConnect(result)   // autonomous mode (opt-in)
         }
@@ -311,19 +321,39 @@ object BleScanner {
     private fun maybeAutoConnect(result: ScanResult) {
         synchronized(lock) {
             val mac = result.device.address
+            val prefix = result.scanRecord?.getManufacturerSpecificData(BleConstants.QAUL_MANUFACTURER_ID)
+            val existing = if (prefix != null) ConnectionPool.getByQaulIdPrefix(prefix) else null
+
+            val currentPhy = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) result.primaryPhy
+            else BluetoothDevice.PHY_LE_1M
+            // Upgrading from Coded to 1M/2M PHY when back in range. Work in progress. This is can only be done from a central connection, asymmetry, peripherals will ignore and wait for central to upgrade
+            // TODO: min RSSI value needs tuned and tested
+            val key = prefix!!.toHexString()
+            val lastTry = lastPhyUpgradeAt[key] ?: 0L
+            if (existing != null && currentPhy == BluetoothDevice.PHY_LE_1M && existing.role == BleRole.CENTRAL && existing.phyLabel == "Coded" && result.rssi > -85 && System.currentTimeMillis() - lastTry > 10_000L){
+                lastPhyUpgradeAt[key] = System.currentTimeMillis()
+                BleTaskScheduler.setPreferredPhy(
+                    existing.device,
+                    BluetoothDevice.PHY_LE_2M_MASK,
+                    BluetoothDevice.PHY_LE_2M_MASK,
+                    BluetoothDevice.PHY_OPTION_NO_PREFERRED
+                )
+                Log.i(TAG, "Upgrading $mac from Coded to 2M.")
+                return
+            }
+
+
             if (System.currentTimeMillis() < (cooldownUntil[mac] ?: 0L)) return   // recently dropped
             if (ConnectionPool.getSize() >= BleConstants.MAX_CONNECTIONS) return  // respect the cap
             // Admission control: don't start another connect while one is still resolving. Keeps the
             // serial GATT queue from jamming with concurrent connectGatts during a discovery burst.
             if (ConnectionPool.connectingCount() >= BleConstants.MAX_CONCURRENT_CONNECTING) return
 
-            val prefix = result.scanRecord?.getManufacturerSpecificData(BleConstants.QAUL_MANUFACTURER_ID)
             // Test topology: with the allowlist on, only auto-connect to designated neighbours
             if (BleConstants.TEST_NEIGHBOUR_ALLOWLIST.isNotEmpty() &&
                 (prefix == null || !BleConstants.isAllowedNeighbour(prefix))) {
                 return
             }
-            val existing = if (prefix != null) ConnectionPool.getByQaulIdPrefix(prefix) else null
 
             if (existing != null) {
                 // Connected now: reset this peer's wrong role defer timer.
@@ -362,8 +392,33 @@ object BleScanner {
                 }
             }
 
-            Log.i(TAG, "Auto-connecting to $mac")
-            BleManager.connect(result.device, BleRole.CENTRAL)
+            // Connect over the PHY of the advert we're responding to, so the peer's address and PHY
+            // match. If this is the long-range (Coded) advert but we can also see this peer up close on
+            // 1M, skip it, their 1M advert will drive a faster short range connection instead.
+            if (currentPhy == BluetoothDevice.PHY_LE_CODED && seenOn1MRecently(prefix)) {
+                return   // prefer the peer's short-range advert
+            }
+            val phy = if (currentPhy == BluetoothDevice.PHY_LE_CODED) BluetoothDevice.PHY_LE_CODED_MASK
+                      else BluetoothDevice.PHY_LE_1M_MASK
+            Log.i(TAG, "Auto-connecting to $mac (${if (phy == BluetoothDevice.PHY_LE_CODED_MASK) "Coded/long-range" else "1M/short-range"})")
+            BleManager.connect(result.device, BleRole.CENTRAL, phy)
         }
+    }
+
+    /** Record that we saw [result]'s peer on the 1M PHY (short range), keyed by advertised prefix.
+     *  API 26+ only. */
+    private fun recordPhySighting(result: ScanResult) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        if (result.primaryPhy != BluetoothDevice.PHY_LE_1M) return
+        val prefix = result.scanRecord?.getManufacturerSpecificData(BleConstants.QAUL_MANUFACTURER_ID) ?: return
+        synchronized(lock) { seen1MAt[prefix.toHexString()] = System.currentTimeMillis() }
+    }
+
+    /** True if we've seen this peers 1M advert within the out of range window (i.e. it's close enough
+     *  to connect short-range). Callers must hold [lock]. */
+    private fun seenOn1MRecently(prefix: ByteArray?): Boolean {
+        if (prefix == null) return false
+        val last = seen1MAt[prefix.toHexString()] ?: return false
+        return System.currentTimeMillis() - last < BleConstants.OUT_OF_RANGE_TIMEOUT_MS
     }
 }
