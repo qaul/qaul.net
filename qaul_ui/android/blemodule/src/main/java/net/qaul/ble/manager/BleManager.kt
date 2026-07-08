@@ -48,8 +48,8 @@ object BleManager : ConnectionEventListener {
         BleTaskScheduler.closeAllGatts()
     }
 
-    fun connect(device: BluetoothDevice, role: BleRole) =
-        ConnectionPool.createConnection(device, role)
+    fun connect(device: BluetoothDevice, role: BleRole, phy: Int = BluetoothDevice.PHY_LE_1M_MASK) =
+        ConnectionPool.createConnection(device, role, phy)
 
     fun disconnect(device: BluetoothDevice) =
         ConnectionPool.disconnect(device)

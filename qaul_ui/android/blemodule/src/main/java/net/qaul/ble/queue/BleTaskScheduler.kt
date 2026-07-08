@@ -116,8 +116,8 @@ object BleTaskScheduler {
 
     // Public API — each call just enqueues an operation
 
-    fun connect(device: BluetoothDevice) =
-        scheduleOperation(Connect(device))
+    fun connect(device: BluetoothDevice, phy: Int = BluetoothDevice.PHY_LE_1M_MASK) =
+        scheduleOperation(Connect(device, phy))
 
     fun disconnect(device: BluetoothDevice) {
         // Drop any writes/reads still queued for this device first, we're tearing it down, so running
@@ -326,7 +326,14 @@ object BleTaskScheduler {
                     // once the connect settles (connected / error etc). TODO: Double check / Think about how much this reduces our ability to / speed of getting other connections, can it block scanning permanently
                     BleScanner.pauseForConnect()
                     @SuppressLint("MissingPermission")
-                    val gatt = device.connectGatt(ctx, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
+                    // On API 26+ open the connection on the chosen PHY (Coded for long-range peers we
+                    // only saw on the Coded advert, 1M otherwise). Older devices lack the phy overload
+                    // and connect on 1M only
+                    val gatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        device.connectGatt(ctx, false, gattCallback, BluetoothDevice.TRANSPORT_LE, phy)
+                    } else {
+                        device.connectGatt(ctx, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
+                    }
                     if (gatt != null) {
                         // Hold the handle immediately, connectGatt allocates a client interface that
                         // MUST be closed even if the connection never completes, otherwise it
@@ -743,6 +750,7 @@ object BleTaskScheduler {
             }
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.i(TAG, "PHY updated for ${gatt.device.address}: TX=${phyName(txPhy)}, RX=${phyName(rxPhy)}")
+                notifyListeners { onPhyUpdated(gatt.device, txPhy, rxPhy) }
             } else {
                 Log.e(TAG, "PHY update failed for ${gatt.device.address}, status=$status — device may not support 2M PHY")
             }
