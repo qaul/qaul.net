@@ -26,6 +26,7 @@ import 'generated/services/chat/chatfile_rpc.pb.dart';
 import 'generated/services/dtn/dtn_rpc.pb.dart';
 import 'generated/services/feed/feed.pb.dart';
 import 'generated/services/group/group_rpc.pb.dart';
+import 'internal/chat_conversation_state.dart';
 import 'internal/file_history.dart';
 import 'libqaul/libqaul.dart';
 import 'rpc_translators/abstract_rpc_module_translator.dart';
@@ -469,6 +470,7 @@ class LibqaulWorker {
         return null;
       },
     );
+    if (result != null) applyChatConversationList(_ref, result);
     return result;
   }
 
