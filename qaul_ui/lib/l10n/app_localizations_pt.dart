@@ -302,6 +302,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get searchUser => 'Procurar usuário...';
 
   @override
+  String get searchChat => 'Search chats...';
+
+  @override
   String get storageUsers => 'Pontos de DTN (Delayed-tolerant network)';
 
   @override

@@ -1,6 +1,7 @@
 export 'design_components/account/account_management.dart';
 export 'design_components/chat/chat_footer.dart';
 export 'design_components/chat/chat_header.dart';
+export 'design_components/chat/chat_room_list.dart';
 export 'design_components/chat/chat_timeline.dart';
 export 'design_components/chat/compute_message_presentation.dart'
     show computeChatMessagePresentation, computeChatBubbleDisplayItems;
@@ -25,6 +26,7 @@ export 'design_components/chat/room_meta_message.dart';
 export 'design_components/shell/qaul_fab.dart';
 export 'design_components/shell/qaul_loading_indicator.dart';
 export 'design_components/shell/qaul_navbar.dart';
+export 'design_components/shell/search_scaffold.dart';
 export 'design_components/users/user_search_scaffold.dart';
 export 'domain/duplicate_username_on_join.dart';
 export 'l10n/qaul_components_l10n_ext.dart';

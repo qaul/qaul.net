@@ -298,6 +298,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchUser => 'Search user...';
 
   @override
+  String get searchChat => 'Search chats...';
+
+  @override
   String get storageUsers => 'Storage Users';
 
   @override

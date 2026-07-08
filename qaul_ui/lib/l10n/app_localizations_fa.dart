@@ -300,6 +300,9 @@ class AppLocalizationsFa extends AppLocalizations {
   String get searchUser => 'جستجوی کاربر ...';
 
   @override
+  String get searchChat => 'Search chats...';
+
+  @override
   String get storageUsers => 'کاربران ذخیره کننده پیام ها';
 
   @override

@@ -298,6 +298,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get searchUser => 'Kullanıcı ara...';
 
   @override
+  String get searchChat => 'Search chats...';
+
+  @override
   String get storageUsers => 'Depolama Kullanıcıları';
 
   @override

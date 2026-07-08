@@ -299,6 +299,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get searchUser => 'Cerca nei contatti...';
 
   @override
+  String get searchChat => 'Search chats...';
+
+  @override
   String get storageUsers => 'Utente del cache';
 
   @override

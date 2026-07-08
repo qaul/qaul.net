@@ -46,6 +46,16 @@ class StubLibqaulWorker implements LibqaulWorker {
   }
 
   @override
+  Future<PaginatedChatRooms?> searchChatRooms({
+    required String query,
+    int offset = 0,
+    int limit = 50,
+  }) async {
+    _logger.info('searchChatRooms query="$query"; ignoring...');
+    return PaginatedChatRooms(rooms: []);
+  }
+
+  @override
   Future<PaginatedGroupInvites?> getGroupInvitesReceived({
     int? offset,
     int? limit,

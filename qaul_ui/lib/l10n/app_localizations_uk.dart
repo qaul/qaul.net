@@ -297,6 +297,9 @@ class AppLocalizationsUk extends AppLocalizations {
   String get searchUser => 'Пошук користувача...';
 
   @override
+  String get searchChat => 'Search chats...';
+
+  @override
   String get storageUsers => 'Вузли DTN';
 
   @override
