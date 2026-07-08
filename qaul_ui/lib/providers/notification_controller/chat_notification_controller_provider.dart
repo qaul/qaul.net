@@ -113,6 +113,16 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
     );
   }
 
+  @override
+  int notificationCountIncrement(ChatRoom value) {
+    final cached = _chats.firstWhereOrNull(
+      (c) => c.roomIdBase58 == value.idBase58,
+    );
+    final previousUnreadCount = cached?.unreadCount ?? 0;
+    final delta = value.unreadCount - previousUnreadCount;
+    return delta > 0 ? delta : 1;
+  }
+
   bool _lastMessageIsFromLocalUser(ChatRoom r1) =>
       localUser.id.equals(r1.lastMessageSenderId ?? []);
 

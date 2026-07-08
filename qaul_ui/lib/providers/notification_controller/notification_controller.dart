@@ -27,9 +27,8 @@ class NotificationController<T> {
 
   @protected
   @visibleForOverriding
-  MapEntry<dynamic, void Function(T?, T)>
-      get strategy =>
-          throw UnimplementedError('Must be implemented by child class');
+  MapEntry<dynamic, void Function(T?, T)> get strategy =>
+      throw UnimplementedError('Must be implemented by child class');
 
   @protected
   @visibleForOverriding
@@ -67,9 +66,11 @@ mixin DataProcessingStrategy<T> on NotificationController<List<T>> {
 
     while (queue.isNotEmpty) {
       final entry = queue.removeFirst();
+      final countIncrement = notificationCountIncrement(entry);
       final message = process(entry);
       if (message == null) continue;
-      newNotificationCount.value = (newNotificationCount.value ?? 0) + 1;
+      newNotificationCount.value =
+          (newNotificationCount.value ?? 0) + countIncrement;
       LocalNotifications.instance.displayNotification(message);
       await Future.delayed(const Duration(milliseconds: 500));
     }
@@ -82,6 +83,9 @@ mixin DataProcessingStrategy<T> on NotificationController<List<T>> {
 
   @visibleForOverriding
   LocalNotification? process(T value);
+
+  @visibleForOverriding
+  int notificationCountIncrement(T value) => 1;
 
   @visibleForOverriding
   void close();
