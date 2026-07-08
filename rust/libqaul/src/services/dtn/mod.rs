@@ -865,26 +865,23 @@ impl Dtn {
             }
         };
 
-        // Validate custody route
-        if req.custody_route.is_empty() {
-            send_response(false, "at least one custody user is required".to_string());
-            return;
-        }
-        if req.custody_route.len() > 10 {
-            send_response(false, "maximum 10 custody users allowed".to_string());
-            return;
-        }
-        for user_bytes in &req.custody_route {
-            if let Ok(uid) = PeerId::from_bytes(user_bytes) {
-                if uid == my_user_id || uid == receiver_id {
-                    send_response(false, "custodians must not include sender or receiver".to_string());
+        // Convert the RPC hops into wire hops and validate.
+        let custody_route: Vec<proto::RouteHop> = req
+            .custody_route
+            .iter()
+            .map(|h| proto::RouteHop {
+                hop: h.hop,
+                ids: h.ids.clone(),
+            })
+            .collect();
+        let (custody_route, total_custodians) =
+            match Self::validate_custody_route(&custody_route, &my_user_id, &receiver_id) {
+                Ok(v) => v,
+                Err(e) => {
+                    send_response(false, e);
                     return;
                 }
-            } else {
-                send_response(false, "invalid custodian user ID".to_string());
-                return;
-            }
-        }
+            };
 
         // Get user account
         let user_account = match UserAccounts::get_by_id(state, my_user_id) {
@@ -895,9 +892,6 @@ impl Dtn {
             }
         };
 
-        // Use the flat custody route directly
-        let custody_route = req.custody_route.clone();
-
         // Calculate expiry
         let expires_at = if req.expiry_seconds > 0 {
             Timestamp::get_timestamp() + (req.expiry_seconds * 1000)
@@ -906,7 +900,6 @@ impl Dtn {
         };
 
         // Calculate remaining handoffs
-        let total_custodians: u32 = custody_route.len() as u32;
         let remaining_handoffs = if req.max_handoffs > 0 {
             req.max_handoffs
         } else {
@@ -932,7 +925,7 @@ impl Dtn {
         let routed_v2 = proto::DtnRoutedV2 {
             container: req.data.clone(),
             custody_route,
-            next_route_index: 0,
+            current_hop: 0,
             original_signature,
             sender_public_key: user_account.keys.public().encode_protobuf(),
             expires_at,
@@ -1029,32 +1022,121 @@ impl Dtn {
         }
     }
 
-    pub fn select_custody_target(
+    /// Maximum number of custodian IDs across a whole custody route.
+    const MAX_CUSTODIANS: usize = 10;
+
+    /// Validate and canonicalize a hop-numbered custody route.
+    ///
+    /// Rules: at least one custodian; hop numbers are >= 1 and unique
+    /// (each hop appears once with its list of alternatives); each hop
+    /// names at least one ID; every ID is a valid PeerId that is
+    /// neither the sender nor the receiver and appears only once; at
+    /// most `MAX_CUSTODIANS` IDs total.
+    ///
+    /// Returns the route sorted by hop ascending, plus the total ID
+    /// count.
+    fn validate_custody_route(
+        route: &[proto::RouteHop],
+        sender: &PeerId,
+        receiver: &PeerId,
+    ) -> Result<(Vec<proto::RouteHop>, u32), String> {
+        if route.is_empty() {
+            return Err("at least one custody hop is required".to_string());
+        }
+        let mut seen_hops: std::collections::HashSet<u32> = std::collections::HashSet::new();
+        let mut seen_ids: std::collections::HashSet<Vec<u8>> = std::collections::HashSet::new();
+        let mut total: usize = 0;
+        for hop in route {
+            if hop.hop < 1 {
+                return Err("hop numbers must be >= 1".to_string());
+            }
+            if !seen_hops.insert(hop.hop) {
+                return Err(format!("duplicate hop number {}", hop.hop));
+            }
+            if hop.ids.is_empty() {
+                return Err(format!("hop {} has no custodians", hop.hop));
+            }
+            for id_bytes in &hop.ids {
+                match PeerId::from_bytes(id_bytes) {
+                    Ok(uid) => {
+                        if uid == *sender || uid == *receiver {
+                            return Err(
+                                "custodians must not include sender or receiver".to_string()
+                            );
+                        }
+                    }
+                    Err(_) => return Err("invalid custodian user ID".to_string()),
+                }
+                if !seen_ids.insert(id_bytes.clone()) {
+                    return Err("a custodian appears more than once in the route".to_string());
+                }
+                total += 1;
+            }
+        }
+        if total > Self::MAX_CUSTODIANS {
+            return Err(format!(
+                "maximum {} custodians allowed",
+                Self::MAX_CUSTODIANS
+            ));
+        }
+        let mut sorted = route.to_vec();
+        sorted.sort_by_key(|h| h.hop);
+        Ok((sorted, total as u32))
+    }
+
+    /// Where to forward a V2 message, and the hop number to stamp on it.
+    ///
+    /// - If the ultimate recipient is directly reachable, deliver to it
+    ///   (the returned hop is left at `current_hop` — delivery ends the
+    ///   route, so it is never re-forwarded).
+    /// - Otherwise walk the hops strictly greater than `current_hop` in
+    ///   ascending order. All IDs sharing a hop are interchangeable
+    ///   alternatives: the first reachable one at the lowest such hop is
+    ///   the target. A hop whose custodians are all unreachable is
+    ///   skipped in favour of the next hop (routes may be sparse).
+    ///
+    /// Returns `(target, new_current_hop)`, or `None` when nothing is
+    /// reachable.
+    pub fn select_custody_target_hop(
         state: &crate::QaulState,
         routed_v2: &proto::DtnRoutedV2,
         receiver_id: &PeerId,
-    ) -> Option<PeerId> {
+    ) -> Option<(PeerId, u32)> {
         let rs = state.get_router();
-        // Check if recipient is directly reachable
+        // Recipient directly reachable → deliver, route terminates.
         if rs.routing_table.get_route_to_user(*receiver_id).is_some() {
-            return Some(*receiver_id);
+            return Some((*receiver_id, routed_v2.current_hop));
         }
 
-        // Strict forward scan from next_route_index
-        let start = routed_v2.next_route_index as usize;
-        let len = routed_v2.custody_route.len();
-        if start >= len {
-            return None;
-        }
-        for i in start..len {
-            if let Ok(custodian_id) = PeerId::from_bytes(&routed_v2.custody_route[i]) {
-                if rs.routing_table.get_route_to_user(custodian_id).is_some() {
-                    return Some(custodian_id);
+        // Hops strictly after the one we currently hold, ascending.
+        let mut hops: Vec<&proto::RouteHop> = routed_v2
+            .custody_route
+            .iter()
+            .filter(|h| h.hop > routed_v2.current_hop)
+            .collect();
+        hops.sort_by_key(|h| h.hop);
+
+        for hop in hops {
+            for id_bytes in &hop.ids {
+                if let Ok(custodian_id) = PeerId::from_bytes(id_bytes) {
+                    if rs.routing_table.get_route_to_user(custodian_id).is_some() {
+                        return Some((custodian_id, hop.hop));
+                    }
                 }
             }
         }
 
         None
+    }
+
+    /// Back-compat wrapper returning just the target (used where the
+    /// new hop cursor is not needed).
+    pub fn select_custody_target(
+        state: &crate::QaulState,
+        routed_v2: &proto::DtnRoutedV2,
+        receiver_id: &PeerId,
+    ) -> Option<PeerId> {
+        Self::select_custody_target_hop(state, routed_v2, receiver_id).map(|(id, _)| id)
     }
 
     /// Process a received DtnRoutedV2 message from the network
@@ -1449,19 +1531,14 @@ impl Dtn {
         routed_v2: &proto::DtnRoutedV2,
         receiver_id: &PeerId,
     ) {
-        if let Some(target) = Self::select_custody_target(state, routed_v2, receiver_id) {
+        if let Some((target, new_hop)) =
+            Self::select_custody_target_hop(state, routed_v2, receiver_id)
+        {
             let mut forwarded = routed_v2.clone();
             forwarded.remaining_handoffs = forwarded.remaining_handoffs.saturating_sub(1);
-
-            // Advance next_route_index past the target
-            for (i, user_bytes) in forwarded.custody_route.iter().enumerate() {
-                if let Ok(uid) = PeerId::from_bytes(user_bytes) {
-                    if uid == target && i as u32 >= forwarded.next_route_index {
-                        forwarded.next_route_index = (i as u32) + 1;
-                        break;
-                    }
-                }
-            }
+            // Advance the cursor to the hop the target sits at, so the
+            // next custodian only considers later hops.
+            forwarded.current_hop = new_hop;
 
             if let Err(e) = super::messaging::Messaging::send_dtn_routed_v2_message(
                 state,
@@ -1787,12 +1864,18 @@ mod tests {
         );
     }
 
-    /// Build a DtnRoutedV2 with the given custody route and next_route_index.
-    fn build_routed_v2(custody_route: Vec<Vec<u8>>, next_route_index: u32) -> proto::DtnRoutedV2 {
+    /// One hop entry.
+    fn hop(n: u32, ids: Vec<Vec<u8>>) -> proto::RouteHop {
+        proto::RouteHop { hop: n, ids }
+    }
+
+    /// Build a DtnRoutedV2 with the given hop-numbered custody route
+    /// and current_hop cursor.
+    fn build_routed_v2(custody_route: Vec<proto::RouteHop>, current_hop: u32) -> proto::DtnRoutedV2 {
         proto::DtnRoutedV2 {
             container: vec![1, 2, 3],
             custody_route,
-            next_route_index,
+            current_hop,
             original_signature: vec![0xAA],
             sender_public_key: vec![0xBB],
             expires_at: 0,
@@ -1806,8 +1889,11 @@ mod tests {
     fn dtn_routed_v2_round_trip() {
         let original = proto::DtnRoutedV2 {
             container: vec![10, 20, 30, 40],
-            custody_route: vec![vec![1, 2, 3], vec![4, 5, 6]],
-            next_route_index: 0,
+            custody_route: vec![
+                proto::RouteHop { hop: 1, ids: vec![vec![1, 2, 3]] },
+                proto::RouteHop { hop: 2, ids: vec![vec![4, 5, 6]] },
+            ],
+            current_hop: 0,
             original_signature: vec![0xAA, 0xBB],
             sender_public_key: vec![0xCC, 0xDD],
             expires_at: 1234567890,
@@ -1820,9 +1906,11 @@ mod tests {
         let decoded = proto::DtnRoutedV2::decode(&encoded[..]).unwrap();
         assert_eq!(decoded.container, original.container);
         assert_eq!(decoded.custody_route.len(), 2);
-        assert_eq!(decoded.custody_route[0], vec![1, 2, 3]);
-        assert_eq!(decoded.custody_route[1], vec![4, 5, 6]);
-        assert_eq!(decoded.next_route_index, 0);
+        assert_eq!(decoded.custody_route[0].hop, 1);
+        assert_eq!(decoded.custody_route[0].ids, vec![vec![1, 2, 3]]);
+        assert_eq!(decoded.custody_route[1].hop, 2);
+        assert_eq!(decoded.custody_route[1].ids, vec![vec![4, 5, 6]]);
+        assert_eq!(decoded.current_hop, 0);
         assert_eq!(decoded.original_signature, original.original_signature);
         assert_eq!(decoded.sender_public_key, original.sender_public_key);
         assert_eq!(decoded.expires_at, original.expires_at);
@@ -1833,8 +1921,8 @@ mod tests {
     fn dtn_routed_v2_serde_round_trip() {
         let original = proto::DtnRoutedV2 {
             container: vec![10, 20],
-            custody_route: vec![vec![1, 2, 3]],
-            next_route_index: 1,
+            custody_route: vec![proto::RouteHop { hop: 1, ids: vec![vec![1, 2, 3]] }],
+            current_hop: 1,
             original_signature: vec![0xAA],
             sender_public_key: vec![0xCC],
             expires_at: 0,
@@ -1882,7 +1970,7 @@ mod tests {
         let routed_v2 = proto::DtnRoutedV2 {
             container: vec![1, 2, 3],
             custody_route: vec![],
-            next_route_index: 0,
+            current_hop: 0,
             original_signature: vec![],
             sender_public_key: vec![],
             expires_at: 0,
@@ -1924,31 +2012,94 @@ mod tests {
             .routing_table
             .set(crate::router::table::RoutingTable { table });
 
-        let v2 = build_routed_v2(vec![custodian.to_bytes()], 0);
+        let v2 = build_routed_v2(vec![hop(1, vec![custodian.to_bytes()])], 0);
 
         let target = Dtn::select_custody_target(&qaul_state, &v2, &recipient);
         assert_eq!(target, Some(recipient));
     }
 
     #[test]
-    fn select_target_returns_first_reachable_custodian() {
+    fn select_target_advances_to_next_hop_when_earlier_unreachable() {
         let qaul_state = crate::QaulState::new_for_simulation();
         let recipient = random_peer();
         let c1 = random_peer();
         let c2 = random_peer();
 
         let mut table = HashMap::new();
-        // recipient offline, c1 offline, c2 online
+        // recipient offline, hop-1 (c1) offline, hop-2 (c2) online
         make_online(&mut table, c2);
         qaul_state
             .get_router()
             .routing_table
             .set(crate::router::table::RoutingTable { table });
 
-        let v2 = build_routed_v2(vec![c1.to_bytes(), c2.to_bytes()], 0);
+        let v2 = build_routed_v2(
+            vec![hop(1, vec![c1.to_bytes()]), hop(2, vec![c2.to_bytes()])],
+            0,
+        );
 
-        let target = Dtn::select_custody_target(&qaul_state, &v2, &recipient);
-        assert_eq!(target, Some(c2));
+        // hop 1 unreachable -> advance to hop 2, target c2 at hop 2
+        assert_eq!(
+            Dtn::select_custody_target_hop(&qaul_state, &v2, &recipient),
+            Some((c2, 2))
+        );
+    }
+
+    #[test]
+    fn select_target_uses_same_hop_alternative() {
+        let qaul_state = crate::QaulState::new_for_simulation();
+        let recipient = random_peer();
+        let a = random_peer();
+        let b = random_peer();
+
+        let mut table = HashMap::new();
+        // a is offline, b online — both share hop 1 as alternatives
+        make_online(&mut table, b);
+        qaul_state
+            .get_router()
+            .routing_table
+            .set(crate::router::table::RoutingTable { table });
+
+        let v2 = build_routed_v2(vec![hop(1, vec![a.to_bytes(), b.to_bytes()])], 0);
+
+        // first reachable alternative at the same hop is chosen, hop stays 1
+        assert_eq!(
+            Dtn::select_custody_target_hop(&qaul_state, &v2, &recipient),
+            Some((b, 1))
+        );
+    }
+
+    #[test]
+    fn select_target_skips_fully_unreachable_hop_across_gap() {
+        let qaul_state = crate::QaulState::new_for_simulation();
+        let recipient = random_peer();
+        let c1 = random_peer();
+        let c3 = random_peer();
+        let c5 = random_peer();
+
+        let mut table = HashMap::new();
+        // hop 3's only custodian offline; hop 5 online. Route is sparse.
+        make_online(&mut table, c5);
+        qaul_state
+            .get_router()
+            .routing_table
+            .set(crate::router::table::RoutingTable { table });
+
+        let v2 = build_routed_v2(
+            vec![
+                hop(1, vec![c1.to_bytes()]),
+                hop(3, vec![random_peer().to_bytes()]),
+                hop(5, vec![c5.to_bytes()]),
+            ],
+            1, // already took hop 1
+        );
+
+        // hop 3 unreachable -> skip the gap to hop 5
+        let _ = c3;
+        assert_eq!(
+            Dtn::select_custody_target_hop(&qaul_state, &v2, &recipient),
+            Some((c5, 5))
+        );
     }
 
     #[test]
@@ -1966,14 +2117,17 @@ mod tests {
                 table: HashMap::new(),
             });
 
-        let v2 = build_routed_v2(vec![c1.to_bytes(), c2.to_bytes()], 0);
+        let v2 = build_routed_v2(
+            vec![hop(1, vec![c1.to_bytes()]), hop(2, vec![c2.to_bytes()])],
+            0,
+        );
 
         let target = Dtn::select_custody_target(&qaul_state, &v2, &recipient);
         assert_eq!(target, None);
     }
 
     #[test]
-    fn select_target_respects_next_route_index() {
+    fn select_target_respects_current_hop() {
         let qaul_state = crate::QaulState::new_for_simulation();
         let recipient = random_peer();
         let c1 = random_peer();
@@ -1988,15 +2142,20 @@ mod tests {
             .routing_table
             .set(crate::router::table::RoutingTable { table });
 
-        // next_route_index = 1 means c1 (index 0) is already done, only c2 eligible
-        let v2 = build_routed_v2(vec![c1.to_bytes(), c2.to_bytes()], 1);
+        // current_hop = 1 means hop 1 (c1) is already taken, only hop 2 eligible
+        let v2 = build_routed_v2(
+            vec![hop(1, vec![c1.to_bytes()]), hop(2, vec![c2.to_bytes()])],
+            1,
+        );
 
-        let target = Dtn::select_custody_target(&qaul_state, &v2, &recipient);
-        assert_eq!(target, Some(c2));
+        assert_eq!(
+            Dtn::select_custody_target_hop(&qaul_state, &v2, &recipient),
+            Some((c2, 2))
+        );
     }
 
     #[test]
-    fn select_target_skips_exhausted_route() {
+    fn select_target_none_when_route_exhausted() {
         let qaul_state = crate::QaulState::new_for_simulation();
         let recipient = random_peer();
         let c1 = random_peer();
@@ -2008,19 +2167,21 @@ mod tests {
             .routing_table
             .set(crate::router::table::RoutingTable { table });
 
-        // next_route_index == len means the route is exhausted
-        let v2 = build_routed_v2(vec![c1.to_bytes()], 1);
+        // current_hop == last hop means the route is exhausted
+        let v2 = build_routed_v2(vec![hop(1, vec![c1.to_bytes()])], 1);
 
-        let target = Dtn::select_custody_target(&qaul_state, &v2, &recipient);
-        assert_eq!(target, None);
+        assert_eq!(
+            Dtn::select_custody_target(&qaul_state, &v2, &recipient),
+            None
+        );
     }
 
     #[test]
-    fn select_target_picks_first_reachable_in_forward_order() {
+    fn select_target_picks_lowest_reachable_hop() {
         let qaul_state = crate::QaulState::new_for_simulation();
         let recipient = random_peer();
-        let c1 = random_peer(); // first in route
-        let c2 = random_peer(); // second in route
+        let c1 = random_peer();
+        let c2 = random_peer();
 
         let mut table = HashMap::new();
         // Both online
@@ -2031,75 +2192,70 @@ mod tests {
             .routing_table
             .set(crate::router::table::RoutingTable { table });
 
-        let v2 = build_routed_v2(vec![c1.to_bytes(), c2.to_bytes()], 0);
+        let v2 = build_routed_v2(
+            vec![hop(1, vec![c1.to_bytes()]), hop(2, vec![c2.to_bytes()])],
+            0,
+        );
 
-        // Forward scan should pick c1 (index 0) as the first reachable
-        let target = Dtn::select_custody_target(&qaul_state, &v2, &recipient);
-        assert_eq!(target, Some(c1));
+        // lowest hop is tried first -> c1 at hop 1
+        assert_eq!(
+            Dtn::select_custody_target_hop(&qaul_state, &v2, &recipient),
+            Some((c1, 1))
+        );
     }
 
-    // ── Route advancement tests ──
+    // ── validate_custody_route tests ──
 
     #[test]
-    fn route_next_route_index_advances_on_forward() {
-        let c1 = random_peer();
-        let c2 = random_peer();
-        let target = c2;
-
-        let mut routed = proto::DtnRoutedV2 {
-            container: vec![],
-            custody_route: vec![c1.to_bytes(), c2.to_bytes()],
-            next_route_index: 0,
-            original_signature: vec![],
-            sender_public_key: vec![],
-            expires_at: 0,
-            remaining_handoffs: 5,
-        };
-
-        // Simulate what try_forward_v2 does to the route state
-        routed.remaining_handoffs = routed.remaining_handoffs.saturating_sub(1);
-        for (i, user_bytes) in routed.custody_route.iter().enumerate() {
-            if let Ok(uid) = PeerId::from_bytes(user_bytes) {
-                if uid == target && i as u32 >= routed.next_route_index {
-                    routed.next_route_index = (i as u32) + 1;
-                    break;
-                }
-            }
-        }
-
-        assert_eq!(routed.remaining_handoffs, 4);
-        assert_eq!(routed.next_route_index, 2); // c2 is at index 1, so next = 2
+    fn validate_route_rejects_empty() {
+        let (s, r) = (random_peer(), random_peer());
+        assert!(Dtn::validate_custody_route(&[], &s, &r).is_err());
     }
 
     #[test]
-    fn route_next_route_index_advances_for_middle_custodian() {
-        let c1 = random_peer();
-        let c2 = random_peer();
-        let c3 = random_peer();
-        let target = c2;
+    fn validate_route_rejects_hop_zero() {
+        let (s, r) = (random_peer(), random_peer());
+        let route = vec![hop(0, vec![random_peer().to_bytes()])];
+        assert!(Dtn::validate_custody_route(&route, &s, &r).is_err());
+    }
 
-        let mut routed = proto::DtnRoutedV2 {
-            container: vec![],
-            custody_route: vec![c1.to_bytes(), c2.to_bytes(), c3.to_bytes()],
-            next_route_index: 0,
-            original_signature: vec![],
-            sender_public_key: vec![],
-            expires_at: 0,
-            remaining_handoffs: 5,
-        };
+    #[test]
+    fn validate_route_rejects_duplicate_hop_number() {
+        let (s, r) = (random_peer(), random_peer());
+        let route = vec![
+            hop(2, vec![random_peer().to_bytes()]),
+            hop(2, vec![random_peer().to_bytes()]),
+        ];
+        assert!(Dtn::validate_custody_route(&route, &s, &r).is_err());
+    }
 
-        routed.remaining_handoffs = routed.remaining_handoffs.saturating_sub(1);
-        for (i, user_bytes) in routed.custody_route.iter().enumerate() {
-            if let Ok(uid) = PeerId::from_bytes(user_bytes) {
-                if uid == target && i as u32 >= routed.next_route_index {
-                    routed.next_route_index = (i as u32) + 1;
-                    break;
-                }
-            }
-        }
+    #[test]
+    fn validate_route_rejects_sender_or_receiver() {
+        let (s, r) = (random_peer(), random_peer());
+        assert!(Dtn::validate_custody_route(&[hop(1, vec![s.to_bytes()])], &s, &r).is_err());
+        assert!(Dtn::validate_custody_route(&[hop(1, vec![r.to_bytes()])], &s, &r).is_err());
+    }
 
-        // c2 at index 1, next_route_index should advance to 2, leaving c3 still eligible
-        assert_eq!(routed.next_route_index, 2);
+    #[test]
+    fn validate_route_rejects_duplicate_custodian() {
+        let (s, r) = (random_peer(), random_peer());
+        let dup = random_peer().to_bytes();
+        let route = vec![hop(1, vec![dup.clone()]), hop(2, vec![dup])];
+        assert!(Dtn::validate_custody_route(&route, &s, &r).is_err());
+    }
+
+    #[test]
+    fn validate_route_sorts_by_hop_and_counts() {
+        let (s, r) = (random_peer(), random_peer());
+        let route = vec![
+            hop(5, vec![random_peer().to_bytes(), random_peer().to_bytes()]),
+            hop(1, vec![random_peer().to_bytes()]),
+        ];
+        let (sorted, total) =
+            Dtn::validate_custody_route(&route, &s, &r).expect("valid route");
+        assert_eq!(total, 3);
+        assert_eq!(sorted[0].hop, 1);
+        assert_eq!(sorted[1].hop, 5);
     }
 
     // ── V2 storage tests ──
@@ -2438,8 +2594,8 @@ mod tests {
     ) -> proto::DtnRoutedV2 {
         proto::DtnRoutedV2 {
             container: container_bytes,
-            custody_route: vec![random_peer().to_bytes()],
-            next_route_index: 0,
+            custody_route: vec![proto::RouteHop { hop: 1, ids: vec![random_peer().to_bytes()] }],
+            current_hop: 0,
             original_signature: signature,
             sender_public_key: keys.public().encode_protobuf(),
             expires_at,
@@ -2660,7 +2816,7 @@ mod tests {
     #[test]
     fn precheck_delivers_to_recipient_with_zero_handoffs() {
         let me = random_peer();
-        let mut v2 = build_routed_v2(vec![random_peer().to_bytes()], 0);
+        let mut v2 = build_routed_v2(vec![hop(1, vec![random_peer().to_bytes()])], 0);
         v2.remaining_handoffs = 0;
         assert_eq!(
             Dtn::precheck_routed_v2(&v2, Some(&me), &me, 1_000),
@@ -2674,7 +2830,7 @@ mod tests {
     fn precheck_rejects_exhausted_handoffs_at_custodian() {
         let me = random_peer();
         let receiver = random_peer();
-        let mut v2 = build_routed_v2(vec![random_peer().to_bytes()], 0);
+        let mut v2 = build_routed_v2(vec![hop(1, vec![random_peer().to_bytes()])], 0);
         v2.remaining_handoffs = 0;
         assert_eq!(
             Dtn::precheck_routed_v2(&v2, Some(&receiver), &me, 1_000),
@@ -2686,7 +2842,7 @@ mod tests {
     #[test]
     fn precheck_expiry_wins_over_delivery() {
         let me = random_peer();
-        let mut v2 = build_routed_v2(vec![random_peer().to_bytes()], 0);
+        let mut v2 = build_routed_v2(vec![hop(1, vec![random_peer().to_bytes()])], 0);
         v2.expires_at = 500;
         assert_eq!(
             Dtn::precheck_routed_v2(&v2, Some(&me), &me, 1_000),
@@ -2700,7 +2856,7 @@ mod tests {
     fn precheck_continues_for_custodian_with_budget() {
         let me = random_peer();
         let receiver = random_peer();
-        let v2 = build_routed_v2(vec![random_peer().to_bytes()], 0);
+        let v2 = build_routed_v2(vec![hop(1, vec![random_peer().to_bytes()])], 0);
         assert_eq!(
             Dtn::precheck_routed_v2(&v2, Some(&receiver), &me, 1_000),
             V2Precheck::Continue

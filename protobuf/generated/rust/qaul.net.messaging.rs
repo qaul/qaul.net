@@ -208,14 +208,14 @@ pub struct RtcMessage {
     pub content: ::prost::alloc::vec::Vec<u8>,
 }
 /// DTN message
-#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Dtn {
     #[prost(oneof = "dtn::Message", tags = "1, 2, 3")]
     pub message: ::core::option::Option<dtn::Message>,
 }
 /// Nested message and enum types in `Dtn`.
 pub mod dtn {
-    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Oneof)]
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
     pub enum Message {
         /// message container
         #[prost(bytes, tag = "1")]
@@ -229,18 +229,37 @@ pub mod dtn {
     }
 }
 /// DTN source routed message (V2)
+/// A single hop in a custody route.
+///
+/// A route is a set of hops, each identified by a `hop` number. All
+/// custodian IDs sharing the same `hop` number are interchangeable
+/// alternatives at that stage of the route: custody advances to a hop
+/// by handing the message to any one reachable ID at that hop. Hop
+/// numbers are >= 1, ordered ascending, and may be sparse (gaps are
+/// allowed, e.g. hops 3 then 5).
 #[derive(serde::Serialize, serde::Deserialize)]
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RouteHop {
+    /// hop / priority number (>= 1, lower = earlier in the route)
+    #[prost(uint32, tag = "1")]
+    pub hop: u32,
+    /// custodian user IDs at this hop (interchangeable alternatives)
+    #[prost(bytes = "vec", repeated, tag = "2")]
+    pub ids: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
+}
+#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct DtnRoutedV2 {
     /// the original encrypted container bytes
     #[prost(bytes = "vec", tag = "1")]
     pub container: ::prost::alloc::vec::Vec<u8>,
-    /// ordered list of custody user IDs
-    #[prost(bytes = "vec", repeated, tag = "2")]
-    pub custody_route: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
-    /// index of the first custody entry that has not yet taken custody
+    /// custody route as hop-numbered entries, ordered by hop ascending
+    #[prost(message, repeated, tag = "2")]
+    pub custody_route: ::prost::alloc::vec::Vec<RouteHop>,
+    /// hop number of the custodian that currently holds the message
+    /// (0 = still at the original sender, no hop taken yet)
     #[prost(uint32, tag = "3")]
-    pub next_route_index: u32,
+    pub current_hop: u32,
     /// signature of the original message (used for dedup)
     #[prost(bytes = "vec", tag = "4")]
     pub original_signature: ::prost::alloc::vec::Vec<u8>,

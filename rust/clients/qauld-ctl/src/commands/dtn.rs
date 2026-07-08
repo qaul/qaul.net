@@ -21,6 +21,39 @@ use super::id_string_to_bin;
 /// protobuf RPC definition
 use qaul_proto::qaul_rpc_dtn as proto;
 
+/// Parse a hop-numbered custody route from `hop:id` tokens.
+///
+/// Each token is `<hop>:<base58 id>`. Tokens sharing a hop number are
+/// grouped into one `DtnRouteHop` (interchangeable alternatives at that
+/// hop), preserving first-seen order.
+pub(crate) fn parse_hop_route(
+    tokens: &[String],
+) -> Result<Vec<proto::DtnRouteHop>, Box<dyn std::error::Error>> {
+    let mut order: Vec<u32> = Vec::new();
+    let mut hops: std::collections::HashMap<u32, Vec<Vec<u8>>> = std::collections::HashMap::new();
+    for token in tokens {
+        let (hop_str, id_str) = token
+            .split_once(':')
+            .ok_or_else(|| format!("route entry '{}' must be in hop:id form", token))?;
+        let hop: u32 = hop_str
+            .trim()
+            .parse()
+            .map_err(|_| format!("invalid hop number '{}'", hop_str))?;
+        let id = id_string_to_bin(id_str.trim().to_string())?;
+        if !hops.contains_key(&hop) {
+            order.push(hop);
+        }
+        hops.entry(hop).or_default().push(id);
+    }
+    Ok(order
+        .into_iter()
+        .map(|hop| proto::DtnRouteHop {
+            hop,
+            ids: hops.remove(&hop).unwrap_or_default(),
+        })
+        .collect())
+}
+
 impl RpcCommand for DtnSubcmd {
     fn encode_request(&self) -> Result<(Vec<u8>, Modules), Box<dyn std::error::Error>> {
         let proto_message = match self {
@@ -68,10 +101,7 @@ impl RpcCommand for DtnSubcmd {
                 max_handoffs,
             } => {
                 let receiver = id_string_to_bin(receiver_id.clone())?;
-                let custody = custody_route
-                    .iter()
-                    .map(|id| id_string_to_bin(id.clone()))
-                    .collect::<Result<Vec<_>, _>>()?;
+                let custody = parse_hop_route(custody_route)?;
                 let data = std::fs::read(data_file)?;
                 proto::Dtn {
                     message: Some(proto::dtn::Message::DtnSendRoutedRequest(
@@ -189,4 +219,43 @@ fn print_status(
         return Err(format!("{label}: {message}").into());
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Valid base58 PeerId strings (>= 52 chars, as id_string_to_bin requires).
+    const ID_A: &str = "12D3KooWHqFzG5fKSCGYTe6Mg3XEFgw8T9GSTsww79ptvaVfGp1r";
+    const ID_B: &str = "12D3KooWAgSafsscJgLgPfkgqd297QdMQ6jJxLueE6DDTygpGYRK";
+    const ID_C: &str = "12D3KooWCSFj52oARtgnyzVLbGsfTDBe3WB3pjy15Zrch9PPpoKc";
+
+    fn id() -> String {
+        ID_A.to_string()
+    }
+
+    #[test]
+    fn parse_hop_route_groups_same_hop_alternatives() {
+        let tokens = vec![
+            format!("1:{ID_A}"),
+            format!("2:{ID_B}"),
+            format!("2:{ID_C}"),
+        ];
+        let route = parse_hop_route(&tokens).expect("valid route");
+        assert_eq!(route.len(), 2);
+        assert_eq!(route[0].hop, 1);
+        assert_eq!(route[0].ids.len(), 1);
+        assert_eq!(route[1].hop, 2);
+        assert_eq!(route[1].ids.len(), 2); // b and c share hop 2
+    }
+
+    #[test]
+    fn parse_hop_route_rejects_missing_colon() {
+        assert!(parse_hop_route(&[id()]).is_err());
+    }
+
+    #[test]
+    fn parse_hop_route_rejects_bad_hop_number() {
+        assert!(parse_hop_route(&[format!("x:{}", id())]).is_err());
+    }
 }
