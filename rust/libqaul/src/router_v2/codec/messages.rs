@@ -13,7 +13,7 @@ use crate::router_v2::codec::{
 };
 
 /// User/Node mappings for the current node
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Mapping {
     /// Absolute 16-bit index being introduced; the receiver binds this
     /// to `target_id` in its mirror dictionary for the sender (§3.5,
