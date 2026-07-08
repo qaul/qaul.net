@@ -319,6 +319,11 @@ pub enum DtnSubcmd {
         #[arg(short = 'm', long, default_value = "0")]
         max_handoffs: u32,
     },
+    /// (DTN V2) manage sender-defined custody routes
+    Route {
+        #[command(subcommand)]
+        command: DtnRouteSubcmd,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -327,6 +332,29 @@ pub enum DtnCustodySubcmd {
     Enable,
     /// disable custody acceptance on this node
     Disable,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum DtnRouteSubcmd {
+    /// store a hop-numbered custody route towards a receiver
+    Set {
+        /// base58-encoded receiver user id
+        #[arg(short = 'r', long)]
+        receiver_id: String,
+        /// hop-numbered route as comma-separated `hop:id` tokens,
+        /// e.g. `1:ID1,2:ID2,2:ID3`. IDs sharing a hop number are
+        /// interchangeable alternatives at that hop.
+        #[arg(short = 'c', long = "custody", value_delimiter = ',')]
+        custody_route: Vec<String>,
+    },
+    /// list stored sender routes
+    List,
+    /// remove the stored route for a receiver
+    Remove {
+        /// base58-encoded receiver user id
+        #[arg(short = 'r', long)]
+        receiver_id: String,
+    },
 }
 
 #[derive(Args, Debug)]

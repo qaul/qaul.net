@@ -99,6 +99,31 @@ const V2_PER_SENDER_QUOTA: u64 = 10 * 1024 * 1024;
 /// if the recipient never becomes reachable.
 const V2_MAX_RETENTION_MS: u64 = 7 * 24 * 60 * 60 * 1000;
 
+/// Name of the per-account sled tree holding sender-defined custody
+/// routes: receiver PeerId bytes => bincode(SenderRouteEntry).
+const SENDER_ROUTES_TREE: &str = "sender-routes";
+
+/// One hop of a stored sender route (bincode form, independent of proto).
+#[derive(Serialize, Deserialize, Clone)]
+pub struct SenderRouteHop {
+    /// hop / priority number (>= 1)
+    pub hop: u32,
+    /// custodian PeerIds at this hop (interchangeable alternatives)
+    pub ids: Vec<Vec<u8>>,
+}
+
+/// A sender-defined hop-numbered custody route towards one receiver.
+///
+/// Stored locally in the sending account's DB and used when a
+/// DtnSendRoutedRequest arrives without an explicit custody route.
+#[derive(Serialize, Deserialize, Clone)]
+pub struct SenderRouteEntry {
+    /// hop-numbered route towards the receiver
+    pub route: Vec<SenderRouteHop>,
+    /// when the route was stored (ms since epoch)
+    pub created_at: u64,
+}
+
 /// Outcome of the stateless checks run on every incoming DtnRoutedV2
 /// before the custody acceptance pipeline.
 #[derive(Debug, PartialEq, Eq)]
@@ -824,6 +849,15 @@ impl Dtn {
                 Some(proto_rpc::dtn::Message::DtnSetCustodyEnabledRequest(req)) => {
                     Self::rpc_set_custody_enabled(state, my_user_id, req, request_id);
                 }
+                Some(proto_rpc::dtn::Message::DtnSetSenderRouteRequest(req)) => {
+                    Self::rpc_set_sender_route(state, my_user_id, req, request_id);
+                }
+                Some(proto_rpc::dtn::Message::DtnSenderRoutesRequest(_req)) => {
+                    Self::rpc_list_sender_routes(state, my_user_id, request_id);
+                }
+                Some(proto_rpc::dtn::Message::DtnRemoveSenderRouteRequest(req)) => {
+                    Self::rpc_remove_sender_route(state, my_user_id, req, request_id);
+                }
                 _ => {
                     log::error!("Unhandled Protobuf DTN RPC message");
                 }
@@ -865,8 +899,10 @@ impl Dtn {
             }
         };
 
-        // Convert the RPC hops into wire hops and validate.
-        let custody_route: Vec<proto::RouteHop> = req
+        // Convert the RPC hops into wire hops. When the caller gave no
+        // route, fall back to a stored sender route / the receiver's
+        // published route / the configured V1 storage node.
+        let requested: Vec<proto::RouteHop> = req
             .custody_route
             .iter()
             .map(|h| proto::RouteHop {
@@ -874,6 +910,20 @@ impl Dtn {
                 ids: h.ids.clone(),
             })
             .collect();
+        let custody_route = if requested.is_empty() {
+            match Self::resolve_custody_route(state, &my_user_id, &receiver_id) {
+                Some(route) => route,
+                None => {
+                    send_response(
+                        false,
+                        "no custody route given and none stored for this receiver".to_string(),
+                    );
+                    return;
+                }
+            }
+        } else {
+            requested
+        };
         let (custody_route, total_custodians) =
             match Self::validate_custody_route(&custody_route, &my_user_id, &receiver_id) {
                 Ok(v) => v,
@@ -1082,6 +1132,293 @@ impl Dtn {
         let mut sorted = route.to_vec();
         sorted.sort_by_key(|h| h.hop);
         Ok((sorted, total as u32))
+    }
+
+    /// Open the sender-routes tree of a local account.
+    fn sender_routes_tree(
+        state: &crate::QaulState,
+        account_id: PeerId,
+    ) -> Option<sled::Tree> {
+        let db = DataBase::get_user_db(state, account_id);
+        match db.open_tree(SENDER_ROUTES_TREE) {
+            Ok(tree) => Some(tree),
+            Err(e) => {
+                log::error!("Failed to open sender-routes tree: {}", e);
+                None
+            }
+        }
+    }
+
+    /// Drop sender/receiver entries from a hop route and remove any hop
+    /// left with no custodians.
+    fn filter_route_hops(
+        route: &[proto::RouteHop],
+        my_user_id: &PeerId,
+        receiver: &PeerId,
+    ) -> Vec<proto::RouteHop> {
+        route
+            .iter()
+            .filter_map(|h| {
+                let ids: Vec<Vec<u8>> = h
+                    .ids
+                    .iter()
+                    .filter(|bytes| match PeerId::from_bytes(bytes) {
+                        Ok(uid) => uid != *my_user_id && uid != *receiver,
+                        Err(_) => false,
+                    })
+                    .cloned()
+                    .collect();
+                if ids.is_empty() {
+                    None
+                } else {
+                    Some(proto::RouteHop { hop: h.hop, ids })
+                }
+            })
+            .collect()
+    }
+
+    /// Resolve the hop-numbered custody route to use towards `receiver`
+    /// when the caller did not provide one. Resolution order:
+    ///
+    /// 1. the sender-defined route stored for this receiver
+    /// 2. the receiver's published preferred custody route (a flat
+    ///    ordered list, mapped to sequential hops 1, 2, 3, …)
+    /// 3. the configured V1 storage node, as a single hop-1 custodian
+    ///
+    /// Entries naming the sender or the receiver are filtered out; a
+    /// source whose route becomes empty after filtering is skipped.
+    pub fn resolve_custody_route(
+        state: &crate::QaulState,
+        my_user_id: &PeerId,
+        receiver: &PeerId,
+    ) -> Option<Vec<proto::RouteHop>> {
+        // 1. sender-defined route
+        if let Some(tree) = Self::sender_routes_tree(state, *my_user_id) {
+            if let Ok(Some(entry_bytes)) = tree.get(receiver.to_bytes()) {
+                if let Ok(entry) = bincode::deserialize::<SenderRouteEntry>(&entry_bytes) {
+                    let route: Vec<proto::RouteHop> = entry
+                        .route
+                        .iter()
+                        .map(|h| proto::RouteHop {
+                            hop: h.hop,
+                            ids: h.ids.clone(),
+                        })
+                        .collect();
+                    let route = Self::filter_route_hops(&route, my_user_id, receiver);
+                    if !route.is_empty() {
+                        return Some(route);
+                    }
+                }
+            }
+        }
+
+        // 2. receiver's published preferred custody route (flat → hops)
+        {
+            let rs = state.get_router();
+            if let Some(user) = Users::get_user_snapshot(&rs, &QaulId::to_q8id(*receiver)) {
+                let route: Vec<proto::RouteHop> = user
+                    .preferred_custody_route
+                    .iter()
+                    .enumerate()
+                    .map(|(i, id)| proto::RouteHop {
+                        hop: (i as u32) + 1,
+                        ids: vec![id.clone()],
+                    })
+                    .collect();
+                let route = Self::filter_route_hops(&route, my_user_id, receiver);
+                if !route.is_empty() {
+                    return Some(route);
+                }
+            }
+        }
+
+        // 3. configured V1 storage node as a single hop-1 custodian
+        if let Some(storage_node) = Self::get_storage_user(state, my_user_id) {
+            if storage_node != *my_user_id && storage_node != *receiver {
+                return Some(vec![proto::RouteHop {
+                    hop: 1,
+                    ids: vec![storage_node.to_bytes()],
+                }]);
+            }
+        }
+
+        None
+    }
+
+    /// Handle DtnSetSenderRouteRequest RPC
+    fn rpc_set_sender_route(
+        state: &crate::QaulState,
+        my_user_id: PeerId,
+        req: proto_rpc::DtnSetSenderRouteRequest,
+        request_id: String,
+    ) {
+        let send_response = |status: bool, message: String| {
+            let proto_message = proto_rpc::Dtn {
+                message: Some(proto_rpc::dtn::Message::DtnSetSenderRouteResponse(
+                    proto_rpc::DtnSetSenderRouteResponse { status, message },
+                )),
+            };
+            Rpc::send_message(
+                state,
+                proto_message.encode_to_vec(),
+                crate::rpc::proto::Modules::Dtn as i32,
+                request_id.clone(),
+                Vec::new(),
+            );
+        };
+
+        let receiver_id = match PeerId::from_bytes(&req.receiver_id) {
+            Ok(id) => id,
+            Err(_) => {
+                send_response(false, "invalid receiver_id".to_string());
+                return;
+            }
+        };
+        let route: Vec<proto::RouteHop> = req
+            .custody_route
+            .iter()
+            .map(|h| proto::RouteHop {
+                hop: h.hop,
+                ids: h.ids.clone(),
+            })
+            .collect();
+        // Same validation as an explicit send-routed route.
+        let (route, _) = match Self::validate_custody_route(&route, &my_user_id, &receiver_id) {
+            Ok(v) => v,
+            Err(e) => {
+                send_response(false, e);
+                return;
+            }
+        };
+
+        let tree = match Self::sender_routes_tree(state, my_user_id) {
+            Some(t) => t,
+            None => {
+                send_response(false, "failed to open sender-routes storage".to_string());
+                return;
+            }
+        };
+        let entry = SenderRouteEntry {
+            route: route
+                .iter()
+                .map(|h| SenderRouteHop {
+                    hop: h.hop,
+                    ids: h.ids.clone(),
+                })
+                .collect(),
+            created_at: Timestamp::get_timestamp(),
+        };
+        let entry_bytes = match bincode::serialize(&entry) {
+            Ok(b) => b,
+            Err(e) => {
+                send_response(false, format!("failed to serialize route: {}", e));
+                return;
+            }
+        };
+        if let Err(e) = tree.insert(receiver_id.to_bytes(), entry_bytes) {
+            send_response(false, format!("failed to store route: {}", e));
+            return;
+        }
+        if let Err(e) = tree.flush() {
+            log::error!("sender-routes flush error: {}", e);
+        }
+        send_response(true, "".to_string());
+    }
+
+    /// Handle DtnSenderRoutesRequest RPC
+    fn rpc_list_sender_routes(
+        state: &crate::QaulState,
+        my_user_id: PeerId,
+        request_id: String,
+    ) {
+        let mut routes = Vec::new();
+        if let Some(tree) = Self::sender_routes_tree(state, my_user_id) {
+            for item in tree.iter() {
+                if let Ok((receiver_bytes, entry_bytes)) = item {
+                    if let Ok(entry) =
+                        bincode::deserialize::<SenderRouteEntry>(&entry_bytes)
+                    {
+                        routes.push(proto_rpc::DtnSenderRoute {
+                            receiver_id: receiver_bytes.to_vec(),
+                            custody_route: entry
+                                .route
+                                .iter()
+                                .map(|h| proto_rpc::DtnRouteHop {
+                                    hop: h.hop,
+                                    ids: h.ids.clone(),
+                                })
+                                .collect(),
+                            created_at: entry.created_at,
+                        });
+                    }
+                }
+            }
+        }
+
+        let proto_message = proto_rpc::Dtn {
+            message: Some(proto_rpc::dtn::Message::DtnSenderRoutesResponse(
+                proto_rpc::DtnSenderRoutesResponse { routes },
+            )),
+        };
+        Rpc::send_message(
+            state,
+            proto_message.encode_to_vec(),
+            crate::rpc::proto::Modules::Dtn as i32,
+            request_id,
+            Vec::new(),
+        );
+    }
+
+    /// Handle DtnRemoveSenderRouteRequest RPC
+    fn rpc_remove_sender_route(
+        state: &crate::QaulState,
+        my_user_id: PeerId,
+        req: proto_rpc::DtnRemoveSenderRouteRequest,
+        request_id: String,
+    ) {
+        let send_response = |status: bool, message: String| {
+            let proto_message = proto_rpc::Dtn {
+                message: Some(proto_rpc::dtn::Message::DtnRemoveSenderRouteResponse(
+                    proto_rpc::DtnRemoveSenderRouteResponse { status, message },
+                )),
+            };
+            Rpc::send_message(
+                state,
+                proto_message.encode_to_vec(),
+                crate::rpc::proto::Modules::Dtn as i32,
+                request_id.clone(),
+                Vec::new(),
+            );
+        };
+
+        let receiver_id = match PeerId::from_bytes(&req.receiver_id) {
+            Ok(id) => id,
+            Err(_) => {
+                send_response(false, "invalid receiver_id".to_string());
+                return;
+            }
+        };
+        let tree = match Self::sender_routes_tree(state, my_user_id) {
+            Some(t) => t,
+            None => {
+                send_response(false, "failed to open sender-routes storage".to_string());
+                return;
+            }
+        };
+        match tree.remove(receiver_id.to_bytes()) {
+            Ok(Some(_)) => {
+                if let Err(e) = tree.flush() {
+                    log::error!("sender-routes flush error: {}", e);
+                }
+                send_response(true, "".to_string());
+            }
+            Ok(None) => {
+                send_response(false, "no route stored for this receiver".to_string());
+            }
+            Err(e) => {
+                send_response(false, format!("failed to remove route: {}", e));
+            }
+        }
     }
 
     /// Where to forward a V2 message, and the hop number to stamp on it.
@@ -2912,5 +3249,236 @@ mod tests {
             "non-blocked sender's message must be stored"
         );
         assert_eq!(v2.message_count, 1);
+    }
+
+    // ── sender-defined hop-numbered routes ──
+
+    /// Register a user that publishes a (flat, ordered) preferred route.
+    fn register_user_with_route(
+        state: &crate::QaulState,
+        keys: &Keypair,
+        route: Vec<Vec<u8>>,
+    ) {
+        let rs = state.get_router();
+        crate::router::users::Users::add(
+            state,
+            &rs,
+            crate::router::users::User {
+                id: PeerId::from(keys.public()),
+                key: keys.public(),
+                name: "receiver".to_string(),
+                verified: false,
+                blocked: false,
+                capabilities: 0,
+                bio: String::new(),
+                avatar: vec![],
+                version: 0,
+                updated_at: 0,
+                signed_profile_bytes: vec![],
+                signed_profile_signature: vec![],
+                preferred_custody_route: route,
+            },
+        );
+    }
+
+    /// Store a hop-numbered sender route via the RPC handler.
+    fn set_sender_route(
+        state: &crate::QaulState,
+        account_id: PeerId,
+        receiver: &PeerId,
+        route: Vec<proto_rpc::DtnRouteHop>,
+    ) {
+        Dtn::rpc_set_sender_route(
+            state,
+            account_id,
+            proto_rpc::DtnSetSenderRouteRequest {
+                receiver_id: receiver.to_bytes(),
+                custody_route: route,
+            },
+            String::new(),
+        );
+    }
+
+    fn rpc_hop(hop: u32, ids: Vec<Vec<u8>>) -> proto_rpc::DtnRouteHop {
+        proto_rpc::DtnRouteHop { hop, ids }
+    }
+
+    /// Resolution order: stored sender route (hop-numbered) beats the
+    /// receiver's published route, which beats the V1 storage node.
+    #[test]
+    fn resolve_custody_route_resolution_order() {
+        let (state, account) = make_custody_state();
+        let receiver_keys = Keypair::generate_ed25519();
+        let receiver = PeerId::from(receiver_keys.public());
+
+        let sender_hop = random_peer();
+        let published_hop = random_peer();
+        let storage_node = random_peer();
+
+        register_user_with_route(&state, &receiver_keys, vec![published_hop.to_bytes()]);
+        match state.config.inner.write() {
+            Ok(mut cfg) => {
+                for user in cfg.user_accounts.iter_mut() {
+                    if user.id == account.id.to_string() {
+                        user.storage.users = vec![storage_node.to_base58()];
+                    }
+                }
+            }
+            Err(e) => panic!("config lock poisoned: {}", e),
+        }
+
+        // 1. stored sender route wins, hop structure preserved
+        set_sender_route(
+            &state,
+            account.id,
+            &receiver,
+            vec![rpc_hop(1, vec![sender_hop.to_bytes()])],
+        );
+        let resolved = Dtn::resolve_custody_route(&state, &account.id, &receiver)
+            .expect("route resolves");
+        assert_eq!(resolved.len(), 1);
+        assert_eq!(resolved[0].hop, 1);
+        assert_eq!(resolved[0].ids, vec![sender_hop.to_bytes()]);
+
+        // 2. without a stored route, the receiver's published route
+        //    (flat) maps to sequential hops
+        Dtn::rpc_remove_sender_route(
+            &state,
+            account.id,
+            proto_rpc::DtnRemoveSenderRouteRequest {
+                receiver_id: receiver.to_bytes(),
+            },
+            String::new(),
+        );
+        let resolved = Dtn::resolve_custody_route(&state, &account.id, &receiver)
+            .expect("published route resolves");
+        assert_eq!(resolved[0].hop, 1);
+        assert_eq!(resolved[0].ids, vec![published_hop.to_bytes()]);
+
+        // 3. unknown receiver -> configured storage node at hop 1
+        let stranger = random_peer();
+        let resolved = Dtn::resolve_custody_route(&state, &account.id, &stranger)
+            .expect("storage-node fallback");
+        assert_eq!(resolved[0].hop, 1);
+        assert_eq!(resolved[0].ids, vec![storage_node.to_bytes()]);
+
+        // 4. nothing available -> None
+        match state.config.inner.write() {
+            Ok(mut cfg) => {
+                for user in cfg.user_accounts.iter_mut() {
+                    if user.id == account.id.to_string() {
+                        user.storage.users = vec![];
+                    }
+                }
+            }
+            Err(e) => panic!("config lock poisoned: {}", e),
+        }
+        assert_eq!(
+            Dtn::resolve_custody_route(&state, &account.id, &stranger),
+            None
+        );
+    }
+
+    /// A stored route keeps same-hop alternatives through resolution.
+    #[test]
+    fn resolve_custody_route_preserves_same_hop_alternatives() {
+        let (state, account) = make_custody_state();
+        let receiver = random_peer();
+        let a = random_peer();
+        let b = random_peer();
+
+        set_sender_route(
+            &state,
+            account.id,
+            &receiver,
+            vec![rpc_hop(2, vec![a.to_bytes(), b.to_bytes()])],
+        );
+        let resolved = Dtn::resolve_custody_route(&state, &account.id, &receiver)
+            .expect("resolves");
+        assert_eq!(resolved.len(), 1);
+        assert_eq!(resolved[0].hop, 2);
+        assert_eq!(resolved[0].ids.len(), 2);
+    }
+
+    /// Filtering drops sender/receiver from a published route and skips
+    /// a hop left empty.
+    #[test]
+    fn resolve_custody_route_filters_published_route() {
+        let (state, account) = make_custody_state();
+        let receiver_keys = Keypair::generate_ed25519();
+        let receiver = PeerId::from(receiver_keys.public());
+        let good = random_peer();
+
+        register_user_with_route(
+            &state,
+            &receiver_keys,
+            vec![account.id.to_bytes(), receiver.to_bytes(), good.to_bytes()],
+        );
+        let resolved = Dtn::resolve_custody_route(&state, &account.id, &receiver)
+            .expect("resolves");
+        // only the good hop survives; sender/receiver hops dropped
+        let all_ids: Vec<Vec<u8>> =
+            resolved.iter().flat_map(|h| h.ids.clone()).collect();
+        assert_eq!(all_ids, vec![good.to_bytes()]);
+    }
+
+    /// The set handler rejects invalid routes (same rules as send-routed).
+    #[test]
+    fn set_sender_route_validates() {
+        let (state, account) = make_custody_state();
+        let receiver = random_peer();
+
+        set_sender_route(&state, account.id, &receiver, vec![]); // empty
+        set_sender_route(
+            &state,
+            account.id,
+            &receiver,
+            vec![rpc_hop(1, vec![receiver.to_bytes()])], // receiver in route
+        );
+
+        let tree = Dtn::sender_routes_tree(&state, account.id).expect("tree opens");
+        assert_eq!(tree.len(), 0, "invalid routes must not be stored");
+    }
+
+    /// send-routed with an empty route falls back to the stored route.
+    #[test]
+    fn rpc_send_routed_uses_stored_sender_route() {
+        let (state, account) = make_custody_state();
+        let receiver = random_peer();
+        let custodian = random_peer();
+
+        let mut table = HashMap::new();
+        make_online(&mut table, custodian);
+        state
+            .get_router()
+            .routing_table
+            .set(crate::router::table::RoutingTable { table });
+
+        set_sender_route(
+            &state,
+            account.id,
+            &receiver,
+            vec![rpc_hop(1, vec![custodian.to_bytes()])],
+        );
+
+        let (_keys, container_bytes, signature) = build_signed_container(&receiver);
+        Dtn::rpc_send_routed(
+            &state,
+            account.id,
+            proto_rpc::DtnSendRoutedRequest {
+                receiver_id: receiver.to_bytes(),
+                data: container_bytes,
+                custody_route: vec![], // fall back to the stored route
+                expiry_seconds: 0,
+                max_handoffs: 0,
+            },
+            String::new(),
+        );
+
+        let v2 = ok(state.services.dtn.v2.read(), "v2 read lock");
+        assert!(
+            ok(v2.db_ref_routed_v2.contains_key(&signature), "contains"),
+            "send-routed must succeed via the stored sender route"
+        );
     }
 }

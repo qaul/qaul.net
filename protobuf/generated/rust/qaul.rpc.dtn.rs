@@ -5,7 +5,7 @@ pub struct Dtn {
     /// message type
     #[prost(
         oneof = "dtn::Message",
-        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14"
+        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20"
     )]
     pub message: ::core::option::Option<dtn::Message>,
 }
@@ -56,6 +56,24 @@ pub mod dtn {
         /// dtn set custody enabled response
         #[prost(message, tag = "14")]
         DtnSetCustodyEnabledResponse(super::DtnSetCustodyEnabledResponse),
+        /// dtn set sender route request
+        #[prost(message, tag = "15")]
+        DtnSetSenderRouteRequest(super::DtnSetSenderRouteRequest),
+        /// dtn set sender route response
+        #[prost(message, tag = "16")]
+        DtnSetSenderRouteResponse(super::DtnSetSenderRouteResponse),
+        /// dtn sender routes request
+        #[prost(message, tag = "17")]
+        DtnSenderRoutesRequest(super::DtnSenderRoutesRequest),
+        /// dtn sender routes response
+        #[prost(message, tag = "18")]
+        DtnSenderRoutesResponse(super::DtnSenderRoutesResponse),
+        /// dtn remove sender route request
+        #[prost(message, tag = "19")]
+        DtnRemoveSenderRouteRequest(super::DtnRemoveSenderRouteRequest),
+        /// dtn remove sender route response
+        #[prost(message, tag = "20")]
+        DtnRemoveSenderRouteResponse(super::DtnRemoveSenderRouteResponse),
     }
 }
 /// Dtn State Request
@@ -200,6 +218,63 @@ pub struct DtnSetCustodyEnabledResponse {
     #[prost(bool, tag = "1")]
     pub status: bool,
     /// error or status message
+    #[prost(string, tag = "2")]
+    pub message: ::prost::alloc::string::String,
+}
+/// Store a sender-defined hop-numbered custody route for a receiver.
+///
+/// Used by DtnSendRoutedRequest when no explicit custody_route is given,
+/// and takes precedence over the receiver's published preferred route.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DtnSetSenderRouteRequest {
+    /// receiver user id (38 byte PeerID)
+    #[prost(bytes = "vec", tag = "1")]
+    pub receiver_id: ::prost::alloc::vec::Vec<u8>,
+    /// hop-numbered custody route
+    #[prost(message, repeated, tag = "2")]
+    pub custody_route: ::prost::alloc::vec::Vec<DtnRouteHop>,
+}
+/// Response to DtnSetSenderRouteRequest
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DtnSetSenderRouteResponse {
+    #[prost(bool, tag = "1")]
+    pub status: bool,
+    #[prost(string, tag = "2")]
+    pub message: ::prost::alloc::string::String,
+}
+/// Request the list of stored sender routes
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DtnSenderRoutesRequest {}
+/// A single stored sender route
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DtnSenderRoute {
+    /// receiver user id
+    #[prost(bytes = "vec", tag = "1")]
+    pub receiver_id: ::prost::alloc::vec::Vec<u8>,
+    /// hop-numbered custody route
+    #[prost(message, repeated, tag = "2")]
+    pub custody_route: ::prost::alloc::vec::Vec<DtnRouteHop>,
+    /// when the route was stored (ms since epoch)
+    #[prost(uint64, tag = "3")]
+    pub created_at: u64,
+}
+/// Response with all stored sender routes
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DtnSenderRoutesResponse {
+    #[prost(message, repeated, tag = "1")]
+    pub routes: ::prost::alloc::vec::Vec<DtnSenderRoute>,
+}
+/// Remove the stored sender route for a receiver
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DtnRemoveSenderRouteRequest {
+    #[prost(bytes = "vec", tag = "1")]
+    pub receiver_id: ::prost::alloc::vec::Vec<u8>,
+}
+/// Response to DtnRemoveSenderRouteRequest
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DtnRemoveSenderRouteResponse {
+    #[prost(bool, tag = "1")]
+    pub status: bool,
     #[prost(string, tag = "2")]
     pub message: ::prost::alloc::string::String,
 }

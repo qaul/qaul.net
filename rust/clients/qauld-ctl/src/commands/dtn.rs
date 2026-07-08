@@ -115,6 +115,31 @@ impl RpcCommand for DtnSubcmd {
                     )),
                 }
             }
+            DtnSubcmd::Route { command } => match command {
+                crate::cli::DtnRouteSubcmd::Set {
+                    receiver_id,
+                    custody_route,
+                } => proto::Dtn {
+                    message: Some(proto::dtn::Message::DtnSetSenderRouteRequest(
+                        proto::DtnSetSenderRouteRequest {
+                            receiver_id: id_string_to_bin(receiver_id.clone())?,
+                            custody_route: parse_hop_route(custody_route)?,
+                        },
+                    )),
+                },
+                crate::cli::DtnRouteSubcmd::List => proto::Dtn {
+                    message: Some(proto::dtn::Message::DtnSenderRoutesRequest(
+                        proto::DtnSenderRoutesRequest {},
+                    )),
+                },
+                crate::cli::DtnRouteSubcmd::Remove { receiver_id } => proto::Dtn {
+                    message: Some(proto::dtn::Message::DtnRemoveSenderRouteRequest(
+                        proto::DtnRemoveSenderRouteRequest {
+                            receiver_id: id_string_to_bin(receiver_id.clone())?,
+                        },
+                    )),
+                },
+            },
         };
 
         Ok((proto_message.encode_to_vec(), Modules::Dtn))
@@ -179,6 +204,57 @@ impl RpcCommand for DtnSubcmd {
                 }
                 Some(proto::dtn::Message::DtnSendRoutedResponse(r)) => {
                     print_status(json, "DTN Send Routed", r.status, &r.message)?;
+                }
+                Some(proto::dtn::Message::DtnSetSenderRouteResponse(r)) => {
+                    print_status(json, "DTN Set Sender Route", r.status, &r.message)?;
+                }
+                Some(proto::dtn::Message::DtnRemoveSenderRouteResponse(r)) => {
+                    print_status(json, "DTN Remove Sender Route", r.status, &r.message)?;
+                }
+                Some(proto::dtn::Message::DtnSenderRoutesResponse(r)) => {
+                    if json {
+                        let routes: Vec<serde_json::Value> = r
+                            .routes
+                            .iter()
+                            .map(|route| {
+                                let hops: Vec<serde_json::Value> = route
+                                    .custody_route
+                                    .iter()
+                                    .map(|h| {
+                                        json!({
+                                            "hop": h.hop,
+                                            "ids": h.ids.iter()
+                                                .map(|c| bs58::encode(c).into_string())
+                                                .collect::<Vec<_>>(),
+                                        })
+                                    })
+                                    .collect();
+                                json!({
+                                    "receiver_id": bs58::encode(&route.receiver_id).into_string(),
+                                    "custody_route": hops,
+                                    "created_at": route.created_at,
+                                })
+                            })
+                            .collect();
+                        println!("{}", serde_json::to_string_pretty(&routes)?);
+                    } else {
+                        println!("====================================");
+                        println!("DTN Sender Routes ({})", r.routes.len());
+                        for route in &r.routes {
+                            println!(
+                                "  -> {}",
+                                bs58::encode(&route.receiver_id).into_string()
+                            );
+                            for h in &route.custody_route {
+                                let ids: Vec<String> = h
+                                    .ids
+                                    .iter()
+                                    .map(|c| bs58::encode(c).into_string())
+                                    .collect();
+                                println!("      hop {}: {}", h.hop, ids.join(", "));
+                            }
+                        }
+                    }
                 }
                 other => {
                     return Err(format!("dtn: unexpected response variant: {other:?}").into());

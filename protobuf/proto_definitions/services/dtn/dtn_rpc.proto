@@ -33,6 +33,18 @@ message DTN {
         DtnSetCustodyEnabledRequest dtn_set_custody_enabled_request = 13;
         // dtn set custody enabled response
         DtnSetCustodyEnabledResponse dtn_set_custody_enabled_response = 14;
+        // dtn set sender route request
+        DtnSetSenderRouteRequest dtn_set_sender_route_request = 15;
+        // dtn set sender route response
+        DtnSetSenderRouteResponse dtn_set_sender_route_response = 16;
+        // dtn sender routes request
+        DtnSenderRoutesRequest dtn_sender_routes_request = 17;
+        // dtn sender routes response
+        DtnSenderRoutesResponse dtn_sender_routes_response = 18;
+        // dtn remove sender route request
+        DtnRemoveSenderRouteRequest dtn_remove_sender_route_request = 19;
+        // dtn remove sender route response
+        DtnRemoveSenderRouteResponse dtn_remove_sender_route_response = 20;
     }
 }
 
@@ -150,5 +162,51 @@ message DtnSetCustodyEnabledResponse {
     // whether the request was successful
     bool status = 1;
     // error or status message
+    string message = 2;
+}
+
+// Store a sender-defined hop-numbered custody route for a receiver.
+//
+// Used by DtnSendRoutedRequest when no explicit custody_route is given,
+// and takes precedence over the receiver's published preferred route.
+message DtnSetSenderRouteRequest {
+    // receiver user id (38 byte PeerID)
+    bytes receiver_id = 1;
+    // hop-numbered custody route
+    repeated DtnRouteHop custody_route = 2;
+}
+
+// Response to DtnSetSenderRouteRequest
+message DtnSetSenderRouteResponse {
+    bool status = 1;
+    string message = 2;
+}
+
+// Request the list of stored sender routes
+message DtnSenderRoutesRequest {}
+
+// A single stored sender route
+message DtnSenderRoute {
+    // receiver user id
+    bytes receiver_id = 1;
+    // hop-numbered custody route
+    repeated DtnRouteHop custody_route = 2;
+    // when the route was stored (ms since epoch)
+    uint64 created_at = 3;
+}
+
+// Response with all stored sender routes
+message DtnSenderRoutesResponse {
+    repeated DtnSenderRoute routes = 1;
+}
+
+// Remove the stored sender route for a receiver
+message DtnRemoveSenderRouteRequest {
+    bytes receiver_id = 1;
+}
+
+// Response to DtnRemoveSenderRouteRequest
+message DtnRemoveSenderRouteResponse {
+    bool status = 1;
     string message = 2;
 }
