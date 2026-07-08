@@ -112,7 +112,7 @@ object ConnectionPool {
             // 2hop = distinct peers reachable via a neighbour (triangle closers we'd skip while holding
             // the reserve slot); lists = how many neighbours have sent us their list.
             val twoHop = neighbourLists.values.flatten().toSet().size
-            sb.append("\nP0 2hop=$twoHop  reserveHold=${isReserveHoldActive()}  lists=${neighbourLists.size}")
+            sb.append("\n2hop=$twoHop  reserveHold=${isReserveHoldActive()}  lists=${neighbourLists.size}")
         }
         return sb.toString()
     }
