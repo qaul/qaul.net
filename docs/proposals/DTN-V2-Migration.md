@@ -28,8 +28,8 @@ The core claims:
 |---|---|---|
 | Wire | `EnvelopPayload.dtn` (bytes) | `EnvelopPayload.dtn_routed_v2` (`DtnRoutedV2`) |
 | Storage | `dtn-messages`, `dtn-messages-ids` | `dtn-routed-v2`, `dtn-sender-quotas` |
-| Routing | single configured storage node | ordered custody route, forwarded hop by hop |
-| Quota | node total only | node total + per-sender (priority-scaled) |
+| Routing | single configured storage node | hop-numbered custody route (same-hop IDs are alternatives), forwarded hop by hop |
+| Quota | node total only | node total + per-sender |
 | Expiry | none explicit | `expires_at` + 7-day local retention cap + handoff budget |
 | Opt-in | `storage.users` allow-list | `dtn_v2_custody_enabled` (default **false**) |
 
@@ -38,13 +38,15 @@ Prerequisites:
 1. **merged** — DTN V2 release hardening (retention cap, quota
    self-heal, blocked-sender rejection, recipient-first delivery,
    V2 state RPC) and the tier-0 delivery fixes.
-2. PR #907 `feat/identity-priority` — local priority levels,
-   priority-scaled per-sender quota (base configurable via
-   `dtn_v2_sender_quota_mb`).
-3. `feat/sender-routes` (stacked on #907) — sender-defined custody
-   routes with the resolution order: sender route → receiver's
-   published route → configured V1 storage node as single-custodian
-   route.
+2. PR #907 `feat/identity-priority` — hop-numbered custody routes.
+   "Priority" is a hop number on each route entry (not a per-identity
+   attribute): a route is a set of hops, and IDs sharing a hop number
+   are interchangeable alternatives at that stage. Wire `DtnRoutedV2`
+   carries `RouteHop { hop, ids }` + a `current_hop` cursor.
+3. `feat/sender-routes` (stacked on #907) — sender-defined hop-numbered
+   custody routes with the resolution order: stored sender route →
+   receiver's published route (flat list mapped to sequential hops) →
+   configured V1 storage node as a single hop-1 custodian.
 
 ## The DTN_V2 capability bit
 
@@ -95,7 +97,7 @@ counters.
 - The messaging DTN fallback (recipient offline) switches from
   `send_dtn_message()` (V1) to building a `DtnRoutedV2` with
   `resolve_custody_route()`. The V1 storage node keeps working through
-  resolution step ③ — as a single-custodian V2 route — so operators
+  resolution step ③ — as a single hop-1 custodian V2 route — so operators
   don't need to reconfigure anything.
 - V1 *sending* is removed; V1 *receiving* stays (nodes still drain
   entries deposited by not-yet-upgraded peers).
