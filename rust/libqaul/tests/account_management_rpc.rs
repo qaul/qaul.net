@@ -22,6 +22,7 @@ use libqaul::node::account_management::{proto as am, AccountManagement};
 use libqaul::node::user_accounts::UserAccounts;
 use libqaul::rpc::authentication::{proto as auth, Authentication};
 use libqaul::storage::database::DataBase;
+use libqaul::storage::Storage;
 use libqaul::{Libqaul, QaulState, RequestContext};
 
 /// Start a fresh libqaul instance in a temp dir (no event loop).
@@ -159,6 +160,55 @@ fn account_and_auth_rpc_dispatch_roundtrips() {
         UserAccounts::get_by_id(state, id).is_some(),
         "account should be back after restore"
     );
+
+    // --- regression: restore must reclaim an orphan directory ---
+    //
+    // Reproduces the delete/lazy-reopen soft-lock: `delete_account` removes the
+    // user directory, but a background storage access (any `get_user_db`
+    // caller) then re-creates an empty `user.db` for the just-deleted account.
+    // The account is gone from config/in-memory state (no login option), yet
+    // the orphan directory previously made restore hard-fail with "User
+    // directory already exists", permanently blocking re-import.
+    {
+        // Delete again (restore above re-added the account).
+        let del = am_dispatch(
+            state,
+            id.to_bytes(),
+            am::account_management::Message::DeleteAccountRequest(am::DeleteAccountRequest {}),
+        );
+        assert!(matches!(del, am::account_management::Message::Ack(_)));
+        assert!(UserAccounts::get_by_id(state, id).is_none());
+
+        // Simulate the race via the real mechanism: a lazy DB open re-creates
+        // the directory the delete had removed. Then release the handle, as an
+        // app restart would (nothing holds the sled lock at restore time).
+        let _ = DataBase::get_user_db(state, id);
+        DataBase::close_user_db(state, id);
+        let orphan_dir = Storage::get_account_path(state, id);
+        assert!(
+            orphan_dir.exists(),
+            "orphan directory should exist to reproduce the soft-lock"
+        );
+
+        // Restore must reclaim the orphan and succeed, not error out.
+        let restored = am_dispatch(
+            state,
+            Vec::new(),
+            am::account_management::Message::RestoreAccountRequest(am::RestoreAccountRequest {
+                archive_path: archive_path.clone(),
+            }),
+        );
+        match restored {
+            am::account_management::Message::RestoreAccountResponse(r) => {
+                assert_eq!(r.user_id_base58, id.to_base58());
+            }
+            other => panic!("orphan directory soft-locked restore: got {other:?}"),
+        }
+        assert!(
+            UserAccounts::get_by_id(state, id).is_some(),
+            "account should be back after reclaiming the orphan and restoring"
+        );
+    }
 
     // --- uniform error channel: malformed caller identity -> error variant ---
     let err = am_dispatch(

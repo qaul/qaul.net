@@ -182,13 +182,32 @@ impl AccountManagement {
             ));
         }
 
+        // The account is not registered on this node (verified by the
+        // `is_account` check above), so a directory here is an orphan left by
+        // an incomplete teardown — e.g. a background storage access lazily
+        // re-created an empty `user.db` (via `DataBase::get_user_db`) after
+        // `delete_account` had already removed the real directory. Reclaim it
+        // instead of hard-failing; erroring here would permanently soft-lock
+        // re-import of an account the node otherwise has no trace of.
         let dest_user_dir = Storage::get_account_path(state, user_id);
         if dest_user_dir.exists() {
-            let _ = fs::remove_dir_all(&temp_dir);
-            return Err(format!(
-                "User directory already exists: {}",
+            log::warn!(
+                "Reclaiming orphan directory for unregistered account before restore: {}",
                 dest_user_dir.display()
-            ));
+            );
+            // Release any lingering sled handle so the on-disk directory and
+            // its cache entry are gone before the restored data is laid down
+            // (and so step 8's lazy open reopens the restored DB, not a stale
+            // handle to the removed inode).
+            DataBase::close_user_db(state, user_id);
+            if let Err(e) = fs::remove_dir_all(&dest_user_dir) {
+                let _ = fs::remove_dir_all(&temp_dir);
+                return Err(format!(
+                    "Failed to reclaim orphan user directory {}: {}",
+                    dest_user_dir.display(),
+                    e
+                ));
+            }
         }
 
         // 5. Move user directory from temp to storage
