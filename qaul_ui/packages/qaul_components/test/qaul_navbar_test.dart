@@ -1,3 +1,4 @@
+import 'package:badges/badges.dart' as badges;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qaul_components/qaul_components.dart';
@@ -34,9 +35,18 @@ void main() {
     });
 
     test('returns correct paths for all tab types with icons', () {
-      expect(navBarTabIconPath(TabType.public, false), 'assets/icons/public-outlined.svg');
-      expect(navBarTabIconPath(TabType.users, false), 'assets/icons/people-outlined.svg');
-      expect(navBarTabIconPath(TabType.network, false), 'assets/icons/network-outlined.svg');
+      expect(
+        navBarTabIconPath(TabType.public, false),
+        'assets/icons/public-outlined.svg',
+      );
+      expect(
+        navBarTabIconPath(TabType.users, false),
+        'assets/icons/people-outlined.svg',
+      );
+      expect(
+        navBarTabIconPath(TabType.network, false),
+        'assets/icons/network-outlined.svg',
+      );
     });
   });
 
@@ -46,7 +56,12 @@ void main() {
       final (selected, icon, active) = navBarColors(theme);
       expect(selected, const Color(0xFF333333));
       expect(icon, theme.iconTheme.color ?? Colors.white);
-      expect(active, theme.navigationBarTheme.surfaceTintColor ?? theme.iconTheme.color ?? Colors.white);
+      expect(
+        active,
+        theme.navigationBarTheme.surfaceTintColor ??
+            theme.iconTheme.color ??
+            Colors.white,
+      );
     });
 
     test('returns light theme colors for Brightness.light', () {
@@ -67,11 +82,46 @@ void main() {
     });
 
     test('throws for account tab', () {
-      expect(
-        () => navBarTabIconSize(TabType.account),
-        throwsStateError,
-      );
+      expect(() => navBarTabIconSize(TabType.account), throwsStateError);
     });
   });
 
+  group('QaulNavBar notification badge', () {
+    testWidgets('uses 16px badge positioned 4px from bottom/end', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: QaulNavBar(
+              vertical: false,
+              selectedTab: TabType.chat,
+              onTabSelected: (_) {},
+              onOverflowSelected: (_) {},
+              overflowMenuLabels: const {},
+              tabTooltips: const {
+                TabType.account: 'Account',
+                TabType.public: 'Public',
+                TabType.users: 'Users',
+                TabType.chat: 'Chat',
+                TabType.network: 'Network',
+              },
+              chatNotificationCount: 5,
+            ),
+          ),
+        ),
+      );
+
+      final badge = tester.widget<badges.Badge>(find.byType(badges.Badge));
+      expect(badge.position?.bottom, 4);
+      expect(badge.position?.end, 4);
+      expect(badge.badgeStyle.padding, EdgeInsets.zero);
+
+      final badgeContent = badge.badgeContent;
+      expect(badgeContent, isA<SizedBox>());
+      final box = badgeContent as SizedBox;
+      expect(box.width, 16);
+      expect(box.height, 16);
+    });
+  });
 }

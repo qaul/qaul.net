@@ -20,12 +20,12 @@ void main() {
   final localUserId = Uint8List.fromList('localUser'.codeUnits);
 
   ChatRoom makeRoom({required int unreadCount}) => ChatRoom(
-        conversationId: roomId,
-        name: 'Test Room',
-        unreadCount: unreadCount,
-        lastMessagePreview: const TextMessageContent('hello'),
-        lastMessageSenderId: otherUserId,
-      );
+    conversationId: roomId,
+    name: 'Test Room',
+    unreadCount: unreadCount,
+    lastMessagePreview: const TextMessageContent('hello'),
+    lastMessageSenderId: otherUserId,
+  );
 
   late ProviderContainer container;
   late ChatNotificationController controller;
@@ -41,12 +41,14 @@ void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
 
-    container = ProviderContainer(overrides: [
-      defaultUserProvider.overrideWith(
-        (_) => User(name: 'Local', id: localUserId),
-      ),
-      qaulWorkerProvider.overrideWithValue(_StubWorker()),
-    ]);
+    container = ProviderContainer(
+      overrides: [
+        defaultUserProvider.overrideWith(
+          (_) => User(name: 'Local', id: localUserId),
+        ),
+        qaulWorkerProvider.overrideWithValue(_StubWorker()),
+      ],
+    );
 
     controller = container.read(chatNotificationControllerProvider);
     await controller.initialize();
@@ -55,8 +57,7 @@ void main() {
   tearDown(() => container.dispose());
 
   group('ChatNotificationController cache vs unreadCount', () {
-    test(
-        'after reading messages (unreadCount drops to 0), '
+    test('after reading messages (unreadCount drops to 0), '
         'a new message (unreadCount back to 1) is detected', () {
       // 1. New room arrives with unreadCount: 1 — should be detected.
       var entries = controller.entriesToBeProcessed([makeRoom(unreadCount: 1)]);
@@ -93,26 +94,42 @@ void main() {
 
       // One new message.
       entries = controller.entriesToBeProcessed([makeRoom(unreadCount: 1)]);
-      expect(entries, isNotEmpty,
-          reason: 'cache updated to 0, so 1 > 0 is a new message');
+      expect(
+        entries,
+        isNotEmpty,
+        reason: 'cache updated to 0, so 1 > 0 is a new message',
+      );
     });
 
-    test('monotonically increasing unreadCount still works (regression guard)',
-        () {
-      var entries = controller.entriesToBeProcessed([makeRoom(unreadCount: 1)]);
-      expect(entries, isNotEmpty);
-      for (final e in entries) {
-        controller.process(e);
-      }
+    test(
+      'monotonically increasing unreadCount still works (regression guard)',
+      () {
+        var entries = controller.entriesToBeProcessed([
+          makeRoom(unreadCount: 1),
+        ]);
+        expect(entries, isNotEmpty);
+        for (final e in entries) {
+          controller.process(e);
+        }
 
-      entries = controller.entriesToBeProcessed([makeRoom(unreadCount: 2)]);
-      expect(entries, isNotEmpty);
-      for (final e in entries) {
-        controller.process(e);
-      }
+        entries = controller.entriesToBeProcessed([makeRoom(unreadCount: 2)]);
+        expect(entries, isNotEmpty);
+        for (final e in entries) {
+          controller.process(e);
+        }
 
-      entries = controller.entriesToBeProcessed([makeRoom(unreadCount: 3)]);
-      expect(entries, isNotEmpty);
+        entries = controller.entriesToBeProcessed([makeRoom(unreadCount: 3)]);
+        expect(entries, isNotEmpty);
+      },
+    );
+
+    test('notification counter increment follows unreadCount delta', () {
+      final firstRoom = makeRoom(unreadCount: 2);
+      expect(controller.notificationCountIncrement(firstRoom), 2);
+      controller.process(firstRoom);
+
+      final updatedRoom = makeRoom(unreadCount: 5);
+      expect(controller.notificationCountIncrement(updatedRoom), 3);
     });
 
     test('same unreadCount on consecutive calls does not re-trigger', () {
@@ -122,12 +139,14 @@ void main() {
       }
 
       entries = controller.entriesToBeProcessed([makeRoom(unreadCount: 1)]);
-      expect(entries, isEmpty,
-          reason: 'same unreadCount should not re-trigger');
+      expect(
+        entries,
+        isEmpty,
+        reason: 'same unreadCount should not re-trigger',
+      );
     });
 
-    test(
-        'unreadCount drop is persisted so a restart '
+    test('unreadCount drop is persisted so a restart '
         'does not revert to stale high watermark', () async {
       // 1. First message arrives — detected and processed.
       final room = makeRoom(unreadCount: 1);
@@ -147,19 +166,24 @@ void main() {
       // 3. Simulate app restart: new container, fresh controller loading
       //    from the same SharedPreferences.
       container.dispose();
-      container = ProviderContainer(overrides: [
-        defaultUserProvider.overrideWith(
-          (_) => User(name: 'Local', id: localUserId),
-        ),
-        qaulWorkerProvider.overrideWithValue(_StubWorker()),
-      ]);
-      final freshController =
-          container.read(chatNotificationControllerProvider);
+      container = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith(
+            (_) => User(name: 'Local', id: localUserId),
+          ),
+          qaulWorkerProvider.overrideWithValue(_StubWorker()),
+        ],
+      );
+      final freshController = container.read(
+        chatNotificationControllerProvider,
+      );
       await freshController.initialize();
 
       // 4. New message arrives (unreadCount: 1). The fresh controller must
       //    detect it, not silently swallow it due to a stale cached count.
-      entries = freshController.entriesToBeProcessed([makeRoom(unreadCount: 1)]);
+      entries = freshController.entriesToBeProcessed([
+        makeRoom(unreadCount: 1),
+      ]);
       expect(
         entries,
         isNotEmpty,
@@ -175,8 +199,10 @@ void main() {
 /// Only [getAllChatRooms] is called during [initialize].
 class _StubWorker implements LibqaulWorker {
   @override
-  Future<PaginatedChatRooms?> getAllChatRooms({int? offset, int? limit}) async =>
-      PaginatedChatRooms(rooms: []);
+  Future<PaginatedChatRooms?> getAllChatRooms({
+    int? offset,
+    int? limit,
+  }) async => PaginatedChatRooms(rooms: []);
 
   @override
   dynamic noSuchMethod(Invocation invocation) =>

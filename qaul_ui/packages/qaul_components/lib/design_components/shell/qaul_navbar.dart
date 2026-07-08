@@ -103,7 +103,8 @@ const double _kNavBarMenuVisualSplashRadius = 8.0;
 /// Circular tap/hover target for the overflow menu ([InkWell] inside [SizedBox]).
 const double _kNavBarMenuHitDiameter = 40.0;
 const double _kNavBarBadgeFontSize = 10.0;
-const double _kNavBarBadgePositionOffset = 8.0;
+const double _kNavBarBadgeSize = 16.0;
+const double _kNavBarBadgePositionOffset = 4.0;
 
 // iOS SafeArea reports the full notch/Dynamic Island inset, but the vertical
 // rail only needs a fraction of that because its content is already inset by
@@ -763,13 +764,21 @@ class _NavBarItem extends StatelessWidget {
         // Let taps pass through the count pill to the tab [InkWell] below.
         ignorePointer: true,
         showBadge: true,
-        badgeStyle: const BadgeStyle(badgeColor: Colors.lightBlue),
-        badgeContent: Text(
-          '$badgeCount',
-          style: const TextStyle(
-            fontSize: _kNavBarBadgeFontSize,
-            color: Colors.white,
-            fontWeight: FontWeight.w800,
+        badgeStyle: const BadgeStyle(
+          badgeColor: Colors.lightBlue,
+          padding: EdgeInsets.zero,
+        ),
+        badgeContent: SizedBox.square(
+          dimension: _kNavBarBadgeSize,
+          child: Center(
+            child: Text(
+              '$badgeCount',
+              style: const TextStyle(
+                fontSize: _kNavBarBadgeFontSize,
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ),
         ),
         position: BadgePosition.bottomEnd(
