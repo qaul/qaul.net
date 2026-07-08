@@ -141,6 +141,8 @@ pub struct RouterV2State {
     /// this node's sequence number
     pub seq_num: RwLock<SeqNum>,
     pub tx_outbound: mpsc::UnboundedSender<OutboundMsg>,
+    /// pairs of entry to batched into the next 10s outbound
+    pub relay_queue: RwLock<HashSet<(Space, u16)>>,
 }
 
 impl RouterV2State {
@@ -159,6 +161,7 @@ impl RouterV2State {
             reintroduction_tracker: RwLock::new(ReintroductionTracker::new()),
             seq_num: RwLock::new(SeqNum::new()),
             tx_outbound: tx,
+            relay_queue: RwLock::new(HashSet::new()),
         };
         (state, rx)
     }
@@ -638,8 +641,7 @@ impl RouterV2State {
             .unwrap()
             .set(space, own_idx, new_entry);
 
-        // TODO: next phase
-
+        self.relay_queue.write().unwrap().insert((space, own_idx));
         Ok(())
     }
 
