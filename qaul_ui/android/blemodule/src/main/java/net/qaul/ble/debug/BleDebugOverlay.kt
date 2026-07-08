@@ -156,7 +156,8 @@ object BleDebugOverlay {
         panel = LinearLayout(app).apply {
             orientation = LinearLayout.VERTICAL
             addView(header)
-            addView(codedButton)
+            // Long-range is now automatic so the manual Coded on/off button is hidden. Uncomment below to bring it back for testing.
+            // addView(codedButton)
             addView(scroll)
         }
 
