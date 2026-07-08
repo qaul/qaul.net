@@ -15,4 +15,5 @@ interface ConnectionEventListener {
     fun onNotificationsDisabled(device: BluetoothDevice, characteristic: BluetoothGattCharacteristic) {}
     fun onNotificationReceived(device: BluetoothDevice, characteristic: BluetoothGattCharacteristic, value: ByteArray) {}
     fun onMtuChanged(device: BluetoothDevice, newMtu: Int) {}
+    fun onPhyUpdated(device: BluetoothDevice, txPhy: Int, rxPhy: Int) {}
 }
