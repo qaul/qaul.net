@@ -38,39 +38,40 @@ bool _linksByMinute(
       b.qaulBubbleBaseWithoutLayout!,
     );
 
+bool _isMediaTextBoundary(
+  ChatTimelinePresentationRow a,
+  ChatTimelinePresentationRow b,
+) => a.isText != b.isText;
+
+bool _sameVisualStreakSameDay(
+  ChatTimelinePresentationRow a,
+  ChatTimelinePresentationRow b,
+) => !_isMediaTextBoundary(a, b) && _sameStreakSameDay(a, b);
+
 Map<String, MessagePresentationComputation> computeChatMessagePresentation({
   required List<ChatTimelinePresentationRow> ascendingTimeline,
   required ChatRenderMode layoutMode,
 }) {
-  final textRows = ascendingTimeline
-      .where(
-        (r) => r.isText && r.qaulBubbleBaseWithoutLayout != null,
-      )
-      .toList();
-
   MessagePresentationComputation buildTextComputation(
     ChatTimelinePresentationRow row,
-    int textIndexInSequence,
     int timelineIndex,
   ) {
     final bubble = row.qaulBubbleBaseWithoutLayout!;
-    final prevTimeline =
-        timelineIndex > 0 ? ascendingTimeline[timelineIndex - 1] : null;
+    final prevTimeline = timelineIndex > 0
+        ? ascendingTimeline[timelineIndex - 1]
+        : null;
     final nextTimeline = timelineIndex < ascendingTimeline.length - 1
         ? ascendingTimeline[timelineIndex + 1]
         : null;
 
-    final prevTextRow = textIndexInSequence > 0
-        ? textRows[textIndexInSequence - 1]
-        : null;
-    final nextTextRow = textIndexInSequence < textRows.length - 1
-        ? textRows[textIndexInSequence + 1]
-        : null;
-
     final linksToPrevious =
-        prevTextRow != null && _linksByMinute(prevTextRow, row);
+        prevTimeline != null &&
+        prevTimeline.isText &&
+        _linksByMinute(prevTimeline, row);
     final linksToNext =
-        nextTextRow != null && _linksByMinute(row, nextTextRow);
+        nextTimeline != null &&
+        nextTimeline.isText &&
+        _linksByMinute(row, nextTimeline);
 
     final isPrimary = row.isOutgoing;
 
@@ -81,8 +82,10 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
     final double topSpacing;
     if (prevTimeline == null) {
       topSpacing = 0;
+    } else if (_isMediaTextBoundary(prevTimeline, row)) {
+      topSpacing = kChatMediaTextGap;
     } else if (layoutMode == ChatRenderMode.group) {
-      topSpacing = _sameStreakSameDay(prevTimeline, row)
+      topSpacing = _sameVisualStreakSameDay(prevTimeline, row)
           ? kChatBubbleLinkedGap
           : kChatBubbleSeparatedGap;
     } else if (linksToPrevious) {
@@ -98,15 +101,15 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
 
     if (layoutMode == ChatRenderMode.group && row.isGroupIncomingEligible) {
       showSenderName =
-          prevTimeline == null || !_sameStreakSameDay(prevTimeline, row);
+          prevTimeline == null || !_sameVisualStreakSameDay(prevTimeline, row);
 
       final continuesAfter =
-          nextTimeline != null && _sameStreakSameDay(row, nextTimeline);
+          nextTimeline != null && _sameVisualStreakSameDay(row, nextTimeline);
       showAvatar = !continuesAfter;
     }
 
     final nonTextClustersWithNext =
-        nextTimeline != null && _sameStreakSameDay(row, nextTimeline);
+        nextTimeline != null && _sameVisualStreakSameDay(row, nextTimeline);
 
     final meta = MessagePresentationMeta(
       linksToPrevious: linksToPrevious,
@@ -138,8 +141,9 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
     ChatTimelinePresentationRow row,
     int timelineIndex,
   ) {
-    final prevTimeline =
-        timelineIndex > 0 ? ascendingTimeline[timelineIndex - 1] : null;
+    final prevTimeline = timelineIndex > 0
+        ? ascendingTimeline[timelineIndex - 1]
+        : null;
     final nextTimeline = timelineIndex < ascendingTimeline.length - 1
         ? ascendingTimeline[timelineIndex + 1]
         : null;
@@ -157,14 +161,19 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
       showAvatar = !continuesAfter;
 
       if (prevTimeline != null) {
-        topSpacing = _sameStreakSameDay(prevTimeline, row)
+        topSpacing = _isMediaTextBoundary(prevTimeline, row)
+            ? kChatMediaTextGap
+            : _sameVisualStreakSameDay(prevTimeline, row)
             ? kChatBubbleLinkedGap
             : kChatBubbleSeparatedGap;
       }
+    } else if (prevTimeline != null &&
+        _isMediaTextBoundary(prevTimeline, row)) {
+      topSpacing = kChatMediaTextGap;
     }
 
     final nonTextClustersWithNext =
-        nextTimeline != null && _sameStreakSameDay(row, nextTimeline);
+        nextTimeline != null && _sameVisualStreakSameDay(row, nextTimeline);
 
     final meta = MessagePresentationMeta(
       linksToPrevious: false,
@@ -185,14 +194,11 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
   }
 
   final map = <String, MessagePresentationComputation>{};
-  var textSeen = 0;
 
   for (var i = 0; i < ascendingTimeline.length; i++) {
     final row = ascendingTimeline[i];
     if (row.isText && row.qaulBubbleBaseWithoutLayout != null) {
-      map[row.messageIdBase58] =
-          buildTextComputation(row, textSeen, i);
-      textSeen++;
+      map[row.messageIdBase58] = buildTextComputation(row, i);
     } else {
       map[row.messageIdBase58] = emptyNonText(row, i);
     }

@@ -422,6 +422,8 @@ const double kChatBubbleLinkedGap = 4.0;
 
 const double kChatBubbleSeparatedGap = 12.0;
 
+const double kChatMediaTextGap = 8.0;
+
 const double kGroupChatBubbleSeparatedGap = 4.0;
 
 const TextStyle kGroupSenderNameTextStyle = TextStyle(
