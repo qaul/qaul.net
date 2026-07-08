@@ -6,12 +6,12 @@
 use futures::{stream::StreamExt, SinkExt};
 use futures_ticker::Ticker;
 use prost::Message;
+use std::{collections::HashMap, path::PathBuf, sync::Arc};
+
+#[cfg(unix)]
 use std::{
-    collections::HashMap,
     fs::{self, Permissions},
     os::unix::fs::PermissionsExt,
-    path::PathBuf,
-    sync::Arc,
 };
 use tokio::{
     io::{AsyncRead, AsyncWrite},
@@ -149,7 +149,7 @@ fn spawn_rpc_poller(
 /// Starts the qauld socket server.
 /// Runs infinitely until a shutdown signal is received.
 pub async fn start_server(
-    socket_dir: PathBuf,
+    #[cfg_attr(windows, allow(unused_variables))] socket_dir: PathBuf,
     instance: Arc<Libqaul>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let client_request_register: Arc<Mutex<HashMap<String, Sender<Bytes>>>> =

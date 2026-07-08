@@ -1,3 +1,10 @@
+# iOS deployment target. cargo-lipo re-invokes cargo with `env -i`, stripping any
+# IPHONEOS_DEPLOYMENT_TARGET exported in the shell. This [env] table is read by the
+# child cargo itself, so it survives. Without it, the default (iOS 10.0) is too old
+# for the Xcode 26 SDK, whose C objects reference ___chkstk_darwin (link error).
+[env]
+IPHONEOS_DEPLOYMENT_TARGET = "13.0"
+
 [target.armv7-unknown-linux-gnueabihf]
 linker = "arm-linux-gnueabihf-gcc"
 
