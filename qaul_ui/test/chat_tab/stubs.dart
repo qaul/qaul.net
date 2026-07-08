@@ -98,7 +98,9 @@ class StubLibqaulWorker implements LibqaulWorker {
 
     return PaginatedUsers(
       users: page.users
-          .where((user) => user.name.toLowerCase().contains(query.toLowerCase()))
+          .where(
+            (user) => user.name.toLowerCase().contains(query.toLowerCase()),
+          )
           .toList(),
       pagination: page.pagination,
     );
@@ -289,6 +291,9 @@ class NullChatNotificationController implements ChatNotificationController {
   LocalNotification? process(ChatRoom value) {
     throw UnimplementedError();
   }
+
+  @override
+  int notificationCountIncrement(ChatRoom value) => 1;
 
   @override
   Ref get ref => throw UnimplementedError();

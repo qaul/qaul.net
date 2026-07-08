@@ -16,15 +16,16 @@ class _NoopWorker implements LibqaulWorker {
   final Ref ref;
 
   @override
-  Future<PaginatedChatRooms?> getAllChatRooms({int? offset, int? limit}) async =>
-      PaginatedChatRooms(rooms: []);
+  Future<PaginatedChatRooms?> getAllChatRooms({
+    int? offset,
+    int? limit,
+  }) async => PaginatedChatRooms(rooms: []);
 
   @override
   Future<PaginatedGroupInvites?> getGroupInvitesReceived({
     int? offset,
     int? limit,
-  }) async =>
-      PaginatedGroupInvites(invites: []);
+  }) async => PaginatedGroupInvites(invites: []);
 
   @override
   Future<bool> get initialized => Future.value(true);
@@ -58,7 +59,7 @@ class _NoopChatNotificationController implements ChatNotificationController {
 
   @override
   MapEntry<dynamic, void Function(List<ChatRoom>?, List<ChatRoom>)>
-      get strategy => const MapEntry(null, _noopStrategy);
+  get strategy => const MapEntry(null, _noopStrategy);
 
   static void _noopStrategy(List<ChatRoom>? _, List<ChatRoom> _) {}
 
@@ -81,6 +82,9 @@ class _NoopChatNotificationController implements ChatNotificationController {
   LocalNotification? process(ChatRoom value) => null;
 
   @override
+  int notificationCountIncrement(ChatRoom value) => 1;
+
+  @override
   void removeNotifications() {}
 
   @override
@@ -90,10 +94,14 @@ class _NoopChatNotificationController implements ChatNotificationController {
 class _DirectRoomNotifier extends ChatRoomListNotifier {
   @override
   List<ChatRoom> build() {
-    final defaultUser =
-        User(name: 'Default', id: Uint8List.fromList('default-user'.codeUnits));
-    final otherUser =
-        User(name: 'Peer', id: Uint8List.fromList('peer-user'.codeUnits));
+    final defaultUser = User(
+      name: 'Default',
+      id: Uint8List.fromList('default-user'.codeUnits),
+    );
+    final otherUser = User(
+      name: 'Peer',
+      id: Uint8List.fromList('peer-user'.codeUnits),
+    );
     return [
       ChatRoom(
         conversationId: Uint8List.fromList('dm-room'.codeUnits),
@@ -111,15 +119,15 @@ class _DirectRoomNotifier extends ChatRoomListNotifier {
 class _GroupRoomWithUnknownEventNotifier extends ChatRoomListNotifier {
   @override
   List<ChatRoom> build() {
-    final defaultUser =
-        User(name: 'Default', id: Uint8List.fromList('default-user'.codeUnits));
+    final defaultUser = User(
+      name: 'Default',
+      id: Uint8List.fromList('default-user'.codeUnits),
+    );
     return [
       ChatRoom(
         conversationId: Uint8List.fromList('group-room'.codeUnits),
         isDirectChat: false,
-        members: [
-          ChatRoomUser(defaultUser, joinedAt: DateTime(2024)),
-        ],
+        members: [ChatRoomUser(defaultUser, joinedAt: DateTime(2024))],
         name: 'Group',
         lastMessagePreview: GroupEventContent(
           userId: Uint8List.fromList('unknown-user'.codeUnits),
@@ -135,40 +143,51 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  testWidgets('direct room renders using member fallback when users store is empty',
-      (tester) async {
-    final defaultUser =
-        User(name: 'Default', id: Uint8List.fromList('default-user'.codeUnits));
+  testWidgets(
+    'direct room renders using member fallback when users store is empty',
+    (tester) async {
+      final defaultUser = User(
+        name: 'Default',
+        id: Uint8List.fromList('default-user'.codeUnits),
+      );
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          defaultUserProvider.overrideWith((_) => defaultUser),
-          chatNotificationControllerProvider
-              .overrideWithValue(_NoopChatNotificationController()),
-          chatRoomsProvider.overrideWith(_DirectRoomNotifier.new),
-          qaulWorkerProvider.overrideWith((ref) => _NoopWorker(ref)),
-        ],
-        child: materialAppWithLocalizations(BaseTab.chat()),
-      ),
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            defaultUserProvider.overrideWith((_) => defaultUser),
+            chatNotificationControllerProvider.overrideWithValue(
+              _NoopChatNotificationController(),
+            ),
+            chatRoomsProvider.overrideWith(_DirectRoomNotifier.new),
+            qaulWorkerProvider.overrideWith((ref) => _NoopWorker(ref)),
+          ],
+          child: materialAppWithLocalizations(BaseTab.chat()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Peer'), findsOneWidget);
+    },
+  );
+
+  testWidgets('group event with missing user shows unknown fallback', (
+    tester,
+  ) async {
+    final defaultUser = User(
+      name: 'Default',
+      id: Uint8List.fromList('default-user'.codeUnits),
     );
-    await tester.pumpAndSettle();
-
-    expect(find.text('Peer'), findsOneWidget);
-  });
-
-  testWidgets('group event with missing user shows unknown fallback',
-      (tester) async {
-    final defaultUser =
-        User(name: 'Default', id: Uint8List.fromList('default-user'.codeUnits));
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           defaultUserProvider.overrideWith((_) => defaultUser),
-          chatNotificationControllerProvider
-              .overrideWithValue(_NoopChatNotificationController()),
-          chatRoomsProvider.overrideWith(_GroupRoomWithUnknownEventNotifier.new),
+          chatNotificationControllerProvider.overrideWithValue(
+            _NoopChatNotificationController(),
+          ),
+          chatRoomsProvider.overrideWith(
+            _GroupRoomWithUnknownEventNotifier.new,
+          ),
           qaulWorkerProvider.overrideWith((ref) => _NoopWorker(ref)),
         ],
         child: materialAppWithLocalizations(BaseTab.chat()),
