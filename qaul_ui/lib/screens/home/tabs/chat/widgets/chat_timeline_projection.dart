@@ -73,6 +73,7 @@ ChatTimelineProjection? buildChatTimelineProjection({
 }) {
   final domainMessages = room.messages?.sorted();
   if (domainMessages == null) return null;
+  final chronologicalMessages = domainMessages.reversed.toList(growable: false);
 
   // Only group rooms disambiguate colliding display names.
   final duplicateNotifications = renderMode == ChatRenderMode.group
@@ -96,20 +97,10 @@ ChatTimelineProjection? buildChatTimelineProjection({
 
   for (final m in domainMessages) {
     final author = resolveAuthor(m, l10n);
-    final internal = m.toInternalMessage(
-      author,
-      ref,
-      l10n: l10n,
-      room: room,
-    );
+    final internal = m.toInternalMessage(author, ref, l10n: l10n, room: room);
 
     if (m.content is TextMessageContent && internal is types.TextMessage) {
-      internalMessages.add(
-        internal.copyWith(
-          status: null,
-          showStatus: false,
-        ),
-      );
+      internalMessages.add(internal.copyWith(status: null, showStatus: false));
       textMessages.add(m);
     } else {
       internalMessages.add(internal);
@@ -137,9 +128,9 @@ ChatTimelineProjection? buildChatTimelineProjection({
         status: m.status == MessageState.sent
             ? MessageStatus.sent
             : (m.status == MessageState.confirmed ||
-                    m.status == MessageState.confirmedByAll
-                ? MessageStatus.read
-                : MessageStatus.notSent),
+                      m.status == MessageState.confirmedByAll
+                  ? MessageStatus.read
+                  : MessageStatus.notSent),
         messageType: isMe ? MessageType.primary : MessageType.secondary,
         edges: const [],
         senderIdBase58: m.senderIdBase58,
@@ -154,15 +145,15 @@ ChatTimelineProjection? buildChatTimelineProjection({
   }
 
   final ascendingRows = <ChatTimelinePresentationRow>[
-    for (final m in domainMessages)
+    for (final m in chronologicalMessages)
       ChatTimelinePresentationRow(
         messageIdBase58: m.messageIdBase58,
         senderIdBase58: m.senderIdBase58,
         sentAt: m.sentAt,
         isText: m.content is TextMessageContent,
         isOutgoing: m.senderId.equals(signedInUser.id),
-        qaulBubbleBaseWithoutLayout:
-            bubbleBaseById[m.messageIdBase58]?.copyWith(edges: const []),
+        qaulBubbleBaseWithoutLayout: bubbleBaseById[m.messageIdBase58]
+            ?.copyWith(edges: const []),
       ),
   ];
 
@@ -174,7 +165,8 @@ ChatTimelineProjection? buildChatTimelineProjection({
   final presentations = <String, MessagePresentation>{};
   for (final m in domainMessages) {
     final slice = computed[m.messageIdBase58]!;
-    final incomingGroup = renderMode == ChatRenderMode.group && !slice.isPrimary;
+    final incomingGroup =
+        renderMode == ChatRenderMode.group && !slice.isPrimary;
 
     QaulGroupMessageSender? groupSender;
     if (incomingGroup) {

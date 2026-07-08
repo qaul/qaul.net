@@ -65,7 +65,7 @@ class ChatMessageRenderer {
     return DirectTextMessageItem(
       presentation: presentation,
       clock: clock,
-      horizontalGutter: mode == ChatRenderMode.direct,
+      horizontalGutter: true,
     );
   }
 
@@ -101,7 +101,7 @@ class DirectTextMessageItem extends StatelessWidget {
 
   /// When true, applies a 16px gutter on the trailing edge for primary
   /// (outgoing) bubbles and on the leading edge for secondary (incoming).
-  /// Set to false for group-mode outgoing bubbles, which render flush.
+  /// Set to false only for layouts that intentionally render flush.
   final bool horizontalGutter;
 
   @override
@@ -184,7 +184,7 @@ class GroupMessageShell extends StatelessWidget {
         ? null
         : colorGenerationStrategy(sender!.idBase58);
     return Padding(
-      padding: EdgeInsetsDirectional.only(top: marginTop),
+      padding: EdgeInsetsDirectional.only(top: marginTop, start: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
