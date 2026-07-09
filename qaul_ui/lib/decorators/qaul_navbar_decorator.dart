@@ -119,6 +119,7 @@ class _ConnectedNavBarState extends ConsumerState<_ConnectedNavBar> {
           handleNavBarOverflowSelected(context, option),
       selectedTab: currentTab,
       onTabSelected: (tab) {
+        FocusManager.instance.primaryFocus?.unfocus();
         tabController.goToTab(tab);
         if (tab == TabType.public) {
           publicController.removeNotifications();

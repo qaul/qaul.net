@@ -103,6 +103,14 @@ class _PublicTabViewState extends ConsumerState<_PublicTabView> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(homeScreenControllerProvider, (previous, next) {
+      if (previous != TabType.public || next == TabType.public) return;
+      FocusManager.instance.primaryFocus?.unfocus();
+      widget.disablePageViewScroll.value = false;
+      final navigator = Navigator.of(context);
+      if (navigator.canPop()) navigator.pop();
+    });
+
     ref.listen(feedMessageStoreProvider, (_, _) {
       final pagination = ref.read(feedMessageStoreProvider.notifier).pagination;
       if (pagination != null && !pagination.hasMore) {
