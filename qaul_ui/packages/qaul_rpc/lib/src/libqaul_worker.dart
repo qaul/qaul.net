@@ -243,6 +243,8 @@ class LibqaulWorker {
         return null;
       },
     );
+    // Future-based fetch: publish our own state (see `_setActiveUser`).
+    if (result != null) _ref.read(nodeInfoProvider.notifier).state = result;
     return result;
   }
 
@@ -689,6 +691,10 @@ class LibqaulWorker {
         return null;
       },
     );
+    // Future-based fetch: publish our own state (see `_setActiveUser`).
+    if (result != null) {
+      _ref.read(dtnConfigurationProvider.notifier).state = result;
+    }
     return result;
   }
 

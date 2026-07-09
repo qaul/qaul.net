@@ -91,14 +91,22 @@ class _StorageUsersList extends HookConsumerWidget {
       worker.getDTNConfiguration();
     }, []);
 
+    // The daemon answers a rejected add/remove with `status: false`, which
+    // DTNTranslator surfaces as an error on the returned future.
     final removeUser = useCallback((Uint8List userId) async {
       final worker = ref.read(qaulWorkerProvider);
-      worker.removeDTNUser(userId);
+      try {
+        await worker.removeDTNUser(userId);
+      } on ArgumentError catch (_) {}
+      await worker.getDTNConfiguration();
     }, []);
 
     final addUser = useCallback((Uint8List userId) async {
       final worker = ref.read(qaulWorkerProvider);
-      worker.addDTNUser(userId);
+      try {
+        await worker.addDTNUser(userId);
+      } on ArgumentError catch (_) {}
+      await worker.getDTNConfiguration();
     }, []);
 
     useMemoized(() async {
@@ -159,6 +167,9 @@ class _AddUserDialog extends HookConsumerWidget {
           itemCount: eligibleUsers.length,
           itemBuilder: (context, i) => QaulListTile.user(
             eligibleUsers[i],
+            // The whole row selects the user; tapping the avatar must not
+            // navigate away to the user's details screen instead.
+            avatarTapRoutesToDetailsScreen: false,
             onTap: () => Navigator.pop(context, eligibleUsers[i]),
           ),
         );
