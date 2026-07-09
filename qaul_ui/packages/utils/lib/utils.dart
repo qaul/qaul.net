@@ -34,7 +34,7 @@ Color colorGenerationStrategy(String first) {
 /// Given a string containing values separated by space (" "), yields a string of length 2
 /// containing the first letter of the first and last word, respectively, in uppercase.
 ///
-/// If the provided string has no spaces, returns its first two letters - also uppercase.
+/// If the provided string has no spaces, returns its first grapheme - also uppercase.
 ///
 /// Note: Filters out emojis, so as not to cause malformed UTF-16 issues. See more here:
 /// * https://github.com/dart-lang/sdk/issues/35798
@@ -56,9 +56,12 @@ String initials(String name) {
   }
   if (name.contains(' ')) {
     final ws = name.split(' ').where((e) => e.isNotEmpty).toList();
-    if (ws.length > 1) return '${ws.first[0]}${ws.last[0]}'.toUpperCase();
+    if (ws.length > 1) {
+      return '${ws.first.characters.first}${ws.last.characters.first}'
+          .toUpperCase();
+    }
   }
-  return name.substring(0, 1).toUpperCase();
+  return name.characters.first.toUpperCase();
 }
 
 /// If [clock] is provided, timestamp is in relation to [clock] (Should only be useful for testing).
