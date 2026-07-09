@@ -275,11 +275,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     final l10n = AppLocalizations.of(context)!;
     final directPeer = _directChatPeer(room);
+    final chatBackgroundColor = QaulColorSheet(
+      Theme.of(context).brightness,
+    ).background;
     _chatRenderMode = resolveChatRenderMode(room);
 
     return Scaffold(
+      backgroundColor: chatBackgroundColor,
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
+        backgroundColor: chatBackgroundColor,
         leading: IconButtonFactory(onPressed: closeChat),
         title: Row(
           mainAxisSize: MainAxisSize.min,
@@ -555,7 +560,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 directPeer?.idBase58 ?? otherUser?.idBase58 ?? room.idBase58,
               ),
             ],
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            backgroundColor: chatBackgroundColor,
             messageInsetsVertical: 0,
             messageInsetsHorizontal: 0,
             dateDividerTextStyle: const TextStyle(
