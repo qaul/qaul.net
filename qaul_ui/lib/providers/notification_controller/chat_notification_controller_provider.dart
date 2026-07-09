@@ -23,6 +23,7 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
   @override
   Future<void> initialize() async {
     await super.initialize();
+    ref.listen(groupInvitesProvider, _executeGroupInvites);
     if (preferences.containsKey(cacheKey)) {
       _chats.addAll(
         preferences.getStringList(cacheKey)!.map((e) {
@@ -34,6 +35,24 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
     _log.config(
       'Initialized:\n\t· User: ${localUser.name}\n\t· Cached chats: $_chats',
     );
+  }
+
+  void _executeGroupInvites(
+    List<GroupInvite>? previous,
+    List<GroupInvite> current,
+  ) {
+    final previousInvites = previous ?? const <GroupInvite>[];
+    final newInvites = current.where((invite) {
+      return !previousInvites.contains(invite);
+    }).toList();
+    if (newInvites.isEmpty ||
+        currentVisibleHomeTab == TabType.chat ||
+        !UserPrefsHelper.instance.chatNotificationsEnabled) {
+      return;
+    }
+
+    newNotificationCount.value =
+        (newNotificationCount.value ?? 0) + newInvites.length;
   }
 
   @override

@@ -16,6 +16,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   final roomId = Uint8List.fromList('room1'.codeUnits);
+  final inviteRoomId = Uint8List.fromList('inviteRoom'.codeUnits);
   final otherUserId = Uint8List.fromList('otherUser'.codeUnits);
   final localUserId = Uint8List.fromList('localUser'.codeUnits);
 
@@ -25,6 +26,16 @@ void main() {
     unreadCount: unreadCount,
     lastMessagePreview: const TextMessageContent('hello'),
     lastMessageSenderId: otherUserId,
+  );
+
+  GroupInvite makeInvite() => GroupInvite(
+    senderId: otherUserId,
+    receivedAt: DateTime(2026, 1, 1),
+    groupDetails: ChatRoom(
+      conversationId: inviteRoomId,
+      name: 'Invited Room',
+      isDirectChat: false,
+    ),
   );
 
   late ProviderContainer container;
@@ -191,6 +202,22 @@ void main() {
             'after restart, cache should reflect unreadCount 0 '
             'so the 0→1 transition is detected',
       );
+    });
+
+    test('new group invite increments notification counter', () {
+      expect(controller.newNotificationCount.value, isNull);
+
+      container.read(groupInvitesProvider.notifier).add(makeInvite());
+
+      expect(controller.newNotificationCount.value, 1);
+    });
+
+    test('new group invite does not increment counter on chat tab', () {
+      container.read(homeScreenControllerProvider.notifier).goToTab(TabType.chat);
+
+      container.read(groupInvitesProvider.notifier).add(makeInvite());
+
+      expect(controller.newNotificationCount.value, isNull);
     });
   });
 }
