@@ -102,7 +102,7 @@ fn account_and_auth_rpc_dispatch_roundtrips() {
         "export archive should exist at {archive_path}"
     );
 
-    // --- auth: session-status (not authenticated) ---
+    // --- auth: session-status (creating an account signs you in) ---
     let status = auth_dispatch(
         state,
         id.to_bytes(), // caller identity (RequestContext)
@@ -110,12 +110,12 @@ fn account_and_auth_rpc_dispatch_roundtrips() {
     );
     match status {
         auth::auth_rpc::Message::SessionStatusResponse(r) => {
-            assert!(!r.authenticated, "fresh account should not be authenticated")
+            assert!(r.authenticated, "a freshly created account is authenticated")
         }
         _ => panic!("expected SessionStatusResponse"),
     }
 
-    // --- auth: logout (no live session -> still acknowledged) ---
+    // --- auth: logout ---
     let logout = auth_dispatch(
         state,
         id.to_bytes(), // caller identity (RequestContext)
@@ -125,6 +125,19 @@ fn account_and_auth_rpc_dispatch_roundtrips() {
         matches!(logout, auth::auth_rpc::Message::Ack(_)),
         "logout should acknowledge"
     );
+
+    // --- auth: session-status (logout ended the session) ---
+    let status = auth_dispatch(
+        state,
+        id.to_bytes(), // caller identity (RequestContext)
+        auth::auth_rpc::Message::SessionStatusRequest(auth::SessionStatusRequest {}),
+    );
+    match status {
+        auth::auth_rpc::Message::SessionStatusResponse(r) => {
+            assert!(!r.authenticated, "logout should end the session")
+        }
+        _ => panic!("expected SessionStatusResponse"),
+    }
 
     // --- delete ---
     let del = am_dispatch(

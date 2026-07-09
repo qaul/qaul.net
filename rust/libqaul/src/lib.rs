@@ -331,6 +331,9 @@ impl Libqaul {
             qaul_state.filelogger.enable(config.debug.log);
         }
 
+        // Bring back the sessions of accounts that were left logged in
+        rpc::authentication::Authentication::restore_sessions(&qaul_state);
+
         // Now that real node identity and user accounts are loaded, register
         // local users in the router's connection table.
         {

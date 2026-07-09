@@ -231,6 +231,11 @@ impl AccountManagement {
         // 7. Add to in-memory user accounts
         Self::add_to_user_accounts(state, user_id, keys.clone(), &exported_account);
 
+        // 7b. Mirror the restored `session_token` into the in-memory session
+        //     table, so a restored account is signed in immediately rather than
+        //     only after the next restart.
+        Authentication::restore_sessions(state);
+
         // 8. Open user's sled DB (lazy init)
         DataBase::get_user_db(state, user_id);
 

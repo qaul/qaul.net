@@ -225,8 +225,10 @@ impl UserAccounts {
         };
 
         // save it to state
-        let mut users = state.user_accounts.inner.write().unwrap();
-        users.users.push(user.clone());
+        {
+            let mut users = state.user_accounts.inner.write().unwrap();
+            users.users.push(user.clone());
+        }
 
         // save it to config
         {
@@ -242,6 +244,9 @@ impl UserAccounts {
             });
         }
         Configuration::save(state);
+
+        // Creating an account signs you in
+        crate::rpc::authentication::Authentication::mark_authenticated(state, id);
 
         // register the account into the router via the canonical local-user
         // path: builds a signed profile stamped with this binary's advertised

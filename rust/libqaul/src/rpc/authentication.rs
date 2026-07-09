@@ -9,11 +9,17 @@
 
 use crate::node::user_accounts::UserAccounts;
 use crate::rpc::Rpc;
+use crate::storage::configuration::Configuration;
 use crate::utilities::timestamp::Timestamp;
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use libp2p::PeerId;
+use rand::Rng;
 use std::collections::BTreeMap;
 use std::sync::RwLock;
+
+/// Lifetime of an authenticated session, in seconds.
+/// Effectively unbounded (~100 years)
+const SESSION_TTL_SECS: u64 = 86400 * 365 * 100;
 
 /// Protobuf message definitions for authentication RPC
 pub use qaul_proto::qaul_rpc_authentication as proto;
@@ -157,11 +163,63 @@ impl Authentication {
         }
     }
 
-    /// Mark a user as authenticated with a session
-    fn mark_authenticated(state: &crate::QaulState, user_id: PeerId) {
+    /// Generate an opaque session token.
+    fn generate_session_token() -> String {
+        let bytes: [u8; 32] = rand::rng().random();
+        bs58::encode(bytes).into_string()
+    }
+
+    /// Write `token` into the config entry of `user_id` and persist it to disk.
+    ///
+    /// `None` clears the session. Accounts that are not in the config are
+    /// ignored — `logout` runs during account deletion, once the entry is gone.
+    fn persist_session_token(state: &crate::QaulState, user_id: PeerId, token: Option<String>) {
+        {
+            let mut config = Configuration::get_mut(state);
+            let id = user_id.to_string();
+            match config.user_accounts.iter_mut().find(|u| u.id == id) {
+                Some(account) => account.session_token = token,
+                None => return,
+            }
+        }
+        Configuration::save(state);
+    }
+
+    /// Mark a user as authenticated, in memory and on disk.
+    ///
+    /// The persisted token is what `restore_sessions` reads back on the next
+    /// boot, so the client can auto-login instead of showing the landing page.
+    pub fn mark_authenticated(state: &crate::QaulState, user_id: PeerId) {
+        {
+            let mut auth = state.auth.authenticated_users.write().unwrap();
+            let expires_at = Timestamp::get_timestamp() + SESSION_TTL_SECS;
+            auth.insert(user_id.to_bytes(), expires_at);
+        }
+        Self::persist_session_token(state, user_id, Some(Self::generate_session_token()));
+    }
+
+    /// Rebuild the in-memory session table from the persisted config.
+    ///
+    /// Called by `Libqaul::new` once user accounts are loaded, and again after
+    /// a restore. Without it the session table starts empty on every boot and
+    /// every launch reports the user as signed out.
+    pub fn restore_sessions(state: &crate::QaulState) {
+        let restored: Vec<PeerId> = {
+            let config = Configuration::get(state);
+            config
+                .user_accounts
+                .iter()
+                .filter(|account| account.session_token.is_some())
+                .filter_map(|account| account.id.parse::<PeerId>().ok())
+                .collect()
+        };
+
+        let expires_at = Timestamp::get_timestamp() + SESSION_TTL_SECS;
         let mut auth = state.auth.authenticated_users.write().unwrap();
-        let expires_at = Timestamp::get_timestamp() + (86400 * 365 * 100);
-        auth.insert(user_id.to_bytes(), expires_at);
+        for id in restored {
+            log::trace!("restored authenticated session for {:?}", id);
+            auth.insert(id.to_bytes(), expires_at);
+        }
     }
 
     /// Check if a user has an active authenticated session
@@ -172,10 +230,13 @@ impl Authentication {
         auth.contains_key(&user_id.to_bytes())
     }
 
-    /// Logout a user by removing their authenticated session
+    /// Logout a user by dropping their authenticated session, in memory and on disk.
     pub fn logout(state: &crate::QaulState, user_id: PeerId) {
-        let mut auth = state.auth.authenticated_users.write().unwrap();
-        auth.remove(&user_id.to_bytes());
+        {
+            let mut auth = state.auth.authenticated_users.write().unwrap();
+            auth.remove(&user_id.to_bytes());
+        }
+        Self::persist_session_token(state, user_id, None);
     }
 
     /// Process incoming authentication RPC messages.
