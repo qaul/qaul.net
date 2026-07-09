@@ -37,6 +37,7 @@ import '../../../../../../stores/stores.dart';
 import '../../../../../providers/providers.dart';
 import '../../../../../utils.dart';
 import '../../../../../widgets/widgets.dart';
+import '../../../user_details_screen.dart';
 import '../../tab.dart';
 import 'conditional/conditional.dart';
 
@@ -208,6 +209,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
+  void _openUserDetails(User user) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => UserDetailsScreen(user: user)),
+    );
+  }
+
   void _scheduleUpdateCurrentOpenChat() =>
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.read(currentOpenChatRoom.notifier).state = room;
@@ -276,9 +284,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            (_chatRenderMode == ChatRenderMode.group)
+            _chatRenderMode == ChatRenderMode.group
                 ? QaulAvatar.groupSmall()
-                : QaulAvatar.small(user: directPeer),
+                : Semantics(
+                    button: directPeer != null,
+                    label: directPeer?.name,
+                    child: InkResponse(
+                      onTap: directPeer == null
+                          ? null
+                          : () => _openUserDetails(directPeer),
+                      radius: 24,
+                      child: QaulAvatar.small(user: directPeer),
+                    ),
+                  ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
