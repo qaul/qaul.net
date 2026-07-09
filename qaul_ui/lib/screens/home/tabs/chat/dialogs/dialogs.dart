@@ -166,53 +166,58 @@ class _InviteUsersToGroupDialogState
     return SearchUserDecorator(
       title: AppLocalizations.of(context)!.inviteUser,
       builder: (_, users) {
-        return Stack(
-          children: [
-            ListView.separated(
-              padding: const EdgeInsets.fromLTRB(8, 8, 8, 40),
-              itemCount: users.length,
-              separatorBuilder: (_, _) => const Divider(height: 12.0),
-              itemBuilder: (context, i) {
-                final usr = users[i];
-                return QaulListTile.user(
-                  usr,
-                  onTap: () {
-                    if (selected.contains(usr)) {
-                      setState(() => selected.remove(usr));
-                      return;
-                    }
-                    setState(() => selected.add(usr));
-                  },
-                  trailingIcon: Checkbox(
-                    value: selected.contains(usr),
-                    onChanged: (ok) {
-                      if (ok ?? false) {
-                        setState(() => selected.add(usr));
+        return SafeArea(
+          top: false,
+          left: false,
+          right: false,
+          child: Stack(
+            children: [
+              ListView.separated(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 72),
+                itemCount: users.length,
+                separatorBuilder: (_, _) => const Divider(height: 12.0),
+                itemBuilder: (context, i) {
+                  final usr = users[i];
+                  return QaulListTile.user(
+                    usr,
+                    onTap: () {
+                      if (selected.contains(usr)) {
+                        setState(() => selected.remove(usr));
                         return;
                       }
-                      setState(() => selected.remove(usr));
+                      setState(() => selected.add(usr));
                     },
-                  ),
-                );
-              },
-            ),
-            Positioned.directional(
-              textDirection: Directionality.of(context),
-              end: 12,
-              bottom: 8,
-              child: QaulButton(
-                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                onPressed: () async {
-                  final worker = ref.read(qaulWorkerProvider);
-                  for (final user in selected) {
-                    worker.inviteUserToGroup(user, widget.room);
-                  }
-                  Navigator.pop(context);
+                    trailingIcon: Checkbox(
+                      value: selected.contains(usr),
+                      onChanged: (ok) {
+                        if (ok ?? false) {
+                          setState(() => selected.add(usr));
+                          return;
+                        }
+                        setState(() => selected.remove(usr));
+                      },
+                    ),
+                  );
                 },
-                label: l10n.invite,
               ),
-            ),
-          ],
+              Positioned.directional(
+                textDirection: Directionality.of(context),
+                end: 12,
+                bottom: 8,
+                child: QaulButton(
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  onPressed: () async {
+                    final worker = ref.read(qaulWorkerProvider);
+                    for (final user in selected) {
+                      worker.inviteUserToGroup(user, widget.room);
+                    }
+                    Navigator.pop(context);
+                  },
+                  label: l10n.invite,
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
