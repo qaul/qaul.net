@@ -42,11 +42,6 @@ Color colorGenerationStrategy(String first) {
 /// * https://github.com/flutter/flutter/issues/43302
 String initials(String name) {
   assert(name.isNotEmpty, 'name should have at least one character');
-  if (hasEmojis(name)) {
-    final emoji = retrieveFirstEmoji(name);
-    if (emoji != null) return emoji;
-    name = removeEmoji(name);
-  }
   if (name.replaceAll(' ', '').isEmpty) {
     throw ArgumentError.value(
       name,
@@ -61,7 +56,19 @@ String initials(String name) {
           .toUpperCase();
     }
   }
+  if (hasEmojis(name)) {
+    final emoji = _firstEmojiGrapheme(name);
+    if (emoji != null) return emoji;
+    name = removeEmoji(name);
+  }
   return name.characters.first.toUpperCase();
+}
+
+String? _firstEmojiGrapheme(String text) {
+  for (final grapheme in text.characters) {
+    if (hasEmojis(grapheme)) return grapheme;
+  }
+  return null;
 }
 
 /// If [clock] is provided, timestamp is in relation to [clock] (Should only be useful for testing).
