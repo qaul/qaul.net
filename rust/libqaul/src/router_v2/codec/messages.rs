@@ -243,7 +243,7 @@ impl IndexDump {
 }
 
 /// an entry in a node's manifest
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct ManifestEntry {
     /// the delegating user's 8-byte ID
     pub user_id: [u8; 8],
