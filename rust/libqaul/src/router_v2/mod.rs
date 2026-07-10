@@ -20,20 +20,13 @@ use tokio::sync::mpsc;
 use tracing::{debug, error, warn};
 
 use crate::{
-    connections::ConnectionModule,
-    router_v2::{
+    connections::ConnectionModule, router_v2::{
         codec::{
-            messages::{Entry, Mapping, RoutingUpdate},
-            CodecError, Header, RoutingMessage,
-        },
-        index::{
+            CodecError, Header, RoutingMessage, messages::{Entry, Mapping, RoutingUpdate},
+        }, index::{
             IndexAllocator, IndexDictionary, MirrorIndexDictionary, ReintroductionTracker, Space,
-        },
-        metric::hop_cost,
-        seq::{is_fresher_u32, Acceptance, SeqNum},
-        table::{Node, Nodes, RoutingEntry, RoutingTable, TargetRef, User, Users},
-    },
-    storage::configuration::RoutingV2Options,
+        }, manifest::Manifest, metric::hop_cost, seq::{Acceptance, SeqNum, is_fresher_u32}, table::{Node, Nodes, RoutingEntry, RoutingTable, TargetRef, User, Users},
+    }, storage::configuration::RoutingV2Options,
 };
 
 pub mod codec;
@@ -43,6 +36,7 @@ pub mod metric;
 pub mod propagation;
 pub mod seq;
 pub mod table;
+pub mod manifest;
 
 #[derive(Debug, thiserror::Error)]
 pub enum RoutingV2Error {
@@ -143,6 +137,8 @@ pub struct RouterV2State {
     pub tx_outbound: mpsc::UnboundedSender<OutboundMsg>,
     /// pairs of entry to batched into the next 10s outbound
     pub relay_queue: RwLock<HashSet<(Space, u16)>>,
+    /// the manifest for this node
+    pub manifest: RwLock<Manifest>
 }
 
 impl RouterV2State {
@@ -162,6 +158,7 @@ impl RouterV2State {
             seq_num: RwLock::new(SeqNum::new()),
             tx_outbound: tx,
             relay_queue: RwLock::new(HashSet::new()),
+            manifest: RwLock::new(Manifest::new())
         };
         (state, rx)
     }

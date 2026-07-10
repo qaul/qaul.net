@@ -32,6 +32,10 @@ impl Multikey {
         id.copy_from_slice(&hash[..8]);
         id
     }
+
+    pub fn verify(&self,  msg: &[u8], sig: &[u8]) -> bool {
+        self.0.verify(msg, sig)
+    }
 }
 
 #[derive(Debug)]
