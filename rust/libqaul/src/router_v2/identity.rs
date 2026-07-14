@@ -7,7 +7,7 @@ use sha2::{Digest, Sha256};
 
 use crate::{QaulState, node::{Node, user_accounts::UserAccount}, router_v2::Result};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Multikey(PublicKey);
 
 impl From<PublicKey> for Multikey {

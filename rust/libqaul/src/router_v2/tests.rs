@@ -3075,3 +3075,387 @@ mod relay {
         );
     }
 }
+
+// ---------- handle_node_manifest ----------
+
+mod handle_node_manifest {
+    use super::*;
+    use crate::router_v2::{
+        codec::messages::{ManifestEntry, NodeManifest},
+        identity::{delegation_signing_input, Multikey},
+        manifest::Manifest,
+        table::{Node, User},
+        test_utils::*,
+    };
+    use libp2p::identity::Keypair;
+
+    fn keypair_and_multikey() -> (Keypair, Multikey) {
+        let kp = Keypair::generate_ed25519();
+        let mk = Multikey::from(kp.public());
+        (kp, mk)
+    }
+
+    fn sign_entry(
+        user_kp: &Keypair,
+        host_mk: &Multikey,
+        user_id: [u8; 8],
+        timeout: u64,
+    ) -> ManifestEntry {
+        let signing_input = delegation_signing_input(&host_mk.encode(), timeout);
+        let sig_bytes = user_kp.sign(&signing_input).unwrap();
+        let entry_signature: [u8; 64] = sig_bytes.try_into().unwrap();
+        ManifestEntry { user_id, timeout, entry_signature }
+    }
+
+    /// Install a Node with a specific public key so we can sign
+    /// matching messages. Returns the origin's node_id.
+    fn install_origin_node(state: &RouterV2State, mk: &Multikey) -> [u8; 8] {
+        let id = mk.to_id();
+        let node = Node {
+            id,
+            public_key: Some(mk.clone()),
+            manifest_version: 0,
+            is_gateway: false,
+            delegated_users: Vec::new(),
+        };
+        state.nodes.write().unwrap().insert(id, node);
+        id
+    }
+
+    fn install_user_with_key(state: &RouterV2State, mk: &Multikey) -> [u8; 8] {
+        let id = mk.to_id();
+        let user = User {
+            id,
+            public_key: Some(mk.clone()),
+            profile_version: 0,
+            routing_entry: None,
+            delegation_gateways: Vec::new(),
+        };
+        state.users.write().unwrap().insert(id, user);
+        id
+    }
+
+    /// Wire a self-origin scenario: neighbour with origin's node_id,
+    /// origin bound at reserved idx 0 in the neighbour's node mirror,
+    /// origin's Node record installed with a real key.
+    fn setup_self_origin(
+        state: &RouterV2State,
+        host_mk: &Multikey,
+    ) -> (libp2p::PeerId, [u8; 8]) {
+        let host_id = install_origin_node(state, host_mk);
+        let peer = fresh_peer();
+        state.add_neighbour_transport(peer, host_id, ConnectionModule::Lan);
+        // Origin uses RESERVED_INDEX 0 in the sender's frame (§3.2).
+        state
+            .mirrors
+            .write()
+            .unwrap()
+            .get_mut(&peer)
+            .unwrap()
+            .nodes
+            .bind(0, host_id);
+        (peer, host_id)
+    }
+
+    fn build_signed_manifest(
+        host_kp: &Keypair,
+        host_mk: &Multikey,
+        version: u32,
+        is_gateway: bool,
+        entries: Vec<ManifestEntry>,
+    ) -> Vec<NodeManifest> {
+        let mut manifest = Manifest::new();
+        manifest.manifest_version = version;
+        manifest.set_gateway(is_gateway);
+        manifest.set_entries(entries);
+        manifest
+            .build_chunks(0, host_kp, &host_mk.encode())
+            .unwrap()
+    }
+
+    // ---------- happy path ----------
+
+    #[test]
+    fn happy_path_commits_manifest_to_node_record() {
+        let (state, mut _rx) = fresh_state();
+        let (host_kp, host_mk) = keypair_and_multikey();
+        let (peer, host_id) = setup_self_origin(&state, &host_mk);
+
+        let (user_kp, user_mk) = keypair_and_multikey();
+        let user_id = install_user_with_key(&state, &user_mk);
+
+        let entries = vec![sign_entry(&user_kp, &host_mk, user_id, 1_000_000)];
+        let chunks = build_signed_manifest(&host_kp, &host_mk, 5, true, entries);
+
+        state
+            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 500)
+            .unwrap();
+
+        let nodes = state.nodes.read().unwrap();
+        let node_arc = nodes.get(&host_id).unwrap();
+        let node = node_arc.read().unwrap();
+        assert_eq!(node.manifest_version, 5);
+        assert!(node.is_gateway);
+        assert_eq!(node.delegated_users.len(), 1);
+        assert_eq!(node.delegated_users[0].user_id, user_id);
+        assert_eq!(node.delegated_users[0].delegation_timeout, 1_000_000);
+    }
+
+    // ---------- drop paths ----------
+
+    #[test]
+    fn unknown_neighbour_is_noop() {
+        let (state, mut _rx) = fresh_state();
+        let (host_kp, host_mk) = keypair_and_multikey();
+        let host_id = install_origin_node(&state, &host_mk);
+        let peer = fresh_peer(); // never added
+
+        let chunks = build_signed_manifest(&host_kp, &host_mk, 5, false, vec![]);
+        state
+            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 0)
+            .unwrap();
+
+        assert_eq!(
+            state
+                .nodes
+                .read()
+                .unwrap()
+                .get(&host_id)
+                .unwrap()
+                .read()
+                .unwrap()
+                .manifest_version,
+            0,
+        );
+    }
+
+    #[test]
+    fn unknown_origin_index_in_mirror_is_noop() {
+        let (state, mut _rx) = fresh_state();
+        let (host_kp, host_mk) = keypair_and_multikey();
+        let host_id = install_origin_node(&state, &host_mk);
+        let peer = fresh_peer();
+        state.add_neighbour_transport(peer, host_id, ConnectionModule::Lan);
+        // Origin NOT bound in the mirror.
+
+        let chunks = build_signed_manifest(&host_kp, &host_mk, 5, false, vec![]);
+        let mut msg = chunks.into_iter().next().unwrap();
+        msg.origin_node_index = 42;
+
+        state.handle_node_manifest(peer, msg, 0).unwrap();
+
+        assert_eq!(
+            state
+                .nodes
+                .read()
+                .unwrap()
+                .get(&host_id)
+                .unwrap()
+                .read()
+                .unwrap()
+                .manifest_version,
+            0,
+        );
+    }
+
+    #[test]
+    fn origin_with_no_public_key_is_noop() {
+        let (state, mut _rx) = fresh_state();
+        let (host_kp, host_mk) = keypair_and_multikey();
+        let host_id = host_mk.to_id();
+
+        // Install origin Node with NO public key.
+        state.nodes.write().unwrap().insert(
+            host_id,
+            Node {
+                id: host_id,
+                public_key: None,
+                manifest_version: 0,
+                is_gateway: false,
+                delegated_users: Vec::new(),
+            },
+        );
+
+        let peer = fresh_peer();
+        state.add_neighbour_transport(peer, host_id, ConnectionModule::Lan);
+        state
+            .mirrors
+            .write()
+            .unwrap()
+            .get_mut(&peer)
+            .unwrap()
+            .nodes
+            .bind(0, host_id);
+
+        let chunks = build_signed_manifest(&host_kp, &host_mk, 5, false, vec![]);
+        state
+            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 0)
+            .unwrap();
+
+        assert_eq!(
+            state
+                .nodes
+                .read()
+                .unwrap()
+                .get(&host_id)
+                .unwrap()
+                .read()
+                .unwrap()
+                .manifest_version,
+            0,
+        );
+    }
+
+    #[test]
+    fn tampered_chunk_signature_dropped() {
+        let (state, mut _rx) = fresh_state();
+        let (host_kp, host_mk) = keypair_and_multikey();
+        let (peer, host_id) = setup_self_origin(&state, &host_mk);
+
+        let chunks = build_signed_manifest(&host_kp, &host_mk, 5, true, vec![]);
+        let mut msg = chunks.into_iter().next().unwrap();
+        msg.manifest_signature[0] ^= 0xFF;
+
+        state.handle_node_manifest(peer, msg, 0).unwrap();
+
+        assert_eq!(
+            state
+                .nodes
+                .read()
+                .unwrap()
+                .get(&host_id)
+                .unwrap()
+                .read()
+                .unwrap()
+                .manifest_version,
+            0,
+        );
+    }
+
+    // ---------- per-entry filtering ----------
+
+    /// One bad entry sig + one good → only the bad one filtered; the
+    /// good one lands in the Node's delegated_users.
+    #[test]
+    fn bad_per_entry_signature_drops_only_that_entry() {
+        let (state, mut _rx) = fresh_state();
+        let (host_kp, host_mk) = keypair_and_multikey();
+        let (peer, host_id) = setup_self_origin(&state, &host_mk);
+
+        let (good_kp, good_mk) = keypair_and_multikey();
+        let good_id = install_user_with_key(&state, &good_mk);
+        let (bad_kp, bad_mk) = keypair_and_multikey();
+        let bad_id = install_user_with_key(&state, &bad_mk);
+
+        let good_entry = sign_entry(&good_kp, &host_mk, good_id, 1_000_000);
+        let mut bad_entry = sign_entry(&bad_kp, &host_mk, bad_id, 1_000_000);
+        bad_entry.entry_signature[0] ^= 0xFF;
+
+        let chunks = build_signed_manifest(
+            &host_kp,
+            &host_mk,
+            1,
+            false,
+            vec![good_entry, bad_entry],
+        );
+        state
+            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 0)
+            .unwrap();
+
+        let nodes = state.nodes.read().unwrap();
+        let node_arc = nodes.get(&host_id).unwrap();
+        let node = node_arc.read().unwrap();
+        assert_eq!(node.delegated_users.len(), 1);
+        assert_eq!(node.delegated_users[0].user_id, good_id);
+    }
+
+    #[test]
+    fn expired_entry_dropped_at_receive_time() {
+        let (state, mut _rx) = fresh_state();
+        let (host_kp, host_mk) = keypair_and_multikey();
+        let (peer, host_id) = setup_self_origin(&state, &host_mk);
+
+        let (user_kp, user_mk) = keypair_and_multikey();
+        let user_id = install_user_with_key(&state, &user_mk);
+
+        // timeout=500, now=1000 → expired.
+        let entries = vec![sign_entry(&user_kp, &host_mk, user_id, 500)];
+        let chunks = build_signed_manifest(&host_kp, &host_mk, 1, false, entries);
+        state
+            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 1_000)
+            .unwrap();
+
+        assert_eq!(
+            state
+                .nodes
+                .read()
+                .unwrap()
+                .get(&host_id)
+                .unwrap()
+                .read()
+                .unwrap()
+                .delegated_users
+                .len(),
+            0,
+        );
+    }
+
+    // ---------- flag propagation ----------
+
+    #[test]
+    fn is_gateway_flag_reflected_in_node_record() {
+        let (state, mut _rx) = fresh_state();
+        let (host_kp, host_mk) = keypair_and_multikey();
+        let (peer, host_id) = setup_self_origin(&state, &host_mk);
+
+        let chunks = build_signed_manifest(&host_kp, &host_mk, 1, true, vec![]);
+        state
+            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 0)
+            .unwrap();
+
+        assert!(
+            state
+                .nodes
+                .read()
+                .unwrap()
+                .get(&host_id)
+                .unwrap()
+                .read()
+                .unwrap()
+                .is_gateway,
+        );
+    }
+
+    /// Documents current "no key → drop entry" behaviour. §11.5
+    /// ProfileFetch (Phase 12) will change this to fetch-then-verify.
+    #[test]
+    fn entry_for_user_with_unknown_key_is_dropped() {
+        let (state, mut _rx) = fresh_state();
+        let (host_kp, host_mk) = keypair_and_multikey();
+        let (peer, host_id) = setup_self_origin(&state, &host_mk);
+
+        let (user_kp, user_mk) = keypair_and_multikey();
+        let user_id = user_mk.to_id();
+        // Do NOT install user — their key is unknown.
+
+        let entries = vec![sign_entry(&user_kp, &host_mk, user_id, 1_000_000)];
+        let chunks = build_signed_manifest(&host_kp, &host_mk, 1, false, entries);
+        state
+            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 0)
+            .unwrap();
+
+        assert_eq!(
+            state
+                .nodes
+                .read()
+                .unwrap()
+                .get(&host_id)
+                .unwrap()
+                .read()
+                .unwrap()
+                .delegated_users
+                .len(),
+            0,
+        );
+    }
+}
