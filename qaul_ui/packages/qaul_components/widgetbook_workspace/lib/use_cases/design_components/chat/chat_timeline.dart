@@ -2,120 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:qaul_components/qaul_components.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
+import '../../../support/chat_fixtures.dart';
 import '../../../support/widgetbook_preview.dart';
 
 final _previewClock = DateTime(2026, 4, 12, 14, 30);
 
-List<TextChatMessage> _buildDirectMessages() {
-  final clock = _previewClock;
-  final today = DateTime(clock.year, clock.month, clock.day);
-  final yesterday = today.subtract(const Duration(days: 1));
-
-  const me = ChatUser(id: 'me', name: 'Me');
-  const them = ChatUser(id: 'them', name: 'Chat Partner');
-
-  return [
-    TextChatMessage(
-      id: 'msg-1',
-      sender: me,
-      content: 'Hello in 16px 300 font',
-      sentAt: yesterday.copyWith(hour: 16, minute: 13),
-      receivedAt: yesterday.copyWith(hour: 16, minute: 13),
-      status: MessageStatus.read,
-    ),
-    TextChatMessage(
-      id: 'msg-2',
-      sender: me,
-      content:
-          'This is a longer message with no own timestamp followed by another message with timestamp',
-      sentAt: yesterday.copyWith(hour: 16, minute: 13),
-      receivedAt: yesterday.copyWith(hour: 16, minute: 13),
-      status: MessageStatus.sent,
-    ),
-    TextChatMessage(
-      id: 'msg-3',
-      sender: me,
-      content: 'This one is it',
-      sentAt: yesterday.copyWith(hour: 16, minute: 13),
-      receivedAt: yesterday.copyWith(hour: 16, minute: 13),
-      status: MessageStatus.read,
-    ),
-    TextChatMessage(
-      id: 'msg-4',
-      sender: them,
-      content: 'Chatpartner is answering',
-      sentAt: yesterday.copyWith(hour: 18, minute: 9),
-      receivedAt: yesterday.copyWith(hour: 18, minute: 9),
-      status: MessageStatus.sent,
-    ),
-    TextChatMessage(
-      id: 'msg-5',
-      sender: them,
-      content: 'Another answer',
-      sentAt: yesterday.copyWith(hour: 18, minute: 29),
-      receivedAt: yesterday.copyWith(hour: 18, minute: 29),
-      status: MessageStatus.sent,
-    ),
-    TextChatMessage(
-      id: 'msg-6',
-      sender: me,
-      content: 'Message',
-      sentAt: yesterday.copyWith(hour: 19, minute: 23),
-      receivedAt: yesterday.copyWith(hour: 19, minute: 23),
-      status: MessageStatus.read,
-    ),
-    TextChatMessage(
-      id: 'msg-7',
-      sender: them,
-      content: 'Longer message from the chatpartner',
-      sentAt: yesterday.copyWith(hour: 21, minute: 19),
-      receivedAt: yesterday.copyWith(hour: 21, minute: 19),
-      status: MessageStatus.sent,
-    ),
-    TextChatMessage(
-      id: 'msg-8',
-      sender: them,
-      content: 'followed by one with time',
-      sentAt: yesterday.copyWith(hour: 21, minute: 19),
-      receivedAt: yesterday.copyWith(hour: 21, minute: 19),
-      status: MessageStatus.sent,
-    ),
-    TextChatMessage(
-      id: 'msg-9',
-      sender: me,
-      content: 'Out and delivered',
-      sentAt: clock.subtract(const Duration(minutes: 12)),
-      receivedAt: clock.subtract(const Duration(minutes: 12)),
-      status: MessageStatus.read,
-    ),
-    TextChatMessage(
-      id: 'msg-10',
-      sender: me,
-      content: 'Out but not delivered yet',
-      sentAt: clock.subtract(const Duration(minutes: 1)),
-      receivedAt: clock.subtract(const Duration(minutes: 1)),
-      status: MessageStatus.sent,
-    ),
-    TextChatMessage(
-      id: 'msg-11',
-      sender: me,
-      content: 'New Message not out',
-      sentAt: clock,
-      receivedAt: clock,
-      status: MessageStatus.notSent,
-    ),
-  ];
-}
-
 @widgetbook.UseCase(name: 'Direct chat preview', type: ChatTimeline)
 Widget buildChatRoomPreviewUseCase(BuildContext context) {
-  const me = ChatUser(id: 'me', name: 'Me');
-
   return widgetbookFullScreenChatPreview(
     context,
     ChatTimeline.direct(
-      currentUser: me,
-      messages: _buildDirectMessages(),
+      currentUser: chatFixtureCurrentUser,
+      messages: buildDirectChatFixtureMessages(
+        clock: _previewClock,
+        includeDelayedMessage: false,
+        includeUnsentMessage: true,
+      ),
       clock: _previewClock,
     ),
   );

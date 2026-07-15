@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:qaul_components/qaul_components.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
+import '../../../support/chat_fixtures.dart';
+
 class ChatJourneyBaselineDesignStory {
   const ChatJourneyBaselineDesignStory();
 }
@@ -12,125 +14,12 @@ class ChatFooterStateDesignStory {
 
 final _journeyClock = DateTime(2026, 4, 18, 12, 42);
 
-const _me = ChatUser(id: 'me', name: 'Me');
-const _peer = ChatUser(id: 'maxx', name: 'MaxX');
-
-Widget _avatar() {
-  return const CircleAvatar(
-    backgroundColor: Color(0xFFE95420),
-    foregroundColor: Colors.white,
-    child: Text(
-      'M',
-      style: TextStyle(
-        fontFamily: 'Roboto',
-        fontWeight: FontWeight.w400,
-        fontSize: 18,
-      ),
-    ),
-  );
-}
-
 List<ChatMessage> _journeyMessages() {
-  final today = DateTime(
-    _journeyClock.year,
-    _journeyClock.month,
-    _journeyClock.day,
-  );
-  final earlier = today.subtract(const Duration(days: 1));
-
   return [
-    TextChatMessage(
-      id: 'journey-1',
-      sender: _me,
-      content: 'Hello in 16px 300 font',
-      sentAt: earlier.copyWith(hour: 16, minute: 13),
-      receivedAt: earlier.copyWith(hour: 16, minute: 13),
-      status: MessageStatus.read,
-    ),
-    TextChatMessage(
-      id: 'journey-2',
-      sender: _me,
-      content:
-          'This is a longer message with no own timestamp followed by another message with timestamp',
-      sentAt: earlier.copyWith(hour: 16, minute: 13),
-      receivedAt: earlier.copyWith(hour: 16, minute: 13),
-      status: MessageStatus.sent,
-    ),
-    TextChatMessage(
-      id: 'journey-3',
-      sender: _me,
-      content: 'This one is it',
-      sentAt: earlier.copyWith(hour: 16, minute: 20),
-      receivedAt: earlier.copyWith(hour: 16, minute: 20),
-      status: MessageStatus.read,
-    ),
-    TextChatMessage(
-      id: 'journey-4',
-      sender: _peer,
-      content: 'Chatpartner is answering',
-      sentAt: earlier.copyWith(hour: 18, minute: 9),
-      receivedAt: earlier.copyWith(hour: 18, minute: 9),
-      status: MessageStatus.sent,
-    ),
-    TextChatMessage(
-      id: 'journey-5',
-      sender: _peer,
-      content: 'Another answer',
-      sentAt: earlier.copyWith(hour: 18, minute: 29),
-      receivedAt: earlier.copyWith(hour: 18, minute: 29),
-      status: MessageStatus.sent,
-    ),
-    TextChatMessage(
-      id: 'journey-6',
-      sender: _me,
-      content: 'Message',
-      sentAt: earlier.copyWith(hour: 19, minute: 23),
-      receivedAt: earlier.copyWith(hour: 19, minute: 23),
-      status: MessageStatus.read,
-    ),
-    TextChatMessage(
-      id: 'journey-7',
-      sender: _peer,
-      content: 'Longer message from the chatpartner',
-      sentAt: earlier.copyWith(hour: 21, minute: 19),
-      receivedAt: earlier.copyWith(hour: 21, minute: 19),
-      status: MessageStatus.sent,
-    ),
-    TextChatMessage(
-      id: 'journey-8',
-      sender: _peer,
-      content: 'followed by one with time',
-      sentAt: earlier.copyWith(hour: 21, minute: 39),
-      receivedAt: earlier.copyWith(hour: 21, minute: 39),
-      status: MessageStatus.sent,
-    ),
-    TextChatMessage(
-      id: 'journey-9',
-      sender: _me,
-      content: 'Message with delay',
-      sentAt: earlier.copyWith(hour: 22, minute: 14),
-      receivedAt: today.copyWith(hour: 12, minute: 14),
-      status: MessageStatus.read,
-    ),
-    TextChatMessage(
-      id: 'journey-10',
-      sender: _me,
-      content: 'Out and delivered',
-      sentAt: _journeyClock.subtract(const Duration(minutes: 12)),
-      receivedAt: _journeyClock.subtract(const Duration(minutes: 12)),
-      status: MessageStatus.read,
-    ),
-    TextChatMessage(
-      id: 'journey-11',
-      sender: _me,
-      content: 'Out but not delivered yet',
-      sentAt: _journeyClock.subtract(const Duration(minutes: 1)),
-      receivedAt: _journeyClock.subtract(const Duration(minutes: 1)),
-      status: MessageStatus.sent,
-    ),
+    ...buildDirectChatFixtureMessages(clock: _journeyClock),
     TextChatMessage(
       id: 'journey-12',
-      sender: _peer,
+      sender: chatFixturePeer,
       content: '**Markdown** _preview_ message for bubble spacing context',
       sentAt: _journeyClock.subtract(const Duration(seconds: 20)),
       receivedAt: _journeyClock.subtract(const Duration(seconds: 20)),
@@ -144,7 +33,10 @@ Widget _chatHeader() {
     applyTopSafeArea: false,
     extraTopPadding: 24,
     onBackPressed: () {},
-    avatar: _avatar(),
+    avatar: chatFixtureAvatar(
+      initials: 'M',
+      backgroundColor: const Color(0xFFE95420),
+    ),
     displayName: 'MaxX',
     isOnline: true,
     onlineLabel: 'online',
@@ -159,7 +51,7 @@ Widget _chatHeader() {
 
 Widget _timeline() {
   return ChatTimeline.direct(
-    currentUser: _me,
+    currentUser: chatFixtureCurrentUser,
     messages: _journeyMessages(),
     clock: _journeyClock,
     padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -187,6 +79,16 @@ Widget _footer({TextEditingController? controller, bool menuOpen = false}) {
   );
 }
 
+Widget _chatJourneyBody({required Widget footer}) {
+  return Column(
+    children: [
+      _chatHeader(),
+      Expanded(child: SingleChildScrollView(reverse: true, child: _timeline())),
+      footer,
+    ],
+  );
+}
+
 class _ChatJourneyViewport extends StatelessWidget {
   const _ChatJourneyViewport({required this.footer});
 
@@ -201,15 +103,7 @@ class _ChatJourneyViewport extends StatelessWidget {
       child: SizedBox.expand(
         child: DecoratedBox(
           decoration: BoxDecoration(color: sheet.background),
-          child: Column(
-            children: [
-              _chatHeader(),
-              Expanded(
-                child: SingleChildScrollView(reverse: true, child: _timeline()),
-              ),
-              footer,
-            ],
-          ),
+          child: _chatJourneyBody(footer: footer),
         ),
       ),
     );
@@ -252,18 +146,7 @@ class _JourneyFrame extends StatelessWidget {
                   width: 1,
                 ),
               ),
-              child: Column(
-                children: [
-                  _chatHeader(),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      reverse: true,
-                      child: _timeline(),
-                    ),
-                  ),
-                  footer,
-                ],
-              ),
+              child: _chatJourneyBody(footer: footer),
             ),
           ),
         ],
