@@ -103,6 +103,9 @@ void main() {
       MapEntry('l🤣h😌o🙄😪😓😳ggasdf', '🤣'),
       MapEntry('😌🤣h😌o🙄😪😓😳ggasdf', '😌'),
       MapEntry('😳🤣h😌🙄😪😓😳ggasdf', '😳'),
+      MapEntry('🫠', '🫠'),
+      MapEntry('🫠 user', '🫠U'),
+      MapEntry('👨‍👩‍👧‍👦', '👨‍👩‍👧‍👦'),
     ];
 
     for (final tc in names) {

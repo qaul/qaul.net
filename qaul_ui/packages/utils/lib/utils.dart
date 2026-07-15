@@ -34,7 +34,7 @@ Color colorGenerationStrategy(String first) {
 /// Given a string containing values separated by space (" "), yields a string of length 2
 /// containing the first letter of the first and last word, respectively, in uppercase.
 ///
-/// If the provided string has no spaces, returns its first two letters - also uppercase.
+/// If the provided string has no spaces, returns its first grapheme - also uppercase.
 ///
 /// Note: Filters out emojis, so as not to cause malformed UTF-16 issues. See more here:
 /// * https://github.com/dart-lang/sdk/issues/35798
@@ -42,11 +42,6 @@ Color colorGenerationStrategy(String first) {
 /// * https://github.com/flutter/flutter/issues/43302
 String initials(String name) {
   assert(name.isNotEmpty, 'name should have at least one character');
-  if (hasEmojis(name)) {
-    final emoji = retrieveFirstEmoji(name);
-    if (emoji != null) return emoji;
-    name = removeEmoji(name);
-  }
   if (name.replaceAll(' ', '').isEmpty) {
     throw ArgumentError.value(
       name,
@@ -56,9 +51,24 @@ String initials(String name) {
   }
   if (name.contains(' ')) {
     final ws = name.split(' ').where((e) => e.isNotEmpty).toList();
-    if (ws.length > 1) return '${ws.first[0]}${ws.last[0]}'.toUpperCase();
+    if (ws.length > 1) {
+      return '${ws.first.characters.first}${ws.last.characters.first}'
+          .toUpperCase();
+    }
   }
-  return name.substring(0, 1).toUpperCase();
+  if (hasEmojis(name)) {
+    final emoji = _firstEmojiGrapheme(name);
+    if (emoji != null) return emoji;
+    name = removeEmoji(name);
+  }
+  return name.characters.first.toUpperCase();
+}
+
+String? _firstEmojiGrapheme(String text) {
+  for (final grapheme in text.characters) {
+    if (hasEmojis(grapheme)) return grapheme;
+  }
+  return null;
 }
 
 /// If [clock] is provided, timestamp is in relation to [clock] (Should only be useful for testing).
