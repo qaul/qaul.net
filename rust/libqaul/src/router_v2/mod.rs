@@ -19,17 +19,11 @@ use libp2p::PeerId;
 use tokio::sync::mpsc;
 
 use crate::{
-    connections::ConnectionModule,
-    router_v2::{
-        codec::CodecError,
-        index::{
+    connections::ConnectionModule, router_v2::{
+        codec::{CodecError, messages::NodeManifest}, index::{
             IndexAllocator, IndexDictionary, MirrorIndexDictionary, ReintroductionTracker, Space,
-        },
-        manifest::{ChunkAssembler, Manifest},
-        seq::SeqNum,
-        table::{Nodes, RoutingTable, Users},
-    },
-    storage::configuration::RoutingV2Options,
+        }, manifest::{ChunkAssembler, Manifest}, seq::SeqNum, table::{Nodes, RoutingTable, Users},
+    }, storage::configuration::RoutingV2Options,
 };
 
 pub mod codec;
@@ -145,6 +139,8 @@ pub struct RouterV2State {
     pub manifest: RwLock<Manifest>,
     /// chunk assembler
     pub chunk_assembler: RwLock<ChunkAssembler>,
+    /// Manifests accepted at receive time, pending relay to other neighbours.
+    pub manifest_relay_queue: RwLock<HashMap<[u8; 8], (Vec<NodeManifest>, Sphere)>>,
 }
 
 impl RouterV2State {
@@ -166,6 +162,7 @@ impl RouterV2State {
             relay_queue: RwLock::new(HashSet::new()),
             manifest: RwLock::new(Manifest::new()),
             chunk_assembler: RwLock::new(ChunkAssembler::new()),
+            manifest_relay_queue: RwLock::new(HashMap::new())
         };
         (state, rx)
     }
