@@ -3188,7 +3188,7 @@ mod handle_node_manifest {
         let chunks = build_signed_manifest(&host_kp, &host_mk, 5, true, entries);
 
         state
-            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 500)
+            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 500, ConnectionModule::Lan)
             .unwrap();
 
         let nodes = state.nodes.read().unwrap();
@@ -3212,7 +3212,7 @@ mod handle_node_manifest {
 
         let chunks = build_signed_manifest(&host_kp, &host_mk, 5, false, vec![]);
         state
-            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 0)
+            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
             .unwrap();
 
         assert_eq!(
@@ -3242,7 +3242,7 @@ mod handle_node_manifest {
         let mut msg = chunks.into_iter().next().unwrap();
         msg.origin_node_index = 42;
 
-        state.handle_node_manifest(peer, msg, 0).unwrap();
+        state.handle_node_manifest(peer, msg, 0, ConnectionModule::Lan).unwrap();
 
         assert_eq!(
             state
@@ -3289,7 +3289,7 @@ mod handle_node_manifest {
 
         let chunks = build_signed_manifest(&host_kp, &host_mk, 5, false, vec![]);
         state
-            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 0)
+            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
             .unwrap();
 
         assert_eq!(
@@ -3316,7 +3316,7 @@ mod handle_node_manifest {
         let mut msg = chunks.into_iter().next().unwrap();
         msg.manifest_signature[0] ^= 0xFF;
 
-        state.handle_node_manifest(peer, msg, 0).unwrap();
+        state.handle_node_manifest(peer, msg, 0, ConnectionModule::Lan).unwrap();
 
         assert_eq!(
             state
@@ -3359,7 +3359,7 @@ mod handle_node_manifest {
             vec![good_entry, bad_entry],
         );
         state
-            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 0)
+            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
             .unwrap();
 
         let nodes = state.nodes.read().unwrap();
@@ -3382,7 +3382,7 @@ mod handle_node_manifest {
         let entries = vec![sign_entry(&user_kp, &host_mk, user_id, 500)];
         let chunks = build_signed_manifest(&host_kp, &host_mk, 1, false, entries);
         state
-            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 1_000)
+            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 1_000, ConnectionModule::Lan)
             .unwrap();
 
         assert_eq!(
@@ -3410,7 +3410,7 @@ mod handle_node_manifest {
 
         let chunks = build_signed_manifest(&host_kp, &host_mk, 1, true, vec![]);
         state
-            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 0)
+            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
             .unwrap();
 
         assert!(
@@ -3441,7 +3441,7 @@ mod handle_node_manifest {
         let entries = vec![sign_entry(&user_kp, &host_mk, user_id, 1_000_000)];
         let chunks = build_signed_manifest(&host_kp, &host_mk, 1, false, entries);
         state
-            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 0)
+            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
             .unwrap();
 
         assert_eq!(
