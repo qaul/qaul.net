@@ -12,19 +12,10 @@ use libp2p::PeerId;
 use tracing::{debug, error, warn};
 
 use crate::{
-    connections::ConnectionModule,
-    router_v2::{
-        codec::{
-            messages::{Entry, Mapping, NodeManifest, RoutingUpdate},
-            CodecError, Header, RoutingMessage,
-        },
-        identity::Multikey,
-        index::Space,
-        manifest::Manifest,
-        metric::hop_cost,
-        seq::{is_fresher_u32, Acceptance, SeqNum},
-        table::{DelegatedUser, Node, RoutingEntry, TargetRef, User},
-        Result, RouterV2State, RoutingV2Error,
+    connections::ConnectionModule, router_v2::{
+        Result, RouterV2State, RoutingV2Error, Sphere, codec::{
+            CodecError, Header, RoutingMessage, messages::{Entry, Mapping, NodeManifest, RoutingUpdate},
+        }, identity::Multikey, index::Space, manifest::Manifest, metric::hop_cost, seq::{Acceptance, SeqNum, is_fresher_u32}, table::{DelegatedUser, Node, RoutingEntry, TargetRef, User},
     },
 };
 
@@ -405,7 +396,7 @@ impl RouterV2State {
                 },
                 RoutingMessage::NodeManifest => match NodeManifest::decode(payload) {
                     Ok(msg) => {
-                        if let Err(e) = self.handle_node_manifest(neighbour, msg, now) {
+                        if let Err(e) = self.handle_node_manifest(neighbour, msg, now, transport) {
                             error!("handle_node_manifest failed: {e}");
                         }
                     }
@@ -445,6 +436,7 @@ impl RouterV2State {
         neighbour: PeerId,
         mut msg: NodeManifest,
         now: u64,
+        transport: ConnectionModule
     ) -> Result<()> {
         let origin_node_id = {
             let mirrors = self.mirrors.read().unwrap();
@@ -542,8 +534,11 @@ impl RouterV2State {
             node.delegated_users = delegated_users;
         }
 
-        //TODO(Phase 8): enqueue completed manifest for relay per §8.5.
-
+        self.manifest_relay_queue.write().unwrap().insert(
+            origin_node_id,
+            (completed_manifest.chunks, Sphere::of(transport)),
+        );
+        
         Ok(())
     }
 }

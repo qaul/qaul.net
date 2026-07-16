@@ -3,7 +3,7 @@
 
 //! This file describes how messages are propagated between nodes.
 
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 use libp2p::PeerId;
 use std::sync::RwLock;
@@ -13,7 +13,7 @@ use crate::{
     connections::ConnectionModule,
     router_v2::{
         codec::{
-            messages::{Entry, Mapping, RoutingUpdate},
+            messages::{Entry, Mapping, NodeManifest, RoutingUpdate},
             Header, RoutingMessage, PROTOCOL_VERSION,
         },
         index::Space,
@@ -261,6 +261,74 @@ pub fn tick_relay(state: &RouterV2State, now: u64) {
             bytes: frame,
         }) {
             warn!("relay tick: outbound channel send failed for {peer:?}: {e}");
+        }
+    }
+}
+
+pub fn tick_relay_manifests(state: &RouterV2State) {
+    let relay_queue: HashMap<[u8; 8], (Vec<NodeManifest>, Sphere)> =
+        std::mem::take(&mut *state.manifest_relay_queue.write().unwrap());
+
+    let pairs: Vec<(PeerId, ConnectionModule)> = {
+        let mirrors = state.mirrors.read().unwrap();
+        mirrors
+            .iter()
+            .flat_map(|(peer, info)| {
+                let peer = *peer;
+                info.transports.iter().map(move |t| (peer, *t))
+            })
+            .collect()
+    };
+
+    for (&origin_id, (chunks, learn_sphere)) in &relay_queue {
+        let is_gateway = chunks
+            .first()
+            .map(|c| (c.flags & 0x01) != 0)
+            .unwrap_or(false);
+
+        let recipients: Vec<(PeerId, ConnectionModule)> = pairs
+            .iter()
+            .copied()
+            .filter(|(_, transport)| {
+                let outgoing_sphere = Sphere::of(*transport);
+                let downward_seal_hit =
+                    *learn_sphere == Sphere::Internet && outgoing_sphere == Sphere::Local;
+                let non_gateway_upward = outgoing_sphere == Sphere::Internet && !is_gateway;
+                !downward_seal_hit && !non_gateway_upward
+            })
+            .collect();
+        if recipients.is_empty() {
+            continue;
+        }
+
+        let mut encoded_chunks: Vec<Vec<u8>> = Vec::with_capacity(chunks.len());
+        for chunk in chunks {
+            let mut body = Vec::new();
+            if let Err(e) = chunk.encode(&mut body) {
+                warn!("manifest relay: encode failed for origin {origin_id:?}: {e}");
+                continue;
+            }
+            let header = Header {
+                version: PROTOCOL_VERSION,
+                message_type: RoutingMessage::NodeManifest,
+                payload_len: body.len() as u16,
+            };
+            let mut frame = Vec::with_capacity(4 + body.len());
+            header.encode(&mut frame);
+            frame.extend(body);
+            encoded_chunks.push(frame);
+        }
+
+        for (peer, transport) in &recipients {
+            for frame in &encoded_chunks {
+                if let Err(e) = state.tx_outbound.send(OutboundMsg {
+                    peer: *peer,
+                    transport: *transport,
+                    bytes: frame.clone(),
+                }) {
+                    warn!("manifest relay: outbound send failed for {peer:?}: {e}");
+                }
+            }
         }
     }
 }
