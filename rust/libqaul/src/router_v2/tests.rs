@@ -3459,3 +3459,274 @@ mod handle_node_manifest {
         );
     }
 }
+
+// ---------- tick_relay_manifests ----------
+
+mod tick_relay_manifests {
+    use super::*;
+    use crate::router_v2::{
+        codec::{
+            messages::NodeManifest, Header, RoutingMessage,
+        },
+        propagation::tick_relay_manifests,
+        test_utils::*,
+        Sphere,
+    };
+
+    /// Build a synthetic NodeManifest chunk with the given metadata.
+    /// The signature is placeholder — the relay tick never verifies.
+    fn synthetic_chunk(
+        origin_node_index: u16,
+        manifest_version: u32,
+        chunk_index: u8,
+        chunk_count: u8,
+        flags: u8,
+    ) -> NodeManifest {
+        NodeManifest {
+            origin_node_index,
+            manifest_version,
+            chunk_index,
+            chunk_count,
+            flags,
+            manifest_signature: [0; 64],
+            entries: Vec::new(),
+        }
+    }
+
+    /// Directly enqueue a manifest into the relay queue with the given
+    /// learn sphere.
+    fn enqueue(
+        state: &RouterV2State,
+        origin_id: [u8; 8],
+        chunks: Vec<NodeManifest>,
+        learn_sphere: Sphere,
+    ) {
+        state
+            .manifest_relay_queue
+            .write()
+            .unwrap()
+            .insert(origin_id, (chunks, learn_sphere));
+    }
+
+    fn decode_frame_type(bytes: &[u8]) -> RoutingMessage {
+        let (header, _) = Header::decode(bytes).expect("frame header");
+        header.message_type
+    }
+
+    fn decode_frame_body(bytes: &[u8]) -> NodeManifest {
+        let (header, body_slice) = Header::decode(bytes).expect("frame header");
+        assert_eq!(header.message_type, RoutingMessage::NodeManifest);
+        let payload = &body_slice[..header.payload_len as usize];
+        NodeManifest::decode(payload).expect("NodeManifest body")
+    }
+
+    // ---------- empty cases ----------
+
+    #[test]
+    fn empty_queue_pushes_nothing() {
+        let (state, mut rx) = fresh_state();
+        let peer = fresh_peer();
+        state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan);
+
+        tick_relay_manifests(&state);
+
+        assert!(rx.try_recv().is_err());
+    }
+
+    #[test]
+    fn no_neighbours_pushes_nothing() {
+        let (state, mut rx) = fresh_state();
+        enqueue(&state, [1; 8], vec![synthetic_chunk(0, 1, 0, 1, 0)], Sphere::Local);
+
+        tick_relay_manifests(&state);
+
+        assert!(rx.try_recv().is_err());
+    }
+
+    // ---------- happy path ----------
+
+    #[test]
+    fn queued_manifest_forwarded_to_neighbour() {
+        let (state, mut rx) = fresh_state();
+        let peer = fresh_peer();
+        state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan);
+
+        let chunk = synthetic_chunk(0, 5, 0, 1, 0);
+        enqueue(&state, [11; 8], vec![chunk], Sphere::Local);
+
+        tick_relay_manifests(&state);
+
+        let msg = rx.try_recv().expect("one outbound");
+        assert_eq!(msg.peer, peer);
+        assert_eq!(msg.transport, ConnectionModule::Lan);
+        assert_eq!(decode_frame_type(&msg.bytes), RoutingMessage::NodeManifest);
+        let decoded = decode_frame_body(&msg.bytes);
+        assert_eq!(decoded.manifest_version, 5);
+        assert!(rx.try_recv().is_err());
+    }
+
+    // ---------- cross-sphere filters ----------
+
+    /// Downward seal: an Internet-learned manifest must not cross onto a
+    /// Local-outgoing neighbour.
+    #[test]
+    fn downward_seal_drops_internet_learned_on_local_outgoing() {
+        let (state, mut rx) = fresh_state();
+        let peer = fresh_peer();
+        state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan);
+
+        // Learned over Internet, has is_gateway=1 (so upward would allow).
+        let chunk = synthetic_chunk(0, 1, 0, 1, 0x01);
+        enqueue(&state, [11; 8], vec![chunk], Sphere::Internet);
+
+        tick_relay_manifests(&state);
+
+        assert!(rx.try_recv().is_err(), "downward seal must drop this manifest");
+    }
+
+    /// A non-gateway manifest must not propagate onto an Internet-outgoing
+    /// neighbour.
+    #[test]
+    fn non_gateway_upward_dropped_on_internet_outgoing() {
+        let (state, mut rx) = fresh_state();
+        let peer = fresh_peer();
+        state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Internet);
+
+        // Local-learned, flags=0 → non-gateway.
+        let chunk = synthetic_chunk(0, 1, 0, 1, 0x00);
+        enqueue(&state, [11; 8], vec![chunk], Sphere::Local);
+
+        tick_relay_manifests(&state);
+
+        assert!(
+            rx.try_recv().is_err(),
+            "non-gateway manifest must not cross upward",
+        );
+    }
+
+    /// A gateway manifest propagates onto an Internet-outgoing neighbour.
+    #[test]
+    fn gateway_upward_propagates_on_internet_outgoing() {
+        let (state, mut rx) = fresh_state();
+        let peer = fresh_peer();
+        state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Internet);
+
+        let chunk = synthetic_chunk(0, 1, 0, 1, 0x01); // is_gateway=1
+        enqueue(&state, [11; 8], vec![chunk], Sphere::Local);
+
+        tick_relay_manifests(&state);
+
+        let msg = rx.try_recv().expect("gateway manifest must propagate upward");
+        let decoded = decode_frame_body(&msg.bytes);
+        assert_eq!(decoded.flags & 0x01, 1);
+    }
+
+    // ---------- multi-chunk ----------
+
+    /// A 3-chunk manifest → 3 outbound messages to the single neighbour.
+    /// Order matters for reassembly at the receiver — chunk_index 0 first.
+    #[test]
+    fn multi_chunk_relay_sends_all_chunks() {
+        let (state, mut rx) = fresh_state();
+        let peer = fresh_peer();
+        state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan);
+
+        let chunks = vec![
+            synthetic_chunk(0, 1, 0, 3, 0),
+            synthetic_chunk(0, 1, 1, 3, 0),
+            synthetic_chunk(0, 1, 2, 3, 0),
+        ];
+        enqueue(&state, [11; 8], chunks, Sphere::Local);
+
+        tick_relay_manifests(&state);
+
+        let mut got_indices = Vec::new();
+        while let Ok(msg) = rx.try_recv() {
+            let decoded = decode_frame_body(&msg.bytes);
+            got_indices.push(decoded.chunk_index);
+        }
+        assert_eq!(got_indices, vec![0, 1, 2], "chunks in canonical order");
+    }
+
+    // ---------- multi-neighbour ----------
+
+    /// Two neighbours, one manifest → each gets the chunks. Pins the
+    /// "encode once, send N times" optimisation shape without asserting on
+    /// its implementation.
+    #[test]
+    fn multi_neighbour_receives_the_manifest() {
+        let (state, mut rx) = fresh_state();
+        let peer_a = fresh_peer();
+        let peer_b = fresh_peer();
+        state.add_neighbour_transport(peer_a, [10; 8], ConnectionModule::Lan);
+        state.add_neighbour_transport(peer_b, [20; 8], ConnectionModule::Lan);
+
+        enqueue(
+            &state,
+            [11; 8],
+            vec![synthetic_chunk(0, 1, 0, 1, 0)],
+            Sphere::Local,
+        );
+
+        tick_relay_manifests(&state);
+
+        let mut recipients: Vec<PeerId> = Vec::new();
+        while let Ok(msg) = rx.try_recv() {
+            recipients.push(msg.peer);
+        }
+        assert_eq!(recipients.len(), 2);
+        assert!(recipients.contains(&peer_a));
+        assert!(recipients.contains(&peer_b));
+    }
+
+    // ---------- multi-transport (§4.2) ----------
+
+    /// A neighbour reachable on Lan and Internet gets the manifest over
+    /// both transports (§4.2). Uses a gateway manifest so Internet-outgoing
+    /// survives the sphere filter.
+    #[test]
+    fn multi_transport_neighbour_gets_manifest_per_transport() {
+        let (state, mut rx) = fresh_state();
+        let peer = fresh_peer();
+        state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan);
+        state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Internet);
+
+        let chunk = synthetic_chunk(0, 1, 0, 1, 0x01); // gateway
+        enqueue(&state, [11; 8], vec![chunk], Sphere::Local);
+
+        tick_relay_manifests(&state);
+
+        let mut transports = Vec::new();
+        while let Ok(msg) = rx.try_recv() {
+            transports.push(msg.transport);
+        }
+        transports.sort_by_key(|t| format!("{t:?}"));
+        assert_eq!(transports.len(), 2);
+        assert!(transports.contains(&ConnectionModule::Lan));
+        assert!(transports.contains(&ConnectionModule::Internet));
+    }
+
+    // ---------- queue drain ----------
+
+    #[test]
+    fn queue_drained_after_tick() {
+        let (state, mut _rx) = fresh_state();
+        let peer = fresh_peer();
+        state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan);
+        enqueue(
+            &state,
+            [11; 8],
+            vec![synthetic_chunk(0, 1, 0, 1, 0)],
+            Sphere::Local,
+        );
+
+        assert_eq!(state.manifest_relay_queue.read().unwrap().len(), 1);
+
+        tick_relay_manifests(&state);
+
+        assert!(
+            state.manifest_relay_queue.read().unwrap().is_empty(),
+            "queue must be empty after tick",
+        );
+    }
+}
