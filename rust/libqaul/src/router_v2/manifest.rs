@@ -183,6 +183,7 @@ pub struct CompletedManifest {
     pub manifest_version: u32,
     pub flags: u8,
     pub entries: Vec<ManifestEntry>,
+    pub chunks: Vec<NodeManifest>,
 }
 
 pub struct ChunkAssembler {
@@ -194,7 +195,7 @@ struct PartialManifest {
     chunk_count: u8,
     flags: u8,
     /// chunk_index → its entries.
-    received: HashMap<u8, Vec<ManifestEntry>>,
+    received: HashMap<u8, NodeManifest>,
 }
 
 impl ChunkAssembler {
@@ -242,17 +243,23 @@ impl ChunkAssembler {
                     .get_mut(&origin_node_id)
                     .unwrap()
                     .received
-                    .insert(chunk.chunk_index, chunk.entries);
+                    .insert(chunk.chunk_index, chunk);
             }
             Action::Replace => {
+                let manifest_version = chunk.manifest_version;
+                let chunk_count = chunk.chunk_count;
+                let flags = chunk.flags;
+                let chunk_index = chunk.chunk_index;
+
                 let mut received = HashMap::new();
-                received.insert(chunk.chunk_index, chunk.entries);
+                received.insert(chunk_index, chunk);
+
                 self.partials.insert(
                     origin_node_id,
                     PartialManifest {
-                        manifest_version: chunk.manifest_version,
-                        chunk_count: chunk.chunk_count,
-                        flags: chunk.flags,
+                        manifest_version,
+                        chunk_count,
+                        flags,
                         received,
                     },
                 );
@@ -264,7 +271,7 @@ impl ChunkAssembler {
             }
         }
 
-        let partial = self.partials.get(&origin_node_id)?;
+        let partial = self.partials.get_mut(&origin_node_id)?;
         if (partial.received.len() as u8) < partial.chunk_count {
             return None;
         }
@@ -272,10 +279,14 @@ impl ChunkAssembler {
         let manifest_version = partial.manifest_version;
         let flags = partial.flags;
         let chunk_count = partial.chunk_count;
+
         let mut entries: Vec<ManifestEntry> = Vec::new();
+        let mut chunks: Vec<NodeManifest> = Vec::new();
+
         for i in 0..chunk_count {
-            if let Some(chunk_entries) = partial.received.get(&i) {
-                entries.extend_from_slice(chunk_entries);
+            if let Some(chunk) = partial.received.remove(&i) {
+                entries.extend(chunk.entries.iter().cloned());
+                chunks.push(chunk);
             }
         }
 
@@ -285,6 +296,7 @@ impl ChunkAssembler {
             manifest_version,
             flags,
             entries,
+            chunks,
         })
     }
 }
@@ -293,7 +305,6 @@ impl ChunkAssembler {
 mod tests {
     use super::*;
     use libp2p::identity::Keypair;
-
 
     fn keypair_and_multikey() -> (Keypair, Multikey) {
         let kp = Keypair::generate_ed25519();
@@ -343,15 +354,10 @@ mod tests {
         }
     }
 
-
     #[test]
     fn set_entries_sorts_out_of_order_input_by_user_id() {
         let mut manifest = Manifest::new();
-        manifest.set_entries(vec![
-            dummy_entry(3),
-            dummy_entry(1),
-            dummy_entry(2),
-        ]);
+        manifest.set_entries(vec![dummy_entry(3), dummy_entry(1), dummy_entry(2)]);
         let ids: Vec<[u8; 8]> = manifest.entries().iter().map(|e| e.user_id).collect();
         assert_eq!(ids, vec![[1; 8], [2; 8], [3; 8]]);
     }
