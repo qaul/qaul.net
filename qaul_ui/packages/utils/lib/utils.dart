@@ -31,12 +31,12 @@ Color colorGenerationStrategy(String first) {
   return colors[first.hashCode % colors.length];
 }
 
-/// Given a string containing values separated by space (" "), yields a string of length 2
-/// containing the first letter of the first and last word, respectively, in uppercase.
+/// If the string contains an emoji, returns the first emoji grapheme found.
 ///
-/// If the provided string has no spaces, returns its first grapheme - also uppercase.
+/// Otherwise, yields the first letter of the first two words, in uppercase.
+/// Single-word names return their first grapheme in uppercase.
 ///
-/// Note: Filters out emojis, so as not to cause malformed UTF-16 issues. See more here:
+/// Note: Uses grapheme-aware extraction to avoid malformed UTF-16 issues. See:
 /// * https://github.com/dart-lang/sdk/issues/35798
 /// * https://github.com/flutter/flutter/issues/52306
 /// * https://github.com/flutter/flutter/issues/43302
@@ -49,26 +49,37 @@ String initials(String name) {
       'not enough characters to form initials string',
     );
   }
-  if (name.contains(' ')) {
-    final ws = name.split(' ').where((e) => e.isNotEmpty).toList();
-    if (ws.length > 1) {
-      return '${ws.first.characters.first}${ws.last.characters.first}'
-          .toUpperCase();
-    }
+
+  final emoji = _firstEmojiGrapheme(name);
+  if (emoji != null) return emoji;
+
+  final words = name.trim().split(RegExp(r'\s+')).where((e) => e.isNotEmpty).toList();
+  if (words.length > 1) {
+    return '${words.first.characters.first}${words[1].characters.first}'
+        .toUpperCase();
   }
-  if (hasEmojis(name)) {
-    final emoji = _firstEmojiGrapheme(name);
-    if (emoji != null) return emoji;
-    name = removeEmoji(name);
-  }
-  return name.characters.first.toUpperCase();
+  return words.first.characters.first.toUpperCase();
+}
+
+bool isEmojiOnlyGrapheme(String text) {
+  if (text.isEmpty) return false;
+  final graphemes = text.characters.toList(growable: false);
+  return graphemes.length == 1 && _looksLikeEmojiGrapheme(graphemes.first);
 }
 
 String? _firstEmojiGrapheme(String text) {
   for (final grapheme in text.characters) {
-    if (hasEmojis(grapheme)) return grapheme;
+    if (_looksLikeEmojiGrapheme(grapheme)) return grapheme;
   }
   return null;
+}
+
+bool _looksLikeEmojiGrapheme(String grapheme) {
+  if (hasEmojis(grapheme)) return true;
+  if (grapheme.contains('\u200D') || grapheme.contains('\uFE0F')) return true;
+  final rune = grapheme.runes.first;
+  return (rune >= 0x1F000 && rune <= 0x1FAFF) ||
+      (rune >= 0x2600 && rune <= 0x27BF);
 }
 
 /// If [clock] is provided, timestamp is in relation to [clock] (Should only be useful for testing).

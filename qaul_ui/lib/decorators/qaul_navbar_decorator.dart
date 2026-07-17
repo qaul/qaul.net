@@ -90,13 +90,18 @@ class _ConnectedNavBarState extends ConsumerState<_ConnectedNavBar> {
     final user = ref.watch(defaultUserProvider);
     final l10n = AppLocalizations.of(context)!;
 
+    final avatarInitials = user != null ? initials(user.name) : null;
     final avatarChild = user != null
         ? CircleAvatar(
             radius: kNavBarAccountSize / 2,
             backgroundColor: colorGenerationStrategy(user.idBase58),
-            child: Text(
-              initials(user.name),
-              style: kNavBarAvatarTextStyle,
+            child: Transform.translate(
+              offset: isEmojiOnlyGrapheme(avatarInitials!) ? const Offset(2, -1) : Offset.zero,
+              child: Text(
+                avatarInitials,
+                style: kNavBarAvatarTextStyle,
+                textAlign: TextAlign.center,
+              ),
             ),
           )
         : null;
