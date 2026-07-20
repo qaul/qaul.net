@@ -59,11 +59,12 @@ async fn round_trip(
     module: proto::Modules,
     data: Vec<u8>,
     timeout: Duration,
+    user_id: &[u8],
 ) -> Result<proto::QaulRpc, Box<dyn std::error::Error>> {
     let envelope = proto::QaulRpc {
         module: module.into(),
         request_id: Uuid::new_v4().to_string(),
-        user_id: Vec::new(),
+        user_id: user_id.to_vec(),
         data,
     };
     transport
@@ -90,7 +91,7 @@ pub async fn fetch_default_user(
         message: Some(ua_proto::user_accounts::Message::GetDefaultUserAccount(true)),
     };
     let mut t = open(connect).await?;
-    let resp = round_trip(&mut t, proto::Modules::Useraccounts, req.encode_to_vec(), timeout).await?;
+    let resp = round_trip(&mut t, proto::Modules::Useraccounts, req.encode_to_vec(), timeout, &[]).await?;
     let parsed = ua_proto::UserAccounts::decode(&resp.data[..])?;
     if let Some(ua_proto::user_accounts::Message::DefaultUserAccount(d)) = parsed.message {
         if let Some(acct) = d.my_user_account {
@@ -121,7 +122,7 @@ pub async fn fetch_users(
         )),
     };
     let mut t = open(connect).await?;
-    let resp = round_trip(&mut t, proto::Modules::Users, req.encode_to_vec(), timeout).await?;
+    let resp = round_trip(&mut t, proto::Modules::Users, req.encode_to_vec(), timeout, &[]).await?;
     let parsed = users_proto::Users::decode(&resp.data[..])?;
     let mut rows = Vec::new();
     if let Some(users_proto::users::Message::UserList(list)) = parsed.message {
@@ -158,14 +159,22 @@ pub struct DtnConfig {
 pub async fn fetch_dtn_state(
     connect: &ConnectInfo,
     timeout: Duration,
+    user_id: &[u8],
 ) -> Result<DtnState, Box<dyn std::error::Error>> {
+    // libqaul's DTN RPC handler decodes `user_id` first and silently
+    // drops the request when it is invalid — an empty id would burn
+    // the whole timeout instead of failing fast.
+    if user_id.is_empty() {
+        return Err("cannot fetch DTN state: no default user account on this node".into());
+    }
     let req = dtn_proto::Dtn {
         message: Some(dtn_proto::dtn::Message::DtnStateRequest(
             dtn_proto::DtnStateRequest {},
         )),
     };
     let mut t = open(connect).await?;
-    let resp = round_trip(&mut t, proto::Modules::Dtn, req.encode_to_vec(), timeout).await?;
+    let resp =
+        round_trip(&mut t, proto::Modules::Dtn, req.encode_to_vec(), timeout, user_id).await?;
     let parsed = dtn_proto::Dtn::decode(&resp.data[..])?;
     if let Some(dtn_proto::dtn::Message::DtnStateResponse(s)) = parsed.message {
         return Ok(DtnState {
@@ -180,14 +189,19 @@ pub async fn fetch_dtn_state(
 pub async fn fetch_dtn_config(
     connect: &ConnectInfo,
     timeout: Duration,
+    user_id: &[u8],
 ) -> Result<DtnConfig, Box<dyn std::error::Error>> {
+    if user_id.is_empty() {
+        return Err("cannot fetch DTN config: no default user account on this node".into());
+    }
     let req = dtn_proto::Dtn {
         message: Some(dtn_proto::dtn::Message::DtnConfigRequest(
             dtn_proto::DtnConfigRequest {},
         )),
     };
     let mut t = open(connect).await?;
-    let resp = round_trip(&mut t, proto::Modules::Dtn, req.encode_to_vec(), timeout).await?;
+    let resp =
+        round_trip(&mut t, proto::Modules::Dtn, req.encode_to_vec(), timeout, user_id).await?;
     let parsed = dtn_proto::Dtn::decode(&resp.data[..])?;
     if let Some(dtn_proto::dtn::Message::DtnConfigResponse(c)) = parsed.message {
         return Ok(DtnConfig {
@@ -233,7 +247,7 @@ pub async fn fetch_network(
         )),
     };
     let mut t = open(connect).await?;
-    let resp = round_trip(&mut t, proto::Modules::Router, req.encode_to_vec(), timeout).await?;
+    let resp = round_trip(&mut t, proto::Modules::Router, req.encode_to_vec(), timeout, &[]).await?;
     let parsed = router_proto::Router::decode(&resp.data[..])?;
     let mut snap = NetworkSnapshot::default();
     if let Some(router_proto::router::Message::ConnectionsList(list)) = parsed.message {
@@ -302,7 +316,7 @@ pub async fn fetch_crypto_config(
         )),
     };
     let mut t = open(connect).await?;
-    let resp = round_trip(&mut t, proto::Modules::Crypto, req.encode_to_vec(), timeout).await?;
+    let resp = round_trip(&mut t, proto::Modules::Crypto, req.encode_to_vec(), timeout, &[]).await?;
     let parsed = crypto_proto::Crypto::decode(&resp.data[..])?;
     if let Some(crypto_proto::crypto::Message::GetConfigResponse(c)) = parsed.message {
         return Ok(CryptoConfig {
@@ -327,7 +341,7 @@ pub async fn fetch_crypto_events(
         )),
     };
     let mut t = open(connect).await?;
-    let resp = round_trip(&mut t, proto::Modules::Crypto, req.encode_to_vec(), timeout).await?;
+    let resp = round_trip(&mut t, proto::Modules::Crypto, req.encode_to_vec(), timeout, &[]).await?;
     let parsed = crypto_proto::Crypto::decode(&resp.data[..])?;
     if let Some(crypto_proto::crypto::Message::GetEventsResponse(r)) = parsed.message {
         return Ok(r.events.iter().map(rotation_event_to_row).collect());
@@ -350,7 +364,7 @@ pub async fn fetch_feed(
         )),
     };
     let mut t = open(connect).await?;
-    let resp = round_trip(&mut t, proto::Modules::Feed, req.encode_to_vec(), timeout).await?;
+    let resp = round_trip(&mut t, proto::Modules::Feed, req.encode_to_vec(), timeout, &[]).await?;
     let parsed = feed_proto::Feed::decode(&resp.data[..])?;
     let mut rows = Vec::new();
     if let Some(feed_proto::feed::Message::Received(list)) = parsed.message {
@@ -551,6 +565,40 @@ mod tests {
         assert!(
             msg.contains("no default user account"),
             "error message should reference the missing account, got: {msg}"
+        );
+    }
+
+    /// The DTN read path has the same requirement as the send path:
+    /// libqaul's DTN RPC handler decodes the envelope `user_id` first
+    /// and silently drops the request when it is invalid — the client
+    /// then burns its whole timeout waiting for a response that will
+    /// never come (this stalled the TUI event loop for ~10s on every
+    /// refresh). An empty user_id must short-circuit before socket I/O.
+    #[tokio::test]
+    async fn fetch_dtn_state_refuses_empty_user_id() {
+        let connect = ConnectInfo {
+            socket: Some("/nonexistent/should-never-be-opened".into()),
+            dir: None,
+        };
+        let res = fetch_dtn_state(&connect, Duration::from_secs(1), &[]).await;
+        let err = res.expect_err("expected Err for empty user_id");
+        assert!(
+            err.to_string().contains("no default user account"),
+            "got: {err}"
+        );
+    }
+
+    #[tokio::test]
+    async fn fetch_dtn_config_refuses_empty_user_id() {
+        let connect = ConnectInfo {
+            socket: Some("/nonexistent/should-never-be-opened".into()),
+            dir: None,
+        };
+        let res = fetch_dtn_config(&connect, Duration::from_secs(1), &[]).await;
+        let err = res.expect_err("expected Err for empty user_id");
+        assert!(
+            err.to_string().contains("no default user account"),
+            "got: {err}"
         );
     }
 }
