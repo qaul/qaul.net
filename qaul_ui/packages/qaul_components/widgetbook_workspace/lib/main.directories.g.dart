@@ -18,6 +18,8 @@ import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat
     as _qaul_components_widgetbook_use_cases_design_components_chat_chat_header;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_timeline.dart'
     as _qaul_components_widgetbook_use_cases_design_components_chat_chat_timeline;
+import 'package:qaul_components_widgetbook/use_cases/design_components/chat/forward_recipient_selector.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_chat_forward_recipient_selector;
 import 'package:qaul_components_widgetbook/use_cases/design_components/qaul_color_sheet.dart'
     as _qaul_components_widgetbook_use_cases_design_components_qaul_color_sheet;
 import 'package:qaul_components_widgetbook/use_cases/design_components/shell/qaul_fab.dart'
@@ -163,6 +165,29 @@ final directories = <_widgetbook.WidgetbookNode>[
                 builder:
                     _qaul_components_widgetbook_use_cases_special_forms_duplicate_username_meta_message
                         .buildDuplicateUsernameMetaMessageUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookComponent(
+            name: 'ForwardRecipientSelector',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Recipients — selected',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_chat_forward_recipient_selector
+                        .buildForwardRecipientSelectorSelectedUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Recipients — unselected',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_chat_forward_recipient_selector
+                        .buildForwardRecipientSelectorUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Search — open',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_chat_forward_recipient_selector
+                        .buildForwardRecipientSelectorSearchUseCase,
               ),
             ],
           ),

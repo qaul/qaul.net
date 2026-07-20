@@ -6,6 +6,7 @@ export 'design_components/chat/chat_timeline.dart';
 export 'design_components/chat/compute_message_presentation.dart'
     show computeChatMessagePresentation, computeChatBubbleDisplayItems;
 export 'design_components/chat/duplicate_username_meta_message.dart';
+export 'design_components/chat/forward_recipient_selector.dart';
 export 'design_components/chat/group_chat_messages.dart'
     show
         ChatMessageRenderer,
