@@ -85,7 +85,7 @@ impl IndexAllocator {
 pub struct IndexDictionary {
     /// forward direction, idx → id. Used by mirror lookups.
     /// and it also answers the question of: "what's the ID at this slot?"
-    forward_dir: HashMap<u16, [u8; 8]>,
+    pub forward_dir: HashMap<u16, [u8; 8]>,
     /// reverse direction, id → idx.
     /// use this when you have a known id and need its index
     reverse_dir: HashMap<[u8; 8], u16>,
