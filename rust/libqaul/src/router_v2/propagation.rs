@@ -13,7 +13,7 @@ use crate::{
     connections::ConnectionModule,
     router_v2::{
         codec::{
-            messages::{Entry, Mapping, NodeManifest, RoutingUpdate},
+            messages::{Entry, IndexDump, Mapping, NodeManifest, RoutingUpdate},
             Header, RoutingMessage, PROTOCOL_VERSION,
         },
         index::Space,
@@ -330,5 +330,99 @@ pub fn tick_relay_manifests(state: &RouterV2State) {
                 }
             }
         }
+    }
+}
+
+/// Sends an INDEX_DUMP when a neighbour connects
+pub fn on_neighbour_connect(state: &RouterV2State, neighbour: PeerId, transport: ConnectionModule) {
+    if matches!(
+        transport,
+        ConnectionModule::Ble1m | ConnectionModule::BleCoded
+    ) {
+        // Per §8.4: no INDEX_DUMP on BLE.
+        // TODO: NODE_MANIFEST send when identity plumbing exists.
+        return;
+    }
+
+    let user_mappings = {
+        let dict = state.user_dict.read().unwrap();
+        let users = state.users.read().unwrap();
+        let mut mappings = Vec::new();
+        for (&idx, &id) in &dict.forward_dir {
+            let version = users
+                .get(&id)
+                .map(|arc| arc.read().unwrap().profile_version)
+                .unwrap_or(0);
+            mappings.push(Mapping {
+                abs_idx: idx,
+                target_id: id,
+                version,
+            });
+        }
+        mappings.sort_by_key(|m| m.abs_idx);
+        mappings
+    };
+
+    let node_mappings = {
+        let dict = state.node_dict.read().unwrap();
+        let nodes = state.nodes.read().unwrap();
+        let mut mappings = Vec::new();
+        for (&idx, &id) in &dict.forward_dir {
+            let version = nodes
+                .get(&id)
+                .map(|arc| arc.read().unwrap().manifest_version)
+                .unwrap_or(0);
+            mappings.push(Mapping {
+                abs_idx: idx,
+                target_id: id,
+                version,
+            });
+        }
+        mappings.sort_by_key(|m| m.abs_idx);
+        mappings
+    };
+
+    let dump = IndexDump {
+        user_mappings,
+        node_mappings,
+    };
+    let mut body = Vec::new();
+    if let Err(e) = dump.encode(&mut body) {
+        warn!("bootstrap: INDEX_DUMP encode failed: {e}");
+        return;
+    }
+
+    if body.len() > 60 * 1024 {
+        // TODO: chunk into multiple INDEX_DUMPs per §8.4.
+        warn!(
+            "bootstrap: INDEX_DUMP oversize ({} bytes), needs chunking — TODO",
+            body.len()
+        );
+        return;
+    }
+
+    let payload_len: u16 = match body.len().try_into() {
+        Ok(n) => n,
+        Err(_) => {
+            warn!("bootstrap: body exceeds u16 range");
+            return;
+        }
+    };
+
+    let header = Header {
+        version: PROTOCOL_VERSION,
+        message_type: RoutingMessage::IndexDump,
+        payload_len,
+    };
+    let mut frame = Vec::with_capacity(4 + body.len());
+    header.encode(&mut frame);
+    frame.extend(&body);
+
+    if let Err(e) = state.tx_outbound.send(OutboundMsg {
+        peer: neighbour,
+        transport,
+        bytes: frame,
+    }) {
+        warn!("bootstrap: outbound send failed for {neighbour:?}: {e}");
     }
 }
