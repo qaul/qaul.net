@@ -69,6 +69,10 @@ pub async fn run(cli: Cli, refresh_secs: u64) -> Result<(), Box<dyn std::error::
     let mut terminal = Terminal::new(backend)?;
 
     let mut app = App::new();
+    // Paint the frame skeleton immediately: the priming refresh below
+    // performs network round-trips, and until it returns the user
+    // would otherwise stare at a blank alternate screen.
+    terminal.draw(|f| ui::draw(f, &app))?;
     // Prime data on launch
     refresh(&mut app, &connect, timeout).await;
 
@@ -234,14 +238,14 @@ async fn refresh(
         Ok(feed) => app.feed = feed,
         Err(e) => app.push_event(format!("feed fetch failed: {e}")),
     }
-    match data::fetch_dtn_state(connect, timeout).await {
+    match data::fetch_dtn_state(connect, timeout, &app.default_user_id).await {
         Ok(state) => {
             app.record_unconfirmed(state.unconfirmed_count);
             app.dtn_state = Some(state);
         }
         Err(e) => app.push_event(format!("dtn state fetch failed: {e}")),
     }
-    match data::fetch_dtn_config(connect, timeout).await {
+    match data::fetch_dtn_config(connect, timeout, &app.default_user_id).await {
         Ok(cfg) => app.dtn_config = Some(cfg),
         Err(e) => app.push_event(format!("dtn config fetch failed: {e}")),
     }
