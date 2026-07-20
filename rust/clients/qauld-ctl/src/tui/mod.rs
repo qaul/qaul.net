@@ -7,7 +7,7 @@
 //! ratatui / crossterm deps entirely.
 
 use std::io;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use crossterm::{
     event::{
@@ -62,6 +62,41 @@ pub async fn run(cli: Cli, refresh_secs: u64) -> Result<(), Box<dyn std::error::
         });
     }
 
+    // Background refresh: a task fans out every polled fetch
+    // concurrently (never on the render loop) and posts a `Snapshot`
+    // into this channel. A slow or hung RPC can no longer stall input
+    // or redraws — the loop simply keeps painting the last snapshot.
+    let (snapshot_tx, mut snapshot_rx) = tokio::sync::mpsc::unbounded_channel::<data::Snapshot>();
+    // Manual-refresh trigger (`r` key, and after sending a feed post).
+    let (refresh_tx, mut refresh_rx) = tokio::sync::mpsc::unbounded_channel::<()>();
+    {
+        let connect = connect.clone();
+        let refresh_secs = refresh_secs.max(1);
+        tokio::spawn(async move {
+            // The poll floor for crypto events lives with the task (the
+            // sole owner of the poll path); the UI dedups against the
+            // push path, so overlaps are harmless.
+            let mut crypto_since: u64 = 0;
+            let mut interval = tokio::time::interval(Duration::from_secs(refresh_secs));
+            // interval's first tick is immediate → prime without blocking
+            loop {
+                tokio::select! {
+                    _ = interval.tick() => {}
+                    _ = refresh_rx.recv() => {}
+                }
+                let snap = data::refresh_once(&connect, timeout, crypto_since).await;
+                if let Ok(ref events) = snap.crypto_events {
+                    for e in events {
+                        crypto_since = crypto_since.max(e.timestamp_ms);
+                    }
+                }
+                if snapshot_tx.send(snap).is_err() {
+                    break; // UI gone
+                }
+            }
+        });
+    }
+
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
@@ -69,24 +104,18 @@ pub async fn run(cli: Cli, refresh_secs: u64) -> Result<(), Box<dyn std::error::
     let mut terminal = Terminal::new(backend)?;
 
     let mut app = App::new();
-    // Paint the frame skeleton immediately: the priming refresh below
-    // performs network round-trips, and until it returns the user
-    // would otherwise stare at a blank alternate screen.
-    terminal.draw(|f| ui::draw(f, &app))?;
-    // Prime data on launch
-    refresh(&mut app, &connect, timeout).await;
 
     let mut term_events = EventStream::new();
-    let mut next_refresh = Instant::now() + Duration::from_secs(refresh_secs);
     let result = loop {
+        // The frame skeleton renders immediately (even before the first
+        // snapshot lands), so startup never shows a blank alt-screen.
         terminal.draw(|f| ui::draw(f, &app))?;
 
-        let tick = tokio::time::sleep_until(tokio::time::Instant::from_std(next_refresh));
         tokio::select! {
             biased;
             ev = term_events.next() => match ev {
                 Some(Ok(CtEvent::Key(k))) if k.kind == KeyEventKind::Press => {
-                    if let Some(exit) = handle_key(&mut app, k, &connect, timeout).await {
+                    if let Some(exit) = handle_key(&mut app, k, &connect, timeout, &refresh_tx).await {
                         break exit;
                     }
                 }
@@ -97,10 +126,10 @@ pub async fn run(cli: Cli, refresh_secs: u64) -> Result<(), Box<dyn std::error::
             line = event_rx.recv() => if let Some(line) = line {
                 app.push_event_line(line);
             },
-            _ = tick => {
-                refresh(&mut app, &connect, timeout).await;
-                next_refresh = Instant::now() + Duration::from_secs(refresh_secs);
-            }
+            snap = snapshot_rx.recv() => match snap {
+                Some(snap) => apply_snapshot(&mut app, snap),
+                None => {} // refresh task ended; keep the UI up
+            },
         }
     };
 
@@ -124,6 +153,7 @@ async fn handle_key(
     key: KeyEvent,
     connect: &qauld_rpc::transport::ConnectInfo,
     timeout: Duration,
+    refresh_tx: &tokio::sync::mpsc::UnboundedSender<()>,
 ) -> Option<Result<(), Box<dyn std::error::Error>>> {
     // Modal text input wins.
     if app.input_mode == InputMode::Composing {
@@ -141,7 +171,9 @@ async fn handle_key(
                         Ok(()) => app.push_event(format!("feed sent: {body}")),
                         Err(e) => app.push_event(format!("feed send FAILED: {e}")),
                     }
-                    refresh(app, connect, timeout).await;
+                    // Ask the background task to pull the new post in;
+                    // the snapshot arrives on the render loop's channel.
+                    let _ = refresh_tx.send(());
                 }
             }
             KeyCode::Backspace => {
@@ -196,7 +228,9 @@ async fn handle_key(
         }
         KeyCode::Tab => app.next_tab(),
         KeyCode::BackTab => app.prev_tab(),
-        KeyCode::Char('r') => refresh(app, connect, timeout).await,
+        KeyCode::Char('r') => {
+            let _ = refresh_tx.send(());
+        }
         KeyCode::Char('/') => {
             app.input_mode = InputMode::Filtering;
             app.filter.clear();
@@ -218,59 +252,52 @@ async fn handle_key(
     None
 }
 
-async fn refresh(
-    app: &mut App,
-    connect: &qauld_rpc::transport::ConnectInfo,
-    timeout: Duration,
-) {
-    match data::fetch_default_user(connect, timeout).await {
+/// Apply a `Snapshot` from the background refresh task to the app
+/// state. Pure state mutation — no I/O, no awaits — so it never blocks
+/// the render loop. Per-field errors are surfaced in the events pane,
+/// mirroring the old inline refresh exactly.
+fn apply_snapshot(app: &mut App, snap: data::Snapshot) {
+    match snap.default_user {
         Ok(d) => {
             app.node_name = d.label;
             app.default_user_id = d.id_bytes;
         }
         Err(e) => app.push_event(format!("default user fetch failed: {e}")),
     }
-    match data::fetch_users(connect, timeout).await {
+    match snap.users {
         Ok(users) => app.users = users,
         Err(e) => app.push_event(format!("users fetch failed: {e}")),
     }
-    match data::fetch_feed(connect, timeout).await {
+    match snap.feed {
         Ok(feed) => app.feed = feed,
         Err(e) => app.push_event(format!("feed fetch failed: {e}")),
     }
-    match data::fetch_dtn_state(connect, timeout, &app.default_user_id).await {
+    match snap.dtn_state {
         Ok(state) => {
             app.record_unconfirmed(state.unconfirmed_count);
             app.dtn_state = Some(state);
         }
         Err(e) => app.push_event(format!("dtn state fetch failed: {e}")),
     }
-    match data::fetch_dtn_config(connect, timeout, &app.default_user_id).await {
+    match snap.dtn_config {
         Ok(cfg) => app.dtn_config = Some(cfg),
         Err(e) => app.push_event(format!("dtn config fetch failed: {e}")),
     }
-    match data::fetch_network(connect, timeout).await {
+    match snap.network {
         Ok(snapshot) => {
             app.record_network(&snapshot);
             app.network = Some(snapshot);
         }
         Err(e) => app.push_event(format!("network fetch failed: {e}")),
     }
-    match data::fetch_crypto_config(connect, timeout).await {
+    match snap.crypto_config {
         Ok(cfg) => app.crypto_config = Some(cfg),
         Err(e) => app.push_event(format!("crypto config fetch failed: {e}")),
     }
-    let since = app.crypto_event_floor_ms;
-    match data::fetch_crypto_events(connect, timeout, since).await {
-        Ok(events) => {
-            // The `since_ms` filter is inclusive on the daemon side, so
-            // drop anything we've already buffered.
-            let fresh: Vec<_> = events
-                .into_iter()
-                .filter(|e| since == 0 || e.timestamp_ms > since)
-                .collect();
-            app.append_crypto_events(fresh);
-        }
+    match snap.crypto_events {
+        // append_crypto_events dedups against the push path, so events
+        // the daemon's inclusive `since_ms` filter re-sends are dropped.
+        Ok(events) => app.append_crypto_events(events),
         Err(e) => app.push_event(format!("crypto events fetch failed: {e}")),
     }
 }
