@@ -563,6 +563,20 @@ impl Crypto {
         Self::fire_rotation_if_triggered(state, user_account, crypto_account, remote_id);
     }
 
+    /// Whether an inbound transport frame must be refused because it
+    /// arrived on the draining session with a nonce above the peer's
+    /// declared final (learned from the rotation cut-over frames).
+    ///
+    /// Spec: the cut-over ACK references the nonce of the last message
+    /// sent via the old session; after that, no message with a higher
+    /// nonce is accepted on it. While the final nonce is still unknown
+    /// nothing is refused — the peer may legitimately keep sending on
+    /// the old session until it promotes.
+    fn refuse_beyond_final_nonce(meta: &RotationMeta, session_id: u32, nonce: u64) -> bool {
+        Some(session_id) == meta.draining_session_id
+            && matches!(meta.draining_recv_target, Some(target) if nonce > target)
+    }
+
     /// Retire the draining session for `remote_id` iff it is safe to:
     /// the inbound drain is complete (every nonce up to the peer's
     /// declared final has arrived) AND none of this node's outbound
@@ -724,6 +738,33 @@ impl Crypto {
                         );
 
                         let session_id = session.session_id;
+
+                        // Final-nonce boundary: on the draining session,
+                        // frames above the peer's declared final nonce
+                        // are refused (the cut-over ACK fixed the last
+                        // legitimate old-session nonce).
+                        if let Some(meta) = crypto_account.get_rotation_meta(remote_id) {
+                            if message.data.iter().any(|data| {
+                                Self::refuse_beyond_final_nonce(&meta, session_id, data.nonce)
+                            }) {
+                                log::info!(
+                                    "refusing message beyond final nonce on draining session {} from {}",
+                                    session_id,
+                                    remote_id.to_base58()
+                                );
+                                events::record(
+                                    &crypto_account,
+                                    events::RotationEvent {
+                                        kind: events::RotationEventKind::MessageDroppedPostDrain,
+                                        remote_id,
+                                        primary_session_id: meta.primary_session_id,
+                                        draining_session_id: session_id,
+                                        timestamp_ms: 0,
+                                    },
+                                );
+                                return None;
+                            }
+                        }
 
                         // decrypt transport message
                         for data in message.data {
@@ -1476,6 +1517,62 @@ mod phase2_tests {
 
         let meta = acct.get_rotation_meta(remote).unwrap();
         assert_eq!(meta, original);
+    }
+
+    // ── final-nonce boundary refusal ──
+    //
+    // Spec (Crypto Session Rotation Update, 1st July): the cut-over
+    // ACK references the nonce of the last message sent via the old
+    // session, and the receiver "then refuses to accept any additional
+    // message with a higher NONCE" on that session.
+
+    // On the draining session with a known final-nonce target, frames
+    // above the target are refused; frames at or below it are not.
+    #[test]
+    fn refuses_nonce_beyond_declared_final_on_draining() {
+        let meta = RotationMeta {
+            primary_session_id: 100,
+            draining_session_id: Some(50),
+            draining_recv_target: Some(7),
+            draining_recv_base: 0,
+            ..Default::default()
+        };
+        // in-flight tail up to the declared final: accepted
+        assert!(!Crypto::refuse_beyond_final_nonce(&meta, 50, 6));
+        assert!(!Crypto::refuse_beyond_final_nonce(&meta, 50, 7));
+        // beyond the declared final: refused
+        assert!(Crypto::refuse_beyond_final_nonce(&meta, 50, 8));
+        assert!(Crypto::refuse_beyond_final_nonce(&meta, 50, u64::MAX));
+    }
+
+    // While the final nonce is not yet known (ACK not yet received),
+    // nothing is refused — the peer may legitimately still be sending
+    // on the old session before it promotes.
+    #[test]
+    fn no_refusal_while_final_nonce_unknown() {
+        let meta = RotationMeta {
+            primary_session_id: 100,
+            draining_session_id: Some(50),
+            draining_recv_target: None,
+            draining_recv_base: 0,
+            ..Default::default()
+        };
+        assert!(!Crypto::refuse_beyond_final_nonce(&meta, 50, u64::MAX));
+    }
+
+    // The boundary only applies to the draining session — the primary
+    // and unrelated sessions are never refused by it.
+    #[test]
+    fn refusal_only_applies_to_draining_session() {
+        let meta = RotationMeta {
+            primary_session_id: 100,
+            draining_session_id: Some(50),
+            draining_recv_target: Some(7),
+            draining_recv_base: 0,
+            ..Default::default()
+        };
+        assert!(!Crypto::refuse_beyond_final_nonce(&meta, 100, 999));
+        assert!(!Crypto::refuse_beyond_final_nonce(&meta, 99, 999));
     }
 }
 
