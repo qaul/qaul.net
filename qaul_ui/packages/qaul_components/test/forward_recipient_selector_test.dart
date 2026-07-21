@@ -163,4 +163,57 @@ void main() {
     expect(indicatorRect.left, lessThan(avatarRect.right));
     expect(indicatorRect.top, lessThan(avatarRect.bottom));
   });
+
+  testWidgets('renders and wires the forwarding header', (tester) async {
+    var backedOut = false;
+    var openedMore = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ForwardRecipientSelector(
+          recipients: recipients,
+          onRecipientSelected: (_) {},
+          onSearchChanged: (_) {},
+          onCancel: () => backedOut = true,
+          onMore: () => openedMore = true,
+        ),
+      ),
+    );
+
+    expect(find.text('Forward message to:'), findsOneWidget);
+    await tester.tap(find.byTooltip('Back'));
+    await tester.tap(find.byTooltip('More options'));
+
+    expect(backedOut, isTrue);
+    expect(openedMore, isTrue);
+  });
+
+  testWidgets('header blends into the background in both themes', (
+    tester,
+  ) async {
+    for (final brightness in Brightness.values) {
+      final expectedColor = brightness == Brightness.dark
+          ? Colors.black
+          : Colors.white;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Theme(
+            data: ThemeData(brightness: brightness),
+            child: ForwardRecipientSelector(
+              recipients: recipients,
+              onRecipientSelected: (_) {},
+              onSearchChanged: (_) {},
+              onCancel: () {},
+            ),
+          ),
+        ),
+      );
+
+      final appBar = tester.widget<AppBar>(find.byType(AppBar));
+      final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+      expect(appBar.backgroundColor, expectedColor);
+      expect(scaffold.backgroundColor, expectedColor);
+      expect(appBar.elevation, 0);
+      expect((appBar.shape! as Border).bottom.style, BorderStyle.none);
+    }
+  });
 }

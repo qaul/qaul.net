@@ -38,6 +38,7 @@ class ForwardRecipientSelector extends StatefulWidget {
     this.initialSelectedRecipientId,
     this.initialSearchOpen = false,
     this.onSearchFilterSelected,
+    this.onMore,
     this.title = 'Forward message to:',
   });
 
@@ -46,6 +47,7 @@ class ForwardRecipientSelector extends StatefulWidget {
   final ValueChanged<String> onSearchChanged;
   final VoidCallback onCancel;
   final ValueChanged<ForwardSearchFilter>? onSearchFilterSelected;
+  final VoidCallback? onMore;
   final String? initialSelectedRecipientId;
   final bool initialSearchOpen;
   final String title;
@@ -83,21 +85,44 @@ class _ForwardRecipientSelectorState extends State<ForwardRecipientSelector> {
     final publicRecipients = _ofKind(ForwardRecipientKind.public);
     final users = _ofKind(ForwardRecipientKind.user);
     final groups = _ofKind(ForwardRecipientKind.group);
+    final backgroundColor = Theme.of(context).brightness == Brightness.dark
+        ? Colors.black
+        : Colors.white;
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
+        backgroundColor: backgroundColor,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        shape: const Border(),
         leading: IconButton(
           tooltip: 'Back',
           onPressed: widget.onCancel,
           icon: const Icon(Icons.arrow_back),
         ),
-        title: Text(widget.title),
+        actions: [
+          IconButton(
+            tooltip: 'More options',
+            onPressed: widget.onMore ?? () {},
+            icon: const Icon(Icons.more_vert),
+          ),
+        ],
       ),
       body: Stack(
         children: [
           ListView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
             children: [
+              Text(
+                widget.title,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 12),
               if (publicRecipients.isNotEmpty) ...[
                 _section(context, 'Public', publicRecipients),
                 const Divider(height: 28),

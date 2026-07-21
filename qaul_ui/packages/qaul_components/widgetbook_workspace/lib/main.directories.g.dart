@@ -12,6 +12,8 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:qaul_components_widgetbook/use_cases/design/account/account_management.dart'
     as _qaul_components_widgetbook_use_cases_design_account_account_management;
+import 'package:qaul_components_widgetbook/use_cases/design/message_forwarding/message_forwarding.dart'
+    as _qaul_components_widgetbook_use_cases_design_message_forwarding_message_forwarding;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_footer.dart'
     as _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_header.dart'
@@ -40,6 +42,22 @@ final directories = <_widgetbook.WidgetbookNode>[
   _widgetbook.WidgetbookCategory(
     name: 'design',
     children: [
+      _widgetbook.WidgetbookFolder(
+        name: 'Message forwarding',
+        children: [
+          _widgetbook.WidgetbookComponent(
+            name: 'ForwardRecipientSelector',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Recipient selection with message',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_message_forwarding_message_forwarding
+                        .buildMessageForwardingFlowUseCase,
+              ),
+            ],
+          ),
+        ],
+      ),
       _widgetbook.WidgetbookFolder(
         name: 'account',
         children: [
