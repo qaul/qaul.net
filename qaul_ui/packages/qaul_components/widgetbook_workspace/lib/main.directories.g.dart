@@ -138,22 +138,22 @@ final directories = <_widgetbook.WidgetbookNode>[
             name: 'ChatMessageContextMenu',
             useCases: [
               _widgetbook.WidgetbookUseCase(
-                name: 'Dark',
+                name: 'Default',
                 builder:
                     _qaul_components_widgetbook_use_cases_components_chat_chat_message_context_menu
-                        .buildDarkContextMenuUseCase,
+                        .buildContextMenuUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
-                name: 'Disabled and hidden actions',
+                name: 'Disabled and hidden elements',
                 builder:
                     _qaul_components_widgetbook_use_cases_components_chat_chat_message_context_menu
                         .buildRestrictedContextMenuUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
-                name: 'Light',
+                name: 'Many paginated actions',
                 builder:
                     _qaul_components_widgetbook_use_cases_components_chat_chat_message_context_menu
-                        .buildLightContextMenuUseCase,
+                        .buildManyActionsContextMenuUseCase,
               ),
             ],
           ),

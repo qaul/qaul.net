@@ -4,68 +4,105 @@ import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
 import '../../../support/widgetbook_preview.dart';
 
-List<ChatMessageQuickReaction> _reactions() => [
-  ChatMessageQuickReaction(
-    child: const Text('❤️', style: TextStyle(fontSize: 27)),
-    semanticLabel: 'Love',
+ChatMessageReactionRow _reactions({bool enabled = true}) {
+  return ChatMessageReactionRow(
+    enabled: enabled,
+    reactions: [
+      ChatMessageQuickReaction(
+        child: const Text('❤️', style: TextStyle(fontSize: 27)),
+        semanticLabel: 'Love',
+        onPressed: () {},
+      ),
+      ChatMessageQuickReaction(
+        child: const Text('👍', style: TextStyle(fontSize: 27)),
+        semanticLabel: 'Like',
+        onPressed: () {},
+      ),
+      ChatMessageQuickReaction(
+        child: const Text('🔥', style: TextStyle(fontSize: 27)),
+        semanticLabel: 'Fire',
+        onPressed: () {},
+      ),
+    ],
+    onAddReaction: () {},
+  );
+}
+
+List<ChatMessageContextMenuElement> _paginatedElements() => [
+  _reactions(),
+  ChatMessageContextMenuAction.reply(onPressed: () {}),
+  ChatMessageContextMenuAction.forward(onPressed: () {}),
+  ChatMessageContextMenuAction.edit(onEdit: () {}),
+  ChatMessageContextMenuAction(
+    id: 'info',
+    label: 'Info',
+    iconAsset: ChatMessageContextMenuIcons.info,
     onPressed: () {},
   ),
-  ChatMessageQuickReaction(
-    child: const Text('👍', style: TextStyle(fontSize: 27)),
-    semanticLabel: 'Like',
+  ChatMessageContextMenuAction(
+    id: 'share',
+    label: 'Share',
+    iconAsset: ChatMessageContextMenuIcons.share,
     onPressed: () {},
   ),
-  ChatMessageQuickReaction(
-    child: const Text('🔥', style: TextStyle(fontSize: 27)),
-    semanticLabel: 'Fire',
+  ChatMessageContextMenuAction(
+    id: 'copy',
+    label: 'Copy',
+    iconAsset: ChatMessageContextMenuIcons.copy,
+    onPressed: () {},
+  ),
+  ChatMessageContextMenuAction(
+    id: 'delete',
+    label: 'Delete',
+    iconAsset: ChatMessageContextMenuIcons.delete,
     onPressed: () {},
   ),
 ];
 
-Widget _preview(BuildContext context) {
+@widgetbook.UseCase(name: 'Default', type: ChatMessageContextMenu)
+Widget buildContextMenuUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(
     context,
-    child: ChatMessageContextMenu(
-      quickReactions: _reactions(),
-      onAddReaction: () {},
-      onReply: () {},
-      onForward: () {},
-      onEdit: () {},
-      onDismiss: () {},
-    ),
-  );
-}
-
-@widgetbook.UseCase(name: 'Dark', type: ChatMessageContextMenu)
-Widget buildDarkContextMenuUseCase(BuildContext context) {
-  return Theme(
-    data: QaulAppTheme.dark,
-    child: const Builder(builder: _preview),
-  );
-}
-
-@widgetbook.UseCase(name: 'Light', type: ChatMessageContextMenu)
-Widget buildLightContextMenuUseCase(BuildContext context) {
-  return Theme(
-    data: QaulAppTheme.light,
-    child: const Builder(builder: _preview),
+    child: ChatMessageContextMenu(elements: _paginatedElements()),
   );
 }
 
 @widgetbook.UseCase(
-  name: 'Disabled and hidden actions',
+  name: 'Disabled and hidden elements',
   type: ChatMessageContextMenu,
 )
 Widget buildRestrictedContextMenuUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(
     context,
     child: ChatMessageContextMenu(
-      quickReactions: _reactions(),
-      onReply: () {},
-      showForward: false,
-      editEnabled: false,
-      onEdit: () {},
-      onDismiss: () {},
+      elements: [
+        _reactions(enabled: false),
+        ChatMessageContextMenuAction.reply(onPressed: () {}),
+        ChatMessageContextMenuAction.forward(hidden: true, onPressed: () {}),
+        ChatMessageContextMenuAction.edit(enabled: false, onEdit: () {}),
+      ],
+    ),
+  );
+}
+
+@widgetbook.UseCase(
+  name: 'Many paginated actions',
+  type: ChatMessageContextMenu,
+)
+Widget buildManyActionsContextMenuUseCase(BuildContext context) {
+  return widgetbookChatComponentFrame(
+    context,
+    child: ChatMessageContextMenu(
+      elements: [
+        _reactions(),
+        for (var index = 1; index <= 21; index++)
+          ChatMessageContextMenuAction(
+            id: 'action-$index',
+            label: 'Action $index',
+            iconAsset: ChatMessageContextMenuIcons.info,
+            onPressed: () {},
+          ),
+      ],
     ),
   );
 }
