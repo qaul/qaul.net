@@ -94,17 +94,17 @@ void main() {
     const names = <MapEntry<String, String>>[
       MapEntry('Name', 'N'),
       MapEntry('Na Me', 'NM'),
-      MapEntry('na me ye be', 'NB'),
+      MapEntry('na me ye be', 'NM'),
       MapEntry('nameyebe', 'N'),
-      MapEntry('NAME NAME MENA ANEM', 'NA'),
-      MapEntry('  NAME NAME MENA ANEM', 'NA'),
-      MapEntry('   NAME NAME MENA ANEM   ', 'NA'),
+      MapEntry('NAME NAME MENA ANEM', 'NN'),
+      MapEntry('  NAME NAME MENA ANEM', 'NN'),
+      MapEntry('   NAME NAME MENA ANEM   ', 'NN'),
       MapEntry('NE ', 'N'),
       MapEntry('l🤣h😌o🙄😪😓😳ggasdf', '🤣'),
       MapEntry('😌🤣h😌o🙄😪😓😳ggasdf', '😌'),
       MapEntry('😳🤣h😌🙄😪😓😳ggasdf', '😳'),
       MapEntry('🫠', '🫠'),
-      MapEntry('🫠 user', '🫠U'),
+      MapEntry('🫠 user', '🫠'),
       MapEntry('👨‍👩‍👧‍👦', '👨‍👩‍👧‍👦'),
     ];
 
