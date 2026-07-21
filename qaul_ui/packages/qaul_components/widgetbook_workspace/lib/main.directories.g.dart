@@ -10,6 +10,8 @@
 // **************************************************************************
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:qaul_components_widgetbook/use_cases/components/chat/chat_message_context_menu.dart'
+    as _qaul_components_widgetbook_use_cases_components_chat_chat_message_context_menu;
 import 'package:qaul_components_widgetbook/use_cases/design/account/account_management.dart'
     as _qaul_components_widgetbook_use_cases_design_account_account_management;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_footer.dart'
@@ -129,6 +131,29 @@ final directories = <_widgetbook.WidgetbookNode>[
                 builder:
                     _qaul_components_widgetbook_use_cases_design_components_chat_chat_header
                         .buildChatHeaderGroupUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookComponent(
+            name: 'ChatMessageContextMenu',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Default',
+                builder:
+                    _qaul_components_widgetbook_use_cases_components_chat_chat_message_context_menu
+                        .buildContextMenuUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Disabled and hidden elements',
+                builder:
+                    _qaul_components_widgetbook_use_cases_components_chat_chat_message_context_menu
+                        .buildRestrictedContextMenuUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Many paginated actions',
+                builder:
+                    _qaul_components_widgetbook_use_cases_components_chat_chat_message_context_menu
+                        .buildManyActionsContextMenuUseCase,
               ),
             ],
           ),

@@ -28,4 +28,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icons/
+    - assets/icons/sub_menu/
     - assets/logo/
