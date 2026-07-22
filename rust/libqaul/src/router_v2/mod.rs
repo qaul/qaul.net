@@ -15,15 +15,22 @@ use std::{
     time::Instant,
 };
 
-use libp2p::PeerId;
+use libp2p::{identity::Keypair, PeerId};
 use tokio::sync::mpsc;
 
 use crate::{
-    connections::ConnectionModule, router_v2::{
-        codec::{CodecError, messages::NodeManifest}, index::{
+    connections::ConnectionModule,
+    router_v2::{
+        codec::{messages::NodeManifest, CodecError},
+        identity::Multikey,
+        index::{
             IndexAllocator, IndexDictionary, MirrorIndexDictionary, ReintroductionTracker, Space,
-        }, manifest::{ChunkAssembler, Manifest}, seq::SeqNum, table::{Nodes, RoutingTable, Users},
-    }, storage::configuration::RoutingV2Options,
+        },
+        manifest::{ChunkAssembler, Manifest},
+        seq::SeqNum,
+        table::{Nodes, RoutingTable, Users},
+    },
+    storage::configuration::RoutingV2Options,
 };
 
 pub mod codec;
@@ -141,10 +148,17 @@ pub struct RouterV2State {
     pub chunk_assembler: RwLock<ChunkAssembler>,
     /// Manifests accepted at receive time, pending relay to other neighbours.
     pub manifest_relay_queue: RwLock<HashMap<[u8; 8], (Vec<NodeManifest>, Sphere)>>,
+    pub host_keypair: Keypair,
+    pub host_mk: Multikey,
+    pub last_manifest_emission_ms: RwLock<u64>,
 }
 
 impl RouterV2State {
-    pub fn new(host_node_id: [u8; 8]) -> (Self, mpsc::UnboundedReceiver<OutboundMsg>) {
+    pub fn new(
+        host_node_id: [u8; 8],
+        host_keypair: Keypair,
+        host_multikey: Multikey,
+    ) -> (Self, mpsc::UnboundedReceiver<OutboundMsg>) {
         let (tx, rx) = mpsc::unbounded_channel::<OutboundMsg>();
         let state = Self {
             options: RoutingV2Options::default(),
@@ -162,7 +176,10 @@ impl RouterV2State {
             relay_queue: RwLock::new(HashSet::new()),
             manifest: RwLock::new(Manifest::new()),
             chunk_assembler: RwLock::new(ChunkAssembler::new()),
-            manifest_relay_queue: RwLock::new(HashMap::new())
+            manifest_relay_queue: RwLock::new(HashMap::new()),
+            host_keypair,
+            host_mk: host_multikey,
+            last_manifest_emission_ms: RwLock::new(0u64)
         };
         (state, rx)
     }

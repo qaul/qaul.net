@@ -21,7 +21,9 @@ pub fn fresh_multikey() -> Multikey {
 }
 
 pub fn fresh_state() -> (RouterV2State, tokio::sync::mpsc::UnboundedReceiver<OutboundMsg>) {
-    RouterV2State::new([0; 8])
+    let host_kp = Keypair::generate_ed25519();
+    let host_mk = Multikey::from(host_kp.public());
+    RouterV2State::new([0; 8], host_kp, host_mk)
 }
 
 pub fn fresh_peer() -> PeerId {

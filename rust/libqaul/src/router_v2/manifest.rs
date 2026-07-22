@@ -25,6 +25,7 @@ use tracing::debug;
 use crate::router_v2::{
     codec::messages::{ManifestEntry, NodeManifest},
     identity::{delegation_signing_input, ChunkSigningCtx, Multikey},
+    RouterV2State, Sphere,
 };
 
 const ENTRY_BYTES: usize = 80;
@@ -664,4 +665,29 @@ mod tests {
         assert_eq!(completed.entries.len(), 1);
         assert_eq!(completed.entries[0].user_id, [7; 8]);
     }
+}
+
+pub fn enqueue_full_manifest(
+    state: &RouterV2State,
+    now: u64,
+    bypass_rate_limit: bool,
+) -> Result<(), ManifestError> {
+    let mut manifest = state.manifest.write().unwrap();
+    if !manifest.is_gateway && manifest.entries().is_empty() {
+        return Ok(());
+    }
+
+    let mut last_manifest_emission_ms = state.last_manifest_emission_ms.write().unwrap();
+    if !bypass_rate_limit && now.saturating_sub(*last_manifest_emission_ms) < 60_000 {
+        return Ok(());
+    }
+
+    manifest.bump_version();
+    let chunks = manifest.build_chunks(0, &state.host_keypair, &state.host_mk.encode())?;
+    
+    let mut manifest_relay = state.manifest_relay_queue.write().unwrap();
+    manifest_relay.insert(state.host_mk.to_id(), (chunks, Sphere::Local));
+    
+    *last_manifest_emission_ms = now;
+    Ok(())
 }
