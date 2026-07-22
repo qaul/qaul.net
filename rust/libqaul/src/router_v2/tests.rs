@@ -3757,7 +3757,7 @@ mod on_neighbour_connect {
         let (state, mut rx) = fresh_state();
         let peer = fresh_peer();
 
-        on_neighbour_connect(&state, peer, ConnectionModule::Lan);
+        on_neighbour_connect(&state, peer, ConnectionModule::Lan, 1_000);
 
         let msg = rx.try_recv().expect("bootstrap must always emit");
         assert_eq!(msg.peer, peer);
@@ -3791,7 +3791,7 @@ mod on_neighbour_connect {
         install_node(&state, node_id, 99, false);
         bind_own_dict(&state, Space::Node, 8, node_id);
 
-        on_neighbour_connect(&state, peer, ConnectionModule::Lan);
+        on_neighbour_connect(&state, peer, ConnectionModule::Lan, 1_000);
 
         let msg = rx.try_recv().expect("one outbound");
         let dump = decode_dump_body(&msg.bytes);
@@ -3829,7 +3829,7 @@ mod on_neighbour_connect {
             bind_own_dict(&state, Space::User, *idx, id);
         }
 
-        on_neighbour_connect(&state, peer, ConnectionModule::Lan);
+        on_neighbour_connect(&state, peer, ConnectionModule::Lan, 1_000);
 
         let msg = rx.try_recv().expect("one outbound");
         let dump = decode_dump_body(&msg.bytes);
@@ -3846,7 +3846,7 @@ mod on_neighbour_connect {
         install_user(&state, [1; 8], 0);
         bind_own_dict(&state, Space::User, 7, [1; 8]);
 
-        on_neighbour_connect(&state, peer, ConnectionModule::Ble1m);
+        on_neighbour_connect(&state, peer, ConnectionModule::Ble1m, 1_000);
 
         assert!(rx.try_recv().is_err(), "BLE must not receive INDEX_DUMP");
     }
@@ -3859,7 +3859,7 @@ mod on_neighbour_connect {
         install_user(&state, [1; 8], 0);
         bind_own_dict(&state, Space::User, 7, [1; 8]);
 
-        on_neighbour_connect(&state, peer, ConnectionModule::BleCoded);
+        on_neighbour_connect(&state, peer, ConnectionModule::BleCoded, 1_000);
 
         assert!(rx.try_recv().is_err(), "BLE-coded must not receive INDEX_DUMP");
     }
@@ -3874,7 +3874,7 @@ mod on_neighbour_connect {
         // Bind but don't install the User.
         bind_own_dict(&state, Space::User, 5, [77; 8]);
 
-        on_neighbour_connect(&state, peer, ConnectionModule::Lan);
+        on_neighbour_connect(&state, peer, ConnectionModule::Lan, 1_000);
 
         let msg = rx.try_recv().expect("one outbound");
         let dump = decode_dump_body(&msg.bytes);
@@ -3889,7 +3889,7 @@ mod on_neighbour_connect {
         let (state, mut rx) = fresh_state();
         let peer = fresh_peer();
 
-        on_neighbour_connect(&state, peer, ConnectionModule::Lan);
+        on_neighbour_connect(&state, peer, ConnectionModule::Lan, 1_000);
 
         let msg = rx.try_recv().expect("one outbound");
         let (header, _) = Header::decode(&msg.bytes).expect("frame header");

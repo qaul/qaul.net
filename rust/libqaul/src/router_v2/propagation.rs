@@ -17,6 +17,7 @@ use crate::{
             Header, RoutingMessage, PROTOCOL_VERSION,
         },
         index::Space,
+        manifest::enqueue_full_manifest,
         table::RoutingEntry,
         OutboundMsg, RouterV2State, Sphere,
     },
@@ -334,7 +335,12 @@ pub fn tick_relay_manifests(state: &RouterV2State) {
 }
 
 /// Sends an INDEX_DUMP when a neighbour connects
-pub fn on_neighbour_connect(state: &RouterV2State, neighbour: PeerId, transport: ConnectionModule) {
+pub fn on_neighbour_connect(
+    state: &RouterV2State,
+    neighbour: PeerId,
+    transport: ConnectionModule,
+    now: u64,
+) {
     if matches!(
         transport,
         ConnectionModule::Ble1m | ConnectionModule::BleCoded
@@ -424,5 +430,12 @@ pub fn on_neighbour_connect(state: &RouterV2State, neighbour: PeerId, transport:
         bytes: frame,
     }) {
         warn!("bootstrap: outbound send failed for {neighbour:?}: {e}");
+    }
+
+    let manifest = state.manifest.read().unwrap();
+    if manifest.is_gateway {
+        if let Err(e) = enqueue_full_manifest(state, now, true) {
+            warn!("bootstrap: failed to send full manifest: {e}");
+        }
     }
 }
