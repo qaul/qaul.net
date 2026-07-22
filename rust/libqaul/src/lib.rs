@@ -173,10 +173,12 @@ impl QaulState {
         router_state: Arc<router::RouterState>,
         default_configs: BTreeMap<String, String>,
     ) -> Self {
-        let host_node_id = Multikey::from(node_identity.keys.public()).to_id();        
+        let host_mk = Multikey::from(node_identity.keys.public());
+        let host_node_id = host_mk.to_id();
+        let host_kp = node_identity.keys.clone();
         Self {
             router: std::sync::RwLock::new(router_state),
-            router_v2: Some(Arc::new(RouterV2State::new(host_node_id).0)),
+            router_v2: Some(Arc::new(RouterV2State::new(host_node_id, host_kp, host_mk).0)),
             services: services::ServicesState::new(),
             user_accounts,
             auth: AuthenticationState::new(),
