@@ -67,7 +67,7 @@ pub fn ping_event(state: &crate::QaulState, event: Event, module: ConnectionModu
             );
             let rs = state.get_router();
             let micros = rtt_micros.unwrap_or(u32::MAX);
-            Neighbours::update_node(state, &rs, module, peer, micros);
+            Neighbours::update_node(state, &rs, module, peer, micros, None);
         }
         // Event {
         //     peer,

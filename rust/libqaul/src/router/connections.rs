@@ -120,8 +120,8 @@ impl ConnectionTableState {
         }
 
         // try Bluetooth module
-        if let Some(rtt) = neighbours_state.get_rtt(&neighbour_id, &ConnectionModule::Ble) {
-            self.fill_received_routing_info(ConnectionModule::Ble, neighbour_id, rtt, info, config);
+        if let Some(rtt) = neighbours_state.get_rtt(&neighbour_id, &ConnectionModule::Ble1m) {
+            self.fill_received_routing_info(ConnectionModule::Ble1m, neighbour_id, rtt, info, config);
         }
     }
 
@@ -175,7 +175,7 @@ impl ConnectionTableState {
         let connection_table_lock = match module {
             ConnectionModule::Internet => &self.internet,
             ConnectionModule::Lan => &self.lan,
-            ConnectionModule::Ble => &self.ble,
+            ConnectionModule::Ble1m | ConnectionModule::BleCoded => &self.ble,
             ConnectionModule::Local | ConnectionModule::None => return,
         };
 
@@ -291,7 +291,7 @@ impl ConnectionTableState {
         table = self.calculate_intermediary_table_instance(table, ConnectionModule::Lan, config);
         table =
             self.calculate_intermediary_table_instance(table, ConnectionModule::Internet, config);
-        table = self.calculate_intermediary_table_instance(table, ConnectionModule::Ble, config);
+        table = self.calculate_intermediary_table_instance(table, ConnectionModule::Ble1m, config);
 
         table
     }
@@ -306,7 +306,7 @@ impl ConnectionTableState {
         let connection_table_lock = match conn {
             ConnectionModule::Internet => &self.internet,
             ConnectionModule::Lan => &self.lan,
-            ConnectionModule::Ble => &self.ble,
+            ConnectionModule::Ble1m | ConnectionModule::BleCoded => &self.ble,
             ConnectionModule::Local | ConnectionModule::None => return table,
         };
 
@@ -446,8 +446,8 @@ impl ConnectionTable {
         }
 
         // try Bluetooth module
-        if let Some(rtt) = router.neighbours.get_rtt(&neighbour_id, &ConnectionModule::Ble) {
-            Self::fill_received_routing_info(router, ConnectionModule::Ble, neighbour_id, rtt, info);
+        if let Some(rtt) = router.neighbours.get_rtt(&neighbour_id, &ConnectionModule::Ble1m) {
+            Self::fill_received_routing_info(router, ConnectionModule::Ble1m, neighbour_id, rtt, info);
         }
     }
 
@@ -521,7 +521,7 @@ impl ConnectionTable {
         match module {
             ConnectionModule::Internet => connection_table = router.connections.internet.write().unwrap(),
             ConnectionModule::Lan => connection_table = router.connections.lan.write().unwrap(),
-            ConnectionModule::Ble => connection_table = router.connections.ble.write().unwrap(),
+            ConnectionModule::Ble1m | ConnectionModule::BleCoded => connection_table = router.connections.ble.write().unwrap(),
             ConnectionModule::Local => return,
             ConnectionModule::None => return,
         }
@@ -617,7 +617,7 @@ impl ConnectionTable {
         table = Self::calculate_intermediary_table(router, table, ConnectionModule::Internet);
 
         // calculate from ble module
-        table = Self::calculate_intermediary_table(router, table, ConnectionModule::Ble);
+        table = Self::calculate_intermediary_table(router, table, ConnectionModule::Ble1m);
 
         // set table as new active routing table
         router.routing_table.set(table);
@@ -647,7 +647,7 @@ impl ConnectionTable {
         match conn {
             ConnectionModule::Internet => connection_table = router.connections.internet.write().unwrap(),
             ConnectionModule::Lan => connection_table = router.connections.lan.write().unwrap(),
-            ConnectionModule::Ble => connection_table = router.connections.ble.write().unwrap(),
+            ConnectionModule::Ble1m | ConnectionModule::BleCoded => connection_table = router.connections.ble.write().unwrap(),
             ConnectionModule::Local => return table,
             ConnectionModule::None => return table,
         }
@@ -794,7 +794,7 @@ impl ConnectionTable {
         let connections_list = proto::ConnectionsList {
             lan: Self::rpc_create_connection_module_list(router, ConnectionModule::Lan),
             internet: Self::rpc_create_connection_module_list(router, ConnectionModule::Internet),
-            ble: Self::rpc_create_connection_module_list(router, ConnectionModule::Ble),
+            ble: Self::rpc_create_connection_module_list(router, ConnectionModule::Ble1m),
             local: Self::rpc_create_connection_module_list(router, ConnectionModule::Local),
         };
 
@@ -829,7 +829,7 @@ impl ConnectionTable {
         match conn {
             ConnectionModule::Lan => connection_table = router.connections.lan.read().unwrap(),
             ConnectionModule::Internet => connection_table = router.connections.internet.read().unwrap(),
-            ConnectionModule::Ble => connection_table = router.connections.ble.read().unwrap(),
+            ConnectionModule::Ble1m | ConnectionModule::BleCoded => connection_table = router.connections.ble.read().unwrap(),
             ConnectionModule::Local => return Vec::new(),
             ConnectionModule::None => return Vec::new(),
         }

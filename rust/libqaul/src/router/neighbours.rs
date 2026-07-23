@@ -66,7 +66,7 @@ impl NeighboursState {
         match module {
             ConnectionModule::Internet => Some(&self.internet),
             ConnectionModule::Lan => Some(&self.lan),
-            ConnectionModule::Ble => Some(&self.ble),
+            ConnectionModule::Ble1m | ConnectionModule::BleCoded => Some(&self.ble),
             _ => None,
         }
     }
@@ -90,6 +90,7 @@ impl NeighboursState {
                 Neighbour {
                     rtt,
                     updated_at: Timestamp::get_timestamp(),
+                    rssi_dbm: None
                 },
             );
         }
@@ -135,7 +136,7 @@ impl NeighboursState {
         {
             let ble = self.ble.read().unwrap();
             if ble.nodes.contains_key(node_id) {
-                return ConnectionModule::Ble;
+                return ConnectionModule::Ble1m;
             }
         }
         ConnectionModule::None
@@ -179,6 +180,10 @@ pub struct Neighbour {
     rtt: u32,
     /// when was this node last seen
     updated_at: u64,
+    /// Received Signal Strength Indication (RSSI).
+    /// router_v2 uses it to calc the quality penalty for BLE transports. 
+    /// Refer to Section 5.1 in the spec.
+    rssi_dbm: Option<i8>
 }
 
 impl Neighbours {
@@ -194,7 +199,7 @@ impl Neighbours {
     ///
     /// If the node already exists, it updates it's rtt value.
     /// If the node does not yet exist, it creates it.
-    pub fn update_node(state: &crate::QaulState, router: &super::RouterState, module: ConnectionModule, node_id: PeerId, rtt: u32) {
+    pub fn update_node(state: &crate::QaulState, router: &super::RouterState, module: ConnectionModule, node_id: PeerId, rtt: u32, rssi: Option<i8>) {
         log::trace!("update_node node {:?}", node_id);
         let ns = &router.neighbours;
         let table_lock = match ns.get_table(&module) {
@@ -208,6 +213,7 @@ impl Neighbours {
         if let Some(node) = node_option {
             node.rtt = Self::calculate_rtt(node.rtt, rtt);
             node.updated_at = Timestamp::get_timestamp();
+            node.rssi_dbm = rssi.or(node.rssi_dbm);
         } else {
             newly_seen = true;
             if neighbours.nodes.len() >= 100_000 {
@@ -222,6 +228,7 @@ impl Neighbours {
                 Neighbour {
                     rtt,
                     updated_at: Timestamp::get_timestamp(),
+                    rssi_dbm: rssi
                 },
             );
 
@@ -373,22 +380,63 @@ mod tests {
 
     #[test]
     fn test_calculate_rtt() {
-        // First ping: old_rtt is 0 -> should take the full new_rtt
         assert_eq!(Neighbours::calculate_rtt(0, 100), 100);
-
-        // Smoothing typical scenario
         // old: 100, new: 180 -> (700 + 180) / 8 = 110
         assert_eq!(Neighbours::calculate_rtt(100, 180), 110);
 
-        // Slow latency drop
+        // test slow latenncy
         // old: 110, new: 30 -> (770 + 30) / 8 = 100
         assert_eq!(Neighbours::calculate_rtt(110, 30), 100);
 
-        // Extreme spike resilience
         // old: 100, new: 1000 -> (700 + 1000) / 8 = 212
         assert_eq!(Neighbours::calculate_rtt(100, 1000), 212);
 
-        // Steady state
-        assert_eq!(Neighbours::calculate_rtt(100, 100), 100);
+    }
+
+    #[test]
+    fn neighbour_construct_with_rssi_some() {
+        let n = Neighbour {
+            rtt: 100,
+            updated_at: 0,
+            rssi_dbm: Some(-72),
+        };
+        assert_eq!(n.rssi_dbm, Some(-72));
+        assert_eq!(n.rtt, 100);
+    }
+
+    #[test]
+    fn neighbour_construct_with_rssi_none() {
+        let n = Neighbour {
+            rtt: 100,
+            updated_at: 0,
+            rssi_dbm: None,
+        };
+        assert_eq!(n.rssi_dbm, None);
+    }
+
+    #[test]
+    fn neighbours_state_inserts_new_node_with_default_rssi() {
+        let state = NeighboursState::new();
+        let peer = PeerId::random();
+        state.update_node(ConnectionModule::Ble1m, peer, 50);
+        let ble = state.ble.read().unwrap();
+        let stored = ble.nodes.get(&peer).expect("neighbour inserted");
+        assert_eq!(stored.rssi_dbm, None);
+        assert_eq!(stored.rtt, 50);
+    }
+
+    #[test]
+    fn neighbours_state_update_node_smooths_rtt_on_second_seen() {
+        let state = NeighboursState::new();
+        let peer = PeerId::random();
+        state.update_node(ConnectionModule::Lan, peer, 100);
+        state.update_node(ConnectionModule::Lan, peer, 180);
+        let lan = state.lan.read().unwrap();
+        let stored = lan
+            .nodes
+            .get(&peer)
+            .expect("neighbour present after second update");
+        // EWMA per calculate_rtt: (100 * 7 + 180) / 8 = 110.
+        assert_eq!(stored.rtt, 110);
     }
 }

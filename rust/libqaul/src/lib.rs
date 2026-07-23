@@ -17,6 +17,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 
+use crate::router_v2::RouterV2State;
+use crate::router_v2::identity::Multikey;
 use crate::rpc::authentication::AuthenticationState;
 use crate::rpc::sys::SysRpcState;
 use crate::rpc::RpcState;
@@ -32,6 +34,7 @@ mod search;
 pub mod services;
 pub mod storage;
 pub mod utilities;
+pub mod router_v2;
 
 use connections::{
     ble::{Ble, BleTransport},
@@ -60,6 +63,7 @@ pub struct QaulState {
     /// Wrapped in RwLock because QaulState is created before Router::init()
     /// populates the real state.
     pub router: std::sync::RwLock<Arc<router::RouterState>>,
+    pub router_v2: Option<Arc<RouterV2State>>,
     /// Services state (messaging, feed, chat, crypto, groups, dtn)
     pub services: services::ServicesState,
     /// User accounts state
@@ -141,6 +145,7 @@ impl QaulState {
             router: std::sync::RwLock::new(Arc::new(router::RouterState::new(
                 config.routing.clone(),
             ))),
+            router_v2: None,
             services: services::ServicesState::new(),
             user_accounts: node::user_accounts::UserAccountsState::new(),
             auth: AuthenticationState::new(),
@@ -168,8 +173,12 @@ impl QaulState {
         router_state: Arc<router::RouterState>,
         default_configs: BTreeMap<String, String>,
     ) -> Self {
+        let host_mk = Multikey::from(node_identity.keys.public());
+        let host_node_id = host_mk.to_id();
+        let host_kp = node_identity.keys.clone();
         Self {
             router: std::sync::RwLock::new(router_state),
+            router_v2: Some(Arc::new(RouterV2State::new(host_node_id, host_kp, host_mk).0)),
             services: services::ServicesState::new(),
             user_accounts,
             auth: AuthenticationState::new(),
@@ -802,7 +811,7 @@ impl Libqaul {
                     if !matches!(msg.incoming_via, ConnectionModule::Internet) {
                         internet.publish_floodsub(&*self.state, msg.topic.clone(), msg.message.clone());
                     }
-                    if !matches!(msg.incoming_via, ConnectionModule::Ble) {
+                    if !matches!(msg.incoming_via, ConnectionModule::Ble1m) {
                         Ble::send_feed_message(&*self.state, msg.topic, msg.message);
                     }
                 }
@@ -952,7 +961,7 @@ impl Libqaul {
                         ConnectionModule::Internet => {
                             internet.send_qaul_messaging_message(&*self.state, neighbour_id, data);
                         }
-                        ConnectionModule::Ble => {
+                        ConnectionModule::Ble1m | ConnectionModule::BleCoded => {
                             Ble::send_messaging_message(&*self.state, neighbour_id, data);
                         }
                         ConnectionModule::Local => {
@@ -988,7 +997,7 @@ impl Libqaul {
         match connection_module {
             ConnectionModule::Lan => lan.send_qaul_info_message(state, neighbour_id, data),
             ConnectionModule::Internet => internet.send_qaul_info_message(state, neighbour_id, data),
-            ConnectionModule::Ble => ble.send_qaul_info_message(state, neighbour_id, data),
+            ConnectionModule::Ble1m | ConnectionModule::BleCoded => ble.send_qaul_info_message(state, neighbour_id, data),
             ConnectionModule::Local => {}
             ConnectionModule::None => {}
         }
