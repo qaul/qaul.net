@@ -99,7 +99,7 @@ fn main() {
 /// Returns only in the daemon child; the parent process has already exited.
 #[cfg(unix)]
 fn daemonize(storage_path: &str) {
-    use daemonize::Daemonize;
+    use daemonix::Daemonize;
 
     let dir = std::path::Path::new(storage_path);
 
@@ -156,7 +156,11 @@ async fn run(cli_arguments: CliArguments, storage_path: String) {
             Some(usr_name) => usr_name.to_string(),
             None => create_default_named(),
         };
-        libqaul::node::user_accounts::UserAccounts::create(&*instance.state, user_name.clone(), None);
+        libqaul::node::user_accounts::UserAccounts::create(
+            &*instance.state,
+            user_name.clone(),
+            None,
+        );
     }
 
     // since we're now starting a socket server, the main thread now has work to do,
