@@ -27,7 +27,7 @@ uuid = { version = "1.13", features = ["v4"] }
 
 # `--daemonize` support (fork into the background). Unix-only.
 [target.'cfg(unix)'.dependencies]
-daemonize = "0.5"
+daemonix = "0.1"
 
 [package.metadata.deb]
 maintainer = "Open Community Projects Association <develop@ocpa.ch>"
