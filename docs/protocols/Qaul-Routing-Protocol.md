@@ -212,7 +212,8 @@ transport remains active. While acting as a gateway, a node:
 1. Composes a manifest of self-delegated and cross-delegated users.
 2. Announces itself in its Local sphere as a node entry rather than as
    a user entry.
-3. Propagates the manifest in both spheres.
+3. Advertises its manifest version in both spheres and serves the
+   manifest on request (Section 10.8).
 
 When every node in a network is a gateway, the sphere model provides no
 compression and the protocol behaves as a flat distance-vector protocol
@@ -336,7 +337,10 @@ are defined in Section 11.5 (the network management sub-protocol).
 Each routing-update introduction (Section 8.3) carries the latest
 known `profile_version` for the introduced ID, so receivers can
 detect when their cached profile is stale and issue a profile
-fetch.
+fetch. For a user reachable only through a gateway's manifest — a
+user in a foreign Local sphere, whose user entry does not cross the
+sphere boundary (Section 2.3) — the `profile_version` is instead
+carried in the manifest entry itself (Section 10.1).
 
 ### 3.5. Indexes
 
@@ -816,14 +820,15 @@ are referenced on the wire by their 8-byte ID (Section 3.3); full
 public keys are not carried in routing messages and are obtained
 through user and node profiles (Section 3.4).
 
-Four message types are defined:
+Five message types are defined:
 
 | Type byte | Name             | Frequency                                                                |
 |-----------|------------------|--------------------------------------------------------------------------|
 | 0x01      | ROUTING_UPDATE   | Every 1 second (relay) or origin                                         |
 | 0x02      | INDEX_DUMP       | On neighbour connect                                                     |
-| 0x03      | NODE_MANIFEST    | Full manifest; on bootstrap, on transition, or as periodic re-sync       |
-| 0x04      | MANIFEST_DELTA   | Incremental manifest update; default emission for changes, rate-limited  |
+| 0x03      | NODE_MANIFEST    | Response to MANIFEST_REQUEST (full sync or delta fallback)               |
+| 0x04      | MANIFEST_DELTA   | Response to MANIFEST_REQUEST (ranged incremental update)                 |
+| 0x05      | MANIFEST_REQUEST | On version-advertisement pull trigger; rate-limited                      |
 
 ### 8.2. Common Header
 
@@ -901,6 +906,7 @@ index, with an explicit escape for larger jumps.
       [2]  seq_num
       [2]  metric
       [1]  hop_count
+      [4]  manifest_version
 ```
 
 #### Delta encoding
@@ -952,15 +958,29 @@ SHALL be masked off by receivers before any hop-count comparison.
 The `local_only` flag is set by the sender per the rule in
 Section 7.4 and stored by the receiver as received.
 
-Routing entries do not carry a version field. Profile and manifest
-versions travel only with inline mappings (this section's
-`n_user_mappings` / `n_node_mappings`) and with `INDEX_DUMP`. When
-the originator's `profile_version` or `manifest_version` for one
-of its assigned indexes increments, the originator's allocator
-marks the index as needing re-introduction (Section 3.8) and the
-next outgoing `ROUTING_UPDATE` includes a fresh inline mapping
-carrying the new version. Between version changes, receivers
-treat their cached version as current.
+User entries do not carry a version field: a user's
+`profile_version` travels only with inline user mappings (this
+section's `n_user_mappings`) and with `INDEX_DUMP`. When the
+originator's `profile_version` for one of its assigned user
+indexes increments, the originator marks the index as needing
+re-introduction (Section 3.8) and the next outgoing
+`ROUTING_UPDATE` includes a fresh inline user mapping carrying the
+new version. Between version changes, receivers treat their cached
+profile version as current.
+
+Node entries additionally carry the origin's current
+`manifest_version` (a 4-byte field appended after `hop_count`).
+Because node entries flood the sphere on the ordinary origin/relay
+cadence (Section 7.1), this re-advertises each manifest-bearing
+node's committed manifest version continuously, which is the
+trigger for manifest synchronization (Section 10.8). A node entry
+exists for exactly the manifest-bearing nodes — gateways and
+multi-user hosts (Section 3.2) — so the field is never wasted. The
+value a node places in its outgoing node entries is its own
+*committed* manifest version for the target, never a version it has
+only heard advertised but not yet verified (the advertise-only-committed
+rule, Section 10.8). Inline node mappings continue to carry
+`manifest_version` as well, for the first introduction of an index.
 
 The maximum number of mappings per kind is 255 (limited by the
 1-byte count). The maximum number of entries per kind is 65,535;
@@ -1016,15 +1036,20 @@ section is fixed by the delta encoding.
 
 ### 8.5. NODE_MANIFEST
 
-The `NODE_MANIFEST` message carries a node's manifest. It is sent by
-every multi-user host and every gateway. Single-user, non-gateway hosts
-do not send this message.
+The `NODE_MANIFEST` message carries a node's full manifest. It is a
+**response** to a `MANIFEST_REQUEST` (Section 8.7): a node emits it
+only when a neighbour asks for an origin's manifest and a ranged
+`MANIFEST_DELTA` cannot serve the request (Section 10.8). It is
+never sent unsolicited and is never relayed. Single-user,
+non-gateway hosts have no manifest and never emit this message.
 
 ```
   Common header (4 bytes)
 
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  |       origin_node_index       |                  (2 bytes)
+  |                               |
+  |         origin_node_id        |                  (8 bytes)
+  |                               |
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
   |        manifest_version       |                  (4 bytes,
   |               ...             |                   wraps over)
@@ -1039,14 +1064,18 @@ do not send this message.
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
   |           n_entries           |                  (2 bytes)
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  For each entry (80 bytes):
+  For each entry (84 bytes):
       [ 8] user_id              (8-byte hash, Section 3.3)
       [ 8] timeout
       [64] entry_signature
+      [ 4] profile_version
 ```
 
-* `origin_node_index` is the index in the node index space of the
-  host the manifest belongs to.
+* `origin_node_id` is the 8-byte ID (Section 3.3) of the host the
+  manifest belongs to. Earlier drafts carried a node-space index
+  here; the full ID is used instead because a request/response
+  exchange can span an index rebinding (Section 3.7), and because
+  the response is link-local, so no index translation applies.
 * `manifest_version` is a 32-bit counter incremented on any change to
   the entry list. Comparison uses circular arithmetic (Section 6.2)
   scaled to 32 bits.
@@ -1063,63 +1092,78 @@ do not send this message.
   chunks of a single `manifest_version`; a receiver MAY read it
   from any chunk.
 * `manifest_signature` is the host's ed25519 signature over the
-  concatenation of `(origin_node_id || manifest_version ||
+  concatenation of `(origin_node_multikey || manifest_version ||
   chunk_index || chunk_count || flags ||
   canonical_entries_in_this_chunk)`.
-  The `origin_node_id` here is the host's full multikey-encoded
-  public key resolved through the node profile (Section 3.4), not
-  the 8-byte ID.
+  `origin_node_multikey` is the host's full multikey-encoded
+  public key resolved through the node profile (Section 3.4) — not
+  the 8-byte `origin_node_id` carried on the wire.
 * For each entry: `user_id` is the delegating user's 8-byte ID;
   `timeout` is the absolute expiry of the delegation in milliseconds
   since the Unix epoch; `entry_signature` is the user's ed25519
-  signature over `(origin_node_id || timeout)`. The
-  `origin_node_id` in the signed content is the host's full
-  multikey-encoded public key (resolved through the node profile,
-  Section 3.4), not the 8-byte ID, this binds the signature to
-  the host's full cryptographic identity, defeating
-  impersonation attempts based on 8-byte ID collisions. The
-  signature is verified against the user's full public key
-  resolved through the user profile (Section 3.4).
+  signature over `(host_node_multikey || timeout)`, where
+  `host_node_multikey` is the host's full multikey-encoded public
+  key (resolved through the node profile, Section 3.4), not the
+  8-byte ID — this binds the signature to the host's full
+  cryptographic identity, defeating impersonation attempts based on
+  8-byte ID collisions. The signature is verified against the
+  user's full public key resolved through the user profile
+  (Section 3.4). `profile_version` is the host's most recent
+  knowledge of the delegating user's profile version (Section 3.4);
+  it is **not** covered by `entry_signature` (the user cannot
+  re-sign on every profile change, and a cross-host gateway holds no
+  user key), but it is covered by `manifest_signature` as part of
+  the canonical entry bytes — a host-asserted hint. It exists
+  because the manifest is the only artifact that conveys a delegated
+  user across a sphere boundary (Section 2.3): a node in a foreign
+  Local sphere learns the user solely through the manifest and would
+  otherwise never detect a profile change to trigger a profile fetch
+  (Section 11.5). A change to a delegated user's profile version,
+  observed by the host through ordinary Local-sphere routing, causes
+  the host to bump `manifest_version` (Section 10.8).
 
-A manifest carrying N entries requires approximately `79 + 80·N`
-bytes per chunk (4 header + 2 + 4 + 2 + 1 `flags` + 64 signature +
-2 `n_entries` = 79 bytes of overhead).
+A manifest carrying N entries requires approximately `85 + 84·N`
+bytes per chunk (4 header + 8 `origin_node_id` + 4 + 2 + 1 `flags`
++ 64 signature + 2 `n_entries` = 85 bytes of overhead; each entry
+is 84 bytes with the appended `profile_version`).
 
-A NODE_MANIFEST message is sent on:
+A NODE_MANIFEST is emitted only as a response to a
+`MANIFEST_REQUEST` (Section 8.7), and only when a ranged
+`MANIFEST_DELTA` cannot serve the request — specifically when the
+requester holds no state for the origin, when the requester's
+version predates the server's retained delta-log history
+(`log_base`, Section 10.9), or when the delta body would exceed the
+60 KiB bound (Section 8.6). The full synchronization procedure —
+version advertisement, request, and serve — is specified in
+Section 10.8.
 
-1. Neighbour (re)connect, as part of bootstrap. The new neighbour
-   receives the host's current full state immediately.
-2. A transition between single-user (no manifest) and multi-user
-   (manifest required) state. In this case, the new manifest SHALL
-   be sent in the next 1-second relay batch and SHALL NOT wait for
-   the next 10-second origin cycle.
-3. Periodic full re-sync, as required by Section 10.8: at least every
-   ten manifest emissions or every hour, whichever first.
-
-Incremental changes between full emissions are propagated as
-MANIFEST_DELTA messages (Section 8.6).
-
-A receiver SHALL relay a NODE_MANIFEST whose `manifest_version` is
-strictly fresher than its stored version for the same
-`origin_node_index`. A node SHALL NOT relay a manifest onto a
-Local-sphere transport if it received that manifest over an
-Internet-sphere transport. Combined with the routing-entry
-propagation rule (Section 2.3), this confines a foreign manifest
-to the Internet sphere; it never enters a foreign Local sphere.
+A NODE_MANIFEST is never relayed: it is a link-local response to
+the neighbour that requested it. A foreign manifest is nonetheless
+confined to the Internet sphere, because a node SHALL NOT serve an
+origin's manifest to a Local-sphere neighbour if it learned that
+manifest over an Internet-sphere transport (the serve-side sphere
+seal, Section 10.8). Combined with the routing-entry propagation
+rule (Section 2.3), this ensures a foreign manifest never enters a
+foreign Local sphere.
 
 ### 8.6. MANIFEST_DELTA
 
-The `MANIFEST_DELTA` message carries an incremental update to a
-manifest: a list of entries to add and a list of user IDs to remove.
-A receiver applies the delta to its stored manifest at `from_version`
-to produce the manifest at `to_version`, then verifies the host's
+The `MANIFEST_DELTA` message is a **response** to a
+`MANIFEST_REQUEST` (Section 8.7). It carries the manifest changes an
+origin made after a given version: a list of entries to add
+(upserts) and a list of user IDs to remove, each annotated with the
+`record_version` at which the origin made the change. A receiver
+applies the delta to its stored manifest at `from_version` to
+produce the manifest at `to_version`, then verifies the host's
 signature against the resulting state.
 
 ```
   Common header (4 bytes)
 
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  |       origin_node_index       |                  (2 bytes)
+  |                               |
+  |         origin_node_id        |                  (8 bytes)
+  |                               |
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
   |         from_version          |                  (4 bytes)
   |               ...             |
@@ -1135,65 +1179,114 @@ signature against the resulting state.
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
   |            n_adds             |                  (2 bytes)
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  For each add (80 bytes):
+  For each add (88 bytes):
       [ 8] user_id              (8-byte hash, Section 3.3)
+      [ 4] record_version
+      [ 4] profile_version
       [ 8] timeout
       [64] entry_signature
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
   |           n_removes           |                  (2 bytes)
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  For each remove (8 bytes):
+  For each remove (12 bytes):
       [ 8] user_id
+      [ 4] record_version
 ```
 
-* `origin_node_index` is the index in the node index space of the
-  host the manifest belongs to.
-* `from_version` is the `manifest_version` the delta builds upon. The
-  receiver MUST hold the manifest at exactly this version; otherwise
-  the delta is not applicable.
-* `to_version` is the resulting `manifest_version` after applying the
-  delta. `to_version` SHALL be strictly fresher than `from_version`
-  by circular comparison.
-* `flags` is the one-byte manifest-flags field (Section 8.5), carrying
-  the `is_gateway` bit and reserved bits. It holds the manifest's
-  flag state at `to_version`. A delta MAY carry a changed `flags`
-  value relative to `from_version` — this is how a change to
-  `is_gateway` propagates incrementally.
+* `origin_node_id` is the 8-byte ID (Section 3.3) of the host the
+  manifest belongs to.
+* `from_version` is the requester's committed version, echoed from
+  the `MANIFEST_REQUEST`; it is the base the delta applies to.
+* `to_version` is the origin's committed `manifest_version` after
+  the delta. `to_version` SHALL be strictly fresher than
+  `from_version` by circular comparison (Section 6.2, scaled to 32
+  bits).
+* `flags` is the one-byte manifest-flags field (Section 8.5),
+  holding the manifest's flag state at `to_version`. A delta MAY
+  carry a changed `flags` value relative to `from_version` — this is
+  how a change to `is_gateway` propagates incrementally.
 * `manifest_signature` is the host's ed25519 signature over the
-  canonical encoding of the *resulting* full entry set at `to_version`,
-  using the same construction as in Section 8.5 (`origin_node_id ||
-  manifest_version || chunk_index || chunk_count || flags ||
-  canonical_entries`). The receiver verifies against the state
-  produced by applying the delta, not against the delta itself.
-* Adds carry full entries (80 bytes each), including the per-entry
-  user signature, identical in shape to entries in NODE_MANIFEST.
-* Removes carry only the `user_id` (8 bytes each); the receiver
-  removes the matching entry from its stored state.
+  canonical encoding of the *resulting* full entry set at
+  `to_version`, using the identical construction as Section 8.5
+  (`origin_node_multikey || to_version || 0 || 1 || flags ||
+  canonical_entries`, with `chunk_index = 0` and `chunk_count = 1`).
+  The receiver verifies against the state produced by applying the
+  delta, not against the delta payload.
+* Each add is an upsert carrying the full entry — identical in shape
+  to a NODE_MANIFEST entry (including the per-entry user signature
+  and the host-asserted `profile_version`, Section 8.5) plus a
+  leading `record_version`.
+* Each remove carries the `user_id` and the `record_version` at
+  which the origin removed it (a tombstone).
+* `record_version` on each add and remove is the origin's
+  `manifest_version` at the moment it made that change. It is
+  **not** covered by any signature: it only tells a server which
+  records fall after a requester's `from_version`. A wrong or
+  missing annotation can at most cause redundant records (harmless —
+  the resulting-state signature still verifies) or a signature
+  mismatch (the receiver discards the delta and re-requests a full
+  manifest, Section 10.8). The damage ceiling of a lying or buggy
+  server is one forced full-manifest transfer, never corrupted
+  state.
 
-Per-message overhead before adds and removes is **83 bytes**
-(4 header + 2 + 4 + 4 + 1 `flags` + 64 signature + 2 + 2). A delta
-carrying one add totals 163 bytes; one remove totals 91 bytes; one
-add and one remove together totals 171 bytes.
+Per-message overhead before adds and removes is **89 bytes**
+(4 header + 8 `origin_node_id` + 4 + 4 + 1 `flags` + 64 signature +
+2 + 2). A delta carrying one add totals 177 bytes; one remove totals
+101 bytes; one add and one remove together total 189 bytes.
 
-A delta SHALL fit in one message. Chunking is not defined for deltas.
-If a delta would exceed the 60 KiB body bound (approximately 740 adds,
-or 7,500 removes), the gateway SHALL emit a full NODE_MANIFEST
-instead.
+A `MANIFEST_DELTA` SHALL fit in one message; it is never chunked. If
+the records after `from_version` would exceed the 60 KiB body bound,
+the server emits a full `NODE_MANIFEST` instead (Section 8.5).
 
-A receiver whose stored version for this host is not equal to
-`from_version` SHALL drop the delta. Re-convergence occurs when the
-host next emits a full NODE_MANIFEST (Section 10.8 bounds the wait)
-or when the receiver triggers a fresh bootstrap on neighbour
-reconnect.
+A `MANIFEST_DELTA` is never relayed: like `NODE_MANIFEST`, it is a
+link-local response to the neighbour that requested it. The
+serve-side sphere seal (Section 10.8) confines a foreign manifest to
+the Internet sphere. A receiver whose committed version for the host
+is not equal to `from_version` SHALL drop the delta (a fresher
+commit landed while the request was in flight); the pull trigger
+re-fires if the receiver is still behind (Section 10.8).
 
-A receiver SHALL relay a MANIFEST_DELTA whose `to_version` is
-strictly fresher than its stored version, in the next 1-second relay
-batch. Split horizon (Section 7.3) applies. As with NODE_MANIFEST
-(Section 8.5), a node SHALL NOT relay a delta onto a Local-sphere
-transport if it received that delta over an Internet-sphere
-transport.
+### 8.7. MANIFEST_REQUEST
 
-### 8.7. Receiver Processing
+The `MANIFEST_REQUEST` message asks a neighbour for the current
+manifest state of one or more origins. It is sent when a node
+observes, through a version advertisement — a node entry's
+`manifest_version`, an inline node mapping, or an `INDEX_DUMP`
+mapping — that a neighbour holds a manifest version fresher than the
+node's own committed version for that origin (Section 10.8).
+
+```
+  Common header (4 bytes)
+
+  +-+-+-+-+-+-+-+-+
+  |    n_items    |                                  (1 byte)
+  +-+-+-+-+-+-+-+-+
+  For each item (13 bytes):
+      [8]  origin_node_id
+      [4]  have_version
+      [1]  item_flags        bit 0: have_none
+                             bits 1-7: reserved, MUST be zero
+```
+
+* `origin_node_id` is the 8-byte ID of the origin whose manifest is
+  requested.
+* `have_version` is the requester's committed `manifest_version` for
+  that origin. It is ignored when `have_none = 1`.
+* `item_flags` bit 0 (`have_none`) is set when the requester holds no
+  manifest state for the origin at all (bootstrap). Bits 1-7 are
+  reserved, MUST be zero on send, and are ignored on receipt.
+
+Multiple origins are batched into one message (`n_items` up to 255):
+a node that connects a neighbour and learns many stale origins from
+its `INDEX_DUMP` requests them together.
+
+A `MANIFEST_REQUEST` carries no request identifier. At most one
+request per `(origin, neighbour)` may be outstanding at a time
+(Section 10.8), so a response is correlated to its request by
+`origin_node_id` alone. Like the manifest responses, it is a
+link-local message: it travels exactly one hop and is never relayed.
+
+### 8.8. Receiver Processing
 
 On receipt of any routing protocol message, a receiver SHALL:
 
@@ -1209,15 +1302,18 @@ For ROUTING_UPDATE (0x01):
 2. For each mapping, decode the delta (or escape), update the cursor
    to the resulting absolute index, and store the binding
    `(target_index -> target_id)` in the corresponding kind's
-   dictionary along with the introduced `profile_version` or
-   `manifest_version`, **replacing any existing binding for the
-   same index**. If the previous binding was for a different
-   `target_id`, the receiver SHALL also clear the routing-table
-   slot at that index (release the entry, drop its back-reference
-   on the previously-bound `User` or `Node` record); this handles
-   the case where the sender has rebound the index to a new target
-   after cooldown (Section 3.8). If the cached version for the new
-   ID is older, schedule a profile or manifest fetch.
+   dictionary, **replacing any existing binding for the same
+   index**. If the previous binding was for a different `target_id`,
+   the receiver SHALL also clear the routing-table slot at that
+   index (release the entry, drop its back-reference on the
+   previously-bound `User` or `Node` record); this handles the case
+   where the sender has rebound the index to a new target after
+   cooldown (Section 3.8). Record the introduced version: for a user
+   mapping, `profile_version` on the `User` record (schedule a
+   profile fetch if fresher than cached, Section 11.5); for a node
+   mapping, `advertised_version` on the `Node` record (a hint; if
+   fresher than the committed `manifest_version`, trigger manifest
+   synchronization, Section 10.8).
 3. For each entry, decode the delta (or escape), update the cursor,
    and:
     a. Look up the resolved absolute `target_index` in the
@@ -1231,6 +1327,14 @@ For ROUTING_UPDATE (0x01):
     d. Apply the relay inclusion rule (Section 7.2). If accepted,
        store the entry (including the extracted `local_only`
        flag) and queue it for the next 1-second relay batch.
+    e. For a node entry, additionally record the carried
+       `manifest_version` as `advertised_version` on the `Node`
+       record; if it is fresher than the committed
+       `manifest_version`, trigger manifest synchronization
+       (Section 10.8). This applies once the entry has passed (a)-(c),
+       whether or not it was accepted for relay in (d): a
+       stale-metric entry may still carry a fresh version
+       advertisement.
 
 For INDEX_DUMP (0x02):
 
@@ -1245,56 +1349,93 @@ For INDEX_DUMP (0x02):
 
 For NODE_MANIFEST (0x03):
 
-1. Look up `origin_node_index` to obtain the host's public key.
+1. Look up `origin_node_id` to obtain the host's public key
+   (Section 11.5 profile fetch if not cached).
 2. Verify `manifest_signature` against the host's public key. If
    verification fails, drop the message.
-3. Compare `manifest_version` to the stored version for this host. If
-   not strictly fresher, drop the message.
-4. For each entry:
-    a. Verify `entry_signature` against `user_id`. If verification
-       fails, drop the entry but continue processing other entries.
-    b. If `timeout` is in the past, drop the entry.
-    c. A user MAY appear in multiple hosts' manifests
-       simultaneously (Section 10.6). Each manifest is a
-       self-contained statement by its host; manifests from
-       different hosts are not compared for freshness across
-       hosts. Add the entry to this host's delegation set
-       without altering the user's other hosts' bindings.
-5. Read the `flags` field. Bit 0 (`is_gateway`) is covered by the
-   verified `manifest_signature` (step 2); store it on the host's
-   `Node` record. Ignore reserved bits 1-7.
-6. Store the chunk. When all chunks for a given `manifest_version`
-   have arrived, update the host's `Node` record and the affected
-   `User` records.
-7. Queue the message for relay in the next 1-second batch, subject
-   to the sphere-scoping relay rule (Sections 8.5 / 8.6).
+3. Accumulate the chunk by `(origin_node_id, manifest_version)`.
+   While chunks are still outstanding, stop here.
+4. When all chunks for a `manifest_version` have arrived, compare
+   that version to the committed version for this host. If not
+   strictly fresher, discard. (This freshness check applies to the
+   completed manifest, not the individual chunk.)
+5. The completed entry set is the manifest's **stored** state and
+   MUST be retained byte-for-byte as signed — entries are never
+   dropped from it, or the node could not later serve verifiable
+   state to a requester (Section 10.8). Verification gates *use*,
+   not *storage*: for each entry, the receiver marks it **trusted**
+   only if `entry_signature` verifies against the user's full key
+   (Section 11.5) and `timeout` is not in the past. Only trusted
+   entries feed `User.delegation_gateways` and route selection
+   (Section 9.2); an untrusted entry stays stored and servable but
+   is not acted upon until its profile resolves. A user MAY appear
+   in multiple hosts' manifests simultaneously (Section 10.6); add
+   the entry to this host's delegation set without altering the
+   user's other hosts' bindings.
+6. For each entry, compare the carried `profile_version` against the
+   `User` record and schedule a profile fetch (Section 11.5) if it
+   is fresher than the cached value.
+7. Read the `flags` field. Bit 0 (`is_gateway`) is covered by the
+   verified `manifest_signature`; store it on the host's `Node`
+   record. Ignore reserved bits 1-7.
+8. Commit: set the committed `manifest_version` for this host, store
+   the entry set, and set the delta-log base `log_base` to this
+   version (Section 10.9) — history before a full sync is unknown,
+   so the log starts fresh. The new committed version is advertised
+   onward through ordinary routing updates (the advertise-only-committed
+   rule, Section 10.8). The manifest is **not** relayed.
 
 For MANIFEST_DELTA (0x04):
 
-1. Look up `origin_node_index` to obtain the host's public key.
-2. Compare `from_version` to the receiver's stored version for this
-   host. If not equal, drop the message; the receiver will recover on
-   the next full NODE_MANIFEST.
-3. In a scratch copy of the stored entry set, apply removes (delete
-   matching `user_id`s) and apply adds (insert new entries).
-4. For each added entry:
-    a. Verify `entry_signature` against `user_id`. If verification
-       fails, drop the entry from the scratch set and log.
-    b. If `timeout` is in the past, drop the entry from the scratch
-       set.
-    c. A user MAY appear in multiple hosts' manifests
-       simultaneously (Section 10.6). Add the entry to this host's
-       scratch set without altering the user's other hosts'
-       bindings.
-5. Compute the canonical encoding of the scratch set and verify
-   `manifest_signature` against it (the `flags` field is part of
-   the signed content, Section 8.6). If verification fails, discard
-   the scratch set without modifying stored state.
-6. Commit: replace the stored entry set with the scratch set; set
-   stored version to `to_version`; store the `flags` field's
-   `is_gateway` bit on the host's `Node` record.
-7. Queue the message for relay in the next 1-second batch, subject
-   to the sphere-scoping relay rule (Sections 8.5 / 8.6).
+1. Look up `origin_node_id` to obtain the host's public key.
+2. If no committed state exists for this host, or the committed
+   `manifest_version` does not equal `from_version`, drop the
+   message — a fresher commit happened while the request was in
+   flight, or the delta does not build on what we hold. The pull
+   trigger re-fires if we are still behind.
+3. In a scratch copy of the stored entry set, apply the removes
+   (delete matching `user_id`s), then apply the adds as upserts.
+   Byte-exact stored discipline (NODE_MANIFEST step 5) applies to
+   the scratch set: adds are not dropped for verification failures
+   here; verification gates trust, computed after the commit.
+4. Compute the canonical encoding of the scratch set at `to_version`
+   and verify `manifest_signature` against it (the `flags` field is
+   part of the signed content, Section 8.6). If verification fails,
+   discard the scratch set without modifying stored state and
+   re-request a full manifest with `have_none = 1` (the delta path
+   is presumed poisoned, Section 10.8).
+5. Commit: replace the stored entry set with the scratch set; set
+   the committed `manifest_version` to `to_version`; store the
+   `flags` field's `is_gateway` bit; append the received records to
+   the delta log, compacting per Section 10.9.
+6. Re-evaluate the trusted subset (NODE_MANIFEST step 5) against
+   cached profiles, comparing each add's `profile_version` and
+   scheduling profile fetches (Section 11.5) as needed.
+7. The new committed version is advertised onward through ordinary
+   routing updates. The delta is **not** relayed.
+
+For MANIFEST_REQUEST (0x05), for each requested item:
+
+1. Look up the origin's manifest state. If none is held, ignore the
+   item (we never advertised it; the requester will look elsewhere).
+2. Sphere seal: if this node learned the origin's manifest over an
+   Internet-sphere transport and the requesting neighbour is on a
+   Local-sphere transport, ignore the item (Section 2.3 confinement,
+   defence in depth).
+3. If `have_none = 1`, or `have_version` predates the retained log
+   history (`log_base`, Section 10.9), or `have_version` is not
+   circularly comparable, respond with the full `NODE_MANIFEST`
+   (chunked as needed).
+4. Else if `have_version` equals the committed version, send nothing
+   (the requester is already current).
+5. Else respond with a `MANIFEST_DELTA` carrying every log record
+   whose `record_version` is circularly fresher than `have_version`;
+   if the delta body would exceed 60 KiB, respond with a full
+   `NODE_MANIFEST` instead.
+
+A node SHALL NOT emit more than `manifest_serve_rate` responses per
+second per neighbour (Section 14); excess items are ignored and the
+requester retries.
 
 ---
 
@@ -1322,13 +1463,26 @@ A node's own self-entry has `local_only = 1` in its stored form;
 the value is then applied per outgoing transport per the origin
 rule in Section 7.4.
 
-The originator's `profile_version` (for users) or `manifest_version`
-(for nodes) is stored on the corresponding `User` or `Node` record
-in `UsersMap` / `NodesMap`, not on the routing entry itself. Each
-`Node` record additionally stores an `is_gateway` boolean, taken
-from the most recent manifest's `flags` field (Sections 8.5,
-10.1); route-selection and cross-host delegation target selection
-(Section 10.3) consult it.
+The originator's `profile_version` (for users) is stored on the
+`User` record in `UsersMap`, not on the routing entry itself. Each
+`Node` record stores **two** manifest versions: the committed
+`manifest_version` — the version of the locally stored,
+signature-verified manifest state, which the node advertises onward
+and serves from — and an `advertised_version`, the freshest version
+heard in any neighbour's node entry or mapping (an untrusted hint
+that triggers a pull when it exceeds the committed value,
+Section 10.8). Each `Node` record also stores an `is_gateway`
+boolean, taken from the most recent manifest's `flags` field
+(Sections 8.5, 10.1); route-selection and cross-host delegation
+target selection (Section 10.3) consult it, along with the
+per-origin delta log (Section 10.9).
+
+A `Node`'s stored delegation set is retained byte-for-byte as the
+host signed it (Section 8.8), so the node can serve verifiable
+manifest state to requesters. Per-entry signature verification and
+`timeout` checks gate whether an entry is *used* for routing — only
+verified, unexpired entries populate `User.delegation_gateways` —
+not whether it is *stored*.
 
 Auxiliary structures bind identities to routing state. A node maintains
 a `NodesMap` keyed by node public key, and a `UsersMap` keyed by user
@@ -1449,6 +1603,19 @@ delegated to it. Each entry in the manifest comprises:
   determined by the verifying public key (resolved from the
   wire-level `user_id` field through the user profile,
   Section 3.4).
+* `profile_version`: the host's most recent knowledge of the
+  delegating user's profile version (Section 3.4). Unlike the three
+  fields above, it is **host-asserted**: it is covered by the
+  whole-manifest signature (Section 8.5) but not by the per-entry
+  user `entry_signature` — the user signs the delegation once and
+  cannot re-sign on every profile change, and a cross-host gateway
+  holds no user key. It is carried because the manifest is the only
+  artifact that conveys a delegated user across a sphere boundary
+  (Section 2.3); without it, a node in a foreign Local sphere could
+  never detect a delegated user's profile change to trigger a fetch
+  (Section 11.5). A change to a delegated user's profile version —
+  which the host observes through ordinary Local-sphere routing —
+  causes the host to bump `manifest_version` (Section 10.8).
 
 The field name `host_node_id` refers to the node
 holding the delegation, regardless of whether that node is the
@@ -1745,70 +1912,139 @@ reachability. This requirement prevents gateways from
 indefinitely advertising users they cannot deliver to, which
 would black-hole traffic addressed to those users.
 
-### 10.8. Emission Rate and Delta Updates
+The 95-second bound is the **origin-side** requirement — the time
+within which the gateway's own manifest ceases to advertise the
+user — and is what the gateway controls. Propagating the resulting
+version bump to a node H hops away adds the advertisement's travel
+time (roughly one relay hop per second, Section 7.1) plus one pull
+exchange per hop (Section 10.8); this propagation tail is
+informative, not normative, and under normal conditions adds on the
+order of a few seconds per hop.
 
-A gateway SHALL emit at most one manifest message (NODE_MANIFEST or
-MANIFEST_DELTA) per minute under normal operation. Manifest changes
-that occur between emission windows accumulate locally and are
-batched into a single MANIFEST_DELTA at the next emission window.
+### 10.8. Manifest Synchronization
 
-The rate limit applies to gateway-originated emissions. The following
-events bypass the rate limit and trigger emission in the next
-1-second relay batch:
+Manifests are distributed by **advertise-and-pull**, not by
+flooding. An origin advertises its current manifest *version*
+through the routing protocol; a node that sees a version fresher
+than the one it holds requests the difference from the neighbour
+that advertised it; the neighbour serves a ranged delta, or a full
+manifest when a delta cannot span the gap. Manifest bytes are never
+flooded and never relayed — only the version number propagates,
+riding traffic the routing protocol already sends.
 
-1. Single-user ↔ multi-user transition. The host's routing-form
-   changes; the new state SHALL propagate immediately rather than
-   wait up to a minute.
-2. Neighbour-connect bootstrap. A new neighbour receives the
-   gateway's current full NODE_MANIFEST immediately. This is a
-   direct response to a peer event, not a periodic emission, and is
-   not rate-limited.
+#### Version bumps at the origin
 
-A change to the host's `is_gateway` flag (Section 10.1) when the host
-gains or loses an active INTERNET-sphere transport, triggers a
-manifest re-emission so that the new flag value propagates. This
-re-emission is subject to the normal 1-per-minute rate limit; it
-does not bypass the limit. A host with a flapping INTERNET
-connection therefore emits at most one manifest per minute
-regardless of how often the flag oscillates.
+An origin bumps its `manifest_version` when its delegation set
+changes: an add, a removal, an `is_gateway` transition, a
+single-user↔multi-user transition (Section 3.2), or a change to a
+delegated user's `profile_version` (Section 10.1). A gateway SHALL
+bump at most once per **60-second** rate-limit window; changes that
+occur within a window accumulate and fold into a single bump.
 
-Removals driven by loss of routing-protocol reachability to a
-delegated user (Section 10.4) MAY wait for the next emission
-window rather than bypassing the rate limit. Section 10.7
-specifies the mandatory upper bound on how long a manifest may
-continue to advertise an unreachable user.
+Two events bypass the rate limit and take effect in the next
+1-second relay batch: the single-user↔multi-user transition (the
+host's routing form changes and must propagate immediately) and a
+removal forced by loss of routing reachability to a delegated user
+(Section 10.7 bounds the delay). An `is_gateway` flag change is
+subject to the rate limit, so a host with a flapping INTERNET
+connection re-advertises at most once per minute.
 
-#### Periodic full re-sync
+On a bump, the origin folds the accumulated changes into
+`committed_version + 1`, appends them to its delta log with
+`record_version` set to the new version (Section 10.9), re-signs the
+resulting entry set, and updates its own node entry's advertised
+`manifest_version`. An origin SHALL persist its `manifest_version`
+across restarts and resume from the persisted value: unlike routing
+sequence numbers (Section 6.3), manifest versions have no
+reboot-detection rule, and per-record versions derive from them, so
+a regression would corrupt delta selection.
 
-A gateway SHALL emit a full NODE_MANIFEST in place of a
-MANIFEST_DELTA at least every ten manifest emissions, OR every
-hour, whichever occurs first. This bounds the catch-up time for
-receivers that have missed an intermediate delta and ensures
-periodic re-anchoring of stored state.
+#### Advertisement
 
-#### Receivers out of sync
+A node advertises a target's `manifest_version` in the node entry it
+originates or relays for that target (Section 8.3), and in the
+inline node mapping and `INDEX_DUMP` mapping that introduce the
+target's index (Sections 8.3, 8.4). Because node entries flood the
+sphere on the origin/relay cadence, the version re-advertises
+continuously; a lost advertisement is repaired within one origin
+cycle rather than leaving a receiver stale.
 
-A receiver that receives a MANIFEST_DELTA whose `from_version` does
-not match its stored version for that host drops the delta. It
-re-converges when the gateway next emits a full NODE_MANIFEST under
-the periodic re-sync rule, or when a fresh bootstrap is triggered
-(for example, on neighbour reconnect).
+**Advertise-only-committed.** The version a node advertises for a
+target SHALL be its own *committed* `manifest_version` — the version
+whose signature-verified state the node holds and can serve — never
+a version it has only heard advertised. This invariant is what makes
+ask-the-advertiser correct: a neighbour that advertised version V is
+guaranteed able to serve V.
 
-#### Choice of full vs delta
+#### Requesting
 
-After the initial NODE_MANIFEST has been published, MANIFEST_DELTA is
-the default emission kind. A gateway selects the message kind subject
-to the following rules:
+On observing an advertised version for an origin (Section 8.8), a
+node updates the origin's `advertised_version` and, if it is
+strictly fresher than the committed `manifest_version` (or the node
+holds no state for the origin), schedules a `MANIFEST_REQUEST`
+(Section 8.7) to the neighbour that advertised it, carrying its
+committed version as `have_version` (or `have_none = 1`).
 
-* The first emission to any receiver (bootstrap) MUST be a
-  NODE_MANIFEST.
-* Periodic re-sync MUST be a NODE_MANIFEST.
-* A delta whose body would exceed the 60 KiB bound MUST be promoted
-  to a NODE_MANIFEST.
-* All other emissions SHOULD be MANIFEST_DELTAs.
+At most one request per `(origin, neighbour)` may be outstanding,
+and a node SHOULD keep at most one request per origin outstanding
+across all neighbours. If no response arrives within
+`manifest_request_timeout` (Section 14), the node MAY retry against
+a different neighbour advertising the same-or-fresher version. A
+node SHALL NOT send more than `manifest_request_rate` requests per
+second per neighbour.
 
-A receiver processes both kinds into the same downstream state; only
-the wire format differs.
+#### Serving and applying
+
+Serving a `MANIFEST_REQUEST` and applying a `NODE_MANIFEST` or
+`MANIFEST_DELTA` response are specified in Section 8.8. A server
+answers from its committed state and delta log: a ranged delta when
+the requester's version falls within the retained log, a full
+manifest otherwise. A requester that fails to verify a delta's
+resulting-state signature falls back to requesting a full manifest.
+Because any base version is either servable as a delta or repaired
+by a full manifest, a receiver can never be permanently out of sync;
+no periodic full re-sync is required.
+
+### 10.9. The Delta Log
+
+To serve ranged deltas, each node keeps a compacted **delta log**
+per origin, alongside the committed manifest state: the origin for
+its own manifest, every other node for the manifests it has learned
+and may be asked to serve.
+
+Each log records, per delegated user, the single most recent
+transition and the `record_version` at which it occurred: an **add**
+(the current entry — `timeout`, `profile_version`, and
+`entry_signature`) or a **tombstone** (a removal). Because a
+`user_id` appears at most once in the live set, the log holds at
+most one record per user: add-then-remove collapses to a tombstone,
+remove-then-re-add to an add, and a delegation refresh upserts the
+add. The log is therefore bounded by the live entry count plus the
+tombstones of recently removed users, independent of churn rate.
+
+A node serves a `MANIFEST_DELTA` from records whose `record_version`
+is fresher than the requester's `have_version` (Section 8.8). The
+`log_base` marks the oldest version the log can still serve from:
+records at or below it have been discarded. A requester whose
+`have_version` predates `log_base` is served a full `NODE_MANIFEST`
+instead.
+
+**Retention.** Cutting history means advancing `log_base` and
+discarding older records. Any retention policy is safe: a requester
+below `log_base` receives a full manifest, so cutting can only turn
+a delta response into a full one, never a wrong one. The normative
+policy is:
+
+* **Restart:** the log is not persisted; on startup a node sets
+  `log_base` to its committed `manifest_version` (its own persisted
+  version for its own manifest; the last committed version for a
+  learned manifest, re-fetched on demand).
+* **Tombstone age:** a tombstone older than the delegation TTL
+  (Section 10.4) MAY be discarded and `log_base` advanced past it —
+  any base old enough to still contain the removed entry would have
+  expired it locally by `timeout` anyway.
+* **Count cap:** a log exceeding 4,096 records MAY discard its
+  oldest records and advance `log_base`.
 
 ---
 
@@ -1988,6 +2224,10 @@ protocol mechanics are invoked. The protocol's standard rules suffice.
   expiry timeout (Section 7.5).
 * The node bridging the partitions sends `INDEX_DUMP` to its new
   neighbours on connect, just as on any other neighbour connection.
+* Manifests reconcile with no merge-specific mechanism: the bridging
+  node's `INDEX_DUMP` and subsequent node entries advertise each
+  side's committed manifest versions across the new link, and each
+  side pulls whatever it is missing (Section 10.8).
 
 If unforeseen edge cases emerge during real deployment, this section
 will be revisited.
@@ -2022,9 +2262,29 @@ The signature length is determined by the cryptographic security
 parameter of the curve and cannot be reduced without lowering the
 forgery cost below acceptable bounds.
 
-A receiver SHALL verify both signatures before acting on a manifest.
-A failed manifest signature aborts processing of the entire chunk;
-a failed entry signature aborts processing of the affected entry only.
+A receiver SHALL verify the whole-manifest signature before storing
+or serving a manifest; a failed manifest signature aborts processing
+of the entire chunk. A failed per-entry signature does not remove
+the entry from stored state (which must stay byte-identical to what
+the host signed, so it can be served onward, Section 8.8); it
+withholds the entry from the *trusted* set, so the entry is stored
+and served but not used for routing until a valid profile resolves
+it.
+
+Manifest synchronization (Section 10.8) is served by intermediate
+nodes, not only origins — untrusted relays of the origin's signed
+state. An intermediate serving a `MANIFEST_DELTA` cannot forge
+state: the origin's signature covers the resulting entry set,
+`flags`, and `to_version`, so a lying or buggy server can at most
+force the requester to fetch a full manifest (Section 8.6). The
+per-record `record_version` and per-entry `profile_version`
+annotations are unsigned hints; a wrong `profile_version` causes at
+most a spurious profile fetch (self-correcting — the fetched profile
+carries its own authenticated version) or a suppressed one (a stale
+display name, never stale key material, since a user's multikey is
+immutable under its 8-byte ID). A `MANIFEST_REQUEST` is a small
+message that can elicit a large response, so serving is rate-limited
+per neighbour (Section 10.8).
 
 ### 13.3. Future Work
 
@@ -2040,13 +2300,14 @@ The following are deferred to a future version of this protocol:
   them in parallel for resilience or load balancing.
 * Per-link sub-metrics beyond bucketed RSSI on BLE: refinement of the
   metric formula based on measured deployment data.
-* Pull- or DHT-based manifest distribution among gateways, required
+* DHT-based distribution of the global gateway directory, required
   only when the gateway count itself reaches the tens of thousands —
-  beyond the current design target. v1 uses scoped push (Section 2.3
-  hierarchical scoping): manifests flood within their home Local
-  sphere and across the Internet sphere, but never into a foreign
-  Local sphere, so a leaf node's state stays bounded by its village
-  and the global directory is replicated only across gateways.
+  beyond the current design target. v1 distributes manifests by
+  scoped advertise-and-pull (Sections 2.3, 10.8): a manifest's
+  version is advertised within its home Local sphere and across the
+  Internet sphere, but never into a foreign Local sphere, and nodes
+  pull the state they lack. A leaf node's state stays bounded by its
+  village; the global directory is replicated only across gateways.
 
 ---
 
@@ -2063,8 +2324,12 @@ The following are deferred to a future version of this protocol:
 | Delegation TTL                  | 6 hours         |
 | Delegation refresh cadence      | 3 hours (recommended, TTL/2) |
 | Mandatory reachability drop     | ≈ 95 s (35 + 60) |
-| Manifest emission rate limit    | 1 per minute    |
-| Periodic full manifest re-sync  | 10 emissions or 1 hour, whichever first |
+| Manifest version-bump rate limit | 1 per minute   |
+| Manifest request timeout        | 10 seconds      |
+| Manifest request rate           | 4 / s per neighbour |
+| Manifest serve rate             | 4 / s per neighbour |
+| Manifest tombstone retention    | delegation TTL (6 hours) |
+| Delta-log record cap            | 4,096 per origin |
 
 Neighbour ping interval is determined by the transport layer and is
 not specified here.
@@ -2138,17 +2403,21 @@ enum TargetRef {
 }
 
 Node {
-    id:               NodeId,        // 8 bytes
-    public_key:       Multikey,      // resolved from node profile
-    manifest_version: u32,
-    is_gateway:       bool,          // from manifest flags (§8.5, §10.1)
-    delegated_users:  Vec<DelegatedUser>,
+    id:                 NodeId,      // 8 bytes
+    public_key:         Multikey,    // resolved from node profile
+    manifest_version:   u32,         // committed (verified, servable)
+    advertised_version: u32,         // freshest hint heard (§10.8)
+    is_gateway:         bool,        // from manifest flags (§8.5, §10.1)
+    delegated_users:    Vec<DelegatedUser>,  // byte-exact stored set
+    manifest_log:       ManifestLog, // per-origin delta log (§10.9)
 }
 
 DelegatedUser {
     user_id:            UserId,      // 8 bytes
     user:               Arc<RwLock<User>>,
     delegation_timeout: u64,
+    profile_version:    u32,         // host-asserted hint (§10.1)
+    entry_signature:    [u8; 64],    // so the host can re-emit (§10.1)
 }
 
 User {
@@ -2243,24 +2512,31 @@ Quick-reference tables for implementers.
 | Element                                      | Size            |
 |----------------------------------------------|-----------------|
 | Common header                                | 4 bytes         |
-| ROUTING_UPDATE entry (delta, no escape)      | 6 bytes         |
-| ROUTING_UPDATE entry (escape, absolute idx)  | 8 bytes         |
+| ROUTING_UPDATE user entry (delta, no escape) | 6 bytes         |
+| ROUTING_UPDATE user entry (escape)           | 8 bytes         |
+| ROUTING_UPDATE node entry (delta, no escape) | 10 bytes        |
+| ROUTING_UPDATE node entry (escape)           | 12 bytes        |
 | Inline mapping introduction (user, no esc.)  | 13 bytes        |
 | Inline mapping introduction (escape)         | 15 bytes        |
 | INDEX_DUMP per mapping (delta, no escape)    | 13 bytes        |
 | INDEX_DUMP per mapping (escape, absolute)    | 15 bytes        |
-| Identifier (target_id) on the wire           | 8 bytes         |
+| Identifier (target_id / origin_node_id)      | 8 bytes         |
 | Profile / manifest version                   | 4 bytes         |
-| NODE_MANIFEST overhead                       | 79 bytes        |
-| NODE_MANIFEST per entry                      | 80 bytes        |
-| MANIFEST_DELTA overhead                      | 83 bytes        |
-| MANIFEST_DELTA per add                       | 80 bytes        |
-| MANIFEST_DELTA per remove                    | 8 bytes         |
+| NODE_MANIFEST overhead                       | 85 bytes        |
+| NODE_MANIFEST per entry                      | 84 bytes        |
+| MANIFEST_DELTA overhead                      | 89 bytes        |
+| MANIFEST_DELTA per add                       | 88 bytes        |
+| MANIFEST_DELTA per remove                    | 12 bytes        |
+| MANIFEST_REQUEST overhead                    | 5 bytes         |
+| MANIFEST_REQUEST per item                    | 13 bytes        |
 
-ROUTING_UPDATE entries are: 1-byte delta + 2 seq + 2 metric + 1
-hop_count. The escape variant prepends a 2-byte absolute index
-after the `0x00` delta marker. Version travels with inline
-mappings, not with routing entries (Section 8.3).
+ROUTING_UPDATE user entries are: 1-byte delta + 2 seq + 2 metric +
+1 hop_count. Node entries append a 4-byte `manifest_version`. The
+escape variant prepends a 2-byte absolute index after the `0x00`
+delta marker. A user's `profile_version` travels with inline user
+mappings, not with user entries; a node's `manifest_version` travels
+both in inline node mappings and in the node entry itself
+(Section 8.3).
 
 Inline mappings are: 1-byte delta + 8 target_id + 4 version.
 
