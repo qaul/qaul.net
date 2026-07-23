@@ -12,12 +12,16 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:qaul_components_widgetbook/use_cases/design/account/account_management.dart'
     as _qaul_components_widgetbook_use_cases_design_account_account_management;
+import 'package:qaul_components_widgetbook/use_cases/design/message_forwarding/message_forwarding.dart'
+    as _qaul_components_widgetbook_use_cases_design_message_forwarding_message_forwarding;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_footer.dart'
     as _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_header.dart'
     as _qaul_components_widgetbook_use_cases_design_components_chat_chat_header;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_timeline.dart'
     as _qaul_components_widgetbook_use_cases_design_components_chat_chat_timeline;
+import 'package:qaul_components_widgetbook/use_cases/design_components/chat/forward_recipient_selector.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_chat_forward_recipient_selector;
 import 'package:qaul_components_widgetbook/use_cases/design_components/qaul_color_sheet.dart'
     as _qaul_components_widgetbook_use_cases_design_components_qaul_color_sheet;
 import 'package:qaul_components_widgetbook/use_cases/design_components/shell/qaul_fab.dart'
@@ -38,6 +42,22 @@ final directories = <_widgetbook.WidgetbookNode>[
   _widgetbook.WidgetbookCategory(
     name: 'design',
     children: [
+      _widgetbook.WidgetbookFolder(
+        name: 'Message forwarding',
+        children: [
+          _widgetbook.WidgetbookComponent(
+            name: 'ForwardRecipientSelector',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Recipient selection with message',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_message_forwarding_message_forwarding
+                        .buildMessageForwardingFlowUseCase,
+              ),
+            ],
+          ),
+        ],
+      ),
       _widgetbook.WidgetbookFolder(
         name: 'account',
         children: [
@@ -163,6 +183,29 @@ final directories = <_widgetbook.WidgetbookNode>[
                 builder:
                     _qaul_components_widgetbook_use_cases_special_forms_duplicate_username_meta_message
                         .buildDuplicateUsernameMetaMessageUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookComponent(
+            name: 'ForwardRecipientSelector',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Recipients — selected',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_chat_forward_recipient_selector
+                        .buildForwardRecipientSelectorSelectedUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Recipients — unselected',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_chat_forward_recipient_selector
+                        .buildForwardRecipientSelectorUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Search — open',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_chat_forward_recipient_selector
+                        .buildForwardRecipientSelectorSearchUseCase,
               ),
             ],
           ),
