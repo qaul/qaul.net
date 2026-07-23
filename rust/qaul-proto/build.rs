@@ -95,6 +95,11 @@ fn main() {
         "DtnRoutedV2",
         "#[derive(serde::Serialize, serde::Deserialize)]",
     );
+    // RouteHop is nested inside DtnRoutedV2, so it must be serializable too
+    prost_build.type_attribute(
+        "RouteHop",
+        "#[derive(serde::Serialize, serde::Deserialize)]",
+    );
 
     // compile these protobuf files
     match prost_build.compile_protos(

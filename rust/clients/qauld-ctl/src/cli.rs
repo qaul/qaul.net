@@ -307,7 +307,9 @@ pub enum DtnSubcmd {
         /// path to a file containing the pre-built signed Container bytes
         #[arg(short = 'd', long)]
         data_file: String,
-        /// ordered list of custodian user ids (base58, repeatable)
+        /// hop-numbered custody route as comma-separated `hop:id`
+        /// tokens, e.g. `1:ID1,2:ID2,2:ID3,3:ID4`. IDs sharing a hop
+        /// number are interchangeable alternatives at that hop.
         #[arg(short = 'c', long = "custody", value_delimiter = ',')]
         custody_route: Vec<String>,
         /// seconds until the message expires (0 = no expiry)
