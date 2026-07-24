@@ -269,8 +269,13 @@ mod next_hop {
             id: [20; 8],
             public_key: Some(fresh_multikey()),
             manifest_version: 0,
+            advertised_version: 0,
             is_gateway: true,
             delegated_users: Vec::new(),
+            manifest_signature: None,
+            retained_chunks: None,
+            learn_sphere: None,
+            manifest_log: crate::router_v2::manifest::ManifestLog::default(),
         }));
         let dangling = Arc::downgrade(&orphan);
         drop(orphan);
@@ -3115,8 +3120,13 @@ mod handle_node_manifest {
             id,
             public_key: Some(mk.clone()),
             manifest_version: 0,
+            advertised_version: 0,
             is_gateway: false,
             delegated_users: Vec::new(),
+            manifest_signature: None,
+            retained_chunks: None,
+            learn_sphere: None,
+            manifest_log: crate::router_v2::manifest::ManifestLog::default(),
         };
         state.nodes.write().unwrap().insert(id, node);
         id
@@ -3271,8 +3281,13 @@ mod handle_node_manifest {
                 id: host_id,
                 public_key: None,
                 manifest_version: 0,
+                advertised_version: 0,
                 is_gateway: false,
                 delegated_users: Vec::new(),
+                manifest_signature: None,
+                retained_chunks: None,
+                learn_sphere: None,
+                manifest_log: crate::router_v2::manifest::ManifestLog::default(),
             },
         );
 

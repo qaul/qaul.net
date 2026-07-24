@@ -1,7 +1,7 @@
 // Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! This file handles decoding and encoding the message types in the 
+//! This file handles decoding and encoding the message types in the
 //! protocol.
 
 use crate::router_v2::codec::{
@@ -26,9 +26,9 @@ pub struct Mapping {
     pub version: u32,
 }
 
-/// An actual entry in the routing table of a node
+/// An actual user entry in the routing table of a node
 #[derive(Debug)]
-pub struct Entry {
+pub struct UserEntry {
     /// denotes whether this entry has ever been propagated only over the Local shpere
     pub local_only: bool,
     /// the number of hops it'll take to reach the node
@@ -41,13 +41,23 @@ pub struct Entry {
     pub abs_idx: u16,
 }
 
+#[derive(Debug)]
+pub struct NodeEntry {
+    pub local_only: bool,
+    pub hop_count: u8,
+    pub metric: u16,
+    pub seq: u16,
+    pub abs_idx: u16,
+    pub manifest_version: u32,
+}
+
 /// The ROUTING_UPDATE wire message.
 #[derive(Debug)]
 pub struct RoutingUpdate {
     pub user_mappings: Vec<Mapping>,
     pub node_mappings: Vec<Mapping>,
-    pub user_entries: Vec<Entry>,
-    pub node_entries: Vec<Entry>,
+    pub user_entries: Vec<UserEntry>,
+    pub node_entries: Vec<NodeEntry>,
 }
 
 /// The INDEX_DUMP wire message.
@@ -92,6 +102,7 @@ impl RoutingUpdate {
             res.extend_from_slice(&ne.seq.to_be_bytes());
             res.extend_from_slice(&ne.metric.to_be_bytes());
             res.push(fill_hop_bytes(ne.hop_count, ne.local_only));
+            res.extend_from_slice(&ne.manifest_version.to_be_bytes());
         }
 
         Ok(())
@@ -138,7 +149,7 @@ impl RoutingUpdate {
             let metric = read_u16_be(&mut buf)?;
             let hop_byte = read_u8(&mut buf)?;
             let (hop_count, local_only) = unpack_hop_byte(hop_byte);
-            user_entries.push(Entry {
+            user_entries.push(UserEntry {
                 abs_idx,
                 seq,
                 metric,
@@ -156,12 +167,14 @@ impl RoutingUpdate {
             let metric = read_u16_be(&mut buf)?;
             let hop_byte = read_u8(&mut buf)?;
             let (hop_count, local_only) = unpack_hop_byte(hop_byte);
-            node_entries.push(Entry {
+            let manifest_version = u32::from_be_bytes(read_array::<4>(&mut buf)?);
+            node_entries.push(NodeEntry {
                 abs_idx,
                 seq,
                 metric,
                 hop_count,
                 local_only,
+                manifest_version,
             });
         }
 
@@ -251,6 +264,7 @@ pub struct ManifestEntry {
     pub timeout: u64,
     /// the signature signed by this user
     pub entry_signature: [u8; 64],
+    pub profile_version: u32,
 }
 
 impl ManifestEntry {
@@ -258,6 +272,7 @@ impl ManifestEntry {
         res.extend_from_slice(&self.user_id);
         res.extend_from_slice(&self.timeout.to_be_bytes());
         res.extend_from_slice(&self.entry_signature);
+        res.extend_from_slice(&self.profile_version.to_be_bytes());
     }
 }
 
@@ -266,7 +281,7 @@ impl ManifestEntry {
 #[derive(Debug)]
 pub struct NodeManifest {
     /// the index of the originatin node
-    pub origin_node_index: u16,
+    pub origin_node_id: [u8; 8],
     /// monotonic u32 counter, incremented on any change to the entries list
     pub manifest_version: u32,
     /// the index of the current chunk
@@ -283,7 +298,7 @@ pub struct NodeManifest {
 
 impl NodeManifest {
     pub fn encode(&self, res: &mut Vec<u8>) -> Result<()> {
-        res.extend_from_slice(&self.origin_node_index.to_be_bytes());
+        res.extend_from_slice(&self.origin_node_id);
         res.extend_from_slice(&self.manifest_version.to_be_bytes());
         res.push(self.chunk_index);
         res.push(self.chunk_count);
@@ -297,7 +312,7 @@ impl NodeManifest {
     pub fn decode(msg: &[u8]) -> Result<NodeManifest> {
         let mut buf = msg;
 
-        let origin_node_index = read_u16_be(&mut buf)?;
+        let origin_node_id = read_array::<8>(&mut buf)?;
         let manifest_version = read_u32_be(&mut buf)?;
         let chunk_index = read_u8(&mut buf)?;
         let chunk_count = read_u8(&mut buf)?;
@@ -310,10 +325,12 @@ impl NodeManifest {
             let user_id = read_array::<8>(&mut buf)?;
             let timeout = read_u64_be(&mut buf)?;
             let entry_signature = read_array::<64>(&mut buf)?;
+            let profile_version = u32::from_be_bytes(read_array::<4>(&mut buf)?);
             entries.push(ManifestEntry {
                 user_id,
                 timeout,
                 entry_signature,
+                profile_version,
             });
         }
 
@@ -322,7 +339,7 @@ impl NodeManifest {
         }
 
         Ok(NodeManifest {
-            origin_node_index,
+            origin_node_id,
             manifest_version,
             chunk_index,
             chunk_count,
@@ -333,12 +350,26 @@ impl NodeManifest {
     }
 }
 
+/// entries recorded that are yet to be announced
+#[derive(Debug)]
+pub struct DeltaAdd {
+    pub record_version: u32,
+    pub entry: ManifestEntry,
+}
+
+/// entries recorded that are yet to be announced
+#[derive(Debug)]
+pub struct DeltaRemove {
+    pub user_id: [u8; 8],
+    pub record_version: u32,
+}
+
 /// The `MANIFEST_DELTA` message carries an incremental update to a
 /// manifest: a list of entries to add and a list of user IDs to remove.
 #[derive(Debug)]
 pub struct ManifestDelta {
     /// the index in the node index space of the host the manifest belongs to
-    pub origin_node_index: u16,
+    pub origin_node_id: [u8; 8],
     /// the `manifest_version` the delta builds upon.
     pub from_version: u32,
     /// the resulting `manifest_version` after applying the delta.
@@ -348,43 +379,55 @@ pub struct ManifestDelta {
     /// the host's ed25519 signature over the canonical encoding of the *resulting* full entry set.
     pub manifest_signature: [u8; 64],
     /// full entries to be updated
-    pub adds: Vec<ManifestEntry>,
+    pub adds: Vec<DeltaAdd>,
     /// the receiver removes the matching entry from its stored state.
-    pub removes: Vec<[u8; 8]>,
+    pub removes: Vec<DeltaRemove>,
 }
 
 impl ManifestDelta {
     pub fn encode(&self, data: &mut Vec<u8>) -> Result<()> {
-        data.extend_from_slice(&self.origin_node_index.to_be_bytes());
+        data.extend_from_slice(&self.origin_node_id);
         data.extend_from_slice(&self.from_version.to_be_bytes());
         data.extend_from_slice(&self.to_version.to_be_bytes());
         data.push(self.flags);
         data.extend_from_slice(&self.manifest_signature);
         data.extend_from_slice(&(self.adds.len() as u16).to_be_bytes());
-        self.adds.iter().for_each(|a| a.encode(data));
+        for a in &self.adds {
+            data.extend_from_slice(&a.record_version.to_be_bytes());
+            a.entry.encode(data);
+        }
         data.extend_from_slice(&(self.removes.len() as u16).to_be_bytes());
-        self.removes.iter().for_each(|r| data.extend_from_slice(r));
+        for r in &self.removes {
+            data.extend_from_slice(&r.user_id);
+            data.extend_from_slice(&r.record_version.to_be_bytes());
+        }
         Ok(())
     }
 
     pub fn decode(msg: &[u8]) -> Result<ManifestDelta> {
         let mut buf = msg;
-        let origin_node_index = read_u16_be(&mut buf)?;
+        let origin_node_id = read_array::<8>(&mut buf)?;
         let from_version = read_u32_be(&mut buf)?;
         let to_version = read_u32_be(&mut buf)?;
         let flags = read_u8(&mut buf)?;
         let manifest_signature = read_array::<64>(&mut buf)?;
         let no_of_additions = read_u16_be(&mut buf)?;
 
-        let mut entries = Vec::with_capacity(no_of_additions as usize);
+        let mut adds = Vec::with_capacity(no_of_additions as usize);
         for _ in 0..no_of_additions {
+            let record_version = u32::from_be_bytes(read_array::<4>(&mut buf)?);
             let user_id = read_array::<8>(&mut buf)?;
             let timeout = read_u64_be(&mut buf)?;
             let entry_signature = read_array::<64>(&mut buf)?;
-            entries.push(ManifestEntry {
-                user_id,
-                timeout,
-                entry_signature,
+            let profile_version = u32::from_be_bytes(read_array::<4>(&mut buf)?);
+            adds.push(DeltaAdd {
+                record_version,
+                entry: ManifestEntry {
+                    user_id,
+                    timeout,
+                    entry_signature,
+                    profile_version,
+                },
             });
         }
 
@@ -392,7 +435,11 @@ impl ManifestDelta {
         let mut removes = Vec::with_capacity(no_of_removes as usize);
         for _ in 0..no_of_removes {
             let user_id = read_array::<8>(&mut buf)?;
-            removes.push(user_id);
+            let record_version = u32::from_be_bytes(read_array::<4>(&mut buf)?);
+            removes.push(DeltaRemove {
+                user_id,
+                record_version,
+            });
         }
 
         if !buf.is_empty() {
@@ -400,16 +447,88 @@ impl ManifestDelta {
         }
 
         let manifest_delta = ManifestDelta {
-            origin_node_index,
+            origin_node_id,
             from_version,
             to_version,
             flags,
             manifest_signature,
-            adds: entries,
+            adds,
             removes,
         };
 
         Ok(manifest_delta)
+    }
+}
+
+/// A single item in a MANIFEST_REQUEST. Identifies one origin
+/// whose manifest state the sender wants to synchronise, and carries the
+/// sender's committed `manifest_version` for that origin as `have_version`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ManifestRequestItem {
+    /// 8-byte ID of the origin whose manifest is being requested.
+    pub origin_node_id: [u8; 8],
+    /// Requester's committed `manifest_version` for the origin. Ignored
+    /// by the responder when `have_none` is set.
+    pub have_version: u32,
+    /// Bit 0 = `have_none` (requester holds no manifest state — bootstrap).
+    /// Bits 1-7 reserved, MUST be zero on send.
+    pub item_flags: u8,
+}
+
+impl ManifestRequestItem {
+    /// True if the requester declares "no state held for this origin"
+    /// (§8.7 have_none bit).
+    pub fn have_none(&self) -> bool {
+        (self.item_flags & 0x01) != 0
+    }
+}
+
+/// The MANIFEST_REQUEST wire message
+#[derive(Debug, Clone)]
+pub struct ManifestRequest {
+    pub items: Vec<ManifestRequestItem>,
+}
+
+impl ManifestRequest {
+    pub fn encode(&self, data: &mut Vec<u8>) -> Result<()> {
+        // n_items is a u8 (spec caps items at 255).
+        if self.items.len() > u8::MAX as usize {
+            return Err(CodecError::Malformed);
+        }
+        data.push(self.items.len() as u8);
+        for item in &self.items {
+            data.extend_from_slice(&item.origin_node_id);
+            data.extend_from_slice(&item.have_version.to_be_bytes());
+            data.push(item.item_flags);
+        }
+        Ok(())
+    }
+
+    pub fn decode(msg: &[u8]) -> Result<ManifestRequest> {
+        let mut buf = msg;
+        let n_items = read_u8(&mut buf)?;
+
+        let mut items = Vec::with_capacity(n_items as usize);
+        for _ in 0..n_items {
+            let origin_node_id = read_array::<8>(&mut buf)?;
+            let have_version = u32::from_be_bytes(read_array::<4>(&mut buf)?);
+            let item_flags = read_u8(&mut buf)?;
+            // §8.7: reserved bits (1..=7) MUST be zero. Reject on send-side
+            if item_flags & 0b1111_1110 != 0 {
+                return Err(CodecError::Malformed);
+            }
+            items.push(ManifestRequestItem {
+                origin_node_id,
+                have_version,
+                item_flags,
+            });
+        }
+
+        if !buf.is_empty() {
+            return Err(CodecError::Malformed);
+        }
+
+        Ok(ManifestRequest { items })
     }
 }
 
@@ -423,12 +542,24 @@ mod tests {
         assert_eq!(actual.version, expected.version, "version");
     }
 
-    fn assert_entry_eq(actual: &Entry, expected: &Entry) {
+    fn assert_user_entry_eq(actual: &UserEntry, expected: &UserEntry) {
         assert_eq!(actual.abs_idx, expected.abs_idx, "abs_idx");
         assert_eq!(actual.seq, expected.seq, "seq");
         assert_eq!(actual.metric, expected.metric, "metric");
         assert_eq!(actual.hop_count, expected.hop_count, "hop_count");
         assert_eq!(actual.local_only, expected.local_only, "local_only");
+    }
+
+    fn assert_node_entry_eq(actual: &NodeEntry, expected: &NodeEntry) {
+        assert_eq!(actual.abs_idx, expected.abs_idx, "abs_idx");
+        assert_eq!(actual.seq, expected.seq, "seq");
+        assert_eq!(actual.metric, expected.metric, "metric");
+        assert_eq!(actual.hop_count, expected.hop_count, "hop_count");
+        assert_eq!(actual.local_only, expected.local_only, "local_only");
+        assert_eq!(
+            actual.manifest_version, expected.manifest_version,
+            "manifest_version",
+        );
     }
 
     fn empty_routing_update() -> RoutingUpdate {
@@ -448,13 +579,31 @@ mod tests {
         }
     }
 
-    fn sample_entry(idx: u16, seq: u16, metric: u16, hop: u8, local: bool) -> Entry {
-        Entry {
+    fn sample_user_entry(idx: u16, seq: u16, metric: u16, hop: u8, local: bool) -> UserEntry {
+        UserEntry {
             abs_idx: idx,
             seq,
             metric,
             hop_count: hop,
             local_only: local,
+        }
+    }
+
+    fn sample_node_entry(
+        idx: u16,
+        seq: u16,
+        metric: u16,
+        hop: u8,
+        local: bool,
+        manifest_version: u32,
+    ) -> NodeEntry {
+        NodeEntry {
+            abs_idx: idx,
+            seq,
+            metric,
+            hop_count: hop,
+            local_only: local,
+            manifest_version,
         }
     }
 
@@ -534,7 +683,8 @@ mod tests {
     #[test]
     fn one_user_entry_byte_layout() {
         let mut ru = empty_routing_update();
-        ru.user_entries.push(sample_entry(10, 100, 20, 5, true));
+        ru.user_entries
+            .push(sample_user_entry(10, 100, 20, 5, true));
 
         let mut buf = Vec::new();
         ru.encode(&mut buf).expect("encode");
@@ -558,33 +708,93 @@ mod tests {
     #[test]
     fn one_user_entry_round_trips() {
         let mut ru = empty_routing_update();
-        ru.user_entries.push(sample_entry(10, 100, 20, 5, true));
+        ru.user_entries
+            .push(sample_user_entry(10, 100, 20, 5, true));
 
         let mut buf = Vec::new();
         ru.encode(&mut buf).expect("encode");
         let decoded = RoutingUpdate::decode(&buf).expect("decode");
 
         assert_eq!(decoded.user_entries.len(), 1);
-        assert_entry_eq(&decoded.user_entries[0], &ru.user_entries[0]);
+        assert_user_entry_eq(&decoded.user_entries[0], &ru.user_entries[0]);
+    }
+
+    /// Node entries are 4 bytes larger than user entries (trailing
+    /// `manifest_version: u32` per §8.3 / §10.8). Byte-layout regression.
+    #[test]
+    fn one_node_entry_byte_layout() {
+        let mut ru = empty_routing_update();
+        ru.node_entries
+            .push(sample_node_entry(20, 200, 30, 10, false, 0x12345678));
+
+        let mut buf = Vec::new();
+        ru.encode(&mut buf).expect("encode");
+
+        // hop_byte: local_only=false → bit 7 = 0; hop_count=10 = 0x0A.
+        let expected: Vec<u8> = vec![
+            0x00, // n_user_mappings
+            0x00, // n_node_mappings
+            0x00, 0x00, // n_user_entries = 0
+            0x00, 0x01, // n_node_entries = 1
+            0x14, // delta 0 -> 20
+            0x00, 0xC8, // seq = 200
+            0x00, 0x1E, // metric = 30
+            0x0A, // hop_byte
+            0x12, 0x34, 0x56, 0x78, // manifest_version (BE)
+        ];
+
+        assert_eq!(buf, expected);
     }
 
     #[test]
     fn one_node_entry_round_trips() {
         let mut ru = empty_routing_update();
-        ru.node_entries.push(sample_entry(20, 200, 30, 10, false));
+        ru.node_entries
+            .push(sample_node_entry(20, 200, 30, 10, false, 42));
 
         let mut buf = Vec::new();
         ru.encode(&mut buf).expect("encode");
         let decoded = RoutingUpdate::decode(&buf).expect("decode");
 
         assert_eq!(decoded.node_entries.len(), 1);
-        assert_entry_eq(&decoded.node_entries[0], &ru.node_entries[0]);
+        assert_node_entry_eq(&decoded.node_entries[0], &ru.node_entries[0]);
+    }
+
+    /// Node entries carry a distinct `manifest_version` — sending 0
+    /// (no committed state for the target, per Phase 8 tick_relay)
+    /// must round-trip as 0.
+    #[test]
+    fn node_entry_zero_manifest_version_round_trips() {
+        let mut ru = empty_routing_update();
+        ru.node_entries
+            .push(sample_node_entry(5, 1, 1, 1, false, 0));
+
+        let mut buf = Vec::new();
+        ru.encode(&mut buf).expect("encode");
+        let decoded = RoutingUpdate::decode(&buf).expect("decode");
+
+        assert_eq!(decoded.node_entries[0].manifest_version, 0);
+    }
+
+    /// Node entries carry the target's committed `manifest_version` per
+    /// §10.8. Verify the full u32 range round-trips (max value).
+    #[test]
+    fn node_entry_max_manifest_version_round_trips() {
+        let mut ru = empty_routing_update();
+        ru.node_entries
+            .push(sample_node_entry(5, 1, 1, 1, false, u32::MAX));
+
+        let mut buf = Vec::new();
+        ru.encode(&mut buf).expect("encode");
+        let decoded = RoutingUpdate::decode(&buf).expect("decode");
+
+        assert_eq!(decoded.node_entries[0].manifest_version, u32::MAX);
     }
 
     #[test]
     fn local_only_true_sets_bit_7_of_hop_byte() {
         let mut ru = empty_routing_update();
-        ru.user_entries.push(sample_entry(1, 0, 0, 0, true));
+        ru.user_entries.push(sample_user_entry(1, 0, 0, 0, true));
 
         let mut buf = Vec::new();
         ru.encode(&mut buf).expect("encode");
@@ -607,7 +817,7 @@ mod tests {
     #[test]
     fn local_only_false_clears_bit_7_of_hop_byte() {
         let mut ru = empty_routing_update();
-        ru.user_entries.push(sample_entry(1, 0, 0, 0, false));
+        ru.user_entries.push(sample_user_entry(1, 0, 0, 0, false));
 
         let mut buf = Vec::new();
         ru.encode(&mut buf).expect("encode");
@@ -632,10 +842,10 @@ mod tests {
                 sample_mapping(10, 0x04, 4),
             ],
             user_entries: vec![
-                sample_entry(1, 100, 200, 0, false),
-                sample_entry(50_000, 300, 400, 63, true), // big gap + max hop count
+                sample_user_entry(1, 100, 200, 0, false),
+                sample_user_entry(50_000, 300, 400, 63, true), // big gap + max hop count
             ],
-            node_entries: vec![sample_entry(2, 500, 600, 31, false)],
+            node_entries: vec![sample_node_entry(2, 500, 600, 31, false, 7)],
         };
 
         let mut buf = Vec::new();
@@ -652,11 +862,11 @@ mod tests {
         }
         assert_eq!(decoded.user_entries.len(), ru.user_entries.len());
         for (a, b) in decoded.user_entries.iter().zip(ru.user_entries.iter()) {
-            assert_entry_eq(a, b);
+            assert_user_entry_eq(a, b);
         }
         assert_eq!(decoded.node_entries.len(), ru.node_entries.len());
         for (a, b) in decoded.node_entries.iter().zip(ru.node_entries.iter()) {
-            assert_entry_eq(a, b);
+            assert_node_entry_eq(a, b);
         }
     }
 
@@ -667,8 +877,8 @@ mod tests {
         let ru = RoutingUpdate {
             user_mappings: vec![sample_mapping(5, 0xAB, 1)],
             node_mappings: vec![sample_mapping(7, 0xCD, 2)],
-            user_entries: vec![sample_entry(10, 100, 200, 5, true)],
-            node_entries: vec![sample_entry(20, 300, 400, 10, false)],
+            user_entries: vec![sample_user_entry(10, 100, 200, 5, true)],
+            node_entries: vec![sample_node_entry(20, 300, 400, 10, false, 99)],
         };
         let mut full = Vec::new();
         ru.encode(&mut full).expect("encode");
@@ -702,12 +912,16 @@ mod tests {
             actual.entry_signature, expected.entry_signature,
             "entry_signature"
         );
+        assert_eq!(
+            actual.profile_version, expected.profile_version,
+            "profile_version"
+        );
     }
 
     fn assert_node_manifest_eq(actual: &NodeManifest, expected: &NodeManifest) {
         assert_eq!(
-            actual.origin_node_index, expected.origin_node_index,
-            "origin_node_index"
+            actual.origin_node_id, expected.origin_node_id,
+            "origin_node_id"
         );
         assert_eq!(
             actual.manifest_version, expected.manifest_version,
@@ -730,17 +944,23 @@ mod tests {
         }
     }
 
-    fn sample_manifest_entry(user_id_byte: u8, timeout: u64, sig_byte: u8) -> ManifestEntry {
+    fn sample_manifest_entry(
+        user_id_byte: u8,
+        timeout: u64,
+        sig_byte: u8,
+        profile_version: u32,
+    ) -> ManifestEntry {
         ManifestEntry {
             user_id: [user_id_byte; 8],
             timeout,
             entry_signature: [sig_byte; 64],
+            profile_version,
         }
     }
 
     fn empty_node_manifest() -> NodeManifest {
         NodeManifest {
-            origin_node_index: 0,
+            origin_node_id: [0; 8],
             manifest_version: 0,
             chunk_index: 0,
             chunk_count: 1,
@@ -751,23 +971,23 @@ mod tests {
     }
 
     #[test]
-    fn empty_node_manifest_encodes_to_75_byte_body() {
+    fn empty_node_manifest_encodes_to_81_byte_body() {
         let m = empty_node_manifest();
         let mut buf = Vec::new();
         m.encode(&mut buf).expect("encode");
-        // origin_node_index(2) + manifest_version(4) + chunk_index(1)
+        // origin_node_id(8) + manifest_version(4) + chunk_index(1)
         // + chunk_count(1) + flags(1) + manifest_signature(64)
-        // + n_entries(2) = 75 bytes
-        // Wait - 2+4+1+1+1+64+2 = 75. Spec §8.5 says "approximately 79 + 80·N",
-        // where the 79 includes the 4-byte common Header. The body itself
-        // (no header) is 75 bytes when entries are empty.
-        assert_eq!(buf.len(), 75);
+        // + n_entries(2) = 81 bytes.
+        // Spec §8.5 says "approximately 85 + 84·N" total body,
+        // where the 85 includes the 4-byte common Header. Body alone
+        // (no header) is 81 bytes when entries are empty.
+        assert_eq!(buf.len(), 81);
     }
 
     #[test]
     fn empty_node_manifest_round_trips() {
         let m = NodeManifest {
-            origin_node_index: 42,
+            origin_node_id: [42; 8],
             manifest_version: 7,
             chunk_index: 0,
             chunk_count: 1,
@@ -785,10 +1005,12 @@ mod tests {
 
     /// Hand-rolled byte fixture for a one-entry manifest. Verifies every
     /// field lands at the right offset on the wire.
+    /// Per new spec §8.5: `origin_node_id` is 8 bytes (was 2-byte index);
+    /// each entry is 84 bytes with the trailing `profile_version` (§10.1).
     #[test]
     fn one_entry_byte_layout() {
         let m = NodeManifest {
-            origin_node_index: 0x1234,
+            origin_node_id: [0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0],
             manifest_version: 0x0A0B0C0D,
             chunk_index: 0x02,
             chunk_count: 0x03,
@@ -798,16 +1020,18 @@ mod tests {
                 user_id: [0x11; 8],
                 timeout: 0x00_11_22_33_44_55_66_77,
                 entry_signature: [0xBB; 64],
+                profile_version: 0xDEAD_BEEF,
             }],
         };
 
         let mut buf = Vec::new();
         m.encode(&mut buf).expect("encode");
 
-        // Assemble expected: header fields, then 64-byte sig, then n_entries,
-        // then the 80-byte entry body.
+        // Assemble expected: origin_node_id(8) + manifest_version(4) +
+        // chunk_index(1) + chunk_count(1) + flags(1) + manifest_signature(64)
+        // + n_entries(2) + one 84-byte entry.
         let mut expected = Vec::new();
-        expected.extend_from_slice(&[0x12, 0x34]); // origin_node_index
+        expected.extend_from_slice(&[0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0]); // origin_node_id
         expected.extend_from_slice(&[0x0A, 0x0B, 0x0C, 0x0D]); // manifest_version
         expected.push(0x02); // chunk_index
         expected.push(0x03); // chunk_count
@@ -818,25 +1042,26 @@ mod tests {
         expected.extend_from_slice(&[0x11; 8]); // user_id
         expected.extend_from_slice(&[0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77]); // timeout
         expected.extend_from_slice(&[0xBB; 64]); // entry_signature
+        expected.extend_from_slice(&[0xDE, 0xAD, 0xBE, 0xEF]); // profile_version
 
         assert_eq!(buf, expected);
-        // Total: 2+4+1+1+1+64+2+80 = 155 bytes.
-        assert_eq!(buf.len(), 155);
+        // Total: 8+4+1+1+1+64+2+84 = 165 bytes.
+        assert_eq!(buf.len(), 165);
     }
 
     #[test]
     fn multi_entry_round_trip() {
         let m = NodeManifest {
-            origin_node_index: 10,
+            origin_node_id: [10; 8],
             manifest_version: 100,
             chunk_index: 0,
             chunk_count: 1,
             flags: 0x00,
             manifest_signature: [0xCC; 64],
             entries: vec![
-                sample_manifest_entry(0x01, 1_000_000, 0xA1),
-                sample_manifest_entry(0x02, 2_000_000, 0xA2),
-                sample_manifest_entry(0x03, 3_000_000, 0xA3),
+                sample_manifest_entry(0x01, 1_000_000, 0xA1, 11),
+                sample_manifest_entry(0x02, 2_000_000, 0xA2, 22),
+                sample_manifest_entry(0x03, 3_000_000, 0xA3, 33),
             ],
         };
 
@@ -851,6 +1076,10 @@ mod tests {
         // pass.
         assert_ne!(decoded.entries[0].user_id, decoded.entries[1].user_id);
         assert_ne!(decoded.entries[1].user_id, decoded.entries[2].user_id);
+        assert_ne!(
+            decoded.entries[0].profile_version, decoded.entries[1].profile_version,
+            "profile_version must round-trip per-entry"
+        );
     }
 
     #[test]
@@ -883,13 +1112,13 @@ mod tests {
     #[test]
     fn decode_truncation_never_panics() {
         let m = NodeManifest {
-            origin_node_index: 42,
+            origin_node_id: [42; 8],
             manifest_version: 7,
             chunk_index: 0,
             chunk_count: 1,
             flags: 0x01,
             manifest_signature: [0xCC; 64],
-            entries: vec![sample_manifest_entry(0xAA, 12345, 0xDD)],
+            entries: vec![sample_manifest_entry(0xAA, 12345, 0xDD, 5)],
         };
         let mut full = Vec::new();
         m.encode(&mut full).expect("encode");
@@ -913,6 +1142,125 @@ mod tests {
             other => panic!("expected Malformed, got {other:?}"),
         }
     }
+
+    // ---------- ManifestRequest ----------
+
+    fn sample_request_item(id_byte: u8, have_version: u32, have_none: bool) -> ManifestRequestItem {
+        ManifestRequestItem {
+            origin_node_id: [id_byte; 8],
+            have_version,
+            item_flags: if have_none { 0x01 } else { 0x00 },
+        }
+    }
+
+    #[test]
+    fn manifest_request_round_trip_empty_items() {
+        let msg = ManifestRequest { items: Vec::new() };
+        let mut buf = Vec::new();
+        msg.encode(&mut buf).unwrap();
+        // Just the u8 n_items = 0.
+        assert_eq!(buf, vec![0x00]);
+        let decoded = ManifestRequest::decode(&buf).unwrap();
+        assert!(decoded.items.is_empty());
+    }
+
+    #[test]
+    fn manifest_request_round_trip_single_item_with_version() {
+        let msg = ManifestRequest {
+            items: vec![sample_request_item(1, 42, false)],
+        };
+        let mut buf = Vec::new();
+        msg.encode(&mut buf).unwrap();
+        // 1 byte n_items + 13 bytes/item = 14
+        assert_eq!(buf.len(), 14);
+        let decoded = ManifestRequest::decode(&buf).unwrap();
+        assert_eq!(decoded.items.len(), 1);
+        assert_eq!(decoded.items[0].origin_node_id, [1; 8]);
+        assert_eq!(decoded.items[0].have_version, 42);
+        assert!(!decoded.items[0].have_none());
+    }
+
+    #[test]
+    fn manifest_request_round_trip_have_none_bit() {
+        let msg = ManifestRequest {
+            items: vec![sample_request_item(5, 0, true)],
+        };
+        let mut buf = Vec::new();
+        msg.encode(&mut buf).unwrap();
+        let decoded = ManifestRequest::decode(&buf).unwrap();
+        assert!(decoded.items[0].have_none());
+    }
+
+    #[test]
+    fn manifest_request_round_trip_many_items() {
+        let items: Vec<ManifestRequestItem> = (0..5)
+            .map(|i| sample_request_item(i as u8, i * 10, i % 2 == 0))
+            .collect();
+        let msg = ManifestRequest {
+            items: items.clone(),
+        };
+        let mut buf = Vec::new();
+        msg.encode(&mut buf).unwrap();
+        // 1 + 5 * 13 = 66
+        assert_eq!(buf.len(), 66);
+        let decoded = ManifestRequest::decode(&buf).unwrap();
+        assert_eq!(decoded.items, items);
+    }
+
+    /// Reserved bits (1..=7) MUST be zero per §8.7. Non-zero rejected.
+    #[test]
+    fn manifest_request_decode_rejects_reserved_bits() {
+        let mut buf = Vec::new();
+        buf.push(0x01); // n_items = 1
+        buf.extend_from_slice(&[7u8; 8]); // origin_node_id
+        buf.extend_from_slice(&0u32.to_be_bytes()); // have_version
+        buf.push(0b0000_0010); // reserved bit set → malformed
+        match ManifestRequest::decode(&buf) {
+            Err(CodecError::Malformed) => {}
+            other => panic!("expected Malformed, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn manifest_request_encode_rejects_over_255_items() {
+        let msg = ManifestRequest {
+            items: vec![sample_request_item(0, 0, false); 256],
+        };
+        let mut buf = Vec::new();
+        match msg.encode(&mut buf) {
+            Err(CodecError::Malformed) => {}
+            other => panic!("expected Malformed, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn manifest_request_decode_truncated_returns_short() {
+        // 1 byte n_items = 3, followed by only one full item's worth of bytes.
+        let mut buf = Vec::new();
+        buf.push(3);
+        buf.extend_from_slice(&[1u8; 8]);
+        buf.extend_from_slice(&42u32.to_be_bytes());
+        buf.push(0x00);
+        // Missing the other two items entirely.
+        match ManifestRequest::decode(&buf) {
+            Err(CodecError::Short) => {}
+            other => panic!("expected Short, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn manifest_request_decode_trailing_junk_returns_malformed() {
+        let msg = ManifestRequest {
+            items: vec![sample_request_item(1, 1, false)],
+        };
+        let mut buf = Vec::new();
+        msg.encode(&mut buf).unwrap();
+        buf.push(0xFF); // trailing byte
+        match ManifestRequest::decode(&buf) {
+            Err(CodecError::Malformed) => {}
+            other => panic!("expected Malformed, got {other:?}"),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -920,7 +1268,6 @@ mod proptests {
     use super::*;
     use crate::router_v2::codec::utils::{decode_indexes, encode_indexes};
     use proptest::prelude::*;
-
 
     fn arb_signature() -> impl Strategy<Value = [u8; 64]> {
         prop::collection::vec(any::<u8>(), 64..=64).prop_map(|v| {
@@ -947,7 +1294,7 @@ mod proptests {
         )
     }
 
-    fn arb_entry_vec(max: usize) -> impl Strategy<Value = Vec<Entry>> {
+    fn arb_user_entry_vec(max: usize) -> impl Strategy<Value = Vec<UserEntry>> {
         prop::collection::vec(
             (
                 any::<u16>(),
@@ -963,7 +1310,7 @@ mod proptests {
             items.dedup_by_key(|(idx, _, _, _, _)| *idx);
             items
                 .into_iter()
-                .map(|(abs_idx, seq, metric, hop, local_only)| Entry {
+                .map(|(abs_idx, seq, metric, hop, local_only)| UserEntry {
                     abs_idx,
                     seq,
                     metric,
@@ -974,21 +1321,91 @@ mod proptests {
         })
     }
 
+    fn arb_node_entry_vec(max: usize) -> impl Strategy<Value = Vec<NodeEntry>> {
+        prop::collection::vec(
+            (
+                any::<u16>(),
+                any::<u16>(),
+                any::<u16>(),
+                any::<u8>(),
+                any::<bool>(),
+                any::<u32>(),
+            ),
+            0..=max,
+        )
+        .prop_map(|mut items| {
+            items.sort_by_key(|(idx, _, _, _, _, _)| *idx);
+            items.dedup_by_key(|(idx, _, _, _, _, _)| *idx);
+            items
+                .into_iter()
+                .map(
+                    |(abs_idx, seq, metric, hop, local_only, manifest_version)| NodeEntry {
+                        abs_idx,
+                        seq,
+                        metric,
+                        hop_count: hop & 0b0011_1111,
+                        local_only,
+                        manifest_version,
+                    },
+                )
+                .collect()
+        })
+    }
+
     fn arb_manifest_entry_vec(max: usize) -> impl Strategy<Value = Vec<ManifestEntry>> {
         prop::collection::vec(
-            (any::<[u8; 8]>(), any::<u64>(), arb_signature()).prop_map(
-                |(user_id, timeout, entry_signature)| ManifestEntry {
-                    user_id,
-                    timeout,
-                    entry_signature,
-                },
-            ),
+            (
+                any::<[u8; 8]>(),
+                any::<u64>(),
+                arb_signature(),
+                any::<u32>(),
+            )
+                .prop_map(|(user_id, timeout, entry_signature, profile_version)| {
+                    ManifestEntry {
+                        user_id,
+                        timeout,
+                        entry_signature,
+                        profile_version,
+                    }
+                }),
             0..=max,
         )
     }
 
-    fn arb_remove_vec(max: usize) -> impl Strategy<Value = Vec<[u8; 8]>> {
-        prop::collection::vec(any::<[u8; 8]>(), 0..=max)
+    fn arb_delta_add_vec(max: usize) -> impl Strategy<Value = Vec<DeltaAdd>> {
+        prop::collection::vec(
+            (
+                any::<u32>(),
+                any::<[u8; 8]>(),
+                any::<u64>(),
+                arb_signature(),
+                any::<u32>(),
+            )
+                .prop_map(
+                    |(record_version, user_id, timeout, entry_signature, profile_version)| {
+                        DeltaAdd {
+                            record_version,
+                            entry: ManifestEntry {
+                                user_id,
+                                timeout,
+                                entry_signature,
+                                profile_version,
+                            },
+                        }
+                    },
+                ),
+            0..=max,
+        )
+    }
+
+    fn arb_delta_remove_vec(max: usize) -> impl Strategy<Value = Vec<DeltaRemove>> {
+        prop::collection::vec(
+            (any::<[u8; 8]>(), any::<u32>()).prop_map(|(user_id, record_version)| DeltaRemove {
+                user_id,
+                record_version,
+            }),
+            0..=max,
+        )
     }
 
     proptest! {
@@ -1018,8 +1435,8 @@ mod proptests {
         fn routing_update_round_trips(
             user_mappings in arb_mapping_vec(50),
             node_mappings in arb_mapping_vec(50),
-            user_entries in arb_entry_vec(50),
-            node_entries in arb_entry_vec(50),
+            user_entries in arb_user_entry_vec(50),
+            node_entries in arb_node_entry_vec(50),
         ) {
             let ru = RoutingUpdate { user_mappings, node_mappings, user_entries, node_entries };
 
@@ -1055,6 +1472,7 @@ mod proptests {
                 prop_assert_eq!(a.metric, b.metric);
                 prop_assert_eq!(a.hop_count, b.hop_count);
                 prop_assert_eq!(a.local_only, b.local_only);
+                prop_assert_eq!(a.manifest_version, b.manifest_version);
             }
         }
 
@@ -1084,7 +1502,7 @@ mod proptests {
 
         #[test]
         fn node_manifest_round_trips(
-            origin_node_index in any::<u16>(),
+            origin_node_id in any::<[u8; 8]>(),
             manifest_version in any::<u32>(),
             chunk_index in any::<u8>(),
             chunk_count in 1u8..=255u8,
@@ -1093,7 +1511,7 @@ mod proptests {
             entries in arb_manifest_entry_vec(30),
         ) {
             let m = NodeManifest {
-                origin_node_index, manifest_version, chunk_index, chunk_count,
+                origin_node_id, manifest_version, chunk_index, chunk_count,
                 flags, manifest_signature, entries,
             };
 
@@ -1101,7 +1519,7 @@ mod proptests {
             m.encode(&mut buf).unwrap();
             let decoded = NodeManifest::decode(&buf).unwrap();
 
-            prop_assert_eq!(decoded.origin_node_index, m.origin_node_index);
+            prop_assert_eq!(decoded.origin_node_id, m.origin_node_id);
             prop_assert_eq!(decoded.manifest_version, m.manifest_version);
             prop_assert_eq!(decoded.chunk_index, m.chunk_index);
             prop_assert_eq!(decoded.chunk_count, m.chunk_count);
@@ -1112,21 +1530,22 @@ mod proptests {
                 prop_assert_eq!(a.user_id, b.user_id);
                 prop_assert_eq!(a.timeout, b.timeout);
                 prop_assert_eq!(a.entry_signature, b.entry_signature);
+                prop_assert_eq!(a.profile_version, b.profile_version);
             }
         }
 
         #[test]
         fn manifest_delta_round_trips(
-            origin_node_index in any::<u16>(),
+            origin_node_id in any::<[u8; 8]>(),
             from_version in any::<u32>(),
             to_version in any::<u32>(),
             flags in any::<u8>(),
             manifest_signature in arb_signature(),
-            adds in arb_manifest_entry_vec(30),
-            removes in arb_remove_vec(30),
+            adds in arb_delta_add_vec(30),
+            removes in arb_delta_remove_vec(30),
         ) {
             let d = ManifestDelta {
-                origin_node_index, from_version, to_version, flags,
+                origin_node_id, from_version, to_version, flags,
                 manifest_signature, adds, removes,
             };
 
@@ -1134,24 +1553,26 @@ mod proptests {
             d.encode(&mut buf).unwrap();
             let decoded = ManifestDelta::decode(&buf).unwrap();
 
-            prop_assert_eq!(decoded.origin_node_index, d.origin_node_index);
+            prop_assert_eq!(decoded.origin_node_id, d.origin_node_id);
             prop_assert_eq!(decoded.from_version, d.from_version);
             prop_assert_eq!(decoded.to_version, d.to_version);
             prop_assert_eq!(decoded.flags, d.flags);
             prop_assert_eq!(decoded.manifest_signature, d.manifest_signature);
             prop_assert_eq!(decoded.adds.len(), d.adds.len());
             for (a, b) in decoded.adds.iter().zip(d.adds.iter()) {
-                prop_assert_eq!(a.user_id, b.user_id);
-                prop_assert_eq!(a.timeout, b.timeout);
-                prop_assert_eq!(a.entry_signature, b.entry_signature);
+                prop_assert_eq!(a.record_version, b.record_version);
+                prop_assert_eq!(a.entry.user_id, b.entry.user_id);
+                prop_assert_eq!(a.entry.timeout, b.entry.timeout);
+                prop_assert_eq!(a.entry.entry_signature, b.entry.entry_signature);
+                prop_assert_eq!(a.entry.profile_version, b.entry.profile_version);
             }
             prop_assert_eq!(decoded.removes.len(), d.removes.len());
             for (a, b) in decoded.removes.iter().zip(d.removes.iter()) {
-                prop_assert_eq!(a, b);
+                prop_assert_eq!(a.user_id, b.user_id);
+                prop_assert_eq!(a.record_version, b.record_version);
             }
         }
     }
-
 
     proptest! {
         /// Arbitrary byte sequences must produce a CodecError or success
@@ -1184,6 +1605,13 @@ mod proptests {
             bytes in prop::collection::vec(any::<u8>(), 0..4096)
         ) {
             let _ = ManifestDelta::decode(&bytes);
+        }
+
+        #[test]
+        fn manifest_request_decode_never_panics(
+            bytes in prop::collection::vec(any::<u8>(), 0..4096)
+        ) {
+            let _ = ManifestRequest::decode(&bytes);
         }
 
         #[test]
