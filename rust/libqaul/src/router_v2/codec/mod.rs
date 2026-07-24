@@ -17,6 +17,7 @@ pub enum RoutingMessage {
     IndexDump = 0x02,
     NodeManifest = 0x03,
     ManifestDelta = 0x04,
+    ManifestRequest = 0x05
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -68,6 +69,7 @@ impl Header {
             2 => RoutingMessage::IndexDump,
             3 => RoutingMessage::NodeManifest,
             4 => RoutingMessage::ManifestDelta,
+            5 => RoutingMessage::ManifestRequest,
             _ => return Err(CodecError::UnknownType(buf[1])),
         };
 
@@ -92,6 +94,7 @@ mod tests {
             RoutingMessage::IndexDump,
             RoutingMessage::NodeManifest,
             RoutingMessage::ManifestDelta,
+            RoutingMessage::ManifestRequest
         ];
 
         for ty in variants {
