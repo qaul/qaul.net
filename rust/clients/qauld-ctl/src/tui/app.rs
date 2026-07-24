@@ -302,18 +302,18 @@ impl App {
         }
     }
 
-    /// Append new rotation events and advance the floor so subsequent
-    /// fetches only ask for what's newer.
-    pub fn append_crypto_events(&mut self, mut new_events: Vec<CryptoRotationEvent>) {
-        if new_events.is_empty() {
-            return;
+    /// Append rotation events from the poll path, deduping each against
+    /// what's already buffered.
+    ///
+    /// Poll and push now advance independent floors (the background
+    /// refresh task owns the poll floor), so the same event can arrive
+    /// on both paths; routing every poll event through the same dedup
+    /// as the push path keeps the list free of duplicates without the
+    /// two paths having to share a floor.
+    pub fn append_crypto_events(&mut self, new_events: Vec<CryptoRotationEvent>) {
+        for e in new_events {
+            self.merge_crypto_event(e);
         }
-        for e in &new_events {
-            if e.timestamp_ms > self.crypto_event_floor_ms {
-                self.crypto_event_floor_ms = e.timestamp_ms;
-            }
-        }
-        self.crypto_events.append(&mut new_events);
         // Cap the buffer so it doesn't grow unbounded; keep newest.
         const MAX: usize = 500;
         if self.crypto_events.len() > MAX {
@@ -402,4 +402,63 @@ fn push_capped(buf: &mut VecDeque<u64>, value: u64) {
         buf.pop_front();
     }
     buf.push_back(value);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::tui::data::CryptoRotationEvent;
+
+    fn ev(ts: u64, primary: u32, draining: u32) -> CryptoRotationEvent {
+        CryptoRotationEvent {
+            timestamp_ms: ts,
+            kind: "Rotated",
+            remote_id: "peer".to_string(),
+            primary_session_id: primary,
+            draining_session_id: draining,
+        }
+    }
+
+    // The background refresh task owns its own poll floor, so the
+    // daemon's inclusive `since_ms` filter re-sends the boundary event
+    // every cycle. append_crypto_events must drop those duplicates
+    // instead of appending them (the old code relied on a floor shared
+    // with the push path, which no longer exists).
+    #[test]
+    fn append_crypto_events_drops_duplicates() {
+        let mut app = App::new();
+        app.append_crypto_events(vec![ev(10, 1, 0), ev(20, 2, 1)]);
+        assert_eq!(app.crypto_events.len(), 2);
+
+        // Next poll re-sends the boundary event (ts=20) plus a new one.
+        app.append_crypto_events(vec![ev(20, 2, 1), ev(30, 3, 2)]);
+        assert_eq!(app.crypto_events.len(), 3, "boundary dup must be dropped");
+        assert_eq!(app.crypto_events.last().unwrap().timestamp_ms, 30);
+    }
+
+    // A poll event that the push path already delivered is deduped too,
+    // since both now route through the same merge.
+    #[test]
+    fn append_crypto_events_dedups_against_push_path() {
+        let mut app = App::new();
+        app.push_event_line(EventLine {
+            topic: "crypto.rotation".into(),
+            text: String::new(),
+            parsed: ParsedEvent::CryptoRotation(ev(50, 5, 4)),
+        });
+        assert_eq!(app.crypto_events.len(), 1);
+
+        // The poll path fetches the same event → no duplicate.
+        app.append_crypto_events(vec![ev(50, 5, 4)]);
+        assert_eq!(app.crypto_events.len(), 1);
+    }
+
+    // Distinct events at the same timestamp (different sessions) are
+    // kept — dedup is by the full identifying tuple, not timestamp.
+    #[test]
+    fn append_crypto_events_keeps_distinct_same_timestamp() {
+        let mut app = App::new();
+        app.append_crypto_events(vec![ev(10, 1, 0), ev(10, 2, 1)]);
+        assert_eq!(app.crypto_events.len(), 2);
+    }
 }

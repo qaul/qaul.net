@@ -544,6 +544,83 @@ fn _codec_dummy() -> LengthDelimitedCodec {
     LengthDelimitedCodec::new()
 }
 
+/// A complete set of polled views fetched in one refresh cycle.
+///
+/// Every field is `Result<_, String>` — not `Box<dyn Error>` — so the
+/// whole struct is `Send` and can be handed from the background refresh
+/// task to the render loop over a channel. Errors are surfaced
+/// per-field in the events pane, exactly as the old inline refresh did.
+#[derive(Debug)]
+pub struct Snapshot {
+    pub default_user: Result<DefaultUser, String>,
+    pub users: Result<Vec<UserRow>, String>,
+    pub feed: Result<Vec<FeedRow>, String>,
+    pub dtn_state: Result<DtnState, String>,
+    pub dtn_config: Result<DtnConfig, String>,
+    pub network: Result<NetworkSnapshot, String>,
+    pub crypto_config: Result<CryptoConfig, String>,
+    pub crypto_events: Result<Vec<CryptoRotationEvent>, String>,
+}
+
+/// Fetch every polled view for one refresh cycle.
+///
+/// Runs off the render loop (in a background task) so a slow or hung
+/// RPC can never stall input handling or redraws. `fetch_default_user`
+/// resolves first because the DTN fetches need the account id as the
+/// envelope `user_id`; the remaining seven fetches are independent and
+/// are fanned out concurrently, so a cycle costs one round-trip's
+/// latency rather than the sum of eight.
+pub async fn refresh_once(
+    connect: &ConnectInfo,
+    timeout: Duration,
+    crypto_since_ms: u64,
+) -> Snapshot {
+    let default_user = fetch_default_user(connect, timeout)
+        .await
+        .map_err(|e| e.to_string());
+    let uid: Vec<u8> = default_user
+        .as_ref()
+        .map(|d| d.id_bytes.clone())
+        .unwrap_or_default();
+
+    let (users, feed, dtn_state, dtn_config, network, crypto_config, crypto_events) = tokio::join!(
+        async { fetch_users(connect, timeout).await.map_err(|e| e.to_string()) },
+        async { fetch_feed(connect, timeout).await.map_err(|e| e.to_string()) },
+        async {
+            fetch_dtn_state(connect, timeout, &uid)
+                .await
+                .map_err(|e| e.to_string())
+        },
+        async {
+            fetch_dtn_config(connect, timeout, &uid)
+                .await
+                .map_err(|e| e.to_string())
+        },
+        async { fetch_network(connect, timeout).await.map_err(|e| e.to_string()) },
+        async {
+            fetch_crypto_config(connect, timeout)
+                .await
+                .map_err(|e| e.to_string())
+        },
+        async {
+            fetch_crypto_events(connect, timeout, crypto_since_ms)
+                .await
+                .map_err(|e| e.to_string())
+        },
+    );
+
+    Snapshot {
+        default_user,
+        users,
+        feed,
+        dtn_state,
+        dtn_config,
+        network,
+        crypto_config,
+        crypto_events,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
