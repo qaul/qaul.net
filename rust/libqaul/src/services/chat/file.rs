@@ -58,6 +58,35 @@ pub struct UserFiles {
     /// key: file_id & chunk_index
     /// value: `Vec<u8>`
     pub file_chunks: sled::Tree,
+    /// per-file envelope content keys (group-file envelope encryption)
+    ///
+    /// Holds received `file_key`s awaiting their body, plus locally
+    /// generated keys for sent files that may need relay. Entries
+    /// expire by `GroupFiles.envelope_ttl_seconds`.
+    ///
+    /// key: file_id (u64 big-endian)
+    /// value: bincode of `FileKey`
+    pub file_keys: sled::Tree,
+}
+
+/// A stored per-file envelope content key.
+///
+/// Either received in a `FileKeyEnvelope` (awaiting the body) or
+/// generated locally for a file we sent (kept for possible relay to
+/// late joiners). `body_digest` binds the key to exactly one body.
+#[derive(Clone, Serialize, Deserialize)]
+pub struct FileKey {
+    pub file_id: u64,
+    pub group_id: Vec<u8>,
+    /// 32-byte ChaCha20-Poly1305 content key.
+    pub file_key: Vec<u8>,
+    /// SHA-256 of the encrypted body this key decrypts.
+    pub body_digest: Vec<u8>,
+    /// Wall-clock ms when this entry was stored; drives TTL expiry.
+    pub stored_at: u64,
+    /// True for keys we generated locally (sent files), which we may
+    /// relay; false for keys received from a sender.
+    pub locally_generated: bool,
 }
 
 impl AllFiles {
@@ -164,6 +193,72 @@ impl UserFiles {
         }
     }
 
+    /// Store an envelope content key for `file_id` (received or locally
+    /// generated). Idempotent: storing the same `file_id` overwrites.
+    pub fn save_file_key(&self, key: &FileKey) {
+        let bytes = match bincode::serialize(key) {
+            Ok(b) => b,
+            Err(e) => {
+                log::error!("Error serializing file key: {}", e);
+                return;
+            }
+        };
+        if let Err(e) = self.file_keys.insert(key.file_id.to_be_bytes(), bytes) {
+            log::error!("Error saving file key: {}", e);
+            return;
+        }
+        if let Err(e) = self.file_keys.flush() {
+            log::error!("Error file_keys flush: {}", e);
+        }
+    }
+
+    /// Fetch the envelope content key for `file_id`, if present.
+    pub fn get_file_key(&self, file_id: u64) -> Option<FileKey> {
+        match self.file_keys.get(file_id.to_be_bytes()) {
+            Ok(Some(bytes)) => match bincode::deserialize(&bytes) {
+                Ok(k) => Some(k),
+                Err(e) => {
+                    log::error!("Error deserializing file key: {}", e);
+                    None
+                }
+            },
+            Ok(None) => None,
+            Err(e) => {
+                log::error!("Error reading file key: {}", e);
+                None
+            }
+        }
+    }
+
+    /// Remove (and zeroize via drop) the stored key for `file_id`,
+    /// e.g. once the body is decrypted and exposed to the user.
+    pub fn delete_file_key(&self, file_id: u64) {
+        if let Err(e) = self.file_keys.remove(file_id.to_be_bytes()) {
+            log::error!("Error removing file key: {}", e);
+        }
+        if let Err(e) = self.file_keys.flush() {
+            log::error!("Error file_keys flush: {}", e);
+        }
+    }
+
+    /// Drop any stored file keys older than `ttl_ms` (by `stored_at`).
+    /// Bounds the `file_keys` tree even when bodies never arrive.
+    pub fn prune_expired_file_keys(&self, now_ms: u64, ttl_ms: u64) {
+        let mut expired: Vec<u64> = Vec::new();
+        for item in self.file_keys.iter() {
+            if let Ok((_k, bytes)) = item {
+                if let Ok(key) = bincode::deserialize::<FileKey>(&bytes) {
+                    if now_ms.saturating_sub(key.stored_at) > ttl_ms {
+                        expired.push(key.file_id);
+                    }
+                }
+            }
+        }
+        for file_id in expired {
+            self.delete_file_key(file_id);
+        }
+    }
+
     /// count file chunks
     ///
     /// Count how many chunks of a file we already have in the data base
@@ -247,6 +342,12 @@ pub struct FileHistory {
     pub sent_at: u64,
     /// file received
     pub received_at: u64,
+    /// Group-file envelope marker + binding. Non-empty means this file
+    /// is envelope-encrypted: the stored chunks are the body ciphertext
+    /// (one per-file key, delivered via FileKeyEnvelope), and this is
+    /// its SHA-256 digest. Empty = legacy per-recipient encryption.
+    #[serde(default)]
+    pub body_digest: Vec<u8>,
 }
 
 impl FileHistory {
@@ -313,6 +414,7 @@ impl ChatFileState {
                 return UserFiles {
                     histories: user_files.histories.clone(),
                     file_chunks: user_files.file_chunks.clone(),
+                    file_keys: user_files.file_keys.clone(),
                 };
             }
         }
@@ -324,10 +426,12 @@ impl ChatFileState {
     fn create_userfiles(&self, user_id: &PeerId, db: &sled::Db) -> UserFiles {
         let histories: sled::Tree = db.open_tree("chat_file").unwrap();
         let file_chunks: sled::Tree = db.open_tree("file_chunks").unwrap();
+        let file_keys: sled::Tree = db.open_tree("file_keys").unwrap();
 
         let user_files = UserFiles {
             histories,
             file_chunks,
+            file_keys,
         };
 
         let mut all_files = self.inner.write().unwrap();
@@ -360,6 +464,7 @@ impl ChatFile {
                 return UserFiles {
                     histories: user_files.histories.clone(),
                     file_chunks: user_files.file_chunks.clone(),
+                    file_keys: user_files.file_keys.clone(),
                 };
             }
         }
@@ -371,6 +476,7 @@ impl ChatFile {
         UserFiles {
             histories: user_files.histories.clone(),
             file_chunks: user_files.file_chunks.clone(),
+            file_keys: user_files.file_keys.clone(),
         }
     }
 
@@ -387,6 +493,7 @@ impl ChatFile {
                 return UserFiles {
                     histories: db.open_tree("__fallback_chat_file").expect("fallback tree"),
                     file_chunks: db.open_tree("__fallback_file_chunks").expect("fallback tree"),
+                    file_keys: db.open_tree("__fallback_file_keys").expect("fallback tree"),
                 };
             }
         };
@@ -397,6 +504,18 @@ impl ChatFile {
                 return UserFiles {
                     histories,
                     file_chunks: db.open_tree("__fallback_file_chunks").expect("fallback tree"),
+                    file_keys: db.open_tree("__fallback_file_keys").expect("fallback tree"),
+                };
+            }
+        };
+        let file_keys: sled::Tree = match db.open_tree("file_keys") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("Error opening file_keys tree: {}", e);
+                return UserFiles {
+                    histories,
+                    file_chunks,
+                    file_keys: db.open_tree("__fallback_file_keys").expect("fallback tree"),
                 };
             }
         };
@@ -404,6 +523,7 @@ impl ChatFile {
         let user_files = UserFiles {
             histories,
             file_chunks,
+            file_keys,
         };
 
         // get chat file state for writing
@@ -527,6 +647,7 @@ impl ChatFile {
             file_size: file_info.file_size,
             sent_at,
             received_at: Timestamp::get_timestamp(),
+            body_digest: file_info.body_digest.clone(),
         }
     }
 
@@ -681,6 +802,30 @@ impl ChatFile {
         // create message ID
         let message_id = group::GroupManage::get_new_message_id(state, &user_account.id, group_id);
 
+        // Envelope mode: encrypt the body once under a per-file key and
+        // distribute that key per-member, instead of encrypting the
+        // whole file once per recipient. Gated on config; capability
+        // negotiation is a follow-up.
+        let envelope_enabled = crate::storage::configuration::Configuration::get(state)
+            .group_files
+            .envelope_enabled;
+        if envelope_enabled {
+            return Self::send_envelope(
+                state,
+                user_account,
+                &group,
+                group_id,
+                file_id,
+                &file_name,
+                &extension,
+                size,
+                &description,
+                &message_id,
+                timestamp,
+                &path_name,
+            );
+        }
+
         // 1. file info message
         let file_info = proto_net::ChatFileInfo {
             file_id,
@@ -691,6 +836,8 @@ impl ChatFile {
             start_index: 0,
             message_count: mesage_count,
             data_chunk_size: DEF_PACKAGE_SIZE,
+            // legacy per-recipient path: not envelope-encrypted
+            body_digest: Vec::new(),
         };
 
         let info = proto_net::ChatFileContainer {
@@ -736,6 +883,7 @@ impl ChatFile {
             file_size: size,
             sent_at: timestamp,
             received_at: 0,
+            body_digest: Vec::new(),
         };
 
         let db_ref = Self::get_db_ref(state, &user_account.id);
@@ -936,6 +1084,229 @@ impl ChatFile {
         );
     }
 
+    /// Like [`send_filecontainer_to_group`] but distributes the file
+    /// container to members **without** per-recipient session
+    /// encryption (the body is already encrypted under the per-file
+    /// key). The Envelope is still signed.
+    fn send_filecontainer_to_group_plain(
+        state: &crate::QaulState,
+        user_account: &UserAccount,
+        group: &Group,
+        message_id: &[u8],
+        timestamp: u64,
+        data: Vec<u8>,
+    ) {
+        let common_message = messaging::proto::CommonMessage {
+            message_id: message_id.to_vec(),
+            group_id: group.id.clone(),
+            sent_at: timestamp,
+            payload: Some(messaging::proto::common_message::Payload::FileMessage(
+                messaging::proto::FileMessage { content: data },
+            )),
+        };
+        let message = messaging::proto::Messaging {
+            message: Some(messaging::proto::messaging::Message::CommonMessage(
+                common_message,
+            )),
+        };
+        let message_bytes = message.encode_to_vec();
+
+        Group::send_to_remote_members_plain(
+            state,
+            user_account,
+            group,
+            &message_bytes,
+            message_id,
+            "sending plain file message error",
+        );
+    }
+
+    /// Envelope-encrypted group file send.
+    ///
+    /// Encrypts the body once under a fresh per-file key, distributes
+    /// the (already-encrypted) body to members via the signed-but-not-
+    /// session-encrypted "plain" path, and fans out the per-file key to
+    /// each member under their per-peer session (`FileKeyEnvelope`).
+    ///
+    /// NOTE: file metadata (name/size/description) currently travels in
+    /// the clear at the service layer (per the proposal). Encrypting
+    /// the FileInfo per-recipient is a noted follow-up.
+    fn send_envelope(
+        state: &crate::QaulState,
+        user_account: &UserAccount,
+        group: &Group,
+        group_id: &[u8],
+        file_id: u64,
+        file_name: &str,
+        extension: &str,
+        size: u32,
+        description: &str,
+        message_id: &[u8],
+        timestamp: u64,
+        path_name: &str,
+    ) -> Result<bool, String> {
+        // read the whole body and encrypt it once under a fresh key
+        let body = match fs::read(path_name) {
+            Ok(b) => b,
+            Err(e) => return Err(format!("file read error: {}", e)),
+        };
+        let file_key = super::file_envelope::generate_file_key();
+        let body_ct = super::file_envelope::encrypt_body(&file_key, &body);
+        let digest = super::file_envelope::body_digest(&body_ct);
+
+        // store the key locally (for possible relay to late joiners)
+        let db_ref = Self::get_db_ref(state, &user_account.id);
+        db_ref.save_file_key(&FileKey {
+            file_id,
+            group_id: group_id.to_vec(),
+            file_key: file_key.clone(),
+            body_digest: digest.clone(),
+            stored_at: timestamp,
+            locally_generated: true,
+        });
+
+        // chunk count over the ciphertext body, using the SAME
+        // convention as the legacy sender: message_count is
+        // (actual chunks + 1), because the receiver completes on
+        // `(count + 1) == message_count`.
+        let ct_len = body_ct.len() as u32;
+        let mut message_count = 1 + ct_len / DEF_PACKAGE_SIZE;
+        if ct_len % DEF_PACKAGE_SIZE > 0 {
+            message_count += 1;
+        }
+
+        // 1. file info (carries the envelope marker / body digest)
+        let file_info = proto_net::ChatFileInfo {
+            file_id,
+            file_name: file_name.to_string(),
+            file_extension: extension.to_string(),
+            file_size: size, // original plaintext size, for display
+            file_description: description.to_string(),
+            start_index: 0,
+            message_count,
+            data_chunk_size: DEF_PACKAGE_SIZE,
+            body_digest: digest.clone(),
+        };
+        let info = proto_net::ChatFileContainer {
+            message: Some(proto_net::chat_file_container::Message::FileInfo(
+                file_info.clone(),
+            )),
+        };
+        Self::send_filecontainer_to_group_plain(
+            state,
+            user_account,
+            group,
+            message_id,
+            timestamp,
+            info.encode_to_vec(),
+        );
+
+        // persist file history + chat message
+        let groupid = match GroupId::from_bytes(group_id) {
+            Ok(id) => id,
+            Err(e) => return Err(format!("invalid group id: {}", e)),
+        };
+        let file_history = FileHistory {
+            group_id: group_id.to_vec(),
+            sender_id: user_account.id.to_bytes(),
+            file_id,
+            message_id: message_id.to_vec(),
+            start_index: 0,
+            message_count,
+            chunk_size: DEF_PACKAGE_SIZE,
+            file_state: FileState::Sending,
+            reception_tracking: BTreeMap::new(),
+            file_name: file_name.to_string(),
+            file_description: description.to_string(),
+            file_extension: extension.to_string(),
+            file_size: size,
+            sent_at: timestamp,
+            received_at: 0,
+            body_digest: digest.clone(),
+        };
+        db_ref.save_filehistory(file_id, file_history.clone());
+        Self::save_filemsg_in_chat(
+            state,
+            user_account,
+            &user_account.id,
+            &groupid,
+            &file_history,
+            super::rpc_proto::MessageStatus::Sending,
+        );
+
+        // 2. body ciphertext chunks via the plain (sign-only) path
+        let mut chunk_index: u32 = 0;
+        for chunk in body_ct.chunks(DEF_PACKAGE_SIZE as usize) {
+            let data = proto_net::ChatFileContainer {
+                message: Some(proto_net::chat_file_container::Message::FileData(
+                    proto_net::ChatFileData {
+                        file_id,
+                        start_index: chunk_index,
+                        message_count,
+                        data: chunk.to_vec(),
+                    },
+                )),
+            };
+            Self::send_filecontainer_to_group_plain(
+                state,
+                user_account,
+                group,
+                message_id,
+                timestamp,
+                data.encode_to_vec(),
+            );
+            chunk_index += 1;
+        }
+
+        // 3. fan out the per-file key to each remote member under their
+        //    per-peer session (small, encrypted, confidential)
+        let sender_bytes = user_account.id.to_bytes();
+        for member in group.members.values() {
+            let member_id = match PeerId::from_bytes(&member.user_id) {
+                Ok(id) => id,
+                Err(_) => continue,
+            };
+            if member_id == user_account.id {
+                continue;
+            }
+            let envelope_bytes =
+                crate::services::crypto::sessionmanager::CryptoSessionManager::create_file_key_envelope_message(
+                    file_id,
+                    group_id.to_vec(),
+                    file_key.clone(),
+                    digest.clone(),
+                    sender_bytes.clone(),
+                    timestamp,
+                );
+            let mut env_msg_id = vec![0u8; 16];
+            {
+                use rand::Rng;
+                rand::rng().fill(&mut env_msg_id[..]);
+            }
+            if let Err(e) = messaging::Messaging::pack_and_send_message(
+                state,
+                user_account,
+                &member_id,
+                envelope_bytes,
+                MessagingServiceType::Crypto,
+                &env_msg_id,
+                true,
+            ) {
+                log::error!("failed sending FileKeyEnvelope to {}: {}", member_id.to_base58(), e);
+            }
+        }
+
+        // mark sent
+        ChatStorage::udate_status(
+            state,
+            &user_account.id,
+            message_id,
+            super::rpc_proto::MessageStatus::Sent,
+        );
+
+        Ok(true)
+    }
+
     /// Generate File id
     fn generate_file_id(group_id: &[u8], sender: &[u8], file_name: &str, size: u32) -> u64 {
         let size_bytes = size.to_be_bytes();
@@ -993,6 +1364,78 @@ impl ChatFile {
             &file_history.file_extension,
         );
 
+        // Envelope-encrypted file: the chunks are body ciphertext. We
+        // need the per-file key (delivered separately via
+        // FileKeyEnvelope) to decrypt. If it hasn't arrived yet, hold —
+        // process_file_key_envelope will re-trigger assembly once it
+        // does. Do NOT write ciphertext to disk as if it were plaintext.
+        if !file_history.body_digest.is_empty() {
+            let key_entry = match user_files.get_file_key(file_history.file_id) {
+                Some(k) => k,
+                None => {
+                    log::info!(
+                        "envelope file {} fully received but key not yet present — waiting",
+                        file_history.file_id
+                    );
+                    return;
+                }
+            };
+
+            // reassemble the body ciphertext (iterator is in chunk-index
+            // order because keys are file_id ‖ index big-endian)
+            let mut body_ct: Vec<u8> = Vec::new();
+            for result in iterator {
+                match result {
+                    Ok((_key, chunk)) => body_ct.extend_from_slice(&chunk),
+                    Err(e) => {
+                        log::error!("reading file chunk failed: {}", e);
+                        return;
+                    }
+                }
+            }
+
+            // verify the digest binds this body to the key's envelope
+            let digest = super::file_envelope::body_digest(&body_ct);
+            if digest != file_history.body_digest || digest != key_entry.body_digest {
+                log::error!(
+                    "envelope file {} body digest mismatch — dropping",
+                    file_history.file_id
+                );
+                return;
+            }
+
+            // decrypt the body once
+            let plaintext = match super::file_envelope::decrypt_body(&key_entry.file_key, &body_ct) {
+                Some(pt) => pt,
+                None => {
+                    log::error!("envelope file {} body decryption failed", file_history.file_id);
+                    return;
+                }
+            };
+
+            match File::create(&file_path) {
+                Ok(mut file) => {
+                    if let Err(e) = file.write_all(&plaintext) {
+                        log::error!("file storing failed {}", e);
+                        return;
+                    }
+                }
+                Err(e) => {
+                    log::error!("file path error: {}", e);
+                    return;
+                }
+            }
+
+            ChatStorage::udate_status(
+                state,
+                &user_account.id,
+                &file_history.message_id,
+                super::rpc_proto::MessageStatus::Received,
+            );
+            return;
+        }
+
+        // Legacy path: chunks are plaintext, write them directly.
         // open a file in write mode
         let mut file: File;
         match File::create(&file_path) {
@@ -1023,6 +1466,36 @@ impl ChatFile {
             &file_history.message_id,
             super::rpc_proto::MessageStatus::Received,
         );
+    }
+
+    /// Process an incoming `FileKeyEnvelope`: store the per-file key,
+    /// then (if the body is already complete) assemble + decrypt the
+    /// file. Idempotent — a duplicate envelope just overwrites the key.
+    pub fn process_file_key_envelope(
+        state: &crate::QaulState,
+        user_account: &UserAccount,
+        _sender_id: &PeerId,
+        envelope: qaul_proto::qaul_net_crypto::FileKeyEnvelope,
+    ) {
+        let user_files = Self::get_db_ref(state, &user_account.id);
+        user_files.save_file_key(&FileKey {
+            file_id: envelope.file_id,
+            group_id: envelope.group_id,
+            file_key: envelope.file_key,
+            body_digest: envelope.body_digest,
+            stored_at: Timestamp::get_timestamp(),
+            locally_generated: false,
+        });
+
+        // if the body (and its info) already arrived, finish now
+        if let Some(file_history) = user_files.get_filehistory(envelope.file_id) {
+            Self::try_store_file(state, user_account, user_files, file_history);
+        } else {
+            log::trace!(
+                "stored file key for {} — awaiting body",
+                envelope.file_id
+            );
+        }
     }
 
     /// process chat file data message
@@ -1359,6 +1832,9 @@ mod tests {
             file_size: 1,
             sent_at: 0,
             received_at: 0,
+            // legacy per-recipient path — this test doesn't exercise
+            // the envelope binding
+            body_digest: Vec::new(),
         };
 
         // A confirms 1 of 2: not complete yet
@@ -1373,5 +1849,56 @@ mod tests {
         assert!(!fh.reception_confirmed(b));
         assert!(fh.reception_confirmed(b));
         assert!(matches!(fh.file_state, FileState::ConfirmedByAll));
+    }
+}
+
+#[cfg(test)]
+mod file_key_store_tests {
+    use super::{FileKey, UserFiles};
+
+    /// Build an in-memory `UserFiles` backed by temporary sled trees.
+    fn test_user_files() -> UserFiles {
+        let db = sled::Config::new().temporary(true).open().unwrap();
+        UserFiles {
+            histories: db.open_tree("chat_file").unwrap(),
+            file_chunks: db.open_tree("file_chunks").unwrap(),
+            file_keys: db.open_tree("file_keys").unwrap(),
+        }
+    }
+
+    fn key(file_id: u64, stored_at: u64) -> FileKey {
+        FileKey {
+            file_id,
+            group_id: vec![1, 2, 3],
+            file_key: vec![7u8; 32],
+            body_digest: vec![9u8; 32],
+            stored_at,
+            locally_generated: false,
+        }
+    }
+
+    #[test]
+    fn save_get_delete_roundtrip() {
+        let uf = test_user_files();
+        assert!(uf.get_file_key(42).is_none());
+        uf.save_file_key(&key(42, 1000));
+        let got = uf.get_file_key(42).expect("stored key");
+        assert_eq!(got.file_id, 42);
+        assert_eq!(got.file_key, vec![7u8; 32]);
+        assert_eq!(got.body_digest, vec![9u8; 32]);
+        uf.delete_file_key(42);
+        assert!(uf.get_file_key(42).is_none());
+    }
+
+    #[test]
+    fn prune_drops_only_expired() {
+        let uf = test_user_files();
+        uf.save_file_key(&key(1, 1_000)); // old
+        uf.save_file_key(&key(2, 9_000)); // fresh
+        // now = 10_000, ttl = 5_000 → entry 1 (age 9000) expired,
+        // entry 2 (age 1000) kept.
+        uf.prune_expired_file_keys(10_000, 5_000);
+        assert!(uf.get_file_key(1).is_none(), "expired key pruned");
+        assert!(uf.get_file_key(2).is_some(), "fresh key kept");
     }
 }
