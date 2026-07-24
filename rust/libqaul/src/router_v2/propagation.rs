@@ -3,7 +3,7 @@
 
 //! This file describes how messages are propagated between nodes.
 
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
 
 use libp2p::PeerId;
 use std::sync::RwLock;
@@ -13,12 +13,11 @@ use crate::{
     connections::ConnectionModule,
     router_v2::{
         codec::{
-            messages::{Entry, IndexDump, Mapping, NodeManifest, RoutingUpdate},
+            messages::{IndexDump, Mapping, NodeEntry, RoutingUpdate, UserEntry},
             Header, RoutingMessage, PROTOCOL_VERSION,
         },
         index::Space,
-        manifest::enqueue_full_manifest,
-        table::RoutingEntry,
+        table::{RoutingEntry, TargetRef},
         OutboundMsg, RouterV2State, Sphere,
     },
 };
@@ -60,29 +59,42 @@ pub fn compute_outgoing_local_only(stored: bool, outgoing_sphere: Sphere) -> boo
 fn build_origin_update(
     new_seq: u16,
     origin_space: Space,
+    manifest_version: u32,
     local_only: bool,
     intros: Vec<Mapping>,
 ) -> RoutingUpdate {
-    let entry = Entry {
-        abs_idx: 0,
-        seq: new_seq,
-        metric: 0,
-        local_only,
-        hop_count: 0,
-    };
     match origin_space {
-        Space::Node => RoutingUpdate {
-            user_mappings: Vec::new(),
-            node_mappings: intros,
-            user_entries: Vec::new(),
-            node_entries: vec![entry],
-        },
-        Space::User => RoutingUpdate {
-            user_mappings: intros,
-            node_mappings: Vec::new(),
-            user_entries: vec![entry],
-            node_entries: Vec::new(),
-        },
+        Space::Node => {
+            let entry = NodeEntry {
+                abs_idx: 0,
+                seq: new_seq,
+                metric: 0,
+                local_only,
+                hop_count: 0,
+                manifest_version,
+            };
+            RoutingUpdate {
+                user_mappings: Vec::new(),
+                node_mappings: intros,
+                user_entries: Vec::new(),
+                node_entries: vec![entry],
+            }
+        }
+        Space::User => {
+            let entry = UserEntry {
+                abs_idx: 0,
+                seq: new_seq,
+                metric: 0,
+                local_only,
+                hop_count: 0,
+            };
+            RoutingUpdate {
+                user_mappings: intros,
+                node_mappings: Vec::new(),
+                user_entries: vec![entry],
+                node_entries: Vec::new(),
+            }
+        }
     }
 }
 
@@ -117,11 +129,17 @@ pub fn tick_origin(state: &RouterV2State) {
             })
             .collect()
     };
-
+    let own_manifest_version = state.manifest.read().unwrap().manifest_version;
     for (peer, transport) in pairs {
         let sphere_outgoing = Sphere::of(transport);
         let local_only = sphere_outgoing == Sphere::Local;
-        let msg = build_origin_update(new_seq, origin_space, local_only, intros.clone());
+        let msg = build_origin_update(
+            new_seq,
+            origin_space,
+            own_manifest_version,
+            local_only,
+            intros.clone(),
+        );
 
         let mut body = Vec::new();
         if let Err(e) = msg.encode(&mut body) {
@@ -208,17 +226,32 @@ pub fn tick_relay(state: &RouterV2State, now: u64) {
                 continue;
             }
 
-            let wire_entry = Entry {
-                abs_idx: *own_idx,
-                seq: e.seq_num.value(),
-                metric: e.metric,
-                hop_count: e.hop_count,
-                local_only: compute_outgoing_local_only(e.local_only, sphere_outbound),
-            };
-
+            let local_only = compute_outgoing_local_only(e.local_only, sphere_outbound);
             match space {
-                Space::Node => node_out.push(wire_entry),
-                Space::User => user_out.push(wire_entry),
+                Space::Node => {
+                    let manifest_version = match &e.target {
+                        TargetRef::Node(n) => n.read().unwrap().manifest_version,
+                        TargetRef::User(_) => {
+                            debug!("routing entry in node-space with User target — skipping");
+                            continue;
+                        }
+                    };
+                    node_out.push(NodeEntry {
+                        abs_idx: *own_idx,
+                        seq: e.seq_num.value(),
+                        metric: e.metric,
+                        hop_count: e.hop_count,
+                        local_only,
+                        manifest_version,
+                    })
+                }
+                Space::User => user_out.push(UserEntry {
+                    abs_idx: *own_idx,
+                    seq: e.seq_num.value(),
+                    metric: e.metric,
+                    hop_count: e.hop_count,
+                    local_only,
+                }),
             }
         }
 
@@ -262,74 +295,6 @@ pub fn tick_relay(state: &RouterV2State, now: u64) {
             bytes: frame,
         }) {
             warn!("relay tick: outbound channel send failed for {peer:?}: {e}");
-        }
-    }
-}
-
-pub fn tick_relay_manifests(state: &RouterV2State) {
-    let relay_queue: HashMap<[u8; 8], (Vec<NodeManifest>, Sphere)> =
-        std::mem::take(&mut *state.manifest_relay_queue.write().unwrap());
-
-    let pairs: Vec<(PeerId, ConnectionModule)> = {
-        let mirrors = state.mirrors.read().unwrap();
-        mirrors
-            .iter()
-            .flat_map(|(peer, info)| {
-                let peer = *peer;
-                info.transports.iter().map(move |t| (peer, *t))
-            })
-            .collect()
-    };
-
-    for (&origin_id, (chunks, learn_sphere)) in &relay_queue {
-        let is_gateway = chunks
-            .first()
-            .map(|c| (c.flags & 0x01) != 0)
-            .unwrap_or(false);
-
-        let recipients: Vec<(PeerId, ConnectionModule)> = pairs
-            .iter()
-            .copied()
-            .filter(|(_, transport)| {
-                let outgoing_sphere = Sphere::of(*transport);
-                let downward_seal_hit =
-                    *learn_sphere == Sphere::Internet && outgoing_sphere == Sphere::Local;
-                let non_gateway_upward = outgoing_sphere == Sphere::Internet && !is_gateway;
-                !downward_seal_hit && !non_gateway_upward
-            })
-            .collect();
-        if recipients.is_empty() {
-            continue;
-        }
-
-        let mut encoded_chunks: Vec<Vec<u8>> = Vec::with_capacity(chunks.len());
-        for chunk in chunks {
-            let mut body = Vec::new();
-            if let Err(e) = chunk.encode(&mut body) {
-                warn!("manifest relay: encode failed for origin {origin_id:?}: {e}");
-                continue;
-            }
-            let header = Header {
-                version: PROTOCOL_VERSION,
-                message_type: RoutingMessage::NodeManifest,
-                payload_len: body.len() as u16,
-            };
-            let mut frame = Vec::with_capacity(4 + body.len());
-            header.encode(&mut frame);
-            frame.extend(body);
-            encoded_chunks.push(frame);
-        }
-
-        for (peer, transport) in &recipients {
-            for frame in &encoded_chunks {
-                if let Err(e) = state.tx_outbound.send(OutboundMsg {
-                    peer: *peer,
-                    transport: *transport,
-                    bytes: frame.clone(),
-                }) {
-                    warn!("manifest relay: outbound send failed for {peer:?}: {e}");
-                }
-            }
         }
     }
 }
@@ -430,12 +395,5 @@ pub fn on_neighbour_connect(
         bytes: frame,
     }) {
         warn!("bootstrap: outbound send failed for {neighbour:?}: {e}");
-    }
-
-    let manifest = state.manifest.read().unwrap();
-    if manifest.is_gateway {
-        if let Err(e) = enqueue_full_manifest(state, now, true) {
-            warn!("bootstrap: failed to send full manifest: {e}");
-        }
     }
 }

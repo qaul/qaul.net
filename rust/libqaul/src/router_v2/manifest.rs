@@ -17,6 +17,12 @@ pub enum VerifyError {
     SignatureInvalid,
 }
 
+/// Per-origin delta log for serving ranged MANIFEST_DELTAs.
+/// TODO(Phase 10b): implement records: BTreeMap<[u8; 8], LogRecord>,
+/// log_base: u32, insert_add/insert_remove/records_after/set_log_base/compact.
+#[derive(Debug, Default)]
+pub struct ManifestLog;
+
 use std::{collections::HashMap, ops::Range};
 
 use libp2p::identity::Keypair;
@@ -28,8 +34,8 @@ use crate::router_v2::{
     RouterV2State, Sphere,
 };
 
-const ENTRY_BYTES: usize = 80;
-const HEADER_OVERHEAD: usize = 79;
+const ENTRY_BYTES: usize = 84;
+const HEADER_OVERHEAD: usize = 85;
 const MAX_BODY: usize = 60 * 1024;
 
 // DelegatedEntry is for the host-side manifest while ManifestEntry
@@ -74,7 +80,7 @@ impl Manifest {
 
     pub fn canonical_chunk_bytes(&self, chunk_range: Range<usize>) -> Vec<u8> {
         let slice = &self.entries()[chunk_range];
-        let mut res = Vec::with_capacity(80 * slice.len());
+        let mut res = Vec::with_capacity(84 * slice.len());
         for entry in slice {
             entry.encode(&mut res);
         }
@@ -83,7 +89,7 @@ impl Manifest {
 
     pub fn build_chunks(
         &self,
-        origin_node_idx: u16,
+        origin_node_id: [u8; 8],
         host_keys: &Keypair,
         multikey: &[u8],
     ) -> Result<Vec<NodeManifest>, ManifestError> {
@@ -125,7 +131,7 @@ impl Manifest {
 
             let entry_slice = self.entries()[start..end].to_vec();
             let nm = NodeManifest {
-                origin_node_index: origin_node_idx,
+                origin_node_id,
                 manifest_version: self.manifest_version,
                 chunk_index: chunk_idx as u8,
                 chunk_count: chunk_count as u8,

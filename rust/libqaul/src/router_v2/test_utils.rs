@@ -93,8 +93,13 @@ pub fn install_node(
         id,
         public_key: Some(fresh_multikey()),
         manifest_version,
+        advertised_version: 0,
         is_gateway,
         delegated_users: Vec::new(),
+        manifest_signature: None,
+        retained_chunks: None,
+        learn_sphere: None,
+        manifest_log: crate::router_v2::manifest::ManifestLog::default(),
     };
     let mut nodes = state.nodes.write().unwrap();
     nodes.insert(id, n);
