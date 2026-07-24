@@ -3,33 +3,25 @@
 
 //! Interactive shell mode for qauld-ctl.
 //!
-//! Reads command lines from stdin, parses each line through the same `clap`
-//! grammar used by single-shot mode, and dispatches them via the existing
-//! `run` function. A fresh socket is opened per command — the same code path
-//! that single-shot uses, so behaviour is identical aside from the prompt
-//! and the persistent process.
+//! Reads command lines through `rustyline` (so arrow up/down recall history
+//! and arrow left/right move the cursor for editing), tokenises them with
+//! shell-style quoting (`shlex`, so `chat send -m "hello my friend"` works),
+//! parses each line through the same `clap` grammar used by single-shot mode,
+//! and dispatches it via the existing `run` function. A fresh socket is opened
+//! per command — the same code path single-shot uses, so behaviour is
+//! identical aside from the prompt and the persistent process.
 //!
-//! The shell also opens a long-running event subscription on a separate
-//! socket and prints incoming events in-line. When an event arrives while
-//! the user is typing, we print the event on its own line and re-print the
-//! prompt; characters typed before the event remain in the kernel's line
-//! buffer (canonical mode) and will be delivered on Enter, but they will
-//! visually appear on the new prompt line.
-//!
-//! Limitations of this initial implementation:
-//! - No line editing or history (we use canonical-mode line input via
-//!   `tokio::io::stdin`); add `rustyline` or similar later if the
-//!   experience demands it.
-//! - Argument tokenisation uses `split_whitespace`, so quoted arguments
-//!   (`feed send -m "hello world"`) won't parse correctly. Use single-word
-//!   arguments for now, or add a shell-style splitter (e.g. `shlex`) later.
+//! A long-running event subscription runs in the background and prints
+//! incoming events via rustyline's `ExternalPrinter`, which redraws the line
+//! being edited so async events never corrupt the user's input.
 
-use clap::Parser;
-use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
+use clap::{CommandFactory, Parser};
+use rustyline::error::ReadlineError;
+use rustyline::{DefaultEditor, ExternalPrinter};
 
 use crate::cli::{Cli, Commands};
 
-const PROMPT: &[u8] = b"qauld> ";
+const PROMPT: &str = "qauld> ";
 
 /// Run the interactive shell loop until the user types `quit` / `exit`
 /// or sends EOF (Ctrl-D).
@@ -39,64 +31,61 @@ const PROMPT: &[u8] = b"qauld> ";
 /// / `--dir` are ignored so the connection target is predictable; per-line
 /// `--json` is honoured per command.
 pub async fn run(shell_cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
-    print_banner();
+    // Line editor: history (↑/↓), cursor movement + editing (←/↑ etc.).
+    let mut rl = DefaultEditor::new()?;
+    let history = history_path();
+    if let Some(path) = history.as_ref() {
+        // A missing history file on first run is fine.
+        let _ = rl.load_history(path);
+    }
 
-    // Open a background event subscription. If the daemon isn't running
-    // yet we surface a warning but keep the shell usable — the user can
-    // still type commands; each command will fail with the same
-    // "connection failed" message until the daemon is up.
-    let mut event_rx = match crate::subscribe::spawn_event_listener(&shell_cli).await {
-        Ok(rx) => Some(rx),
+    // Background event subscription. Events print via rustyline's external
+    // printer so they don't corrupt the line being edited. If the daemon
+    // isn't up yet we warn but keep the shell usable.
+    match crate::subscribe::spawn_event_listener(&shell_cli).await {
+        Ok(mut event_rx) => match rl.create_external_printer() {
+            Ok(mut printer) => {
+                tokio::spawn(async move {
+                    while let Some(line) = event_rx.recv().await {
+                        if printer.print(format!("{line}\n")).is_err() {
+                            break;
+                        }
+                    }
+                });
+            }
+            Err(e) => {
+                eprintln!("shell: live events unavailable ({e}); commands still work");
+            }
+        },
         Err(e) => {
-            eprintln!(
-                "shell: event subscription unavailable ({e}); commands still work"
-            );
-            None
+            eprintln!("shell: event subscription unavailable ({e}); commands still work");
         }
-    };
+    }
 
-    let mut stdout = tokio::io::stdout();
-    let stdin = tokio::io::stdin();
-    let mut reader = BufReader::new(stdin).lines();
+    // Show the help screen on startup.
+    print_intro();
+    print_help();
 
     loop {
-        if let Err(e) = write_prompt(&mut stdout).await {
-            log::error!("shell: failed to write prompt: {e}");
-            break;
-        }
+        // `rustyline::readline` is blocking, so run it on the blocking pool;
+        // move the editor in and back out so history persists across lines.
+        let prompt = PROMPT.to_string();
+        let (editor, readline) = tokio::task::spawn_blocking(move || {
+            let res = rl.readline(&prompt);
+            (rl, res)
+        })
+        .await?;
+        rl = editor;
 
-        // Race the user's next line against any pushed events. If an
-        // event wins, we print it and loop back to redraw the prompt.
-        let line = loop {
-            tokio::select! {
-                biased;
-                ev = recv_event(&mut event_rx) => {
-                    if let Some(line) = ev {
-                        // Drop to a fresh line, print the event, redraw prompt.
-                        // Any chars the user typed-but-not-Entered are still
-                        // in the kernel's line buffer and will be delivered
-                        // on Enter — they just visually move to the new line.
-                        print_async_event(&mut stdout, &line).await;
-                        if let Err(e) = write_prompt(&mut stdout).await {
-                            log::error!("shell: failed to redraw prompt: {e}");
-                            return Ok(());
-                        }
-                    }
-                }
-                next = reader.next_line() => {
-                    match next {
-                        Ok(Some(l)) => break l,
-                        Ok(None) => {
-                            // EOF (Ctrl-D)
-                            println!();
-                            return Ok(());
-                        }
-                        Err(e) => {
-                            log::error!("shell: failed to read line: {e}");
-                            return Ok(());
-                        }
-                    }
-                }
+        let line = match readline {
+            Ok(l) => l,
+            // Ctrl-C: abandon the current line and show a fresh prompt.
+            Err(ReadlineError::Interrupted) => continue,
+            // Ctrl-D: exit the shell.
+            Err(ReadlineError::Eof) => break,
+            Err(e) => {
+                eprintln!("shell: input error: {e}");
+                break;
             }
         };
 
@@ -104,6 +93,8 @@ pub async fn run(shell_cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
         if trimmed.is_empty() {
             continue;
         }
+        let _ = rl.add_history_entry(trimmed);
+
         if trimmed == "quit" || trimmed == "exit" {
             break;
         }
@@ -112,14 +103,25 @@ pub async fn run(shell_cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
             continue;
         }
 
-        // Parse the line through the same clap grammar as single-shot mode.
+        // Tokenise with shell-style quoting so quoted values with spaces are a
+        // single argument. `shlex::split` returns None on unbalanced quotes.
+        let tokens = match shlex::split(trimmed) {
+            Some(t) if !t.is_empty() => t,
+            Some(_) => continue,
+            None => {
+                eprintln!("error: unbalanced quotes in command");
+                continue;
+            }
+        };
+
         // Prepend the binary name so clap's parser is happy.
-        let argv = std::iter::once("qauld-ctl")
-            .chain(trimmed.split_whitespace())
+        let argv = std::iter::once("qauld-ctl".to_string())
+            .chain(tokens)
             .collect::<Vec<_>>();
         let parsed = match Cli::try_parse_from(&argv) {
             Ok(p) => p,
             Err(e) => {
+                // clap renders help/usage/errors here, including `<cmd> --help`.
                 eprintln!("{e}");
                 continue;
             }
@@ -146,73 +148,43 @@ pub async fn run(shell_cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
             command: parsed.command,
         };
 
-        let mut transport = match qauld_rpc::SocketTransport::connect(&crate::connect_info(&shell_cli)).await {
-            Ok(t) => t,
-            Err(e) => {
-                eprintln!("connection failed: {e}");
-                continue;
-            }
-        };
+        let mut transport =
+            match qauld_rpc::SocketTransport::connect(&crate::connect_info(&shell_cli)).await {
+                Ok(t) => t,
+                Err(e) => {
+                    eprintln!("connection failed: {e}");
+                    continue;
+                }
+            };
         if let Err(e) = crate::run(&mut transport, merged).await {
             eprintln!("error: {e}");
         }
     }
 
+    if let Some(path) = history.as_ref() {
+        let _ = rl.save_history(path);
+    }
     println!("bye");
     Ok(())
 }
 
-async fn write_prompt(
-    stdout: &mut tokio::io::Stdout,
-) -> Result<(), Box<dyn std::error::Error>> {
-    stdout.write_all(PROMPT).await?;
-    stdout.flush().await?;
-    Ok(())
+/// Where to persist shell history across sessions. `None` (no `$HOME`) just
+/// means in-session-only history — arrow-key recall still works.
+fn history_path() -> Option<std::path::PathBuf> {
+    let home = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE"))?;
+    Some(std::path::PathBuf::from(home).join(".qauld-ctl_history"))
 }
 
-/// Receive the next event from the listener. Returns `None` if the
-/// listener was never started (no daemon at shell launch) or has gone
-/// away. We never return early on `None` from a live channel; instead
-/// we drop the receiver so future iterations skip the event branch.
-async fn recv_event(rx: &mut Option<tokio::sync::mpsc::UnboundedReceiver<String>>) -> Option<String> {
-    match rx {
-        Some(r) => match r.recv().await {
-            Some(line) => Some(line),
-            None => {
-                // Channel closed; drop the receiver so we don't poll it again.
-                *rx = None;
-                None
-            }
-        },
-        None => {
-            // Park forever so `tokio::select!` always picks the stdin branch.
-            std::future::pending::<Option<String>>().await
-        }
-    }
-}
-
-async fn print_async_event(stdout: &mut tokio::io::Stdout, line: &str) {
-    // Carriage return + clear-rest-of-line (ANSI), then the event, then a
-    // newline. The clear-rest-of-line keeps the prompt from leaking onto
-    // the event line in terminals that support it; in terminals that
-    // don't, the worst case is a stale "qauld> " prefix on the event row.
-    let payload = format!("\r\x1b[K{line}\n");
-    let _ = stdout.write_all(payload.as_bytes()).await;
-    let _ = stdout.flush().await;
-}
-
-fn print_banner() {
-    println!("qauld-ctl interactive shell");
-    println!("Type a qauld-ctl command (without the leading binary name).");
-    println!("Examples:  node info  |  users list  |  help  |  quit");
-    println!("Live events from qauld will appear in this window as they happen.");
+fn print_intro() {
+    println!("qauld-ctl interactive shell — type a command (no leading binary name).");
+    println!("  history: ↑/↓   edit line: ←/→   help: help   exit: quit / Ctrl-D");
+    println!("Live events from qauld appear inline as they happen.");
     println!();
 }
 
+/// Render the real clap help (command list + options) so `help` and the
+/// startup screen show the actual grammar rather than a vague pointer.
 fn print_help() {
-    println!("Available commands are the same as qauld-ctl in single-shot mode.");
-    println!("Run `qauld-ctl --help` outside the shell for the full grammar, or");
-    println!("type any subcommand with `--help` here to see its options, e.g.");
-    println!("  users --help");
-    println!("Quoted arguments with spaces are not yet supported in shell mode.");
+    let mut cmd = Cli::command();
+    println!("{}", cmd.render_help());
 }
