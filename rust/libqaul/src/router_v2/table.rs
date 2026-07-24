@@ -14,7 +14,10 @@
 
 use crate::{
     connections::ConnectionModule,
-    router_v2::{identity::Multikey, index::Space, seq::SeqNum},
+    router_v2::{
+        codec::messages::NodeManifest, identity::Multikey, index::Space, manifest::ManifestLog,
+        seq::SeqNum, Sphere,
+    },
 };
 use std::{
     collections::HashMap,
@@ -35,9 +38,24 @@ pub struct User {
 pub struct Node {
     pub id: [u8; 8],
     pub public_key: Option<Multikey>,
+    /// this is the committed manifest_version which is the signature-verified state
+    /// a node holds and can serve to a MANIFEST_REQUEST (spec §10.8).
     pub manifest_version: u32,
+    /// the freshest manifest_version heard through routing advertisements
+    pub advertised_version: u32,
     pub is_gateway: bool,
+    /// Byte-exact stored delegation set. retained as the
+    /// origin signed it, so we can serve it onward.
     pub delegated_users: Vec<DelegatedUser>,
+    /// whole-state signature covering `delegated_users` at
+    /// `manifest_version` with chunk_index=0, chunk_count=1.
+    pub manifest_signature: Option<[u8; 64]>,
+    /// Original signed NODE_MANIFEST chunks for when state > 60kb
+    pub retained_chunks: Option<Vec<NodeManifest>>,
+    ///  sphere the current committed manifest was learned over
+    pub learn_sphere: Option<Sphere>,
+    /// Per-origin delta log for serving ranged MANIFEST_DELTAs (§10.9).
+    pub manifest_log: ManifestLog,
 }
 
 /// a user that has delegated its global reachability to thus node
@@ -47,6 +65,7 @@ pub struct DelegatedUser {
     pub user: Arc<RwLock<User>>,
     pub delegation_timeout: u64,
     pub entry_signature: [u8; 64],
+    pub profile_version: u32,
 }
 
 #[derive(Debug)]
@@ -213,8 +232,13 @@ mod tests {
             id,
             public_key: Some(fresh_multikey()),
             manifest_version: 0,
+            advertised_version: 0,
             is_gateway: false,
             delegated_users: Vec::new(),
+            manifest_signature: None,
+            retained_chunks: None,
+            learn_sphere: None,
+            manifest_log: crate::router_v2::manifest::ManifestLog::default(),
         }
     }
 
