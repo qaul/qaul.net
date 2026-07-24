@@ -6,18 +6,87 @@
 use std::{
     sync::{Arc, RwLock},
     time::Instant,
+    todo,
 };
 
 use libp2p::PeerId;
 use tracing::{debug, error, warn};
 
 use crate::{
-    connections::ConnectionModule, router_v2::{
-        Result, RouterV2State, RoutingV2Error, Sphere, codec::{
-            CodecError, Header, RoutingMessage, messages::{Entry, Mapping, NodeManifest, RoutingUpdate},
-        }, identity::Multikey, index::Space, manifest::Manifest, metric::hop_cost, seq::{Acceptance, SeqNum, is_fresher_u32}, table::{DelegatedUser, Node, RoutingEntry, TargetRef, User},
+    connections::ConnectionModule,
+    router_v2::{
+        codec::{
+            messages::{Mapping, NodeEntry, NodeManifest, RoutingUpdate, UserEntry},
+            CodecError, Header, RoutingMessage,
+        },
+        identity::Multikey,
+        index::Space,
+        manifest::{Manifest, ManifestLog},
+        metric::hop_cost,
+        seq::{is_fresher_u32, Acceptance, SeqNum},
+        table::{DelegatedUser, Node, RoutingEntry, TargetRef, User},
+        Result, RouterV2State, RoutingV2Error, Sphere,
     },
 };
+
+struct ReceiveCtx {
+    pub neighbour: PeerId,
+    pub transport: ConnectionModule,
+    pub rssi_dbm: Option<i8>,
+    pub now: u64,
+}
+
+struct EntryArg {
+    pub abs_idx: u16,
+    pub seq: u16,
+    pub metric: u16,
+    pub hop_count: u8,
+    pub local_only: bool,
+}
+
+impl From<&UserEntry> for EntryArg {
+    fn from(e: &UserEntry) -> Self {
+        Self {
+            abs_idx: e.abs_idx,
+            seq: e.seq,
+            metric: e.metric,
+            hop_count: e.hop_count,
+            local_only: e.local_only,
+        }
+    }
+}
+
+impl From<&NodeEntry> for EntryArg {
+    fn from(e: &NodeEntry) -> Self {
+        Self {
+            abs_idx: e.abs_idx,
+            seq: e.seq,
+            metric: e.metric,
+            hop_count: e.hop_count,
+            local_only: e.local_only,
+        }
+    }
+}
+
+struct AcceptedEntry {
+    own_idx: u16,
+    target: TargetRef,
+    seq: u16,
+    metric: u16,
+    next_hop_idx: u16,
+    hop_count: u8,
+    local_only: bool,
+}
+
+enum EvaluateOutcome {
+    Accept(AcceptedEntry),
+    /// we successfly translated the target, but relay-inclusion rejected it.
+    RejectedButTargetKnown {
+        target_ref: TargetRef,
+    },
+    /// dropped before target resolution (unknown mapping, TTL, missing target).
+    Dropped,
+}
 
 impl RouterV2State {
     pub fn translate_incoming(
@@ -118,34 +187,37 @@ impl RouterV2State {
                 let mut nodes = self.nodes.write().unwrap();
                 match nodes.get(&mapping.target_id) {
                     Some(node) => {
-                        let version = {
+                        let advertised = {
                             let n = node.read().unwrap();
-                            n.manifest_version
+                            n.advertised_version
                         };
-                        if is_fresher_u32(mapping.version, version) {
+
+                        if is_fresher_u32(mapping.version, advertised) {
                             let mut n = node.write().unwrap();
-                            n.manifest_version = mapping.version;
-                        } else if version == mapping.version {
+                            n.advertised_version = mapping.version;
+                            // TODO(Phase 10b): if mapping.version > n.manifest_version trigger a MANIFEST_REQUEST pull.
                         } else {
-                            // TODO
-                            debug!(
-                                "stale profile echo from {neighbour:?}: target={:?} stored_version={version} incoming={}",
-                                mapping.target_id,
-                                mapping.version
-                            );
+                            debug!("stale node advertisement from {neighbour:?}: target={:?} stored_advertised={advertised} incoming={}",
+                                mapping.target_id, mapping.version);
                         }
                     }
                     None => {
                         let n = Node {
                             id: mapping.target_id,
+                            public_key: None,
+                            manifest_version: 0,
+                            advertised_version: mapping.version,
                             is_gateway: false,
                             delegated_users: Vec::new(),
-                            manifest_version: mapping.version,
-                            public_key: None,
+                            manifest_signature: None,
+                            retained_chunks: None,
+                            learn_sphere: None,
+                            manifest_log: ManifestLog::default(),
                         };
                         nodes.insert(mapping.target_id, n);
+                        // TODO(Phase 10b): if mapping.version > 0, enqueue a MANIFEST_REQUEST
                     }
-                };
+                }
             }
             Space::User => {
                 let mut users = self.users.write().unwrap();
@@ -184,115 +256,148 @@ impl RouterV2State {
         Ok(())
     }
 
-    /// takes the wire-form entry from codec::messages and builds the stored form RoutingEntry
-    pub fn apply_entry(
+    fn lookup_target(&self, space: Space, own_idx: u16) -> Option<TargetRef> {
+        match space {
+            Space::User => {
+                let dict = self.user_dict.read().unwrap();
+                let id = dict.id_of(own_idx)?;
+                drop(dict);
+                let users = self.users.read().unwrap();
+                users.get(&id).map(TargetRef::User)
+            }
+            Space::Node => {
+                let dict = self.node_dict.read().unwrap();
+                let id = dict.id_of(own_idx)?;
+                drop(dict);
+                let nodes = self.nodes.read().unwrap();
+                nodes.get(&id).map(TargetRef::Node)
+            }
+        }
+    }
+
+    fn evaluate_entry(
         &self,
-        neighbour: PeerId,
-        transport: ConnectionModule,
-        rssi_dbm: Option<i8>,
+        ctx: &ReceiveCtx,
         space: Space,
-        entry: Entry,
-        now: u64,
-    ) -> Result<()> {
-        // the hop count has exceeded the design limit
+        entry: EntryArg,
+    ) -> Result<EvaluateOutcome> {
         if entry.hop_count >= 63 {
-            return Ok(());
+            return Ok(EvaluateOutcome::Dropped);
         }
 
-        let metric = entry.metric.saturating_add(hop_cost(transport, rssi_dbm));
-        let own_idx = match self.translate_incoming(neighbour, space, entry.abs_idx) {
+        let metric = entry
+            .metric
+            .saturating_add(hop_cost(ctx.transport, ctx.rssi_dbm));
+
+        let own_idx = match self.translate_incoming(ctx.neighbour, space, entry.abs_idx) {
             Ok(idx) => idx,
-            Err(RoutingV2Error::UnknownMapping(_)) => return Ok(()),
+            Err(RoutingV2Error::UnknownMapping(_)) => return Ok(EvaluateOutcome::Dropped),
             Err(e) => return Err(e),
         };
 
-        let target = {
-            match space {
-                Space::Node => {
-                    let dict = self.node_dict.read().unwrap();
-                    let Some(id) = dict.id_of(own_idx) else {
-                        debug!("receive-loop drop: own_idx {own_idx:?} has no dict binding (space={space:?})");
-                        return Ok(());
-                    };
-                    let nodes = self.nodes.read().unwrap();
-                    if let Some(node) = nodes.get(&id) {
-                        TargetRef::Node(node)
-                    } else {
-                        debug!("failed to find mapping");
-                        return Ok(());
-                    }
-                }
-                Space::User => {
-                    let dict = self.user_dict.read().unwrap();
-                    let Some(id) = dict.id_of(own_idx) else {
-                        debug!(
-                            "receive-loop drop: user own_idx {own_idx} has no user_dict binding"
-                        );
-                        return Ok(());
-                    };
-                    let users = self.users.read().unwrap();
-                    if let Some(user) = users.get(&id) {
-                        TargetRef::User(user)
-                    } else {
-                        debug!("receive-loop drop: user_id {id:?} not found in users map (own_idx={own_idx})");
-                        return Ok(());
-                    }
-                }
-            }
+        let Some(target) = self.lookup_target(space, own_idx) else {
+            debug!("receive-loop drop: target lookup failed (space={space:?}, own_idx={own_idx})");
+            return Ok(EvaluateOutcome::Dropped);
         };
 
-        let (accept_entry, local_entry) = {
+        // §7.2 relay-inclusion + §7.4 local_only monotonicity.
+        let (accept, local_only) = {
             let rt = self.routing_table.read().unwrap();
             match rt.get(space, own_idx) {
-                // that is, yhe slot is empty, so accept it.
                 None => (true, entry.local_only),
-                Some(e) => {
-                    let stored_entry = e.read().unwrap();
-                    let accept = match stored_entry.seq_num.acceptance(SeqNum::from(entry.seq)) {
+                Some(existing) => {
+                    let stored = existing.read().unwrap();
+                    let accept = match stored.seq_num.acceptance(SeqNum::from(entry.seq)) {
                         Acceptance::Fresher | Acceptance::Reboot => true,
-                        // that is, acceot only if the incoming metric is better
-                        Acceptance::NoChange => metric < stored_entry.metric,
+                        Acceptance::NoChange => metric < stored.metric,
                     };
-                    (accept, stored_entry.local_only && entry.local_only)
+                    (accept, stored.local_only && entry.local_only)
                 }
             }
         };
-        if !accept_entry {
+        if !accept {
             debug!(
-                "receive-loop drop: not better than stored (own_idx={own_idx}, incoming_seq={}, incoming_metric={metric})",
-                entry.seq,
-            );
-            return Ok(());
+                    "receive-loop drop: not better than stored (own_idx={own_idx}, seq={}, metric={metric})",
+                    entry.seq
+                );
+            return Ok(EvaluateOutcome::RejectedButTargetKnown { target_ref: target });
         }
 
-        // get next_hop
         let neighbour_node_id = {
             let mirrors = self.mirrors.read().unwrap();
-            let Some(info) = mirrors.get(&neighbour) else {
-                return Ok(());
+            let Some(info) = mirrors.get(&ctx.neighbour) else {
+                debug!("neighbour vanished mid-receive: {:?}", ctx.neighbour);
+                return Ok(EvaluateOutcome::RejectedButTargetKnown { target_ref: target });
             };
             info.node_id
         };
         let next_hop_idx = {
             let dict = self.node_dict.read().unwrap();
-            if let Some(idx) = dict.idx_of(&neighbour_node_id) {
-                idx
-            } else {
-                debug!("neighbour node_id has no node_dict entry: {neighbour_node_id:?}");
-                return Ok(());
+            match dict.idx_of(&neighbour_node_id) {
+                Some(idx) => idx,
+                None => {
+                    debug!("neighbour node_id has no node_dict entry: {neighbour_node_id:?}");
+                    return Ok(EvaluateOutcome::RejectedButTargetKnown { target_ref: target });
+                }
             }
         };
 
-        let new_entry = Arc::new(RwLock::new(RoutingEntry {
+        Ok(EvaluateOutcome::Accept(AcceptedEntry {
+            own_idx,
             target,
-            target_index: own_idx,
-            seq_num: SeqNum::from(entry.seq),
+            seq: entry.seq,
             metric,
-            next_hop: next_hop_idx,
-            transport,
-            last_update: now,
-            hop_count: entry.hop_count.saturating_add(1),
-            local_only: local_entry,
+            next_hop_idx,
+            hop_count: entry.hop_count,
+            local_only,
+        }))
+    }
+
+    pub fn apply_user_entry(&self, ctx: &ReceiveCtx, entry: UserEntry) -> Result<()> {
+        match self.evaluate_entry(&ctx, Space::User, (&entry).into())? {
+            EvaluateOutcome::Accept(a) => {
+                self.commit_routing_entry(ctx, Space::User, a);
+            }
+            _ => {}
+        };
+        Ok(())
+    }
+
+    pub fn apply_node_entry(&self, ctx: &ReceiveCtx, entry: NodeEntry) -> Result<()> {
+        let outcome = self.evaluate_entry(ctx, Space::User, (&entry).into())?;
+        let target = match &outcome {
+            EvaluateOutcome::Accept(a) => Some(&a.target),
+            EvaluateOutcome::RejectedButTargetKnown { target_ref } => Some(target_ref),
+            EvaluateOutcome::Dropped => None,
+        };
+
+        if let Some(TargetRef::Node(n)) = target {
+            let mut node = n.write().unwrap();
+            if is_fresher_u32(entry.manifest_version, node.advertised_version) {
+                node.advertised_version = entry.manifest_version;
+                // TODO(Phase 10b): if entry.manifest_version > node.manifest_version,
+                //   maybe_enqueue_request(state, ctx.neighbour, target_id, entry.manifest_version).
+            }
+        }
+
+        if let EvaluateOutcome::Accept(accepted) = outcome {
+            self.commit_routing_entry(ctx, Space::Node, accepted);
+        }
+
+        Ok(())
+    }
+
+    fn commit_routing_entry(&self, ctx: &ReceiveCtx, space: Space, accepted: AcceptedEntry) {
+        let new_entry = Arc::new(RwLock::new(RoutingEntry {
+            target: accepted.target,
+            target_index: accepted.own_idx,
+            seq_num: SeqNum::from(accepted.seq),
+            metric: accepted.metric,
+            next_hop: accepted.next_hop_idx,
+            transport: ctx.transport,
+            last_update: ctx.now,
+            hop_count: accepted.hop_count.saturating_add(1),
+            local_only: accepted.local_only,
         }));
 
         if let TargetRef::User(user) = &new_entry.read().unwrap().target {
@@ -302,10 +407,12 @@ impl RouterV2State {
         self.routing_table
             .write()
             .unwrap()
-            .set(space, own_idx, new_entry);
+            .set(space, accepted.own_idx, new_entry);
 
-        self.relay_queue.write().unwrap().insert((space, own_idx));
-        Ok(())
+        self.relay_queue
+            .write()
+            .unwrap()
+            .insert((space, accepted.own_idx));
     }
 
     pub fn handle_routing_update(
@@ -330,18 +437,22 @@ impl RouterV2State {
             };
         }
 
+        let ctx = ReceiveCtx {
+            neighbour,
+            transport,
+            rssi_dbm,
+            now,
+        };
         for entry in msg.user_entries {
-            match self.apply_entry(neighbour, transport, rssi_dbm, Space::User, entry, now) {
-                Ok(_) => {}
-                Err(e) => warn!("apply_entry user failed: {e}"),
-            };
+            if let Err(e) = self.apply_user_entry(&ctx, entry) {
+                warn!("apply_user_entry failed: {e}");
+            }
         }
 
         for entry in msg.node_entries {
-            match self.apply_entry(neighbour, transport, rssi_dbm, Space::Node, entry, now) {
-                Ok(_) => {}
-                Err(e) => warn!("apply_entry node failed: {e}"),
-            };
+            if let Err(e) = self.apply_node_entry(&ctx, entry) {
+                warn!("apply_node_entry failed: {e}");
+            }
         }
 
         Ok(())
@@ -436,25 +547,9 @@ impl RouterV2State {
         neighbour: PeerId,
         mut msg: NodeManifest,
         now: u64,
-        transport: ConnectionModule
+        transport: ConnectionModule,
     ) -> Result<()> {
-        let origin_node_id = {
-            let mirrors = self.mirrors.read().unwrap();
-            let Some(info) = mirrors.get(&neighbour) else {
-                debug!("node_manifest from unknown neighbour: {neighbour:?}");
-                return Ok(());
-            };
-
-            let Some(id) = info.nodes.id_of(msg.origin_node_index) else {
-                debug!(
-                    "node_manifest origin_node_index {} unknown in mirror",
-                    msg.origin_node_index
-                );
-                return Ok(());
-            };
-
-            id
-        };
+        let origin_node_id = msg.origin_node_id;
 
         let host_mk = {
             match self.get_resource_mk(&origin_node_id, Space::Node) {
@@ -508,7 +603,7 @@ impl RouterV2State {
                                 User {
                                     id: entry.user_id,
                                     public_key: None,
-                                    profile_version: 0,
+                                    profile_version: entry.profile_version,
                                     routing_entry: None,
                                     delegation_gateways: Vec::new(),
                                 },
@@ -521,6 +616,10 @@ impl RouterV2State {
                         user: user_arc,
                         delegation_timeout: entry.timeout,
                         entry_signature: entry.entry_signature,
+                        // TODO(Phase 3 codec update): once ManifestEntry
+                        // carries profile_version on the wire (spec §10.1),
+                        // read it from `entry.profile_version` here.
+                        profile_version: 0,
                     }
                 })
                 .collect()
@@ -538,7 +637,7 @@ impl RouterV2State {
             origin_node_id,
             (completed_manifest.chunks, Sphere::of(transport)),
         );
-        
+
         Ok(())
     }
 }
