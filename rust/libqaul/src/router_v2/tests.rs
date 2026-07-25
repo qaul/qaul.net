@@ -3156,7 +3156,7 @@ mod handle_node_manifest {
     fn happy_path_commits_manifest_to_node_record() {
         let (state, mut _rx) = fresh_state();
         let (host_kp, host_mk) = keypair_and_multikey();
-        let (peer, host_id) = setup_self_origin(&state, &host_mk);
+        let (_, host_id) = setup_self_origin(&state, &host_mk);
 
         let (user_kp, user_mk) = keypair_and_multikey();
         let user_id = install_user_with_key(&state, &user_mk);
@@ -3165,7 +3165,7 @@ mod handle_node_manifest {
         let chunks = build_signed_manifest(&host_kp, &host_mk, 5, true, entries);
 
         state
-            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 500, ConnectionModule::Lan)
+            .handle_node_manifest(chunks.into_iter().next().unwrap(), 500, ConnectionModule::Lan)
             .unwrap();
 
         let nodes = state.nodes.read().unwrap();
@@ -3185,11 +3185,10 @@ mod handle_node_manifest {
         let (state, mut _rx) = fresh_state();
         let (host_kp, host_mk) = keypair_and_multikey();
         let host_id = install_origin_node(&state, &host_mk);
-        let peer = fresh_peer(); // never added
 
         let chunks = build_signed_manifest(&host_kp, &host_mk, 5, false, vec![]);
         state
-            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
+            .handle_node_manifest(chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
             .unwrap();
 
         assert_eq!(
@@ -3225,7 +3224,7 @@ mod handle_node_manifest {
         msg.origin_node_id = [99; 8];
 
         state
-            .handle_node_manifest(peer, msg, 0, ConnectionModule::Lan)
+            .handle_node_manifest(msg, 0, ConnectionModule::Lan)
             .unwrap();
 
         // The real origin's Node record is untouched.
@@ -3281,7 +3280,7 @@ mod handle_node_manifest {
 
         let chunks = build_signed_manifest(&host_kp, &host_mk, 5, false, vec![]);
         state
-            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
+            .handle_node_manifest(chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
             .unwrap();
 
         assert_eq!(
@@ -3302,13 +3301,13 @@ mod handle_node_manifest {
     fn tampered_chunk_signature_dropped() {
         let (state, mut _rx) = fresh_state();
         let (host_kp, host_mk) = keypair_and_multikey();
-        let (peer, host_id) = setup_self_origin(&state, &host_mk);
+        let (_, host_id) = setup_self_origin(&state, &host_mk);
 
         let chunks = build_signed_manifest(&host_kp, &host_mk, 5, true, vec![]);
         let mut msg = chunks.into_iter().next().unwrap();
         msg.manifest_signature[0] ^= 0xFF;
 
-        state.handle_node_manifest(peer, msg, 0, ConnectionModule::Lan).unwrap();
+        state.handle_node_manifest(msg, 0, ConnectionModule::Lan).unwrap();
 
         assert_eq!(
             state
@@ -3332,7 +3331,7 @@ mod handle_node_manifest {
     fn bad_per_entry_signature_drops_only_that_entry() {
         let (state, mut _rx) = fresh_state();
         let (host_kp, host_mk) = keypair_and_multikey();
-        let (peer, host_id) = setup_self_origin(&state, &host_mk);
+        let (_, host_id) = setup_self_origin(&state, &host_mk);
 
         let (good_kp, good_mk) = keypair_and_multikey();
         let good_id = install_user_with_key(&state, &good_mk);
@@ -3351,7 +3350,7 @@ mod handle_node_manifest {
             vec![good_entry, bad_entry],
         );
         state
-            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
+            .handle_node_manifest(chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
             .unwrap();
 
         let nodes = state.nodes.read().unwrap();
@@ -3365,7 +3364,7 @@ mod handle_node_manifest {
     fn expired_entry_dropped_at_receive_time() {
         let (state, mut _rx) = fresh_state();
         let (host_kp, host_mk) = keypair_and_multikey();
-        let (peer, host_id) = setup_self_origin(&state, &host_mk);
+        let (_, host_id) = setup_self_origin(&state, &host_mk);
 
         let (user_kp, user_mk) = keypair_and_multikey();
         let user_id = install_user_with_key(&state, &user_mk);
@@ -3374,7 +3373,7 @@ mod handle_node_manifest {
         let entries = vec![sign_entry(&user_kp, &host_mk, user_id, 500)];
         let chunks = build_signed_manifest(&host_kp, &host_mk, 1, false, entries);
         state
-            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 1_000, ConnectionModule::Lan)
+            .handle_node_manifest(chunks.into_iter().next().unwrap(), 1_000, ConnectionModule::Lan)
             .unwrap();
 
         assert_eq!(
@@ -3398,11 +3397,11 @@ mod handle_node_manifest {
     fn is_gateway_flag_reflected_in_node_record() {
         let (state, mut _rx) = fresh_state();
         let (host_kp, host_mk) = keypair_and_multikey();
-        let (peer, host_id) = setup_self_origin(&state, &host_mk);
+        let (_, host_id) = setup_self_origin(&state, &host_mk);
 
         let chunks = build_signed_manifest(&host_kp, &host_mk, 1, true, vec![]);
         state
-            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
+            .handle_node_manifest(chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
             .unwrap();
 
         assert!(
@@ -3424,7 +3423,7 @@ mod handle_node_manifest {
     fn entry_for_user_with_unknown_key_is_dropped() {
         let (state, mut _rx) = fresh_state();
         let (host_kp, host_mk) = keypair_and_multikey();
-        let (peer, host_id) = setup_self_origin(&state, &host_mk);
+        let (_, host_id) = setup_self_origin(&state, &host_mk);
 
         let (user_kp, user_mk) = keypair_and_multikey();
         let user_id = user_mk.to_id();
@@ -3433,7 +3432,7 @@ mod handle_node_manifest {
         let entries = vec![sign_entry(&user_kp, &host_mk, user_id, 1_000_000)];
         let chunks = build_signed_manifest(&host_kp, &host_mk, 1, false, entries);
         state
-            .handle_node_manifest(peer, chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
+            .handle_node_manifest(chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
             .unwrap();
 
         assert_eq!(
@@ -3478,7 +3477,7 @@ mod on_neighbour_connect {
         let (state, mut rx) = fresh_state();
         let peer = fresh_peer();
 
-        on_neighbour_connect(&state, peer, ConnectionModule::Lan, 1_000);
+        on_neighbour_connect(&state, peer, ConnectionModule::Lan);
 
         let msg = rx.try_recv().expect("bootstrap must always emit");
         assert_eq!(msg.peer, peer);
@@ -3512,7 +3511,7 @@ mod on_neighbour_connect {
         install_node(&state, node_id, 99, false);
         bind_own_dict(&state, Space::Node, 8, node_id);
 
-        on_neighbour_connect(&state, peer, ConnectionModule::Lan, 1_000);
+        on_neighbour_connect(&state, peer, ConnectionModule::Lan);
 
         let msg = rx.try_recv().expect("one outbound");
         let dump = decode_dump_body(&msg.bytes);
@@ -3550,7 +3549,7 @@ mod on_neighbour_connect {
             bind_own_dict(&state, Space::User, *idx, id);
         }
 
-        on_neighbour_connect(&state, peer, ConnectionModule::Lan, 1_000);
+        on_neighbour_connect(&state, peer, ConnectionModule::Lan);
 
         let msg = rx.try_recv().expect("one outbound");
         let dump = decode_dump_body(&msg.bytes);
@@ -3567,7 +3566,7 @@ mod on_neighbour_connect {
         install_user(&state, [1; 8], 0);
         bind_own_dict(&state, Space::User, 7, [1; 8]);
 
-        on_neighbour_connect(&state, peer, ConnectionModule::Ble1m, 1_000);
+        on_neighbour_connect(&state, peer, ConnectionModule::Ble1m);
 
         assert!(rx.try_recv().is_err(), "BLE must not receive INDEX_DUMP");
     }
@@ -3580,7 +3579,7 @@ mod on_neighbour_connect {
         install_user(&state, [1; 8], 0);
         bind_own_dict(&state, Space::User, 7, [1; 8]);
 
-        on_neighbour_connect(&state, peer, ConnectionModule::BleCoded, 1_000);
+        on_neighbour_connect(&state, peer, ConnectionModule::BleCoded);
 
         assert!(rx.try_recv().is_err(), "BLE-coded must not receive INDEX_DUMP");
     }
@@ -3595,7 +3594,7 @@ mod on_neighbour_connect {
         // Bind but don't install the User.
         bind_own_dict(&state, Space::User, 5, [77; 8]);
 
-        on_neighbour_connect(&state, peer, ConnectionModule::Lan, 1_000);
+        on_neighbour_connect(&state, peer, ConnectionModule::Lan);
 
         let msg = rx.try_recv().expect("one outbound");
         let dump = decode_dump_body(&msg.bytes);
@@ -3610,7 +3609,7 @@ mod on_neighbour_connect {
         let (state, mut rx) = fresh_state();
         let peer = fresh_peer();
 
-        on_neighbour_connect(&state, peer, ConnectionModule::Lan, 1_000);
+        on_neighbour_connect(&state, peer, ConnectionModule::Lan);
 
         let msg = rx.try_recv().expect("one outbound");
         let (header, _) = Header::decode(&msg.bytes).expect("frame header");
