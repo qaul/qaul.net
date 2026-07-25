@@ -6,7 +6,6 @@
 use std::{
     sync::{Arc, RwLock},
     time::Instant,
-    todo,
 };
 
 use libp2p::PeerId;
@@ -29,7 +28,7 @@ use crate::{
     },
 };
 
-struct ReceiveCtx {
+pub(crate) struct ReceiveCtx {
     pub neighbour: PeerId,
     pub transport: ConnectionModule,
     pub rssi_dbm: Option<i8>,
@@ -364,7 +363,7 @@ impl RouterV2State {
     }
 
     pub fn apply_node_entry(&self, ctx: &ReceiveCtx, entry: NodeEntry) -> Result<()> {
-        let outcome = self.evaluate_entry(ctx, Space::User, (&entry).into())?;
+        let outcome = self.evaluate_entry(ctx, Space::Node, (&entry).into())?;
         let target = match &outcome {
             EvaluateOutcome::Accept(a) => Some(&a.target),
             EvaluateOutcome::RejectedButTargetKnown { target_ref } => Some(target_ref),
@@ -544,7 +543,6 @@ impl RouterV2State {
 
     pub fn handle_node_manifest(
         &self,
-        neighbour: PeerId,
         mut msg: NodeManifest,
         now: u64,
         transport: ConnectionModule,
