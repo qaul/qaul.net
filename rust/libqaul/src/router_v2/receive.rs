@@ -352,7 +352,7 @@ impl RouterV2State {
         }))
     }
 
-    pub fn apply_user_entry(&self, ctx: &ReceiveCtx, entry: UserEntry) -> Result<()> {
+    pub(crate) fn apply_user_entry(&self, ctx: &ReceiveCtx, entry: UserEntry) -> Result<()> {
         match self.evaluate_entry(&ctx, Space::User, (&entry).into())? {
             EvaluateOutcome::Accept(a) => {
                 self.commit_routing_entry(ctx, Space::User, a);
@@ -362,7 +362,7 @@ impl RouterV2State {
         Ok(())
     }
 
-    pub fn apply_node_entry(&self, ctx: &ReceiveCtx, entry: NodeEntry) -> Result<()> {
+    pub(crate) fn apply_node_entry(&self, ctx: &ReceiveCtx, entry: NodeEntry) -> Result<()> {
         let outcome = self.evaluate_entry(ctx, Space::Node, (&entry).into())?;
         let target = match &outcome {
             EvaluateOutcome::Accept(a) => Some(&a.target),
@@ -506,7 +506,7 @@ impl RouterV2State {
                 },
                 RoutingMessage::NodeManifest => match NodeManifest::decode(payload) {
                     Ok(msg) => {
-                        if let Err(e) = self.handle_node_manifest(neighbour, msg, now, transport) {
+                        if let Err(e) = self.handle_node_manifest(msg, now, transport) {
                             error!("handle_node_manifest failed: {e}");
                         }
                     }
