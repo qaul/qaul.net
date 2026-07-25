@@ -300,12 +300,7 @@ pub fn tick_relay(state: &RouterV2State, now: u64) {
 }
 
 /// Sends an INDEX_DUMP when a neighbour connects
-pub fn on_neighbour_connect(
-    state: &RouterV2State,
-    neighbour: PeerId,
-    transport: ConnectionModule,
-    now: u64,
-) {
+pub fn on_neighbour_connect(state: &RouterV2State, neighbour: PeerId, transport: ConnectionModule) {
     if matches!(
         transport,
         ConnectionModule::Ble1m | ConnectionModule::BleCoded

@@ -3,6 +3,20 @@
 
 //! Nodes manifest handling
 
+use std::{collections::HashMap, ops::Range};
+
+use libp2p::identity::Keypair;
+use tracing::debug;
+
+use crate::router_v2::{
+    codec::messages::{ManifestEntry, NodeManifest},
+    identity::{delegation_signing_input, ChunkSigningCtx, Multikey},
+};
+
+const ENTRY_BYTES: usize = 84;
+const HEADER_OVERHEAD: usize = 85;
+const MAX_BODY: usize = 60 * 1024;
+
 #[derive(Debug, thiserror::Error)]
 pub enum ManifestError {
     #[error("failed to sign the input")]
@@ -22,21 +36,6 @@ pub enum VerifyError {
 /// log_base: u32, insert_add/insert_remove/records_after/set_log_base/compact.
 #[derive(Debug, Default)]
 pub struct ManifestLog;
-
-use std::{collections::HashMap, ops::Range};
-
-use libp2p::identity::Keypair;
-use tracing::debug;
-
-use crate::router_v2::{
-    codec::messages::{ManifestEntry, NodeManifest},
-    identity::{delegation_signing_input, ChunkSigningCtx, Multikey},
-    RouterV2State, Sphere,
-};
-
-const ENTRY_BYTES: usize = 84;
-const HEADER_OVERHEAD: usize = 85;
-const MAX_BODY: usize = 60 * 1024;
 
 // DelegatedEntry is for the host-side manifest while ManifestEntry
 // is for the wire codec. Since they have the same fields, we cna repurpose
@@ -333,6 +332,7 @@ mod tests {
             user_id,
             timeout,
             entry_signature,
+            profile_version: 0,
         }
     }
 
@@ -343,7 +343,7 @@ mod tests {
         entries: Vec<ManifestEntry>,
     ) -> NodeManifest {
         NodeManifest {
-            origin_node_index: 0,
+            origin_node_id: [0; 8],
             manifest_version,
             chunk_index,
             chunk_count,
@@ -358,6 +358,7 @@ mod tests {
             user_id: [user_id_byte; 8],
             timeout: 0,
             entry_signature: [0; 64],
+            profile_version: 0,
         }
     }
 
@@ -384,7 +385,7 @@ mod tests {
         let (host_kp, host_mk) = keypair_and_multikey();
         let manifest = Manifest::new();
         let chunks = manifest
-            .build_chunks(0, &host_kp, &host_mk.encode())
+            .build_chunks(host_mk.to_id(), &host_kp, &host_mk.encode())
             .unwrap();
         assert_eq!(chunks.len(), 1);
         assert!(chunks[0].entries.is_empty());
@@ -402,7 +403,7 @@ mod tests {
         manifest.set_entries(vec![entry]);
 
         let chunks = manifest
-            .build_chunks(0, &host_kp, &host_mk.encode())
+            .build_chunks(host_mk.to_id(), &host_kp, &host_mk.encode())
             .unwrap();
         assert_eq!(chunks.len(), 1);
         assert_eq!(chunks[0].entries.len(), 1);
@@ -416,7 +417,7 @@ mod tests {
         let mut manifest = Manifest::new();
         manifest.set_gateway(true);
         let chunks = manifest
-            .build_chunks(0, &host_kp, &host_mk.encode())
+            .build_chunks(host_mk.to_id(), &host_kp, &host_mk.encode())
             .unwrap();
         assert_eq!(chunks[0].flags, 1);
     }
@@ -432,7 +433,7 @@ mod tests {
         let mut manifest = Manifest::new();
         manifest.set_entries(vec![entry]);
         let chunks = manifest
-            .build_chunks(0, &host_kp, &host_mk.encode())
+            .build_chunks(host_mk.to_id(), &host_kp, &host_mk.encode())
             .unwrap();
 
         assert!(Manifest::verify_chunk(&chunks[0], &host_mk).is_ok());
@@ -458,7 +459,7 @@ mod tests {
         let mut manifest = Manifest::new();
         manifest.set_entries(vec![entry]);
         let mut chunks = manifest
-            .build_chunks(0, &host_kp, &host_mk.encode())
+            .build_chunks(host_mk.to_id(), &host_kp, &host_mk.encode())
             .unwrap();
         chunks[0].manifest_signature[0] ^= 0xFF;
 
@@ -476,7 +477,7 @@ mod tests {
         let mut manifest = Manifest::new();
         manifest.set_gateway(true);
         let mut chunks = manifest
-            .build_chunks(0, &host_kp, &host_mk.encode())
+            .build_chunks(host_mk.to_id(), &host_kp, &host_mk.encode())
             .unwrap();
         // Signed with flags=1; tamper to flags=0.
         chunks[0].flags = 0;
@@ -491,7 +492,7 @@ mod tests {
         let (host_kp, host_mk) = keypair_and_multikey();
         let manifest = Manifest::new();
         let mut chunks = manifest
-            .build_chunks(0, &host_kp, &host_mk.encode())
+            .build_chunks(host_mk.to_id(), &host_kp, &host_mk.encode())
             .unwrap();
         chunks[0].manifest_version = chunks[0].manifest_version.wrapping_add(1);
         assert!(matches!(
@@ -531,7 +532,7 @@ mod tests {
         let (_, wrong_mk) = keypair_and_multikey();
         let manifest = Manifest::new();
         let chunks = manifest
-            .build_chunks(0, &host_kp, &host_mk.encode())
+            .build_chunks(host_mk.to_id(), &host_kp, &host_mk.encode())
             .unwrap();
         assert!(matches!(
             Manifest::verify_chunk(&chunks[0], &wrong_mk),
@@ -655,7 +656,7 @@ mod tests {
         let mut manifest = Manifest::new();
         manifest.set_entries(vec![entry]);
         let chunks = manifest
-            .build_chunks(0, &host_kp, &host_mk.encode())
+            .build_chunks(host_mk.to_id(), &host_kp, &host_mk.encode())
             .unwrap();
 
         // Verify the chunk signature.
@@ -671,29 +672,4 @@ mod tests {
         assert_eq!(completed.entries.len(), 1);
         assert_eq!(completed.entries[0].user_id, [7; 8]);
     }
-}
-
-pub fn enqueue_full_manifest(
-    state: &RouterV2State,
-    now: u64,
-    bypass_rate_limit: bool,
-) -> Result<(), ManifestError> {
-    let mut manifest = state.manifest.write().unwrap();
-    if !manifest.is_gateway && manifest.entries().is_empty() {
-        return Ok(());
-    }
-
-    let mut last_manifest_emission_ms = state.last_manifest_emission_ms.write().unwrap();
-    if !bypass_rate_limit && now.saturating_sub(*last_manifest_emission_ms) < 60_000 {
-        return Ok(());
-    }
-
-    manifest.bump_version();
-    let chunks = manifest.build_chunks(0, &state.host_keypair, &state.host_mk.encode())?;
-    
-    let mut manifest_relay = state.manifest_relay_queue.write().unwrap();
-    manifest_relay.insert(state.host_mk.to_id(), (chunks, Sphere::Local));
-    
-    *last_manifest_emission_ms = now;
-    Ok(())
 }
