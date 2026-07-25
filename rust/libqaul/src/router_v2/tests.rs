@@ -1218,13 +1218,25 @@ mod apply_mapping {
 mod apply_entry {
     use super::*;
     use crate::router_v2::{
-        codec::messages::Entry,
+        codec::messages::{NodeEntry, UserEntry},
         index::Space,
+        receive::ReceiveCtx,
         seq::SeqNum,
         table::{RoutingEntry, TargetRef},
         test_utils::*,
     };
     use libp2p::PeerId;
+
+    /// Build a ReceiveCtx with defaults every test uses (Lan transport,
+    /// no RSSI). Callers vary neighbour and `now`.
+    fn default_ctx(peer: PeerId, now: u64) -> ReceiveCtx {
+        ReceiveCtx {
+            neighbour: peer,
+            transport: ConnectionModule::Lan,
+            rssi_dbm: None,
+            now,
+        }
+    }
 
     const NEIGHBOUR_NODE_ID: [u8; 8] = [77; 8];
     const NEIGHBOUR_IDX_IN_NODE_DICT: u16 = 500;
@@ -1291,19 +1303,37 @@ mod apply_entry {
         state.routing_table.write().unwrap().set(space, own_idx, entry);
     }
 
-    fn wire_entry(
+    fn wire_user_entry(
         abs_idx: u16,
         seq: u16,
         metric: u16,
         hop_count: u8,
         local_only: bool,
-    ) -> Entry {
-        Entry {
+    ) -> UserEntry {
+        UserEntry {
             abs_idx,
             seq,
             metric,
             hop_count,
             local_only,
+        }
+    }
+
+    fn wire_node_entry(
+        abs_idx: u16,
+        seq: u16,
+        metric: u16,
+        hop_count: u8,
+        local_only: bool,
+        manifest_version: u32,
+    ) -> NodeEntry {
+        NodeEntry {
+            abs_idx,
+            seq,
+            metric,
+            hop_count,
+            local_only,
+            manifest_version,
         }
     }
 
@@ -1316,13 +1346,9 @@ mod apply_entry {
         let (peer, _) = setup_user_target(&state, 5, 42, target_id);
 
         state
-            .apply_entry(
-                peer,
-                ConnectionModule::Lan,
-                None,
-                Space::User,
-                wire_entry(5, 1, 10, 63, false),
-                1_000,
+            .apply_user_entry(
+                &default_ctx(peer, 1_000),
+                wire_user_entry(5, 1, 10, 63, false),
             )
             .unwrap();
 
@@ -1341,13 +1367,9 @@ mod apply_entry {
         let (peer, _) = setup_user_target(&state, 5, 42, target_id);
 
         state
-            .apply_entry(
-                peer,
-                ConnectionModule::Lan,
-                None,
-                Space::User,
-                wire_entry(5, 1, 10, 62, false),
-                1_000,
+            .apply_user_entry(
+                &default_ctx(peer, 1_000),
+                wire_user_entry(5, 1, 10, 62, false),
             )
             .unwrap();
 
@@ -1365,13 +1387,9 @@ mod apply_entry {
         bind_own_dict(&state, Space::Node, NEIGHBOUR_IDX_IN_NODE_DICT, NEIGHBOUR_NODE_ID);
 
         state
-            .apply_entry(
-                peer,
-                ConnectionModule::Lan,
-                None,
-                Space::User,
-                wire_entry(5, 1, 10, 1, false),
-                1_000,
+            .apply_user_entry(
+                &default_ctx(peer, 1_000),
+                wire_user_entry(5, 1, 10, 1, false),
             )
             .unwrap();
 
@@ -1400,13 +1418,9 @@ mod apply_entry {
         // NOTE: no install_user — the record is missing.
 
         state
-            .apply_entry(
-                peer,
-                ConnectionModule::Lan,
-                None,
-                Space::User,
-                wire_entry(5, 1, 10, 1, false),
-                1_000,
+            .apply_user_entry(
+                &default_ctx(peer, 1_000),
+                wire_user_entry(5, 1, 10, 1, false),
             )
             .unwrap();
 
@@ -1430,13 +1444,9 @@ mod apply_entry {
         // NOTE: no bind_own_dict for NEIGHBOUR_NODE_ID — step 7 must fail.
 
         state
-            .apply_entry(
-                peer,
-                ConnectionModule::Lan,
-                None,
-                Space::User,
-                wire_entry(5, 1, 10, 1, false),
-                1_000,
+            .apply_user_entry(
+                &default_ctx(peer, 1_000),
+                wire_user_entry(5, 1, 10, 1, false),
             )
             .unwrap();
 
@@ -1460,13 +1470,9 @@ mod apply_entry {
         let (peer, user) = setup_user_target(&state, 5, 42, target_id);
 
         state
-            .apply_entry(
-                peer,
-                ConnectionModule::Lan,
-                None,
-                Space::User,
-                wire_entry(5, 7, 10, 2, false),
-                1_234,
+            .apply_user_entry(
+                &default_ctx(peer, 1_234),
+                wire_user_entry(5, 7, 10, 2, false),
             )
             .unwrap();
 
@@ -1497,13 +1503,9 @@ mod apply_entry {
         let (peer, _) = setup_node_target(&state, 5, 42, target_id);
 
         state
-            .apply_entry(
-                peer,
-                ConnectionModule::Lan,
-                None,
-                Space::Node,
-                wire_entry(5, 1, 10, 0, false),
-                500,
+            .apply_node_entry(
+                &default_ctx(peer, 500),
+                wire_node_entry(5, 1, 10, 0, false, 0),
             )
             .unwrap();
 
@@ -1532,13 +1534,9 @@ mod apply_entry {
         );
 
         state
-            .apply_entry(
-                peer,
-                ConnectionModule::Lan,
-                None,
-                Space::User,
-                wire_entry(5, 20, 10, 1, false),
-                2_000,
+            .apply_user_entry(
+                &default_ctx(peer, 2_000),
+                wire_user_entry(5, 20, 10, 1, false),
             )
             .unwrap();
 
@@ -1572,13 +1570,9 @@ mod apply_entry {
 
         // Incoming seq=30, stored=200: forward gap under wrap is 65_366, > 100 → Reboot.
         state
-            .apply_entry(
-                peer,
-                ConnectionModule::Lan,
-                None,
-                Space::User,
-                wire_entry(5, 30, 10, 1, false),
-                2_000,
+            .apply_user_entry(
+                &default_ctx(peer, 2_000),
+                wire_user_entry(5, 30, 10, 1, false),
             )
             .unwrap();
 
@@ -1614,13 +1608,9 @@ mod apply_entry {
 
         // seq=40, stored=50: forward gap under wrap = 65_526 → Reboot bucket.
         state
-            .apply_entry(
-                peer,
-                ConnectionModule::Lan,
-                None,
-                Space::User,
-                wire_entry(5, 40, 10, 1, false),
-                2_000,
+            .apply_user_entry(
+                &default_ctx(peer, 2_000),
+                wire_user_entry(5, 40, 10, 1, false),
             )
             .unwrap();
 
@@ -1652,13 +1642,9 @@ mod apply_entry {
 
         // Same seq, incoming metric 5 + hop_cost(Lan, None)=10 = 15 < stored 50.
         state
-            .apply_entry(
-                peer,
-                ConnectionModule::Lan,
-                None,
-                Space::User,
-                wire_entry(5, 10, 5, 1, false),
-                2_000,
+            .apply_user_entry(
+                &default_ctx(peer, 2_000),
+                wire_user_entry(5, 10, 5, 1, false),
             )
             .unwrap();
 
@@ -1690,13 +1676,9 @@ mod apply_entry {
 
         // Same seq, new metric 10 + 10 = 20 = stored → strict < fails → drop.
         state
-            .apply_entry(
-                peer,
-                ConnectionModule::Lan,
-                None,
-                Space::User,
-                wire_entry(5, 10, 10, 5, false),
-                2_000,
+            .apply_user_entry(
+                &default_ctx(peer, 2_000),
+                wire_user_entry(5, 10, 10, 5, false),
             )
             .unwrap();
 
@@ -1727,13 +1709,9 @@ mod apply_entry {
         );
 
         state
-            .apply_entry(
-                peer,
-                ConnectionModule::Lan,
-                None,
-                Space::User,
-                wire_entry(5, 10, 30, 1, false),
-                2_000,
+            .apply_user_entry(
+                &default_ctx(peer, 2_000),
+                wire_user_entry(5, 10, 30, 1, false),
             )
             .unwrap();
 
@@ -1771,13 +1749,9 @@ mod apply_entry {
 
         // Fresher seq → accepted; local_only should stay false.
         state
-            .apply_entry(
-                peer,
-                ConnectionModule::Lan,
-                None,
-                Space::User,
-                wire_entry(5, 20, 10, 1, true),
-                2_000,
+            .apply_user_entry(
+                &default_ctx(peer, 2_000),
+                wire_user_entry(5, 20, 10, 1, true),
             )
             .unwrap();
 
@@ -1801,13 +1775,9 @@ mod apply_entry {
         preload_entry(&state, Space::User, 42, TargetRef::User(user), 10, 50, true);
 
         state
-            .apply_entry(
-                peer,
-                ConnectionModule::Lan,
-                None,
-                Space::User,
-                wire_entry(5, 20, 10, 1, false),
-                2_000,
+            .apply_user_entry(
+                &default_ctx(peer, 2_000),
+                wire_user_entry(5, 20, 10, 1, false),
             )
             .unwrap();
 
@@ -1829,13 +1799,9 @@ mod apply_entry {
         let (peer, _) = setup_user_target(&state, 5, 42, target_id);
 
         state
-            .apply_entry(
-                peer,
-                ConnectionModule::Lan,
-                None,
-                Space::User,
-                wire_entry(5, 1, 10, 1, true),
-                1_000,
+            .apply_user_entry(
+                &default_ctx(peer, 1_000),
+                wire_user_entry(5, 1, 10, 1, true),
             )
             .unwrap();
 
@@ -1856,7 +1822,7 @@ mod apply_entry {
 mod handle_routing_update {
     use super::*;
     use crate::router_v2::{
-        codec::messages::{Entry, Mapping, RoutingUpdate},
+        codec::messages::{Mapping, NodeEntry, RoutingUpdate, UserEntry},
         index::Space,
         seq::SeqNum,
         test_utils::*,
@@ -1927,7 +1893,7 @@ mod handle_routing_update {
                 version: 3,
             }],
             node_mappings: Vec::new(),
-            user_entries: vec![Entry {
+            user_entries: vec![UserEntry {
                 abs_idx: 5,
                 seq: 7,
                 metric: 10,
@@ -1990,19 +1956,20 @@ mod handle_routing_update {
                 target_id: node_id,
                 version: 2,
             }],
-            user_entries: vec![Entry {
+            user_entries: vec![UserEntry {
                 abs_idx: 5,
                 seq: 1,
                 metric: 10,
                 hop_count: 1,
                 local_only: false,
             }],
-            node_entries: vec![Entry {
+            node_entries: vec![NodeEntry {
                 abs_idx: 6,
                 seq: 1,
                 metric: 15,
                 hop_count: 1,
                 local_only: false,
+                manifest_version: 0,
             }],
         };
 
@@ -2054,7 +2021,7 @@ mod received {
     use super::*;
     use crate::router_v2::{
         codec::{
-            messages::{Entry, Mapping, RoutingUpdate},
+            messages::{Mapping, RoutingUpdate, UserEntry},
             Header, RoutingMessage, PROTOCOL_VERSION,
         },
         index::Space,
@@ -2101,7 +2068,7 @@ mod received {
                 version: 1,
             }],
             node_mappings: Vec::new(),
-            user_entries: vec![Entry {
+            user_entries: vec![UserEntry {
                 abs_idx: 5,
                 seq: 1,
                 metric: 10,
@@ -3109,7 +3076,7 @@ mod handle_node_manifest {
         let signing_input = delegation_signing_input(&host_mk.encode(), timeout);
         let sig_bytes = user_kp.sign(&signing_input).unwrap();
         let entry_signature: [u8; 64] = sig_bytes.try_into().unwrap();
-        ManifestEntry { user_id, timeout, entry_signature }
+        ManifestEntry { user_id, timeout, entry_signature, profile_version: 0 }
     }
 
     /// Install a Node with a specific public key so we can sign
@@ -3179,7 +3146,7 @@ mod handle_node_manifest {
         manifest.set_gateway(is_gateway);
         manifest.set_entries(entries);
         manifest
-            .build_chunks(0, host_kp, &host_mk.encode())
+            .build_chunks(host_mk.to_id(), host_kp, &host_mk.encode())
             .unwrap()
     }
 
@@ -3239,21 +3206,29 @@ mod handle_node_manifest {
         );
     }
 
+    /// Under the pull-based model (spec §8.5), NODE_MANIFEST carries
+    /// `origin_node_id` on the wire — no index translation via the
+    /// neighbour's mirror. If the id doesn't match any Node record we
+    /// hold, the handler drops the message.
     #[test]
-    fn unknown_origin_index_in_mirror_is_noop() {
+    fn unknown_origin_node_id_is_noop() {
         let (state, mut _rx) = fresh_state();
         let (host_kp, host_mk) = keypair_and_multikey();
         let host_id = install_origin_node(&state, &host_mk);
         let peer = fresh_peer();
         state.add_neighbour_transport(peer, host_id, ConnectionModule::Lan);
-        // Origin NOT bound in the mirror.
 
+        // Build a signed manifest, then rewrite origin_node_id to point
+        // at a Node we have no record of.
         let chunks = build_signed_manifest(&host_kp, &host_mk, 5, false, vec![]);
         let mut msg = chunks.into_iter().next().unwrap();
-        msg.origin_node_index = 42;
+        msg.origin_node_id = [99; 8];
 
-        state.handle_node_manifest(peer, msg, 0, ConnectionModule::Lan).unwrap();
+        state
+            .handle_node_manifest(peer, msg, 0, ConnectionModule::Lan)
+            .unwrap();
 
+        // The real origin's Node record is untouched.
         assert_eq!(
             state
                 .nodes
@@ -3266,6 +3241,8 @@ mod handle_node_manifest {
                 .manifest_version,
             0,
         );
+        // No stub was created for the unknown id.
+        assert!(state.nodes.read().unwrap().get(&[99; 8]).is_none());
     }
 
     #[test]
@@ -3471,277 +3448,6 @@ mod handle_node_manifest {
                 .delegated_users
                 .len(),
             0,
-        );
-    }
-}
-
-// ---------- tick_relay_manifests ----------
-
-mod tick_relay_manifests {
-    use super::*;
-    use crate::router_v2::{
-        codec::{
-            messages::NodeManifest, Header, RoutingMessage,
-        },
-        propagation::tick_relay_manifests,
-        test_utils::*,
-        Sphere,
-    };
-
-    /// Build a synthetic NodeManifest chunk with the given metadata.
-    /// The signature is placeholder — the relay tick never verifies.
-    fn synthetic_chunk(
-        origin_node_index: u16,
-        manifest_version: u32,
-        chunk_index: u8,
-        chunk_count: u8,
-        flags: u8,
-    ) -> NodeManifest {
-        NodeManifest {
-            origin_node_index,
-            manifest_version,
-            chunk_index,
-            chunk_count,
-            flags,
-            manifest_signature: [0; 64],
-            entries: Vec::new(),
-        }
-    }
-
-    /// Directly enqueue a manifest into the relay queue with the given
-    /// learn sphere.
-    fn enqueue(
-        state: &RouterV2State,
-        origin_id: [u8; 8],
-        chunks: Vec<NodeManifest>,
-        learn_sphere: Sphere,
-    ) {
-        state
-            .manifest_relay_queue
-            .write()
-            .unwrap()
-            .insert(origin_id, (chunks, learn_sphere));
-    }
-
-    fn decode_frame_type(bytes: &[u8]) -> RoutingMessage {
-        let (header, _) = Header::decode(bytes).expect("frame header");
-        header.message_type
-    }
-
-    fn decode_frame_body(bytes: &[u8]) -> NodeManifest {
-        let (header, body_slice) = Header::decode(bytes).expect("frame header");
-        assert_eq!(header.message_type, RoutingMessage::NodeManifest);
-        let payload = &body_slice[..header.payload_len as usize];
-        NodeManifest::decode(payload).expect("NodeManifest body")
-    }
-
-    // ---------- empty cases ----------
-
-    #[test]
-    fn empty_queue_pushes_nothing() {
-        let (state, mut rx) = fresh_state();
-        let peer = fresh_peer();
-        state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan);
-
-        tick_relay_manifests(&state);
-
-        assert!(rx.try_recv().is_err());
-    }
-
-    #[test]
-    fn no_neighbours_pushes_nothing() {
-        let (state, mut rx) = fresh_state();
-        enqueue(&state, [1; 8], vec![synthetic_chunk(0, 1, 0, 1, 0)], Sphere::Local);
-
-        tick_relay_manifests(&state);
-
-        assert!(rx.try_recv().is_err());
-    }
-
-    // ---------- happy path ----------
-
-    #[test]
-    fn queued_manifest_forwarded_to_neighbour() {
-        let (state, mut rx) = fresh_state();
-        let peer = fresh_peer();
-        state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan);
-
-        let chunk = synthetic_chunk(0, 5, 0, 1, 0);
-        enqueue(&state, [11; 8], vec![chunk], Sphere::Local);
-
-        tick_relay_manifests(&state);
-
-        let msg = rx.try_recv().expect("one outbound");
-        assert_eq!(msg.peer, peer);
-        assert_eq!(msg.transport, ConnectionModule::Lan);
-        assert_eq!(decode_frame_type(&msg.bytes), RoutingMessage::NodeManifest);
-        let decoded = decode_frame_body(&msg.bytes);
-        assert_eq!(decoded.manifest_version, 5);
-        assert!(rx.try_recv().is_err());
-    }
-
-    // ---------- cross-sphere filters ----------
-
-    /// Downward seal: an Internet-learned manifest must not cross onto a
-    /// Local-outgoing neighbour.
-    #[test]
-    fn downward_seal_drops_internet_learned_on_local_outgoing() {
-        let (state, mut rx) = fresh_state();
-        let peer = fresh_peer();
-        state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan);
-
-        // Learned over Internet, has is_gateway=1 (so upward would allow).
-        let chunk = synthetic_chunk(0, 1, 0, 1, 0x01);
-        enqueue(&state, [11; 8], vec![chunk], Sphere::Internet);
-
-        tick_relay_manifests(&state);
-
-        assert!(rx.try_recv().is_err(), "downward seal must drop this manifest");
-    }
-
-    /// A non-gateway manifest must not propagate onto an Internet-outgoing
-    /// neighbour.
-    #[test]
-    fn non_gateway_upward_dropped_on_internet_outgoing() {
-        let (state, mut rx) = fresh_state();
-        let peer = fresh_peer();
-        state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Internet);
-
-        // Local-learned, flags=0 → non-gateway.
-        let chunk = synthetic_chunk(0, 1, 0, 1, 0x00);
-        enqueue(&state, [11; 8], vec![chunk], Sphere::Local);
-
-        tick_relay_manifests(&state);
-
-        assert!(
-            rx.try_recv().is_err(),
-            "non-gateway manifest must not cross upward",
-        );
-    }
-
-    /// A gateway manifest propagates onto an Internet-outgoing neighbour.
-    #[test]
-    fn gateway_upward_propagates_on_internet_outgoing() {
-        let (state, mut rx) = fresh_state();
-        let peer = fresh_peer();
-        state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Internet);
-
-        let chunk = synthetic_chunk(0, 1, 0, 1, 0x01); // is_gateway=1
-        enqueue(&state, [11; 8], vec![chunk], Sphere::Local);
-
-        tick_relay_manifests(&state);
-
-        let msg = rx.try_recv().expect("gateway manifest must propagate upward");
-        let decoded = decode_frame_body(&msg.bytes);
-        assert_eq!(decoded.flags & 0x01, 1);
-    }
-
-    // ---------- multi-chunk ----------
-
-    /// A 3-chunk manifest → 3 outbound messages to the single neighbour.
-    /// Order matters for reassembly at the receiver — chunk_index 0 first.
-    #[test]
-    fn multi_chunk_relay_sends_all_chunks() {
-        let (state, mut rx) = fresh_state();
-        let peer = fresh_peer();
-        state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan);
-
-        let chunks = vec![
-            synthetic_chunk(0, 1, 0, 3, 0),
-            synthetic_chunk(0, 1, 1, 3, 0),
-            synthetic_chunk(0, 1, 2, 3, 0),
-        ];
-        enqueue(&state, [11; 8], chunks, Sphere::Local);
-
-        tick_relay_manifests(&state);
-
-        let mut got_indices = Vec::new();
-        while let Ok(msg) = rx.try_recv() {
-            let decoded = decode_frame_body(&msg.bytes);
-            got_indices.push(decoded.chunk_index);
-        }
-        assert_eq!(got_indices, vec![0, 1, 2], "chunks in canonical order");
-    }
-
-    // ---------- multi-neighbour ----------
-
-    /// Two neighbours, one manifest → each gets the chunks. Pins the
-    /// "encode once, send N times" optimisation shape without asserting on
-    /// its implementation.
-    #[test]
-    fn multi_neighbour_receives_the_manifest() {
-        let (state, mut rx) = fresh_state();
-        let peer_a = fresh_peer();
-        let peer_b = fresh_peer();
-        state.add_neighbour_transport(peer_a, [10; 8], ConnectionModule::Lan);
-        state.add_neighbour_transport(peer_b, [20; 8], ConnectionModule::Lan);
-
-        enqueue(
-            &state,
-            [11; 8],
-            vec![synthetic_chunk(0, 1, 0, 1, 0)],
-            Sphere::Local,
-        );
-
-        tick_relay_manifests(&state);
-
-        let mut recipients: Vec<PeerId> = Vec::new();
-        while let Ok(msg) = rx.try_recv() {
-            recipients.push(msg.peer);
-        }
-        assert_eq!(recipients.len(), 2);
-        assert!(recipients.contains(&peer_a));
-        assert!(recipients.contains(&peer_b));
-    }
-
-    // ---------- multi-transport (§4.2) ----------
-
-    /// A neighbour reachable on Lan and Internet gets the manifest over
-    /// both transports (§4.2). Uses a gateway manifest so Internet-outgoing
-    /// survives the sphere filter.
-    #[test]
-    fn multi_transport_neighbour_gets_manifest_per_transport() {
-        let (state, mut rx) = fresh_state();
-        let peer = fresh_peer();
-        state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan);
-        state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Internet);
-
-        let chunk = synthetic_chunk(0, 1, 0, 1, 0x01); // gateway
-        enqueue(&state, [11; 8], vec![chunk], Sphere::Local);
-
-        tick_relay_manifests(&state);
-
-        let mut transports = Vec::new();
-        while let Ok(msg) = rx.try_recv() {
-            transports.push(msg.transport);
-        }
-        transports.sort_by_key(|t| format!("{t:?}"));
-        assert_eq!(transports.len(), 2);
-        assert!(transports.contains(&ConnectionModule::Lan));
-        assert!(transports.contains(&ConnectionModule::Internet));
-    }
-
-    // ---------- queue drain ----------
-
-    #[test]
-    fn queue_drained_after_tick() {
-        let (state, mut _rx) = fresh_state();
-        let peer = fresh_peer();
-        state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan);
-        enqueue(
-            &state,
-            [11; 8],
-            vec![synthetic_chunk(0, 1, 0, 1, 0)],
-            Sphere::Local,
-        );
-
-        assert_eq!(state.manifest_relay_queue.read().unwrap().len(), 1);
-
-        tick_relay_manifests(&state);
-
-        assert!(
-            state.manifest_relay_queue.read().unwrap().is_empty(),
-            "queue must be empty after tick",
         );
     }
 }
