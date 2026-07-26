@@ -12,6 +12,8 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:qaul_components_widgetbook/use_cases/components/chat/chat_message_context_menu.dart'
     as _qaul_components_widgetbook_use_cases_components_chat_chat_message_context_menu;
+import 'package:qaul_components_widgetbook/use_cases/components/chat/chat_reply_bubble_preview.dart'
+    as _qaul_components_widgetbook_use_cases_components_chat_chat_reply_bubble_preview;
 import 'package:qaul_components_widgetbook/use_cases/design/account/account_management.dart'
     as _qaul_components_widgetbook_use_cases_design_account_account_management;
 import 'package:qaul_components_widgetbook/use_cases/design/chat/chat_journey.dart'
@@ -190,6 +192,35 @@ final directories = <_widgetbook.WidgetbookNode>[
                 builder:
                     _qaul_components_widgetbook_use_cases_components_chat_chat_message_context_menu
                         .buildManyActionsContextMenuUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookComponent(
+            name: 'ChatReplyBubblePreview',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Incoming — another user',
+                builder:
+                    _qaul_components_widgetbook_use_cases_components_chat_chat_reply_bubble_preview
+                        .buildIncomingReplyToAnotherUserUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Incoming — own message',
+                builder:
+                    _qaul_components_widgetbook_use_cases_components_chat_chat_reply_bubble_preview
+                        .buildIncomingReplyToOwnMessageUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Outgoing — another user',
+                builder:
+                    _qaul_components_widgetbook_use_cases_components_chat_chat_reply_bubble_preview
+                        .buildOutgoingReplyToAnotherUserUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Outgoing — own message',
+                builder:
+                    _qaul_components_widgetbook_use_cases_components_chat_chat_reply_bubble_preview
+                        .buildOutgoingReplyToOwnMessageUseCase,
               ),
             ],
           ),
