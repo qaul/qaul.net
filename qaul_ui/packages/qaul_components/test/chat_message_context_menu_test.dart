@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qaul_components/qaul_components.dart';
 
@@ -15,7 +16,6 @@ void main() {
     int index, {
     VoidCallback? onPressed,
     bool enabled = true,
-    bool hidden = false,
   }) {
     return ChatMessageContextMenuAction(
       id: 'action-$index',
@@ -23,7 +23,6 @@ void main() {
       iconAsset: ChatMessageContextMenuIcons.info,
       onPressed: onPressed ?? () {},
       enabled: enabled,
-      hidden: hidden,
     );
   }
 
@@ -62,7 +61,7 @@ void main() {
             ChatMessageContextMenuAction.forward(
               onPressed: () => forwardCount++,
             ),
-            ChatMessageContextMenuAction.edit(onEdit: () => editCount++),
+            ChatMessageContextMenuAction.edit(onPressed: () => editCount++),
           ],
         ),
       ),
@@ -160,25 +159,31 @@ void main() {
     expect(find.text('Action 9'), findsOneWidget);
   });
 
-  testWidgets('hidden elements do not occupy pagination slots', (tester) async {
+  testWidgets('labels built-in actions from the active locale', (tester) async {
     await tester.pumpWidget(
-      app(
-        ChatMessageContextMenu(
-          elements: [
-            action(1),
-            action(2),
-            action(3, hidden: true),
-            action(4),
-            action(5),
-            action(6),
-          ],
+      MaterialApp(
+        locale: const Locale('de'),
+        localizationsDelegates:
+            QaulComponentsLocalizations.localizationsDelegates,
+        supportedLocales: QaulComponentsLocalizations.supportedLocales,
+        home: Scaffold(
+          body: ChatMessageContextMenu(
+            elements: [
+              reactions(),
+              ChatMessageContextMenuAction.reply(onPressed: () {}),
+              ChatMessageContextMenuAction.forward(onPressed: () {}),
+              ChatMessageContextMenuAction.edit(onPressed: () {}),
+            ],
+          ),
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
-    expect(find.text('Action 3'), findsNothing);
-    expect(find.text('Action 6'), findsOneWidget);
-    expect(find.byTooltip('Next page'), findsNothing);
+    expect(find.text('Antworten'), findsOneWidget);
+    expect(find.text('Weiterleiten'), findsOneWidget);
+    expect(find.text('Bearbeiten'), findsOneWidget);
+    expect(find.byTooltip('Weitere Reaktionen'), findsOneWidget);
   });
 
   testWidgets('disabled is dimmer than enabled and ignores hover and tap', (
@@ -197,21 +202,19 @@ void main() {
       ),
     );
 
-    Color foreground(String label) {
-      final button = tester.widget<TextButton>(
-        find.ancestor(
-          of: find.text(label),
-          matching: find.bySubtype<TextButton>(),
-        ),
-      );
-      return button.style!.foregroundColor!.resolve({})!;
-    }
+    // Assert the color actually painted, not the style declaration.
+    Color foreground(String label) => tester
+        .renderObject<RenderParagraph>(find.text(label))
+        .text
+        .style!
+        .color!;
 
     expect(foreground('Action 1'), const Color(0xFF999999));
     expect(foreground('Action 2'), const Color(0xFF5F5F5F));
 
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await mouse.addPointer();
+    await mouse.addPointer(location: Offset.zero);
+    addTearDown(mouse.removePointer);
     await mouse.moveTo(tester.getCenter(find.text('Action 2')));
     await tester.pump();
     expect(foreground('Action 2'), const Color(0xFF5F5F5F));
@@ -220,7 +223,7 @@ void main() {
     expect(disabledTaps, 0);
 
     await mouse.moveTo(tester.getCenter(find.text('Action 1')));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(foreground('Action 1'), Colors.white);
   });
 

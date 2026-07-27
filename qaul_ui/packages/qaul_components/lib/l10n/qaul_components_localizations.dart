@@ -333,6 +333,42 @@ abstract class QaulComponentsLocalizations {
   /// **'Set password'**
   String get accountSetPassword;
 
+  /// No description provided for @chatMenuReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply'**
+  String get chatMenuReply;
+
+  /// No description provided for @chatMenuForward.
+  ///
+  /// In en, this message translates to:
+  /// **'Forward'**
+  String get chatMenuForward;
+
+  /// No description provided for @chatMenuEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get chatMenuEdit;
+
+  /// No description provided for @chatMenuPreviousPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous page'**
+  String get chatMenuPreviousPage;
+
+  /// No description provided for @chatMenuNextPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Next page'**
+  String get chatMenuNextPage;
+
+  /// No description provided for @chatMenuMoreReactions.
+  ///
+  /// In en, this message translates to:
+  /// **'More reactions'**
+  String get chatMenuMoreReactions;
+
   /// No description provided for @membersCount.
   ///
   /// In en, this message translates to:

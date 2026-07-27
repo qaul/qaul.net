@@ -32,7 +32,7 @@ List<ChatMessageContextMenuElement> _paginatedElements() => [
   _reactions(),
   ChatMessageContextMenuAction.reply(onPressed: () {}),
   ChatMessageContextMenuAction.forward(onPressed: () {}),
-  ChatMessageContextMenuAction.edit(onEdit: () {}),
+  ChatMessageContextMenuAction.edit(onPressed: () {}),
   ChatMessageContextMenuAction(
     id: 'info',
     label: 'Info',
@@ -68,7 +68,7 @@ Widget buildContextMenuUseCase(BuildContext context) {
 }
 
 @widgetbook.UseCase(
-  name: 'Disabled and hidden elements',
+  name: 'Disabled and omitted elements',
   type: ChatMessageContextMenu,
 )
 Widget buildRestrictedContextMenuUseCase(BuildContext context) {
@@ -78,8 +78,8 @@ Widget buildRestrictedContextMenuUseCase(BuildContext context) {
       elements: [
         _reactions(enabled: false),
         ChatMessageContextMenuAction.reply(onPressed: () {}),
-        ChatMessageContextMenuAction.forward(hidden: true, onPressed: () {}),
-        ChatMessageContextMenuAction.edit(enabled: false, onEdit: () {}),
+        // Forward is left out entirely rather than rendered hidden.
+        ChatMessageContextMenuAction.edit(enabled: false, onPressed: () {}),
       ],
     ),
   );
