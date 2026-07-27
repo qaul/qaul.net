@@ -125,6 +125,24 @@ class QaulComponentsLocalizationsZh extends QaulComponentsLocalizations {
   String get accountSetPassword => 'Set password';
 
   @override
+  String get chatMenuReply => '回复';
+
+  @override
+  String get chatMenuForward => '转发';
+
+  @override
+  String get chatMenuEdit => '编辑';
+
+  @override
+  String get chatMenuPreviousPage => '上一页';
+
+  @override
+  String get chatMenuNextPage => '下一页';
+
+  @override
+  String get chatMenuMoreReactions => '更多表情';
+
+  @override
   String membersCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

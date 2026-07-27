@@ -37,6 +37,12 @@
   "accountNewPassword": "New password",
   "accountRemovePassword": "Remove password",
   "accountSetPassword": "Set password",
+  "chatMenuReply": "Reply",
+  "chatMenuForward": "Forward",
+  "chatMenuEdit": "Edit",
+  "chatMenuPreviousPage": "Previous page",
+  "chatMenuNextPage": "Next page",
+  "chatMenuMoreReactions": "More reactions",
   "membersCount": "{count, plural, =1{1 member} other{{count} members}}",
   "@membersCount": {
     "placeholders": {

@@ -125,6 +125,24 @@ class QaulComponentsLocalizationsEn extends QaulComponentsLocalizations {
   String get accountSetPassword => 'Set password';
 
   @override
+  String get chatMenuReply => 'Reply';
+
+  @override
+  String get chatMenuForward => 'Forward';
+
+  @override
+  String get chatMenuEdit => 'Edit';
+
+  @override
+  String get chatMenuPreviousPage => 'Previous page';
+
+  @override
+  String get chatMenuNextPage => 'Next page';
+
+  @override
+  String get chatMenuMoreReactions => 'More reactions';
+
+  @override
   String membersCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

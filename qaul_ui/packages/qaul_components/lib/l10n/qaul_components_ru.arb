@@ -11,5 +11,11 @@
   "navOverflowSupport": "Служба поддержки",
   "navOverflowRoutingTable": "Таблица данных маршрутизации",
   "navOverflowFileHistory": "История файлов",
+  "chatMenuReply": "Ответить",
+  "chatMenuForward": "Переслать",
+  "chatMenuEdit": "Редактировать",
+  "chatMenuPreviousPage": "Предыдущая страница",
+  "chatMenuNextPage": "Следующая страница",
+  "chatMenuMoreReactions": "Другие реакции",
   "membersCount": "{count, plural, =1{1 участник} few{{count} участника} many{{count} участников} other{{count} участника}}"
 }
