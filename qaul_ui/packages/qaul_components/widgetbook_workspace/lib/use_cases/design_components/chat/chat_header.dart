@@ -2,22 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:qaul_components/qaul_components.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
+import '../../../support/chat_fixtures.dart';
 import '../../../support/widgetbook_preview.dart';
-
-Widget _demoAvatar({required String initials}) {
-  return CircleAvatar(
-    backgroundColor: const Color(0xFFD35400),
-    foregroundColor: Colors.white,
-    child: Text(
-      initials,
-      style: const TextStyle(
-        fontFamily: 'Roboto',
-        fontWeight: FontWeight.w400,
-        fontSize: 18,
-      ),
-    ),
-  );
-}
 
 @widgetbook.UseCase(name: 'Direct — online', type: ChatHeader)
 Widget buildChatHeaderDirectOnlineUseCase(BuildContext context) {
@@ -25,7 +11,7 @@ Widget buildChatHeaderDirectOnlineUseCase(BuildContext context) {
     context,
     ChatHeader(
       onBackPressed: () {},
-      avatar: _demoAvatar(initials: 'MJ'),
+      avatar: chatFixtureAvatar(initials: 'MJ'),
       displayName: 'Mathias Jud',
       isOnline: true,
       onlineLabel: 'online',
@@ -46,7 +32,7 @@ Widget buildChatHeaderDirectLastSeenUseCase(BuildContext context) {
     context,
     ChatHeader(
       onBackPressed: () {},
-      avatar: _demoAvatar(initials: 'MJ'),
+      avatar: chatFixtureAvatar(initials: 'MJ'),
       displayName: 'Mathias Jud',
       isOnline: false,
       onlineLabel: 'online',
@@ -64,7 +50,7 @@ Widget buildChatHeaderGroupUseCase(BuildContext context) {
     context,
     ChatHeader.group(
       onBackPressed: () {},
-      avatar: _demoAvatar(initials: 'QC'),
+      avatar: chatFixtureAvatar(initials: 'QC'),
       groupName: 'qaul contributors',
       membersCount: 12,
       extraTopPadding: 32,
