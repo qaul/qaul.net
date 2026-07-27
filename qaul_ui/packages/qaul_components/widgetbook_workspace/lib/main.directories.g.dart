@@ -60,8 +60,14 @@ final directories = <_widgetbook.WidgetbookNode>[
         name: 'chat',
         children: [
           _widgetbook.WidgetbookComponent(
-            name: 'ChatFooterStateDesignStory',
+            name: 'ChatJourneyDesignStory',
             useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Baseline',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_chat_chat_journey
+                        .buildChatJourneyBaselineUseCase,
+              ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Empty footer',
                 builder:
@@ -79,17 +85,6 @@ final directories = <_widgetbook.WidgetbookNode>[
                 builder:
                     _qaul_components_widgetbook_use_cases_design_chat_chat_journey
                         .buildChatJourneyPlusMenuUseCase,
-              ),
-            ],
-          ),
-          _widgetbook.WidgetbookComponent(
-            name: 'ChatJourneyBaselineDesignStory',
-            useCases: [
-              _widgetbook.WidgetbookUseCase(
-                name: 'Baseline',
-                builder:
-                    _qaul_components_widgetbook_use_cases_design_chat_chat_journey
-                        .buildChatJourneyBaselineUseCase,
               ),
             ],
           ),

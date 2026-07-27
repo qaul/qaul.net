@@ -3,60 +3,34 @@ import 'package:qaul_components/qaul_components.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
 import '../../../support/chat_fixtures.dart';
+import '../../../support/widgetbook_preview.dart';
 
-class ChatJourneyBaselineDesignStory {
-  const ChatJourneyBaselineDesignStory();
-}
-
-class ChatFooterStateDesignStory {
-  const ChatFooterStateDesignStory();
+/// Widgetbook node for the full chat screen (header + timeline + footer), as
+/// opposed to the single-component stories under `[design components]/chat`.
+class ChatJourneyDesignStory {
+  const ChatJourneyDesignStory();
 }
 
 final _journeyClock = DateTime(2026, 4, 18, 12, 42);
 
-List<ChatMessage> _journeyMessages() {
-  return [
-    ...buildDirectChatFixtureMessages(clock: _journeyClock),
-    TextChatMessage(
-      id: 'journey-12',
-      sender: chatFixturePeer,
-      content: '**Markdown** _preview_ message for bubble spacing context',
-      sentAt: _journeyClock.subtract(const Duration(seconds: 20)),
-      receivedAt: _journeyClock.subtract(const Duration(seconds: 20)),
-      status: MessageStatus.sent,
-    ),
-  ];
-}
+const _kLongDraft =
+    'Start writing a message and writing more text than one single line so '
+    'the input uses the full width of the container.';
 
-Widget _chatHeader() {
-  return ChatHeader(
-    applyTopSafeArea: false,
-    extraTopPadding: 24,
-    onBackPressed: () {},
-    avatar: chatFixtureAvatar(
-      initials: 'M',
-      backgroundColor: const Color(0xFFE95420),
-    ),
-    displayName: 'MaxX',
-    isOnline: true,
-    onlineLabel: 'online',
-    lastSeenLabel: '',
-    menuEntries: const [
-      ChatHeaderMenuEntry(id: 'mute', label: 'Mute'),
-      ChatHeaderMenuEntry(id: 'info', label: 'Info'),
-    ],
-    onMenuSelected: (_) {},
-  );
-}
+/// Footer states the journey documents. Each is rendered both as its own use
+/// case and side by side in [buildChatJourneyBaselineUseCase].
+final _footerStates = <({String title, Widget Function() build})>[
+  (title: 'Empty footer', build: _emptyFooter),
+  (title: 'Plus menu / pagination', build: _plusMenuFooter),
+  (title: 'Long typed text', build: _longTextFooter),
+];
 
-Widget _timeline() {
-  return ChatTimeline.direct(
-    currentUser: chatFixtureCurrentUser,
-    messages: _journeyMessages(),
-    clock: _journeyClock,
-    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-  );
-}
+Widget _emptyFooter() => _footer();
+
+Widget _plusMenuFooter() => _footer(menuOpen: true);
+
+Widget _longTextFooter() =>
+    _footer(controller: TextEditingController(text: _kLongDraft));
 
 Widget _footer({TextEditingController? controller, bool menuOpen = false}) {
   return ChatFooter(
@@ -79,37 +53,66 @@ Widget _footer({TextEditingController? controller, bool menuOpen = false}) {
   );
 }
 
-Widget _chatJourneyBody({required Widget footer}) {
-  return Column(
-    children: [
-      _chatHeader(),
-      Expanded(child: SingleChildScrollView(reverse: true, child: _timeline())),
-      footer,
-    ],
-  );
-}
-
-class _ChatJourneyViewport extends StatelessWidget {
-  const _ChatJourneyViewport({required this.footer});
+/// Header + scrolled timeline + [footer], on the themed chat canvas.
+class _ChatJourneyScreen extends StatelessWidget {
+  const _ChatJourneyScreen({required this.footer, this.bordered = false});
 
   final Widget footer;
 
+  /// Outlines the screen so it reads as a device frame when several are shown
+  /// next to each other.
+  final bool bordered;
+
   @override
   Widget build(BuildContext context) {
-    final sheet = QaulColorSheet(Theme.of(context).brightness);
-
     return Material(
-      color: sheet.surfaceContainer,
-      child: SizedBox.expand(
-        child: DecoratedBox(
-          decoration: BoxDecoration(color: sheet.background),
-          child: _chatJourneyBody(footer: footer),
+      color: widgetbookChatSurfaceColor(context),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: widgetbookChatCanvasColor(context),
+          border: bordered
+              ? Border.all(color: Theme.of(context).colorScheme.primary)
+              : null,
+        ),
+        child: Column(
+          children: [
+            ChatHeader(
+              applyTopSafeArea: false,
+              extraTopPadding: 24,
+              onBackPressed: () {},
+              avatar: chatFixtureAvatar(initials: 'M'),
+              displayName: chatFixturePeer.name,
+              isOnline: true,
+              onlineLabel: 'online',
+              lastSeenLabel: '',
+              menuEntries: const [
+                ChatHeaderMenuEntry(id: 'mute', label: 'Mute'),
+                ChatHeaderMenuEntry(id: 'info', label: 'Info'),
+              ],
+              onMenuSelected: (_) {},
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                reverse: true,
+                child: ChatTimeline.direct(
+                  currentUser: chatFixtureCurrentUser,
+                  messages: buildDirectChatFixtureMessages(
+                    clock: _journeyClock,
+                  ),
+                  clock: _journeyClock,
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                ),
+              ),
+            ),
+            footer,
+          ],
         ),
       ),
     );
   }
 }
 
+/// Phone-width [_ChatJourneyScreen] under a caption, for the baseline row.
 class _JourneyFrame extends StatelessWidget {
   const _JourneyFrame({required this.title, required this.footer});
 
@@ -118,37 +121,24 @@ class _JourneyFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sheet = QaulColorSheet(Theme.of(context).brightness);
+    final theme = Theme.of(context);
 
     return SizedBox(
       width: 393,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Text(
               title,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.62),
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.62),
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
-          Expanded(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: sheet.background,
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.primary,
-                  width: 1,
-                ),
-              ),
-              child: _chatJourneyBody(footer: footer),
-            ),
-          ),
+          Expanded(child: _ChatJourneyScreen(footer: footer, bordered: true)),
         ],
       ),
     );
@@ -157,34 +147,22 @@ class _JourneyFrame extends StatelessWidget {
 
 @widgetbook.UseCase(
   name: 'Baseline',
-  type: ChatJourneyBaselineDesignStory,
+  type: ChatJourneyDesignStory,
   path: '[design]/chat',
 )
 Widget buildChatJourneyBaselineUseCase(BuildContext context) {
   return ColoredBox(
-    color: QaulColorSheet(Theme.of(context).brightness).surfaceContainer,
+    color: widgetbookChatSurfaceColor(context),
     child: SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.all(24),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _JourneyFrame(title: 'Empty footer', footer: _footer()),
-          const SizedBox(width: 24),
-          _JourneyFrame(
-            title: 'Plus menu / pagination',
-            footer: _footer(menuOpen: true),
-          ),
-          const SizedBox(width: 24),
-          _JourneyFrame(
-            title: 'Long typed text',
-            footer: _footer(
-              controller: TextEditingController(
-                text:
-                    'Start writing a message and writing more text than one single line so the input uses the full width of the container.',
-              ),
-            ),
-          ),
+          for (final (index, state) in _footerStates.indexed) ...[
+            if (index > 0) const SizedBox(width: 24),
+            _JourneyFrame(title: state.title, footer: state.build()),
+          ],
         ],
       ),
     ),
@@ -193,34 +171,27 @@ Widget buildChatJourneyBaselineUseCase(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'Empty footer',
-  type: ChatFooterStateDesignStory,
+  type: ChatJourneyDesignStory,
   path: '[design]/chat',
 )
 Widget buildChatJourneyEmptyFooterUseCase(BuildContext context) {
-  return _ChatJourneyViewport(footer: _footer());
+  return _ChatJourneyScreen(footer: _emptyFooter());
 }
 
 @widgetbook.UseCase(
   name: 'Plus menu / pagination',
-  type: ChatFooterStateDesignStory,
+  type: ChatJourneyDesignStory,
   path: '[design]/chat',
 )
 Widget buildChatJourneyPlusMenuUseCase(BuildContext context) {
-  return _ChatJourneyViewport(footer: _footer(menuOpen: true));
+  return _ChatJourneyScreen(footer: _plusMenuFooter());
 }
 
 @widgetbook.UseCase(
   name: 'Long typed text',
-  type: ChatFooterStateDesignStory,
+  type: ChatJourneyDesignStory,
   path: '[design]/chat',
 )
 Widget buildChatJourneyLongTextUseCase(BuildContext context) {
-  return _ChatJourneyViewport(
-    footer: _footer(
-      controller: TextEditingController(
-        text:
-            'Start writing a message and writing more text than one single line so the input uses the full width of the container.',
-      ),
-    ),
-  );
+  return _ChatJourneyScreen(footer: _longTextFooter());
 }

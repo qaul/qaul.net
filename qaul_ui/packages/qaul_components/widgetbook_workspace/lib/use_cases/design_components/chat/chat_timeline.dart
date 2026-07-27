@@ -13,11 +13,7 @@ Widget buildChatRoomPreviewUseCase(BuildContext context) {
     context,
     ChatTimeline.direct(
       currentUser: chatFixtureCurrentUser,
-      messages: buildDirectChatFixtureMessages(
-        clock: _previewClock,
-        includeDelayedMessage: false,
-        includeUnsentMessage: true,
-      ),
+      messages: buildDirectChatFixtureMessages(clock: _previewClock),
       clock: _previewClock,
     ),
   );
