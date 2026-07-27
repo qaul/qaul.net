@@ -10,14 +10,14 @@
 // **************************************************************************
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:qaul_components_widgetbook/use_cases/components/chat/chat_footer_reply_preview.dart'
-    as _qaul_components_widgetbook_use_cases_components_chat_chat_footer_reply_preview;
 import 'package:qaul_components_widgetbook/use_cases/components/chat/chat_message_context_menu.dart'
     as _qaul_components_widgetbook_use_cases_components_chat_chat_message_context_menu;
 import 'package:qaul_components_widgetbook/use_cases/design/account/account_management.dart'
     as _qaul_components_widgetbook_use_cases_design_account_account_management;
-import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_footer.dart'
-    as _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer;
+import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_footer/chat_footer.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer_chat_footer;
+import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_footer/chat_footer_reply_preview.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer_chat_footer_reply_preview;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_header.dart'
     as _qaul_components_widgetbook_use_cases_design_components_chat_chat_header;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_timeline.dart'
@@ -66,58 +66,6 @@ final directories = <_widgetbook.WidgetbookNode>[
       _widgetbook.WidgetbookFolder(
         name: 'chat',
         children: [
-          _widgetbook.WidgetbookComponent(
-            name: 'ChatFooter',
-            useCases: [
-              _widgetbook.WidgetbookUseCase(
-                name: 'Empty — attachment actions',
-                builder:
-                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
-                        .buildChatFooterEmptyClosedUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Empty — submenu open',
-                builder:
-                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
-                        .buildChatFooterEmptyOpenUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Long draft (multiline)',
-                builder:
-                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
-                        .buildChatFooterLongDraftUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'With text — plus and send',
-                builder:
-                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
-                        .buildChatFooterWithTextUseCase,
-              ),
-            ],
-          ),
-          _widgetbook.WidgetbookComponent(
-            name: 'ChatFooterReplyPreview',
-            useCases: [
-              _widgetbook.WidgetbookUseCase(
-                name: 'Empty draft',
-                builder:
-                    _qaul_components_widgetbook_use_cases_components_chat_chat_footer_reply_preview
-                        .buildReplyFooterEmptyUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Long excerpt',
-                builder:
-                    _qaul_components_widgetbook_use_cases_components_chat_chat_footer_reply_preview
-                        .buildLongReplyFooterUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'With draft',
-                builder:
-                    _qaul_components_widgetbook_use_cases_components_chat_chat_footer_reply_preview
-                        .buildReplyFooterDraftUseCase,
-              ),
-            ],
-          ),
           _widgetbook.WidgetbookComponent(
             name: 'ChatHeader',
             useCases: [
@@ -252,6 +200,63 @@ final directories = <_widgetbook.WidgetbookNode>[
                 builder:
                     _qaul_components_widgetbook_use_cases_special_forms_room_meta_message
                         .buildRoomMetaMessageDateUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookFolder(
+            name: 'chat_footer',
+            children: [
+              _widgetbook.WidgetbookComponent(
+                name: 'ChatFooter',
+                useCases: [
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Empty — attachment actions',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer_chat_footer
+                            .buildChatFooterEmptyClosedUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Empty — submenu open',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer_chat_footer
+                            .buildChatFooterEmptyOpenUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Long draft (multiline)',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer_chat_footer
+                            .buildChatFooterLongDraftUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'With text — plus and send',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer_chat_footer
+                            .buildChatFooterWithTextUseCase,
+                  ),
+                ],
+              ),
+              _widgetbook.WidgetbookComponent(
+                name: 'ChatFooterReplyPreview',
+                useCases: [
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Empty draft',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer_chat_footer_reply_preview
+                            .buildReplyFooterEmptyUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Long excerpt',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer_chat_footer_reply_preview
+                            .buildLongReplyFooterUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'With draft',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer_chat_footer_reply_preview
+                            .buildReplyFooterDraftUseCase,
+                  ),
+                ],
               ),
             ],
           ),

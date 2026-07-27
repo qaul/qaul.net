@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../styles/qaul_color_sheet.dart';
+import '../../../styles/qaul_color_sheet.dart';
 import 'chat_footer_reply_preview.dart';
 
 const Color _kActionIconColor = Color(0xFF999999);
@@ -43,12 +43,12 @@ const int _kAttachmentMenuMaxVisibleActions = 6;
 const int _kAttachmentMenuMinPaginatedSlots = 3;
 const _AttachmentMenuLayoutConfig _kAttachmentMenuLayout =
     _AttachmentMenuLayoutConfig(
-  maxVisibleSlots: _kAttachmentMenuMaxVisibleActions,
-  minPaginatedSlots: _kAttachmentMenuMinPaginatedSlots,
-  itemMaxSize: _kAttachmentMenuItemMaxSize,
-  itemMinSize: _kAttachmentMenuItemMinSize,
-  itemSpacing: _kAttachmentMenuItemSpacing,
-);
+      maxVisibleSlots: _kAttachmentMenuMaxVisibleActions,
+      minPaginatedSlots: _kAttachmentMenuMinPaginatedSlots,
+      itemMaxSize: _kAttachmentMenuItemMaxSize,
+      itemMinSize: _kAttachmentMenuItemMinSize,
+      itemSpacing: _kAttachmentMenuItemSpacing,
+    );
 
 class _AttachmentMenuLayoutConfig {
   const _AttachmentMenuLayoutConfig({
@@ -247,9 +247,7 @@ class _ChatFooterState extends State<ChatFooter> {
       }
     }
 
-    final newActionSignature = _attachmentActionSignature(
-      _attachmentActions(),
-    );
+    final newActionSignature = _attachmentActionSignature(_attachmentActions());
     if (newActionSignature != _attachmentActionsSignature) {
       _attachmentActionsSignature = newActionSignature;
       _attachmentMenuPageIndex = 0;
@@ -519,7 +517,8 @@ class _ComposerPill extends StatelessWidget {
         _kTextActionSpacing +
         _kActionButtonMinSize +
         _kHorizontalPadding;
-    final inlineTextWidth = maxWidth -
+    final inlineTextWidth =
+        maxWidth -
         inlineActionsWidth -
         _kFieldInputHorizontal -
         _kFieldInputHorizontal;
@@ -588,7 +587,7 @@ class _ComposerPill extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _ComposerTextField(
-                    key: textFieldKey,
+                        key: textFieldKey,
                         footer: footer,
                         theme: theme,
                         controller: controller,
@@ -597,7 +596,9 @@ class _ComposerPill extends StatelessWidget {
                     ),
                     if (hasText)
                       Padding(
-                        padding: const EdgeInsets.only(right: _kHorizontalPadding),
+                        padding: const EdgeInsets.only(
+                          right: _kHorizontalPadding,
+                        ),
                         child: _TextActions(
                           onMore: onMorePressed,
                           onPressed: onSendPressed,
@@ -879,8 +880,9 @@ class _AttachmentSubmenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final itemSize =
-            _kAttachmentMenuLayout.itemSizeForWidth(constraints.maxWidth);
+        final itemSize = _kAttachmentMenuLayout.itemSizeForWidth(
+          constraints.maxWidth,
+        );
         final showAllActions = _kAttachmentMenuLayout.itemsFit(
           itemCount: actions.length,
           availableWidth: constraints.maxWidth,
@@ -894,10 +896,7 @@ class _AttachmentSubmenu extends StatelessWidget {
               );
         final pages = showAllActions
             ? [_AttachmentMenuPage(actions: actions)]
-            : _buildAttachmentMenuPages(
-                actions: actions,
-                slotCount: slotCount,
-              );
+            : _buildAttachmentMenuPages(actions: actions, slotCount: slotCount);
         final currentPage = pages[pageIndex.clamp(0, pages.length - 1)];
         final visibleActions = [
           if (currentPage.hasPrevious)
@@ -923,12 +922,12 @@ class _AttachmentSubmenu extends StatelessWidget {
               for (var index = 0; index < visibleActions.length; index++) ...[
                 if (index > 0)
                   const SizedBox(width: _kAttachmentMenuItemSpacing),
-                  _AttachmentSubmenuButton(
-                    key: ValueKey(visibleActions[index].id),
-                    action: visibleActions[index],
-                    theme: theme,
-                    itemSize: itemSize,
-                  ),
+                _AttachmentSubmenuButton(
+                  key: ValueKey(visibleActions[index].id),
+                  action: visibleActions[index],
+                  theme: theme,
+                  itemSize: itemSize,
+                ),
               ],
             ],
           ),
