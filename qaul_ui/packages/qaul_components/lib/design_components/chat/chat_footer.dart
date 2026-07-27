@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
 import '../../styles/qaul_color_sheet.dart';
+import 'chat_footer_reply_preview.dart';
 
 const Color _kActionIconColor = Color(0xFF999999);
 const double _kInputBorderRadius = 15;
@@ -29,6 +31,7 @@ const double _kTextActionSpacing = 20;
 const double _kAttachmentIconSpacing = 24;
 const double _kActionButtonMinSize = 40;
 const double _kAttachmentMenuTopSpacing = 12;
+const double _kReplyPreviewBottomSpacing = 12;
 const double _kAttachmentMenuItemMaxSize = 45;
 const double _kAttachmentMenuItemMinSize = 35;
 const double _kAttachmentMenuArrowSize = 35;
@@ -159,6 +162,8 @@ class ChatFooter extends StatefulWidget {
     required this.placeholder,
     this.controller,
     this.onSend,
+    this.replyPreview,
+    this.onCancelReply,
     this.onVoicePressed,
     this.onCameraPressed,
     this.onMoreAttachmentsPressed,
@@ -168,6 +173,7 @@ class ChatFooter extends StatefulWidget {
     this.applyBottomSafeArea = true,
     this.initialAttachmentMenuOpen = false,
     this.sendTooltip,
+    this.cancelReplyTooltip,
     this.voiceTooltip,
     this.cameraTooltip,
     this.attachmentsTooltip,
@@ -180,6 +186,8 @@ class ChatFooter extends StatefulWidget {
 
   final TextEditingController? controller;
   final ValueChanged<String>? onSend;
+  final ChatFooterReplyPreviewData? replyPreview;
+  final VoidCallback? onCancelReply;
   final VoidCallback? onVoicePressed;
   final VoidCallback? onCameraPressed;
   final VoidCallback? onMoreAttachmentsPressed;
@@ -189,6 +197,7 @@ class ChatFooter extends StatefulWidget {
   final bool applyBottomSafeArea;
   final bool initialAttachmentMenuOpen;
   final String? sendTooltip;
+  final String? cancelReplyTooltip;
   final String? voiceTooltip;
   final String? cameraTooltip;
   final String? attachmentsTooltip;
@@ -421,6 +430,14 @@ class _ChatFooterState extends State<ChatFooter> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (widget.replyPreview != null) ...[
+            ChatFooterReplyPreview(
+              data: widget.replyPreview!,
+              onCancelReply: widget.onCancelReply,
+              cancelTooltip: widget.cancelReplyTooltip,
+            ),
+            const SizedBox(height: _kReplyPreviewBottomSpacing),
+          ],
           _ComposerPill(
             footer: widget,
             theme: theme,
@@ -446,7 +463,19 @@ class _ChatFooterState extends State<ChatFooter> {
     );
 
     return DecoratedBox(
-      decoration: BoxDecoration(color: shell, boxShadow: shadows),
+      key: const ValueKey('chat-footer-surface'),
+      decoration: BoxDecoration(
+        color: shell,
+        border: Border(
+          top: BorderSide(
+            color: theme.brightness == Brightness.dark
+                ? Colors.white
+                : const Color(0xFFD1D1D6),
+            width: 0.5,
+          ),
+        ),
+        boxShadow: shadows,
+      ),
       child: Material(
         color: Colors.transparent,
         child: widget.applyBottomSafeArea
