@@ -60,7 +60,7 @@ void main() {
 
     final darkDivider = await topDivider(darkTheme);
     expect(darkDivider.width, 0.5);
-    expect(darkDivider.color, darkTheme.colorScheme.onSurface);
+    expect(darkDivider.color, Colors.white);
 
     final lightDivider = await topDivider(lightTheme);
     expect(lightDivider.width, 0.5);
