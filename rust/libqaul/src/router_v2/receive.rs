@@ -24,7 +24,7 @@ use crate::{
         metric::hop_cost,
         seq::{is_fresher_u32, Acceptance, SeqNum},
         table::{DelegatedUser, Node, RoutingEntry, TargetRef, User},
-        Result, RouterV2State, RoutingV2Error, Sphere,
+        Result, RouterV2State, RoutingV2Error,
     },
 };
 
@@ -545,7 +545,7 @@ impl RouterV2State {
         &self,
         mut msg: NodeManifest,
         now: u64,
-        transport: ConnectionModule,
+        _transport: ConnectionModule,
     ) -> Result<()> {
         let origin_node_id = msg.origin_node_id;
 
@@ -631,10 +631,6 @@ impl RouterV2State {
             node.delegated_users = delegated_users;
         }
 
-        self.manifest_relay_queue.write().unwrap().insert(
-            origin_node_id,
-            (completed_manifest.chunks, Sphere::of(transport)),
-        );
 
         Ok(())
     }

@@ -21,7 +21,7 @@ use tokio::sync::mpsc;
 use crate::{
     connections::ConnectionModule,
     router_v2::{
-        codec::{messages::NodeManifest, CodecError},
+        codec::CodecError,
         identity::Multikey,
         index::{
             IndexAllocator, IndexDictionary, MirrorIndexDictionary, ReintroductionTracker, Space,
@@ -146,8 +146,6 @@ pub struct RouterV2State {
     pub manifest: RwLock<Manifest>,
     /// chunk assembler
     pub chunk_assembler: RwLock<ChunkAssembler>,
-    /// Manifests accepted at receive time, pending relay to other neighbours.
-    pub manifest_relay_queue: RwLock<HashMap<[u8; 8], (Vec<NodeManifest>, Sphere)>>,
     pub host_keypair: Keypair,
     pub host_mk: Multikey,
     pub last_manifest_emission_ms: RwLock<u64>,
@@ -176,10 +174,9 @@ impl RouterV2State {
             relay_queue: RwLock::new(HashSet::new()),
             manifest: RwLock::new(Manifest::new()),
             chunk_assembler: RwLock::new(ChunkAssembler::new()),
-            manifest_relay_queue: RwLock::new(HashMap::new()),
             host_keypair,
             host_mk: host_multikey,
-            last_manifest_emission_ms: RwLock::new(0u64)
+            last_manifest_emission_ms: RwLock::new(0u64),
         };
         (state, rx)
     }
