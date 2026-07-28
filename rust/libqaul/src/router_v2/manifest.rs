@@ -3,7 +3,10 @@
 
 //! Nodes manifest handling
 
-use std::{collections::HashMap, ops::Range};
+use std::{
+    collections::{BTreeMap, HashMap},
+    ops::Range,
+};
 
 use libp2p::identity::Keypair;
 use tracing::debug;
@@ -11,6 +14,7 @@ use tracing::debug;
 use crate::router_v2::{
     codec::messages::{ManifestEntry, NodeManifest},
     identity::{delegation_signing_input, ChunkSigningCtx, Multikey},
+    seq::is_fresher_u32,
 };
 
 const ENTRY_BYTES: usize = 84;
@@ -31,11 +35,151 @@ pub enum VerifyError {
     SignatureInvalid,
 }
 
-/// Per-origin delta log for serving ranged MANIFEST_DELTAs.
-/// TODO(Phase 10b): implement records: BTreeMap<[u8; 8], LogRecord>,
-/// log_base: u32, insert_add/insert_remove/records_after/set_log_base/compact.
-#[derive(Debug, Default)]
-pub struct ManifestLog;
+/// Records the most-recent transition per delegated user. Serving a
+/// ranged MANIFEST_DELTA is exactly `records_after(from_version)`.
+#[derive(Debug, Clone)]
+pub enum LogRecord {
+    Add {
+        record_version: u32,
+        entry: ManifestEntry,
+    },
+    Tombstone {
+        user_id: [u8; 8],
+        record_version: u32,
+        created_ms: u64,
+    },
+}
+
+impl LogRecord {
+    pub fn record_version(&self) -> u32 {
+        match self {
+            LogRecord::Add { record_version, .. } => *record_version,
+            LogRecord::Tombstone { record_version, .. } => *record_version,
+        }
+    }
+
+    pub fn user_id(&self) -> [u8; 8] {
+        match self {
+            LogRecord::Add { entry, .. } => entry.user_id,
+            LogRecord::Tombstone { user_id, .. } => *user_id,
+        }
+    }
+}
+
+/// Per-origin delta log. One instance per Node record for
+/// foreign manifests; one on the host's own Manifest for our origin.
+#[derive(Debug, Default, Clone)]
+pub struct ManifestLog {
+    /// Oldest servable version.
+    pub log_base: u32,
+    /// Keyed by user_id. we're storing at most one record per user.
+    records: BTreeMap<[u8; 8], LogRecord>,
+}
+
+impl ManifestLog {
+    /// simply upsert instead of replace
+    pub fn insert_add(&mut self, record_version: u32, entry: ManifestEntry) {
+        self.records.insert(
+            entry.user_id,
+            LogRecord::Add {
+                record_version,
+                entry,
+            },
+        );
+    }
+
+    /// instead of removing, we'll replace any prior Add for the same user that has a Tombstone.
+    /// if the tombstone exists, just refresh the version+timestamp so we can track the latest event.
+    pub fn insert_remove(&mut self, user_id: [u8; 8], record_version: u32, now_ms: u64) {
+        self.records.insert(
+            user_id,
+            LogRecord::Tombstone {
+                user_id,
+                record_version,
+                created_ms: now_ms,
+            },
+        );
+    }
+
+    /// get the records where record_version > from_version.
+    /// in ascending order of of record_version
+    pub fn records_after(&self, from_version: u32) -> Vec<LogRecord> {
+        let mut recs: Vec<LogRecord> = self
+            .records
+            .values()
+            .filter(|r| is_fresher_u32(r.record_version(), from_version))
+            .cloned()
+            .collect();
+        recs.sort_by_key(|r| r.record_version());
+        recs
+    }
+
+    /// sets the oldest observable version and drops records below or equal to it.
+    pub fn set_log_base(&mut self, v: u32) {
+        self.log_base = v;
+        self.records
+            .retain(|_, r| is_fresher_u32(r.record_version(), v));
+    }
+
+    /// this fn is governed by section 10.9 in the spec
+    pub fn compact(&mut self, now_ms: u64, tombstone_ttl_ms: u64, cap: usize) {
+        // first: make old tobstomes expired
+        let ttl_cutoff = now_ms.saturating_sub(tombstone_ttl_ms);
+        let expired: Vec<[u8; 8]> = self
+            .records
+            .iter()
+            .filter_map(|(id, r)| match r {
+                LogRecord::Tombstone { created_ms, .. } if *created_ms <= ttl_cutoff => Some(*id),
+                _ => None,
+            })
+            .collect();
+
+        let mut max_discarded_version = 0u32;
+        let mut has_discarded = false;
+        for uid in expired {
+            if let Some(r) = self.records.remove(&uid) {
+                if !has_discarded || is_fresher_u32(r.record_version(), max_discarded_version) {
+                    max_discarded_version = r.record_version();
+                }
+                has_discarded = true;
+            }
+        }
+
+        if self.records.len() > cap {
+            let excess = self.records.len() - cap;
+            let mut by_version: Vec<([u8; 8], u32)> = self
+                .records
+                .iter()
+                .map(|(uid, r)| (*uid, r.record_version()))
+                .collect();
+            by_version.sort_by_key(|(_, v)| *v);
+            for (uid, v) in by_version.into_iter().take(excess) {
+                self.records.remove(&uid);
+                if !has_discarded || is_fresher_u32(v, max_discarded_version) {
+                    max_discarded_version = v;
+                }
+                has_discarded = true;
+            }
+        }
+
+        if has_discarded && is_fresher_u32(max_discarded_version, self.log_base) {
+            self.log_base = max_discarded_version;
+        }
+    }
+
+    pub fn reset_to(&mut self, version: u32) {
+        self.records.clear();
+        self.log_base = version;
+    }
+
+    pub fn len(&self) -> usize {
+        self.records.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.records.is_empty()
+    }
+}
 
 // DelegatedEntry is for the host-side manifest while ManifestEntry
 // is for the wire codec. Since they have the same fields, we cna repurpose
@@ -671,5 +815,263 @@ mod tests {
             .expect("completes");
         assert_eq!(completed.entries.len(), 1);
         assert_eq!(completed.entries[0].user_id, [7; 8]);
+    }
+
+    // ---------- ManifestLog (Phase 10b subtask 1) ----------
+
+    fn entry_at(user_id_byte: u8, timeout: u64) -> ManifestEntry {
+        ManifestEntry {
+            user_id: [user_id_byte; 8],
+            timeout,
+            entry_signature: [0; 64],
+            profile_version: 0,
+        }
+    }
+
+    /// `insert_add` upserts by user_id — later add replaces earlier.
+    #[test]
+    fn insert_add_replaces_prior_add_for_same_user() {
+        let mut log = ManifestLog::default();
+        log.insert_add(1, entry_at(7, 100));
+        log.insert_add(5, entry_at(7, 999));
+        assert_eq!(log.len(), 1);
+        let recs = log.records_after(0);
+        match &recs[0] {
+            LogRecord::Add { record_version, entry } => {
+                assert_eq!(*record_version, 5);
+                assert_eq!(entry.timeout, 999);
+            }
+            other => panic!("expected Add, got {other:?}"),
+        }
+    }
+
+    /// `insert_add` after a tombstone for the same user erases the
+    /// tombstone (re-add collapses history to just the Add).
+    #[test]
+    fn insert_add_replaces_prior_tombstone_for_same_user() {
+        let mut log = ManifestLog::default();
+        log.insert_remove([7; 8], 3, 0);
+        log.insert_add(5, entry_at(7, 42));
+        assert_eq!(log.len(), 1);
+        let recs = log.records_after(0);
+        assert!(matches!(recs[0], LogRecord::Add { record_version: 5, .. }));
+    }
+
+    /// `insert_remove` after an Add collapses to a Tombstone at the
+    /// remove's version — the earlier Add is gone.
+    #[test]
+    fn insert_remove_collapses_prior_add() {
+        let mut log = ManifestLog::default();
+        log.insert_add(2, entry_at(9, 100));
+        log.insert_remove([9; 8], 4, 12_345);
+        assert_eq!(log.len(), 1);
+        let recs = log.records_after(0);
+        match &recs[0] {
+            LogRecord::Tombstone { record_version, created_ms, user_id } => {
+                assert_eq!(*record_version, 4);
+                assert_eq!(*created_ms, 12_345);
+                assert_eq!(*user_id, [9; 8]);
+            }
+            other => panic!("expected Tombstone, got {other:?}"),
+        }
+    }
+
+    /// A second `insert_remove` for the same user refreshes version +
+    /// timestamp so retention age tracks the latest event.
+    #[test]
+    fn insert_remove_refreshes_existing_tombstone() {
+        let mut log = ManifestLog::default();
+        log.insert_remove([1; 8], 3, 100);
+        log.insert_remove([1; 8], 8, 500);
+        let recs = log.records_after(0);
+        assert_eq!(recs.len(), 1);
+        match &recs[0] {
+            LogRecord::Tombstone { record_version, created_ms, .. } => {
+                assert_eq!(*record_version, 8);
+                assert_eq!(*created_ms, 500);
+            }
+            other => panic!("expected Tombstone, got {other:?}"),
+        }
+    }
+
+    /// `records_after(v)` is a strict-greater filter — records at
+    /// exactly `v` are NOT included (the caller already holds V, so
+    /// records AT V shouldn't ride the delta).
+    #[test]
+    fn records_after_excludes_boundary_record() {
+        let mut log = ManifestLog::default();
+        log.insert_add(5, entry_at(1, 0));
+        log.insert_add(6, entry_at(2, 0));
+        let out = log.records_after(5);
+        assert_eq!(out.len(), 1);
+        assert_eq!(out[0].user_id(), [2; 8]);
+    }
+
+    /// `records_after` returns records sorted ascending by
+    /// `record_version` — this is the wire order the receiver applies
+    /// against their scratch set (§8.6).
+    #[test]
+    fn records_after_returns_sorted_by_record_version() {
+        let mut log = ManifestLog::default();
+        // Insert out of version order (by different user_ids so nothing collapses).
+        log.insert_add(10, entry_at(3, 0));
+        log.insert_add(2, entry_at(1, 0));
+        log.insert_add(7, entry_at(2, 0));
+        let out = log.records_after(0);
+        let versions: Vec<u32> = out.iter().map(|r| r.record_version()).collect();
+        assert_eq!(versions, vec![2, 7, 10]);
+    }
+
+    /// Empty log → empty vec. Records-below-`from_version` → empty vec.
+    #[test]
+    fn records_after_empty_and_all_below() {
+        let mut log = ManifestLog::default();
+        assert!(log.records_after(0).is_empty());
+
+        log.insert_add(3, entry_at(1, 0));
+        log.insert_add(5, entry_at(2, 0));
+        assert!(log.records_after(100).is_empty(), "all records below from_version");
+    }
+
+    /// Under circular arithmetic, `is_fresher_u32(new, old)` treats
+    /// wrap correctly (§6.2 scaled to 32 bits). A record at version 1
+    /// IS fresher than a from_version of u32::MAX (wrap gives distance 2).
+    #[test]
+    fn records_after_handles_wrap_around_versions() {
+        let mut log = ManifestLog::default();
+        log.insert_add(1, entry_at(9, 0));
+        let out = log.records_after(u32::MAX);
+        assert_eq!(out.len(), 1);
+        assert_eq!(out[0].record_version(), 1);
+    }
+
+    /// `set_log_base(v)` drops records at or below v (strict-greater
+    /// retention) and sets `log_base` for serve-side "old requester →
+    /// full manifest" fallback.
+    #[test]
+    fn set_log_base_drops_at_or_below_and_sets_field() {
+        let mut log = ManifestLog::default();
+        log.insert_add(1, entry_at(1, 0));
+        log.insert_add(2, entry_at(2, 0));
+        log.insert_add(3, entry_at(3, 0));
+        log.insert_add(4, entry_at(4, 0));
+
+        log.set_log_base(2);
+
+        assert_eq!(log.log_base, 2);
+        let out = log.records_after(0);
+        let versions: Vec<u32> = out.iter().map(|r| r.record_version()).collect();
+        assert_eq!(versions, vec![3, 4], "records at or below log_base must be gone");
+    }
+
+    /// `compact` drops tombstones older than TTL, leaves adds alone
+    /// (adds have their own expiry via `entry.timeout`), and advances
+    /// `log_base` past the highest discarded version.
+    #[test]
+    fn compact_drops_expired_tombstones_and_advances_log_base() {
+        let mut log = ManifestLog::default();
+        log.insert_add(1, entry_at(1, 0));       // add — untouched by TTL
+        log.insert_remove([2; 8], 3, 100);       // old tombstone
+        log.insert_remove([3; 8], 7, 5_000);     // fresh tombstone
+        log.insert_add(9, entry_at(4, 0));       // add — untouched
+
+        // now_ms=1_000, ttl=500 → cutoff=500 → tombstone at t=100 expires,
+        // tombstone at t=5_000 stays.
+        log.compact(1_000, 500, 100);
+
+        let versions: Vec<u32> = log.records_after(0).iter().map(|r| r.record_version()).collect();
+        assert_eq!(versions, vec![1, 7, 9], "one tombstone expired, adds untouched");
+        assert_eq!(log.log_base, 3, "log_base advances past highest discarded version");
+    }
+
+    /// `compact` enforces the cap by dropping lowest-version records.
+    /// Advances `log_base` to the highest dropped version so the serve
+    /// path knows to answer with a full manifest for old requesters.
+    #[test]
+    fn compact_cap_drops_lowest_versions_first() {
+        let mut log = ManifestLog::default();
+        log.insert_add(1, entry_at(1, 100));
+        log.insert_add(2, entry_at(2, 100));
+        log.insert_add(3, entry_at(3, 100));
+        log.insert_add(4, entry_at(4, 100));
+        log.insert_add(5, entry_at(5, 100));
+
+        // now_ms far in future, huge TTL → no tombstone expiry path
+        // triggers. Cap of 2 forces 3 drops.
+        log.compact(u64::MAX, u64::MAX, 2);
+
+        let versions: Vec<u32> = log.records_after(0).iter().map(|r| r.record_version()).collect();
+        assert_eq!(versions, vec![4, 5], "lowest 3 versions dropped");
+        assert_eq!(log.log_base, 3, "log_base advances to highest dropped (version 3)");
+    }
+
+    /// Both retention rules fire in one call — TTL first, cap second.
+    /// The cap operates on the post-TTL set, so the numbers compose
+    /// deterministically.
+    #[test]
+    fn compact_ttl_then_cap_in_one_pass() {
+        let mut log = ManifestLog::default();
+        // Two old tombstones + three adds.
+        log.insert_remove([1; 8], 1, 0);
+        log.insert_remove([2; 8], 2, 0);
+        log.insert_add(3, entry_at(3, 0));
+        log.insert_add(4, entry_at(4, 0));
+        log.insert_add(5, entry_at(5, 0));
+
+        // TTL drops the two tombstones (versions 1, 2); cap=2 then
+        // drops the lowest add (version 3).
+        log.compact(10_000, 1_000, 2);
+
+        let versions: Vec<u32> = log.records_after(0).iter().map(|r| r.record_version()).collect();
+        assert_eq!(versions, vec![4, 5]);
+        assert_eq!(log.log_base, 3, "highest dropped version was 3");
+    }
+
+    /// `compact` with nothing to do → log unchanged, `log_base` unchanged.
+    #[test]
+    fn compact_noop_when_nothing_expires_or_overflows() {
+        let mut log = ManifestLog::default();
+        log.log_base = 42;
+        log.insert_add(50, entry_at(1, 0));
+        log.insert_add(60, entry_at(2, 0));
+
+        log.compact(u64::MAX, u64::MAX, 100); // huge TTL, huge cap
+
+        assert_eq!(log.log_base, 42, "log_base must not move when nothing dropped");
+        assert_eq!(log.len(), 2);
+    }
+
+    /// `reset_to(v)` clears every record and sets `log_base = v`.
+    /// Called from `handle_node_manifest` on full-commit per §10.9
+    /// "history before a full sync is unknown".
+    #[test]
+    fn reset_to_clears_records_and_sets_base() {
+        let mut log = ManifestLog::default();
+        log.insert_add(1, entry_at(1, 0));
+        log.insert_add(2, entry_at(2, 0));
+        log.insert_remove([3; 8], 3, 100);
+
+        log.reset_to(99);
+
+        assert_eq!(log.log_base, 99);
+        assert!(log.is_empty(), "reset must clear all records");
+        assert!(log.records_after(0).is_empty());
+    }
+
+    /// `LogRecord::user_id()` returns the right id regardless of variant.
+    #[test]
+    fn log_record_user_id_accessor() {
+        let add = LogRecord::Add {
+            record_version: 5,
+            entry: entry_at(7, 0),
+        };
+        assert_eq!(add.user_id(), [7; 8]);
+
+        let tombstone = LogRecord::Tombstone {
+            user_id: [9; 8],
+            record_version: 10,
+            created_ms: 0,
+        };
+        assert_eq!(tombstone.user_id(), [9; 8]);
     }
 }
