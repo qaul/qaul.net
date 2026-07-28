@@ -87,12 +87,12 @@ Every encrypted payload carries `session_id`, so receiver logic is straightforwa
 | Incoming `session_id` | Behaviour |
 |---|---|
 | matches `primary` | decrypt with primary, normal path. |
-| matches `draining` (and not yet expired) | decrypt with draining, normal out-of-order handling. Decrement `draining_remaining_volume`. |
-| matches `draining` (already expired) | drop, emit `MessageDroppedPastGrace`. |
-| matches `last_retired_session_id` | drop, emit `MessageDroppedPastGrace` — UI surfaces "message expired, ask sender to resend." |
+| matches `draining`, nonce ≤ declared final (`draining_recv_target`) | decrypt with draining, normal out-of-order handling; record the nonce in the drain bitmap. |
+| matches `draining`, nonce > declared final | **refuse** before decrypting, emit `MessageDroppedPostDrain`. The cut-over ACK fixed the last legitimate old-session nonce; a sender overrunning it is not accepted. While the final nonce is still unknown (ACK not yet received) nothing is refused. |
+| matches `last_retired_session_id` | drop, emit `MessageDroppedPostDrain` — UI surfaces "message expired, ask sender to resend." |
 | unknown, from a peer with an active session | treat as a fresh first-handshake attempt. |
 
-This keeps the UX clean for the common failure mode: a message sent under session N, crossed a rotation boundary, and arrived during N's grace window or shortly after.
+This is the *final-nonce boundary* from the 1st-July rotation spec: the in-flight tail up to the sender's declared final nonce stays deliverable across the rotation, but nothing above it is accepted, so a peer cannot keep the old session alive indefinitely by continuing to send on it.
 
 ## State
 
