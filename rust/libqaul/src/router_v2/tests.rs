@@ -962,7 +962,13 @@ mod apply_mapping {
         let nodes = state.nodes.read().unwrap();
         let node = nodes.get(&[2; 8]).unwrap();
         let n = node.read().unwrap();
-        assert_eq!(n.manifest_version, 99);
+        // Under the pull-based model (§10.8), a node mapping carries an
+        // *advertisement* of the origin's manifest_version, not the
+        // committed value. Stub nodes have manifest_version=0 (no
+        // committed manifest yet); the mapping's version writes to
+        // advertised_version and later drives the pull trigger.
+        assert_eq!(n.manifest_version, 0, "stub node has no committed manifest");
+        assert_eq!(n.advertised_version, 99, "mapping's version → advertised_version");
         assert!(!n.is_gateway, "stub node is not a gateway by default");
         assert!(n.public_key.is_none());
     }
@@ -1137,11 +1143,15 @@ mod apply_mapping {
         );
     }
 
+    /// A fresher advertised version updates Node.advertised_version
+    /// (the hint), not the committed manifest_version. The committed
+    /// value only advances when a verified manifest lands (§10.8).
     #[test]
-    fn apply_mapping_incoming_version_fresher_updates_node() {
+    fn apply_mapping_incoming_version_fresher_updates_advertised_only() {
         let (state, _rx) = fresh_state();
         let peer = add_neighbour(&state);
         let id = [6; 8];
+        // install_node sets manifest_version=5 (committed); advertised_version=0.
         install_node(&state, id, 5, false);
 
         state
@@ -1156,18 +1166,13 @@ mod apply_mapping {
             )
             .unwrap();
 
-        assert_eq!(
-            state
-                .nodes
-                .read()
-                .unwrap()
-                .get(&id)
-                .unwrap()
-                .read()
-                .unwrap()
-                .manifest_version,
-            12,
-        );
+        let nodes = state.nodes.read().unwrap();
+        let node = nodes.get(&id).unwrap();
+        let n = node.read().unwrap();
+        // Committed value stays at 5 — we haven't verified a manifest at 12.
+        assert_eq!(n.manifest_version, 5, "committed manifest_version must not change from a mapping");
+        // The hint updates so the pull trigger can compare.
+        assert_eq!(n.advertised_version, 12, "advertised_version records the incoming hint");
     }
 
     #[test]
@@ -3179,31 +3184,13 @@ mod handle_node_manifest {
     }
 
     // ---------- drop paths ----------
-
-    #[test]
-    fn unknown_neighbour_is_noop() {
-        let (state, mut _rx) = fresh_state();
-        let (host_kp, host_mk) = keypair_and_multikey();
-        let host_id = install_origin_node(&state, &host_mk);
-
-        let chunks = build_signed_manifest(&host_kp, &host_mk, 5, false, vec![]);
-        state
-            .handle_node_manifest(chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
-            .unwrap();
-
-        assert_eq!(
-            state
-                .nodes
-                .read()
-                .unwrap()
-                .get(&host_id)
-                .unwrap()
-                .read()
-                .unwrap()
-                .manifest_version,
-            0,
-        );
-    }
+    //
+    // Under the pull-based model (spec §8.5), NODE_MANIFEST is link-local
+    // and carries origin_node_id directly on the wire — `handle_node_manifest`
+    // takes no `neighbour` parameter. The old "unknown neighbour is noop"
+    // test is therefore obsolete; the equivalent drop path (origin_node_id
+    // maps to no Node record) is covered by `unknown_origin_node_id_is_noop`
+    // below.
 
     /// Under the pull-based model (spec §8.5), NODE_MANIFEST carries
     /// `origin_node_id` on the wire — no index translation via the
