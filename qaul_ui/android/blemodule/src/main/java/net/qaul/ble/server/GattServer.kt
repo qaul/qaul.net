@@ -207,6 +207,12 @@ object GattServer {
                     return
                 }
                 Log.i(TAG, "Client connected: ${device.address}")
+                if (!BleConstants.ENGINE_READY) {
+                    // Engine still staging, this handshake cant complete yet, easier to retyr than hold a dead slot until its reaped.
+                    Log.i(TAG, "Engine not ready — rejecting inbound ${device.address}")
+                    gattServer?.cancelConnection(device)
+                    return
+                }
                 // Only create a PERIPHERAL pool entry if we don't already have a CENTRAL
                 // connection to this device — if we do, the GattServer link is the second
                 // leg of a dual-role pair and the CENTRAL entry should stay.
@@ -311,6 +317,9 @@ object GattServer {
                 if (value.contentEquals(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)) {
                     subscribedDevices.add(device)
                     Log.i(TAG, "${device.address} enabled notifications")
+                    // Our notify path is only usable from here. Reflush in case a SEND_ID attempted
+                    // before this was setup ("no longer subscribed ... skipping")
+                    ConnectionPool.getByAddress(device.address)?.onRemoteSubscribed()
                 } else if (value.contentEquals(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE)) {
                     subscribedDevices.remove(device)
                     Log.i(TAG, "${device.address} disabled notifications")

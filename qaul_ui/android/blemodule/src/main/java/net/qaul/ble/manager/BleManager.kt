@@ -34,9 +34,10 @@ object BleManager : ConnectionEventListener {
         ConnectionPool.onNeighbourUp = { qaulId -> onNeighbourUp?.invoke(qaulId) }
         ConnectionPool.onNeighbourDown = { qaulId -> onNeighbourDown?.invoke(qaulId) }
         ConnectionPool.onMessageResult = { messageId, success -> onMessageResult?.invoke(messageId, success) }
-        ConnectionPool.start()
+        ConnectionPool.start(context)
         BleTaskScheduler.registerListener(this)
     }
+
     fun stop(){
         BleTaskScheduler.unregisterListener(this)
         ConnectionPool.onNeighbourUp = null

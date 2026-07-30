@@ -20,9 +20,14 @@ import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import android.widget.Toast
 import net.qaul.ble.BleConstants
 import net.qaul.ble.test.ble.advertiser.BleAdvertiser
 import net.qaul.ble.test.ble.connection.ConnectionPool
+import net.qaul.ble.test.ble.metrics.GpsProvider
+import net.qaul.ble.test.ble.metrics.SessionLogger
+import net.qaul.ble.test.ble.util.toHexString
+import net.qaul.ble.test.ble.util.toHexKey
 
 /**
  * Floating, draggable, collapsible debug overlay that shows live BLE stats (neighbours, radio state,
@@ -153,9 +158,28 @@ object BleDebugOverlay {
             setOnClickListener { onCodedToggle() }
         }
 
+        // Field-test recording controls: start a JSONL session (topology + GPS) and stop/export it.
+        fun testButton(label: String, bg: Long, onTap: () -> Unit) = TextView(app).apply {
+            text = label
+            setTextColor(Color.WHITE)
+            setBackgroundColor(bg.toInt())
+            setPadding(app.dp(12), app.dp(8), app.dp(12), app.dp(8))
+            textSize = 11f
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            setOnClickListener { onTap() }
+        }
+        val testControls = LinearLayout(app).apply {
+            orientation = LinearLayout.HORIZONTAL
+            addView(testButton("● Start test", 0xFF2E7D32) { startTestSession(app) })
+            addView(testButton("■ Stop & Export", 0xFFC62828) { stopTestSession(app) })
+        }
+
         panel = LinearLayout(app).apply {
             orientation = LinearLayout.VERTICAL
             addView(header)
+            addView(testControls)
             // Long-range is now automatic so the manual Coded on/off button is hidden. Uncomment below to bring it back for testing.
             // addView(codedButton)
             addView(scroll)
@@ -250,6 +274,24 @@ object BleDebugOverlay {
         } catch (e: Exception) {
             Log.e(TAG, "overlay update failed", e)
         }
+    }
+
+    /** Start a field-test recording: opens a fresh JSONL session file and begins GPS updates.
+     *  Topology snapshots + connect/disconnect events flow to it automatically from ConnectionPool. */
+    private fun startTestSession(ctx: Context) {
+        SessionLogger[ctx].startSession(BleConstants.LOCAL_QAUL_ID.toHexKey(), 0L)   // clean hex → correlates with Dart routing ids
+        GpsProvider.start(ctx)
+        Toast.makeText(ctx, "Test recording started", Toast.LENGTH_SHORT).show()
+        Log.i(TAG, "Test session started")
+    }
+
+    /** Stop the recording, flush/close the file, and show its path (pull via adb / file manager). */
+    private fun stopTestSession(ctx: Context) {
+        val path = SessionLogger[ctx].currentFilePath()
+        SessionLogger[ctx].close()
+        GpsProvider.stop()
+        Toast.makeText(ctx, "Saved: ${path ?: "(no active session)"}", Toast.LENGTH_LONG).show()
+        Log.i(TAG, "Test session stopped → $path")
     }
 
     /** Flip Coded PHY (long range) live and restart the advertiser so the new mode takes effect.
