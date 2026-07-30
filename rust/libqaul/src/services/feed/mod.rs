@@ -79,10 +79,14 @@ pub struct FeedState {
     _db: RwLock<sled::Db>,
 }
 
-
 impl FeedState {
     /// Create a FeedState from production sled database.
-    pub fn from_production(db: sled::Db, tree: sled::Tree, tree_ids: sled::Tree, last_message: u64) -> Self {
+    pub fn from_production(
+        db: sled::Db,
+        tree: sled::Tree,
+        tree_ids: sled::Tree,
+        last_message: u64,
+    ) -> Self {
         Self {
             inner: RwLock::new(Feed {
                 messages: BTreeMap::new(),
@@ -112,7 +116,13 @@ impl FeedState {
 
     /// Swap the temporary database with a production one and reload the trees.
     /// Called during `Feed::init()` after `QaulState` is available.
-    pub fn init_production(&self, db: sled::Db, tree: sled::Tree, tree_ids: sled::Tree, last_message: u64) {
+    pub fn init_production(
+        &self,
+        db: sled::Db,
+        tree: sled::Tree,
+        tree_ids: sled::Tree,
+        last_message: u64,
+    ) {
         {
             let mut feed = self.inner.write().unwrap();
             feed.tree = tree;
@@ -147,14 +157,20 @@ impl FeedState {
         };
 
         let message_data_bytes = bincode::serialize(&message_data).unwrap();
-        if let Err(e) = feed.tree.insert(&last_message.to_be_bytes(), message_data_bytes) {
+        if let Err(e) = feed
+            .tree
+            .insert(&last_message.to_be_bytes(), message_data_bytes)
+        {
             log::error!("Error saving feed message to data base: {}", e);
         } else if let Err(e) = feed.tree.flush() {
             log::error!("Error when flushing data base to disk: {}", e);
         }
 
         let last_message_bytes = bincode::serialize(&last_message).unwrap();
-        if let Err(e) = feed.tree_ids.insert(&message_data.message_id[..], last_message_bytes) {
+        if let Err(e) = feed
+            .tree_ids
+            .insert(&message_data.message_id[..], last_message_bytes)
+        {
             log::error!("Error saving feed id to data base: {}", e);
         } else if let Err(e) = feed.tree_ids.flush() {
             log::error!("Error when flushing data base to disk: {}", e);
@@ -164,7 +180,13 @@ impl FeedState {
     }
 
     /// Save a message received via sync. Returns early if it already exists.
-    pub fn save_message_by_sync(&self, message_id: &[u8], sender_id: &[u8], content: String, time: u64) {
+    pub fn save_message_by_sync(
+        &self,
+        message_id: &[u8],
+        sender_id: &[u8],
+        content: String,
+        time: u64,
+    ) {
         let mut feed = self.inner.write().unwrap();
         if let Some(_index) = feed.tree_ids.get(&message_id[..]).unwrap() {
             return;
@@ -190,7 +212,10 @@ impl FeedState {
         };
 
         let message_data_bytes = bincode::serialize(&message_data).unwrap();
-        if let Err(e) = feed.tree.insert(&last_message.to_be_bytes(), message_data_bytes) {
+        if let Err(e) = feed
+            .tree
+            .insert(&last_message.to_be_bytes(), message_data_bytes)
+        {
             log::error!("Error saving feed message to data base: {}", e);
         } else if let Err(e) = feed.tree.flush() {
             log::error!("Error when flushing data base to disk: {}", e);
@@ -210,7 +235,9 @@ impl FeedState {
     pub fn get_messages(&self, last_message: u64) -> proto::FeedMessageList {
         let feed = self.inner.read().unwrap();
         let mut feed_list = proto::FeedMessageList {
-            feed_message: Vec::with_capacity(feed.last_message.saturating_sub(last_message) as usize),
+            feed_message: Vec::with_capacity(
+                feed.last_message.saturating_sub(last_message) as usize
+            ),
             pagination: None,
         };
 
@@ -220,7 +247,8 @@ impl FeedState {
             for res in feed.tree.range(first_message_bytes.as_slice()..) {
                 match res {
                     Ok((_id, message_bytes)) => {
-                        let message: FeedMessageData = bincode::deserialize(&message_bytes).unwrap();
+                        let message: FeedMessageData =
+                            bincode::deserialize(&message_bytes).unwrap();
                         let sender_id_base58 = bs58::encode(&message.sender_id).into_string();
                         let time_sent = timestamp::Timestamp::create_time();
                         let time_rfc3339 = humantime::format_rfc3339(time_sent).to_string();
@@ -300,7 +328,12 @@ impl FeedState {
                 let index: u64 = bincode::deserialize(&index_bytes).unwrap();
                 if let Some(message_bytes) = feed.tree.get(index.to_be_bytes()).unwrap() {
                     let message: FeedMessageData = bincode::deserialize(&message_bytes).unwrap();
-                    res.push((id.clone(), message.sender_id.clone(), message.content.clone(), message.timestamp_sent));
+                    res.push((
+                        id.clone(),
+                        message.sender_id.clone(),
+                        message.content.clone(),
+                        message.timestamp_sent,
+                    ));
                 }
             }
         }
@@ -353,7 +386,10 @@ impl Feed {
         }
 
         // swap temporary DB with production DB in existing state
-        state.services.feed.init_production(db, tree, tree_ids, last_message);
+        state
+            .services
+            .feed
+            .init_production(db, tree, tree_ids, last_message);
     }
 
     /// Send message via all swarms
@@ -395,7 +431,10 @@ impl Feed {
             .expect("Vec<u8> provides capacity as needed");
 
         // save message in feed store
-        state.services.feed.save_message(container.signature.clone(), msg);
+        state
+            .services
+            .feed
+            .save_message(container.signature.clone(), msg);
 
         // flood via floodsub through the Transport trait so LAN, Internet,
         // and BLE all route through the same call.
@@ -453,7 +492,10 @@ impl Feed {
                         // check if message exists
                         if new_message {
                             // write message to store
-                            state.services.feed.save_message(feed_container.signature.clone(), feed_content);
+                            state
+                                .services
+                                .feed
+                                .save_message(feed_container.signature.clone(), feed_content);
 
                             // display message
                             log::trace!("message received:");
@@ -523,7 +565,10 @@ impl Feed {
                         // get feed messages from data base
                         // Pagination is optional: when limit is set to 0, we fallback to the previous index-based impl
                         let feed_list = if feed_request.limit > 0 {
-                            state.services.feed.get_paginated_messages(feed_request.offset, feed_request.limit)
+                            state
+                                .services
+                                .feed
+                                .get_paginated_messages(feed_request.offset, feed_request.limit)
                         } else {
                             state.services.feed.get_messages(feed_request.last_index)
                         };
@@ -557,7 +602,13 @@ impl Feed {
                             Ok(user_id_decoded) => {
                                 match UserAccounts::get_by_id(state, user_id_decoded) {
                                     Some(account) => {
-                                        Self::send(state, &account, send_feed.content, lan, internet);
+                                        Self::send(
+                                            state,
+                                            &account,
+                                            send_feed.content,
+                                            lan,
+                                            internet,
+                                        );
                                         (true, String::new())
                                     }
                                     None => {

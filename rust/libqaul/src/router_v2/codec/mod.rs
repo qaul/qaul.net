@@ -1,7 +1,7 @@
 // Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! Wire protocol message types. 
+//! Wire protocol message types.
 
 pub mod messages;
 pub mod utils;
@@ -17,7 +17,7 @@ pub enum RoutingMessage {
     IndexDump = 0x02,
     NodeManifest = 0x03,
     ManifestDelta = 0x04,
-    ManifestRequest = 0x05
+    ManifestRequest = 0x05,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -84,8 +84,8 @@ impl Header {
 
 #[cfg(test)]
 mod tests {
-    use crate::router_v2::codec::utils::*;
     use super::*;
+    use crate::router_v2::codec::utils::*;
 
     #[test]
     fn header_round_trips_for_each_message_type() {
@@ -94,7 +94,7 @@ mod tests {
             RoutingMessage::IndexDump,
             RoutingMessage::NodeManifest,
             RoutingMessage::ManifestDelta,
-            RoutingMessage::ManifestRequest
+            RoutingMessage::ManifestRequest,
         ];
 
         for ty in variants {

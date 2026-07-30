@@ -74,7 +74,10 @@ impl FileLogger {
     /// `log_config` is a shared handle obtained from
     /// `FileLoggerState::config_handle()` so that runtime enable/disable
     /// toggles are visible to the `log::Log` implementation.
-    pub fn new(logger: simplelog::WriteLogger<File>, log_config: Arc<RwLock<FileLoggerConfig>>) -> Self {
+    pub fn new(
+        logger: simplelog::WriteLogger<File>,
+        log_config: Arc<RwLock<FileLoggerConfig>>,
+    ) -> Self {
         FileLogger {
             logger,
             config: log_config,

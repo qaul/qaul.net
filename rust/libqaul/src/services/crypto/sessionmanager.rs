@@ -252,8 +252,12 @@ impl CryptoSessionManager {
             ChaCha20Poly1305,
             Sha256,
             &[u8],
-        >(Some(state), crypto_account.clone(), *sender_id, rotate_second)
-        {
+        >(
+            Some(state),
+            crypto_account.clone(),
+            *sender_id,
+            rotate_second,
+        ) {
             Some(rf) => rf,
             None => {
                 log::warn!(
