@@ -10,7 +10,7 @@
 //! and supports gateway-based delegation across network boundaries.
 
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{hash_map::Entry, HashMap, HashSet},
     sync::{Arc, RwLock},
     time::Instant,
 };
@@ -36,13 +36,13 @@ use crate::{
 pub mod codec;
 pub mod identity;
 pub mod index;
+pub mod init;
 pub mod manifest;
 pub mod metric;
 pub mod propagation;
 pub mod receive;
 pub mod seq;
 pub mod table;
-pub mod init;
 
 #[derive(Debug, thiserror::Error)]
 pub enum RoutingV2Error {
@@ -50,6 +50,7 @@ pub enum RoutingV2Error {
     CodecError(#[from] CodecError),
     UnknownMapping(u16),
     AllocatorExhausted,
+    PeerIdNotInlineKey(u64),
 }
 
 impl std::fmt::Display for RoutingV2Error {
@@ -62,6 +63,12 @@ impl std::fmt::Display for RoutingV2Error {
             }
             RoutingV2Error::AllocatorExhausted => {
                 write!(f, "internal allocator has been exhausted")
+            }
+            RoutingV2Error::PeerIdNotInlineKey(code) => {
+                write!(
+                    f,
+                    "peer id does not embed a public key (multihash code {code:#x})"
+                )
             }
         }
     }
@@ -157,10 +164,11 @@ impl RouterV2State {
         host_node_id: [u8; 8],
         host_keypair: Keypair,
         host_multikey: Multikey,
+        options: RoutingV2Options,
     ) -> (Self, mpsc::UnboundedReceiver<OutboundMsg>) {
         let (tx, rx) = mpsc::unbounded_channel::<OutboundMsg>();
         let state = Self {
-            options: RoutingV2Options::default(),
+            options,
             user_dict: RwLock::new(IndexDictionary::new(None)),
             node_dict: RwLock::new(IndexDictionary::new(Some(host_node_id))),
             mirrors: RwLock::new(HashMap::new()),
@@ -204,20 +212,22 @@ impl RouterV2State {
         );
     }
 
-    /// Spec 4.2
+    /// saves `transport` as a way to reach `peer`.
+    /// `true` when this transport was not already registered for peer
     pub fn add_neighbour_transport(
         &self,
         peer: PeerId,
         node_id: [u8; 8],
         transport: ConnectionModule,
-    ) {
+    ) -> bool {
         let mut mirrors = self.mirrors.write().unwrap();
-        mirrors
-            .entry(peer)
-            .and_modify(|info| {
-                info.transports.insert(transport);
-            })
-            .or_insert_with(|| NeighbourInfo::new(node_id, transport));
+        match mirrors.entry(peer) {
+            Entry::Occupied(mut existing) => existing.get_mut().transports.insert(transport),
+            Entry::Vacant(slot) => {
+                slot.insert(NeighbourInfo::new(node_id, transport));
+                true
+            }
+        }
     }
 
     pub fn remove_neighbour_transport(&self, peer: PeerId, transport: ConnectionModule) {

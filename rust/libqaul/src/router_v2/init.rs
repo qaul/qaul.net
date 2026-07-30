@@ -16,7 +16,7 @@ use crate::{
         propagation::{tick_origin, tick_relay},
         OutboundMsg, RouterV2State,
     },
-    storage::manifest_state::HostManifestState,
+    storage::{configuration::RoutingV2Options, manifest_state::HostManifestState},
 };
 
 pub struct RouterV2Handle {
@@ -24,14 +24,16 @@ pub struct RouterV2Handle {
     pub rx: UnboundedReceiver<OutboundMsg>,
 }
 
+/// Builds a live [`RouterV2State`] from the host's keypair.
 pub fn init_router_v2(
     host_keypair: Keypair,
-    host_multikey: Multikey,
     storage_path: &str,
+    options: RoutingV2Options,
 ) -> RouterV2Handle {
+    let host_multikey = Multikey::from(host_keypair.public());
     let host_node_id = host_multikey.to_id();
 
-    let (state, rx) = RouterV2State::new(host_node_id, host_keypair, host_multikey);
+    let (state, rx) = RouterV2State::new(host_node_id, host_keypair, host_multikey, options);
     let state = Arc::new(state);
 
     // Restore persisted host manifest (spec §10.8).

@@ -285,19 +285,23 @@ pub struct RoutingV2Options {
     /// version-bump policy, not manifest emissions — manifests are
     /// served on demand per §8.7 rather than pushed periodically.
     pub manifest_rate_limit: u64,
+    /// enable using the v2 router or stick to v1
+    #[serde(default)]
+    pub enabled: bool,
 }
 
 impl Default for RoutingV2Options {
     fn default() -> Self {
         RoutingV2Options {
-            origin_interval_time: 60,
+            origin_interval_time: 10,
             relay_interval: 1,
             route_expiry_ms: 35_000,
             idx_cooldown: 60,
             reboot_for_seq_num: 100,
             delegation_ttl: 21600,
             manifest_rate_limit: 60,
-            delegation_referesh: 800,
+            delegation_referesh: 10800,
+            enabled: false,
         }
     }
 }
@@ -399,6 +403,7 @@ pub struct Configuration {
     pub handshake_extras: HandshakeExtras,
     #[serde(default)]
     pub crypto_rotation: CryptoRotation,
+    #[serde(default)]
     pub v2_routing: RoutingV2Options,
 }
 
@@ -414,7 +419,7 @@ impl Default for Configuration {
             routing: RoutingOptions::default(),
             handshake_extras: HandshakeExtras::default(),
             crypto_rotation: CryptoRotation::default(),
-            v2_routing: RoutingV2Options::default()
+            v2_routing: RoutingV2Options::default(),
         }
     }
 }

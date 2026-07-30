@@ -135,7 +135,12 @@ mod next_hop {
         bind_own_dict(&state, Space::Node, 101, nbr_hi);
         bind_own_dict(&state, Space::Node, 102, nbr_lo);
 
-        let e_hi = make_entry(TargetRef::Node(g_hi.clone()), 101, 30, ConnectionModule::Lan);
+        let e_hi = make_entry(
+            TargetRef::Node(g_hi.clone()),
+            101,
+            30,
+            ConnectionModule::Lan,
+        );
         let e_lo = make_entry(
             TargetRef::Node(g_lo.clone()),
             102,
@@ -968,7 +973,10 @@ mod apply_mapping {
         // committed manifest yet); the mapping's version writes to
         // advertised_version and later drives the pull trigger.
         assert_eq!(n.manifest_version, 0, "stub node has no committed manifest");
-        assert_eq!(n.advertised_version, 99, "mapping's version → advertised_version");
+        assert_eq!(
+            n.advertised_version, 99,
+            "mapping's version → advertised_version"
+        );
         assert!(!n.is_gateway, "stub node is not a gateway by default");
         assert!(n.public_key.is_none());
     }
@@ -1170,9 +1178,15 @@ mod apply_mapping {
         let node = nodes.get(&id).unwrap();
         let n = node.read().unwrap();
         // Committed value stays at 5 — we haven't verified a manifest at 12.
-        assert_eq!(n.manifest_version, 5, "committed manifest_version must not change from a mapping");
+        assert_eq!(
+            n.manifest_version, 5,
+            "committed manifest_version must not change from a mapping"
+        );
         // The hint updates so the pull trigger can compare.
-        assert_eq!(n.advertised_version, 12, "advertised_version records the incoming hint");
+        assert_eq!(
+            n.advertised_version, 12,
+            "advertised_version records the incoming hint"
+        );
     }
 
     #[test]
@@ -1263,7 +1277,12 @@ mod apply_entry {
         state.add_neighbour_transport(peer, NEIGHBOUR_NODE_ID, ConnectionModule::Lan);
         bind_mirror(state, peer, Space::User, abs_idx, target_id);
         bind_own_dict(state, Space::User, own_idx, target_id);
-        bind_own_dict(state, Space::Node, NEIGHBOUR_IDX_IN_NODE_DICT, NEIGHBOUR_NODE_ID);
+        bind_own_dict(
+            state,
+            Space::Node,
+            NEIGHBOUR_IDX_IN_NODE_DICT,
+            NEIGHBOUR_NODE_ID,
+        );
         let user = install_user(state, target_id, 0);
         (peer, user)
     }
@@ -1278,7 +1297,12 @@ mod apply_entry {
         state.add_neighbour_transport(peer, NEIGHBOUR_NODE_ID, ConnectionModule::Lan);
         bind_mirror(state, peer, Space::Node, abs_idx, target_id);
         bind_own_dict(state, Space::Node, own_idx, target_id);
-        bind_own_dict(state, Space::Node, NEIGHBOUR_IDX_IN_NODE_DICT, NEIGHBOUR_NODE_ID);
+        bind_own_dict(
+            state,
+            Space::Node,
+            NEIGHBOUR_IDX_IN_NODE_DICT,
+            NEIGHBOUR_NODE_ID,
+        );
         let node = install_node(state, target_id, 0, false);
         (peer, node)
     }
@@ -1305,7 +1329,11 @@ mod apply_entry {
             hop_count: 0,
             local_only,
         }));
-        state.routing_table.write().unwrap().set(space, own_idx, entry);
+        state
+            .routing_table
+            .write()
+            .unwrap()
+            .set(space, own_idx, entry);
     }
 
     fn wire_user_entry(
@@ -1389,7 +1417,12 @@ mod apply_entry {
         let peer = fresh_peer();
         state.add_neighbour_transport(peer, NEIGHBOUR_NODE_ID, ConnectionModule::Lan);
         // Neighbour exists but has no mirror binding at abs_idx 5.
-        bind_own_dict(&state, Space::Node, NEIGHBOUR_IDX_IN_NODE_DICT, NEIGHBOUR_NODE_ID);
+        bind_own_dict(
+            &state,
+            Space::Node,
+            NEIGHBOUR_IDX_IN_NODE_DICT,
+            NEIGHBOUR_NODE_ID,
+        );
 
         state
             .apply_user_entry(
@@ -1419,7 +1452,12 @@ mod apply_entry {
         state.add_neighbour_transport(peer, NEIGHBOUR_NODE_ID, ConnectionModule::Lan);
         bind_mirror(&state, peer, Space::User, 5, target_id);
         bind_own_dict(&state, Space::User, 42, target_id);
-        bind_own_dict(&state, Space::Node, NEIGHBOUR_IDX_IN_NODE_DICT, NEIGHBOUR_NODE_ID);
+        bind_own_dict(
+            &state,
+            Space::Node,
+            NEIGHBOUR_IDX_IN_NODE_DICT,
+            NEIGHBOUR_NODE_ID,
+        );
         // NOTE: no install_user — the record is missing.
 
         state
@@ -1760,15 +1798,17 @@ mod apply_entry {
             )
             .unwrap();
 
-        assert!(!state
-            .routing_table
-            .read()
-            .unwrap()
-            .get(Space::User, 42)
-            .unwrap()
-            .read()
-            .unwrap()
-            .local_only);
+        assert!(
+            !state
+                .routing_table
+                .read()
+                .unwrap()
+                .get(Space::User, 42)
+                .unwrap()
+                .read()
+                .unwrap()
+                .local_only
+        );
     }
 
     /// Transitions to false: stored=true is overridden by incoming=false.
@@ -1786,15 +1826,17 @@ mod apply_entry {
             )
             .unwrap();
 
-        assert!(!state
-            .routing_table
-            .read()
-            .unwrap()
-            .get(Space::User, 42)
-            .unwrap()
-            .read()
-            .unwrap()
-            .local_only);
+        assert!(
+            !state
+                .routing_table
+                .read()
+                .unwrap()
+                .get(Space::User, 42)
+                .unwrap()
+                .read()
+                .unwrap()
+                .local_only
+        );
     }
 
     #[test]
@@ -1810,15 +1852,17 @@ mod apply_entry {
             )
             .unwrap();
 
-        assert!(state
-            .routing_table
-            .read()
-            .unwrap()
-            .get(Space::User, 42)
-            .unwrap()
-            .read()
-            .unwrap()
-            .local_only);
+        assert!(
+            state
+                .routing_table
+                .read()
+                .unwrap()
+                .get(Space::User, 42)
+                .unwrap()
+                .read()
+                .unwrap()
+                .local_only
+        );
     }
 }
 
@@ -1842,7 +1886,12 @@ mod handle_routing_update {
     fn setup_neighbour(state: &RouterV2State) -> PeerId {
         let peer = fresh_peer();
         state.add_neighbour_transport(peer, NEIGHBOUR_NODE_ID, ConnectionModule::Lan);
-        bind_own_dict(state, Space::Node, NEIGHBOUR_IDX_IN_NODE_DICT, NEIGHBOUR_NODE_ID);
+        bind_own_dict(
+            state,
+            Space::Node,
+            NEIGHBOUR_IDX_IN_NODE_DICT,
+            NEIGHBOUR_NODE_ID,
+        );
         peer
     }
 
@@ -1861,13 +1910,7 @@ mod handle_routing_update {
         let peer = setup_neighbour(&state);
 
         state
-            .handle_routing_update(
-                peer,
-                ConnectionModule::Lan,
-                None,
-                empty_update(),
-                1_000,
-            )
+            .handle_routing_update(peer, ConnectionModule::Lan, None, empty_update(), 1_000)
             .unwrap();
 
         assert_eq!(state.users.read().unwrap().len(), 0);
@@ -1914,10 +1957,7 @@ mod handle_routing_update {
 
         // Mirror binding from the mapping section.
         let mirrors = state.mirrors.read().unwrap();
-        assert_eq!(
-            mirrors.get(&peer).unwrap().users.id_of(5),
-            Some(target_id),
-        );
+        assert_eq!(mirrors.get(&peer).unwrap().users.id_of(5), Some(target_id),);
         drop(mirrors);
 
         // User stub created by the mapping section, with the carried version.
@@ -2272,7 +2312,12 @@ mod received {
     fn setup_neighbour(state: &RouterV2State) -> PeerId {
         let peer = fresh_peer();
         state.add_neighbour_transport(peer, NEIGHBOUR_NODE_ID, ConnectionModule::Lan);
-        bind_own_dict(state, Space::Node, NEIGHBOUR_IDX_IN_NODE_DICT, NEIGHBOUR_NODE_ID);
+        bind_own_dict(
+            state,
+            Space::Node,
+            NEIGHBOUR_IDX_IN_NODE_DICT,
+            NEIGHBOUR_NODE_ID,
+        );
         peer
     }
 
@@ -2514,6 +2559,145 @@ mod received {
     }
 }
 
+// ---------- neighbour transport registration (§4.2) ----------
+
+mod neighbour_transport {
+    use super::*;
+    use crate::router_v2::test_utils::*;
+
+    /// The first transport for an unknown peer is new: the mirror is created
+    /// and the caller is told to run bootstrap work.
+    #[test]
+    fn first_transport_for_new_peer_reports_new() {
+        let (state, _rx) = fresh_state();
+        let peer = fresh_peer();
+
+        assert!(
+            state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan),
+            "first registration must report the pair as newly reachable"
+        );
+
+        let mirrors = state.mirrors.read().unwrap();
+        let info = mirrors.get(&peer).expect("mirror created");
+        assert_eq!(info.node_id, [77; 8]);
+        assert!(info.transports.contains(&ConnectionModule::Lan));
+    }
+
+    /// Re-registering the same transport must report `false`. This is what
+    /// stops `on_neighbour_connect` re-sending a full INDEX_DUMP on every
+    /// ping, since ping_event fires continuously for a live neighbour.
+    #[test]
+    fn repeat_registration_of_same_transport_reports_not_new() {
+        let (state, _rx) = fresh_state();
+        let peer = fresh_peer();
+
+        assert!(state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan));
+
+        for _ in 0..5 {
+            assert!(
+                !state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan),
+                "repeat pings must not re-trigger bootstrap"
+            );
+        }
+
+        let mirrors = state.mirrors.read().unwrap();
+        assert_eq!(
+            mirrors.get(&peer).unwrap().transports.len(),
+            1,
+            "transport set must not grow on repeats"
+        );
+    }
+
+    /// A second, distinct transport to an already-known peer is also new —
+    /// §4.2 tracks reachability per (peer, transport) pair, and the new
+    /// transport needs its own INDEX_DUMP.
+    #[test]
+    fn second_distinct_transport_reports_new() {
+        let (state, _rx) = fresh_state();
+        let peer = fresh_peer();
+
+        assert!(state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan));
+        assert!(
+            state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Internet),
+            "a distinct transport to a known peer is newly reachable"
+        );
+
+        let mirrors = state.mirrors.read().unwrap();
+        let info = mirrors.get(&peer).unwrap();
+        assert_eq!(info.transports.len(), 2);
+        assert!(info.transports.contains(&ConnectionModule::Lan));
+        assert!(info.transports.contains(&ConnectionModule::Internet));
+    }
+
+    /// Distinct peers are tracked independently.
+    #[test]
+    fn distinct_peers_are_independent() {
+        let (state, _rx) = fresh_state();
+        let peer_a = fresh_peer();
+        let peer_b = fresh_peer();
+
+        assert!(state.add_neighbour_transport(peer_a, [10; 8], ConnectionModule::Lan));
+        assert!(
+            state.add_neighbour_transport(peer_b, [20; 8], ConnectionModule::Lan),
+            "a different peer on the same transport is still new"
+        );
+
+        let mirrors = state.mirrors.read().unwrap();
+        assert_eq!(mirrors.get(&peer_a).unwrap().node_id, [10; 8]);
+        assert_eq!(mirrors.get(&peer_b).unwrap().node_id, [20; 8]);
+    }
+
+    /// Dropping the last transport removes the mirror, so a later reconnect
+    /// reports `true` again and bootstrap re-runs. Without this the reconnect
+    /// path would silently stop sending INDEX_DUMP.
+    #[test]
+    fn reconnect_after_full_disconnect_reports_new_again() {
+        let (state, _rx) = fresh_state();
+        let peer = fresh_peer();
+
+        assert!(state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan));
+        state.remove_neighbour_transport(peer, ConnectionModule::Lan);
+        assert!(
+            state.mirrors.read().unwrap().get(&peer).is_none(),
+            "last transport removed → mirror dropped"
+        );
+
+        assert!(
+            state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan),
+            "reconnect must be reported as new so bootstrap re-runs"
+        );
+    }
+
+    /// Dropping one of two transports keeps the mirror alive, and re-adding
+    /// only that transport is new — the surviving one is not.
+    #[test]
+    fn partial_disconnect_keeps_mirror_and_other_transport() {
+        let (state, _rx) = fresh_state();
+        let peer = fresh_peer();
+
+        state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan);
+        state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Internet);
+
+        state.remove_neighbour_transport(peer, ConnectionModule::Lan);
+
+        {
+            let mirrors = state.mirrors.read().unwrap();
+            let info = mirrors.get(&peer).expect("mirror survives partial drop");
+            assert_eq!(info.transports.len(), 1);
+            assert!(info.transports.contains(&ConnectionModule::Internet));
+        }
+
+        assert!(
+            state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan),
+            "the dropped transport is new again"
+        );
+        assert!(
+            !state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Internet),
+            "the surviving transport is not new"
+        );
+    }
+}
+
 // ---------- propagation (Phase 8 checkpoint A) ----------
 
 mod propagation {
@@ -2608,7 +2792,12 @@ mod propagation {
     fn should_propagate_local_outgoing_blocks_internet_learned() {
         let (state, _rx) = fresh_state();
         let target = install_user(&state, [1; 8], 0);
-        let entry = make_entry(TargetRef::User(target), 0, ConnectionModule::Internet, false);
+        let entry = make_entry(
+            TargetRef::User(target),
+            0,
+            ConnectionModule::Internet,
+            false,
+        );
         assert!(!should_propagate(&entry, Sphere::Local));
     }
 
@@ -2634,7 +2823,12 @@ mod propagation {
     fn should_propagate_internet_outgoing_blocks_user_targets() {
         let (state, _rx) = fresh_state();
         let target = install_user(&state, [1; 8], 0);
-        let entry = make_entry(TargetRef::User(target), 0, ConnectionModule::Internet, false);
+        let entry = make_entry(
+            TargetRef::User(target),
+            0,
+            ConnectionModule::Internet,
+            false,
+        );
         assert!(!should_propagate(&entry, Sphere::Internet));
     }
 
@@ -2855,7 +3049,11 @@ mod relay {
             hop_count: 2,
             local_only,
         }));
-        state.routing_table.write().unwrap().set(space, own_idx, arc);
+        state
+            .routing_table
+            .write()
+            .unwrap()
+            .set(space, own_idx, arc);
         state.relay_queue.write().unwrap().insert((space, own_idx));
     }
 
@@ -3321,7 +3519,11 @@ mod relay {
             by_transport.insert(msg.transport, wire_local_only);
         }
         assert_eq!(by_transport.len(), 2, "one message per transport");
-        assert_eq!(by_transport[&ConnectionModule::Lan], true, "Local passes stored=true through");
+        assert_eq!(
+            by_transport[&ConnectionModule::Lan],
+            true,
+            "Local passes stored=true through"
+        );
         assert_eq!(
             by_transport[&ConnectionModule::Internet],
             false,
@@ -3358,7 +3560,12 @@ mod handle_node_manifest {
         let signing_input = delegation_signing_input(&host_mk.encode(), timeout);
         let sig_bytes = user_kp.sign(&signing_input).unwrap();
         let entry_signature: [u8; 64] = sig_bytes.try_into().unwrap();
-        ManifestEntry { user_id, timeout, entry_signature, profile_version: 0 }
+        ManifestEntry {
+            user_id,
+            timeout,
+            entry_signature,
+            profile_version: 0,
+        }
     }
 
     /// Install a Node with a specific public key so we can sign
@@ -3397,10 +3604,7 @@ mod handle_node_manifest {
     /// Wire a self-origin scenario: neighbour with origin's node_id,
     /// origin bound at reserved idx 0 in the neighbour's node mirror,
     /// origin's Node record installed with a real key.
-    fn setup_self_origin(
-        state: &RouterV2State,
-        host_mk: &Multikey,
-    ) -> (libp2p::PeerId, [u8; 8]) {
+    fn setup_self_origin(state: &RouterV2State, host_mk: &Multikey) -> (libp2p::PeerId, [u8; 8]) {
         let host_id = install_origin_node(state, host_mk);
         let peer = fresh_peer();
         state.add_neighbour_transport(peer, host_id, ConnectionModule::Lan);
@@ -3447,7 +3651,11 @@ mod handle_node_manifest {
         let chunks = build_signed_manifest(&host_kp, &host_mk, 5, true, entries);
 
         state
-            .handle_node_manifest(chunks.into_iter().next().unwrap(), 500, ConnectionModule::Lan)
+            .handle_node_manifest(
+                chunks.into_iter().next().unwrap(),
+                500,
+                ConnectionModule::Lan,
+            )
             .unwrap();
 
         let nodes = state.nodes.read().unwrap();
@@ -3571,7 +3779,9 @@ mod handle_node_manifest {
         let mut msg = chunks.into_iter().next().unwrap();
         msg.manifest_signature[0] ^= 0xFF;
 
-        state.handle_node_manifest(msg, 0, ConnectionModule::Lan).unwrap();
+        state
+            .handle_node_manifest(msg, 0, ConnectionModule::Lan)
+            .unwrap();
 
         assert_eq!(
             state
@@ -3606,13 +3816,8 @@ mod handle_node_manifest {
         let mut bad_entry = sign_entry(&bad_kp, &host_mk, bad_id, 1_000_000);
         bad_entry.entry_signature[0] ^= 0xFF;
 
-        let chunks = build_signed_manifest(
-            &host_kp,
-            &host_mk,
-            1,
-            false,
-            vec![good_entry, bad_entry],
-        );
+        let chunks =
+            build_signed_manifest(&host_kp, &host_mk, 1, false, vec![good_entry, bad_entry]);
         state
             .handle_node_manifest(chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
             .unwrap();
@@ -3637,7 +3842,11 @@ mod handle_node_manifest {
         let entries = vec![sign_entry(&user_kp, &host_mk, user_id, 500)];
         let chunks = build_signed_manifest(&host_kp, &host_mk, 1, false, entries);
         state
-            .handle_node_manifest(chunks.into_iter().next().unwrap(), 1_000, ConnectionModule::Lan)
+            .handle_node_manifest(
+                chunks.into_iter().next().unwrap(),
+                1_000,
+                ConnectionModule::Lan,
+            )
             .unwrap();
 
         assert_eq!(
@@ -3720,9 +3929,7 @@ mod handle_node_manifest {
 mod on_neighbour_connect {
     use super::*;
     use crate::router_v2::{
-        codec::{
-            messages::IndexDump, Header, RoutingMessage,
-        },
+        codec::{messages::IndexDump, Header, RoutingMessage},
         index::Space,
         propagation::on_neighbour_connect,
         test_utils::*,
@@ -3845,7 +4052,10 @@ mod on_neighbour_connect {
 
         on_neighbour_connect(&state, peer, ConnectionModule::BleCoded);
 
-        assert!(rx.try_recv().is_err(), "BLE-coded must not receive INDEX_DUMP");
+        assert!(
+            rx.try_recv().is_err(),
+            "BLE-coded must not receive INDEX_DUMP"
+        );
     }
 
     /// dict has an idx→id binding but no matching User record — the

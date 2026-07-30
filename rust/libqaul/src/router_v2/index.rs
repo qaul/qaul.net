@@ -198,7 +198,7 @@ impl ReintroductionTracker {
 
     // these three mark_* functions functionally serve the same purpose
     // but I separated them because these are the conditions that the spec
-    // states that a reintroduction of an index is needed. so that when it is 
+    // states that a reintroduction of an index is needed. so that when it is
     // seen in the code, an idea of ehat is happening can be had.
 
     pub fn mark_first_time(&mut self, space: Space, idx: u16) {
@@ -217,7 +217,7 @@ impl ReintroductionTracker {
     pub fn take_pending(&mut self, space: Space) -> HashSet<u16> {
         match space {
             Space::Node => std::mem::take(&mut self.node_pending),
-            Space::User => std::mem::take(&mut self.user_pending)
+            Space::User => std::mem::take(&mut self.user_pending),
         }
     }
 }

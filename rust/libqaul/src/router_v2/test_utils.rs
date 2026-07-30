@@ -12,6 +12,7 @@ use crate::{
         table::{Node, User},
         OutboundMsg, RouterV2State,
     },
+    storage::configuration::RoutingV2Options,
 };
 use libp2p::{identity::Keypair, PeerId};
 use std::sync::{Arc, RwLock};
@@ -20,10 +21,13 @@ pub fn fresh_multikey() -> Multikey {
     Multikey::from(Keypair::generate_ed25519().public())
 }
 
-pub fn fresh_state() -> (RouterV2State, tokio::sync::mpsc::UnboundedReceiver<OutboundMsg>) {
+pub fn fresh_state() -> (
+    RouterV2State,
+    tokio::sync::mpsc::UnboundedReceiver<OutboundMsg>,
+) {
     let host_kp = Keypair::generate_ed25519();
     let host_mk = Multikey::from(host_kp.public());
-    RouterV2State::new([0; 8], host_kp, host_mk)
+    RouterV2State::new([0; 8], host_kp, host_mk, RoutingV2Options::default())
 }
 
 pub fn fresh_peer() -> PeerId {
@@ -39,13 +43,7 @@ pub fn add_neighbour(state: &RouterV2State) -> PeerId {
 }
 
 /// Binds a neighbour's mirror-dictionary entry in the given space.
-pub fn bind_mirror(
-    state: &RouterV2State,
-    peer: PeerId,
-    space: Space,
-    idx: u16,
-    id: [u8; 8],
-) {
+pub fn bind_mirror(state: &RouterV2State, peer: PeerId, space: Space, idx: u16, id: [u8; 8]) {
     let mut mirrors = state.mirrors.write().unwrap();
     let nm = mirrors.get_mut(&peer).unwrap();
     match space {
@@ -64,11 +62,7 @@ pub fn bind_own_dict(state: &RouterV2State, space: Space, idx: u16, id: [u8; 8])
 
 /// Installs a User with a real key and the given profile_version;
 /// returns the live Arc so callers can downgrade / mutate it.
-pub fn install_user(
-    state: &RouterV2State,
-    id: [u8; 8],
-    profile_version: u32,
-) -> Arc<RwLock<User>> {
+pub fn install_user(state: &RouterV2State, id: [u8; 8], profile_version: u32) -> Arc<RwLock<User>> {
     let u = User {
         id,
         public_key: Some(fresh_multikey()),

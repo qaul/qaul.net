@@ -21,10 +21,10 @@ use std::sync::RwLock;
 /// Effectively unbounded (~100 years)
 const SESSION_TTL_SECS: u64 = 86400 * 365 * 100;
 
-/// Protobuf message definitions for authentication RPC
-pub use qaul_proto::qaul_rpc_authentication as proto;
 /// Shared RPC response / error types used by the generated service dispatch.
 use qaul_proto::qaul_common::{Ack, RpcError};
+/// Protobuf message definitions for authentication RPC
+pub use qaul_proto::qaul_rpc_authentication as proto;
 
 /// Active authentication challenge for a user
 #[allow(dead_code)]
@@ -103,7 +103,11 @@ impl Authentication {
     }
 
     /// Verify a challenge response from the client
-    pub fn verify_challenge(state: &crate::QaulState, user_id: PeerId, challenge_hash: Vec<u8>) -> Result<bool, String> {
+    pub fn verify_challenge(
+        state: &crate::QaulState,
+        user_id: PeerId,
+        challenge_hash: Vec<u8>,
+    ) -> Result<bool, String> {
         let now = Timestamp::get_timestamp();
         let user_id_bytes = user_id.to_bytes();
 

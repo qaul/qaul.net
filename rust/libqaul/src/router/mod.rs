@@ -134,7 +134,6 @@ pub struct Router {}
 impl Router {
     /// Initialize the qaul router
     pub fn init(qaul_state: &crate::QaulState) {
-
         // Initialize the RouterState and store it in QaulState.
         RouterState::init_into_qaul_state(qaul_state);
 
@@ -145,7 +144,6 @@ impl Router {
 
         // initialize users table (database-backed)
         Users::init_with_state(qaul_state, &rs);
-
     }
 
     /// Get router configuration from an explicit state reference
@@ -155,7 +153,12 @@ impl Router {
 
     /// Process incoming RPC request messages and send them to
     /// the submodules
-    pub fn rpc(state: &crate::QaulState, router_state: &RouterState, data: Vec<u8>, request_id: String) {
+    pub fn rpc(
+        state: &crate::QaulState,
+        router_state: &RouterState,
+        data: Vec<u8>,
+        request_id: String,
+    ) {
         match proto::Router::decode(&data[..]) {
             Ok(router) => {
                 match router.message {
