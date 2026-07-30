@@ -7,7 +7,10 @@ use prost::Message;
 pub struct RtcManaging {}
 impl RtcManaging {
     /// process session list from cli
-    pub fn session_list(state: &crate::QaulState, _my_user_id: &PeerId) -> super::proto_rpc::RtcSessionListResponse {
+    pub fn session_list(
+        state: &crate::QaulState,
+        _my_user_id: &PeerId,
+    ) -> super::proto_rpc::RtcSessionListResponse {
         let mut res = super::proto_rpc::RtcSessionListResponse { sessions: vec![] };
 
         let sessions = super::Rtc::rtc_state(state).sessions.read().unwrap();
@@ -62,7 +65,12 @@ impl RtcManaging {
                     return Err(format!("Error parsing PeerId from group_id: {}", e));
                 }
             };
-            super::Rtc::send_rtc_message_through_message(state, &user_account, receiver, &message_buff);
+            super::Rtc::send_rtc_message_through_message(
+                state,
+                &user_account,
+                receiver,
+                &message_buff,
+            );
         } else {
             return Err("user account has problem".to_string());
         }
@@ -98,7 +106,12 @@ impl RtcManaging {
                     return Err(format!("Error parsing PeerId from group_id: {}", e));
                 }
             };
-            super::Rtc::send_rtc_message_through_message(state, &user_account, receiver, &message_buff);
+            super::Rtc::send_rtc_message_through_message(
+                state,
+                &user_account,
+                receiver,
+                &message_buff,
+            );
         } else {
             return Err("user account has problem".to_string());
         }
@@ -133,9 +146,12 @@ impl RtcManaging {
                         return Err("unknown session management option".to_string());
                     }
                 }
-                if let Err(error) =
-                    Self::send_session_management(state, my_user_id, &session.group_id.clone(), req.option)
-                {
+                if let Err(error) = Self::send_session_management(
+                    state,
+                    my_user_id,
+                    &session.group_id.clone(),
+                    req.option,
+                ) {
                     return Err(error);
                 }
                 Ok(session.group_id.clone())

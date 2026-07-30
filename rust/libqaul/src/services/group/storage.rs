@@ -72,7 +72,9 @@ impl GroupSaveReason {
     fn triggers_reindex(self) -> bool {
         match self {
             // Searchable text (name / direct-chat partner) or recency changed.
-            GroupSaveReason::Created | GroupSaveReason::Renamed | GroupSaveReason::NewMessage => true,
+            GroupSaveReason::Created | GroupSaveReason::Renamed | GroupSaveReason::NewMessage => {
+                true
+            }
             // Neither the indexed text nor the recency key is affected.
             GroupSaveReason::UnreadCleared
             | GroupSaveReason::MembershipChanged
@@ -201,14 +203,16 @@ impl GroupStorage {
             Ok(tree) => tree,
             Err(e) => {
                 log::error!("failed to open groups tree: {}", e);
-                db.open_tree("__fallback_groups").expect("critical: cannot open fallback groups tree")
+                db.open_tree("__fallback_groups")
+                    .expect("critical: cannot open fallback groups tree")
             }
         };
         let invited: sled::Tree = match db.open_tree("invited") {
             Ok(tree) => tree,
             Err(e) => {
                 log::error!("failed to open invited tree: {}", e);
-                db.open_tree("__fallback_invited").expect("critical: cannot open fallback invited tree")
+                db.open_tree("__fallback_invited")
+                    .expect("critical: cannot open fallback invited tree")
             }
         };
 
@@ -261,7 +265,11 @@ impl GroupStorage {
     }
 
     /// get a group from data base
-    pub fn get_group(state: &crate::QaulState, account_id: PeerId, group_id: &[u8]) -> Option<Group> {
+    pub fn get_group(
+        state: &crate::QaulState,
+        account_id: PeerId,
+        group_id: &[u8],
+    ) -> Option<Group> {
         // get DB ref
         let db_ref = Self::get_db_ref(state, account_id);
 
@@ -338,7 +346,12 @@ impl GroupStorage {
     ///
     /// This function overwrites an already existing group entry or
     /// creates a new one. `reason` drives whether the search index is updated.
-    pub fn save_group(state: &crate::QaulState, account_id: PeerId, group: Group, reason: GroupSaveReason) {
+    pub fn save_group(
+        state: &crate::QaulState,
+        account_id: PeerId,
+        group: Group,
+        reason: GroupSaveReason,
+    ) {
         Self::save_group_with_mode(state, account_id, group, FlushMode::Immediate, reason);
     }
 
@@ -346,7 +359,12 @@ impl GroupStorage {
     ///
     /// Useful when batching several writes in one operation.
     #[allow(dead_code)]
-    pub fn save_group_deferred(state: &crate::QaulState, account_id: PeerId, group: Group, reason: GroupSaveReason) {
+    pub fn save_group_deferred(
+        state: &crate::QaulState,
+        account_id: PeerId,
+        group: Group,
+        reason: GroupSaveReason,
+    ) {
         Self::save_group_with_mode(state, account_id, group, FlushMode::Deferred, reason);
     }
 
@@ -447,7 +465,13 @@ impl GroupStorage {
             if sender_id != account_id {
                 group.unread_messages += 1;
             }
-            Self::save_group_with_mode(state, account_id, group, flush_mode, GroupSaveReason::NewMessage);
+            Self::save_group_with_mode(
+                state,
+                account_id,
+                group,
+                flush_mode,
+                GroupSaveReason::NewMessage,
+            );
         } else {
             log::error!("group_update_last_chat group not found");
         }
@@ -457,9 +481,15 @@ impl GroupStorage {
     pub fn group_clear_unread(state: &crate::QaulState, account_id: PeerId, group_id: Vec<u8>) {
         log::debug!("group_clear_unread");
 
-        if Self::with_group_mut(state, &account_id, &group_id, GroupSaveReason::UnreadCleared, |group| {
-            group.unread_messages = 0;
-        })
+        if Self::with_group_mut(
+            state,
+            &account_id,
+            &group_id,
+            GroupSaveReason::UnreadCleared,
+            |group| {
+                group.unread_messages = 0;
+            },
+        )
         .is_none()
         {
             log::error!("group_clear_unread group not found");
@@ -467,7 +497,11 @@ impl GroupStorage {
     }
 
     /// get invite
-    pub fn get_invite(state: &crate::QaulState, account_id: PeerId, group_id: &[u8]) -> Option<GroupInvited> {
+    pub fn get_invite(
+        state: &crate::QaulState,
+        account_id: PeerId,
+        group_id: &[u8],
+    ) -> Option<GroupInvited> {
         // get DB ref
         let db_ref = Self::get_db_ref(state, account_id);
 
@@ -500,11 +534,20 @@ impl GroupStorage {
 
     /// Save a group invite without flushing.
     #[allow(dead_code)]
-    pub fn save_invite_deferred(state: &crate::QaulState, account_id: PeerId, invite: GroupInvited) {
+    pub fn save_invite_deferred(
+        state: &crate::QaulState,
+        account_id: PeerId,
+        invite: GroupInvited,
+    ) {
         Self::save_invite_with_mode(state, account_id, invite, FlushMode::Deferred);
     }
 
-    fn save_invite_with_mode(state: &crate::QaulState, account_id: PeerId, invite: GroupInvited, flush_mode: FlushMode) {
+    fn save_invite_with_mode(
+        state: &crate::QaulState,
+        account_id: PeerId,
+        invite: GroupInvited,
+        flush_mode: FlushMode,
+    ) {
         // get DB ref
         let db_ref = Self::get_db_ref(state, account_id);
 
@@ -535,7 +578,12 @@ impl GroupStorage {
         Self::remove_invite_with_mode(state, account_id, group_id, FlushMode::Deferred);
     }
 
-    fn remove_invite_with_mode(state: &crate::QaulState, account_id: PeerId, group_id: &[u8], flush_mode: FlushMode) {
+    fn remove_invite_with_mode(
+        state: &crate::QaulState,
+        account_id: PeerId,
+        group_id: &[u8],
+        flush_mode: FlushMode,
+    ) {
         // get DB ref
         let db_ref = Self::get_db_ref(state, account_id);
 
