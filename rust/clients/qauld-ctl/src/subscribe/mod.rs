@@ -21,8 +21,7 @@ pub use qaul_proto::qaul_rpc_subscribe as proto_sub;
 
 /// Run the subscribe command: connect, send SubscribeRequest, print events.
 pub async fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
-    let transport =
-        qauld_rpc::SocketTransport::connect(&crate::connect_info(&cli)).await?;
+    let transport = qauld_rpc::SocketTransport::connect(&crate::connect_info(&cli)).await?;
     if cli.verbose {
         eprintln!("qauld-ctl subscribed via: {}", transport.addr);
     }
@@ -75,8 +74,7 @@ pub async fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
 pub(crate) async fn spawn_event_listener(
     cli: &Cli,
 ) -> Result<mpsc::UnboundedReceiver<String>, Box<dyn std::error::Error>> {
-    let transport =
-        qauld_rpc::SocketTransport::connect(&crate::connect_info(cli)).await?;
+    let transport = qauld_rpc::SocketTransport::connect(&crate::connect_info(cli)).await?;
     let mut framed = transport.into_framed();
 
     let request_id = Uuid::new_v4().to_string();
