@@ -10,6 +10,7 @@ import net.qaul.ble.BleConstants
 import net.qaul.ble.test.ble.l2cap.L2capChannel
 import net.qaul.ble.test.ble.metrics.BleMetrics
 import net.qaul.ble.test.ble.queue.BleTaskScheduler
+import net.qaul.ble.test.ble.queue.NeighbourUpdate
 import net.qaul.ble.test.ble.queue.OpLane
 import net.qaul.ble.test.ble.queue.ReceiveQueue
 import net.qaul.ble.test.ble.queue.SendQueue
@@ -29,6 +30,10 @@ class BleConnection(
      *  update completes. For the debug overlay so we can see which links are long-range Coded. */
     @Volatile var phyLabel: String = "?"
 
+    /** Live connection RSSI (dBm), refreshed periodically via readRemoteRssi. CENTRAL connections only can read
+     * Field-test telemetry. */
+    @Volatile var rssi: Int? = null
+
     val createdAt: Long = System.currentTimeMillis()
 
     /**
@@ -47,7 +52,7 @@ class BleConnection(
 
     /** Fired when the remote sends its neighbour list (SEND_NEIGHBOURS FLC). Each entry is a
      *  QAUL_ID_ADVERT_BYTES prefix. ConnectionPool uses it for 2 hop topology awareness. */
-    var onNeighboursReceived: ((device: BluetoothDevice, neighbours: List<ByteArray>) -> Unit)? = null
+    var onNeighboursReceived: ((device: BluetoothDevice, neighbourUpdate: NeighbourUpdate) -> Unit)? = null
 
     private val TAG = "BleConnection"
 
@@ -70,14 +75,16 @@ class BleConnection(
         when (role) {
             BleRole.CENTRAL -> {
                 BleTaskScheduler.connect(device, connectPhy)   // open on the discovered PHY (1M or Coded)
-                // Request a tighter connection interval for faster throughput
-                // no callback
-                BleTaskScheduler.requestConnectionPriority(device, BluetoothGatt.CONNECTION_PRIORITY_HIGH)
+                // Connection interval. High (7.5-15ms) on every link saturates the controller radio schedule once several links are up
+                // Balanced (~30-50ms) is the idle default, allows for at least 4 connections. We could raise to high while a bulk transfer is in flight.
+                BleTaskScheduler.requestConnectionPriority(device, BleConstants.IDLE_CONNECTION_PRIORITY)
+                // Order matters: the scheduler is serial, do identity first, so both ends
+                // resolve as early as possible, READ_CHAR gives us the peer's qaul ID, and notifications open the path the peer needs to receive ours.
                 BleTaskScheduler.discoverServices(device)
+                BleTaskScheduler.enableNotifications(device, BleConstants.MSG_CHAR)
                 BleTaskScheduler.readCharacteristic(device, BleConstants.READ_CHAR) // Gets qaul id
                 BleTaskScheduler.requestMtu(device, BleConstants.TARGET_MTU)
                 BleTaskScheduler.readCharacteristic(device, BleConstants.PSM_CHAR)  // Gets L2CAP PSM
-                BleTaskScheduler.enableNotifications(device, BleConstants.MSG_CHAR)
                 // Keep the connection on the PHY we opened it on. This is a request, the controller negotiates down if unsupported and
                 // onPhyUpdate logs what is actually agreed
                 if (connectPhy == BluetoothDevice.PHY_LE_CODED_MASK) {
@@ -267,8 +274,48 @@ class BleConnection(
      */
     fun onServicesDiscovered() {
         if (role == BleRole.CENTRAL) {
+            //a SEND_ID written before discovery finished fails with "characteristic not found" and is gone. Re-arm before flushing.
+            markTransportReady()
+            sendQueue.resendQaulId()
             flushSendQueue()
         }
+    }
+
+    /**
+     * True once this link can actually carry a SEND_ID: services discovered (CENTRAL) or the remote
+     * subscribed to MSG_CHAR (PERIPHERAL). Before that, sends are dropped by the transport, so
+     * [resendIdentity] waits.
+     */
+    @Volatile private var transportReady = false
+
+    /** When identity exchange became possible (services discovered, or the remote subscribed), or
+     *  null while the connect is still in flight. The unresolved reaper measures from here.*/
+    @Volatile var handshakeStartedAt: Long? = null
+        private set
+
+    private fun markTransportReady() {
+        transportReady = true
+        if (handshakeStartedAt == null) handshakeStartedAt = System.currentTimeMillis()
+    }
+
+    /**
+     * Re-send our qaul ID if this link still hasn't resolved the remote's. Retried periodically
+     * until resolved or the unresolved reaper drops the connection.
+     */
+    fun resendIdentity() {
+        if (!transportReady || remoteQaulId != null) return
+        sendQueue.resendQaulId()
+        flushSendQueue()
+    }
+
+    /**
+     * The remote enabled notifications on MSG_CHAR so our PERIPHERAL side notify path only
+     * becomes usable now. Re-flush so the identity exchange actually completes.
+     */
+    fun onRemoteSubscribed() {
+        markTransportReady()
+        sendQueue.resendQaulId()
+        flushSendQueue()
     }
 
     /**
@@ -298,8 +345,10 @@ class BleConnection(
    /**
     * send our current neighbour list to this peer (SEND_NEIGHBOURS FLC) for 2 hop awareness.
     */
-    fun sendNeighbourList(prefixes: List<ByteArray>) {
-        sendQueue.addFlcNeighbours(prefixes)
+    fun sendNeighbourList(originId: ByteArray,
+                          seq: Int,
+                          ttl: Int, sealed: Boolean, prefixes: List<ByteArray>) {
+        sendQueue.addFlcNeighbours(originId, seq, ttl, sealed, prefixes)
         flushSendQueue()
     }
 

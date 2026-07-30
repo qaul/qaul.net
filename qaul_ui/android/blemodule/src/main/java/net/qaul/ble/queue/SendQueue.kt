@@ -170,9 +170,17 @@ class SendQueue(qaulId: ByteArray) {
         }
         return largeMessageIndex
     }
+      /**
+     * Re-arm the SEND_ID so the next [getChunks] emits it again. [qaulIdSent] is set optimistically
+     * when the chunk is handed to the scheduler, so a chunk the transport then drops (peer not yet
+     * subscribed to notifications or packed lost) is never resent and the peer
+     * stays unresolved.
+     */
+    @Synchronized
+    fun resendQaulId() { qaulIdSent = false }
 
     /**
-     * Schedule a new message for sending and create the 
+     * Schedule a new message for sending and create the
      * message chunks.
      * @param message the message to send
      * @return a queue of message chunks
@@ -253,8 +261,10 @@ class SendQueue(qaulId: ByteArray) {
      * schedule a SEND_NEIGHBOURS message carrying our current neighbour prefixes.
      */
     @Synchronized
-    fun addFlcNeighbours(prefixes: List<ByteArray>) {
-        flcToSend.add(FlcCreate.createSendNeighbours(prefixes))
+    fun addFlcNeighbours(originId: ByteArray,
+                         seq: Int,
+                         ttl: Int, sealed: Boolean, prefixes: List<ByteArray>) {
+        flcToSend.add(FlcCreate.createSendNeighbours(originId, seq, ttl, sealed, prefixes))
     }
 
     /**
