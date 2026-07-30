@@ -1,0 +1,845 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>qaul mesh editor — 2-hop / fill-gate visualiser</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#ffffff; --ink:#1a1f27; --muted:#6b7480; --line:#d7dce3;
+    --node:#c9d2dd; --nodeStroke:#8a95a3;
+    --sel:#2d6cdf; --hop1:#2fa36b; --hop2:#e0a020; --merge:#b0562f; --other:#c9d2dd;
+    --edge:#9aa4b1; --bridge:#d64545; --thin:#7a3fd0;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#12151a; --panel:#1a1f27; --ink:#e6e9ee; --muted:#8b95a3; --line:#2a323d;
+      --node:#3a434f; --nodeStroke:#5c6775;
+      --sel:#5b8def; --hop1:#43c489; --hop2:#f0b846; --merge:#e07a4f; --other:#3a434f;
+      --edge:#5c6775; --bridge:#ef5a5a; --thin:#a06ff0;
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+  .wrap{display:flex;height:100vh;width:100vw}
+  canvas{flex:1;display:block;cursor:crosshair;touch-action:none}
+  .side{width:320px;min-width:320px;background:var(--panel);border-left:1px solid var(--line);
+        padding:14px 16px;overflow-y:auto;font-size:13px;line-height:1.5}
+  h1{font-size:14px;margin:0 0 4px}
+  .hint{color:var(--muted);font-size:12px;margin:0 0 12px}
+  .row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  button{font:inherit;font-size:12px;padding:5px 9px;border:1px solid var(--line);
+         background:transparent;color:var(--ink);border-radius:6px;cursor:pointer}
+  button:hover{border-color:var(--sel)}
+  .card{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:10px}
+  .card h2{font-size:12px;margin:0 0 6px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  .kv{display:flex;justify-content:space-between;gap:8px}
+  .kv b{font-variant-numeric:tabular-nums}
+  .pill{display:inline-block;padding:1px 7px;border-radius:20px;font-size:11px;font-weight:600}
+  .ok{background:color-mix(in srgb,var(--hop1) 22%,transparent);color:var(--hop1)}
+  .warn{background:color-mix(in srgb,var(--bridge) 20%,transparent);color:var(--bridge)}
+  .legend div{display:flex;align-items:center;gap:8px;margin:3px 0;font-size:12px}
+  .sw{width:22px;height:0;border-top-width:3px;border-top-style:solid;display:inline-block}
+  .dot{width:12px;height:12px;border-radius:50%;display:inline-block;border:1px solid var(--nodeStroke)}
+  .elist div{font-size:12px;padding:2px 0;border-bottom:1px dashed var(--line)}
+  .mut{color:var(--muted)}
+  label.cfg{display:flex;align-items:center;gap:6px;font-size:12px}
+  input[type=number]{width:52px;font:inherit;padding:2px 4px;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <canvas id="c"></canvas>
+  <div class="side">
+    <h1>Mesh editor</h1>
+    <p class="hint">
+      <b>Click empty</b> = add node · <b>Drag node</b> = move ·
+      <b>Shift-drag A→B</b> = toggle edge · <b>Click node</b> = inspect ·
+      <b>Double-click node</b> = delete
+    </p>
+
+    <div class="row">
+      <label class="cfg">CAP <input id="cap" type="number" min="1" max="8" value="3"></label>
+      <button id="clear">Clear</button>
+    </div>
+    <div class="row">
+      <button data-preset="k4">K4 island</button>
+      <button data-preset="barbell">Corridor</button>
+      <button data-preset="blob">Sealed blob</button>
+      <button data-preset="converge">Two clumps</button>
+    </div>
+
+    <div class="row">
+      <button data-preset="petersen">Petersen (10, optimal)</button>
+      <button id="randBtn">Random 3-reg</button>
+      <label class="cfg">n <input id="randN" type="number" min="4" max="200" value="20"></label>
+    </div>
+
+    <div class="row">
+      <button id="simReset">⟲ Sim reset</button>
+      <button id="simBack">◀ Back</button>
+      <button id="simAdd">+ Add node</button>
+      <button id="simS2">Run Stage 2</button>
+    </div>
+    <div class="row">
+      <label class="cfg"><input type="checkbox" id="s2" checked> auto Stage&nbsp;2</label>
+      <label class="cfg"><input type="checkbox" id="cont"> continuous scan</label>
+      <label class="cfg"><input type="checkbox" id="graphLayout" checked> spread layout</label>
+      <label class="cfg">reconnect cooldown <input id="cooldownTurns" type="number" min="0" value="3"> turns</label>
+      <label class="cfg">Election
+        <select id="elect">
+          <option value="1">1-hop</option>
+          <option value="2" selected>2-hop</option>
+          <option value="3">3-hop</option>
+        </select></label>
+      <label class="cfg">Drop
+        <select id="dropPol">
+          <option value="far">farthest</option>
+          <option value="redundant">most redundant</option>
+          <option value="degree">peer degree</option>
+        </select></label>
+      <label class="cfg">seed <input id="seed" type="number" min="1" value="1"></label>
+      <label class="cfg">range <input id="range" type="number" min="0" step="20" value="0"></label>
+      <label class="cfg">spawn
+        <select id="spawn">
+          <option value="tidy" selected>tidy</option>
+          <option value="scatter">scatter</option>
+          <option value="corridor">corridor</option>
+        </select></label>
+      <label class="cfg">Drop-safe
+        <select id="dropSafe">
+          <option value="triangle" selected>triangle (safe)</option>
+          <option value="linkstate">link-state (bisects)</option>
+          <option value="anyroute">≥1 backup route (permissive)</option>
+          <option value="edgeabsent">edge-absent (≤k, N routes)</option>
+        </select></label>
+      <label class="cfg">routes
+        <select id="eak"><option value="1">1</option><option value="2" selected>2</option></select></label>
+      <label class="cfg">stable steps <input id="stableSteps" type="number" min="0" value="0"> (0=off)</label>
+      <label class="cfg">Link-state k
+        <select id="lsK">
+          <option value="2">2 hops</option>
+          <option value="3" selected>3 hops</option>
+          <option value="4">4 hops</option>
+          <option value="5">5 hops</option>
+          <option value="99">full</option>
+        </select></label>
+      <label class="cfg">Seal scope
+        <select id="sealHops">
+          <option value="2">2 hops</option>
+          <option value="3" selected>3 hops</option>
+        </select></label>
+    </div>
+    <div class="card" id="capCard" style="display:none">
+      <h2>Decision log</h2>
+      <div id="simLog" class="elist" style="max-height:230px;overflow-y:auto"></div>
+    </div>
+
+    <div class="card" id="selCard">
+      <h2>Selected node</h2>
+      <div id="selBody" class="mut">Click a node to inspect its 2-hop neighbourhood.</div>
+    </div>
+
+    <div class="card">
+      <h2>Whole mesh</h2>
+      <div id="global"></div>
+    </div>
+
+    <div class="card legend">
+      <h2>Legend</h2>
+      <div><span class="dot" style="background:var(--sel)"></span> selected</div>
+      <div><span class="dot" style="background:var(--hop1)"></span> 1-hop neighbour</div>
+      <div><span class="dot" style="background:var(--hop2)"></span> 2-hop neighbour</div>
+      <div><span class="dot" style="background:var(--merge)"></span> beyond 2-hop → a link here is a <i>merge</i></div>
+      <div><span class="sw" style="border-top-color:var(--edge)"></span> redundant edge</div>
+      <div><span class="sw" style="border-top-color:var(--bridge)"></span> bridge (critical — never drop)</div>
+      <div><span class="sw" style="border-top-color:var(--thin);border-top-style:dashed"></span> safe-to-thin CANDIDATE (per Drop-safe rule) — most never drop</div>
+      <div><span class="sw" style="border-top-color:#ff8a1f"></span> will actually drop next Stage 2 round (sealed + elected)</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+let CAP = 3;
+let nodes = [];      // {id,x,y}
+let edges = new Set();// "a|b" with a<b
+let nextId = 0;
+let sel = null;      // selected node id
+let dragId = null, dragMoved = false, edgeFrom = null, down = null;
+
+const key = (a,b)=> a<b ? a+'|'+b : b+'|'+a;
+function resize(){ const r = cv.getBoundingClientRect(); cv.width = r.width*devicePixelRatio; cv.height = r.height*devicePixelRatio; ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); draw(); }
+addEventListener('resize', resize);
+
+/* ---------- graph helpers ---------- */
+function adj(){
+  const m = new Map(); nodes.forEach(n=>m.set(n.id,new Set()));
+  for(const e of edges){ const [a,b]=e.split('|').map(Number); m.get(a)?.add(b); m.get(b)?.add(a); }
+  return m;
+}
+const degree = (A,id)=> A.get(id)?.size||0;
+
+function hops(A, src, maxH){                 // returns Map id->hopdist (0..maxH)
+  const dist = new Map([[src,0]]); let frontier=[src];
+  for(let h=1;h<=maxH;h++){ const nx=[]; for(const u of frontier) for(const v of A.get(u)) if(!dist.has(v)){dist.set(v,h);nx.push(v);} frontier=nx; }
+  return dist;
+}
+function neighbourhoodOpenSlots(A, ids){
+  let s=0; for(const id of ids) s += (CAP - degree(A,id)); return s;
+}
+function common(A,a,b){ let c=0; for(const x of A.get(a)) if(A.get(b).has(x)) c++; return c; }
+
+function bridges(A){                          // Tarjan; returns Set of edge keys
+  const disc=new Map(), low=new Map(), br=new Set(); let t=0;
+  function dfs(u,parent){
+    disc.set(u,t); low.set(u,t); t++;
+    for(const v of A.get(u)){
+      if(!disc.has(v)){ dfs(v,u); low.set(u,Math.min(low.get(u),low.get(v)));
+        if(low.get(v)>disc.get(u)) br.add(key(u,v)); }
+      else if(v!==parent){ low.set(u,Math.min(low.get(u),disc.get(v))); }
+    }
+  }
+  for(const n of nodes) if(!disc.has(n.id)) dfs(n.id,-1);
+  return br;
+}
+/* ---- degree-diameter theory ----
+   Moore bound: with max degree d, within k hops you can reach at most
+   1 + d + d(d-1) + ... + d(d-1)^(k-1) nodes. For d=3 that is 3·2^k − 2.
+   The bound is almost never achieved; CUBIC_MAX holds the actual largest
+   cubic graphs per diameter (proven optimal for small k, best-known beyond). */
+const DEG_MAX={
+  3:{1:4,2:10,3:20,4:38,5:70,6:132,7:196,8:336,9:600,10:1250},
+  4:{1:5,2:15,3:41,4:98,5:364,6:740,7:1320,8:3243,9:7575,10:17703},
+  5:{1:6,2:24,3:72,4:212,5:624,6:2772,7:5516,8:17030,9:57840,10:187056}
+};
+function mooreBound(d,k){
+  if(d<=2) return 2*k+1;
+  return 1 + d*(Math.pow(d-1,k)-1)/(d-2);
+}
+function bestDiameter(n,cap){                 // fewest hops achievable for n nodes
+  if(n<=1) return 0;
+  const tbl=DEG_MAX[cap];
+  if(tbl){ for(let k=1;k<=10;k++) if(tbl[k]>=n) return {k,exact:true}; return {k:'>10',exact:true}; }
+  for(let k=1;k<=12;k++) if(mooreBound(cap,k)>=n) return {k,exact:false};
+  return {k:'?',exact:false};
+}
+function diameter(A){                          // longest shortest-path; Infinity if split
+  if(nodes.length<2) return 0;
+  let dia=0;
+  for(const n of nodes){
+    const dist=new Map([[n.id,0]]); let fr=[n.id], h=0;
+    while(fr.length){ h++; const nx=[];
+      for(const u of fr) for(const v of A.get(u)) if(!dist.has(v)){dist.set(v,h);nx.push(v);}
+      fr=nx; }
+    if(dist.size<nodes.length) return Infinity;
+    for(const v of dist.values()) if(v>dia) dia=v;
+  }
+  return dia;
+}
+function components(A){
+  const seen=new Set(); let c=0;
+  for(const n of nodes){ if(seen.has(n.id)) continue; c++; const st=[n.id]; seen.add(n.id);
+    while(st.length){ const u=st.pop(); for(const v of A.get(u)) if(!seen.has(v)){seen.add(v);st.push(v);} } }
+  return c;
+}
+// edge is "safe to thin" (Stage-2 proxy): not a bridge AND endpoints share >=2 neighbours
+// classify an edge for display using the SAME test Stage 2 uses at runtime:
+//   bridge    = a true global cut edge — never droppable
+//   thin      = Stage 2 would find it safely droppable (no new bridge in the
+//               dropper's LS_K link-state view; either endpoint's view counts)
+//   redundant = non-bridge but NOT safely droppable from either 3-hop view
+//               (e.g. a longer cycle straddles the horizon → looks unsafe)
+function edgeClass(A, br, dropSet, a, b){
+  if(br.has(key(a,b))) return 'bridge';
+  return dropSet.has(key(a,b)) ? 'thin' : 'redundant';
+}
+function stage2DropSet(A,br){
+  const s=new Set();
+  for(const n of nodes) for(const c of droppable(A,br,n.id)) s.add(key(n.id,c.p));
+  return s;
+}
+/* The edges Stage 2 would ACTUALLY drop on the next round: only in a SEALED (3-hop)
+   neighbourhood, only the ELECTED node (lowest id within ELECT hops), and only the one
+   edge its drop-policy picks. This is a strict subset of the dashed candidates — usually
+   just 1–2 edges — which is why most dashed lines never disappear. */
+function nextDropSet(A,br){
+  const elig=new Map();
+  for(const n of nodes){ if(neighbourhoodOpenSlots(A,sealBall(A,n.id))!==0) continue;
+    const d=droppable(A,br,n.id); if(d.length) elig.set(n.id,d); }
+  const set=new Set();
+  for(const [id,cands] of elig){ const c=[...hops(A,id,ELECT).keys()].filter(v=>elig.has(v));
+    let win=id; for(const v of c) if(prioOf(v)<prioOf(win)) win=v; if(win!==id) continue;
+    const cc=[...cands];
+    if(DROP_POL==='far')            cc.sort((x,y)=>dist2(id,y.p)-dist2(id,x.p));
+    else if(DROP_POL==='redundant') cc.sort((x,y)=>((x.after||2)-(y.after||2))||dist2(id,y.p)-dist2(id,x.p));
+    else                            cc.sort((x,y)=>degree(A,y.p)-degree(A,x.p));
+    set.add(key(id,cc[0].p));
+  }
+  return set;
+}
+
+/* ---------- hit testing ---------- */
+const R = 17;
+function nodeAt(x,y){ for(let i=nodes.length-1;i>=0;i--){ const n=nodes[i]; if((n.x-x)**2+(n.y-y)**2 <= (R+3)**2) return n; } return null; }
+function pos(ev){ const r=cv.getBoundingClientRect(); return {x:ev.clientX-r.left, y:ev.clientY-r.top}; }
+
+/* ---------- interaction ---------- */
+cv.addEventListener('mousedown', ev=>{
+  const p=pos(ev); const n=nodeAt(p.x,p.y); down=p; dragMoved=false;
+  if(n){ if(ev.shiftKey){ edgeFrom=n.id; } else { dragId=n.id; } }
+});
+cv.addEventListener('mousemove', ev=>{
+  const p=pos(ev);
+  if(dragId!=null){ const n=nodes.find(n=>n.id===dragId); n.x=p.x;n.y=p.y; dragMoved=true; draw(); }
+  else if(edgeFrom!=null){ draw(); const from=nodes.find(n=>n.id===edgeFrom);
+    ctx.strokeStyle=getCSS('--thin'); ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(from.x,from.y); ctx.lineTo(p.x,p.y); ctx.stroke(); ctx.setLineDash([]); }
+});
+cv.addEventListener('mouseup', ev=>{
+  const p=pos(ev); const n=nodeAt(p.x,p.y);
+  if(edgeFrom!=null){ if(n && n.id!==edgeFrom){ const k=key(edgeFrom,n.id); edges.has(k)?edges.delete(k):edges.add(k); } }
+  else if(dragId!=null){ if(!dragMoved){ sel = (sel===dragId? null : dragId); } }
+  else if(!n){ // click empty => add node
+    if(Math.hypot(p.x-down.x,p.y-down.y)<4){ nodes.push({id:nextId++,x:p.x,y:p.y}); }
+  }
+  dragId=null; edgeFrom=null; down=null; draw();
+});
+cv.addEventListener('dblclick', ev=>{
+  const p=pos(ev); const n=nodeAt(p.x,p.y); if(!n) return;
+  nodes=nodes.filter(m=>m.id!==n.id);
+  for(const e of [...edges]){ const [a,b]=e.split('|').map(Number); if(a===n.id||b===n.id) edges.delete(e); }
+  if(sel===n.id) sel=null; draw();
+});
+
+document.getElementById('clear').onclick=()=>{ nodes=[];edges.clear();sel=null;nextId=0;draw(); };
+document.getElementById('cap').oninput=e=>{ CAP=Math.max(1,+e.target.value||3); draw(); };
+document.querySelectorAll('[data-preset]').forEach(b=> b.onclick=()=>preset(b.dataset.preset));
+
+/* ---------- drawing ---------- */
+function getCSS(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function draw(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  const A=adj(); const br=bridges(A);
+  const dropSet=stage2DropSet(A,br);
+  const nextDrop=nextDropSet(A,br);
+  const dist = sel!=null ? hops(A, sel, 2) : null;
+
+  // edges
+  for(const e of edges){
+    const [a,b]=e.split('|').map(Number);
+    const na=nodes.find(n=>n.id===a), nb=nodes.find(n=>n.id===b); if(!na||!nb) continue;
+    const cls=edgeClass(A,br,dropSet,a,b);
+    const willDrop=nextDrop.has(e);
+    if(willDrop){                                   // Stage 2 drops THIS one next round
+      ctx.lineWidth=4; ctx.strokeStyle='#ff8a1f'; ctx.setLineDash([]);
+    } else {
+      ctx.lineWidth = cls==='bridge'?3.5:2.5;
+      ctx.strokeStyle = cls==='bridge'?getCSS('--bridge'): cls==='thin'?getCSS('--thin'):getCSS('--edge');
+      ctx.setLineDash(cls==='thin'?[6,5]:[]);
+    }
+    const inSel = sel!=null && (a===sel||b===sel);
+    ctx.globalAlpha = (sel!=null && !inSel && cls!=='bridge' && !willDrop)?0.4:1;
+    ctx.beginPath(); ctx.moveTo(na.x,na.y); ctx.lineTo(nb.x,nb.y); ctx.stroke();
+    ctx.globalAlpha=1; ctx.setLineDash([]);
+  }
+  // nodes
+  for(const n of nodes){
+    let fill=getCSS('--node'), stroke=getCSS('--nodeStroke'), lw=1.5;
+    if(sel!=null){
+      const d = dist.get(n.id);
+      if(n.id===sel){ fill=getCSS('--sel'); stroke=getCSS('--sel'); lw=2.5; }
+      else if(d===1){ fill=getCSS('--hop1'); }
+      else if(d===2){ fill=getCSS('--hop2'); }
+      else { fill=getCSS('--merge'); }   // beyond 2-hop (incl other components)
+    }
+    ctx.beginPath(); ctx.arc(n.x,n.y,R,0,7); ctx.fillStyle=fill; ctx.fill();
+    ctx.lineWidth=lw; ctx.strokeStyle=stroke; ctx.stroke();
+    // free-slot ring dots
+    const free=CAP-degree(A,n.id);
+    ctx.fillStyle=getCSS('--ink');
+    ctx.font='11px system-ui'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle = (sel!=null && (n.id===sel))?'#fff':getCSS('--ink');
+    ctx.fillText(n.id, n.x, n.y);
+    // small free-slot badge
+    ctx.fillStyle=free===0?getCSS('--bridge'):getCSS('--muted');
+    ctx.font='10px system-ui';
+    ctx.fillText('•'.repeat(Math.max(0,free))||'∅', n.x, n.y+R+9);
+  }
+  panel(A,br,dropSet,dist);
+}
+
+function esc(s){return String(s);}
+function panel(A,br,dropSet,dist){
+  // global
+  const g=document.getElementById('global');
+  let sealed=0; for(const n of nodes){ if(neighbourhoodOpenSlots(A,sealBall(A,n.id))===0) sealed++; }
+  const dia=diameter(A), best=bestDiameter(nodes.length,CAP);
+  const diaTxt = dia===Infinity ? '<span class="pill warn">split</span>' : dia;
+  const gap = (dia!==Infinity && typeof best.k==='number' && dia>best.k)
+      ? ` <span class="pill warn">+${dia-best.k}</span>` : (dia!==Infinity&&dia===best.k?' <span class="pill ok">optimal</span>':'');
+  g.innerHTML =
+    kv('Nodes', nodes.length)+kv('Edges', edges.size)+
+    kv('Components', components(A))+kv('Bridges', br.size)+
+    kv(`Sealed nbhds (${SEAL_HOPS}-hop)`, sealed + (sealed?' ⚠':''))+
+    kv('Diameter (max hops)', diaTxt+gap)+
+    kv(`Best possible @CAP ${CAP}`, best.k + (best.exact?'':'*'))+
+    `<div class="mut" style="font-size:11px;margin-top:6px">Moore ceiling: ${Math.floor(mooreBound(CAP,typeof best.k==='number'?best.k:3))} nodes at that diameter.
+     ${best.exact?'Cubic values are proven/best-known optima.':'* Moore floor only — real optima are usually worse.'}</div>`;
+
+  const sb=document.getElementById('selBody');
+  if(sel==null){ sb.className='mut'; sb.textContent='Click a node to inspect its 2-hop neighbourhood.'; return; }
+  sb.className='';
+  const A2=A;
+  const d1=[...dist].filter(([id,d])=>d===1).map(([id])=>id);
+  const d2=[...dist].filter(([id,d])=>d===2).map(([id])=>id);
+  const ids=[...dist.keys()];
+  const os=neighbourhoodOpenSlots(A2,ids);
+  const deg=degree(A2,sel), free=CAP-deg;
+  const mergeCount = nodes.length - dist.size;   // nodes not within 2 hops = merge candidates
+
+  let edgeRows='';
+  for(const v of A2.get(sel)){
+    const cls=edgeClass(A2,br,dropSet,sel,v);
+    const tag = cls==='bridge' ? '<span class="pill warn">bridge</span>'
+              : cls==='thin'   ? '<span class="pill ok">safe-to-thin</span>'
+              :                  '<span class="mut">redundant</span>';
+    edgeRows += `<div>${sel} — ${v} &nbsp; ${tag} <span class="mut">(${common(A2,sel,v)} shared)</span></div>`;
+  }
+
+  sb.innerHTML =
+    kv('Node', sel)+
+    kv('Degree', `${deg} / ${CAP}`)+
+    kv('Free slots', free)+
+    (()=>{ const osSeal=neighbourhoodOpenSlots(A2,sealBall(A2,sel));
+      return `<div class="kv"><span>${LS_K}-hop open slots</span><b>${osSeal} ${osSeal===0?'<span class="pill warn">SEALED</span>':'<span class="pill ok">open</span>'}</b></div>`
+        +`<div class="kv"><span class="mut">2-hop open slots</span><b class="mut">${os}</b></div>`; })()+
+    `<div style="margin:8px 0 4px" class="mut">1-hop (${d1.length}): ${d1.join(', ')||'—'}</div>`+
+    `<div class="mut">2-hop (${d2.length}): ${d2.join(', ')||'—'}</div>`+
+    `<div class="mut" style="margin-bottom:6px">merge candidates (beyond 2-hop): ${mergeCount}</div>`+
+    `<div class="mut" style="margin-top:8px;font-weight:600">incident edges</div><div class="elist">${edgeRows||'<div class="mut">none</div>'}</div>`;
+}
+function kv(k,v){ return `<div class="kv"><span>${k}</span><b>${v}</b></div>`; }
+
+/* ---------- presets ---------- */
+function preset(kind){
+  nodes=[];edges.clear();sel=null;nextId=0;
+  const cx=cv.getBoundingClientRect().width/2, cy=cv.getBoundingClientRect().height/2;
+  const add=(x,y)=>{const id=nextId++;nodes.push({id,x,y,prio:rng()});return id;};
+  const link=(a,b)=>edges.add(key(a,b));
+  const ring=(cxx,cyy,r,n)=>{const ids=[];for(let i=0;i<n;i++){const t=i/n*Math.PI*2;ids.push(add(cxx+r*Math.cos(t),cyy+r*Math.sin(t)));}return ids;};
+
+  if(kind==='k4'){                         // 4-clique island: sealed, no admission point
+    const q=ring(cx,cy,80,4); for(let i=0;i<4;i++)for(let j=i+1;j<4;j++)link(q[i],q[j]);
+  }
+  else if(kind==='barbell'){               // two dense clumps joined by a thin waist (corridor)
+    const L=ring(cx-180,cy,70,4), Rr=ring(cx+180,cy,70,4);
+    for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){if(!(i===0))link(L[i],L[j]);}
+    for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){if(!(i===0))link(Rr[i],Rr[j]);}
+    link(L[0],L[1]);link(L[0],L[2]);link(Rr[0],Rr[1]);link(Rr[0],Rr[2]);
+    link(L[0],Rr[0]);                      // single waist — a bridge
+  }
+  else if(kind==='blob'){                  // ~3-regular sealed blob (prism-ish), no open slots
+    const inner=ring(cx,cy,60,3), outer=ring(cx,cy,130,3);
+    for(let i=0;i<3;i++){link(inner[i],inner[(i+1)%3]);link(outer[i],outer[(i+1)%3]);link(inner[i],outer[i]);}
+  }
+  else if(kind==='petersen'){             // 10 nodes, cubic, diameter 2 — a Moore graph
+    const out=ring(cx,cy,170,5), inn=[];
+    for(let i=0;i<5;i++){const t=i/5*Math.PI*2; inn.push(add(cx+75*Math.cos(t),cy+75*Math.sin(t)));}
+    for(let i=0;i<5;i++){ link(out[i],out[(i+1)%5]);        // outer pentagon
+                          link(inn[i],inn[(i+2)%5]);        // inner pentagram
+                          link(out[i],inn[i]); }            // spokes
+  }
+  else if(kind==='converge'){              // two near-saturated triangles about to meet
+    const a=ring(cx-140,cy,60,3), b=ring(cx+140,cy,60,3);
+    for(let i=0;i<3;i++){link(a[i],a[(i+1)%3]);link(b[i],b[(i+1)%3]);}
+  }
+  relaxIf(); draw();
+}
+
+/* ---------- random d-regular (pairing model) ----------
+   A random 3-regular graph is a good expander: diameter ~log2(n), i.e. within a
+   hop or two of the proven optimum. Useful as the realistic target — the algorithm
+   does not need to build the Petersen graph, it needs to avoid chains. */
+function randomRegular(n,d){
+  if((n*d)%2) n--;
+  for(let attempt=0;attempt<400;attempt++){
+    const stubs=[]; for(let i=0;i<n;i++) for(let j=0;j<d;j++) stubs.push(i);
+    for(let i=stubs.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[stubs[i],stubs[j]]=[stubs[j],stubs[i]];}
+    const es=new Set(); let ok=true;
+    for(let i=0;i<stubs.length;i+=2){ const a=stubs[i],b=stubs[i+1];
+      if(a===b||es.has(key(a,b))){ok=false;break;} es.add(key(a,b)); }
+    if(ok) return {es,n};
+  }
+  return null;
+}
+document.getElementById('randBtn').onclick=()=>{
+  const n=Math.max(4,Math.min(200,+document.getElementById('randN').value||20));
+  const r=randomRegular(n,Math.min(CAP,3));
+  if(!r){ alert('could not generate — try another n'); return; }
+  nodes=[];edges.clear();sel=null;nextId=0;
+  const rect=cv.getBoundingClientRect(), cx=rect.width/2, cy=rect.height/2;
+  const R=Math.min(cx,cy)-40;
+  for(let i=0;i<r.n;i++){ const t=i/r.n*Math.PI*2; nodes.push({id:i,x:cx+R*Math.cos(t),y:cy+R*Math.sin(t)}); }
+  nextId=r.n; for(const e of r.es) edges.add(e);
+  growth=null;
+  document.getElementById('capCard').style.display='none';
+  draw();
+};
+
+/* ---------- accurate Stage 1 + Stage 2 simulator ----------
+   CAP-limited sequential arrival, every node in radio range of every other.
+   Stage 1 = fill gate, evaluated from BOTH endpoints (an edge forms only if both accept).
+   Stage 2 = proactive drop, gated ENTIRELY on the node's own LINK-STATE view (no routing
+   table). LS_K = the TTL of link-state gossip: a node knows the full neighbour list of
+   every node within LS_K hops, and therefore every edge incident to those nodes. The
+   drop-safety test (bridge / no-new-bridge) runs on THAT reconstructed subgraph. Nodes
+   just past the horizon appear as fringe leaves, so cycles longer than the view read as
+   phantom bridges → the node conservatively refuses (safe direction). */
+let LS_K=3, ELECT=2, DROP_POL='far', SEED=1, RANGE=0, SPAWN='tidy', CONT=false, DROPSAFE='triangle', GRAPH_LAYOUT=true, SEAL_HOPS=3, EAK=2, STABLE_STEPS=0, simLog=[];
+// Stability gate: Stage 2 only fires after the edge set has been unchanged for STABLE_STEPS
+// consecutive turns (models T_STABLE — drops are slow/deliberate). 0 = off.
+let stableCounter=0, lastSig=null;
+function edgeSig(){ return [...edges].sort().join(','); }
+function tickStability(){ const s=edgeSig(); if(s===lastSig) stableCounter++; else { stableCounter=0; lastSig=s; } }
+/* Reconnect cooldown: after Stage 2 drops an edge, that exact pair cannot re-connect for
+   COOLDOWN_TURNS turns (a turn = one "+ Add node" or "Run Stage 2" step). Damps the
+   drop/re-add oscillation the permissive rules cause. 0 = off. */
+let cooldown = new Map();          // edgeKey -> turns remaining
+let COOLDOWN_TURNS = 3;
+function tickCooldown(){ for(const [k,v] of [...cooldown]) { if(v<=1) cooldown.delete(k); else cooldown.set(k,v-1); } }
+
+/* Force-directed (Fruchterman–Reingold) layout: edges pull, all nodes repel. Connected
+   clumps cluster together; a bridge shows as a thin link between two separate blobs; a
+   bisection splits into two drifting components. Only used with RANGE=0 (all-in-range),
+   where node positions are purely visual — with a range limit, positions are physical and
+   must not be moved. Incremental: relaxes from current positions so it animates smoothly. */
+function forceLayout(iters){
+  if(nodes.length<2 || RANGE>0) return;
+  const r=cv.getBoundingClientRect(); const W=Math.max(300,r.width||900), H=Math.max(300,r.height||700);
+  const k=0.8*Math.sqrt(W*H/nodes.length);
+  const byId=new Map(nodes.map(n=>[n.id,n]));
+  for(let it=0;it<iters;it++){
+    const dsp=new Map(nodes.map(n=>[n.id,{x:0,y:0}]));
+    for(let i=0;i<nodes.length;i++){ const a=nodes[i];
+      for(let j=i+1;j<nodes.length;j++){ const b=nodes[j];
+        let dx=a.x-b.x, dy=a.y-b.y, d=Math.hypot(dx,dy);
+        if(d<0.01){ dx=rng()-0.5; dy=rng()-0.5; d=Math.hypot(dx,dy)||0.01; }
+        const f=k*k/d, ux=dx/d, uy=dy/d, da=dsp.get(a.id), db=dsp.get(b.id);
+        da.x+=ux*f; da.y+=uy*f; db.x-=ux*f; db.y-=uy*f; } }
+    for(const e of edges){ const [ia,ib]=e.split('|').map(Number); const a=byId.get(ia), b=byId.get(ib); if(!a||!b) continue;
+      let dx=a.x-b.x, dy=a.y-b.y, d=Math.hypot(dx,dy)||0.01;
+      const f=d*d/k, ux=dx/d, uy=dy/d, da=dsp.get(ia), db=dsp.get(ib);
+      da.x-=ux*f; da.y-=uy*f; db.x+=ux*f; db.y+=uy*f; }
+    // mild gravity to centre so disconnected components settle at a moderate separation
+    // (not flung to the corners), which keeps the fit-to-canvas from shrinking each clump
+    for(const n of nodes){ const dp=dsp.get(n.id); dp.x+=(W/2-n.x)*0.03; dp.y+=(H/2-n.y)*0.03; }
+    const temp=Math.max(3, k*0.12*(1-it/iters));
+    for(const n of nodes){ const dp=dsp.get(n.id), d=Math.hypot(dp.x,dp.y)||0.01, s=Math.min(d,temp);
+      n.x+=dp.x/d*s; n.y+=dp.y/d*s; }
+  }
+  // fit-to-canvas (auto-zoom so separated components stay visible)
+  let mnx=1e9,mny=1e9,mxx=-1e9,mxy=-1e9;
+  for(const n of nodes){ mnx=Math.min(mnx,n.x);mxx=Math.max(mxx,n.x);mny=Math.min(mny,n.y);mxy=Math.max(mxy,n.y); }
+  const bw=mxx-mnx||1, bh=mxy-mny||1, sc=Math.min((W-90)/bw,(H-90)/bh,2.5), cx=(mnx+mxx)/2, cy=(mny+mxy)/2;
+  for(const n of nodes){ n.x=W/2+(n.x-cx)*sc; n.y=H/2+(n.y-cy)*sc; }
+}
+function relaxIf(){ if(GRAPH_LAYOUT && RANGE===0) forceLayout(90); }
+
+/* seeded PRNG with externally-visible state so the undo stack can snapshot/restore it.
+   Batch callers use seedRng(s) then rng(); mulberry32 kept for reference. */
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0;
+  let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t;
+  return ((t^t>>>14)>>>0)/4294967296; }; }
+let rngState=SEED|0;
+function rng(){ let a=(rngState=(rngState+0x6D2B79F5)|0);
+  let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t;
+  return ((t^t>>>14)>>>0)/4294967296; }
+function seedRng(s){ rngState=s|0; }
+function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1));
+  [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+
+/* Election tiebreak keys off `prio`, a random per-node value modelling the real qaul id
+   (a random hash). Using the sequential id would correlate the tiebreak with join order
+   and systematically favour early arrivals — an artifact, not a real effect. */
+const prioOf = id => nodes.find(n=>n.id===id).prio;
+const dist2  = (a,b)=>{ const p=nodes.find(n=>n.id===a), q=nodes.find(n=>n.id===b);
+  return Math.hypot(p.x-q.x, p.y-q.y); };
+const twoHopBall=(A,x)=>[...hops(A,x,2).keys()];
+/* SEAL scope = the same LS_K link-state view used by the classifier and drop-safety.
+   Using this (3 hops) rather than the 2-hop ball makes a node declare itself "sealed"
+   (and the fill-gate reject a redundant edge) only when its WHOLE view is full — so
+   Stage 2 fires less, keeps the mesh denser (lower diameter) and, for link-state
+   drop-safety, roughly halves bisections. Tradeoff: admission points are ~1 per 3-hop
+   region instead of per 2-hop region (sparser), leaving more of the physical-frontier
+   admission load to Stage 3. */
+const sealBall=(A,x)=>[...hops(A,x,SEAL_HOPS).keys()];
+
+/* Link-state view from `id` at TTL k: every node within k hops (whose full neighbour
+   list the node has heard), plus every edge incident to those nodes — so a within-k
+   node's list reveals its edges to (k+1)-hop fringe nodes too. Returns {nodes,edges}. */
+function lsView(A,id,k){
+  const dist=hops(A,id,k);
+  const vN=new Set(dist.keys()), vE=new Set();
+  for(const u of dist.keys()) for(const v of A.get(u)){ vE.add(key(u,v)); vN.add(v); }
+  return {vN,vE};
+}
+/* Tarjan bridges over an explicit node/edge subset (the link-state view). */
+function bridgesIn(vN,vE){
+  const a=new Map(); for(const n of vN) a.set(n,new Set());
+  for(const e of vE){ const [x,y]=e.split('|').map(Number);
+    if(a.has(x)&&a.has(y)){ a.get(x).add(y); a.get(y).add(x); } }
+  const disc=new Map(),low=new Map(),br=new Set(); let t=0;
+  function dfs(u,par){ disc.set(u,t);low.set(u,t);t++;
+    for(const v of a.get(u)){
+      if(!disc.has(v)){ dfs(v,u); low.set(u,Math.min(low.get(u),low.get(v)));
+        if(low.get(v)>disc.get(u)) br.add(key(u,v)); }
+      else if(v!==par){ low.set(u,Math.min(low.get(u),disc.get(v))); } } }
+  for(const n of vN) if(!disc.has(n)) dfs(n,-1);
+  return br;
+}
+/* shortest hop distance within a view (for the 'most redundant' drop policy). */
+function hopsIn(vN,vE,src){
+  const a=new Map(); for(const n of vN) a.set(n,new Set());
+  for(const e of vE){ const [x,y]=e.split('|').map(Number);
+    if(a.has(x)&&a.has(y)){ a.get(x).add(y); a.get(y).add(x); } }
+  const d=new Map([[src,0]]); let fr=[src];
+  while(fr.length){ const nx=[]; for(const u of fr) for(const v of a.get(u))
+    if(!d.has(v)){ d.set(v,d.get(u)+1); nx.push(v); } fr=nx; }
+  return d;
+}
+/* Two edge-disjoint src→dst paths within a view? (BFS one path, remove its edges, BFS again.)
+   True ⇒ dst stays reachable even if any single edge fails ⇒ dropping won't leave a bridge. */
+function hasTwoDisjointPaths(vN,vE,src,dst){
+  const a=new Map(); for(const n of vN) a.set(n,new Set());
+  for(const e of vE){ const [x,y]=e.split('|').map(Number); if(a.has(x)&&a.has(y)){ a.get(x).add(y); a.get(y).add(x); } }
+  const bfs=()=>{ const prev=new Map([[src,null]]); const q=[src];
+    while(q.length){ const u=q.shift(); if(u===dst) break; for(const v of a.get(u)) if(!prev.has(v)){ prev.set(v,u); q.push(v); } }
+    if(!prev.has(dst)) return null; const p=[]; let c=dst; while(c!=null){ p.unshift(c); c=prev.get(c); } return p; };
+  const p1=bfs(); if(!p1) return false;
+  for(let i=0;i<p1.length-1;i++){ a.get(p1[i]).delete(p1[i+1]); a.get(p1[i+1]).delete(p1[i]); }
+  return bfs()!=null;
+}
+
+/* Aligned fill-gate (the agreed Stage-1 spec):
+   - redundancy judged on the SAME LS_K link-state view Stage 2 uses (not a BFS horizon),
+     so Stage 1 and Stage 2 agree about what "reachable" means → a dropped edge is seen
+     as redundant, not a merge, and is not blindly re-added;
+   - open slots checked EXACTLY (hypothetically add the edge, recompute the seal-scope
+     sum), so ADD is the exact inverse of DROP → re-adding a dropped edge re-seals → rejected. */
+function fillGate(A,me,p){
+  if(degree(A,me)>=CAP) return {ok:false,why:'own slots full'};
+  if(degree(A,p)>=CAP)  return {ok:false,why:'peer slots full'};
+  const {vN,vE}=lsView(A,me,LS_K);
+  if(!hopsIn(vN,vE,me).has(p)) return {ok:true,why:'merge'};   // unreachable in my view
+  const before=neighbourhoodOpenSlots(A,sealBall(A,me));
+  const tmp=new Map(); for(const [k,v] of A) tmp.set(k,new Set(v));
+  tmp.get(me).add(p); tmp.get(p).add(me);                      // hypothetically add
+  const after=neighbourhoodOpenSlots(tmp,sealBall(tmp,me));
+  return after>=1 ? {ok:true,  why:`redundant, open ${before}→${after}`}
+                  : {ok:false, why:`redundant would SEAL (${before}→${after})`};
+}
+
+function simAddNode(){
+  const id=nextId++;
+  const r=cv.getBoundingClientRect();
+  const W=Math.max(200,r.width||900), H=Math.max(200,r.height||700);
+  let x,y;
+  if(GRAPH_LAYOUT && RANGE===0){ x=W/2+(rng()-0.5)*80; y=H/2+(rng()-0.5)*80; }  // force layout arranges
+  else if(SPAWN==='tidy'){
+    // phyllotaxis spiral keyed to id: stable per-node position, even spacing, no overlaps.
+    // Real coords, so dist2()/RANGE still work behind the visual.
+    const golden=Math.PI*(3-Math.sqrt(5)), C=Math.min(64, (Math.min(W,H)/2-28)/Math.sqrt(26));
+    x=W/2 + C*Math.sqrt(id)*Math.cos(id*golden);
+    y=H/2 + C*Math.sqrt(id)*Math.sin(id*golden);
+  }
+  else if(SPAWN==='corridor'){ const h=Math.min(H-80,130); x=40+rng()*(W-80); y=(H-h)/2+rng()*h; }
+  else { x=40+rng()*(W-80); y=40+rng()*(H-80); }
+  nodes.push({id, prio:rng(), x, y});
+  simLog.push(`<b class="hdr">n=${nodes.length} · node ${id} arrives</b>`);
+  // discovery order is random, not id order
+  for(const p of shuffle(nodes.map(n=>n.id).filter(v=>v!==id))){
+    const A=adj();
+    if(degree(A,id)>=CAP){ simLog.push(`<span class="mut">&nbsp;&nbsp;${id} full, stops</span>`); break; }
+    if(cooldown.has(key(id,p))) continue;               // reconnect cooldown
+    if(RANGE>0 && dist2(id,p)>RANGE) continue;          // out of radio range
+    const a=fillGate(A,id,p), b=fillGate(A,p,id);
+    if(a.ok&&b.ok){ edges.add(key(id,p));
+      simLog.push(`&nbsp;&nbsp;<b>${id}–${p}</b> ✓ ${a.why}`); }
+    else simLog.push(`<span class="mut">&nbsp;&nbsp;${id}–${p} ✗ ${a.ok? b.why+' [peer]' : a.why}</span>`);
+  }
+}
+
+/* which of id's edges may be dropped, judged ONLY from id's LS_K link-state view:
+   not a bridge in the view, and removing it creates no NEW bridge in the view.
+   No global graph, no routing table. `br` is unused (kept for call-site signature). */
+/* Which of id's edges Stage 2 may drop. Two safety rules (DROPSAFE toggle):
+   'triangle'  — ONLY drop an edge whose endpoints share a common neighbour c, so the
+                 alternate id-c-p is REAL, short, and immune to churn/concurrency/horizon.
+                 Provably never bisects (verified 0/20 splits under continuous scan).
+   'linkstate' — drop if removing it makes no new bridge in the 3-hop link-state view.
+                 More aggressive (opens more seals) but can BISECT the mesh (~7/20 under
+                 continuous scan): a locally-safe drop can be one edge of a global 2-cut. */
+function droppable(A,br,id){
+  const out=[];
+  if(DROPSAFE==='triangle'){
+    for(const p of A.get(id)){
+      if(br.has(key(id,p))) continue;                          // never a global bridge
+      let shared=false; for(const x of A.get(id)) if(x!==p && A.get(p).has(x)){ shared=true; break; }
+      if(shared) out.push({p,after:2});                        // alternate id-c-p is 2 hops
+    }
+    return out;
+  }
+  if(DROPSAFE==='anyroute'){
+    // most permissive: drop if the peer is still reachable by ANY other route in the
+    // 3-hop view (edge not a bridge in view). No "no-new-bridge" guard → allows bridges
+    // to form and inherits the far-alternate view-inconsistency → expect oscillation/splits.
+    const {vN,vE}=lsView(A,id,LS_K);
+    for(const p of A.get(id)){
+      vE.delete(key(id,p));
+      const d=hopsIn(vN,vE,id);
+      vE.add(key(id,p));
+      if(d.has(p)) out.push({p, after:d.get(p)});              // reachable another way in view
+    }
+    return out;
+  }
+  if(DROPSAFE==='edgeabsent'){
+    // Build the view WITHOUT the edge (the churn fix — drop-check and fill-gate then agree),
+    // and require the peer reachable within LS_K hops. EAK=1 → any one route; EAK=2 → two
+    // edge-disjoint routes (no single-thread bridge). Only churns if the neighbourhood CHANGES.
+    for(const p of A.get(id)){
+      edges.delete(key(id,p));
+      const {vN,vE}=lsView(adj(),id,LS_K);
+      const d=hopsIn(vN,vE,id);
+      const ok = d.has(p) && (EAK<2 || hasTwoDisjointPaths(vN,vE,id,p));
+      edges.add(key(id,p));
+      if(ok) out.push({p, after:(d.get(p)||2)});
+    }
+    return out;
+  }
+  const {vN,vE}=lsView(A,id,LS_K);
+  const brView=bridgesIn(vN,vE);
+  for(const p of A.get(id)){
+    if(brView.has(key(id,p))) continue;              // bridge in my view → never drop
+    vE.delete(key(id,p));
+    const brAfter=bridgesIn(vN,vE);
+    let created=false; for(const b of brAfter) if(!brView.has(b)){ created=true; break; }
+    const after=hopsIn(vN,vE,id).get(p);             // alternate distance within view
+    vE.add(key(id,p));
+    if(!created && after!==undefined) out.push({p,after});
+  }
+  return out;
+}
+
+function simStage2(){
+  if(STABLE_STEPS>0 && stableCounter<STABLE_STEPS){       // wait for a steady neighbourhood
+    simLog.push(`<span class="mut">&nbsp;&nbsp;S2: not stable yet (${stableCounter}/${STABLE_STEPS})</span>`); return; }
+  const A=adj(), br=bridges(A), elig=new Map();
+  for(const n of nodes){
+    if(neighbourhoodOpenSlots(A,sealBall(A,n.id))!==0) continue;
+    const d=droppable(A,br,n.id);
+    if(d.length) elig.set(n.id,d);
+    else simLog.push(`<span class="mut">&nbsp;&nbsp;S2: ${n.id} sealed but no safe drop</span>`);
+  }
+  if(!elig.size){ simLog.push('<span class="mut">&nbsp;&nbsp;S2: nothing sealed</span>'); return; }
+  /* ELECT-hop scoped election. Guarantee: no two droppers within ELECT hops of each
+     other, because any two nodes at distance <= ELECT appear in each other's ball and
+     the lower id wins consistently. Disagreement is only possible beyond ELECT hops,
+     so widening the scope directly throttles simultaneous drops:
+       droppers per round ~ n / (ball size)  ->  1-hop ~n/4, 2-hop ~n/10, 3-hop ~n/22 */
+  const drops=[];
+  for(const [id,cands] of elig){
+    const contenders=[...hops(A,id,ELECT).keys()].filter(v=>elig.has(v));
+    // lowest random prio wins (models lowest qaul id), NOT lowest join order
+    let win=id; for(const v of contenders) if(prioOf(v)<prioOf(win)) win=v;
+    if(win!==id){ simLog.push(`<span class="mut">&nbsp;&nbsp;S2: ${id} sealed, defers to ${win} (${ELECT}-hop)</span>`); continue; }
+    /* which of my droppable edges to give up:
+       far       — physically farthest peer (proxy for weakest RSSI / most costly link)
+       redundant — peer that stays CLOSEST in hops after the drop (edge added least reach)
+       degree    — peer with the most other connections */
+    if(DROP_POL==='far')            cands.sort((x,y)=> dist2(id,y.p)-dist2(id,x.p));
+    else if(DROP_POL==='redundant') cands.sort((x,y)=> x.after-y.after || dist2(id,y.p)-dist2(id,x.p));
+    else                            cands.sort((x,y)=> degree(A,y.p)-degree(A,x.p));
+    drops.push([id,cands[0].p]);
+  }
+  for(const [a,b] of drops){ edges.delete(key(a,b));
+    if(COOLDOWN_TURNS>0) cooldown.set(key(a,b), COOLDOWN_TURNS);   // block reconnect for N turns
+    simLog.push(`&nbsp;&nbsp;<b>S2: ${a} elected → drops ${a}–${b}</b>`); }
+  if(drops.length>1) simLog.push(`&nbsp;&nbsp;<span class="pill warn">${drops.length} concurrent drops</span> all >${ELECT} hops apart`);
+}
+
+/* Continuous-scan model (no cooldown). BLE keeps scanning, so any node still below CAP
+   re-attempts connections whenever a valid peer exists. With the aligned fill-gate this
+   is order-INDEPENDENT and self-consistent: a just-dropped edge is redundant + would
+   re-seal → rejected (not re-added), while genuinely under-connected nodes DO pick up
+   an opened slot. Runs to convergence (bounded passes). Deterministic (id order, no rng),
+   so undo stays exact. */
+function rescan(){
+  let changed=true, guard=0;
+  while(changed && guard++ < CAP*3){
+    changed=false;
+    let A=adj();
+    for(const a of nodes.map(n=>n.id)){
+      if(degree(A,a)>=CAP) continue;
+      for(const b of nodes.map(n=>n.id)){
+        if(b===a || edges.has(key(a,b))) continue;
+        if(cooldown.has(key(a,b))) continue;              // reconnect cooldown
+        if(degree(A,a)>=CAP) break;
+        if(degree(A,b)>=CAP) continue;
+        if(RANGE>0 && dist2(a,b)>RANGE) continue;
+        if(fillGate(A,a,b).ok && fillGate(A,b,a).ok){
+          edges.add(key(a,b)); changed=true; A=adj();
+          simLog.push(`&nbsp;&nbsp;<span class="mut">re-scan ${a}–${b} ✓</span>`);
+        }
+      }
+    }
+  }
+}
+
+function renderLog(){
+  const el=document.getElementById('simLog');
+  el.innerHTML=simLog.slice(-40).map(l=>`<div>${l}</div>`).join('');
+  el.scrollTop=el.scrollHeight;
+  document.getElementById('capCard').style.display='block';
+}
+let history=[];   // undo stack of full snapshots
+function snapshot(){ return { nodes:nodes.map(n=>({...n})), edges:[...edges],
+  nextId, rngState, logLen:simLog.length, cooldown:[...cooldown] }; }
+function restore(s){ nodes=s.nodes.map(n=>({...n})); edges=new Set(s.edges);
+  nextId=s.nextId; rngState=s.rngState; simLog.length=s.logLen; sel=null;
+  cooldown=new Map(s.cooldown||[]); }
+function simReset(){ seedRng(SEED); history=[]; cooldown.clear(); stableCounter=0; lastSig=null;
+  nodes=[];edges.clear();sel=null;nextId=0;simLog=[];
+  simAddNode(); renderLog(); draw(); }
+document.getElementById('simReset').onclick=simReset;
+document.getElementById('simBack').onclick=()=>{
+  if(!history.length) return;
+  restore(history.pop()); renderLog(); draw(); };
+document.getElementById('simAdd').onclick=()=>{
+  history.push(snapshot()); tickCooldown(); tickStability();   // one turn elapses
+  simAddNode();
+  if(CONT) rescan();                                   // existing under-CAP nodes re-attempt
+  if(document.getElementById('s2').checked) simStage2();
+  if(CONT) rescan();                                   // opened slots get filled if valid
+  relaxIf(); renderLog(); draw(); };
+document.getElementById('simS2').onclick=()=>{
+  history.push(snapshot()); tickCooldown(); tickStability();   // one turn elapses
+  simStage2(); if(CONT) rescan();
+  relaxIf(); renderLog(); draw(); };
+document.getElementById('cont').onchange=e=>{ CONT=e.target.checked; };
+document.getElementById('graphLayout').onchange=e=>{ GRAPH_LAYOUT=e.target.checked; relaxIf(); draw(); };
+document.getElementById('dropSafe').onchange=e=>{ DROPSAFE=e.target.value; draw(); };
+document.getElementById('sealHops').onchange=e=>{ SEAL_HOPS=+e.target.value; draw(); };
+document.getElementById('eak').onchange=e=>{ EAK=+e.target.value; draw(); };
+document.getElementById('stableSteps').onchange=e=>{ STABLE_STEPS=Math.max(0,+e.target.value||0); };
+document.getElementById('cooldownTurns').onchange=e=>{ COOLDOWN_TURNS=Math.max(0,+e.target.value||0); };
+document.getElementById('lsK').onchange=e=>{ LS_K=+e.target.value; };
+document.getElementById('range').onchange=e=>{ RANGE=+e.target.value||0; simReset(); };
+document.getElementById('spawn').onchange=e=>{ SPAWN=e.target.value; simReset(); };
+document.getElementById('elect').onchange=e=>{ ELECT=+e.target.value; };
+document.getElementById('dropPol').onchange=e=>{ DROP_POL=e.target.value; };
+document.getElementById('seed').onchange=e=>{ SEED=+e.target.value||1; simReset(); };
+
+resize();
+</script>
+</body>
+</html>

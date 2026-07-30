@@ -1,0 +1,509 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>qaul field-test replay</title>
+<style>
+  body{margin:0;background:#0e1116;color:#c9d1d9;font:13px/1.5 -apple-system,system-ui,sans-serif}
+  #top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid #21262d}
+  #wrap{display:flex;gap:14px;padding:14px;flex-wrap:wrap}
+  canvas{background:#0a0d12;border:1px solid #21262d;border-radius:8px}
+  button,label.btn{background:#21262d;color:#c9d1d9;border:1px solid #30363d;border-radius:6px;padding:6px 11px;cursor:pointer;font-size:12px}
+  button:hover,label.btn:hover{background:#30363d}
+  #panel{width:250px}
+  h1{font-size:14px;margin:0 8px 0 0;display:inline}
+  #stats{padding:10px;background:#0a0d12;border:1px solid #21262d;border-radius:6px;font-size:12px}
+  #stats b{color:#fff} .ok{color:#3fb950}.bad{color:#f85149}
+  #time{font:12px ui-monospace,Menlo,monospace;color:#8b949e}
+  input[type=range]{vertical-align:middle}
+  #tl{width:100%}
+  .legend{margin-top:10px;font-size:11px;color:#8b949e}
+  .legend div{margin:3px 0;display:flex;align-items:center;gap:7px}
+  .dot{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .muted{color:#6e7681;font-size:11px}
+  /* Stage 1/2 decision popup — sits over the canvas while the playhead is on an event */
+  #topopop{position:absolute;top:10px;left:10px;display:flex;flex-direction:column;gap:6px;
+           pointer-events:none;z-index:5}
+  .topocard{font:11px ui-monospace,Menlo,monospace;padding:7px 10px;border-radius:6px;
+            border-left:3px solid;background:rgba(13,17,23,.93);box-shadow:0 2px 10px rgba(0,0,0,.5)}
+  .topocard.s1{border-color:#d29922;color:#f0c674}
+  .topocard.s2{border-color:#f85149;color:#ff9d95}
+  .topocard b{color:#e6edf3}
+</style>
+</head>
+<body>
+<div id="top">
+  <h1>qaul field-test replay</h1>
+  <label class="btn">Load session files<input id="files" type="file" multiple accept=".jsonl,.json,.txt,.log" style="display:none"></label>
+  <button id="sample">Load sample</button>
+  <button id="play">▶ play</button>
+  <label class="muted">speed <input id="speed" type="range" min="1" max="60" value="12" style="width:90px"></label>
+  <label class="muted"><input id="map" type="checkbox"> map (OSM)</label>
+  <label class="muted"><input id="rssiEdges" type="checkbox" checked> RSSI edges</label>
+  <label class="muted"><input id="rings" type="checkbox"> range rings (observed)</label>
+  <label class="muted"><input id="gaps" type="checkbox"> flag in-range gaps</label>
+  <span id="time">—</span>
+</div>
+<div style="padding:0 14px"><input id="tl" type="range" min="0" max="1000" value="0"></div>
+<div id="wrap">
+  <div>
+    <div style="position:relative">
+      <canvas id="c" width="820" height="560"></canvas>
+      <div id="topopop"></div>
+    </div>
+    <div class="muted" style="margin-top:6px">component-count over session (red = islanded):</div>
+    <canvas id="spark" width="820" height="60"></canvas>
+  </div>
+  <div id="panel">
+    <div id="stats"></div>
+    <div class="legend">
+      <hr style="border:0;border-top:1px solid #21262d">
+      <div><span class="dot" style="background:#3fb950"></span> one connected mesh</div>
+      <div><span class="dot" style="background:#f85149"></span><span class="dot" style="background:#d29922"></span> islands (distinct colours)</div>
+      <div><span class="dot" style="background:#6e7681"></span> present but idle (no edges)</div>
+      <div style="margin-top:6px">edge = a neighbour link reported in either device's latest snapshot.</div>
+      <div>positions = GPS if present, else a stable circular layout.</div>
+      <div><span class="dot" style="background:#3fb950"></span><span class="dot" style="background:#d29922"></span><span class="dot" style="background:#f85149"></span> RSSI edges: green strong (~−55) → red weak (~−95) · grey = no reading</div>
+      <div><span style="display:inline-block;width:11px;height:11px;border-radius:50%;border:2px solid #3fb950"></span> select a node → rings mark nodes it has a route to (colour = hop count); dashed red = present but no route</div>
+      <div style="margin-top:6px"><span class="dot" style="background:#d29922"></span> Stage 1 fill-gate reject · <span class="dot" style="background:#f85149"></span> Stage 2 drop — popup over the canvas at the moment it fired, ticks on the sparkline</div>
+      <div style="margin-top:6px;color:#c9d1d9">scroll = zoom · drag = pan · click = inspect · dbl-click = reset view</div>
+    </div>
+    <div id="sel" style="margin-top:10px;padding:9px;background:#0a0d12;border:1px solid #21262d;border-radius:6px;font:11px ui-monospace,Menlo,monospace"></div>
+    <div id="devlist" class="muted" style="margin-top:10px"></div>
+  </div>
+</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+const sk=document.getElementById('spark'),skx=sk.getContext('2d');
+const $=id=>document.getElementById(id);
+const PAL=['#3fb950','#f85149','#d29922','#a371f7','#58a6ff','#ec6547','#39c5cf','#db61a2','#7ee787','#ffab70'];
+const STALE_MS=32000;              // a device with no snapshot in this window is "gone" (crashed/left)
+function hashStr(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
+
+let devices={};                    // id -> {snaps:[{t,nbrs:[{id,phy}],gps}], model, qid}
+let tMin=0,tMax=0, playing=false, T=0, useGps=false, proj=null, layoutPos={}, spark=[];
+let observedRange=0, perPhyRange={}, selected=null;
+// node id ≠ user id in libqaul: topology is node-keyed, routing is user-keyed (with node in `via`).
+// Each device's mod:"local" route pairs its user (to) with its node (via) → build the map to translate.
+let userToNode={}, nodeToUser={};
+// Stage 1/2 topology decisions (fill-gate rejects, proactive drops) — flashed as markers on the
+// timeline and as a popup while the playhead is near them.
+let topoEvents=[];
+const TOPO_POPUP_MS = 4000;   // how long a marker stays "current" in replay time
+let mapOn=false, mapT=null, bboxLL=null; const tileCache={};
+let zoom=1, panX=0, panY=0;   // view transform: screen = base*zoom + pan
+// Web-Mercator world pixels at zoom 0 (256px tiles) — OSM's projection, so nodes align with tiles.
+function mx0(lon){ return (lon+180)/360*256; }
+function my0(lat){ const r=lat*Math.PI/180; return (1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*256; }
+function pxPerM(){ if(mapOn&&mapT) return 256*Math.pow(2,mapT.z)/(40075016.686*Math.cos(mapT.latRef*Math.PI/180)); return proj?proj.scale:1; }
+function computeMapT(){
+  if(!bboxLL){ mapT=null; return; }
+  const {laMin,laMax,loMin,loMax}=bboxLL, pad=20;
+  const dx0=Math.abs(mx0(loMax)-mx0(loMin))||0.4, dy0=Math.abs(my0(laMin)-my0(laMax))||0.4;
+  let z=Math.floor(Math.log2(Math.min((W-2*pad)/dx0,(H-2*pad)/dy0)));
+  z=Math.max(1,Math.min(19,z||1)); const s=Math.pow(2,z);
+  mapT={z, originX:mx0(loMin)*s, originY:my0(laMax)*s, offX:(W-dx0*s)/2, offY:(H-dy0*s)/2, latRef:(laMin+laMax)/2};
+}
+function drawMap(){
+  if(!(mapOn&&mapT)) return;
+  // fetch tiles at a zoom level matching the on-screen resolution (keeps them crisp when zoomed in)
+  const tileZ=Math.max(1,Math.min(19,Math.round(mapT.z+Math.log2(zoom))));
+  const f=Math.pow(2,mapT.z-tileZ), ts=256*f, n=Math.pow(2,tileZ);   // ts = base-world-px per tile
+  const wl=mapT.originX-mapT.offX, wt=mapT.originY-mapT.offY;
+  const bxMin=wl+(-panX)/zoom, bxMax=wl+(W-panX)/zoom, byMin=wt+(-panY)/zoom, byMax=wt+(H-panY)/zoom;
+  for(let tx=Math.floor(bxMin/ts); tx<=Math.floor(bxMax/ts); tx++)
+    for(let ty=Math.floor(byMin/ts); ty<=Math.floor(byMax/ts); ty++){
+      if(tx<0||ty<0||tx>=n||ty>=n) continue;
+      const url=`https://tile.openstreetmap.org/${tileZ}/${tx}/${ty}.png`;
+      let img=tileCache[url];
+      if(!img){ img=new Image(); tileCache[url]=img; img.onload=()=>{ if(!playing) draw(); }; img.onerror=()=>{}; img.src=url; }
+      if(img.complete&&img.naturalWidth) ctx.drawImage(img, (tx*ts-wl)*zoom+panX, (ty*ts-wt)*zoom+panY, ts*zoom, ts*zoom);
+    }
+  ctx.fillStyle='rgba(10,13,18,0.32)'; ctx.fillRect(0,0,W,H);   // scrim so node colours pop
+  ctx.fillStyle='rgba(201,209,217,0.7)'; ctx.font='10px system-ui'; ctx.textAlign='right'; ctx.textBaseline='bottom';
+  ctx.fillText('© OpenStreetMap contributors', W-4, H-2);
+}
+function distM(a,b){ const lr=proj?proj.latRef:a.lat; return Math.hypot((a.lon-b.lon)*111320*Math.cos(lr*Math.PI/180),(a.lat-b.lat)*110574); }
+// RSSI for edge a-b (logged by whichever end is CENTRAL — take it from either endpoint's nbr entry)
+function edgeRssi(st,a,b){
+  const fa=(st.snapOf[a]?.nbrs||[]).find(n=>n.id===b); if(fa&&fa.rssi!=null) return fa.rssi;
+  const fb=(st.snapOf[b]?.nbrs||[]).find(n=>n.id===a); if(fb&&fb.rssi!=null) return fb.rssi;
+  return null;
+}
+// green (strong, ~-55 dBm) → red (weak, ~-95 dBm); grey if unknown
+function rssiColor(r){ if(r==null) return 'rgba(120,133,150,0.4)'; const t=Math.max(0,Math.min(1,(r+95)/40)); return `hsla(${Math.round(120*t)},70%,55%,0.85)`; }
+
+// ---------- ingest ----------
+function ingest(lines){
+  for(const line of lines){
+    const s=line.trim(); if(!s) continue;
+    let e; try{ e=JSON.parse(s); }catch{ continue; }
+    if(!e.dev||!e.type) continue;
+    const d = devices[e.dev] || (devices[e.dev]={snaps:[],routes:[],model:'',qid:''});
+    if(!d.routes) d.routes=[];
+    if(e.type==='session'){ d.model=e.model||''; d.qid=e.qid||''; }
+    else if(e.type==='snapshot'){ d.snaps.push({t:e.t, nbrs:e.nbrs||[], gps:e.gps||null}); }
+    else if(e.type==='routing'){ d.routes.push({t:e.t, entries:e.routes||[]}); }
+    else if(e.type==='topo'){ topoEvents.push({t:e.t, dev:e.dev, stage:e.stage, action:e.action, peer:e.peer, reason:e.reason, open:e.open}); }
+    // connect/disconnect are captured too but the periodic snapshots are the reconstruction source
+  }
+  finalizeLoad();
+}
+function finalizeLoad(){
+  const ids=Object.keys(devices);
+  if(!ids.length){ return; }
+  userToNode={}; nodeToUser={};
+  let lo=Infinity, hi=-Infinity, gpsPts=[];
+  for(const id of ids){
+    devices[id].snaps.sort((a,b)=>a.t-b.t);
+    (devices[id].routes||[]).sort((a,b)=>a.t-b.t);
+    for(const rs of (devices[id].routes||[])) for(const e of rs.entries) if(e.mod==='local'){ userToNode[e.to]=e.via; nodeToUser[e.via]=e.to; }
+    for(const s of devices[id].snaps){ lo=Math.min(lo,s.t); hi=Math.max(hi,s.t); if(s.gps) gpsPts.push(s.gps); }
+  }
+  // include topo decisions in the span, in case one lands outside the snapshot range
+  for(const e of topoEvents){ lo=Math.min(lo,e.t); hi=Math.max(hi,e.t); }
+  topoEvents.sort((a,b)=>a.t-b.t);
+  tMin=lo; tMax=hi; T=lo;
+  useGps = gpsPts.length>0;
+  if(useGps){
+    // Equal-aspect metric projection: convert lat/lon to local metres (equirectangular around the
+    // centre), then one metres-per-pixel scale for BOTH axes so shapes/distances are true.
+    const lats=gpsPts.map(g=>g.lat), lons=gpsPts.map(g=>g.lon);
+    const latRef=(Math.min(...lats)+Math.max(...lats))/2, lonRef=(Math.min(...lons)+Math.max(...lons))/2;
+    bboxLL={laMin:Math.min(...lats),laMax:Math.max(...lats),loMin:Math.min(...lons),loMax:Math.max(...lons)};
+    const mPerLat=110574, mPerLon=111320*Math.cos(latRef*Math.PI/180);
+    let xmin=Infinity,xmax=-Infinity,ymin=Infinity,ymax=-Infinity;
+    for(const g of gpsPts){ const mx=(g.lon-lonRef)*mPerLon, my=(g.lat-latRef)*mPerLat;
+      xmin=Math.min(xmin,mx);xmax=Math.max(xmax,mx);ymin=Math.min(ymin,my);ymax=Math.max(ymax,my); }
+    const pad=46, wM=Math.max(xmax-xmin,1), hM=Math.max(ymax-ymin,1);
+    const scale=Math.min((W-2*pad)/wM,(H-2*pad)/hM);      // px per metre (equal both axes)
+    proj={latRef,lonRef,mPerLat,mPerLon,xmin,xmax,ymin,ymax,scale,
+          offX:(W-(xmax-xmin)*scale)/2, offY:(H-(ymax-ymin)*scale)/2};
+
+    // Empirical range, MEASURED from the data: GPS distance of pairs that were actually connected,
+    // per PHY. Not a guess — the reference ring + in-range-gap flag both use this.
+    const dAll=[], dPhy={};
+    for(const id in devices) for(const s of devices[id].snaps){ if(!s.gps) continue;
+      for(const n of s.nbrs){ const o=devices[n.id]; if(!o) continue; const os=latestSnap(n.id,s.t);
+        if(!os||!os.gps) continue; const d=distM(s.gps,os.gps);
+        dAll.push(d); (dPhy[n.phy]=dPhy[n.phy]||[]).push(d); } }
+    const pct=(arr,p)=>{ if(!arr.length) return 0; const a=[...arr].sort((x,y)=>x-y); return a[Math.min(a.length-1,Math.floor(p*a.length))]; };
+    observedRange = pct(dAll,0.95);
+    perPhyRange = Object.fromEntries(Object.entries(dPhy).map(([k,v])=>[k,{p95:Math.round(pct(v,0.95)),max:Math.round(Math.max(...v)),n:v.length}]));
+  }
+  // stable circular layout fallback, keyed by sorted id
+  ids.sort(); ids.forEach((id,i)=>{ const a=2*Math.PI*i/ids.length; layoutPos[id]=[W/2+Math.cos(a)*Math.min(W,H)*0.36, H/2+Math.sin(a)*Math.min(W,H)*0.36]; });
+  // precompute component-count sparkline
+  spark=[]; const N=300;
+  for(let i=0;i<=N;i++){ const t=tMin+(tMax-tMin)*i/N; spark.push([t, stateAt(t).comps]); }
+  if(mapOn) computeMapT();
+  $('tl').value=0; draw();
+}
+function project(id, g){   // g = a gps {lat,lon} or null
+  let b;
+  if(useGps && g){
+    if(mapOn && mapT){ const s=Math.pow(2,mapT.z); b=[mx0(g.lon)*s-mapT.originX+mapT.offX, my0(g.lat)*s-mapT.originY+mapT.offY]; }
+    else if(proj){ const mx=(g.lon-proj.lonRef)*proj.mPerLon, my=(g.lat-proj.latRef)*proj.mPerLat;
+      b=[proj.offX+(mx-proj.xmin)*proj.scale, proj.offY+(proj.ymax-my)*proj.scale]; } // north up
+  }
+  if(!b) b = layoutPos[id]||[W/2,H/2];
+  return [ b[0]*zoom+panX, b[1]*zoom+panY ];   // apply view transform
+}
+function latestSnap(id,t){ const s=devices[id].snaps; let r=null; for(const x of s){ if(x.t<=t) r=x; else break; } return r; }
+// most recent snapshot at/before t that actually HAD a GPS fix — lets a node hold its last known
+// position through a GPS dropout instead of jumping to the layout fallback.
+function latestGpsSnap(id,t){ const s=devices[id].snaps; let r=null; for(const x of s){ if(x.t<=t){ if(x.gps) r=x; } else break; } return r; }
+// most recent routing-table snapshot at/before t for a device (or null)
+function latestRouting(id,t){ const key=nodeToUser[id]||id; const r=devices[key]&&devices[key].routes; if(!r||!r.length) return null; let x=null; for(const s of r){ if(s.t<=t) x=s; else break; } return x; }
+
+// ---------- reconstruct state at time t ----------
+function stateAt(t){
+  const present=[], pos={}, snapOf={}, gpsOf={};
+  for(const id in devices){
+    const s=latestSnap(id,t);
+    if(s && t-s.t<=STALE_MS){ present.push(id); snapOf[id]=s;
+      const gs=latestGpsSnap(id,t); gpsOf[id]=gs?gs.gps:null; pos[id]=project(id,gpsOf[id]); }
+  }
+  const pset=new Set(present);
+  // GHOSTS: ids reported as neighbours by a present device but with no log of their own (file not
+  // pulled, pull failed, or logging never started). Previously these edges were silently dropped,
+  // which made the mesh look far more fragmented than it was — one missing file erased that phone's
+  // every link from every other phone's view. Show them instead, marked as unlogged.
+  const ghosts=new Set();
+  for(const id of present) for(const n of snapOf[id].nbrs){
+    if(n.id && n.id!=='unresolved' && !pset.has(n.id)) ghosts.add(n.id);
+  }
+  for(const g of ghosts){ pos[g]=project(g,null); }
+  const all=present.concat([...ghosts]);
+  const aset=new Set(all);
+  const edges=new Set();
+  for(const id of present) for(const n of snapOf[id].nbrs){ if(n.id&&n.id!=='unresolved'&&aset.has(n.id)) edges.add(id<n.id?id+'|'+n.id:n.id+'|'+id); }
+  // components (union-find) — over present AND ghost nodes, since a ghost can legitimately be the
+  // node joining two otherwise-separate groups. Excluding it would report a false island.
+  const par={}; all.forEach(id=>par[id]=id);
+  const find=x=>{while(par[x]!==x){par[x]=par[par[x]];x=par[x];}return x;};
+  for(const e of edges){ const [a,b]=e.split('|'); const ra=find(a),rb=find(b); if(ra!==rb)par[ra]=rb; }
+  const grp={}; all.forEach(id=>{ const r=find(id); (grp[r]=grp[r]||[]).push(id); });
+  const roots=Object.keys(grp), single=roots.length<=1, color={};
+  // Stable colouring: green (PAL[0]) iff one connected mesh; else colour each island by a hash of its
+  // lowest member id (never green), so colours don't flicker frame-to-frame.
+  for(const r of roots){ const mem=grp[r];
+    if(single) mem.forEach(id=>color[id]=0);
+    else { const key=mem.reduce((a,b)=>a<b?a:b); const ci=1+(hashStr(key)%(PAL.length-1)); mem.forEach(id=>color[id]=ci); }
+  }
+  return {present,pos,edges,color,comps:roots.length,single,snapOf,gpsOf,ghosts};
+}
+
+// ---------- topology-decision popups ----------
+/** Show Stage 1/2 decisions whose timestamp the playhead has just passed, newest first, and
+ *  fade them out over TOPO_POPUP_MS of replay time. */
+function drawTopoPopups(){
+  const box=$('topopop'); if(!box) return;
+  const live=topoEvents.filter(e=>T>=e.t && T-e.t<TOPO_POPUP_MS)
+                       .sort((a,b)=>b.t-a.t).slice(0,5);
+  box.innerHTML = live.map(e=>{
+    const age=(T-e.t)/TOPO_POPUP_MS;
+    const label = e.stage===2 ? 'STAGE 2 · drop' : 'STAGE 1 · reject';
+    return `<div class="topocard s${e.stage}" style="opacity:${(1-age*0.75).toFixed(2)}">`+
+           `<b>${label}</b> &nbsp;${e.dev} → ${e.peer}<br>${e.reason} &nbsp;<span style="opacity:.7">(open=${e.open})</span></div>`;
+  }).join('');
+}
+/** Vertical ticks on the component sparkline marking every topo event (so they're findable
+ *  without scrubbing blindly). */
+function drawTopoTicks(w,h){
+  if(!topoEvents.length || tMax<=tMin) return;
+  for(const e of topoEvents){
+    const x=(e.t-tMin)/(tMax-tMin)*w;
+    skx.strokeStyle = e.stage===2 ? '#f85149' : '#d29922';
+    skx.lineWidth=1.5; skx.beginPath(); skx.moveTo(x,0); skx.lineTo(x,h*0.28); skx.stroke();
+  }
+}
+
+// ---------- render ----------
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  if(mapOn) drawMap();
+  const st=stateAt(T), single=st.single;
+  const linked=new Set(); st.edges.forEach(e=>{ const [a,b]=e.split('|'); linked.add(a); linked.add(b); });
+  // observed-range rings (radius = 95th-pct connected-link distance, from the data)
+  if(useGps && proj && observedRange>0 && $('rings').checked){
+    ctx.strokeStyle='rgba(88,166,255,0.13)'; ctx.lineWidth=1;
+    for(const id of st.present){ const [x,y]=st.pos[id]; ctx.beginPath(); ctx.arc(x,y,observedRange*pxPerM()*zoom,0,6.28); ctx.stroke(); }
+  }
+  // in-range-but-unconnected pairs = algorithm-islanding candidates (could have linked, didn't)
+  if(useGps && proj && observedRange>0 && $('gaps').checked){
+    ctx.strokeStyle='rgba(248,81,73,0.6)'; ctx.lineWidth=1.4; ctx.setLineDash([4,3]);
+    const P=st.present;
+    for(let i=0;i<P.length;i++) for(let j=i+1;j<P.length;j++){ const a=P[i],b=P[j];
+      if(st.edges.has(a<b?a+'|'+b:b+'|'+a)) continue;
+      if(!st.gpsOf[a]||!st.gpsOf[b]) continue;
+      if(distM(st.gpsOf[a],st.gpsOf[b]) < observedRange){ ctx.beginPath(); ctx.moveTo(...st.pos[a]); ctx.lineTo(...st.pos[b]); ctx.stroke(); } }
+    ctx.setLineDash([]);
+  }
+  // edges
+  const rssiMode=$('rssiEdges').checked;
+  ctx.lineWidth=1.8;
+  for(const e of st.edges){ const [a,b]=e.split('|');
+    ctx.strokeStyle= rssiMode ? rssiColor(edgeRssi(st,a,b))
+                              : (single?'rgba(63,185,80,0.5)':'rgba(120,133,150,0.45)');
+    ctx.beginPath(); ctx.moveTo(...st.pos[a]); ctx.lineTo(...st.pos[b]); ctx.stroke();
+  }
+  // ghost nodes (reported as a neighbour, but no log loaded for them) — hollow, so it's obvious
+  // the link is real but that device's own data is missing
+  for(const id of st.ghosts){ const [x,y]=st.pos[id];
+    ctx.setLineDash([3,2]); ctx.strokeStyle='#8b949e'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.arc(x,y,10,0,6.28); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='#8b949e'; ctx.font='bold 9px system-ui'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(id.slice(0,4), x, y);
+  }
+  // nodes
+  for(const id of st.present){ const [x,y]=st.pos[id];
+    ctx.fillStyle = !linked.has(id) ? '#6e7681' : PAL[st.color[id]%PAL.length];
+    ctx.beginPath(); ctx.arc(x,y,10,0,6.28); ctx.fill();
+    ctx.fillStyle='#0a0d12'; ctx.font='bold 9px system-ui'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(id.slice(0,4), x, y);
+  }
+  // selected node: highlight it, its links, and each link's real GPS distance
+  if(selected && st.present.includes(selected)){
+    const [sx,sy]=st.pos[selected];
+    for(const e of st.edges){ const [a,b]=e.split('|'); if(a!==selected&&b!==selected) continue;
+      const o=a===selected?b:a, [ox,oy]=st.pos[o];
+      ctx.strokeStyle='#e3b341'; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(ox,oy); ctx.stroke();
+      const ga=st.gpsOf[selected], gb=st.gpsOf[o];
+      if(ga&&gb){ ctx.fillStyle='#e3b341'; ctx.font='bold 10px system-ui'; ctx.textAlign='center';
+        ctx.fillText(Math.round(distM(ga,gb))+' m',(sx+ox)/2,(sy+oy)/2-4); }
+    }
+    ctx.strokeStyle='#fff'; ctx.lineWidth=2.5; ctx.beginPath(); ctx.arc(sx,sy,14,0,6.28); ctx.stroke();
+    // routing marks: ring every node the selected node has a current route to, coloured by hop count;
+    // present nodes it has NO route to get a dashed red ring (physically here, logically unreachable).
+    const rt=latestRouting(selected,T);
+    if(rt){ const routeTo={}; for(const r of rt.entries){ const nid=userToNode[r.to]||r.to; if(!routeTo[nid]||r.hc<routeTo[nid].hc) routeTo[nid]=r; }
+      for(const id of st.present){ if(id===selected) continue; const [x,y]=st.pos[id]; const r=routeTo[id];
+        if(r){ const c=r.hc<=1?'#3fb950':(r.hc<=2?'#d29922':'#f0883e');
+          ctx.strokeStyle=c; ctx.lineWidth=3; ctx.setLineDash([]); ctx.beginPath(); ctx.arc(x,y,18,0,6.28); ctx.stroke();
+          ctx.fillStyle=c; ctx.font='bold 9px system-ui'; ctx.textAlign='center'; ctx.textBaseline='alphabetic'; ctx.fillText('h'+r.hc,x,y-20);
+        } else { ctx.strokeStyle='rgba(248,81,73,0.55)'; ctx.lineWidth=1.5; ctx.setLineDash([2,2]);
+          ctx.beginPath(); ctx.arc(x,y,18,0,6.28); ctx.stroke(); ctx.setLineDash([]); }
+      }
+    }
+  }
+  if(mapOn) drawScaleBar(); else drawAxes();
+  drawSpark(st);
+  drawTopoPopups();
+  // stats
+  // count only real logging devices — routing lines are keyed by USER id, not node id, so they
+  // create alias entries with no snapshots that would otherwise double the device count
+  const total=Object.keys(devices).filter(id=>devices[id].snaps.length).length;
+  $('time').textContent = tMax? new Date(T).toLocaleTimeString()+`  (${((T-tMin)/1000)|0}s / ${((tMax-tMin)/1000)|0}s)` : '—';
+  $('stats').innerHTML = !total ? 'Load session files, or click <b>Load sample</b>.' :
+    `present: <b>${st.present.length}</b> / ${total} devices<br>`+
+    `edges: <b>${st.edges.size}</b><br>`+
+    `components: <b>${st.comps}</b> ${st.present.length?(single?'<span class=ok>✓ connected</span>':'<span class=bad>✗ islanded</span>'):''}<br>`+
+    `positions: <b>${useGps?'GPS':'layout (no GPS)'}</b>`+
+    (useGps&&observedRange? `<br>observed range (95pct): <b>${Math.round(observedRange)} m</b>`+
+      Object.entries(perPhyRange).map(([k,v])=>`<br>&nbsp;&nbsp;${k}: ${v.p95} m <span class=muted>(max ${v.max}, n=${v.n})</span>`).join('') : '');
+  // selected-node link table (per-link GPS distance + PHY)
+  if(selected && st.present.includes(selected)){
+    const links=[...st.edges].filter(e=>{const[a,b]=e.split('|');return a===selected||b===selected;});
+    const sn=st.snapOf[selected];
+    const rows=links.map(e=>{ const [a,b]=e.split('|'); const o=a===selected?b:a;
+      const nb=sn.nbrs.find(n=>n.id===o); const phy=nb?nb.phy:'?';
+      // RSSI is logged by whichever end is CENTRAL — take it from either endpoint's neighbour entry
+      let rssi = (nb&&nb.rssi!=null)?nb.rssi:((st.snapOf[o]?.nbrs||[]).find(n=>n.id===selected)?.rssi);
+      const rs = (rssi!=null)?rssi+'dBm':'—';
+      const ga=st.gpsOf[selected], gb=st.gpsOf[o];
+      const d=(ga&&gb)?Math.round(distM(ga,gb))+' m':'?'; return `${o} ${phy.padEnd(5)} ${(''+rs).padEnd(7)} ${d}`; });
+    // routing table (from the libqaul routing snapshot), sorted by hop count
+    const rt=latestRouting(selected,T);
+    let routeHtml;
+    if(rt){ const rr=rt.entries.slice().sort((a,b)=>(a.hc-b.hc)||(a.to<b.to?-1:1))
+        .map(e=>`${userToNode[e.to]||e.to} via ${e.via} h${e.hc} ${e.mod}`);   // show node ids (translated)
+      routeHtml=`<br><span style="color:#8b949e">routing table (${rt.entries.length}) — to · via · hc · mod</span><br>`+(rr.join('<br>')||'none');
+    } else routeHtml=`<br><span style="color:#6e7681">no routing snapshot for this node/time</span>`;
+    $('sel').innerHTML = `<b style="color:#fff">▷ ${selected}</b>  (${links.length} links)<br><span style="color:#6e7681">peer  phy   rssi    dist</span><br>`+(rows.join('<br>')||'no links')+routeHtml+`<br><span style="color:#6e7681">click empty space to deselect</span>`;
+  } else $('sel').innerHTML = '<span style="color:#6e7681">click a node to inspect its links + distances</span>';
+  $('devlist').innerHTML = Object.keys(devices).filter(id=>devices[id].snaps.length).sort().map(id=>{
+    const on=st.present.includes(id); return `<div style="color:${on?'#c9d1d9':'#484f58'}">${id}  ${devices[id].model||''}</div>`;
+  }).join('')
+  + [...st.ghosts].sort().map(id=>`<div style="color:#8b949e">${id} <i>— seen as neighbour, no log loaded</i></div>`).join('');
+}
+function drawSpark(st){
+  skx.clearRect(0,0,sk.width,sk.height); if(!spark.length) return;
+  const maxC=Math.max(2,...spark.map(s=>s[1]));
+  // islanded shading + line
+  for(let i=0;i<spark.length;i++){ const [t,c]=spark[i]; const x=i/(spark.length-1)*sk.width;
+    if(c>1){ skx.fillStyle='rgba(248,81,73,0.12)'; skx.fillRect(x,0,sk.width/spark.length+1,sk.height); } }
+  skx.strokeStyle='#58a6ff'; skx.lineWidth=1.5; skx.beginPath();
+  spark.forEach((s,i)=>{ const x=i/(spark.length-1)*sk.width, y=sk.height-6-(s[1]-1)/(maxC-1)*(sk.height-14);
+    i?skx.lineTo(x,y):skx.moveTo(x,y); }); skx.stroke();
+  drawTopoTicks(sk.width, sk.height);
+  // playhead
+  const px=(T-tMin)/(tMax-tMin||1)*sk.width; skx.strokeStyle='#e3b341'; skx.lineWidth=1.5;
+  skx.beginPath(); skx.moveTo(px,0); skx.lineTo(px,sk.height); skx.stroke();
+}
+
+function niceStep(t){ const p=Math.pow(10,Math.floor(Math.log10(t))); return [1,2,5,10].map(m=>m*p).reduce((a,b)=>Math.abs(b-t)<Math.abs(a-t)?b:a); }
+function drawScaleBar(){   // used in map mode (a metre grid over tiles is cluttered)
+  const ppm=pxPerM()*zoom; if(!ppm) return;
+  const nice=niceStep((W*0.16)/ppm), px=nice*ppm, x0=14, y0=H-16;
+  ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.beginPath();
+  ctx.moveTo(x0,y0);ctx.lineTo(x0+px,y0); ctx.moveTo(x0,y0-4);ctx.lineTo(x0,y0+4); ctx.moveTo(x0+px,y0-4);ctx.lineTo(x0+px,y0+4); ctx.stroke();
+  ctx.fillStyle='#fff'; ctx.font='bold 11px system-ui'; ctx.textAlign='left'; ctx.textBaseline='bottom'; ctx.fillText(fmtM(nice), x0, y0-5);
+}
+function fmtM(m){ return m>=1000?(m/1000)+' km':m+' m'; }
+// Two-axis distance rulers: metre grid + tick labels along the bottom (x/east) and left (y/north),
+// origin at the deployment's SW corner. Gives a real distance reference on both axes.
+function drawAxes(){
+  if(!(useGps&&proj)) return;
+  const step=niceStep((W*0.16)/(proj.scale*zoom));   // metres per grid line at current zoom
+  const sx=m=>(proj.offX+(m-proj.xmin)*proj.scale)*zoom+panX;   // base→screen x
+  const sy=m=>(proj.offY+(proj.ymax-m)*proj.scale)*zoom+panY;   // base→screen y
+  ctx.font='10px system-ui'; ctx.fillStyle='#8b949e';
+  ctx.textAlign='center'; ctx.textBaseline='bottom';
+  for(let m=Math.ceil(proj.xmin/step)*step; m<=proj.xmax; m+=step){
+    const x=sx(m); if(x<0||x>W) continue;
+    ctx.strokeStyle='rgba(139,148,158,0.12)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+    ctx.fillText(fmtM(Math.round(m-proj.xmin)), x, H-3);
+  }
+  ctx.textAlign='left'; ctx.textBaseline='middle';
+  for(let m=Math.ceil(proj.ymin/step)*step; m<=proj.ymax; m+=step){
+    const y=sy(m); if(y<0||y>H) continue;
+    ctx.strokeStyle='rgba(139,148,158,0.12)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+    ctx.fillText(fmtM(Math.round(m-proj.ymin)), 3, y);
+  }
+  ctx.fillStyle='#c9d1d9'; ctx.textAlign='right'; ctx.textBaseline='top'; ctx.font='bold 11px system-ui';
+  ctx.fillText('N ↑  (grid = '+fmtM(step)+')', W-6, 6);
+}
+
+// ---------- playback ----------
+let last=0;
+function loop(ts){ if(playing && tMax>tMin){ const dt=(ts-last)||16; T+=dt*(+$('speed').value); if(T>tMax){T=tMin;} $('tl').value=(T-tMin)/(tMax-tMin)*1000; draw(); } last=ts; requestAnimationFrame(loop); }
+requestAnimationFrame(loop);
+$('play').onclick=()=>{ playing=!playing; $('play').textContent=playing?'⏸ pause':'▶ play'; };
+$('rings').onchange=draw; $('gaps').onchange=draw; $('rssiEdges').onchange=draw;
+$('map').onchange=e=>{ mapOn=e.target.checked; if(mapOn) computeMapT(); draw(); };
+// pan (drag), zoom (wheel, at cursor), select (click), reset (double-click)
+let md=null, moved=false;
+cv.addEventListener('mousedown', ev=>{ const r=cv.getBoundingClientRect(); md={x:ev.clientX-r.left,y:ev.clientY-r.top,panX,panY}; moved=false; });
+cv.addEventListener('mousemove', ev=>{ if(!md) return; const r=cv.getBoundingClientRect(), x=ev.clientX-r.left,y=ev.clientY-r.top;
+  if(moved||Math.hypot(x-md.x,y-md.y)>3){ moved=true; panX=md.panX+(x-md.x); panY=md.panY+(y-md.y); draw(); } });
+window.addEventListener('mouseup', ()=>{
+  if(md && !moved){ const st=stateAt(T); let best=null,bd=16;
+    for(const id of st.present){ const [px,py]=st.pos[id]; const d=Math.hypot(px-md.x,py-md.y); if(d<bd){bd=d;best=id;} }
+    selected=best; draw(); }
+  md=null; });
+cv.addEventListener('wheel', ev=>{ ev.preventDefault(); const r=cv.getBoundingClientRect(), cx=ev.clientX-r.left, cy=ev.clientY-r.top;
+  const nz=Math.max(0.3,Math.min(40, zoom*(ev.deltaY<0?1.15:1/1.15)));
+  panX=cx-(cx-panX)*(nz/zoom); panY=cy-(cy-panY)*(nz/zoom); zoom=nz; draw(); }, {passive:false});
+cv.addEventListener('dblclick', ()=>{ zoom=1; panX=0; panY=0; draw(); });
+cv.style.cursor='grab';
+$('tl').oninput=e=>{ T=tMin+(tMax-tMin)*e.target.value/1000; draw(); };
+$('files').onchange=e=>{ const fs=[...e.target.files]; devices={}; topoEvents=[]; let pending=fs.length;
+  fs.forEach(f=>{ const r=new FileReader(); r.onload=()=>{ ingest(r.result.split('\n')); if(--pending===0){} }; r.readAsText(f); }); };
+
+// ---------- sample data (same schema the app writes) ----------
+// Two tight groups of 4 that start ~450 m apart (clearly 2 islands) and converge to the SAME
+// point by step ~30 (one connected mesh). Neighbours recomputed fresh each step, cap 3.
+function loadSample(){
+  devices={};
+  const steps=46, dt=10000, t0=Date.now()-steps*dt;
+  const baseLat=53.3438, baseLon=-6.2546;
+  const startA=[baseLat+0.0016, baseLon+0.0022], startB=[baseLat-0.0016, baseLon-0.0022];
+  const idA=['0a1b2c','0d3e4f','0f5a6b','017c8d'], idB=['1a2b3c','1d4e5f','1f6a7b','118c9d'];
+  // fixed rosette offsets per member (B rotated 45° so merged groups interleave, not overlap)
+  const mk=(ids,off)=> ids.map((id,i)=>{ const a=2*Math.PI*i/ids.length+off;
+    return {id, dLat:Math.cos(a)*0.00016, dLon:Math.sin(a)*0.00024, lat:0, lon:0}; });
+  const nodes=[...mk(idA,0).map(n=>({...n,grp:'A'})), ...mk(idB,Math.PI/4).map(n=>({...n,grp:'B'}))];
+  const lines=[];
+  nodes.forEach(n=> lines.push(JSON.stringify({t:t0,dev:n.id,type:'session',model:'Sample Pixel',os:'14',qid:n.id+'aabbcc',clock_off_ms:0})));
+  for(let s=0;s<steps;s++){ const t=t0+s*dt;
+    const conv=Math.max(0,Math.min(1,(s-12)/18));        // apart until step12, fully merged by step30
+    const cA=[startA[0]+(baseLat-startA[0])*conv, startA[1]+(baseLon-startA[1])*conv];
+    const cB=[startB[0]+(baseLat-startB[0])*conv, startB[1]+(baseLon-startB[1])*conv];
+    nodes.forEach(n=>{ const c=n.grp==='A'?cA:cB; n.lat=c[0]+n.dLat; n.lon=c[1]+n.dLon; });
+    const deg={}, adj={}; nodes.forEach(n=>{deg[n.id]=0; adj[n.id]=[];});   // fresh each step
+    nodes.forEach(a=>{
+      const near=nodes.filter(b=>b.id!==a.id)
+        .map(b=>[b, Math.hypot((a.lat-b.lat)*111000,(a.lon-b.lon)*66000)])
+        .filter(([,d])=>d<120).sort((x,y)=>x[1]-y[1]);
+      const nbrs=[]; for(const [b,d] of near){ if(deg[a.id]>=3||deg[b.id]>=3) continue; deg[a.id]++;deg[b.id]++;
+        const rssi=Math.round(-45-22*Math.log10(Math.max(1,d)));   // synthetic path-loss so RSSI edges are demoable
+        nbrs.push({id:b.id,phy:'2M',rssi}); adj[a.id].push(b.id); adj[b.id].push(a.id); }
+      lines.push(JSON.stringify({t,dev:a.id,type:'snapshot',deg:nbrs.length,
+        gps:{lat:+a.lat.toFixed(6),lon:+a.lon.toFixed(6),acc:8}, nbrs}));
+    });
+    // fake routing feed: BFS from each node over the current edges → hop count + first-hop via
+    nodes.forEach(a=>{
+      const seen={[a.id]:0}, via={}, q=[a.id];
+      while(q.length){ const u=q.shift(); for(const w of adj[u]) if(seen[w]===undefined){ seen[w]=seen[u]+1; via[w]=(u===a.id)?w:via[u]; q.push(w); } }
+      const routes=[]; for(const id in seen){ if(id===a.id) continue; routes.push({to:id,via:via[id],hc:seen[id],rtt:seen[id]*15,mod:'BLE'}); }
+      lines.push(JSON.stringify({t,dev:a.id,type:'routing',routes}));
+    });
+  }
+  ingest(lines);
+}
+$('sample').onclick=loadSample;
+loadSample();
+</script>
+</body>
+</html>
