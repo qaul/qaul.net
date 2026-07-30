@@ -32,6 +32,8 @@ import qaul.sys.ble.BleOuterClass
 // even though the files moved into net/qaul/ble/ — rename later and update these imports.
 import net.qaul.ble.test.ble.manager.BleManager
 import net.qaul.ble.test.ble.util.toHexKey
+import net.qaul.ble.test.ble.metrics.SessionLogger
+import net.qaul.ble.test.ble.metrics.GpsProvider
 import net.qaul.ble.test.ble.util.hexKeyToBytes
 import net.qaul.ble.test.ble.server.GattServer
 import net.qaul.ble.test.ble.advertiser.BleAdvertiser
@@ -170,6 +172,7 @@ open class BleWrapperClass(context: Activity) {
         unregisterBtStateReceiver()
         stopEngine()
         bleStarted = false
+        BleConstants.ENGINE_READY = false
 
         val bleRes = BleOuterClass.Ble.newBuilder()
         val stopResult = BleOuterClass.BleStopResult.newBuilder()
@@ -186,11 +189,15 @@ open class BleWrapperClass(context: Activity) {
     private fun startEngine(appContext: Context) {
         BleManager.start(appContext)
         GattServer.start(appContext)          // register our service first (immediate)
-        BleScanner.autoConnect = true
 
         val handler = Handler(Looper.getMainLooper())
         handler.postDelayed(
-            { BleAdvertiser.start(appContext) },
+            {
+                BleAdvertiser.start(appContext)
+                // Inbound connections are accepted from here on. Gated on the advertiser rather
+                // than the scanner: advertising is what makes us legitimately discoverable.
+                BleConstants.ENGINE_READY = true
+            },
             BleConstants.STARTUP_ADVERTISE_DELAY_MS
         )
         val scanDelay = Random.nextLong(
@@ -305,6 +312,11 @@ open class BleWrapperClass(context: Activity) {
         if(!bleStarted) {
             bleStarted = true
             BleConstants.LOCAL_QAUL_ID = id
+            // Field-test recording starts automatically here (first point the real qaul ID is known,
+            // so the session is labelled correctly). Resumes the current file if the app was
+            // restarted mid run, see SessionLogger.SESSION_RESUME_GAP_MS.
+            SessionLogger[context].startSession(BleConstants.LOCAL_QAUL_ID.toHexKey(), 0L)
+            GpsProvider.start(context)
             logDeviceCapabilities(context)
             wireBleManagerCallbacks()
             registerBtStateReceiver(context)      // auto recover the engine across Bluetooth toggles

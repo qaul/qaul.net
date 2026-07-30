@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -7,6 +8,7 @@ import 'package:fixnum/fixnum.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hooks_riverpod/legacy.dart';
 import 'package:logging/logging.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:protobuf/protobuf.dart' as pb;
 import 'package:utils/utils.dart';
 import 'package:uuid/uuid.dart';
@@ -49,6 +51,12 @@ class LibqaulWorker {
   final _heartbeats = Queue<bool>();
   final _pendingRequests = <String, _PendingRequest>{};
 
+  // Field-test routing telemetry (debug only): periodically dump this node's routing table
+  // (from the USERS response) to a JSONL file the replay tool ingests, correlated to the BLE
+  // logs by q8id prefix. Set false for release builds.
+  static const bool _kFieldTestRouting = true;
+  File? _routingFile;
+
   void _init() async {
     if (_initialized.isCompleted) return;
     // Throws when called for some reason
@@ -75,7 +83,109 @@ class LibqaulWorker {
       _sendMessage(Modules.DEBUG, msg);
     });
 
+    if (_kFieldTestRouting) {
+      Timer.periodic(const Duration(seconds: 10), (_) => _logRoutingSnapshot());
+    }
+
     _initialized.complete(true);
+  }
+
+  // *******************************
+  // Field-test routing telemetry
+  // *******************************
+
+  /// q8id prefix (first 3 bytes of the 8-byte q8id) — matches the BLE logs' dev/peer ids.
+  /// A full user id is >14 bytes (q8id lives at [6..14]); an already-q8id is 8 bytes.
+  String _q8prefix(List<int> b) {
+    final q8 = b.length >= 14 ? b.sublist(6, 14) : b;
+    return q8.take(3).map((x) => x.toRadixString(16).padLeft(2, '0')).join();
+  }
+
+  /// Snapshot this node's routing table (via the existing USERS response) to a JSONL line.
+  /// Uses the mapped Dart [User.availableTypes] (hopCount / nodeID=via / ping) per user.
+  Future<void> _logRoutingSnapshot() async {
+    try {
+      final me = _ref.read(defaultUserProvider);
+      if (me == null || me.id.isEmpty) return; // no account yet
+      final page = await getUsers(limit: 1000);
+      if (page == null) return;
+      final routes = <Map<String, dynamic>>[];
+      for (final u in page.users) {
+        final types = u.availableTypes;
+        if (types == null) continue;
+        types.forEach((type, info) {
+          routes.add({
+            'to': _q8prefix(u.id),
+            'via': (info.nodeID != null) ? _q8prefix(info.nodeID!) : '',
+            'hc': info.hopCount ?? 1,
+            'rtt': info.ping ?? 0,
+            'mod': type.name,
+          });
+        });
+      }
+      final dev = _q8prefix(me.id);
+      final line = jsonEncode({
+        't': DateTime.now().millisecondsSinceEpoch,
+        'dev': dev,
+        'type': 'routing',
+        'routes': routes,
+      });
+      final f = await _routingLogFileFor(dev);
+      await f?.writeAsString('$line\n', mode: FileMode.append, flush: true);
+    } catch (e, s) {
+      _log.warning('routing telemetry failed: $e\n$s');
+    }
+  }
+
+  /// Resume the most recent routing log for this device if it was written within
+  /// [_kRoutingResumeGap], otherwise start a fresh one. Mirrors SessionLogger's
+  /// SESSION_RESUME_GAP_MS on the Kotlin side, so an app restart mid-run keeps appending to one
+  /// file per device while a genuinely new run gets its own.
+  static const Duration _kRoutingResumeGap = Duration(minutes: 30);
+
+  /// `yyyyMMdd-HHmmss`, matching SessionLogger's filename stamp so session-* and routing-* files
+  /// sort identically by name. (Local time, as on the Kotlin side.)
+  String _stamp(DateTime d) {
+    String p(int v, [int w = 2]) => v.toString().padLeft(w, '0');
+    return '${p(d.year, 4)}${p(d.month)}${p(d.day)}-${p(d.hour)}${p(d.minute)}${p(d.second)}';
+  }
+
+  Future<File?> _routingLogFileFor(String dev) async {
+    if (_routingFile != null) return _routingFile;
+    try {
+      // INTERNAL storage, matching SessionLogger — Android 11+ blocks adb (and run-as) from
+      // reading the external /Android/data/<pkg>/ dir, making logs written there unpullable.
+      final dir = await getApplicationSupportDirectory();
+      final sessions = Directory('${dir.path}/sessions');
+      await sessions.create(recursive: true);
+
+      final now = DateTime.now();
+      File? newest;
+      DateTime? newestAt;
+      await for (final e in sessions.list()) {
+        if (e is! File) continue;
+        final name = e.uri.pathSegments.last;
+        if (!name.startsWith('routing-$dev-') || !name.endsWith('.jsonl')) continue;
+        final at = await e.lastModified();
+        if (newestAt == null || at.isAfter(newestAt)) {
+          newest = e;
+          newestAt = at;
+        }
+      }
+
+      if (newest != null && now.difference(newestAt!).abs() < _kRoutingResumeGap) {
+        _routingFile = newest;
+        _log.info('routing log resumed → ${newest.path}');
+      } else {
+        _routingFile = await File('${sessions.path}/routing-$dev-${_stamp(now)}.jsonl')
+            .create(recursive: true);
+        _log.info('routing log started → ${_routingFile!.path}');
+      }
+      return _routingFile;
+    } catch (e) {
+      _log.warning('routing log file init failed: $e');
+      return null;
+    }
   }
 
   // *******************************
