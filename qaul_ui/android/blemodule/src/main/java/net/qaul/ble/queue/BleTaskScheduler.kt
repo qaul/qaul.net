@@ -273,6 +273,10 @@ object BleTaskScheduler {
     fun setPreferredPhy(device: BluetoothDevice, txPhy: Int, rxPhy: Int, phyOptions: Int) =
         scheduleOperation(PhyRequest(device, txPhy, rxPhy, phyOptions))
 
+    /** Read the live connection RSSI. Completion is signalled via [onRssiRead] in the GATT callback.
+     *  CENTRAL connections only, no GATT client for peripheral legs, so those are skipped. */
+    fun readRemoteRssi(device: BluetoothDevice) = scheduleOperation(ReadRssi(device))
+
 
     // Queue management
     //
@@ -550,6 +554,15 @@ object BleTaskScheduler {
                     skipOperation()
                 }
             }
+            is ReadRssi -> with(operation) {
+                val gatt = deviceGattMap[device]
+                if (gatt != null) {
+                    @SuppressLint("MissingPermission")
+                    gatt.readRemoteRssi()   // onReadRemoteRssi signals completion
+                } else {
+                    skipOperation()          // peripheral leg, no GATT client
+                }
+            }
             is NotifyCharacteristicChange -> with(operation) {
                 if (!isSubscribed(device)){
                     Log.e(TAG, "$device is no longer subscribed to the Gatt server, skipping")
@@ -755,6 +768,13 @@ object BleTaskScheduler {
                 Log.e(TAG, "PHY update failed for ${gatt.device.address}, status=$status — device may not support 2M PHY")
             }
             signalOperationComplete<PhyRequest>(gatt.device)
+        }
+
+        override fun onReadRemoteRssi(gatt: BluetoothGatt, rssi: Int, status: Int) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                notifyListeners { onRssiRead(gatt.device, rssi) }
+            }
+            signalOperationComplete<ReadRssi>(gatt.device)
         }
 
         override fun onMtuChanged(gatt: BluetoothGatt, mtu: Int, status: Int) {

@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import net.qaul.ble.AppLog
 
 class PermissionHandler(private val context: Context) {
     companion object {
@@ -17,7 +18,7 @@ class PermissionHandler(private val context: Context) {
         private const val LOCATION_ENABLE_REQ_CODE = 112
         private const val REQUEST_ENABLE_BT = 113
 
-        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.CHANGE_WIFI_STATE)
+        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.CHANGE_WIFI_STATE, Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
     private var permissionCallback: ((Boolean) -> Unit)? = null
@@ -28,40 +29,42 @@ class PermissionHandler(private val context: Context) {
         val permissionsToRequest = mutableListOf<String>()
         for (permission in REQUIRED_PERMISSIONS) {
             val permissionStatus = ContextCompat.checkSelfPermission(context, permission)
+
+            AppLog.e(
+                "PERMISSIONS",
+                "$permission status=$permissionStatus"
+            )
+
             if (permissionStatus != PackageManager.PERMISSION_GRANTED) {
                 permissionsToRequest.add(permission)
             }
         }
-
+        AppLog.e("PERMISSIONS", "To request: $permissionsToRequest")
         if (permissionsToRequest.isEmpty()) {
             // All permissions are already granted
             permissionCallback?.invoke(true)
         } else {
-            ActivityCompat.requestPermissions(context as Activity, permissionsToRequest.toTypedArray(), WIFI_PERMISSION_REQUEST_CODE)
+            ActivityCompat.requestPermissions(context as Activity, permissionsToRequest.toTypedArray(), LOCATION_PERMISSION_REQ_CODE)
         }
     }
 
     fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if (requestCode == WIFI_PERMISSION_REQUEST_CODE) {
-            var allPermissionsGranted = true
-            for (result in grantResults) {
-                if (result != PackageManager.PERMISSION_GRANTED) {
-                    allPermissionsGranted = false
-                    break
-                }
+            val allGranted = grantResults.all {
+                it == PackageManager.PERMISSION_GRANTED
             }
-            permissionCallback?.invoke(allPermissionsGranted)
+            permissionCallback?.invoke(allGranted)
         }
     }
 
     fun hasLocationPermission() : Boolean {
         val permissionStatus = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-        return permissionStatus != PackageManager.PERMISSION_GRANTED
+        return permissionStatus == PackageManager.PERMISSION_GRANTED
     }
 
     fun hasBLEPermission() : Boolean {
         val permissionStatus = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-        return permissionStatus != PackageManager.PERMISSION_GRANTED
+        return permissionStatus == PackageManager.PERMISSION_GRANTED
     }
 
     fun requestLocationPermission() {

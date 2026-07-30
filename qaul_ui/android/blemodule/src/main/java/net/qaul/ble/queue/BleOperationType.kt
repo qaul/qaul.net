@@ -23,6 +23,7 @@ data class Connect(
 ) : BleOperationType()
 data class Disconnect(override val device: BluetoothDevice) : BleOperationType()
 data class ServiceDiscovery(override val device: BluetoothDevice) : BleOperationType()
+data class ReadRssi(override val device: BluetoothDevice) : BleOperationType()   // live connection RSSI (CENTRAL only)
 
 data class CharacteristicRead(
     override val device: BluetoothDevice,
