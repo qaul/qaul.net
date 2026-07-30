@@ -713,6 +713,7 @@ class _SendButton extends StatelessWidget {
     return _wrapTooltip(
       tooltip,
       IconButton(
+        key: const ValueKey('chat-footer-send'),
         onPressed: onPressed,
         icon: const _ChatFooterSvgIcon(
           asset: _kSendSvg,

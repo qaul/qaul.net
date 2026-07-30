@@ -1,3 +1,4 @@
+import '../design_components/chat/chat_reply_bubble_preview.dart';
 import '../design_components/chat/qaul_chat_bubble.dart' show MessageStatus;
 import 'chat_user.dart';
 
@@ -16,6 +17,7 @@ class TextChatMessage extends ChatMessage {
     required this.sentAt,
     required this.receivedAt,
     required this.status,
+    this.replyPreview,
   });
 
   @override
@@ -25,6 +27,7 @@ class TextChatMessage extends ChatMessage {
   final DateTime sentAt;
   final DateTime receivedAt;
   final MessageStatus status;
+  final ChatReplyPreviewData? replyPreview;
 }
 
 /// Caller-supplied event meta, pre-formatted for i18n.

@@ -111,3 +111,51 @@ Widget buildIncomingLongUseCase(BuildContext context) {
     ),
   );
 }
+
+class _LongPressSelectionPreview extends StatefulWidget {
+  const _LongPressSelectionPreview();
+
+  @override
+  State<_LongPressSelectionPreview> createState() =>
+      _LongPressSelectionPreviewState();
+}
+
+class _LongPressSelectionPreviewState
+    extends State<_LongPressSelectionPreview> {
+  var _isSelected = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return widgetbookChatComponentFrame(
+      context,
+      alignment: Alignment.centerLeft,
+      child: GestureDetector(
+        key: const ValueKey('widgetbook-pressable-chat-bubble'),
+        behavior: HitTestBehavior.opaque,
+        onLongPress: () => setState(() => _isSelected = true),
+        onTap: _isSelected ? () => setState(() => _isSelected = false) : null,
+        child: QaulChatBubble(
+          message: QaulChatBubbleMessage(
+            content: 'Another answer',
+            sentAt: _clock.subtract(const Duration(minutes: 1)),
+            receivedAt: _clock.subtract(const Duration(minutes: 1)),
+            status: MessageStatus.sent,
+            messageType: MessageType.secondary,
+            edges: const [],
+            senderIdBase58: 'group-member-2',
+            senderDisplayName: 'Groupmember 2',
+            senderDisplayNameColor: const Color(0xFFFF9800),
+          ),
+          clock: _clock,
+          showTimestamp: true,
+          isSelected: _isSelected,
+        ),
+      ),
+    );
+  }
+}
+
+@widgetbook.UseCase(name: 'Interactive — long press', type: QaulChatBubble)
+Widget buildInteractiveLongPressUseCase(BuildContext context) {
+  return const _LongPressSelectionPreview();
+}

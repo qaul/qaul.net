@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../styles/qaul_color_sheet.dart';
 import 'chat_message.dart';
 import 'chat_reply_bubble_preview.dart';
 
@@ -40,6 +41,7 @@ class ChatBubbleStyle {
   static const verticalPadding = 6.0;
   static const replyBubbleVerticalPadding = 10.0;
   static const gapAfterReplyPreview = 6.0;
+  static const selectedOutlineWidth = 2.0;
 
   static const gapBetweenTextAndDate = 4.0;
 
@@ -196,6 +198,7 @@ class QaulChatBubble extends StatelessWidget {
     required this.message,
     required this.clock,
     this.showTimestamp = true,
+    this.isSelected = false,
   });
 
   final QaulChatBubbleMessage message;
@@ -205,6 +208,7 @@ class QaulChatBubble extends StatelessWidget {
   final DateTime clock;
 
   final bool showTimestamp;
+  final bool isSelected;
 
   Widget? _buildStatusIcon(Color textColor, double iconSize) {
     switch (message.status) {
@@ -230,6 +234,7 @@ class QaulChatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isPrimary = message.messageType == MessageType.primary;
+    final sheet = QaulColorSheet(Theme.of(context).brightness);
 
     final width = MediaQuery.sizeOf(context).width;
     final isMobile = width < kChatBubbleWidthBreakpoint;
@@ -278,6 +283,12 @@ class QaulChatBubble extends StatelessWidget {
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: borderRadius,
+            border: isSelected
+                ? Border.all(
+                    color: sheet.chatBubbleSelectionOutline,
+                    width: ChatBubbleStyle.selectedOutlineWidth,
+                  )
+                : null,
           ),
           child: Padding(
             key: const ValueKey('chat-bubble-padding'),
