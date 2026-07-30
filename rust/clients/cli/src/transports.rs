@@ -121,12 +121,7 @@ impl Transports {
         for t in &list.transports {
             println!(
                 "{:<10} | {:<20} | {:<10} | {:>7} | {:>13} | {:>11}",
-                t.id,
-                t.label,
-                t.status,
-                t.enabled,
-                t.supports_runtime_toggle,
-                t.is_local_only,
+                t.id, t.label, t.status, t.enabled, t.supports_runtime_toggle, t.is_local_only,
             );
         }
     }
@@ -135,10 +130,7 @@ impl Transports {
         if result.success {
             println!("transport '{}' updated", result.id);
         } else {
-            println!(
-                "transport '{}' update FAILED: {}",
-                result.id, result.error
-            );
+            println!("transport '{}' update FAILED: {}", result.id, result.error);
         }
     }
 }

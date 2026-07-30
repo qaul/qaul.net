@@ -280,11 +280,11 @@ pub struct RoutingV2Options {
     pub delegation_ttl: u64,
     /// interval at which a delegating user re-issues a fresh delegation entry
     pub delegation_referesh: u64,
-    /// min interval between manifest emissions from a gatewat
+    /// Minimum interval between origin `manifest_version` bumps
+    /// (spec §10.8). Under the pull-based model this rate-limits the
+    /// version-bump policy, not manifest emissions — manifests are
+    /// served on demand per §8.7 rather than pushed periodically.
     pub manifest_rate_limit: u64,
-    pub manifest_resync: u64,
-    /// no of consecutive delta emissions before a full NODE_MANIFEST is forced as a periodic re-sync
-    pub manifest_resync_count: u32,
 }
 
 impl Default for RoutingV2Options {
@@ -297,8 +297,6 @@ impl Default for RoutingV2Options {
             reboot_for_seq_num: 100,
             delegation_ttl: 21600,
             manifest_rate_limit: 60,
-            manifest_resync: 3600,
-            manifest_resync_count: 10,
             delegation_referesh: 800,
         }
     }

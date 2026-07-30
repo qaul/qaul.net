@@ -75,9 +75,7 @@ impl Crypto {
         match (verb, arg) {
             ("enable", None) => Self::set_partial(state, |req| req.enabled = Some(true)),
             ("disable", None) => Self::set_partial(state, |req| req.enabled = Some(false)),
-            ("volume", Some(a)) => {
-                Self::set_u64(state, a, |req, v| req.volume_messages = Some(v))
-            }
+            ("volume", Some(a)) => Self::set_u64(state, a, |req, v| req.volume_messages = Some(v)),
             _ => {
                 log::error!(
                     "unknown crypto config command '{}'. Valid: enable | disable | \
@@ -111,10 +109,7 @@ impl Crypto {
     fn get_events(state: &super::CliState, limit: u32) {
         let msg = proto::Crypto {
             message: Some(proto::crypto::Message::GetEventsRequest(
-                proto::GetRotationEventsRequest {
-                    since_ms: 0,
-                    limit,
-                },
+                proto::GetRotationEventsRequest { since_ms: 0, limit },
             )),
         };
         Self::send(state, msg);
@@ -228,9 +223,7 @@ impl Crypto {
             let kind = match proto::RotationEventKind::try_from(e.kind) {
                 Ok(proto::RotationEventKind::Rotated) => "Rotated",
                 Ok(proto::RotationEventKind::DrainCompleted) => "DrainCompleted",
-                Ok(proto::RotationEventKind::MessageDroppedPostDrain) => {
-                    "MessageDroppedPostDrain"
-                }
+                Ok(proto::RotationEventKind::MessageDroppedPostDrain) => "MessageDroppedPostDrain",
                 _ => "Unspecified",
             };
             let remote = bs58::encode(&e.remote_id).into_string();
