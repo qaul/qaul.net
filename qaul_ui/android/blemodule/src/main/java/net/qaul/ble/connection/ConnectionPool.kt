@@ -10,6 +10,10 @@ import net.qaul.ble.test.ble.manager.ConnectionEventListener
 import net.qaul.ble.test.ble.queue.BleTaskScheduler
 import net.qaul.ble.test.ble.util.toHexString
 import net.qaul.ble.test.ble.util.toHexKey
+import net.qaul.ble.test.ble.metrics.SessionLogger
+import net.qaul.ble.test.ble.metrics.GpsProvider
+import android.content.Context
+import net.qaul.ble.test.ble.queue.NeighbourUpdate
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
@@ -17,6 +21,7 @@ import java.util.concurrent.TimeUnit
 
 object ConnectionPool {
     private const val TAG = "ConnectionPool"
+    @Volatile private var appContext: Context? = null   // for SessionLogger / GpsProvider access
     private val connections = ConcurrentHashMap<String, BleConnection>() // MAC address → BleConnection. remoteQaulId set once READ_CHAR comes back.
     // We would likely want another map of qaul ids to connections once the qaul id is retrieved to improve lookups
     private val pendingDisconnects = mutableSetOf<String>() // addresses of intentional disconnects in flight
@@ -41,12 +46,18 @@ object ConnectionPool {
     // qaul IDs (hex) currently reachable via at least one connection — the dedup key for up/down.
     private val upNeighbours = mutableSetOf<String>()
 
-    // Per connection: the neighbour qaul id prefixes that peer last told us about.
-    // The union across all entries is our 2 hop reachable set. Keyed by device address.
-    private val neighbourLists = ConcurrentHashMap<String, Set<String>>()
-    // When we last reached MAX_CONNECTIONS-1 slot, The last slot is "held" for a
-    // bridge for RESERVE_SLOT_HOLD_MS after this instant.
-    @Volatile private var reachedReserveThresholdAt: Long = 0L
+    // Link-state table: every origin's reported neighbour list, learned via flooded SEND_NEIGHBOURS
+    // gossip (TTL-hops). Keyed by the origin's QAUL_ID_ADVERT_BYTES prefix (hex). Soft-state: an
+    // entry lives only while fresh gossip keeps arriving (dedup by seq) and is expired on a timer, no acks or resends used
+    // no longer removed on our local disconnect, because an origin can still be reachable via a another route.
+    private data class LsEntry(val seq: Int, val neighbours: Set<String>, val sealed: Boolean, val lastSeen: Long)
+    private val linkState = ConcurrentHashMap<String, LsEntry>()
+    // Our own origin key.
+    private fun selfKey() = BleConstants.LOCAL_QAUL_ID.copyOf(BleConstants.QAUL_ID_ADVERT_BYTES).toHexKey()
+    // Wraparound safe freshness: is `new` strictly ahead of `old` in the 16-bit seq space?
+    private fun seqFresher(new: Int, old: Int) = ((new - old) and 0xFFFF) in 1 until 0x8000
+
+    @Volatile private var sealedSince: Long = 0L   // 0 = not currently sealed
 
     private val reaper = Executors.newSingleThreadScheduledExecutor { r ->
         Thread(r, "connection-aliveness-watchdog").apply { isDaemon = true }
@@ -57,6 +68,8 @@ object ConnectionPool {
     @Volatile private var snapshotTask: ScheduledFuture<*>? = null
 
     @Volatile private var pingTask: ScheduledFuture<*>? = null
+
+    @Volatile private var identityRetryTask: ScheduledFuture<*>? = null
 
     @Volatile private var radioHealthTask: ScheduledFuture<*>? = null
 
@@ -88,6 +101,23 @@ object ConnectionPool {
     }
 
     /**
+     * Field-test telemetry: one snapshot line per tick with our degree, neighbour qaul-ID prefixes,
+     * their PHY, and current GPS fix. For reconstructing the global mesh graph + positions offline.
+     */
+    private fun logTelemetrySnapshot() {
+        val ctx = appContext ?: return
+        try {
+            val conns = connections.values.toList()
+            val nbrs = conns.map { c ->
+                Triple(c.remoteQaulId?.toHexKey()?.take(6) ?: "unresolved", c.rssi, c.phyLabel)
+            }
+            SessionLogger[ctx].snapshot(conns.size, nbrs, GpsProvider.last())
+        } catch (e: Exception) {
+            Log.e(TAG, "telemetry snapshot failed", e)
+        }
+    }
+
+    /**
      * Status for the on device debug overlay. Reads non draining scan values so it can refresh
      * faster than the 10s log without stealing its window.
      */
@@ -109,10 +139,10 @@ object ConnectionPool {
         sb.append("scan=${BleScanner.isScanning} adv=${BleAdvertiser.isAdvertising} capPaused=${BleAdvertiser.pausedForCap}\n")
         sb.append("scanResults(total)=${BleScanner.totalScanResults}  lastResult=$sinceStr")
         if (BleConstants.ANTI_ISLANDING) {
-            // 2hop = distinct peers reachable via a neighbour (triangle closers we'd skip while holding
-            // the reserve slot); lists = how many neighbours have sent us their list.
-            val twoHop = neighbourLists.values.flatten().toSet().size
-            sb.append("\n2hop=$twoHop  reserveHold=${isReserveHoldActive()}  lists=${neighbourLists.size}")
+            // hop = distinct peers reachable via a neighbour; lists = how many neighbours have sent
+            // us their list; open = exact free-slot count over the neighborhood
+            val twoHop = linkState.values.flatMap { it.neighbours }.toSet().size
+            sb.append("\nhop=$twoHop  open=${openSlots()}  lists=${linkState.size}")
         }
         return sb.toString()
     }
@@ -149,7 +179,11 @@ object ConnectionPool {
         try {
             val now = System.currentTimeMillis()
             connections.values.toList().forEach { conn ->
-                if (conn.remoteQaulId == null && now - conn.createdAt > BleConstants.UNRESOLVED_TIMEOUT_MS) {
+                // Measured from when the handshake could actually start, not from createdAt
+                // this reaper is only for established links whose handshake never finished
+                val startedAt = conn.handshakeStartedAt
+                if (startedAt != null && conn.remoteQaulId == null &&
+                    now - startedAt > BleConstants.UNRESOLVED_TIMEOUT_MS) {
                     Log.w(TAG, "Unresolved reaper: ${conn.device.address}/${conn.role} never resolved in ${BleConstants.UNRESOLVED_TIMEOUT_MS}ms — dropping")
                     disconnect(conn.device)
                 }
@@ -159,9 +193,23 @@ object ConnectionPool {
         }
     }
 
+    /** Re-send SEND_ID on every still unresolved link (no-op if the transport is ready and the
+     *  ID has arrived). */
+    private fun retryUnresolvedIdentity() {
+        try {
+            connections.values.toList().forEach { it.resendIdentity() }
+        } catch (e: Exception) {
+            Log.e(TAG, "Identity retry failed", e)
+        }
+    }
+
     private fun pingAll() {
         try {
-            connections.values.toList().forEach { it.sendPing() }
+            connections.values.toList().forEach {
+                it.sendPing()
+                // Refresh live RSSI for field-test telemetry currently (CENTRAL only)
+                if (it.role == BleRole.CENTRAL) BleTaskScheduler.readRemoteRssi(it.device)
+            }
         } catch (e: Exception) { Log.e(TAG, "pingAll failed", e) }
     }
 
@@ -178,11 +226,20 @@ object ConnectionPool {
         } catch (e: Exception) { Log.e(TAG, "radio health check failed", e) }
     }
 
-    fun start() {
+    fun start(context: Context) {
+        appContext = context.applicationContext
         BleTaskScheduler.registerListener(connectionEventListener)
-        // Diagnostic topology snapshot every 10s — no behavioural effect, safe to remove later.
+        // Diagnostic topology snapshot — no behavioural effect, safe to remove later.
+        // And takes a telemetry snapshot to the field test SessionLogger
         snapshotTask = reaper.scheduleWithFixedDelay(
-            { logTopologySnapshot() }, 10_000L, 10_000L, TimeUnit.MILLISECONDS
+            { logTopologySnapshot(); logTelemetrySnapshot(); expireLinkState(); stage2Check() }, 3_000L, 3_000L, TimeUnit.MILLISECONDS
+        )
+        // Soft-state keepalive: periodically re broadcast our own neighbour list even if
+        // unchanged, so peers' link-state timeouts don't starve on a static mesh and in case of lost packets. The change-driven
+        // broadcast still fires immediately on connect/disconnect for fast updates.
+        reaper.scheduleWithFixedDelay(
+            { if (BleConstants.ANTI_ISLANDING) try { broadcastNeighbourList() } catch (e: Exception) { Log.e(TAG, "keepalive broadcast failed", e) } },
+            BleConstants.NEIGHBOUR_KEEPALIVE_MS, BleConstants.NEIGHBOUR_KEEPALIVE_MS, TimeUnit.MILLISECONDS
         )
         // Unresolved-connection reaper: ENABLED. Drops stuck/zombie handshakes (remoteQaulId == null
         // after UNRESOLVED_TIMEOUT_MS). Safe to run always — it never targets resolved connections.
@@ -206,6 +263,13 @@ object ConnectionPool {
             BleConstants.PING_INTERVAL_MS,
             TimeUnit.MILLISECONDS
         )
+        // does it matter that this keeps going after all resolved?
+        identityRetryTask = reaper.scheduleWithFixedDelay(
+            { retryUnresolvedIdentity() },
+            BleConstants.IDENTITY_RETRY_MS,
+            BleConstants.IDENTITY_RETRY_MS,
+            TimeUnit.MILLISECONDS
+        )
 
         radioHealthTask = reaper.scheduleWithFixedDelay(
             { checkRadioHealth() },
@@ -222,6 +286,8 @@ object ConnectionPool {
         livenessReaperTask = null
         pingTask?.cancel(false)
         pingTask = null
+        identityRetryTask?.cancel(false)
+        identityRetryTask = null
         radioHealthTask?.cancel(false)
         radioHealthTask = null
         snapshotTask?.cancel(false)
@@ -244,7 +310,7 @@ object ConnectionPool {
         val newConnection = BleConnection(device, role, phy)
         newConnection.onQaulIdResolved = { dev, qaulId -> handleQaulIdResolved(dev, qaulId) }
         newConnection.onMessageResult = { messageId, success -> onMessageResult?.invoke(messageId, success) }
-        newConnection.onNeighboursReceived = { dev, list -> handleNeighboursReceived(dev, list) }
+        newConnection.onNeighboursReceived = { dev, update -> handleNeighboursReceived(dev, update) }
         connections[device.address] = newConnection
         newConnection.connect()
         Log.i(TAG, "Connection added for ${device.address} (${connections.size} total)")
@@ -265,7 +331,13 @@ object ConnectionPool {
         }
         conn.disconnect()
         conn.failPendingMessages()   // report any in-flight sends to this peer as failed
-        neighbourLists.remove(device.address)   // forget this peer's 2 hop list
+        // Telemtry disconnect logging
+        appContext?.let { ctx ->
+            SessionLogger[ctx].disconnect(
+                conn.remoteQaulId?.toHexKey()?.take(6) ?: "unresolved",
+                "intentional", System.currentTimeMillis() - conn.createdAt
+            )
+        }
         Log.i(TAG, "Connection removed for ${device.address} (${connections.size} remaining)")
         // Re-evaluate after removal: only reports DOWN if no other leg still holds this qaul ID.
         refreshNeighbourDown(conn.remoteQaulId)
@@ -281,7 +353,6 @@ object ConnectionPool {
      */
     private fun notifyConnectionsChanged() {
         if (getSize() >= BleConstants.MAX_CONNECTIONS) BleAdvertiser.pause() else BleAdvertiser.resume()
-        updateReserveThreshold()   // track when we enter/leave the reserve slot state
         onConnectionsChanged?.invoke()
     }
 
@@ -337,7 +408,7 @@ object ConnectionPool {
      * CENTRAL entry. Both peers run the same comparison, so they agree on which connection survives.
      * TODO: Look into enhanced decision making for tie breaking, for example, the more powerful device should likely be CENTRAL as they can use a smaller connection interval, increasing throughput. there may be other factors as well
      */
-    // TODO: Investigate bug where dual connection resolution only occurs after a message is sent
+
     private fun handleQaulIdResolved(device: BluetoothDevice, qaulId: ByteArray) {
         markNeighbourUp(qaulId)
 
@@ -346,10 +417,12 @@ object ConnectionPool {
         }
         if (existing == null || existing.device.address == device.address) return
 
-        // Timing A: PERIPHERAL resolves after CENTRAL already exists
         val localShouldBeCentral = compareUnsigned(BleConstants.LOCAL_QAUL_ID, qaulId) < 0
-        val toDisconnect = if (localShouldBeCentral) device else existing.device
-        Log.w(TAG, "Tiebreaker (SEND_ID path): local ${if (localShouldBeCentral) "wins" else "loses"} CENTRAL, dropping ${toDisconnect.address}")
+        // Choose by ROLE,, lower qaul id should be central currently.
+        val keepRole = if (localShouldBeCentral) BleRole.CENTRAL else BleRole.PERIPHERAL
+        val justResolved = connections[device.address]
+        val toDisconnect = if (justResolved?.role == keepRole) existing.device else device
+        Log.w(TAG, "Tiebreaker (SEND_ID path): local ${if (localShouldBeCentral) "wins" else "loses"} CENTRAL, keeping $keepRole leg, dropping ${toDisconnect.address}")
         disconnect(toDisconnect)
     }
 
@@ -404,12 +477,26 @@ object ConnectionPool {
     }
 
     // --------------------------------------------------------------------------------------------
-    // BLE Topology Management: Anti-islanding (add-only so far).
+    // BLE Topology Management:
     // --------------------------------------------------------------------------------------------
 
     /** Store a peer's reported neighbour list (its entries are QAUL_ID_ADVERT_BYTES prefixes). */
-    private fun handleNeighboursReceived(device: BluetoothDevice, neighbours: List<ByteArray>) {
-        neighbourLists[device.address] = neighbours.map { it.toHexKey() }.toSet()
+    private fun handleNeighboursReceived(device: BluetoothDevice, u: NeighbourUpdate) {
+        if (u.ttl < 1 || u.ttl > BleConstants.TTL) return           // out of range TTL (parser also guards)
+        val originKey = u.origin.toHexKey()
+        if (originKey == selfKey()) return                          // our own list echoed back, ignore
+        val prev = linkState[originKey]
+        if (prev != null && !seqFresher(u.seq, prev.seq)) return    // stale or duplicate, drop
+        linkState[originKey] = LsEntry(
+            u.seq, u.neighbours.map { it.toHexKey() }.toSet(), u.sealed, System.currentTimeMillis()
+        )
+        if (u.ttl > 1) relayNeighbourList(device, u)
+    }
+
+    /** Expire link state entries we haven't heard a fresh update for. Runs on the periodic tick. */ //TODO: Evaluate timings
+    private fun expireLinkState() {
+        val cutoff = System.currentTimeMillis() - BleConstants.LINK_STATE_TIMEOUT_MS
+        linkState.entries.removeIf { it.value.lastSeen < cutoff }
     }
 
     /** Our current neighbour list: each resolved neighbour's QAUL_ID_ADVERT_BYTES. */
@@ -420,32 +507,133 @@ object ConnectionPool {
     private fun broadcastNeighbourList() {
         if (!BleConstants.ANTI_ISLANDING) return
         val prefixes = currentNeighbourPrefixes()
-        connections.values.forEach { it.sendNeighbourList(prefixes) }
-    }
-
-    /** Is [prefix] (an advertised qaul ID prefix) already reachable via one of our neighbours (2 hops)?
-     *  If true, connecting to it would just close a triangle, false, then it's a bridge to something new! */
-    fun is2HopReachable(prefix: ByteArray): Boolean {
-        val key = prefix.copyOf(BleConstants.QAUL_ID_ADVERT_BYTES).toHexKey()
-        return neighbourLists.values.any { it.contains(key) }
-    }
-
-    /** True while we're holding the last free slot for a bridge: we're at MAX-1 slots and still within
-     *  the hold window. During this window the scanner skips 2-hop-reachable (redundant) candidates. */
-    fun isReserveHoldActive(): Boolean {
-        if (getSize() < BleConstants.MAX_CONNECTIONS - 1) return false
-        val since = reachedReserveThresholdAt
-        return since != 0L && System.currentTimeMillis() - since < BleConstants.RESERVE_SLOT_HOLD_MS
-    }
-
-    /** Track when we entered the reserve state. */
-    private fun updateReserveThreshold() {
-        if (getSize() == BleConstants.MAX_CONNECTIONS - 1) {
-            if (reachedReserveThresholdAt == 0L) reachedReserveThresholdAt = System.currentTimeMillis()
-        } else {
-            reachedReserveThresholdAt = 0L
+        val localId = BleConstants.LOCAL_QAUL_ID.copyOf(BleConstants.QAUL_ID_ADVERT_BYTES)
+        val seq = BleConstants.nextNeighbourSeq()
+        val sealed = openSlots() == 0   // our own "whole 3-hop view full" state, for Stage 2's election
+        connections.values.forEach { it.sendNeighbourList(localId, seq, BleConstants.TTL, sealed, prefixes)
         }
     }
+
+
+    /** Relay a received neighbour list onward to the rest of our connections*/
+    private fun relayNeighbourList(receivedFrom: BluetoothDevice, neighboursUpdate: NeighbourUpdate) {
+        if (!BleConstants.ANTI_ISLANDING) return
+        connections.values.forEach {
+            if (it.device.address != receivedFrom.address){   //  not back to sender
+                it.sendNeighbourList(neighboursUpdate.origin, neighboursUpdate.seq, neighboursUpdate.ttl-1, neighboursUpdate.sealed, neighboursUpdate.neighbours)
+            }
+        }
+    }
+
+    /** Is [prefix] (an advertised qaul ID prefix) already reachable within the neighborhood?
+     *  If true, connecting to it would just close a triangle, false, then it's a bridge to something new! */
+    fun is3HopReachable(prefix: ByteArray): Boolean {
+        val key = prefix.copyOf(BleConstants.QAUL_ID_ADVERT_BYTES).toHexKey()
+        return linkState.values.any { it.neighbours.contains(key) }
+    }
+
+    /** deg(key) as known from the gossip view: for a node we've heard broadcast FROM, we check their broadcasted count
+     *  an origin we have no entry for defaults to 0. Self uses our true real connection
+     *  count. */
+    private fun degreeOf(key: String): Int =
+        if (key == selfKey()) connections.size else (linkState[key]?.neighbours?.size ?: 0)
+
+    /** Sum of free slots (CAP − degree) across every node in the link-state ball +
+     *  ourselves. optionally with a hypotheticalPeer edge added first. This is
+     *  the exact recomputation both the Stage 1 fill-gate and Stage 2 share, so
+     *  adding is the exact inverse of dropping which is needed so both checks agree*/
+    private fun openSlots(hypotheticalPeer: String? = null): Int {
+        val self = selfKey()
+        val ball = linkState.keys + self + (hypotheticalPeer?.let { setOf(it) } ?: emptySet())
+        return ball.sumOf { key ->
+            val base = degreeOf(key)
+            val bumped = if (hypotheticalPeer != null && (key == self || key == hypotheticalPeer)) base + 1 else base
+            (BleConstants.MAX_CONNECTIONS - bumped.coerceAtMost(BleConstants.MAX_CONNECTIONS)).coerceAtLeast(0)
+        }
+    }
+
+    /** Stage 1 fill-gate: should we form an edge to the peer advertising [prefix]?
+     *  - Reject outright if my slots are full, or the PEER's are of course
+     *  - MERGE (peer unreachable in our neighbourhood view) → always accept, it's a bridge to something new.
+     *  - REDUNDANT (peer already reachable in that view) → accept only if the edge would NOT seal the
+     *    whole neighborhood, via the open slot recomputation above. */
+
+
+    fun shouldAcceptEdge(prefix: ByteArray): Boolean = fillGateDecision(prefix).first
+
+    /** The fill gate decision plus a short reason, reason just for telemetry/replay markers.
+     *  @return accept? to the reason it was/wasnt accepted. */
+    fun fillGateDecision(prefix: ByteArray): Pair<Boolean, String> {
+        if (connections.size >= BleConstants.MAX_CONNECTIONS) return false to "local slots full"
+        val key = prefix.copyOf(BleConstants.QAUL_ID_ADVERT_BYTES).toHexKey()
+        if (degreeOf(key) >= BleConstants.MAX_CONNECTIONS) return false to "peer slots full"
+        if (!is3HopReachable(prefix)) return true to "merge"
+        return if (openSlots(hypotheticalPeer = key) > 0) true to "redundant, slots remain"
+               else false to "redundant, would seal"
+    }
+
+    /** openSlots() for callers outside the pool (telemetry only). */
+    fun openSlotCount(): Int = openSlots()
+
+
+    /** Stage 2 reactive drop: **/
+
+    private fun stage2Check(){
+        if (!BleConstants.ANTI_ISLANDING || !BleConstants.STAGE2_PROACTIVE_DROP) return
+        if (openSlots() > 0){
+            sealedSince = 0L
+            return
+        }
+        if (sealedSince == 0L){
+            sealedSince = System.currentTimeMillis() // just became sealed, start the stability clock
+            return
+        }
+
+        if (System.currentTimeMillis() - sealedSince < BleConstants.T_STABLE_MS) return // hasnt been stable long enough
+
+        val candidates = connections.values.filter { isTriangle(it) }
+        if (candidates.isEmpty()) return // no triangle safe edge here, another node or stage 3's problem
+
+        if (!isElectedNode()) return    // election: only the lowest-qaul-id node in the
+        // 2-hop neighborhood actually acts this round (correctness floor)
+
+        val victim = candidates.filter { it.rssi != null }.minByOrNull { it.rssi!! } ?: candidates.first()
+
+        if (!isTriangle(victim)) return
+
+        val peerKey = victim.remoteQaulId?.toHexKey()?.take(6) ?: "unresolved"
+        Log.i(TAG, "Stage 2: dropping $peerKey (${victim.device.address}) — sealed + triangle-safe, rssi=${victim.rssi}")
+        appContext?.let { ctx ->
+            SessionLogger[ctx].topoEvent(
+                2, "drop", peerKey,
+                "sealed ${BleConstants.T_STABLE_MS / 1000}s + triangle-safe (rssi=${victim.rssi ?: "n/a"})",
+                0
+            )
+        }
+        disconnect(victim.device)                      // existing disconnect() path already does the
+        sealedSince = 0L
+    }
+
+    private fun isTriangle(conn: BleConnection): Boolean {
+        val peerKey = conn.remoteQaulId?.copyOf(BleConstants.QAUL_ID_ADVERT_BYTES)?.toHexKey() ?: return false
+        val isTriangle = connections.values.any { other ->
+            other.device.address != conn.device.address &&
+                    linkState[other.remoteQaulId?.copyOf(BleConstants.QAUL_ID_ADVERT_BYTES)
+                        ?.toHexKey()]
+                        ?.neighbours?.contains(peerKey) == true
+        }
+        return isTriangle
+    }
+
+    private fun isElectedNode(): Boolean {
+        val sealedRivals = linkState.filterValues { it.sealed }.keys
+        return sealedRivals.all { it >= selfKey() }
+    }
+
+
+
+
+
 
     // Send
 
@@ -481,7 +669,15 @@ object ConnectionPool {
                 // Unexpected drop — clean up, then re-evaluate neighbour reachability
                 val conn = connections.remove(device.address)
                 conn?.failPendingMessages()   // fail in-flight sends to this peer → libqaul re-routes
-                neighbourLists.remove(device.address)   // forget this peer's 2 hop list
+                // telemetry
+                conn?.let { c ->
+                    appContext?.let { ctx ->
+                        SessionLogger[ctx].disconnect(
+                            c.remoteQaulId?.toHexKey()?.take(6) ?: "unresolved",
+                            "unexpected", System.currentTimeMillis() - c.createdAt
+                        )
+                    }
+                }
                 Log.i(TAG, "Unexpected disconnect cleaned up for ${device.address}")
                 refreshNeighbourDown(conn?.remoteQaulId)
             }
@@ -511,6 +707,10 @@ object ConnectionPool {
             }
         }
 
+        override fun onRssiRead(device: BluetoothDevice, rssi: Int) {
+            connections[device.address]?.rssi = rssi
+        }
+
         override fun onServicesDiscovered(device: BluetoothDevice) {
             connections[device.address]?.onServicesDiscovered()
         }
@@ -538,6 +738,9 @@ object ConnectionPool {
                     conn.remoteQaulId = value
                     Log.i(TAG, "Qaul ID received from ${device.address}: ${value.toHexString()}")
                     markNeighbourUp(value)
+                    appContext?.let { ctx -> // telemetry
+                        SessionLogger[ctx].connect(value.toHexKey().take(6), conn.phyLabel, null, conn.role.name)
+                    }
                 }
 
                 if (existing != null && existing.device.address != device.address) {

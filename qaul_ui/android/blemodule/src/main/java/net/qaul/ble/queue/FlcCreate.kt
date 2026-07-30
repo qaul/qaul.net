@@ -86,11 +86,21 @@ object FlcCreate {
 
     /**
      * Create a SEND_NEIGHBOURS message: our current neighbour list as concatenated fixed length
-     * qaul ID prefixes. Used for 2-hop topology awareness.
-     * Tiny, at most 10 bytes worth of prefixes, so it always fits in a single chunk.
+     * qaul ID prefixes. Nodes forward the flc until ttl runs out. Used for building topology awareness.
+     * [sealed] is the ORIGIN's own "my whole 3-hop view is full" state (bit 0 of a reserved flags
+     * byte, room left for more stuff later). relayers forward it unchanged, since it
+     * describes the origin, not the hop that's relaying it. Needed for Stage 2's election: a rival's
+     * sealed status isn't derivable from our own linkState view (their 3-hop ball can extend well
+     * outside ours), so it has to be signalled here.
+     * Wire format:
+     * [FLC Header: 1 Bytes]-[Origin ID: 5 Bytes]-[sequence number: 2 Bytes]-[TTL: 1 Byte]-[Flags: 1 Byte]-[Neighbour IDs: 5 x No. neighbours Bytes]
      */
-    fun createSendNeighbours(prefixes: List<ByteArray>): ByteArray {
+    fun createSendNeighbours(originId: ByteArray, seq: Int, ttl: Int, sealed: Boolean, prefixes: List<ByteArray>): ByteArray {
         var message = byteArrayOf(FlowControlMessageType.SEND_NEIGHBOURS.value)
+        message += originId
+        message += byteArrayOf((seq shr 8).toByte(), seq.toByte())   // 2 byte big-endian, same pattern as creareRequestChunks
+        message += byteArrayOf(ttl.toByte())
+        message += byteArrayOf(if (sealed) 0x01.toByte() else 0x00.toByte())
         prefixes.forEach { message += it }
         return message
     }
