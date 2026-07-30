@@ -19,10 +19,7 @@ fn main() {
     let proto_root = &["../../protobuf/proto_definitions"];
 
     // --- Pass 1: compile common.proto by itself so qaul.common.rs is generated ---
-    match prost_build::Config::new().compile_protos(
-        &["common/common.proto"],
-        proto_root,
-    ) {
+    match prost_build::Config::new().compile_protos(&["common/common.proto"], proto_root) {
         Ok(_) => {
             fs::copy(
                 Path::new(&out_dir).join("qaul.common.rs"),
