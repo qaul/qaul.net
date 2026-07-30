@@ -64,7 +64,10 @@ impl RpcCommand for DebugSubcmd {
                 }
                 Some(proto::debug::Message::HeartbeatResponse(_)) => {
                     if json {
-                        println!("{}", serde_json::to_string_pretty(&json!({ "heartbeat": true }))?);
+                        println!(
+                            "{}",
+                            serde_json::to_string_pretty(&json!({ "heartbeat": true }))?
+                        );
                     } else {
                         println!("Heartbeat response received");
                     }

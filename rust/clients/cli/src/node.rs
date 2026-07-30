@@ -41,7 +41,12 @@ impl Node {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(state, buf, super::rpc::proto::Modules::Node.into(), "".to_string());
+        Rpc::send_message(
+            state,
+            buf,
+            super::rpc::proto::Modules::Node.into(),
+            "".to_string(),
+        );
     }
 
     /// Process received RPC message

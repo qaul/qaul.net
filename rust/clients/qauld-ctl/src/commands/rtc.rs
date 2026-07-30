@@ -47,8 +47,8 @@ impl RpcCommand for RtcSubcmd {
     }
 
     fn decode_response(&self, data: &[u8], json: bool) -> Result<(), Box<dyn std::error::Error>> {
-        let envelope = proto::RtcRpc::decode(data)
-            .map_err(|e| format!("rtc: malformed response: {e}"))?;
+        let envelope =
+            proto::RtcRpc::decode(data).map_err(|e| format!("rtc: malformed response: {e}"))?;
         match envelope.message {
             Some(proto::rtc_rpc::Message::RtcSessionListResponse(list)) => {
                 if json {
@@ -86,10 +86,7 @@ impl RpcCommand for RtcSubcmd {
     }
 }
 
-fn management(
-    group_id: &str,
-    option: u32,
-) -> Result<proto::RtcRpc, Box<dyn std::error::Error>> {
+fn management(group_id: &str, option: u32) -> Result<proto::RtcRpc, Box<dyn std::error::Error>> {
     Ok(proto::RtcRpc {
         message: Some(proto::rtc_rpc::Message::RtcSessionManagement(
             proto::RtcSessionManagement {
