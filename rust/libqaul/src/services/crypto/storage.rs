@@ -551,7 +551,6 @@ impl CryptoStorage {
         // State already exists in QaulState.services.crypto
     }
 
-
     /// get DB refs for user account
     pub fn get_db_ref(state: &crate::QaulState, account_id: PeerId) -> CryptoAccount {
         // check if user account data exists

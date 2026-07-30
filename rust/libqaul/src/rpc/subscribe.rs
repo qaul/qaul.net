@@ -36,10 +36,10 @@ use prost::Message;
 use super::Rpc;
 use crate::utilities::timestamp::Timestamp;
 
-/// Import generated protobuf types for the subscribe wire format.
-pub use qaul_proto::qaul_rpc_subscribe as proto;
 /// Top-level Modules enum (we tag every emitted event with this module).
 use crate::rpc::proto as rpc_proto;
+/// Import generated protobuf types for the subscribe wire format.
+pub use qaul_proto::qaul_rpc_subscribe as proto;
 
 /// Information we keep about each active subscriber.
 #[derive(Clone, Debug)]
@@ -108,12 +108,7 @@ pub struct Subscribe {}
 impl Subscribe {
     /// Handle an incoming `SubscribeRequest`. The subscription stays open
     /// indefinitely; events are pushed asynchronously by `fire`.
-    pub fn rpc(
-        state: &crate::QaulState,
-        data: Vec<u8>,
-        user_id: Vec<u8>,
-        request_id: String,
-    ) {
+    pub fn rpc(state: &crate::QaulState, data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
         // Decode the inner Subscribe envelope. We don't currently use any
         // of the fields, but we still parse so a malformed request is
         // logged rather than silently accepted.
@@ -127,10 +122,7 @@ impl Subscribe {
                     match state.subscriptions.subscribers.write() {
                         Ok(mut subs) => {
                             subs.insert(request_id, info);
-                            log::info!(
-                                "Subscribe: {} active subscriber(s)",
-                                subs.len()
-                            );
+                            log::info!("Subscribe: {} active subscriber(s)", subs.len());
                         }
                         Err(e) => {
                             log::error!("Subscribe: subscribers lock poisoned: {}", e);
@@ -138,9 +130,7 @@ impl Subscribe {
                     }
                 }
                 Some(proto::subscribe::Message::Event(_)) => {
-                    log::warn!(
-                        "Subscribe: client sent an Event variant; ignoring"
-                    );
+                    log::warn!("Subscribe: client sent an Event variant; ignoring");
                 }
                 None => {
                     log::warn!("Subscribe: empty oneof; ignoring");
@@ -406,10 +396,7 @@ mod tests {
         }
         assert_eq!(state.subscriptions.len(), 3);
 
-        super::Rpc::client_disconnected(
-            &state,
-            &["a".to_string(), "b".to_string()],
-        );
+        super::Rpc::client_disconnected(&state, &["a".to_string(), "b".to_string()]);
         assert_eq!(state.subscriptions.len(), 1);
     }
 

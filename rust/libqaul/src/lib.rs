@@ -14,10 +14,12 @@ use std::collections::BTreeMap;
 use std::fs::File;
 use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
+use tokio::sync::mpsc::UnboundedReceiver;
 
-use crate::router_v2::{identity::Multikey, init::init_router_v2, RouterV2State};
+use crate::router_v2::OutboundMsg;
+use crate::router_v2::{init::init_router_v2, RouterV2State};
 use crate::rpc::authentication::AuthenticationState;
 use crate::rpc::sys::SysRpcState;
 use crate::rpc::RpcState;
@@ -131,6 +133,10 @@ impl QaulState {
         self.router.read().unwrap().clone()
     }
 
+    pub fn get_router_v2(&self) -> Option<Arc<RouterV2State>> {
+        self.router_v2.read().unwrap().clone()
+    }
+
     /// Get a snapshot of the current node identity.
     pub fn get_node(&self) -> Arc<node::NodeIdentity> {
         self.node.read().unwrap().clone()
@@ -230,6 +236,9 @@ pub struct Libqaul {
     /// RPC channel receiver (from external to libqaul)
     rpc_receiver: Receiver<Vec<u8>>,
 
+    /// Outbound frames from router_v2,
+    router_v2_rx: Mutex<Option<UnboundedReceiver<OutboundMsg>>>,
+
     /// SYS channel receiver (from external to libqaul)
     sys_receiver: Receiver<Vec<u8>>,
 
@@ -324,29 +333,22 @@ impl Libqaul {
         // Also initialize global router state for backward compatibility
         Router::init(&*qaul_state);
 
-        let router_v2_handle = {
-            let node = qaul_state.node.read().unwrap();
-            let host_kp = node.keys.clone();
-            let host_mk = Multikey::from(node.keys.public());
-            drop(node);
-
-            let storage_path = storage::Storage::get_path(&qaul_state);
-            init_router_v2(host_kp, host_mk, &storage_path)
+        let config_v2 = {
+            let config = storage.config.read().unwrap();
+            config.v2_routing.clone()
         };
-        *qaul_state.router_v2.write().unwrap() = Some(Arc::clone(&router_v2_handle.state));
 
-        let mut outbound_rx = router_v2_handle.rx;
-        tokio::spawn(async move {
-            while let Some(msg) = outbound_rx.recv().await {
-                log::debug!(
-                    "router_v2 → qaul_info: peer={} transport={:?} bytes={}",
-                    msg.peer,
-                    msg.transport,
-                    msg.bytes.len(),
-                );
-                // TODO: hand msg.bytes to qaul_info for msg.peer/msg.transport.
-            }
-        });
+        let mut router_v2_rx = None;
+        if config_v2.enabled {
+            let router_v2_handle = {
+                let host_kp = crate::node::Node::get_keys(&qaul_state);
+                let storage_path = storage::Storage::get_path(&qaul_state);
+                init_router_v2(host_kp, &storage_path, config_v2)
+            };
+            *qaul_state.router_v2.write().unwrap() = Some(Arc::clone(&router_v2_handle.state));
+
+            router_v2_rx = Some(router_v2_handle.rx);
+        }
 
         // Bring back the sessions of accounts that were left logged in
         rpc::authentication::Authentication::restore_sessions(&qaul_state);
@@ -402,6 +404,7 @@ impl Libqaul {
             rpc_receiver,
             sys_receiver,
             initialized: AtomicBool::new(false),
+            router_v2_rx: Mutex::new(router_v2_rx),
         });
 
         instance
@@ -606,6 +609,7 @@ impl Libqaul {
         let mut routing_table_ticker = Ticker::new(Duration::from_millis(1000));
         let mut messaging_ticker = Ticker::new(Duration::from_millis(10));
         let mut retransmit_ticker = Ticker::new(Duration::from_millis(1000));
+        let mut router_v2_ticker = Ticker::new(Duration::from_millis(100));
         // No rotation ticker: session rotation is clock-free. Draining
         // sessions are retired by nonce in the decrypt path (see
         // `after_decrypt_rotation`), not by a periodic wall-clock scan.
@@ -633,6 +637,7 @@ impl Libqaul {
             &mut routing_table_ticker,
             &mut messaging_ticker,
             &mut retransmit_ticker,
+            &mut router_v2_ticker,
         )
         .await;
     }
@@ -656,6 +661,7 @@ impl Libqaul {
         routing_table_ticker: &mut Ticker,
         messaging_ticker: &mut Ticker,
         retransmit_ticker: &mut Ticker,
+        router_v2_ticker: &mut Ticker,
     ) {
         // Take a snapshot of the router state once; it doesn't change after init.
         let router = self.state.get_router();
@@ -674,6 +680,7 @@ impl Libqaul {
                 let connection_fut = connection_ticker.next().fuse();
                 let routing_table_fut = routing_table_ticker.next().fuse();
                 let messaging_fut = messaging_ticker.next().fuse();
+                let router_v2_fut = router_v2_ticker.next().fuse();
                 let retransmit_fut = retransmit_ticker.next().fuse();
 
                 pin_mut!(
@@ -690,6 +697,7 @@ impl Libqaul {
                     connection_fut,
                     routing_table_fut,
                     messaging_fut,
+                    router_v2_fut,
                     retransmit_fut,
                 );
 
@@ -699,9 +707,18 @@ impl Libqaul {
                             libp2p::swarm::SwarmEvent::ConnectionEstablished{peer_id,  ..} => {
                                 log::trace!("lan connection established: {:?}", peer_id);
                             }
-                            libp2p::swarm::SwarmEvent::ConnectionClosed{peer_id, ..} => {
+                            libp2p::swarm::SwarmEvent::ConnectionClosed{peer_id, num_established, ..} => {
                                 log::trace!("lan connection closed: {:?}", peer_id);
-                                router.neighbours.delete(ConnectionModule::Lan, peer_id);
+                                // we're using this to guard against if a peer holds multiple connections
+                                // so that it doesn't remove when others are still connected
+                                if num_established == 0 {
+                                        if let Some(r_v2) = self.state.get_router_v2() {
+                                            r_v2.remove_neighbour_transport(peer_id, ConnectionModule::Lan);
+                                        } else {
+                                            router.neighbours.delete(ConnectionModule::Lan, peer_id);
+                                        }
+                                    }
+
                             },
                             libp2p::swarm::SwarmEvent::Behaviour(behaviour) => {
                                 lan.swarm.behaviour_mut().process_events(&*self.state, behaviour);
@@ -736,9 +753,15 @@ impl Libqaul {
                                     _ => {}
                                 }
                             }
-                            libp2p::swarm::SwarmEvent::ConnectionClosed{peer_id, endpoint, ..} => {
+                            libp2p::swarm::SwarmEvent::ConnectionClosed{peer_id, endpoint, num_established, ..} => {
                                 log::trace!("internet connection closed: {:?}", peer_id);
-                                router.neighbours.delete(ConnectionModule::Internet, peer_id);
+                                if num_established == 0 {
+                                        if let Some(r_v2) = self.state.get_router_v2() {
+                                            r_v2.remove_neighbour_transport(peer_id, ConnectionModule::Internet);
+                                        } else {
+                                            router.neighbours.delete(ConnectionModule::Internet, peer_id);
+                                        }
+                                    }
 
                                 match endpoint {
                                     libp2p::core::ConnectedPoint::Dialer{address, ..} =>{
@@ -767,6 +790,7 @@ impl Libqaul {
                     _connection_event = connection_fut => Some(EventType::ReConnecting),
                     _routing_table_event = routing_table_fut => Some(EventType::RoutingTable),
                     _messaging_event = messaging_fut => Some(EventType::Messaging),
+                    _router_v2_event = router_v2_fut => Some(EventType::RouterV2Outbound),
                     _retransmit_event = retransmit_fut => Some(EventType::Retransmit),
                 }
             };
@@ -993,6 +1017,32 @@ impl Libqaul {
                 // Messaging::schedule_message — all routed through QaulState.
                 services::messaging::retransmit::MessagingRetransmit::process(&*self.state);
             }
+            EventType::RouterV2Outbound => {
+                const MAX_PER_TICK: usize = 64;
+                let mut guard = self.router_v2_rx.lock().unwrap();
+                if let Some(rx) = guard.as_mut() {
+                    for _ in 0..MAX_PER_TICK {
+                        let Ok(msg) = rx.try_recv() else { break };
+                        match msg.transport {
+                            ConnectionModule::Local | ConnectionModule::None => {
+                                log::debug!(
+                                    "router_v2: dropping frame for unsendable transport {:?}",
+                                    msg.transport
+                                );
+                            }
+                            transport => Self::send_via_module(
+                                &*self.state,
+                                transport,
+                                msg.peer,
+                                msg.bytes,
+                                lan,
+                                internet,
+                                ble,
+                            ),
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -1061,6 +1111,7 @@ enum EventType {
     RoutingTable,
     Messaging,
     Retransmit,
+    RouterV2Outbound,
 }
 
 /// Legacy entry point — removed in favor of `Libqaul::new()` + `Libqaul::run()`.

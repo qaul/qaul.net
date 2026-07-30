@@ -201,14 +201,14 @@ impl ChatStorage {
             return;
         };
 
-        let mut chat_message: rpc_proto::ChatMessage =
-            match bincode::deserialize(&chat_msg_fromdb) {
-                Ok(v) => v,
-                Err(e) => {
-                    log::error!("Error deserializing chat message: {}", e);
-                    return;
-                }
-            };
+        let mut chat_message: rpc_proto::ChatMessage = match bincode::deserialize(&chat_msg_fromdb)
+        {
+            Ok(v) => v,
+            Err(e) => {
+                log::error!("Error deserializing chat message: {}", e);
+                return;
+            }
+        };
         mutate(&mut chat_message);
 
         Self::save_chat_message_record(db_ref, &key, &chat_message, flush_mode);
@@ -216,7 +216,11 @@ impl ChatStorage {
 
     /// check if messages exists
     #[allow(dead_code)]
-    pub fn messages_exist(state: &crate::QaulState, user_id: &PeerId, message_ids: &Vec<Vec<u8>>) -> bool {
+    pub fn messages_exist(
+        state: &crate::QaulState,
+        user_id: &PeerId,
+        message_ids: &Vec<Vec<u8>>,
+    ) -> bool {
         // get data base of user account
         let db_ref = Self::get_db_ref(state, user_id.clone());
         for id in message_ids {
@@ -516,7 +520,11 @@ impl ChatStorage {
     }
 
     /// Get chat messages of a specific conversation from data base
-    pub fn get_messages(state: &crate::QaulState, account_id: PeerId, group_id: Vec<u8>) -> rpc_proto::ChatConversationList {
+    pub fn get_messages(
+        state: &crate::QaulState,
+        account_id: PeerId,
+        group_id: Vec<u8>,
+    ) -> rpc_proto::ChatConversationList {
         // create empty messages list
         let mut message_list: Vec<rpc_proto::ChatMessage> = Vec::new();
 
@@ -639,8 +647,12 @@ impl ChatStorage {
             Err(e) => {
                 log::error!("Error opening chat_messages tree: {}", e);
                 return ChatAccountDb {
-                    messages: db.open_tree("__fallback_chat_messages").expect("fallback tree"),
-                    message_ids: db.open_tree("__fallback_chat_message_ids").expect("fallback tree"),
+                    messages: db
+                        .open_tree("__fallback_chat_messages")
+                        .expect("fallback tree"),
+                    message_ids: db
+                        .open_tree("__fallback_chat_message_ids")
+                        .expect("fallback tree"),
                 };
             }
         };
@@ -650,7 +662,9 @@ impl ChatStorage {
                 log::error!("Error opening chat_message_ids tree: {}", e);
                 return ChatAccountDb {
                     messages,
-                    message_ids: db.open_tree("__fallback_chat_message_ids").expect("fallback tree"),
+                    message_ids: db
+                        .open_tree("__fallback_chat_message_ids")
+                        .expect("fallback tree"),
                 };
             }
         };

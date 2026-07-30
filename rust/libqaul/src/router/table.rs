@@ -172,12 +172,10 @@ impl RoutingTableState {
 
 impl RoutingTable {
     /// get online users info
-    pub fn get_online_users_info(router: &super::RouterState) -> BTreeMap<Vec<u8>, Vec<RoutingConnectionEntry>> {
-        let routing_table = router
-            .routing_table
-            .inner
-            .read()
-            .unwrap();
+    pub fn get_online_users_info(
+        router: &super::RouterState,
+    ) -> BTreeMap<Vec<u8>, Vec<RoutingConnectionEntry>> {
+        let routing_table = router.routing_table.inner.read().unwrap();
         let mut users: BTreeMap<Vec<u8>, Vec<RoutingConnectionEntry>> = BTreeMap::new();
         for (user_id, user) in routing_table.table.iter() {
             if !user.connections.is_empty() {
@@ -188,12 +186,12 @@ impl RoutingTable {
     }
 
     /// send protobuf RPC routing table list
-    pub fn rpc_send_routing_table(state: &crate::QaulState, router: &super::RouterState, request_id: String) {
-        let routing_table = router
-            .routing_table
-            .inner
-            .read()
-            .unwrap();
+    pub fn rpc_send_routing_table(
+        state: &crate::QaulState,
+        router: &super::RouterState,
+        request_id: String,
+    ) {
+        let routing_table = router.routing_table.inner.read().unwrap();
         let mut table_list = Vec::with_capacity(routing_table.table.len());
 
         // loop through all user table entries

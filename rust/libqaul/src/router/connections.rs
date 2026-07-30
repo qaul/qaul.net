@@ -121,7 +121,13 @@ impl ConnectionTableState {
 
         // try Bluetooth module
         if let Some(rtt) = neighbours_state.get_rtt(&neighbour_id, &ConnectionModule::Ble1m) {
-            self.fill_received_routing_info(ConnectionModule::Ble1m, neighbour_id, rtt, info, config);
+            self.fill_received_routing_info(
+                ConnectionModule::Ble1m,
+                neighbour_id,
+                rtt,
+                info,
+                config,
+            );
         }
     }
 
@@ -436,18 +442,45 @@ impl ConnectionTable {
         info: &[router_net_proto::RoutingInfoEntry],
     ) {
         // try Lan module
-        if let Some(rtt) = router.neighbours.get_rtt(&neighbour_id, &ConnectionModule::Lan) {
-            Self::fill_received_routing_info(router, ConnectionModule::Lan, neighbour_id, rtt, info);
+        if let Some(rtt) = router
+            .neighbours
+            .get_rtt(&neighbour_id, &ConnectionModule::Lan)
+        {
+            Self::fill_received_routing_info(
+                router,
+                ConnectionModule::Lan,
+                neighbour_id,
+                rtt,
+                info,
+            );
         }
 
         // try Internet module
-        if let Some(rtt) = router.neighbours.get_rtt(&neighbour_id, &ConnectionModule::Internet) {
-            Self::fill_received_routing_info(router, ConnectionModule::Internet, neighbour_id, rtt, info);
+        if let Some(rtt) = router
+            .neighbours
+            .get_rtt(&neighbour_id, &ConnectionModule::Internet)
+        {
+            Self::fill_received_routing_info(
+                router,
+                ConnectionModule::Internet,
+                neighbour_id,
+                rtt,
+                info,
+            );
         }
 
         // try Bluetooth module
-        if let Some(rtt) = router.neighbours.get_rtt(&neighbour_id, &ConnectionModule::Ble1m) {
-            Self::fill_received_routing_info(router, ConnectionModule::Ble1m, neighbour_id, rtt, info);
+        if let Some(rtt) = router
+            .neighbours
+            .get_rtt(&neighbour_id, &ConnectionModule::Ble1m)
+        {
+            Self::fill_received_routing_info(
+                router,
+                ConnectionModule::Ble1m,
+                neighbour_id,
+                rtt,
+                info,
+            );
         }
     }
 
@@ -519,9 +552,13 @@ impl ConnectionTable {
         // get access to the connection table
         let mut connection_table;
         match module {
-            ConnectionModule::Internet => connection_table = router.connections.internet.write().unwrap(),
+            ConnectionModule::Internet => {
+                connection_table = router.connections.internet.write().unwrap()
+            }
             ConnectionModule::Lan => connection_table = router.connections.lan.write().unwrap(),
-            ConnectionModule::Ble1m | ConnectionModule::BleCoded => connection_table = router.connections.ble.write().unwrap(),
+            ConnectionModule::Ble1m | ConnectionModule::BleCoded => {
+                connection_table = router.connections.ble.write().unwrap()
+            }
             ConnectionModule::Local => return,
             ConnectionModule::None => return,
         }
@@ -624,7 +661,10 @@ impl ConnectionTable {
     }
 
     /// insert local routes into routing table
-    fn local_routes_to_intermediary_table(router: &super::RouterState, mut table: RoutingTable) -> RoutingTable {
+    fn local_routes_to_intermediary_table(
+        router: &super::RouterState,
+        mut table: RoutingTable,
+    ) -> RoutingTable {
         // get local routes
         let local = router.connections.local.read().unwrap();
 
@@ -645,9 +685,13 @@ impl ConnectionTable {
         // get connections table
         let mut connection_table;
         match conn {
-            ConnectionModule::Internet => connection_table = router.connections.internet.write().unwrap(),
+            ConnectionModule::Internet => {
+                connection_table = router.connections.internet.write().unwrap()
+            }
             ConnectionModule::Lan => connection_table = router.connections.lan.write().unwrap(),
-            ConnectionModule::Ble1m | ConnectionModule::BleCoded => connection_table = router.connections.ble.write().unwrap(),
+            ConnectionModule::Ble1m | ConnectionModule::BleCoded => {
+                connection_table = router.connections.ble.write().unwrap()
+            }
             ConnectionModule::Local => return table,
             ConnectionModule::None => return table,
         }
@@ -716,7 +760,10 @@ impl ConnectionTable {
 
     /// find best entry
     /// and remove all old entries
-    fn find_best_connection(router: &super::RouterState, user: &mut UserEntry) -> (bool, Option<NeighbourEntry>) {
+    fn find_best_connection(
+        router: &super::RouterState,
+        user: &mut UserEntry,
+    ) -> (bool, Option<NeighbourEntry>) {
         Self::find_best_connection_with_config(user, &router.configuration)
     }
 
@@ -789,7 +836,11 @@ impl ConnectionTable {
     }
 
     /// send protobuf RPC connections list
-    pub fn rpc_send_connections_list(state: &crate::QaulState, router: &super::RouterState, request_id: String) {
+    pub fn rpc_send_connections_list(
+        state: &crate::QaulState,
+        router: &super::RouterState,
+        request_id: String,
+    ) {
         // create connections list
         let connections_list = proto::ConnectionsList {
             lan: Self::rpc_create_connection_module_list(router, ConnectionModule::Lan),
@@ -828,8 +879,12 @@ impl ConnectionTable {
         let connection_table;
         match conn {
             ConnectionModule::Lan => connection_table = router.connections.lan.read().unwrap(),
-            ConnectionModule::Internet => connection_table = router.connections.internet.read().unwrap(),
-            ConnectionModule::Ble1m | ConnectionModule::BleCoded => connection_table = router.connections.ble.read().unwrap(),
+            ConnectionModule::Internet => {
+                connection_table = router.connections.internet.read().unwrap()
+            }
+            ConnectionModule::Ble1m | ConnectionModule::BleCoded => {
+                connection_table = router.connections.ble.read().unwrap()
+            }
             ConnectionModule::Local => return Vec::new(),
             ConnectionModule::None => return Vec::new(),
         }
