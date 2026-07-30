@@ -21,7 +21,7 @@ use tokio::sync::mpsc;
 use crate::{
     connections::ConnectionModule,
     router_v2::{
-        codec::CodecError,
+        codec::{messages::ManifestEntry, CodecError},
         identity::Multikey,
         index::{
             IndexAllocator, IndexDictionary, MirrorIndexDictionary, ReintroductionTracker, Space,
@@ -30,7 +30,7 @@ use crate::{
         seq::SeqNum,
         table::{Nodes, RoutingTable, Users},
     },
-    storage::configuration::RoutingV2Options,
+    storage::{configuration::RoutingV2Options, manifest_state::HostManifestState},
 };
 
 pub mod codec;
@@ -42,6 +42,7 @@ pub mod propagation;
 pub mod receive;
 pub mod seq;
 pub mod table;
+pub mod init;
 
 #[derive(Debug, thiserror::Error)]
 pub enum RoutingV2Error {
@@ -179,6 +180,28 @@ impl RouterV2State {
             last_manifest_emission_ms: RwLock::new(0u64),
         };
         (state, rx)
+    }
+
+    pub fn restore_host_manifest(&self, persisted: &HostManifestState) {
+        let mut manifest = self.manifest.write().unwrap();
+        manifest.manifest_version = persisted.manifest_version;
+        manifest.set_gateway(persisted.is_gateway);
+        manifest.set_entries(
+            persisted
+                .entries
+                .iter()
+                .map(|e| ManifestEntry {
+                    user_id: e.user_id,
+                    timeout: e.timeout,
+                    entry_signature: {
+                        let mut arr = [0u8; 64];
+                        arr.copy_from_slice(&e.entry_signature);
+                        arr
+                    },
+                    profile_version: e.profile_version,
+                })
+                .collect(),
+        );
     }
 
     /// Spec 4.2

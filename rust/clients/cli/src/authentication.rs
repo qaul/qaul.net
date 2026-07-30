@@ -133,7 +133,12 @@ impl Auth {
         let mut buf = Vec::with_capacity(proto_message.encoded_len());
         proto_message.encode(&mut buf).unwrap();
 
-        Rpc::send_message(state, buf, super::rpc::proto::Modules::Auth.into(), "".to_string());
+        Rpc::send_message(
+            state,
+            buf,
+            super::rpc::proto::Modules::Auth.into(),
+            "".to_string(),
+        );
     }
 
     /// Handle logout

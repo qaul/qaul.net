@@ -13,10 +13,10 @@ use futures::{SinkExt, StreamExt};
 use prost::Message;
 use tokio_util::codec::{Framed, LengthDelimitedCodec};
 
-#[cfg(unix)]
-use tokio::net::UnixStream;
 #[cfg(windows)]
 use tokio::net::TcpStream;
+#[cfg(unix)]
+use tokio::net::UnixStream;
 
 use crate::proto;
 
@@ -156,9 +156,7 @@ mod embedded {
     }
 
     impl EmbeddedTransport {
-        pub async fn start(
-            storage_path: String,
-        ) -> Result<Self, Box<dyn std::error::Error>> {
+        pub async fn start(storage_path: String) -> Result<Self, Box<dyn std::error::Error>> {
             let instance = libqaul::api::start_instance_in_thread(storage_path, None);
             let deadline = std::time::Instant::now() + Duration::from_secs(30);
             while !instance.is_initialized() {
@@ -172,11 +170,7 @@ mod embedded {
                     "Community Node {}",
                     libqaul::utilities::timestamp::Timestamp::get_timestamp()
                 );
-                libqaul::node::user_accounts::UserAccounts::create(
-                    &*instance.state,
-                    name,
-                    None,
-                );
+                libqaul::node::user_accounts::UserAccounts::create(&*instance.state, name, None);
             }
             Ok(Self { instance })
         }
