@@ -79,8 +79,11 @@ impl Chat {
                 match chat.message {
                     Some(rpc_proto::chat::Message::ConversationRequest(conversation_request)) => {
                         // get messages of a conversation from data base
-                        let conversation_list =
-                            ChatStorage::get_messages(state, account_id, conversation_request.group_id);
+                        let conversation_list = ChatStorage::get_messages(
+                            state,
+                            account_id,
+                            conversation_request.group_id,
+                        );
 
                         // pack message
                         let proto_message = rpc_proto::Chat {
@@ -110,18 +113,20 @@ impl Chat {
                         // get user account from user_id
                         let user_account;
                         match PeerId::from_bytes(&user_id) {
-                            Ok(user_id_decoded) => match UserAccounts::get_by_id(state,user_id_decoded) {
-                                Some(account) => {
-                                    user_account = account;
+                            Ok(user_id_decoded) => {
+                                match UserAccounts::get_by_id(state, user_id_decoded) {
+                                    Some(account) => {
+                                        user_account = account;
+                                    }
+                                    None => {
+                                        log::error!(
+                                            "user account id not found: {:?}",
+                                            user_id_decoded.to_base58()
+                                        );
+                                        return;
+                                    }
                                 }
-                                None => {
-                                    log::error!(
-                                        "user account id not found: {:?}",
-                                        user_id_decoded.to_base58()
-                                    );
-                                    return;
-                                }
-                            },
+                            }
                             Err(e) => {
                                 log::error!("user account id could'nt be encoded: {:?}", e);
                                 return;

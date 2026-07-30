@@ -9,7 +9,7 @@
 use std::{fs, path::Path};
 
 use serde::{Deserialize, Serialize};
-use tracing::{info, error};
+use tracing::{error, info};
 
 /// One delegation entry as it lives on disk. Matches the wire `ManifestEntry`
 #[derive(Debug, Clone, Serialize, Deserialize)]

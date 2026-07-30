@@ -12,10 +12,13 @@ use qaul_messaging::QaulMessagingEvent;
 
 use crate::connections::ConnectionModule;
 use crate::router::{info::RouterInfo, neighbours::Neighbours};
+use crate::router_v2::identity::Multikey;
+use crate::router_v2::propagation;
 use crate::services::messaging::Messaging;
+use crate::utilities::timestamp::Timestamp;
 
 /// Handle incoming QaulInfo behaviour events
-pub fn qaul_info_event(state: &crate::QaulState, event: QaulInfoEvent, _module: ConnectionModule) {
+pub fn qaul_info_event(state: &crate::QaulState, event: QaulInfoEvent, module: ConnectionModule) {
     match event {
         // received a RoutingInfo message
         QaulInfoEvent::Message(message) => {
@@ -25,14 +28,30 @@ pub fn qaul_info_event(state: &crate::QaulState, event: QaulInfoEvent, _module: 
             );
 
             // forward to router
-            let rs = state.get_router();
-            RouterInfo::received(state, &rs, message);
+            if let Some(router_v2) = state.get_router_v2() {
+                if let Err(e) = router_v2.received(
+                    message.received_from,
+                    module,
+                    None,
+                    &message.data,
+                    Timestamp::get_timestamp(),
+                ) {
+                    log::error!("router_v2 received failed: {e}");
+                }
+            } else {
+                let rs = state.get_router();
+                RouterInfo::received(state, &rs, message);
+            }
         }
     }
 }
 
 /// Handle incoming QaulMessaging behaviour events
-pub fn qaul_messaging_event(state: &crate::QaulState, event: QaulMessagingEvent, _module: ConnectionModule) {
+pub fn qaul_messaging_event(
+    state: &crate::QaulState,
+    event: QaulMessagingEvent,
+    _module: ConnectionModule,
+) {
     match event {
         // received a messaging message
         QaulMessagingEvent::Message(message) => {
@@ -65,9 +84,20 @@ pub fn ping_event(state: &crate::QaulState, event: Event, module: ConnectionModu
             let rtt_micros = u32::try_from(
                 duration.as_secs() * 1_000_000 + (duration.subsec_nanos() / 1_000) as u64,
             );
-            let rs = state.get_router();
-            let micros = rtt_micros.unwrap_or(u32::MAX);
-            Neighbours::update_node(state, &rs, module, peer, micros, None);
+            if let Some(router_v2) = state.get_router_v2() {
+                match Multikey::try_from_peer_id(&peer) {
+                    Ok(mk) => {
+                        if router_v2.add_neighbour_transport(peer, mk.to_id(), module) {
+                            propagation::on_neighbour_connect(&router_v2, peer, module);
+                        }
+                    }
+                    Err(e) => log::warn!("v2: cannot derive node_id for {peer}: {e}"),
+                }
+            } else {
+                let rs = state.get_router();
+                let micros = rtt_micros.unwrap_or(u32::MAX);
+                Neighbours::update_node(state, &rs, module, peer, micros, None);
+            }
         }
         // Event {
         //     peer,

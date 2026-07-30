@@ -74,7 +74,12 @@ impl Member {
     }
 
     /// invite member from rpc command
-    pub fn invite(state: &crate::QaulState, account_id: &PeerId, group_id: &[u8], user_id: &PeerId) -> Result<bool, String> {
+    pub fn invite(
+        state: &crate::QaulState,
+        account_id: &PeerId,
+        group_id: &[u8],
+        user_id: &PeerId,
+    ) -> Result<bool, String> {
         // get group
         let mut group;
         match GroupStorage::get_group(state, account_id.to_owned(), group_id) {
@@ -129,7 +134,12 @@ impl Member {
         };
 
         if let Some(user_account) = UserAccounts::get_by_id(state, *account_id) {
-            Group::send_notify_message(state, &user_account, user_id, proto_message.encode_to_vec());
+            Group::send_notify_message(
+                state,
+                &user_account,
+                user_id,
+                proto_message.encode_to_vec(),
+            );
 
             // save new user
             let member = super::GroupMember {
@@ -142,7 +152,12 @@ impl Member {
 
             group.members.insert(user_id_bytes, member);
 
-            GroupStorage::save_group(state, user_account.id, group, GroupSaveReason::MembershipChanged);
+            GroupStorage::save_group(
+                state,
+                user_account.id,
+                group,
+                GroupSaveReason::MembershipChanged,
+            );
         } else {
             return Err("user account problem".to_string());
         }
@@ -181,7 +196,12 @@ impl Member {
         };
 
         if let Some(user_account) = UserAccounts::get_by_id(state, *account_id) {
-            Group::send_notify_message(state, &user_account, &receiver, proto_message.encode_to_vec());
+            Group::send_notify_message(
+                state,
+                &user_account,
+                &receiver,
+                proto_message.encode_to_vec(),
+            );
 
             // remove invited
             GroupStorage::remove_invite_deferred(state, account_id.to_owned(), group_id);
@@ -192,7 +212,12 @@ impl Member {
         // save group into data base if invite was accepted
         if accept {
             // save group to data base
-            GroupStorage::save_group_deferred(state, account_id.to_owned(), invite.group, GroupSaveReason::MembershipChanged);
+            GroupStorage::save_group_deferred(
+                state,
+                account_id.to_owned(),
+                invite.group,
+                GroupSaveReason::MembershipChanged,
+            );
         }
         GroupStorage::flush_account(state, account_id);
 
@@ -218,7 +243,12 @@ impl Member {
     }
 
     /// remove member from rpc command
-    pub fn remove(state: &crate::QaulState, account_id: &PeerId, group_id: &[u8], user_id: &PeerId) -> Result<bool, String> {
+    pub fn remove(
+        state: &crate::QaulState,
+        account_id: &PeerId,
+        group_id: &[u8],
+        user_id: &PeerId,
+    ) -> Result<bool, String> {
         // get user account from node
         let user_account;
         match UserAccounts::get_by_id(state, *account_id) {
@@ -259,7 +289,12 @@ impl Member {
             group.revision += 1;
 
             // save to data base
-            GroupStorage::save_group(state, account_id.to_owned(), group, GroupSaveReason::MembershipChanged);
+            GroupStorage::save_group(
+                state,
+                account_id.to_owned(),
+                group,
+                GroupSaveReason::MembershipChanged,
+            );
         } else {
             return Err("this user is not member of this group".to_string());
         }
@@ -379,7 +414,12 @@ impl Member {
                 return Ok(true);
             }
         };
-        GroupStorage::save_group(state, account_id.to_owned(), group, GroupSaveReason::MembershipChanged);
+        GroupStorage::save_group(
+            state,
+            account_id.to_owned(),
+            group,
+            GroupSaveReason::MembershipChanged,
+        );
 
         // save event
         Self::save_group_event_message(
@@ -424,7 +464,12 @@ impl Member {
         }
 
         group.members.remove(&sender_id_bytes);
-        GroupStorage::save_group(state, account_id.to_owned(), group, GroupSaveReason::MembershipChanged);
+        GroupStorage::save_group(
+            state,
+            account_id.to_owned(),
+            group,
+            GroupSaveReason::MembershipChanged,
+        );
 
         Ok(true)
     }
@@ -497,7 +542,12 @@ impl Member {
                 return Ok(true);
             }
         };
-        GroupStorage::save_group(state, account_id.to_owned(), group, GroupSaveReason::StatusChanged);
+        GroupStorage::save_group(
+            state,
+            account_id.to_owned(),
+            group,
+            GroupSaveReason::StatusChanged,
+        );
 
         // save event
         Self::save_group_event_message(

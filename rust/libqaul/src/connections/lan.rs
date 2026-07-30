@@ -251,7 +251,12 @@ impl Transport for Lan {
         Ok(())
     }
 
-    fn send_qaul_info_message(&mut self, _state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>) {
+    fn send_qaul_info_message(
+        &mut self,
+        _state: &crate::QaulState,
+        peer_id: PeerId,
+        data: Vec<u8>,
+    ) {
         if !self.is_enabled() {
             return;
         }
@@ -261,7 +266,12 @@ impl Transport for Lan {
             .send_qaul_info_message(peer_id, data);
     }
 
-    fn send_qaul_messaging_message(&mut self, _state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>) {
+    fn send_qaul_messaging_message(
+        &mut self,
+        _state: &crate::QaulState,
+        peer_id: PeerId,
+        data: Vec<u8>,
+    ) {
         if !self.is_enabled() {
             return;
         }
@@ -271,14 +281,16 @@ impl Transport for Lan {
             .send_qaul_messaging_message(peer_id, data);
     }
 
-    fn publish_floodsub(&mut self, _state: &crate::QaulState, topic: floodsub::Topic, data: Vec<u8>) {
+    fn publish_floodsub(
+        &mut self,
+        _state: &crate::QaulState,
+        topic: floodsub::Topic,
+        data: Vec<u8>,
+    ) {
         if !self.is_enabled() {
             return;
         }
-        self.swarm
-            .behaviour_mut()
-            .floodsub
-            .publish(topic, data);
+        self.swarm.behaviour_mut().floodsub.publish(topic, data);
     }
 
     fn listeners(&self) -> Vec<Multiaddr> {

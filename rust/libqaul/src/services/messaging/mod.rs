@@ -31,7 +31,6 @@ use qaul_messaging::QaulMessagingReceived;
 /// Import protobuf message definition
 pub use qaul_proto::qaul_net_messaging as proto;
 
-
 /// Messaging Scheduling Structure
 pub struct ScheduledMessage {
     receiver: PeerId,
@@ -41,7 +40,6 @@ pub struct ScheduledMessage {
     scheduled_dtn: bool,
     is_dtn: bool,
 }
-
 
 // TODO: check if it wouldn't be easier to store
 // the message
@@ -320,7 +318,10 @@ impl MessagingState {
             }
         };
         let unconfirmed = self.unconfirmed.write().unwrap();
-        if let Err(e) = unconfirmed.unconfirmed.insert(container.signature.clone(), entry_bytes) {
+        if let Err(e) = unconfirmed
+            .unconfirmed
+            .insert(container.signature.clone(), entry_bytes)
+        {
             log::error!("{}", e);
         }
         if let Err(e) = unconfirmed.unconfirmed.flush() {
@@ -439,7 +440,10 @@ impl MessagingState {
         }
         mutate(&mut msg);
         let serialized = bincode::serialize(&msg).unwrap();
-        if let Err(_e) = unconfirmed.unconfirmed.insert(signature.to_vec(), serialized) {
+        if let Err(_e) = unconfirmed
+            .unconfirmed
+            .insert(signature.to_vec(), serialized)
+        {
             log::error!("error updating unconfirmed table");
         } else if let Err(_e) = unconfirmed.unconfirmed.flush() {
             log::error!("error updating unconfirmed table");
@@ -490,13 +494,14 @@ impl Messaging {
 
                 match v {
                     Some(unconfirmed_bytes) => {
-                        let unconfirmed: UnConfirmedMessage = match bincode::deserialize(&unconfirmed_bytes) {
-                            Ok(u) => u,
-                            Err(e) => {
-                                log::error!("Failed to deserialize unconfirmed message: {}", e);
-                                return;
-                            }
-                        };
+                        let unconfirmed: UnConfirmedMessage =
+                            match bincode::deserialize(&unconfirmed_bytes) {
+                                Ok(u) => u,
+                                Err(e) => {
+                                    log::error!("Failed to deserialize unconfirmed message: {}", e);
+                                    return;
+                                }
+                            };
 
                         // check message and decide what to do
                         match unconfirmed.message_type {
@@ -602,15 +607,18 @@ impl Messaging {
         // reaches Transport. Probing before encrypt avoids cloning `data` on
         // the common (already-established) path — file chunks can be tens of KB.
         if Crypto::session_pending_handshake(state, user_account, receiver.clone()) {
-            state.services.messaging.enqueue_pending_plaintext(PendingPlaintext {
-                user_id: user_account.id.to_bytes(),
-                receiver_id: receiver.to_bytes(),
-                data,
-                message_type,
-                message_id: message_id.to_vec(),
-                needs_confirmation: message_needs_confirmation,
-                queued_at: Timestamp::get_timestamp(),
-            });
+            state
+                .services
+                .messaging
+                .enqueue_pending_plaintext(PendingPlaintext {
+                    user_id: user_account.id.to_bytes(),
+                    receiver_id: receiver.to_bytes(),
+                    data,
+                    message_type,
+                    message_id: message_id.to_vec(),
+                    needs_confirmation: message_needs_confirmation,
+                    queued_at: Timestamp::get_timestamp(),
+                });
             log::debug!(
                 "queued outbound message for {} (peer handshake in progress)",
                 receiver.to_base58()
@@ -633,7 +641,8 @@ impl Messaging {
 
         // encrypt data
         let encrypted_message: proto::Encrypted;
-        let encryption_result = Crypto::encrypt(state, data, user_account.to_owned(), receiver.clone());
+        let encryption_result =
+            Crypto::encrypt(state, data, user_account.to_owned(), receiver.clone());
 
         match encryption_result {
             Some(encrypted) => {
@@ -898,7 +907,9 @@ impl Messaging {
     ///
     /// Check if there is a message scheduled for sending.
     ///
-    pub fn check_scheduler(state: &crate::QaulState) -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
+    pub fn check_scheduler(
+        state: &crate::QaulState,
+    ) -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
         let message_item: Option<ScheduledMessage>;
 
         // get scheduled messaging buffer
@@ -912,7 +923,10 @@ impl Messaging {
             let rs = state.get_router();
             if let Some(route) = rs.routing_table.get_route_to_user(message.receiver) {
                 // update unconfirmed table set scheduled flag.
-                state.services.messaging.on_scheduled_message(&message.container.signature);
+                state
+                    .services
+                    .messaging
+                    .on_scheduled_message(&message.container.signature);
 
                 // create binary message
                 let data = message.container.encode_to_vec();
@@ -973,7 +987,7 @@ impl Messaging {
             bs58::encode(signature).into_string()
         );
 
-        if let Some(user) = UserAccounts::get_by_id(state,user_id.clone()) {
+        if let Some(user) = UserAccounts::get_by_id(state, user_id.clone()) {
             // create timestamp
             let timestamp = Timestamp::get_timestamp();
 
@@ -1029,7 +1043,7 @@ impl Messaging {
                 };
 
                 // check if message is local user account
-                match UserAccounts::get_by_id(state,receiver_id) {
+                match UserAccounts::get_by_id(state, receiver_id) {
                     // we are the receiving node,
                     // process and save the message
                     Some(user_account) => {
@@ -1037,9 +1051,14 @@ impl Messaging {
                     }
 
                     // schedule it for further sending otherwise
-                    None => {
-                        state.services.messaging.schedule_message(receiver_id, container, true, true, false, false)
-                    }
+                    None => state.services.messaging.schedule_message(
+                        receiver_id,
+                        container,
+                        true,
+                        true,
+                        false,
+                        false,
+                    ),
                 }
             }
             Err(e) => log::error!("Messaging container decoding error: {}", e),

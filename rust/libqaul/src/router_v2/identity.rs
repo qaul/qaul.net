@@ -2,10 +2,17 @@
 // This software is published under the AGPLv3 license.
 
 //! Identifying a user/node on the protocol. Inlcuding the user/node profile.
-use libp2p::identity::PublicKey;
+use libp2p::{identity::PublicKey, PeerId};
 use sha2::{Digest, Sha256};
 
-use crate::{QaulState, node::{Node, user_accounts::UserAccount}, router_v2::Result};
+use crate::{
+    node::{user_accounts::UserAccount, Node},
+    router_v2::{Result, RoutingV2Error},
+    QaulState,
+};
+
+/// Multihash code for the `identity` hash function
+const IDENTITY_MULTIHASH_CODE: u64 = 0;
 
 #[derive(Debug, Clone)]
 pub struct Multikey(PublicKey);
@@ -26,6 +33,7 @@ impl Multikey {
         Ok(Multikey(key))
     }
 
+    /// The 8-byte routing identifier (spec §3.3)
     pub fn to_id(&self) -> [u8; 8] {
         let hash = Sha256::digest(self.encode());
         let mut id = [0u8; 8];
@@ -33,7 +41,18 @@ impl Multikey {
         id
     }
 
-    pub fn verify(&self,  msg: &[u8], sig: &[u8]) -> bool {
+    /// Recovers the public key embedded in a `PeerId`.
+    // TODO: resolve an ID to a key is the §11.5 profile fetch
+    pub fn try_from_peer_id(peer: &PeerId) -> Result<Self> {
+        let multihash = peer.as_ref();
+        let code = multihash.code();
+        if code != IDENTITY_MULTIHASH_CODE {
+            return Err(RoutingV2Error::PeerIdNotInlineKey(code));
+        }
+        Multikey::decode(multihash.digest())
+    }
+
+    pub fn verify(&self, msg: &[u8], sig: &[u8]) -> bool {
         self.0.verify(msg, sig)
     }
 }
@@ -98,8 +117,7 @@ impl UserAccount {
 
     pub fn sign_with_user(&self, buf: &[u8]) -> [u8; 64] {
         let pk = &self.keys.clone();
-        pk
-            .sign(buf)
+        pk.sign(buf)
             .expect("ed25519 sign")
             .try_into()
             .expect("ed25519 signatures are 64 bytes")
@@ -165,6 +183,70 @@ mod tests {
             p_b.multikey.to_id(),
             "distinct keypairs must produce distinct ids"
         );
+    }
+
+    /// The load-bearing assertion: an id recovered via the PeerId must equal
+    /// the id derived straight from the public key. If these ever diverge,
+    /// every mirror binding and manifest lookup in v2 breaks.
+    #[test]
+    fn try_from_peer_id_agrees_with_direct_derivation() {
+        let kp = Keypair::generate_ed25519();
+        let peer = kp.public().to_peer_id();
+
+        let recovered = Multikey::try_from_peer_id(&peer).expect("ed25519 key is inline");
+
+        assert_eq!(
+            recovered.to_id(),
+            Multikey::from(kp.public()).to_id(),
+            "id via PeerId must match id via public key"
+        );
+    }
+
+    /// Manifest signing inputs use the full multikey encoding, not the 8-byte
+    /// id, so recovery must preserve the key material byte-for-byte.
+    #[test]
+    fn try_from_peer_id_preserves_key_material() {
+        let kp = Keypair::generate_ed25519();
+        let peer = kp.public().to_peer_id();
+
+        let recovered = Multikey::try_from_peer_id(&peer).expect("ed25519 key is inline");
+
+        assert_eq!(
+            recovered.encode(),
+            Multikey::from(kp.public()).encode(),
+            "recovered multikey must encode identically to the original"
+        );
+    }
+
+    /// A PeerId built from a SHA-256 multihash has hashed the key away. That
+    /// must be a clean error, not a panic — it is reachable from network input
+    /// as soon as a peer uses a key longer than libp2p's inline limit.
+    #[test]
+    fn try_from_peer_id_rejects_hashed_multihash() {
+        let digest = Sha256::digest(b"not a key");
+        let multihash = libp2p::multihash::Multihash::<64>::wrap(0x12, &digest)
+            .expect("sha2-256 digest fits in 64 bytes");
+        let peer = PeerId::from_multihash(multihash).expect("sha2-256 is a valid peer id code");
+
+        match Multikey::try_from_peer_id(&peer) {
+            Err(RoutingV2Error::PeerIdNotInlineKey(code)) => assert_eq!(code, 0x12),
+            other => panic!("expected PeerIdNotInlineKey, got {other:?}"),
+        }
+    }
+
+    /// Identity multihash, but the payload is not a valid protobuf public key.
+    /// This exercises the `decode` failure path independently of the code check.
+    #[test]
+    fn try_from_peer_id_rejects_identity_multihash_with_garbage() {
+        let multihash = libp2p::multihash::Multihash::<64>::wrap(0, &[0xFFu8; 32])
+            .expect("32 bytes fits in 64");
+        let peer =
+            PeerId::from_multihash(multihash).expect("identity code is valid, payload short");
+
+        match Multikey::try_from_peer_id(&peer) {
+            Err(RoutingV2Error::MultikeyErrror(_)) => {}
+            other => panic!("expected a multikey decoding error, got {other:?}"),
+        }
     }
 
     #[test]

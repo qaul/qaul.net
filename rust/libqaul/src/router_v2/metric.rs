@@ -58,7 +58,6 @@ mod tests {
         assert_eq!(transport_weight(ConnectionModule::None), u16::MAX);
     }
 
-
     /// RSSI is a BLE concept; on wired/internet transports the value
     /// must be ignored even when supplied.
     #[test]
