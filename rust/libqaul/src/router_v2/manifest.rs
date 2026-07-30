@@ -837,7 +837,10 @@ mod tests {
         assert_eq!(log.len(), 1);
         let recs = log.records_after(0);
         match &recs[0] {
-            LogRecord::Add { record_version, entry } => {
+            LogRecord::Add {
+                record_version,
+                entry,
+            } => {
                 assert_eq!(*record_version, 5);
                 assert_eq!(entry.timeout, 999);
             }
@@ -854,7 +857,13 @@ mod tests {
         log.insert_add(5, entry_at(7, 42));
         assert_eq!(log.len(), 1);
         let recs = log.records_after(0);
-        assert!(matches!(recs[0], LogRecord::Add { record_version: 5, .. }));
+        assert!(matches!(
+            recs[0],
+            LogRecord::Add {
+                record_version: 5,
+                ..
+            }
+        ));
     }
 
     /// `insert_remove` after an Add collapses to a Tombstone at the
@@ -867,7 +876,11 @@ mod tests {
         assert_eq!(log.len(), 1);
         let recs = log.records_after(0);
         match &recs[0] {
-            LogRecord::Tombstone { record_version, created_ms, user_id } => {
+            LogRecord::Tombstone {
+                record_version,
+                created_ms,
+                user_id,
+            } => {
                 assert_eq!(*record_version, 4);
                 assert_eq!(*created_ms, 12_345);
                 assert_eq!(*user_id, [9; 8]);
@@ -886,7 +899,11 @@ mod tests {
         let recs = log.records_after(0);
         assert_eq!(recs.len(), 1);
         match &recs[0] {
-            LogRecord::Tombstone { record_version, created_ms, .. } => {
+            LogRecord::Tombstone {
+                record_version,
+                created_ms,
+                ..
+            } => {
                 assert_eq!(*record_version, 8);
                 assert_eq!(*created_ms, 500);
             }
@@ -930,7 +947,10 @@ mod tests {
 
         log.insert_add(3, entry_at(1, 0));
         log.insert_add(5, entry_at(2, 0));
-        assert!(log.records_after(100).is_empty(), "all records below from_version");
+        assert!(
+            log.records_after(100).is_empty(),
+            "all records below from_version"
+        );
     }
 
     /// Under circular arithmetic, `is_fresher_u32(new, old)` treats
@@ -961,7 +981,11 @@ mod tests {
         assert_eq!(log.log_base, 2);
         let out = log.records_after(0);
         let versions: Vec<u32> = out.iter().map(|r| r.record_version()).collect();
-        assert_eq!(versions, vec![3, 4], "records at or below log_base must be gone");
+        assert_eq!(
+            versions,
+            vec![3, 4],
+            "records at or below log_base must be gone"
+        );
     }
 
     /// `compact` drops tombstones older than TTL, leaves adds alone
@@ -970,18 +994,29 @@ mod tests {
     #[test]
     fn compact_drops_expired_tombstones_and_advances_log_base() {
         let mut log = ManifestLog::default();
-        log.insert_add(1, entry_at(1, 0));       // add — untouched by TTL
-        log.insert_remove([2; 8], 3, 100);       // old tombstone
-        log.insert_remove([3; 8], 7, 5_000);     // fresh tombstone
-        log.insert_add(9, entry_at(4, 0));       // add — untouched
+        log.insert_add(1, entry_at(1, 0)); // add — untouched by TTL
+        log.insert_remove([2; 8], 3, 100); // old tombstone
+        log.insert_remove([3; 8], 7, 5_000); // fresh tombstone
+        log.insert_add(9, entry_at(4, 0)); // add — untouched
 
         // now_ms=1_000, ttl=500 → cutoff=500 → tombstone at t=100 expires,
         // tombstone at t=5_000 stays.
         log.compact(1_000, 500, 100);
 
-        let versions: Vec<u32> = log.records_after(0).iter().map(|r| r.record_version()).collect();
-        assert_eq!(versions, vec![1, 7, 9], "one tombstone expired, adds untouched");
-        assert_eq!(log.log_base, 3, "log_base advances past highest discarded version");
+        let versions: Vec<u32> = log
+            .records_after(0)
+            .iter()
+            .map(|r| r.record_version())
+            .collect();
+        assert_eq!(
+            versions,
+            vec![1, 7, 9],
+            "one tombstone expired, adds untouched"
+        );
+        assert_eq!(
+            log.log_base, 3,
+            "log_base advances past highest discarded version"
+        );
     }
 
     /// `compact` enforces the cap by dropping lowest-version records.
@@ -1000,9 +1035,16 @@ mod tests {
         // triggers. Cap of 2 forces 3 drops.
         log.compact(u64::MAX, u64::MAX, 2);
 
-        let versions: Vec<u32> = log.records_after(0).iter().map(|r| r.record_version()).collect();
+        let versions: Vec<u32> = log
+            .records_after(0)
+            .iter()
+            .map(|r| r.record_version())
+            .collect();
         assert_eq!(versions, vec![4, 5], "lowest 3 versions dropped");
-        assert_eq!(log.log_base, 3, "log_base advances to highest dropped (version 3)");
+        assert_eq!(
+            log.log_base, 3,
+            "log_base advances to highest dropped (version 3)"
+        );
     }
 
     /// Both retention rules fire in one call — TTL first, cap second.
@@ -1022,7 +1064,11 @@ mod tests {
         // drops the lowest add (version 3).
         log.compact(10_000, 1_000, 2);
 
-        let versions: Vec<u32> = log.records_after(0).iter().map(|r| r.record_version()).collect();
+        let versions: Vec<u32> = log
+            .records_after(0)
+            .iter()
+            .map(|r| r.record_version())
+            .collect();
         assert_eq!(versions, vec![4, 5]);
         assert_eq!(log.log_base, 3, "highest dropped version was 3");
     }
@@ -1037,7 +1083,10 @@ mod tests {
 
         log.compact(u64::MAX, u64::MAX, 100); // huge TTL, huge cap
 
-        assert_eq!(log.log_base, 42, "log_base must not move when nothing dropped");
+        assert_eq!(
+            log.log_base, 42,
+            "log_base must not move when nothing dropped"
+        );
         assert_eq!(log.len(), 2);
     }
 

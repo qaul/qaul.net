@@ -90,7 +90,7 @@ impl NeighboursState {
                 Neighbour {
                     rtt,
                     updated_at: Timestamp::get_timestamp(),
-                    rssi_dbm: None
+                    rssi_dbm: None,
                 },
             );
         }
@@ -181,9 +181,9 @@ pub struct Neighbour {
     /// when was this node last seen
     updated_at: u64,
     /// Received Signal Strength Indication (RSSI).
-    /// router_v2 uses it to calc the quality penalty for BLE transports. 
+    /// router_v2 uses it to calc the quality penalty for BLE transports.
     /// Refer to Section 5.1 in the spec.
-    rssi_dbm: Option<i8>
+    rssi_dbm: Option<i8>,
 }
 
 impl Neighbours {
@@ -199,7 +199,14 @@ impl Neighbours {
     ///
     /// If the node already exists, it updates it's rtt value.
     /// If the node does not yet exist, it creates it.
-    pub fn update_node(state: &crate::QaulState, router: &super::RouterState, module: ConnectionModule, node_id: PeerId, rtt: u32, rssi: Option<i8>) {
+    pub fn update_node(
+        state: &crate::QaulState,
+        router: &super::RouterState,
+        module: ConnectionModule,
+        node_id: PeerId,
+        rtt: u32,
+        rssi: Option<i8>,
+    ) {
         log::trace!("update_node node {:?}", node_id);
         let ns = &router.neighbours;
         let table_lock = match ns.get_table(&module) {
@@ -228,7 +235,7 @@ impl Neighbours {
                 Neighbour {
                     rtt,
                     updated_at: Timestamp::get_timestamp(),
-                    rssi_dbm: rssi
+                    rssi_dbm: rssi,
                 },
             );
 
@@ -312,7 +319,11 @@ impl Neighbours {
     }
 
     /// send protobuf RPC neighbours list
-    pub fn rpc_send_neighbours_list(state: &crate::QaulState, router: &super::RouterState, request_id: String) {
+    pub fn rpc_send_neighbours_list(
+        state: &crate::QaulState,
+        router: &super::RouterState,
+        request_id: String,
+    ) {
         let ns = &router.neighbours;
 
         let lan_neighbours = {
@@ -390,7 +401,6 @@ mod tests {
 
         // old: 100, new: 1000 -> (700 + 1000) / 8 = 212
         assert_eq!(Neighbours::calculate_rtt(100, 1000), 212);
-
     }
 
     #[test]

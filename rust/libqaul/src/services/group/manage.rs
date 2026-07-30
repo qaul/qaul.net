@@ -49,8 +49,16 @@ pub(crate) fn paginate_group_infos(
     limit: u32,
 ) -> super::proto_rpc::GroupListResponse {
     let total = groups.len() as u32;
-    let take = if limit == 0 { usize::MAX } else { limit as usize };
-    let page: Vec<_> = groups.into_iter().skip(offset as usize).take(take).collect();
+    let take = if limit == 0 {
+        usize::MAX
+    } else {
+        limit as usize
+    };
+    let page: Vec<_> = groups
+        .into_iter()
+        .skip(offset as usize)
+        .take(take)
+        .collect();
 
     let has_more = limit > 0 && offset.saturating_add(limit) < total;
 
@@ -83,13 +91,26 @@ fn build_invited_list_response(
 ) -> super::proto_rpc::GroupInvitedResponse {
     invites.sort_unstable_by(|a, b| b.received_at.cmp(&a.received_at));
     let total = invites.len() as u32;
-    let take = if limit == 0 { usize::MAX } else { limit as usize };
-    let page: Vec<_> = invites.into_iter().skip(offset as usize).take(take).collect();
+    let take = if limit == 0 {
+        usize::MAX
+    } else {
+        limit as usize
+    };
+    let page: Vec<_> = invites
+        .into_iter()
+        .skip(offset as usize)
+        .take(take)
+        .collect();
 
     let invited_proto: Vec<_> = page
         .into_iter()
         .map(|invite| {
-            let members = invite.group.members.values().map(to_rpc_group_member).collect();
+            let members = invite
+                .group
+                .members
+                .values()
+                .map(to_rpc_group_member)
+                .collect();
             super::proto_rpc::GroupInvited {
                 sender_id: invite.sender_id.clone(),
                 received_at: invite.received_at,
@@ -126,7 +147,6 @@ fn build_invited_list_response(
 /// Group Manage Structure
 pub struct GroupManage {}
 impl GroupManage {
-
     fn group_event_message(
         event_type: chat::rpc_proto::GroupEventType,
         user_id: Vec<u8>,
@@ -194,7 +214,11 @@ impl GroupManage {
     ///
     /// * `account_id` your user account ID
     /// * `user_id` the user ID of the other user
-    pub fn create_new_direct_chat_group(state: &crate::QaulState, account_id: &PeerId, user_id: &PeerId) -> Group {
+    pub fn create_new_direct_chat_group(
+        state: &crate::QaulState,
+        account_id: &PeerId,
+        user_id: &PeerId,
+    ) -> Group {
         let group_id = GroupId::from_peers(account_id, user_id).to_bytes();
 
         // check if group already exists
@@ -229,13 +253,22 @@ impl GroupManage {
         group.is_direct_chat = true;
 
         // save group to data base
-        GroupStorage::save_group(state, account_id.to_owned(), group.clone(), GroupSaveReason::Created);
+        GroupStorage::save_group(
+            state,
+            account_id.to_owned(),
+            group.clone(),
+            GroupSaveReason::Created,
+        );
 
         group
     }
 
     /// create new group from rpc command
-    pub fn create_new_group(state: &crate::QaulState, account_id: &PeerId, name: String) -> Vec<u8> {
+    pub fn create_new_group(
+        state: &crate::QaulState,
+        account_id: &PeerId,
+        name: String,
+    ) -> Vec<u8> {
         let mut group = Group::new();
 
         group.id = uuid::Uuid::new_v4().as_bytes().to_vec();
@@ -254,7 +287,12 @@ impl GroupManage {
         group.name = name;
 
         // save group
-        GroupStorage::save_group(state, account_id.to_owned(), group.clone(), GroupSaveReason::Created);
+        GroupStorage::save_group(
+            state,
+            account_id.to_owned(),
+            group.clone(),
+            GroupSaveReason::Created,
+        );
 
         // save group created event
         let event = chat::rpc_proto::ChatContentMessage {
@@ -290,35 +328,58 @@ impl GroupManage {
     /// rename group from RPC command
     ///
     /// `account_id` the user account ID
-    pub fn rename_group(state: &crate::QaulState, account_id: &PeerId, group_id: &[u8], name: String) -> Result<(), String> {
-        match GroupStorage::try_with_group_mut(state, account_id, group_id, GroupSaveReason::Renamed, |group| {
-            // check if administrator
-            if let Some(member) = group.get_member(&account_id.to_bytes()) {
-                if member.role != 255 {
-                    return Err("you don't have the permissions to rename this group".to_string());
+    pub fn rename_group(
+        state: &crate::QaulState,
+        account_id: &PeerId,
+        group_id: &[u8],
+        name: String,
+    ) -> Result<(), String> {
+        match GroupStorage::try_with_group_mut(
+            state,
+            account_id,
+            group_id,
+            GroupSaveReason::Renamed,
+            |group| {
+                // check if administrator
+                if let Some(member) = group.get_member(&account_id.to_bytes()) {
+                    if member.role != 255 {
+                        return Err(
+                            "you don't have the permissions to rename this group".to_string()
+                        );
+                    }
+                } else {
+                    return Err("you are not a member for this group".to_string());
                 }
-            } else {
-                return Err("you are not a member for this group".to_string());
-            }
 
-            group.name = name;
-            group.revision += 1;
+                group.name = name;
+                group.revision += 1;
 
-            Ok(())
-        })? {
+                Ok(())
+            },
+        )? {
             Some(()) => Ok(()),
             None => Err("can not find group".to_string()),
         }
     }
 
     /// get a new message ID
-    pub fn get_new_message_id(state: &crate::QaulState, account_id: &PeerId, group_id: &[u8]) -> Vec<u8> {
-        match GroupStorage::try_with_group_mut(state, account_id, group_id, GroupSaveReason::MessageIndexBumped, |group| {
-            let account_id_bytes = account_id.to_bytes();
-            let member = group.members.get_mut(&account_id_bytes).ok_or(())?;
-            member.last_message_index += 1;
-            Ok(member.last_message_index)
-        }) {
+    pub fn get_new_message_id(
+        state: &crate::QaulState,
+        account_id: &PeerId,
+        group_id: &[u8],
+    ) -> Vec<u8> {
+        match GroupStorage::try_with_group_mut(
+            state,
+            account_id,
+            group_id,
+            GroupSaveReason::MessageIndexBumped,
+            |group| {
+                let account_id_bytes = account_id.to_bytes();
+                let member = group.members.get_mut(&account_id_bytes).ok_or(())?;
+                member.last_message_index += 1;
+                Ok(member.last_message_index)
+            },
+        ) {
             Ok(Some(new_index)) => Chat::generate_message_id(group_id, account_id, new_index),
             Ok(None) | Err(()) => Vec::new(),
         }

@@ -14,7 +14,6 @@ use crate::rpc::Rpc;
 use crate::storage::configuration;
 use crate::storage::configuration::Configuration;
 use crate::utilities::timestamp::Timestamp;
-use std::collections::BTreeMap;
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::SaltString;
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
@@ -24,6 +23,7 @@ use libp2p::{
     PeerId,
 };
 use prost::Message;
+use std::collections::BTreeMap;
 use std::sync::RwLock;
 
 /// Import protobuf message definition
@@ -74,14 +74,14 @@ impl UserAccounts {
         let mut accounts = UserAccounts { users: Vec::new() };
 
         for user in &config.user_accounts {
-            let mut basedecode = match base64::engine::general_purpose::STANDARD
-                .decode(&user.keys)
+            let mut basedecode = match base64::engine::general_purpose::STANDARD.decode(&user.keys)
             {
                 Ok(bytes) => bytes,
                 Err(e) => {
                     log::error!(
                         "skipping user '{}': failed to base64-decode keys: {}",
-                        user.name, e
+                        user.name,
+                        e
                     );
                     continue;
                 }
@@ -91,7 +91,8 @@ impl UserAccounts {
                 Err(e) => {
                     log::error!(
                         "skipping user '{}': failed to parse ed25519 keypair: {}",
-                        user.name, e
+                        user.name,
+                        e
                     );
                     continue;
                 }
@@ -261,7 +262,11 @@ impl UserAccounts {
     }
 
     /// set or update the password for existing user
-    pub fn set_password(state: &crate::QaulState, user_id: PeerId, password: Option<String>) -> Result<(), String> {
+    pub fn set_password(
+        state: &crate::QaulState,
+        user_id: PeerId,
+        password: Option<String>,
+    ) -> Result<(), String> {
         let (password_hash, password_salt) = Self::hash_password(password);
 
         // update the configuration
@@ -327,7 +332,11 @@ impl UserAccounts {
     }
 
     /// verify password for user
-    pub fn verify_password(state: &crate::QaulState, user_id: PeerId, password: String) -> Result<bool, String> {
+    pub fn verify_password(
+        state: &crate::QaulState,
+        user_id: PeerId,
+        password: String,
+    ) -> Result<bool, String> {
         let accounts = state.user_accounts.inner.read().unwrap();
         accounts.verify_password_inner(user_id, password)
     }
@@ -522,8 +531,11 @@ impl UserAccounts {
                     }
                     Some(proto::user_accounts::Message::CreateUserAccount(create_user_account)) => {
                         // create user account
-                        let user_account =
-                            Self::create(state, create_user_account.name, create_user_account.password);
+                        let user_account = Self::create(
+                            state,
+                            create_user_account.name,
+                            create_user_account.password,
+                        );
 
                         // get RPC key values
                         let (key_type, key_base58) =
@@ -592,7 +604,13 @@ impl UserAccounts {
                         let user_peer_id = match PeerId::from_bytes(&user_id) {
                             Ok(id) => id,
                             Err(_) => {
-                                Self::send_update_profile_response(state, false, "invalid user id".to_string(), 0, request_id);
+                                Self::send_update_profile_response(
+                                    state,
+                                    false,
+                                    "invalid user id".to_string(),
+                                    0,
+                                    request_id,
+                                );
                                 return;
                             }
                         };
@@ -600,7 +618,13 @@ impl UserAccounts {
                         let account = match Self::get_by_id(state, user_peer_id) {
                             Some(a) => a,
                             None => {
-                                Self::send_update_profile_response(state, false, "user account not found".to_string(), 0, request_id);
+                                Self::send_update_profile_response(
+                                    state,
+                                    false,
+                                    "user account not found".to_string(),
+                                    0,
+                                    request_id,
+                                );
                                 return;
                             }
                         };
@@ -609,26 +633,41 @@ impl UserAccounts {
                         let q8id = id_bytes[6..14].to_vec();
 
                         let rs = state.get_router();
-                        let updated_user = match router::users::Users::get_user_snapshot(&rs, &q8id) {
+                        let updated_user = match router::users::Users::get_user_snapshot(&rs, &q8id)
+                        {
                             Some(user) => {
-                                let new_name = if update_req.name.is_empty() { user.name.clone() } else { update_req.name.clone() };
-                                let new_bio = if update_req.bio.is_empty() { user.bio.clone() } else { update_req.bio.clone() };
-                                let new_avatar = if update_req.avatar.is_empty() { user.avatar.clone() } else { update_req.avatar.clone() };
+                                let new_name = if update_req.name.is_empty() {
+                                    user.name.clone()
+                                } else {
+                                    update_req.name.clone()
+                                };
+                                let new_bio = if update_req.bio.is_empty() {
+                                    user.bio.clone()
+                                } else {
+                                    update_req.bio.clone()
+                                };
+                                let new_avatar = if update_req.avatar.is_empty() {
+                                    user.avatar.clone()
+                                } else {
+                                    update_req.avatar.clone()
+                                };
                                 // Proto spec (user_accounts.proto:51):
                                 //   empty Vec     -> no change
                                 //   [Vec::new()]  -> clear (wipe sentinel)
                                 //   otherwise     -> set to provided hops
-                                let new_custody_route = if update_req.preferred_custody_route.is_empty() {
-                                    user.preferred_custody_route.clone()
-                                } else if update_req.preferred_custody_route.len() == 1
-                                    && update_req.preferred_custody_route[0].is_empty()
-                                {
-                                    Vec::new()
-                                } else {
-                                    update_req.preferred_custody_route.clone()
-                                };
+                                let new_custody_route =
+                                    if update_req.preferred_custody_route.is_empty() {
+                                        user.preferred_custody_route.clone()
+                                    } else if update_req.preferred_custody_route.len() == 1
+                                        && update_req.preferred_custody_route[0].is_empty()
+                                    {
+                                        Vec::new()
+                                    } else {
+                                        update_req.preferred_custody_route.clone()
+                                    };
                                 let new_version = user.version + 1;
-                                let new_updated_at = crate::utilities::timestamp::Timestamp::get_timestamp();
+                                let new_updated_at =
+                                    crate::utilities::timestamp::Timestamp::get_timestamp();
 
                                 router::users::User {
                                     id: user.id,
@@ -647,12 +686,21 @@ impl UserAccounts {
                                 }
                             }
                             None => {
-                                Self::send_update_profile_response(state, false, "user not found in users table".to_string(), 0, request_id);
+                                Self::send_update_profile_response(
+                                    state,
+                                    false,
+                                    "user not found in users table".to_string(),
+                                    0,
+                                    request_id,
+                                );
                                 return;
                             }
                         };
 
-                        let signed = router::users::Users::create_signed_profile(&updated_user, &account.keys);
+                        let signed = router::users::Users::create_signed_profile(
+                            &updated_user,
+                            &account.keys,
+                        );
                         let new_version = updated_user.version;
                         let new_name_for_account = updated_user.name.clone();
                         let mut user_to_store = updated_user;
@@ -668,7 +716,13 @@ impl UserAccounts {
                             Self::update_account_name(state, user_peer_id, &new_name_for_account);
                         }
 
-                        Self::send_update_profile_response(state, true, String::new(), new_version, request_id);
+                        Self::send_update_profile_response(
+                            state,
+                            true,
+                            String::new(),
+                            new_version,
+                            request_id,
+                        );
                     }
                     _ => {}
                 }
@@ -680,7 +734,13 @@ impl UserAccounts {
     }
 
     /// send update profile response to client
-    fn send_update_profile_response(state: &crate::QaulState, success: bool, error_message: String, new_version: u32, request_id: String) {
+    fn send_update_profile_response(
+        state: &crate::QaulState,
+        success: bool,
+        error_message: String,
+        new_version: u32,
+        request_id: String,
+    ) {
         let proto_message = proto::UserAccounts {
             message: Some(proto::user_accounts::Message::UpdateProfileResponse(
                 proto::UpdateProfileResponse {
@@ -705,7 +765,12 @@ impl UserAccounts {
     }
 
     /// send password operation response ot client
-    fn send_password_response(state: &crate::QaulState, success: bool, message: String, request_id: String) {
+    fn send_password_response(
+        state: &crate::QaulState,
+        success: bool,
+        message: String,
+        request_id: String,
+    ) {
         let proto_message = proto::UserAccounts {
             message: Some(proto::user_accounts::Message::SetPasswordResponse(
                 proto::SetPasswordResponse {
