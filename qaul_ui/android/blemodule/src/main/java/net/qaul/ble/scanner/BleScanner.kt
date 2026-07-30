@@ -20,6 +20,8 @@ import net.qaul.ble.test.ble.connection.ConnectionPool
 import net.qaul.ble.test.ble.manager.BleManager
 import net.qaul.ble.test.ble.queue.BleTaskScheduler
 import net.qaul.ble.test.ble.util.toHexString
+import net.qaul.ble.test.ble.util.toHexKey
+import net.qaul.ble.test.ble.metrics.SessionLogger
 import kotlin.math.pow
 import kotlin.random.Random
 
@@ -56,8 +58,8 @@ object BleScanner {
     var isScanning = false
         private set
 
-    /** Manual mode = false (default). Toggle on to auto-connect to discovered valid peers. */
-    var autoConnect = false
+    /** Toggle on to auto-connect to discovered valid peers. */
+    var autoConnect = true
 
     /** Fired for every scan result so the UI (or anything) can list discovered peers. */
     var onPeerDiscovered: ((ScanResult) -> Unit)? = null
@@ -74,6 +76,9 @@ object BleScanner {
 
     private val lastPhyUpgradeAt = mutableMapOf<String, Long>()   // prefix hex -> last upgrade attempt
 
+    // MACs currently rejected because of fill-gate. Logged once on the transition into rejection, not on
+    // every scan cycle, it would otherwise spam one log line per SCAN_INTERVAL_MS forever.
+    private val fillGateRejected = mutableSetOf<String>()
 
     // Pause scanning during connecting state. The BLE radio is shared between scanning and connecting, so we pause the scan around
     // each connect attempt and resume it once the connect activity quiets.
@@ -328,22 +333,44 @@ object BleScanner {
             else BluetoothDevice.PHY_LE_1M
             // Upgrading from Coded to 1M/2M PHY when back in range. Work in progress. This is can only be done from a central connection, asymmetry, peripherals will ignore and wait for central to upgrade
             // TODO: min RSSI value needs tuned and tested
-            val key = prefix!!.toHexString()
-            val lastTry = lastPhyUpgradeAt[key] ?: 0L
-            if (existing != null && currentPhy == BluetoothDevice.PHY_LE_1M && existing.role == BleRole.CENTRAL && existing.phyLabel == "Coded" && result.rssi > -85 && System.currentTimeMillis() - lastTry > 10_000L){
-                lastPhyUpgradeAt[key] = System.currentTimeMillis()
-                BleTaskScheduler.setPreferredPhy(
-                    existing.device,
-                    BluetoothDevice.PHY_LE_2M_MASK,
-                    BluetoothDevice.PHY_LE_2M_MASK,
-                    BluetoothDevice.PHY_OPTION_NO_PREFERRED
-                )
-                Log.i(TAG, "Upgrading $mac from Coded to 2M.")
-                return
+            if (prefix != null && existing != null && currentPhy == BluetoothDevice.PHY_LE_1M && existing.role == BleRole.CENTRAL && existing.phyLabel == "Coded" && result.rssi > -85) {
+                val key = prefix.toHexString()
+                val lastTry = lastPhyUpgradeAt[key] ?: 0L
+                if (System.currentTimeMillis() - lastTry > 10_000L) {
+                    lastPhyUpgradeAt[key] = System.currentTimeMillis()
+                    BleTaskScheduler.setPreferredPhy(
+                        existing.device,
+                        BluetoothDevice.PHY_LE_2M_MASK,
+                        BluetoothDevice.PHY_LE_2M_MASK,
+                        BluetoothDevice.PHY_OPTION_NO_PREFERRED
+                    )
+                    Log.i(TAG, "Upgrading $mac from Coded to 2M.")
+                    return
+                }
             }
 
 
             if (System.currentTimeMillis() < (cooldownUntil[mac] ?: 0L)) return   // recently dropped
+            // Stage 1 fill-gate: reject if my slots or the peers's are full, merge (peer unreachable
+            // in our TTL=3 gossip view) = accept, redundant (visible in neighbourhood) = accept only if it wouldn't seal the
+            // 3-hop ball
+            if (BleConstants.ANTI_ISLANDING && BleConstants.STAGE1_FILL_GATE && prefix != null) {
+                val (accept, reason) = ConnectionPool.fillGateDecision(prefix)
+                if (!accept) {
+                    if (fillGateRejected.add(mac)) {
+                        Log.i(TAG, "Fill-gate: rejecting $mac — $reason")
+                        appContext?.let { ctx ->
+                            SessionLogger[ctx].topoEvent(
+                                // toHexKey (compact lowercase) must match the snapshot/dev id format the replay tool expects
+                                1, "reject", prefix.toHexKey().take(6),
+                                reason, ConnectionPool.openSlotCount()
+                            )
+                        }
+                    }
+                    return
+                }
+            }
+            fillGateRejected.remove(mac)   // no longer rejected, re-arm the log
             if (ConnectionPool.getSize() >= BleConstants.MAX_CONNECTIONS) return  // respect the cap
             // Admission control: don't start another connect while one is still resolving. Keeps the
             // serial GATT queue from jamming with concurrent connectGatts during a discovery burst.
@@ -383,12 +410,6 @@ object BleScanner {
                         return   // give them the chance to connect to us first (correct role)
                     }
                     Log.i(TAG, "Defer window lapsed for $mac — connecting outbound (asymmetric fallback)")
-                }
-
-                if (BleConstants.ANTI_ISLANDING && prefix != null &&
-                    ConnectionPool.isReserveHoldActive() && ConnectionPool.is2HopReachable(prefix)) {
-                    Log.i(TAG, "Reserving last slot: $mac reachable in 2 hops, holding for a bridge")
-                    return
                 }
             }
 
