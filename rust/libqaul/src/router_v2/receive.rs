@@ -15,7 +15,7 @@ use crate::{
     connections::ConnectionModule,
     router_v2::{
         codec::{
-            messages::{Mapping, NodeEntry, NodeManifest, RoutingUpdate, UserEntry},
+            messages::{IndexDump, Mapping, NodeEntry, NodeManifest, RoutingUpdate, UserEntry},
             CodecError, Header, RoutingMessage,
         },
         identity::Multikey,
@@ -512,6 +512,14 @@ impl RouterV2State {
                     }
                     Err(e) => error!("NodeManifest decode failed: {e}"),
                 },
+                RoutingMessage::IndexDump => match IndexDump::decode(payload) {
+                    Ok(msg) => {
+                        if let Err(e) = self.handle_index_dump(neighbour, msg) {
+                            error!("handle_index_dump failed: {e}");
+                        }
+                    }
+                    Err(e) => error!("IndexDump decode failed: {e}"),
+                },
                 _ => debug!("to be implemented"),
             }
         }
@@ -631,7 +639,21 @@ impl RouterV2State {
             node.delegated_users = delegated_users;
         }
 
+        Ok(())
+    }
 
+    pub fn handle_index_dump(&self, neighbour: PeerId, msg: IndexDump) -> Result<()> {
+        for mapping in msg.user_mappings {
+            if let Err(e) = self.apply_mapping(neighbour, Space::User, mapping) {
+                warn!("index_dump: apply_mapping user failed: {e}");
+            }
+        }
+
+        for mapping in msg.node_mappings {
+            if let Err(e) = self.apply_mapping(neighbour, Space::Node, mapping) {
+                warn!("index_dump: apply_mapping node failed: {e}");
+            }
+        }
         Ok(())
     }
 }
