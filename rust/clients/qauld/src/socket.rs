@@ -112,10 +112,7 @@ where
 }
 
 /// RPC poller which forwards libqaul response
-fn spawn_rpc_poller(
-    register: Arc<Mutex<HashMap<String, Sender<Bytes>>>>,
-    instance: Arc<Libqaul>,
-) {
+fn spawn_rpc_poller(register: Arc<Mutex<HashMap<String, Sender<Bytes>>>>, instance: Arc<Libqaul>) {
     tokio::spawn(async move {
         let mut futures_ticker = Ticker::new(Duration::from_millis(10));
         loop {

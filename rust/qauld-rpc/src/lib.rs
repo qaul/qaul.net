@@ -21,10 +21,10 @@ pub use qaul_proto::qaul_rpc as proto;
 
 pub mod transport;
 
-pub use transport::RpcTransport;
-pub use transport::SocketTransport;
 #[cfg(feature = "embedded")]
 pub use transport::EmbeddedTransport;
+pub use transport::RpcTransport;
+pub use transport::SocketTransport;
 
 /// A single RPC command that can be sent to a running qauld daemon.
 ///

@@ -57,9 +57,7 @@ impl Simulator {
             let router = Arc::new(RouterState::new(config.clone()));
 
             // Register this node as a "local user" in its own routing table
-            router
-                .connections
-                .add_local_user(peer_id, peer_id);
+            router.connections.add_local_user(peer_id, peer_id);
 
             nodes.push(SimNode {
                 peer_id,
@@ -132,7 +130,11 @@ impl Simulator {
     fn phase_exchange(&self) {
         // Collect routing info from each node for each of its neighbours.
         // We collect first to avoid borrow conflicts.
-        let mut deliveries: Vec<(usize, PeerId, Vec<libqaul::router::router_net_proto::RoutingInfoEntry>)> = Vec::new();
+        let mut deliveries: Vec<(
+            usize,
+            PeerId,
+            Vec<libqaul::router::router_net_proto::RoutingInfoEntry>,
+        )> = Vec::new();
 
         for node_idx in 0..self.nodes.len() {
             let node = &self.nodes[node_idx];
@@ -245,8 +247,16 @@ mod tests {
         let table1 = sim.nodes[1].router.routing_table.inner.read().unwrap();
 
         // Both should have 2 entries (self + other)
-        let reachable0 = table0.table.values().filter(|e| !e.connections.is_empty()).count();
-        let reachable1 = table1.table.values().filter(|e| !e.connections.is_empty()).count();
+        let reachable0 = table0
+            .table
+            .values()
+            .filter(|e| !e.connections.is_empty())
+            .count();
+        let reachable1 = table1
+            .table
+            .values()
+            .filter(|e| !e.connections.is_empty())
+            .count();
 
         assert_eq!(reachable0, 2, "Node 0 should see 2 users (self + node 1)");
         assert_eq!(reachable1, 2, "Node 1 should see 2 users (self + node 0)");
@@ -275,7 +285,10 @@ mod tests {
         let mut rng = rand::rng();
 
         let ticks = sim.ticks_to_convergence(30, &mut rng);
-        assert!(ticks.is_some(), "5-node ring should converge within 30 ticks");
+        assert!(
+            ticks.is_some(),
+            "5-node ring should converge within 30 ticks"
+        );
     }
 
     #[test]
@@ -304,7 +317,11 @@ mod tests {
         // The existing routes will still be in the table but will eventually expire.
         // For now, just verify the link is broken.
         let neighbours = sim.topology.neighbours(0);
-        assert_eq!(neighbours.len(), 0, "Node 0 should have no active neighbours");
+        assert_eq!(
+            neighbours.len(),
+            0,
+            "Node 0 should have no active neighbours"
+        );
 
         // Restore the link
         sim.topology.set_link_active(0, 1, true);
@@ -312,8 +329,15 @@ mod tests {
 
         // Node 0 should eventually see nodes again after re-convergence
         let table0 = sim.nodes[0].router.routing_table.inner.read().unwrap();
-        let reachable = table0.table.values().filter(|e| !e.connections.is_empty()).count();
-        assert!(reachable >= 2, "Node 0 should see at least itself and node 1 after recovery");
+        let reachable = table0
+            .table
+            .values()
+            .filter(|e| !e.connections.is_empty())
+            .count();
+        assert!(
+            reachable >= 2,
+            "Node 0 should see at least itself and node 1 after recovery"
+        );
     }
 
     #[test]
@@ -324,7 +348,13 @@ mod tests {
 
         // Full mesh should converge very quickly since everyone is a direct neighbour
         let ticks = sim.ticks_to_convergence(5, &mut rng);
-        assert!(ticks.is_some(), "4-node full mesh should converge within 5 ticks");
-        assert!(ticks.unwrap() <= 3, "Full mesh should converge in 2-3 ticks");
+        assert!(
+            ticks.is_some(),
+            "4-node full mesh should converge within 5 ticks"
+        );
+        assert!(
+            ticks.unwrap() <= 3,
+            "Full mesh should converge in 2-3 ticks"
+        );
     }
 }
