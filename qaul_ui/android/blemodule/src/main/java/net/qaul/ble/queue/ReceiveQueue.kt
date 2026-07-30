@@ -30,6 +30,15 @@ data class ReceivedMessage(
     val createdAt: kotlin.time.TimeSource.Monotonic.ValueTimeMark = kotlin.time.TimeSource.Monotonic.markNow()
 )
 
+data class NeighbourUpdate(
+    val origin: ByteArray,           // 5 byte prefix of the originator
+    val seq: Int,                    // 16 bit, for dedup + freshness
+    val ttl: Int,                    // remaining hops
+    val sealed: Boolean,             // origin's own "3-hop view fully sealed" state (Stage 2 election)
+    val neighbours: List<ByteArray>
+)
+
+
 /**
  * Return object of ReceiveQueue
  */
@@ -43,9 +52,9 @@ class ReceiveQueueResult {
     var flcSendAck: FlcAck? = null
     var flcRequestAck: Byte? = null
     var flcAckReceived: FlcAck? = null
-    /** Phase 0: the remote's current neighbour list (each entry a QAUL_ID_ADVERT_BYTES prefix),
-     *  set on a SEND_NEIGHBOURS FLC message. Used for 2-hop topology awareness. */
-    var neighboursReceived: List<ByteArray>? = null
+    /** Neighbour list update.
+     *  set on a SEND_NEIGHBOURS FLC message. Used for link state topology awareness. */
+    var neighboursReceived: NeighbourUpdate? = null
     /** Non null only when a complete, deliverable message is ready (normal message or fully
      *  assembled large message). Never set to a partial large-message part. */
     var receivedMessage: ReceivedMessage? = null
@@ -274,18 +283,34 @@ class ReceiveQueue {
                 AppLog.e(TAG, "incomingFlowControlMessage: LIVENESS_CHECK_PING")
             }
             FlowControlMessageType.SEND_NEIGHBOURS.value -> {
-                // payload is N concatenated fixed length prefixes
-                val size = BleConstants.QAUL_ID_ADVERT_BYTES
-                if (payload.size % size == 0) {
-                    val list = ArrayList<ByteArray>(payload.size / size)
-                    var i = 0
-                    while (i + size <= payload.size) {
-                        list.add(payload.sliceArray(i until i + size))
-                        i += size
+                val p = BleConstants.QAUL_ID_ADVERT_BYTES        // 5
+                val header = p + 2 + 1 + 1                       // origin + seq(2) + ttl(1) + flags(1)
+
+                when {
+                    payload.size < header ->
+                        AppLog.e(TAG, "SEND_NEIGHBOURS too short: ${payload.size} < $header")
+                    (payload.size - header) % p != 0 ->
+                        AppLog.e(TAG, "SEND_NEIGHBOURS body ${payload.size - header} not a multiple of $p")
+                    else -> {
+                        val origin = payload.sliceArray(0 until p)
+                        // 2-byte big-endian seq, mask 0xFF: Kotlin Byte is signed
+                        val seq = ((payload[p].toInt() and 0xFF) shl 8) or (payload[p + 1].toInt() and 0xFF)
+                        val ttl = payload[p + 2].toInt() and 0xFF
+                        val flags = payload[p + 3].toInt() and 0xFF
+                        val sealed = (flags and 0x01) != 0
+                        if (ttl > BleConstants.TTL || ttl < 1) {
+                            AppLog.e(TAG, "SEND_NEIGHBOURS ttl: $ttl, is outside of the valid range")
+                        }
+                        else {
+                            val list = ArrayList<ByteArray>((payload.size - header) / p)
+                            var i = header
+                            while (i + p <= payload.size) {
+                                list.add(payload.sliceArray(i until i + p))
+                                i += p
+                            }
+                            receiveQueueResult.neighboursReceived = NeighbourUpdate(origin, seq, ttl, sealed, list)
+                        }
                     }
-                    receiveQueueResult.neighboursReceived = list
-                } else {
-                    AppLog.e(TAG, "SEND_NEIGHBOURS payload size ${payload.size} not a multiple of $size")
                 }
             }
             else -> {
