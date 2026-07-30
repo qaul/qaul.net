@@ -52,18 +52,16 @@ object BleConstants {
     // --------------------------------------------------------------------------------------------
 
     /** Maximum number of simultaneous peer connections. Android BLE is unreliable above 3. */
-    const val MAX_CONNECTIONS = 3
+    const val MAX_CONNECTIONS = 4
 
-    /** anti-islanding (ADD-ONLY). Combats cold start fracture into islands by (a) holding the
-     *  last free connection slot briefly for a "bridge" rather than filling it with a peer we can
-     *  already reach, and (b) exchanging 2 hop neighbour lists (a small FLC message) so we can tell a
-     *  bridge from a redundant triangle topology. In this 1st phase, it never drops a healthy link, so it cannot cause
-     *  connection flapping. can be disabled if it misbehaves. */
-    const val ANTI_ISLANDING = true
+    /** anti-islanding: enables gossiped link-state (SEND_NEIGHBOURS flc) feeds the Stage 1 fill-gate
+     *  (ConnectionPool.shouldAcceptEdge) and Stage 2 proactive drop  */
+    const val ANTI_ISLANDING = false
 
-    /** How long to hold the last free slot for a bridge (a peer not already reachable within 2 hops)
-     *  before filling it with whatever is available, so the slot is never wasted. */
-    const val RESERVE_SLOT_HOLD_MS = 10_000L
+    /**Enable topology mechanisms. Both require [ANTI_ISLANDING] (they read
+     *  the gossiped link-state). */
+    const val STAGE1_FILL_GATE = false
+    const val STAGE2_PROACTIVE_DROP = false
 
     /** TEST ONLY — force a fixed topology (e.g. a line for multi-hop testing) even when every device is
      *  in RF range. If non-empty, this device only forms/keeps connections with peers whose qaul ID
@@ -78,6 +76,18 @@ object BleConstants {
         return TEST_NEIGHBOUR_ALLOWLIST.any { hex.startsWith(it.lowercase()) }
     }
 
+    /** False until the BLE engine has finished staging (advertiser up) when Qaul is launched. The GATT server registers
+     *  first, so between registration and staging a peer can connect and will cause problems */
+    @Volatile
+    var ENGINE_READY = false
+
+    /** Connection interval requested for an idle link.
+     *  Every open link consumes a connection event this often, and the controller must interleave
+     *  them all with scanning and advertising. At high, several concurrent links can exhaust the
+     *  radio schedule, missed events accumulate into continous supervision timeouts / churn when above a
+     * conneciton cap of 3*/
+    const val IDLE_CONNECTION_PRIORITY = android.bluetooth.BluetoothGatt.CONNECTION_PRIORITY_BALANCED
+
     /** Connection admission control: max outbound CENTRAL connects we'll have in flight at once (connected but not yet
      *  qaul id resolved). Auto connect is gated on this. Prevents the scanner from piling on
      *  connects faster than the serial GATT queue can drain, which jams the queue with hung connectGatts,
@@ -85,11 +95,16 @@ object BleConstants {
     const val MAX_CONCURRENT_CONNECTING = 1
 
     /** Wrong role connect defer. When we discover a peer we should be PERIPHERAL to (their
-     *  advertised qaul ID < ours), wait this long for them to connect to us before we connect outbound
-     *  ourselves. Stops our outbound connect from racing their inbound one and forming a dual link that
-     *  collapses with 133 or wastes time doing tiebreakers. After the window we connect anyway as a fallback. */
-     // TODO: More testing of this, does waiting waste opportunities to form connections quicker even if they are in the wrong direction
-    const val WRONG_ROLE_DEFER_MS = 9_000L
+     *  advertised qaul ID < ours), wait this long for them to connect to us before we connect
+     *  outbound ourselves, after the window we connect anyway as a fallback.
+     *
+     *  Useful as it makes exactly one side of every pair the
+     *  initiator, so a cluster forming at once produces  about half the connect attempts it otherwise
+     *  would, with less load on the GATT queue and fewer 133s.
+     *
+    * If "Defer window lapsed" appears a lot in logs, the mechanism isn't earning its
+     *  keep and should be removed rather than tuned. TODO: Check again if this seems to be correct, it might be different if scanner mode was lowered */
+    const val WRONG_ROLE_DEFER_MS = 2_000L
 
     /** Company ID for the manufacturer-data block carrying the truncated qaul ID in advertisements.
      *  0xFFFF is the SIG value reserved for testing / internal use. */
@@ -136,16 +151,20 @@ object BleConstants {
     const val CONNECTION_TIMEOUT_MS = 8_000L
 
     /** How long with no data before a connection is considered dead and force-disconnected. */
-    const val LIVENESS_TIMEOUT_MS = 30_000L
+    const val LIVENESS_TIMEOUT_MS = 16_000L
 
     /** How often we check if all connections are still alive */
     const val LIVENESS_CHECK_INTERVAL_MS = 5_000L
 
     /** How long a connection may stay unresolved (qaulId never learned) before the unresolved
      *  reaper drops it as a stuck handshake / zombie. */
-    const val UNRESOLVED_TIMEOUT_MS = 8_000L
+    const val UNRESOLVED_TIMEOUT_MS = 6_000L
 
-    const val PING_INTERVAL_MS = 10_000L
+    /** How often an unresolved connection re-sends its SEND_ID. this handles a SEND_ID simply lost over the air, which is the dominant
+     *  failure at range. Short enough for several attempts inside [UNRESOLVED_TIMEOUT_MS]. */
+    const val IDENTITY_RETRY_MS = 1_500L
+
+    const val PING_INTERVAL_MS = 5_000L
 
     /** Show the on-device floating BLE stats overlay (BleDebugOverlay) while BLE is running. For debugging purposes,
      *  set false to disable. Needs the "Draw over other apps" permission, requested on first show. */
@@ -223,4 +242,26 @@ object BleConstants {
 
     /** How long without seeing a device before it is considered out of range in milliseconds. */
     const val OUT_OF_RANGE_TIMEOUT_MS = 15_000L
+
+    /** Neighbour link state settings **/
+    private val neighbourSeq = java.util.concurrent.atomic.AtomicInteger(
+        SecureRandom().nextInt(0x10000)
+    )
+
+    /**  Neighbour FLC time to live (max relay hops for link-state gossip) **/
+    const val TTL = 3
+
+    /** Re-broadcast our own neighbour list this often as a soft state keepalive, even when it hasn't
+     *  changed. Needed so peers' link-state entries don't time out on a static mesh. */
+    const val NEIGHBOUR_KEEPALIVE_MS = 15_000L
+
+    /** Discard a gossiped link-state entry if no fresher update has arrived in this window
+     */
+    const val LINK_STATE_TIMEOUT_MS = 45_000L
+
+    /** Call once per emit cycle when you originate a fresh neighbour list. Returns the new seq. */
+    fun nextNeighbourSeq(): Int = neighbourSeq.incrementAndGet() and 0xFFFF  // 16 bit
+
+    /** How long the neigbourhood has to be stable (no node has joined or left) before proactively dropping a link is considered. */
+    const val T_STABLE_MS = 35_000L
 }
