@@ -87,7 +87,9 @@ pub fn ping_event(state: &crate::QaulState, event: Event, module: ConnectionModu
             if let Some(router_v2) = state.get_router_v2() {
                 match Multikey::try_from_peer_id(&peer) {
                     Ok(mk) => {
-                        if router_v2.add_neighbour_transport(peer, mk.to_id(), module) {
+                        let node_id = mk.to_id();
+                        if router_v2.add_neighbour_transport(peer, node_id, module) {
+                            router_v2.register_neighbour_node(node_id, Some(mk));
                             propagation::on_neighbour_connect(&router_v2, peer, module);
                         }
                     }
