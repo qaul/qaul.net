@@ -9,7 +9,7 @@ use std::{
 };
 
 use libp2p::PeerId;
-use tracing::{debug, error, warn};
+use tracing::{debug, error, info, warn};
 
 use crate::{
     connections::ConnectionModule,
@@ -281,6 +281,10 @@ impl RouterV2State {
         entry: EntryArg,
     ) -> Result<EvaluateOutcome> {
         if entry.hop_count >= 63 {
+            info!(
+                "receive-loop drop: hop_count {} >= 63 (space={space:?}, peer={})",
+                entry.hop_count, ctx.neighbour
+            );
             return Ok(EvaluateOutcome::Dropped);
         }
 
@@ -290,12 +294,18 @@ impl RouterV2State {
 
         let own_idx = match self.translate_incoming(ctx.neighbour, space, entry.abs_idx) {
             Ok(idx) => idx,
-            Err(RoutingV2Error::UnknownMapping(_)) => return Ok(EvaluateOutcome::Dropped),
+            Err(RoutingV2Error::UnknownMapping(idx)) => {
+                info!(
+                    "receive-loop drop: no mapping for incoming idx={idx} (space={space:?}, peer={})",
+                    ctx.neighbour
+                );
+                return Ok(EvaluateOutcome::Dropped);
+            }
             Err(e) => return Err(e),
         };
 
         let Some(target) = self.lookup_target(space, own_idx) else {
-            debug!("receive-loop drop: target lookup failed (space={space:?}, own_idx={own_idx})");
+            info!("receive-loop drop: target lookup failed (space={space:?}, own_idx={own_idx})");
             return Ok(EvaluateOutcome::Dropped);
         };
 
@@ -315,7 +325,7 @@ impl RouterV2State {
             }
         };
         if !accept {
-            debug!(
+            info!(
                     "receive-loop drop: not better than stored (own_idx={own_idx}, seq={}, metric={metric})",
                     entry.seq
                 );
@@ -324,18 +334,18 @@ impl RouterV2State {
 
         let neighbour_node_id = {
             let mirrors = self.mirrors.read().unwrap();
-            let Some(info) = mirrors.get(&ctx.neighbour) else {
-                debug!("neighbour vanished mid-receive: {:?}", ctx.neighbour);
+            let Some(neighbour_info) = mirrors.get(&ctx.neighbour) else {
+                info!("neighbour vanished mid-receive: {:?}", ctx.neighbour);
                 return Ok(EvaluateOutcome::RejectedButTargetKnown { target_ref: target });
             };
-            info.node_id
+            neighbour_info.node_id
         };
         let next_hop_idx = {
             let dict = self.node_dict.read().unwrap();
             match dict.idx_of(&neighbour_node_id) {
                 Some(idx) => idx,
                 None => {
-                    debug!("neighbour node_id has no node_dict entry: {neighbour_node_id:?}");
+                    info!("neighbour node_id has no node_dict entry: {neighbour_node_id:?}");
                     return Ok(EvaluateOutcome::RejectedButTargetKnown { target_ref: target });
                 }
             }
@@ -412,6 +422,18 @@ impl RouterV2State {
             .write()
             .unwrap()
             .insert((space, accepted.own_idx));
+
+        // TEMP(smoke test): positive confirmation that an entry landed. Without
+        // this, acceptance is only inferable from the *absence* of a drop log.
+        info!(
+            "router_v2 ACCEPT ✓ space={space:?} own_idx={} metric={} hop_count={} next_hop={} local_only={} peer={}",
+            accepted.own_idx,
+            accepted.metric,
+            accepted.hop_count.saturating_add(1),
+            accepted.next_hop_idx,
+            accepted.local_only,
+            ctx.neighbour,
+        );
     }
 
     pub fn handle_routing_update(
@@ -465,6 +487,14 @@ impl RouterV2State {
         mut buf: &[u8],
         now: u64,
     ) -> Result<()> {
+        // TEMP(smoke test): first thing to check when nothing arrives — this
+        // separates "never sent" from "sent but not dispatched here".
+        info!(
+            "router_v2 RECV ← peer={neighbour} transport={transport:?} type={:#04x} bytes={}",
+            buf.get(1).copied().unwrap_or(0),
+            buf.len(),
+        );
+
         while !buf.is_empty() {
             let (header, body_slice) = match Header::decode(buf) {
                 Ok(h) => h,
@@ -643,6 +673,14 @@ impl RouterV2State {
     }
 
     pub fn handle_index_dump(&self, neighbour: PeerId, msg: IndexDump) -> Result<()> {
+        // TEMP(smoke test): an empty dump is expected from a fresh node —
+        // dictionaries are only populated once the origin tick runs.
+        info!(
+            "router_v2 INDEX_DUMP ← peer={neighbour} user_mappings={} node_mappings={}",
+            msg.user_mappings.len(),
+            msg.node_mappings.len(),
+        );
+
         for mapping in msg.user_mappings {
             if let Err(e) = self.apply_mapping(neighbour, Space::User, mapping) {
                 warn!("index_dump: apply_mapping user failed: {e}");
