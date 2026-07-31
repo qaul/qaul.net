@@ -68,6 +68,11 @@ void main() {
     );
 
     expect(tester.getSize(find.byTooltip('Love')), const Size.square(40));
+    final reactionText = tester.renderObject<RenderParagraph>(find.text('❤️'));
+    expect(
+      reactionText.text.style?.fontSize,
+      ChatMessageContextMenuStyle.quickReactionFontSize,
+    );
     expect(find.byTooltip('Next page'), findsNothing);
     await tester.tap(find.byTooltip('Love'));
     await tester.tap(find.text('Reply'));

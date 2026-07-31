@@ -9,17 +9,17 @@ ChatMessageReactionRow _reactions({bool enabled = true}) {
     enabled: enabled,
     reactions: [
       ChatMessageQuickReaction(
-        child: const Text('❤️', style: TextStyle(fontSize: 27)),
+        child: const Text('❤️'),
         semanticLabel: 'Love',
         onPressed: () {},
       ),
       ChatMessageQuickReaction(
-        child: const Text('👍', style: TextStyle(fontSize: 27)),
+        child: const Text('👍'),
         semanticLabel: 'Like',
         onPressed: () {},
       ),
       ChatMessageQuickReaction(
-        child: const Text('🔥', style: TextStyle(fontSize: 27)),
+        child: const Text('🔥'),
         semanticLabel: 'Fire',
         onPressed: () {},
       ),
