@@ -363,6 +363,13 @@ impl Libqaul {
             }
         }
 
+        // this binds the hosted user into router_v2's user index space (§3.2, §3.5).
+        if let Some(router_v2) = qaul_state.get_router_v2() {
+            for account in crate::node::user_accounts::UserAccounts::get_all_users(&qaul_state) {
+                router_v2.set_hosted_user(account.routing_user_id(), 0);
+            }
+        }
+
         // Initialize node global state for backward compatibility.
         // This now delegates to qaul_state.node and saves config if needed.
         Node::init(&qaul_state);
@@ -524,9 +531,14 @@ impl Libqaul {
                 log_config.clone(),
             );
             // Ignore error if global logger was already set (e.g. multi-instance tests).
+            //
+            // This level is the process-wide `log::set_max_level` cap: records
+            // below it are dropped before any logger sees them. It must follow
+            // RUST_LOG, otherwise `RUST_LOG=debug` configures `env_logger` for
+            // Debug and then has every Debug record discarded upstream of it.
             let _ = multi_log::MultiLogger::init(
                 vec![env_logger, Box::new(w_logger)],
-                log::Level::Info,
+                level_filter.to_level().unwrap_or(log::Level::Error),
             );
         }
     }
@@ -1030,15 +1042,28 @@ impl Libqaul {
                                     msg.transport
                                 );
                             }
-                            transport => Self::send_via_module(
-                                &*self.state,
-                                transport,
-                                msg.peer,
-                                msg.bytes,
-                                lan,
-                                internet,
-                                ble,
-                            ),
+                            transport => {
+                                // TEMP(smoke test): byte 1 of the frame is the
+                                // routing message type (0x01 ROUTING_UPDATE,
+                                // 0x02 INDEX_DUMP, 0x03 NODE_MANIFEST,
+                                // 0x04 MANIFEST_DELTA, 0x05 MANIFEST_REQUEST).
+                                log::info!(
+                                    "router_v2 SEND → peer={} transport={:?} type={:#04x} bytes={}",
+                                    msg.peer,
+                                    transport,
+                                    msg.bytes.get(1).copied().unwrap_or(0),
+                                    msg.bytes.len(),
+                                );
+                                Self::send_via_module(
+                                    &*self.state,
+                                    transport,
+                                    msg.peer,
+                                    msg.bytes,
+                                    lan,
+                                    internet,
+                                    ble,
+                                )
+                            }
                         }
                     }
                 }
