@@ -25,10 +25,11 @@ use crate::{
         identity::Multikey,
         index::{
             IndexAllocator, IndexDictionary, MirrorIndexDictionary, ReintroductionTracker, Space,
+            RESERVED_INDEX,
         },
-        manifest::{ChunkAssembler, Manifest},
+        manifest::{ChunkAssembler, Manifest, ManifestLog},
         seq::SeqNum,
-        table::{Nodes, RoutingTable, Users},
+        table::{Node, Nodes, RoutingTable, User, Users},
     },
     storage::{configuration::RoutingV2Options, manifest_state::HostManifestState},
 };
@@ -210,6 +211,88 @@ impl RouterV2State {
                 })
                 .collect(),
         );
+    }
+
+    /// Binds this node's hosted user to `RESERVED_INDEX` in the user space
+    /// (spec §3.5), so the node can propagate it as a user entry per §3.2.
+    pub fn set_hosted_user(&self, user_id: [u8; 8], profile_version: u32) {
+        self.user_dict
+            .write()
+            .unwrap()
+            .bind(RESERVED_INDEX, user_id);
+        {
+            let mut users = self.users.write().unwrap();
+            match users.get(&user_id) {
+                Some(existing) => existing.write().unwrap().profile_version = profile_version,
+                None => users.insert(
+                    user_id,
+                    User {
+                        id: user_id,
+                        public_key: None,
+                        profile_version,
+                        routing_entry: None,
+                        delegation_gateways: Vec::new(),
+                    },
+                ),
+            }
+        }
+
+        self.reintroduction_tracker
+            .write()
+            .unwrap()
+            .mark_first_time(Space::User, RESERVED_INDEX);
+
+        tracing::info!(
+            "router_v2: hosted user bound at RESERVED_INDEX (user_id={user_id:?}, profile_version={profile_version})"
+        );
+    }
+
+    /// Registers a neighbour as a routable node: ensures a [`Node`]
+    pub fn register_neighbour_node(&self, node_id: [u8; 8], public_key: Option<Multikey>) {
+        {
+            let mut nodes = self.nodes.write().unwrap();
+            match nodes.get(&node_id) {
+                Some(existing) => {
+                    if public_key.is_some() {
+                        existing.write().unwrap().public_key = public_key.clone();
+                    }
+                }
+                None => nodes.insert(
+                    node_id,
+                    Node {
+                        id: node_id,
+                        public_key: public_key.clone(),
+                        manifest_version: 0,
+                        advertised_version: 0,
+                        is_gateway: false,
+                        delegated_users: Vec::new(),
+                        manifest_signature: None,
+                        retained_chunks: None,
+                        learn_sphere: None,
+                        manifest_log: ManifestLog::default(),
+                    },
+                ),
+            }
+        }
+
+        let mut dict = self.node_dict.write().unwrap();
+        if dict.idx_of(&node_id).is_some() {
+            return;
+        }
+
+        let mut allocator = self.node_allocator.write().unwrap();
+        let Some(idx) = allocator.allocate() else {
+            tracing::error!("node allocator exhausted registering neighbour {node_id:?}");
+            return;
+        };
+        dict.bind(idx, node_id);
+
+        self.reintroduction_tracker
+            .write()
+            .unwrap()
+            .mark_first_time(Space::Node, idx);
+
+        tracing::info!("router_v2: neighbour node {node_id:?} allocated node index {idx}");
     }
 
     /// saves `transport` as a way to reach `peer`.
