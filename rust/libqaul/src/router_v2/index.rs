@@ -9,9 +9,7 @@ use std::{
 };
 
 /// Spec §3.5: `0x0000` is reserved in each space for the node's self-reference
-/// and is never returned by the allocator. In the node space it is bound to the
-/// node itself; in the user space it is bound to the hosted user when the node
-/// propagates as a user entry (§3.2).
+/// and is never returned by the allocator.
 pub(crate) const RESERVED_INDEX: u16 = 0x0000;
 
 /// an independent allocator for each of the two index spaces that a node maintains.
@@ -215,6 +213,10 @@ impl ReintroductionTracker {
 
     pub fn mark_version_bump(&mut self, space: Space, idx: u16) {
         self.set_for(space).insert(idx);
+    }
+
+    pub fn clear_mark(&mut self, space: Space, idx: u16) -> bool {
+        self.set_for(space).remove(&idx)
     }
 
     /// get indices ready for reintroduction

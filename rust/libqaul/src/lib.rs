@@ -366,7 +366,7 @@ impl Libqaul {
         // this binds the hosted user into router_v2's user index space (§3.2, §3.5).
         if let Some(router_v2) = qaul_state.get_router_v2() {
             for account in crate::node::user_accounts::UserAccounts::get_all_users(&qaul_state) {
-                router_v2.set_hosted_user(account.routing_user_id(), 0);
+                router_v2.register_hosted_user(account.routing_user_id(), 0);
             }
         }
 
