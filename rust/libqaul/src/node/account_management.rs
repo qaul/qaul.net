@@ -19,6 +19,7 @@ use tar::{Archive, Builder};
 
 use crate::router::connections::ConnectionTable;
 use crate::router::users::Users;
+use crate::router_v2::identity::Multikey;
 use crate::rpc::authentication::Authentication;
 use crate::services::chat::file::AllFiles;
 use crate::services::chat::ChatStorage;
@@ -94,6 +95,14 @@ impl AccountManagement {
         let router = state.get_router();
         ConnectionTable::remove_local_user(&router, user_id);
         Users::remove(state, &router, user_id);
+
+        // 5b. we do the same for router_v2. which derives from the PeerId rather than the account
+        if let Some(router_v2) = state.get_router_v2() {
+            match Multikey::try_from_peer_id(&user_id) {
+                Ok(mk) => router_v2.unregister_hosted_user(mk.to_id()),
+                Err(e) => log::warn!("v2: cannot derive routing id for {user_id}: {e}"),
+            }
+        }
 
         // 6. Remove authentication session (no-op if not logged in)
         Authentication::logout(state, user_id);

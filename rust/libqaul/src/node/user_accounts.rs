@@ -257,7 +257,7 @@ impl UserAccounts {
 
         // bind the new account as router_v2's hosted user (§3.2, §3.5). 
         if let Some(router_v2) = state.get_router_v2() {
-            router_v2.set_hosted_user(user.routing_user_id(), 0);
+            router_v2.register_hosted_user(user.routing_user_id(), 0);
         }
 
         // display id
