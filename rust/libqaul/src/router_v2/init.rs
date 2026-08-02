@@ -31,9 +31,8 @@ pub fn init_router_v2(
     options: RoutingV2Options,
 ) -> RouterV2Handle {
     let host_multikey = Multikey::from(host_keypair.public());
-    let host_node_id = host_multikey.to_id();
 
-    let (state, rx) = RouterV2State::new(host_node_id, host_keypair, host_multikey, options);
+    let (state, rx) = RouterV2State::new(host_keypair, host_multikey, options);
     let state = Arc::new(state);
 
     // Restore persisted host manifest (spec §10.8).
