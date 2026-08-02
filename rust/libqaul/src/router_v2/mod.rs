@@ -17,6 +17,7 @@ use std::{
 
 use libp2p::{identity::Keypair, PeerId};
 use tokio::sync::mpsc;
+use tracing::error;
 
 use crate::{
     connections::ConnectionModule,
@@ -92,6 +93,23 @@ impl Sphere {
     }
 }
 
+/// Which kind of entry this node originates for itself (spec §3.2).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PropagationForm {
+    User,
+    Node,
+}
+
+impl PropagationForm {
+    /// The index space this node originates its own entry in.
+    pub const fn origin_space(self) -> Space {
+        match self {
+            PropagationForm::User => Space::User,
+            PropagationForm::Node => Space::Node,
+        }
+    }
+}
+
 /// groups one user-space and one node-space mirror per neigbour
 #[derive(Debug, Default)]
 pub struct NeighbourInfo {
@@ -158,11 +176,14 @@ pub struct RouterV2State {
     pub host_keypair: Keypair,
     pub host_mk: Multikey,
     pub last_manifest_emission_ms: RwLock<u64>,
+    /// The §3.2 form currently *in effect*. Compared against
+    /// `desired_propagation_form()` each origin tick; a difference drives the
+    /// §3.5 reserved-index transition.
+    pub propagation_form: RwLock<PropagationForm>,
 }
 
 impl RouterV2State {
     pub fn new(
-        host_node_id: [u8; 8],
         host_keypair: Keypair,
         host_multikey: Multikey,
         options: RoutingV2Options,
@@ -171,7 +192,10 @@ impl RouterV2State {
         let state = Self {
             options,
             user_dict: RwLock::new(IndexDictionary::new(None)),
-            node_dict: RwLock::new(IndexDictionary::new(Some(host_node_id))),
+            // Both spaces start with no self-binding. §3.5 ties each reserved
+            // index to a propagation form, and `sync_propagation_form`
+            // establishes whichever one applies.
+            node_dict: RwLock::new(IndexDictionary::new(None)),
             mirrors: RwLock::new(HashMap::new()),
             routing_table: Arc::new(RwLock::new(RoutingTable::new())),
             users: Arc::new(RwLock::new(Users::new())),
@@ -187,6 +211,9 @@ impl RouterV2State {
             host_keypair,
             host_mk: host_multikey,
             last_manifest_emission_ms: RwLock::new(0u64),
+            // A fresh node hosts no users and has no neighbours, so it starts
+            // in user form; the first origin tick reconciles it.
+            propagation_form: RwLock::new(PropagationForm::User),
         };
         (state, rx)
     }
@@ -213,17 +240,16 @@ impl RouterV2State {
         );
     }
 
-    /// Binds this node's hosted user to `RESERVED_INDEX` in the user space
-    /// (spec §3.5), so the node can propagate it as a user entry per §3.2.
-    pub fn set_hosted_user(&self, user_id: [u8; 8], profile_version: u32) {
-        self.user_dict
-            .write()
-            .unwrap()
-            .bind(RESERVED_INDEX, user_id);
+    /// we're adding a locally hosted user in this node's user index space.
+    pub fn register_hosted_user(&self, user_id: [u8; 8], profile_version: u32) {
         {
             let mut users = self.users.write().unwrap();
             match users.get(&user_id) {
-                Some(existing) => existing.write().unwrap().profile_version = profile_version,
+                Some(existing) => {
+                    let mut u = existing.write().unwrap();
+                    u.profile_version = profile_version;
+                    u.is_hosted = true;
+                }
                 None => users.insert(
                     user_id,
                     User {
@@ -232,19 +258,215 @@ impl RouterV2State {
                         profile_version,
                         routing_entry: None,
                         delegation_gateways: Vec::new(),
+                        is_hosted: true,
                     },
                 ),
             }
         }
 
+        let newly_bound = {
+            let mut dict = self.user_dict.write().unwrap();
+            if dict.idx_of(&user_id).is_some() {
+                // this means it has been added so we don't have anythint to rebind or reintroduce
+                None
+            } else if dict.id_of(RESERVED_INDEX).is_none() {
+                dict.bind(RESERVED_INDEX, user_id);
+                Some(RESERVED_INDEX)
+            } else {
+                let mut allocator = self.users_allocator.write().unwrap();
+                match allocator.allocate() {
+                    Some(idx) => {
+                        dict.bind(idx, user_id);
+                        Some(idx)
+                    }
+                    None => {
+                        error!("user allocator exhausted registering hosted user {user_id:?}");
+                        None
+                    }
+                }
+            }
+        };
+
+        if let Some(idx) = newly_bound {
+            self.reintroduction_tracker
+                .write()
+                .unwrap()
+                .mark_first_time(Space::User, idx);
+
+            tracing::info!(
+                "router_v2: hosted user {user_id:?} bound at user index {idx} (profile_version={profile_version}, reserved={})",
+                idx == RESERVED_INDEX
+            );
+        }
+    }
+
+    /// IDs of the users this node hosts locally.
+    pub fn hosted_user_ids(&self) -> Vec<[u8; 8]> {
+        self.users
+            .read()
+            .unwrap()
+            .iter()
+            .filter(|(_, arc)| arc.read().unwrap().is_hosted)
+            .map(|(id, _)| *id)
+            .collect()
+    }
+
+    /// The form this node *should* be propagating in right now (spec §3.2).
+    pub fn desired_propagation_form(&self) -> PropagationForm {
+        if self.hosted_user_ids().len() > 1 {
+            return PropagationForm::Node;
+        }
+        let has_internet_peer = self
+            .mirrors
+            .read()
+            .unwrap()
+            .values()
+            .any(|info| info.transports.contains(&ConnectionModule::Internet));
+        if has_internet_peer {
+            return PropagationForm::Node;
+        }
+
+        // TODO(Phase 13): holding a delegation from another user is the third
+        // §3.2 trigger; cross-host delegation does not exist yet.
+        PropagationForm::User
+    }
+
+    pub(crate) fn release_index(&self, space: Space, id: &[u8; 8]) -> Option<u16> {
+        let (dict_lock, alloc_lock) = match space {
+            Space::Node => (&self.node_dict, &self.node_allocator),
+            Space::User => (&self.user_dict, &self.users_allocator),
+        };
+
+        let mut dict = dict_lock.write().unwrap();
+        let idx = dict.idx_of(id)?;
+
+        self.routing_table.write().unwrap().clear(space, idx);
+        if idx != RESERVED_INDEX {
+            alloc_lock.write().unwrap().release(idx, Instant::now());
+        }
+        dict.unbind(idx);
+
         self.reintroduction_tracker
             .write()
             .unwrap()
-            .mark_first_time(Space::User, RESERVED_INDEX);
+            .clear_mark(space, idx);
 
-        tracing::info!(
-            "router_v2: hosted user bound at RESERVED_INDEX (user_id={user_id:?}, profile_version={profile_version})"
+        Some(idx)
+    }
+
+    /// Makes sure this node has a [`Node`] record for itself.
+    fn ensure_host_node_record(&self, host_node_id: [u8; 8]) {
+        let manifest_version = self.manifest.read().unwrap().manifest_version;
+        let mut nodes = self.nodes.write().unwrap();
+        if nodes.get(&host_node_id).is_some() {
+            return;
+        }
+        nodes.insert(
+            host_node_id,
+            Node {
+                id: host_node_id,
+                public_key: Some(self.host_mk.clone()),
+                manifest_version,
+                advertised_version: 0,
+                is_gateway: false,
+                delegated_users: Vec::new(),
+                manifest_signature: None,
+                retained_chunks: None,
+                learn_sphere: None,
+                manifest_log: ManifestLog::default(),
+            },
         );
+    }
+
+    pub fn sync_propagation_form(&self) -> PropagationForm {
+        let desired = self.desired_propagation_form();
+        let current = *self.propagation_form.read().unwrap();
+        if desired == current {
+            return current;
+        }
+
+        // §3.5: the reserved index of the form we are leaving is released
+        match desired {
+            PropagationForm::Node => {
+                for user_id in self.hosted_user_ids() {
+                    if let Some(idx) = self.release_index(Space::User, &user_id) {
+                        tracing::info!(
+                            "router_v2: released user index {idx} for hosted user {user_id:?} (→ node form)"
+                        );
+                    }
+                }
+
+                let host_node_id = self.host_mk.to_id();
+                self.ensure_host_node_record(host_node_id);
+                self.node_dict
+                    .write()
+                    .unwrap()
+                    .bind(RESERVED_INDEX, host_node_id);
+                self.reintroduction_tracker
+                    .write()
+                    .unwrap()
+                    .mark_first_time(Space::Node, RESERVED_INDEX);
+                tracing::info!(
+                    "router_v2: host node {host_node_id:?} bound at node RESERVED_INDEX (→ node form)"
+                );
+            }
+            PropagationForm::User => {
+                // Give up the node-space self-binding; nothing references it
+                // while we originate user entries.
+                self.release_index(Space::Node, &self.host_mk.to_id());
+
+                if let Some(user_id) = self.hosted_user_ids().first().copied() {
+                    self.release_index(Space::User, &user_id);
+                    self.user_dict
+                        .write()
+                        .unwrap()
+                        .bind(RESERVED_INDEX, user_id);
+                    self.reintroduction_tracker
+                        .write()
+                        .unwrap()
+                        .mark_first_time(Space::User, RESERVED_INDEX);
+                    tracing::info!(
+                        "router_v2: hosted user {user_id:?} reclaimed RESERVED_INDEX (→ user form)"
+                    );
+                }
+            }
+        }
+
+        *self.propagation_form.write().unwrap() = desired;
+        tracing::info!("router_v2: propagation form {current:?} → {desired:?} (§3.2)");
+        desired
+    }
+
+    pub fn unregister_hosted_user(&self, user_id: [u8; 8]) {
+        let held_reserved = self
+            .user_dict
+            .read()
+            .unwrap()
+            .idx_of(&user_id)
+            .map(|idx| idx == RESERVED_INDEX)
+            .unwrap_or(false);
+
+        self.release_index(Space::User, &user_id);
+        self.users.write().unwrap().remove(&user_id);
+
+        if held_reserved {
+            if let Some(next) = self.hosted_user_ids().first().copied() {
+                self.release_index(Space::User, &next);
+                self.user_dict.write().unwrap().bind(RESERVED_INDEX, next);
+                self.reintroduction_tracker
+                    .write()
+                    .unwrap()
+                    .mark_rebind(Space::User, RESERVED_INDEX);
+                tracing::info!(
+                    "router_v2: hosted user {next:?} promoted to RESERVED_INDEX after removal"
+                );
+            }
+        }
+
+        // TODO(Phase 11): drop the user from the manifest and bump
+        // manifest_version (§10.5, §10.7). Symmetric with the gap on the
+        // creation side — neither half touches the manifest yet.
+        tracing::info!("router_v2: hosted user {user_id:?} unregistered");
     }
 
     /// Registers a neighbour as a routable node: ensures a [`Node`]

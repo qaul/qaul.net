@@ -106,8 +106,7 @@ pub fn tick_origin(state: &RouterV2State) {
         seq.value()
     };
 
-    // TODO: switch to Space::Node for multi-user hosts and gateways per §3.2.
-    let origin_space = Space::User;
+    let origin_space = state.sync_propagation_form().origin_space();
 
     let intros = state
         .pending_introductions(origin_space)

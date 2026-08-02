@@ -27,7 +27,7 @@ pub fn fresh_state() -> (
 ) {
     let host_kp = Keypair::generate_ed25519();
     let host_mk = Multikey::from(host_kp.public());
-    RouterV2State::new([0; 8], host_kp, host_mk, RoutingV2Options::default())
+    RouterV2State::new(host_kp, host_mk, RoutingV2Options::default())
 }
 
 pub fn fresh_peer() -> PeerId {
@@ -69,6 +69,7 @@ pub fn install_user(state: &RouterV2State, id: [u8; 8], profile_version: u32) ->
         profile_version,
         routing_entry: None,
         delegation_gateways: Vec::new(),
+        is_hosted: false,
     };
     let mut users = state.users.write().unwrap();
     users.insert(id, u);

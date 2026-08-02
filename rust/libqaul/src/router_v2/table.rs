@@ -31,6 +31,9 @@ pub struct User {
     pub profile_version: u32,
     pub routing_entry: Option<Weak<RwLock<RoutingEntry>>>,
     pub delegation_gateways: Vec<Weak<RwLock<Node>>>,
+    /// `true` for a user account held by *this* node, `false` for one learned
+    /// from a neighbour
+    pub is_hosted: bool,
 }
 
 /// A node
@@ -224,6 +227,7 @@ mod tests {
             profile_version: 0,
             routing_entry: None,
             delegation_gateways: Vec::new(),
+            is_hosted: false,
         }
     }
 
