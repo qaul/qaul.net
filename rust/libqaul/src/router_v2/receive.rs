@@ -3,10 +3,7 @@
 
 //! Receive-side handlers for router_v2.
 
-use std::{
-    sync::{Arc, RwLock},
-    time::Instant,
-};
+use std::sync::{Arc, RwLock};
 
 use libp2p::PeerId;
 use tracing::{debug, error, info, warn};
@@ -146,23 +143,7 @@ impl RouterV2State {
 
         match mirror_id {
             Some(id) if id != mapping.target_id => {
-                let mut rt = self.routing_table.write().unwrap();
-                let (mut entry_dict, mut allocator) = match space {
-                    Space::Node => (
-                        self.node_dict.write().unwrap(),
-                        self.node_allocator.write().unwrap(),
-                    ),
-                    Space::User => (
-                        self.user_dict.write().unwrap(),
-                        self.users_allocator.write().unwrap(),
-                    ),
-                };
-
-                if let Some(idx) = entry_dict.idx_of(&id) {
-                    rt.clear(space, idx);
-                    allocator.release(idx, Instant::now());
-                    entry_dict.unbind(idx);
-                }
+                self.release_index(space, &id);
             }
             Some(_) => {}
             None => {}
@@ -246,6 +227,7 @@ impl RouterV2State {
                             routing_entry: None,
                             delegation_gateways: Vec::new(),
                             public_key: None,
+                            is_hosted: false,
                         };
                         users.insert(mapping.target_id, u);
                     }
@@ -642,6 +624,7 @@ impl RouterV2State {
                                     profile_version: entry.profile_version,
                                     routing_entry: None,
                                     delegation_gateways: Vec::new(),
+                                    is_hosted: false,
                                 },
                             );
                             users.get(&entry.user_id).expect("just inserted")
