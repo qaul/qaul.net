@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'chat_message.dart';
+import 'chat_reply_bubble_preview.dart';
 
 // ---------------------------------------------------------------------------
 // Enums
@@ -37,6 +38,8 @@ class ChatBubbleStyle {
 
   static const horizontalPadding = 10.0;
   static const verticalPadding = 6.0;
+  static const replyBubbleVerticalPadding = 10.0;
+  static const gapAfterReplyPreview = 6.0;
 
   static const gapBetweenTextAndDate = 4.0;
 
@@ -82,6 +85,7 @@ class QaulChatBubbleMessage extends ChatMessage {
     this.senderIdBase58,
     this.senderDisplayName,
     this.senderDisplayNameColor,
+    this.replyPreview,
   });
 
   final String content;
@@ -95,6 +99,7 @@ class QaulChatBubbleMessage extends ChatMessage {
   final String? senderIdBase58;
   final String? senderDisplayName;
   final Color? senderDisplayNameColor;
+  final ChatReplyPreviewData? replyPreview;
 
   QaulChatBubbleMessage copyWith({
     Key? key,
@@ -109,6 +114,7 @@ class QaulChatBubbleMessage extends ChatMessage {
     String? senderIdBase58,
     String? senderDisplayName,
     Color? senderDisplayNameColor,
+    ChatReplyPreviewData? replyPreview,
   }) {
     return QaulChatBubbleMessage(
       key: key ?? this.key,
@@ -124,6 +130,7 @@ class QaulChatBubbleMessage extends ChatMessage {
       senderDisplayName: senderDisplayName ?? this.senderDisplayName,
       senderDisplayNameColor:
           senderDisplayNameColor ?? this.senderDisplayNameColor,
+      replyPreview: replyPreview ?? this.replyPreview,
     );
   }
 
@@ -267,14 +274,18 @@ class QaulChatBubble extends StatelessWidget {
           maxWidth: maxBubbleWidth,
         ),
         child: DecoratedBox(
+          key: const ValueKey('chat-bubble-surface'),
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: borderRadius,
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(
+            key: const ValueKey('chat-bubble-padding'),
+            padding: EdgeInsets.symmetric(
               horizontal: ChatBubbleStyle.horizontalPadding,
-              vertical: ChatBubbleStyle.verticalPadding,
+              vertical: message.replyPreview == null
+                  ? ChatBubbleStyle.verticalPadding
+                  : ChatBubbleStyle.replyBubbleVerticalPadding,
             ),
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: maxTextWidth),
@@ -334,6 +345,7 @@ class QaulChatBubble extends StatelessWidget {
                     ],
                   );
 
+                  final replyPreview = message.replyPreview;
                   Widget messageContent;
                   if (!showTimestamp) {
                     messageContent = RichText(
@@ -341,6 +353,22 @@ class QaulChatBubble extends StatelessWidget {
                       textWidthBasis: TextWidthBasis.longestLine,
                       textScaler: textScaler,
                       text: messageSpan,
+                    );
+                  } else if (fitsOnOneLine && replyPreview != null) {
+                    messageContent = Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: RichText(
+                            textAlign: TextAlign.left,
+                            textWidthBasis: TextWidthBasis.longestLine,
+                            textScaler: textScaler,
+                            text: messageSpan,
+                          ),
+                        ),
+                        const SizedBox(width: gap),
+                        timeRow,
+                      ],
                     );
                   } else if (fitsOnOneLine) {
                     messageContent = Row(
@@ -357,6 +385,26 @@ class QaulChatBubble extends StatelessWidget {
                         ),
                         const SizedBox(width: gap),
                         timeRow,
+                      ],
+                    );
+                  } else if (replyPreview != null) {
+                    messageContent = Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        RichText(
+                          textAlign: TextAlign.left,
+                          textWidthBasis: TextWidthBasis.longestLine,
+                          textScaler: textScaler,
+                          text: messageSpan,
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: gap),
+                            child: timeRow,
+                          ),
+                        ),
                       ],
                     );
                   } else {
@@ -380,8 +428,11 @@ class QaulChatBubble extends StatelessWidget {
                     );
                   }
 
-                  if (message.senderDisplayName == null ||
-                      message.senderDisplayName!.isEmpty) {
+                  final hasSenderDisplayName =
+                      message.senderDisplayName != null &&
+                      message.senderDisplayName!.isNotEmpty;
+
+                  if (!hasSenderDisplayName && replyPreview == null) {
                     return messageContent;
                   }
 
@@ -389,18 +440,33 @@ class QaulChatBubble extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Text(
-                          message.senderDisplayName!,
-                          style: kGroupSenderNameTextStyle.copyWith(
-                            color:
-                                message.senderDisplayNameColor ??
-                                Colors.white.withValues(alpha: 0.85),
+                      if (hasSenderDisplayName)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(
+                            message.senderDisplayName!,
+                            style: kGroupSenderNameTextStyle.copyWith(
+                              color:
+                                  message.senderDisplayNameColor ??
+                                  Colors.white.withValues(alpha: 0.85),
+                            ),
+                            textScaler: textScaler,
                           ),
-                          textScaler: textScaler,
                         ),
-                      ),
+                      if (replyPreview != null)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: ChatBubbleStyle.gapAfterReplyPreview,
+                          ),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: ChatReplyBubblePreview(
+                              data: replyPreview,
+                              isOutgoing: isPrimary,
+                              textScaler: textScaler,
+                            ),
+                          ),
+                        ),
                       messageContent,
                     ],
                   );
