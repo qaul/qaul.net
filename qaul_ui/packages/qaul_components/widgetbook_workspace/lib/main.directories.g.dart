@@ -10,6 +10,8 @@
 // **************************************************************************
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:qaul_components_widgetbook/use_cases/components/chat/chat_footer_reply_preview.dart'
+    as _qaul_components_widgetbook_use_cases_components_chat_chat_footer_reply_preview;
 import 'package:qaul_components_widgetbook/use_cases/components/chat/chat_message_context_menu.dart'
     as _qaul_components_widgetbook_use_cases_components_chat_chat_message_context_menu;
 import 'package:qaul_components_widgetbook/use_cases/components/chat/chat_reply_bubble_preview.dart'
@@ -118,24 +120,6 @@ final directories = <_widgetbook.WidgetbookNode>[
                         .buildChatFooterEmptyOpenUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
-                name: 'Light — empty actions',
-                builder:
-                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
-                        .buildChatFooterLightEmptyClosedUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Light — submenu open',
-                builder:
-                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
-                        .buildChatFooterLightEmptyOpenUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Light — with text',
-                builder:
-                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
-                        .buildChatFooterLightWithTextUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
                 name: 'Long draft (multiline)',
                 builder:
                     _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
@@ -146,6 +130,29 @@ final directories = <_widgetbook.WidgetbookNode>[
                 builder:
                     _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
                         .buildChatFooterWithTextUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookComponent(
+            name: 'ChatFooterReplyPreview',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Empty draft',
+                builder:
+                    _qaul_components_widgetbook_use_cases_components_chat_chat_footer_reply_preview
+                        .buildReplyFooterEmptyUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Long excerpt',
+                builder:
+                    _qaul_components_widgetbook_use_cases_components_chat_chat_footer_reply_preview
+                        .buildLongReplyFooterUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'With draft',
+                builder:
+                    _qaul_components_widgetbook_use_cases_components_chat_chat_footer_reply_preview
+                        .buildReplyFooterDraftUseCase,
               ),
             ],
           ),
