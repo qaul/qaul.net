@@ -99,7 +99,15 @@ impl AccountManagement {
         // 5b. we do the same for router_v2. which derives from the PeerId rather than the account
         if let Some(router_v2) = state.get_router_v2() {
             match Multikey::try_from_peer_id(&user_id) {
-                Ok(mk) => router_v2.unregister_hosted_user(mk.to_id()),
+                Ok(mk) => {
+                    let routing_id = mk.to_id();
+                    // Index space (§3.5) and manifest membership (§10.3) are
+                    // separate concerns, so both are released explicitly. The
+                    // version bump folds in on the next relay tick (§10.8) —
+                    // an ordinary deletion is not one of the two bypasses.
+                    router_v2.unregister_hosted_user(routing_id);
+                    router_v2.remove_self_delegation(&routing_id);
+                }
                 Err(e) => log::warn!("v2: cannot derive routing id for {user_id}: {e}"),
             }
         }
