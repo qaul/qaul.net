@@ -255,9 +255,22 @@ impl UserAccounts {
         let rs = state.get_router();
         crate::router::users::Users::register_local_user(state, &rs, name.clone(), &keys_ed25519);
 
-        // bind the new account as router_v2's hosted user (§3.2, §3.5). 
+        // bind the new account as router_v2's hosted user (§3.2, §3.5).
         if let Some(router_v2) = state.get_router_v2() {
-            router_v2.register_hosted_user(user.routing_user_id(), 0);
+            let routing_id = user.routing_user_id();
+            router_v2.register_hosted_user(routing_id, 0);
+
+            // TODO(Phase 11 subtask 1/7): honour an `opt_out_delegation` flag on
+            // UserAccount.
+            let ttl_ms = {
+                let config = Configuration::get(state);
+                config.v2_routing.delegation_ttl.saturating_mul(1000)
+            };
+            let delegation = user.issue_self_delegation(
+                &router_v2.host_mk,
+                Timestamp::get_timestamp().saturating_add(ttl_ms),
+            );
+            router_v2.add_self_delegation(routing_id, 0, delegation);
         }
 
         // display id

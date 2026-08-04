@@ -14,7 +14,7 @@ use crate::{
     router_v2::{
         identity::Multikey,
         propagation::{tick_origin, tick_relay},
-        OutboundMsg, RouterV2State,
+        BumpTrigger, OutboundMsg, RouterV2State,
     },
     storage::{configuration::RoutingV2Options, manifest_state::HostManifestState},
 };
@@ -42,10 +42,19 @@ pub fn init_router_v2(
     // origin tick: spec §7.1
     spawn_origin_tick(Arc::clone(&state));
 
-    // relay tick: spec §7.1.
-    spawn_relay_tick(Arc::clone(&state));
+    // relay tick: spec §7.1, and the §10.8 manifest bump/persist path.
+    spawn_relay_tick(Arc::clone(&state), storage_path.to_string());
 
     RouterV2Handle { state, rx }
+}
+
+/// Milliseconds since the UNIX epoch, matching the unit used throughout
+/// `router_v2` for timeouts, expiry and rate-limit windows.
+fn now_ms() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_millis() as u64)
+        .unwrap_or(0)
 }
 
 fn spawn_origin_tick(state: Arc<RouterV2State>) {
@@ -55,22 +64,33 @@ fn spawn_origin_tick(state: Arc<RouterV2State>) {
         ticker.tick().await;
         loop {
             ticker.tick().await;
-            tick_origin(&state);
+            tick_origin(&state, now_ms());
         }
     });
 }
 
-fn spawn_relay_tick(state: Arc<RouterV2State>) {
+fn spawn_relay_tick(state: Arc<RouterV2State>, storage_path: String) {
     tokio::spawn(async move {
         let mut ticker = tokio::time::interval(std::time::Duration::from_secs(1));
         ticker.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
         loop {
             ticker.tick().await;
-            let now_ms = std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .map(|d| d.as_millis() as u64)
-                .unwrap_or(0);
-            tick_relay(&state, now_ms);
+            let now = now_ms();
+            tick_relay(&state, now);
+
+            // §10.8: accumulated delegation changes fold into one bump once the
+            // rate-limit window has elapsed. Attempted on the 1s tick because
+            // the rate-limit bypasses must "take effect in the next 1-second
+            // relay batch", so one call site serves both.
+            if state
+                .try_bump_manifest_version(now, BumpTrigger::Accumulated)
+                .is_some()
+            {
+                // §10.8 SHALL: the origin persists manifest_version across
+                // restarts. Per-record versions derive from it, so a regression
+                // would corrupt delta selection.
+                state.host_manifest_snapshot().save_to_path(&storage_path);
+            }
         }
     });
 }
