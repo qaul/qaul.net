@@ -137,7 +137,7 @@ List<ChatMessage> buildDirectChatFixtureMessages({
     chatFixtureTextMessage(
       id: 'direct-12',
       sender: peer,
-      content: '**Markdown** _preview_ message for bubble spacing context',
+      content: 'Reply preview message for bubble spacing context',
       sentAt: clock.subtract(const Duration(seconds: 20)),
     ),
     chatFixtureTextMessage(
