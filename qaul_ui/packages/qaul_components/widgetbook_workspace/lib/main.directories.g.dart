@@ -20,6 +20,8 @@ import 'package:qaul_components_widgetbook/use_cases/design/account/account_mana
     as _qaul_components_widgetbook_use_cases_design_account_account_management;
 import 'package:qaul_components_widgetbook/use_cases/design/chat/chat_journey.dart'
     as _qaul_components_widgetbook_use_cases_design_chat_chat_journey;
+import 'package:qaul_components_widgetbook/use_cases/design/chat/reply_journey/reply_journey.dart'
+    as _qaul_components_widgetbook_use_cases_design_chat_reply_journey_reply_journey;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_footer.dart'
     as _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_header.dart'
@@ -91,6 +93,28 @@ final directories = <_widgetbook.WidgetbookNode>[
                 builder:
                     _qaul_components_widgetbook_use_cases_design_chat_chat_journey
                         .buildChatJourneyPlusMenuUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookFolder(
+            name: 'reply_journey',
+            children: [
+              _widgetbook.WidgetbookComponent(
+                name: 'ChatReplyJourney',
+                useCases: [
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Direct chat',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_chat_reply_journey_reply_journey
+                            .buildDirectReplyJourneyUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Group chat',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_chat_reply_journey_reply_journey
+                            .buildGroupReplyJourneyUseCase,
+                  ),
+                ],
               ),
             ],
           ),
@@ -189,7 +213,7 @@ final directories = <_widgetbook.WidgetbookNode>[
                         .buildContextMenuUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
-                name: 'Disabled and hidden elements',
+                name: 'Disabled and omitted elements',
                 builder:
                     _qaul_components_widgetbook_use_cases_components_chat_chat_message_context_menu
                         .buildRestrictedContextMenuUseCase,
@@ -290,6 +314,12 @@ final directories = <_widgetbook.WidgetbookNode>[
                 builder:
                     _qaul_components_widgetbook_use_cases_special_forms_qaul_chat_bubble
                         .buildIncomingShortUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'Interactive — long press',
+                builder:
+                    _qaul_components_widgetbook_use_cases_special_forms_qaul_chat_bubble
+                        .buildInteractiveLongPressUseCase,
               ),
               _widgetbook.WidgetbookUseCase(
                 name: 'Outgoing — not sent',

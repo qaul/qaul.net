@@ -11,6 +11,10 @@ const _kDisabledLightColor = Color(0xFFC7C7C7);
 const _kMenuPageSize = 5;
 const _kRowHeight = 49.0;
 
+abstract final class ChatMessageContextMenuStyle {
+  static const quickReactionFontSize = 27.0;
+}
+
 /// Asset paths for the actions supplied with [ChatMessageContextMenu].
 abstract final class ChatMessageContextMenuIcons {
   static const reply = 'assets/icons/sub_menu/reply_arrow.svg';
@@ -162,7 +166,7 @@ class ChatMessageContextMenu extends StatefulWidget {
 
   final List<ChatMessageContextMenuElement> elements;
 
-  static const double width = 216;
+  static const double width = 200;
 
   @override
   State<ChatMessageContextMenu> createState() => _ChatMessageContextMenuState();
@@ -324,7 +328,12 @@ class _ReactionButton extends StatelessWidget {
               onPressed: enabled ? reaction.onPressed : null,
               icon: Opacity(
                 opacity: !enabled ? 0.28 : (hovered ? 1.0 : 0.72),
-                child: reaction.child,
+                child: DefaultTextStyle.merge(
+                  style: const TextStyle(
+                    fontSize: ChatMessageContextMenuStyle.quickReactionFontSize,
+                  ),
+                  child: reaction.child,
+                ),
               ),
               iconSize: 30,
               padding: EdgeInsets.zero,

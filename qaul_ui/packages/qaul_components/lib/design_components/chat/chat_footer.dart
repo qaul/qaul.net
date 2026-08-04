@@ -467,12 +467,7 @@ class _ChatFooterState extends State<ChatFooter> {
       decoration: BoxDecoration(
         color: shell,
         border: Border(
-          top: BorderSide(
-            color: theme.brightness == Brightness.dark
-                ? Colors.white
-                : const Color(0xFFD1D1D6),
-            width: 0.5,
-          ),
+          top: BorderSide(color: sheet.chatFooterDivider, width: 0.5),
         ),
         boxShadow: shadows,
       ),
@@ -713,6 +708,7 @@ class _SendButton extends StatelessWidget {
     return _wrapTooltip(
       tooltip,
       IconButton(
+        key: const ValueKey('chat-footer-send'),
         onPressed: onPressed,
         icon: const _ChatFooterSvgIcon(
           asset: _kSendSvg,

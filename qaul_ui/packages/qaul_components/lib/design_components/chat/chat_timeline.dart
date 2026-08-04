@@ -11,6 +11,9 @@ import 'message_presentation_meta.dart';
 import 'qaul_chat_bubble.dart';
 import 'room_meta_message.dart';
 
+typedef ChatTextMessageLongPressStart =
+    void Function(model.TextChatMessage message, Offset globalPosition);
+
 /// A design-system-friendly chat timeline widget.
 ///
 /// Consumers own the scroll context; this widget renders a plain [Column].
@@ -24,6 +27,8 @@ class ChatTimeline extends StatelessWidget {
     required this.messages,
     this.clock,
     this.padding = const EdgeInsets.all(16),
+    this.onTextMessageLongPressStart,
+    this.selectedTextMessageId,
   }) : _mode = ChatRenderMode.direct;
 
   /// Creates a group chat timeline. Sender identity is derived from each
@@ -34,6 +39,8 @@ class ChatTimeline extends StatelessWidget {
     required this.messages,
     this.clock,
     this.padding = const EdgeInsets.all(16),
+    this.onTextMessageLongPressStart,
+    this.selectedTextMessageId,
   }) : _mode = ChatRenderMode.group;
 
   final ChatUser currentUser;
@@ -45,6 +52,14 @@ class ChatTimeline extends StatelessWidget {
 
   /// Outer inset around the timeline column (matches legacy [ChatRoom]).
   final EdgeInsetsGeometry padding;
+
+  /// Notifies the screen parent that a text message was selected.
+  ///
+  /// The timeline does not own selection state or contextual actions.
+  final ChatTextMessageLongPressStart? onTextMessageLongPressStart;
+
+  /// Message currently highlighted by a screen-owned contextual selection.
+  final String? selectedTextMessageId;
 
   final ChatRenderMode _mode;
 
@@ -127,6 +142,7 @@ class ChatTimeline extends StatelessWidget {
                 : MessageType.secondary,
             edges: const [],
             senderIdBase58: e.message.sender.id,
+            replyPreview: e.message.replyPreview,
           ),
         ),
     ];
@@ -210,11 +226,24 @@ class ChatTimeline extends StatelessWidget {
             computation: computation,
           );
 
+          final bubble = ChatMessageRenderer.renderText(
+            presentation: presentation,
+            mode: _mode,
+            clock: effectiveClock,
+            isSelected: message.id == selectedTextMessageId,
+          );
+
           children.add(
-            ChatMessageRenderer.renderText(
-              presentation: presentation,
-              mode: _mode,
-              clock: effectiveClock,
+            GestureDetector(
+              key: ValueKey('chat-message-${message.id}'),
+              behavior: HitTestBehavior.opaque,
+              onLongPressStart: onTextMessageLongPressStart == null
+                  ? null
+                  : (details) => onTextMessageLongPressStart!(
+                      message,
+                      details.globalPosition,
+                    ),
+              child: bubble,
             ),
           );
           isFirst = false;
