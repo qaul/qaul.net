@@ -217,6 +217,41 @@ impl Manifest {
         self.is_gateway = is_gateway;
     }
 
+    /// Inserts or replaces one user's delegation entry,
+    /// Returns whether the stored state actually changed.
+    pub fn upsert_entry(&mut self, entry: DelegetedEntry) -> bool {
+        match self
+            .entries
+            .binary_search_by(|e| e.user_id.cmp(&entry.user_id))
+        {
+            Ok(i) => {
+                let existing = &self.entries[i];
+                if existing.timeout == entry.timeout
+                    && existing.entry_signature == entry.entry_signature
+                    && existing.profile_version == entry.profile_version
+                {
+                    return false;
+                }
+                self.entries[i] = entry;
+                true
+            }
+            Err(i) => {
+                self.entries.insert(i, entry);
+                true
+            }
+        }
+    }
+
+    pub fn remove_entry(&mut self, user_id: &[u8; 8]) -> bool {
+        match self.entries.binary_search_by(|e| e.user_id.cmp(user_id)) {
+            Ok(i) => {
+                self.entries.remove(i);
+                true
+            }
+            Err(_) => false,
+        }
+    }
+
     pub fn bump_version(&mut self) {
         self.manifest_version = self.manifest_version.wrapping_add(1);
     }
