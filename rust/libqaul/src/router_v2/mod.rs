@@ -23,16 +23,19 @@ use crate::{
     connections::ConnectionModule,
     router_v2::{
         codec::{messages::ManifestEntry, CodecError},
-        identity::Multikey,
+        identity::{Multikey, SelfDelegation},
         index::{
             IndexAllocator, IndexDictionary, MirrorIndexDictionary, ReintroductionTracker, Space,
             RESERVED_INDEX,
         },
-        manifest::{ChunkAssembler, Manifest, ManifestLog},
+        manifest::{ChunkAssembler, DelegetedEntry, Manifest, ManifestLog},
         seq::SeqNum,
         table::{Node, Nodes, RoutingTable, User, Users},
     },
-    storage::{configuration::RoutingV2Options, manifest_state::HostManifestState},
+    storage::{
+        configuration::RoutingV2Options,
+        manifest_state::{DelegationEntry, HostManifestState},
+    },
 };
 
 pub mod codec;
@@ -110,6 +113,15 @@ impl PropagationForm {
     }
 }
 
+/// spec 10.8 says why a `manifest_version` bump is being attempted
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BumpTrigger {
+    Accumulated,
+    FormTransition,
+    /// removal forced by loss of routing reachability to a delegated user
+    ForcedRemoval,
+}
+
 /// groups one user-space and one node-space mirror per neigbour
 #[derive(Debug, Default)]
 pub struct NeighbourInfo {
@@ -175,10 +187,12 @@ pub struct RouterV2State {
     pub chunk_assembler: RwLock<ChunkAssembler>,
     pub host_keypair: Keypair,
     pub host_mk: Multikey,
-    pub last_manifest_emission_ms: RwLock<u64>,
-    /// The §3.2 form currently *in effect*. Compared against
-    /// `desired_propagation_form()` each origin tick; a difference drives the
-    /// §3.5 reserved-index transition.
+    pub last_manifest_bump_ms: RwLock<u64>,
+    /// This origin's own delta log (§10.9).
+    pub own_manifest_log: RwLock<ManifestLog>,
+    /// User ids whose delegation entry has changed since the last bump
+    pub dirty_delegations: RwLock<HashSet<[u8; 8]>>,
+    /// spec 3.5
     pub propagation_form: RwLock<PropagationForm>,
 }
 
@@ -210,7 +224,9 @@ impl RouterV2State {
             chunk_assembler: RwLock::new(ChunkAssembler::new()),
             host_keypair,
             host_mk: host_multikey,
-            last_manifest_emission_ms: RwLock::new(0u64),
+            last_manifest_bump_ms: RwLock::new(0u64),
+            own_manifest_log: RwLock::new(ManifestLog::default()),
+            dirty_delegations: RwLock::new(HashSet::new()),
             // A fresh node hosts no users and has no neighbours, so it starts
             // in user form; the first origin tick reconciles it.
             propagation_form: RwLock::new(PropagationForm::User),
@@ -378,7 +394,101 @@ impl RouterV2State {
         );
     }
 
-    pub fn sync_propagation_form(&self) -> PropagationForm {
+    /// 10.3 says: a user's self-delegation in this host's manifest is recoreded
+    pub fn add_self_delegation(
+        &self,
+        user_id: [u8; 8],
+        profile_version: u32,
+        delegation: SelfDelegation,
+    ) -> bool {
+        let changed = self.manifest.write().unwrap().upsert_entry(DelegetedEntry {
+            user_id,
+            timeout: delegation.timeout,
+            entry_signature: delegation.entry_signature,
+            profile_version,
+        });
+
+        if changed {
+            self.dirty_delegations.write().unwrap().insert(user_id);
+        }
+        changed
+    }
+
+    pub fn remove_self_delegation(&self, user_id: &[u8; 8]) -> bool {
+        let removed = self.manifest.write().unwrap().remove_entry(user_id);
+        if removed {
+            self.dirty_delegations.write().unwrap().insert(*user_id);
+        }
+        removed
+    }
+
+    pub fn try_bump_manifest_version(&self, now_ms: u64, trigger: BumpTrigger) -> Option<u32> {
+        let dirty: Vec<[u8; 8]> = self
+            .dirty_delegations
+            .read()
+            .unwrap()
+            .iter()
+            .copied()
+            .collect();
+
+        if trigger == BumpTrigger::Accumulated {
+            if dirty.is_empty() {
+                return None;
+            }
+            // `manifest_rate_limit` is seconds; everything else here is ms.
+            let window_ms = self.options.manifest_rate_limit.saturating_mul(1000);
+            let last = *self.last_manifest_bump_ms.read().unwrap();
+            if now_ms < last.saturating_add(window_ms) {
+                return None;
+            }
+        }
+
+        let mut manifest = self.manifest.write().unwrap();
+        let new_version = manifest.manifest_version.wrapping_add(1);
+
+        {
+            let mut log = self.own_manifest_log.write().unwrap();
+            for user_id in &dirty {
+                match manifest.entries().iter().find(|e| e.user_id == *user_id) {
+                    Some(entry) => log.insert_add(new_version, entry.clone()),
+                    None => log.insert_remove(*user_id, new_version, now_ms),
+                }
+            }
+        }
+
+        manifest.manifest_version = new_version;
+        drop(manifest);
+
+        self.dirty_delegations.write().unwrap().clear();
+        *self.last_manifest_bump_ms.write().unwrap() = now_ms;
+
+        tracing::info!(
+            "router_v2: manifest_version → {new_version} ({trigger:?}, {} record(s) folded)",
+            dirty.len()
+        );
+        Some(new_version)
+    }
+
+    pub fn host_manifest_snapshot(&self) -> HostManifestState {
+        let manifest = self.manifest.read().unwrap();
+        HostManifestState {
+            manifest_version: manifest.manifest_version,
+            is_gateway: manifest.is_gateway,
+            entries: manifest
+                .entries()
+                .iter()
+                .map(|e| DelegationEntry {
+                    user_id: e.user_id,
+                    timeout: e.timeout,
+                    entry_signature: e.entry_signature.to_vec(),
+                    profile_version: e.profile_version,
+                })
+                .collect(),
+            last_bump_ms_reserved: None,
+        }
+    }
+
+    pub fn sync_propagation_form(&self, now_ms: u64) -> PropagationForm {
         let desired = self.desired_propagation_form();
         let current = *self.propagation_form.read().unwrap();
         if desired == current {
@@ -434,6 +544,12 @@ impl RouterV2State {
 
         *self.propagation_form.write().unwrap() = desired;
         tracing::info!("router_v2: propagation form {current:?} → {desired:?} (§3.2)");
+
+        // §10.8: the single-user↔multi-user transition is a bump trigger, and
+        // one of the two events that bypass the rate limit — the host's routing
+        // form has changed and must propagate in the next relay batch.
+        self.try_bump_manifest_version(now_ms, BumpTrigger::FormTransition);
+
         desired
     }
 
