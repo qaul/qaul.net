@@ -75,6 +75,14 @@ impl Profile {
     }
 }
 
+/// A user's authorisation for a host to represent it (spec §10.3).
+#[derive(Debug, Clone, Copy)]
+pub struct SelfDelegation {
+    /// Absolute expiry, ms since epoch.
+    pub timeout: u64,
+    pub entry_signature: [u8; 64],
+}
+
 pub fn delegation_signing_input(host_full_multikey: &[u8], timeout: u64) -> Vec<u8> {
     let mut buf = Vec::new();
     buf.extend_from_slice(host_full_multikey);
@@ -121,6 +129,14 @@ impl UserAccount {
             .expect("ed25519 sign")
             .try_into()
             .expect("ed25519 signatures are 64 bytes")
+    }
+
+    pub fn issue_self_delegation(&self, host_mk: &Multikey, timeout: u64) -> SelfDelegation {
+        let signing_input = delegation_signing_input(&host_mk.encode(), timeout);
+        SelfDelegation {
+            timeout,
+            entry_signature: self.sign_with_user(&signing_input),
+        }
     }
 }
 

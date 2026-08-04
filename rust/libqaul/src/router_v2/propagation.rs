@@ -99,14 +99,14 @@ fn build_origin_update(
 }
 
 /// orchestrates sending routing updates per second
-pub fn tick_origin(state: &RouterV2State) {
+pub fn tick_origin(state: &RouterV2State, now_ms: u64) {
     let new_seq = {
         let mut seq = state.seq_num.write().unwrap();
         seq.increment();
         seq.value()
     };
 
-    let origin_space = state.sync_propagation_form().origin_space();
+    let origin_space = state.sync_propagation_form(now_ms).origin_space();
 
     let intros = state
         .pending_introductions(origin_space)
