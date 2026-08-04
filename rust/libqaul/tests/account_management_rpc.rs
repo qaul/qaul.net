@@ -110,7 +110,10 @@ fn account_and_auth_rpc_dispatch_roundtrips() {
     );
     match status {
         auth::auth_rpc::Message::SessionStatusResponse(r) => {
-            assert!(r.authenticated, "a freshly created account is authenticated")
+            assert!(
+                r.authenticated,
+                "a freshly created account is authenticated"
+            )
         }
         _ => panic!("expected SessionStatusResponse"),
     }

@@ -48,9 +48,7 @@ pub async fn run(shell_cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
     let mut event_rx = match crate::subscribe::spawn_event_listener(&shell_cli).await {
         Ok(rx) => Some(rx),
         Err(e) => {
-            eprintln!(
-                "shell: event subscription unavailable ({e}); commands still work"
-            );
+            eprintln!("shell: event subscription unavailable ({e}); commands still work");
             None
         }
     };
@@ -146,13 +144,14 @@ pub async fn run(shell_cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
             command: parsed.command,
         };
 
-        let mut transport = match qauld_rpc::SocketTransport::connect(&crate::connect_info(&shell_cli)).await {
-            Ok(t) => t,
-            Err(e) => {
-                eprintln!("connection failed: {e}");
-                continue;
-            }
-        };
+        let mut transport =
+            match qauld_rpc::SocketTransport::connect(&crate::connect_info(&shell_cli)).await {
+                Ok(t) => t,
+                Err(e) => {
+                    eprintln!("connection failed: {e}");
+                    continue;
+                }
+            };
         if let Err(e) = crate::run(&mut transport, merged).await {
             eprintln!("error: {e}");
         }
@@ -162,9 +161,7 @@ pub async fn run(shell_cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-async fn write_prompt(
-    stdout: &mut tokio::io::Stdout,
-) -> Result<(), Box<dyn std::error::Error>> {
+async fn write_prompt(stdout: &mut tokio::io::Stdout) -> Result<(), Box<dyn std::error::Error>> {
     stdout.write_all(PROMPT).await?;
     stdout.flush().await?;
     Ok(())
@@ -174,7 +171,9 @@ async fn write_prompt(
 /// listener was never started (no daemon at shell launch) or has gone
 /// away. We never return early on `None` from a live channel; instead
 /// we drop the receiver so future iterations skip the event branch.
-async fn recv_event(rx: &mut Option<tokio::sync::mpsc::UnboundedReceiver<String>>) -> Option<String> {
+async fn recv_event(
+    rx: &mut Option<tokio::sync::mpsc::UnboundedReceiver<String>>,
+) -> Option<String> {
     match rx {
         Some(r) => match r.recv().await {
             Some(line) => Some(line),

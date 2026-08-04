@@ -11,8 +11,8 @@ use std::time::{Duration, Instant};
 
 use crossterm::{
     event::{
-        DisableMouseCapture, EnableMouseCapture, Event as CtEvent, EventStream, KeyCode,
-        KeyEvent, KeyEventKind, KeyModifiers,
+        DisableMouseCapture, EnableMouseCapture, Event as CtEvent, EventStream, KeyCode, KeyEvent,
+        KeyEventKind, KeyModifiers,
     },
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
@@ -214,11 +214,7 @@ async fn handle_key(
     None
 }
 
-async fn refresh(
-    app: &mut App,
-    connect: &qauld_rpc::transport::ConnectInfo,
-    timeout: Duration,
-) {
+async fn refresh(app: &mut App, connect: &qauld_rpc::transport::ConnectInfo, timeout: Duration) {
     match data::fetch_default_user(connect, timeout).await {
         Ok(d) => {
             app.node_name = d.label;

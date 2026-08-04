@@ -1351,15 +1351,15 @@ mod handshake_extras_primitive_tests {
         acct.save_state(remote, session_id, send_state.clone());
 
         let plaintext = b"hello extras".to_vec();
-        let (ciphertext, pre_index) =
-            CryptoNoise::encrypt_noise_kk_handshake_extra::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
-                &state,
-                plaintext.clone(),
-                acct.clone(),
-                send_state,
-                remote,
-            )
-            .expect("encrypt should succeed when pre_cipher_out is set");
+        let (ciphertext, pre_index) = CryptoNoise::encrypt_noise_kk_handshake_extra::<
+            X25519,
+            ChaCha20Poly1305,
+            Sha256,
+            &[u8],
+        >(
+            &state, plaintext.clone(), acct.clone(), send_state, remote
+        )
+        .expect("encrypt should succeed when pre_cipher_out is set");
         assert_eq!(pre_index, 0, "first extra carries pre_index 0");
 
         // Pre-index advanced and bytes accounted on the saved state.
@@ -1369,16 +1369,20 @@ mod handshake_extras_primitive_tests {
 
         // Set up an independent receiver side with the same shared key.
         let recv_state = dummy_halfoutgoing(session_id, &key);
-        let decrypted =
-            CryptoNoise::decrypt_noise_kk_handshake_extra::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
-                &state,
-                ciphertext,
-                pre_index,
-                acct.clone(),
-                recv_state,
-                remote,
-            )
-            .expect("decrypt should succeed for matching pre_cipher_in");
+        let decrypted = CryptoNoise::decrypt_noise_kk_handshake_extra::<
+            X25519,
+            ChaCha20Poly1305,
+            Sha256,
+            &[u8],
+        >(
+            &state,
+            ciphertext,
+            pre_index,
+            acct.clone(),
+            recv_state,
+            remote,
+        )
+        .expect("decrypt should succeed for matching pre_cipher_in");
         assert_eq!(decrypted, plaintext);
     }
 
@@ -1398,26 +1402,22 @@ mod handshake_extras_primitive_tests {
         // Produce two extras.
         let p0 = b"zero".to_vec();
         let p1 = b"one".to_vec();
-        let (c0, idx0) =
-            CryptoNoise::encrypt_noise_kk_handshake_extra::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
-                &state,
-                p0.clone(),
-                acct.clone(),
-                send_state.clone(),
-                remote,
-            )
-            .unwrap();
+        let (c0, idx0) = CryptoNoise::encrypt_noise_kk_handshake_extra::<
+            X25519,
+            ChaCha20Poly1305,
+            Sha256,
+            &[u8],
+        >(&state, p0.clone(), acct.clone(), send_state.clone(), remote)
+        .unwrap();
         // Refresh send_state (encrypt persists, so reload).
         send_state = acct.get_state_by_id(remote, session_id).unwrap();
-        let (c1, idx1) =
-            CryptoNoise::encrypt_noise_kk_handshake_extra::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
-                &state,
-                p1.clone(),
-                acct.clone(),
-                send_state,
-                remote,
-            )
-            .unwrap();
+        let (c1, idx1) = CryptoNoise::encrypt_noise_kk_handshake_extra::<
+            X25519,
+            ChaCha20Poly1305,
+            Sha256,
+            &[u8],
+        >(&state, p1.clone(), acct.clone(), send_state, remote)
+        .unwrap();
         assert_eq!((idx0, idx1), (0, 1));
 
         // Receiver side: deliver index 1 first, then index 0.
@@ -1478,15 +1478,15 @@ mod handshake_extras_primitive_tests {
 
         let send_state = dummy_halfoutgoing(session_id, &key);
         acct.save_state(remote, session_id, send_state.clone());
-        let (ciphertext, pre_index) =
-            CryptoNoise::encrypt_noise_kk_handshake_extra::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
-                &state,
-                b"once".to_vec(),
-                acct.clone(),
-                send_state,
-                remote,
-            )
-            .unwrap();
+        let (ciphertext, pre_index) = CryptoNoise::encrypt_noise_kk_handshake_extra::<
+            X25519,
+            ChaCha20Poly1305,
+            Sha256,
+            &[u8],
+        >(
+            &state, b"once".to_vec(), acct.clone(), send_state, remote
+        )
+        .unwrap();
 
         let recv_state = dummy_halfoutgoing(session_id, &key);
         acct.save_state(remote, session_id, recv_state);
@@ -1545,15 +1545,19 @@ mod handshake_extras_primitive_tests {
         // we pass an index well above it. The contents are irrelevant
         // because the cap check fires before AEAD.
         let bogus = vec![0u8; 16];
-        let result =
-            CryptoNoise::decrypt_noise_kk_handshake_extra::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
-                &state,
-                bogus,
-                cap, // exactly at the cap → rejected (bound is exclusive)
-                acct.clone(),
-                acct.get_state_by_id(remote, session_id).unwrap(),
-                remote,
-            );
+        let result = CryptoNoise::decrypt_noise_kk_handshake_extra::<
+            X25519,
+            ChaCha20Poly1305,
+            Sha256,
+            &[u8],
+        >(
+            &state,
+            bogus,
+            cap, // exactly at the cap → rejected (bound is exclusive)
+            acct.clone(),
+            acct.get_state_by_id(remote, session_id).unwrap(),
+            remote,
+        );
         assert!(result.is_none());
 
         // Bitmap untouched — the early-return must come before any
@@ -1578,15 +1582,12 @@ mod handshake_extras_primitive_tests {
         recv_state.pre_cipher_in = None;
         acct.save_state(remote, session_id, recv_state.clone());
 
-        let result =
-            CryptoNoise::decrypt_noise_kk_handshake_extra::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
-                &state,
-                vec![0u8; 16],
-                0,
-                acct,
-                recv_state,
-                remote,
-            );
+        let result = CryptoNoise::decrypt_noise_kk_handshake_extra::<
+            X25519,
+            ChaCha20Poly1305,
+            Sha256,
+            &[u8],
+        >(&state, vec![0u8; 16], 0, acct, recv_state, remote);
         assert!(result.is_none());
     }
 
@@ -1605,14 +1606,12 @@ mod handshake_extras_primitive_tests {
         send_state.pre_cipher_out = None;
         acct.save_state(remote, session_id, send_state.clone());
 
-        let result =
-            CryptoNoise::encrypt_noise_kk_handshake_extra::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
-                &state,
-                b"x".to_vec(),
-                acct,
-                send_state,
-                remote,
-            );
+        let result = CryptoNoise::encrypt_noise_kk_handshake_extra::<
+            X25519,
+            ChaCha20Poly1305,
+            Sha256,
+            &[u8],
+        >(&state, b"x".to_vec(), acct, send_state, remote);
         assert!(result.is_none());
     }
 }

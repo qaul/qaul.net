@@ -31,7 +31,7 @@ config = "0.15"
 toml = "0.9"
 base64 ="0.22"
 humantime = "2.1"
-tracing = "0.1"
+tracing = { version = "0.1", features = ["log"] }
 void = "1.0"
 wasm-timer = "0.2"
 rand = "0.9"
@@ -56,6 +56,8 @@ semver = "1.0"
 argon2 = "0.5.3"
 tar = "0.4"
 flate2 = "1.1"
+bitvec = "1.0.1"
+serde_bytes = "0.11.19"
 
 # Search module dependencies
 tantivy = "0.25.0"
@@ -80,6 +82,7 @@ android_logger = "0.15"
 
 [dev-dependencies]
 tempfile = "3"
+proptest = "1.11.0"
 
 # linting rules
 [lints.rust]

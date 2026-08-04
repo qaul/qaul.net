@@ -215,10 +215,7 @@ impl RpcCommand for AccountSubcmd {
                         }))?
                     );
                 } else if response.success {
-                    println!(
-                        "Profile updated; new version: {}",
-                        response.new_version
-                    );
+                    println!("Profile updated; new version: {}", response.new_version);
                 } else {
                     println!("Profile update FAILED: {}", response.error_message);
                 }

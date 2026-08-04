@@ -6,8 +6,7 @@
 use std::collections::VecDeque;
 
 use super::data::{
-    CryptoConfig, CryptoRotationEvent, DtnConfig, DtnState, EventLine, NetworkSnapshot,
-    ParsedEvent,
+    CryptoConfig, CryptoRotationEvent, DtnConfig, DtnState, EventLine, NetworkSnapshot, ParsedEvent,
 };
 
 const MAX_EVENTS: usize = 200;
@@ -193,10 +192,7 @@ impl App {
 
     pub fn filtered_users(&self) -> impl Iterator<Item = &UserRow> {
         self.users.iter().filter(move |u| {
-            self.matches_filter(&format!(
-                "{} {} {} {}",
-                u.name, u.id, u.connectivity, u.bio
-            ))
+            self.matches_filter(&format!("{} {} {} {}", u.name, u.id, u.connectivity, u.bio))
         })
     }
 
@@ -212,7 +208,10 @@ impl App {
     pub fn filtered_peers(&self) -> impl Iterator<Item = &super::data::PeerRow> {
         self.network.iter().flat_map(move |n| {
             n.peers.iter().filter(move |p| {
-                self.matches_filter(&format!("{} {} h{} rtt{}", p.module, p.user_id, p.hops, p.rtt_ms))
+                self.matches_filter(&format!(
+                    "{} {} h{} rtt{}",
+                    p.module, p.user_id, p.hops, p.rtt_ms
+                ))
             })
         })
     }

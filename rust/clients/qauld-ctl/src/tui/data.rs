@@ -87,10 +87,18 @@ pub async fn fetch_default_user(
     timeout: Duration,
 ) -> Result<DefaultUser, Box<dyn std::error::Error>> {
     let req = ua_proto::UserAccounts {
-        message: Some(ua_proto::user_accounts::Message::GetDefaultUserAccount(true)),
+        message: Some(ua_proto::user_accounts::Message::GetDefaultUserAccount(
+            true,
+        )),
     };
     let mut t = open(connect).await?;
-    let resp = round_trip(&mut t, proto::Modules::Useraccounts, req.encode_to_vec(), timeout).await?;
+    let resp = round_trip(
+        &mut t,
+        proto::Modules::Useraccounts,
+        req.encode_to_vec(),
+        timeout,
+    )
+    .await?;
     let parsed = ua_proto::UserAccounts::decode(&resp.data[..])?;
     if let Some(ua_proto::user_accounts::Message::DefaultUserAccount(d)) = parsed.message {
         if let Some(acct) = d.my_user_account {
@@ -117,7 +125,10 @@ pub async fn fetch_users(
 ) -> Result<Vec<UserRow>, Box<dyn std::error::Error>> {
     let req = users_proto::Users {
         message: Some(users_proto::users::Message::UserRequest(
-            users_proto::UserRequest { offset: 0, limit: 0 },
+            users_proto::UserRequest {
+                offset: 0,
+                limit: 0,
+            },
         )),
     };
     let mut t = open(connect).await?;
@@ -320,10 +331,7 @@ pub async fn fetch_crypto_events(
 ) -> Result<Vec<CryptoRotationEvent>, Box<dyn std::error::Error>> {
     let req = crypto_proto::Crypto {
         message: Some(crypto_proto::crypto::Message::GetEventsRequest(
-            crypto_proto::GetRotationEventsRequest {
-                since_ms,
-                limit: 0,
-            },
+            crypto_proto::GetRotationEventsRequest { since_ms, limit: 0 },
         )),
     };
     let mut t = open(connect).await?;
@@ -479,7 +487,10 @@ fn format_event(data: &[u8]) -> Option<EventLine> {
                         reason,
                     )
                 }
-                Err(_) => format!("[{}] dtn.delivery_response <decode failed>", event.timestamp),
+                Err(_) => format!(
+                    "[{}] dtn.delivery_response <decode failed>",
+                    event.timestamp
+                ),
             }
         }
         "crypto.rotation" => match crypto_proto::RotationEvent::decode(&event.payload[..]) {
@@ -505,7 +516,11 @@ fn format_event(data: &[u8]) -> Option<EventLine> {
             event.payload.len()
         ),
     };
-    Some(EventLine { topic, text, parsed })
+    Some(EventLine {
+        topic,
+        text,
+        parsed,
+    })
 }
 
 fn rotation_event_to_row(ev: &crypto_proto::RotationEvent) -> CryptoRotationEvent {
