@@ -37,6 +37,22 @@ class BleConnection(
     val createdAt: Long = System.currentTimeMillis()
 
     /**
+     * Is this link on the long-range Coded PHY? Drives per connection timeout scaling.
+     *
+     * Uses the negotiated [phyLabel] once known, falling back to the PHY we opened on ,which is
+     * what covers the fragile setup window of an outbound Coded connect, before any onPhyUpdate has
+     * landed. Problem?: an peripheral Coded link can't be identified until its PHY update
+     * arrives
+     */
+    val isCoded: Boolean
+        get() = phyLabel == "Coded" ||
+                (phyLabel == "?" && connectPhy == BluetoothDevice.PHY_LE_CODED_MASK)
+
+    /** [base] scaled for this link's PHY  */
+    fun scaleTimeout(base: Long): Long =
+        if (isCoded) base * BleConstants.CODED_TIMEOUT_MULTIPLIER else base
+
+    /**
      * Fired the first time we learn the remote's qaul ID from the data stream (SEND_ID FLC).
      * ConnectionPool sets this to detect duplicates across MAC addresses.
      */
@@ -95,10 +111,12 @@ class BleConnection(
                         BluetoothDevice.PHY_OPTION_S8
                     )
                 } else {
+                    val phy = if (BleConstants.PREFER_2M) BluetoothDevice.PHY_LE_2M_MASK
+                              else BluetoothDevice.PHY_LE_1M_MASK
                     BleTaskScheduler.setPreferredPhy(
                         device,
-                        BluetoothDevice.PHY_LE_2M_MASK,
-                        BluetoothDevice.PHY_LE_2M_MASK,
+                        phy,
+                        phy,
                         BluetoothDevice.PHY_OPTION_NO_PREFERRED
                     )
                 }
@@ -182,7 +200,8 @@ class BleConnection(
                 onMessageReceived = { data -> BleTaskScheduler.notifyMessageAssembled(device, data) },
                 // Only clear if the field still points at THIS channel (a replacement may have
                 // already taken its place).
-                onClosed = { synchronized(l2capLock) { if (l2capChannel === newChannel) l2capChannel = null } }
+                onClosed = { synchronized(l2capLock) { if (l2capChannel === newChannel) l2capChannel = null } },
+                onBulkReceive = { active -> BleTaskScheduler.notifyBulkTransport(device, active) }
             )
             l2capChannel = newChannel
             Log.i(TAG, "L2CAP channel ready for ${device.address} ($role)")
@@ -199,7 +218,13 @@ class BleConnection(
         // and real FLC ACK. They ride separate channels, so a file can't block a routing
         // update. If there's no L2CAP channel, everything goes GATT and large lands in the BULK lane.
         if (channel != null && payload.size > BleConstants.MEDIUM_MESSAGE_MAX_BYTES) {
-            channel.send(payload)
+            // Escalation is signalled from here, not from the scheduler's BULK lane. This branch is
+            // the only place that knows both "this is bulk" and "it took L2CAP" — the lane-based
+            // signal is GATT-only, so before this every transfer big enough to use L2CAP ran its
+            // full length at idle priority (45ms interval) on 1M, which is the worst configuration
+            // available and exactly the one real files were getting.
+            BleTaskScheduler.notifyBulkTransport(device, true)
+            channel.send(payload) { BleTaskScheduler.notifyBulkTransport(device, false) }
             // TODO: L2CAP has no per-message ACK. is this ok?. the socket write is the delivery signal for now.
             onMessageResult?.invoke(messageId, true)
         } else {
@@ -227,6 +252,9 @@ class BleConnection(
                 onQaulIdResolved?.invoke(device, id)
             }
         }
+
+        // Receive side half of the bulk transfer PHY/interval escalation signal, how a receiver knows we should upgrade the link due to an incoming bulk send
+        result.bulkReceiveActive?.let { BleTaskScheduler.notifyBulkReceive(device, it) }
 
         // Fully assembled message — deliver upward
         result.receivedMessage?.let {
