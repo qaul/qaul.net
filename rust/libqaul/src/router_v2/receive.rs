@@ -12,16 +12,22 @@ use crate::{
     connections::ConnectionModule,
     router_v2::{
         codec::{
-            messages::{IndexDump, Mapping, NodeEntry, NodeManifest, RoutingUpdate, UserEntry},
+            messages::{
+                IndexDump, ManifestDelta, ManifestEntry, ManifestRequest, Mapping, NodeEntry,
+                NodeManifest, RoutingUpdate, UserEntry,
+            },
             CodecError, Header, RoutingMessage,
         },
-        identity::Multikey,
+        identity::{ChunkSigningCtx, Multikey},
         index::Space,
-        manifest::{Manifest, ManifestLog},
+        manifest::{
+            canonical_entry_bytes, decide_serve, DeltaHeader, Manifest, ManifestLog,
+            OriginServeState, ServeDecision, MAX_BODY,
+        },
         metric::hop_cost,
         seq::{is_fresher_u32, Acceptance, SeqNum},
         table::{DelegatedUser, Node, RoutingEntry, TargetRef, User},
-        Result, RouterV2State, RoutingV2Error,
+        OutboundMsg, Result, RouterV2State, RoutingV2Error, Sphere,
     },
 };
 
@@ -173,9 +179,16 @@ impl RouterV2State {
                         };
 
                         if is_fresher_u32(mapping.version, advertised) {
-                            let mut n = node.write().unwrap();
-                            n.advertised_version = mapping.version;
-                            // TODO(Phase 10b): if mapping.version > n.manifest_version trigger a MANIFEST_REQUEST pull.
+                            {
+                                let mut n = node.write().unwrap();
+                                n.advertised_version = mapping.version;
+                            }
+                            // per 10.8. a fresher advertisement is the pull trigger
+                            self.maybe_request_manifest(
+                                neighbour,
+                                mapping.target_id,
+                                mapping.version,
+                            );
                         } else {
                             debug!("stale node advertisement from {neighbour:?}: target={:?} stored_advertised={advertised} incoming={}",
                                 mapping.target_id, mapping.version);
@@ -195,7 +208,10 @@ impl RouterV2State {
                             manifest_log: ManifestLog::default(),
                         };
                         nodes.insert(mapping.target_id, n);
-                        // TODO(Phase 10b): if mapping.version > 0, enqueue a MANIFEST_REQUEST
+                        drop(nodes);
+                        // new origin does not hold any state, so, we need to pull it since its version is fresher
+                        self.maybe_request_manifest(neighbour, mapping.target_id, mapping.version);
+                        return Ok(());
                     }
                 }
             }
@@ -363,12 +379,15 @@ impl RouterV2State {
         };
 
         if let Some(TargetRef::Node(n)) = target {
-            let mut node = n.write().unwrap();
-            if is_fresher_u32(entry.manifest_version, node.advertised_version) {
-                node.advertised_version = entry.manifest_version;
-                // TODO(Phase 10b): if entry.manifest_version > node.manifest_version,
-                //   maybe_enqueue_request(state, ctx.neighbour, target_id, entry.manifest_version).
-            }
+            let target_id = {
+                let mut node = n.write().unwrap();
+                if is_fresher_u32(entry.manifest_version, node.advertised_version) {
+                    node.advertised_version = entry.manifest_version;
+                }
+                node.id
+            };
+            // per 8.8: fire another pull trigger since the advertisement is recorded
+            self.maybe_request_manifest(ctx.neighbour, target_id, entry.manifest_version);
         }
 
         if let EvaluateOutcome::Accept(accepted) = outcome {
@@ -469,7 +488,7 @@ impl RouterV2State {
         mut buf: &[u8],
         now: u64,
     ) -> Result<()> {
-        // TEMP(smoke test): first thing to check when nothing arrives — this
+        // TEMP(): first thing to check when nothing arrives — this
         // separates "never sent" from "sent but not dispatched here".
         info!(
             "router_v2 RECV ← peer={neighbour} transport={transport:?} type={:#04x} bytes={}",
@@ -532,7 +551,22 @@ impl RouterV2State {
                     }
                     Err(e) => error!("IndexDump decode failed: {e}"),
                 },
-                _ => debug!("to be implemented"),
+                RoutingMessage::ManifestDelta => match ManifestDelta::decode(payload) {
+                    Ok(msg) => {
+                        if let Err(e) = self.handle_manifest_delta(msg, now, transport) {
+                            error!("handle_manifest_delta failed: {e}");
+                        }
+                    }
+                    Err(e) => error!("ManifestDelta decode failed: {e}"),
+                },
+                RoutingMessage::ManifestRequest => match ManifestRequest::decode(payload) {
+                    Ok(msg) => {
+                        if let Err(e) = self.handle_manifest_request(neighbour, transport, msg) {
+                            error!("handle_manifest_request failed: {e}");
+                        }
+                    }
+                    Err(e) => error!("ManifestRequest decode failed: {e}"),
+                },
             }
         }
         Ok(())
@@ -561,11 +595,44 @@ impl RouterV2State {
         }
     }
 
+    fn delegated_users_from_entries(&self, entries: &[ManifestEntry]) -> Vec<DelegatedUser> {
+        let mut users = self.users.write().unwrap();
+        entries
+            .iter()
+            .map(|entry| {
+                let user_arc = match users.get(&entry.user_id) {
+                    Some(arc) => arc,
+                    None => {
+                        users.insert(
+                            entry.user_id,
+                            User {
+                                id: entry.user_id,
+                                public_key: None,
+                                profile_version: entry.profile_version,
+                                routing_entry: None,
+                                delegation_gateways: Vec::new(),
+                                is_hosted: false,
+                            },
+                        );
+                        users.get(&entry.user_id).expect("just inserted")
+                    }
+                };
+                DelegatedUser {
+                    user_id: entry.user_id,
+                    user: user_arc,
+                    delegation_timeout: entry.timeout,
+                    entry_signature: entry.entry_signature,
+                    profile_version: entry.profile_version,
+                }
+            })
+            .collect()
+    }
+
     pub fn handle_node_manifest(
         &self,
         mut msg: NodeManifest,
         now: u64,
-        _transport: ConnectionModule,
+        transport: ConnectionModule,
     ) -> Result<()> {
         let origin_node_id = msg.origin_node_id;
 
@@ -607,42 +674,7 @@ impl RouterV2State {
         };
 
         let is_gateway = (completed_manifest.flags & 0x01) != 0;
-        let delegated_users: Vec<DelegatedUser> = {
-            let mut users = self.users.write().unwrap();
-            completed_manifest
-                .entries
-                .iter()
-                .map(|entry| {
-                    let user_arc = match users.get(&entry.user_id) {
-                        Some(arc) => arc,
-                        None => {
-                            users.insert(
-                                entry.user_id,
-                                User {
-                                    id: entry.user_id,
-                                    public_key: None,
-                                    profile_version: entry.profile_version,
-                                    routing_entry: None,
-                                    delegation_gateways: Vec::new(),
-                                    is_hosted: false,
-                                },
-                            );
-                            users.get(&entry.user_id).expect("just inserted")
-                        }
-                    };
-                    DelegatedUser {
-                        user_id: entry.user_id,
-                        user: user_arc,
-                        delegation_timeout: entry.timeout,
-                        entry_signature: entry.entry_signature,
-                        // TODO(Phase 3 codec update): once ManifestEntry
-                        // carries profile_version on the wire (spec §10.1),
-                        // read it from `entry.profile_version` here.
-                        profile_version: 0,
-                    }
-                })
-                .collect()
-        };
+        let delegated_users = self.delegated_users_from_entries(&completed_manifest.entries);
 
         let nodes = self.nodes.read().unwrap();
         if let Some(node_arc) = nodes.get(&origin_node_id) {
@@ -650,8 +682,409 @@ impl RouterV2State {
             node.manifest_version = completed_manifest.manifest_version;
             node.is_gateway = is_gateway;
             node.delegated_users = delegated_users;
+            // §2.3
+            node.learn_sphere = Some(Sphere::of(transport));
+
+            // we're retaining what the origin signed exactly byte by byte
+            node.manifest_signature = if completed_manifest.chunks.len() == 1 {
+                Some(completed_manifest.chunks[0].manifest_signature)
+            } else {
+                None
+            };
+            node.retained_chunks = Some(completed_manifest.chunks);
+            // start the log afresh with thw base at the version we just commited.
+            node.manifest_log
+                .reset_to(completed_manifest.manifest_version);
         }
 
+        Ok(())
+    }
+
+    /// per spec 8.8: handle MANIFEST_DELTA. the spec has 7 steps
+    fn send_framed(
+        &self,
+        peer: PeerId,
+        transport: ConnectionModule,
+        message_type: RoutingMessage,
+        body: Vec<u8>,
+    ) {
+        let payload_len = match u16::try_from(body.len()) {
+            Ok(n) => n,
+            Err(_) => {
+                error!("send_framed: body of {} bytes exceeds u16", body.len());
+                return;
+            }
+        };
+        let header = Header {
+            version: crate::router_v2::codec::PROTOCOL_VERSION,
+            message_type,
+            payload_len,
+        };
+        let mut frame = Vec::with_capacity(4 + body.len());
+        header.encode(&mut frame);
+        frame.extend(body);
+
+        if let Err(e) = self.tx_outbound.send(OutboundMsg {
+            peer,
+            transport,
+            bytes: frame,
+        }) {
+            warn!("send_framed: outbound channel closed for {peer:?}: {e}");
+        }
+    }
+
+    /// frames and sends a batched `MANIFEST_REQUEST` to one neighbour
+    pub fn send_manifest_request(&self, peer: PeerId, req: ManifestRequest) {
+        let transport = {
+            let mirrors = self.mirrors.read().unwrap();
+            let Some(info) = mirrors.get(&peer) else {
+                debug!("manifest request dropped: peer {peer} is no longer a neighbour");
+                return;
+            };
+            let Some(t) = info
+                .transports
+                .iter()
+                .copied()
+                .min_by_key(|t| hop_cost(*t, None))
+            else {
+                return;
+            };
+            t
+        };
+
+        let mut body = Vec::new();
+        if let Err(e) = req.encode(&mut body) {
+            error!("manifest request encode failed for {peer}: {e}");
+            return;
+        }
+
+        info!(
+            "router_v2 PULL → peer={peer} transport={transport:?} items={}",
+            req.items.len()
+        );
+        self.send_framed(peer, transport, RoutingMessage::ManifestRequest, body);
+    }
+
+    /// MANIFEST_REQUEST receiver processing (spec §8.8, steps 1-5).
+    pub fn handle_manifest_request(
+        &self,
+        neighbour: PeerId,
+        transport: ConnectionModule,
+        msg: ManifestRequest,
+    ) -> Result<()> {
+        let host_node_id = self.host_mk.to_id();
+        let requester_sphere = Sphere::of(transport);
+
+        // TODO(§14): cap responses at `manifest_serve_rate` per second per
+        // neighbour; excess items are ignored and the requester retries.
+        for item in &msg.items {
+            let origin_node_id = item.origin_node_id;
+            let is_own = origin_node_id == host_node_id;
+
+            // Step 1: no state for this origin means we never advertised it
+            let Some(origin) = self.origin_serve_state(&origin_node_id, is_own) else {
+                debug!("manifest_request: no state for origin {origin_node_id:?}, ignoring item");
+                continue;
+            };
+
+            let decision = decide_serve(item, &origin, requester_sphere);
+            info!(
+                "router_v2 MANIFEST_REQUEST ← peer={neighbour} origin={origin_node_id:?} have={} have_none={} committed={} log_base={} → {decision:?}",
+                item.have_version,
+                item.have_none(),
+                origin.committed,
+                origin.log_base,
+            );
+
+            match decision {
+                ServeDecision::Sealed | ServeDecision::Nothing => {}
+                ServeDecision::Full => {
+                    self.serve_full_manifest(neighbour, transport, origin_node_id, is_own)
+                }
+                ServeDecision::Delta { from_version } => {
+                    self.serve_delta(neighbour, transport, origin_node_id, is_own, from_version)
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    /// looks for the serving view of an origin, or `None` when we hold nothing
+    fn origin_serve_state(
+        &self,
+        origin_node_id: &[u8; 8],
+        is_own: bool,
+    ) -> Option<OriginServeState> {
+        if is_own {
+            return Some(OriginServeState {
+                committed: self.manifest.read().unwrap().manifest_version,
+                log_base: self.own_manifest_log.read().unwrap().log_base,
+                learn_sphere: None,
+            });
+        }
+
+        let node_arc = self.nodes.read().unwrap().get(origin_node_id)?;
+        let node = node_arc.read().unwrap();
+        // a stub created from a mapping has version 0 and no entries
+        if node.manifest_version == 0 && node.delegated_users.is_empty() {
+            return None;
+        }
+        Some(OriginServeState {
+            committed: node.manifest_version,
+            log_base: node.manifest_log.log_base,
+            learn_sphere: node.learn_sphere,
+        })
+    }
+
+    /// serve a full `NODE_MANIFEST`
+    fn serve_full_manifest(
+        &self,
+        neighbour: PeerId,
+        transport: ConnectionModule,
+        origin_node_id: [u8; 8],
+        is_own: bool,
+    ) {
+        let chunks: Vec<NodeManifest> = if is_own {
+            match self.manifest.read().unwrap().build_chunks(
+                origin_node_id,
+                &self.host_keypair,
+                &self.host_mk.encode(),
+            ) {
+                Ok(c) => c,
+                Err(e) => {
+                    error!("serve_full: building own manifest chunks failed: {e}");
+                    return;
+                }
+            }
+        } else {
+            let Some(node_arc) = self.nodes.read().unwrap().get(&origin_node_id) else {
+                return;
+            };
+            let node = node_arc.read().unwrap();
+
+            if let Some(retained) = &node.retained_chunks {
+                retained.clone()
+            } else if let Some(signature) = node.manifest_signature {
+                vec![NodeManifest {
+                    origin_node_id,
+                    manifest_version: node.manifest_version,
+                    chunk_index: 0,
+                    chunk_count: 1,
+                    flags: if node.is_gateway { 1 } else { 0 },
+                    manifest_signature: signature,
+                    entries: node
+                        .delegated_users
+                        .iter()
+                        .map(|d| ManifestEntry {
+                            user_id: d.user_id,
+                            timeout: d.delegation_timeout,
+                            entry_signature: d.entry_signature,
+                            profile_version: d.profile_version,
+                        })
+                        .collect(),
+                }]
+            } else {
+                debug!("serve_full: no signed bytes retained for {origin_node_id:?}, cannot serve");
+                return;
+            }
+        };
+
+        for chunk in chunks {
+            let mut body = Vec::new();
+            if let Err(e) = chunk.encode(&mut body) {
+                error!("serve_full: encode failed for {origin_node_id:?}: {e}");
+                return;
+            }
+            self.send_framed(neighbour, transport, RoutingMessage::NodeManifest, body);
+        }
+    }
+
+    /// serve a MANIFEST_DELTA. respond with full manifest is body is above 60kb
+    fn serve_delta(
+        &self,
+        neighbour: PeerId,
+        transport: ConnectionModule,
+        origin_node_id: [u8; 8],
+        is_own: bool,
+        from_version: u32,
+    ) {
+        let assembled = if is_own {
+            let manifest = self.manifest.read().unwrap();
+            let signature = match manifest.sign_state(&self.host_keypair, &self.host_mk.encode()) {
+                Ok(sig) => sig,
+                Err(e) => {
+                    error!("serve_delta: signing own resulting state failed: {e}");
+                    return;
+                }
+            };
+            let header = DeltaHeader {
+                origin_node_id,
+                from_version,
+                to_version: manifest.manifest_version,
+                is_gateway: manifest.is_gateway,
+                manifest_signature: signature,
+            };
+            let records = self
+                .own_manifest_log
+                .read()
+                .unwrap()
+                .records_after(from_version);
+            header.assemble(records)
+        } else {
+            let Some(node_arc) = self.nodes.read().unwrap().get(&origin_node_id) else {
+                return;
+            };
+            let node = node_arc.read().unwrap();
+            let Some(signature) = node.manifest_signature else {
+                debug!(
+                    "serve_delta: no whole-state signature for {origin_node_id:?}, serving full"
+                );
+                drop(node);
+                self.serve_full_manifest(neighbour, transport, origin_node_id, false);
+                return;
+            };
+            let header = DeltaHeader {
+                origin_node_id,
+                from_version,
+                to_version: node.manifest_version,
+                is_gateway: node.is_gateway,
+                manifest_signature: signature,
+            };
+            let records = node.manifest_log.records_after(from_version);
+            header.assemble(records)
+        };
+
+        let mut body = Vec::new();
+        if let Err(e) = assembled.encode(&mut body) {
+            error!("serve_delta: encode failed for {origin_node_id:?}: {e}");
+            return;
+        }
+
+        if body.len() > MAX_BODY {
+            debug!(
+                "serve_delta: body {} bytes exceeds cap, falling back to full",
+                body.len()
+            );
+            self.serve_full_manifest(neighbour, transport, origin_node_id, is_own);
+            return;
+        }
+
+        self.send_framed(neighbour, transport, RoutingMessage::ManifestDelta, body);
+    }
+
+    pub fn handle_manifest_delta(
+        &self,
+        msg: ManifestDelta,
+        now: u64,
+        transport: ConnectionModule,
+    ) -> Result<()> {
+        let origin_node_id = msg.origin_node_id;
+
+        // Step 1: resolve the origin's key.
+        let Some(origin_mk) = self.get_resource_mk(&origin_node_id, Space::Node) else {
+            debug!(
+                "manifest_delta from {origin_node_id:?} dropped: origin public_key unknown — TODO(§11.5 ProfileFetch)"
+            );
+            return Ok(());
+        };
+
+        // Step 2: the delta must build on exactly what we hold.
+        let Some(node_arc) = self.nodes.read().unwrap().get(&origin_node_id) else {
+            debug!("manifest_delta from {origin_node_id:?} dropped: no node record");
+            return Ok(());
+        };
+        let (committed, stored): (u32, Vec<ManifestEntry>) = {
+            let node = node_arc.read().unwrap();
+            let entries = node
+                .delegated_users
+                .iter()
+                .map(|d| ManifestEntry {
+                    user_id: d.user_id,
+                    timeout: d.delegation_timeout,
+                    entry_signature: d.entry_signature,
+                    profile_version: d.profile_version,
+                })
+                .collect();
+            (node.manifest_version, entries)
+        };
+        if committed != msg.from_version {
+            info!(
+                "manifest_delta from {origin_node_id:?} dropped: committed {committed} != from_version {}",
+                msg.from_version
+            );
+            return Ok(());
+        }
+
+        // Step 3: build the scratch set. removes first, then adds as upserts
+        let mut scratch = stored;
+        for remove in &msg.removes {
+            scratch.retain(|e| e.user_id != remove.user_id);
+        }
+        for add in &msg.adds {
+            match scratch.binary_search_by(|e| e.user_id.cmp(&add.entry.user_id)) {
+                Ok(i) => scratch[i] = add.entry,
+                Err(i) => scratch.insert(i, add.entry),
+            }
+        }
+
+        // Step 4: verify the signature over the resulting state at to_version.
+        let flags = msg.flags & 0x01;
+        let scratch_bytes = canonical_entry_bytes(&scratch);
+        let ctx = ChunkSigningCtx {
+            origin_multikey: &origin_mk.encode(),
+            manifest_version: msg.to_version,
+            chunk_index: 0,
+            chunk_count: 1,
+            flags,
+            canonical_entries: &scratch_bytes,
+        };
+        if !origin_mk.verify(&ctx.signing_input(), &msg.manifest_signature) {
+            warn!(
+                "manifest_delta from {origin_node_id:?} failed resulting-state verification; discarding scratch"
+            );
+            // TODO(§10.8): re-request a full manifest with have_none = 1 — the
+            // delta path is presumed poisoned. Needs the request machinery.
+            return Ok(());
+        }
+
+        // Step 5: commit.
+        let is_gateway = flags != 0;
+        let delegated_users = self.delegated_users_from_entries(&scratch);
+        {
+            let mut node = node_arc.write().unwrap();
+            node.manifest_version = msg.to_version;
+            node.is_gateway = is_gateway;
+            node.delegated_users = delegated_users;
+            node.learn_sphere = Some(Sphere::of(transport));
+            node.manifest_signature = Some(msg.manifest_signature);
+            node.retained_chunks = None;
+
+            for add in &msg.adds {
+                node.manifest_log.insert_add(add.record_version, add.entry);
+            }
+            for remove in &msg.removes {
+                node.manifest_log
+                    .insert_remove(remove.user_id, remove.record_version, now);
+            }
+            let tombstone_ttl_ms = self.options.delegation_ttl.saturating_mul(1000);
+            node.manifest_log
+                .compact(now, tombstone_ttl_ms, self.options.delta_log_cap);
+        }
+
+        info!(
+            "router_v2 MANIFEST_DELTA ← origin={origin_node_id:?} {} → {} (+{} -{})",
+            msg.from_version,
+            msg.to_version,
+            msg.adds.len(),
+            msg.removes.len(),
+        );
+
+        // Step 6: re-evaluate the trusted subset and schedule profile fetches.
+        // TODO(§11.5): needs the profile-fetch sub-protocol.
+        //
+        // Step 7: the new committed version rides ordinary routing updates.
+        // The delta is never relayed.
         Ok(())
     }
 
