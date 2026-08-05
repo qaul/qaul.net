@@ -264,6 +264,7 @@ impl Default for CryptoRotation {
 /// The following options can be configured:
 /// All time units are in seconds
 #[derive(Debug, Deserialize, Clone, Serialize)]
+#[serde(default)]
 pub struct RoutingV2Options {
     /// time for each node's own self-entry origin update
     pub origin_interval_time: u64,
@@ -280,13 +281,17 @@ pub struct RoutingV2Options {
     pub delegation_ttl: u64,
     /// interval at which a delegating user re-issues a fresh delegation entry
     pub delegation_referesh: u64,
-    /// Minimum interval between origin `manifest_version` bumps
-    /// (spec §10.8). Under the pull-based model this rate-limits the
-    /// version-bump policy, not manifest emissions — manifests are
-    /// served on demand per §8.7 rather than pushed periodically.
+    /// min interval between origin `manifest_version` bumps
     pub manifest_rate_limit: u64,
+    /// time before another MANIFEST_REQUEST ccan be requested with another neighbour
+    pub manifest_request_timeout: u64,
+    /// max MANIFEST_REQUESTs a node may send per second, per neighbour
+    pub manifest_request_rate: u32,
+    /// max manifest responses a node may emit per second, per neighbour
+    pub manifest_serve_rate: u32,
+    /// Per-origin delta-log record cap (§10.9).
+    pub delta_log_cap: usize,
     /// enable using the v2 router or stick to v1
-    #[serde(default)]
     pub enabled: bool,
 }
 
@@ -301,6 +306,10 @@ impl Default for RoutingV2Options {
             delegation_ttl: 21600,
             manifest_rate_limit: 60,
             delegation_referesh: 10800,
+            manifest_request_timeout: 10,
+            manifest_request_rate: 4,
+            manifest_serve_rate: 4,
+            delta_log_cap: 4096,
             enabled: false,
         }
     }

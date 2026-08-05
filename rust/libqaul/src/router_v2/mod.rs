@@ -22,14 +22,17 @@ use tracing::error;
 use crate::{
     connections::ConnectionModule,
     router_v2::{
-        codec::{messages::ManifestEntry, CodecError},
+        codec::{
+            messages::{ManifestEntry, ManifestRequest, ManifestRequestItem},
+            CodecError,
+        },
         identity::{Multikey, SelfDelegation},
         index::{
             IndexAllocator, IndexDictionary, MirrorIndexDictionary, ReintroductionTracker, Space,
             RESERVED_INDEX,
         },
         manifest::{ChunkAssembler, DelegetedEntry, Manifest, ManifestLog},
-        seq::SeqNum,
+        seq::{is_fresher_u32, SeqNum},
         table::{Node, Nodes, RoutingTable, User, Users},
     },
     storage::{
@@ -192,6 +195,10 @@ pub struct RouterV2State {
     pub own_manifest_log: RwLock<ManifestLog>,
     /// User ids whose delegation entry has changed since the last bump
     pub dirty_delegations: RwLock<HashSet<[u8; 8]>>,
+    /// per 8.7: the origins we intend to ask our next neighbour about
+    pub pending_manifest_requests: RwLock<HashMap<PeerId, HashSet<[u8; 8]>>>,
+    /// current requests that are in flight
+    pub outstanding_manifest_requests: RwLock<HashMap<([u8; 8], PeerId), u64>>,
     /// spec 3.5
     pub propagation_form: RwLock<PropagationForm>,
 }
@@ -206,9 +213,6 @@ impl RouterV2State {
         let state = Self {
             options,
             user_dict: RwLock::new(IndexDictionary::new(None)),
-            // Both spaces start with no self-binding. §3.5 ties each reserved
-            // index to a propagation form, and `sync_propagation_form`
-            // establishes whichever one applies.
             node_dict: RwLock::new(IndexDictionary::new(None)),
             mirrors: RwLock::new(HashMap::new()),
             routing_table: Arc::new(RwLock::new(RoutingTable::new())),
@@ -227,8 +231,8 @@ impl RouterV2State {
             last_manifest_bump_ms: RwLock::new(0u64),
             own_manifest_log: RwLock::new(ManifestLog::default()),
             dirty_delegations: RwLock::new(HashSet::new()),
-            // A fresh node hosts no users and has no neighbours, so it starts
-            // in user form; the first origin tick reconciles it.
+            pending_manifest_requests: RwLock::new(HashMap::new()),
+            outstanding_manifest_requests: RwLock::new(HashMap::new()),
             propagation_form: RwLock::new(PropagationForm::User),
         };
         (state, rx)
@@ -467,6 +471,118 @@ impl RouterV2State {
             dirty.len()
         );
         Some(new_version)
+    }
+
+    /// per 10.8: queues manifest pull for origin_node_id against the neighbour that
+    /// advertised the advertised_version.
+    pub fn maybe_request_manifest(
+        &self,
+        neighbour: PeerId,
+        origin_node_id: [u8; 8],
+        advertised_version: u32,
+    ) {
+        // we can't pull our own manifest
+        if origin_node_id == self.host_mk.to_id() {
+            return;
+        }
+
+        let committed = self
+            .nodes
+            .read()
+            .unwrap()
+            .get(&origin_node_id)
+            .map(|n| n.read().unwrap().manifest_version)
+            .unwrap_or(0);
+
+        if !is_fresher_u32(advertised_version, committed) {
+            return;
+        }
+
+        {
+            let outstanding = self.outstanding_manifest_requests.read().unwrap();
+            if outstanding
+                .keys()
+                .any(|(origin, _)| *origin == origin_node_id)
+            {
+                return;
+            }
+        }
+
+        let newly_queued = self
+            .pending_manifest_requests
+            .write()
+            .unwrap()
+            .entry(neighbour)
+            .or_default()
+            .insert(origin_node_id);
+
+        if newly_queued {
+            tracing::info!(
+                "router_v2 PULL queued: origin={origin_node_id:?} advertised={advertised_version} committed={committed} via peer={neighbour}"
+            );
+        }
+    }
+
+    /// constructs one MANIFEST_REQUEST per neigjbour from the queue
+    pub fn drain_manifest_reqs(&self, now_ms: u64) -> Vec<(PeerId, ManifestRequest)> {
+        let queued: HashMap<PeerId, HashSet<[u8; 8]>> =
+            std::mem::take(&mut *self.pending_manifest_requests.write().unwrap());
+
+        let mut out = Vec::new();
+        for (neighbour, origins) in queued {
+            let mut items = Vec::new();
+            for origin_node_id in origins {
+                let (have_version, have_none) =
+                    match self.nodes.read().unwrap().get(&origin_node_id) {
+                        Some(node_arc) => {
+                            let node = node_arc.read().unwrap();
+                            if node.manifest_version == 0 && node.delegated_users.is_empty() {
+                                (0, true)
+                            } else {
+                                (node.manifest_version, false)
+                            }
+                        }
+                        None => (0, true),
+                    };
+
+                items.push(ManifestRequestItem {
+                    origin_node_id,
+                    have_version,
+                    item_flags: if have_none { 0x01 } else { 0x00 },
+                });
+
+                self.outstanding_manifest_requests
+                    .write()
+                    .unwrap()
+                    .insert((origin_node_id, neighbour), now_ms);
+
+                // per 8.7: n_items is a single byte on the wire protocol
+                if items.len() == 255 {
+                    break;
+                }
+            }
+
+            if !items.is_empty() {
+                out.push((neighbour, ManifestRequest { items }));
+            }
+        }
+        out
+    }
+
+    /// drops requests that weren't answered and the time is past the
+    /// confgured manifest_request_timeout. per 10.8
+    pub fn drop_manifest_req_timeout(&self, now_ms: u64) {
+        let timeout_ms = self.options.manifest_request_timeout.saturating_mul(1000);
+        let mut outstanding = self.outstanding_manifest_requests.write().unwrap();
+        outstanding.retain(|(origin, neighbour), sent_at| {
+            let live = now_ms < sent_at.saturating_add(timeout_ms);
+            if !live {
+                tracing::debug!(
+                    "manifest request for origin={origin:?} via peer={neighbour} timed out"
+                );
+            }
+            live
+        });
     }
 
     pub fn host_manifest_snapshot(&self) -> HostManifestState {
