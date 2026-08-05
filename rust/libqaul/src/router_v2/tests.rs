@@ -2564,7 +2564,7 @@ mod received {
 
 mod self_and_neighbour_registration {
     use super::*;
-    use crate::router_v2::{index::RESERVED_INDEX, index::Space, test_utils::*};
+    use crate::router_v2::{index::RESERVED_INDEX, index::Space, test_utils::*, PropagationForm};
 
     /// Drains the pending introduction marks for `space`.
     fn take_marks(state: &RouterV2State, space: Space) -> std::collections::HashSet<u16> {
@@ -2656,11 +2656,14 @@ mod self_and_neighbour_registration {
         assert_eq!(users.len(), 1);
     }
 
-    /// §3.5: exactly one hosted user occupies RESERVED_INDEX; the rest get
-    /// allocator indexes. Binding every hosted user at RESERVED_INDEX would
-    /// evict its predecessor, because `IndexDictionary::bind` replaces whatever
-    /// occupies the index — silently repointing peers' index 0 at a different
-    /// user.
+    /// §3.2 reading (a): a second hosted user puts the node in *node* form,
+    /// where users are named by the manifest rather than by routing entries —
+    /// so the newcomer gets no user index at all, and the first keeps the
+    /// reserved slot until the form transition releases it.
+    ///
+    /// The eviction this guards against is real: `IndexDictionary::bind`
+    /// replaces whatever occupies an index, so binding every hosted user at
+    /// RESERVED_INDEX would silently repoint peers' index 0 at a different user.
     #[test]
     fn second_hosted_user_does_not_evict_the_first() {
         let (state, _rx) = fresh_state();
@@ -2676,21 +2679,25 @@ mod self_and_neighbour_registration {
             Some(first),
             "the first hosted user keeps the reserved slot"
         );
-        let second_idx = dict
-            .idx_of(&second)
-            .expect("the second hosted user is allocated an index");
-        assert_ne!(
-            second_idx, RESERVED_INDEX,
-            "the second user must not take the reserved slot"
+        assert!(
+            dict.idx_of(&second).is_none(),
+            "a node-form host assigns its users no user index"
         );
         drop(dict);
 
-        assert_eq!(state.users.read().unwrap().len(), 2);
+        assert_eq!(state.hosted_user_ids().len(), 2);
+        assert_eq!(
+            state.desired_propagation_form(),
+            PropagationForm::Node,
+            "two hosted users is the §3.2 node-form trigger"
+        );
     }
 
-    /// Both hosted users must be introduced, each at its own index.
+    /// Only an indexed user can be introduced. The second has no index, so the
+    /// user space has exactly one introduction pending — and it is the first
+    /// user at the reserved slot.
     #[test]
-    fn both_hosted_users_are_introduced() {
+    fn only_the_indexed_hosted_user_is_introduced() {
         let (state, _rx) = fresh_state();
         let first = [1; 8];
         let second = [2; 8];
@@ -2698,33 +2705,32 @@ mod self_and_neighbour_registration {
         state.register_hosted_user(first, 3);
         state.register_hosted_user(second, 4);
 
-        let second_idx = state.user_dict.read().unwrap().idx_of(&second).unwrap();
-
-        let mut intros = state.pending_introductions(Space::User);
-        intros.sort_by_key(|i| i.0);
-        assert_eq!(intros, vec![(RESERVED_INDEX, first, 3), (second_idx, second, 4)]);
+        assert_eq!(
+            state.pending_introductions(Space::User),
+            vec![(RESERVED_INDEX, first, 3)]
+        );
     }
 
-    /// Re-registering an already-indexed user must not consume a second index,
-    /// whether it holds the reserved slot or an allocated one.
+    /// Re-registering must not disturb the reserved slot or duplicate records,
+    /// whichever form the node is in.
     #[test]
-    fn repeat_registration_does_not_reallocate_for_either_user() {
+    fn repeat_registration_is_stable_across_the_form_boundary() {
         let (state, _rx) = fresh_state();
         let first = [1; 8];
         let second = [2; 8];
 
         state.register_hosted_user(first, 1);
         state.register_hosted_user(second, 1);
-        let second_idx = state.user_dict.read().unwrap().idx_of(&second).unwrap();
 
         state.register_hosted_user(first, 2);
         state.register_hosted_user(second, 2);
 
         let dict = state.user_dict.read().unwrap();
         assert_eq!(dict.id_of(RESERVED_INDEX), Some(first));
-        assert_eq!(dict.idx_of(&second), Some(second_idx));
+        assert!(dict.idx_of(&second).is_none());
         drop(dict);
         assert_eq!(state.users.read().unwrap().len(), 2);
+        assert_eq!(state.hosted_user_ids().len(), 2);
     }
 
     // ----- register_neighbour_node -----
@@ -3087,10 +3093,9 @@ mod propagation_form {
         let (state, _rx) = fresh_state();
         state.register_hosted_user([1; 8], 0);
         state.register_hosted_user([2; 8], 0);
-        let second_idx = state.user_dict.read().unwrap().idx_of(&[2; 8]).unwrap();
 
-        // Both registrations queued introductions; the form switch releases
-        // both indexes, so neither should still be pending.
+        // The first registration queued an introduction at the reserved slot;
+        // the form switch releases that index, so the mark must go with it.
         assert_eq!(state.sync_propagation_form(0), PropagationForm::Node);
 
         let pending = state
@@ -3101,10 +3106,6 @@ mod propagation_form {
         assert!(
             !pending.contains(&RESERVED_INDEX),
             "reserved slot's mark must be cleared with its binding"
-        );
-        assert!(
-            !pending.contains(&second_idx),
-            "allocated index's mark must be cleared with its binding"
         );
         assert!(pending.is_empty(), "no user-space marks should survive");
     }
@@ -3144,26 +3145,23 @@ mod propagation_form {
         );
     }
 
-    /// Removing a non-reserved hosted user leaves the reserved slot alone and
-    /// returns its index to cooldown.
+    /// Removing an *un-indexed* hosted user — the normal case in node form,
+    /// where only the reserved slot is ever bound — must leave that slot alone.
     #[test]
-    fn unregister_non_reserved_user_leaves_reserved_slot_intact() {
+    fn unregister_unindexed_user_leaves_reserved_slot_intact() {
         let (state, _rx) = fresh_state();
         state.register_hosted_user([1; 8], 0);
         state.register_hosted_user([2; 8], 0);
-        let second_idx = state.user_dict.read().unwrap().idx_of(&[2; 8]).unwrap();
+        assert!(state.user_dict.read().unwrap().idx_of(&[2; 8]).is_none());
 
         state.unregister_hosted_user([2; 8]);
 
         assert_eq!(
             state.user_dict.read().unwrap().id_of(RESERVED_INDEX),
-            Some([1; 8])
+            Some([1; 8]),
+            "the reserved slot is untouched by removing an un-indexed user"
         );
-        assert!(state
-            .users_allocator
-            .read()
-            .unwrap()
-            .idx_in_cooldown(second_idx));
+        assert_eq!(state.hosted_user_ids(), vec![[1; 8]]);
     }
 
     /// Unregistering something we never hosted must not panic or disturb state.
@@ -4459,8 +4457,25 @@ mod handle_node_manifest {
         let nodes = state.nodes.read().unwrap();
         let node_arc = nodes.get(&host_id).unwrap();
         let node = node_arc.read().unwrap();
-        assert_eq!(node.delegated_users.len(), 1);
-        assert_eq!(node.delegated_users[0].user_id, good_id);
+        // §8.8 step 5: both entries are *stored* byte-exact — the manifest
+        // signature covers the whole set, so dropping one would leave this node
+        // unable to serve it or to apply a later delta against it.
+        assert_eq!(node.delegated_users.len(), 2);
+
+        // Verification gates *use*: only the well-signed entry earns a
+        // delegation gateway.
+        drop(node);
+        drop(nodes);
+        let users = state.users.read().unwrap();
+        assert_eq!(
+            users.get(&good_id).unwrap().read().unwrap().delegation_gateways.len(),
+            1,
+            "the correctly signed entry is trusted"
+        );
+        assert!(
+            users.get(&bad_id).unwrap().read().unwrap().delegation_gateways.is_empty(),
+            "a bad per-entry signature must not earn trust"
+        );
     }
 
     #[test]
@@ -4483,6 +4498,8 @@ mod handle_node_manifest {
             )
             .unwrap();
 
+        // Stored regardless — expiry is a trust judgement, not a storage one,
+        // and the stored set must stay byte-identical to what was signed.
         assert_eq!(
             state
                 .nodes
@@ -4494,7 +4511,22 @@ mod handle_node_manifest {
                 .unwrap()
                 .delegated_users
                 .len(),
-            0,
+            1,
+        );
+
+        // §10.4: an expired delegation is never trusted.
+        assert!(
+            state
+                .users
+                .read()
+                .unwrap()
+                .get(&user_id)
+                .unwrap()
+                .read()
+                .unwrap()
+                .delegation_gateways
+                .is_empty(),
+            "an expired delegation must not earn a gateway"
         );
     }
 
@@ -4524,10 +4556,14 @@ mod handle_node_manifest {
         );
     }
 
-    /// Documents current "no key → drop entry" behaviour. §11.5
-    /// ProfileFetch (Phase 12) will change this to fetch-then-verify.
+    /// An entry whose subject's key we do not hold is stored but not trusted.
+    ///
+    /// This is exactly why storage and trust are separated: the entry survives,
+    /// so the manifest stays servable and a later delta still applies against
+    /// it, and the entry becomes trusted the moment §11.5 delivers the profile
+    /// — without re-fetching the manifest.
     #[test]
-    fn entry_for_user_with_unknown_key_is_dropped() {
+    fn entry_for_user_with_unknown_key_is_stored_but_untrusted() {
         let (state, mut _rx) = fresh_state();
         let (host_kp, host_mk) = keypair_and_multikey();
         let (_, host_id) = setup_self_origin(&state, &host_mk);
@@ -4553,7 +4589,23 @@ mod handle_node_manifest {
                 .unwrap()
                 .delegated_users
                 .len(),
-            0,
+            1,
+            "stored byte-exact even though unverifiable"
+        );
+
+        // A stub User record exists, but with no gateway — nothing vouches for
+        // it yet.
+        assert!(
+            state
+                .users
+                .read()
+                .unwrap()
+                .get(&user_id)
+                .unwrap()
+                .read()
+                .unwrap()
+                .delegation_gateways
+                .is_empty()
         );
     }
 }
