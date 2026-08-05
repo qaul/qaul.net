@@ -278,7 +278,7 @@ impl ManifestEntry {
 
 /// the manifest that a node holds which keeps track of
 /// all users that delegated to it
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NodeManifest {
     /// the index of the originatin node
     pub origin_node_id: [u8; 8],
