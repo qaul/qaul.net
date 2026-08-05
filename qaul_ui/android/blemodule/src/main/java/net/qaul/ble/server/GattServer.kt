@@ -198,6 +198,15 @@ object GattServer {
         if (!ok) Log.e(TAG, "sendResponse REJECTED for ${device.address} (requestId=$requestId) — device gone or stack wedged")
     }
 
+    /**
+
+     */
+    private fun admitted(device: BluetoothDevice, what: String): Boolean {
+        if (ConnectionPool.getByAddress(device.address) != null) return true
+        Log.w(TAG, "Refusing $what from unadmitted ${device.address} (not in pool)")
+        return false
+    }
+
     private val gattServerCallback = object : BluetoothGattServerCallback() {
 
         override fun onConnectionStateChange(device: BluetoothDevice, status: Int, newState: Int) {
@@ -244,6 +253,12 @@ object GattServer {
                         Log.i(TAG, "${device.address} already in pool as CENTRAL, skipping PERIPHERAL entry")
                     }
                 }
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    try { gattServer?.readPhy(device) } catch (e: Exception) {
+                        Log.w(TAG, "readPhy failed for ${device.address}: ${e.message}")
+                    }
+                }
                 onClientConnectionChanged?.invoke(device, true)
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.i(TAG, "Client disconnected: ${device.address}")
@@ -259,12 +274,27 @@ object GattServer {
             }
         }
 
+
+        override fun onPhyRead(device: BluetoothDevice, txPhy: Int, rxPhy: Int, status: Int) {
+            if (status != BluetoothGatt.GATT_SUCCESS) return
+            ConnectionPool.notePhy(device.address, txPhy)
+        }
+
+        override fun onPhyUpdate(device: BluetoothDevice, txPhy: Int, rxPhy: Int, status: Int) {
+            if (status != BluetoothGatt.GATT_SUCCESS) return
+            ConnectionPool.notePhy(device.address, txPhy)
+        }
+
         override fun onCharacteristicReadRequest(
             device: BluetoothDevice,
             requestId: Int,
             offset: Int,
             characteristic: BluetoothGattCharacteristic
         ) {
+            if (!admitted(device, "read ${characteristic.uuid}")) {
+                respond(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null)
+                return
+            }
             when (characteristic.uuid) {
                 BleConstants.READ_CHAR -> {
                     val response = BleConstants.LOCAL_QAUL_ID
@@ -290,6 +320,16 @@ object GattServer {
             offset: Int,
             value: ByteArray
         ) {
+            if (ConnectionPool.getByAddress(device.address) == null) {
+
+                if (characteristic.uuid != BleConstants.MSG_CHAR) {
+                    Log.w(TAG, "Discarding write ${characteristic.uuid} from unadmitted ${device.address}")
+                }
+                if (responseNeeded) {
+                    respond(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null)
+                }
+                return
+            }
             if (characteristic.uuid == BleConstants.MSG_CHAR) {
                 // Hot path: per-chunk logcat write throttles the write-receive rate. Debug only.
                 //Log.i(TAG, "Chunk received from ${device.address}: ${value.size} bytes")
@@ -313,6 +353,12 @@ object GattServer {
             offset: Int,
             value: ByteArray
         ) {
+            if (!admitted(device, "subscribe")) {
+                if (responseNeeded) {
+                    respond(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null)
+                }
+                return
+            }
             if (descriptor.uuid == BleConstants.CCCD_UUID) {
                 if (value.contentEquals(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)) {
                     subscribedDevices.add(device)

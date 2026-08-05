@@ -74,6 +74,11 @@ object BleScanner {
     // last time we saw them on the 1M PHY (short range). Drives the connect PHY choice: seen on 1M recently → connect 1M (fast)
     private val seen1MAt = mutableMapOf<String, Long>()
 
+    private val codedOnlySince = mutableMapOf<String, Long>()
+
+
+    private val first1MOfStreakAt = mutableMapOf<String, Long>()
+
     private val lastPhyUpgradeAt = mutableMapOf<String, Long>()   // prefix hex -> last upgrade attempt
 
     // MACs currently rejected because of fill-gate. Logged once on the transition into rejection, not on
@@ -165,14 +170,53 @@ object BleScanner {
      * safety net — after a dual-connection drop the kept connection already dedups the peer.
      */
     fun applyCooldown(macAddress: String) {
+        val key = backoffKey(macAddress)
         synchronized(lock) {
-            cooldownUntil[macAddress] = System.currentTimeMillis() + COOLDOWN_MS
+            cooldownUntil[key] = System.currentTimeMillis() + COOLDOWN_MS
         }
     }
 
-    // Consecutive connect failure count per MAC, used to grow the reconnect backoff. Reset on a
+    /**
+     * A link to this peer went away, restart its wrong role defer window
+     *
+     */
+    fun noteDisconnected(macAddress: String) {
+        synchronized(lock) {
+            macToPrefix[macAddress]?.let { deferredSince.remove(it) }
+        }
+    }
+
+    // Consecutive connect failure count, used to grow the reconnect backoff. Reset on a
     // successful GATT connect. This backoff exists to dampen the rapid same address retry churn (133s) within a few seconds.
     private val failureCount = mutableMapOf<String, Int>()
+
+    // MAC -> advertised qaul ID prefix, learned from scan results. Peers rotate their RPA (and draw a
+    // fresh one every time their advertising set restarts), so a mac keyed backoff will reset
+    // on every rotation and never engage as the peer looks like a brand new device each time
+    private val macToPrefix = mutableMapOf<String, String>()
+
+    /** Addresses confirmed (by GATT inspection, not the advert) to not be qaul peers
+    * Not a permanent blocklist: as RPA rotation eventually gives the same device
+     *  a new address */
+    private val nonQaulPeers = mutableSetOf<String>()
+
+    /**
+     * Record that [macAddress] passed our scan filter, connected, and discovered cleanly, but
+     * exposed none of qaul's characteristics, a confirmed non qaul device.
+     */
+    fun noteNonQaulPeer(macAddress: String) {
+        synchronized(lock) { nonQaulPeers.add(macAddress) }
+    }
+
+    /** Stable backoff identity for [mac]: its advertised qaul id prefix if we've seen one, else the
+     *  mac itself */
+    private fun backoffKey(mac: String): String =
+        synchronized(lock) { macToPrefix[mac] ?: mac }
+
+    private fun rememberPrefix(mac: String, prefix: ByteArray?) {
+        if (prefix == null) return
+        synchronized(lock) { macToPrefix[mac] = prefix.toHexString() }
+    }
 
     /**
      * Record a failed/abandoned connect to [macAddress] (status 133, watchdog timeout, etc.) and
@@ -182,9 +226,10 @@ object BleScanner {
      * The jitter keeps several peers that fail together from all retrying on the same tick.
      */
     fun noteConnectFailure(macAddress: String) {
+        val key = backoffKey(macAddress)
         synchronized(lock) {
-            val attempts = (failureCount[macAddress] ?: 0) + 1
-            failureCount[macAddress] = attempts
+            val attempts = (failureCount[key] ?: 0) + 1
+            failureCount[key] = attempts
             // First few failures retry immediately a single transient 133 shouldn't silence the
             // node. Only escalate once a peer keeps failing past the free retry grace.
             if (attempts <= BleConstants.RECONNECT_FREE_RETRIES) {
@@ -198,7 +243,7 @@ object BleScanner {
                 .coerceAtMost(BleConstants.RECONNECT_DELAY_MAX_MS)
             val jitter = (base * BleConstants.RECONNECT_JITTER_FACTOR).toLong()
             val delay = base + Random.nextLong(-jitter, jitter + 1)   // full ± jitter
-            cooldownUntil[macAddress] = System.currentTimeMillis() + delay
+            cooldownUntil[key] = System.currentTimeMillis() + delay
             Log.i(TAG, "Connect to $macAddress failed (attempt $attempts) — backing off ${delay}ms")
         }
     }
@@ -249,9 +294,10 @@ object BleScanner {
 
     /** Clear the backoff for [macAddress] after a successful GATT connect. */
     fun noteConnectSuccess(macAddress: String) {
+        val key = backoffKey(macAddress)
         synchronized(lock) {
-            if (failureCount.remove(macAddress) != null) {
-                cooldownUntil.remove(macAddress)
+            if (failureCount.remove(key) != null) {
+                cooldownUntil.remove(key)
                 Log.i(TAG, "Connect to $macAddress succeeded — backoff cleared")
             }
         }
@@ -327,30 +373,37 @@ object BleScanner {
         synchronized(lock) {
             val mac = result.device.address
             val prefix = result.scanRecord?.getManufacturerSpecificData(BleConstants.QAUL_MANUFACTURER_ID)
+            rememberPrefix(mac, prefix)   // so backoff survives this peer rotating its RPA
+            if (mac in nonQaulPeers) return
             val existing = if (prefix != null) ConnectionPool.getByQaulIdPrefix(prefix) else null
 
             val currentPhy = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) result.primaryPhy
             else BluetoothDevice.PHY_LE_1M
             // Upgrading from Coded to 1M/2M PHY when back in range. Work in progress. This is can only be done from a central connection, asymmetry, peripherals will ignore and wait for central to upgrade
             // TODO: min RSSI value needs tuned and tested
-            if (prefix != null && existing != null && currentPhy == BluetoothDevice.PHY_LE_1M && existing.role == BleRole.CENTRAL && existing.phyLabel == "Coded" && result.rssi > -85) {
+
+            val streakStart = if (prefix != null) first1MOfStreakAt[prefix.toHexString()] else null
+            val sustained1M = streakStart != null &&
+                    System.currentTimeMillis() - streakStart >= BleConstants.PHY_UPGRADE_CONFIRM_MS
+            if (BleConstants.ALLOW_PHY_UPGRADE && sustained1M &&
+                prefix != null && existing != null && currentPhy == BluetoothDevice.PHY_LE_1M && existing.role == BleRole.CENTRAL && existing.phyLabel == "Coded") {
                 val key = prefix.toHexString()
                 val lastTry = lastPhyUpgradeAt[key] ?: 0L
                 if (System.currentTimeMillis() - lastTry > 10_000L) {
                     lastPhyUpgradeAt[key] = System.currentTimeMillis()
                     BleTaskScheduler.setPreferredPhy(
                         existing.device,
-                        BluetoothDevice.PHY_LE_2M_MASK,
-                        BluetoothDevice.PHY_LE_2M_MASK,
+                        BluetoothDevice.PHY_LE_1M_MASK,
+                        BluetoothDevice.PHY_LE_1M_MASK,
                         BluetoothDevice.PHY_OPTION_NO_PREFERRED
                     )
-                    Log.i(TAG, "Upgrading $mac from Coded to 2M.")
+                    Log.i(TAG, "Upgrading $mac from Coded to 1M.")
                     return
                 }
             }
 
 
-            if (System.currentTimeMillis() < (cooldownUntil[mac] ?: 0L)) return   // recently dropped
+            if (System.currentTimeMillis() < (cooldownUntil[backoffKey(mac)] ?: 0L)) return // recently dropped
             // Stage 1 fill-gate: reject if my slots or the peers's are full, merge (peer unreachable
             // in our TTL=3 gossip view) = accept, redundant (visible in neighbourhood) = accept only if it wouldn't seal the
             // 3-hop ball
@@ -419,7 +472,22 @@ object BleScanner {
             if (currentPhy == BluetoothDevice.PHY_LE_CODED && seenOn1MRecently(prefix)) {
                 return   // prefer the peer's short-range advert
             }
-            val phy = if (currentPhy == BluetoothDevice.PHY_LE_CODED) BluetoothDevice.PHY_LE_CODED_MASK
+
+            if (currentPhy == BluetoothDevice.PHY_LE_CODED && !BleConstants.FORCE_CODED_LINKS) {
+                // Prefix-keyed where known so the window survives RPA rotation; MAC otherwise, same
+                // fallback backoffKey uses.
+                val key = prefix?.toHexString() ?: mac
+                val firstCodedAt = codedOnlySince.getOrPut(key) { System.currentTimeMillis() }
+                if (System.currentTimeMillis() - firstCodedAt < BleConstants.CODED_ONLY_CONFIRM_MS) {
+                    return   // still waiting to see whether they're also on 1M
+                }
+                Log.i(TAG, "Only seen $mac on Coded for ${BleConstants.CODED_ONLY_CONFIRM_MS}ms — connecting long-range")
+            }
+            // FORCE_CODED_LINKS also has to override the PHY itself, not just skip the gate: at close
+            // range we'll normally be responding to the peer's 1M advert, so there'd be no Coded to
+            // preserve. See the constant for what this does and doesn't measure.
+            val phy = if (BleConstants.FORCE_CODED_LINKS || currentPhy == BluetoothDevice.PHY_LE_CODED)
+                          BluetoothDevice.PHY_LE_CODED_MASK
                       else BluetoothDevice.PHY_LE_1M_MASK
             Log.i(TAG, "Auto-connecting to $mac (${if (phy == BluetoothDevice.PHY_LE_CODED_MASK) "Coded/long-range" else "1M/short-range"})")
             BleManager.connect(result.device, BleRole.CENTRAL, phy)
@@ -432,7 +500,18 @@ object BleScanner {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         if (result.primaryPhy != BluetoothDevice.PHY_LE_1M) return
         val prefix = result.scanRecord?.getManufacturerSpecificData(BleConstants.QAUL_MANUFACTURER_ID) ?: return
-        synchronized(lock) { seen1MAt[prefix.toHexString()] = System.currentTimeMillis() }
+        synchronized(lock) {
+            val key = prefix.toHexString()
+            val now = System.currentTimeMillis()
+
+            val last = seen1MAt[key]
+            if (last == null || now - last > BleConstants.OUT_OF_RANGE_TIMEOUT_MS) {
+                first1MOfStreakAt[key] = now
+            }
+            seen1MAt[key] = now
+
+            codedOnlySince.remove(key)
+        }
     }
 
     /** True if we've seen this peers 1M advert within the out of range window (i.e. it's close enough
