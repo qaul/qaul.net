@@ -20,14 +20,10 @@ import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
-import android.widget.Toast
 import net.qaul.ble.BleConstants
 import net.qaul.ble.test.ble.advertiser.BleAdvertiser
 import net.qaul.ble.test.ble.connection.ConnectionPool
-import net.qaul.ble.test.ble.metrics.GpsProvider
-import net.qaul.ble.test.ble.metrics.SessionLogger
 import net.qaul.ble.test.ble.util.toHexString
-import net.qaul.ble.test.ble.util.toHexKey
 
 /**
  * Floating, draggable, collapsible debug overlay that shows live BLE stats (neighbours, radio state,
@@ -52,6 +48,7 @@ object BleDebugOverlay {
     private var panel: LinearLayout? = null
     private var body: TextView? = null
     private var codedButton: TextView? = null
+    private var capButton: TextView? = null
     private var layoutParams: WindowManager.LayoutParams? = null
 
     // Whether this device can actually do Coded PHY (long range). Computed once at build time; the
@@ -158,28 +155,28 @@ object BleDebugOverlay {
             setOnClickListener { onCodedToggle() }
         }
 
-        // Field-test recording controls: start a JSONL session (topology + GPS) and stop/export it.
-        fun testButton(label: String, bg: Long, onTap: () -> Unit) = TextView(app).apply {
-            text = label
+        // The manual "Start test" / "Stop & Export" buttons are gone: sessions now open
+        // automatically once the qaul ID is known, and SessionLogger mirrors the log into public
+        // Downloads on a timer. Nothing to press — which matters because the overlay needs
+        // draw-over-other-apps and some handsets refuse it outright, leaving those devices with no
+        // way to reach a button at all.
+
+        // Connection-cap selector. Tap to cycle MAX_CONNECTIONS so the real per-handset ceiling can
+        // be swept without a rebuild — how many concurrent GATT links a phone actually sustains is
+        // the open question behind whether topology management is needed at all.
+        capButton = TextView(app).apply {
             setTextColor(Color.WHITE)
-            setBackgroundColor(bg.toInt())
             setPadding(app.dp(12), app.dp(8), app.dp(12), app.dp(8))
             textSize = 11f
             typeface = Typeface.DEFAULT_BOLD
             gravity = Gravity.CENTER
-            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            setOnClickListener { onTap() }
-        }
-        val testControls = LinearLayout(app).apply {
-            orientation = LinearLayout.HORIZONTAL
-            addView(testButton("● Start test", 0xFF2E7D32) { startTestSession(app) })
-            addView(testButton("■ Stop & Export", 0xFFC62828) { stopTestSession(app) })
+            setOnClickListener { onCapTap() }
         }
 
         panel = LinearLayout(app).apply {
             orientation = LinearLayout.VERTICAL
             addView(header)
-            addView(testControls)
+            addView(capButton)
             // Long-range is now automatic so the manual Coded on/off button is hidden. Uncomment below to bring it back for testing.
             // addView(codedButton)
             addView(scroll)
@@ -221,6 +218,7 @@ object BleDebugOverlay {
         }
         render()
         updateCodedButton()
+        updateCapButton()
         update()
     }
 
@@ -270,28 +268,11 @@ object BleDebugOverlay {
             if (expanded) {
                 body?.text = ConnectionPool.debugStatusText()
                 updateCodedButton()
+                updateCapButton()      // keeps the live-count readout current
             } else pill?.text = ConnectionPool.debugSummary()
         } catch (e: Exception) {
             Log.e(TAG, "overlay update failed", e)
         }
-    }
-
-    /** Start a field-test recording: opens a fresh JSONL session file and begins GPS updates.
-     *  Topology snapshots + connect/disconnect events flow to it automatically from ConnectionPool. */
-    private fun startTestSession(ctx: Context) {
-        SessionLogger[ctx].startSession(BleConstants.LOCAL_QAUL_ID.toHexKey(), 0L)   // clean hex → correlates with Dart routing ids
-        GpsProvider.start(ctx)
-        Toast.makeText(ctx, "Test recording started", Toast.LENGTH_SHORT).show()
-        Log.i(TAG, "Test session started")
-    }
-
-    /** Stop the recording, flush/close the file, and show its path (pull via adb / file manager). */
-    private fun stopTestSession(ctx: Context) {
-        val path = SessionLogger[ctx].currentFilePath()
-        SessionLogger[ctx].close()
-        GpsProvider.stop()
-        Toast.makeText(ctx, "Saved: ${path ?: "(no active session)"}", Toast.LENGTH_LONG).show()
-        Log.i(TAG, "Test session stopped → $path")
     }
 
     /** Flip Coded PHY (long range) live and restart the advertiser so the new mode takes effect.
@@ -321,5 +302,27 @@ object BleDebugOverlay {
                 btn.setBackgroundColor(0xFF00695C.toInt())   // teal
             }
         }
+    }
+
+    /** Cycle the connection cap. Raising takes effect on the next admission decision; lowering does
+     *  NOT tear down existing links (deliberately — a forced teardown would confound the very
+     *  stability we're trying to measure), it just stops new ones until the count drops. */
+    private fun onCapTap() {
+        val opts = BleConstants.MAX_CONNECTION_OPTIONS
+        val i = opts.indexOf(BleConstants.MAX_CONNECTIONS)
+        val next = opts[if (i < 0) 0 else (i + 1) % opts.size]
+        BleConstants.MAX_CONNECTIONS = next
+        Log.i(TAG, "Connection cap → $next (live=${ConnectionPool.getSize()})")
+        updateCapButton()
+    }
+
+    private fun updateCapButton() {
+        val btn = capButton ?: return
+        val cap = BleConstants.MAX_CONNECTIONS
+        val live = ConnectionPool.getSize()
+        btn.text = "Cap: $cap   (live $live)   tap → cycle"
+        // Amber once we're actually holding more links than this codebase has validated (3-4) —
+        // that's the regime where the answer is unknown and worth watching for churn.
+        btn.setBackgroundColor(if (live > 4) 0xFFEF6C00.toInt() else 0xFF37474F.toInt())
     }
 }

@@ -27,7 +27,10 @@ class L2capChannel(
     private val socket: BluetoothSocket,
     private val label: String,
     private val onMessageReceived: (ByteArray) -> Unit = {},
-    private val onClosed: () -> Unit = {}
+    private val onClosed: () -> Unit = {},
+    /** Fired true when a framed message starts arriving and false when it completes, so the owner
+     *  can raise/drop the link's connection priority for the duration. */
+    private val onBulkReceive: ((Boolean) -> Unit)? = null
 ) {
     private val TAG = "L2capChannel"
     private val input = DataInputStream(socket.inputStream)
@@ -53,7 +56,14 @@ class L2capChannel(
                 }
                 val buf = ByteArray(length)
                 val start = TimeSource.Monotonic.markNow()
-                input.readFully(buf)                    // blocks until the whole message arrives
+
+                val isBulk = length > BULK_ESCALATION_MIN_BYTES
+                if (isBulk) onBulkReceive?.invoke(true)
+                try {
+                    input.readFully(buf)                // blocks until the whole message arrives
+                } finally {
+                    if (isBulk) onBulkReceive?.invoke(false)
+                }
                 val ms = start.elapsedNow().inWholeMilliseconds
                 val kbps = if (ms > 0) length * 8.0 / ms else 0.0
                 Log.i(TAG, "[$label] L2CAP RECEIVED: $length B in $ms ms (${"%.1f".format(kbps)} kbps)")
@@ -72,7 +82,7 @@ class L2capChannel(
      * time is near-zero. For large payloads write() blocks once the OS buffer fills, so the
      * time becomes meaningful, but the RECEIVED metric on the other end is authoritative.
      */
-    fun send(data: ByteArray) {
+    fun send(data: ByteArray, onComplete: (() -> Unit)? = null) {
         writer.execute {
             try {
                 val start = TimeSource.Monotonic.markNow()
@@ -85,6 +95,9 @@ class L2capChannel(
             } catch (e: IOException) {
                 Log.e(TAG, "[$label] write failed: ${e.message}")
                 close()
+            } finally {
+
+                onComplete?.invoke()
             }
         }
     }
@@ -101,5 +114,10 @@ class L2capChannel(
 
     companion object {
         private const val MAX_MESSAGE = 16 * 1024 * 1024   // 16 MB sanity cap on a single frame
+
+        /** Inbound frames above this escalate the link's connection priority for their duration.
+         *  Mirrors BleConstants.MEDIUM_MESSAGE_MAX_BYTES, the same threshold the sender uses to
+         *  choose L2CAP over GATT, so both ends agree on what counts as a bulk transfer. */
+        private const val BULK_ESCALATION_MIN_BYTES = 16000
     }
 }

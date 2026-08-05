@@ -35,6 +35,7 @@ class MainActivity : FlutterActivity() {
         const val REQUEST_ENABLE_BT = 113
         const val BLE_PERMISSION_REQ_CODE_12 = 114
         const val NOTIFICATION_PERMISSION_REQ_CODE = 115
+        const val STORAGE_PERMISSION_REQ_CODE = 116
 
         lateinit var permissionHandler: PermissionHandler
     }
@@ -148,10 +149,31 @@ class MainActivity : FlutterActivity() {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), NOTIFICATION_PERMISSION_REQ_CODE)
         } else {
             // Permission already granted or not needed (pre-Android 13)
+            requestLegacyStoragePermissionIfNeeded()
             if (PreferenceManager.isBackgroundServiceEnabled(this)) {
                 startBackgroundService()
             }
         }
+    }
+
+    /**
+     * WRITE_EXTERNAL_STORAGE, for API 26-28 only.
+     *
+     * SessionLogger mirrors its field-test logs into public Downloads so a participant can send
+     * them on without adb or any in-app action. On API 29+ that goes through MediaStore and needs
+     * no permission at all; below 29 public storage is still a plain filesystem and does.
+     *
+
+     * Nothing is gated on the answer ,if it's declined, the mirror logs and skips, and the internal log (and the adb
+     * pull path) is unaffected.
+     */
+    private fun requestLegacyStoragePermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) return
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            == PackageManager.PERMISSION_GRANTED) return
+        ActivityCompat.requestPermissions(
+            this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), STORAGE_PERMISSION_REQ_CODE
+        )
     }
 
     private fun startBackgroundService() {

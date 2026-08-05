@@ -10,6 +10,9 @@ import java.io.File
 import java.io.FileWriter
 import java.text.SimpleDateFormat
 import java.util.Locale
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 
 /**
  * Field-test telemetry logger. Writes one JSON object per line (JSONL) to a per-session file
@@ -36,6 +39,19 @@ class SessionLogger private constructor(context: Context) {
     private var writer: BufferedWriter? = null
     private var file: File? = null
     private val lock = Any()
+
+    // Public-Downloads mirroring. The internal file is authoritative; this copy exists so a field
+    // test participant can retrieve their own log with no adb and no in-app action — which matters
+    // because the debug overlay needs draw-over-other-apps, and at least one handset refuses it.
+    //
+    // Keyed by file name → lastModified() at the last successful mirror, so a sweep only copies
+    // what actually changed. Deliberately mtime-based rather than a "we wrote something" flag: the
+    // Dart side writes routing-*.jsonl into this same directory, and mtime notices that too.
+    private val mirroredAt = mutableMapOf<String, Long>()
+    private val mirrorExec = Executors.newSingleThreadScheduledExecutor { r ->
+        Thread(r, "session-mirror").apply { isDaemon = true }
+    }
+    private var mirrorTask: ScheduledFuture<*>? = null
 
     /**
      * Open a session file and write the header line. Called automatically once the qaul ID is known.
@@ -79,6 +95,56 @@ class SessionLogger private constructor(context: Context) {
             put("resumed", resumed)
         })
         Log.i(TAG, "Session ${if (resumed) "resumed" else "started"} → ${file?.absolutePath}")
+        startMirroring()
+    }
+
+    /**
+     * Keep a copy of this run in Downloads/qaul, refreshed on a timer.
+     *
+     * The timer is not about the API — it's about process death. Mirroring only on a clean close
+     * would lose the whole log on any phone the OS kills, and across a two-hour multi-device test
+     * several will be. A periodic copy bounds the worst case to one interval instead of everything.
+     * Only mirrors when something was actually written since last time, so an idle session costs
+     * nothing.
+     *
+     * Also sweeps any other recent session file once at startup: a run split by a >30min gap (see
+     * [SESSION_RESUME_GAP_MS]) leaves an earlier file that the participant still needs to send.
+     */
+    private fun startMirroring() {
+        mirrorTask?.cancel(false)
+        mirrorTask = mirrorExec.scheduleWithFixedDelay(
+            { mirrorSweep() }, MIRROR_INTERVAL_MS, MIRROR_INTERVAL_MS, TimeUnit.MILLISECONDS
+        )
+        mirrorExec.execute { mirrorSweep() }     // don't wait a full interval for the first copy
+    }
+
+    /**
+     * Mirror every recently-touched log in the sessions dir whose content has changed since we last
+     * copied it.
+     *
+     * Sweeps the whole directory rather than just [file] on purpose: the Dart side writes
+     * routing-*.jsonl alongside our session-*.jsonl (same dir, same naming, same 30-min resume
+     * rule), and a participant needs both. Going by mtime means we pick those up without either
+     * side having to tell the other anything.
+     *
+     * The [MIRROR_LOOKBACK_MS] cutoff is what keeps this bounded — it covers a whole test day,
+     * including a run split by a long break, without re-copying last week's logs on every tick.
+     */
+    private fun mirrorSweep() {
+        try {
+            val cutoff = now() - MIRROR_LOOKBACK_MS
+            val files = sessionsDir().listFiles { f ->
+                f.isFile && f.name.endsWith(".jsonl") && f.lastModified() >= cutoff
+            } ?: return
+            for (f in files) {
+                val stamp = f.lastModified()
+                if (mirroredAt[f.name] == stamp) continue          // unchanged since last mirror
+                // Only record success, so a failed copy is simply retried on the next tick.
+                if (DownloadsMirror.mirror(appContext, f)) mirroredAt[f.name] = stamp
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "mirror sweep failed: ${e.message}")
+        }
     }
 
     fun connect(peerId: String, phy: String, rssi: Int?, role: String) = write(JSONObject().apply {
@@ -174,15 +240,28 @@ class SessionLogger private constructor(context: Context) {
 
     fun close() {
         synchronized(lock) {
+            mirrorTask?.cancel(false)
+            mirrorTask = null
             try { writer?.flush(); writer?.close() } catch (_: Exception) {}
             writer = null
         }
+        // Sweep after the writer is closed, so the exported copy is the complete file. Off the
+        // caller's thread: close() runs on shutdown paths and a MediaStore write is not instant.
+        mirrorExec.execute { mirrorSweep() }
     }
 
     companion object {
         /** Reopening within this window appends to the previous file (same test run, app was
          *  restarted); a longer gap starts a new one. */
         const val SESSION_RESUME_GAP_MS = 30 * 60 * 1000L   // 30 min
+
+        /** How often the Downloads copy is refreshed. Also the worst-case data loss if the OS kills
+         *  the process, since nothing else flushes the export. */
+        const val MIRROR_INTERVAL_MS = 90_000L
+
+        /** At startup, mirror any session file touched this recently — wide enough to cover a whole
+         *  test day (including a run split by a long break) without dragging in last week's. */
+        const val MIRROR_LOOKBACK_MS = 8 * 60 * 60 * 1000L  // 8 h
 
         @Volatile private var instance: SessionLogger? = null
         operator fun get(context: Context): SessionLogger =

@@ -62,6 +62,9 @@ class ReceiveQueueResult {
      *  chunk-queue is complete, consumed by incomingMessage to feed addLargeMessagePart.
      *  Never exposed to BleConnection. */
     var assembledLargeMessagePart: ReceivedMessage? = null
+    /** This link just started (true) or stopped (false) actively receiving a message over MEDIUM_MESSAGE_MAX_BYTES. BleConnection forwards this to
+     *  BleTaskScheduler.notifyBulkReceive: the receive-side half of the bulk transfer PHY/interval escalation signal */
+    var bulkReceiveActive: Boolean? = null
 }
 
 /**
@@ -99,6 +102,20 @@ class ReceiveQueue {
 
     // Large Messages
     var largeMessageQueues: MutableMap<Int, ReceiveLargeMessage> = mutableMapOf()
+
+    // Tracks the last reported bulk receive state so ReceiveQueueResult.bulkReceiveActive doesnt fire on every chunk of an already known bulk message.
+    private var lastBulkReceiveState = false
+
+    /** Check if any queue slot still receiving a bulk-sized message */
+    private fun updateBulkReceiveState(result: ReceiveQueueResult) {
+        val active = receiveQueues.values.any {
+            it.state == ReceiveQueueMessageState.RECEIVING && it.isBulkSized
+        }
+        if (active != lastBulkReceiveState) {
+            lastBulkReceiveState = active
+            result.bulkReceiveActive = active
+        }
+    }
 
     /**
      * Analyze an incoming message
@@ -357,6 +374,7 @@ class ReceiveQueue {
         // add chunk to queue
         val receiveQueueResult = receiveQueueMessage.addReceivedChunk(receiveMessageStructure, qaulIdKnown)
         receiveQueues.put(receiveMessageStructure.queueIndex, receiveQueueMessage)
+        updateBulkReceiveState(receiveQueueResult)
 
         return receiveQueueResult
     }
@@ -467,6 +485,10 @@ class ReceiveQueueMessage {
     var largeMessageIndicator: Byte = 0
     var messageQueueIndex: Byte = 0
     var messageSize: Int? = null
+    /** Same threshold SendQueue already uses to route BULK vs MEDIUM lane — deliberately NOT the
+     *  much-higher (>65535B) multi-part large-message protocol threshold, which a normal photo
+     *  never crosses (it's for reassembly correctness, not for "is this a big transfer"). */
+    val isBulkSized: Boolean get() = (messageSize ?: 0) > BleConstants.MEDIUM_MESSAGE_MAX_BYTES
     var totalChunks: Short? = null
     var crc32Checksum: Long? = null
     var chunkSize: Int = 20

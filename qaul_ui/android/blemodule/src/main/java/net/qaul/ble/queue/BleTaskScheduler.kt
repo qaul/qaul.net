@@ -25,6 +25,8 @@ import net.qaul.ble.test.ble.util.isWritable
 import net.qaul.ble.test.ble.util.isWritableWithoutResponse
 import net.qaul.ble.test.ble.util.printGattTable
 import net.qaul.ble.test.ble.util.toHexString
+import net.qaul.ble.test.ble.connection.BleRole
+import net.qaul.ble.test.ble.connection.ConnectionPool
 import java.lang.ref.WeakReference
 import java.util.UUID
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -139,6 +141,7 @@ object BleTaskScheduler {
         bulkOperationQueue.removeIf { it.device == device }
         val removed = before - (bleOperationQueue.size + mediumOperationQueue.size + bulkOperationQueue.size)
         if (removed > 0) Log.i(TAG, "Purged $removed queued op(s) for ${device.address}")
+        clearBulkState(device)
     }
 
     /**
@@ -155,6 +158,7 @@ object BleTaskScheduler {
             try { gatt.close() } catch (_: Exception) {}
         }
         val n = deviceGattMap.size
+        deviceGattMap.keys.forEach { clearBulkState(it) }
         deviceGattMap.clear()
         bleOperationQueue.clear()
         mediumOperationQueue.clear()
@@ -296,9 +300,143 @@ object BleTaskScheduler {
     @Synchronized
     private fun scheduleOperation(operation: BleOperationType) {
         queueForOperation(operation).add(operation)
+        if (isBulkOp(operation)) bulkSendStarted(operation.device)
         if (pendingOperation == null) {
             executeNext()
         }
+    }
+
+    // --- Bulk-lane priority/PHY escalation -----------------------------------------------------
+    //
+    // Raise connection priority + PHY on a link while it's carrying BULK lane traffic (photos,
+    // files), drop back once it drains. Two independent signals feed this, because the send side
+    // is visible as ops in bulkOperationQueue, but the receive side only uses the receive queue.
+    // ReceiveQueue reports the receive side via notifyBulkReceive.
+    //
+    // The threshold is MEDIUM_MESSAGE_MAX_BYTES, the same line SendQueue already draws between
+    // "routing/small chat" and "bulk".
+
+    private val bulkSendCount = mutableMapOf<BluetoothDevice, Int>()
+    private val bulkReceiving = mutableSetOf<BluetoothDevice>()
+    private val bulkTransport = mutableSetOf<BluetoothDevice>()   // L2CAP transfers — see notifyBulkTransport
+    private val escalatedDevices = mutableSetOf<BluetoothDevice>()           // already raised,  avoid duplicate requests
+    // Devices where we actually raised the PHY (not just priority), see refreshBulkState. Only
+    // these get a PHY reverted on downgrade as a coded only link that never got the phy bump must
+    // never have one forced onto it either.
+    private val phyEscalatedDevices = mutableSetOf<BluetoothDevice>()
+    private val bulkDowngradeTasks = mutableMapOf<BluetoothDevice, ScheduledFuture<*>>()
+
+    private fun isBulkOp(op: BleOperationType): Boolean = when (op) {
+        is CharacteristicWrite -> op.characteristicUuid == BleConstants.MSG_CHAR && op.lane == OpLane.BULK
+        is NotifyCharacteristicChange -> op.characteristicUuid == BleConstants.MSG_CHAR && op.lane == OpLane.BULK
+        else -> false
+    }
+
+    @Synchronized
+    private fun bulkSendStarted(device: BluetoothDevice) {
+        val was = bulkSendCount.getOrDefault(device, 0)
+        bulkSendCount[device] = was +   1
+        if (was == 0) refreshBulkState(device)
+    }
+
+    /** Called with the op that just completed/was skipped, before pendingOperation is cleared,
+     *  covers both a normal completion (signalOperationComplete) and a watchdog force-advance
+     *  (skipOperation), since either can end a BULK op's time as "active". */
+    @Synchronized
+    private fun bulkSendEnded(op: BleOperationType?) {
+        if (op == null || !isBulkOp(op)) return
+        val device = op.device
+        val was = bulkSendCount.getOrDefault(device, 0)
+        if (was <= 0) return
+        val now = was - 1
+        if (now <= 0) bulkSendCount.remove(device) else bulkSendCount[device] = now
+        if (was == 1) refreshBulkState(device)
+    }
+
+    /** Receive side half of the signal. Called by ReceiveQueue when a message
+     *  crossing MEDIUM_MESSAGE_MAX_BYTES starts or finishes assembling on this link. */
+    @Synchronized
+    fun notifyBulkReceive(device: BluetoothDevice, active: Boolean) {
+        val changed = if (active) bulkReceiving.add(device) else bulkReceiving.remove(device)
+        if (changed) refreshBulkState(device)
+    }
+
+    /**
+     * Bulk activity on the L2CAP transport, which the two signals above cannot see.
+     *
+
+     */
+    @Synchronized
+    fun notifyBulkTransport(device: BluetoothDevice, active: Boolean) {
+        val changed = if (active) bulkTransport.add(device) else bulkTransport.remove(device)
+        if (changed) refreshBulkState(device)
+    }
+
+    private fun isBulkActive(device: BluetoothDevice) =
+        (bulkSendCount[device] ?: 0) > 0 || device in bulkReceiving || device in bulkTransport
+
+    /** React to a real active/inactive transition for [device]. Downgrades only after [BleConstants.BULK_HOLD_DOWN_MS] with no
+     *  further activity, re checking rather than assuming, since a new transfer may have started in the meantime. */
+    private fun refreshBulkState(device: BluetoothDevice) {
+        if (isBulkActive(device)) {
+            bulkDowngradeTasks.remove(device)?.cancel(false)
+
+            val conn = ConnectionPool.getByAddress(device.address)
+            if (conn != null && conn.role != BleRole.CENTRAL) {
+                Log.i(TAG, "Bulk active on ${device.address} but we're PERIPHERAL — interval is the central's to set, skipping escalation")
+                return
+            }
+            if (device !in escalatedDevices && escalatedDevices.size >= BleConstants.MAX_ESCALATED_LINKS) {
+                Log.i(TAG, "Bulk active on ${device.address} but ${escalatedDevices.size} links already escalated — leaving at idle priority")
+                return
+            }
+            if (escalatedDevices.add(device)) {
+                Log.i(TAG, "Bulk transfer active on ${device.address} — raising priority")
+                requestConnectionPriority(device, BleConstants.HIGH_LOAD_CONNECTION_PRIORITY)
+                // 2M needs RANGE margin, and "not Coded" doesn't prove any: a 1M link at the edge of
+                // 1M range has none, and 2M's range is roughly half. Raising it there risks the
+                // controller granting it and the link then degrading or supervision-timing-out
+                // mid-transfer — the worst possible moment. So require positive evidence the peer is
+                // close: a recent RSSI comfortably inside 1M's budget.
+                val rssi = conn?.rssi
+                if (conn?.isCoded == false && rssi != null && rssi > BleConstants.BULK_2M_MIN_RSSI) {
+                    setPreferredPhy(device, BluetoothDevice.PHY_LE_2M_MASK, BluetoothDevice.PHY_LE_2M_MASK, BluetoothDevice.PHY_OPTION_NO_PREFERRED)
+                    phyEscalatedDevices.add(device)
+                } else {
+                    Log.i(TAG, "Not raising PHY for ${device.address} (coded=${conn?.isCoded}, rssi=$rssi) — no 2M range margin")
+                }
+            }
+        } else if (device in escalatedDevices) {
+            bulkDowngradeTasks[device]?.cancel(false)
+            bulkDowngradeTasks[device] = watchdog.schedule({
+                synchronized(this) {
+                    bulkDowngradeTasks.remove(device)
+                    if (!isBulkActive(device) && escalatedDevices.remove(device)) {
+                        Log.i(TAG, "Bulk transfer on ${device.address} drained — dropping priority")
+                        requestConnectionPriority(device, BleConstants.IDLE_CONNECTION_PRIORITY)
+                        // only revert PHY if a) we're the ones who raised it, and b) the link is  still on the 2M
+                        //we put it on. [phyEscalatedDevices] only records that we  once escalated, it says nothing about now.
+                        // e.g. forcing 2M back onto a link that had to retreat to coded to survive
+                        // would be actively harmful
+                        if (phyEscalatedDevices.remove(device) &&
+                            ConnectionPool.getByAddress(device.address)?.phyLabel == "2M") {
+                            val phy = if (BleConstants.PREFER_2M) BluetoothDevice.PHY_LE_2M_MASK else BluetoothDevice.PHY_LE_1M_MASK
+                            setPreferredPhy(device, phy, phy, BluetoothDevice.PHY_OPTION_NO_PREFERRED)
+                        }
+                    }
+                }
+            }, BleConstants.BULK_HOLD_DOWN_MS, TimeUnit.MILLISECONDS)
+        }
+    }
+
+    /** Drop all bulk escalation tracking for a device that's disconnecting */
+    @Synchronized
+    private fun clearBulkState(device: BluetoothDevice) {
+        bulkSendCount.remove(device)
+        bulkReceiving.remove(device)
+        escalatedDevices.remove(device)
+        phyEscalatedDevices.remove(device)
+        bulkDowngradeTasks.remove(device)?.cancel(false)
     }
 
     @Synchronized
@@ -633,6 +771,7 @@ object BleTaskScheduler {
                 Log.e(TAG, "Rogue callback: device mismatch, expected $device, got ${pendingOperation?.device}")
                 return
             }
+            bulkSendEnded(pendingOperation)
             pendingOperation = null
             if (hasPendingOps()) executeNext() else disarmWatchdog()
         }
@@ -640,6 +779,7 @@ object BleTaskScheduler {
 
     @Synchronized
     private fun skipOperation() {
+        bulkSendEnded(pendingOperation)
         pendingOperation = null
         if (hasPendingOps()) executeNext() else disarmWatchdog()
     }
@@ -648,10 +788,35 @@ object BleTaskScheduler {
      * Per operation type watchdog timeout, sized to each op's real completion time so a hung op (which
      * holds the single scheduler slot and blocks all queued ops) is caught as fast as is safe.
      */
-    private fun timeoutFor(operation: BleOperationType): Long = when (operation) {
-        is Connect, is Disconnect -> BleConstants.CONNECTION_TIMEOUT_MS        // connects can legitimately be slow
-        is ServiceDiscovery       -> BleConstants.SERVICE_DISCOVERY_TIMEOUT_MS // the one slow non connect op 1+ seconds
-        else                      -> BleConstants.FAST_OP_TIMEOUT_MS           // reads/writes/notify/MTU/PHY/desc - fast
+    private fun timeoutFor(operation: BleOperationType): Long {
+        val base = when (operation) {
+            is Connect, is Disconnect -> BleConstants.CONNECTION_TIMEOUT_MS        // connects can legitimately be slow
+            is ServiceDiscovery       -> BleConstants.SERVICE_DISCOVERY_TIMEOUT_MS // the one slow non connect op 1+ seconds
+            // MTU and PHY are NEGOTIATIONS, not data transfers: each is an over-the-air procedure
+            // between the two controllers, and MTU was the op actually observed exceeding 4s under
+            // load (the reason this budget was raised to 10s in the first place). They keep the
+            // generous window.
+            is MtuRequest, is PhyRequest -> BleConstants.NEGOTIATION_OP_TIMEOUT_MS
+            // Everything else is a single ATT round trip on an established link — sub-300ms when
+            // healthy. Giving these the negotiation budget meant one hung read or notify stalled the
+            // shared scheduler for 10s, which is the head-of-line blocking that took out healthy
+            // links elsewhere. They don't need it, so they don't get it.
+            else                      -> BleConstants.FAST_OP_TIMEOUT_MS
+        }
+        // Scale for the PHY of each link: a coded op spends far longer on air than the same op on a
+        // close 1M link, so one budget can't serve both.
+        //
+        // TODO: gate the Coded CONNECT budget on RSSI, not just on which advert arrived first.
+        //  The scanner picks the connect PHY from result.primaryPhy, so a peer two metres away that
+        //  also runs a Coded advert gets a Coded connect purely by luck of scan timing — and then a
+        //  failed connect holds a scarce slot for 24s instead of 8s (measured: a quarter of a cap-4
+        //  device's capacity gone for 24s during mesh formation). Dropping the multiplier here fixes
+        //  that but shortens the budget for connects that are genuinely at range, which is the more
+        //  expensive failure — a missed long-range link is worse than a wasted close-range slot. So
+        //  the multiplier stays until the real fix: prefer 1M when RSSI is strong (better than about
+        //  -80 dBm; the park run saw -87 at 373m on Coded, and Coded S=8 buys ~12dB over 1M), so the
+        //  only Coded connects left are ones that actually need the long budget.
+        return ConnectionPool.getByAddress(operation.device.address)?.scaleTimeout(base) ?: base
     }
 
     /**
@@ -686,17 +851,43 @@ object BleTaskScheduler {
      */
     @SuppressLint("MissingPermission")
     private fun cleanupStuckOperation(operation: BleOperationType) {
-        if (operation is Connect) {
-            deviceGattMap.remove(operation.device)?.let { gatt ->
-                try { gatt.disconnect() } catch (_: Exception) {}
-                try { gatt.close() } catch (_: Exception) {}
-                Log.w(TAG, "Watchdog: closed leaked GATT for ${operation.device.address}")
+        when (operation) {
+            is Connect -> {
+                abandonConnection(operation.device, "connect timed out")
+                BleScanner.resumeAfterConnect()   // stuck connect timed out, let the scan back
             }
-            purgeOperationsForDevice(operation.device)   // drop the now orphaned setup ops for this device
-            BleScanner.noteConnectFailure(operation.device.address)   // backoff before retrying this MAC
-            BleScanner.resumeAfterConnect()   // stuck connect timed out, let the scan back
-            notifyListeners { onDisconnectedFromDevice(operation.device) }
+            // A ServiceDiscovery that never completed leaves us with no service database, so every queued op behind
+            // it is certain to fail with "characteristic not found".
+            is ServiceDiscovery -> {
+                abandonConnection(operation.device, "service discovery timed out")
+                BleScanner.resumeAfterConnect()
+            }
+            else -> {}
         }
+    }
+
+    /**
+     * Does this peer actually implement our GATT service correctly? in case of
+     */
+    private fun hasQaulCharacteristics(gatt: BluetoothGatt): Boolean {
+        val service = gatt.getService(BleConstants.SERVICE_UUID) ?: return false
+        return service.getCharacteristic(BleConstants.MSG_CHAR) != null &&
+                service.getCharacteristic(BleConstants.READ_CHAR) != null
+    }
+
+    /**
+     * Give up on a link whose setup cannot succeed, remove and close everything down
+     */
+    @SuppressLint("MissingPermission")
+    private fun abandonConnection(device: BluetoothDevice, reason: String) {
+        Log.w(TAG, "Abandoning ${device.address}: $reason")
+        deviceGattMap.remove(device)?.let { gatt ->
+            try { gatt.disconnect() } catch (_: Exception) {}
+            try { gatt.close() } catch (_: Exception) {}
+        }
+        purgeOperationsForDevice(device)
+        BleScanner.noteConnectFailure(device.address)
+        notifyListeners { onDisconnectedFromDevice(device) }
     }
 
     // --------------------------------------------------------------------------------------------
@@ -746,6 +937,13 @@ object BleTaskScheduler {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.i(TAG, "Discovered ${gatt.services.size} services for ${gatt.device.address}")
                 gatt.printGattTable()
+                if (!hasQaulCharacteristics(gatt)) {
+                    Log.w(TAG, "${gatt.device.address} exposes none of our characteristics — not a qaul peer")
+                    BleScanner.noteNonQaulPeer(gatt.device.address)
+                    abandonConnection(gatt.device, "peer is not a qaul node")
+                    signalOperationComplete<ServiceDiscovery>(gatt.device)
+                    return
+                }
                 notifyListeners { onServicesDiscovered(gatt.device) }
             } else {
                 Log.e(TAG, "Service discovery failed for ${gatt.device.address}, status: $status")
@@ -930,6 +1128,13 @@ object BleTaskScheduler {
                 }
             } else {
                 Log.e(TAG, "Descriptor write failed for ${descriptor.uuid}, status: $status")
+                if (descriptor.uuid == BleConstants.CCCD_UUID) {
+                    // The CCCD write is the first op after discovery, and status 1 is
+                    // GATT_INVALID_HANDLE: the handles we discovered don't address anything real on
+                    // this peer, so no other operations will work, so kill here instead of waiting on reapers. TODO: re-check this
+                    abandonConnection(gatt.device, "CCCD write failed (status $status)")
+                    skipOperation()
+                }
             }
         }
     }
