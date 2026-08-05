@@ -78,17 +78,17 @@ fn spawn_relay_tick(state: Arc<RouterV2State>, storage_path: String) {
             let now = now_ms();
             tick_relay(&state, now);
 
-            // §10.8: accumulated delegation changes fold into one bump once the
-            // rate-limit window has elapsed. Attempted on the 1s tick because
-            // the rate-limit bypasses must "take effect in the next 1-second
-            // relay batch", so one call site serves both.
+            // §10.8: batched manifest pulls, one message per neighbour.
+            state.drop_manifest_req_timeout(now);
+            for (peer, request) in state.drain_manifest_reqs(now) {
+                state.send_manifest_request(peer, request);
+            }
+
+            // §10.8
             if state
                 .try_bump_manifest_version(now, BumpTrigger::Accumulated)
                 .is_some()
             {
-                // §10.8 SHALL: the origin persists manifest_version across
-                // restarts. Per-record versions derive from it, so a regression
-                // would corrupt delta selection.
                 state.host_manifest_snapshot().save_to_path(&storage_path);
             }
         }
