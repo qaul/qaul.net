@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:qaul_components/qaul_components.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
-import '../../../support/widgetbook_preview.dart';
+import '../../../../support/widgetbook_preview.dart';
 
 final _clock = DateTime(2026, 4, 12, 14, 30);
 
 @widgetbook.UseCase(
   name: 'Outgoing — own message',
   type: ChatReplyBubblePreview,
+  path: 'design_components/chat/bubble',
 )
 Widget buildOutgoingReplyToOwnMessageUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(
@@ -37,6 +38,7 @@ Widget buildOutgoingReplyToOwnMessageUseCase(BuildContext context) {
 @widgetbook.UseCase(
   name: 'Outgoing — another user',
   type: ChatReplyBubblePreview,
+  path: 'design_components/chat/bubble',
 )
 Widget buildOutgoingReplyToAnotherUserUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(
@@ -67,6 +69,7 @@ Widget buildOutgoingReplyToAnotherUserUseCase(BuildContext context) {
 @widgetbook.UseCase(
   name: 'Incoming — own message',
   type: ChatReplyBubblePreview,
+  path: 'design_components/chat/bubble',
 )
 Widget buildIncomingReplyToOwnMessageUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(
@@ -95,6 +98,7 @@ Widget buildIncomingReplyToOwnMessageUseCase(BuildContext context) {
 @widgetbook.UseCase(
   name: 'Incoming — another user',
   type: ChatReplyBubblePreview,
+  path: 'design_components/chat/bubble',
 )
 Widget buildIncomingReplyToAnotherUserUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(

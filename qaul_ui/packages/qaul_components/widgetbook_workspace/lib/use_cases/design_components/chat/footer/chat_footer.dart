@@ -21,7 +21,11 @@ Widget _frameFooter(BuildContext context, Widget child) {
   );
 }
 
-@widgetbook.UseCase(name: 'Empty — attachment actions', type: ChatFooter)
+@widgetbook.UseCase(
+  name: 'Empty — attachment actions',
+  type: ChatFooter,
+  path: 'design_components/chat/footer',
+)
 Widget buildChatFooterEmptyClosedUseCase(BuildContext context) {
   return _frameFooter(
     context,
@@ -44,7 +48,11 @@ Widget buildChatFooterEmptyClosedUseCase(BuildContext context) {
   );
 }
 
-@widgetbook.UseCase(name: 'Empty — submenu open', type: ChatFooter)
+@widgetbook.UseCase(
+  name: 'Empty — submenu open',
+  type: ChatFooter,
+  path: 'design_components/chat/footer',
+)
 Widget buildChatFooterEmptyOpenUseCase(BuildContext context) {
   return _frameFooter(
     context,
@@ -68,7 +76,11 @@ Widget buildChatFooterEmptyOpenUseCase(BuildContext context) {
   );
 }
 
-@widgetbook.UseCase(name: 'With text — plus and send', type: ChatFooter)
+@widgetbook.UseCase(
+  name: 'With text — plus and send',
+  type: ChatFooter,
+  path: 'design_components/chat/footer',
+)
 Widget buildChatFooterWithTextUseCase(BuildContext context) {
   return _frameFooter(
     context,
@@ -86,7 +98,11 @@ Widget buildChatFooterWithTextUseCase(BuildContext context) {
   );
 }
 
-@widgetbook.UseCase(name: 'Long draft (multiline)', type: ChatFooter)
+@widgetbook.UseCase(
+  name: 'Long draft (multiline)',
+  type: ChatFooter,
+  path: 'design_components/chat/footer',
+)
 Widget buildChatFooterLongDraftUseCase(BuildContext context) {
   return _frameFooter(
     context,

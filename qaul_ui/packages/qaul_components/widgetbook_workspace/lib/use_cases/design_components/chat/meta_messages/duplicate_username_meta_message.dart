@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:qaul_components/qaul_components.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
-import '../../support/widgetbook_preview.dart';
+import '../../../../support/widgetbook_preview.dart';
 
-@widgetbook.UseCase(name: 'Tappable action', type: DuplicateUsernameMetaMessage)
+@widgetbook.UseCase(
+  name: 'Tappable action',
+  type: DuplicateUsernameMetaMessage,
+  path: 'design_components/chat/meta_messages',
+)
 Widget buildDuplicateUsernameMetaMessageUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(
     context,
@@ -20,7 +24,11 @@ Widget buildDuplicateUsernameMetaMessageUseCase(BuildContext context) {
   );
 }
 
-@widgetbook.UseCase(name: 'Read-only', type: DuplicateUsernameMetaMessage)
+@widgetbook.UseCase(
+  name: 'Read-only',
+  type: DuplicateUsernameMetaMessage,
+  path: 'design_components/chat/meta_messages',
+)
 Widget buildDuplicateUsernameMetaMessageReadOnlyUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(
     context,

@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:qaul_components/qaul_components.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
-import '../../../support/chat_fixtures.dart';
-import '../../../support/widgetbook_preview.dart';
+import '../../../../support/chat_fixtures.dart';
+import '../../../../support/widgetbook_preview.dart';
 
 final _previewClock = DateTime(2026, 4, 12, 14, 30);
 
-@widgetbook.UseCase(name: 'Direct chat preview', type: ChatTimeline)
+@widgetbook.UseCase(
+  name: 'Direct chat preview',
+  type: ChatTimeline,
+  path: 'design_components/chat/bubble',
+)
 Widget buildChatRoomPreviewUseCase(BuildContext context) {
   return widgetbookFullScreenChatPreview(
     context,
@@ -125,7 +129,11 @@ List<ChatMessage> _buildGroupMessages() {
   ];
 }
 
-@widgetbook.UseCase(name: 'Group chat preview', type: ChatTimeline)
+@widgetbook.UseCase(
+  name: 'Group chat preview',
+  type: ChatTimeline,
+  path: 'design_components/chat/bubble',
+)
 Widget buildGroupChatUseCase(BuildContext context) {
   const me = ChatUser(id: 'me', name: 'Me');
 

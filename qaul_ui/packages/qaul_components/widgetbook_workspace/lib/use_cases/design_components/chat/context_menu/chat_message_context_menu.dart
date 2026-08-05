@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qaul_components/qaul_components.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
-import '../../../support/widgetbook_preview.dart';
+import '../../../../support/widgetbook_preview.dart';
 
 ChatMessageReactionRow _reactions({bool enabled = true}) {
   return ChatMessageReactionRow(
@@ -59,7 +59,11 @@ List<ChatMessageContextMenuElement> _paginatedElements() => [
   ),
 ];
 
-@widgetbook.UseCase(name: 'Default', type: ChatMessageContextMenu)
+@widgetbook.UseCase(
+  name: 'Default',
+  type: ChatMessageContextMenu,
+  path: 'design_components/chat/context_menu',
+)
 Widget buildContextMenuUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(
     context,
@@ -70,6 +74,7 @@ Widget buildContextMenuUseCase(BuildContext context) {
 @widgetbook.UseCase(
   name: 'Disabled and omitted elements',
   type: ChatMessageContextMenu,
+  path: 'design_components/chat/context_menu',
 )
 Widget buildRestrictedContextMenuUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(
@@ -88,6 +93,7 @@ Widget buildRestrictedContextMenuUseCase(BuildContext context) {
 @widgetbook.UseCase(
   name: 'Many paginated actions',
   type: ChatMessageContextMenu,
+  path: 'design_components/chat/context_menu',
 )
 Widget buildManyActionsContextMenuUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(

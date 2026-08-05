@@ -10,38 +10,38 @@
 // **************************************************************************
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:qaul_components_widgetbook/use_cases/components/chat/chat_footer_reply_preview.dart'
-    as _qaul_components_widgetbook_use_cases_components_chat_chat_footer_reply_preview;
-import 'package:qaul_components_widgetbook/use_cases/components/chat/chat_message_context_menu.dart'
-    as _qaul_components_widgetbook_use_cases_components_chat_chat_message_context_menu;
-import 'package:qaul_components_widgetbook/use_cases/components/chat/chat_reply_bubble_preview.dart'
-    as _qaul_components_widgetbook_use_cases_components_chat_chat_reply_bubble_preview;
 import 'package:qaul_components_widgetbook/use_cases/design/account/account_management.dart'
     as _qaul_components_widgetbook_use_cases_design_account_account_management;
 import 'package:qaul_components_widgetbook/use_cases/design/chat/chat_journey.dart'
     as _qaul_components_widgetbook_use_cases_design_chat_chat_journey;
 import 'package:qaul_components_widgetbook/use_cases/design/chat/reply_journey/reply_journey.dart'
     as _qaul_components_widgetbook_use_cases_design_chat_reply_journey_reply_journey;
-import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_footer.dart'
-    as _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer;
-import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_header.dart'
-    as _qaul_components_widgetbook_use_cases_design_components_chat_chat_header;
-import 'package:qaul_components_widgetbook/use_cases/design_components/chat/chat_timeline.dart'
-    as _qaul_components_widgetbook_use_cases_design_components_chat_chat_timeline;
+import 'package:qaul_components_widgetbook/use_cases/design_components/chat/bubble/chat_reply_bubble_preview.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_chat_bubble_chat_reply_bubble_preview;
+import 'package:qaul_components_widgetbook/use_cases/design_components/chat/bubble/chat_timeline.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_chat_bubble_chat_timeline;
+import 'package:qaul_components_widgetbook/use_cases/design_components/chat/bubble/qaul_chat_bubble.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_chat_bubble_qaul_chat_bubble;
+import 'package:qaul_components_widgetbook/use_cases/design_components/chat/context_menu/chat_message_context_menu.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_chat_context_menu_chat_message_context_menu;
+import 'package:qaul_components_widgetbook/use_cases/design_components/chat/footer/chat_footer.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_chat_footer_chat_footer;
+import 'package:qaul_components_widgetbook/use_cases/design_components/chat/footer/chat_footer_reply_preview.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_chat_footer_chat_footer_reply_preview;
+import 'package:qaul_components_widgetbook/use_cases/design_components/chat/header/chat_header.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_chat_header_chat_header;
+import 'package:qaul_components_widgetbook/use_cases/design_components/chat/meta_messages/duplicate_username_meta_message.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_chat_meta_messages_duplicate_username_meta_message;
+import 'package:qaul_components_widgetbook/use_cases/design_components/chat/meta_messages/group_join_meta_message.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_chat_meta_messages_group_join_meta_message;
+import 'package:qaul_components_widgetbook/use_cases/design_components/chat/meta_messages/room_meta_message.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_chat_meta_messages_room_meta_message;
 import 'package:qaul_components_widgetbook/use_cases/design_components/qaul_color_sheet.dart'
     as _qaul_components_widgetbook_use_cases_design_components_qaul_color_sheet;
 import 'package:qaul_components_widgetbook/use_cases/design_components/shell/qaul_fab.dart'
     as _qaul_components_widgetbook_use_cases_design_components_shell_qaul_fab;
 import 'package:qaul_components_widgetbook/use_cases/design_components/shell/qaul_navbar.dart'
     as _qaul_components_widgetbook_use_cases_design_components_shell_qaul_navbar;
-import 'package:qaul_components_widgetbook/use_cases/special_forms/duplicate_username_meta_message.dart'
-    as _qaul_components_widgetbook_use_cases_special_forms_duplicate_username_meta_message;
-import 'package:qaul_components_widgetbook/use_cases/special_forms/group_join_meta_message.dart'
-    as _qaul_components_widgetbook_use_cases_special_forms_group_join_meta_message;
-import 'package:qaul_components_widgetbook/use_cases/special_forms/qaul_chat_bubble.dart'
-    as _qaul_components_widgetbook_use_cases_special_forms_qaul_chat_bubble;
-import 'package:qaul_components_widgetbook/use_cases/special_forms/room_meta_message.dart'
-    as _qaul_components_widgetbook_use_cases_special_forms_room_meta_message;
 import 'package:widgetbook/widgetbook.dart' as _widgetbook;
 
 final directories = <_widgetbook.WidgetbookNode>[
@@ -128,227 +128,252 @@ final directories = <_widgetbook.WidgetbookNode>[
       _widgetbook.WidgetbookFolder(
         name: 'chat',
         children: [
-          _widgetbook.WidgetbookComponent(
-            name: 'ChatFooter',
-            useCases: [
-              _widgetbook.WidgetbookUseCase(
-                name: 'Empty — attachment actions',
-                builder:
-                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
-                        .buildChatFooterEmptyClosedUseCase,
+          _widgetbook.WidgetbookFolder(
+            name: 'bubble',
+            children: [
+              _widgetbook.WidgetbookComponent(
+                name: 'ChatReplyBubblePreview',
+                useCases: [
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Incoming — another user',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_bubble_chat_reply_bubble_preview
+                            .buildIncomingReplyToAnotherUserUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Incoming — own message',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_bubble_chat_reply_bubble_preview
+                            .buildIncomingReplyToOwnMessageUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Outgoing — another user',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_bubble_chat_reply_bubble_preview
+                            .buildOutgoingReplyToAnotherUserUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Outgoing — own message',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_bubble_chat_reply_bubble_preview
+                            .buildOutgoingReplyToOwnMessageUseCase,
+                  ),
+                ],
               ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Empty — submenu open',
-                builder:
-                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
-                        .buildChatFooterEmptyOpenUseCase,
+              _widgetbook.WidgetbookComponent(
+                name: 'ChatTimeline',
+                useCases: [
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Direct chat preview',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_bubble_chat_timeline
+                            .buildChatRoomPreviewUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Group chat preview',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_bubble_chat_timeline
+                            .buildGroupChatUseCase,
+                  ),
+                ],
               ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Long draft (multiline)',
-                builder:
-                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
-                        .buildChatFooterLongDraftUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'With text — plus and send',
-                builder:
-                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_footer
-                        .buildChatFooterWithTextUseCase,
-              ),
-            ],
-          ),
-          _widgetbook.WidgetbookComponent(
-            name: 'ChatFooterReplyPreview',
-            useCases: [
-              _widgetbook.WidgetbookUseCase(
-                name: 'Empty draft',
-                builder:
-                    _qaul_components_widgetbook_use_cases_components_chat_chat_footer_reply_preview
-                        .buildReplyFooterEmptyUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Long excerpt',
-                builder:
-                    _qaul_components_widgetbook_use_cases_components_chat_chat_footer_reply_preview
-                        .buildLongReplyFooterUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'With draft',
-                builder:
-                    _qaul_components_widgetbook_use_cases_components_chat_chat_footer_reply_preview
-                        .buildReplyFooterDraftUseCase,
-              ),
-            ],
-          ),
-          _widgetbook.WidgetbookComponent(
-            name: 'ChatHeader',
-            useCases: [
-              _widgetbook.WidgetbookUseCase(
-                name: 'Direct — last seen',
-                builder:
-                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_header
-                        .buildChatHeaderDirectLastSeenUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Direct — online',
-                builder:
-                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_header
-                        .buildChatHeaderDirectOnlineUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Group',
-                builder:
-                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_header
-                        .buildChatHeaderGroupUseCase,
-              ),
-            ],
-          ),
-          _widgetbook.WidgetbookComponent(
-            name: 'ChatMessageContextMenu',
-            useCases: [
-              _widgetbook.WidgetbookUseCase(
-                name: 'Default',
-                builder:
-                    _qaul_components_widgetbook_use_cases_components_chat_chat_message_context_menu
-                        .buildContextMenuUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Disabled and omitted elements',
-                builder:
-                    _qaul_components_widgetbook_use_cases_components_chat_chat_message_context_menu
-                        .buildRestrictedContextMenuUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Many paginated actions',
-                builder:
-                    _qaul_components_widgetbook_use_cases_components_chat_chat_message_context_menu
-                        .buildManyActionsContextMenuUseCase,
+              _widgetbook.WidgetbookComponent(
+                name: 'QaulChatBubble',
+                useCases: [
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Incoming — long',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_bubble_qaul_chat_bubble
+                            .buildIncomingLongUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Incoming — short',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_bubble_qaul_chat_bubble
+                            .buildIncomingShortUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Interactive — long press',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_bubble_qaul_chat_bubble
+                            .buildInteractiveLongPressUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Outgoing — not sent',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_bubble_qaul_chat_bubble
+                            .buildOutgoingNotSentUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Outgoing — read',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_bubble_qaul_chat_bubble
+                            .buildOutgoingReadUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Outgoing — sent',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_bubble_qaul_chat_bubble
+                            .buildOutgoingSentUseCase,
+                  ),
+                ],
               ),
             ],
           ),
-          _widgetbook.WidgetbookComponent(
-            name: 'ChatReplyBubblePreview',
-            useCases: [
-              _widgetbook.WidgetbookUseCase(
-                name: 'Incoming — another user',
-                builder:
-                    _qaul_components_widgetbook_use_cases_components_chat_chat_reply_bubble_preview
-                        .buildIncomingReplyToAnotherUserUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Incoming — own message',
-                builder:
-                    _qaul_components_widgetbook_use_cases_components_chat_chat_reply_bubble_preview
-                        .buildIncomingReplyToOwnMessageUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Outgoing — another user',
-                builder:
-                    _qaul_components_widgetbook_use_cases_components_chat_chat_reply_bubble_preview
-                        .buildOutgoingReplyToAnotherUserUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Outgoing — own message',
-                builder:
-                    _qaul_components_widgetbook_use_cases_components_chat_chat_reply_bubble_preview
-                        .buildOutgoingReplyToOwnMessageUseCase,
-              ),
-            ],
-          ),
-          _widgetbook.WidgetbookComponent(
-            name: 'ChatTimeline',
-            useCases: [
-              _widgetbook.WidgetbookUseCase(
-                name: 'Direct chat preview',
-                builder:
-                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_timeline
-                        .buildChatRoomPreviewUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Group chat preview',
-                builder:
-                    _qaul_components_widgetbook_use_cases_design_components_chat_chat_timeline
-                        .buildGroupChatUseCase,
+          _widgetbook.WidgetbookFolder(
+            name: 'context_menu',
+            children: [
+              _widgetbook.WidgetbookComponent(
+                name: 'ChatMessageContextMenu',
+                useCases: [
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Default',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_context_menu_chat_message_context_menu
+                            .buildContextMenuUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Disabled and omitted elements',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_context_menu_chat_message_context_menu
+                            .buildRestrictedContextMenuUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Many paginated actions',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_context_menu_chat_message_context_menu
+                            .buildManyActionsContextMenuUseCase,
+                  ),
+                ],
               ),
             ],
           ),
-          _widgetbook.WidgetbookComponent(
-            name: 'DuplicateUsernameMetaMessage',
-            useCases: [
-              _widgetbook.WidgetbookUseCase(
-                name: 'Read-only',
-                builder:
-                    _qaul_components_widgetbook_use_cases_special_forms_duplicate_username_meta_message
-                        .buildDuplicateUsernameMetaMessageReadOnlyUseCase,
+          _widgetbook.WidgetbookFolder(
+            name: 'footer',
+            children: [
+              _widgetbook.WidgetbookComponent(
+                name: 'ChatFooter',
+                useCases: [
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Empty — attachment actions',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_footer_chat_footer
+                            .buildChatFooterEmptyClosedUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Empty — submenu open',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_footer_chat_footer
+                            .buildChatFooterEmptyOpenUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Long draft (multiline)',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_footer_chat_footer
+                            .buildChatFooterLongDraftUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'With text — plus and send',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_footer_chat_footer
+                            .buildChatFooterWithTextUseCase,
+                  ),
+                ],
               ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Tappable action',
-                builder:
-                    _qaul_components_widgetbook_use_cases_special_forms_duplicate_username_meta_message
-                        .buildDuplicateUsernameMetaMessageUseCase,
-              ),
-            ],
-          ),
-          _widgetbook.WidgetbookComponent(
-            name: 'GroupJoinMetaMessage',
-            useCases: [
-              _widgetbook.WidgetbookUseCase(
-                name: 'Default',
-                builder:
-                    _qaul_components_widgetbook_use_cases_special_forms_group_join_meta_message
-                        .buildGroupJoinMetaMessageUseCase,
-              ),
-            ],
-          ),
-          _widgetbook.WidgetbookComponent(
-            name: 'QaulChatBubble',
-            useCases: [
-              _widgetbook.WidgetbookUseCase(
-                name: 'Incoming — long',
-                builder:
-                    _qaul_components_widgetbook_use_cases_special_forms_qaul_chat_bubble
-                        .buildIncomingLongUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Incoming — short',
-                builder:
-                    _qaul_components_widgetbook_use_cases_special_forms_qaul_chat_bubble
-                        .buildIncomingShortUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Interactive — long press',
-                builder:
-                    _qaul_components_widgetbook_use_cases_special_forms_qaul_chat_bubble
-                        .buildInteractiveLongPressUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Outgoing — not sent',
-                builder:
-                    _qaul_components_widgetbook_use_cases_special_forms_qaul_chat_bubble
-                        .buildOutgoingNotSentUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Outgoing — read',
-                builder:
-                    _qaul_components_widgetbook_use_cases_special_forms_qaul_chat_bubble
-                        .buildOutgoingReadUseCase,
-              ),
-              _widgetbook.WidgetbookUseCase(
-                name: 'Outgoing — sent',
-                builder:
-                    _qaul_components_widgetbook_use_cases_special_forms_qaul_chat_bubble
-                        .buildOutgoingSentUseCase,
+              _widgetbook.WidgetbookComponent(
+                name: 'ChatFooterReplyPreview',
+                useCases: [
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Empty draft',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_footer_chat_footer_reply_preview
+                            .buildReplyFooterEmptyUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Long excerpt',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_footer_chat_footer_reply_preview
+                            .buildLongReplyFooterUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'With draft',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_footer_chat_footer_reply_preview
+                            .buildReplyFooterDraftUseCase,
+                  ),
+                ],
               ),
             ],
           ),
-          _widgetbook.WidgetbookComponent(
-            name: 'RoomMetaMessage',
-            useCases: [
-              _widgetbook.WidgetbookUseCase(
-                name: 'Date',
-                builder:
-                    _qaul_components_widgetbook_use_cases_special_forms_room_meta_message
-                        .buildRoomMetaMessageDateUseCase,
+          _widgetbook.WidgetbookFolder(
+            name: 'header',
+            children: [
+              _widgetbook.WidgetbookComponent(
+                name: 'ChatHeader',
+                useCases: [
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Direct — last seen',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_header_chat_header
+                            .buildChatHeaderDirectLastSeenUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Direct — online',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_header_chat_header
+                            .buildChatHeaderDirectOnlineUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Group',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_header_chat_header
+                            .buildChatHeaderGroupUseCase,
+                  ),
+                ],
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookFolder(
+            name: 'meta_messages',
+            children: [
+              _widgetbook.WidgetbookComponent(
+                name: 'DuplicateUsernameMetaMessage',
+                useCases: [
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Read-only',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_meta_messages_duplicate_username_meta_message
+                            .buildDuplicateUsernameMetaMessageReadOnlyUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Tappable action',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_meta_messages_duplicate_username_meta_message
+                            .buildDuplicateUsernameMetaMessageUseCase,
+                  ),
+                ],
+              ),
+              _widgetbook.WidgetbookComponent(
+                name: 'GroupJoinMetaMessage',
+                useCases: [
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Default',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_meta_messages_group_join_meta_message
+                            .buildGroupJoinMetaMessageUseCase,
+                  ),
+                ],
+              ),
+              _widgetbook.WidgetbookComponent(
+                name: 'RoomMetaMessage',
+                useCases: [
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Date',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_meta_messages_room_meta_message
+                            .buildRoomMetaMessageDateUseCase,
+                  ),
+                ],
               ),
             ],
           ),

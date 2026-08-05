@@ -38,12 +38,20 @@ ChatFooter _footer({
   );
 }
 
-@widgetbook.UseCase(name: 'Empty draft', type: ChatFooterReplyPreview)
+@widgetbook.UseCase(
+  name: 'Empty draft',
+  type: ChatFooterReplyPreview,
+  path: 'design_components/chat/footer',
+)
 Widget buildReplyFooterEmptyUseCase(BuildContext context) {
   return _frame(context, _footer());
 }
 
-@widgetbook.UseCase(name: 'With draft', type: ChatFooterReplyPreview)
+@widgetbook.UseCase(
+  name: 'With draft',
+  type: ChatFooterReplyPreview,
+  path: 'design_components/chat/footer',
+)
 Widget buildReplyFooterDraftUseCase(BuildContext context) {
   return _frame(
     context,
@@ -51,7 +59,11 @@ Widget buildReplyFooterDraftUseCase(BuildContext context) {
   );
 }
 
-@widgetbook.UseCase(name: 'Long excerpt', type: ChatFooterReplyPreview)
+@widgetbook.UseCase(
+  name: 'Long excerpt',
+  type: ChatFooterReplyPreview,
+  path: 'design_components/chat/footer',
+)
 Widget buildLongReplyFooterUseCase(BuildContext context) {
   return _frame(
     context,

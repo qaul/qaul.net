@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:qaul_components/qaul_components.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
-import '../../../support/chat_fixtures.dart';
-import '../../../support/widgetbook_preview.dart';
+import '../../../../support/chat_fixtures.dart';
+import '../../../../support/widgetbook_preview.dart';
 
-@widgetbook.UseCase(name: 'Direct — online', type: ChatHeader)
+@widgetbook.UseCase(
+  name: 'Direct — online',
+  type: ChatHeader,
+  path: 'design_components/chat/header',
+)
 Widget buildChatHeaderDirectOnlineUseCase(BuildContext context) {
   return widgetbookTopChromeFrame(
     context,
@@ -26,7 +30,11 @@ Widget buildChatHeaderDirectOnlineUseCase(BuildContext context) {
   );
 }
 
-@widgetbook.UseCase(name: 'Direct — last seen', type: ChatHeader)
+@widgetbook.UseCase(
+  name: 'Direct — last seen',
+  type: ChatHeader,
+  path: 'design_components/chat/header',
+)
 Widget buildChatHeaderDirectLastSeenUseCase(BuildContext context) {
   return widgetbookTopChromeFrame(
     context,
@@ -44,7 +52,11 @@ Widget buildChatHeaderDirectLastSeenUseCase(BuildContext context) {
   );
 }
 
-@widgetbook.UseCase(name: 'Group', type: ChatHeader)
+@widgetbook.UseCase(
+  name: 'Group',
+  type: ChatHeader,
+  path: 'design_components/chat/header',
+)
 Widget buildChatHeaderGroupUseCase(BuildContext context) {
   return widgetbookTopChromeFrame(
     context,
