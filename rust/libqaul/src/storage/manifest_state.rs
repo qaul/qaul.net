@@ -16,7 +16,6 @@ use tracing::{error, info};
 pub struct DelegationEntry {
     pub user_id: [u8; 8],
     pub timeout: u64,
-    #[serde(with = "serde_bytes")]
     pub entry_signature: Vec<u8>,
     pub profile_version: u32,
 }
@@ -58,8 +57,13 @@ impl HostManifestState {
 
     /// save to `<storage_path>/manifest_state.yaml`
     pub fn save_to_path(&self, storage_path: &str) {
-        let yaml =
-            serde_yaml_ng::to_string(self).expect("HostManifestState should always serialise");
+        let yaml = match serde_yaml_ng::to_string(self) {
+            Ok(y) => y,
+            Err(e) => {
+                error!("failed to serialise manifest_state: {e}");
+                return;
+            }
+        };
         let path = Path::new(storage_path).join("manifest_state.yaml");
         if let Err(e) = fs::write(&path, yaml) {
             error!("failed to persist manifest_state to {path:?}: {e}");
