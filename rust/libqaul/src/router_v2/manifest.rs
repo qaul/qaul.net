@@ -12,14 +12,17 @@ use libp2p::identity::Keypair;
 use tracing::debug;
 
 use crate::router_v2::{
-    codec::messages::{ManifestEntry, NodeManifest},
+    codec::messages::{
+        DeltaAdd, DeltaRemove, ManifestDelta, ManifestEntry, ManifestRequestItem, NodeManifest,
+    },
     identity::{delegation_signing_input, ChunkSigningCtx, Multikey},
     seq::is_fresher_u32,
+    Sphere,
 };
 
 const ENTRY_BYTES: usize = 84;
 const HEADER_OVERHEAD: usize = 85;
-const MAX_BODY: usize = 60 * 1024;
+pub(crate) const MAX_BODY: usize = 60 * 1024;
 
 #[derive(Debug, thiserror::Error)]
 pub enum ManifestError {
@@ -257,12 +260,29 @@ impl Manifest {
     }
 
     pub fn canonical_chunk_bytes(&self, chunk_range: Range<usize>) -> Vec<u8> {
-        let slice = &self.entries()[chunk_range];
-        let mut res = Vec::with_capacity(84 * slice.len());
-        for entry in slice {
-            entry.encode(&mut res);
-        }
-        res
+        canonical_entry_bytes(&self.entries()[chunk_range])
+    }
+
+    /// sign the whole entry as one and it is the sig `MANIFEST_DELTA` carries.
+    /// the `from_version` is absent per 8.6
+    pub fn sign_state(
+        &self,
+        host_keys: &Keypair,
+        origin_multikey: &[u8],
+    ) -> Result<[u8; 64], ManifestError> {
+        let entry_bytes = canonical_entry_bytes(self.entries());
+        let ctx = ChunkSigningCtx {
+            origin_multikey,
+            manifest_version: self.manifest_version,
+            chunk_index: 0,
+            chunk_count: 1,
+            flags: if self.is_gateway { 1 } else { 0 },
+            canonical_entries: &entry_bytes,
+        };
+        let signature = host_keys
+            .sign(&ctx.signing_input())
+            .map_err(|_| ManifestError::SigningFailed)?;
+        Ok(signature.try_into().expect("ed25519 signature is 64 bytes"))
     }
 
     pub fn build_chunks(
@@ -363,6 +383,117 @@ impl Manifest {
     }
 }
 
+/// encodes slice entry. the caller IS responsible for ordering the user_id
+pub fn canonical_entry_bytes(entries: &[ManifestEntry]) -> Vec<u8> {
+    let mut res = Vec::with_capacity(ENTRY_BYTES * entries.len());
+    for entry in entries {
+        entry.encode(&mut res);
+    }
+    res
+}
+
+pub struct DeltaHeader {
+    pub origin_node_id: [u8; 8],
+    /// version the delta builds upon: remember, this is not signed
+    pub from_version: u32,
+    pub to_version: u32,
+    pub is_gateway: bool,
+    pub manifest_signature: [u8; 64],
+}
+
+impl DeltaHeader {
+    pub fn assemble(self, records: Vec<LogRecord>) -> ManifestDelta {
+        let mut adds = Vec::new();
+        let mut removes = Vec::new();
+
+        for record in records {
+            match record {
+                LogRecord::Add {
+                    record_version,
+                    entry,
+                } => adds.push(DeltaAdd {
+                    record_version,
+                    entry,
+                }),
+                LogRecord::Tombstone {
+                    user_id,
+                    record_version,
+                    ..
+                } => removes.push(DeltaRemove {
+                    user_id,
+                    record_version,
+                }),
+            }
+        }
+
+        ManifestDelta {
+            origin_node_id: self.origin_node_id,
+            from_version: self.from_version,
+            to_version: self.to_version,
+            flags: if self.is_gateway { 1 } else { 0 },
+            manifest_signature: self.manifest_signature,
+            adds,
+            removes,
+        }
+    }
+}
+
+/// the things known about an origin to respond to it.
+pub struct OriginServeState {
+    pub committed: u32,
+    pub log_base: u32,
+    /// Sphere the manifest was learned over.
+    pub learn_sphere: Option<Sphere>,
+}
+
+/// per 8.8 how a MANIFEST_REQUEST should be answered
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ServeDecision {
+    /// Full `NODE_MANIFEST`
+    /// which means the requester needs to bootstrap, that is, its base is far behind the current log
+    Full,
+    Delta {
+        from_version: u32,
+    },
+    /// versions are equal
+    Nothing,
+    /// per 2.3: if we learnt about it over internet
+    Sealed,
+}
+
+/// per 8.8: steps 2 to 5: we decide how to answer one request item
+pub fn decide_serve(
+    item: &ManifestRequestItem,
+    origin: &OriginServeState,
+    requester_sphere: Sphere,
+) -> ServeDecision {
+    if origin.learn_sphere == Some(Sphere::Internet) && requester_sphere == Sphere::Local {
+        return ServeDecision::Sealed;
+    }
+
+    if item.have_none() {
+        return ServeDecision::Full;
+    }
+
+    if !is_fresher_u32(item.have_version, origin.log_base) {
+        return ServeDecision::Full;
+    }
+
+    if item.have_version == origin.committed {
+        return ServeDecision::Nothing;
+    }
+
+    if is_fresher_u32(origin.committed, item.have_version) {
+        return ServeDecision::Delta {
+            from_version: item.have_version,
+        };
+    }
+
+    // anything else we cannot decipher, sending back full manifest
+    // is the best decision, i think
+    ServeDecision::Full
+}
+
 /// a manifest that was assembled successfully from bytes over the wire
 pub struct CompletedManifest {
     pub manifest_version: u32,
@@ -390,11 +521,6 @@ impl ChunkAssembler {
         }
     }
 
-    /// Insert a verified chunk. Returns Some when the manifest is now
-    /// complete; None while still accumulating.
-    ///
-    /// Callers must verify each chunk (see `verify_chunk`) before
-    /// insertion — the assembler assumes signatures are already checked.
     pub fn insert(
         &mut self,
         origin_node_id: [u8; 8],
