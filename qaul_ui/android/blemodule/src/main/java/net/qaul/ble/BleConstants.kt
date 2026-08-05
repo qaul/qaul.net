@@ -51,8 +51,13 @@ object BleConstants {
     // Connection settings
     // --------------------------------------------------------------------------------------------
 
-    /** Maximum number of simultaneous peer connections. Android BLE is unreliable above 3. */
-    const val MAX_CONNECTIONS = 4
+    /** Maximum number of simultaneous peer connections. **/
+    @Volatile
+    var MAX_CONNECTIONS = 4
+
+    /** Values the debug overlay cycles through.
+     *   3-4 is what we have has validated so far. */
+    val MAX_CONNECTION_OPTIONS = intArrayOf(2, 3, 4, 5, 6, 7, 8)
 
     /** anti-islanding: enables gossiped link-state (SEND_NEIGHBOURS flc) feeds the Stage 1 fill-gate
      *  (ConnectionPool.shouldAcceptEdge) and Stage 2 proactive drop  */
@@ -60,8 +65,8 @@ object BleConstants {
 
     /**Enable topology mechanisms. Both require [ANTI_ISLANDING] (they read
      *  the gossiped link-state). */
-    const val STAGE1_FILL_GATE = false
-    const val STAGE2_PROACTIVE_DROP = false
+    const val STAGE1_FILL_GATE = true
+    const val STAGE2_PROACTIVE_DROP = true
 
     /** TEST ONLY — force a fixed topology (e.g. a line for multi-hop testing) even when every device is
      *  in RF range. If non-empty, this device only forms/keeps connections with peers whose qaul ID
@@ -81,12 +86,47 @@ object BleConstants {
     @Volatile
     var ENGINE_READY = false
 
+
+    const val PREFER_2M = false
+
+    /** Allow an established Coded link to be upgraded when the peer is seen close up.
+     *  TODO: a single RSSI spike promotes a long-range link to a short-range PHY, which then drops as soon as the peer moves away again. */
+    const val ALLOW_PHY_UPGRADE = true
+
+
+    const val PHY_UPGRADE_CONFIRM_MS = 10_000L
+
     /** Connection interval requested for an idle link.
      *  Every open link consumes a connection event this often, and the controller must interleave
      *  them all with scanning and advertising. At high, several concurrent links can exhaust the
      *  radio schedule, missed events accumulate into continous supervision timeouts / churn when above a
      * conneciton cap of 3*/
     const val IDLE_CONNECTION_PRIORITY = android.bluetooth.BluetoothGatt.CONNECTION_PRIORITY_BALANCED
+
+    const val HIGH_LOAD_CONNECTION_PRIORITY = android.bluetooth.BluetoothGatt.CONNECTION_PRIORITY_HIGH
+
+    /** How long a link stays escalated (high priority + 2M) after its last bulk lane activity
+     *  before dropping back to idle. Prevents flipping quickly between consecutive bulk sends */
+    const val BULK_HOLD_DOWN_MS = 4_000L
+
+
+    /*  TODO: reasoned, not measured — the field test's concurrent-transfer scenario should set it. */
+    const val MAX_ESCALATED_LINKS = 2
+
+
+    const val FORCE_CODED_LINKS = false
+
+
+    const val NOMINAL_ADVERT_INTERVAL_MS = 100L
+
+
+    const val CODED_ONLY_CONFIRM_INTERVALS = 10
+
+
+    const val CODED_ONLY_CONFIRM_MS = NOMINAL_ADVERT_INTERVAL_MS * CODED_ONLY_CONFIRM_INTERVALS
+
+
+    const val BULK_2M_MIN_RSSI = -80
 
     /** Connection admission control: max outbound CENTRAL connects we'll have in flight at once (connected but not yet
      *  qaul id resolved). Auto connect is gated on this. Prevents the scanner from piling on
@@ -104,7 +144,7 @@ object BleConstants {
      *
     * If "Defer window lapsed" appears a lot in logs, the mechanism isn't earning its
      *  keep and should be removed rather than tuned. TODO: Check again if this seems to be correct, it might be different if scanner mode was lowered */
-    const val WRONG_ROLE_DEFER_MS = 2_000L
+    const val WRONG_ROLE_DEFER_MS = 8_000L
 
     /** Company ID for the manufacturer-data block carrying the truncated qaul ID in advertisements.
      *  0xFFFF is the SIG value reserved for testing / internal use. */
@@ -139,13 +179,27 @@ object BleConstants {
      *  TODO: tune against real qaul routing-message sizes once measured */
     const val MEDIUM_MESSAGE_MAX_BYTES = 16000
 
-    /** Watchdog timeout for fast GATT ops (reads, writes, notifies, MTU, descriptor, PHY). These
-     *  complete in well under 300ms, so a hung one is caught quickly. Kept short because a hang holds the single scheduler slot, blocking all ops. */
-    const val FAST_OP_TIMEOUT_MS = 2_500L
+    // Op timeouts. The base values are the short-range budgets validated in close range 4 device
+    // runs. Coded links multiply them by [CODED_TIMEOUT_MULTIPLIER]
+    //
+    // The problem: a timeout that is too long stalls the  scheduler for
+    // every peer until it expires, one that is too short force advances a still live op
 
-    /** Watchdog timeout for service discovery, the one legitimately-slow non-connect op (up to ~2s, usually ~1s
-     *  more on devices with many services / slow links), so it gets a more generous window. */
+    /** Watchdog timeout for fast GATT ops (reads, writes, notifies, MTU, descriptor, PHY).
+     *  usually under 300ms on a close idle 1M link, but the budget must cover the worst case, and MTU
+     *  requests were repeatedly observed exceeding 4s under real app load */
+    const val FAST_OP_TIMEOUT_MS = 4_000L
+
+
+    const val NEGOTIATION_OP_TIMEOUT_MS = 10_000L
+
+    /** Watchdog timeout for service discovery, the slowest non connect op and the most fragile at
+     *  range, being many sequential round trips each of which can be lost. */
     const val SERVICE_DISCOVERY_TIMEOUT_MS = 5_000L
+
+    /** Multiplier applied to op/handshake timeouts on a coded  link. Coded spends 8x
+     *  the airtime per bit and needs more retransmissions at range */
+    const val CODED_TIMEOUT_MULTIPLIER = 3
 
     /** Timeout in milliseconds for initial connection before giving up. */
     const val CONNECTION_TIMEOUT_MS = 8_000L

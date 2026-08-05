@@ -158,10 +158,11 @@ object ConnectionPool {
         try {
             val now = System.currentTimeMillis()
             connections.values.toList().forEach { conn ->
-                if (now - conn.lastActivityAt > BleConstants.LIVENESS_TIMEOUT_MS)
+                val budget = conn.scaleTimeout(BleConstants.LIVENESS_TIMEOUT_MS)
+                if (now - conn.lastActivityAt > budget)
                 {
                     disconnect(conn.device)
-                    Log.w(TAG, "Liveness: ${conn.device.address} last seen > ${BleConstants.LIVENESS_TIMEOUT_MS}ms ago — dropping")
+                    Log.w(TAG, "Liveness: ${conn.device.address} last seen > ${budget}ms ago — dropping")
                 }
             }
         }
@@ -182,9 +183,10 @@ object ConnectionPool {
                 // Measured from when the handshake could actually start, not from createdAt
                 // this reaper is only for established links whose handshake never finished
                 val startedAt = conn.handshakeStartedAt
+                val budget = conn.scaleTimeout(BleConstants.UNRESOLVED_TIMEOUT_MS)
                 if (startedAt != null && conn.remoteQaulId == null &&
-                    now - startedAt > BleConstants.UNRESOLVED_TIMEOUT_MS) {
-                    Log.w(TAG, "Unresolved reaper: ${conn.device.address}/${conn.role} never resolved in ${BleConstants.UNRESOLVED_TIMEOUT_MS}ms — dropping")
+                    now - startedAt > budget) {
+                    Log.w(TAG, "Unresolved reaper: ${conn.device.address}/${conn.role} never resolved in ${budget}ms — dropping")
                     disconnect(conn.device)
                 }
             }
@@ -339,6 +341,8 @@ object ConnectionPool {
             )
         }
         Log.i(TAG, "Connection removed for ${device.address} (${connections.size} remaining)")
+        // Restart this peer's wrong role defer window
+        BleScanner.noteDisconnected(device.address)
         // Re-evaluate after removal: only reports DOWN if no other leg still holds this qaul ID.
         refreshNeighbourDown(conn.remoteQaulId)
         notifyConnectionsChanged()
@@ -346,12 +350,25 @@ object ConnectionPool {
 
 
 
-    /**
+     /**
      * Call after any connection add/remove. Toggles advertising on the connection cap. stop
      * advertising once full so peers stop discovering us and stop trying to connect. the GattServer
      * rejects them at the cap anyway
      */
     private fun notifyConnectionsChanged() {
+        // Counted on [getSize] — pending outbound connects INCLUDED — so this agrees exactly with
+        // GattServer's inbound cap check, which uses the same number. When the two disagreed we
+        // advertised to peers we would then refuse: discoverable while an outbound connect held the
+        // last slot, so an inbound arrived, and Android gives a peripheral no way to decline it
+        // (cancelConnection is unreliable — a "rejected" peer was measured staying 2.8s and
+        // completing a full handshake).
+        //
+        // An earlier version counted only ESTABLISHED links to avoid going invisible for the whole
+        // connect timeout, because restarting an advertising set draws a fresh RPA and peers reset
+        // their MAC-keyed backoff on the "new" device — a connect storm that leaked GATT client
+        // interfaces until the stack wedged. Both halves of that are now handled: backoff is keyed
+        // on the advertised qaul-id prefix so it survives rotation, and fail-fast teardown means a
+        // doomed connect no longer holds the slot for its full budget.
         if (getSize() >= BleConstants.MAX_CONNECTIONS) BleAdvertiser.pause() else BleAdvertiser.resume()
         onConnectionsChanged?.invoke()
     }
@@ -366,6 +383,22 @@ object ConnectionPool {
     fun allConnections(): List<BleConnection> = connections.values.toList()
 
     fun getSize(): Int = connections.size
+
+    /**
+     * Record the negotiated PHY for a link, from either role.
+     *
+     * Public because the GATT server has to reach it too. An inbound (peripheral) link has no connectPhy to fall back on,
+     * as  we didn't open it, so without a server side PHY report [BleConnection.isCoded] stays false and a genuinely long range inbound link runs on
+     * short range budgets on our side.
+     */
+    fun notePhy(address: String, txPhy: Int) {
+        connections[address]?.phyLabel = when (txPhy) {
+            BluetoothDevice.PHY_LE_1M -> "1M"
+            BluetoothDevice.PHY_LE_2M -> "2M"
+            BluetoothDevice.PHY_LE_CODED -> "Coded"
+            else -> "phy$txPhy"
+        }
+    }
 
     /** Count of outbound (CENTRAL) connections still in-flight, connected but qaul id hasn't resolved.
      *  The scanner gates new auto-connects on this so it can't pile connects onto the serial GATT queue
@@ -634,7 +667,6 @@ object ConnectionPool {
 
 
 
-
     // Send
 
 
@@ -651,10 +683,7 @@ object ConnectionPool {
         }
     }
 
-    // Sends to all connected devices
-    fun broadcast(payload: ByteArray){
-        connections.values.forEach { it.sendMessage(payload) }
-    }
+
 
     private val connectionEventListener = object : ConnectionEventListener {
 
@@ -699,12 +728,7 @@ object ConnectionPool {
         }
 
         override fun onPhyUpdated(device: BluetoothDevice, txPhy: Int, rxPhy: Int) {
-            connections[device.address]?.phyLabel = when (txPhy) {
-                BluetoothDevice.PHY_LE_1M -> "1M"
-                BluetoothDevice.PHY_LE_2M -> "2M"
-                BluetoothDevice.PHY_LE_CODED -> "Coded"
-                else -> "phy$txPhy"
-            }
+            notePhy(device.address, txPhy)
         }
 
         override fun onRssiRead(device: BluetoothDevice, rssi: Int) {
