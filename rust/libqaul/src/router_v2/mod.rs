@@ -293,25 +293,25 @@ impl RouterV2State {
             return;
         }
 
+        // In user form there is exactly one hosted user and it takes the
+        // reserved slot (§3.5). There is no allocator path: a node with a
+        // second hosted user is in node form by §3.2, and returned above.
         let newly_bound = {
             let mut dict = self.user_dict.write().unwrap();
-            if dict.idx_of(&user_id).is_some() {
-                // this means it has been added so we don't have anythint to rebind or reintroduce
-                None
-            } else if dict.id_of(RESERVED_INDEX).is_none() {
-                dict.bind(RESERVED_INDEX, user_id);
-                Some(RESERVED_INDEX)
-            } else {
-                let mut allocator = self.users_allocator.write().unwrap();
-                match allocator.allocate() {
-                    Some(idx) => {
-                        dict.bind(idx, user_id);
-                        Some(idx)
-                    }
-                    None => {
-                        error!("user allocator exhausted registering hosted user {user_id:?}");
-                        None
-                    }
+            match dict.id_of(RESERVED_INDEX) {
+                Some(existing) if existing == user_id => None,
+                Some(existing) => {
+                    // Only hosted users are ever bound here, and user form
+                    // permits only one — so this means state has drifted.
+                    error!(
+                        "user RESERVED_INDEX held by {existing:?} while registering hosted user {user_id:?}; rebinding"
+                    );
+                    dict.bind(RESERVED_INDEX, user_id);
+                    Some(RESERVED_INDEX)
+                }
+                None => {
+                    dict.bind(RESERVED_INDEX, user_id);
+                    Some(RESERVED_INDEX)
                 }
             }
         };
