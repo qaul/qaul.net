@@ -284,6 +284,15 @@ impl RouterV2State {
             }
         }
 
+        // per 3.2: a propagating node names its users through the manifest
+        // not routing entries.
+        if self.desired_propagation_form() == PropagationForm::Node {
+            tracing::info!(
+                "router_v2: hosted user {user_id:?} registered without a user index (node form, §3.2)"
+            );
+            return;
+        }
+
         let newly_bound = {
             let mut dict = self.user_dict.write().unwrap();
             if dict.idx_of(&user_id).is_some() {
