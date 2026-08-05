@@ -170,8 +170,12 @@ impl RouterV2State {
 
         match space {
             Space::Node => {
-                let mut nodes = self.nodes.write().unwrap();
-                match nodes.get(&mapping.target_id) {
+                // `Nodes::get` hands back a cloned Arc, so the map guard is
+                // released here. It must be: `maybe_request_manifest` reads
+                // `self.nodes`, and holding a write guard across that call
+                // deadlocks a std RwLock on the same thread.
+                let existing = self.nodes.read().unwrap().get(&mapping.target_id);
+                match existing {
                     Some(node) => {
                         let advertised = {
                             let n = node.read().unwrap();
@@ -207,8 +211,7 @@ impl RouterV2State {
                             learn_sphere: None,
                             manifest_log: ManifestLog::default(),
                         };
-                        nodes.insert(mapping.target_id, n);
-                        drop(nodes);
+                        self.nodes.write().unwrap().insert(mapping.target_id, n);
                         // new origin does not hold any state, so, we need to pull it since its version is fresher
                         self.maybe_request_manifest(neighbour, mapping.target_id, mapping.version);
                         return Ok(());
@@ -595,6 +598,65 @@ impl RouterV2State {
         }
     }
 
+    /// spec: 8.8 steps 5-6
+    fn refresh_delegation_trust(&self, origin_node_id: &[u8; 8], now: u64) {
+        let Some(node_arc) = self.nodes.read().unwrap().get(origin_node_id) else {
+            return;
+        };
+        let Some(host_mk) = self.get_resource_mk(origin_node_id, Space::Node) else {
+            return;
+        };
+
+        let (trusted, unverifiable): (Vec<[u8; 8]>, usize) = {
+            let node = node_arc.read().unwrap();
+            let mut trusted = Vec::new();
+            let mut unverifiable = 0usize;
+
+            for delegated in &node.delegated_users {
+                // 10.4: an expired delegation is never trusted.
+                if delegated.delegation_timeout <= now {
+                    continue;
+                }
+                let Some(user_mk) = self.get_resource_mk(&delegated.user_id, Space::User) else {
+                    // TODO(§11.5): fetch the subject's profile, then re-run this.
+                    unverifiable += 1;
+                    continue;
+                };
+                let entry = ManifestEntry {
+                    user_id: delegated.user_id,
+                    timeout: delegated.delegation_timeout,
+                    entry_signature: delegated.entry_signature,
+                    profile_version: delegated.profile_version,
+                };
+                if Manifest::verify_entry(&entry, &host_mk, &user_mk).is_ok() {
+                    trusted.push(delegated.user_id);
+                }
+            }
+            (trusted, unverifiable)
+        };
+
+        let weak_node = Arc::downgrade(&node_arc);
+        let users = self.users.read().unwrap();
+        for user_id in &trusted {
+            let Some(user_arc) = users.get(user_id) else {
+                continue;
+            };
+            let mut user = user_arc.write().unwrap();
+            user.delegation_gateways.retain(|w| {
+                w.upgrade()
+                    .map(|n| n.read().unwrap().id != *origin_node_id)
+                    .unwrap_or(false)
+            });
+            user.delegation_gateways.push(weak_node.clone());
+        }
+
+        info!(
+            "router_v2 TRUST origin={origin_node_id:?} trusted={} unverifiable={} (awaiting §11.5 profiles)",
+            trusted.len(),
+            unverifiable,
+        );
+    }
+
     fn delegated_users_from_entries(&self, entries: &[ManifestEntry]) -> Vec<DelegatedUser> {
         let mut users = self.users.write().unwrap();
         entries
@@ -630,7 +692,7 @@ impl RouterV2State {
 
     pub fn handle_node_manifest(
         &self,
-        mut msg: NodeManifest,
+        msg: NodeManifest,
         now: u64,
         transport: ConnectionModule,
     ) -> Result<()> {
@@ -651,20 +713,7 @@ impl RouterV2State {
             return Ok(());
         };
 
-        let mut filtered_entries = Vec::new();
-        for entry in msg.entries {
-            let Some(user_mk) = self.get_resource_mk(&entry.user_id, Space::User) else {
-                continue;
-            };
-
-            if Manifest::verify_entry(&entry, &host_mk, &user_mk).is_err() || entry.timeout <= now {
-                continue;
-            }
-
-            filtered_entries.push(entry);
-        }
-        msg.entries = filtered_entries;
-
+        // §8.8 step 5, byte-exact stored discipline
         let completed_manifest = {
             let mut assembler = self.chunk_assembler.write().unwrap();
             let Some(completed) = assembler.insert(origin_node_id, msg) else {
@@ -696,6 +745,9 @@ impl RouterV2State {
             node.manifest_log
                 .reset_to(completed_manifest.manifest_version);
         }
+        drop(nodes);
+
+        self.refresh_delegation_trust(&origin_node_id, now);
 
         Ok(())
     }
@@ -1080,9 +1132,11 @@ impl RouterV2State {
             msg.removes.len(),
         );
 
-        // Step 6: re-evaluate the trusted subset and schedule profile fetches.
-        // TODO(§11.5): needs the profile-fetch sub-protocol.
-        //
+        // Step 6: re-evaluate the trusted subset. Applies to this path exactly
+        // as it does to a full manifest — a delegation that arrives by delta
+        // must be able to become trusted too.
+        self.refresh_delegation_trust(&origin_node_id, now);
+
         // Step 7: the new committed version rides ordinary routing updates.
         // The delta is never relayed.
         Ok(())
