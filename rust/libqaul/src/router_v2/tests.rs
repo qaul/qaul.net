@@ -2467,16 +2467,17 @@ mod received {
         assert_eq!(state.users.read().unwrap().len(), 0);
     }
 
-    /// Message types with no handler yet (ManifestDelta, ManifestRequest)
-    /// must be skipped past — buf advances, next message still processes.
+    /// A body that fails to decode must not desync the frame loop: alignment
+    /// comes from the header's `payload_len`, which is consumed before the body
+    /// is parsed, so the next message still processes.
     #[test]
-    fn unimplemented_message_type_is_skipped_and_next_processed() {
+    fn undecodable_body_is_skipped_and_next_processed() {
         let (state, _rx) = fresh_state();
         let peer = setup_neighbour(&state);
         let target_id = [4; 8];
 
-        // Send a ManifestDelta with a small body, then a valid RoutingUpdate.
-        let delta_body = [0x00u8; 2]; // arbitrary bytes; payload isn't decoded
+        // A ManifestDelta too short to be a valid body, then a good update.
+        let delta_body = [0x00u8; 2];
         let mut bytes = frame(RoutingMessage::ManifestDelta, &delta_body);
         bytes.extend(frame_routing_update(&small_valid_update(target_id)));
 
@@ -2484,7 +2485,7 @@ mod received {
             .received(peer, ConnectionModule::Lan, None, &bytes, 1_000)
             .unwrap();
 
-        // The ManifestDelta was skipped, then the RoutingUpdate applied.
+        // The malformed delta was dropped, then the RoutingUpdate applied.
         assert!(state.users.read().unwrap().get(&target_id).is_some());
     }
 
