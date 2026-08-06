@@ -5150,3 +5150,648 @@ mod self_delegation {
         assert!(state.manifest.read().unwrap().entries().is_empty());
     }
 }
+
+// ---------- Phase 10: delta build primitives ----------
+
+mod delta_build {
+    use crate::router_v2::{
+        codec::messages::{ManifestDelta, ManifestEntry, NodeManifest},
+        identity::{delegation_signing_input, ChunkSigningCtx, Multikey},
+        manifest::{
+            canonical_entry_bytes, BuildError, DeltaHeader, LogRecord, Manifest, MAX_BODY,
+        },
+    };
+    use libp2p::identity::Keypair;
+
+    fn origin() -> (Keypair, Multikey) {
+        let kp = Keypair::generate_ed25519();
+        let mk = Multikey::from(kp.public());
+        (kp, mk)
+    }
+
+    /// A delegation entry genuinely signed by a fresh user for `host_mk`.
+    fn signed_entry(host_mk: &Multikey, timeout: u64, profile_version: u32) -> ManifestEntry {
+        let user_kp = Keypair::generate_ed25519();
+        let user_mk = Multikey::from(user_kp.public());
+        let signing_input = delegation_signing_input(&host_mk.encode(), timeout);
+        let sig: [u8; 64] = user_kp.sign(&signing_input).unwrap().try_into().unwrap();
+        ManifestEntry {
+            user_id: user_mk.to_id(),
+            timeout,
+            entry_signature: sig,
+            profile_version,
+        }
+    }
+
+    fn manifest_at(host_mk: &Multikey, version: u32, is_gateway: bool, n: usize) -> Manifest {
+        let mut m = Manifest::new();
+        m.manifest_version = version;
+        m.set_gateway(is_gateway);
+        m.set_entries(
+            (0..n)
+                .map(|i| signed_entry(host_mk, 9_000 + i as u64, i as u32))
+                .collect(),
+        );
+        m
+    }
+
+    /// Rebuilds a single-chunk NODE_MANIFEST around an already-stored
+    /// signature — no keys. This is the shape Phase 10 subtask 3's
+    /// `reconstruct_single_chunk_full` must produce, and the shape the
+    /// serve path must use instead of re-signing.
+    fn single_chunk_full(
+        origin_node_id: [u8; 8],
+        manifest_version: u32,
+        is_gateway: bool,
+        entries: &[ManifestEntry],
+        stored_signature: [u8; 64],
+    ) -> NodeManifest {
+        NodeManifest {
+            origin_node_id,
+            manifest_version,
+            chunk_index: 0,
+            chunk_count: 1,
+            flags: if is_gateway { 1 } else { 0 },
+            manifest_signature: stored_signature,
+            entries: entries.to_vec(),
+        }
+    }
+
+    /// Mirrors `handle_manifest_delta` step 4: the receiver verifies the
+    /// message signature against the canonical bytes of the *resulting*
+    /// state at `to_version`, not against anything in the delta itself.
+    fn delta_verifies(msg: &ManifestDelta, mk: &Multikey, resulting: &[ManifestEntry]) -> bool {
+        let bytes = canonical_entry_bytes(resulting);
+        let ctx = ChunkSigningCtx {
+            origin_multikey: &mk.encode(),
+            manifest_version: msg.to_version,
+            chunk_index: 0,
+            chunk_count: 1,
+            flags: msg.flags & 0x01,
+            canonical_entries: &bytes,
+        };
+        mk.verify(&ctx.signing_input(), &msg.manifest_signature)
+    }
+
+    fn adds_for(entries: &[ManifestEntry], record_version: u32) -> Vec<LogRecord> {
+        entries
+            .iter()
+            .map(|e| LogRecord::Add {
+                record_version,
+                entry: *e,
+            })
+            .collect()
+    }
+
+    #[test]
+    fn sign_state_round_trips_through_verify_chunk() {
+        let (kp, mk) = origin();
+        let manifest = manifest_at(&mk, 7, false, 3);
+
+        let sig = manifest.sign_state(&kp, &mk.encode()).unwrap();
+        let full = single_chunk_full(mk.to_id(), 7, false, manifest.entries(), sig);
+
+        assert!(Manifest::verify_chunk(&full, &mk).is_ok());
+    }
+
+    #[test]
+    fn sign_state_covers_the_gateway_flag() {
+        let (kp, mk) = origin();
+        let manifest = manifest_at(&mk, 7, true, 2);
+        let sig = manifest.sign_state(&kp, &mk.encode()).unwrap();
+
+        // Same entries, same version, flags flipped: must not verify.
+        let lying = single_chunk_full(mk.to_id(), 7, false, manifest.entries(), sig);
+        assert!(Manifest::verify_chunk(&lying, &mk).is_err());
+    }
+
+    #[test]
+    fn stored_signature_verifies_an_assembled_delta() {
+        let (kp, mk) = origin();
+        let manifest = manifest_at(&mk, 5, false, 3);
+        let sig = manifest.sign_state(&kp, &mk.encode()).unwrap();
+
+        let header = DeltaHeader {
+            origin_node_id: mk.to_id(),
+            from_version: 0,
+            to_version: 5,
+            is_gateway: false,
+            manifest_signature: sig,
+        };
+        let msg = header.assemble(adds_for(manifest.entries(), 5)).unwrap();
+
+        assert!(delta_verifies(&msg, &mk, manifest.entries()));
+    }
+
+    /// The property the whole sign-once/serve-many split rests on:
+    /// `from_version` is not signed content (§8.6), so one signature at
+    /// `to_version` serves a delta from *any* earlier base. This is what
+    /// lets a relay serve a foreign manifest without the origin's key.
+    #[test]
+    fn one_signature_serves_every_from_version() {
+        let (kp, mk) = origin();
+        let manifest = manifest_at(&mk, 9, true, 4);
+        let sig = manifest.sign_state(&kp, &mk.encode()).unwrap();
+
+        let mut seen = Vec::new();
+        for from in [0u32, 1, 5, 8] {
+            let header = DeltaHeader {
+                origin_node_id: mk.to_id(),
+                from_version: from,
+                to_version: 9,
+                is_gateway: true,
+                manifest_signature: sig,
+            };
+            let msg = header.assemble(adds_for(manifest.entries(), 9)).unwrap();
+
+            assert_eq!(msg.from_version, from);
+            assert_eq!(msg.manifest_signature, sig, "signature must not vary with from_version");
+            assert!(
+                delta_verifies(&msg, &mk, manifest.entries()),
+                "delta from {from} failed resulting-state verification"
+            );
+            seen.push(msg.manifest_signature);
+        }
+
+        // And the very same signature still verifies as a full manifest.
+        let full = single_chunk_full(mk.to_id(), 9, true, manifest.entries(), sig);
+        assert!(Manifest::verify_chunk(&full, &mk).is_ok());
+        assert!(seen.iter().all(|s| *s == sig));
+    }
+
+    #[test]
+    fn tampering_with_flags_breaks_delta_verification() {
+        let (kp, mk) = origin();
+        let manifest = manifest_at(&mk, 4, true, 2);
+        let sig = manifest.sign_state(&kp, &mk.encode()).unwrap();
+
+        let header = DeltaHeader {
+            origin_node_id: mk.to_id(),
+            from_version: 3,
+            to_version: 4,
+            is_gateway: true,
+            manifest_signature: sig,
+        };
+        let mut msg = header.assemble(adds_for(manifest.entries(), 4)).unwrap();
+        assert!(delta_verifies(&msg, &mk, manifest.entries()));
+
+        // Clearing the gateway bit in flight must be detected.
+        msg.flags = 0;
+        assert!(!delta_verifies(&msg, &mk, manifest.entries()));
+    }
+
+    #[test]
+    fn tampering_with_to_version_breaks_delta_verification() {
+        let (kp, mk) = origin();
+        let manifest = manifest_at(&mk, 4, false, 2);
+        let sig = manifest.sign_state(&kp, &mk.encode()).unwrap();
+
+        let header = DeltaHeader {
+            origin_node_id: mk.to_id(),
+            from_version: 3,
+            to_version: 4,
+            is_gateway: false,
+            manifest_signature: sig,
+        };
+        let mut msg = header.assemble(adds_for(manifest.entries(), 4)).unwrap();
+
+        msg.to_version = 5;
+        assert!(!delta_verifies(&msg, &mk, manifest.entries()));
+    }
+
+    /// A version bump that leaves the entry set untouched is legitimate,
+    /// and produces a delta with no records. The receiver's scratch set
+    /// equals its stored set, so the signature must still verify.
+    #[test]
+    fn empty_records_still_verify_when_the_state_did_not_change() {
+        let (kp, mk) = origin();
+        let manifest = manifest_at(&mk, 6, false, 2);
+        let sig = manifest.sign_state(&kp, &mk.encode()).unwrap();
+
+        let header = DeltaHeader {
+            origin_node_id: mk.to_id(),
+            from_version: 5,
+            to_version: 6,
+            is_gateway: false,
+            manifest_signature: sig,
+        };
+        let msg = header.assemble(Vec::new()).unwrap();
+
+        assert!(msg.adds.is_empty());
+        assert!(msg.removes.is_empty());
+        assert!(delta_verifies(&msg, &mk, manifest.entries()));
+    }
+
+    #[test]
+    fn assemble_splits_records_into_adds_and_removes() {
+        let (_, mk) = origin();
+        let kept = signed_entry(&mk, 9_000, 0);
+        let dropped_id = [7u8; 8];
+
+        let header = DeltaHeader {
+            origin_node_id: mk.to_id(),
+            from_version: 1,
+            to_version: 3,
+            is_gateway: false,
+            manifest_signature: [0u8; 64],
+        };
+        let msg = header
+            .assemble(vec![
+                LogRecord::Add {
+                    record_version: 2,
+                    entry: kept,
+                },
+                LogRecord::Tombstone {
+                    user_id: dropped_id,
+                    record_version: 3,
+                    created_ms: 1_000,
+                },
+            ])
+            .unwrap();
+
+        assert_eq!(msg.adds.len(), 1);
+        assert_eq!(msg.adds[0].record_version, 2);
+        assert_eq!(msg.adds[0].entry.user_id, kept.user_id);
+        assert_eq!(msg.removes.len(), 1);
+        assert_eq!(msg.removes[0].user_id, dropped_id);
+        assert_eq!(msg.removes[0].record_version, 3);
+    }
+
+    fn dummy_adds(n: u32) -> Vec<LogRecord> {
+        (0..n)
+            .map(|i| LogRecord::Add {
+                record_version: 1,
+                entry: ManifestEntry {
+                    user_id: (i as u64).to_be_bytes(),
+                    timeout: 0,
+                    entry_signature: [0u8; 64],
+                    profile_version: 0,
+                },
+            })
+            .collect()
+    }
+
+    fn dummy_header() -> DeltaHeader {
+        DeltaHeader {
+            origin_node_id: [1u8; 8],
+            from_version: 0,
+            to_version: 1,
+            is_gateway: false,
+            manifest_signature: [0u8; 64],
+        }
+    }
+
+    /// §8.6: a delta is never chunked, so an oversize range must be refused
+    /// here and served as a full NODE_MANIFEST instead. The check runs
+    /// before any encoding work.
+    #[test]
+    fn an_oversized_delta_is_refused_by_the_size_guard() {
+        // 88 bytes per add + 89 overhead: 700 adds clears the 60 KiB body.
+        let err = dummy_header().assemble(dummy_adds(700)).unwrap_err();
+        assert!(matches!(err, BuildError::WouldExceedSizeLimit));
+    }
+
+    /// Boundary: (61_440 - 89) / 88 = 697.16, so 697 adds fit and 698 do not.
+    #[test]
+    fn the_size_guard_admits_the_largest_delta_that_fits() {
+        let largest = dummy_header().assemble(dummy_adds(697)).unwrap();
+        let mut body = Vec::new();
+        largest.encode(&mut body).unwrap();
+        assert!(body.len() <= MAX_BODY, "697 adds encoded to {}", body.len());
+
+        assert!(matches!(
+            dummy_header().assemble(dummy_adds(698)).unwrap_err(),
+            BuildError::WouldExceedSizeLimit
+        ));
+    }
+
+    #[test]
+    fn a_modest_delta_body_stays_under_the_wire_cap() {
+        let (kp, mk) = origin();
+        let manifest = manifest_at(&mk, 2, false, 8);
+        let sig = manifest.sign_state(&kp, &mk.encode()).unwrap();
+
+        let header = DeltaHeader {
+            origin_node_id: mk.to_id(),
+            from_version: 1,
+            to_version: 2,
+            is_gateway: false,
+            manifest_signature: sig,
+        };
+        let msg = header.assemble(adds_for(manifest.entries(), 2)).unwrap();
+
+        let mut body = Vec::new();
+        msg.encode(&mut body).unwrap();
+        assert!(body.len() < MAX_BODY);
+    }
+}
+
+// ---------- Phase 10: regression proofs for the two bugs fixed ----------
+//
+// These do not test the new code paths so much as *demonstrate the defects
+// they replaced*. Each asserts both the fixed behaviour and the exact wrong
+// answer the old code produced, so the tests fail loudly if either fix is
+// reverted or quietly weakened.
+
+mod phase10_regressions {
+    use crate::router_v2::{
+        codec::messages::{ManifestEntry, ManifestRequestItem},
+        identity::{ChunkSigningCtx, SelfDelegation},
+        manifest::{
+            canonical_entry_bytes, decide_serve, OriginServeState, ServeDecision,
+        },
+        test_utils::*,
+        BumpTrigger, Sphere,
+    };
+    use crate::storage::manifest_state::{DelegationEntry, HostManifestState};
+
+    fn delegation(timeout: u64, marker: u8) -> SelfDelegation {
+        SelfDelegation {
+            timeout,
+            entry_signature: [marker; 64],
+        }
+    }
+
+    /// Verifies a whole-state signature the way `handle_manifest_delta` and
+    /// `verify_chunk` both do: over the canonical entry bytes at a claimed
+    /// version, chunk 0 of 1.
+    fn verifies_as_state_at(
+        state: &crate::router_v2::RouterV2State,
+        signature: &[u8; 64],
+        entries: &[ManifestEntry],
+        version: u32,
+        is_gateway: bool,
+    ) -> bool {
+        let bytes = canonical_entry_bytes(entries);
+        let ctx = ChunkSigningCtx {
+            origin_multikey: &state.host_mk.encode(),
+            manifest_version: version,
+            chunk_index: 0,
+            chunk_count: 1,
+            flags: if is_gateway { 1 } else { 0 },
+            canonical_entries: &bytes,
+        };
+        state.host_mk.verify(&ctx.signing_input(), signature)
+    }
+
+    /// THE BUG STEP 3 FIXES.
+    ///
+    /// `add_self_delegation` mutates the entry set immediately and only marks
+    /// the user dirty; the version bump that commits it is rate-limited to
+    /// once per 60 s (§10.8). So between bumps the entry set is *ahead* of
+    /// `manifest_version`. Signing at serve time — as `serve_delta` and
+    /// `serve_full_manifest` both used to — therefore signs uncommitted
+    /// state under the committed version number we advertise, and a receiver
+    /// commits state the origin never committed at that version.
+    #[test]
+    fn signing_at_serve_time_would_cover_uncommitted_state() {
+        let (state, _rx) = fresh_state();
+
+        // Commit one delegation at v1.
+        state.add_self_delegation([1u8; 8], 0, delegation(9_000, 0xA1));
+        let v1 = state
+            .try_bump_manifest_version(1_000_000, BumpTrigger::Accumulated)
+            .expect("first bump");
+
+        let (cached_at_v1, entries_at_v1) = {
+            let m = state.manifest.read().unwrap();
+            (m.manifest_signature.unwrap(), m.entries().to_vec())
+        };
+        assert_eq!(entries_at_v1.len(), 1);
+
+        // A second delegation lands 500 ms later. The entry set changes
+        // immediately, but the 60 s rate limit blocks the bump.
+        state.add_self_delegation([2u8; 8], 0, delegation(9_000, 0xB2));
+        assert!(
+            state
+                .try_bump_manifest_version(1_000_500, BumpTrigger::Accumulated)
+                .is_none(),
+            "§10.8 rate limit should suppress a bump 500ms after the last"
+        );
+
+        let m = state.manifest.read().unwrap();
+
+        // The divergence that makes serve-time signing unsound.
+        assert_eq!(m.manifest_version, v1, "still advertising v1");
+        assert_eq!(m.entries().len(), 2, "but the entry set already moved on");
+
+        // What the old serve path computed, on demand, from current state.
+        let serve_time_sig = m
+            .sign_state(&state.host_keypair, &state.host_mk.encode())
+            .unwrap();
+
+        assert_ne!(
+            serve_time_sig, cached_at_v1,
+            "serve-time signature differs from the committed one — this is the bug"
+        );
+
+        // The cached signature is the correct one for the version we
+        // advertise; the serve-time one is not.
+        assert!(
+            verifies_as_state_at(&state, &cached_at_v1, &entries_at_v1, v1, false),
+            "cached signature must verify against the state committed at v1"
+        );
+        assert!(
+            !verifies_as_state_at(&state, &serve_time_sig, &entries_at_v1, v1, false),
+            "serve-time signature must NOT verify against v1's committed state"
+        );
+
+        // And it is not salvageable by claiming the next version either:
+        // nothing has committed v1+1, so no receiver would accept it.
+        assert!(
+            !verifies_as_state_at(&state, &serve_time_sig, &entries_at_v1, v1 + 1, false),
+            "serve-time signature covers neither the committed nor any advertised version"
+        );
+    }
+
+    /// The other half: after the fix the cached signature survives a
+    /// subsequent bump correctly — it tracks the new committed state, not
+    /// the stale one.
+    #[test]
+    fn the_cached_signature_follows_each_commit() {
+        let (state, _rx) = fresh_state();
+
+        state.add_self_delegation([1u8; 8], 0, delegation(9_000, 0xA1));
+        let v1 = state
+            .try_bump_manifest_version(1_000_000, BumpTrigger::Accumulated)
+            .unwrap();
+        let sig_v1 = state.manifest.read().unwrap().manifest_signature.unwrap();
+
+        // Past the 60 s window, so this one commits.
+        state.add_self_delegation([2u8; 8], 0, delegation(9_000, 0xB2));
+        let v2 = state
+            .try_bump_manifest_version(1_070_000, BumpTrigger::Accumulated)
+            .expect("bump past the rate-limit window");
+        assert_eq!(v2, v1 + 1);
+
+        let m = state.manifest.read().unwrap();
+        let sig_v2 = m.manifest_signature.unwrap();
+        assert_ne!(sig_v1, sig_v2);
+        assert!(
+            verifies_as_state_at(&state, &sig_v2, m.entries(), v2, false),
+            "cached signature must cover the newly committed state"
+        );
+    }
+
+    /// End-to-end proof for Step 3: drive a real MANIFEST_REQUEST through
+    /// `handle_manifest_request` and check the emitted MANIFEST_DELTA the way
+    /// a receiver does — apply the records to the state at `from_version`,
+    /// then verify the signature over the resulting state at `to_version`.
+    ///
+    /// With serve-time signing this fails: the signature covers whatever the
+    /// entry set happens to be at serve time, not the committed state at
+    /// `to_version`.
+    #[test]
+    fn a_served_delta_verifies_against_the_state_it_claims_to_produce() {
+        use crate::connections::ConnectionModule;
+        use crate::router_v2::codec::{
+            messages::{ManifestDelta, ManifestRequest},
+            Header, RoutingMessage,
+        };
+
+        let (state, mut rx) = fresh_state();
+        let peer = fresh_peer();
+        state.add_neighbour_transport(peer, [7u8; 8], ConnectionModule::Lan);
+
+        // Commit two versions so a ranged delta (1 -> 2) is servable.
+        state.add_self_delegation([1u8; 8], 0, delegation(9_000, 0xA1));
+        state
+            .try_bump_manifest_version(1_000_000, BumpTrigger::Accumulated)
+            .unwrap();
+        state.add_self_delegation([2u8; 8], 0, delegation(9_000, 0xB2));
+        let v2 = state
+            .try_bump_manifest_version(1_070_000, BumpTrigger::Accumulated)
+            .unwrap();
+
+        let entries_at_v2 = state.manifest.read().unwrap().entries().to_vec();
+        assert_eq!(entries_at_v2.len(), 2);
+
+        // A third delegation lands but cannot commit — the rate limit holds.
+        // The entry set is now ahead of the version we still advertise.
+        state.add_self_delegation([3u8; 8], 0, delegation(9_000, 0xC3));
+        assert!(state
+            .try_bump_manifest_version(1_070_500, BumpTrigger::Accumulated)
+            .is_none());
+        assert_eq!(state.manifest.read().unwrap().entries().len(), 3);
+        assert_eq!(state.manifest.read().unwrap().manifest_version, v2);
+
+        // Serve a request from a neighbour sitting at version 1.
+        let req = ManifestRequest {
+            items: vec![ManifestRequestItem {
+                origin_node_id: state.host_mk.to_id(),
+                have_version: 1,
+                item_flags: 0x00,
+            }],
+        };
+        state
+            .handle_manifest_request(peer, ConnectionModule::Lan, req, 1_070_500)
+            .unwrap();
+
+        let out = rx.try_recv().expect("a response should have been emitted");
+        let (header, body) = Header::decode(&out.bytes).unwrap();
+        assert_eq!(header.message_type, RoutingMessage::ManifestDelta);
+        let delta = ManifestDelta::decode(body).unwrap();
+
+        assert_eq!(delta.from_version, 1);
+        assert_eq!(delta.to_version, v2);
+
+        // Replay the receiver: state at from_version, apply, then verify.
+        let mut scratch: Vec<ManifestEntry> = entries_at_v2
+            .iter()
+            .copied()
+            .filter(|e| e.user_id == [1u8; 8])
+            .collect();
+        for r in &delta.removes {
+            scratch.retain(|e| e.user_id != r.user_id);
+        }
+        for a in &delta.adds {
+            match scratch.binary_search_by(|e| e.user_id.cmp(&a.entry.user_id)) {
+                Ok(i) => scratch[i] = a.entry,
+                Err(i) => scratch.insert(i, a.entry),
+            }
+        }
+        let ids = |v: &[ManifestEntry]| v.iter().map(|e| e.user_id).collect::<Vec<_>>();
+        assert_eq!(
+            ids(&scratch),
+            ids(&entries_at_v2),
+            "delta must reproduce v2's entry set"
+        );
+
+        assert!(
+            verifies_as_state_at(&state, &delta.manifest_signature, &scratch, v2, false),
+            "the served delta must verify against the state it claims to produce"
+        );
+    }
+
+    /// THE BUG STEP 1 FIXES.
+    ///
+    /// §10.9: the delta log is not persisted, so on restart `log_base` must
+    /// be set to the committed version. Left at 0, `decide_serve` picks the
+    /// delta branch for any requester below the committed version — and
+    /// serves a delta assembled from an empty log, which cannot verify.
+    #[test]
+    fn after_restart_a_stale_requester_gets_a_full_manifest_not_an_empty_delta() {
+        let (state, _rx) = fresh_state();
+
+        let persisted = HostManifestState {
+            manifest_version: 5,
+            is_gateway: false,
+            entries: vec![DelegationEntry {
+                user_id: [9u8; 8],
+                timeout: 9_000,
+                entry_signature: vec![0xC3; 64],
+                profile_version: 0,
+            }],
+            last_bump_ms_reserved: None,
+        };
+        state.restore_host_manifest(&persisted);
+
+        let log_base = state.own_manifest_log.read().unwrap().log_base;
+        assert_eq!(log_base, 5, "§10.9 restart: log_base tracks committed");
+
+        // Restore must also leave the origin able to serve at all.
+        assert!(
+            state.manifest.read().unwrap().manifest_signature.is_some(),
+            "a restored origin must be servable without waiting for a bump"
+        );
+
+        // A neighbour two versions behind.
+        let item = ManifestRequestItem {
+            origin_node_id: state.host_mk.to_id(),
+            have_version: 3,
+            item_flags: 0x00,
+        };
+
+        let fixed = OriginServeState {
+            committed: 5,
+            log_base,
+            learn_sphere: None,
+        };
+        assert_eq!(
+            decide_serve(&item, &fixed, Sphere::Local),
+            ServeDecision::Full,
+            "history before the restart is unknown, so only a full manifest is honest"
+        );
+
+        // The counterfactual: log_base left at 0, as before the fix.
+        let broken = OriginServeState {
+            committed: 5,
+            log_base: 0,
+            learn_sphere: None,
+        };
+        assert_eq!(
+            decide_serve(&item, &broken, Sphere::Local),
+            ServeDecision::Delta { from_version: 3 },
+            "the old state chose a delta ..."
+        );
+        assert!(
+            state
+                .own_manifest_log
+                .read()
+                .unwrap()
+                .records_after(3)
+                .is_empty(),
+            "... assembled from a log with no records — a 3→5 delta claiming no changes"
+        );
+    }
+}
