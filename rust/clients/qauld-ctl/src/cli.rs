@@ -533,6 +533,21 @@ pub enum GroupSubcmd {
         #[arg(short, long)]
         name: String,
     },
+    /// show the derived CRDT membership/metadata view of a group
+    CrdtView {
+        /// the group id
+        #[arg(short, long)]
+        group_id: String,
+    },
+    /// compact a group's CRDT op history (admin; collapses tombstones)
+    CrdtCompact {
+        /// the group id
+        #[arg(short, long)]
+        group_id: String,
+        /// collapse ops below this lamport (0 = current max lamport)
+        #[arg(short, long, default_value_t = 0)]
+        below: u64,
+    },
 }
 
 #[derive(Args, Debug)]

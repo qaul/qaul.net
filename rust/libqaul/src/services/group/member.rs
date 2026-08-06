@@ -123,6 +123,7 @@ impl Member {
                         created_at: group.created_at,
                         revision: group.revision,
                         members,
+                        founder: group.founder.clone(),
                     }),
                 },
             )),
@@ -320,6 +321,8 @@ impl Member {
         group.created_at = group_info.created_at;
         group.status = super::proto_rpc::GroupStatus::InviteAccepted as i32;
         group.revision = group_info.revision;
+        // learn the founder so this invitee can derive the membership CRDT
+        group.founder = group_info.founder.clone();
 
         let invited = super::GroupInvited {
             sender_id: sender_id.to_bytes(),
