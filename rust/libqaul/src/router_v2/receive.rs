@@ -13,8 +13,8 @@ use crate::{
     router_v2::{
         codec::{
             messages::{
-                IndexDump, ManifestDelta, ManifestEntry, ManifestRequest, Mapping, NodeEntry,
-                NodeManifest, RoutingUpdate, UserEntry,
+                IndexDump, ManifestDelta, ManifestEntry, ManifestRequest, ManifestRequestItem,
+                Mapping, NodeEntry, NodeManifest, RoutingUpdate, UserEntry,
             },
             CodecError, Header, RoutingMessage,
         },
@@ -556,7 +556,7 @@ impl RouterV2State {
                 },
                 RoutingMessage::ManifestDelta => match ManifestDelta::decode(payload) {
                     Ok(msg) => {
-                        if let Err(e) = self.handle_manifest_delta(msg, now, transport) {
+                        if let Err(e) = self.handle_manifest_delta(neighbour, msg, now, transport) {
                             error!("handle_manifest_delta failed: {e}");
                         }
                     }
@@ -1038,6 +1038,7 @@ impl RouterV2State {
 
     pub fn handle_manifest_delta(
         &self,
+        neighbour: PeerId,
         msg: ManifestDelta,
         now: u64,
         transport: ConnectionModule,
@@ -1106,8 +1107,7 @@ impl RouterV2State {
             warn!(
                 "manifest_delta from {origin_node_id:?} failed resulting-state verification; discarding scratch"
             );
-            // TODO(§10.8): re-request a full manifest with have_none = 1 — the
-            // delta path is presumed poisoned. Needs the request machinery.
+            self.request_full_manifest(neighbour, origin_node_id, now);
             return Ok(());
         }
 
@@ -1151,6 +1151,33 @@ impl RouterV2State {
         // Step 7: the new committed version rides ordinary routing updates.
         // The delta is never relayed.
         Ok(())
+    }
+
+    /// per 8.8: sends a single MANIFEST_REQUEST setting have_none = 1 to trigger a full MANIFEST_NODE.
+    fn request_full_manifest(&self, neighbour: PeerId, origin_node_id: [u8; 8], now: u64) {
+        if !self.allow_manifest_request(neighbour, now) {
+            debug!(
+                "full re-request for {origin_node_id:?} suppressed by request rate limit; \
+                 re-advertisement will retrigger"
+            );
+            return;
+        }
+
+        self.outstanding_manifest_requests
+            .write()
+            .unwrap()
+            .insert((origin_node_id, neighbour), now);
+
+        self.send_manifest_request(
+            neighbour,
+            ManifestRequest {
+                items: vec![ManifestRequestItem {
+                    origin_node_id,
+                    have_version: 0,
+                    item_flags: 0x01,
+                }],
+            },
+        );
     }
 
     pub fn handle_index_dump(&self, neighbour: PeerId, msg: IndexDump) -> Result<()> {
