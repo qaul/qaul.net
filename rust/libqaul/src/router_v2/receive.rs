@@ -21,8 +21,8 @@ use crate::{
         identity::{ChunkSigningCtx, Multikey},
         index::Space,
         manifest::{
-            canonical_entry_bytes, decide_serve, DeltaHeader, Manifest, ManifestLog,
-            OriginServeState, ServeDecision, MAX_BODY,
+            canonical_entry_bytes, decide_serve, reconstruct_single_chunk_full, DeltaHeader,
+            Manifest, ManifestLog, OriginServeState, ServeDecision,
         },
         metric::hop_cost,
         seq::{is_fresher_u32, Acceptance, SeqNum},
@@ -564,7 +564,8 @@ impl RouterV2State {
                 },
                 RoutingMessage::ManifestRequest => match ManifestRequest::decode(payload) {
                     Ok(msg) => {
-                        if let Err(e) = self.handle_manifest_request(neighbour, transport, msg) {
+                        if let Err(e) = self.handle_manifest_request(neighbour, transport, msg, now)
+                        {
                             error!("handle_manifest_request failed: {e}");
                         }
                     }
@@ -823,12 +824,11 @@ impl RouterV2State {
         neighbour: PeerId,
         transport: ConnectionModule,
         msg: ManifestRequest,
+        now: u64,
     ) -> Result<()> {
         let host_node_id = self.host_mk.to_id();
         let requester_sphere = Sphere::of(transport);
 
-        // TODO(§14): cap responses at `manifest_serve_rate` per second per
-        // neighbour; excess items are ignored and the requester retries.
         for item in &msg.items {
             let origin_node_id = item.origin_node_id;
             let is_own = origin_node_id == host_node_id;
@@ -850,6 +850,13 @@ impl RouterV2State {
 
             match decision {
                 ServeDecision::Sealed | ServeDecision::Nothing => {}
+                ServeDecision::Full | ServeDecision::Delta { .. }
+                    if !self.allow_manifest_serve(neighbour, now) =>
+                {
+                    debug!(
+                        "manifest_request: serve rate limit reached for peer={neighbour}, ignoring item for origin {origin_node_id:?}"
+                    );
+                }
                 ServeDecision::Full => {
                     self.serve_full_manifest(neighbour, transport, origin_node_id, is_own)
                 }
@@ -898,16 +905,21 @@ impl RouterV2State {
         is_own: bool,
     ) {
         let chunks: Vec<NodeManifest> = if is_own {
-            match self.manifest.read().unwrap().build_chunks(
-                origin_node_id,
-                &self.host_keypair,
-                &self.host_mk.encode(),
-            ) {
-                Ok(c) => c,
-                Err(e) => {
-                    error!("serve_full: building own manifest chunks failed: {e}");
-                    return;
-                }
+            let manifest = self.manifest.read().unwrap();
+
+            if let Some(retained) = &manifest.retained_chunks {
+                retained.clone()
+            } else if let Some(signature) = manifest.manifest_signature {
+                vec![reconstruct_single_chunk_full(
+                    origin_node_id,
+                    manifest.manifest_version,
+                    manifest.is_gateway,
+                    manifest.entries().to_vec(),
+                    signature,
+                )]
+            } else {
+                debug!("serve_full: own manifest not signed yet, cannot serve");
+                return;
             }
         } else {
             let Some(node_arc) = self.nodes.read().unwrap().get(&origin_node_id) else {
@@ -918,15 +930,11 @@ impl RouterV2State {
             if let Some(retained) = &node.retained_chunks {
                 retained.clone()
             } else if let Some(signature) = node.manifest_signature {
-                vec![NodeManifest {
+                vec![reconstruct_single_chunk_full(
                     origin_node_id,
-                    manifest_version: node.manifest_version,
-                    chunk_index: 0,
-                    chunk_count: 1,
-                    flags: if node.is_gateway { 1 } else { 0 },
-                    manifest_signature: signature,
-                    entries: node
-                        .delegated_users
+                    node.manifest_version,
+                    node.is_gateway,
+                    node.delegated_users
                         .iter()
                         .map(|d| ManifestEntry {
                             user_id: d.user_id,
@@ -935,7 +943,8 @@ impl RouterV2State {
                             profile_version: d.profile_version,
                         })
                         .collect(),
-                }]
+                    signature,
+                )]
             } else {
                 debug!("serve_full: no signed bytes retained for {origin_node_id:?}, cannot serve");
                 return;
@@ -963,12 +972,12 @@ impl RouterV2State {
     ) {
         let assembled = if is_own {
             let manifest = self.manifest.read().unwrap();
-            let signature = match manifest.sign_state(&self.host_keypair, &self.host_mk.encode()) {
-                Ok(sig) => sig,
-                Err(e) => {
-                    error!("serve_delta: signing own resulting state failed: {e}");
-                    return;
-                }
+            // Cached at bump time, never computed here — see serve_full.
+            let Some(signature) = manifest.manifest_signature else {
+                debug!("serve_delta: own manifest not signed yet, serving full");
+                drop(manifest);
+                self.serve_full_manifest(neighbour, transport, origin_node_id, true);
+                return;
             };
             let header = DeltaHeader {
                 origin_node_id,
@@ -1007,18 +1016,20 @@ impl RouterV2State {
             header.assemble(records)
         };
 
+        // §8.6: a delta is never chunked, so an oversize range becomes a
+        // full manifest
+        let assembled = match assembled {
+            Ok(msg) => msg,
+            Err(e) => {
+                debug!("serve_delta: {e} for {origin_node_id:?}");
+                self.serve_full_manifest(neighbour, transport, origin_node_id, is_own);
+                return;
+            }
+        };
+
         let mut body = Vec::new();
         if let Err(e) = assembled.encode(&mut body) {
             error!("serve_delta: encode failed for {origin_node_id:?}: {e}");
-            return;
-        }
-
-        if body.len() > MAX_BODY {
-            debug!(
-                "serve_delta: body {} bytes exceeds cap, falling back to full",
-                body.len()
-            );
-            self.serve_full_manifest(neighbour, transport, origin_node_id, is_own);
             return;
         }
 
