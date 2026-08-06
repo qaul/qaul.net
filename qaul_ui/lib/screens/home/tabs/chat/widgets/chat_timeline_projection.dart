@@ -93,15 +93,21 @@ ChatTimelineProjection? buildChatTimelineProjection({
   };
 
   final internalMessages = <types.Message>[];
-  final textMessages = <Message>[];
+  final bubbleBaseById = <String, QaulChatBubbleMessage>{};
 
   for (final m in domainMessages) {
     final author = resolveAuthor(m, l10n);
     final internal = m.toInternalMessage(author, ref, l10n: l10n, room: room);
 
+    final bubbleBase = _qaulBubbleBaseForMessage(m, signedInUser);
     if (m.content is TextMessageContent && internal is types.TextMessage) {
       internalMessages.add(internal.copyWith(status: null, showStatus: false));
-      textMessages.add(m);
+      bubbleBaseById[m.messageIdBase58] = bubbleBase!;
+    } else if (m.content is FileShareContent) {
+      internalMessages.add(_withoutLegacyStatus(internal));
+      if (bubbleBase != null) {
+        bubbleBaseById[m.messageIdBase58] = bubbleBase;
+      }
     } else {
       internalMessages.add(internal);
     }
@@ -113,35 +119,6 @@ ChatTimelineProjection? buildChatTimelineProjection({
         _duplicateUsernameSystemMessage(notification, l10n: l10n),
       );
     }
-  }
-
-  final bubbleMessages = <QaulChatBubbleMessage>[];
-  final bubbleIds = <String>[];
-
-  for (final m in textMessages) {
-    final isMe = m.senderId.equals(signedInUser.id);
-    bubbleMessages.add(
-      QaulChatBubbleMessage(
-        content: (m.content as TextMessageContent).content,
-        sentAt: m.sentAt,
-        receivedAt: m.receivedAt,
-        status: m.status == MessageState.sent
-            ? MessageStatus.sent
-            : (m.status == MessageState.confirmed ||
-                      m.status == MessageState.confirmedByAll
-                  ? MessageStatus.read
-                  : MessageStatus.notSent),
-        messageType: isMe ? MessageType.primary : MessageType.secondary,
-        edges: const [],
-        senderIdBase58: m.senderIdBase58,
-      ),
-    );
-    bubbleIds.add(m.messageIdBase58);
-  }
-
-  final bubbleBaseById = <String, QaulChatBubbleMessage>{};
-  for (var i = 0; i < bubbleIds.length; i++) {
-    bubbleBaseById[bubbleIds[i]] = bubbleMessages[i];
   }
 
   final ascendingRows = <ChatTimelinePresentationRow>[
@@ -189,6 +166,92 @@ ChatTimelineProjection? buildChatTimelineProjection({
     internalMessages: internalMessages,
     presentations: presentations,
   );
+}
+
+QaulChatBubbleMessage? _qaulBubbleBaseForMessage(
+  Message message,
+  User signedInUser,
+) {
+  final content = message.content;
+  if (content is! TextMessageContent && content is! FileShareContent) {
+    return null;
+  }
+
+  return QaulChatBubbleMessage(
+    content: content is TextMessageContent ? content.content : '',
+    sentAt: message.sentAt,
+    receivedAt: message.receivedAt,
+    status: message.status == MessageState.sent
+        ? MessageStatus.sent
+        : (message.status == MessageState.confirmed ||
+                  message.status == MessageState.confirmedByAll
+              ? MessageStatus.read
+              : MessageStatus.notSent),
+    messageType: message.senderId.equals(signedInUser.id)
+        ? MessageType.primary
+        : MessageType.secondary,
+    edges: const [],
+    senderIdBase58: message.senderIdBase58,
+  );
+}
+
+types.Message _withoutLegacyStatus(types.Message message) {
+  if (message is types.ImageMessage) {
+    return types.ImageMessage(
+      author: message.author,
+      createdAt: message.createdAt,
+      height: message.height,
+      id: message.id,
+      metadata: message.metadata,
+      name: message.name,
+      remoteId: message.remoteId,
+      repliedMessage: message.repliedMessage,
+      roomId: message.roomId,
+      showStatus: false,
+      size: message.size,
+      uri: message.uri,
+      width: message.width,
+    );
+  }
+
+  if (message is types.AudioMessage) {
+    return types.AudioMessage(
+      author: message.author,
+      createdAt: message.createdAt,
+      duration: message.duration,
+      id: message.id,
+      metadata: message.metadata,
+      mimeType: message.mimeType,
+      name: message.name,
+      remoteId: message.remoteId,
+      repliedMessage: message.repliedMessage,
+      roomId: message.roomId,
+      showStatus: false,
+      size: message.size,
+      uri: message.uri,
+      waveForm: message.waveForm,
+    );
+  }
+
+  if (message is types.FileMessage) {
+    return types.FileMessage(
+      author: message.author,
+      createdAt: message.createdAt,
+      id: message.id,
+      isLoading: message.isLoading,
+      metadata: message.metadata,
+      mimeType: message.mimeType,
+      name: message.name,
+      remoteId: message.remoteId,
+      repliedMessage: message.repliedMessage,
+      roomId: message.roomId,
+      showStatus: false,
+      size: message.size,
+      uri: message.uri,
+    );
+  }
+
+  return message;
 }
 
 /// Maps the room's members and join events onto the pure domain snapshots and

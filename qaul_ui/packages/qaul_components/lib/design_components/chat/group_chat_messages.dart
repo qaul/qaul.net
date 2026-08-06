@@ -92,6 +92,44 @@ class ChatMessageRenderer {
       child: child,
     );
   }
+
+  static Widget renderMedia({
+    required Widget child,
+    required MessagePresentation presentation,
+    required ChatRenderMode mode,
+    required DateTime clock,
+    bool isSelected = false,
+  }) {
+    final display = presentation.bubbleDisplay;
+    if (display == null) return child;
+
+    final mediaBubble = QaulChatBubble.media(
+      message: display.message,
+      clock: clock,
+      showTimestamp: presentation.meta.showTimestamp,
+      isSelected: isSelected,
+      child: child,
+    );
+
+    if (mode != ChatRenderMode.group || presentation.isPrimary) {
+      return Padding(
+        padding: EdgeInsetsDirectional.only(
+          top: presentation.meta.topSpacing,
+          end: presentation.isPrimary ? 16 : 0,
+          start: presentation.isPrimary ? 0 : 16,
+        ),
+        child: mediaBubble,
+      );
+    }
+
+    return GroupMessageShell(
+      marginTop: presentation.meta.topSpacing,
+      sender: presentation.sender,
+      showSenderName: presentation.meta.showSenderName,
+      showSenderAvatar: presentation.meta.showAvatar,
+      child: mediaBubble,
+    );
+  }
 }
 
 class DirectTextMessageItem extends StatelessWidget {

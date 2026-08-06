@@ -231,6 +231,24 @@ class QaulChatBubble extends StatelessWidget {
     }
   }
 
+  static Widget media({
+    Key? key,
+    required QaulChatBubbleMessage message,
+    required DateTime clock,
+    required Widget child,
+    bool showTimestamp = true,
+    bool isSelected = false,
+  }) {
+    return _QaulChatBubbleSurface(
+      key: key,
+      message: message,
+      clock: clock,
+      showTimestamp: showTimestamp,
+      isSelected: isSelected,
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isPrimary = message.messageType == MessageType.primary;
@@ -483,6 +501,134 @@ class QaulChatBubble extends StatelessWidget {
                   );
                 },
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _QaulChatBubbleSurface extends StatelessWidget {
+  const _QaulChatBubbleSurface({
+    super.key,
+    required this.message,
+    required this.clock,
+    required this.child,
+    required this.showTimestamp,
+    required this.isSelected,
+  });
+
+  final QaulChatBubbleMessage message;
+  final DateTime clock;
+  final Widget child;
+  final bool showTimestamp;
+  final bool isSelected;
+
+  Widget? _buildStatusIcon(Color textColor, double iconSize) {
+    switch (message.status) {
+      case MessageStatus.notSent:
+        return null;
+
+      case MessageStatus.sent:
+        return Icon(
+          Icons.check,
+          size: iconSize,
+          color: textColor.withValues(alpha: 0.8),
+        );
+
+      case MessageStatus.read:
+        return Icon(
+          Icons.done_all,
+          size: iconSize,
+          color: textColor.withValues(alpha: 0.9),
+        );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isPrimary = message.messageType == MessageType.primary;
+    final sheet = QaulColorSheet(Theme.of(context).brightness);
+    final width = MediaQuery.sizeOf(context).width;
+    final isMobile = width < kChatBubbleWidthBreakpoint;
+    final maxBubbleWidth = isMobile
+        ? ChatBubbleStyle.maxBubbleWidthMobile
+        : ChatBubbleStyle.maxBubbleWidthExtended;
+    const textColor = Colors.white;
+    final backgroundColor = isPrimary
+        ? ChatBubbleStyle.primaryColor
+        : ChatBubbleStyle.secondaryColor;
+    final edges = message.edges.toSet();
+    final borderRadius = BorderRadiusDirectional.only(
+      topStart: edges.contains(TailEdge.topStart)
+          ? Radius.zero
+          : ChatBubbleStyle.radius,
+      topEnd: edges.contains(TailEdge.topEnd)
+          ? Radius.zero
+          : ChatBubbleStyle.radius,
+      bottomStart: edges.contains(TailEdge.bottomStart)
+          ? Radius.zero
+          : ChatBubbleStyle.radius,
+      bottomEnd: edges.contains(TailEdge.bottomEnd)
+          ? Radius.zero
+          : ChatBubbleStyle.radius,
+    );
+
+    final textScaler = chatBubbleTextScaler(context);
+    final statusIconSize = textScaler.scale(14);
+    final statusIcon = _buildStatusIcon(textColor, statusIconSize);
+    final timeLabel = formatQaulChatBubbleTime(message, clock);
+
+    final timeRow = Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Text(
+          timeLabel,
+          style: ChatBubbleStyle.timeStyle,
+          textScaler: textScaler,
+        ),
+        const SizedBox(width: ChatBubbleStyle.gapBetweenTimeAndStatusIcon),
+        if (isPrimary && statusIcon != null) statusIcon,
+      ],
+    );
+
+    return Align(
+      alignment: isPrimary ? Alignment.centerRight : Alignment.centerLeft,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: ChatBubbleStyle.minBubbleWidth,
+          maxWidth: maxBubbleWidth,
+        ),
+        child: DecoratedBox(
+          key: const ValueKey('chat-bubble-surface'),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: borderRadius,
+            border: isSelected
+                ? Border.all(
+                    color: sheet.chatBubbleSelectionOutline,
+                    width: ChatBubbleStyle.selectedOutlineWidth,
+                  )
+                : null,
+          ),
+          child: ClipRRect(
+            borderRadius: borderRadius.resolve(Directionality.of(context)),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                child,
+                if (showTimestamp)
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(10, 4, 10, 6),
+                    child: Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: timeRow,
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
