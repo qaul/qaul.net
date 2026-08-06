@@ -7,6 +7,19 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 void main() {
   final conversationId = Uint8List.fromList('room1'.codeUnits);
 
+  Uint8List peerIdWithQ8id(List<int> q8id) {
+    return Uint8List.fromList([
+      0,
+      36,
+      8,
+      1,
+      18,
+      32,
+      ...q8id,
+      ...List<int>.filled(24, 7),
+    ]);
+  }
+
   Message message(int index) => Message(
         senderId: Uint8List.fromList('sender'.codeUnits),
         messageId: Uint8List.fromList('msg$index'.codeUnits),
@@ -26,6 +39,47 @@ void main() {
         messages: messages,
         lastMessageIndex: lastMessageIndex,
       );
+
+  group('ChatRoom.blank direct chat ids', () {
+    test('builds the direct conversation id from the active local user', () {
+      final localUser = User(
+        name: 'Local',
+        id: peerIdWithQ8id([8, 7, 6, 5, 4, 3, 2, 1]),
+      );
+      final otherUser = User(
+        name: 'Other',
+        id: peerIdWithQ8id([1, 2, 3, 4, 5, 6, 7, 8]),
+        conversationId: Uint8List.fromList(List<int>.filled(16, 99)),
+      );
+
+      final draft = ChatRoom.blank(otherUser: otherUser, localUser: localUser);
+
+      expect(
+        draft.conversationId,
+        orderedEquals([1, 2, 3, 4, 5, 6, 7, 8, 8, 7, 6, 5, 4, 3, 2, 1]),
+      );
+      expect(draft.conversationId, isNot(orderedEquals(otherUser.conversationId!)));
+    });
+
+    test('marks newly opened direct chats as drafts', () {
+      final localUser = User(
+        name: 'Local',
+        id: peerIdWithQ8id([1, 1, 1, 1, 1, 1, 1, 1]),
+      );
+      final otherUser = User(
+        name: 'Other',
+        id: peerIdWithQ8id([2, 2, 2, 2, 2, 2, 2, 2]),
+      );
+
+      final draft = ChatRoom.blank(otherUser: otherUser, localUser: localUser);
+
+      expect(draft.isDraftDirectChat, isTrue);
+      expect(
+        draft.copyWith(messages: [message(1)], lastMessageIndex: 1).isDraftDirectChat,
+        isFalse,
+      );
+    });
+  });
 
   group('ChatRoom Equatable props (idBase58, lastMessageIndex, messages)', () {
     test('rooms with same idBase58, lastMessageIndex, and messages are equal', () {
