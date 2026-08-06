@@ -199,7 +199,9 @@ object GattServer {
     }
 
     /**
-
+     * Android gives a peripheral no way to refuse an incoming connection. so a central we rejected stays connected until it gives up.
+     * Without this check the stack happily services its reads/ Refusing at the ATT layer makes the rejection something the peer can actually see.
+     *
      */
     private fun admitted(device: BluetoothDevice, what: String): Boolean {
         if (ConnectionPool.getByAddress(device.address) != null) return true
@@ -253,7 +255,8 @@ object GattServer {
                         Log.i(TAG, "${device.address} already in pool as CENTRAL, skipping PERIPHERAL entry")
                     }
                 }
-
+                // Ask the stack what PHY this inbound link actually landed on. We need to know for timeouts and
+                // for upgrade potential
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     try { gattServer?.readPhy(device) } catch (e: Exception) {
                         Log.w(TAG, "readPhy failed for ${device.address}: ${e.message}")
@@ -274,7 +277,8 @@ object GattServer {
             }
         }
 
-
+        // Server side PHY reporting
+        // TODO: Validate how well this works in practice
         override fun onPhyRead(device: BluetoothDevice, txPhy: Int, rxPhy: Int, status: Int) {
             if (status != BluetoothGatt.GATT_SUCCESS) return
             ConnectionPool.notePhy(device.address, txPhy)
@@ -321,7 +325,7 @@ object GattServer {
             value: ByteArray
         ) {
             if (ConnectionPool.getByAddress(device.address) == null) {
-
+                // Respond to writes as success to avoid unreachable client retrying
                 if (characteristic.uuid != BleConstants.MSG_CHAR) {
                     Log.w(TAG, "Discarding write ${characteristic.uuid} from unadmitted ${device.address}")
                 }
