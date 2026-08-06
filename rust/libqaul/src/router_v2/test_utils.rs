@@ -1,3 +1,6 @@
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
 //! Shared test scaffolding for the router_v2 test suite.
 //!
 //! Consolidates the fixture builders that every test module was

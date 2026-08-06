@@ -1,23 +1,21 @@
 // Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! Nodes manifest handling
+//! A node's manifest: the set of users delegated to it (spec §10.1).
 
-use std::{
-    collections::{BTreeMap, HashMap},
-    ops::Range,
-};
+pub mod log;
+pub mod serve;
+
+pub use log::{LogRecord, ManifestLog};
+pub use serve::{decide_serve, ChunkAssembler, CompletedManifest, OriginServeState, ServeDecision};
+
+use std::ops::Range;
 
 use libp2p::identity::Keypair;
-use tracing::debug;
 
 use crate::router_v2::{
-    codec::messages::{
-        DeltaAdd, DeltaRemove, ManifestDelta, ManifestEntry, ManifestRequestItem, NodeManifest,
-    },
+    codec::messages::{DeltaAdd, DeltaRemove, ManifestDelta, ManifestEntry, NodeManifest},
     identity::{delegation_signing_input, ChunkSigningCtx, Multikey},
-    seq::is_fresher_u32,
-    Sphere,
 };
 
 const ENTRY_BYTES: usize = 84;
@@ -48,154 +46,6 @@ pub enum BuildError {
     WouldExceedSizeLimit,
 }
 
-/// Records the most-recent transition per delegated user. Serving a
-/// ranged MANIFEST_DELTA is exactly `records_after(from_version)`.
-#[derive(Debug, Clone)]
-pub enum LogRecord {
-    Add {
-        record_version: u32,
-        entry: ManifestEntry,
-    },
-    Tombstone {
-        user_id: [u8; 8],
-        record_version: u32,
-        created_ms: u64,
-    },
-}
-
-impl LogRecord {
-    pub fn record_version(&self) -> u32 {
-        match self {
-            LogRecord::Add { record_version, .. } => *record_version,
-            LogRecord::Tombstone { record_version, .. } => *record_version,
-        }
-    }
-
-    pub fn user_id(&self) -> [u8; 8] {
-        match self {
-            LogRecord::Add { entry, .. } => entry.user_id,
-            LogRecord::Tombstone { user_id, .. } => *user_id,
-        }
-    }
-}
-
-/// Per-origin delta log. One instance per Node record for
-/// foreign manifests; one on the host's own Manifest for our origin.
-#[derive(Debug, Default, Clone)]
-pub struct ManifestLog {
-    /// Oldest servable version.
-    pub log_base: u32,
-    /// Keyed by user_id. we're storing at most one record per user.
-    records: BTreeMap<[u8; 8], LogRecord>,
-}
-
-impl ManifestLog {
-    /// simply upsert instead of replace
-    pub fn insert_add(&mut self, record_version: u32, entry: ManifestEntry) {
-        self.records.insert(
-            entry.user_id,
-            LogRecord::Add {
-                record_version,
-                entry,
-            },
-        );
-    }
-
-    /// instead of removing, we'll replace any prior Add for the same user that has a Tombstone.
-    /// if the tombstone exists, just refresh the version+timestamp so we can track the latest event.
-    pub fn insert_remove(&mut self, user_id: [u8; 8], record_version: u32, now_ms: u64) {
-        self.records.insert(
-            user_id,
-            LogRecord::Tombstone {
-                user_id,
-                record_version,
-                created_ms: now_ms,
-            },
-        );
-    }
-
-    /// get the records where record_version > from_version.
-    /// in ascending order of of record_version
-    pub fn records_after(&self, from_version: u32) -> Vec<LogRecord> {
-        let mut recs: Vec<LogRecord> = self
-            .records
-            .values()
-            .filter(|r| is_fresher_u32(r.record_version(), from_version))
-            .cloned()
-            .collect();
-        recs.sort_by_key(|r| r.record_version());
-        recs
-    }
-
-    /// sets the oldest observable version and drops records below or equal to it.
-    pub fn set_log_base(&mut self, v: u32) {
-        self.log_base = v;
-        self.records
-            .retain(|_, r| is_fresher_u32(r.record_version(), v));
-    }
-
-    /// this fn is governed by section 10.9 in the spec
-    pub fn compact(&mut self, now_ms: u64, tombstone_ttl_ms: u64, cap: usize) {
-        // first: make old tobstomes expired
-        let ttl_cutoff = now_ms.saturating_sub(tombstone_ttl_ms);
-        let expired: Vec<[u8; 8]> = self
-            .records
-            .iter()
-            .filter_map(|(id, r)| match r {
-                LogRecord::Tombstone { created_ms, .. } if *created_ms <= ttl_cutoff => Some(*id),
-                _ => None,
-            })
-            .collect();
-
-        let mut max_discarded_version = 0u32;
-        let mut has_discarded = false;
-        for uid in expired {
-            if let Some(r) = self.records.remove(&uid) {
-                if !has_discarded || is_fresher_u32(r.record_version(), max_discarded_version) {
-                    max_discarded_version = r.record_version();
-                }
-                has_discarded = true;
-            }
-        }
-
-        if self.records.len() > cap {
-            let excess = self.records.len() - cap;
-            let mut by_version: Vec<([u8; 8], u32)> = self
-                .records
-                .iter()
-                .map(|(uid, r)| (*uid, r.record_version()))
-                .collect();
-            by_version.sort_by_key(|(_, v)| *v);
-            for (uid, v) in by_version.into_iter().take(excess) {
-                self.records.remove(&uid);
-                if !has_discarded || is_fresher_u32(v, max_discarded_version) {
-                    max_discarded_version = v;
-                }
-                has_discarded = true;
-            }
-        }
-
-        if has_discarded && is_fresher_u32(max_discarded_version, self.log_base) {
-            self.log_base = max_discarded_version;
-        }
-    }
-
-    pub fn reset_to(&mut self, version: u32) {
-        self.records.clear();
-        self.log_base = version;
-    }
-
-    pub fn len(&self) -> usize {
-        self.records.len()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.records.is_empty()
-    }
-}
-
-// DelegatedEntry is for the host-side manifest while ManifestEntry
-// is for the wire codec. Since they have the same fields, we cna repurpose
 pub type DelegetedEntry = ManifestEntry;
 
 /// A node's manifest
@@ -406,7 +256,6 @@ pub fn canonical_entry_bytes(entries: &[ManifestEntry]) -> Vec<u8> {
     res
 }
 
-
 pub fn reconstruct_single_chunk_full(
     origin_node_id: [u8; 8],
     manifest_version: u32,
@@ -435,7 +284,10 @@ pub struct DeltaHeader {
 }
 
 impl DeltaHeader {
-    pub fn assemble(self, records: Vec<LogRecord>) -> std::result::Result<ManifestDelta, BuildError> {
+    pub fn assemble(
+        self,
+        records: Vec<LogRecord>,
+    ) -> std::result::Result<ManifestDelta, BuildError> {
         let (n_adds, n_removes) =
             records
                 .iter()
@@ -479,180 +331,6 @@ impl DeltaHeader {
             manifest_signature: self.manifest_signature,
             adds,
             removes,
-        })
-    }
-}
-
-/// the things known about an origin to respond to it.
-pub struct OriginServeState {
-    pub committed: u32,
-    pub log_base: u32,
-    /// Sphere the manifest was learned over.
-    pub learn_sphere: Option<Sphere>,
-}
-
-/// per 8.8 how a MANIFEST_REQUEST should be answered
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ServeDecision {
-    /// Full `NODE_MANIFEST`
-    /// which means the requester needs to bootstrap, that is, its base is far behind the current log
-    Full,
-    Delta {
-        from_version: u32,
-    },
-    /// versions are equal
-    Nothing,
-    /// per 2.3: if we learnt about it over internet
-    Sealed,
-}
-
-/// per 8.8: steps 2 to 5: we decide how to answer one request item
-pub fn decide_serve(
-    item: &ManifestRequestItem,
-    origin: &OriginServeState,
-    requester_sphere: Sphere,
-) -> ServeDecision {
-    if origin.learn_sphere == Some(Sphere::Internet) && requester_sphere == Sphere::Local {
-        return ServeDecision::Sealed;
-    }
-
-    if item.have_none() {
-        return ServeDecision::Full;
-    }
-
-    if !is_fresher_u32(item.have_version, origin.log_base) {
-        return ServeDecision::Full;
-    }
-
-    if item.have_version == origin.committed {
-        return ServeDecision::Nothing;
-    }
-
-    if is_fresher_u32(origin.committed, item.have_version) {
-        return ServeDecision::Delta {
-            from_version: item.have_version,
-        };
-    }
-
-    // anything else we cannot decipher, sending back full manifest
-    // is the best decision, i think
-    ServeDecision::Full
-}
-
-/// a manifest that was assembled successfully from bytes over the wire
-pub struct CompletedManifest {
-    pub manifest_version: u32,
-    pub flags: u8,
-    pub entries: Vec<ManifestEntry>,
-    pub chunks: Vec<NodeManifest>,
-}
-
-pub struct ChunkAssembler {
-    partials: HashMap<[u8; 8], PartialManifest>,
-}
-
-struct PartialManifest {
-    manifest_version: u32,
-    chunk_count: u8,
-    flags: u8,
-    /// chunk_index → its entries.
-    received: HashMap<u8, NodeManifest>,
-}
-
-impl ChunkAssembler {
-    pub fn new() -> Self {
-        Self {
-            partials: HashMap::new(),
-        }
-    }
-
-    pub fn insert(
-        &mut self,
-        origin_node_id: [u8; 8],
-        chunk: NodeManifest,
-    ) -> Option<CompletedManifest> {
-        if chunk.chunk_index >= chunk.chunk_count {
-            debug!("chunk index exceeds chunk_count");
-            return None;
-        }
-
-        enum Action {
-            Insert,
-            Replace,
-            Reset,
-        }
-
-        let action = match self.partials.get(&origin_node_id) {
-            Some(partial) if partial.manifest_version == chunk.manifest_version => {
-                if chunk.chunk_count != partial.chunk_count || chunk.flags != partial.flags {
-                    Action::Reset
-                } else {
-                    Action::Insert
-                }
-            }
-            _ => Action::Replace,
-        };
-
-        match action {
-            Action::Insert => {
-                self.partials
-                    .get_mut(&origin_node_id)
-                    .unwrap()
-                    .received
-                    .insert(chunk.chunk_index, chunk);
-            }
-            Action::Replace => {
-                let manifest_version = chunk.manifest_version;
-                let chunk_count = chunk.chunk_count;
-                let flags = chunk.flags;
-                let chunk_index = chunk.chunk_index;
-
-                let mut received = HashMap::new();
-                received.insert(chunk_index, chunk);
-
-                self.partials.insert(
-                    origin_node_id,
-                    PartialManifest {
-                        manifest_version,
-                        chunk_count,
-                        flags,
-                        received,
-                    },
-                );
-            }
-            Action::Reset => {
-                debug!("chunk set inconsistent; dropping partial for {origin_node_id:?}");
-                self.partials.remove(&origin_node_id);
-                return None;
-            }
-        }
-
-        let partial = self.partials.get_mut(&origin_node_id)?;
-        if (partial.received.len() as u8) < partial.chunk_count {
-            return None;
-        }
-
-        let manifest_version = partial.manifest_version;
-        let flags = partial.flags;
-        let chunk_count = partial.chunk_count;
-
-        let mut entries: Vec<ManifestEntry> = Vec::new();
-        let mut chunks: Vec<NodeManifest> = Vec::new();
-
-        for i in 0..chunk_count {
-            if let Some(chunk) = partial.received.remove(&i) {
-                entries.extend(chunk.entries.iter().cloned());
-                chunks.push(chunk);
-            }
-        }
-
-        self.partials.remove(&origin_node_id);
-
-        Some(CompletedManifest {
-            manifest_version,
-            flags,
-            entries,
-            chunks,
         })
     }
 }
