@@ -107,13 +107,24 @@ message DtnSetTotalSizeResponse {
 }
 
 // Request to send a DTN source routed message
+// A single hop in a custody route (RPC form).
+//
+// Mirror of the wire `RouteHop`: IDs sharing a `hop` number are
+// interchangeable alternatives at that stage of the route.
+message DtnRouteHop {
+    // hop / priority number (>= 1, lower = earlier)
+    uint32 hop = 1;
+    // custodian user IDs at this hop (interchangeable alternatives)
+    repeated bytes ids = 2;
+}
+
 message DtnSendRoutedRequest {
     // the receiver user ID
     bytes receiver_id = 1;
     // the message data to send (signed Container bytes)
     bytes data = 2;
-    // ordered list of custody user IDs
-    repeated bytes custody_route = 3;
+    // custody route as hop-numbered entries
+    repeated DtnRouteHop custody_route = 3;
     // how many seconds until the message expires (0 = no expiry)
     uint64 expiry_seconds = 4;
     // maximum number of custody handoffs allowed

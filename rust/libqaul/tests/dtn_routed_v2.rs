@@ -70,12 +70,20 @@ fn build_test_v2(
         envelope: Some(envelope),
     };
 
-    let custody_route: Vec<Vec<u8>> = custodians.iter().map(|c| c.to_bytes()).collect();
+    // Each custodian becomes an alternative at hop 1 for these tests.
+    let custody_route: Vec<proto::RouteHop> = if custodians.is_empty() {
+        Vec::new()
+    } else {
+        vec![proto::RouteHop {
+            hop: 1,
+            ids: custodians.iter().map(|c| c.to_bytes()).collect(),
+        }]
+    };
 
     proto::DtnRoutedV2 {
         container: container.encode_to_vec(),
         custody_route,
-        next_route_index: 0,
+        current_hop: 0,
         original_signature: signature,
         sender_public_key: keys.public().encode_protobuf(),
         expires_at,
@@ -126,7 +134,8 @@ fn v2_message_survives_full_envelope_chain() {
         Some(proto::envelop_payload::Payload::DtnRoutedV2(decoded_v2)) => {
             assert_eq!(decoded_v2.remaining_handoffs, 5);
             assert_eq!(decoded_v2.custody_route.len(), 1);
-            assert_eq!(decoded_v2.custody_route[0], custodian.to_bytes());
+            assert_eq!(decoded_v2.custody_route[0].hop, 1);
+            assert_eq!(decoded_v2.custody_route[0].ids, vec![custodian.to_bytes()]);
 
             // Decode the inner container to get the ultimate receiver
             let inner = proto::Container::decode(&decoded_v2.container[..]).unwrap();
@@ -382,40 +391,35 @@ fn v2_expired_messages_detected_in_storage_scan() {
 }
 
 #[test]
-fn v2_flat_route_construction_and_advancement() {
+fn v2_hop_route_construction_and_cursor_advancement() {
     let c1 = random_peer();
     let c2 = random_peer();
     let c3 = random_peer();
-    let _receiver = random_peer();
 
     let mut v2 = proto::DtnRoutedV2 {
         container: vec![],
-        custody_route: vec![c1.to_bytes(), c2.to_bytes(), c3.to_bytes()],
-        next_route_index: 0,
+        custody_route: vec![
+            proto::RouteHop { hop: 1, ids: vec![c1.to_bytes()] },
+            proto::RouteHop { hop: 2, ids: vec![c2.to_bytes()] },
+            proto::RouteHop { hop: 3, ids: vec![c3.to_bytes()] },
+        ],
+        current_hop: 0,
         original_signature: vec![0xAA],
         sender_public_key: vec![],
         expires_at: 0,
         remaining_handoffs: 6,
     };
 
-    // Simulate forwarding to c2 (index 1)
-    let target = c2;
+    // Simulate forwarding to c2 at hop 2: decrement handoffs, set cursor.
     v2.remaining_handoffs = v2.remaining_handoffs.saturating_sub(1);
-    for (i, user_bytes) in v2.custody_route.iter().enumerate() {
-        if let Ok(uid) = PeerId::from_bytes(user_bytes) {
-            if uid == target && i as u32 >= v2.next_route_index {
-                v2.next_route_index = (i as u32) + 1;
-                break;
-            }
-        }
-    }
+    v2.current_hop = 2;
 
     assert_eq!(v2.remaining_handoffs, 5);
-    assert_eq!(v2.next_route_index, 2); // past c2, c3 still eligible
+    assert_eq!(v2.current_hop, 2); // hop 3 (c3) still eligible
 
     // Encode and decode — verify state persists
     let encoded = v2.encode_to_vec();
     let decoded = proto::DtnRoutedV2::decode(&encoded[..]).unwrap();
-    assert_eq!(decoded.next_route_index, 2);
+    assert_eq!(decoded.current_hop, 2);
     assert_eq!(decoded.remaining_handoffs, 5);
 }

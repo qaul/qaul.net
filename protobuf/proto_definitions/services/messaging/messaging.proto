@@ -175,13 +175,29 @@ message Dtn {
 }
 
 // DTN source routed message (V2)
+// A single hop in a custody route.
+//
+// A route is a set of hops, each identified by a `hop` number. All
+// custodian IDs sharing the same `hop` number are interchangeable
+// alternatives at that stage of the route: custody advances to a hop
+// by handing the message to any one reachable ID at that hop. Hop
+// numbers are >= 1, ordered ascending, and may be sparse (gaps are
+// allowed, e.g. hops 3 then 5).
+message RouteHop {
+    // hop / priority number (>= 1, lower = earlier in the route)
+    uint32 hop = 1;
+    // custodian user IDs at this hop (interchangeable alternatives)
+    repeated bytes ids = 2;
+}
+
 message DtnRoutedV2 {
     // the original encrypted container bytes
     bytes container = 1;
-    // ordered list of custody user IDs
-    repeated bytes custody_route = 2;
-    // index of the first custody entry that has not yet taken custody
-    uint32 next_route_index = 3;
+    // custody route as hop-numbered entries, ordered by hop ascending
+    repeated RouteHop custody_route = 2;
+    // hop number of the custodian that currently holds the message
+    // (0 = still at the original sender, no hop taken yet)
+    uint32 current_hop = 3;
     // signature of the original message (used for dedup)
     bytes original_signature = 4;
     // public key of the original sender (protobuf-encoded)
