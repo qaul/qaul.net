@@ -192,6 +192,43 @@ impl Group {
         }
     }
 
+    /// Like [`send_to_remote_members`] but uses the signed-but-not-
+    /// session-encrypted ("plain") path, so an already-encrypted
+    /// payload (group-file envelope body) is sent to each member
+    /// without N× per-recipient re-encryption.
+    pub fn send_to_remote_members_plain(
+        state: &crate::QaulState,
+        user_account: &UserAccount,
+        group: &Group,
+        data: &[u8],
+        message_id: &[u8],
+        error_context: &str,
+    ) {
+        for member in group.members.values() {
+            let receiver = match PeerId::from_bytes(&member.user_id) {
+                Ok(id) => id,
+                Err(e) => {
+                    log::error!("failed to parse member peer id: {}", e);
+                    continue;
+                }
+            };
+            if receiver == user_account.id {
+                continue;
+            }
+
+            if let Err(error) = Messaging::pack_and_send_plain_data(
+                state,
+                user_account,
+                &receiver,
+                data.to_vec(),
+                message_id,
+                true,
+            ) {
+                log::error!("{} {}", error_context, error);
+            }
+        }
+    }
+
     /// Send packed notify message directly
     pub fn send_notify_message(state: &crate::QaulState, user_account: &UserAccount, receiver: &PeerId, data: Vec<u8>) {
         // pack group container into messaging message
