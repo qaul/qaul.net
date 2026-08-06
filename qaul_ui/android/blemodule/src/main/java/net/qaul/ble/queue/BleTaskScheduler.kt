@@ -364,7 +364,7 @@ object BleTaskScheduler {
     /**
      * Bulk activity on the L2CAP transport, which the two signals above cannot see.
      *
-
+     * [bulkSendCount] and [bulkReceiving] are GATT only. So need a seperate marker for when L2CAP is doing a bulk transport as well
      */
     @Synchronized
     fun notifyBulkTransport(device: BluetoothDevice, active: Boolean) {
@@ -380,7 +380,11 @@ object BleTaskScheduler {
     private fun refreshBulkState(device: BluetoothDevice) {
         if (isBulkActive(device)) {
             bulkDowngradeTasks.remove(device)?.cancel(false)
-
+            // Hard ceiling on concurrent escalations. The idea is that we cant have everyone on 2M and high priority interval
+            // because it overloads the radio so we allow up to 2 links to be upgraded at any time
+            // TODO: 2 is an informed guess, not enough evidence yet fro full confidence
+            // Escalation is central only due to BLEs constraints. This means only centrals can attempt to request an upgrade
+            // One issue is that centrals also have to read rssi which isn't always available, again only centrals can read it
             val conn = ConnectionPool.getByAddress(device.address)
             if (conn != null && conn.role != BleRole.CENTRAL) {
                 Log.i(TAG, "Bulk active on ${device.address} but we're PERIPHERAL — interval is the central's to set, skipping escalation")
@@ -393,11 +397,7 @@ object BleTaskScheduler {
             if (escalatedDevices.add(device)) {
                 Log.i(TAG, "Bulk transfer active on ${device.address} — raising priority")
                 requestConnectionPriority(device, BleConstants.HIGH_LOAD_CONNECTION_PRIORITY)
-                // 2M needs RANGE margin, and "not Coded" doesn't prove any: a 1M link at the edge of
-                // 1M range has none, and 2M's range is roughly half. Raising it there risks the
-                // controller granting it and the link then degrading or supervision-timing-out
-                // mid-transfer — the worst possible moment. So require positive evidence the peer is
-                // close: a recent RSSI comfortably inside 1M's budget.
+                // Require positive evidence the peer is close: a recent RSSI comfortably inside 1M's budget as 2M can't reach as far as 1M.
                 val rssi = conn?.rssi
                 if (conn?.isCoded == false && rssi != null && rssi > BleConstants.BULK_2M_MIN_RSSI) {
                     setPreferredPhy(device, BluetoothDevice.PHY_LE_2M_MASK, BluetoothDevice.PHY_LE_2M_MASK, BluetoothDevice.PHY_OPTION_NO_PREFERRED)

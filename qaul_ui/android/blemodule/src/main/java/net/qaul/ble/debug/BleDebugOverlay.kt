@@ -155,15 +155,9 @@ object BleDebugOverlay {
             setOnClickListener { onCodedToggle() }
         }
 
-        // The manual "Start test" / "Stop & Export" buttons are gone: sessions now open
-        // automatically once the qaul ID is known, and SessionLogger mirrors the log into public
-        // Downloads on a timer. Nothing to press — which matters because the overlay needs
-        // draw-over-other-apps and some handsets refuse it outright, leaving those devices with no
-        // way to reach a button at all.
 
-        // Connection-cap selector. Tap to cycle MAX_CONNECTIONS so the real per-handset ceiling can
-        // be swept without a rebuild — how many concurrent GATT links a phone actually sustains is
-        // the open question behind whether topology management is needed at all.
+
+        // Connection-cap selector. Tap to cycle MAX_CONNECTIONS.
         capButton = TextView(app).apply {
             setTextColor(Color.WHITE)
             setPadding(app.dp(12), app.dp(8), app.dp(12), app.dp(8))
@@ -176,7 +170,7 @@ object BleDebugOverlay {
         panel = LinearLayout(app).apply {
             orientation = LinearLayout.VERTICAL
             addView(header)
-            addView(capButton)
+            //addView(capButton)
             // Long-range is now automatic so the manual Coded on/off button is hidden. Uncomment below to bring it back for testing.
             // addView(codedButton)
             addView(scroll)
