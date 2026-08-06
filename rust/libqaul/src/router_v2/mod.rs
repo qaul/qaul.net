@@ -10,7 +10,7 @@
 //! and supports gateway-based delegation across network boundaries.
 
 use std::{
-    collections::{hash_map::Entry, HashMap, HashSet},
+    collections::{hash_map::Entry, HashMap, HashSet, VecDeque},
     sync::{Arc, RwLock},
     time::Instant,
 };
@@ -199,6 +199,9 @@ pub struct RouterV2State {
     pub pending_manifest_requests: RwLock<HashMap<PeerId, HashSet<[u8; 8]>>>,
     /// current requests that are in flight
     pub outstanding_manifest_requests: RwLock<HashMap<([u8; 8], PeerId), u64>>,
+    /// spec section 14 sliding windows
+    pub manifest_request_window: RwLock<HashMap<PeerId, VecDeque<u64>>>,
+    pub manifest_serve_window: RwLock<HashMap<PeerId, VecDeque<u64>>>,
     /// spec 3.5
     pub propagation_form: RwLock<PropagationForm>,
 }
@@ -233,6 +236,8 @@ impl RouterV2State {
             dirty_delegations: RwLock::new(HashSet::new()),
             pending_manifest_requests: RwLock::new(HashMap::new()),
             outstanding_manifest_requests: RwLock::new(HashMap::new()),
+            manifest_request_window: RwLock::new(HashMap::new()),
+            manifest_serve_window: RwLock::new(HashMap::new()),
             propagation_form: RwLock::new(PropagationForm::User),
         };
         (state, rx)
@@ -258,6 +263,35 @@ impl RouterV2State {
                 })
                 .collect(),
         );
+
+        self.own_manifest_log
+            .write()
+            .unwrap()
+            .reset_to(persisted.manifest_version);
+        self.resign_own_manifest(&mut manifest);
+    }
+
+    fn resign_own_manifest(&self, manifest: &mut Manifest) {
+        let origin_multikey = self.host_mk.encode();
+
+        manifest.manifest_signature =
+            match manifest.sign_state(&self.host_keypair, &origin_multikey) {
+                Ok(sig) => Some(sig),
+                Err(e) => {
+                    tracing::error!("router_v2: signing own manifest state failed: {e}");
+                    None
+                }
+            };
+
+        manifest.retained_chunks =
+            match manifest.build_chunks(self.host_mk.to_id(), &self.host_keypair, &origin_multikey)
+            {
+                Ok(chunks) => Some(chunks),
+                Err(e) => {
+                    tracing::error!("router_v2: building own manifest chunks failed: {e}");
+                    None
+                }
+            };
     }
 
     /// we're adding a locally hosted user in this node's user index space.
@@ -470,6 +504,8 @@ impl RouterV2State {
         }
 
         manifest.manifest_version = new_version;
+
+        self.resign_own_manifest(&mut manifest);
         drop(manifest);
 
         self.dirty_delegations.write().unwrap().clear();
@@ -539,6 +575,16 @@ impl RouterV2State {
 
         let mut out = Vec::new();
         for (neighbour, origins) in queued {
+            if !self.allow_manifest_request(neighbour, now_ms) {
+                self.pending_manifest_requests
+                    .write()
+                    .unwrap()
+                    .entry(neighbour)
+                    .or_default()
+                    .extend(origins);
+                continue;
+            }
+
             let mut items = Vec::new();
             for origin_node_id in origins {
                 let (have_version, have_none) =
@@ -576,6 +622,29 @@ impl RouterV2State {
             }
         }
         out
+    }
+
+    /// per 10.8: "A node SHALL NOT send more than `manifest_request_rate`
+    /// requests per second per neighbour." 
+    pub fn allow_manifest_request(&self, peer: PeerId, now_ms: u64) -> bool {
+        allow_in_window(
+            &self.manifest_request_window,
+            peer,
+            now_ms,
+            self.options.manifest_request_rate,
+        )
+    }
+
+    /// per 8.8: "A node SHALL NOT emit more than `manifest_serve_rate`
+    /// responses per second per neighbour; excess items are ignored and the
+    /// requester retries."
+    pub fn allow_manifest_serve(&self, peer: PeerId, now_ms: u64) -> bool {
+        allow_in_window(
+            &self.manifest_serve_window,
+            peer,
+            now_ms,
+            self.options.manifest_serve_rate,
+        )
     }
 
     /// drops requests that weren't answered and the time is past the
@@ -786,6 +855,9 @@ impl RouterV2State {
         };
         if now_empty {
             mirrors.remove(&peer);
+            drop(mirrors);
+            self.manifest_request_window.write().unwrap().remove(&peer);
+            self.manifest_serve_window.write().unwrap().remove(&peer);
         }
     }
 
@@ -950,6 +1022,31 @@ impl RouterV2State {
         res.sort_by_key(|(idx, _, _)| *idx);
         res
     }
+}
+
+/// 1 second sliding-window rate limiter as in section 14
+fn allow_in_window(
+    window: &RwLock<HashMap<PeerId, VecDeque<u64>>>,
+    peer: PeerId,
+    now_ms: u64,
+    limit: u32,
+) -> bool {
+    let mut windows = window.write().unwrap();
+    let samples = windows.entry(peer).or_default();
+
+    while let Some(oldest) = samples.front() {
+        if now_ms.saturating_sub(*oldest) >= 1_000 {
+            samples.pop_front();
+        } else {
+            break;
+        }
+    }
+
+    if samples.len() >= limit as usize {
+        return false;
+    }
+    samples.push_back(now_ms);
+    true
 }
 
 #[cfg(test)]
