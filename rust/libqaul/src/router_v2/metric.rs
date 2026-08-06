@@ -1,4 +1,7 @@
-//! All metrics related functionality, like the bucketed weights and all.
+// Copyright (c) 2023 Open Community Project Association https://ocpa.ch
+// This software is published under the AGPLv3 license.
+
+//! The routing metric (spec §5).
 
 use crate::connections::ConnectionModule;
 
