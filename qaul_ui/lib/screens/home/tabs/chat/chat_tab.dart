@@ -12,6 +12,7 @@ class _ChatState extends _BaseTabState<_Chat> {
   static const _pageSize = ChatRoomsStore.defaultPageSize;
   late final ScrollController _scrollController;
   bool _isLoadingMore = false;
+  bool _isLoadingInitialPage = true;
   bool _hasMoreChatRooms = true;
   bool _hasMoreInvites = true;
   int _chatRoomsOffset = 0;
@@ -23,9 +24,17 @@ class _ChatState extends _BaseTabState<_Chat> {
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await ref.read(chatNotificationControllerProvider).initialize();
+      _initializeNotifications();
       await _fetchFirstPage();
     });
+  }
+
+  Future<void> _initializeNotifications() async {
+    try {
+      await ref.read(chatNotificationControllerProvider).initialize();
+    } catch (error, stackTrace) {
+      _log.warning('Failed to initialize chat notifications', error, stackTrace);
+    }
   }
 
   @override
@@ -64,19 +73,24 @@ class _ChatState extends _BaseTabState<_Chat> {
     _chatRoomsOffset = 0;
     _invitesOffset = 0;
     setState(() {
+      _isLoadingInitialPage = true;
       _hasMoreChatRooms = true;
       _hasMoreInvites = true;
     });
 
-    final groups = ref.read(chatRoomsStoreProvider.notifier);
-    final results = await Future.wait([
-      groups.getChatRooms(offset: 0, limit: _pageSize),
-      groups.getGroupInvites(offset: 0, limit: _pageSize),
-    ]);
-    if (!mounted) return;
+    try {
+      final groups = ref.read(chatRoomsStoreProvider.notifier);
+      final results = await Future.wait([
+        groups.getChatRooms(offset: 0, limit: _pageSize),
+        groups.getGroupInvites(offset: 0, limit: _pageSize),
+      ]);
+      if (!mounted) return;
 
-    _updatePaginationFromRoomsResult(results.first as PaginatedChatRooms?);
-    _updatePaginationFromInvitesResult(results.last as PaginatedGroupInvites?);
+      _updatePaginationFromRoomsResult(results.first as PaginatedChatRooms?);
+      _updatePaginationFromInvitesResult(results.last as PaginatedGroupInvites?);
+    } finally {
+      if (mounted) setState(() => _isLoadingInitialPage = false);
+    }
   }
 
   Future<void> _refreshChatsAndInvites() async {
@@ -174,7 +188,8 @@ class _ChatState extends _BaseTabState<_Chat> {
     final showInvites = !roomSearch.isActive;
     final listItemCount =
         (showInvites ? groupInvites.length : 0) + displayRooms.length;
-    final isListLoading = _isLoadingMore ||
+    final isListLoading = _isLoadingInitialPage ||
+        _isLoadingMore ||
         (roomSearch.isActive &&
             roomSearch.isLoading &&
             roomSearch.results.isEmpty);
@@ -202,7 +217,10 @@ class _ChatState extends _BaseTabState<_Chat> {
         MaterialPageRoute(builder: (_) => const _CreateNewRoomDialog()),
       );
       if (newChat is User) {
-        final newRoom = ChatRoom.blank(otherUser: newChat);
+        final newRoom = ChatRoom.blank(
+          otherUser: newChat,
+          localUser: defaultUser,
+        );
         setOpenChat(newRoom, newChat);
       } else if (newChat is ChatRoom) {
         setOpenChat(newChat);
@@ -229,7 +247,7 @@ class _ChatState extends _BaseTabState<_Chat> {
             ref.read(chatRoomsSearchProvider.notifier).clear();
           },
           onRefresh: _refreshChatsAndInvites,
-          isEmpty: listItemCount == 0,
+          isEmpty: !isListLoading && listItemCount == 0,
           emptyMessage: l10n.emptyChatsList,
           itemCount: listItemCount,
           itemBuilder: (_, i) {

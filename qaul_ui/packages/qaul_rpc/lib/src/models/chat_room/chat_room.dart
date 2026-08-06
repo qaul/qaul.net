@@ -60,10 +60,9 @@ class ChatRoom with EquatableMixin implements Comparable {
 
   final String idBase58;
 
-  factory ChatRoom.blank({required User otherUser}) {
-    assert(otherUser.conversationId != null);
+  factory ChatRoom.blank({required User otherUser, required User localUser}) {
     return ChatRoom(
-      conversationId: otherUser.conversationId!,
+      conversationId: _directConversationId(localUser, otherUser),
       name: otherUser.name,
       members: [
         ChatRoomUser(
@@ -72,6 +71,24 @@ class ChatRoom with EquatableMixin implements Comparable {
         ),
       ],
     );
+  }
+
+  static Uint8List _directConversationId(User localUser, User otherUser) {
+    final localQ8id = localUser.id.sublist(6, 14);
+    final otherQ8id = otherUser.id.sublist(6, 14);
+    final first = _compareBytes(localQ8id, otherQ8id) <= 0
+        ? localQ8id
+        : otherQ8id;
+    final second = identical(first, localQ8id) ? otherQ8id : localQ8id;
+    return Uint8List.fromList([...first, ...second]);
+  }
+
+  static int _compareBytes(List<int> a, List<int> b) {
+    for (var i = 0; i < a.length && i < b.length; i++) {
+      final diff = a[i].compareTo(b[i]);
+      if (diff != 0) return diff;
+    }
+    return a.length.compareTo(b.length);
   }
 
   factory ChatRoom.fromRpcGroupInfo(GroupInfo g, List<User> users) {
@@ -100,6 +117,12 @@ class ChatRoom with EquatableMixin implements Comparable {
   }
 
   bool get isGroupChatRoom => !isDirectChat;
+
+  bool get isDraftDirectChat =>
+      isDirectChat &&
+      createdAt == null &&
+      lastMessageIndex == null &&
+      messages == null;
 
   String? get groupAdminIdBase58 => members
       .firstWhereOrNull((m) => m.role == ChatRoomUserRole.admin)

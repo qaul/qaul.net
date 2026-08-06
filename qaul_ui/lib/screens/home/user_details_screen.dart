@@ -68,8 +68,11 @@ class UserDetailsScreen extends HookConsumerWidget {
                     child: QaulButton(
                       label: l10n.newChatTooltip,
                       onPressed: () {
-                        final defaultUser = ref.watch(defaultUserProvider)!;
-                        final newRoom = ChatRoom.blank(otherUser: user);
+                        final defaultUser = ref.read(defaultUserProvider)!;
+                        final newRoom = ChatRoom.blank(
+                          otherUser: user,
+                          localUser: defaultUser,
+                        );
                         Navigator.pop(context);
                         openChat(
                           newRoom,
@@ -110,8 +113,11 @@ class UserDetailsScreen extends HookConsumerWidget {
                     child: QaulButton(
                       label: l10n.newChatTooltip,
                       onPressed: () {
-                        final defaultUser = ref.watch(defaultUserProvider)!;
-                        final newRoom = ChatRoom.blank(otherUser: user);
+                        final defaultUser = ref.read(defaultUserProvider)!;
+                        final newRoom = ChatRoom.blank(
+                          otherUser: user,
+                          localUser: defaultUser,
+                        );
                         Navigator.pop(context);
                         openChat(
                           newRoom,

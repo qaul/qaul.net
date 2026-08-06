@@ -157,7 +157,10 @@ class UsersStore extends Notifier<List<User>> {
   static const _pollingInterval = Duration(seconds: 3);
 
   @override
-  List<User> build() => [];
+  List<User> build() {
+    ref.onDispose(stopOnlinePolling);
+    return [];
+  }
 
   // ---------------------------------------------------------------------------
   // Paginated user fetching

@@ -7,8 +7,8 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 
 import '../l10n/app_localizations.dart';
 import '../stores/stores.dart';
-
 import '../widgets/widgets.dart';
+import 'loading_decorator.dart';
 
 typedef SearchUserResultBuilder = Widget Function(
     BuildContext context, List<User> users);
@@ -30,14 +30,26 @@ class SearchUserDecorator extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = useTextEditingController();
+    final isLoadingInitialUsers = useState(false);
     final searchNotifier = ref.read(usersSearchProvider.notifier);
 
     useEffect(() {
+      Future.microtask(() {
+        if (ref.read(usersStoreProvider).isEmpty) {
+          isLoadingInitialUsers.value = true;
+          ref.read(usersStoreProvider.notifier).getUsers().whenComplete(() {
+            if (!context.mounted) return;
+            isLoadingInitialUsers.value = false;
+          });
+        }
+      });
       return searchNotifier.clear;
     }, const []);
 
     final search = ref.watch(usersSearchProvider);
     final users = search.isActive ? search.results : _localUsersForPicker(ref);
+    final isLoading = isLoadingInitialUsers.value ||
+        (search.isActive && search.isLoading && search.results.isEmpty);
 
     final l10n = AppLocalizations.of(context)!;
     return UserSearchScaffold(
@@ -50,7 +62,11 @@ class SearchUserDecorator extends HookConsumerWidget {
         controller.clear();
         searchNotifier.clear();
       },
-      body: builder(context, users),
+      body: LoadingDecorator(
+        isLoading: isLoading,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        child: builder(context, users),
+      ),
     );
   }
 }

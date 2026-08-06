@@ -193,6 +193,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final Map<String, String> _overflowMenuOptions = {};
   Map<String, MessagePresentation> _messagePresentations = {};
   ChatRenderMode _chatRenderMode = ChatRenderMode.direct;
+  bool _draftDirectMessageSent = false;
 
   void _handleClick(String value) {
     switch (value) {
@@ -219,6 +220,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void _scheduleUpdateCurrentOpenChat() =>
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.read(currentOpenChatRoom.notifier).state = room;
+        if (room.isDraftDirectChat) return;
         ref.read(qaulWorkerProvider).getChatRoomMessages(room.conversationId);
       });
 
@@ -252,6 +254,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     final refreshCurrentRoom = useCallback(() async {
       if (!mounted) return;
+      if (room.isDraftDirectChat && !_draftDirectMessageSent) return;
       final worker = ref.read(qaulWorkerProvider);
       worker.getChatRoomMessages(
         room.conversationId,
@@ -269,6 +272,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     final sendMessage = useCallback((types.PartialText msg) {
       if (!mounted) return;
+      if (room.isDraftDirectChat) _draftDirectMessageSent = true;
       final worker = ref.read(qaulWorkerProvider);
       worker.sendMessage(room.conversationId, msg.text);
     }, [room]);

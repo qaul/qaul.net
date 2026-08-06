@@ -7,6 +7,7 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 import '../decorators/loading_decorator.dart';
 import '../helpers/navigation_helper.dart';
 import '../l10n/app_localizations.dart';
+import '../providers/session_state_reset.dart';
 import '../widgets/widgets.dart';
 
 class CreateAccountScreen extends HookConsumerWidget {
@@ -108,6 +109,7 @@ class CreateAccountScreen extends HookConsumerWidget {
     loading.value = false;
 
     if (createdUser != null) {
+      resetSessionScopedState(ref, activeUser: createdUser);
       Navigator.pushReplacementNamed(context, NavigationHelper.home);
       return;
     }

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -9,6 +7,7 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 import '../helpers/navigation_helper.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/account_session_provider.dart';
+import '../providers/session_state_reset.dart';
 
 class AccountManagementCoordinator {
   const AccountManagementCoordinator._();
@@ -42,7 +41,7 @@ class AccountManagementCoordinator {
     final path = picked?.files.single.path;
     if (path == null || !context.mounted) return;
 
-    await _runWithProgress(context, () async {
+    final restoredAndLoggedIn = await _runWithProgress<bool>(context, () async {
       final worker = ref.read(qaulWorkerProvider);
       final restored = await ref.read(qaulWorkerProvider).restoreAccount(path);
       if (restored == null) throw const RpcRequestException('Restore failed');
@@ -66,9 +65,10 @@ class AccountManagementCoordinator {
 
       final loggedIn = await worker.loginLocalAccount(restoredAccount);
       if (!loggedIn) throw const RpcRequestException('Restore login failed');
+      return true;
     });
-    if (!context.mounted) return;
-    Navigator.pushReplacementNamed(context, NavigationHelper.home);
+    if (!context.mounted || restoredAndLoggedIn != true) return;
+    _returnHomeWithActiveSession(context, ref);
   }
 
   static Future<void> showLoginFlow(BuildContext context, WidgetRef ref) async {
@@ -107,7 +107,7 @@ class AccountManagementCoordinator {
     );
     if (!context.mounted || loggedIn != true) return;
 
-    Navigator.pushReplacementNamed(context, NavigationHelper.home);
+    _returnHomeWithActiveSession(context, ref);
   }
 
   static Future<void> showExportFlow(
@@ -161,16 +161,20 @@ class AccountManagementCoordinator {
     final user = ref.read(defaultUserProvider);
     if (user == null) return;
 
+    final loggedOut = await ref
+        .read(qaulWorkerProvider)
+        .logout(userId: user.id)
+        .catchError((_) => false);
+    if (!context.mounted) return;
+    if (!loggedOut) {
+      _showMessage(context, AppLocalizations.of(context)!.genericErrorMessage);
+      return;
+    }
+
     final navigator = Navigator.of(context, rootNavigator: true);
     ref.read(forceSignedOutProvider.notifier).state = true;
     if (!navigator.mounted) return;
     _returnToInitial(navigator, ref);
-
-    unawaited(
-      ref.read(qaulWorkerProvider).logout(userId: user.id).catchError((_) {
-        return false;
-      }),
-    );
   }
 
   static Future<void> showDeleteFlow(
@@ -295,11 +299,16 @@ class AccountManagementCoordinator {
   }
 
   static void _returnToInitial(NavigatorState navigator, WidgetRef ref) {
+    resetSessionScopedState(ref);
+    ref.invalidate(accountSessionProvider);
     navigator.pushNamedAndRemoveUntil(NavigationHelper.initial, (_) => false);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(defaultUserProvider.notifier).state = null;
-      ref.invalidate(accountSessionProvider);
-    });
+  }
+
+  static void _returnHomeWithActiveSession(BuildContext context, WidgetRef ref) {
+    final activeUser = ref.read(defaultUserProvider);
+    if (activeUser == null) return;
+    resetSessionScopedState(ref, activeUser: activeUser);
+    Navigator.pushReplacementNamed(context, NavigationHelper.home);
   }
 
   static LocalAccount? _findAccount(
