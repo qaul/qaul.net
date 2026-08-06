@@ -68,11 +68,11 @@ class MessagePresentationMeta {
 class MessagePresentationComputation {
   const MessagePresentationComputation({
     required this.meta,
-    required this.textDisplay,
+    required this.bubbleDisplay,
     required this.isPrimary,
   });
 
   final MessagePresentationMeta meta;
-  final QaulChatBubbleDisplayItem? textDisplay;
+  final QaulChatBubbleDisplayItem? bubbleDisplay;
   final bool isPrimary;
 }

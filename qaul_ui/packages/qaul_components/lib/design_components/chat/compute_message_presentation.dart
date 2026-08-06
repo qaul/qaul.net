@@ -132,7 +132,7 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
 
     return MessagePresentationComputation(
       meta: meta,
-      textDisplay: item,
+      bubbleDisplay: item,
       isPrimary: row.isOutgoing,
     );
   }
@@ -191,7 +191,7 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
 
     return MessagePresentationComputation(
       meta: meta,
-      textDisplay: item,
+      bubbleDisplay: item,
       isPrimary: row.isOutgoing,
     );
   }
@@ -235,6 +235,6 @@ List<QaulChatBubbleDisplayItem> computeChatBubbleDisplayItems(
 
   return [
     for (var i = 0; i < messages.length; i++)
-      computed['text-only-$i']!.textDisplay!,
+      computed['text-only-$i']!.bubbleDisplay!,
   ];
 }

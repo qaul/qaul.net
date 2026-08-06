@@ -104,7 +104,7 @@ ChatTimelineProjection? buildChatTimelineProjection({
       internalMessages.add(internal.copyWith(status: null, showStatus: false));
       bubbleBaseById[m.messageIdBase58] = bubbleBase!;
     } else if (m.content is FileShareContent) {
-      internalMessages.add(_withoutLegacyStatus(internal));
+      internalMessages.add(internal);
       if (bubbleBase != null) {
         bubbleBaseById[m.messageIdBase58] = bubbleBase;
       }
@@ -193,65 +193,6 @@ QaulChatBubbleMessage? _qaulBubbleBaseForMessage(
     edges: const [],
     senderIdBase58: message.senderIdBase58,
   );
-}
-
-types.Message _withoutLegacyStatus(types.Message message) {
-  if (message is types.ImageMessage) {
-    return types.ImageMessage(
-      author: message.author,
-      createdAt: message.createdAt,
-      height: message.height,
-      id: message.id,
-      metadata: message.metadata,
-      name: message.name,
-      remoteId: message.remoteId,
-      repliedMessage: message.repliedMessage,
-      roomId: message.roomId,
-      showStatus: false,
-      size: message.size,
-      uri: message.uri,
-      width: message.width,
-    );
-  }
-
-  if (message is types.AudioMessage) {
-    return types.AudioMessage(
-      author: message.author,
-      createdAt: message.createdAt,
-      duration: message.duration,
-      id: message.id,
-      metadata: message.metadata,
-      mimeType: message.mimeType,
-      name: message.name,
-      remoteId: message.remoteId,
-      repliedMessage: message.repliedMessage,
-      roomId: message.roomId,
-      showStatus: false,
-      size: message.size,
-      uri: message.uri,
-      waveForm: message.waveForm,
-    );
-  }
-
-  if (message is types.FileMessage) {
-    return types.FileMessage(
-      author: message.author,
-      createdAt: message.createdAt,
-      id: message.id,
-      isLoading: message.isLoading,
-      metadata: message.metadata,
-      mimeType: message.mimeType,
-      name: message.name,
-      remoteId: message.remoteId,
-      repliedMessage: message.repliedMessage,
-      roomId: message.roomId,
-      showStatus: false,
-      size: message.size,
-      uri: message.uri,
-    );
-  }
-
-  return message;
 }
 
 /// Maps the room's members and join events onto the pure domain snapshots and

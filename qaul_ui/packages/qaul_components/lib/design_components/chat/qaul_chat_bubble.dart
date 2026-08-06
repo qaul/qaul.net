@@ -210,27 +210,6 @@ class QaulChatBubble extends StatelessWidget {
   final bool showTimestamp;
   final bool isSelected;
 
-  Widget? _buildStatusIcon(Color textColor, double iconSize) {
-    switch (message.status) {
-      case MessageStatus.notSent:
-        return null;
-
-      case MessageStatus.sent:
-        return Icon(
-          Icons.check,
-          size: iconSize,
-          color: textColor.withValues(alpha: 0.8),
-        );
-
-      case MessageStatus.read:
-        return Icon(
-          Icons.done_all,
-          size: iconSize,
-          color: textColor.withValues(alpha: 0.9),
-        );
-    }
-  }
-
   static Widget media({
     Key? key,
     required QaulChatBubbleMessage message,
@@ -254,11 +233,7 @@ class QaulChatBubble extends StatelessWidget {
     final isPrimary = message.messageType == MessageType.primary;
     final sheet = QaulColorSheet(Theme.of(context).brightness);
 
-    final width = MediaQuery.sizeOf(context).width;
-    final isMobile = width < kChatBubbleWidthBreakpoint;
-    final maxBubbleWidth = isMobile
-        ? ChatBubbleStyle.maxBubbleWidthMobile
-        : ChatBubbleStyle.maxBubbleWidthExtended;
+    final maxBubbleWidth = _chatBubbleMaxWidth(context);
     final maxTextWidth = maxBubbleWidth - ChatBubbleStyle.horizontalPadding * 2;
 
     final backgroundColor = isPrimary
@@ -267,27 +242,16 @@ class QaulChatBubble extends StatelessWidget {
 
     const textColor = Colors.white;
 
-    final edges = message.edges.toSet();
-
-    final borderRadius = BorderRadiusDirectional.only(
-      topStart: edges.contains(TailEdge.topStart)
-          ? Radius.zero
-          : ChatBubbleStyle.radius,
-      topEnd: edges.contains(TailEdge.topEnd)
-          ? Radius.zero
-          : ChatBubbleStyle.radius,
-      bottomStart: edges.contains(TailEdge.bottomStart)
-          ? Radius.zero
-          : ChatBubbleStyle.radius,
-      bottomEnd: edges.contains(TailEdge.bottomEnd)
-          ? Radius.zero
-          : ChatBubbleStyle.radius,
-    );
+    final borderRadius = _chatBubbleBorderRadius(message.edges);
 
     final timeLabel = formatQaulChatBubbleTime(message, clock);
     final textScaler = chatBubbleTextScaler(context);
     final statusIconSize = textScaler.scale(14);
-    final statusIcon = _buildStatusIcon(textColor, statusIconSize);
+    final statusIcon = _buildChatBubbleStatusIcon(
+      message.status,
+      textColor,
+      statusIconSize,
+    );
 
     return Align(
       alignment: isPrimary ? Alignment.centerRight : Alignment.centerLeft,
@@ -525,59 +489,24 @@ class _QaulChatBubbleSurface extends StatelessWidget {
   final bool showTimestamp;
   final bool isSelected;
 
-  Widget? _buildStatusIcon(Color textColor, double iconSize) {
-    switch (message.status) {
-      case MessageStatus.notSent:
-        return null;
-
-      case MessageStatus.sent:
-        return Icon(
-          Icons.check,
-          size: iconSize,
-          color: textColor.withValues(alpha: 0.8),
-        );
-
-      case MessageStatus.read:
-        return Icon(
-          Icons.done_all,
-          size: iconSize,
-          color: textColor.withValues(alpha: 0.9),
-        );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final isPrimary = message.messageType == MessageType.primary;
     final sheet = QaulColorSheet(Theme.of(context).brightness);
-    final width = MediaQuery.sizeOf(context).width;
-    final isMobile = width < kChatBubbleWidthBreakpoint;
-    final maxBubbleWidth = isMobile
-        ? ChatBubbleStyle.maxBubbleWidthMobile
-        : ChatBubbleStyle.maxBubbleWidthExtended;
+    final maxBubbleWidth = _chatBubbleMaxWidth(context);
     const textColor = Colors.white;
     final backgroundColor = isPrimary
         ? ChatBubbleStyle.primaryColor
         : ChatBubbleStyle.secondaryColor;
-    final edges = message.edges.toSet();
-    final borderRadius = BorderRadiusDirectional.only(
-      topStart: edges.contains(TailEdge.topStart)
-          ? Radius.zero
-          : ChatBubbleStyle.radius,
-      topEnd: edges.contains(TailEdge.topEnd)
-          ? Radius.zero
-          : ChatBubbleStyle.radius,
-      bottomStart: edges.contains(TailEdge.bottomStart)
-          ? Radius.zero
-          : ChatBubbleStyle.radius,
-      bottomEnd: edges.contains(TailEdge.bottomEnd)
-          ? Radius.zero
-          : ChatBubbleStyle.radius,
-    );
+    final borderRadius = _chatBubbleBorderRadius(message.edges);
 
     final textScaler = chatBubbleTextScaler(context);
     final statusIconSize = textScaler.scale(14);
-    final statusIcon = _buildStatusIcon(textColor, statusIconSize);
+    final statusIcon = _buildChatBubbleStatusIcon(
+      message.status,
+      textColor,
+      statusIconSize,
+    );
     final timeLabel = formatQaulChatBubbleTime(message, clock);
 
     final timeRow = Row(
@@ -647,8 +576,6 @@ const double kChatBubbleSeparatedGap = 12.0;
 
 const double kChatMediaTextGap = 8.0;
 
-const double kGroupChatBubbleSeparatedGap = 4.0;
-
 const TextStyle kGroupSenderNameTextStyle = TextStyle(
   fontFamily: 'Roboto',
   fontSize: 11,
@@ -702,6 +629,56 @@ bool isChatBubbleLinked(QaulChatBubbleMessage a, QaulChatBubbleMessage b) =>
 // ---------------------------------------------------------------------------
 // Private helpers
 // ---------------------------------------------------------------------------
+
+double _chatBubbleMaxWidth(BuildContext context) {
+  final width = MediaQuery.sizeOf(context).width;
+  return width < kChatBubbleWidthBreakpoint
+      ? ChatBubbleStyle.maxBubbleWidthMobile
+      : ChatBubbleStyle.maxBubbleWidthExtended;
+}
+
+BorderRadiusDirectional _chatBubbleBorderRadius(List<TailEdge> edges) {
+  final edgeSet = edges.toSet();
+  return BorderRadiusDirectional.only(
+    topStart: edgeSet.contains(TailEdge.topStart)
+        ? Radius.zero
+        : ChatBubbleStyle.radius,
+    topEnd: edgeSet.contains(TailEdge.topEnd)
+        ? Radius.zero
+        : ChatBubbleStyle.radius,
+    bottomStart: edgeSet.contains(TailEdge.bottomStart)
+        ? Radius.zero
+        : ChatBubbleStyle.radius,
+    bottomEnd: edgeSet.contains(TailEdge.bottomEnd)
+        ? Radius.zero
+        : ChatBubbleStyle.radius,
+  );
+}
+
+Widget? _buildChatBubbleStatusIcon(
+  MessageStatus status,
+  Color textColor,
+  double iconSize,
+) {
+  switch (status) {
+    case MessageStatus.notSent:
+      return null;
+
+    case MessageStatus.sent:
+      return Icon(
+        Icons.check,
+        size: iconSize,
+        color: textColor.withValues(alpha: 0.8),
+      );
+
+    case MessageStatus.read:
+      return Icon(
+        Icons.done_all,
+        size: iconSize,
+        color: textColor.withValues(alpha: 0.9),
+      );
+  }
+}
 
 List<TailEdge> tailEdgesForPrimary(bool hasPreviousLinked, bool hasNextLinked) {
   if (!hasPreviousLinked && !hasNextLinked) return const [TailEdge.bottomEnd];

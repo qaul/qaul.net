@@ -38,7 +38,7 @@ class MessagePresentation {
       isPrimary: computation.isPrimary,
       sender: sender,
       meta: computation.meta,
-      bubbleDisplay: computation.textDisplay,
+      bubbleDisplay: computation.bubbleDisplay,
     );
   }
 
@@ -72,24 +72,6 @@ class ChatMessageRenderer {
       clock: clock,
       horizontalGutter: true,
       isSelected: isSelected,
-    );
-  }
-
-  static Widget wrapNonText({
-    required Widget child,
-    required MessagePresentation presentation,
-    required ChatRenderMode mode,
-  }) {
-    if (mode != ChatRenderMode.group || presentation.isPrimary) {
-      return child;
-    }
-
-    return GroupMessageShell(
-      marginTop: presentation.meta.topSpacing,
-      sender: presentation.sender,
-      showSenderName: presentation.meta.showSenderName,
-      showSenderAvatar: presentation.meta.showAvatar,
-      child: child,
     );
   }
 

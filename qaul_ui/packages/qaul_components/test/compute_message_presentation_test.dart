@@ -315,11 +315,11 @@ void main() {
         layoutMode: ChatRenderMode.direct,
       );
 
-      expect(out['id-media']!.textDisplay, isNotNull);
-      expect(out['id-media']!.textDisplay!.showTimestamp, isTrue);
-      expect(out['id-media']!.textDisplay!.message.status, MessageStatus.read);
+      expect(out['id-media']!.bubbleDisplay, isNotNull);
+      expect(out['id-media']!.bubbleDisplay!.showTimestamp, isTrue);
+      expect(out['id-media']!.bubbleDisplay!.message.status, MessageStatus.read);
       expect(
-        out['id-media']!.textDisplay!.message.edges,
+        out['id-media']!.bubbleDisplay!.message.edges,
         const [TailEdge.bottomEnd],
       );
     });
@@ -368,8 +368,8 @@ void main() {
         layoutMode: ChatRenderMode.group,
       );
 
-      expect(out['media-0']!.textDisplay!.showTimestamp, isTrue);
-      expect(out['media-1']!.textDisplay!.showTimestamp, isTrue);
+      expect(out['media-0']!.bubbleDisplay!.showTimestamp, isTrue);
+      expect(out['media-1']!.bubbleDisplay!.showTimestamp, isTrue);
       expect(out['media-0']!.meta.nonTextClustersWithNext, isFalse);
       expect(out['media-1']!.meta.topSpacing, kChatBubbleSeparatedGap);
       expect(out['media-1']!.meta.showSenderName, isTrue);
