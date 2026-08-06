@@ -74,9 +74,12 @@ object BleScanner {
     // last time we saw them on the 1M PHY (short range). Drives the connect PHY choice: seen on 1M recently → connect 1M (fast)
     private val seen1MAt = mutableMapOf<String, Long>()
 
+    /** When we first saw a peer on Coded with no 1M sighting to contradict it. Cleared by recordPhySighting when a 1M advert arrives.
+    * If this has stood for [BleConstants.CODED_ONLY_CONFIRM_MS] then we accept Coded as the peers only route. */
     private val codedOnlySince = mutableMapOf<String, Long>()
 
-
+    /** Start of the current UNBROKEN run of 1M sightings for a peer (by advertised prefix). Reset
+     *  whenever the run lapses — see recordPhySighting. Drives the Coded→1M upgrade. */
     private val first1MOfStreakAt = mutableMapOf<String, Long>()
 
     private val lastPhyUpgradeAt = mutableMapOf<String, Long>()   // prefix hex -> last upgrade attempt
@@ -380,8 +383,8 @@ object BleScanner {
             val currentPhy = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) result.primaryPhy
             else BluetoothDevice.PHY_LE_1M
             // Upgrading from Coded to 1M/2M PHY when back in range. Work in progress. This is can only be done from a central connection, asymmetry, peripherals will ignore and wait for central to upgrade
-            // TODO: min RSSI value needs tuned and tested
 
+            // Coded to 1M upgrade. Based on an unbroken run of 1M sightings,
             val streakStart = if (prefix != null) first1MOfStreakAt[prefix.toHexString()] else null
             val sustained1M = streakStart != null &&
                     System.currentTimeMillis() - streakStart >= BleConstants.PHY_UPGRADE_CONFIRM_MS
@@ -472,10 +475,10 @@ object BleScanner {
             if (currentPhy == BluetoothDevice.PHY_LE_CODED && seenOn1MRecently(prefix)) {
                 return   // prefer the peer's short-range advert
             }
+            // Coded is a last resort. A dual advertising peer is visible on 1M and Coded at the same time, so
+            // if we just choose based on first seen advertisement, we may create a coded link even if both devices are next to each other.
 
-            if (currentPhy == BluetoothDevice.PHY_LE_CODED && !BleConstants.FORCE_CODED_LINKS) {
-                // Prefix-keyed where known so the window survives RPA rotation; MAC otherwise, same
-                // fallback backoffKey uses.
+            if (currentPhy == BluetoothDevice.PHY_LE_CODED) {
                 val key = prefix?.toHexString() ?: mac
                 val firstCodedAt = codedOnlySince.getOrPut(key) { System.currentTimeMillis() }
                 if (System.currentTimeMillis() - firstCodedAt < BleConstants.CODED_ONLY_CONFIRM_MS) {
@@ -483,10 +486,7 @@ object BleScanner {
                 }
                 Log.i(TAG, "Only seen $mac on Coded for ${BleConstants.CODED_ONLY_CONFIRM_MS}ms — connecting long-range")
             }
-            // FORCE_CODED_LINKS also has to override the PHY itself, not just skip the gate: at close
-            // range we'll normally be responding to the peer's 1M advert, so there'd be no Coded to
-            // preserve. See the constant for what this does and doesn't measure.
-            val phy = if (BleConstants.FORCE_CODED_LINKS || currentPhy == BluetoothDevice.PHY_LE_CODED)
+            val phy = if (currentPhy == BluetoothDevice.PHY_LE_CODED)
                           BluetoothDevice.PHY_LE_CODED_MASK
                       else BluetoothDevice.PHY_LE_1M_MASK
             Log.i(TAG, "Auto-connecting to $mac (${if (phy == BluetoothDevice.PHY_LE_CODED_MASK) "Coded/long-range" else "1M/short-range"})")
@@ -503,13 +503,14 @@ object BleScanner {
         synchronized(lock) {
             val key = prefix.toHexString()
             val now = System.currentTimeMillis()
-
+            // A 1M streak: if the last sighting is stale the peer went out of 1M range and came
+            // back, so the run restarts. Prevents inconsistent advertisements triggering upgrade
             val last = seen1MAt[key]
             if (last == null || now - last > BleConstants.OUT_OF_RANGE_TIMEOUT_MS) {
                 first1MOfStreakAt[key] = now
             }
             seen1MAt[key] = now
-
+            // Proof this peer is reachable on 1M, so it's no longer a coded only candidate
             codedOnlySince.remove(key)
         }
     }

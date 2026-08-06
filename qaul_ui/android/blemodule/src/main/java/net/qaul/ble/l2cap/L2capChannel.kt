@@ -57,6 +57,9 @@ class L2capChannel(
                 val buf = ByteArray(length)
                 val start = TimeSource.Monotonic.markNow()
 
+                //
+                // Size gated on the same threshold the send side uses to choose this transport, so
+                // the two agree on what "bulk" means TODO: Check this
                 val isBulk = length > BULK_ESCALATION_MIN_BYTES
                 if (isBulk) onBulkReceive?.invoke(true)
                 try {
@@ -96,7 +99,6 @@ class L2capChannel(
                 Log.e(TAG, "[$label] write failed: ${e.message}")
                 close()
             } finally {
-
                 onComplete?.invoke()
             }
         }
