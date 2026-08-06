@@ -61,7 +61,7 @@ object BleConstants {
 
     /** anti-islanding: enables gossiped link-state (SEND_NEIGHBOURS flc) feeds the Stage 1 fill-gate
      *  (ConnectionPool.shouldAcceptEdge) and Stage 2 proactive drop  */
-    const val ANTI_ISLANDING = false
+    const val ANTI_ISLANDING = true
 
     /**Enable topology mechanisms. Both require [ANTI_ISLANDING] (they read
      *  the gossiped link-state). */
@@ -86,14 +86,18 @@ object BleConstants {
     @Volatile
     var ENGINE_READY = false
 
-
+    /** Push every short-range link to 2M as soon as it connects.
+     *
+ */
     const val PREFER_2M = false
 
     /** Allow an established Coded link to be upgraded when the peer is seen close up.
      *  TODO: a single RSSI spike promotes a long-range link to a short-range PHY, which then drops as soon as the peer moves away again. */
     const val ALLOW_PHY_UPGRADE = true
 
-
+    /** How long a continous run of 1M sightings must last before a coded link is upgraded to
+     *  1M (expensive to get wrong, if 1M then fails, re-establishing at range is the
+     *  fragile part). Also we need to be wary of coded/1M flipping if on the border of 1Ms reach. */
     const val PHY_UPGRADE_CONFIRM_MS = 10_000L
 
     /** Connection interval requested for an idle link.
@@ -109,23 +113,29 @@ object BleConstants {
      *  before dropping back to idle. Prevents flipping quickly between consecutive bulk sends */
     const val BULK_HOLD_DOWN_MS = 4_000L
 
-
-    /*  TODO: reasoned, not measured — the field test's concurrent-transfer scenario should set it. */
+    /** Most links allowed to hold the bulk escalation (High priority + 2M) at once. High costs ~4x the connection events
+     * so if 4 links are all high, the radio can be overwhelmed and links timeout.
+     *  TODO: setting to 2 hasnt been truly validated */
     const val MAX_ESCALATED_LINKS = 2
 
 
-    const val FORCE_CODED_LINKS = false
-
-
+    /** Theoretical advert interval at low latency mode, combined with [CODED_ONLY_CONFIRM_INTERVALS] to give
+     * a margin of waiting for a close range advert before choosing coded.
+   */
     const val NOMINAL_ADVERT_INTERVAL_MS = 100L
 
-
+    /** How many advertising intervals of evidence before concluding a peer is Coded only reachable. */
     const val CODED_ONLY_CONFIRM_INTERVALS = 10
 
-
+    /** How long a peer must be seen ONLY on Coded before we accept Coded as its only route and
+     *  connect long-range.
+     *
+     (see the TODO on BleAdvertiser's ADVERTISE_MODE) — a hardcoded value would silently
+     *  become too short and start forcing Coded links on peers that are  advertising slower. */
+    // TODO: This would have to change if advert modes are ever changed for battery optimization etc*/
     const val CODED_ONLY_CONFIRM_MS = NOMINAL_ADVERT_INTERVAL_MS * CODED_ONLY_CONFIRM_INTERVALS
 
-
+    /** Minimum RSSI before a bulk transfer may raise a link from 1M to 2M.  */
     const val BULK_2M_MIN_RSSI = -80
 
     /** Connection admission control: max outbound CENTRAL connects we'll have in flight at once (connected but not yet
@@ -190,7 +200,7 @@ object BleConstants {
      *  requests were repeatedly observed exceeding 4s under real app load */
     const val FAST_OP_TIMEOUT_MS = 4_000L
 
-
+    /** Budget for MTU and PHY negotiation. */
     const val NEGOTIATION_OP_TIMEOUT_MS = 10_000L
 
     /** Watchdog timeout for service discovery, the slowest non connect op and the most fragile at
