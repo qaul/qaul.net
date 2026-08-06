@@ -23,6 +23,10 @@ use crate::router_v2::{
 const ENTRY_BYTES: usize = 84;
 const HEADER_OVERHEAD: usize = 85;
 pub(crate) const MAX_BODY: usize = 60 * 1024;
+// §8.6 MANIFEST_DELTA sizes.
+const DELTA_ADD_BYTES: usize = 88;
+const DELTA_REMOVE_BYTES: usize = 12;
+const DELTA_OVERHEAD: usize = 89;
 
 #[derive(Debug, thiserror::Error)]
 pub enum ManifestError {
@@ -36,6 +40,12 @@ pub enum ManifestError {
 pub enum VerifyError {
     #[error("signature does not verify")]
     SignatureInvalid,
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum BuildError {
+    #[error("delta body would exceed the 60 KiB bound; serve a full manifest instead")]
+    WouldExceedSizeLimit,
 }
 
 /// Records the most-recent transition per delegated user. Serving a
@@ -196,6 +206,8 @@ pub struct Manifest {
     // we have to keep it in ascending order by the user_id
     // any method that touches this must resort it in ascending orfer
     entries: Vec<DelegetedEntry>,
+    pub manifest_signature: Option<[u8; 64]>,
+    pub retained_chunks: Option<Vec<NodeManifest>>,
 }
 
 impl Manifest {
@@ -204,6 +216,8 @@ impl Manifest {
             manifest_version: 0,
             is_gateway: false,
             entries: Vec::new(),
+            manifest_signature: None,
+            retained_chunks: None,
         }
     }
 
@@ -392,6 +406,25 @@ pub fn canonical_entry_bytes(entries: &[ManifestEntry]) -> Vec<u8> {
     res
 }
 
+
+pub fn reconstruct_single_chunk_full(
+    origin_node_id: [u8; 8],
+    manifest_version: u32,
+    is_gateway: bool,
+    entries: Vec<ManifestEntry>,
+    stored_signature: [u8; 64],
+) -> NodeManifest {
+    NodeManifest {
+        origin_node_id,
+        manifest_version,
+        chunk_index: 0,
+        chunk_count: 1,
+        flags: if is_gateway { 1 } else { 0 },
+        manifest_signature: stored_signature,
+        entries,
+    }
+}
+
 pub struct DeltaHeader {
     pub origin_node_id: [u8; 8],
     /// version the delta builds upon: remember, this is not signed
@@ -402,7 +435,19 @@ pub struct DeltaHeader {
 }
 
 impl DeltaHeader {
-    pub fn assemble(self, records: Vec<LogRecord>) -> ManifestDelta {
+    pub fn assemble(self, records: Vec<LogRecord>) -> std::result::Result<ManifestDelta, BuildError> {
+        let (n_adds, n_removes) =
+            records
+                .iter()
+                .fold((0usize, 0usize), |(a, r), record| match record {
+                    LogRecord::Add { .. } => (a + 1, r),
+                    LogRecord::Tombstone { .. } => (a, r + 1),
+                });
+        let estimated = DELTA_ADD_BYTES * n_adds + DELTA_REMOVE_BYTES * n_removes + DELTA_OVERHEAD;
+        if estimated > MAX_BODY {
+            return Err(BuildError::WouldExceedSizeLimit);
+        }
+
         let mut adds = Vec::new();
         let mut removes = Vec::new();
 
@@ -426,7 +471,7 @@ impl DeltaHeader {
             }
         }
 
-        ManifestDelta {
+        Ok(ManifestDelta {
             origin_node_id: self.origin_node_id,
             from_version: self.from_version,
             to_version: self.to_version,
@@ -434,7 +479,7 @@ impl DeltaHeader {
             manifest_signature: self.manifest_signature,
             adds,
             removes,
-        }
+        })
     }
 }
 
