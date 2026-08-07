@@ -30,7 +30,8 @@ class L2capChannel(
     private val onClosed: () -> Unit = {},
     /** Fired true when a framed message starts arriving and false when it completes, so the owner
      *  can raise/drop the link's connection priority for the duration. */
-    private val onBulkReceive: ((Boolean) -> Unit)? = null
+    private val onBulkReceive: ((Boolean) -> Unit)? = null,
+    private val onBulkTransfer: ((direction: String, sizeBytes: Int, ms: Long) -> Unit)? = null
 ) {
     private val TAG = "L2capChannel"
     private val input = DataInputStream(socket.inputStream)
@@ -70,6 +71,7 @@ class L2capChannel(
                 val ms = start.elapsedNow().inWholeMilliseconds
                 val kbps = if (ms > 0) length * 8.0 / ms else 0.0
                 Log.i(TAG, "[$label] L2CAP RECEIVED: $length B in $ms ms (${"%.1f".format(kbps)} kbps)")
+                if (isBulk) onBulkTransfer?.invoke("received", length, ms)
                 onMessageReceived(buf)
             }
         } catch (e: IOException) {
@@ -95,6 +97,7 @@ class L2capChannel(
                 val ms = start.elapsedNow().inWholeMilliseconds
                 val kbps = if (ms > 0) data.size * 8.0 / ms else 0.0
                 Log.i(TAG, "[$label] L2CAP SENT: ${data.size} B in $ms ms (${"%.1f".format(kbps)} kbps)")
+                if (data.size > BULK_ESCALATION_MIN_BYTES) onBulkTransfer?.invoke("sent", data.size, ms)
             } catch (e: IOException) {
                 Log.e(TAG, "[$label] write failed: ${e.message}")
                 close()

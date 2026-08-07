@@ -201,7 +201,10 @@ class BleConnection(
                 // Only clear if the field still points at THIS channel (a replacement may have
                 // already taken its place).
                 onClosed = { synchronized(l2capLock) { if (l2capChannel === newChannel) l2capChannel = null } },
-                onBulkReceive = { active -> BleTaskScheduler.notifyBulkTransport(device, active) }
+                onBulkReceive = { active -> BleTaskScheduler.notifyBulkTransport(device, active) },
+                onBulkTransfer = { direction, sizeBytes, ms ->
+                    ConnectionPool.logTransfer(device.address, direction, "l2cap", sizeBytes, ms)
+                }
             )
             l2capChannel = newChannel
             Log.i(TAG, "L2CAP channel ready for ${device.address} ($role)")
@@ -260,6 +263,12 @@ class BleConnection(
         result.receivedMessage?.let {
             Log.i(TAG, "Message assembled from ${device.address}: ${it.message.size} bytes")
             BleMetrics.onMessageAssembled(it.message.size, it.createdAt)
+            if (it.message.size > BleConstants.MEDIUM_MESSAGE_MAX_BYTES) {
+                ConnectionPool.logTransfer(
+                    device.address, "received", "gatt",
+                    it.message.size, it.createdAt.elapsedNow().inWholeMilliseconds
+                )
+            }
             BleTaskScheduler.notifyMessageAssembled(device, it.message)
         }
 
@@ -278,6 +287,12 @@ class BleConnection(
         result.flcAckReceived?.let { ack ->
             val messageId = sendQueue.flcAckReceived(ack.messageIndex, ack.success, ack.errorCode)
             if (messageId.isNotEmpty()) onMessageResult?.invoke(messageId, ack.success)
+            // gatts send throughput is the entire send + ack path unlike the others
+            sendQueue.lastAckMetric?.let { m ->
+                if (m.sizeBytes > BleConstants.MEDIUM_MESSAGE_MAX_BYTES) {
+                    ConnectionPool.logTransfer(device.address, "sent", "gatt", m.sizeBytes, m.durationMs)
+                }
+            }
             flushSendQueue() // Advance to the next queued message now that this one is ACK'd
         }
 

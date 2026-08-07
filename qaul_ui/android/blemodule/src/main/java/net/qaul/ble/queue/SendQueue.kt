@@ -463,9 +463,13 @@ class SendQueue(qaulId: ByteArray) {
         // remove message from send queue messages
         sendQueues.remove(queueIndex)
 
-        if (result.isNotEmpty()) BleMetrics.onMessageAcknowledged(result)
+        if (result.isNotEmpty()) lastAckMetric = BleMetrics.onMessageAcknowledged(result)
         return result
     }
+
+    /** Set by [flcAckReceived] on every call, so ble connection can find */
+    var lastAckMetric: BleMetrics.TransferResult? = null
+        private set
 
     /**
      * This Message chunk queue was sent

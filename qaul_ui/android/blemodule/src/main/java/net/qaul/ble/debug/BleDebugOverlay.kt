@@ -185,7 +185,7 @@ object BleDebugOverlay {
         else @Suppress("DEPRECATION") WindowManager.LayoutParams.TYPE_PHONE
 
         val lp = WindowManager.LayoutParams(
-            app.dp(300),
+            WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             type,
             // Not focusable so we never steal keyboard/input from the qaul app; touch on the view itself

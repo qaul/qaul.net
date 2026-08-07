@@ -64,12 +64,13 @@ object BleMetrics {
      * Called by SendQueue.flcAckReceived() when the remote ACKs the complete message.
      * Records the round-trip time from first chunk out to ACK in.
      */
-    fun onMessageAcknowledged(messageId: String) {
-        val (sizeBytes, startedAt) = pendingSends.remove(messageId) ?: return
+    fun onMessageAcknowledged(messageId: String): TransferResult? {
+        val (sizeBytes, startedAt) = pendingSends.remove(messageId) ?: return null
         val durationMs = startedAt.elapsedNow().inWholeMilliseconds
         val result = TransferResult(messageId, sizeBytes, durationMs, Direction.SENT)
         results.add(result)
         Log.i(TAG, "SENT: ${sizeBytes}B in ${durationMs}ms (${String.format("%.1f", result.throughputKbps)} kbps)")
+        return result
     }
 
     // --------------------------------------------------------------------------------------------
