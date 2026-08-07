@@ -14,6 +14,8 @@ import 'package:flutter/material.dart' hide Draggable;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hooks_riverpod/legacy.dart';
+import 'package:qaul_components/qaul_components.dart'
+    show kQaulAvatarNetworkEmojiOffset;
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
 
@@ -221,11 +223,22 @@ class _NetworkNodeComponent extends BodyComponent
     await super.onLoad();
     // if level >= 4, the circle is too small to render text
     if (level < 4) {
+      final label = initials(node.user.name);
+      final isEmoji = isEmojiOnlyGrapheme(label);
       add(TextComponent(
-        text: initials(node.user.name),
+        text: label,
         textRenderer: TextPaint(
-          style: TextStyle(fontSize: radius, height: 0.7 + 0.0625 * radius),
+          style: TextStyle(
+            fontSize: radius,
+            height: isEmoji ? 1 : 0.7 + 0.0625 * radius,
+          ),
         ),
+        position: isEmoji
+            ? Vector2(
+                kQaulAvatarNetworkEmojiOffset.dx,
+                kQaulAvatarNetworkEmojiOffset.dy,
+              )
+            : Vector2.zero(),
         anchor: Anchor.center,
         priority: 2,
       ));
