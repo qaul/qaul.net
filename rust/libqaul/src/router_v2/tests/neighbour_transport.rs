@@ -137,3 +137,92 @@ fn partial_disconnect_keeps_mirror_and_other_transport() {
         "the surviving transport is not new"
     );
 }
+
+// ---------- peer_of_node ----------
+//
+// `next_hop_for_user` returns an 8-byte node id, but every transport is keyed
+// by PeerId, so a send cannot happen without this reverse lookup. It exists
+// only for neighbours: a next hop is adjacent by definition.
+
+mod peer_of_node {
+    use crate::connections::ConnectionModule;
+    use crate::router_v2::test_utils::*;
+
+    #[test]
+    fn resolves_a_registered_neighbour() {
+        let (state, _rx) = fresh_state();
+        let peer = fresh_peer();
+        let node_id = [11u8; 8];
+        state.add_neighbour_transport(peer, node_id, ConnectionModule::Lan);
+
+        assert_eq!(state.peer_of_node(&node_id), Some(peer));
+    }
+
+    #[test]
+    fn misses_on_an_unknown_node_id() {
+        let (state, _rx) = fresh_state();
+        state.add_neighbour_transport(fresh_peer(), [11u8; 8], ConnectionModule::Lan);
+
+        assert_eq!(state.peer_of_node(&[99u8; 8]), None);
+    }
+
+    #[test]
+    fn distinguishes_two_neighbours() {
+        let (state, _rx) = fresh_state();
+        let (a, b) = (fresh_peer(), fresh_peer());
+        state.add_neighbour_transport(a, [1u8; 8], ConnectionModule::Lan);
+        state.add_neighbour_transport(b, [2u8; 8], ConnectionModule::Lan);
+
+        assert_eq!(state.peer_of_node(&[1u8; 8]), Some(a));
+        assert_eq!(state.peer_of_node(&[2u8; 8]), Some(b));
+    }
+
+    /// A miss here means "the neighbour went away", which the forwarding path
+    /// must treat as no-route rather than as a hard error.
+    #[test]
+    fn misses_once_the_last_transport_drops() {
+        let (state, _rx) = fresh_state();
+        let peer = fresh_peer();
+        let node_id = [11u8; 8];
+        state.add_neighbour_transport(peer, node_id, ConnectionModule::Lan);
+        assert!(state.peer_of_node(&node_id).is_some());
+
+        state.remove_neighbour_transport(peer, ConnectionModule::Lan);
+        assert_eq!(state.peer_of_node(&node_id), None);
+    }
+
+    #[test]
+    fn survives_losing_one_of_several_transports() {
+        let (state, _rx) = fresh_state();
+        let peer = fresh_peer();
+        let node_id = [11u8; 8];
+        state.add_neighbour_transport(peer, node_id, ConnectionModule::Lan);
+        state.add_neighbour_transport(peer, node_id, ConnectionModule::Internet);
+
+        state.remove_neighbour_transport(peer, ConnectionModule::Lan);
+        assert_eq!(
+            state.peer_of_node(&node_id),
+            Some(peer),
+            "the neighbour is still reachable over Internet"
+        );
+    }
+
+    /// The round trip the forwarding path actually performs: derive the id
+    /// from a PeerId the way `ping_event` does, then resolve it back.
+    #[test]
+    fn round_trips_with_the_id_derived_from_the_peer_id() {
+        use crate::router_v2::identity::{id_from_peer_id, Multikey};
+        use libp2p::identity::Keypair;
+
+        let (state, _rx) = fresh_state();
+        let kp = Keypair::generate_ed25519();
+        let peer = kp.public().to_peer_id();
+        let node_id = Multikey::from(kp.public()).to_id();
+
+        state.add_neighbour_transport(peer, node_id, ConnectionModule::Lan);
+
+        let derived = id_from_peer_id(&peer).expect("ed25519 peer ids embed their key");
+        assert_eq!(derived, node_id);
+        assert_eq!(state.peer_of_node(&derived), Some(peer));
+    }
+}
