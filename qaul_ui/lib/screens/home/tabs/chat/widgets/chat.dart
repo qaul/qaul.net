@@ -25,7 +25,7 @@ import 'package:mime/mime.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' hide context, Context;
 import 'package:path_provider/path_provider.dart';
-import 'package:qaul_components/qaul_components.dart';
+import 'package:qaul_components/qaul_components.dart' hide QaulAvatar;
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:record/record.dart';
 import 'package:url_launcher/url_launcher.dart';
