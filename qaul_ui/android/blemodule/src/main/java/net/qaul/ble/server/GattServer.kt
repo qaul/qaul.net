@@ -62,7 +62,7 @@ object GattServer {
         // Closing PERIPHERAL pool entries also closes their L2CAP channels (BleConnection owns them).
         ConnectionPool.allConnections()
             .filter { it.role == BleRole.PERIPHERAL }
-            .forEach { ConnectionPool.disconnect(it.device) }
+            .forEach { ConnectionPool.disconnect(it.device, "engine_stop") }
 
         // Close the L2CAP server socket to unblock and end the accept loop.
         try { l2capServerSocket?.close() } catch (_: IOException) {}
@@ -243,7 +243,7 @@ object GattServer {
                     existing.role == BleRole.PERIPHERAL -> {
                         // Stale entry from a previous connection — replace it
                         Log.i(TAG, "${device.address} reconnected, replacing stale PERIPHERAL entry")
-                        BleManager.disconnect(device)
+                        BleManager.disconnect(device) // this should log with disconnect reason?
                         BleManager.connect(device, BleRole.PERIPHERAL)
                     }
                     else -> {

@@ -27,6 +27,7 @@ import net.qaul.ble.test.ble.util.printGattTable
 import net.qaul.ble.test.ble.util.toHexString
 import net.qaul.ble.test.ble.connection.BleRole
 import net.qaul.ble.test.ble.connection.ConnectionPool
+import net.qaul.ble.test.ble.metrics.SessionLogger
 import java.lang.ref.WeakReference
 import java.util.UUID
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -400,6 +401,7 @@ object BleTaskScheduler {
                 // Require positive evidence the peer is close: a recent RSSI comfortably inside 1M's budget as 2M can't reach as far as 1M.
                 val rssi = conn?.rssi
                 if (conn?.isCoded == false && rssi != null && rssi > BleConstants.BULK_2M_MIN_RSSI) {
+                    ConnectionPool.notePhyRequestReason(device.address, "bulk_escalation")
                     setPreferredPhy(device, BluetoothDevice.PHY_LE_2M_MASK, BluetoothDevice.PHY_LE_2M_MASK, BluetoothDevice.PHY_OPTION_NO_PREFERRED)
                     phyEscalatedDevices.add(device)
                 } else {
@@ -421,6 +423,7 @@ object BleTaskScheduler {
                         if (phyEscalatedDevices.remove(device) &&
                             ConnectionPool.getByAddress(device.address)?.phyLabel == "2M") {
                             val phy = if (BleConstants.PREFER_2M) BluetoothDevice.PHY_LE_2M_MASK else BluetoothDevice.PHY_LE_1M_MASK
+                            ConnectionPool.notePhyRequestReason(device.address, "bulk_downgrade")
                             setPreferredPhy(device, phy, phy, BluetoothDevice.PHY_OPTION_NO_PREFERRED)
                         }
                     }
@@ -881,13 +884,16 @@ object BleTaskScheduler {
     @SuppressLint("MissingPermission")
     private fun abandonConnection(device: BluetoothDevice, reason: String) {
         Log.w(TAG, "Abandoning ${device.address}: $reason")
+        appContext?.let {
+            SessionLogger[it].attemptEnded(device.address, null, success = false, error = reason)
+        }
         deviceGattMap.remove(device)?.let { gatt ->
             try { gatt.disconnect() } catch (_: Exception) {}
             try { gatt.close() } catch (_: Exception) {}
         }
         purgeOperationsForDevice(device)
         BleScanner.noteConnectFailure(device.address)
-        notifyListeners { onDisconnectedFromDevice(device) }
+        notifyListeners { onDisconnectedFromDevice(device, reason) }
     }
 
     // --------------------------------------------------------------------------------------------
@@ -903,6 +909,7 @@ object BleTaskScheduler {
                 when (newState) {
                     BluetoothProfile.STATE_CONNECTED -> {
                         Log.i(TAG, "Connected to $address")
+                        appContext?.let { SessionLogger[it].attemptStage(address, "link") }
                         deviceGattMap[gatt.device] = gatt
                         BleScanner.noteConnectSuccess(address)   // clear any reconnect backoff
                         BleScanner.resumeAfterConnect()   // link established, scan can resume
@@ -920,6 +927,9 @@ object BleTaskScheduler {
                 }
             } else {
                 Log.e(TAG, "Connection error $status for $address")
+                appContext?.let {
+                    SessionLogger[it].attemptEnded(address, null, success = false, error = "gatt_$status")
+                }
                 deviceGattMap.remove(gatt.device)
                 gatt.close()
                 purgeOperationsForDevice(gatt.device)   // drop stale ops for the now dead link
@@ -928,7 +938,7 @@ object BleTaskScheduler {
                 if (pendingOperation is Connect || pendingOperation is Disconnect) {
                     skipOperation()
                 }
-                notifyListeners { onDisconnectedFromDevice(gatt.device) }
+                notifyListeners { onDisconnectedFromDevice(gatt.device, "gatt_$status") }
             }
         }
 
@@ -936,6 +946,7 @@ object BleTaskScheduler {
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.i(TAG, "Discovered ${gatt.services.size} services for ${gatt.device.address}")
+                appContext?.let { SessionLogger[it].attemptStage(gatt.device.address, "discovery") }
                 gatt.printGattTable()
                 if (!hasQaulCharacteristics(gatt)) {
                     Log.w(TAG, "${gatt.device.address} exposes none of our characteristics — not a qaul peer")
@@ -978,6 +989,8 @@ object BleTaskScheduler {
         override fun onMtuChanged(gatt: BluetoothGatt, mtu: Int, status: Int) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.i(TAG, "MTU changed to $mtu for ${gatt.device.address}")
+
+                appContext?.let { SessionLogger[it].attemptStage(gatt.device.address, "mtu") }
                 notifyListeners { onMtuChanged(gatt.device, mtu) }
                 // Connection is fully set up — notify listeners - later l2capp could be checked next
                 notifyListeners { onConnectionSetupComplete(gatt) }
@@ -1111,6 +1124,7 @@ object BleTaskScheduler {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.i(TAG, "Wrote descriptor ${descriptor.uuid}")
                 if (descriptor.uuid == BleConstants.CCCD_UUID) {
+                    appContext?.let { SessionLogger[it].attemptStage(gatt.device.address, "cccd") }
                     val characteristic = descriptor.characteristic
                     when (pendingOperation) {
                         is EnableNotifications -> {
