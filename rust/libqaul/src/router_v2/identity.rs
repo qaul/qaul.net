@@ -57,6 +57,11 @@ impl Multikey {
     }
 }
 
+/// Derives the 8-byte routing id for a `PeerId` that embeds its key
+pub fn id_from_peer_id(peer: &PeerId) -> Option<[u8; 8]> {
+    Multikey::try_from_peer_id(peer).ok().map(|mk| mk.to_id())
+}
+
 #[derive(Debug)]
 pub struct Profile {
     pub multikey: Multikey,
@@ -204,6 +209,42 @@ mod tests {
     /// The load-bearing assertion: an id recovered via the PeerId must equal
     /// the id derived straight from the public key. If these ever diverge,
     /// every mirror binding and manifest lookup in v2 breaks.
+    /// `id_from_peer_id` is the bridge the messaging layer crosses: it takes a
+    /// `PeerId` from the message envelope and produces the 8-byte id the v2
+    /// routing tables are keyed by.
+    #[test]
+    fn id_from_peer_id_matches_the_multikey_derivation() {
+        let kp = Keypair::generate_ed25519();
+        let peer = kp.public().to_peer_id();
+
+        assert_eq!(
+            id_from_peer_id(&peer),
+            Some(Multikey::from(kp.public()).to_id()),
+        );
+    }
+
+    /// §3.3 derives user and node ids by the same rule, so one helper serves
+    /// both index spaces — only the lookup that follows differs.
+    #[test]
+    fn id_from_peer_id_is_stable_across_calls() {
+        let peer = Keypair::generate_ed25519().public().to_peer_id();
+        assert_eq!(id_from_peer_id(&peer), id_from_peer_id(&peer));
+    }
+
+    /// A hashed PeerId has thrown the key away. The messaging layer reaches
+    /// this with recipients that came off the wire, so it must be `None`
+    /// rather than a panic — and the caller routes it to DTN, exactly as v1
+    /// does for an unreachable recipient.
+    #[test]
+    fn id_from_peer_id_returns_none_when_the_key_is_hashed() {
+        let digest = Sha256::digest(b"not a key");
+        let multihash = libp2p::multihash::Multihash::<64>::wrap(0x12, &digest)
+            .expect("sha2-256 digest fits in 64 bytes");
+        let peer = PeerId::from_multihash(multihash).expect("sha2-256 is a valid peer id code");
+
+        assert_eq!(id_from_peer_id(&peer), None);
+    }
+
     #[test]
     fn try_from_peer_id_agrees_with_direct_derivation() {
         let kp = Keypair::generate_ed25519();

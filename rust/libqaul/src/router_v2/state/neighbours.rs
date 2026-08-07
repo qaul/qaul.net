@@ -16,6 +16,17 @@ use crate::{
 };
 
 impl RouterV2State {
+    /// Resolves a routable node id back to the neighbour `PeerId` we reach it
+    /// through.
+    pub fn peer_of_node(&self, node_id: &[u8; 8]) -> Option<PeerId> {
+        self.mirrors
+            .read()
+            .unwrap()
+            .iter()
+            .find(|(_, info)| info.node_id == *node_id)
+            .map(|(peer, _)| *peer)
+    }
+
     /// Registers a neighbour as a routable node: ensures a [`Node`]
     pub fn register_neighbour_node(&self, node_id: [u8; 8], public_key: Option<Multikey>) {
         {
