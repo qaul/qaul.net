@@ -3,6 +3,7 @@ package net.qaul.ble.test.ble.metrics
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import net.qaul.ble.BleConstants
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedWriter
@@ -93,6 +94,13 @@ class SessionLogger private constructor(context: Context) {
             put("qid", qaulId)
             put("clock_off_ms", clockOffsetMs)
             put("resumed", resumed)
+
+            put("cap", BleConstants.MAX_CONNECTIONS)
+            put("anti_islanding", BleConstants.ANTI_ISLANDING)
+            put("stage1", BleConstants.STAGE1_FILL_GATE)
+            put("stage2", BleConstants.STAGE2_PROACTIVE_DROP)
+            put("prefer_2m", BleConstants.PREFER_2M)
+            put("allow_phy_upgrade", BleConstants.ALLOW_PHY_UPGRADE)
         })
         Log.i(TAG, "Session ${if (resumed) "resumed" else "started"} → ${file?.absolutePath}")
         startMirroring()
@@ -147,6 +155,73 @@ class SessionLogger private constructor(context: Context) {
         }
     }
 
+    // ── Connection attempt tracking
+    //
+
+    /** Furthest point an attempt got */
+    private class Attempt(val role: String, val phy: String, val startedAt: Long) {
+        var stage: String = "connecting"
+    }
+
+    private val attempts = mutableMapOf<String, Attempt>()
+
+    fun attemptStarted(mac: String, role: String, phy: String) {
+        synchronized(lock) { attempts[mac] = Attempt(role, phy, now()) }
+    }
+
+    fun attemptStage(mac: String, stage: String) {
+        synchronized(lock) { attempts[mac]?.stage = stage }
+    }
+
+    fun attemptEnded(mac: String, peerId: String?, success: Boolean, error: String? = null) {
+        val a = synchronized(lock) { attempts.remove(mac) } ?: return
+        write(JSONObject().apply {
+            put("type", "connect_attempt")
+            put("mac", mac)
+            peerId?.let { put("peer", it) }
+            put("role", a.role)
+            put("phy", a.phy)
+            put("ok", success)
+            put("reached", a.stage)
+            put("ms", now() - a.startedAt)   // time it took to establish or failed
+            error?.let { put("err", it) }
+        })
+    }
+
+    fun gossipTx(seq: Int, sealed: Boolean, nbrs: Int, fanout: Int, trigger: String) =
+        write(JSONObject().apply {
+            put("type", "gossip_tx"); put("seq", seq); put("sealed", sealed)
+            put("nbrs", nbrs); put("fanout", fanout); put("trigger", trigger)
+        })
+
+    /** first receipt of a new neighbour gossip. Duplicates are only counted in the snapshot instead to avoid bloat  */
+    fun gossipRx(origin: String, seq: Int, hops: Int, relayed: Boolean, lsSize: Int) =
+        write(JSONObject().apply {
+            put("type", "gossip_rx"); put("origin", origin); put("seq", seq)
+            put("hops", hops); put("relayed", relayed); put("ls", lsSize)
+        })
+
+    /**
+     * A completed bulk transfer
+     */
+    fun transfer(peer: String, direction: String, transport: String, sizeBytes: Int, ms: Long,
+                 phy: String, rssi: Int?) = write(JSONObject().apply {
+        put("type", "transfer"); put("peer", peer); put("dir", direction); put("transport", transport)
+        put("bytes", sizeBytes); put("ms", ms)
+        put("kbps", if (ms > 0) (sizeBytes * 8.0 / ms) else 0.0)
+        put("phy", phy); rssi?.let { put("rssi", it) }
+    })
+
+    /**
+     * A link's negotiated PHY changed. Covers every path that can move it: the initial connect PHY,
+     * the bulk transfer 1M to 2M escalation and its downgrade back, and the Coded to 1M upgrade
+     */
+    fun phyChange(peer: String, from: String, to: String, reason: String, rssi: Int?) =
+        write(JSONObject().apply {
+            put("type", "phy"); put("peer", peer); put("from", from); put("to", to)
+            put("reason", reason); rssi?.let { put("rssi", it) }
+        })
+
     fun connect(peerId: String, phy: String, rssi: Int?, role: String) = write(JSONObject().apply {
         put("type", "connect"); put("peer", peerId); put("phy", phy); put("role", role)
         rssi?.let { put("rssi", it) }   // omitted until RSSI is plumbed through
@@ -189,9 +264,13 @@ class SessionLogger private constructor(context: Context) {
      * @param gps        (lat, lon, accuracyMeters) or null if unavailable
      */
     fun snapshot(degree: Int, neighbours: List<Triple<String, Int?, String>>,
-                 gps: Triple<Double, Double, Float>?) = write(JSONObject().apply {
+                 gps: Triple<Double, Double, Float>?,
+                 gossipRx: Int = 0, gossipDup: Int = 0, gossipRelayed: Int = 0,
+                 linkStateSize: Int = 0) = write(JSONObject().apply {
         put("type", "snapshot")
         put("deg", degree)
+        put("g_rx", gossipRx); put("g_dup", gossipDup)
+        put("g_relay", gossipRelayed); put("g_ls", linkStateSize)
         put("nbrs", JSONArray().apply {
             neighbours.forEach { (id, rssi, phy) ->
                 put(JSONObject().apply { put("id", id); rssi?.let { put("rssi", it) }; put("phy", phy) })

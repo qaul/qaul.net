@@ -111,7 +111,8 @@ object ConnectionPool {
             val nbrs = conns.map { c ->
                 Triple(c.remoteQaulId?.toHexKey()?.take(6) ?: "unresolved", c.rssi, c.phyLabel)
             }
-            SessionLogger[ctx].snapshot(conns.size, nbrs, GpsProvider.last())
+            val (rx, dup, relayed) = drainGossipStats()
+            SessionLogger[ctx].snapshot(conns.size, nbrs, GpsProvider.last(), rx, dup, relayed, linkState.size)
         } catch (e: Exception) {
             Log.e(TAG, "telemetry snapshot failed", e)
         }
@@ -142,7 +143,7 @@ object ConnectionPool {
             // hop = distinct peers reachable via a neighbour; lists = how many neighbours have sent
             // us their list; open = exact free-slot count over the neighborhood
             val twoHop = linkState.values.flatMap { it.neighbours }.toSet().size
-            sb.append("\nhop=$twoHop  open=${openSlots()}  lists=${linkState.size}")
+            sb.append("\nneighboursVis=$twoHop  open=${openSlots()}  lists=${linkState.size}")
         }
         return sb.toString()
     }
@@ -161,7 +162,7 @@ object ConnectionPool {
                 val budget = conn.scaleTimeout(BleConstants.LIVENESS_TIMEOUT_MS)
                 if (now - conn.lastActivityAt > budget)
                 {
-                    disconnect(conn.device)
+                    disconnect(conn.device, "liveness_timeout")
                     Log.w(TAG, "Liveness: ${conn.device.address} last seen > ${budget}ms ago — dropping")
                 }
             }
@@ -187,7 +188,12 @@ object ConnectionPool {
                 if (startedAt != null && conn.remoteQaulId == null &&
                     now - startedAt > budget) {
                     Log.w(TAG, "Unresolved reaper: ${conn.device.address}/${conn.role} never resolved in ${budget}ms — dropping")
-                    disconnect(conn.device)
+                    appContext?.let { ctx ->
+                        SessionLogger[ctx].attemptEnded(
+                            conn.device.address, null, success = false, error = "unresolved_reaper"
+                        )
+                    }
+                    disconnect(conn.device, "unresolved_reaper")
                 }
             }
         } catch (e: Exception) {
@@ -240,7 +246,7 @@ object ConnectionPool {
         // unchanged, so peers' link-state timeouts don't starve on a static mesh and in case of lost packets. The change-driven
         // broadcast still fires immediately on connect/disconnect for fast updates.
         reaper.scheduleWithFixedDelay(
-            { if (BleConstants.ANTI_ISLANDING) try { broadcastNeighbourList() } catch (e: Exception) { Log.e(TAG, "keepalive broadcast failed", e) } },
+            { if (BleConstants.ANTI_ISLANDING) try { gossipTrigger = "keepalive"; broadcastNeighbourList() } catch (e: Exception) { Log.e(TAG, "keepalive broadcast failed", e) } },
             BleConstants.NEIGHBOUR_KEEPALIVE_MS, BleConstants.NEIGHBOUR_KEEPALIVE_MS, TimeUnit.MILLISECONDS
         )
         // Unresolved-connection reaper: ENABLED. Drops stuck/zombie handshakes (remoteQaulId == null
@@ -316,10 +322,16 @@ object ConnectionPool {
         connections[device.address] = newConnection
         newConnection.connect()
         Log.i(TAG, "Connection added for ${device.address} (${connections.size} total)")
+
+        if (role == BleRole.PERIPHERAL) {
+            appContext?.let { ctx ->
+                SessionLogger[ctx].attemptStarted(device.address, role.name, "?")
+            }
+        }
         notifyConnectionsChanged()
     }
 
-    fun disconnect(device: BluetoothDevice) {
+    fun disconnect(device: BluetoothDevice, reason: String = "intentional") {
         val conn = connections.remove(device.address) ?: run {
             Log.w(TAG, "disconnect called but no connection found for ${device.address}")
             return
@@ -337,7 +349,7 @@ object ConnectionPool {
         appContext?.let { ctx ->
             SessionLogger[ctx].disconnect(
                 conn.remoteQaulId?.toHexKey()?.take(6) ?: "unresolved",
-                "intentional", System.currentTimeMillis() - conn.createdAt
+                reason, System.currentTimeMillis() - conn.createdAt
             )
         }
         Log.i(TAG, "Connection removed for ${device.address} (${connections.size} remaining)")
@@ -391,12 +403,44 @@ object ConnectionPool {
      * as  we didn't open it, so without a server side PHY report [BleConnection.isCoded] stays false and a genuinely long range inbound link runs on
      * short range budgets on our side.
      */
-    fun notePhy(address: String, txPhy: Int) {
-        connections[address]?.phyLabel = when (txPhy) {
+    private val pendingPhyReason = mutableMapOf<String, String>()
+    fun notePhyRequestReason(address: String, reason: String) { pendingPhyReason[address] = reason }
+
+    /**
+     * Log a completed bulk transfer
+     */
+    fun logTransfer(address: String, direction: String, transport: String, sizeBytes: Int, ms: Long) {
+        val ctx = appContext ?: return
+        val conn = connections[address]
+        SessionLogger[ctx].transfer(
+            conn?.remoteQaulId?.toHexKey()?.take(6) ?: address, direction, transport,
+            sizeBytes, ms, conn?.phyLabel ?: "?", conn?.rssi
+        )
+    }
+
+    /**
+     * @param reason why we're checking, not why it changed
+     */
+    fun notePhy(address: String, txPhy: Int, reason: String = "update") {
+        val label = when (txPhy) {
             BluetoothDevice.PHY_LE_1M -> "1M"
             BluetoothDevice.PHY_LE_2M -> "2M"
             BluetoothDevice.PHY_LE_CODED -> "Coded"
             else -> "phy$txPhy"
+        }
+        val conn = connections[address] ?: return
+        val from = conn.phyLabel
+        conn.phyLabel = label
+        // Only a real transition, not the "change" from unknow to initial phy when connecting
+        if (from != label && from != "?") {
+            val effectiveReason = pendingPhyReason.remove(address) ?: reason
+            appContext?.let { ctx ->
+                SessionLogger[ctx].phyChange(
+                    conn.remoteQaulId?.toHexKey()?.take(6) ?: address, from, label, effectiveReason, conn.rssi
+                )
+            }
+        } else {
+            pendingPhyReason.remove(address)
         }
     }
 
@@ -456,7 +500,7 @@ object ConnectionPool {
         val justResolved = connections[device.address]
         val toDisconnect = if (justResolved?.role == keepRole) existing.device else device
         Log.w(TAG, "Tiebreaker (SEND_ID path): local ${if (localShouldBeCentral) "wins" else "loses"} CENTRAL, keeping $keepRole leg, dropping ${toDisconnect.address}")
-        disconnect(toDisconnect)
+        disconnect(toDisconnect, "tiebreaker")
     }
 
     private fun compareUnsigned(a: ByteArray, b: ByteArray): Int {
@@ -489,7 +533,7 @@ object ConnectionPool {
         if (upNeighbours.add(qaulId.toHexString())) {
             Log.i(TAG, "Neighbour up: ${qaulId.toHexString()}")
             onNeighbourUp?.invoke(qaulId)
-            broadcastNeighbourList()   // our neighbour set grew, tell everyone including the new peer
+            gossipTrigger = "connect"; broadcastNeighbourList()   // our neighbour set grew, tell everyone including the new peer
         }
     }
 
@@ -505,7 +549,7 @@ object ConnectionPool {
         if (!stillReachable && upNeighbours.remove(qaulId.toHexString())) {
             Log.i(TAG, "Neighbour down: ${qaulId.toHexString()}")
             onNeighbourDown?.invoke(qaulId)
-            broadcastNeighbourList()   // our neighbour set shrank, tell the rest
+            gossipTrigger = "disconnect"; broadcastNeighbourList()   // our neighbour set shrank, tell the rest
         }
     }
 
@@ -519,11 +563,36 @@ object ConnectionPool {
         val originKey = u.origin.toHexKey()
         if (originKey == selfKey()) return                          // our own list echoed back, ignore
         val prev = linkState[originKey]
-        if (prev != null && !seqFresher(u.seq, prev.seq)) return    // stale or duplicate, drop
+        if (prev != null && !seqFresher(u.seq, prev.seq)) {
+            gossipRxDup++       // only counted
+            gossipRxTotal++     //  the ratio is the redundancy cost of TTL=3
+            return
+        }
+        gossipRxTotal++
         linkState[originKey] = LsEntry(
             u.seq, u.neighbours.map { it.toHexKey() }.toSet(), u.sealed, System.currentTimeMillis()
         )
-        if (u.ttl > 1) relayNeighbourList(device, u)
+        val willRelay = u.ttl > 1
+        if (willRelay) {
+            gossipRelayed++
+            relayNeighbourList(device, u)
+        }
+        // Only the first receipt of each unique gossip is logged. can join with origins gossip tx time to see propogation time
+        appContext?.let { ctx ->
+            SessionLogger[ctx].gossipRx(
+                originKey.take(6), u.seq, BleConstants.TTL - u.ttl, willRelay, linkState.size
+            )
+        }
+    }
+
+    @Volatile private var gossipRxTotal = 0
+    @Volatile private var gossipRxDup = 0
+    @Volatile private var gossipRelayed = 0
+
+    private fun drainGossipStats(): Triple<Int, Int, Int> {
+        val t = Triple(gossipRxTotal, gossipRxDup, gossipRelayed)
+        gossipRxTotal = 0; gossipRxDup = 0; gossipRelayed = 0
+        return t
     }
 
     /** Expire link state entries we haven't heard a fresh update for. Runs on the periodic tick. */ //TODO: Evaluate timings
@@ -545,7 +614,13 @@ object ConnectionPool {
         val sealed = openSlots() == 0   // our own "whole 3-hop view full" state, for Stage 2's election
         connections.values.forEach { it.sendNeighbourList(localId, seq, BleConstants.TTL, sealed, prefixes)
         }
+        appContext?.let { ctx ->
+            SessionLogger[ctx].gossipTx(seq, sealed, prefixes.size, connections.size, gossipTrigger)
+        }
     }
+
+    /** Why the pending broadcast fired, so we can seperate the connect/disconnect broadcasts vs the continous ones */
+    @Volatile private var gossipTrigger: String = "keepalive"
 
 
     /** Relay a received neighbour list onward to the rest of our connections*/
@@ -643,7 +718,7 @@ object ConnectionPool {
                 0
             )
         }
-        disconnect(victim.device)                      // existing disconnect() path already does the
+        disconnect(victim.device, "stage2_drop")        // existing disconnect() path already does the
         sealedSince = 0L
     }
 
@@ -688,7 +763,7 @@ object ConnectionPool {
     private val connectionEventListener = object : ConnectionEventListener {
 
         // Callback only for a CENTRAL connection
-        override fun onDisconnectedFromDevice(device: BluetoothDevice) {
+        override fun onDisconnectedFromDevice(device: BluetoothDevice, reason: String) {
             if (pendingDisconnects.remove(device.address)) {
                 // Intentional disconnect — already removed from map in disconnect() (which also
                 // already ran refreshNeighbourDown), don't touch it (a new connection for this
@@ -703,7 +778,7 @@ object ConnectionPool {
                     appContext?.let { ctx ->
                         SessionLogger[ctx].disconnect(
                             c.remoteQaulId?.toHexKey()?.take(6) ?: "unresolved",
-                            "unexpected", System.currentTimeMillis() - c.createdAt
+                            reason, System.currentTimeMillis() - c.createdAt
                         )
                     }
                 }
@@ -750,6 +825,7 @@ object ConnectionPool {
                     java.nio.ByteBuffer.wrap(value).order(java.nio.ByteOrder.BIG_ENDIAN).int
                 } else -1
                 Log.i(TAG, "PSM received from ${device.address}: $psm")
+                appContext?.let { SessionLogger[it].attemptStage(device.address, "psm") }
                 connections[device.address]?.connectL2cap(psm)
                 return
             }
@@ -764,6 +840,10 @@ object ConnectionPool {
                     markNeighbourUp(value)
                     appContext?.let { ctx -> // telemetry
                         SessionLogger[ctx].connect(value.toHexKey().take(6), conn.phyLabel, null, conn.role.name)
+                        // qaul-id read, so we can log the setup attempt as finished and successful at this point.
+                        SessionLogger[ctx].attemptEnded(
+                            device.address, value.toHexKey().take(6), success = true
+                        )
                     }
                 }
 
@@ -776,7 +856,7 @@ object ConnectionPool {
                                 TAG,
                                 "Already connected as CENTRAL to this qaul ID via ${existing.device.address}, dropping duplicate CENTRAL ${device.address}"
                             )
-                            disconnect(device)
+                            disconnect(device, "duplicate")
                             return
                         }
 
@@ -791,7 +871,7 @@ object ConnectionPool {
                                 TAG,
                                 "Tiebreaker (READ_CHAR path): local ${if (localShouldBeCentral) "wins" else "loses"} CENTRAL, dropping ${toDisconnect.address}"
                             )
-                            disconnect(toDisconnect)
+                            disconnect(toDisconnect, "tiebreaker")
                         }
                     }
                 }

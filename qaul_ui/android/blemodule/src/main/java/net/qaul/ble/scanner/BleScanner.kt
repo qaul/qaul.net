@@ -233,17 +233,23 @@ object BleScanner {
         synchronized(lock) {
             val attempts = (failureCount[key] ?: 0) + 1
             failureCount[key] = attempts
+
+            val freeRetries = if (ConnectionPool.getByAddress(macAddress)?.isCoded == true)
+                BleConstants.CODED_RECONNECT_FREE_RETRIES else BleConstants.RECONNECT_FREE_RETRIES
+
+            val reconnectDelayMax = if (ConnectionPool.getByAddress(macAddress)?.isCoded == true)
+                BleConstants.CODED_RECONNECT_DELAY_MAX_MS else BleConstants.RECONNECT_DELAY_MAX_MS
             // First few failures retry immediately a single transient 133 shouldn't silence the
             // node. Only escalate once a peer keeps failing past the free retry grace.
-            if (attempts <= BleConstants.RECONNECT_FREE_RETRIES) {
+            if (attempts <= freeRetries) {
                 Log.i(TAG, "Connect to $macAddress failed (attempt $attempts) — retrying without backoff")
                 return
             }
-            val n = attempts - BleConstants.RECONNECT_FREE_RETRIES
+            val n = attempts - freeRetries
             val base = (BleConstants.RECONNECT_DELAY_MIN_MS *
                     BleConstants.RECONNECT_BACKOFF_MULTIPLIER.pow(n - 1))
                 .toLong()
-                .coerceAtMost(BleConstants.RECONNECT_DELAY_MAX_MS)
+                .coerceAtMost(reconnectDelayMax)
             val jitter = (base * BleConstants.RECONNECT_JITTER_FACTOR).toLong()
             val delay = base + Random.nextLong(-jitter, jitter + 1)   // full ± jitter
             cooldownUntil[key] = System.currentTimeMillis() + delay
@@ -394,6 +400,7 @@ object BleScanner {
                 val lastTry = lastPhyUpgradeAt[key] ?: 0L
                 if (System.currentTimeMillis() - lastTry > 10_000L) {
                     lastPhyUpgradeAt[key] = System.currentTimeMillis()
+                    ConnectionPool.notePhyRequestReason(existing.device.address, "coded_upgrade")
                     BleTaskScheduler.setPreferredPhy(
                         existing.device,
                         BluetoothDevice.PHY_LE_1M_MASK,
@@ -412,7 +419,7 @@ object BleScanner {
             // 3-hop ball
             if (BleConstants.ANTI_ISLANDING && BleConstants.STAGE1_FILL_GATE && prefix != null) {
                 val (accept, reason) = ConnectionPool.fillGateDecision(prefix)
-                if (!accept) {
+                if (!accept && reason == "redundant, would seal") {
                     if (fillGateRejected.add(mac)) {
                         Log.i(TAG, "Fill-gate: rejecting $mac — $reason")
                         appContext?.let { ctx ->
@@ -490,6 +497,12 @@ object BleScanner {
                           BluetoothDevice.PHY_LE_CODED_MASK
                       else BluetoothDevice.PHY_LE_1M_MASK
             Log.i(TAG, "Auto-connecting to $mac (${if (phy == BluetoothDevice.PHY_LE_CODED_MASK) "Coded/long-range" else "1M/short-range"})")
+            appContext?.let { ctx ->
+                SessionLogger[ctx].attemptStarted(
+                    mac, BleRole.CENTRAL.name,
+                    if (phy == BluetoothDevice.PHY_LE_CODED_MASK) "Coded" else "1M"
+                )
+            }
             BleManager.connect(result.device, BleRole.CENTRAL, phy)
         }
     }
