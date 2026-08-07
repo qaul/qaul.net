@@ -14,7 +14,12 @@ class PublicNotificationController
   final _log = Logger('PublicNotificationController');
 
   @override
-  String get cacheKey => 'publicNotificationControllerLastPostIndexDataKey';
+  String get legacyCacheKey =>
+      'publicNotificationControllerLastPostIndexDataKey';
+
+  @override
+  Future<void> adoptLegacyValue(Object value) =>
+      preferences.setInt(cacheKey, value as int);
 
   @override
   MapEntry<dynamic, void Function(List<FeedMessage>?, List<FeedMessage>)>

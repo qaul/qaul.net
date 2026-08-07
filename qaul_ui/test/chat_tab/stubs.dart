@@ -275,6 +275,12 @@ class NullChatNotificationController implements ChatNotificationController {
   String get cacheKey => throw UnimplementedError();
 
   @override
+  String get legacyCacheKey => throw UnimplementedError();
+
+  @override
+  Future<void> adoptLegacyValue(Object value) => throw UnimplementedError();
+
+  @override
   void close() {}
 
   @override

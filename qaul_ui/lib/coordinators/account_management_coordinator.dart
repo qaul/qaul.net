@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -9,6 +7,7 @@ import 'package:qaul_rpc/qaul_rpc.dart';
 import '../helpers/navigation_helper.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/account_session_provider.dart';
+import '../session/session_scope.dart';
 
 class AccountManagementCoordinator {
   const AccountManagementCoordinator._();
@@ -161,16 +160,25 @@ class AccountManagementCoordinator {
     final user = ref.read(defaultUserProvider);
     if (user == null) return;
 
+    final container = ProviderScope.containerOf(context, listen: false);
     final navigator = Navigator.of(context, rootNavigator: true);
+
+    // Signing out must always succeed locally. The RPC is awaited so the user
+    // sees the daemon wind down behind the progress indicator, but a failure
+    // there (10s timeout; RPC lag is common on iOS) is reported rather than
+    // used to keep them signed in.
+    final loggedOut = await _runWithProgress<bool>(
+      context,
+      () => ref.read(qaulWorkerProvider).logout(userId: user.id),
+    );
+    if (!context.mounted) return;
+    if (loggedOut != true) {
+      _showMessage(context, AppLocalizations.of(context)!.genericErrorMessage);
+    }
+
     ref.read(forceSignedOutProvider.notifier).state = true;
     if (!navigator.mounted) return;
-    _returnToInitial(navigator, ref);
-
-    unawaited(
-      ref.read(qaulWorkerProvider).logout(userId: user.id).catchError((_) {
-        return false;
-      }),
-    );
+    _returnToInitial(navigator, container);
   }
 
   static Future<void> showDeleteFlow(
@@ -203,6 +211,7 @@ class AccountManagementCoordinator {
 
     final user = ref.read(defaultUserProvider);
     if (user == null) return;
+    final container = ProviderScope.containerOf(context, listen: false);
     final navigator = Navigator.of(context, rootNavigator: true);
     final deleted = await _runWithProgress<bool>(
       context,
@@ -212,7 +221,7 @@ class AccountManagementCoordinator {
 
     ref.read(forceSignedOutProvider.notifier).state = true;
     if (!navigator.mounted) return;
-    _returnToInitial(navigator, ref);
+    _returnToInitial(navigator, container);
   }
 
   static Future<void> _setPassword(
@@ -294,11 +303,22 @@ class AccountManagementCoordinator {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  static void _returnToInitial(NavigatorState navigator, WidgetRef ref) {
+  /// Tears the signed-in UI down first, then ends the session.
+  ///
+  /// The order matters: widgets on the /home route read session providers with
+  /// a null-check (`ref.watch(defaultUserProvider)!`), so ending the session
+  /// while they are still mounted would rebuild them against a null user. By
+  /// the post-frame callback the route is gone and nothing observes the state
+  /// the session listener is about to discard.
+  static void _returnToInitial(
+    NavigatorState navigator,
+    ProviderContainer container,
+  ) {
     navigator.pushNamedAndRemoveUntil(NavigationHelper.initial, (_) => false);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(defaultUserProvider.notifier).state = null;
-      ref.invalidate(accountSessionProvider);
+      // Clearing the session key is the whole teardown; `listenForSessionChanges`
+      // discards the rest (see lib/session/session_scope.dart).
+      container.read(sessionKeyProvider.notifier).state = null;
     });
   }
 

@@ -28,6 +28,10 @@ class FeedMessageStore extends Notifier<List<FeedMessage>> {
 
   @override
   List<FeedMessage> build() {
+    // Non-state resources, reset here because Riverpod reuses the Notifier
+    // instance across invalidations — see lib/session/session_scope.dart.
+    _posts = [];
+    _pagination = null;
     ref.listen(usersStoreProvider, (_, _) {
       Future.microtask(_rebuildFeedMessages);
     });
