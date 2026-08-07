@@ -995,7 +995,7 @@ impl Libqaul {
                     .state
                     .services
                     .messaging
-                    .check_scheduler(&router.routing_table)
+                    .check_scheduler(&router.routing_table, self.state.get_router_v2().as_ref())
                 {
                     log::trace!(
                         "sending messaging message via {:?} to {}",

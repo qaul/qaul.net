@@ -11,7 +11,7 @@ use prost::Message;
 use serde::{Deserialize, Serialize};
 use sled;
 use std::collections::VecDeque;
-use std::sync::RwLock;
+use std::sync::{Arc, RwLock};
 
 #[cfg(emulate)]
 mod network_emul;
@@ -23,6 +23,8 @@ use super::chat::{ChatFile, ChatStorage};
 use super::crypto::Crypto;
 use crate::connections::ConnectionModule;
 use crate::node::user_accounts::{UserAccount, UserAccounts};
+use crate::router_v2::forwarding::ForwardingDecision;
+use crate::router_v2::RouterV2State;
 use crate::storage::database::DataBase;
 use crate::utilities::timestamp::Timestamp;
 use process::MessagingProcess;
@@ -30,6 +32,32 @@ use qaul_messaging::QaulMessagingReceived;
 
 /// Import protobuf message definition
 pub use qaul_proto::qaul_net_messaging as proto;
+
+/// Resolves the next hop for `receiver` under whichever routing protocol is
+/// active. `router_v2` is `Some` exactly when v2 is enabled, so it doubles as
+/// the version flag.
+///
+/// Both protocols agree on the contract that matters to callers: `None` means
+/// "no route right now", and the caller either drops the message or schedules
+/// it through DTN. v2 reaches that answer via
+/// [`ForwardingDecision::HandoffToDTN`], which already covers an unknown
+/// recipient, a recipient whose key is not recoverable from its `PeerId`, and
+/// a next hop that stopped being a neighbour between lookup and send.
+fn resolve_route(
+    routing_table: &crate::router::table::RoutingTableState,
+    router_v2: Option<&Arc<RouterV2State>>,
+    receiver: PeerId,
+) -> Option<(PeerId, ConnectionModule)> {
+    match router_v2 {
+        Some(v2) => match v2.resolve_forwarding(receiver) {
+            ForwardingDecision::Forward { peer, transport } => Some((peer, transport)),
+            ForwardingDecision::HandoffToDTN => None,
+        },
+        None => routing_table
+            .get_route_to_user(receiver)
+            .map(|route| (route.node, route.module)),
+    }
+}
 
 /// Messaging Scheduling Structure
 pub struct ScheduledMessage {
@@ -272,6 +300,7 @@ impl MessagingState {
     pub fn check_scheduler(
         &self,
         routing_table: &crate::router::table::RoutingTableState,
+        router_v2: Option<&Arc<RouterV2State>>,
     ) -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
         let message_item: Option<ScheduledMessage>;
         {
@@ -280,10 +309,12 @@ impl MessagingState {
         }
 
         if let Some(message) = message_item {
-            if let Some(route) = routing_table.get_route_to_user(message.receiver) {
+            if let Some((neighbour, transport)) =
+                resolve_route(routing_table, router_v2, message.receiver)
+            {
                 self.on_scheduled_message(&message.container.signature);
                 let data = message.container.encode_to_vec();
-                return Some((route.node, route.module, data));
+                return Some((neighbour, transport, data));
             }
         }
 
@@ -919,9 +950,12 @@ impl Messaging {
         }
 
         if let Some(message) = message_item {
-            // check for route
+            // check for route, under whichever routing protocol is active
             let rs = state.get_router();
-            if let Some(route) = rs.routing_table.get_route_to_user(message.receiver) {
+            let router_v2 = state.get_router_v2();
+            if let Some((neighbour, transport)) =
+                resolve_route(&rs.routing_table, router_v2.as_ref(), message.receiver)
+            {
                 // update unconfirmed table set scheduled flag.
                 state
                     .services
@@ -932,7 +966,7 @@ impl Messaging {
                 let data = message.container.encode_to_vec();
 
                 // return information
-                return Some((route.node, route.module, data));
+                return Some((neighbour, transport, data));
             } else {
                 // user is offline we schedule through DTN service
                 if !message.is_forward
