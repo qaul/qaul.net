@@ -77,7 +77,7 @@ void main() {
       expect((avatarCenter.dy - emojiCenter.dy).abs(), lessThan(1));
     });
 
-    testWidgets('applies the compact emoji offset to small avatars', (
+    testWidgets('keeps small emoji avatars centered in the circle', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -85,31 +85,6 @@ void main() {
           const QaulAvatar(
             name: '😘 Small',
             id: 'small-emoji',
-          ),
-        ),
-      );
-
-      final avatarCenter = tester.getCenter(find.byType(CircleAvatar));
-      final emojiCenter = tester.getCenter(find.text('😘'));
-      expect(
-        emojiCenter.dx - avatarCenter.dx,
-        moreOrLessEquals(kQaulAvatarCompactEmojiOffset.dx, epsilon: 1),
-      );
-      expect(
-        emojiCenter.dy - avatarCenter.dy,
-        moreOrLessEquals(kQaulAvatarCompactEmojiOffset.dy, epsilon: 1),
-      );
-    });
-
-    testWidgets('allows emoji offset override for preview surfaces', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        wrap(
-          const QaulAvatar(
-            name: '😘 Small',
-            id: 'small-emoji-preview',
-            emojiOffset: Offset.zero,
           ),
         ),
       );

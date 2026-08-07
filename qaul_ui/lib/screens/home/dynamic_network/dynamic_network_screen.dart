@@ -15,7 +15,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hooks_riverpod/legacy.dart';
 import 'package:qaul_components/qaul_components.dart'
-    show kQaulAvatarNetworkEmojiOffset;
+    show kQaulAvatarEmojiFontFamilyFallback;
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
 
@@ -230,15 +230,12 @@ class _NetworkNodeComponent extends BodyComponent
         textRenderer: TextPaint(
           style: TextStyle(
             fontSize: radius,
+            fontFamilyFallback:
+                isEmoji ? kQaulAvatarEmojiFontFamilyFallback : null,
             height: isEmoji ? 1 : 0.7 + 0.0625 * radius,
           ),
         ),
-        position: isEmoji
-            ? Vector2(
-                kQaulAvatarNetworkEmojiOffset.dx,
-                kQaulAvatarNetworkEmojiOffset.dy,
-              )
-            : Vector2.zero(),
+        position: Vector2.zero(),
         anchor: Anchor.center,
         priority: 2,
       ));

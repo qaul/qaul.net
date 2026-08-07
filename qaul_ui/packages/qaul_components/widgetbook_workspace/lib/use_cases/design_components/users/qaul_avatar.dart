@@ -22,7 +22,6 @@ Widget buildQaulAvatarUseCase(BuildContext context) {
       id: '12D3KooWLSWqK6vhW2LuRMpGqQcd2migeh12f8n497T27AUn2faN',
     ),
   ];
-  const widgetbookEmojiOffset = Offset.zero;
 
   return Center(
     child: Wrap(
@@ -35,13 +34,11 @@ Widget buildQaulAvatarUseCase(BuildContext context) {
             name: user.name,
             id: user.id,
             size: QaulAvatarSize.tiny,
-            emojiOffset: widgetbookEmojiOffset,
           ),
           QaulAvatar(
             name: user.name,
             id: user.id,
             size: QaulAvatarSize.small,
-            emojiOffset: widgetbookEmojiOffset,
           ),
           QaulAvatarBadge(
             size: QaulAvatarSize.small,
@@ -49,14 +46,12 @@ Widget buildQaulAvatarUseCase(BuildContext context) {
               name: user.name,
               id: user.id,
               size: QaulAvatarSize.small,
-              emojiOffset: widgetbookEmojiOffset,
             ),
           ),
           QaulAvatar(
             name: user.name,
             id: user.id,
             size: QaulAvatarSize.large,
-            emojiOffset: widgetbookEmojiOffset,
           ),
         ],
         const QaulAvatar.group(size: QaulAvatarSize.small),
