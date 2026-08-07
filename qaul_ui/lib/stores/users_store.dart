@@ -50,7 +50,18 @@ class UsersSearchStore extends Notifier<UsersSearchState> {
   bool _loadMoreInFlight = false;
 
   @override
-  UsersSearchState build() => const UsersSearchState();
+  UsersSearchState build() {
+    // Non-state resources, reset here because Riverpod reuses the Notifier
+    // instance across invalidations — see lib/session/session_scope.dart.
+    // Bumping the generation strands any request still in flight for the
+    // previous session.
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
+    _requestGeneration++;
+    _loadMoreInFlight = false;
+    ref.onDispose(() => _debounceTimer?.cancel());
+    return const UsersSearchState();
+  }
 
   void setQuery(String query) {
     _debounceTimer?.cancel();
@@ -157,7 +168,19 @@ class UsersStore extends Notifier<List<User>> {
   static const _pollingInterval = Duration(seconds: 3);
 
   @override
-  List<User> build() => [];
+  List<User> build() {
+    // Non-state resources, reset here because Riverpod reuses the Notifier
+    // instance across invalidations — see lib/session/session_scope.dart.
+    _pagination = null;
+    _securityNumber = null;
+    _inFlightByUserId.clear();
+
+    // A session reset must not leave the previous account's poller running.
+    // Whether polling *should* run is decided by the app shell, which owns both
+    // inputs to that question (see `_syncOnlinePolling` in main.dart).
+    ref.onDispose(stopOnlinePolling);
+    return [];
+  }
 
   // ---------------------------------------------------------------------------
   // Paginated user fetching

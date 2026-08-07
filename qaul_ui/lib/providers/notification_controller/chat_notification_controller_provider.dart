@@ -14,7 +14,11 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
   final _log = Logger('ChatNotificationController');
 
   @override
-  String get cacheKey => 'chatNotificationControllerChatDataKey';
+  String get legacyCacheKey => 'chatNotificationControllerChatDataKey';
+
+  @override
+  Future<void> adoptLegacyValue(Object value) =>
+      preferences.setStringList(cacheKey, (value as List).cast<String>());
 
   @override
   MapEntry<dynamic, void Function(List<ChatRoom>?, List<ChatRoom>)>

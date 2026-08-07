@@ -8,10 +8,15 @@ final homeScreenControllerProvider =
 class HomeScreenTabController extends Notifier<TabType> {
   @override
   TabType build() {
+    // Non-state resource, created here because Riverpod reuses the Notifier
+    // instance across invalidations — see lib/session/session_scope.dart. A
+    // field initializer would hand the next session a disposed controller.
+    _pageController = PageController(initialPage: 1);
+    ref.onDispose(_pageController.dispose);
     return TabType.public;
   }
 
-  final _pageController = PageController(initialPage: 1);
+  late PageController _pageController;
 
   PageController controller() {
     return _pageController;

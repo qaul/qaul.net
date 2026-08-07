@@ -13,6 +13,7 @@ import 'force_update.dart';
 import 'helpers/user_prefs_helper.dart';
 import 'l10n/app_localizations.dart';
 import 'qaul_app.dart';
+import 'session/session_scope.dart';
 import 'stores/stores.dart';
 
 final _container = ProviderContainer();
@@ -71,28 +72,45 @@ class _CustomProviderScope extends StatefulWidget {
 
 class _CustomProviderScopeState extends State<_CustomProviderScope>
     with WidgetsBindingObserver {
+  ProviderSubscription<String?>? _sessionSubscription;
+  bool _resumed = true;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _container.read(usersStoreProvider.notifier).startOnlinePolling();
+    // The single session boundary: it discards the outgoing account's state and
+    // then brings polling in line with the incoming one. A session reset takes
+    // UsersStore's polling timer down with it, so polling has to be restarted
+    // per session rather than once at startup.
+    _sessionSubscription = listenForSessionChanges(
+      _container,
+      onSessionChanged: (_) => _syncOnlinePolling(),
+    );
   }
 
   @override
   void dispose() {
-    _container.read(usersStoreProvider.notifier).stopOnlinePolling();
+    _sessionSubscription?.close();
     WidgetsBinding.instance.removeObserver(this);
-    // disposing the globally self managed container.
+    // Disposing the globally self managed container. UsersStore cancels its
+    // polling timer from `ref.onDispose`.
     _container.dispose();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    _resumed = state == AppLifecycleState.resumed;
+    _syncOnlinePolling();
+  }
+
+  /// Polling is a function of two inputs — a foregrounded app and a signed-in
+  /// account — evaluated in one place so the two triggers cannot disagree.
+  void _syncOnlinePolling() {
+    final shouldPoll = _resumed && _container.read(sessionKeyProvider) != null;
     final store = _container.read(usersStoreProvider.notifier);
-    state == AppLifecycleState.resumed
-        ? store.startOnlinePolling()
-        : store.stopOnlinePolling();
+    shouldPoll ? store.startOnlinePolling() : store.stopOnlinePolling();
   }
 
   @override
