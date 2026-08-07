@@ -33,6 +33,7 @@ use crate::{
 };
 
 pub mod codec;
+pub mod forwarding;
 pub mod identity;
 pub mod index;
 pub mod init;
