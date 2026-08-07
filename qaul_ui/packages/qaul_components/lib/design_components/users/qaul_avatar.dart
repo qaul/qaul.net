@@ -6,6 +6,11 @@ import 'package:utils/utils.dart';
 const Color kQaulAvatarOnlineBadgeColor = Color(0xFF00C853);
 const Offset kQaulAvatarCompactEmojiOffset = Offset(3, 1);
 const Offset kQaulAvatarNetworkEmojiOffset = Offset(1.0, 1.0);
+const List<String> kQaulAvatarEmojiFontFamilyFallback = [
+  'Apple Color Emoji',
+  'Noto Color Emoji',
+  'Segoe UI Emoji',
+];
 
 enum QaulAvatarSize {
   tiny(radius: 14, fontSize: 12, fontWeight: FontWeight.w500),
@@ -24,9 +29,8 @@ enum QaulAvatarSize {
 
   Offset get emojiOffset {
     return switch (this) {
-      QaulAvatarSize.tiny || QaulAvatarSize.small =>
-        kQaulAvatarCompactEmojiOffset,
-      QaulAvatarSize.large => Offset.zero,
+      QaulAvatarSize.small => kQaulAvatarCompactEmojiOffset,
+      QaulAvatarSize.tiny || QaulAvatarSize.large => Offset.zero,
     };
   }
 }
@@ -37,13 +41,15 @@ class QaulAvatar extends StatelessWidget {
     required this.name,
     required this.id,
     this.size = QaulAvatarSize.small,
+    this.emojiOffset,
   })  : isGroup = false,
         isBlank = false;
 
   const QaulAvatar.blank({
     super.key,
     this.size = QaulAvatarSize.large,
-  })  : name = null,
+  })  : emojiOffset = null,
+        name = null,
         id = null,
         isGroup = false,
         isBlank = true;
@@ -51,7 +57,8 @@ class QaulAvatar extends StatelessWidget {
   const QaulAvatar.group({
     super.key,
     this.size = QaulAvatarSize.small,
-  })  : name = null,
+  })  : emojiOffset = null,
+        name = null,
         id = null,
         isGroup = true,
         isBlank = false;
@@ -59,6 +66,7 @@ class QaulAvatar extends StatelessWidget {
   final String? name;
   final String? id;
   final QaulAvatarSize size;
+  final Offset? emojiOffset;
   final bool isGroup;
   final bool isBlank;
 
@@ -81,7 +89,11 @@ class QaulAvatar extends StatelessWidget {
       child: SizedBox.square(
         dimension: size.radius * 2,
         child: Center(
-          child: _AvatarInitials(text: avatarInitials, size: size),
+          child: _AvatarInitials(
+            text: avatarInitials,
+            size: size,
+            emojiOffset: emojiOffset ?? size.emojiOffset,
+          ),
         ),
       ),
     );
@@ -89,10 +101,15 @@ class QaulAvatar extends StatelessWidget {
 }
 
 class _AvatarInitials extends StatelessWidget {
-  const _AvatarInitials({required this.text, required this.size});
+  const _AvatarInitials({
+    required this.text,
+    required this.size,
+    required this.emojiOffset,
+  });
 
   final String text;
   final QaulAvatarSize size;
+  final Offset emojiOffset;
 
   @override
   Widget build(BuildContext context) {
@@ -103,6 +120,8 @@ class _AvatarInitials extends StatelessWidget {
         fontSize: size.fontSize,
         color: Colors.white,
         fontWeight: size.fontWeight,
+        fontFamilyFallback:
+            isEmoji ? kQaulAvatarEmojiFontFamilyFallback : null,
         height: isEmoji ? 1 : null,
       ),
       textAlign: TextAlign.center,
@@ -115,8 +134,8 @@ class _AvatarInitials extends StatelessWidget {
           : null,
     );
 
-    if (!isEmoji || size.emojiOffset == Offset.zero) return child;
-    return Transform.translate(offset: size.emojiOffset, child: child);
+    if (!isEmoji || emojiOffset == Offset.zero) return child;
+    return Transform.translate(offset: emojiOffset, child: child);
   }
 }
 

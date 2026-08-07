@@ -101,6 +101,25 @@ void main() {
       );
     });
 
+    testWidgets('allows emoji offset override for preview surfaces', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          const QaulAvatar(
+            name: '😘 Small',
+            id: 'small-emoji-preview',
+            emojiOffset: Offset.zero,
+          ),
+        ),
+      );
+
+      final avatarCenter = tester.getCenter(find.byType(CircleAvatar));
+      final emojiCenter = tester.getCenter(find.text('😘'));
+      expect((avatarCenter.dx - emojiCenter.dx).abs(), lessThan(1));
+      expect((avatarCenter.dy - emojiCenter.dy).abs(), lessThan(1));
+    });
+
     testWidgets('uses the shared online badge color when visible', (
       tester,
     ) async {
