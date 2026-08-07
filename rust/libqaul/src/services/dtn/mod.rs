@@ -17,6 +17,7 @@ use std::{fmt, sync::RwLock};
 use super::messaging::{proto, MessagingServiceType};
 use crate::node::user_accounts::{UserAccount, UserAccounts};
 use crate::router::users::Users;
+use crate::router_v2;
 use crate::rpc::Rpc;
 use crate::storage::configuration::Configuration;
 use crate::storage::database::DataBase;
@@ -1042,14 +1043,27 @@ impl Dtn {
         }
     }
 
+    /// Whether we hold a route to this specific user.
+    fn has_route_to_user(state: &crate::QaulState, user_id: &PeerId) -> bool {
+        match state.get_router_v2() {
+            Some(v2) => router_v2::identity::id_from_peer_id(user_id)
+                .and_then(|id| v2.next_hop_for_user(id))
+                .is_some(),
+            None => state
+                .get_router()
+                .routing_table
+                .get_route_to_user(*user_id)
+                .is_some(),
+        }
+    }
+
     pub fn select_custody_target(
         state: &crate::QaulState,
         routed_v2: &proto::DtnRoutedV2,
         receiver_id: &PeerId,
     ) -> Option<PeerId> {
-        let rs = state.get_router();
         // Check if recipient is directly reachable
-        if rs.routing_table.get_route_to_user(*receiver_id).is_some() {
+        if Self::has_route_to_user(state, receiver_id) {
             return Some(*receiver_id);
         }
 
@@ -1061,7 +1075,7 @@ impl Dtn {
         }
         for i in start..len {
             if let Ok(custodian_id) = PeerId::from_bytes(&routed_v2.custody_route[i]) {
-                if rs.routing_table.get_route_to_user(custodian_id).is_some() {
+                if Self::has_route_to_user(state, &custodian_id) {
                     return Some(custodian_id);
                 }
             }

@@ -392,7 +392,7 @@ mod tests {
         let result = sim.nodes[0]
             .services
             .messaging
-            .check_scheduler(&sim.nodes[0].router.routing_table);
+            .check_scheduler(&sim.nodes[0].router.routing_table, None);
 
         assert!(
             result.is_some(),
@@ -411,7 +411,7 @@ mod tests {
         let result2 = sim.nodes[0]
             .services
             .messaging
-            .check_scheduler(&sim.nodes[0].router.routing_table);
+            .check_scheduler(&sim.nodes[0].router.routing_table, None);
         assert!(result2.is_none(), "Queue should be empty after pop");
     }
 
