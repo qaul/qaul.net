@@ -38,7 +38,7 @@ class MessagePresentation {
       isPrimary: computation.isPrimary,
       sender: sender,
       meta: computation.meta,
-      bubbleDisplay: computation.textDisplay,
+      bubbleDisplay: computation.bubbleDisplay,
     );
   }
 
@@ -75,13 +75,33 @@ class ChatMessageRenderer {
     );
   }
 
-  static Widget wrapNonText({
+  static Widget renderMedia({
     required Widget child,
     required MessagePresentation presentation,
     required ChatRenderMode mode,
+    required DateTime clock,
+    bool isSelected = false,
   }) {
+    final display = presentation.bubbleDisplay;
+    if (display == null) return child;
+
+    final mediaBubble = QaulChatBubble.media(
+      message: display.message,
+      clock: clock,
+      showTimestamp: presentation.meta.showTimestamp,
+      isSelected: isSelected,
+      child: child,
+    );
+
     if (mode != ChatRenderMode.group || presentation.isPrimary) {
-      return child;
+      return Padding(
+        padding: EdgeInsetsDirectional.only(
+          top: presentation.meta.topSpacing,
+          end: presentation.isPrimary ? 16 : 0,
+          start: presentation.isPrimary ? 0 : 16,
+        ),
+        child: mediaBubble,
+      );
     }
 
     return GroupMessageShell(
@@ -89,7 +109,7 @@ class ChatMessageRenderer {
       sender: presentation.sender,
       showSenderName: presentation.meta.showSenderName,
       showSenderAvatar: presentation.meta.showAvatar,
-      child: child,
+      child: mediaBubble,
     );
   }
 }

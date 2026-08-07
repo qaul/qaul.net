@@ -88,10 +88,8 @@ class _ImageMessageWidgetState extends State<ImageMessageWidget> {
 
   @override
   Widget build(BuildContext context) {
-    var color = widget.isDefaultUser ? Colors.lightBlue.shade700 : Colors.white;
-
     var style = Theme.of(context).textTheme.bodyLarge!.copyWith(
-          color: widget.isDefaultUser ? Colors.white : Colors.black,
+          color: Colors.white,
           fontSize: 17,
           fontWeight: FontWeight.w400,
         );
@@ -99,18 +97,15 @@ class _ImageMessageWidgetState extends State<ImageMessageWidget> {
     Widget image;
     if (_isReceivingImage()) {
       image = Container(
-        color: color,
         height: 80,
         width: 80,
         padding: const EdgeInsets.all(20),
         child: const QaulLoadingIndicator(),
       );
     } else if (_size.aspectRatio == 0) {
-      image = Container(color: color, height: _size.height, width: _size.width);
+      image = SizedBox(height: _size.height, width: _size.width);
     } else if (_size.aspectRatio < 0.1 || _size.aspectRatio > 10) {
-      image = Container(
-        color: color,
-        child: Row(
+      image = Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
@@ -150,7 +145,6 @@ class _ImageMessageWidgetState extends State<ImageMessageWidget> {
               ),
             ),
           ],
-        ),
       );
     } else {
       image = Container(

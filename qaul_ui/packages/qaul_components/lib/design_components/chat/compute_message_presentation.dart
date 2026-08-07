@@ -132,7 +132,7 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
 
     return MessagePresentationComputation(
       meta: meta,
-      textDisplay: item,
+      bubbleDisplay: item,
       isPrimary: row.isOutgoing,
     );
   }
@@ -144,51 +144,54 @@ Map<String, MessagePresentationComputation> computeChatMessagePresentation({
     final prevTimeline = timelineIndex > 0
         ? ascendingTimeline[timelineIndex - 1]
         : null;
-    final nextTimeline = timelineIndex < ascendingTimeline.length - 1
-        ? ascendingTimeline[timelineIndex + 1]
-        : null;
-
     double topSpacing = 0;
     var showAvatar = false;
     var showSenderName = false;
+    const linksToPrevious = false;
+    const linksToNext = false;
 
     if (layoutMode == ChatRenderMode.group && row.isGroupIncomingEligible) {
-      showSenderName =
-          prevTimeline == null || !_sameStreakSameDay(prevTimeline, row);
+      showSenderName = true;
 
-      final continuesAfter =
-          nextTimeline != null && _sameStreakSameDay(row, nextTimeline);
-      showAvatar = !continuesAfter;
+      showAvatar = true;
 
       if (prevTimeline != null) {
         topSpacing = _isMediaTextBoundary(prevTimeline, row)
             ? kChatMediaTextGap
-            : _sameVisualStreakSameDay(prevTimeline, row)
-            ? kChatBubbleLinkedGap
             : kChatBubbleSeparatedGap;
       }
-    } else if (prevTimeline != null &&
-        _isMediaTextBoundary(prevTimeline, row)) {
-      topSpacing = kChatMediaTextGap;
+    } else if (prevTimeline != null) {
+      topSpacing = _isMediaTextBoundary(prevTimeline, row)
+          ? kChatMediaTextGap
+          : kChatBubbleSeparatedGap;
     }
 
-    final nonTextClustersWithNext =
-        nextTimeline != null && _sameVisualStreakSameDay(row, nextTimeline);
+    const nonTextClustersWithNext = false;
 
     final meta = MessagePresentationMeta(
       linksToPrevious: false,
       linksToNext: false,
       showAvatar: showAvatar,
       showSenderName: showSenderName,
-      showTimestamp: false,
-      tailEdges: const [],
+      showTimestamp: !linksToNext,
+      tailEdges: row.isOutgoing
+          ? tailEdgesForPrimary(linksToPrevious, linksToNext)
+          : tailEdgesForSecondary(linksToPrevious, linksToNext),
       topSpacing: topSpacing,
       nonTextClustersWithNext: nonTextClustersWithNext,
     );
+    final bubble = row.qaulBubbleBaseWithoutLayout;
+    final item = bubble == null
+        ? null
+        : QaulChatBubbleDisplayItem(
+            message: bubble.copyWith(edges: meta.tailEdges),
+            showTimestamp: meta.showTimestamp,
+            marginTop: topSpacing,
+          );
 
     return MessagePresentationComputation(
       meta: meta,
-      textDisplay: null,
+      bubbleDisplay: item,
       isPrimary: row.isOutgoing,
     );
   }
@@ -232,6 +235,6 @@ List<QaulChatBubbleDisplayItem> computeChatBubbleDisplayItems(
 
   return [
     for (var i = 0; i < messages.length; i++)
-      computed['text-only-$i']!.textDisplay!,
+      computed['text-only-$i']!.bubbleDisplay!,
   ];
 }

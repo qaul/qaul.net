@@ -199,6 +199,12 @@ final directories = <_widgetbook.WidgetbookNode>[
                             .buildInteractiveLongPressUseCase,
                   ),
                   _widgetbook.WidgetbookUseCase(
+                    name: 'Media — separated bubbles',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_bubble_qaul_chat_bubble
+                            .buildMediaSeparatedBubblesUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
                     name: 'Outgoing — not sent',
                     builder:
                         _qaul_components_widgetbook_use_cases_design_components_chat_bubble_qaul_chat_bubble
