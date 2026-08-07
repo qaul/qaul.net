@@ -44,6 +44,7 @@ class _PublicTabView extends ConsumerStatefulWidget {
 class _PublicTabViewState extends ConsumerState<_PublicTabView> {
   static const _pageSize = 50;
   late final ScrollController _scrollController;
+  bool _isLoadingInitialPage = true;
   bool _isLoadingMore = false;
   bool _hasMore = true;
   int _currentOffset = 0;
@@ -54,8 +55,7 @@ class _PublicTabViewState extends ConsumerState<_PublicTabView> {
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(publicNotificationControllerProvider).initialize();
-      _currentOffset = _pageSize;
+      _initializePublicFeed();
     });
   }
 
@@ -84,20 +84,38 @@ class _PublicTabViewState extends ConsumerState<_PublicTabView> {
   }
 
   Future<void> _loadMore() async {
-    if (_isLoadingMore || !_hasMore) return;
+    if (_isLoadingInitialPage || _isLoadingMore || !_hasMore) return;
 
     setState(() => _isLoadingMore = true);
     try {
       final result = await ref
           .read(feedMessageStoreProvider.notifier)
           .loadMore(_currentOffset, limit: _pageSize);
+      if (!mounted) return;
       _updatePaginationFromResult(result);
     } finally {
       if (mounted) setState(() => _isLoadingMore = false);
     }
   }
 
+  Future<void> _initializePublicFeed() async {
+    if (!mounted) return;
+
+    setState(() => _isLoadingInitialPage = true);
+    try {
+      final result = await ref
+          .read(publicNotificationControllerProvider)
+          .initializeWithFirstPage();
+      if (!mounted) return;
+      _updatePaginationFromResult(result);
+    } finally {
+      if (mounted) setState(() => _isLoadingInitialPage = false);
+    }
+  }
+
   Future<void> _refreshPublic() async {
+    if (_isLoadingInitialPage) return;
+
     await ref.read(feedMessageStoreProvider.notifier).refreshPublic();
   }
 
@@ -119,6 +137,7 @@ class _PublicTabViewState extends ConsumerState<_PublicTabView> {
     });
 
     final messages = ref.watch(feedMessageStoreProvider);
+    final isInitialContentLoading = _isLoadingInitialPage && messages.isEmpty;
 
     final l10n = AppLocalizations.of(context)!;
 
@@ -151,10 +170,11 @@ class _PublicTabViewState extends ConsumerState<_PublicTabView> {
         child: RefreshIndicator(
           onRefresh: () async => await _refreshPublic(),
           child: LoadingDecorator(
-            isLoading: _isLoadingMore,
+            isLoading: isInitialContentLoading || _isLoadingMore,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             child: EmptyStateTextDecorator(
               l10n.emptyPublicList,
-              isEmpty: messages.isEmpty,
+              isEmpty: !isInitialContentLoading && messages.isEmpty,
               child: ListView.separated(
                 controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
