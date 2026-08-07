@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -13,13 +14,22 @@ class _SessionWorker extends StubLibqaulWorker {
     super.ref, {
     this.user,
     this.authenticated = false,
-  });
+    Future<bool>? initialized,
+  }) : _initialized = initialized ?? Future.value(true);
 
+  final Future<bool> _initialized;
   final User? user;
   final bool authenticated;
+  int defaultUserAccountReads = 0;
 
   @override
-  Future<User?> getDefaultUserAccount() async => user;
+  Future<bool> get initialized => _initialized;
+
+  @override
+  Future<User?> getDefaultUserAccount() async {
+    defaultUserAccountReads++;
+    return user;
+  }
 
   @override
   Future<bool> getSessionStatus({Uint8List? userId}) async => authenticated;
@@ -76,6 +86,28 @@ void main() {
         await container.read(accountSessionProvider.future),
         QaulAccountSessionState.noLocalAccount,
       );
+    });
+
+    test('waits for the worker before reading the default account', () async {
+      final initialized = Completer<bool>();
+      late _SessionWorker worker;
+      final container = _container(
+        workerBuilder: (ref) {
+          worker = _SessionWorker(ref, initialized: initialized.future);
+          return worker;
+        },
+      );
+      addTearDown(container.dispose);
+
+      final session = container.read(accountSessionProvider.future);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(worker.defaultUserAccountReads, 0);
+
+      initialized.complete(true);
+
+      expect(await session, QaulAccountSessionState.noLocalAccount);
+      expect(worker.defaultUserAccountReads, 1);
     });
 
     test('forceSignedOut skips daemon check after explicit logout', () async {

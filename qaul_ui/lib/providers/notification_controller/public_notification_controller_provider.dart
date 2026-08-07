@@ -28,9 +28,19 @@ class PublicNotificationController
   @override
   Future<void> initialize() async {
     await super.initialize();
+    await _loadFirstPage();
+  }
+
+  Future<PaginatedPosts?> initializeWithFirstPage() async {
+    await super.initialize();
+    return _loadFirstPage();
+  }
+
+  Future<PaginatedPosts?> _loadFirstPage() async {
     if (preferences.containsKey(cacheKey)) {
       _lastIndex = preferences.getInt(cacheKey)!;
     }
+
     final result = await ref
         .read(qaulWorkerProvider)
         .requestPublicMessages(offset: 0, limit: 50);
@@ -38,6 +48,7 @@ class PublicNotificationController
       await ref.read(feedMessageStoreProvider.notifier).applyPaginatedPosts(result);
     }
     _log.config('Initialized:\n\t· Last Post Index: $_lastIndex');
+    return result;
   }
 
   @override
