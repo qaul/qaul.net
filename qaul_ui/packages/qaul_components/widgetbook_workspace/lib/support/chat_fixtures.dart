@@ -5,17 +5,10 @@ const chatFixtureCurrentUser = ChatUser(id: 'me', name: 'Me');
 const chatFixturePeer = ChatUser(id: 'maxx', name: 'MaxX');
 
 Widget chatFixtureAvatar({required String initials}) {
-  return CircleAvatar(
-    backgroundColor: const Color(0xFFD35400),
-    foregroundColor: Colors.white,
-    child: Text(
-      initials,
-      style: const TextStyle(
-        fontFamily: 'Roboto',
-        fontWeight: FontWeight.w400,
-        fontSize: 18,
-      ),
-    ),
+  return QaulAvatar(
+    name: initials.characters.join(' '),
+    id: 'fixture-avatar-$initials',
+    size: QaulAvatarSize.small,
   );
 }
 
