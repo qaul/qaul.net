@@ -215,7 +215,7 @@ object BleConstants {
     const val CONNECTION_TIMEOUT_MS = 8_000L
 
     /** How long with no data before a connection is considered dead and force-disconnected. */
-    const val LIVENESS_TIMEOUT_MS = 16_000L
+    const val LIVENESS_TIMEOUT_MS = 30_000L
 
     /** How often we check if all connections are still alive */
     const val LIVENESS_CHECK_INTERVAL_MS = 5_000L
