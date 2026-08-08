@@ -111,7 +111,7 @@ object BleConstants {
 
     /** How long a link stays escalated (high priority + 2M) after its last bulk lane activity
      *  before dropping back to idle. Prevents flipping quickly between consecutive bulk sends */
-    const val BULK_HOLD_DOWN_MS = 4_000L
+    const val BULK_HOLD_DOWN_MS = 10_000L
 
     /** Most links allowed to hold the bulk escalation (High priority + 2M) at once. High costs ~4x the connection events
      * so if 4 links are all high, the radio can be overwhelmed and links timeout.
