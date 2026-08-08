@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:qaul_components/qaul_components.dart';
+import 'package:qaul_components/qaul_components.dart' hide QaulAvatar;
+import 'package:qaul_components/qaul_components.dart' as qc
+    show QaulAvatar, QaulAvatarSize;
 import 'package:qaul_rpc/qaul_rpc.dart';
-import 'package:utils/utils.dart';
 
 import '../helpers/navigation_helper.dart';
 import '../l10n/app_localizations.dart';
@@ -90,18 +91,14 @@ class _ConnectedNavBarState extends ConsumerState<_ConnectedNavBar> {
     final user = ref.watch(defaultUserProvider);
     final l10n = AppLocalizations.of(context)!;
 
-    final avatarInitials = user != null ? initials(user.name) : null;
     final avatarChild = user != null
-        ? CircleAvatar(
-            radius: kNavBarAccountSize / 2,
-            backgroundColor: colorGenerationStrategy(user.idBase58),
-            child: Transform.translate(
-              offset: isEmojiOnlyGrapheme(avatarInitials!) ? const Offset(2, -1) : Offset.zero,
-              child: Text(
-                avatarInitials,
-                style: kNavBarAvatarTextStyle,
-                textAlign: TextAlign.center,
-              ),
+        ? SizedBox(
+            width: kNavBarAccountSize,
+            height: kNavBarAccountSize,
+            child: qc.QaulAvatar(
+              name: user.name,
+              id: user.idBase58,
+              size: qc.QaulAvatarSize.small,
             ),
           )
         : null;

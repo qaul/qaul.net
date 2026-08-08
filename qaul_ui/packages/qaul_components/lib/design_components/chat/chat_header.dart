@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/qaul_components_l10n_ext.dart';
 import '../../styles/qaul_color_sheet.dart';
+import '../users/qaul_avatar.dart';
 
 const Color _kChatHeaderControlColor = Color(0xFF999999);
 const double _kChatHeaderDividerWidth = 0.5;
-const Color _kOnlineColor = Color(0xFF34C759);
 
 const double kChatHeaderToolbarHeight = kToolbarHeight;
 const double kChatHeaderAvatarSize = 40;
@@ -13,8 +13,6 @@ const double _kHorizontalPadding = 12;
 const double _kBackAvatarGap = 4;
 const double _kAvatarTitleGap = 12;
 const double _kTitleSubtitleGap = 4;
-const double _kOnlineDotSize = 12;
-const double _kOnlineDotBorder = 1.5;
 const double _kHeaderControlIconSize = 30;
 
 class ChatHeaderMenuEntry {
@@ -266,26 +264,10 @@ class _AvatarWithOnlineBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!showOnline) return child;
-
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        child,
-        Positioned(
-          right: -1,
-          bottom: -1,
-          child: Container(
-            width: _kOnlineDotSize,
-            height: _kOnlineDotSize,
-            decoration: BoxDecoration(
-              color: _kOnlineColor,
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: _kOnlineDotBorder),
-            ),
-          ),
-        ),
-      ],
+    return QaulAvatarBadge(
+      size: QaulAvatarSize.small,
+      isVisible: showOnline,
+      child: child,
     );
   }
 }

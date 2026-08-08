@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../l10n/qaul_components_l10n_ext.dart';
 import '../../styles/qaul_color_sheet.dart';
+import '../users/qaul_avatar.dart';
 
 // ---------------------------------------------------------------------------
 // Enums
@@ -26,13 +27,6 @@ enum NavBarOverflowOption {
 
 const double kNavBarAccountSize = 40.0;
 const double kNavBarMobileMargin = 16.0;
-
-const TextStyle kNavBarAvatarTextStyle = TextStyle(
-  fontFamily: 'Roboto',
-  fontSize: 20,
-  fontWeight: FontWeight.w300,
-  color: Color(0xFFFFFFFF),
-);
 
 // ---------------------------------------------------------------------------
 // Private constants & helpers
@@ -686,11 +680,7 @@ class _NavBarItem extends StatelessWidget {
             borderRadius: BorderRadius.circular(kNavBarAccountSize / 2),
             child:
                 avatarChild ??
-                CircleAvatar(
-                  radius: kNavBarAccountSize / 2,
-                  backgroundColor: Colors.grey.shade700,
-                  child: const Text('WW', style: kNavBarAvatarTextStyle),
-                ),
+                const QaulAvatar.blank(size: QaulAvatarSize.small),
           ),
         ),
       );

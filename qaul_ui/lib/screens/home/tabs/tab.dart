@@ -8,7 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/locale.dart';
 import 'package:logging/logging.dart';
-import 'package:qaul_components/qaul_components.dart';
+import 'package:qaul_components/qaul_components.dart' hide QaulAvatar;
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
 

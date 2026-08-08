@@ -24,45 +24,27 @@ abstract class QaulAvatar extends ConsumerWidget {
   factory QaulAvatar.groupLarge({Key? key}) =>
       const _LargeQaulAvatar(isGroup: true);
 
-  double get radius;
+  qc.QaulAvatarSize get componentSize;
 
-  TextStyle get initialsStyle;
-
-  String get userInitials => initials(user!.name);
-
-  Color get userColor => colorGenerationStrategy(user!.idBase58);
+  bool get componentBadgeEnabled => false;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final defaultUser = ref.watch(defaultUserProvider);
-    final defaultUserColor = defaultUser == null
-        ? null
-        : colorGenerationStrategy(defaultUser.idBase58);
+    final avatarUser = user ?? defaultUser;
+    if (avatarUser == null) return const qc.QaulAvatar.blank();
 
-    return CircleAvatar(
-      radius: radius,
-      backgroundColor:
-          user != null ? userColor : defaultUserColor ?? Colors.red.shade700,
-      child: Text(
-        user != null
-            ? userInitials
-            : defaultUser != null
-                ? initials(defaultUser.name)
-                : 'WW',
-        style: initialsStyle,
-      ),
+    final avatar = qc.QaulAvatar(
+      name: avatarUser.name,
+      id: avatarUser.idBase58,
+      size: componentSize,
     );
-  }
 
-  @protected
-  String generateRandomInitials() {
-    int charA = "a".codeUnitAt(0);
-    int charZ = "z".codeUnitAt(0);
-    var out = '';
-    for (var i = 0; i < 2; i++) {
-      out += String.fromCharCode(charA + Random().nextInt(charZ - charA));
-    }
-    return out.toUpperCase();
+    return qc.QaulAvatarBadge(
+      size: componentSize,
+      isVisible: componentBadgeEnabled && avatarUser.isConnected,
+      child: avatar,
+    );
   }
 }
 
@@ -70,14 +52,7 @@ class _TinyQaulAvatar extends QaulAvatar {
   const _TinyQaulAvatar({super.key, super.user});
 
   @override
-  double get radius => 14.0;
-
-  @override
-  TextStyle get initialsStyle => const TextStyle(
-        fontSize: 12,
-        color: Colors.white,
-        fontWeight: FontWeight.w500,
-      );
+  qc.QaulAvatarSize get componentSize => qc.QaulAvatarSize.tiny;
 }
 
 class _SmallQaulAvatar extends QaulAvatar {
@@ -91,40 +66,19 @@ class _SmallQaulAvatar extends QaulAvatar {
   final bool isGroup;
 
   @override
-  double get radius => 20.0;
+  qc.QaulAvatarSize get componentSize => qc.QaulAvatarSize.small;
 
   @override
-  TextStyle get initialsStyle => const TextStyle(
-        fontSize: 16,
-        color: Colors.white,
-        fontWeight: FontWeight.w700,
-      );
+  bool get componentBadgeEnabled => badgeEnabled;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (isGroup) {
-      const groupIcon = 'assets/icons/group.svg';
-      return SvgPicture.asset(groupIcon, width: radius * 2, height: radius * 2);
+      return const qc.QaulAvatar.group(size: qc.QaulAvatarSize.small);
     }
 
-    if (!badgeEnabled || userIsOffline(user)) {
-      return super.build(context, ref);
-    }
-
-    return Badge(
-      position: BadgePosition.bottomEnd(bottom: 0, end: 0),
-      badgeAnimation: const BadgeAnimation.slide(toAnimate: false),
-      badgeStyle: BadgeStyle(
-        elevation: 0.0,
-        padding: const EdgeInsets.all(6),
-        badgeColor: Colors.greenAccent.shade700,
-        borderSide: const BorderSide(color: Colors.white, width: 1.5),
-      ),
-      child: super.build(context, ref),
-    );
+    return super.build(context, ref);
   }
-
-  bool userIsOffline(User? u) => u == null || !u.isConnected;
 }
 
 class _LargeQaulAvatar extends QaulAvatar {
@@ -138,19 +92,13 @@ class _LargeQaulAvatar extends QaulAvatar {
   final bool isBlankUser;
 
   @override
-  double get radius => 80.0;
-
-  @override
-  TextStyle get initialsStyle => const TextStyle(
-        fontSize: 68,
-        color: Colors.white,
-        fontWeight: FontWeight.w700,
-      );
+  qc.QaulAvatarSize get componentSize => qc.QaulAvatarSize.large;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (!isGroup && !isBlankUser) return super.build(context, ref);
-    final icon = 'assets/icons/${isGroup ? 'group' : 'user'}.svg';
-    return SvgPicture.asset(icon, width: radius * 2, height: radius * 2);
+    return isGroup
+        ? const qc.QaulAvatar.group(size: qc.QaulAvatarSize.large)
+        : const qc.QaulAvatar.blank(size: qc.QaulAvatarSize.large);
   }
 }
