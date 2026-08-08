@@ -51,6 +51,7 @@ object BleTaskScheduler {
     // BULK: large message payloads (images/files). Drained only when CONTROL and MEDIUM are both empty.
     private val bulkOperationQueue = ConcurrentLinkedQueue<BleOperationType>()
     @Volatile private var pendingOperation: BleOperationType? = null
+    @Volatile private var pendingOperationSince: Long = 0L
 
     // Watchdog: if a pending operation never completes — a dropped GATT callback (connectGatt
     // hanging, a missing write/read callback, which the Android BLE stack genuinely does) —
@@ -78,6 +79,23 @@ object BleTaskScheduler {
 
     private fun hasPendingOps(): Boolean =
         bleOperationQueue.isNotEmpty() || mediumOperationQueue.isNotEmpty() || bulkOperationQueue.isNotEmpty()
+
+    /** Telemetry`; snapshot of queue depths + how long the current op has been holding the single
+     *  pendingOperation slot. */
+    fun queueDepths(): QueueDepths {
+        val op = pendingOperation
+        return QueueDepths(
+            control = bleOperationQueue.size,
+            medium = mediumOperationQueue.size,
+            bulk = bulkOperationQueue.size,
+            pending = op?.let { it::class.simpleName } ?: "none",
+            pendingMs = if (op != null) System.currentTimeMillis() - pendingOperationSince else 0L
+        )
+    }
+
+    data class QueueDepths(
+        val control: Int, val medium: Int, val bulk: Int, val pending: String, val pendingMs: Long
+    )
 
     // Tracks GATT connections by device. Touched from the scheduler, GATT callback threads, and
     // the watchdog thread, so it must be concurrent.
@@ -456,6 +474,7 @@ object BleTaskScheduler {
             return
         }
         pendingOperation = operation
+        pendingOperationSince = System.currentTimeMillis()
         armWatchdog(operation)
 
         when (operation) {
@@ -809,17 +828,15 @@ object BleTaskScheduler {
         // Scale for the PHY of each link: a coded op spends far longer on air than the same op on a
         // close 1M link, so one budget can't serve both.
         //
-        // TODO: gate the Coded CONNECT budget on RSSI, not just on which advert arrived first.
-        //  The scanner picks the connect PHY from result.primaryPhy, so a peer two metres away that
-        //  also runs a Coded advert gets a Coded connect purely by luck of scan timing — and then a
-        //  failed connect holds a scarce slot for 24s instead of 8s (measured: a quarter of a cap-4
-        //  device's capacity gone for 24s during mesh formation). Dropping the multiplier here fixes
-        //  that but shortens the budget for connects that are genuinely at range, which is the more
-        //  expensive failure — a missed long-range link is worse than a wasted close-range slot. So
-        //  the multiplier stays until the real fix: prefer 1M when RSSI is strong (better than about
-        //  -80 dBm; the park run saw -87 at 373m on Coded, and Coded S=8 buys ~12dB over 1M), so the
-        //  only Coded connects left are ones that actually need the long budget.
-        return ConnectionPool.getByAddress(operation.device.address)?.scaleTimeout(base) ?: base
+
+        //
+        // MTU and PHY are excluded from the multiplier deliberately. Both are short fixed size
+        // control procedures a couple tiny packets, not data transfers, so coded 8x airtime
+        // barely moves their real duration
+        return when (operation) {
+            is MtuRequest, is PhyRequest -> base
+            else -> ConnectionPool.getByAddress(operation.device.address)?.scaleTimeout(base) ?: base
+        }
     }
 
     /**
