@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import net.qaul.ble.BleConstants
+import net.qaul.ble.test.ble.queue.BleTaskScheduler
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedWriter
@@ -266,11 +267,18 @@ class SessionLogger private constructor(context: Context) {
     fun snapshot(degree: Int, neighbours: List<Triple<String, Int?, String>>,
                  gps: Triple<Double, Double, Float>?,
                  gossipRx: Int = 0, gossipDup: Int = 0, gossipRelayed: Int = 0,
-                 linkStateSize: Int = 0) = write(JSONObject().apply {
+                 linkStateSize: Int = 0,
+                 queue: BleTaskScheduler.QueueDepths? = null) = write(JSONObject().apply {
         put("type", "snapshot")
         put("deg", degree)
         put("g_rx", gossipRx); put("g_dup", gossipDup)
         put("g_relay", gossipRelayed); put("g_ls", linkStateSize)
+        queue?.let { q ->
+            put("q", JSONObject().apply {
+                put("ctrl", q.control); put("med", q.medium); put("bulk", q.bulk)
+                put("pending", q.pending); put("pending_ms", q.pendingMs)
+            })
+        }
         put("nbrs", JSONArray().apply {
             neighbours.forEach { (id, rssi, phy) ->
                 put(JSONObject().apply { put("id", id); rssi?.let { put("rssi", it) }; put("phy", phy) })

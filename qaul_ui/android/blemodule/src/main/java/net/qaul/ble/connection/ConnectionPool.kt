@@ -112,7 +112,10 @@ object ConnectionPool {
                 Triple(c.remoteQaulId?.toHexKey()?.take(6) ?: "unresolved", c.rssi, c.phyLabel)
             }
             val (rx, dup, relayed) = drainGossipStats()
-            SessionLogger[ctx].snapshot(conns.size, nbrs, GpsProvider.last(), rx, dup, relayed, linkState.size)
+            SessionLogger[ctx].snapshot(
+                conns.size, nbrs, GpsProvider.last(), rx, dup, relayed, linkState.size,
+                BleTaskScheduler.queueDepths()
+            )
         } catch (e: Exception) {
             Log.e(TAG, "telemetry snapshot failed", e)
         }
@@ -562,16 +565,24 @@ object ConnectionPool {
         if (u.ttl < 1 || u.ttl > BleConstants.TTL) return           // out of range TTL (parser also guards)
         val originKey = u.origin.toHexKey()
         if (originKey == selfKey()) return                          // our own list echoed back, ignore
-        val prev = linkState[originKey]
-        if (prev != null && !seqFresher(u.seq, prev.seq)) {
+        // Freshness check and store must be one atomic operation.
+        var fresh = false
+        linkState.compute(originKey) { _, prev ->
+            if (prev != null && !seqFresher(u.seq, prev.seq)) {
+                prev                                        // stale/dup — leave the entry as it was
+            } else {
+                fresh = true
+                LsEntry(
+                    u.seq, u.neighbours.map { it.toHexKey() }.toSet(), u.sealed,
+                    System.currentTimeMillis()
+                )
+            }
+        }
+        gossipRxTotal++         // the dup ratio is the redundancy cost of TTL=3
+        if (!fresh) {
             gossipRxDup++       // only counted
-            gossipRxTotal++     //  the ratio is the redundancy cost of TTL=3
             return
         }
-        gossipRxTotal++
-        linkState[originKey] = LsEntry(
-            u.seq, u.neighbours.map { it.toHexKey() }.toSet(), u.sealed, System.currentTimeMillis()
-        )
         val willRelay = u.ttl > 1
         if (willRelay) {
             gossipRelayed++
