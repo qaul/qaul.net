@@ -4,7 +4,6 @@ import '../../l10n/qaul_components_l10n_ext.dart';
 import '../../styles/qaul_color_sheet.dart';
 
 const Color _kChatHeaderControlColor = Color(0xFF999999);
-const Color _kChatHeaderDividerColor = Color(0xFF9E9E9E);
 const double _kChatHeaderDividerWidth = 0.5;
 const Color _kOnlineColor = Color(0xFF34C759);
 
@@ -30,12 +29,8 @@ Color _chatHeaderShellColor(ThemeData theme) {
   return sheet.background;
 }
 
-/// The bottom divider is a dark-mode affordance. In light mode it blends into
-/// the header background so it reads as invisible.
 Color _chatHeaderDividerColor(ThemeData theme) {
-  return theme.brightness == Brightness.dark
-      ? _kChatHeaderDividerColor
-      : _chatHeaderShellColor(theme);
+  return QaulColorSheet(theme.brightness).chatHeaderDivider;
 }
 
 Color _chatHeaderTextColor(ThemeData theme) => theme.colorScheme.onSurface;
@@ -241,6 +236,7 @@ class ChatHeader extends StatelessWidget {
         : header;
 
     return DecoratedBox(
+      key: const ValueKey('chat-header-surface'),
       decoration: BoxDecoration(
         color: _chatHeaderShellColor(theme),
         border: Border(

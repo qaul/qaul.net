@@ -21,6 +21,8 @@ final accountSessionProvider = FutureProvider<QaulAccountSessionState>((
   }
 
   final worker = ref.read(qaulWorkerProvider);
+  await worker.initialized;
+
   final user = await worker.getDefaultUserAccount();
   if (user == null) return QaulAccountSessionState.noLocalAccount;
 

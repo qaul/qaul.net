@@ -11,5 +11,11 @@
   "navOverflowSupport": "الدعم",
   "navOverflowRoutingTable": "جدول بيانات التوجيه",
   "navOverflowFileHistory": "تاريخ الملف",
+  "chatMenuReply": "رد",
+  "chatMenuForward": "إعادة توجيه",
+  "chatMenuEdit": "تعديل",
+  "chatMenuPreviousPage": "الصفحة السابقة",
+  "chatMenuNextPage": "الصفحة التالية",
+  "chatMenuMoreReactions": "المزيد من التفاعلات",
   "membersCount": "{count, plural, =1{عضو واحد} other{{count} أعضاء}}"
 }

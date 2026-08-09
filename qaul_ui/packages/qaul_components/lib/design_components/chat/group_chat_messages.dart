@@ -54,18 +54,24 @@ class ChatMessageRenderer {
     required MessagePresentation presentation,
     required ChatRenderMode mode,
     required DateTime clock,
+    bool isSelected = false,
   }) {
     final display = presentation.bubbleDisplay;
     if (display == null) return const SizedBox.shrink();
 
     if (mode == ChatRenderMode.group && !presentation.isPrimary) {
-      return GroupTextMessageItem(presentation: presentation, clock: clock);
+      return GroupTextMessageItem(
+        presentation: presentation,
+        clock: clock,
+        isSelected: isSelected,
+      );
     }
 
     return DirectTextMessageItem(
       presentation: presentation,
       clock: clock,
       horizontalGutter: true,
+      isSelected: isSelected,
     );
   }
 
@@ -94,10 +100,12 @@ class DirectTextMessageItem extends StatelessWidget {
     required this.presentation,
     required this.clock,
     this.horizontalGutter = true,
+    this.isSelected = false,
   });
 
   final MessagePresentation presentation;
   final DateTime clock;
+  final bool isSelected;
 
   /// When true, applies a 16px gutter on the trailing edge for primary
   /// (outgoing) bubbles and on the leading edge for secondary (incoming).
@@ -118,6 +126,7 @@ class DirectTextMessageItem extends StatelessWidget {
         message: display.message,
         clock: clock,
         showTimestamp: presentation.meta.showTimestamp,
+        isSelected: isSelected,
       ),
     );
   }
@@ -128,10 +137,12 @@ class GroupTextMessageItem extends StatelessWidget {
     super.key,
     required this.presentation,
     required this.clock,
+    this.isSelected = false,
   });
 
   final MessagePresentation presentation;
   final DateTime clock;
+  final bool isSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -156,6 +167,7 @@ class GroupTextMessageItem extends StatelessWidget {
         message: bubbleMessage,
         clock: clock,
         showTimestamp: presentation.meta.showTimestamp,
+        isSelected: isSelected,
       ),
     );
   }

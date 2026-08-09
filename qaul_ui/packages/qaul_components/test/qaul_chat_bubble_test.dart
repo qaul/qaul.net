@@ -14,6 +14,13 @@ Finder _findTimestampText(WidgetTester tester) {
   );
 }
 
+Finder _findMessageRichText(String content) {
+  return find.byWidgetPredicate(
+    (widget) =>
+        widget is RichText && widget.text.toPlainText().trim() == content,
+  );
+}
+
 void main() {
   group('computeChatBubbleDisplayItems', () {
     test('links messages from same sender and same minute', () {
@@ -467,6 +474,197 @@ void main() {
         moreOrLessEquals(
           ChatBubbleStyle.timeStyle.fontSize! * kChatBubbleMaxTextScaleFactor,
         ),
+      );
+    });
+  });
+
+  group('QaulChatBubble reply preview', () {
+    Widget app(QaulChatBubbleMessage message, DateTime clock) {
+      return MaterialApp(
+        home: Material(
+          child: QaulChatBubble(
+            message: message,
+            clock: clock,
+            showTimestamp: true,
+          ),
+        ),
+      );
+    }
+
+    testWidgets('renders an outgoing reply to own message above content', (
+      tester,
+    ) async {
+      final clock = DateTime(2026, 4, 19, 10, 53);
+      final message = QaulChatBubbleMessage(
+        content: 'As I said earlier...',
+        sentAt: clock,
+        receivedAt: clock,
+        status: MessageStatus.read,
+        messageType: MessageType.primary,
+        edges: const [TailEdge.bottomEnd],
+        replyPreview: const ChatReplyPreviewData(
+          author: 'You',
+          content: 'This is about quoting myself.',
+        ),
+      );
+
+      await tester.pumpWidget(app(message, clock));
+
+      expect(find.byKey(const ValueKey('chat-reply-preview')), findsOneWidget);
+      expect(find.text('You'), findsOneWidget);
+      expect(find.text('This is about quoting myself.'), findsOneWidget);
+      expect(_findMessageRichText('As I said earlier...'), findsOneWidget);
+      expect(find.text('Now'), findsOneWidget);
+      expect(find.byIcon(Icons.done_all), findsOneWidget);
+
+      final previewPadding = tester.widget<Padding>(
+        find.descendant(
+          of: find.byKey(const ValueKey('chat-reply-preview')),
+          matching: find.byType(Padding),
+        ),
+      );
+      expect(
+        previewPadding.padding,
+        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      );
+      final bubblePadding = tester.widget<Padding>(
+        find.byKey(const ValueKey('chat-bubble-padding')),
+      );
+      expect(
+        bubblePadding.padding,
+        const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      );
+
+      final bubbleRect = tester.getRect(
+        find.byKey(const ValueKey('chat-bubble-surface')),
+      );
+      final messageRect = tester.getRect(
+        _findMessageRichText('As I said earlier...'),
+      );
+      final statusRect = tester.getRect(find.byIcon(Icons.done_all));
+      expect(messageRect.left - bubbleRect.left, 10);
+      expect(bubbleRect.right - statusRect.right, 10);
+
+      final previewTop = tester.getTopLeft(find.text('You')).dy;
+      final messageTop = tester
+          .getTopLeft(_findMessageRichText('As I said earlier...'))
+          .dy;
+      expect(previewTop, lessThan(messageTop));
+    });
+
+    testWidgets('renders an incoming reply to another user', (tester) async {
+      final clock = DateTime(2026, 4, 19, 10, 53);
+      final message = QaulChatBubbleMessage(
+        content: 'Written in the morning',
+        sentAt: clock.subtract(const Duration(minutes: 44)),
+        receivedAt: clock.subtract(const Duration(minutes: 44)),
+        status: MessageStatus.sent,
+        messageType: MessageType.secondary,
+        edges: const [TailEdge.bottomStart],
+        replyPreview: const ChatReplyPreviewData(
+          author: 'MaxX',
+          content: 'This is a quote sent by another user.',
+        ),
+      );
+
+      await tester.pumpWidget(app(message, clock));
+
+      expect(find.text('MaxX'), findsOneWidget);
+      expect(
+        find.text('This is a quote sent by another user.'),
+        findsOneWidget,
+      );
+      expect(_findMessageRichText('Written in the morning'), findsOneWidget);
+
+      final author = tester.widget<Text>(find.text('MaxX'));
+      expect(author.style!.color, Colors.white);
+    });
+
+    testWidgets('constrains and truncates a long reply excerpt', (
+      tester,
+    ) async {
+      final clock = DateTime(2026, 4, 19, 10, 53);
+      const excerpt =
+          'This is a very long replied message that should remain inside the '
+          'bubble and be truncated after a few lines instead of expanding the '
+          'timeline row indefinitely or overflowing its horizontal bounds.';
+      final message = QaulChatBubbleMessage(
+        content: 'Short response',
+        sentAt: clock,
+        receivedAt: clock,
+        status: MessageStatus.sent,
+        messageType: MessageType.primary,
+        edges: const [TailEdge.bottomEnd],
+        replyPreview: const ChatReplyPreviewData(
+          author: 'Another participant with a long name',
+          content: excerpt,
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(size: Size(320, 640)),
+            child: Material(
+              child: QaulChatBubble(
+                message: message,
+                clock: clock,
+                showTimestamp: true,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byKey(const ValueKey('chat-reply-preview'))).width,
+        lessThanOrEqualTo(
+          ChatBubbleStyle.maxBubbleWidthMobile -
+              ChatBubbleStyle.horizontalPadding * 2,
+        ),
+      );
+      final excerptText = tester.widget<Text>(find.text(excerpt));
+      expect(excerptText.maxLines, 3);
+      expect(excerptText.overflow, TextOverflow.ellipsis);
+    });
+
+    testWidgets('does not render reply UI without reply data', (tester) async {
+      final clock = DateTime(2026, 4, 19, 10, 53);
+      final message = QaulChatBubbleMessage(
+        content: 'Regular message',
+        sentAt: clock,
+        receivedAt: clock,
+        status: MessageStatus.sent,
+        messageType: MessageType.secondary,
+        edges: const [TailEdge.bottomStart],
+      );
+
+      await tester.pumpWidget(app(message, clock));
+
+      expect(find.byKey(const ValueKey('chat-reply-preview')), findsNothing);
+      expect(_findMessageRichText('Regular message'), findsOneWidget);
+    });
+
+    testWidgets('keeps timestamp beside short text without reply data', (
+      tester,
+    ) async {
+      final clock = DateTime(2026, 4, 19, 10, 53);
+      final message = QaulChatBubbleMessage(
+        content: 'Hi',
+        sentAt: clock,
+        receivedAt: clock,
+        status: MessageStatus.sent,
+        messageType: MessageType.secondary,
+        edges: const [TailEdge.bottomStart],
+      );
+
+      await tester.pumpWidget(app(message, clock));
+
+      final messageRect = tester.getRect(_findMessageRichText('Hi'));
+      final timestampRect = tester.getRect(find.text('Now'));
+      expect(
+        timestampRect.left - messageRect.right,
+        ChatBubbleStyle.gapBetweenTextAndDate,
       );
     });
   });

@@ -44,6 +44,12 @@ class _NoopChatNotificationController implements ChatNotificationController {
   String get cacheKey => '';
 
   @override
+  String get legacyCacheKey => '';
+
+  @override
+  Future<void> adoptLegacyValue(Object value) async {}
+
+  @override
   TabType get currentVisibleHomeTab => TabType.chat;
 
   @override

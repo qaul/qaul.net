@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:qaul_components/design_components/chat/qaul_chat_bubble.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
-import '../../support/widgetbook_preview.dart';
+import '../../../../support/widgetbook_preview.dart';
 
 final _clock = DateTime(2026, 4, 12, 14, 30);
 
-@widgetbook.UseCase(name: 'Outgoing — sent', type: QaulChatBubble)
+@widgetbook.UseCase(
+  name: 'Outgoing — sent',
+  type: QaulChatBubble,
+  path: 'design_components/chat/bubble',
+)
 Widget buildOutgoingSentUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(
     context,
@@ -27,7 +31,11 @@ Widget buildOutgoingSentUseCase(BuildContext context) {
   );
 }
 
-@widgetbook.UseCase(name: 'Outgoing — read', type: QaulChatBubble)
+@widgetbook.UseCase(
+  name: 'Outgoing — read',
+  type: QaulChatBubble,
+  path: 'design_components/chat/bubble',
+)
 Widget buildOutgoingReadUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(
     context,
@@ -48,7 +56,11 @@ Widget buildOutgoingReadUseCase(BuildContext context) {
   );
 }
 
-@widgetbook.UseCase(name: 'Outgoing — not sent', type: QaulChatBubble)
+@widgetbook.UseCase(
+  name: 'Outgoing — not sent',
+  type: QaulChatBubble,
+  path: 'design_components/chat/bubble',
+)
 Widget buildOutgoingNotSentUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(
     context,
@@ -69,7 +81,11 @@ Widget buildOutgoingNotSentUseCase(BuildContext context) {
   );
 }
 
-@widgetbook.UseCase(name: 'Incoming — short', type: QaulChatBubble)
+@widgetbook.UseCase(
+  name: 'Incoming — short',
+  type: QaulChatBubble,
+  path: 'design_components/chat/bubble',
+)
 Widget buildIncomingShortUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(
     context,
@@ -90,7 +106,11 @@ Widget buildIncomingShortUseCase(BuildContext context) {
   );
 }
 
-@widgetbook.UseCase(name: 'Incoming — long', type: QaulChatBubble)
+@widgetbook.UseCase(
+  name: 'Incoming — long',
+  type: QaulChatBubble,
+  path: 'design_components/chat/bubble',
+)
 Widget buildIncomingLongUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(
     context,
@@ -110,4 +130,56 @@ Widget buildIncomingLongUseCase(BuildContext context) {
       showTimestamp: true,
     ),
   );
+}
+
+class _LongPressSelectionPreview extends StatefulWidget {
+  const _LongPressSelectionPreview();
+
+  @override
+  State<_LongPressSelectionPreview> createState() =>
+      _LongPressSelectionPreviewState();
+}
+
+class _LongPressSelectionPreviewState
+    extends State<_LongPressSelectionPreview> {
+  var _isSelected = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return widgetbookChatComponentFrame(
+      context,
+      alignment: Alignment.centerLeft,
+      child: GestureDetector(
+        key: const ValueKey('widgetbook-pressable-chat-bubble'),
+        behavior: HitTestBehavior.opaque,
+        onLongPress: () => setState(() => _isSelected = true),
+        onTap: _isSelected ? () => setState(() => _isSelected = false) : null,
+        child: QaulChatBubble(
+          message: QaulChatBubbleMessage(
+            content: 'Another answer',
+            sentAt: _clock.subtract(const Duration(minutes: 1)),
+            receivedAt: _clock.subtract(const Duration(minutes: 1)),
+            status: MessageStatus.sent,
+            messageType: MessageType.secondary,
+            edges: const [],
+            senderIdBase58: 'group-member-2',
+            senderDisplayName: 'Groupmember 2',
+            senderDisplayNameColor: const Color(0xFFFF9800),
+          ),
+          clock: _clock,
+          showTimestamp: true,
+          isSelected: _isSelected,
+        ),
+      ),
+    );
+  }
+}
+
+@widgetbook.UseCase(
+  name: 'Interactive — long press',
+  type: QaulChatBubble,
+  path: 'design_components/chat/bubble',
+)
+Widget buildInteractiveLongPressUseCase(BuildContext context) {
+  return const _LongPressSelectionPreview();
 }

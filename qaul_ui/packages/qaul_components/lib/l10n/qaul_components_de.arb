@@ -11,5 +11,11 @@
   "navOverflowSupport": "Support",
   "navOverflowRoutingTable": "Routing-Tabelle",
   "navOverflowFileHistory": "Alle Chat-Dateien",
+  "chatMenuReply": "Antworten",
+  "chatMenuForward": "Weiterleiten",
+  "chatMenuEdit": "Bearbeiten",
+  "chatMenuPreviousPage": "Vorherige Seite",
+  "chatMenuNextPage": "Nächste Seite",
+  "chatMenuMoreReactions": "Weitere Reaktionen",
   "membersCount": "{count, plural, =1{1 Mitglied} other{{count} Mitglieder}}"
 }

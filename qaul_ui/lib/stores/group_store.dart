@@ -1,6 +1,7 @@
 part of 'stores.dart';
 
-final chatRoomsStoreProvider = NotifierProvider<ChatRoomsStore, void>(
+final chatRoomsStoreProvider =
+    NotifierProvider<ChatRoomsStore, ChatRoomsPagination>(
   ChatRoomsStore.new,
 );
 
@@ -51,6 +52,14 @@ class ChatRoomsSearchStore extends Notifier<ChatRoomsSearchState> {
 
   @override
   ChatRoomsSearchState build() {
+    // Non-state resources, reset here because Riverpod reuses the Notifier
+    // instance across invalidations — see lib/session/session_scope.dart.
+    // Bumping the generation strands any request still in flight for the
+    // previous session.
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
+    _requestGeneration++;
+    _loadMoreInFlight = false;
     ref.onDispose(() => _debounceTimer?.cancel());
     return const ChatRoomsSearchState();
   }
@@ -168,17 +177,20 @@ class ChatRoomsSearchStore extends Notifier<ChatRoomsSearchState> {
   }
 }
 
-class ChatRoomsStore extends Notifier<void> {
+/// How far the chat room and group invite lists have been paged through.
+typedef ChatRoomsPagination = ({
+  PaginationState? chatRooms,
+  PaginationState? groupInvites,
+});
+
+class ChatRoomsStore extends Notifier<ChatRoomsPagination> {
   static const defaultPageSize = 50;
 
-  PaginationState? _chatRoomsPagination;
-  PaginationState? _groupInvitesPagination;
-
-  PaginationState? get chatRoomsPagination => _chatRoomsPagination;
-  PaginationState? get groupInvitesPagination => _groupInvitesPagination;
+  PaginationState? get chatRoomsPagination => state.chatRooms;
+  PaginationState? get groupInvitesPagination => state.groupInvites;
 
   @override
-  void build() {}
+  ChatRoomsPagination build() => (chatRooms: null, groupInvites: null);
 
   Future<PaginatedChatRooms?> getChatRooms({
     int offset = 0,
@@ -187,13 +199,13 @@ class ChatRoomsStore extends Notifier<void> {
     final worker = ref.read(qaulWorkerProvider);
     final result = await worker.getAllChatRooms(offset: offset, limit: limit);
     if (!ref.mounted || result == null) return null;
-    _chatRoomsPagination = result.pagination;
-    final state = ref.read(chatRoomsProvider.notifier);
+    state = (chatRooms: result.pagination, groupInvites: state.groupInvites);
+    final roomState = ref.read(chatRoomsProvider.notifier);
     final pagination = result.pagination;
     if (pagination != null && pagination.offset > 0) {
-      state.append(result.rooms);
+      roomState.append(result.rooms);
     } else {
-      state.mergeOrderedFromBackend(result.rooms);
+      roomState.mergeOrderedFromBackend(result.rooms);
     }
     await resolveUsersForRooms(result.rooms);
     if (!ref.mounted) return null;
@@ -213,7 +225,7 @@ class ChatRoomsStore extends Notifier<void> {
       limit: limit,
     );
     if (!ref.mounted || result == null) return null;
-    _groupInvitesPagination = result.pagination;
+    state = (chatRooms: state.chatRooms, groupInvites: result.pagination);
     final inviteState = ref.read(groupInvitesProvider.notifier);
     final pagination = result.pagination;
     if (pagination != null && pagination.offset > 0) {

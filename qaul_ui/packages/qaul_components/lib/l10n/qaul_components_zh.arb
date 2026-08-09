@@ -11,5 +11,11 @@
   "navOverflowSupport": "帮助与支持",
   "navOverflowRoutingTable": "路由表",
   "navOverflowFileHistory": "File history",
+  "chatMenuReply": "回复",
+  "chatMenuForward": "转发",
+  "chatMenuEdit": "编辑",
+  "chatMenuPreviousPage": "上一页",
+  "chatMenuNextPage": "下一页",
+  "chatMenuMoreReactions": "更多表情",
   "membersCount": "{count, plural, other{{count} 位成员}}"
 }

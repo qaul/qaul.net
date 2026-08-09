@@ -2,30 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:qaul_components/qaul_components.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
-import '../../../support/widgetbook_preview.dart';
+import '../../../../support/chat_fixtures.dart';
+import '../../../../support/widgetbook_preview.dart';
 
-Widget _demoAvatar({required String initials}) {
-  return CircleAvatar(
-    backgroundColor: const Color(0xFFD35400),
-    foregroundColor: Colors.white,
-    child: Text(
-      initials,
-      style: const TextStyle(
-        fontFamily: 'Roboto',
-        fontWeight: FontWeight.w400,
-        fontSize: 18,
-      ),
-    ),
-  );
-}
-
-@widgetbook.UseCase(name: 'Direct — online', type: ChatHeader)
+@widgetbook.UseCase(
+  name: 'Direct — online',
+  type: ChatHeader,
+  path: 'design_components/chat/header',
+)
 Widget buildChatHeaderDirectOnlineUseCase(BuildContext context) {
   return widgetbookTopChromeFrame(
     context,
     ChatHeader(
       onBackPressed: () {},
-      avatar: _demoAvatar(initials: 'MJ'),
+      avatar: chatFixtureAvatar(initials: 'MJ'),
       displayName: 'Mathias Jud',
       isOnline: true,
       onlineLabel: 'online',
@@ -40,13 +30,17 @@ Widget buildChatHeaderDirectOnlineUseCase(BuildContext context) {
   );
 }
 
-@widgetbook.UseCase(name: 'Direct — last seen', type: ChatHeader)
+@widgetbook.UseCase(
+  name: 'Direct — last seen',
+  type: ChatHeader,
+  path: 'design_components/chat/header',
+)
 Widget buildChatHeaderDirectLastSeenUseCase(BuildContext context) {
   return widgetbookTopChromeFrame(
     context,
     ChatHeader(
       onBackPressed: () {},
-      avatar: _demoAvatar(initials: 'MJ'),
+      avatar: chatFixtureAvatar(initials: 'MJ'),
       displayName: 'Mathias Jud',
       isOnline: false,
       onlineLabel: 'online',
@@ -58,13 +52,17 @@ Widget buildChatHeaderDirectLastSeenUseCase(BuildContext context) {
   );
 }
 
-@widgetbook.UseCase(name: 'Group', type: ChatHeader)
+@widgetbook.UseCase(
+  name: 'Group',
+  type: ChatHeader,
+  path: 'design_components/chat/header',
+)
 Widget buildChatHeaderGroupUseCase(BuildContext context) {
   return widgetbookTopChromeFrame(
     context,
     ChatHeader.group(
       onBackPressed: () {},
-      avatar: _demoAvatar(initials: 'QC'),
+      avatar: chatFixtureAvatar(initials: 'QC'),
       groupName: 'qaul contributors',
       membersCount: 12,
       extraTopPadding: 32,

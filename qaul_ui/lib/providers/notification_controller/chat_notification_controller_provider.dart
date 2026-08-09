@@ -14,7 +14,11 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
   final _log = Logger('ChatNotificationController');
 
   @override
-  String get cacheKey => 'chatNotificationControllerChatDataKey';
+  String get legacyCacheKey => 'chatNotificationControllerChatDataKey';
+
+  @override
+  Future<void> adoptLegacyValue(Object value) =>
+      preferences.setStringList(cacheKey, (value as List).cast<String>());
 
   @override
   MapEntry<dynamic, void Function(List<ChatRoom>?, List<ChatRoom>)>
@@ -23,7 +27,7 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
   @override
   Future<void> initialize() async {
     await super.initialize();
-    ref.listen(groupInvitesProvider, _executeGroupInvites);
+    ref.listen(groupInvitesProvider, _processNewGroupInvite);
     if (preferences.containsKey(cacheKey)) {
       _chats.addAll(
         preferences.getStringList(cacheKey)!.map((e) {
@@ -37,19 +41,18 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
     );
   }
 
-  void _executeGroupInvites(
+  void _processNewGroupInvite(
     List<GroupInvite>? previous,
     List<GroupInvite> current,
   ) {
-    final previousInvites = previous ?? const <GroupInvite>[];
-    final newInvites = current.where((invite) {
-      return !previousInvites.contains(invite);
-    }).toList();
-    if (newInvites.isEmpty ||
-        currentVisibleHomeTab == TabType.chat ||
+    if (currentVisibleHomeTab == TabType.chat ||
         !UserPrefsHelper.instance.chatNotificationsEnabled) {
       return;
     }
+    final newInvites = current.toSet().difference(
+      (previous ?? const <GroupInvite>[]).toSet(),
+    );
+    if (newInvites.isEmpty) return;
 
     newNotificationCount.value =
         (newNotificationCount.value ?? 0) + newInvites.length;

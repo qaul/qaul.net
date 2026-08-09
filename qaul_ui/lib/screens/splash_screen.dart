@@ -28,20 +28,26 @@ class SplashScreen extends ConsumerWidget {
     final session = ref.watch(accountSessionProvider);
 
     return session.when(
-      data: (state) => QaulAccountLanding(
-        state: state,
-        logo: const QaulAccountLogo(),
-        languageSelector: const LanguageSelectDropDown(),
-        onCreateAccount: () => Navigator.pushReplacementNamed(
-          context,
-          NavigationHelper.createAccount,
-        ),
-        onRestoreAccount: () =>
-            AccountManagementCoordinator.showRestoreFlow(context, ref),
-        onLogin: () => AccountManagementCoordinator.showLoginFlow(context, ref),
-        onLearnMore: () =>
-            launchUrl(Uri.parse('https://qaul.net/tutorials/onboarding/')),
-      ),
+      data: (state) {
+        if (state == QaulAccountSessionState.signedIn) {
+          return const _SplashLoadingState();
+        }
+
+        return QaulAccountLanding(
+          state: state,
+          logo: const QaulAccountLogo(),
+          languageSelector: const LanguageSelectDropDown(),
+          onCreateAccount: () => Navigator.pushReplacementNamed(
+            context,
+            NavigationHelper.createAccount,
+          ),
+          onRestoreAccount: () =>
+              AccountManagementCoordinator.showRestoreFlow(context, ref),
+          onLogin: () => AccountManagementCoordinator.showLoginFlow(context, ref),
+          onLearnMore: () =>
+              launchUrl(Uri.parse('https://qaul.net/tutorials/onboarding/')),
+        );
+      },
       error: (error, stackTrace) => QaulAccountLanding(
         state: QaulAccountSessionState.noLocalAccount,
         logo: const QaulAccountLogo(),
@@ -55,9 +61,25 @@ class SplashScreen extends ConsumerWidget {
         onLearnMore: () =>
             launchUrl(Uri.parse('https://qaul.net/tutorials/onboarding/')),
       ),
-      loading: () => const Scaffold(
-        body: Center(
-          child: SizedBox(width: 320, height: 320, child: QaulAccountLogo()),
+      loading: () => const _SplashLoadingState(),
+    );
+  }
+}
+
+class _SplashLoadingState extends StatelessWidget {
+  const _SplashLoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(width: 320, height: 320, child: QaulAccountLogo()),
+            SizedBox(height: 24),
+            QaulLoadingIndicator(),
+          ],
         ),
       ),
     );
