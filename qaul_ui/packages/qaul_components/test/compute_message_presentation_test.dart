@@ -288,6 +288,94 @@ void main() {
       expect(out['id-1']!.meta.topSpacing, kChatMediaTextGap);
     });
 
+    test('direct media gets bubble display with timestamp and status', () {
+      final base = DateTime(2026, 4, 19, 10, 0);
+      final media = QaulChatBubbleMessage(
+        content: '',
+        sentAt: base,
+        receivedAt: base,
+        status: MessageStatus.read,
+        messageType: MessageType.primary,
+        edges: const [],
+        senderIdBase58: 'me',
+      );
+      final timeline = <ChatTimelinePresentationRow>[
+        ChatTimelinePresentationRow(
+          messageIdBase58: 'id-media',
+          senderIdBase58: 'me',
+          sentAt: base,
+          isText: false,
+          isOutgoing: true,
+          qaulBubbleBaseWithoutLayout: media,
+        ),
+      ];
+
+      final out = computeChatMessagePresentation(
+        ascendingTimeline: timeline,
+        layoutMode: ChatRenderMode.direct,
+      );
+
+      expect(out['id-media']!.bubbleDisplay, isNotNull);
+      expect(out['id-media']!.bubbleDisplay!.showTimestamp, isTrue);
+      expect(out['id-media']!.bubbleDisplay!.message.status, MessageStatus.read);
+      expect(
+        out['id-media']!.bubbleDisplay!.message.edges,
+        const [TailEdge.bottomEnd],
+      );
+    });
+
+    test('media always breaks bubble continuation', () {
+      final base = DateTime(2026, 4, 19, 10, 0);
+      final firstMedia = QaulChatBubbleMessage(
+        content: '',
+        sentAt: base,
+        receivedAt: base,
+        status: MessageStatus.sent,
+        messageType: MessageType.secondary,
+        edges: const [],
+        senderIdBase58: 'alice',
+      );
+      final secondMedia = QaulChatBubbleMessage(
+        content: '',
+        sentAt: base,
+        receivedAt: base,
+        status: MessageStatus.sent,
+        messageType: MessageType.secondary,
+        edges: const [],
+        senderIdBase58: 'alice',
+      );
+      final timeline = <ChatTimelinePresentationRow>[
+        ChatTimelinePresentationRow(
+          messageIdBase58: 'media-0',
+          senderIdBase58: 'alice',
+          sentAt: base,
+          isText: false,
+          isOutgoing: false,
+          qaulBubbleBaseWithoutLayout: firstMedia,
+        ),
+        ChatTimelinePresentationRow(
+          messageIdBase58: 'media-1',
+          senderIdBase58: 'alice',
+          sentAt: base,
+          isText: false,
+          isOutgoing: false,
+          qaulBubbleBaseWithoutLayout: secondMedia,
+        ),
+      ];
+
+      final out = computeChatMessagePresentation(
+        ascendingTimeline: timeline,
+        layoutMode: ChatRenderMode.group,
+      );
+
+      expect(out['media-0']!.bubbleDisplay!.showTimestamp, isTrue);
+      expect(out['media-1']!.bubbleDisplay!.showTimestamp, isTrue);
+      expect(out['media-0']!.meta.nonTextClustersWithNext, isFalse);
+      expect(out['media-1']!.meta.topSpacing, kChatBubbleSeparatedGap);
+      expect(out['media-1']!.meta.showSenderName, isTrue);
+      expect(out['media-1']!.meta.showAvatar, isTrue);
+    });
+
     test(
       'direct: same clock minute on different calendar days does not link',
       () {

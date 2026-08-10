@@ -671,56 +671,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       );
     }
 
-    final nonTextBubble = _buildNonTextBubble(
-      child,
-      message,
-      clustersWithNext: presentation.meta.nonTextClustersWithNext,
-      topSpacing:
-          _chatRenderMode == ChatRenderMode.group && !presentation.isPrimary
-          ? 0
-          : presentation.meta.topSpacing,
-    );
-    return ChatMessageRenderer.wrapNonText(
-      child: nonTextBubble,
+    return ChatMessageRenderer.renderMedia(
+      child: child,
       presentation: presentation,
       mode: _chatRenderMode,
-    );
-  }
-
-  Widget _buildNonTextBubble(
-    Widget child,
-    types.Message message, {
-    required bool clustersWithNext,
-    required double topSpacing,
-  }) {
-    const radius = 20.0;
-    return Builder(
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(top: topSpacing),
-          child: Bubble(
-            elevation: 0,
-            nipRadius: 0,
-            nipWidth: 0.1,
-            nipHeight: radius,
-            radius: const Radius.circular(radius),
-            padding: EdgeInsets.zero,
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            color: user.toInternalUser().id != message.author.id
-                ? Colors.grey.shade200
-                : Colors.lightBlue.shade700,
-            nip: clustersWithNext
-                ? BubbleNip.no
-                : user.toInternalUser().id != message.author.id
-                ? BubbleNip.leftBottom
-                : BubbleNip.rightBottom,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: child,
-            ),
-          ),
-        );
-      },
+      clock: DateTime.now(),
     );
   }
 
@@ -804,7 +759,7 @@ extension _MessageExtension on Message {
           id: messageIdBase58,
           author: author.toInternalUser(),
           createdAt: receivedAt.millisecondsSinceEpoch,
-          status: mappedState,
+          showStatus: false,
           uri: filePath,
           size: (content as FileShareContent).size,
           name: (content as FileShareContent).fileName,
@@ -819,7 +774,7 @@ extension _MessageExtension on Message {
           duration: const Duration(seconds: 100),
           author: author.toInternalUser(),
           createdAt: receivedAt.millisecondsSinceEpoch,
-          status: mappedState,
+          showStatus: false,
           uri: filePath,
           size: (content as FileShareContent).size,
           name: (content as FileShareContent).fileName,
@@ -837,7 +792,7 @@ extension _MessageExtension on Message {
         uri: filePath,
         author: author.toInternalUser(),
         createdAt: receivedAt.millisecondsSinceEpoch,
-        status: mappedState,
+        showStatus: false,
         metadata: {
           'description': (content as FileShareContent).description,
           'messageState': status.toJson(),

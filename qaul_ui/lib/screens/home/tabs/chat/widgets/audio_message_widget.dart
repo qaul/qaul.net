@@ -35,11 +35,11 @@ class _AudioMessageWidgetState extends State<AudioMessageWidget> {
 
   late StreamSubscription<Duration> _positionChangedSubscription;
 
-  Color get primaryColor => Theme.of(context).colorScheme.primary;
+  Color get primaryColor => Colors.white;
 
-  Color get containerColor => Theme.of(context).colorScheme.primaryContainer;
+  Color get containerColor => Colors.white.withValues(alpha: 0.18);
 
-  Color get backgroundColor => Theme.of(context).colorScheme.surface;
+  Color get backgroundColor => Colors.white.withValues(alpha: 0.72);
 
   bool _isReceivingFile() {
     var isReceiving = false;
@@ -132,7 +132,7 @@ class _AudioMessageWidgetState extends State<AudioMessageWidget> {
               child: Text(
                 '${_duration?.inSeconds ?? 0.0} Seconds',
                 style: ttheme.labelLarge?.copyWith(
-                  color: backgroundColor,
+                  color: Colors.white.withValues(alpha: 0.82),
                   fontStyle: FontStyle.italic,
                 ),
               ),

@@ -132,6 +132,77 @@ Widget buildIncomingLongUseCase(BuildContext context) {
   );
 }
 
+@widgetbook.UseCase(name: 'Media — separated bubbles', type: QaulChatBubble)
+Widget buildMediaSeparatedBubblesUseCase(BuildContext context) {
+  return widgetbookChatComponentFrame(
+    context,
+    alignment: Alignment.centerLeft,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        QaulChatBubble.media(
+          message: QaulChatBubbleMessage(
+            content: '',
+            sentAt: _clock.subtract(const Duration(minutes: 2)),
+            receivedAt: _clock.subtract(const Duration(minutes: 2)),
+            status: MessageStatus.read,
+            messageType: MessageType.primary,
+            edges: const [TailEdge.bottomEnd],
+            senderIdBase58: 'me',
+          ),
+          clock: _clock,
+          child: Container(
+            height: 160,
+            color: Colors.white.withValues(alpha: 0.12),
+            alignment: Alignment.center,
+            child: const Icon(Icons.image, color: Colors.white, size: 44),
+          ),
+        ),
+        const SizedBox(height: kChatBubbleSeparatedGap),
+        QaulChatBubble.media(
+          message: QaulChatBubbleMessage(
+            content: '',
+            sentAt: _clock.subtract(const Duration(minutes: 1)),
+            receivedAt: _clock.subtract(const Duration(minutes: 1)),
+            status: MessageStatus.sent,
+            messageType: MessageType.primary,
+            edges: const [TailEdge.bottomEnd],
+            senderIdBase58: 'me',
+          ),
+          clock: _clock,
+          child: Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(16, 14, 16, 8),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.18),
+                  ),
+                  child: const Icon(Icons.play_arrow, color: Colors.white),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Container(
+                    height: 4,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(2),
+                      color: Colors.white.withValues(alpha: 0.72),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 class _LongPressSelectionPreview extends StatefulWidget {
   const _LongPressSelectionPreview();
 
