@@ -17,11 +17,14 @@ class SplashScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen(accountSessionProvider, (_, snapshot) {
+      if (snapshot.isLoading || snapshot.hasError) return;
       if (snapshot.value != QaulAccountSessionState.signedIn) return;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
-        Navigator.of(context, rootNavigator: true)
-            .pushReplacementNamed(NavigationHelper.home);
+        Navigator.of(
+          context,
+          rootNavigator: true,
+        ).pushReplacementNamed(NavigationHelper.home);
       });
     });
 
@@ -43,7 +46,8 @@ class SplashScreen extends ConsumerWidget {
           ),
           onRestoreAccount: () =>
               AccountManagementCoordinator.showRestoreFlow(context, ref),
-          onLogin: () => AccountManagementCoordinator.showLoginFlow(context, ref),
+          onLogin: () =>
+              AccountManagementCoordinator.showLoginFlow(context, ref),
           onLearnMore: () =>
               launchUrl(Uri.parse('https://qaul.net/tutorials/onboarding/')),
         );
