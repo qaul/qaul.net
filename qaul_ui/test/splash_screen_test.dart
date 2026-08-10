@@ -74,6 +74,9 @@ void main() {
 
       expect(find.byType(SplashScreen), findsOneWidget);
       expect(find.text('home'), findsNothing);
+
+      pendingRefresh.complete(QaulAccountSessionState.signedOut);
+      await tester.pump();
     },
   );
 }
