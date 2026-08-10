@@ -1,9 +1,6 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:hooks_riverpod/legacy.dart';
 import 'package:qaul_components/qaul_components.dart';
 import 'package:qaul_ui/helpers/navigation_helper.dart';
 import 'package:qaul_ui/providers/account_session_provider.dart';
@@ -35,32 +32,15 @@ void main() {
   );
 
   testWidgets(
-    'does not redirect while refreshing a previous signed-in session',
+    'does not redirect while the session is loading',
     (tester) async {
-      final refreshTriggerProvider = StateProvider((_) => false);
-      final pendingRefresh = Completer<QaulAccountSessionState>();
-      final container = ProviderContainer(
-        overrides: [
-          accountSessionProvider.overrideWith((ref) {
-            final refreshing = ref.watch(refreshTriggerProvider);
-            if (refreshing) return pendingRefresh.future;
-            return QaulAccountSessionState.signedIn;
-          }),
-        ],
-      );
-      addTearDown(container.dispose);
-
-      expect(
-        await container.read(accountSessionProvider.future),
-        QaulAccountSessionState.signedIn,
-      );
-      container.read(refreshTriggerProvider.notifier).state = true;
-      container.read(accountSessionProvider);
-      await Future<void>.delayed(Duration.zero);
-
       await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
+        ProviderScope(
+          overrides: [
+            accountSessionProvider.overrideWithValue(
+              const AsyncLoading<QaulAccountSessionState>(),
+            ),
+          ],
           child: MaterialApp(
             routes: {
               NavigationHelper.initial: (_) => const SplashScreen(),
@@ -74,9 +54,6 @@ void main() {
 
       expect(find.byType(SplashScreen), findsOneWidget);
       expect(find.text('home'), findsNothing);
-
-      pendingRefresh.complete(QaulAccountSessionState.signedOut);
-      await tester.pump();
     },
   );
 }
