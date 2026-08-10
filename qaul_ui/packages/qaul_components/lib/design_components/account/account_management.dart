@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../l10n/qaul_components_localizations.dart';
 import '../../l10n/qaul_components_localizations_en.dart';
 import '../../models/account.dart';
+import '../users/qaul_avatar.dart';
 
 QaulComponentsLocalizations _l10n(BuildContext context) =>
     QaulComponentsLocalizations.of(context) ?? QaulComponentsLocalizationsEn();
@@ -309,35 +310,11 @@ class _AccountAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CircleAvatar(
-      radius: 80,
-      backgroundColor: _avatarColor(account.id),
-      child: Text(
-        _initials(account.name),
-        style: const TextStyle(
-          fontSize: 68,
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
+    return QaulAvatar(
+      name: account.name,
+      id: account.id,
+      size: QaulAvatarSize.large,
     );
-  }
-
-  Color _avatarColor(String seed) {
-    const colors = Colors.primaries;
-    final index =
-        seed.codeUnits.fold<int>(0, (sum, code) => sum + code) % colors.length;
-    return colors[index].shade700;
-  }
-
-  String _initials(String name) {
-    final words = name.trim().split(RegExp(r'\s+'));
-    if (words.isEmpty || words.first.isEmpty) return 'WW';
-    final chars = words
-        .where((word) => word.isNotEmpty)
-        .take(2)
-        .map((word) => word.characters.first.toUpperCase());
-    return chars.join();
   }
 }
 

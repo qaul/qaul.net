@@ -42,6 +42,8 @@ import 'package:qaul_components_widgetbook/use_cases/design_components/shell/qau
     as _qaul_components_widgetbook_use_cases_design_components_shell_qaul_fab;
 import 'package:qaul_components_widgetbook/use_cases/design_components/shell/qaul_navbar.dart'
     as _qaul_components_widgetbook_use_cases_design_components_shell_qaul_navbar;
+import 'package:qaul_components_widgetbook/use_cases/design_components/users/qaul_avatar.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_users_qaul_avatar;
 import 'package:widgetbook/widgetbook.dart' as _widgetbook;
 
 final directories = <_widgetbook.WidgetbookNode>[
@@ -419,6 +421,22 @@ final directories = <_widgetbook.WidgetbookNode>[
                 builder:
                     _qaul_components_widgetbook_use_cases_design_components_shell_qaul_navbar
                         .buildNavBarVerticalUseCase,
+              ),
+            ],
+          ),
+        ],
+      ),
+      _widgetbook.WidgetbookFolder(
+        name: 'users',
+        children: [
+          _widgetbook.WidgetbookComponent(
+            name: 'QaulAvatar',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Qaul Avatar',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_users_qaul_avatar
+                        .buildQaulAvatarUseCase,
               ),
             ],
           ),

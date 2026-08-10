@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:utils/utils.dart';
 
+import '../users/qaul_avatar.dart';
 import 'message_presentation_meta.dart';
 import 'qaul_chat_bubble.dart';
 
@@ -263,46 +264,17 @@ class GroupSenderAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final background = colorGenerationStrategy(sender.idBase58);
-    final textScaler = chatBubbleTextScaler(context);
-
     return SizedBox(
       width: 28,
       height: 28,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          CircleAvatar(
-            radius: 14,
-            backgroundColor: background,
-            child: Text(
-              initials(sender.name),
-              style: const TextStyle(
-                fontFamily: 'Roboto',
-                fontSize: 14,
-                color: Colors.white,
-                fontWeight: FontWeight.w300,
-                height: 1.2,
-                letterSpacing: 0,
-              ),
-              textScaler: textScaler,
-            ),
-          ),
-          if (sender.isConnected)
-            Positioned(
-              right: -1,
-              bottom: -1,
-              child: Container(
-                width: 9,
-                height: 9,
-                decoration: BoxDecoration(
-                  color: Colors.greenAccent.shade700,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 0.5),
-                ),
-              ),
-            ),
-        ],
+      child: QaulAvatarBadge(
+        size: QaulAvatarSize.tiny,
+        isVisible: sender.isConnected,
+        child: QaulAvatar(
+          name: sender.name,
+          id: sender.idBase58,
+          size: QaulAvatarSize.tiny,
+        ),
       ),
     );
   }
