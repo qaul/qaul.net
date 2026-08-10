@@ -1,6 +1,6 @@
 [package]
 name = "qauld-ctl"
-version = "2.0.0-rc.6"
+version = "2.0.0-rc.7"
 authors = ["qaul community <contact@qaul.net>"]
 edition = "2021"
 description = "qaul-ctl: Client to control the qauld daemon"
