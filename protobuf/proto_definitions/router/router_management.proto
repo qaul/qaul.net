@@ -1,0 +1,68 @@
+syntax = "proto3";
+package qaul.net.router_management;
+
+// Network management sub-protocol (spec section 11).
+//
+// A thin end-to-end addressed-message layer carrying control messages that
+// are not reachability: profile fetch (11.5), and in a later phase
+// delegation subscribe (11.6) and revoke (11.7). It depends on the routing
+// protocol for delivery but performs no routing of its own — each hop
+// forwards using an ordinary routing-table next-hop lookup (11.2, 11.4).
+
+// The envelope every management message is wrapped in (11.3).
+message ManagementMessage {
+    // sub-protocol version
+    uint32 version = 1;
+    // 8-byte ID of the recipient (section 3.3)
+    bytes destination = 2;
+    // selects the index space the destination lives in (section 3.5)
+    bool destination_is_node = 3;
+    // 8-byte ID of the requester
+    bytes source = 4;
+    bool source_is_node = 5;
+    // correlates a response to its request; echoed unchanged by the
+    // responder
+    uint32 request_id = 6;
+
+    oneof body {
+        ProfileRequest profile_request = 7;
+        ProfileResponse profile_response = 8;
+    }
+
+    // Phase 13 (sections 11.6, 11.7) adds delegation_subscribe,
+    // delegation_subscribe_ack, delegation_revoke and
+    // delegation_revoke_ack here. Reserved so those land without
+    // renumbering anything above.
+    reserved 9, 10, 11, 12;
+}
+
+// Profile fetch (11.5).
+//
+// Sent when a node holds an 8-byte ID but needs the subject's full key —
+// to verify a delegation entry or manifest signature — or a fresher
+// profile than it has cached. Addressed to the subject.
+message ProfileRequest {
+    // the requester's cached profile_version for the subject, or 0 if it
+    // holds none
+    uint32 cached_version = 1;
+}
+
+message ProfileResponse {
+    bool found = 1;
+    Profile profile = 2;
+}
+
+message Profile {
+    // full multikey-encoded public key (section 3.3)
+    bytes multikey = 1;
+    uint32 profile_version = 2;
+    // may be empty
+    string name = 3;
+    // the subject's ed25519 signature over
+    // (multikey || profile_version || name)
+    bytes self_signature = 4;
+
+    // Feature-capability bitset. A qaul extension, not part of section
+    // 11.5.
+    uint32 capabilities = 5;
+}
