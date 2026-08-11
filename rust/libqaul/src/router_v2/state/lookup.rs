@@ -14,6 +14,15 @@ impl RouterV2State {
         node_entries.id_of(next_hop)
     }
 
+    /// resolves a node's routing entry as per spec: 9.2
+    pub fn next_hop_for_node(&self, target: [u8; 8]) -> Option<([u8; 8], ConnectionModule)> {
+        let idx = self.node_dict.read().unwrap().idx_of(&target)?;
+        let entry = self.routing_table.read().unwrap().get(Space::Node, idx)?;
+        let entry = entry.read().unwrap();
+        let next_hop = self.next_hop_node_id(entry.next_hop)?;
+        Some((next_hop, entry.transport))
+    }
+
     pub fn next_hop_for_user(&self, recipient: [u8; 8]) -> Option<([u8; 8], ConnectionModule)> {
         let users = self.users.read().unwrap();
         if let Some(user) = users.get(&recipient) {

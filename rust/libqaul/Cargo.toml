@@ -69,6 +69,7 @@ directories = "6.0"
 
 # internal references
 qaul_info = { path = "../libp2p_modules/qaul_info" }
+qaul_management = { path = "../libp2p_modules/qaul_management" }
 qaul_messaging = { path = "../libp2p_modules/qaul_messaging" }
 qaul-proto = { path = "../qaul-proto" }
 
