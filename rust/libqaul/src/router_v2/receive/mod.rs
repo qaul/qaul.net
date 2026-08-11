@@ -20,7 +20,7 @@ use crate::{
             messages::{IndexDump, ManifestDelta, ManifestRequest, NodeManifest, RoutingUpdate},
             CodecError, Header, RoutingMessage,
         },
-        OutboundMsg, Result, RouterV2State,
+        OutboundKind, OutboundMsg, Result, RouterV2State,
     },
 };
 
@@ -150,6 +150,7 @@ impl RouterV2State {
         frame.extend(body);
 
         if let Err(e) = self.tx_outbound.send(OutboundMsg {
+            kind: OutboundKind::Routing,
             peer,
             transport,
             bytes: frame,
