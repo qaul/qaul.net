@@ -295,3 +295,133 @@ fn next_hop_node_id_resolves_bound_indices_and_misses_unbound() {
     assert_eq!(state.next_hop_node_id(77), Some([7; 8]));
     assert_eq!(state.next_hop_node_id(78), None);
 }
+
+// ---------- next_hop_for_node ----------
+//
+// §11.4 forwards a management message by an ordinary next-hop lookup, with
+// `destination_is_node` selecting the index space. The property that matters
+// here is what this lookup *refuses* to do: no delegation-gateway fallback
+// and no nearest-gateway default route. A node is reachable through its own
+// entry or not at all — defaulting would hand the message to a gateway that
+// is not its destination, which §11.4 step 3 says to drop instead.
+
+mod next_hop_for_node {
+    use super::*;
+
+    #[test]
+    fn unknown_node_returns_none() {
+        let (state, _rx) = fresh_state();
+        assert_eq!(state.next_hop_for_node([99; 8]), None);
+    }
+
+    /// Bound in the dictionary but with no routing entry: known of, not
+    /// reachable.
+    #[test]
+    fn a_node_without_a_routing_entry_returns_none() {
+        let (state, _rx) = fresh_state();
+        let target = [5u8; 8];
+        install_node(&state, target, 1, false);
+        bind_own_dict(&state, Space::Node, 40, target);
+
+        assert_eq!(state.next_hop_for_node(target), None);
+    }
+
+    #[test]
+    fn a_reachable_node_resolves_its_next_hop_and_transport() {
+        let (state, _rx) = fresh_state();
+        let target = [5u8; 8];
+        let neighbour_id = [9u8; 8];
+
+        let node = install_node(&state, target, 1, false);
+        bind_own_dict(&state, Space::Node, 40, target);
+        bind_own_dict(&state, Space::Node, 100, neighbour_id);
+
+        let entry = make_entry(TargetRef::Node(node), 100, 10, ConnectionModule::Internet);
+        state
+            .routing_table
+            .write()
+            .unwrap()
+            .set(Space::Node, 40, entry);
+
+        assert_eq!(
+            state.next_hop_for_node(target),
+            Some((neighbour_id, ConnectionModule::Internet))
+        );
+    }
+
+    /// The entry names a next hop the node dictionary cannot resolve, so the
+    /// hop cannot be turned into a neighbour. Must be `None`, not a panic.
+    #[test]
+    fn an_unresolvable_next_hop_index_returns_none() {
+        let (state, _rx) = fresh_state();
+        let target = [5u8; 8];
+
+        let node = install_node(&state, target, 1, false);
+        bind_own_dict(&state, Space::Node, 40, target);
+        // index 100 is deliberately left unbound
+
+        let entry = make_entry(TargetRef::Node(node), 100, 10, ConnectionModule::Lan);
+        state
+            .routing_table
+            .write()
+            .unwrap()
+            .set(Space::Node, 40, entry);
+
+        assert_eq!(state.next_hop_for_node(target), None);
+    }
+
+    /// The defining difference from `resolve_forwarding`. A reachable
+    /// gateway exists, but the destination node is unknown — a management
+    /// message must be dropped, not default-routed to the gateway, which is
+    /// not the message's destination.
+    #[test]
+    fn an_unknown_node_does_not_fall_back_to_a_reachable_gateway() {
+        let (state, _rx) = fresh_state();
+        let gateway_id = [7u8; 8];
+
+        let gateway = install_node(&state, gateway_id, 1, true);
+        bind_own_dict(&state, Space::Node, 50, gateway_id);
+        let entry = make_entry(TargetRef::Node(gateway), 50, 10, ConnectionModule::Lan);
+        state
+            .routing_table
+            .write()
+            .unwrap()
+            .set(Space::Node, 50, entry);
+
+        // The gateway itself resolves...
+        assert!(state.next_hop_for_node(gateway_id).is_some());
+        // ...but an unrelated node does not borrow its route.
+        assert_eq!(state.next_hop_for_node([99u8; 8]), None);
+    }
+
+    /// A node entry is not consulted for a user id, and vice versa: the two
+    /// index spaces are separate (§3.5).
+    #[test]
+    fn the_node_lookup_does_not_see_user_space() {
+        let (state, _rx) = fresh_state();
+        let shared = [3u8; 8];
+
+        let user = install_user(&state, shared, 0);
+        bind_own_dict(&state, Space::User, 40, shared);
+        bind_own_dict(&state, Space::Node, 100, [9u8; 8]);
+        let entry = make_entry(
+            TargetRef::User(user.clone()),
+            100,
+            10,
+            ConnectionModule::Lan,
+        );
+        user.write().unwrap().routing_entry = Some(Arc::downgrade(&entry));
+        state
+            .routing_table
+            .write()
+            .unwrap()
+            .set(Space::User, 40, entry);
+
+        assert!(state.next_hop_for_user(shared).is_some());
+        assert_eq!(
+            state.next_hop_for_node(shared),
+            None,
+            "a user-space entry must not satisfy a node-space lookup"
+        );
+    }
+}

@@ -1037,6 +1037,7 @@ impl Libqaul {
                                 Self::send_via_module(
                                     &*self.state,
                                     transport,
+                                    msg.kind,
                                     msg.peer,
                                     msg.bytes,
                                     lan,
@@ -1055,22 +1056,32 @@ impl Libqaul {
     fn send_via_module(
         state: &crate::QaulState,
         connection_module: ConnectionModule,
+        kind: router_v2::OutboundKind,
         neighbour_id: libp2p::PeerId,
         data: Vec<u8>,
         lan: &mut connections::lan::Lan,
         internet: &mut connections::internet::Internet,
         ble: &mut BleTransport,
     ) {
-        match connection_module {
-            ConnectionModule::Lan => lan.send_qaul_info_message(state, neighbour_id, data),
-            ConnectionModule::Internet => {
-                internet.send_qaul_info_message(state, neighbour_id, data)
+        match kind {
+            router_v2::OutboundKind::Routing => match connection_module {
+                ConnectionModule::Lan => lan.send_qaul_info_message(state, neighbour_id, data),
+                ConnectionModule::Internet => {
+                    internet.send_qaul_info_message(state, neighbour_id, data)
+                }
+                ConnectionModule::Ble1m | ConnectionModule::BleCoded => {
+                    ble.send_qaul_info_message(state, neighbour_id, data)
+                }
+                ConnectionModule::Local => {}
+                ConnectionModule::None => {}
+            },
+            router_v2::OutboundKind::Management => {
+                // TODO(Phase 12 subtask 11)
+                log::debug!(
+                    "router_v2: management frame for {} dropped, behaviour not yet in the swarm",
+                    neighbour_id
+                );
             }
-            ConnectionModule::Ble1m | ConnectionModule::BleCoded => {
-                ble.send_qaul_info_message(state, neighbour_id, data)
-            }
-            ConnectionModule::Local => {}
-            ConnectionModule::None => {}
         }
     }
 }
