@@ -496,32 +496,18 @@ impl Libqaul {
         // only use the simple logger on desktop systems
         #[cfg(not(any(target_os = "android", target_os = "ios")))]
         {
-            // find rust env var
-            let mut env_log_level = String::from("error");
-            for (key, value) in std::env::vars() {
-                if key == "RUST_LOG" {
-                    env_log_level = value;
-                    break;
-                }
-            }
-
-            // define log level
-            let mut level_filter = log::LevelFilter::Error;
-            if env_log_level == "warn" {
-                level_filter = log::LevelFilter::Warn;
-            } else if env_log_level == "debug" {
-                level_filter = log::LevelFilter::Debug;
-            } else if env_log_level == "info" {
-                level_filter = log::LevelFilter::Info;
-            } else if env_log_level == "trace" {
-                level_filter = log::LevelFilter::Trace;
-            }
+            let env_log_level = match std::env::var("RUST_LOG") {
+                Ok(value) if !value.trim().is_empty() => value,
+                _ => String::from("info"),
+            };
 
             let env_logger = Box::new(
                 pretty_env_logger::formatted_builder()
-                    .filter(None, level_filter)
+                    .parse_filters(&env_log_level)
                     .build(),
             );
+
+            let level_filter = log::LevelFilter::Trace;
             let w_logger = FileLogger::new(
                 *simplelog::WriteLogger::new(
                     simplelog::LevelFilter::Error,
@@ -530,15 +516,9 @@ impl Libqaul {
                 ),
                 log_config.clone(),
             );
-            // Ignore error if global logger was already set (e.g. multi-instance tests).
-            //
-            // This level is the process-wide `log::set_max_level` cap: records
-            // below it are dropped before any logger sees them. It must follow
-            // RUST_LOG, otherwise `RUST_LOG=debug` configures `env_logger` for
-            // Debug and then has every Debug record discarded upstream of it.
             let _ = multi_log::MultiLogger::init(
                 vec![env_logger, Box::new(w_logger)],
-                level_filter.to_level().unwrap_or(log::Level::Error),
+                level_filter.to_level().unwrap_or(log::Level::Trace),
             );
         }
     }

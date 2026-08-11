@@ -133,7 +133,14 @@ pub async fn fetch_users(
         )),
     };
     let mut t = open(connect).await?;
-    let resp = round_trip(&mut t, proto::Modules::Users, req.encode_to_vec(), timeout, &[]).await?;
+    let resp = round_trip(
+        &mut t,
+        proto::Modules::Users,
+        req.encode_to_vec(),
+        timeout,
+        &[],
+    )
+    .await?;
     let parsed = users_proto::Users::decode(&resp.data[..])?;
     let mut rows = Vec::new();
     if let Some(users_proto::users::Message::UserList(list)) = parsed.message {
@@ -184,8 +191,14 @@ pub async fn fetch_dtn_state(
         )),
     };
     let mut t = open(connect).await?;
-    let resp =
-        round_trip(&mut t, proto::Modules::Dtn, req.encode_to_vec(), timeout, user_id).await?;
+    let resp = round_trip(
+        &mut t,
+        proto::Modules::Dtn,
+        req.encode_to_vec(),
+        timeout,
+        user_id,
+    )
+    .await?;
     let parsed = dtn_proto::Dtn::decode(&resp.data[..])?;
     if let Some(dtn_proto::dtn::Message::DtnStateResponse(s)) = parsed.message {
         return Ok(DtnState {
@@ -211,8 +224,14 @@ pub async fn fetch_dtn_config(
         )),
     };
     let mut t = open(connect).await?;
-    let resp =
-        round_trip(&mut t, proto::Modules::Dtn, req.encode_to_vec(), timeout, user_id).await?;
+    let resp = round_trip(
+        &mut t,
+        proto::Modules::Dtn,
+        req.encode_to_vec(),
+        timeout,
+        user_id,
+    )
+    .await?;
     let parsed = dtn_proto::Dtn::decode(&resp.data[..])?;
     if let Some(dtn_proto::dtn::Message::DtnConfigResponse(c)) = parsed.message {
         return Ok(DtnConfig {
@@ -258,7 +277,14 @@ pub async fn fetch_network(
         )),
     };
     let mut t = open(connect).await?;
-    let resp = round_trip(&mut t, proto::Modules::Router, req.encode_to_vec(), timeout, &[]).await?;
+    let resp = round_trip(
+        &mut t,
+        proto::Modules::Router,
+        req.encode_to_vec(),
+        timeout,
+        &[],
+    )
+    .await?;
     let parsed = router_proto::Router::decode(&resp.data[..])?;
     let mut snap = NetworkSnapshot::default();
     if let Some(router_proto::router::Message::ConnectionsList(list)) = parsed.message {
@@ -327,7 +353,14 @@ pub async fn fetch_crypto_config(
         )),
     };
     let mut t = open(connect).await?;
-    let resp = round_trip(&mut t, proto::Modules::Crypto, req.encode_to_vec(), timeout, &[]).await?;
+    let resp = round_trip(
+        &mut t,
+        proto::Modules::Crypto,
+        req.encode_to_vec(),
+        timeout,
+        &[],
+    )
+    .await?;
     let parsed = crypto_proto::Crypto::decode(&resp.data[..])?;
     if let Some(crypto_proto::crypto::Message::GetConfigResponse(c)) = parsed.message {
         return Ok(CryptoConfig {
@@ -349,7 +382,14 @@ pub async fn fetch_crypto_events(
         )),
     };
     let mut t = open(connect).await?;
-    let resp = round_trip(&mut t, proto::Modules::Crypto, req.encode_to_vec(), timeout, &[]).await?;
+    let resp = round_trip(
+        &mut t,
+        proto::Modules::Crypto,
+        req.encode_to_vec(),
+        timeout,
+        &[],
+    )
+    .await?;
     let parsed = crypto_proto::Crypto::decode(&resp.data[..])?;
     if let Some(crypto_proto::crypto::Message::GetEventsResponse(r)) = parsed.message {
         return Ok(r.events.iter().map(rotation_event_to_row).collect());
@@ -372,7 +412,14 @@ pub async fn fetch_feed(
         )),
     };
     let mut t = open(connect).await?;
-    let resp = round_trip(&mut t, proto::Modules::Feed, req.encode_to_vec(), timeout, &[]).await?;
+    let resp = round_trip(
+        &mut t,
+        proto::Modules::Feed,
+        req.encode_to_vec(),
+        timeout,
+        &[],
+    )
+    .await?;
     let parsed = feed_proto::Feed::decode(&resp.data[..])?;
     let mut rows = Vec::new();
     if let Some(feed_proto::feed::Message::Received(list)) = parsed.message {
@@ -599,8 +646,16 @@ pub async fn refresh_once(
         .unwrap_or_default();
 
     let (users, feed, dtn_state, dtn_config, network, crypto_config, crypto_events) = tokio::join!(
-        async { fetch_users(connect, timeout).await.map_err(|e| e.to_string()) },
-        async { fetch_feed(connect, timeout).await.map_err(|e| e.to_string()) },
+        async {
+            fetch_users(connect, timeout)
+                .await
+                .map_err(|e| e.to_string())
+        },
+        async {
+            fetch_feed(connect, timeout)
+                .await
+                .map_err(|e| e.to_string())
+        },
         async {
             fetch_dtn_state(connect, timeout, &uid)
                 .await
@@ -611,7 +666,11 @@ pub async fn refresh_once(
                 .await
                 .map_err(|e| e.to_string())
         },
-        async { fetch_network(connect, timeout).await.map_err(|e| e.to_string()) },
+        async {
+            fetch_network(connect, timeout)
+                .await
+                .map_err(|e| e.to_string())
+        },
         async {
             fetch_crypto_config(connect, timeout)
                 .await
