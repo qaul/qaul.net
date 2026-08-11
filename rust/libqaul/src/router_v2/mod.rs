@@ -11,7 +11,7 @@
 
 use std::{
     collections::{HashMap, HashSet, VecDeque},
-    sync::{Arc, RwLock},
+    sync::{atomic::AtomicU32, Arc, RwLock},
 };
 
 use libp2p::{identity::Keypair, PeerId};
@@ -37,6 +37,7 @@ pub mod forwarding;
 pub mod identity;
 pub mod index;
 pub mod init;
+pub mod management;
 pub mod manifest;
 pub mod metric;
 pub mod propagation;
@@ -140,11 +141,21 @@ impl NeighbourInfo {
     }
 }
 
+/// Which libp2p behaviour carries an outbound frame.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum OutboundKind {
+    /// A routing protocol frame (§8), over the qaul_info pipe.
+    Routing,
+    /// A `ManagementMessage` envelope (§11.3), over qaul_management.
+    Management,
+}
+
 /// the shape for a message to be sent over the wire
 #[derive(Debug, Clone)]
 pub struct OutboundMsg {
     pub peer: PeerId,
     pub transport: ConnectionModule,
+    pub kind: OutboundKind,
     pub bytes: Vec<u8>,
 }
 
@@ -192,6 +203,11 @@ pub struct RouterV2State {
     pub pending_manifest_requests: RwLock<HashMap<PeerId, HashSet<[u8; 8]>>>,
     /// current requests that are in flight
     pub outstanding_manifest_requests: RwLock<HashMap<([u8; 8], PeerId), u64>>,
+    /// §11.5 profile fetches that are waiting for response.
+    /// key is (subject, is_node)
+    pub management_in_flight: RwLock<HashMap<([u8; 8], bool), u64>>,
+    /// §11.3 request_id source
+    pub next_request_id: AtomicU32,
     /// spec section 14 sliding windows
     pub manifest_request_window: RwLock<HashMap<PeerId, VecDeque<u64>>>,
     pub manifest_serve_window: RwLock<HashMap<PeerId, VecDeque<u64>>>,
@@ -229,6 +245,8 @@ impl RouterV2State {
             dirty_delegations: RwLock::new(HashSet::new()),
             pending_manifest_requests: RwLock::new(HashMap::new()),
             outstanding_manifest_requests: RwLock::new(HashMap::new()),
+            management_in_flight: RwLock::new(HashMap::new()),
+            next_request_id: AtomicU32::new(1),
             manifest_request_window: RwLock::new(HashMap::new()),
             manifest_serve_window: RwLock::new(HashMap::new()),
             propagation_form: RwLock::new(PropagationForm::User),

@@ -18,7 +18,7 @@ use crate::{
         },
         index::Space,
         table::{RoutingEntry, TargetRef},
-        OutboundMsg, RouterV2State, Sphere,
+        OutboundKind, OutboundMsg, RouterV2State, Sphere,
     },
 };
 
@@ -156,6 +156,7 @@ pub fn tick_origin(state: &RouterV2State, now_ms: u64) {
         header_bytes.extend(body);
 
         if let Err(e) = state.tx_outbound.send(OutboundMsg {
+            kind: OutboundKind::Routing,
             peer,
             transport,
             bytes: header_bytes,
@@ -289,6 +290,7 @@ pub fn tick_relay(state: &RouterV2State, now: u64) {
         frame.extend(body);
 
         if let Err(e) = state.tx_outbound.send(OutboundMsg {
+            kind: OutboundKind::Routing,
             peer,
             transport,
             bytes: frame,
@@ -384,6 +386,7 @@ pub fn on_neighbour_connect(state: &RouterV2State, neighbour: PeerId, transport:
     frame.extend(&body);
 
     if let Err(e) = state.tx_outbound.send(OutboundMsg {
+        kind: OutboundKind::Routing,
         peer: neighbour,
         transport,
         bytes: frame,

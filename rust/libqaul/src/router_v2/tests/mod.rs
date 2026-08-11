@@ -13,6 +13,7 @@ mod forwarding;
 mod handle_index_dump;
 mod handle_node_manifest;
 mod handle_routing_update;
+mod management;
 mod neighbour_transport;
 mod next_hop;
 mod on_neighbour_connect;
