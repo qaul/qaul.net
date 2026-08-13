@@ -29,6 +29,10 @@ impl RouterV2State {
         bytes: &[u8],
         now_ms: u64,
     ) -> ManagementOutcome {
+        debug!(
+            "management: received {} bytes from {from_peer}",
+            bytes.len()
+        );
         let envelope = match ManagementMessage::decode(bytes) {
             Ok(m) => m,
             Err(e) => {
