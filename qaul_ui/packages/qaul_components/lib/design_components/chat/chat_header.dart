@@ -96,6 +96,7 @@ class ChatHeader extends StatelessWidget {
     required this.onlineLabel,
     required this.lastSeenLabel,
     this.showOnlineIndicatorWhenOnline = true,
+    this.showBackButton = true,
     this.applyTopSafeArea = true,
     this.extraTopPadding = 0,
     this.menuEntries = const [],
@@ -113,6 +114,7 @@ class ChatHeader extends StatelessWidget {
     required String groupName,
     required int membersCount,
     String Function(int count)? formatMembersCount,
+    this.showBackButton = true,
     this.applyTopSafeArea = true,
     this.extraTopPadding = 0,
     this.menuEntries = const [],
@@ -137,6 +139,7 @@ class ChatHeader extends StatelessWidget {
   final String onlineLabel;
   final String lastSeenLabel;
   final bool showOnlineIndicatorWhenOnline;
+  final bool showBackButton;
   final bool applyTopSafeArea;
   final double extraTopPadding;
   final List<ChatHeaderMenuEntry> menuEntries;
@@ -168,6 +171,8 @@ class ChatHeader extends StatelessWidget {
       base: theme.textTheme.bodySmall,
       fontSize: 11,
     );
+    final subtitle = _subtitle(context);
+    final hasSubtitle = subtitle.isNotEmpty;
 
     final menu = menuEntries.isNotEmpty && onMenuSelected != null
         ? _ChatHeaderOverflowMenuButton(
@@ -182,18 +187,20 @@ class ChatHeader extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: _kHorizontalPadding),
         child: Row(
           children: [
-            IconButton(
-              tooltip:
-                  backButtonTooltip ??
-                  MaterialLocalizations.of(context).backButtonTooltip,
-              onPressed: onBackPressed,
-              icon: const Icon(
-                Icons.arrow_back_rounded,
-                size: _kHeaderControlIconSize,
-                color: _kChatHeaderControlColor,
+            if (showBackButton) ...[
+              IconButton(
+                tooltip:
+                    backButtonTooltip ??
+                    MaterialLocalizations.of(context).backButtonTooltip,
+                onPressed: onBackPressed,
+                icon: const Icon(
+                  Icons.arrow_back_rounded,
+                  size: _kHeaderControlIconSize,
+                  color: _kChatHeaderControlColor,
+                ),
               ),
-            ),
-            const SizedBox(width: _kBackAvatarGap),
+              const SizedBox(width: _kBackAvatarGap),
+            ],
             _AvatarWithOnlineBadge(
               showOnline: _showOnlineDot,
               child: SizedBox.square(
@@ -213,13 +220,15 @@ class ChatHeader extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: primaryStyle,
                   ),
-                  const SizedBox(height: _kTitleSubtitleGap),
-                  Text(
-                    _subtitle(context),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: secondaryStyle,
-                  ),
+                  if (hasSubtitle) ...[
+                    const SizedBox(height: _kTitleSubtitleGap),
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: secondaryStyle,
+                    ),
+                  ],
                 ],
               ),
             ),
