@@ -95,9 +95,10 @@ pub async fn fetch_default_user(
     let mut t = open(connect).await?;
     let resp = round_trip(
         &mut t,
-        proto::Modules::Useraccounts,
+        proto::Modules::Users,
         req.encode_to_vec(),
         timeout,
+        &[],
     )
     .await?;
     let parsed = ua_proto::UserAccounts::decode(&resp.data[..])?;
