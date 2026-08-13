@@ -10,8 +10,8 @@ use libp2p::PeerId;
 use crate::{
     connections::ConnectionModule,
     router_v2::{
-        identity::Multikey, index::Space, manifest::ManifestLog, table::Node, NeighbourInfo,
-        RouterV2State,
+        identity::Multikey, index::Space, manifest::ManifestLog, metric, table::Node,
+        NeighbourInfo, RouterV2State,
     },
 };
 
@@ -25,6 +25,17 @@ impl RouterV2State {
             .iter()
             .find(|(_, info)| info.node_id == *node_id)
             .map(|(peer, _)| *peer)
+    }
+
+    pub fn neighbour_transport(&self, node_id: &[u8; 8]) -> Option<ConnectionModule> {
+        let mirrors = self.mirrors.read().unwrap();
+        mirrors
+            .values()
+            .find(|info| info.node_id == *node_id)?
+            .transports
+            .iter()
+            .copied()
+            .min_by_key(|t| metric::hop_cost(*t, None))
     }
 
     /// Registers a neighbour as a routable node: ensures a [`Node`]
