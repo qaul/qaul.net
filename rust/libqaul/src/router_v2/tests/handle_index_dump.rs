@@ -32,7 +32,7 @@ fn both_sections_populate_mirrors_and_stubs() {
         node_mappings: vec![mapping(9, [2; 8], 99)],
     };
 
-    state.handle_index_dump(peer, dump).unwrap();
+    state.handle_index_dump(peer, dump, 1_000).unwrap();
 
     {
         let mirrors = state.mirrors.read().unwrap();
@@ -74,6 +74,7 @@ fn second_dump_accumulates_and_does_not_clear_first() {
                 user_mappings: vec![mapping(5, [1; 8], 1)],
                 node_mappings: vec![mapping(5, [11; 8], 1)],
             },
+            1_000,
         )
         .unwrap();
 
@@ -84,6 +85,7 @@ fn second_dump_accumulates_and_does_not_clear_first() {
                 user_mappings: vec![mapping(9, [2; 8], 1)],
                 node_mappings: vec![mapping(9, [22; 8], 1)],
             },
+            1_000,
         )
         .unwrap();
 
@@ -137,6 +139,7 @@ fn dump_rebinding_live_index_clears_old_routing_state() {
                 user_mappings: vec![mapping(5, new_id, 1)],
                 node_mappings: Vec::new(),
             },
+            1_000,
         )
         .unwrap();
 
@@ -175,6 +178,7 @@ fn user_section_is_processed_before_node_section() {
                 user_mappings: vec![mapping(3, [7; 8], 5)],
                 node_mappings: vec![mapping(3, [8; 8], 6)],
             },
+            1_000,
         )
         .unwrap();
 
@@ -200,7 +204,7 @@ fn unknown_neighbour_is_noop() {
         node_mappings: vec![mapping(9, [2; 8], 99)],
     };
 
-    assert!(state.handle_index_dump(peer, dump).is_ok());
+    assert!(state.handle_index_dump(peer, dump, 1_000).is_ok());
     assert!(state.mirrors.read().unwrap().get(&peer).is_none());
     assert_eq!(state.users.read().unwrap().len(), 0);
     assert_eq!(state.nodes.read().unwrap().len(), 0);
@@ -220,6 +224,7 @@ fn empty_dump_is_harmless() {
                 user_mappings: Vec::new(),
                 node_mappings: Vec::new(),
             },
+            1_000,
         )
         .unwrap();
 

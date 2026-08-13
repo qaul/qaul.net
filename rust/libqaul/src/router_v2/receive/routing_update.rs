@@ -215,8 +215,13 @@ impl RouterV2State {
             local_only: accepted.local_only,
         }));
 
+        let mut needs_profile: Option<[u8; 8]> = None;
         if let TargetRef::User(user) = &new_entry.read().unwrap().target {
-            user.write().unwrap().routing_entry = Some(Arc::downgrade(&new_entry));
+            let mut u = user.write().unwrap();
+            u.routing_entry = Some(Arc::downgrade(&new_entry));
+            if u.public_key.is_none() {
+                needs_profile = Some(u.id);
+            }
         }
 
         self.routing_table
@@ -240,6 +245,10 @@ impl RouterV2State {
             accepted.local_only,
             ctx.neighbour,
         );
+
+        if let Some(user_id) = needs_profile {
+            self.request_profile(user_id, false, ctx.now);
+        }
     }
 
     pub fn handle_routing_update(
@@ -251,14 +260,14 @@ impl RouterV2State {
         now: u64,
     ) -> Result<()> {
         for mapping in msg.user_mappings {
-            match self.apply_mapping(neighbour, Space::User, mapping) {
+            match self.apply_mapping(neighbour, Space::User, mapping, now) {
                 Ok(_) => {}
                 Err(e) => warn!("apply_mapping user failed: {e}"),
             };
         }
 
         for mapping in msg.node_mappings {
-            match self.apply_mapping(neighbour, Space::Node, mapping) {
+            match self.apply_mapping(neighbour, Space::Node, mapping, now) {
                 Ok(_) => {}
                 Err(e) => warn!("apply_mapping node failed: {e}"),
             };

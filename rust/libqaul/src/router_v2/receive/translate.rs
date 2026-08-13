@@ -58,7 +58,13 @@ impl RouterV2State {
         Ok(allocated_idx)
     }
 
-    pub fn apply_mapping(&self, neighbour: PeerId, space: Space, mapping: Mapping) -> Result<()> {
+    pub fn apply_mapping(
+        &self,
+        neighbour: PeerId,
+        space: Space,
+        mapping: Mapping,
+        now: u64,
+    ) -> Result<()> {
         let mirror_id = {
             let mirrors = self.mirrors.read().unwrap();
             let Some(neigbour_mirrors) = mirrors.get(&neighbour) else {
@@ -140,38 +146,48 @@ impl RouterV2State {
                 }
             }
             Space::User => {
-                let mut users = self.users.write().unwrap();
-                match users.get(&mapping.target_id) {
-                    Some(user) => {
-                        let version = {
-                            let u = user.read().unwrap();
-                            u.profile_version
-                        };
-                        if is_fresher_u32(mapping.version, version) {
-                            let mut u = user.write().unwrap();
-                            u.profile_version = mapping.version;
-                        } else if version == mapping.version {
-                        } else {
-                            // TODO
-                            debug!(
-                                "stale profile echo from {neighbour:?}: target={:?} stored_version={version} incoming={}",
-                                mapping.target_id,
-                                mapping.version
-                            );
+                // §8.8 step 2: record the introduced version, and schedule a
+                // profile fetch when it is fresher than what we hold.
+                let needs_profile = {
+                    let mut users = self.users.write().unwrap();
+                    match users.get(&mapping.target_id) {
+                        Some(user) => {
+                            let version = {
+                                let u = user.read().unwrap();
+                                u.profile_version
+                            };
+                            if is_fresher_u32(mapping.version, version) {
+                                let mut u = user.write().unwrap();
+                                u.profile_version = mapping.version;
+                                true
+                            } else if version == mapping.version {
+                                user.read().unwrap().public_key.is_none()
+                            } else {
+                                debug!(
+                                    "stale profile echo from {neighbour:?}: target={:?} stored_version={version} incoming={}",
+                                    mapping.target_id, mapping.version
+                                );
+                                false
+                            }
+                        }
+                        None => {
+                            let u = User {
+                                id: mapping.target_id,
+                                profile_version: mapping.version,
+                                routing_entry: None,
+                                delegation_gateways: Vec::new(),
+                                public_key: None,
+                                is_hosted: false,
+                            };
+                            users.insert(mapping.target_id, u);
+                            true
                         }
                     }
-                    None => {
-                        let u = User {
-                            id: mapping.target_id,
-                            profile_version: mapping.version,
-                            routing_entry: None,
-                            delegation_gateways: Vec::new(),
-                            public_key: None,
-                            is_hosted: false,
-                        };
-                        users.insert(mapping.target_id, u);
-                    }
                 };
+
+                if needs_profile {
+                    self.request_profile(mapping.target_id, false, now);
+                }
             }
         }
         Ok(())
@@ -196,7 +212,7 @@ impl RouterV2State {
         }
     }
 
-    pub fn handle_index_dump(&self, neighbour: PeerId, msg: IndexDump) -> Result<()> {
+    pub fn handle_index_dump(&self, neighbour: PeerId, msg: IndexDump, now: u64) -> Result<()> {
         // TEMP(smoke test)
         info!(
             "router_v2 INDEX_DUMP ← peer={neighbour} user_mappings={} node_mappings={}",
@@ -205,13 +221,13 @@ impl RouterV2State {
         );
 
         for mapping in msg.user_mappings {
-            if let Err(e) = self.apply_mapping(neighbour, Space::User, mapping) {
+            if let Err(e) = self.apply_mapping(neighbour, Space::User, mapping, now) {
                 warn!("index_dump: apply_mapping user failed: {e}");
             }
         }
 
         for mapping in msg.node_mappings {
-            if let Err(e) = self.apply_mapping(neighbour, Space::Node, mapping) {
+            if let Err(e) = self.apply_mapping(neighbour, Space::Node, mapping, now) {
                 warn!("index_dump: apply_mapping node failed: {e}");
             }
         }
