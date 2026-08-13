@@ -203,6 +203,11 @@ pub struct RouterV2State {
     pub pending_manifest_requests: RwLock<HashMap<PeerId, HashSet<[u8; 8]>>>,
     /// current requests that are in flight
     pub outstanding_manifest_requests: RwLock<HashMap<([u8; 8], PeerId), u64>>,
+    /// profiles this node hosts
+    pub hosted_profiles: RwLock<HashMap<[u8; 8], crate::router_v2::identity::Profile>>,
+    /// `(source, request_id)` of recently forwarded management messages,
+    /// with the time forwarded.
+    pub management_recent_forwards: RwLock<HashMap<([u8; 8], u32), u64>>,
     /// §11.5 profile fetches that are waiting for response.
     /// key is (subject, is_node)
     pub management_in_flight: RwLock<HashMap<([u8; 8], bool), u64>>,
@@ -245,6 +250,8 @@ impl RouterV2State {
             dirty_delegations: RwLock::new(HashSet::new()),
             pending_manifest_requests: RwLock::new(HashMap::new()),
             outstanding_manifest_requests: RwLock::new(HashMap::new()),
+            hosted_profiles: RwLock::new(HashMap::new()),
+            management_recent_forwards: RwLock::new(HashMap::new()),
             management_in_flight: RwLock::new(HashMap::new()),
             next_request_id: AtomicU32::new(1),
             manifest_request_window: RwLock::new(HashMap::new()),

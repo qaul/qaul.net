@@ -3,6 +3,9 @@
 
 //! Network management sub-protocol (spec §11).
 
+pub mod forwarding;
+pub mod profile;
+
 use tracing::debug;
 
 use crate::router_v2::{OutboundKind, OutboundMsg, RouterV2State};
@@ -10,6 +13,30 @@ use crate::router_v2::{OutboundKind, OutboundMsg, RouterV2State};
 use prost::Message;
 use proto::{management_message::Body, ManagementMessage, ProfileRequest};
 use qaul_proto::qaul_net_router_management as proto;
+
+/// addressing half of a §11.3 envelope, body is not included
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct Addressing {
+    pub destination: [u8; 8],
+    pub destination_is_node: bool,
+    pub source: [u8; 8],
+    pub source_is_node: bool,
+    pub request_id: u32,
+}
+
+impl Addressing {
+    pub(crate) fn reply(&self, body: Body) -> ManagementMessage {
+        ManagementMessage {
+            version: MANAGEMENT_VERSION,
+            destination: self.source.to_vec(),
+            destination_is_node: self.source_is_node,
+            source: self.destination.to_vec(),
+            source_is_node: self.destination_is_node,
+            request_id: self.request_id,
+            body: Some(body),
+        }
+    }
+}
 
 /// Sub-protocol version we speak and accept (§11.3).
 pub const MANAGEMENT_VERSION: u32 = 1;
