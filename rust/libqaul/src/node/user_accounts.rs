@@ -261,7 +261,7 @@ impl UserAccounts {
         if let Some(router_v2) = state.get_router_v2() {
             Self::publish_hosted_profile(state, &router_v2, &user);
             let routing_id = user.routing_user_id();
-            router_v2.register_hosted_user(routing_id, 0);
+            router_v2.register_hosted_user(routing_id, 0, user.multikey());
 
             // TODO(Phase 11 subtask 1/7): honour an `opt_out_delegation` flag on
             // UserAccount.

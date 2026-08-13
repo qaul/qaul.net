@@ -18,6 +18,7 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::sync::mpsc::UnboundedReceiver;
 
+use crate::node::user_accounts::UserAccounts;
 use crate::router_v2::OutboundMsg;
 use crate::router_v2::{init::init_router_v2, RouterV2State};
 use crate::rpc::authentication::AuthenticationState;
@@ -366,7 +367,8 @@ impl Libqaul {
         // this binds the hosted user into router_v2's user index space (§3.2, §3.5).
         if let Some(router_v2) = qaul_state.get_router_v2() {
             for account in crate::node::user_accounts::UserAccounts::get_all_users(&qaul_state) {
-                router_v2.register_hosted_user(account.routing_user_id(), 0);
+                router_v2.register_hosted_user(account.routing_user_id(), 0, account.multikey());
+                UserAccounts::publish_hosted_profile(&qaul_state, &router_v2, &account);
             }
         }
 
