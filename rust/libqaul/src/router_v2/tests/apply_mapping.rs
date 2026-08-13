@@ -25,6 +25,7 @@ fn apply_mapping_unknown_neighbour_is_noop() {
             target_id: [1; 8],
             version: 42,
         },
+        1_000,
     );
 
     assert!(result.is_ok());
@@ -46,6 +47,7 @@ fn apply_mapping_fresh_user_creates_stub_and_binds_mirror() {
                 target_id: [1; 8],
                 version: 42,
             },
+            1_000,
         )
         .unwrap();
 
@@ -75,6 +77,7 @@ fn apply_mapping_fresh_node_creates_stub_and_binds_mirror() {
                 target_id: [2; 8],
                 version: 99,
             },
+            1_000,
         )
         .unwrap();
 
@@ -117,6 +120,7 @@ fn apply_mapping_same_id_updates_version_only() {
                 target_id: id,
                 version: 20,
             },
+            1_000,
         )
         .unwrap();
 
@@ -172,6 +176,7 @@ fn apply_mapping_rebind_clears_old_routing_state() {
                 target_id: new_id,
                 version: 1,
             },
+            1_000,
         )
         .unwrap();
 
@@ -218,6 +223,7 @@ fn apply_mapping_incoming_version_equal_is_noop() {
                 target_id: id,
                 version: 42,
             },
+            1_000,
         )
         .unwrap();
 
@@ -251,6 +257,7 @@ fn apply_mapping_incoming_version_older_preserves_stored() {
                 target_id: id,
                 version: 50,
             },
+            1_000,
         )
         .unwrap();
 
@@ -289,6 +296,7 @@ fn apply_mapping_incoming_version_fresher_updates_advertised_only() {
                 target_id: id,
                 version: 12,
             },
+            1_000,
         )
         .unwrap();
 
@@ -323,6 +331,7 @@ fn apply_mapping_user_and_node_spaces_are_independent() {
                 target_id: user_id,
                 version: 1,
             },
+            1_000,
         )
         .unwrap();
     state
@@ -334,6 +343,7 @@ fn apply_mapping_user_and_node_spaces_are_independent() {
                 target_id: node_id,
                 version: 1,
             },
+            1_000,
         )
         .unwrap();
 

@@ -98,7 +98,7 @@ impl RouterV2State {
                 },
                 RoutingMessage::IndexDump => match IndexDump::decode(payload) {
                     Ok(msg) => {
-                        if let Err(e) = self.handle_index_dump(neighbour, msg) {
+                        if let Err(e) = self.handle_index_dump(neighbour, msg, now) {
                             error!("handle_index_dump failed: {e}");
                         }
                     }
