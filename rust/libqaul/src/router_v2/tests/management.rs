@@ -73,6 +73,8 @@ mod envelope {
                     name: "alice".into(),
                     self_signature: vec![0xBB; 64],
                     capabilities: 1,
+                    signed_profile: Vec::new(),
+                    signed_profile_signature: Vec::new(),
                 }),
             })),
         };
@@ -155,6 +157,8 @@ mod envelope {
             name: "alice".into(),
             self_signature: signature.to_vec(),
             capabilities: 0xFF, // must not affect verification
+            signed_profile: Vec::new(),
+            signed_profile_signature: Vec::new(),
         };
 
         let rebuilt = Profile {

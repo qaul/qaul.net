@@ -1250,6 +1250,19 @@ impl Transport for BleTransport {
         Ble::send_routing_info(state, peer_id, data);
     }
 
+    /// For now, the management sub-protocol does not support BLE.
+    /// and the consequene is that a BLE-only node cannot fetch profiles,
+    /// so it can't verify delegation entries or learn user names
+    /// we probably still need to look into this.
+    fn send_qaul_management_message(
+        &mut self,
+        _state: &crate::QaulState,
+        peer_id: PeerId,
+        _data: Vec<u8>,
+    ) {
+        log::debug!("management envelope for {peer_id} dropped: not carried over BLE");
+    }
+
     fn send_qaul_messaging_message(
         &mut self,
         state: &crate::QaulState,
