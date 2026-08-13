@@ -71,6 +71,12 @@ pub trait Transport {
     fn start(&mut self, state: &crate::QaulState) -> Result<(), TransportError>;
 
     fn send_qaul_info_message(&mut self, state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>);
+    fn send_qaul_management_message(
+        &mut self,
+        state: &crate::QaulState,
+        peer_id: PeerId,
+        data: Vec<u8>,
+    );
     fn send_qaul_messaging_message(
         &mut self,
         state: &crate::QaulState,
