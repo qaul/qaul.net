@@ -55,10 +55,10 @@ impl RouterV2State {
             return;
         };
 
-        let (trusted, unverifiable): (Vec<[u8; 8]>, usize) = {
+        let (trusted, unverifiable): (Vec<[u8; 8]>, Vec<[u8; 8]>) = {
             let node = node_arc.read().unwrap();
             let mut trusted = Vec::new();
-            let mut unverifiable = 0usize;
+            let mut unverifiable = Vec::new();
 
             for delegated in &node.delegated_users {
                 // 10.4: an expired delegation is never trusted.
@@ -66,8 +66,10 @@ impl RouterV2State {
                     continue;
                 }
                 let Some(user_mk) = self.get_resource_mk(&delegated.user_id, Space::User) else {
-                    // TODO(§11.5): fetch the subject's profile, then re-run this.
-                    unverifiable += 1;
+                    // §8.8 step 5: the entry stays stored and servable, it
+                    // simply cannot be trusted until the key arrives.
+                    // Collected rather than fetched here — see below.
+                    unverifiable.push(delegated.user_id);
                     continue;
                 };
                 let entry = ManifestEntry {
@@ -83,26 +85,40 @@ impl RouterV2State {
             (trusted, unverifiable)
         };
 
-        let weak_node = Arc::downgrade(&node_arc);
-        let users = self.users.read().unwrap();
-        for user_id in &trusted {
-            let Some(user_arc) = users.get(user_id) else {
-                continue;
-            };
-            let mut user = user_arc.write().unwrap();
-            user.delegation_gateways.retain(|w| {
-                w.upgrade()
-                    .map(|n| n.read().unwrap().id != *origin_node_id)
-                    .unwrap_or(false)
-            });
-            user.delegation_gateways.push(weak_node.clone());
+        {
+            let weak_node = Arc::downgrade(&node_arc);
+            let users = self.users.read().unwrap();
+            for user_id in &trusted {
+                let Some(user_arc) = users.get(user_id) else {
+                    continue;
+                };
+                let mut user = user_arc.write().unwrap();
+                user.delegation_gateways.retain(|w| {
+                    w.upgrade()
+                        .map(|n| n.read().unwrap().id != *origin_node_id)
+                        .unwrap_or(false)
+                });
+                user.delegation_gateways.push(weak_node.clone());
+            }
         }
 
         info!(
-            "router_v2 TRUST origin={origin_node_id:?} trusted={} unverifiable={} (awaiting §11.5 profiles)",
+            "router_v2 TRUST origin={origin_node_id:?} trusted={} unverifiable={}",
             trusted.len(),
-            unverifiable,
+            unverifiable.len(),
         );
+
+        // §11.5: fetch the keys we are missing, which is what lets these
+        // entries become trusted on a later pass.
+        //
+        // Deliberately after every guard above has been dropped —
+        // `request_profile` takes `users` and, through `next_hop_for_user`,
+        // reads `nodes` again. Calling it inside the loop that found these
+        // ids would nest those locks.
+        drop(node_arc);
+        for user_id in unverifiable {
+            self.request_profile(user_id, false, now);
+        }
     }
 
     fn delegated_users_from_entries(&self, entries: &[ManifestEntry]) -> Vec<DelegatedUser> {
@@ -150,7 +166,11 @@ impl RouterV2State {
             match self.get_resource_mk(&origin_node_id, Space::Node) {
                 Some(mk) => mk,
                 None => {
-                    debug!("node_manifest received but origin's public_key is unknown — TODO(§11.5 ProfileFetch)");
+                    debug!(
+                        "node_manifest from {origin_node_id:?} deferred: origin key unknown, \
+                         fetching its profile (§11.5)"
+                    );
+                    self.request_profile(origin_node_id, true, now);
                     return Ok(());
                 }
             }
@@ -212,8 +232,10 @@ impl RouterV2State {
         // Step 1: resolve the origin's key.
         let Some(origin_mk) = self.get_resource_mk(&origin_node_id, Space::Node) else {
             debug!(
-                "manifest_delta from {origin_node_id:?} dropped: origin public_key unknown — TODO(§11.5 ProfileFetch)"
+                "manifest_delta from {origin_node_id:?} dropped: origin key unknown, \
+                 fetching its profile (§11.5)"
             );
+            self.request_profile(origin_node_id, true, now);
             return Ok(());
         };
 
