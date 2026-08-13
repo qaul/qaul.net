@@ -62,7 +62,7 @@ pub fn id_from_peer_id(peer: &PeerId) -> Option<[u8; 8]> {
     Multikey::try_from_peer_id(peer).ok().map(|mk| mk.to_id())
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Profile {
     pub multikey: Multikey,
     pub version: u32,

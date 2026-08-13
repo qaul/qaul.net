@@ -360,7 +360,7 @@ mod request_profile {
 
         // past the timeout, the sweep clears it
         let timeout_ms = state.options.manifest_request_timeout * 1_000;
-        state.sweep_management_timeouts(1_000 + timeout_ms + 1);
+        state.clear_management_msgs(1_000 + timeout_ms + 1);
 
         state.request_profile(subject, false, 1_000 + timeout_ms + 2);
         assert!(rx.try_recv().is_ok(), "a swept subject can be retried");
