@@ -8,6 +8,7 @@ use tracing::error;
 use crate::{
     connections::ConnectionModule,
     router_v2::{
+        identity::Multikey,
         index::{Space, RESERVED_INDEX},
         manifest::ManifestLog,
         table::{Node, User},
@@ -16,8 +17,12 @@ use crate::{
 };
 
 impl RouterV2State {
-    /// we're adding a locally hosted user in this node's user index space.
-    pub fn register_hosted_user(&self, user_id: [u8; 8], profile_version: u32) {
+    pub fn register_hosted_user(
+        &self,
+        user_id: [u8; 8],
+        profile_version: u32,
+        public_key: Multikey,
+    ) {
         {
             let mut users = self.users.write().unwrap();
             match users.get(&user_id) {
@@ -25,12 +30,13 @@ impl RouterV2State {
                     let mut u = existing.write().unwrap();
                     u.profile_version = profile_version;
                     u.is_hosted = true;
+                    u.public_key = Some(public_key);
                 }
                 None => users.insert(
                     user_id,
                     User {
                         id: user_id,
-                        public_key: None,
+                        public_key: Some(public_key),
                         profile_version,
                         routing_entry: None,
                         delegation_gateways: Vec::new(),

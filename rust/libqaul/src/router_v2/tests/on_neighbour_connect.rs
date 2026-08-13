@@ -55,7 +55,7 @@ fn user_form_dump_carries_the_hosted_user_self_binding() {
     let (state, mut rx) = fresh_state();
     let peer = fresh_peer();
     let user_id = [42; 8];
-    state.register_hosted_user(user_id, 7);
+    state.register_hosted_user(user_id, 7, fresh_multikey());
 
     on_neighbour_connect(&state, peer, ConnectionModule::Lan);
 

@@ -44,6 +44,15 @@ pub const MANAGEMENT_VERSION: u32 = 1;
 impl RouterV2State {
     /// schedules a profile fetch for `subject` per: 11.5
     pub fn request_profile(&self, subject: [u8; 8], is_node: bool, now_ms: u64) {
+        let is_local = if is_node {
+            subject == self.host_mk.to_id()
+        } else {
+            self.hosted_user_ids().contains(&subject)
+        };
+        if is_local {
+            return;
+        }
+
         if self
             .management_in_flight
             .read()
@@ -111,6 +120,7 @@ impl RouterV2State {
         };
 
         let bytes = envelope.encode_to_vec();
+        let envelope_len = bytes.len();
         if let Err(e) = self.tx_outbound.send(OutboundMsg {
             peer,
             transport,
@@ -120,6 +130,11 @@ impl RouterV2State {
             debug!("management: outbound channel closed for {peer}: {e}");
             return false;
         }
+        debug!(
+            "management: queued for {destination:?} via peer={peer} transport={transport:?} \
+             ({} bytes)",
+            envelope_len
+        );
         true
     }
 

@@ -10,7 +10,7 @@ use crate::router_v2::{index::Space, index::RESERVED_INDEX, test_utils::*, Propa
 #[test]
 fn single_user_no_internet_is_user_form() {
     let (state, _rx) = fresh_state();
-    state.register_hosted_user([1; 8], 0);
+    state.register_hosted_user([1; 8], 0, fresh_multikey());
     state.add_neighbour_transport(fresh_peer(), [77; 8], ConnectionModule::Lan);
 
     assert_eq!(state.desired_propagation_form(), PropagationForm::User);
@@ -22,7 +22,7 @@ fn single_user_no_internet_is_user_form() {
 #[test]
 fn remote_users_do_not_trigger_node_form() {
     let (state, _rx) = fresh_state();
-    state.register_hosted_user([1; 8], 0);
+    state.register_hosted_user([1; 8], 0, fresh_multikey());
     install_user(&state, [2; 8], 0); // learned from a neighbour
     install_user(&state, [3; 8], 0);
 
@@ -39,7 +39,7 @@ fn registering_an_existing_remote_stub_marks_it_hosted() {
     let (state, _rx) = fresh_state();
     install_user(&state, [1; 8], 5); // remote stub
 
-    state.register_hosted_user([1; 8], 6);
+    state.register_hosted_user([1; 8], 6, fresh_multikey());
 
     assert_eq!(state.hosted_user_ids(), vec![[1; 8]]);
     assert_eq!(state.users.read().unwrap().len(), 1, "no duplicate record");
@@ -48,10 +48,10 @@ fn registering_an_existing_remote_stub_marks_it_hosted() {
 #[test]
 fn second_hosted_user_triggers_node_form() {
     let (state, _rx) = fresh_state();
-    state.register_hosted_user([1; 8], 0);
+    state.register_hosted_user([1; 8], 0, fresh_multikey());
     assert_eq!(state.desired_propagation_form(), PropagationForm::User);
 
-    state.register_hosted_user([2; 8], 0);
+    state.register_hosted_user([2; 8], 0, fresh_multikey());
     assert_eq!(state.desired_propagation_form(), PropagationForm::Node);
 }
 
@@ -60,7 +60,7 @@ fn second_hosted_user_triggers_node_form() {
 #[test]
 fn internet_neighbour_triggers_node_form() {
     let (state, _rx) = fresh_state();
-    state.register_hosted_user([1; 8], 0);
+    state.register_hosted_user([1; 8], 0, fresh_multikey());
     state.add_neighbour_transport(fresh_peer(), [77; 8], ConnectionModule::Internet);
 
     assert_eq!(state.desired_propagation_form(), PropagationForm::Node);
@@ -71,13 +71,13 @@ fn internet_neighbour_triggers_node_form() {
 #[test]
 fn switching_to_node_form_releases_hosted_user_indexes() {
     let (state, _rx) = fresh_state();
-    state.register_hosted_user([1; 8], 0);
+    state.register_hosted_user([1; 8], 0, fresh_multikey());
     assert_eq!(
         state.user_dict.read().unwrap().id_of(RESERVED_INDEX),
         Some([1; 8])
     );
 
-    state.register_hosted_user([2; 8], 0);
+    state.register_hosted_user([2; 8], 0, fresh_multikey());
     assert_eq!(state.sync_propagation_form(0), PropagationForm::Node);
 
     let dict = state.user_dict.read().unwrap();
@@ -108,8 +108,8 @@ fn switching_to_node_form_releases_hosted_user_indexes() {
 fn entering_node_form_binds_the_node_reserved_index() {
     let (state, _rx) = fresh_state();
     let host_node_id = state.host_mk.to_id();
-    state.register_hosted_user([1; 8], 0);
-    state.register_hosted_user([2; 8], 0);
+    state.register_hosted_user([1; 8], 0, fresh_multikey());
+    state.register_hosted_user([2; 8], 0, fresh_multikey());
 
     assert_eq!(state.sync_propagation_form(0), PropagationForm::Node);
 
@@ -137,8 +137,8 @@ fn entering_node_form_binds_the_node_reserved_index() {
 #[test]
 fn leaving_node_form_releases_the_node_reserved_index() {
     let (state, _rx) = fresh_state();
-    state.register_hosted_user([1; 8], 0);
-    state.register_hosted_user([2; 8], 0);
+    state.register_hosted_user([1; 8], 0, fresh_multikey());
+    state.register_hosted_user([2; 8], 0, fresh_multikey());
     assert_eq!(state.sync_propagation_form(0), PropagationForm::Node);
 
     state.unregister_hosted_user([2; 8]);
@@ -164,8 +164,8 @@ fn leaving_node_form_releases_the_node_reserved_index() {
 #[test]
 fn switching_back_to_user_form_rebinds_reserved_index() {
     let (state, _rx) = fresh_state();
-    state.register_hosted_user([1; 8], 0);
-    state.register_hosted_user([2; 8], 0);
+    state.register_hosted_user([1; 8], 0, fresh_multikey());
+    state.register_hosted_user([2; 8], 0, fresh_multikey());
     assert_eq!(state.sync_propagation_form(0), PropagationForm::Node);
 
     state.unregister_hosted_user([2; 8]);
@@ -183,7 +183,7 @@ fn switching_back_to_user_form_rebinds_reserved_index() {
 #[test]
 fn sync_is_a_noop_when_the_form_has_not_changed() {
     let (state, _rx) = fresh_state();
-    state.register_hosted_user([1; 8], 0);
+    state.register_hosted_user([1; 8], 0, fresh_multikey());
     assert_eq!(state.sync_propagation_form(0), PropagationForm::User);
 
     // drain marks from registration
@@ -207,8 +207,8 @@ fn sync_is_a_noop_when_the_form_has_not_changed() {
 #[test]
 fn releasing_an_index_clears_its_pending_mark() {
     let (state, _rx) = fresh_state();
-    state.register_hosted_user([1; 8], 0);
-    state.register_hosted_user([2; 8], 0);
+    state.register_hosted_user([1; 8], 0, fresh_multikey());
+    state.register_hosted_user([2; 8], 0, fresh_multikey());
 
     // The first registration queued an introduction at the reserved slot;
     // the form switch releases that index, so the mark must go with it.
@@ -231,7 +231,7 @@ fn releasing_an_index_clears_its_pending_mark() {
 #[test]
 fn unregister_releases_index_and_record() {
     let (state, _rx) = fresh_state();
-    state.register_hosted_user([1; 8], 0);
+    state.register_hosted_user([1; 8], 0, fresh_multikey());
 
     state.unregister_hosted_user([1; 8]);
 
@@ -250,8 +250,8 @@ fn unregister_releases_index_and_record() {
 #[test]
 fn unregister_promotes_a_survivor_into_the_reserved_slot() {
     let (state, _rx) = fresh_state();
-    state.register_hosted_user([1; 8], 0);
-    state.register_hosted_user([2; 8], 0);
+    state.register_hosted_user([1; 8], 0, fresh_multikey());
+    state.register_hosted_user([2; 8], 0, fresh_multikey());
     assert_eq!(
         state.user_dict.read().unwrap().id_of(RESERVED_INDEX),
         Some([1; 8])
@@ -271,8 +271,8 @@ fn unregister_promotes_a_survivor_into_the_reserved_slot() {
 #[test]
 fn unregister_unindexed_user_leaves_reserved_slot_intact() {
     let (state, _rx) = fresh_state();
-    state.register_hosted_user([1; 8], 0);
-    state.register_hosted_user([2; 8], 0);
+    state.register_hosted_user([1; 8], 0, fresh_multikey());
+    state.register_hosted_user([2; 8], 0, fresh_multikey());
     assert!(state.user_dict.read().unwrap().idx_of(&[2; 8]).is_none());
 
     state.unregister_hosted_user([2; 8]);
@@ -289,7 +289,7 @@ fn unregister_unindexed_user_leaves_reserved_slot_intact() {
 #[test]
 fn unregister_unknown_user_is_a_noop() {
     let (state, _rx) = fresh_state();
-    state.register_hosted_user([1; 8], 0);
+    state.register_hosted_user([1; 8], 0, fresh_multikey());
 
     state.unregister_hosted_user([9; 8]);
 
