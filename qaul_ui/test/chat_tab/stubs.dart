@@ -158,7 +158,21 @@ class StubLibqaulWorker implements LibqaulWorker {
   }) => throw UnimplementedError();
 
   @override
-  Future<ChatRoom?> getGroupInfo(Uint8List id) => throw UnimplementedError();
+  Future<ChatRoom?> getGroupInfo(Uint8List id) async {
+    _logger.info('requested group info fetch; ignoring...');
+    for (final room in ref.read(chatRoomsProvider)) {
+      if (_bytesEqual(room.conversationId, id)) return room;
+    }
+    return null;
+  }
+
+  bool _bytesEqual(Uint8List a, Uint8List b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
 
   @override
   Future<PaginatedUsers?> getOnlineUsers({int? offset, int? limit}) =>
