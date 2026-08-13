@@ -65,4 +65,10 @@ message Profile {
     // Feature-capability bitset. A qaul extension, not part of section
     // 11.5.
     uint32 capabilities = 5;
+
+    // The subject's extended profile (avatar, bio, updated_at, preferred
+    // custody route) carried verbatim from v1
+    bytes signed_profile = 6;
+    // The subject's signature over the bytes of field 6.
+    bytes signed_profile_signature = 7;
 }

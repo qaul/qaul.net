@@ -15,6 +15,27 @@ use crate::router_v2::{
 use proto::{management_message::Body, Profile as ProtoProfile, ProfileResponse};
 use qaul_proto::qaul_net_router_management as proto;
 
+/// same as v1's `SignedUserProfile`
+#[derive(Debug, Clone, Default)]
+pub struct SignedProfileBlob {
+    pub profile: Vec<u8>,
+    pub signature: Vec<u8>,
+}
+
+impl SignedProfileBlob {
+    pub fn is_empty(&self) -> bool {
+        self.profile.is_empty() || self.signature.is_empty()
+    }
+}
+
+/// properties needed to answer a ProfileRequest for a user this node hosts
+#[derive(Debug, Clone)]
+pub struct HostedProfile {
+    pub profile: Profile,
+    /// empty if the user has not published its extended profile
+    pub signed: SignedProfileBlob,
+}
+
 /// What the caller must do after a management message was processed.
 #[derive(Debug, Clone)]
 pub enum ManagementOutcome {
@@ -28,30 +49,36 @@ pub enum ManagementOutcome {
         profile_version: u32,
         /// this is just an extension, not in the spec
         capabilities: u32,
+        /// contains: avatar, bio, custody route
+        signed: SignedProfileBlob,
     },
 }
 
 impl RouterV2State {
     /// register the signed profile for a user that this node is a host for
-    pub fn register_hosted_profile(&self, user_id: [u8; 8], profile: Profile) {
+    pub fn register_hosted_profile(&self, user_id: [u8; 8], hosted: HostedProfile) {
         self.hosted_profiles
             .write()
             .unwrap()
-            .insert(user_id, profile);
+            .insert(user_id, hosted);
     }
 
     /// Answers a `ProfileRequest` addressed to one of our identities
     pub(crate) fn handle_profile_request(&self, addressing: Addressing, _cached_version: u32) {
         let subject = addressing.destination;
 
-        let profile = if addressing.destination_is_node {
-            self.sign_node_profile()
+        let hosted = if addressing.destination_is_node {
+            // A node has no extended profile: no avatar, no bio, no name.
+            self.sign_node_profile().map(|profile| HostedProfile {
+                profile,
+                signed: SignedProfileBlob::default(),
+            })
         } else {
-            let hosted = self.hosted_profiles.read().unwrap();
-            hosted.get(&subject).cloned()
+            let profiles = self.hosted_profiles.read().unwrap();
+            profiles.get(&subject).cloned()
         };
 
-        let Some(profile) = profile else {
+        let Some(HostedProfile { profile, signed }) = hosted else {
             debug!(
                 "management: no profile available for {subject:?}, cannot answer request {}",
                 addressing.request_id
@@ -67,6 +94,8 @@ impl RouterV2State {
                 name: profile.name,
                 self_signature: profile.self_signature.to_vec(),
                 capabilities: self.local_capabilities(),
+                signed_profile: signed.profile,
+                signed_profile_signature: signed.signature,
             }),
         });
 
@@ -185,6 +214,14 @@ impl RouterV2State {
                 name: p.name,
                 profile_version: p.profile_version,
                 capabilities: p.capabilities,
+                // Deliberately not verified here: the blob is v1's shape and
+                // v1 already owns a verifier for it. Passing it on unchecked
+                // is safe because that verifier is the gate — nothing is
+                // written from it before it passes.
+                signed: SignedProfileBlob {
+                    profile: p.signed_profile,
+                    signature: p.signed_profile_signature,
+                },
             }
         } else {
             ManagementOutcome::None
