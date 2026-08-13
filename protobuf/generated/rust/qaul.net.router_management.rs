@@ -70,4 +70,11 @@ pub struct Profile {
     /// 11.5.
     #[prost(uint32, tag = "5")]
     pub capabilities: u32,
+    /// The subject's extended profile (avatar, bio, updated_at, preferred
+    /// custody route) carried verbatim from v1
+    #[prost(bytes = "vec", tag = "6")]
+    pub signed_profile: ::prost::alloc::vec::Vec<u8>,
+    /// The subject's signature over the bytes of field 6.
+    #[prost(bytes = "vec", tag = "7")]
+    pub signed_profile_signature: ::prost::alloc::vec::Vec<u8>,
 }

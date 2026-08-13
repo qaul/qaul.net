@@ -3,16 +3,21 @@
 
 //! Event handling for connection modules
 
+use libp2p::identity::PublicKey;
 use libp2p::ping::{Event, Failure};
 use std::convert::TryFrom;
 //use std::time::Duration;
 
 use qaul_info::QaulInfoEvent;
+use qaul_management::QaulManagementEvent;
 use qaul_messaging::QaulMessagingEvent;
 
 use crate::connections::ConnectionModule;
+use crate::router::router_net_proto;
+use crate::router::users::Users;
 use crate::router::{info::RouterInfo, neighbours::Neighbours};
 use crate::router_v2::identity::Multikey;
+use crate::router_v2::management::profile::ManagementOutcome;
 use crate::router_v2::propagation;
 use crate::services::messaging::Messaging;
 use crate::utilities::timestamp::Timestamp;
@@ -42,6 +47,70 @@ pub fn qaul_info_event(state: &crate::QaulState, event: QaulInfoEvent, module: C
                 let rs = state.get_router();
                 RouterInfo::received(state, &rs, message);
             }
+        }
+    }
+}
+
+/// Handle incoming QaulManagement behaviour events (spec §11.4).
+/// it only handles routing from v2 drops any v1 related
+pub fn qaul_management_event(
+    state: &crate::QaulState,
+    event: QaulManagementEvent,
+    _module: ConnectionModule,
+) {
+    match event {
+        QaulManagementEvent::Message(message) => {
+            let Some(router_v2) = state.get_router_v2() else {
+                log::trace!("management message received while routing v1 is active, dropping");
+                return;
+            };
+
+            let outcome = router_v2.on_management_received(
+                message.received_from,
+                &message.data,
+                Timestamp::get_timestamp(),
+            );
+
+            apply_management_outcome(state, outcome);
+        }
+    }
+}
+
+fn apply_management_outcome(state: &crate::QaulState, outcome: ManagementOutcome) {
+    match outcome {
+        ManagementOutcome::None => {}
+        ManagementOutcome::UserProfileLearned {
+            user_id,
+            multikey,
+            name,
+            profile_version,
+            capabilities,
+            signed,
+        } => {
+            let Ok(public_key) = PublicKey::try_decode_protobuf(&multikey.encode()) else {
+                log::warn!("management: could not rebuild public key for {user_id:?}");
+                return;
+            };
+            let peer_id = public_key.to_peer_id();
+            let rs = state.get_router();
+
+            if !signed.is_empty() {
+                Users::add_signed_user_info_table(
+                    state,
+                    &rs,
+                    &[router_net_proto::SignedUserProfile {
+                        profile: signed.profile,
+                        signature: signed.signature,
+                    }],
+                );
+            }
+
+            // name and key for user without extended profile
+            Users::add_with_check_caps(state, &rs, peer_id, public_key, name, capabilities);
+
+            log::debug!(
+                "management: directory updated for {user_id:?} (version={profile_version})"
+            );
         }
     }
 }

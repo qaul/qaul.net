@@ -80,6 +80,8 @@ fn spawn_relay_tick(state: Arc<RouterV2State>, storage_path: String) {
 
             // §10.8: batched manifest pulls, one message per neighbour.
             state.drop_manifest_req_timeout(now);
+
+            state.clear_management_msgs(now);
             for (peer, request) in state.drain_manifest_reqs(now) {
                 state.send_manifest_request(peer, request);
             }

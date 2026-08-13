@@ -22,8 +22,7 @@ use super::MANAGEMENT_VERSION;
 const FORWARD_MEMORY_MS: u64 = 5_000;
 
 impl RouterV2State {
-    /// Returns what the caller must still do — see [`ManagementOutcome`].
-    /// Everything the router can do for itself has already happened.
+    /// what must the caller must still do
     pub fn on_management_received(
         &self,
         from_peer: PeerId,

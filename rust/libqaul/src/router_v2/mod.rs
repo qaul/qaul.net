@@ -25,6 +25,7 @@ use crate::{
         index::{
             IndexAllocator, IndexDictionary, MirrorIndexDictionary, ReintroductionTracker, Space,
         },
+        management::profile::HostedProfile,
         manifest::{ChunkAssembler, Manifest, ManifestLog},
         seq::SeqNum,
         table::{Nodes, RoutingTable, Users},
@@ -204,7 +205,7 @@ pub struct RouterV2State {
     /// current requests that are in flight
     pub outstanding_manifest_requests: RwLock<HashMap<([u8; 8], PeerId), u64>>,
     /// profiles this node hosts
-    pub hosted_profiles: RwLock<HashMap<[u8; 8], crate::router_v2::identity::Profile>>,
+    pub hosted_profiles: RwLock<HashMap<[u8; 8], HostedProfile>>,
     /// `(source, request_id)` of recently forwarded management messages,
     /// with the time forwarded.
     pub management_recent_forwards: RwLock<HashMap<([u8; 8], u32), u64>>,
