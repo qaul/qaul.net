@@ -1047,21 +1047,26 @@ impl Libqaul {
                                     // §11.2 puts management on a behaviour
                                     // of its own, so it cannot ride the
                                     // routing pipe.
-                                    //
-                                    // TODO(Phase 12 subtask 11): compose
-                                    // qaul_management into the lan/internet
-                                    // swarms and dispatch here. Dropping is
-                                    // correct in the interim — §11.2 is
-                                    // best-effort and the using layer
-                                    // re-issues — but profile fetches are
-                                    // inert until that lands.
-                                    router_v2::OutboundKind::Management => {
-                                        log::debug!(
-                                            "router_v2: management frame for {} dropped, \
-                                             behaviour not yet in the swarm",
-                                            msg.peer
-                                        );
-                                    }
+                                    router_v2::OutboundKind::Management => match transport {
+                                        ConnectionModule::Lan => lan.send_qaul_management_message(
+                                            &*self.state,
+                                            msg.peer,
+                                            msg.bytes,
+                                        ),
+                                        ConnectionModule::Internet => internet
+                                            .send_qaul_management_message(
+                                                &*self.state,
+                                                msg.peer,
+                                                msg.bytes,
+                                            ),
+                                        ConnectionModule::Ble1m | ConnectionModule::BleCoded => ble
+                                            .send_qaul_management_message(
+                                                &*self.state,
+                                                msg.peer,
+                                                msg.bytes,
+                                            ),
+                                        ConnectionModule::Local | ConnectionModule::None => {}
+                                    },
                                 }
                             }
                         }

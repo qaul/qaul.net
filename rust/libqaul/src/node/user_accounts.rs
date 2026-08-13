@@ -9,11 +9,13 @@
 //! * Public / private key
 //! * user name (optional)
 
-use crate::router;
+use crate::router::users::Users;
 use crate::rpc::Rpc;
 use crate::storage::configuration;
 use crate::storage::configuration::Configuration;
+use crate::utilities::qaul_id::QaulId;
 use crate::utilities::timestamp::Timestamp;
+use crate::{router, router_v2, QaulState};
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::SaltString;
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
@@ -24,7 +26,7 @@ use libp2p::{
 };
 use prost::Message;
 use std::collections::BTreeMap;
-use std::sync::RwLock;
+use std::sync::{Arc, RwLock};
 
 /// Import protobuf message definition
 pub use qaul_proto::qaul_rpc_user_accounts as proto;
@@ -257,6 +259,7 @@ impl UserAccounts {
 
         // bind the new account as router_v2's hosted user (§3.2, §3.5).
         if let Some(router_v2) = state.get_router_v2() {
+            Self::publish_hosted_profile(state, &router_v2, &user);
             let routing_id = user.routing_user_id();
             router_v2.register_hosted_user(routing_id, 0);
 
@@ -277,6 +280,45 @@ impl UserAccounts {
         log::trace!("created user account '{}' {:?}", name, id);
 
         user
+    }
+
+    /// simply publish the profile so we have answer to ProfileRequest
+    pub fn publish_hosted_profile(
+        state: &QaulState,
+        router_v2: &Arc<router_v2::RouterV2State>,
+        account: &UserAccount,
+    ) {
+        use crate::router_v2::identity::Profile;
+        use crate::router_v2::management::profile::{HostedProfile, SignedProfileBlob};
+
+        let rs = state.get_router();
+        let q8id = QaulId::to_q8id(account.id);
+        let Some(user) = Users::get_user_snapshot(&rs, &q8id) else {
+            log::warn!(
+                "no directory entry for {} yet, cannot publish its profile",
+                account.id
+            );
+            return;
+        };
+
+        let mut profile = Profile {
+            multikey: account.multikey(),
+            version: user.version,
+            name: user.name.clone(),
+            self_signature: [0u8; 64],
+        };
+        profile.self_signature = account.sign_with_user(&profile.sign_input());
+
+        router_v2.register_hosted_profile(
+            account.routing_user_id(),
+            HostedProfile {
+                profile,
+                signed: SignedProfileBlob {
+                    profile: user.signed_profile_bytes.clone(),
+                    signature: user.signed_profile_signature.clone(),
+                },
+            },
+        );
     }
 
     /// set or update the password for existing user
@@ -725,6 +767,13 @@ impl UserAccounts {
                         user_to_store.signed_profile_bytes = signed.profile;
                         user_to_store.signed_profile_signature = signed.signature;
                         router::users::Users::add(state, &rs, user_to_store);
+
+                        // The §11.5 profile peers fetch is a copy, so it has
+                        // to be re-published or they keep serving the old
+                        // name, avatar and bio.
+                        if let Some(router_v2) = state.get_router_v2() {
+                            Self::publish_hosted_profile(state, &router_v2, &account);
+                        }
 
                         // Mirror the rename into the local account label so
                         // `GetDefaultUserAccount` reflects it. Only the `name`
