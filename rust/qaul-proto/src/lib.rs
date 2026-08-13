@@ -91,6 +91,10 @@ pub mod qaul_net_router_net_info {
     include!("../../../protobuf/generated/rust/qaul.net.router_net_info.rs");
 }
 #[allow(clippy::all)]
+pub mod qaul_net_router_management {
+    include!("../../../protobuf/generated/rust/qaul.net.router_management.rs");
+}
+#[allow(clippy::all)]
 pub mod qaul_net_messaging {
     include!("../../../protobuf/generated/rust/qaul.net.messaging.rs");
 }

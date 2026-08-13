@@ -1034,16 +1034,35 @@ impl Libqaul {
                                     msg.bytes.get(1).copied().unwrap_or(0),
                                     msg.bytes.len(),
                                 );
-                                Self::send_via_module(
-                                    &*self.state,
-                                    transport,
-                                    msg.kind,
-                                    msg.peer,
-                                    msg.bytes,
-                                    lan,
-                                    internet,
-                                    ble,
-                                )
+                                match msg.kind {
+                                    router_v2::OutboundKind::Routing => Self::send_via_module(
+                                        &*self.state,
+                                        transport,
+                                        msg.peer,
+                                        msg.bytes,
+                                        lan,
+                                        internet,
+                                        ble,
+                                    ),
+                                    // §11.2 puts management on a behaviour
+                                    // of its own, so it cannot ride the
+                                    // routing pipe.
+                                    //
+                                    // TODO(Phase 12 subtask 11): compose
+                                    // qaul_management into the lan/internet
+                                    // swarms and dispatch here. Dropping is
+                                    // correct in the interim — §11.2 is
+                                    // best-effort and the using layer
+                                    // re-issues — but profile fetches are
+                                    // inert until that lands.
+                                    router_v2::OutboundKind::Management => {
+                                        log::debug!(
+                                            "router_v2: management frame for {} dropped, \
+                                             behaviour not yet in the swarm",
+                                            msg.peer
+                                        );
+                                    }
+                                }
                             }
                         }
                     }
@@ -1056,32 +1075,22 @@ impl Libqaul {
     fn send_via_module(
         state: &crate::QaulState,
         connection_module: ConnectionModule,
-        kind: router_v2::OutboundKind,
         neighbour_id: libp2p::PeerId,
         data: Vec<u8>,
         lan: &mut connections::lan::Lan,
         internet: &mut connections::internet::Internet,
         ble: &mut BleTransport,
     ) {
-        match kind {
-            router_v2::OutboundKind::Routing => match connection_module {
-                ConnectionModule::Lan => lan.send_qaul_info_message(state, neighbour_id, data),
-                ConnectionModule::Internet => {
-                    internet.send_qaul_info_message(state, neighbour_id, data)
-                }
-                ConnectionModule::Ble1m | ConnectionModule::BleCoded => {
-                    ble.send_qaul_info_message(state, neighbour_id, data)
-                }
-                ConnectionModule::Local => {}
-                ConnectionModule::None => {}
-            },
-            router_v2::OutboundKind::Management => {
-                // TODO(Phase 12 subtask 11)
-                log::debug!(
-                    "router_v2: management frame for {} dropped, behaviour not yet in the swarm",
-                    neighbour_id
-                );
+        match connection_module {
+            ConnectionModule::Lan => lan.send_qaul_info_message(state, neighbour_id, data),
+            ConnectionModule::Internet => {
+                internet.send_qaul_info_message(state, neighbour_id, data)
             }
+            ConnectionModule::Ble1m | ConnectionModule::BleCoded => {
+                ble.send_qaul_info_message(state, neighbour_id, data)
+            }
+            ConnectionModule::Local => {}
+            ConnectionModule::None => {}
         }
     }
 }

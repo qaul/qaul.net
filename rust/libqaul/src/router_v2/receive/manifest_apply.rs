@@ -47,7 +47,7 @@ impl RouterV2State {
     }
 
     /// spec: 8.8 steps 5-6
-    fn refresh_delegation_trust(&self, origin_node_id: &[u8; 8], now: u64) {
+    pub(crate) fn refresh_delegation_trust(&self, origin_node_id: &[u8; 8], now: u64) {
         let Some(node_arc) = self.nodes.read().unwrap().get(origin_node_id) else {
             return;
         };
