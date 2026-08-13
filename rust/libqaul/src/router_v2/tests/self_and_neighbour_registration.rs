@@ -26,7 +26,7 @@ fn register_hosted_user_binds_record_and_marks() {
     let (state, _rx) = fresh_state();
     let user_id = [42; 8];
 
-    state.register_hosted_user(user_id, 7);
+    state.register_hosted_user(user_id, 7, fresh_multikey());
 
     assert_eq!(
         state.user_dict.read().unwrap().id_of(RESERVED_INDEX),
@@ -54,7 +54,7 @@ fn register_hosted_user_produces_a_resolvable_introduction() {
     let (state, _rx) = fresh_state();
     let user_id = [42; 8];
 
-    state.register_hosted_user(user_id, 7);
+    state.register_hosted_user(user_id, 7, fresh_multikey());
 
     let intros = state.pending_introductions(Space::User);
     assert_eq!(
@@ -70,8 +70,8 @@ fn register_hosted_user_is_idempotent() {
     let (state, _rx) = fresh_state();
     let user_id = [42; 8];
 
-    state.register_hosted_user(user_id, 1);
-    state.register_hosted_user(user_id, 1);
+    state.register_hosted_user(user_id, 1, fresh_multikey());
+    state.register_hosted_user(user_id, 1, fresh_multikey());
 
     assert_eq!(
         state.user_dict.read().unwrap().id_of(RESERVED_INDEX),
@@ -87,8 +87,8 @@ fn register_hosted_user_updates_profile_version_on_existing_record() {
     let (state, _rx) = fresh_state();
     let user_id = [42; 8];
 
-    state.register_hosted_user(user_id, 1);
-    state.register_hosted_user(user_id, 9);
+    state.register_hosted_user(user_id, 1, fresh_multikey());
+    state.register_hosted_user(user_id, 9, fresh_multikey());
 
     let users = state.users.read().unwrap();
     let user_arc = users.get(&user_id).unwrap();
@@ -110,8 +110,8 @@ fn second_hosted_user_does_not_evict_the_first() {
     let first = [1; 8];
     let second = [2; 8];
 
-    state.register_hosted_user(first, 1);
-    state.register_hosted_user(second, 1);
+    state.register_hosted_user(first, 1, fresh_multikey());
+    state.register_hosted_user(second, 1, fresh_multikey());
 
     let dict = state.user_dict.read().unwrap();
     assert_eq!(
@@ -142,8 +142,8 @@ fn only_the_indexed_hosted_user_is_introduced() {
     let first = [1; 8];
     let second = [2; 8];
 
-    state.register_hosted_user(first, 3);
-    state.register_hosted_user(second, 4);
+    state.register_hosted_user(first, 3, fresh_multikey());
+    state.register_hosted_user(second, 4, fresh_multikey());
 
     assert_eq!(
         state.pending_introductions(Space::User),
@@ -159,11 +159,11 @@ fn repeat_registration_is_stable_across_the_form_boundary() {
     let first = [1; 8];
     let second = [2; 8];
 
-    state.register_hosted_user(first, 1);
-    state.register_hosted_user(second, 1);
+    state.register_hosted_user(first, 1, fresh_multikey());
+    state.register_hosted_user(second, 1, fresh_multikey());
 
-    state.register_hosted_user(first, 2);
-    state.register_hosted_user(second, 2);
+    state.register_hosted_user(first, 2, fresh_multikey());
+    state.register_hosted_user(second, 2, fresh_multikey());
 
     let dict = state.user_dict.read().unwrap();
     assert_eq!(dict.id_of(RESERVED_INDEX), Some(first));
@@ -302,7 +302,7 @@ fn only_the_active_form_holds_a_reserved_binding() {
     let (state, _rx) = fresh_state();
     let user_id = [42; 8];
 
-    state.register_hosted_user(user_id, 1);
+    state.register_hosted_user(user_id, 1, fresh_multikey());
     state.register_neighbour_node([77; 8], None);
 
     assert_eq!(

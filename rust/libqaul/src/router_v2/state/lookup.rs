@@ -14,8 +14,24 @@ impl RouterV2State {
         node_entries.id_of(next_hop)
     }
 
-    /// resolves a node's routing entry as per spec: 9.2
+    /// Resolves a node to a next hop (§9.2), for §11.4 forwarding.
+    ///
+    /// An adjacent node is answered first, and without consulting the
+    /// routing table. Under user form a node originates a *user* entry for
+    /// its hosted user and no node entry for itself (§3.2), so a direct
+    /// neighbour — the one node guaranteed reachable — has no node-space
+    /// routing entry at all. Resolving purely through the table would fail
+    /// for exactly the peers we can always reach.
+    ///
+    /// Beyond that: no delegation-gateway fallback and no nearest-gateway
+    /// default. A non-adjacent node is reachable through its own entry or
+    /// not at all, since defaulting would hand a management message to a
+    /// gateway that is not its destination (§11.4 step 3 says drop).
     pub fn next_hop_for_node(&self, target: [u8; 8]) -> Option<([u8; 8], ConnectionModule)> {
+        if let Some(transport) = self.neighbour_transport(&target) {
+            return Some((target, transport));
+        }
+
         let idx = self.node_dict.read().unwrap().idx_of(&target)?;
         let entry = self.routing_table.read().unwrap().get(Space::Node, idx)?;
         let entry = entry.read().unwrap();

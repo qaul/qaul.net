@@ -291,6 +291,10 @@ impl Transport for Lan {
         if !self.is_enabled() {
             return;
         }
+        log::debug!(
+            "management: handing {} bytes to the qaul_management behaviour for {peer_id}",
+            data.len()
+        );
         self.swarm
             .behaviour_mut()
             .qaul_management
