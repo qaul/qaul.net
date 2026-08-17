@@ -7,7 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:local_notifications/src/local_notifications.dart';
 import 'package:logging/logging.dart';
 import 'package:qaul_components/qaul_components.dart'
-    show ChatHeader, QaulComponentsLocalizations;
+    show ChatFooter, ChatHeader, QaulComponentsLocalizations;
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_rpc/src/generated/services/chat/chat.pb.dart';
 import 'package:qaul_ui/l10n/app_localizations.dart';
@@ -43,6 +43,7 @@ void main() {
 
   setUp(() {
     chatKey = UniqueKey();
+    StubLibqaulWorker.sentTexts.clear();
     SharedPreferences.setMockInitialValues({});
   });
 
@@ -75,7 +76,11 @@ void main() {
     await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);
 
     expect(find.byType(ChatHeader), findsOneWidget);
+    expect(find.byType(ChatFooter), findsOneWidget);
     expect(find.text(otherUser.name), findsOneWidget);
+    expect(find.text('Secure private message'), findsOneWidget);
+    expect(find.byTooltip('Record audio message'), findsOneWidget);
+    expect(find.byTooltip('Send File'), findsOneWidget);
     expect(find.byTooltip('Back'), findsNothing);
 
     final avatarTapTarget = find.descendant(
@@ -96,8 +101,54 @@ void main() {
     expect(find.byType(ChatHeader), findsOneWidget);
     expect(find.text('Group Chat'), findsOneWidget);
     expect(find.text('2 members'), findsOneWidget);
+    expect(find.text('Group chat message'), findsOneWidget);
     expect(find.byIcon(Icons.more_vert), findsOneWidget);
     expect(find.byTooltip('Back'), findsNothing);
+  });
+
+  testWidgets('chat footer sends typed text and clears draft', (tester) async {
+    await pumpChatScreen(tester, buildGroupChat());
+
+    await tester.enterText(find.byType(TextField), 'hello footer');
+    await tester.pump();
+    await tester.tap(find.byTooltip('Send'));
+    await tester.pumpAndSettle();
+
+    expect(StubLibqaulWorker.sentTexts, ['hello footer']);
+    expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, '');
+  });
+
+  testWidgets('chat footer prevents empty sends', (tester) async {
+    await pumpChatScreen(tester, buildGroupChat());
+
+    expect(find.byTooltip('Send'), findsNothing);
+
+    await tester.enterText(find.byType(TextField), '   ');
+    await tester.pump();
+
+    expect(find.byTooltip('Send'), findsNothing);
+    expect(StubLibqaulWorker.sentTexts, isEmpty);
+  });
+
+  testWidgets('disabled room blocks chat footer sending', (tester) async {
+    await pumpChatScreen(
+      tester,
+      buildGroupChat(status: ChatRoomStatus.inviteAccepted),
+    );
+
+    expect(
+      find.text(
+        'Please wait for the admin to confirm your acceptance to send messages',
+      ),
+      findsOneWidget,
+    );
+
+    await tester.enterText(find.byType(TextField), 'blocked');
+    await tester.pump();
+    await tester.tap(find.byTooltip('Send'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    expect(StubLibqaulWorker.sentTexts, isEmpty);
   });
 
   testWidgets('group header menu opens group settings', (tester) async {
