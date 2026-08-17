@@ -98,15 +98,12 @@ class _CustomInput extends StatefulWidget {
     required this.onSendPressed,
     required this.sendButtonVisibilityMode,
     required this.hintText,
-    this.initialText,
     this.isTextRequired = true,
   });
 
   final void Function(types.PartialText) onSendPressed;
 
   final SendButtonVisibilityMode sendButtonVisibilityMode;
-
-  final String? initialText;
 
   final String hintText;
 
@@ -126,7 +123,7 @@ class _CustomInputState extends State<_CustomInput> {
   void initState() {
     super.initState();
 
-    _textController = TextEditingController(text: widget.initialText);
+    _textController = TextEditingController();
 
     if (widget.sendButtonVisibilityMode == SendButtonVisibilityMode.editing) {
       _sendButtonVisible = _textController.text.trim() != '';
