@@ -79,7 +79,10 @@ void main() {
     expect(find.byType(ChatFooter), findsOneWidget);
     expect(find.text(otherUser.name), findsOneWidget);
     expect(find.text('Secure private message'), findsOneWidget);
-    expect(find.byTooltip('Record audio message'), findsOneWidget);
+    expect(
+      find.byTooltip('Record audio message'),
+      Platform.isLinux ? findsNothing : findsOneWidget,
+    );
     expect(find.byTooltip('Send File'), findsOneWidget);
     expect(find.byTooltip('Back'), findsNothing);
 
