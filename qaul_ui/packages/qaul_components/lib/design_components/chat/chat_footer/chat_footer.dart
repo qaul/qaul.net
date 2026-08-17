@@ -288,6 +288,7 @@ class _ChatFooterState extends State<ChatFooter> {
   }
 
   void _handleMoreAttachmentsPressed() {
+    if (_attachmentActions().isEmpty) return;
     setState(() {
       final willOpen = !_isAttachmentMenuOpen;
       _isAttachmentMenuOpen = willOpen;
@@ -325,86 +326,38 @@ class _ChatFooterState extends State<ChatFooter> {
 
   List<_FooterAttachmentAction> _attachmentActions() {
     return [
-      _FooterAttachmentAction(
-        id: 'audio',
-        icon: const _ChatFooterSvgIcon(asset: _kMicrophoneSvg),
-        tooltip: widget.voiceTooltip,
-        onPressed: () => _handleAttachmentAction(widget.onVoicePressed),
-      ),
-      _FooterAttachmentAction(
-        id: 'photo',
-        icon: const _ChatFooterSvgIcon(asset: _kPhotosSvg),
-        tooltip: widget.cameraTooltip,
-        onPressed: () => _handleAttachmentAction(widget.onCameraPressed),
-      ),
-      _FooterAttachmentAction(
-        id: 'attachment',
-        icon: const Icon(Icons.attach_file_rounded, color: _kActionIconColor),
-        tooltip: widget.attachmentsTooltip,
-        onPressed: () => _handleAttachmentAction(
-          widget.onAttachmentPressed ?? widget.onMoreAttachmentsPressed,
+      if (widget.onAttachmentPressed != null ||
+          widget.onMoreAttachmentsPressed != null)
+        _FooterAttachmentAction(
+          id: 'attachment',
+          icon: const Icon(Icons.attach_file_rounded, color: _kActionIconColor),
+          tooltip: widget.attachmentsTooltip,
+          onPressed: () => _handleAttachmentAction(
+            widget.onAttachmentPressed ?? widget.onMoreAttachmentsPressed,
+          ),
         ),
-      ),
-      _FooterAttachmentAction(
-        id: 'emoji',
-        icon: const _ChatFooterSvgIcon(
-          asset: _kEmoticonSvg,
-          width: 24,
-          height: 24,
+      if (widget.onEmojiPressed != null)
+        _FooterAttachmentAction(
+          id: 'emoji',
+          icon: const _ChatFooterSvgIcon(
+            asset: _kEmoticonSvg,
+            width: 24,
+            height: 24,
+          ),
+          tooltip: widget.emojiTooltip,
+          onPressed: () => _handleAttachmentAction(widget.onEmojiPressed),
         ),
-        tooltip: widget.emojiTooltip,
-        onPressed: () => _handleAttachmentAction(widget.onEmojiPressed),
-      ),
-      _FooterAttachmentAction(
-        id: 'location',
-        icon: const _ChatFooterSvgIcon(
-          asset: _kGeolocationSvg,
-          width: 17,
-          height: 25,
+      if (widget.onLocationPressed != null)
+        _FooterAttachmentAction(
+          id: 'location',
+          icon: const _ChatFooterSvgIcon(
+            asset: _kGeolocationSvg,
+            width: 17,
+            height: 25,
+          ),
+          tooltip: widget.locationTooltip,
+          onPressed: () => _handleAttachmentAction(widget.onLocationPressed),
         ),
-        tooltip: widget.locationTooltip,
-        onPressed: () => _handleAttachmentAction(widget.onLocationPressed),
-      ),
-      ..._debugMarkdownPaginationActions(),
-    ];
-  }
-
-  List<_FooterAttachmentAction> _debugMarkdownPaginationActions() {
-    var includeDebugActions = false;
-    assert(() {
-      includeDebugActions = true;
-      return true;
-    }());
-    if (!includeDebugActions) return const [];
-
-    return [
-      _FooterAttachmentAction(
-        id: 'markdown-bold',
-        icon: const Icon(Icons.format_bold_rounded, color: _kActionIconColor),
-        tooltip: 'Bold',
-        onPressed: () => _handleAttachmentAction(null),
-      ),
-      _FooterAttachmentAction(
-        id: 'markdown-italic',
-        icon: const Icon(Icons.format_italic_rounded, color: _kActionIconColor),
-        tooltip: 'Italic',
-        onPressed: () => _handleAttachmentAction(null),
-      ),
-      _FooterAttachmentAction(
-        id: 'markdown-underline',
-        icon: const Icon(
-          Icons.format_underlined_rounded,
-          color: _kActionIconColor,
-        ),
-        tooltip: 'Underline',
-        onPressed: () => _handleAttachmentAction(null),
-      ),
-      _FooterAttachmentAction(
-        id: 'markdown-code',
-        icon: const Icon(Icons.code_rounded, color: _kActionIconColor),
-        tooltip: 'Code',
-        onPressed: () => _handleAttachmentAction(null),
-      ),
     ];
   }
 
@@ -417,6 +370,7 @@ class _ChatFooterState extends State<ChatFooter> {
     final shadows = theme.brightness == Brightness.dark
         ? _kFooterShadowsDark
         : _kFooterShadowsLight;
+    final hasAttachmentMenu = _attachmentActions().isNotEmpty;
 
     final inner = Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -444,7 +398,7 @@ class _ChatFooterState extends State<ChatFooter> {
             focusNode: _inputFocusNode,
             textFieldKey: _composerTextFieldKey,
             onSendPressed: _handleSend,
-            onMorePressed: _handleMoreAttachmentsPressed,
+            onMorePressed: hasAttachmentMenu ? _handleMoreAttachmentsPressed : null,
           ),
           if (_isAttachmentMenuOpen) ...[
             const SizedBox(height: _kAttachmentMenuTopSpacing),
@@ -500,7 +454,7 @@ class _ComposerPill extends StatelessWidget {
   final FocusNode focusNode;
   final GlobalKey textFieldKey;
   final VoidCallback onSendPressed;
-  final VoidCallback onMorePressed;
+  final VoidCallback? onMorePressed;
 
   bool _usesFullWidthTypedLayout(BuildContext context, double maxWidth) {
     if (!maxWidth.isFinite) return true;
@@ -687,11 +641,14 @@ class _TextActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasMoreAction = onMore != null;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _PlusInCircleButton(onPressed: onMore, tooltip: attachmentsTooltip),
-        const SizedBox(width: _kTextActionSpacing),
+        if (hasMoreAction) ...[
+          _PlusInCircleButton(onPressed: onMore, tooltip: attachmentsTooltip),
+          const SizedBox(width: _kTextActionSpacing),
+        ],
         _SendButton(onPressed: onPressed, tooltip: tooltip),
       ],
     );
@@ -743,24 +700,34 @@ class _AttachmentActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final actions = [
+      if (onVoice != null)
+        _svgIconButton(
+          asset: _kMicrophoneSvg,
+          onPressed: onVoice,
+          tooltip: voiceTooltip,
+        ),
+      if (onCamera != null)
+        _svgIconButton(
+          asset: _kPhotosSvg,
+          onPressed: onCamera,
+          tooltip: cameraTooltip,
+        ),
+      if (onMore != null)
+        _PlusInCircleButton(onPressed: onMore, tooltip: attachmentsTooltip),
+    ];
+
+    if (actions.isEmpty) return const SizedBox.shrink();
+
     return Padding(
       padding: const EdgeInsets.only(right: _kHorizontalPadding),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _svgIconButton(
-            asset: _kMicrophoneSvg,
-            onPressed: onVoice,
-            tooltip: voiceTooltip,
-          ),
-          const SizedBox(width: _kAttachmentIconSpacing),
-          _svgIconButton(
-            asset: _kPhotosSvg,
-            onPressed: onCamera,
-            tooltip: cameraTooltip,
-          ),
-          const SizedBox(width: _kAttachmentIconSpacing),
-          _PlusInCircleButton(onPressed: onMore, tooltip: attachmentsTooltip),
+          for (var index = 0; index < actions.length; index++) ...[
+            if (index > 0) const SizedBox(width: _kAttachmentIconSpacing),
+            actions[index],
+          ],
         ],
       ),
     );
