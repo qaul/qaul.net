@@ -993,6 +993,7 @@ class _PlusInCircleButton extends StatelessWidget {
       Material(
         color: Colors.transparent,
         child: InkWell(
+          key: const ValueKey('chat-footer-more'),
           onTap: onPressed,
           customBorder: const CircleBorder(),
           child: const SizedBox(

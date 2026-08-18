@@ -83,8 +83,15 @@ void main() {
       find.byTooltip('Record audio message'),
       Platform.isLinux ? findsNothing : findsOneWidget,
     );
-    expect(find.byTooltip('Send File'), findsOneWidget);
+    expect(find.byTooltip('Send File'), findsWidgets);
     expect(find.byTooltip('Back'), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('chat-footer-more')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('attachment')), findsOneWidget);
+    expect(find.byKey(const ValueKey('emoji')), findsNothing);
+    expect(find.byKey(const ValueKey('location')), findsNothing);
 
     final avatarTapTarget = find.descendant(
       of: find.byType(ChatHeader),

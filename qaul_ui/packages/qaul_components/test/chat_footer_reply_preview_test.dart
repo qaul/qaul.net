@@ -190,4 +190,36 @@ void main() {
     expect(voiceCount, 1);
     expect(cameraCount, 1);
   });
+
+  testWidgets('opens attachment menu from plus action', (tester) async {
+    var attachmentCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.bottomCenter,
+            child: ChatFooter(
+              placeholder: 'Secure private message',
+              onAttachmentPressed: () => attachmentCount++,
+              attachmentsTooltip: 'More',
+              applyBottomSafeArea: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const ValueKey('chat-footer-more')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('attachment')), findsOneWidget);
+    expect(find.byKey(const ValueKey('emoji')), findsNothing);
+    expect(find.byKey(const ValueKey('location')), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('attachment')));
+    await tester.pumpAndSettle();
+
+    expect(attachmentCount, 1);
+  });
 }

@@ -263,6 +263,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     _openSendFileDialog(file, room);
   }
 
+  Future<void> _openAttachmentPicker(ChatRoom room) async {
+    final result = await FilePicker.platform.pickFiles();
+    if (result?.files.single.path == null || !mounted) return;
+    _openSendFileDialog(File(result!.files.single.path!), room);
+  }
+
   void _openAudioRecorder(ChatRoom room) {
     showModalBottomSheet(
       context: context,
@@ -454,6 +460,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         ? null
                         : () => _openAudioRecorder(room),
                     onPickImagePressed: () => _openPhotoPicker(room),
+                    onAttachmentPressed: () => _openAttachmentPicker(room),
                   ),
                   onMessageTap: (context, message) async {
                     if (message is! types.FileMessage ||

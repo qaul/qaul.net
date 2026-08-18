@@ -12,6 +12,7 @@ class _ChatTextFooter extends StatefulWidget {
   const _ChatTextFooter({
     required this.onSendPressed,
     required this.hintText,
+    this.onAttachmentPressed,
     this.onPickImagePressed,
     this.onSendAudioPressed,
     this.disabledMessage,
@@ -19,6 +20,7 @@ class _ChatTextFooter extends StatefulWidget {
   });
 
   final void Function(types.PartialText) onSendPressed;
+  final VoidCallback? onAttachmentPressed;
   final VoidCallback? onPickImagePressed;
   final VoidCallback? onSendAudioPressed;
   final bool isDisabled;
@@ -58,9 +60,11 @@ class _ChatTextFooterState extends State<_ChatTextFooter> {
       onSend: _handleSend,
       onVoicePressed: widget.isDisabled ? null : widget.onSendAudioPressed,
       onCameraPressed: widget.isDisabled ? null : widget.onPickImagePressed,
+      onAttachmentPressed: widget.isDisabled ? null : widget.onAttachmentPressed,
       sendTooltip: AppLocalizations.of(context)!.sendTooltip,
       voiceTooltip: AppLocalizations.of(context)!.sendAudioTooltip,
       cameraTooltip: AppLocalizations.of(context)!.sendFileTooltip,
+      attachmentsTooltip: AppLocalizations.of(context)!.sendFileTooltip,
     );
 
     return Stack(
