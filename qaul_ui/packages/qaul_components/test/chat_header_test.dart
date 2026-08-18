@@ -48,4 +48,31 @@ void main() {
       const QaulColorSheet(Brightness.dark).chatHeaderDivider,
     );
   });
+
+  testWidgets('can hide back button and center title without subtitle', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatHeader(
+            applyTopSafeArea: false,
+            showBackButton: false,
+            onBackPressed: () {},
+            avatar: const CircleAvatar(child: Text('M')),
+            displayName: 'MaxX',
+            isOnline: false,
+            onlineLabel: '',
+            lastSeenLabel: '',
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.arrow_back_rounded), findsNothing);
+    expect(
+      tester.getCenter(find.text('MaxX')).dy,
+      closeTo(tester.getCenter(find.byType(CircleAvatar)).dy, 1),
+    );
+  });
 }

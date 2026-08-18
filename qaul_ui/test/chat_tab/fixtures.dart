@@ -17,6 +17,17 @@ ChatRoom buildGroupChat({List<Message>? messages}) => ChatRoom(
   isDirectChat: false,
   members: [
     ChatRoomUser(defaultUser, joinedAt: DateTime(2000)),
+    ChatRoomUser(otherUser, joinedAt: DateTime(2000)),
+  ],
+);
+
+ChatRoom buildDirectChat({List<Message>? messages}) => ChatRoom(
+  name: otherUser.name,
+  messages: messages,
+  conversationId: Uint8List.fromList('directId'.codeUnits),
+  isDirectChat: true,
+  members: [
     ChatRoomUser(defaultUser, joinedAt: DateTime(2000)),
+    ChatRoomUser(otherUser, joinedAt: DateTime(2000)),
   ],
 );
