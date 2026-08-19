@@ -11,52 +11,65 @@ use crate::router_v2::{
 };
 
 impl RouterV2State {
-    /// gets expired indexes
+    /// per 7.5 and 3.7
     pub fn sweep_expired(&self, now: u64) {
-        let expiry_ms = self.options.route_expiry_ms;
-        let mut rt = self.routing_table.write().unwrap();
-
-        {
-            let mut users_dict = self.user_dict.write().unwrap();
-            let mut allocator = self.users_allocator.write().unwrap();
-            let user_entries = &mut rt.user_entries;
-
-            for idx in 0..user_entries.len() {
-                // skip empty entries
-                let Some(e) = &user_entries[idx] else {
-                    continue;
-                };
-                let expired = {
-                    let entry = e.read().unwrap();
-                    entry.last_update.saturating_add(expiry_ms) < now
-                };
-                if expired {
-                    user_entries[idx] = None;
-                    users_dict.unbind(idx as u16);
-                    allocator.release(idx as u16, Instant::now());
-                }
+        for space in [Space::User, Space::Node] {
+            let expired = self.collect_expired(space, now);
+            if !expired.is_empty() {
+                self.retire_expired(space, &expired, now);
             }
         }
+    }
 
-        {
-            let mut nodes_dict = self.node_dict.write().unwrap();
-            let mut allocator = self.node_allocator.write().unwrap();
-            let node_entries = &mut rt.node_entries;
+    /// indices whose entry has not been refreshed inside the
+    /// expiry window
+    pub(crate) fn collect_expired(&self, space: Space, now: u64) -> Vec<u16> {
+        let expiry_ms = self.options.route_expiry_ms;
+        let rt = self.routing_table.read().unwrap();
+        let entries = match space {
+            Space::User => &rt.user_entries,
+            Space::Node => &rt.node_entries,
+        };
 
-            for idx in 0..node_entries.len() {
-                // skip empty entries
-                let Some(e) = &node_entries[idx] else {
-                    continue;
-                };
-                let expired = {
-                    let entry = e.read().unwrap();
-                    entry.last_update.saturating_add(expiry_ms) < now
-                };
-                if expired {
-                    node_entries[idx] = None;
-                    nodes_dict.unbind(idx as u16);
-                    allocator.release(idx as u16, Instant::now());
-                }
+        entries
+            .iter()
+            .enumerate()
+            .filter_map(|(idx, slot)| {
+                let entry = slot.as_ref()?;
+                let stale = entry.read().unwrap().last_update.saturating_add(expiry_ms) < now;
+                stale.then_some(idx as u16)
+            })
+            .collect()
+    }
+
+    /// retire the collected indices in canonical lock order.
+    pub(crate) fn retire_expired(&self, space: Space, expired: &[u16], now: u64) {
+        let expiry_ms = self.options.route_expiry_ms;
+        let (dict_lock, alloc_lock) = match space {
+            Space::Node => (&self.node_dict, &self.node_allocator),
+            Space::User => (&self.user_dict, &self.users_allocator),
+        };
+
+        let mut dict = dict_lock.write().unwrap();
+        let mut rt = self.routing_table.write().unwrap();
+        let mut allocator = alloc_lock.write().unwrap();
+        let mut tracker = self.reintroduction_tracker.write().unwrap();
+
+        for &idx in expired {
+            let still_stale = rt
+                .get(space, idx)
+                .is_some_and(|e| e.read().unwrap().last_update.saturating_add(expiry_ms) < now);
+            if !still_stale {
+                continue;
+            }
+
+            rt.clear(space, idx);
+            dict.unbind(idx);
+
+            tracker.clear_mark(space, idx);
+
+            if idx != RESERVED_INDEX {
+                allocator.release(idx, Instant::now());
             }
         }
     }
