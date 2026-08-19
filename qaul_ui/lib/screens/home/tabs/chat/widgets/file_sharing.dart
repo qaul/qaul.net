@@ -5,11 +5,9 @@ class _SendFileDialog extends HookConsumerWidget {
     this.file, {
     required this.room,
     required this.onSendPressed,
-    this.partialMessage,
   });
   final File file;
   final ChatRoom room;
-  final String? partialMessage;
   final Function(types.PartialText) onSendPressed;
 
   @override
@@ -45,7 +43,6 @@ class _SendFileDialog extends HookConsumerWidget {
         ),
         const SizedBox(height: 8),
         _CustomInput(
-          initialText: partialMessage,
           isTextRequired: false,
           hintText: AppLocalizations.of(context)!.chatEmptyMessageHint,
           onSendPressed: (desc) {
