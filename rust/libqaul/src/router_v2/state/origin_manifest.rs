@@ -86,6 +86,31 @@ impl RouterV2State {
         changed
     }
 
+    /// whether this user already has an entry in our own manifest
+    pub fn has_self_delegation(&self, user_id: &[u8; 8]) -> bool {
+        self.manifest
+            .read()
+            .unwrap()
+            .entries()
+            .iter()
+            .any(|e| e.user_id == *user_id)
+    }
+
+    /// entries that are in the refresh window and have their profile_version
+    pub fn delegations_due_for_refresh(&self, now_ms: u64) -> Vec<([u8; 8], u32)> {
+        let window_ms = self.options.delegation_referesh.saturating_mul(1000);
+        let deadline = now_ms.saturating_add(window_ms);
+
+        self.manifest
+            .read()
+            .unwrap()
+            .entries()
+            .iter()
+            .filter(|e| e.timeout <= deadline)
+            .map(|e| (e.user_id, e.profile_version))
+            .collect()
+    }
+
     pub fn remove_self_delegation(&self, user_id: &[u8; 8]) -> bool {
         let removed = self.manifest.write().unwrap().remove_entry(user_id);
         if removed {
