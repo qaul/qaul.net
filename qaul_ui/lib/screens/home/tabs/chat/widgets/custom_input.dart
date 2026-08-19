@@ -15,6 +15,8 @@ class _ChatTextFooter extends StatefulWidget {
     this.onAttachmentPressed,
     this.onPickImagePressed,
     this.onSendAudioPressed,
+    this.replyPreview,
+    this.onCancelReply,
     this.disabledMessage,
     this.isDisabled = false,
   });
@@ -23,6 +25,8 @@ class _ChatTextFooter extends StatefulWidget {
   final VoidCallback? onAttachmentPressed;
   final VoidCallback? onPickImagePressed;
   final VoidCallback? onSendAudioPressed;
+  final ChatFooterReplyPreviewData? replyPreview;
+  final VoidCallback? onCancelReply;
   final bool isDisabled;
   final String? disabledMessage;
   final String hintText;
@@ -58,6 +62,8 @@ class _ChatTextFooterState extends State<_ChatTextFooter> {
       controller: _textController,
       placeholder: widget.hintText,
       onSend: _handleSend,
+      replyPreview: widget.replyPreview,
+      onCancelReply: widget.onCancelReply,
       onVoicePressed: widget.isDisabled ? null : widget.onSendAudioPressed,
       onCameraPressed: widget.isDisabled ? null : widget.onPickImagePressed,
       onAttachmentPressed: widget.isDisabled ? null : widget.onAttachmentPressed,

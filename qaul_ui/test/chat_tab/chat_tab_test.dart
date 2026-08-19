@@ -2,12 +2,15 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_chat_ui/flutter_chat_ui.dart' as chat_ui;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:local_notifications/src/local_notifications.dart';
 import 'package:logging/logging.dart';
 import 'package:qaul_components/qaul_components.dart'
-    show ChatFooter, ChatHeader, QaulComponentsLocalizations;
+    show ChatFooter, ChatFooterReplyPreview, ChatHeader,
+        ChatMessageContextMenu, QaulComponentsLocalizations;
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_rpc/src/generated/services/chat/chat.pb.dart';
 import 'package:qaul_ui/l10n/app_localizations.dart';
@@ -126,6 +129,154 @@ void main() {
 
     expect(StubLibqaulWorker.sentTexts, ['hello footer']);
     expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, '');
+  });
+
+  types.TextMessage replyTargetMessage() => types.TextMessage(
+    id: 'reply-target',
+    author: types.User(id: otherUser.idBase58, firstName: otherUser.name),
+    text: 'message to reply',
+  );
+
+  testWidgets('message long press opens full context menu', (tester) async {
+    await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);
+
+    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+    chat.onMessageLongPress!(
+      tester.element(find.byType(chat_ui.Chat)),
+      replyTargetMessage(),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ChatMessageContextMenu), findsOneWidget);
+    expect(find.text('Reply'), findsOneWidget);
+    expect(find.text('Forward'), findsOneWidget);
+    expect(find.text('Edit'), findsOneWidget);
+    expect(find.byKey(const ValueKey('reaction-row')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('next-page')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Info'), findsOneWidget);
+    expect(find.text('Share'), findsOneWidget);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Delete'), findsOneWidget);
+  });
+
+  testWidgets('reply action shows preview and send clears it', (tester) async {
+    await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);
+
+    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+    chat.onMessageLongPress!(
+      tester.element(find.byType(chat_ui.Chat)),
+      replyTargetMessage(),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Reply'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ChatMessageContextMenu), findsNothing);
+    expect(find.byType(ChatFooterReplyPreview), findsOneWidget);
+    expect(find.text(otherUser.name), findsWidgets);
+    expect(find.text('message to reply'), findsWidgets);
+
+    await tester.enterText(find.byType(TextField), 'reply body');
+    await tester.pump();
+    await tester.tap(find.byTooltip('Send'));
+    await tester.pumpAndSettle();
+
+    expect(StubLibqaulWorker.sentTexts, ['reply body']);
+    expect(find.byType(ChatFooterReplyPreview), findsNothing);
+  });
+
+  testWidgets('reply preview can be cancelled', (tester) async {
+    await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);
+
+    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+    chat.onMessageLongPress!(
+      tester.element(find.byType(chat_ui.Chat)),
+      replyTargetMessage(),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Reply'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ChatFooterReplyPreview), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('cancel-chat-reply')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ChatFooterReplyPreview), findsNothing);
+  });
+
+  testWidgets('switching rooms clears reply preview', (tester) async {
+    final directRoom = buildDirectChat();
+    final groupRoom = buildGroupChat();
+    final wut = ProviderScope(
+      overrides: [
+        defaultUserProvider.overrideWith((_) => defaultUser),
+        chatNotificationControllerProvider.overrideWithValue(
+          NullChatNotificationController(),
+        ),
+        chatRoomsProvider.overrideWith(TestChatRoomListNotifier.new),
+        qaulWorkerProvider.overrideWith((ref) => StubLibqaulWorker(ref)),
+      ],
+      child: materialAppWithLocalizations(
+        Consumer(
+          builder: (context, ref, child) {
+            return Stack(
+              children: [
+                ChatScreen(directRoom, defaultUser, otherUser: otherUser),
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: TextButton(
+                    onPressed: () {
+                      ref.read(currentOpenChatRoom.notifier).state = groupRoom;
+                    },
+                    child: const Text('Switch room'),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(wut);
+    await tester.pump();
+
+    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+    chat.onMessageLongPress!(
+      tester.element(find.byType(chat_ui.Chat)),
+      replyTargetMessage(),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Reply'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ChatFooterReplyPreview), findsOneWidget);
+
+    await tester.tap(find.text('Switch room'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ChatFooterReplyPreview), findsNothing);
+  });
+
+  testWidgets('unsupported meta messages do not open reply context menu', (
+    tester,
+  ) async {
+    await pumpChatScreen(tester, buildGroupChat());
+
+    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+    chat.onMessageLongPress!(
+      tester.element(find.byType(chat_ui.Chat)),
+      const types.SystemMessage(id: 'join-event', text: 'joined'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ChatMessageContextMenu), findsNothing);
+    expect(find.text('Reply'), findsNothing);
   });
 
   testWidgets('chat footer prevents empty sends', (tester) async {

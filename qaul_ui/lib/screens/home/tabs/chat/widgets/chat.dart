@@ -193,6 +193,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final Map<String, String> _overflowMenuOptions = {};
   Map<String, MessagePresentation> _messagePresentations = {};
   ChatRenderMode _chatRenderMode = ChatRenderMode.direct;
+  types.TextMessage? _replyTarget;
+  String? _activeRoomIdBase58;
 
   void _handleClick(String value) {
     switch (value) {
@@ -290,6 +292,98 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
+  void _handleMessageLongPress(
+    BuildContext messageContext,
+    types.Message message,
+  ) {
+    if (message is! types.TextMessage) return;
+
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black38,
+      builder: (dialogContext) {
+        return GestureDetector(
+          onTap: () => Navigator.pop(dialogContext),
+          child: Material(
+            color: Colors.transparent,
+            child: Center(
+              child: GestureDetector(
+                onTap: () {},
+                child: ChatMessageContextMenu(
+                  elements: _contextMenuElements(dialogContext, message),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  List<ChatMessageContextMenuElement> _contextMenuElements(
+    BuildContext dialogContext,
+    types.TextMessage message,
+  ) {
+    return [
+      ChatMessageReactionRow(
+        enabled: false,
+        reactions: const [
+          ChatMessageQuickReaction(child: Text('❤️'), semanticLabel: 'Love'),
+          ChatMessageQuickReaction(child: Text('👍'), semanticLabel: 'Like'),
+          ChatMessageQuickReaction(child: Text('🔥'), semanticLabel: 'Fire'),
+        ],
+        showAddReaction: true,
+      ),
+      ChatMessageContextMenuAction.reply(
+        onPressed: () {
+          Navigator.pop(dialogContext);
+          if (!mounted) return;
+          setState(() => _replyTarget = message);
+        },
+      ),
+      ChatMessageContextMenuAction.forward(enabled: false, onPressed: () {}),
+      ChatMessageContextMenuAction.edit(enabled: false, onPressed: () {}),
+      ChatMessageContextMenuAction(
+        id: 'info',
+        label: 'Info',
+        iconAsset: ChatMessageContextMenuIcons.info,
+        enabled: false,
+        onPressed: () {},
+      ),
+      ChatMessageContextMenuAction(
+        id: 'share',
+        label: 'Share',
+        iconAsset: ChatMessageContextMenuIcons.share,
+        enabled: false,
+        onPressed: () {},
+      ),
+      ChatMessageContextMenuAction(
+        id: 'copy',
+        label: 'Copy',
+        iconAsset: ChatMessageContextMenuIcons.copy,
+        enabled: false,
+        onPressed: () {},
+      ),
+      ChatMessageContextMenuAction(
+        id: 'delete',
+        label: 'Delete',
+        iconAsset: ChatMessageContextMenuIcons.delete,
+        enabled: false,
+        onPressed: () {},
+      ),
+    ];
+  }
+
+  ChatFooterReplyPreviewData? _replyPreviewData(
+    types.TextMessage? message,
+  ) {
+    if (message == null) return null;
+    return ChatFooterReplyPreviewData(
+      author: message.author.firstName ?? AppLocalizations.of(context)!.unknown,
+      content: message.text,
+    );
+  }
+
   Widget _buildChatHeader({
     required ChatRoom room,
     required AppLocalizations l10n,
@@ -369,6 +463,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       return Scaffold(body: const QaulLoadingIndicator());
     }
 
+    if (_activeRoomIdBase58 != room.idBase58) {
+      _activeRoomIdBase58 = room.idBase58;
+      _replyTarget = null;
+    }
+
     final refreshCurrentRoom = useCallback(() async {
       if (!mounted) return;
       final worker = ref.read(qaulWorkerProvider);
@@ -390,6 +489,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       if (!mounted) return;
       final worker = ref.read(qaulWorkerProvider);
       worker.sendMessage(room.conversationId, msg.text);
+      setState(() => _replyTarget = null);
     }, [room]);
 
     final l10n = AppLocalizations.of(context)!;
@@ -461,7 +561,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         : () => _openAudioRecorder(room),
                     onPickImagePressed: () => _openPhotoPicker(room),
                     onAttachmentPressed: () => _openAttachmentPicker(room),
+                    replyPreview: _replyPreviewData(_replyTarget),
+                    onCancelReply: () => setState(() => _replyTarget = null),
                   ),
+                  onMessageLongPress: _handleMessageLongPress,
                   onMessageTap: (context, message) async {
                     if (message is! types.FileMessage ||
                         _isReceivingFile(message)) {
