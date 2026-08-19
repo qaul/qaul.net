@@ -367,8 +367,17 @@ impl Libqaul {
         // this binds the hosted user into router_v2's user index space (§3.2, §3.5).
         if let Some(router_v2) = qaul_state.get_router_v2() {
             for account in crate::node::user_accounts::UserAccounts::get_all_users(&qaul_state) {
-                router_v2.register_hosted_user(account.routing_user_id(), 0, account.multikey());
+                let routing_id = account.routing_user_id();
+                router_v2.register_hosted_user(routing_id, 0, account.multikey());
                 UserAccounts::publish_hosted_profile(&qaul_state, &router_v2, &account);
+
+                // An account created while v2 was disabled never reached the
+                // issuance path in `UserAccounts::create`, so it has no entry
+                // to restore. Issue one now rather than leaving the user
+                // unroutable under node form (§3.2, §10.2).
+                if !router_v2.has_self_delegation(&routing_id) {
+                    UserAccounts::publish_self_delegation(&qaul_state, &router_v2, &account, 0);
+                }
             }
         }
 
@@ -604,6 +613,8 @@ impl Libqaul {
         let mut messaging_ticker = Ticker::new(Duration::from_millis(10));
         let mut retransmit_ticker = Ticker::new(Duration::from_millis(1000));
         let mut router_v2_ticker = Ticker::new(Duration::from_millis(100));
+        // per 10.4 refresh. The cadence is 3 h
+        let mut delegation_refresh_ticker = Ticker::new(Duration::from_secs(300));
         // No rotation ticker: session rotation is clock-free. Draining
         // sessions are retired by nonce in the decrypt path (see
         // `after_decrypt_rotation`), not by a periodic wall-clock scan.
@@ -632,6 +643,7 @@ impl Libqaul {
             &mut messaging_ticker,
             &mut retransmit_ticker,
             &mut router_v2_ticker,
+            &mut delegation_refresh_ticker,
         )
         .await;
     }
@@ -656,6 +668,7 @@ impl Libqaul {
         messaging_ticker: &mut Ticker,
         retransmit_ticker: &mut Ticker,
         router_v2_ticker: &mut Ticker,
+        delegation_refresh_ticker: &mut Ticker,
     ) {
         // Take a snapshot of the router state once; it doesn't change after init.
         let router = self.state.get_router();
@@ -675,6 +688,7 @@ impl Libqaul {
                 let routing_table_fut = routing_table_ticker.next().fuse();
                 let messaging_fut = messaging_ticker.next().fuse();
                 let router_v2_fut = router_v2_ticker.next().fuse();
+                let delegation_refresh_fut = delegation_refresh_ticker.next().fuse();
                 let retransmit_fut = retransmit_ticker.next().fuse();
 
                 pin_mut!(
@@ -692,6 +706,7 @@ impl Libqaul {
                     routing_table_fut,
                     messaging_fut,
                     router_v2_fut,
+                    delegation_refresh_fut,
                     retransmit_fut,
                 );
 
@@ -785,6 +800,7 @@ impl Libqaul {
                     _routing_table_event = routing_table_fut => Some(EventType::RoutingTable),
                     _messaging_event = messaging_fut => Some(EventType::Messaging),
                     _router_v2_event = router_v2_fut => Some(EventType::RouterV2Outbound),
+                    _delegation_refresh_event = delegation_refresh_fut => Some(EventType::DelegationRefresh),
                     _retransmit_event = retransmit_fut => Some(EventType::Retransmit),
                 }
             };
@@ -1075,6 +1091,37 @@ impl Libqaul {
                     }
                 }
             }
+            EventType::DelegationRefresh => {
+                self.refresh_self_delegations();
+            }
+        }
+    }
+
+    fn refresh_self_delegations(&self) {
+        let Some(router_v2) = self.state.get_router_v2() else {
+            return;
+        };
+
+        let now = Timestamp::get_timestamp();
+        let due = router_v2.delegations_due_for_refresh(now);
+        if due.is_empty() {
+            return;
+        }
+
+        for account in UserAccounts::get_all_users(&*self.state) {
+            let routing_id = account.routing_user_id();
+            let Some((_, profile_version)) = due.iter().find(|(id, _)| *id == routing_id) else {
+                continue;
+            };
+
+            if UserAccounts::publish_self_delegation(
+                &self.state,
+                &router_v2,
+                &account,
+                *profile_version,
+            ) {
+                log::info!("router_v2: self-delegation for {routing_id:?} refreshed (§10.4)");
+            }
         }
     }
 
@@ -1144,6 +1191,7 @@ enum EventType {
     Messaging,
     Retransmit,
     RouterV2Outbound,
+    DelegationRefresh,
 }
 
 /// Legacy entry point — removed in favor of `Libqaul::new()` + `Libqaul::run()`.

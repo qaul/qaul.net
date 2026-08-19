@@ -265,21 +265,28 @@ impl UserAccounts {
 
             // TODO(Phase 11 subtask 1/7): honour an `opt_out_delegation` flag on
             // UserAccount.
-            let ttl_ms = {
-                let config = Configuration::get(state);
-                config.v2_routing.delegation_ttl.saturating_mul(1000)
-            };
-            let delegation = user.issue_self_delegation(
-                &router_v2.host_mk,
-                Timestamp::get_timestamp().saturating_add(ttl_ms),
-            );
-            router_v2.add_self_delegation(routing_id, 0, delegation);
+            Self::publish_self_delegation(state, &router_v2, &user, 0);
         }
 
         // display id
         log::trace!("created user account '{}' {:?}", name, id);
 
         user
+    }
+
+    pub fn publish_self_delegation(
+        state: &QaulState,
+        router_v2: &Arc<router_v2::RouterV2State>,
+        account: &UserAccount,
+        profile_version: u32,
+    ) -> bool {
+        let ttl_ms = {
+            let config = Configuration::get(state);
+            config.v2_routing.delegation_ttl.saturating_mul(1000)
+        };
+        let timeout = Timestamp::get_timestamp().saturating_add(ttl_ms);
+        let delegation = account.issue_self_delegation(&router_v2.host_mk, timeout);
+        router_v2.add_self_delegation(account.routing_user_id(), profile_version, delegation)
     }
 
     /// simply publish the profile so we have answer to ProfileRequest
