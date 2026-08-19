@@ -172,6 +172,117 @@ fn expired_entry_pushes_idx_into_allocator_cooldown() {
     );
 }
 
+/// A mark that outlives its dictionary binding is an orphan: the next
+/// `pending_introductions` pass finds no id for the index and drops it
+/// with a warning. Retiring the index must retire the mark with it.
+#[test]
+fn expired_entry_clears_the_reintroduction_mark() {
+    let (state, _rx) = fresh_state();
+    let user = install_user(&state, [1; 8], 0);
+    let now: u64 = 100_000;
+    let last_update = now - expiry_ms(&state) - 1;
+    install_entry(
+        &state,
+        Space::User,
+        5,
+        [1; 8],
+        TargetRef::User(user),
+        last_update,
+    );
+    state
+        .reintroduction_tracker
+        .write()
+        .unwrap()
+        .mark_first_time(Space::User, 5);
+
+    state.sweep_expired(now);
+
+    let pending = state
+        .reintroduction_tracker
+        .write()
+        .unwrap()
+        .take_pending(Space::User);
+    assert!(
+        !pending.contains(&5),
+        "sweeping an index must clear its reintroduction mark, not leave an orphan",
+    );
+}
+
+/// RESERVED_INDEX is bound directly rather than allocated (§3.2), so the
+/// allocator has nothing to take back. Releasing it would put an index
+/// the allocator never owned into cooldown.
+#[test]
+fn expired_reserved_index_is_not_returned_to_the_allocator() {
+    let (state, _rx) = fresh_state();
+    let user = install_user(&state, [1; 8], 0);
+    let now: u64 = 100_000;
+    let last_update = now - expiry_ms(&state) - 1;
+    install_entry(
+        &state,
+        Space::User,
+        index::RESERVED_INDEX,
+        [1; 8],
+        TargetRef::User(user),
+        last_update,
+    );
+
+    state.sweep_expired(now);
+
+    assert!(
+        state
+            .routing_table
+            .read()
+            .unwrap()
+            .get(Space::User, index::RESERVED_INDEX)
+            .is_none(),
+        "the reserved slot still expires like any other",
+    );
+    assert!(
+        !state
+            .users_allocator
+            .read()
+            .unwrap()
+            .idx_in_cooldown(index::RESERVED_INDEX),
+        "RESERVED_INDEX must never enter allocator cooldown",
+    );
+}
+
+/// The scan and the retirement are separate phases, so an entry
+/// refreshed in between must survive. Simulated by re-installing the
+/// entry with a current `last_update` at the same index.
+#[test]
+fn entry_refreshed_between_scan_and_retire_is_kept() {
+    let (state, _rx) = fresh_state();
+    let user = install_user(&state, [1; 8], 0);
+    let now: u64 = 100_000;
+    let stale = now - expiry_ms(&state) - 1;
+    install_entry(
+        &state,
+        Space::User,
+        5,
+        [1; 8],
+        TargetRef::User(user.clone()),
+        stale,
+    );
+
+    let expired = state.collect_expired(Space::User, now);
+    assert_eq!(expired, vec![5], "scan must see the stale entry");
+
+    // the refresh a concurrent commit would have performed
+    install_entry(&state, Space::User, 5, [1; 8], TargetRef::User(user), now);
+    state.retire_expired(Space::User, &expired, now);
+
+    assert!(
+        state
+            .routing_table
+            .read()
+            .unwrap()
+            .get(Space::User, 5)
+            .is_some(),
+        "a route refreshed after the scan must not be retired",
+    );
+}
+
 /// Cycle discipline (spec A.3): once the table drops its Arc, the
 /// User's back-edge Weak must resolve to None.
 #[test]

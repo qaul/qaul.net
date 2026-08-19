@@ -256,6 +256,130 @@ fn redelegating_with_a_new_timeout_is_a_change() {
     assert_eq!(state.manifest.read().unwrap().entries().len(), 1);
 }
 
+/// The startup path uses this to tell "restored from disk" from "created
+/// while v2 was disabled, so never issued at all".
+#[test]
+fn has_self_delegation_distinguishes_present_from_absent() {
+    let (state, _rx) = fresh_state();
+    let account = fresh_account();
+    let id = account.routing_user_id();
+
+    assert!(!state.has_self_delegation(&id));
+    delegate(&state, &account, 1_000_000_000);
+    assert!(state.has_self_delegation(&id));
+
+    state.remove_self_delegation(&id);
+    assert!(!state.has_self_delegation(&id));
+}
+
+// ----- §10.4 refresh window -----
+
+/// `delegation_referesh` defaults to 3 h (TTL/2), in seconds.
+const REFRESH_MS: u64 = 3 * 60 * 60 * 1000;
+
+#[test]
+fn a_fresh_delegation_is_not_due_for_refresh() {
+    let (state, _rx) = fresh_state();
+    let account = fresh_account();
+    let now = 1_000_000_000u64;
+    delegate(&state, &account, now);
+
+    assert!(
+        state.delegations_due_for_refresh(now).is_empty(),
+        "a delegation with a full TTL ahead of it is not due"
+    );
+}
+
+#[test]
+fn a_delegation_inside_the_window_is_due() {
+    let (state, _rx) = fresh_state();
+    let account = fresh_account();
+    let now = 1_000_000_000u64;
+    let id = delegate(&state, &account, now);
+
+    // one ms past the point where the remaining lifetime drops to TTL/2
+    let due = state.delegations_due_for_refresh(now + REFRESH_MS + 1);
+
+    assert_eq!(due, vec![(id, 0)]);
+}
+
+/// The boundary itself counts as due — waiting for strict expiry would
+/// leave no margin for a missed tick.
+#[test]
+fn a_delegation_exactly_at_the_window_edge_is_due() {
+    let (state, _rx) = fresh_state();
+    let account = fresh_account();
+    let now = 1_000_000_000u64;
+    let id = delegate(&state, &account, now);
+
+    let due = state.delegations_due_for_refresh(now + REFRESH_MS);
+
+    assert_eq!(due, vec![(id, 0)]);
+}
+
+/// A node down for longer than the TTL comes back with expired entries.
+/// They must still be reported, or the user is never rescued.
+#[test]
+fn an_already_expired_delegation_is_still_due() {
+    let (state, _rx) = fresh_state();
+    let account = fresh_account();
+    let now = 1_000_000_000u64;
+    let id = delegate(&state, &account, now);
+
+    let due = state.delegations_due_for_refresh(now + TTL_MS + 1);
+
+    assert_eq!(due, vec![(id, 0)]);
+}
+
+/// The refresh re-issues through `add_self_delegation`, which replaces the
+/// whole entry — so the caller has to carry the stored `profile_version`
+/// forward rather than assuming zero.
+#[test]
+fn due_entries_report_their_profile_version() {
+    let (state, _rx) = fresh_state();
+    let account = fresh_account();
+    let id = account.routing_user_id();
+    let now = 1_000_000_000u64;
+    state.add_self_delegation(
+        id,
+        7,
+        account.issue_self_delegation(&state.host_mk, now + TTL_MS),
+    );
+
+    let due = state.delegations_due_for_refresh(now + REFRESH_MS + 1);
+
+    assert_eq!(due, vec![(id, 7)]);
+}
+
+/// A refresh is an ordinary change: it marks the user dirty and rides the
+/// next accumulated bump rather than forcing one.
+#[test]
+fn refreshing_marks_dirty_and_bumps_with_the_window() {
+    let (state, _rx) = fresh_state();
+    let account = fresh_account();
+    let id = account.routing_user_id();
+    let now = 1_000_000_000u64;
+    delegate(&state, &account, now);
+    state.try_bump_manifest_version(now, BumpTrigger::Accumulated);
+
+    let refresh_at = now + REFRESH_MS + 1;
+    assert!(
+        state.add_self_delegation(
+            id,
+            0,
+            account.issue_self_delegation(&state.host_mk, refresh_at + TTL_MS)
+        ),
+        "a new timeout is a change"
+    );
+
+    let bumped = state.try_bump_manifest_version(refresh_at, BumpTrigger::Accumulated);
+    assert!(bumped.is_some(), "the refresh must reach a version bump");
+    assert!(
+        state.delegations_due_for_refresh(refresh_at).is_empty(),
+        "after refreshing, the entry leaves the window"
+    );
+}
+
 #[test]
 fn removing_an_absent_delegation_is_not_a_change() {
     let (state, _rx) = fresh_state();
