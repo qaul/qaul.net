@@ -18,6 +18,7 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart'
         TextMessage;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:hooks_riverpod/legacy.dart' show StateProvider;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
@@ -53,11 +54,24 @@ part 'file_sharing.dart';
 
 part 'group_settings.dart';
 
+part 'forward_recipient_selector.dart';
+
 part 'image_message_widget.dart';
 
 part 'chat_timeline_projection.dart';
 
 typedef OnSendPressed = void Function(String rawText);
+
+class _ForwardDraft {
+  const _ForwardDraft({required this.roomIdBase58, required this.text});
+
+  final String roomIdBase58;
+  final String text;
+}
+
+final _pendingForwardDraftProvider = StateProvider<_ForwardDraft?>(
+  (_) => null,
+);
 
 ChatRenderMode resolveChatRenderMode(ChatRoom room) =>
     room.isGroupChatRoom ? ChatRenderMode.group : ChatRenderMode.direct;
@@ -70,6 +84,7 @@ Future<void> openChat(
   required BuildContext context,
   required User user,
   User? otherUser,
+  String? initialMessageText,
 }) async {
   ref.read(currentOpenChatRoom.notifier).state = room;
 
@@ -83,14 +98,25 @@ Future<void> openChat(
   await Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (context) => ChatScreen(room, user, otherUser: otherUser),
+      builder: (context) => ChatScreen(
+        room,
+        user,
+        otherUser: otherUser,
+        initialMessageText: initialMessageText,
+      ),
       settings: const RouteSettings(name: _kChatRouteName),
     ),
   );
 }
 
 class ChatScreen extends StatefulHookConsumerWidget {
-  const ChatScreen(this.room, this.user, {super.key, this.otherUser});
+  const ChatScreen(
+    this.room,
+    this.user, {
+    super.key,
+    this.otherUser,
+    this.initialMessageText,
+  });
 
   final ChatRoom room;
 
@@ -99,6 +125,8 @@ class ChatScreen extends StatefulHookConsumerWidget {
 
   /// Someone the default user is having a conversation with. Leave null if group chat
   final User? otherUser;
+
+  final String? initialMessageText;
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -193,6 +221,138 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final Map<String, String> _overflowMenuOptions = {};
   Map<String, MessagePresentation> _messagePresentations = {};
   ChatRenderMode _chatRenderMode = ChatRenderMode.direct;
+  String? _initialComposerText;
+  String? _activeRoomIdBase58;
+  String? _forwardDraftRoomIdBase58;
+  String? _selectedContextMenuMessageId;
+
+  void _handleMessageLongPress(
+    BuildContext messageContext,
+    types.Message message,
+  ) {
+    if (message is! types.TextMessage) return;
+
+    setState(() => _selectedContextMenuMessageId = message.id);
+
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black38,
+      builder: (dialogContext) {
+        return GestureDetector(
+          onTap: () {
+            Navigator.pop(dialogContext);
+          },
+          child: Material(
+            color: Colors.transparent,
+            child: Center(
+              child: GestureDetector(
+                onTap: () {},
+                child: ChatMessageContextMenu(
+                  elements: _buildForwardContextMenuElements(
+                    onForward: () {
+                      Navigator.pop(dialogContext);
+                      setState(() => _selectedContextMenuMessageId = null);
+                      _openForwardRecipientSelector(message.text);
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    ).whenComplete(() {
+      if (!mounted) return;
+      setState(() => _selectedContextMenuMessageId = null);
+    });
+  }
+
+  List<ChatMessageContextMenuElement> _buildForwardContextMenuElements({
+    required VoidCallback onForward,
+  }) {
+    return [
+      const ChatMessageReactionRow(
+        enabled: false,
+        reactions: [
+          ChatMessageQuickReaction(
+            child: Text('❤️'),
+            semanticLabel: 'Love',
+          ),
+          ChatMessageQuickReaction(
+            child: Text('👍'),
+            semanticLabel: 'Like',
+          ),
+          ChatMessageQuickReaction(
+            child: Text('🔥'),
+            semanticLabel: 'Fire',
+          ),
+        ],
+      ),
+      const ChatMessageContextMenuAction.reply(enabled: false),
+      ChatMessageContextMenuAction.forward(onPressed: onForward),
+      const ChatMessageContextMenuAction.edit(enabled: false),
+      const ChatMessageContextMenuAction(
+        id: 'info',
+        label: 'Info',
+        iconAsset: ChatMessageContextMenuIcons.info,
+        enabled: false,
+      ),
+      const ChatMessageContextMenuAction(
+        id: 'share',
+        label: 'Share',
+        iconAsset: ChatMessageContextMenuIcons.share,
+        enabled: false,
+      ),
+      const ChatMessageContextMenuAction(
+        id: 'copy',
+        label: 'Copy',
+        iconAsset: ChatMessageContextMenuIcons.copy,
+        enabled: false,
+      ),
+      const ChatMessageContextMenuAction(
+        id: 'delete',
+        label: 'Delete',
+        iconAsset: ChatMessageContextMenuIcons.delete,
+        enabled: false,
+      ),
+    ];
+  }
+
+  Future<void> _openForwardRecipientSelector(String messageText) async {
+    final defaultUser = ref.read(defaultUserProvider);
+    if (defaultUser == null) return;
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => _ForwardRecipientSelectorScreen(
+          defaultUser: defaultUser,
+          forwardedText: messageText,
+        ),
+      ),
+    );
+  }
+
+  void _consumeForwardDraft(ChatRoom room) {
+    final pending = ref.read(_pendingForwardDraftProvider);
+    if (pending != null && pending.roomIdBase58 == room.idBase58) {
+      _initialComposerText = pending.text;
+      _forwardDraftRoomIdBase58 = room.idBase58;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (ref.read(_pendingForwardDraftProvider) == pending) {
+          ref.read(_pendingForwardDraftProvider.notifier).state = null;
+        }
+      });
+      return;
+    }
+
+    if (_forwardDraftRoomIdBase58 == room.idBase58) return;
+
+    _initialComposerText = widget.initialMessageText;
+    _forwardDraftRoomIdBase58 =
+        widget.initialMessageText == null ? null : room.idBase58;
+  }
 
   void _handleClick(String value) {
     switch (value) {
@@ -270,6 +430,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    _activeRoomIdBase58 = room.idBase58;
+    _consumeForwardDraft(room);
     _scheduleUpdateCurrentOpenChat();
   }
 
@@ -283,6 +445,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void didUpdateWidget(covariant ChatScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.room == room) return;
+    _consumeForwardDraft(room);
     _updateMenuOptionsBasedOnRoomType(resolveChatRenderMode(room));
     _scheduleUpdateCurrentOpenChat();
   }
@@ -293,6 +456,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     if (room == null) {
       return Scaffold(body: const QaulLoadingIndicator());
+    }
+
+    if (_activeRoomIdBase58 != room.idBase58) {
+      _activeRoomIdBase58 = room.idBase58;
+      _consumeForwardDraft(room);
     }
 
     final refreshCurrentRoom = useCallback(() async {
@@ -314,6 +482,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     final sendMessage = useCallback((types.PartialText msg) {
       if (!mounted) return;
+      _initialComposerText = null;
+      _forwardDraftRoomIdBase58 = null;
       final worker = ref.read(qaulWorkerProvider);
       worker.sendMessage(room.conversationId, msg.text);
     }, [room]);
@@ -372,20 +542,23 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   emptyState: Center(child: Text(l10n.chatEmptyState)),
                   bubbleBuilder: _bubbleBuilder,
                   systemMessageBuilder: _buildSystemMessage,
-                  customBottomWidget: _CustomInput(
+                  customBottomWidget: _ChatTextFooter(
+                    key: ValueKey(
+                      '${room.idBase58}:${_initialComposerText ?? ''}',
+                    ),
                     isDisabled: room.status != ChatRoomStatus.active,
                     disabledMessage:
                         room.status != ChatRoomStatus.inviteAccepted
                         ? null
                         : 'Please wait for the admin to confirm your acceptance to send messages',
-                    sendButtonVisibilityMode: SendButtonVisibilityMode.editing,
                     hintText: _chatRenderMode == ChatRenderMode.group
                         ? l10n.groupChatMessageHint
                         : l10n.securePrivateMessageHint,
+                    initialText: _initialComposerText,
                     onSendPressed: sendMessage,
                     onAttachmentPressed: (room.messages?.isEmpty ?? true)
                         ? null
-                        : ({types.PartialText? text}) async {
+                        : () async {
                             FilePickerResult? result;
                             try {
                               result = await FilePicker.platform.pickFiles();
@@ -406,7 +579,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                   final dialog = _SendFileDialog(
                                     file,
                                     room: room,
-                                    partialMessage: text?.text,
                                     onSendPressed: (description) {
                                       final worker = ref.read(
                                         qaulWorkerProvider,
@@ -441,7 +613,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         ? null
                         : (room.messages?.isEmpty ?? true)
                         ? null
-                        : ({types.PartialText? text}) async {
+                        : () async {
                             final result = await ImagePicker().pickImage(
                               source: ImageSource.camera,
                             );
@@ -458,7 +630,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                   final dialog = _SendFileDialog(
                                     file,
                                     room: room,
-                                    partialMessage: text?.text,
                                     onSendPressed: (description) {
                                       final worker = ref.read(
                                         qaulWorkerProvider,
@@ -494,7 +665,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         ? null
                         : (room.messages?.isEmpty ?? true)
                         ? null
-                        : ({types.PartialText? text}) async {
+                        : () async {
                             // ignore: use_build_context_synchronously
                             if (!context.mounted) return;
                             showModalBottomSheet(
@@ -504,7 +675,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                               builder: (_) {
                                 return _RecordAudioDialog(
                                   room: room,
-                                  partialMessage: text?.text,
                                   onSendPressed: (file, description) {
                                     final worker = ref.read(qaulWorkerProvider);
                                     worker.sendFile(
@@ -518,6 +688,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             );
                           },
                   ),
+                  onMessageLongPress: _handleMessageLongPress,
                   onMessageTap: (context, message) async {
                     if (message is! types.FileMessage ||
                         _isReceivingFile(message)) {
@@ -700,6 +871,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         presentation: presentation,
         mode: _chatRenderMode,
         clock: DateTime.now(),
+        isSelected: message.id == _selectedContextMenuMessageId,
       );
     }
 
