@@ -27,34 +27,47 @@ pub struct GatewayCandidate {
 impl RouterV2State {
     /// delegation targets in order. prioritize best metric
     pub fn eligible_gateways(&self) -> Vec<GatewayCandidate> {
-        let gateways: Vec<([u8; 8], Option<Multikey>)> = {
-            let nodes = self.nodes.read().unwrap();
-            nodes
-                .iter()
-                .filter_map(|(id, node)| {
-                    let node = node.read().unwrap();
-                    node.is_gateway.then(|| (*id, node.public_key.clone()))
-                })
-                .collect()
-        };
+        let node_ids: Vec<[u8; 8]> = self
+            .nodes
+            .read()
+            .unwrap()
+            .iter()
+            .map(|(id, _)| *id)
+            .collect();
 
-        let mut candidates: Vec<GatewayCandidate> = gateways
+        let mut candidates: Vec<GatewayCandidate> = node_ids
             .into_iter()
-            .filter_map(|(node_id, multikey)| {
-                let idx = self.node_dict.read().unwrap().idx_of(&node_id)?;
-                let entry = self.routing_table.read().unwrap().get(Space::Node, idx)?;
-                let entry = entry.read().unwrap();
-
-                entry.local_only.then_some(GatewayCandidate {
-                    node_id,
-                    multikey,
-                    metric: entry.metric,
-                })
-            })
+            .filter_map(|id| self.candidate_for(&id))
             .collect();
 
         candidates.sort_by_key(|c| c.metric);
         candidates
+    }
+
+    /// This node as a §10.3 candidate
+    pub fn candidate_for(&self, node_id: &[u8; 8]) -> Option<GatewayCandidate> {
+        // criterion 2: it must be a gateway, or its manifest never crosses
+        // the Internet sphere and carrying the user achieves nothing.
+        let multikey = {
+            let nodes = self.nodes.read().unwrap();
+            let node = nodes.get(node_id)?;
+            let node = node.read().unwrap();
+            if !node.is_gateway {
+                return None;
+            }
+            node.public_key.clone()
+        };
+
+        // criterion 1: local-sphere reachable
+        let idx = self.node_dict.read().unwrap().idx_of(node_id)?;
+        let entry = self.routing_table.read().unwrap().get(Space::Node, idx)?;
+        let entry = entry.read().unwrap();
+
+        entry.local_only.then_some(GatewayCandidate {
+            node_id: *node_id,
+            multikey,
+            metric: entry.metric,
+        })
     }
 }
 
@@ -91,9 +104,6 @@ impl RouterV2State {
         user_id: &[u8; 8],
         now_ms: u64,
     ) -> Option<GatewayCandidate> {
-        if self.has_live_subscription(user_id, now_ms) {
-            return None;
-        }
         if self
             .outstanding_subscribes
             .read()
@@ -111,6 +121,19 @@ impl RouterV2State {
                 .map(|(_, node)| *node)
                 .collect()
         };
+
+        // when the refresh window opens, a settled user is re-issued to the same gateway
+        if let Some(current) = self.subscriptions.read().unwrap().get(user_id) {
+            if !self.subscription_due_for_refresh(current, now_ms) {
+                return None;
+            }
+            if !declined.contains(&current.target_node_id) {
+                if let Some(candidate) = self.candidate_for(&current.target_node_id) {
+                    return Some(candidate);
+                }
+            }
+            // the target has stopped qualifying, or just refused, we can simply fall thru
+        }
 
         let best = self
             .eligible_gateways()
@@ -135,6 +158,37 @@ impl RouterV2State {
             .unwrap()
             .get(user_id)
             .is_some_and(|s| s.timeout > now_ms)
+    }
+
+    /// inside TTL/2 of expiry, re-issue rather than wait for the gateway to drop us
+    fn subscription_due_for_refresh(&self, subscription: &Subscription, now_ms: u64) -> bool {
+        let window_ms = self.options.delegation_referesh.saturating_mul(1000);
+        subscription.timeout <= now_ms.saturating_add(window_ms)
+    }
+
+    /// §10.3: drops subscriptions whose target has stopped qualifying.
+    fn prune_broken_subscriptions(&self, now_ms: u64) {
+        let broken: Vec<([u8; 8], [u8; 8])> = self
+            .subscriptions
+            .read()
+            .unwrap()
+            .iter()
+            .filter(|(_, s)| self.candidate_for(&s.target_node_id).is_none())
+            .map(|(user, s)| (*user, s.target_node_id))
+            .collect();
+
+        if broken.is_empty() {
+            return;
+        }
+
+        let mut subscriptions = self.subscriptions.write().unwrap();
+        for (user_id, target) in broken {
+            tracing::info!(
+                "router_v2 DELEGATION broken: target={target:?} no longer eligible for user={user_id:?}, will re-select (§10.3)"
+            );
+            subscriptions.remove(&user_id);
+        }
+        let _ = now_ms;
     }
 
     /// 11.6 says to send a subscription, we send it and remember it
@@ -276,5 +330,7 @@ impl RouterV2State {
             .write()
             .unwrap()
             .retain(|_, s| s.timeout > now_ms);
+
+        self.prune_broken_subscriptions(now_ms);
     }
 }
