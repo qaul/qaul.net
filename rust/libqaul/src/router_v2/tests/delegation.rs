@@ -500,10 +500,13 @@ mod issuing {
     use crate::router_v2::delegation::DelegationRequest;
     use proto::DelegationSubscribeAck;
 
-    fn request_to(
+    /// `issued_at` matters: a refresh re-signs with a *new* timeout, and
+    /// that is what takes the user back out of the refresh window.
+    pub(super) fn request_to(
         state: &RouterV2State,
         account: &UserAccount,
         target: [u8; 8],
+        issued_at: u64,
     ) -> DelegationRequest {
         let target_mk = state
             .nodes
@@ -519,11 +522,11 @@ mod issuing {
         DelegationRequest {
             user_id: account.routing_user_id(),
             target_node_id: target,
-            delegation: account.issue_self_delegation(&target_mk, NOW + TTL_MS),
+            delegation: account.issue_self_delegation(&target_mk, issued_at + TTL_MS),
         }
     }
 
-    fn ack_from(target: [u8; 8], user_id: [u8; 8], request_id: u32) -> Addressing {
+    pub(super) fn ack_from(target: [u8; 8], user_id: [u8; 8], request_id: u32) -> Addressing {
         Addressing {
             destination: user_id,
             destination_is_node: false,
@@ -534,7 +537,7 @@ mod issuing {
     }
 
     /// The only request_id in flight after a send.
-    fn sole_request_id(state: &RouterV2State) -> u32 {
+    pub(super) fn sole_request_id(state: &RouterV2State) -> u32 {
         let outstanding = state.outstanding_subscribes.read().unwrap();
         assert_eq!(outstanding.len(), 1);
         *outstanding.keys().next().unwrap()
@@ -546,7 +549,7 @@ mod issuing {
         let account = fresh_account();
         install_reachable_gateway(&state, [1; 8], 10, 20);
 
-        assert!(state.send_delegation_subscribe(request_to(&state, &account, [1; 8]), NOW));
+        assert!(state.send_delegation_subscribe(request_to(&state, &account, [1; 8], NOW), NOW));
 
         let out = rx.try_recv().expect("a subscribe should have been sent");
         let decoded = ManagementMessage::decode(&out.bytes[..]).unwrap();
@@ -595,7 +598,7 @@ mod issuing {
         let account = fresh_account();
         let user_id = account.routing_user_id();
         install_reachable_gateway(&state, [1; 8], 10, 20);
-        state.send_delegation_subscribe(request_to(&state, &account, [1; 8]), NOW);
+        state.send_delegation_subscribe(request_to(&state, &account, [1; 8], NOW), NOW);
         let request_id = sole_request_id(&state);
 
         state.handle_delegation_subscribe_ack(
@@ -628,7 +631,7 @@ mod issuing {
 
         let best = state.select_delegation_target(&user_id, NOW).unwrap();
         assert_eq!(best.node_id, [1; 8]);
-        state.send_delegation_subscribe(request_to(&state, &account, [1; 8]), NOW);
+        state.send_delegation_subscribe(request_to(&state, &account, [1; 8], NOW), NOW);
         let request_id = sole_request_id(&state);
 
         state.handle_delegation_subscribe_ack(
@@ -653,7 +656,7 @@ mod issuing {
         let user_id = account.routing_user_id();
         install_reachable_gateway(&state, [1; 8], 10, 10);
         install_reachable_gateway(&state, [2; 8], 11, 20);
-        state.send_delegation_subscribe(request_to(&state, &account, [1; 8]), NOW);
+        state.send_delegation_subscribe(request_to(&state, &account, [1; 8], NOW), NOW);
 
         assert!(
             state.select_delegation_target(&user_id, NOW).is_none(),
@@ -678,7 +681,7 @@ mod issuing {
         let account = fresh_account();
         let user_id = account.routing_user_id();
         install_reachable_gateway(&state, [1; 8], 10, 10);
-        state.send_delegation_subscribe(request_to(&state, &account, [1; 8]), NOW);
+        state.send_delegation_subscribe(request_to(&state, &account, [1; 8], NOW), NOW);
         let request_id = sole_request_id(&state);
         state.handle_delegation_subscribe_ack(
             ack_from([1; 8], user_id, request_id),
@@ -708,7 +711,7 @@ mod issuing {
         let account = fresh_account();
         let user_id = account.routing_user_id();
         install_reachable_gateway(&state, [1; 8], 10, 10);
-        state.send_delegation_subscribe(request_to(&state, &account, [1; 8]), NOW);
+        state.send_delegation_subscribe(request_to(&state, &account, [1; 8], NOW), NOW);
         let request_id = sole_request_id(&state);
 
         state.handle_delegation_subscribe_ack(
@@ -757,5 +760,183 @@ mod issuing {
                 .contains_key(&([1u8; 8], true)),
             "the missing key must be fetched as a node profile (§11.5)"
         );
+    }
+}
+
+// ----- §10.3 break monitor and §10.4 refresh -----
+
+mod lifecycle {
+    use super::issuing::*;
+    use super::*;
+    use proto::DelegationSubscribeAck;
+
+    /// Drives a user to a settled subscription with `target`.
+    fn settle(state: &RouterV2State, account: &UserAccount, target: [u8; 8], now: u64) {
+        state.send_delegation_subscribe(request_to(state, account, target, now), now);
+        let request_id = sole_request_id(state);
+        state.handle_delegation_subscribe_ack(
+            ack_from(target, account.routing_user_id(), request_id),
+            DelegationSubscribeAck {
+                accepted: true,
+                reason: 0,
+            },
+            now,
+        );
+    }
+
+    /// Rewrites the target's node-space routing entry.
+    fn set_entry(state: &RouterV2State, id: [u8; 8], idx: u16, local_only: bool) {
+        install_gateway(state, id, idx, true, local_only, 10);
+    }
+
+    #[test]
+    fn a_target_that_stops_being_a_gateway_breaks_the_subscription() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = account.routing_user_id();
+        install_reachable_gateway(&state, [1; 8], 10, 10);
+        settle(&state, &account, [1; 8], NOW);
+        assert!(state.has_live_subscription(&user_id, NOW));
+
+        state
+            .nodes
+            .read()
+            .unwrap()
+            .get(&[1; 8])
+            .unwrap()
+            .write()
+            .unwrap()
+            .is_gateway = false;
+        state.clear_delegation_state(NOW + 1);
+
+        assert!(!state.has_live_subscription(&user_id, NOW + 1));
+    }
+
+    /// §10.3: `local_only` 1 → 0 means the user can no longer reliably
+    /// reach or monitor the target, so the delegation is broken.
+    #[test]
+    fn a_target_leaving_the_local_sphere_breaks_the_subscription() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = account.routing_user_id();
+        install_reachable_gateway(&state, [1; 8], 10, 10);
+        settle(&state, &account, [1; 8], NOW);
+
+        set_entry(&state, [1; 8], 10, false);
+        state.clear_delegation_state(NOW + 1);
+
+        assert!(!state.has_live_subscription(&user_id, NOW + 1));
+    }
+
+    #[test]
+    fn a_target_whose_route_expired_breaks_the_subscription() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = account.routing_user_id();
+        install_reachable_gateway(&state, [1; 8], 10, 10);
+        settle(&state, &account, [1; 8], NOW);
+
+        state.routing_table.write().unwrap().clear(Space::Node, 10);
+        state.clear_delegation_state(NOW + 1);
+
+        assert!(!state.has_live_subscription(&user_id, NOW + 1));
+    }
+
+    #[test]
+    fn a_broken_subscription_re_selects_another_gateway() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = account.routing_user_id();
+        install_reachable_gateway(&state, [1; 8], 10, 10);
+        install_reachable_gateway(&state, [2; 8], 11, 20);
+        settle(&state, &account, [1; 8], NOW);
+
+        set_entry(&state, [1; 8], 10, false);
+        state.clear_delegation_state(NOW + 1);
+
+        assert_eq!(
+            state
+                .select_delegation_target(&user_id, NOW + 1)
+                .unwrap()
+                .node_id,
+            [2; 8]
+        );
+    }
+
+    /// A healthy subscription is left alone until the refresh window opens.
+    #[test]
+    fn a_settled_user_is_not_touched_before_the_refresh_window() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = account.routing_user_id();
+        install_reachable_gateway(&state, [1; 8], 10, 10);
+        settle(&state, &account, [1; 8], NOW);
+
+        state.clear_delegation_state(NOW + 1);
+        assert!(state.select_delegation_target(&user_id, NOW + 1).is_none());
+    }
+
+    /// §10.4: inside TTL/2, re-issue — and to the *same* gateway, since a
+    /// refresh is the original conveyed again.
+    #[test]
+    fn the_refresh_window_re_targets_the_same_gateway() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = account.routing_user_id();
+        install_reachable_gateway(&state, [1; 8], 10, 10);
+        install_reachable_gateway(&state, [2; 8], 11, 5); // better metric
+        settle(&state, &account, [1; 8], NOW);
+
+        let refresh_ms = state.options.delegation_referesh * 1000;
+        let due = NOW + TTL_MS - refresh_ms;
+
+        let target = state.select_delegation_target(&user_id, due).unwrap();
+        assert_eq!(
+            target.node_id, [1; 8],
+            "a refresh must not silently migrate the user to a better gateway"
+        );
+    }
+
+    /// If the current target has stopped qualifying by the time the refresh
+    /// is due, the refresh becomes a re-selection.
+    #[test]
+    fn a_refresh_against_a_broken_target_picks_a_new_one() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = account.routing_user_id();
+        install_reachable_gateway(&state, [1; 8], 10, 10);
+        install_reachable_gateway(&state, [2; 8], 11, 20);
+        settle(&state, &account, [1; 8], NOW);
+
+        set_entry(&state, [1; 8], 10, false);
+        let refresh_ms = state.options.delegation_referesh * 1000;
+        let due = NOW + TTL_MS - refresh_ms;
+
+        assert_eq!(
+            state
+                .select_delegation_target(&user_id, due)
+                .unwrap()
+                .node_id,
+            [2; 8]
+        );
+    }
+
+    /// A refreshed subscription carries the new timeout.
+    #[test]
+    fn a_refresh_ack_extends_the_subscription() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = account.routing_user_id();
+        install_reachable_gateway(&state, [1; 8], 10, 10);
+        settle(&state, &account, [1; 8], NOW);
+
+        let refresh_ms = state.options.delegation_referesh * 1000;
+        let due = NOW + TTL_MS - refresh_ms;
+        settle(&state, &account, [1; 8], due);
+
+        let subscriptions = state.subscriptions.read().unwrap();
+        let sub = subscriptions.get(&user_id).unwrap();
+        assert_eq!(sub.acked_at_ms, due);
+        assert!(state.select_delegation_target(&user_id, due).is_none());
     }
 }
