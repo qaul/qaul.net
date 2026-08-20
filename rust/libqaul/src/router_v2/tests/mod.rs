@@ -8,6 +8,7 @@
 
 mod apply_entry;
 mod apply_mapping;
+mod delegation;
 mod delta_build;
 mod forwarding;
 mod handle_index_dump;
