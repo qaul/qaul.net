@@ -21,11 +21,12 @@ use crate::{
     connections::ConnectionModule,
     router_v2::{
         codec::CodecError,
+        delegation::{OutstandingSubscribe, Subscription},
         identity::Multikey,
         index::{
             IndexAllocator, IndexDictionary, MirrorIndexDictionary, ReintroductionTracker, Space,
         },
-        management::profile::HostedProfile,
+        management::{delegation::PendingSubscribe, profile::HostedProfile},
         manifest::{ChunkAssembler, Manifest, ManifestLog},
         seq::SeqNum,
         table::{Nodes, RoutingTable, Users},
@@ -34,6 +35,7 @@ use crate::{
 };
 
 pub mod codec;
+pub mod delegation;
 pub mod forwarding;
 pub mod identity;
 pub mod index;
@@ -212,6 +214,14 @@ pub struct RouterV2State {
     /// §11.5 profile fetches that are waiting for response.
     /// key is (subject, is_node)
     pub management_in_flight: RwLock<HashMap<([u8; 8], bool), u64>>,
+    /// subscribes parked until the delegating user's key arrives per 11.6
+    pub(crate) pending_subscribes: RwLock<HashMap<[u8; 8], Vec<PendingSubscribe>>>,
+    /// subscribes we sent, keyed by request_id so the ack can be matched, per 11.6
+    pub(crate) outstanding_subscribes: RwLock<HashMap<u32, OutstandingSubscribe>>,
+    /// cross-host delegations a gateway has accepted
+    pub(crate) subscriptions: RwLock<HashMap<[u8; 8], Subscription>>,
+    /// (user, node) pairs that refused or went silent and when
+    pub(crate) declined_targets: RwLock<HashMap<([u8; 8], [u8; 8]), u64>>,
     /// §11.3 request_id source
     pub next_request_id: AtomicU32,
     /// spec section 14 sliding windows
@@ -254,6 +264,10 @@ impl RouterV2State {
             hosted_profiles: RwLock::new(HashMap::new()),
             management_recent_forwards: RwLock::new(HashMap::new()),
             management_in_flight: RwLock::new(HashMap::new()),
+            pending_subscribes: RwLock::new(HashMap::new()),
+            outstanding_subscribes: RwLock::new(HashMap::new()),
+            subscriptions: RwLock::new(HashMap::new()),
+            declined_targets: RwLock::new(HashMap::new()),
             next_request_id: AtomicU32::new(1),
             manifest_request_window: RwLock::new(HashMap::new()),
             manifest_serve_window: RwLock::new(HashMap::new()),

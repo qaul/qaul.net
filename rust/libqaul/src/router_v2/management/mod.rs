@@ -3,6 +3,7 @@
 
 //! Network management sub-protocol (spec §11).
 
+pub mod delegation;
 pub mod forwarding;
 pub mod profile;
 

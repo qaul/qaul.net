@@ -73,12 +73,21 @@ impl RouterV2State {
         profile_version: u32,
         delegation: SelfDelegation,
     ) -> bool {
-        let changed = self.manifest.write().unwrap().upsert_entry(DelegetedEntry {
+        self.record_delegation(DelegetedEntry {
             user_id,
             timeout: delegation.timeout,
             entry_signature: delegation.entry_signature,
             profile_version,
-        });
+        })
+    }
+
+    /// Puts a verified delegation entry into our own manifest, whoever
+    /// signed it (§10.1). Self-delegations and accepted cross-host
+    /// subscribes (§11.6) are the same thing once verified, and both ride
+    /// the accumulated bump rather than forcing one.
+    pub(crate) fn record_delegation(&self, entry: DelegetedEntry) -> bool {
+        let user_id = entry.user_id;
+        let changed = self.manifest.write().unwrap().upsert_entry(entry);
 
         if changed {
             self.dirty_delegations.write().unwrap().insert(user_id);
