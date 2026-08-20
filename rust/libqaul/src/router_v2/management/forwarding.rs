@@ -115,10 +115,22 @@ impl RouterV2State {
                 ManagementOutcome::None
             }
             Some(Body::ProfileResponse(resp)) => self.handle_profile_response(resp, now_ms),
+            Some(Body::DelegationSubscribe(req)) => {
+                self.handle_delegation_subscribe(addressing, req, now_ms);
+                ManagementOutcome::None
+            }
+            Some(Body::DelegationSubscribeAck(ack)) => {
+                self.handle_delegation_subscribe_ack(addressing, ack, now_ms);
+                ManagementOutcome::None
+            }
+            Some(Body::DelegationRevoke(_)) | Some(Body::DelegationRevokeAck(_)) => {
+                debug!(
+                    "management: request {} from {source:?} carries a delegation body we do not handle yet, ignoring",
+                    addressing.request_id
+                );
+                ManagementOutcome::None
+            }
             None => {
-                // A Phase 13 peer sending subscribe/revoke to a Phase 12
-                // node. Ignore rather than treat as malformed — §11.2 is
-                // best-effort and the sender detects the missing outcome.
                 debug!(
                     "management: request {} from {source:?} carries no body we recognise, ignoring",
                     addressing.request_id
