@@ -27,20 +27,14 @@ message ManagementMessage {
     oneof body {
         ProfileRequest profile_request = 7;
         ProfileResponse profile_response = 8;
+        DelegationSubscribe delegation_subscribe = 9;
+        DelegationSubscribeAck delegation_subscribe_ack = 10;
+        DelegationRevoke delegation_revoke = 11;
+        DelegationRevokeAck delegation_revoke_ack = 12;
     }
-
-    // Phase 13 (sections 11.6, 11.7) adds delegation_subscribe,
-    // delegation_subscribe_ack, delegation_revoke and
-    // delegation_revoke_ack here. Reserved so those land without
-    // renumbering anything above.
-    reserved 9, 10, 11, 12;
 }
 
 // Profile fetch (11.5).
-//
-// Sent when a node holds an 8-byte ID but needs the subject's full key —
-// to verify a delegation entry or manifest signature — or a fresher
-// profile than it has cached. Addressed to the subject.
 message ProfileRequest {
     // the requester's cached profile_version for the subject, or 0 if it
     // holds none
@@ -71,4 +65,40 @@ message Profile {
     bytes signed_profile = 6;
     // The subject's signature over the bytes of field 6.
     bytes signed_profile_signature = 7;
+}
+
+// Cross-host delegation subscribe (11.6)
+message DelegationSubscribe {
+    // 8-byte ID of the delegating user (section 3.3)
+    bytes user_id = 1;
+    // absolute expiry of the delegation
+    uint64 timeout = 2;
+    // the user's ed25519 signature over
+    // (target_full_multikey || timeout), per section 10.1
+    bytes entry_signature = 3;
+}
+
+enum RejectReason {
+    NONE = 0;
+    AT_CAPACITY = 1;
+    POLICY = 2;
+}
+
+message DelegationSubscribeAck {
+    bool accepted = 1;
+    RejectReason reason = 2;
+}
+
+// Cross-host delegation revoke (11.7).
+message DelegationRevoke {
+    bytes user_id = 1;
+    // identifies which delegation entry is being revoked
+    uint64 timeout = 2;
+    // per section 10.5
+    bytes revoke_signature = 3;
+}
+
+// Removing an entry that is already absent is a successful no-op
+message DelegationRevokeAck {
+    bool done = 1;
 }

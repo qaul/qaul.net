@@ -207,6 +207,11 @@ impl RouterV2State {
 
         self.refresh_trust_for_subject(&subject, now_ms);
 
+        // §11.6 subscribes parked on this key can now be decided.
+        if asked_as_user {
+            self.resume_pending_subscribes(&subject, now_ms);
+        }
+
         if asked_as_user {
             ManagementOutcome::UserProfileLearned {
                 user_id: subject,

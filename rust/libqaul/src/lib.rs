@@ -1093,6 +1093,7 @@ impl Libqaul {
             }
             EventType::DelegationRefresh => {
                 self.refresh_self_delegations();
+                self.ensure_cross_host_delegations();
             }
         }
     }
@@ -1122,6 +1123,48 @@ impl Libqaul {
             ) {
                 log::info!("router_v2: self-delegation for {routing_id:?} refreshed (§10.4)");
             }
+        }
+    }
+
+    /// §10.3: keep every hosted user carried by some gateway
+    fn ensure_cross_host_delegations(&self) {
+        let Some(router_v2) = self.state.get_router_v2() else {
+            return;
+        };
+
+        // A gateway carries its own users (§10.2)
+        if router_v2.host_is_gateway() {
+            return;
+        }
+
+        let now = Timestamp::get_timestamp();
+        let ttl_ms = storage::configuration::Configuration::get(&*self.state)
+            .v2_routing
+            .delegation_ttl
+            .saturating_mul(1000);
+
+        for account in UserAccounts::get_all_users(&*self.state) {
+            let user_id = account.routing_user_id();
+            let Some(target) = router_v2.select_delegation_target(&user_id, now) else {
+                continue;
+            };
+            let Some(target_mk) = target.multikey.as_ref() else {
+                continue;
+            };
+
+            // §10.1's construction with the *target* as host_node_id — the
+            // same signing input as a self-delegation, naming a different
+            // node.
+            let delegation = account.issue_self_delegation(target_mk, now.saturating_add(ttl_ms));
+
+            router_v2.send_delegation_subscribe(
+                router_v2::delegation::DelegationRequest {
+                    user_id,
+                    target_node_id: target.node_id,
+                    delegation,
+                },
+                now,
+            );
         }
     }
 

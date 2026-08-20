@@ -23,7 +23,7 @@ use crate::{
 };
 
 impl RouterV2State {
-    fn get_resource_mk(&self, resouce_id: &[u8; 8], space: Space) -> Option<Multikey> {
+    pub(crate) fn get_resource_mk(&self, resouce_id: &[u8; 8], space: Space) -> Option<Multikey> {
         match space {
             Space::Node => {
                 let nodes = self.nodes.read().unwrap();

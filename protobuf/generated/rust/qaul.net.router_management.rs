@@ -20,7 +20,7 @@ pub struct ManagementMessage {
     /// responder
     #[prost(uint32, tag = "6")]
     pub request_id: u32,
-    #[prost(oneof = "management_message::Body", tags = "7, 8")]
+    #[prost(oneof = "management_message::Body", tags = "7, 8, 9, 10, 11, 12")]
     pub body: ::core::option::Option<management_message::Body>,
 }
 /// Nested message and enum types in `ManagementMessage`.
@@ -31,13 +31,17 @@ pub mod management_message {
         ProfileRequest(super::ProfileRequest),
         #[prost(message, tag = "8")]
         ProfileResponse(super::ProfileResponse),
+        #[prost(message, tag = "9")]
+        DelegationSubscribe(super::DelegationSubscribe),
+        #[prost(message, tag = "10")]
+        DelegationSubscribeAck(super::DelegationSubscribeAck),
+        #[prost(message, tag = "11")]
+        DelegationRevoke(super::DelegationRevoke),
+        #[prost(message, tag = "12")]
+        DelegationRevokeAck(super::DelegationRevokeAck),
     }
 }
 /// Profile fetch (11.5).
-///
-/// Sent when a node holds an 8-byte ID but needs the subject's full key —
-/// to verify a delegation entry or manifest signature — or a fresher
-/// profile than it has cached. Addressed to the subject.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ProfileRequest {
     /// the requester's cached profile_version for the subject, or 0 if it
@@ -77,4 +81,72 @@ pub struct Profile {
     /// The subject's signature over the bytes of field 6.
     #[prost(bytes = "vec", tag = "7")]
     pub signed_profile_signature: ::prost::alloc::vec::Vec<u8>,
+}
+/// Cross-host delegation subscribe (11.6)
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DelegationSubscribe {
+    /// 8-byte ID of the delegating user (section 3.3)
+    #[prost(bytes = "vec", tag = "1")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
+    /// absolute expiry of the delegation
+    #[prost(uint64, tag = "2")]
+    pub timeout: u64,
+    /// the user's ed25519 signature over
+    /// (target_full_multikey || timeout), per section 10.1
+    #[prost(bytes = "vec", tag = "3")]
+    pub entry_signature: ::prost::alloc::vec::Vec<u8>,
+}
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DelegationSubscribeAck {
+    #[prost(bool, tag = "1")]
+    pub accepted: bool,
+    #[prost(enumeration = "RejectReason", tag = "2")]
+    pub reason: i32,
+}
+/// Cross-host delegation revoke (11.7).
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DelegationRevoke {
+    #[prost(bytes = "vec", tag = "1")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
+    /// identifies which delegation entry is being revoked
+    #[prost(uint64, tag = "2")]
+    pub timeout: u64,
+    /// per section 10.5
+    #[prost(bytes = "vec", tag = "3")]
+    pub revoke_signature: ::prost::alloc::vec::Vec<u8>,
+}
+/// Removing an entry that is already absent is a successful no-op
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DelegationRevokeAck {
+    #[prost(bool, tag = "1")]
+    pub done: bool,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum RejectReason {
+    None = 0,
+    AtCapacity = 1,
+    Policy = 2,
+}
+impl RejectReason {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            Self::None => "NONE",
+            Self::AtCapacity => "AT_CAPACITY",
+            Self::Policy => "POLICY",
+        }
+    }
+    /// Creates an enum from field names used in the ProtoBuf definition.
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "NONE" => Some(Self::None),
+            "AT_CAPACITY" => Some(Self::AtCapacity),
+            "POLICY" => Some(Self::Policy),
+            _ => None,
+        }
+    }
 }
