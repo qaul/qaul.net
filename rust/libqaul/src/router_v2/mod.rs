@@ -222,6 +222,8 @@ pub struct RouterV2State {
     pub(crate) subscriptions: RwLock<HashMap<[u8; 8], Subscription>>,
     /// (user, node) pairs that refused or went silent and when
     pub(crate) declined_targets: RwLock<HashMap<([u8; 8], [u8; 8]), u64>>,
+    /// §10.7: when each carried user was last seen reachable
+    pub(crate) delegation_liveness: RwLock<HashMap<[u8; 8], u64>>,
     /// §11.3 request_id source
     pub next_request_id: AtomicU32,
     /// spec section 14 sliding windows
@@ -268,6 +270,7 @@ impl RouterV2State {
             outstanding_subscribes: RwLock::new(HashMap::new()),
             subscriptions: RwLock::new(HashMap::new()),
             declined_targets: RwLock::new(HashMap::new()),
+            delegation_liveness: RwLock::new(HashMap::new()),
             next_request_id: AtomicU32::new(1),
             manifest_request_window: RwLock::new(HashMap::new()),
             manifest_serve_window: RwLock::new(HashMap::new()),
