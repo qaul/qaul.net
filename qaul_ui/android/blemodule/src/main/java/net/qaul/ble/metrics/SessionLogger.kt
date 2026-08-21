@@ -173,7 +173,11 @@ class SessionLogger private constructor(context: Context) {
     //
 
     /** Furthest point an attempt got */
-    private class Attempt(val role: String, val phy: String, val startedAt: Long) {
+    private class Attempt(
+        val role: String, val phy: String, val startedAt: Long,
+        /** Advertised qaul-id prefix of the peer we are dialling, when the scanner knew one.. */
+        val advertPeer: String? = null
+    ) {
         var stage: String = "connecting"
         /** stage name -> ms from attempt start to entering it. Lets each timeout in
          *  BleTaskScheduler.timeoutFor be set from the measured distribution of that stage rather
@@ -183,8 +187,8 @@ class SessionLogger private constructor(context: Context) {
 
     private val attempts = mutableMapOf<String, Attempt>()
 
-    fun attemptStarted(mac: String, role: String, phy: String) {
-        synchronized(lock) { attempts[mac] = Attempt(role, phy, now()) }
+    fun attemptStarted(mac: String, role: String, phy: String, advertPeer: String? = null) {
+        synchronized(lock) { attempts[mac] = Attempt(role, phy, now(), advertPeer) }
     }
 
     fun attemptStage(mac: String, stage: String) {
@@ -198,7 +202,7 @@ class SessionLogger private constructor(context: Context) {
         write(JSONObject().apply {
             put("type", "connect_attempt")
             put("mac", mac)
-            peerId?.let { put("peer", it) }
+            (peerId ?: a.advertPeer)?.let { put("peer", it) }
             put("role", a.role)
             put("phy", a.phy)
             put("ok", success)
