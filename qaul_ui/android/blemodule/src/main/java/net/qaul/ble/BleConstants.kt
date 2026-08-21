@@ -303,8 +303,7 @@ object BleConstants {
      *  node for seconds over one blip. */
     const val RECONNECT_FREE_RETRIES = 2
 
-    // TODO: this needs reviewed
-    const val CODED_RECONNECT_FREE_RETRIES = 5
+    const val CODED_RECONNECT_FREE_RETRIES = 3
 
     /** Minimum delay between reconnect attempts in milliseconds. */
     const val RECONNECT_DELAY_MIN_MS = 5_000L
