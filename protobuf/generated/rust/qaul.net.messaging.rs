@@ -43,9 +43,9 @@ pub mod envelop_payload {
         /// DTN message
         #[prost(bytes, tag = "2")]
         Dtn(::prost::alloc::vec::Vec<u8>),
-        /// directed custody routed DTN message
+        /// directed custody routed DTN message (V2, signed immutable route)
         #[prost(message, tag = "3")]
-        DtnRoutedV2(super::DtnRoutedV2),
+        DtnV2(super::DtnV2Container),
     }
 }
 /// encrypted message data
@@ -82,7 +82,7 @@ pub struct Data {
 /// messaging unified message
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Messaging {
-    #[prost(oneof = "messaging::Message", tags = "1, 2, 3, 4, 5, 6")]
+    #[prost(oneof = "messaging::Message", tags = "1, 2, 3, 4, 5, 6, 7")]
     pub message: ::core::option::Option<messaging::Message>,
 }
 /// Nested message and enum types in `Messaging`.
@@ -107,6 +107,9 @@ pub mod messaging {
         /// common message
         #[prost(message, tag = "6")]
         CommonMessage(super::CommonMessage),
+        /// signed dtn response message (V2)
+        #[prost(message, tag = "7")]
+        DtnResponseV2(super::DtnResponseV2),
     }
 }
 /// message received confirmation
@@ -210,7 +213,7 @@ pub struct RtcMessage {
 /// DTN message
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Dtn {
-    #[prost(oneof = "dtn::Message", tags = "1, 2, 3")]
+    #[prost(oneof = "dtn::Message", tags = "1, 2, 3, 4")]
     pub message: ::core::option::Option<dtn::Message>,
 }
 /// Nested message and enum types in `Dtn`.
@@ -220,41 +223,281 @@ pub mod dtn {
         /// message container
         #[prost(bytes, tag = "1")]
         Container(::prost::alloc::vec::Vec<u8>),
-        /// message received response
+        /// message received response (V1, unauthenticated)
         #[prost(message, tag = "2")]
         Response(super::DtnResponse),
-        /// directed custody routed DTN message
+        /// directed custody routed DTN message (V2, signed immutable route)
         #[prost(message, tag = "3")]
-        RoutedV2(super::DtnRoutedV2),
+        ContainerV2(super::DtnV2Container),
+        /// signed DTN response (V2)
+        #[prost(message, tag = "4")]
+        ResponseV2(super::DtnResponseV2),
     }
 }
-/// DTN source routed message (V2)
-#[derive(serde::Serialize, serde::Deserialize)]
+/// DTN v2 custody container.
+///
+/// The route is authored and signed once by the sender and is immutable in
+/// transit: custodians verify `dtn_route_sig` over `dtn_route` against the
+/// sender's key and never rewrite it. Traversal is stateless (a custodian finds
+/// itself in the route), so there is no cursor or handoff counter on the wire.
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
-pub struct DtnRoutedV2 {
-    /// the original encrypted container bytes
+pub struct DtnV2Container {
+    /// encoded DtnRoute (the signed blob)
     #[prost(bytes = "vec", tag = "1")]
-    pub container: ::prost::alloc::vec::Vec<u8>,
-    /// ordered list of custody user IDs
-    #[prost(bytes = "vec", repeated, tag = "2")]
-    pub custody_route: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
-    /// index of the first custody entry that has not yet taken custody
-    #[prost(uint32, tag = "3")]
-    pub next_route_index: u32,
-    /// signature of the original message (used for dedup)
+    pub dtn_route: ::prost::alloc::vec::Vec<u8>,
+    /// sender's signature over `dtn_route` bytes
+    #[prost(bytes = "vec", tag = "2")]
+    pub dtn_route_sig: ::prost::alloc::vec::Vec<u8>,
+    /// the original message container bytes (signed inner message)
+    #[prost(bytes = "vec", tag = "3")]
+    pub envelope: ::prost::alloc::vec::Vec<u8>,
+    /// optional recipient-signed custody grant (primary admission gate)
+    #[prost(message, optional, tag = "4")]
+    pub custody_grant: ::core::option::Option<CustodyGrant>,
+    /// optional proof-of-work stamp (grant-less untrusted pool)
+    #[prost(message, optional, tag = "5")]
+    pub pow: ::core::option::Option<PowStamp>,
+}
+/// DTN routing information, signed by the sender.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DtnRoute {
+    /// signature of the original message (dedup / end-to-end key)
+    #[prost(bytes = "vec", tag = "1")]
+    pub original_signature: ::prost::alloc::vec::Vec<u8>,
+    /// custody route as hop entries, ordered by hop ascending.
+    /// Position gives the order; there is no explicit hop number. Several
+    /// interchangeable custodian ids may share one hop.
+    #[prost(message, repeated, tag = "2")]
+    pub route_hop: ::prost::alloc::vec::Vec<RouteHop>,
+    /// public key of the original sender (protobuf-encoded)
+    #[prost(bytes = "vec", tag = "3")]
+    pub sender_public_key: ::prost::alloc::vec::Vec<u8>,
+    /// optional expiry (ms since epoch). Retention is otherwise custodian-local.
+    #[prost(uint64, optional, tag = "4")]
+    pub expires_at: ::core::option::Option<u64>,
+}
+/// one custodian candidate within a hop
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RouteEntry {
+    /// custodian qaul id
+    ///
+    /// extension point for future relay / connectivity information
+    #[prost(bytes = "vec", tag = "1")]
+    pub id: ::prost::alloc::vec::Vec<u8>,
+}
+/// one hop: a set of interchangeable custodian candidates
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RouteHop {
+    #[prost(message, repeated, tag = "1")]
+    pub route_entry: ::prost::alloc::vec::Vec<RouteEntry>,
+}
+/// Recipient-signed custody grant (capability).
+///
+/// The recipient authorizes a specific sender to have messages held in custody
+/// on its behalf. A custodian accepts a grant-bearing message only if the grant
+/// is signed by the recipient named in the inner container, names this sender,
+/// and the deposit fits `quota_bytes`. Rotating `epoch` revokes older grants.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct CustodyGrant {
+    /// sender authorized to deposit (qaul id)
+    #[prost(bytes = "vec", tag = "1")]
+    pub grantee: ::prost::alloc::vec::Vec<u8>,
+    /// recipient that issued and signed this grant (qaul id)
+    #[prost(bytes = "vec", tag = "2")]
+    pub recipient: ::prost::alloc::vec::Vec<u8>,
+    /// recipient's public key (protobuf-encoded), used to verify `signature`
+    #[prost(bytes = "vec", tag = "3")]
+    pub recipient_public_key: ::prost::alloc::vec::Vec<u8>,
+    /// per-sender custody budget this grant authorizes
+    #[prost(uint64, tag = "4")]
+    pub quota_bytes: u64,
+    /// grant epoch; a higher epoch from the same recipient supersedes lower ones
+    #[prost(uint32, tag = "5")]
+    pub epoch: u32,
+    /// optional expiry (ms since epoch), 0 = no expiry
+    #[prost(uint64, tag = "6")]
+    pub not_after: u64,
+    /// recipient's signature over the grant fields (signature field empty)
+    #[prost(bytes = "vec", tag = "7")]
+    pub signature: ::prost::alloc::vec::Vec<u8>,
+}
+/// Proof-of-work stamp for the grant-less untrusted pool.
+///
+/// Verified bound to (original_signature, custodian_id, day) so a stamp cannot be
+/// reused across custodians or days. A one-machine Sybil flood pays
+/// difficulty x identities x custodians and does not scale.
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct PowStamp {
+    /// solution nonce
+    #[prost(uint64, tag = "1")]
+    pub nonce: u64,
+    /// required leading zero bits in the bound hash
+    #[prost(uint32, tag = "2")]
+    pub difficulty: u32,
+}
+/// Signed DTN response (V2).
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DtnResponseV2 {
+    #[prost(enumeration = "dtn_response_v2::Kind", tag = "1")]
+    pub kind: i32,
+    #[prost(enumeration = "dtn_response_v2::ResponseType", tag = "2")]
+    pub response_type: i32,
+    #[prost(enumeration = "dtn_response_v2::Reason", tag = "3")]
+    pub reason: i32,
+    /// the referenced message (original message signature)
     #[prost(bytes = "vec", tag = "4")]
     pub original_signature: ::prost::alloc::vec::Vec<u8>,
-    /// public key of the original sender (protobuf-encoded)
+    /// responder public key (protobuf-encoded); verifies `signature` and must
+    /// hash to the responder identity the verifier expects
     #[prost(bytes = "vec", tag = "5")]
-    pub sender_public_key: ::prost::alloc::vec::Vec<u8>,
-    /// expiry timestamp (milliseconds since epoch), 0 = no expiry
-    #[prost(uint64, tag = "6")]
-    pub expires_at: u64,
-    /// remaining allowed handoffs before message is dropped
-    #[prost(uint32, tag = "7")]
-    pub remaining_handoffs: u32,
+    pub responder_public_key: ::prost::alloc::vec::Vec<u8>,
+    /// responder's signature over the response fields (signature field empty)
+    #[prost(bytes = "vec", tag = "6")]
+    pub signature: ::prost::alloc::vec::Vec<u8>,
 }
-/// DTN response
+/// Nested message and enum types in `DtnResponseV2`.
+pub mod dtn_response_v2 {
+    /// what this response asserts
+    #[derive(
+        Clone,
+        Copy,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+        PartialOrd,
+        Ord,
+        ::prost::Enumeration
+    )]
+    #[repr(i32)]
+    pub enum Kind {
+        /// receiver -> sender: authoritative "delivered", stops retransmission
+        Delivery = 0,
+        /// receiver -> last custodian: custody release, free storage now
+        CustodyRelease = 1,
+        /// custodian -> previous holder: accepted into custody (receipt)
+        Receipt = 2,
+        /// custodian -> sender: dropped (denied / expired / full)
+        DropReport = 3,
+    }
+    impl Kind {
+        /// String value of the enum field names used in the ProtoBuf definition.
+        ///
+        /// The values are not transformed in any way and thus are considered stable
+        /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+        pub fn as_str_name(&self) -> &'static str {
+            match self {
+                Self::Delivery => "DELIVERY",
+                Self::CustodyRelease => "CUSTODY_RELEASE",
+                Self::Receipt => "RECEIPT",
+                Self::DropReport => "DROP_REPORT",
+            }
+        }
+        /// Creates an enum from field names used in the ProtoBuf definition.
+        pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+            match value {
+                "DELIVERY" => Some(Self::Delivery),
+                "CUSTODY_RELEASE" => Some(Self::CustodyRelease),
+                "RECEIPT" => Some(Self::Receipt),
+                "DROP_REPORT" => Some(Self::DropReport),
+                _ => None,
+            }
+        }
+    }
+    /// accepted / rejected
+    #[derive(
+        Clone,
+        Copy,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+        PartialOrd,
+        Ord,
+        ::prost::Enumeration
+    )]
+    #[repr(i32)]
+    pub enum ResponseType {
+        Accepted = 0,
+        Rejected = 1,
+    }
+    impl ResponseType {
+        /// String value of the enum field names used in the ProtoBuf definition.
+        ///
+        /// The values are not transformed in any way and thus are considered stable
+        /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+        pub fn as_str_name(&self) -> &'static str {
+            match self {
+                Self::Accepted => "ACCEPTED",
+                Self::Rejected => "REJECTED",
+            }
+        }
+        /// Creates an enum from field names used in the ProtoBuf definition.
+        pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+            match value {
+                "ACCEPTED" => Some(Self::Accepted),
+                "REJECTED" => Some(Self::Rejected),
+                _ => None,
+            }
+        }
+    }
+    /// rejection / drop reason
+    #[derive(
+        Clone,
+        Copy,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash,
+        PartialOrd,
+        Ord,
+        ::prost::Enumeration
+    )]
+    #[repr(i32)]
+    pub enum Reason {
+        None = 0,
+        UserNotAccepted = 1,
+        OverallQuota = 2,
+        UserQuota = 3,
+        /// no valid custody grant and no acceptable proof-of-work
+        NoGrant = 4,
+        /// grant-less deposit requires a proof-of-work stamp
+        PowRequired = 5,
+        /// sender is blocked by this custodian
+        Blocked = 6,
+    }
+    impl Reason {
+        /// String value of the enum field names used in the ProtoBuf definition.
+        ///
+        /// The values are not transformed in any way and thus are considered stable
+        /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+        pub fn as_str_name(&self) -> &'static str {
+            match self {
+                Self::None => "NONE",
+                Self::UserNotAccepted => "USER_NOT_ACCEPTED",
+                Self::OverallQuota => "OVERALL_QUOTA",
+                Self::UserQuota => "USER_QUOTA",
+                Self::NoGrant => "NO_GRANT",
+                Self::PowRequired => "POW_REQUIRED",
+                Self::Blocked => "BLOCKED",
+            }
+        }
+        /// Creates an enum from field names used in the ProtoBuf definition.
+        pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+            match value {
+                "NONE" => Some(Self::None),
+                "USER_NOT_ACCEPTED" => Some(Self::UserNotAccepted),
+                "OVERALL_QUOTA" => Some(Self::OverallQuota),
+                "USER_QUOTA" => Some(Self::UserQuota),
+                "NO_GRANT" => Some(Self::NoGrant),
+                "POW_REQUIRED" => Some(Self::PowRequired),
+                "BLOCKED" => Some(Self::Blocked),
+                _ => None,
+            }
+        }
+    }
+}
+/// DTN response (V1, unauthenticated — retained for legacy V1 custody)
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct DtnResponse {
     /// the type of the message
