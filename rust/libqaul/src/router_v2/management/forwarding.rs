@@ -123,11 +123,12 @@ impl RouterV2State {
                 self.handle_delegation_subscribe_ack(addressing, ack, now_ms);
                 ManagementOutcome::None
             }
-            Some(Body::DelegationRevoke(_)) | Some(Body::DelegationRevokeAck(_)) => {
-                debug!(
-                    "management: request {} from {source:?} carries a delegation body we do not handle yet, ignoring",
-                    addressing.request_id
-                );
+            Some(Body::DelegationRevoke(req)) => {
+                self.handle_delegation_revoke(addressing, req, now_ms);
+                ManagementOutcome::None
+            }
+            Some(Body::DelegationRevokeAck(ack)) => {
+                self.handle_delegation_revoke_ack(addressing, ack);
                 ManagementOutcome::None
             }
             None => {
