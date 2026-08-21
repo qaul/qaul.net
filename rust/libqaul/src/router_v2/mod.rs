@@ -21,12 +21,12 @@ use crate::{
     connections::ConnectionModule,
     router_v2::{
         codec::CodecError,
-        delegation::{OutstandingSubscribe, Subscription},
+        delegation::{OutstandingSubscribe, PendingRevocation, Subscription},
         identity::Multikey,
         index::{
             IndexAllocator, IndexDictionary, MirrorIndexDictionary, ReintroductionTracker, Space,
         },
-        management::{delegation::PendingSubscribe, profile::HostedProfile},
+        management::{delegation::PendingDelegation, profile::HostedProfile},
         manifest::{ChunkAssembler, Manifest, ManifestLog},
         seq::SeqNum,
         table::{Nodes, RoutingTable, Users},
@@ -215,7 +215,7 @@ pub struct RouterV2State {
     /// key is (subject, is_node)
     pub management_in_flight: RwLock<HashMap<([u8; 8], bool), u64>>,
     /// subscribes parked until the delegating user's key arrives per 11.6
-    pub(crate) pending_subscribes: RwLock<HashMap<[u8; 8], Vec<PendingSubscribe>>>,
+    pub(crate) pending_subscribes: RwLock<HashMap<[u8; 8], Vec<PendingDelegation>>>,
     /// subscribes we sent, keyed by request_id so the ack can be matched, per 11.6
     pub(crate) outstanding_subscribes: RwLock<HashMap<u32, OutstandingSubscribe>>,
     /// cross-host delegations a gateway has accepted
@@ -224,6 +224,8 @@ pub struct RouterV2State {
     pub(crate) declined_targets: RwLock<HashMap<([u8; 8], [u8; 8]), u64>>,
     /// §10.7: when each carried user was last seen reachable
     pub(crate) delegation_liveness: RwLock<HashMap<[u8; 8], u64>>,
+    /// §10.5 revocations waiting for the layer above to sign and send
+    pub(crate) pending_revocations: RwLock<Vec<PendingRevocation>>,
     /// §11.3 request_id source
     pub next_request_id: AtomicU32,
     /// spec section 14 sliding windows
@@ -271,6 +273,7 @@ impl RouterV2State {
             subscriptions: RwLock::new(HashMap::new()),
             declined_targets: RwLock::new(HashMap::new()),
             delegation_liveness: RwLock::new(HashMap::new()),
+            pending_revocations: RwLock::new(Vec::new()),
             next_request_id: AtomicU32::new(1),
             manifest_request_window: RwLock::new(HashMap::new()),
             manifest_serve_window: RwLock::new(HashMap::new()),

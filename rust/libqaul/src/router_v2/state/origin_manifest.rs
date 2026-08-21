@@ -88,10 +88,7 @@ impl RouterV2State {
         })
     }
 
-    /// Puts a verified delegation entry into our own manifest, whoever
-    /// signed it (§10.1). Self-delegations and accepted cross-host
-    /// subscribes (§11.6) are the same thing once verified, and both ride
-    /// the accumulated bump rather than forcing one.
+    /// Puts a verified delegation entry into our own manifest
     pub(crate) fn record_delegation(&self, entry: DelegetedEntry) -> bool {
         let user_id = entry.user_id;
         let changed = self.manifest.write().unwrap().upsert_entry(entry);
@@ -135,16 +132,7 @@ impl RouterV2State {
         removed
     }
 
-    /// §10.7: stop advertising delegated users we can no longer deliver to.
-    ///
-    /// Returns whether the manifest changed, so the caller can persist.
-    ///
-    /// The §10.7 budget is 95 s: up to 35 s for route expiry to make the
-    /// loss visible, then the emission window. Route expiry is already
-    /// spent by the time anything is observable here, so the grace measured
-    /// from observation is the remainder — waiting the full 95 s from the
-    /// first unreachable tick would overshoot the bound by the detection
-    /// interval.
+    /// stop advertising delegated users we can no longer deliver to, per 11.7
     pub fn sweep_unreachable_delegations(&self, now_ms: u64) -> bool {
         let carried: HashSet<[u8; 8]> = self
             .manifest
