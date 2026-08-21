@@ -4,6 +4,8 @@
 //! This origin's own manifest: delegation set, version bumps, persistence
 //! (spec §10.1, §10.8, §10.9).
 
+use std::collections::HashSet;
+
 use crate::{
     router_v2::{
         codec::messages::ManifestEntry,
@@ -13,6 +15,11 @@ use crate::{
     },
     storage::manifest_state::{DelegationEntry, HostManifestState},
 };
+
+/// Grace from the first unreachable observation to removal: the §10.7
+/// budget of 95 s less the 35 s route expiry already spent making the
+/// loss visible.
+const UNREACHABLE_GRACE_MS: u64 = 60_000;
 
 impl RouterV2State {
     pub fn restore_host_manifest(&self, persisted: &HostManifestState) {
@@ -126,6 +133,100 @@ impl RouterV2State {
             self.dirty_delegations.write().unwrap().insert(*user_id);
         }
         removed
+    }
+
+    /// §10.7: stop advertising delegated users we can no longer deliver to.
+    ///
+    /// Returns whether the manifest changed, so the caller can persist.
+    ///
+    /// The §10.7 budget is 95 s: up to 35 s for route expiry to make the
+    /// loss visible, then the emission window. Route expiry is already
+    /// spent by the time anything is observable here, so the grace measured
+    /// from observation is the remainder — waiting the full 95 s from the
+    /// first unreachable tick would overshoot the bound by the detection
+    /// interval.
+    pub fn sweep_unreachable_delegations(&self, now_ms: u64) -> bool {
+        let carried: HashSet<[u8; 8]> = self
+            .manifest
+            .read()
+            .unwrap()
+            .entries()
+            .iter()
+            .map(|e| e.user_id)
+            .collect();
+
+        if carried.is_empty() {
+            self.delegation_liveness.write().unwrap().clear();
+            return false;
+        }
+
+        let expired: Vec<[u8; 8]> = {
+            let mut liveness = self.delegation_liveness.write().unwrap();
+            liveness.retain(|user_id, _| carried.contains(user_id));
+
+            carried
+                .iter()
+                .filter(|user_id| {
+                    if self.delegated_user_is_reachable(user_id) {
+                        liveness.insert(**user_id, now_ms);
+                        return false;
+                    }
+                    // First unreachable sighting starts the clock rather
+                    // than dropping outright, so a single missed tick does
+                    // not evict an entry.
+                    let since = *liveness.entry(**user_id).or_insert(now_ms);
+                    now_ms.saturating_sub(since) > UNREACHABLE_GRACE_MS
+                })
+                .copied()
+                .collect()
+        };
+
+        if expired.is_empty() {
+            return false;
+        }
+
+        {
+            let mut liveness = self.delegation_liveness.write().unwrap();
+            for user_id in &expired {
+                tracing::info!(
+                    "router_v2 DELEGATION dropped: {user_id:?} unreachable past the §10.7 bound"
+                );
+                liveness.remove(user_id);
+            }
+        }
+        for user_id in &expired {
+            self.remove_self_delegation(user_id);
+        }
+
+        // §10.8 exempts this from the 60 s rate limit: a manifest that keeps
+        // advertising an undeliverable user black-holes traffic addressed to
+        // them, which is exactly what §10.7 exists to prevent. Flapping is
+        // bounded on the other side — a dropped user only comes back by
+        // subscribing again (§11.6), and that re-add rides the ordinary
+        // rate-limited accumulated bump.
+        self.try_bump_manifest_version(now_ms, BumpTrigger::ForcedRemoval)
+            .is_some()
+    }
+
+    /// Can we still deliver to this delegated user?
+    ///
+    /// A user we host is reachable by definition. It also never has a
+    /// routing entry — `register_hosted_user` leaves it `None`, and under
+    /// node form §3.2 gives hosted users no user index at all — so testing
+    /// one the same way as a foreign entry would drop our own users from
+    /// our own manifest on the first tick after startup.
+    fn delegated_user_is_reachable(&self, user_id: &[u8; 8]) -> bool {
+        let users = self.users.read().unwrap();
+        let Some(user) = users.get(user_id) else {
+            return false;
+        };
+        let user = user.read().unwrap();
+
+        user.is_hosted
+            || user
+                .routing_entry
+                .as_ref()
+                .is_some_and(|weak| weak.upgrade().is_some())
     }
 
     pub fn try_bump_manifest_version(&self, now_ms: u64, trigger: BumpTrigger) -> Option<u32> {

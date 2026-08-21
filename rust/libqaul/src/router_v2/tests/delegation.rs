@@ -940,3 +940,164 @@ mod lifecycle {
         assert!(state.select_delegation_target(&user_id, due).is_none());
     }
 }
+
+// ----- §10.7 gateway-side reachability sweep -----
+
+mod reachability {
+    use super::*;
+    use crate::router_v2::BumpTrigger;
+
+    const GRACE_MS: u64 = 60_000;
+
+    /// Puts `user` in our manifest the way an accepted subscribe would.
+    fn carry(state: &RouterV2State, account: &UserAccount) -> [u8; 8] {
+        let user_id = account.routing_user_id();
+        state.add_self_delegation(
+            user_id,
+            0,
+            account.issue_self_delegation(&state.host_mk, NOW + TTL_MS),
+        );
+        user_id
+    }
+
+    /// A foreign user with a live routing entry, i.e. deliverable.
+    fn make_reachable(state: &RouterV2State, user_id: [u8; 8], idx: u16) {
+        install_user_with_key(state, user_id, fresh_multikey());
+        let user = state.users.read().unwrap().get(&user_id).unwrap();
+        let e = Arc::new(RwLock::new(RoutingEntry {
+            target_index: idx,
+            target: TargetRef::User(user.clone()),
+            seq_num: SeqNum::from(0u16),
+            metric: 10,
+            next_hop: 0,
+            transport: ConnectionModule::Lan,
+            last_update: NOW,
+            hop_count: 1,
+            local_only: false,
+        }));
+        user.write().unwrap().routing_entry = Some(Arc::downgrade(&e));
+        state.routing_table.write().unwrap().set(Space::User, idx, e);
+    }
+
+    /// The trap: a hosted user never has a routing entry, and under node
+    /// form (§3.2) has no user index either. Testing it like a foreign
+    /// entry would evict our own users on the first tick.
+    #[test]
+    fn a_hosted_user_is_never_swept() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = carry(&state, &account);
+        state.register_hosted_user(user_id, 0, account.multikey());
+
+        assert!(!state.sweep_unreachable_delegations(NOW));
+        assert!(!state.sweep_unreachable_delegations(NOW + GRACE_MS * 10));
+        assert!(state.has_self_delegation(&user_id));
+    }
+
+    #[test]
+    fn a_reachable_delegated_user_is_kept() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = carry(&state, &account);
+        make_reachable(&state, user_id, 30);
+
+        assert!(!state.sweep_unreachable_delegations(NOW + GRACE_MS * 10));
+        assert!(state.has_self_delegation(&user_id));
+    }
+
+    /// A single unreachable observation starts the clock; it does not evict.
+    #[test]
+    fn one_unreachable_tick_does_not_evict() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = carry(&state, &account);
+        make_reachable(&state, user_id, 30);
+        state.sweep_unreachable_delegations(NOW);
+
+        state.routing_table.write().unwrap().clear(Space::User, 30);
+
+        assert!(!state.sweep_unreachable_delegations(NOW + 1));
+        assert!(state.has_self_delegation(&user_id));
+    }
+
+    #[test]
+    fn an_unreachable_user_is_dropped_past_the_grace() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = carry(&state, &account);
+        make_reachable(&state, user_id, 30);
+        state.sweep_unreachable_delegations(NOW);
+
+        state.routing_table.write().unwrap().clear(Space::User, 30);
+        state.sweep_unreachable_delegations(NOW + 1);
+
+        assert!(state.sweep_unreachable_delegations(NOW + GRACE_MS + 2));
+        assert!(!state.has_self_delegation(&user_id));
+    }
+
+    /// §10.8 exempts the removal from the 60 s window, so the black hole
+    /// clears without waiting for the next accumulated bump.
+    #[test]
+    fn the_removal_bumps_inside_the_rate_limit_window() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = carry(&state, &account);
+        make_reachable(&state, user_id, 30);
+        state.try_bump_manifest_version(NOW, BumpTrigger::Accumulated);
+        let before = state.manifest.read().unwrap().manifest_version;
+
+        state.routing_table.write().unwrap().clear(Space::User, 30);
+        state.sweep_unreachable_delegations(NOW + 1);
+        assert!(state.sweep_unreachable_delegations(NOW + GRACE_MS + 2));
+
+        let after = state.manifest.read().unwrap().manifest_version;
+        assert_eq!(after, before + 1, "the forced removal must not be rate-limited");
+    }
+
+    /// Reachability returning before the grace elapses resets the clock.
+    #[test]
+    fn recovering_before_the_grace_resets_the_clock() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = carry(&state, &account);
+        make_reachable(&state, user_id, 30);
+        state.sweep_unreachable_delegations(NOW);
+
+        state.routing_table.write().unwrap().clear(Space::User, 30);
+        state.sweep_unreachable_delegations(NOW + 1);
+
+        make_reachable(&state, user_id, 30);
+        state.sweep_unreachable_delegations(NOW + GRACE_MS / 2);
+
+        state.routing_table.write().unwrap().clear(Space::User, 30);
+        assert!(!state.sweep_unreachable_delegations(NOW + GRACE_MS));
+        assert!(state.has_self_delegation(&user_id));
+    }
+
+    /// A user we have never routed to is unreachable, but the clock still
+    /// starts on first sight rather than evicting immediately.
+    #[test]
+    fn a_never_seen_user_starts_the_clock_then_drops() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = carry(&state, &account);
+
+        assert!(!state.sweep_unreachable_delegations(NOW));
+        assert!(state.sweep_unreachable_delegations(NOW + GRACE_MS + 1));
+        assert!(!state.has_self_delegation(&user_id));
+    }
+
+    #[test]
+    fn liveness_does_not_accumulate_for_entries_that_left() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = carry(&state, &account);
+        state.sweep_unreachable_delegations(NOW);
+        assert_eq!(state.delegation_liveness.read().unwrap().len(), 1);
+
+        state.remove_self_delegation(&user_id);
+        state.sweep_unreachable_delegations(NOW + 1);
+
+        assert!(state.delegation_liveness.read().unwrap().is_empty());
+    }
+}
