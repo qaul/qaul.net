@@ -553,7 +553,8 @@ object BleScanner {
             appContext?.let { ctx ->
                 SessionLogger[ctx].attemptStarted(
                     mac, BleRole.CENTRAL.name,
-                    if (phy == BluetoothDevice.PHY_LE_CODED_MASK) "Coded" else "1M"
+                    if (phy == BluetoothDevice.PHY_LE_CODED_MASK) "Coded" else "1M",
+                    prefix?.toHexKey()   // so a failed attempt is still attributable to a peer
                 )
             }
             deferred = { BleManager.connect(result.device, BleRole.CENTRAL, phy) }
