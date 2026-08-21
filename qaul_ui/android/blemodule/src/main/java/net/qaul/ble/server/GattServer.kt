@@ -18,13 +18,14 @@ import android.util.Log
 import net.qaul.ble.BleConstants
 import net.qaul.ble.test.ble.connection.BleRole
 import net.qaul.ble.test.ble.connection.ConnectionPool
+import net.qaul.ble.test.ble.metrics.SessionLogger
 import net.qaul.ble.test.ble.manager.BleManager
 import net.qaul.ble.test.ble.queue.BleTaskScheduler
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-@SuppressLint("MissingPermission")
+@SuppressLint("MissingPermission", "StaticFieldLeak")   // refusalContext is the application context, never an Activity
 object GattServer {
 
     private const val TAG = "GattServer"
@@ -46,7 +47,11 @@ object GattServer {
 
     // Start / stop
 
+    // Application context, kept only so inbound refusals can be written to the session log.
+    @Volatile private var refusalContext: Context? = null
+
     fun start(context: Context) {
+        refusalContext = context.applicationContext
         val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         bluetoothAdapter = bluetoothManager.adapter
         gattServer = bluetoothManager.openGattServer(context, gattServerCallback)
@@ -221,6 +226,9 @@ object GattServer {
                 if (!BleConstants.ENGINE_READY) {
                     // Engine still staging, this handshake cant complete yet, easier to retyr than hold a dead slot until its reaped.
                     Log.i(TAG, "Engine not ready — rejecting inbound ${device.address}")
+                    refusalContext?.let {
+                        SessionLogger[it].inboundRefused(device.address, "engine_not_ready", -1, -1)
+                    }
                     gattServer?.cancelConnection(device)
                     return
                 }
@@ -235,6 +243,14 @@ object GattServer {
                                 TAG,
                                 "At connection cap (${BleConstants.MAX_CONNECTIONS}), rejecting inbound ${device.address}"
                             )
+                            // Record the refusal from this side. The central only ever sees a failed
+                            // CCCD write and cannot tell a saturated peer from a protocol fault
+                            refusalContext?.let {
+                                SessionLogger[it].inboundRefused(
+                                    device.address, "at_cap",
+                                    ConnectionPool.getSize(), ConnectionPool.connectingCount()
+                                )
+                            }
                             gattServer?.cancelConnection(device)   // best-effort; old stacks honour it inconsistently
                             return
                         }
@@ -359,7 +375,8 @@ object GattServer {
         ) {
             if (!admitted(device, "subscribe")) {
                 if (responseNeeded) {
-                    respond(device, requestId, BluetoothGatt.GATT_FAILURE, 0, null)
+                    // Must be a real one byte ATT code.
+                    respond(device, requestId, BleConstants.ATT_ERR_NO_SLOT, 0, null)
                 }
                 return
             }

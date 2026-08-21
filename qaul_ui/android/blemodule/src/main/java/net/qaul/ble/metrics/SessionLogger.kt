@@ -102,6 +102,19 @@ class SessionLogger private constructor(context: Context) {
             put("stage2", BleConstants.STAGE2_PROACTIVE_DROP)
             put("prefer_2m", BleConstants.PREFER_2M)
             put("allow_phy_upgrade", BleConstants.ALLOW_PHY_UPGRADE)
+            // The tuned timeout budgets. . Values also let
+            // the analysis tools check a measured duration against the budget that was actually
+            // flown, rather than against whatever the constants say today.
+            put("t_fast_op", BleConstants.FAST_OP_TIMEOUT_MS)
+            put("t_negotiation", BleConstants.NEGOTIATION_OP_TIMEOUT_MS)
+            put("t_service_discovery", BleConstants.SERVICE_DISCOVERY_TIMEOUT_MS)
+            put("t_connect", BleConstants.CONNECTION_TIMEOUT_MS)
+            put("t_connect_coded", BleConstants.CODED_CONNECT_TIMEOUT_MS)
+            put("t_unresolved", BleConstants.UNRESOLVED_TIMEOUT_MS)
+            put("t_identity_retry", BleConstants.IDENTITY_RETRY_MS)
+            put("t_liveness", BleConstants.LIVENESS_TIMEOUT_MS)
+            put("t_liveness_coded", BleConstants.CODED_LIVENESS_TIMEOUT_MS)
+            put("t_rssi_refresh", BleConstants.RSSI_REFRESH_MS)
         })
         Log.i(TAG, "Session ${if (resumed) "resumed" else "started"} → ${file?.absolutePath}")
         startMirroring()
@@ -162,6 +175,10 @@ class SessionLogger private constructor(context: Context) {
     /** Furthest point an attempt got */
     private class Attempt(val role: String, val phy: String, val startedAt: Long) {
         var stage: String = "connecting"
+        /** stage name -> ms from attempt start to entering it. Lets each timeout in
+         *  BleTaskScheduler.timeoutFor be set from the measured distribution of that stage rather
+         *  than argued from constants */
+        val stageAt = linkedMapOf<String, Long>()
     }
 
     private val attempts = mutableMapOf<String, Attempt>()
@@ -171,7 +188,9 @@ class SessionLogger private constructor(context: Context) {
     }
 
     fun attemptStage(mac: String, stage: String) {
-        synchronized(lock) { attempts[mac]?.stage = stage }
+        synchronized(lock) {
+            attempts[mac]?.let { it.stage = stage; it.stageAt.putIfAbsent(stage, now() - it.startedAt) }
+        }
     }
 
     fun attemptEnded(mac: String, peerId: String?, success: Boolean, error: String? = null) {
@@ -185,6 +204,7 @@ class SessionLogger private constructor(context: Context) {
             put("ok", success)
             put("reached", a.stage)
             put("ms", now() - a.startedAt)   // time it took to establish or failed
+            if (a.stageAt.isNotEmpty()) put("at", JSONObject(a.stageAt as Map<*, *>))
             error?.let { put("err", it) }
         })
     }
@@ -277,6 +297,7 @@ class SessionLogger private constructor(context: Context) {
             put("q", JSONObject().apply {
                 put("ctrl", q.control); put("med", q.medium); put("bulk", q.bulk)
                 put("pending", q.pending); put("pending_ms", q.pendingMs)
+                q.pendingPeer?.let { put("pending_peer", it) }
             })
         }
         put("nbrs", JSONArray().apply {
@@ -322,6 +343,55 @@ class SessionLogger private constructor(context: Context) {
             }
         }
     }
+
+    /**
+     * What the scanner could see this interval, and every reason it declined to connect.
+     */
+    fun scanVisibility(rows: List<Triple<String, Triple<Int, Int, String>, Map<String, Int>>>) {
+        if (rows.isEmpty()) return
+        write(JSONObject().apply {
+            put("type", "scan")
+            put("peers", JSONArray().apply {
+                rows.forEach { (peer, seen, skips) ->
+                    put(JSONObject().apply {
+                        put("id", peer.take(6))
+                        put("n", seen.first)
+                        if (seen.first > 0) { put("rssi", seen.second); put("phy", seen.third) }
+                        if (skips.isNotEmpty()) put("skip", JSONObject(skips as Map<*, *>))
+                    })
+                }
+            })
+        })
+    }
+
+    /**
+     * We turned an inbound connection away. Logged from the peripheral side, which is the half of
+     * this event that has never been visible: the central only ever saw a CCCD write fail, with no
+     * way to tell whether the peer was genuinely full, still staging, or something else entirely.
+     *
+     * [poolSize] vs [connecting] is the important pair. A refusal at poolSize=4 with connecting=0 is
+     * a genuinely saturated device; the same refusal with connecting=2 means half the cap was held
+     * by handshakes that had not resolved, the "falsely full" case, where real capacity existed.
+     */
+    fun inboundRefused(mac: String, reason: String, poolSize: Int, connecting: Int) =
+        write(JSONObject().apply {
+            put("type", "refused")
+            put("mac", mac)
+            put("reason", reason)
+            put("pool", poolSize)
+            put("connecting", connecting)
+        })
+
+    /** A scheduler operation finished or was killed by its watchdog.*/
+    fun op(mac: String, op: String, ms: Long, ok: Boolean, budget: Long? = null) =
+        write(JSONObject().apply {
+            put("type", "op")
+            put("mac", mac)
+            put("op", op)
+            put("ms", ms)
+            put("ok", ok)
+            budget?.let { put("budget", it) }
+        })
 
     fun currentFilePath(): String? = file?.absolutePath
 

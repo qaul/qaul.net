@@ -34,6 +34,9 @@ class BleConnection(
      * Field-test telemetry. */
     @Volatile var rssi: Int? = null
 
+    /** When [rssi] was last refreshed, so the read can be throttled to [BleConstants.RSSI_REFRESH_MS]  */
+    @Volatile var rssiReadAt: Long = 0L
+
     val createdAt: Long = System.currentTimeMillis()
 
     /**
@@ -47,10 +50,6 @@ class BleConnection(
     val isCoded: Boolean
         get() = phyLabel == "Coded" ||
                 (phyLabel == "?" && connectPhy == BluetoothDevice.PHY_LE_CODED_MASK)
-
-    /** [base] scaled for this link's PHY  */
-    fun scaleTimeout(base: Long): Long =
-        if (isCoded) base * BleConstants.CODED_TIMEOUT_MULTIPLIER else base
 
     /**
      * Fired the first time we learn the remote's qaul ID from the data stream (SEND_ID FLC).
@@ -88,6 +87,10 @@ class BleConnection(
     private var l2capChannel: L2capChannel? = null
 
     fun connect() {
+
+        if (handshakeStartedAt == null) {
+            handshakeStartedAt = System.currentTimeMillis()
+        }
         when (role) {
             BleRole.CENTRAL -> {
                 BleTaskScheduler.connect(device, connectPhy)   // open on the discovered PHY (1M or Coded)
@@ -331,14 +334,21 @@ class BleConnection(
      */
     @Volatile private var transportReady = false
 
-    /** When identity exchange became possible (services discovered, or the remote subscribed), or
-     *  null while the connect is still in flight. The unresolved reaper measures from here.*/
+    /** When the connection attempt began, set in connect(). Backstop clock for the whole setup:
+     *  connect + discovery + CCCD + identity. See [BleConstants.SETUP_TIMEOUT_MS]. */
     @Volatile var handshakeStartedAt: Long? = null
-        private set
+        internal set
+
+    /** When identity exchange became possible (services discovered, or the remote subscribed), or
+     *  null while the connect is still in flight. */
+    @Volatile var transportReadyAt: Long? = null
+        internal set
 
     private fun markTransportReady() {
         transportReady = true
-        if (handshakeStartedAt == null) handshakeStartedAt = System.currentTimeMillis()
+        val now = System.currentTimeMillis()
+        if (handshakeStartedAt == null) handshakeStartedAt = now
+        if (transportReadyAt == null) transportReadyAt = now
     }
 
     /**
