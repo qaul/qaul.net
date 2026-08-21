@@ -193,6 +193,46 @@ object BleScanner {
     // successful GATT connect. This backoff exists to dampen the rapid same address retry churn (133s) within a few seconds.
     private val failureCount = mutableMapOf<String, Int>()
 
+    // ---- scan visibility telemetry ----------
+
+    private class Sighting(var count: Int = 0, var rssi: Int = 0, var phy: String = "?", var lastAt: Long = 0)
+    private val sightings = mutableMapOf<String, Sighting>()        // peer prefix (or mac) -> seen
+    private val skipReasons = mutableMapOf<String, MutableMap<String, Int>>()  // peer -> reason -> n
+
+    /** Record that we saw this peer's advert. Called for every qaul scan result. */
+    private fun noteSighting(key: String, rssi: Int, phy: Int) {
+        val s = sightings.getOrPut(key) { Sighting() }
+        s.count++; s.rssi = rssi; s.lastAt = System.currentTimeMillis()
+        s.phy = when (phy) {
+            BluetoothDevice.PHY_LE_1M -> "1M"
+            BluetoothDevice.PHY_LE_CODED -> "Coded"
+            BluetoothDevice.PHY_LE_2M -> "2M"
+            else -> "?"
+        }
+    }
+
+    /** Record why we saw a peer and chose not to connect to it. */
+    private fun noteSkip(key: String, reason: String) {
+        skipReasons.getOrPut(key) { mutableMapOf() }.merge(reason, 1, Int::plus)
+    }
+
+    /** One peers visibility over the last snapshot interval: how often we saw it, how strong, on
+     *  which PHY, and every reason we declined to connect  */
+    data class ScanVisibility(
+        val peer: String, val seen: Int, val rssi: Int, val phy: String, val skips: Map<String, Int>
+    )
+
+    /** Hand the intervals visibility to the telemetry snapshot and reset */
+    fun drainScanVisibility(): List<ScanVisibility> = synchronized(lock) {
+        val keys = sightings.keys + skipReasons.keys
+        val out = keys.map { k ->
+            val s = sightings[k]
+            ScanVisibility(k, s?.count ?: 0, s?.rssi ?: 0, s?.phy ?: "?", skipReasons[k]?.toMap() ?: emptyMap())
+        }
+        sightings.clear(); skipReasons.clear()
+        out
+    }
+
     // MAC -> advertised qaul ID prefix, learned from scan results. Peers rotate their RPA (and draw a
     // fresh one every time their advertising set restarts), so a mac keyed backoff will reset
     // on every rotation and never engage as the peer looks like a brand new device each time
@@ -379,11 +419,15 @@ object BleScanner {
     }
 
     private fun maybeAutoConnect(result: ScanResult) {
+        // LOCK ORDER.
+        var deferred: (() -> Unit)? = null
         synchronized(lock) {
             val mac = result.device.address
             val prefix = result.scanRecord?.getManufacturerSpecificData(BleConstants.QAUL_MANUFACTURER_ID)
             rememberPrefix(mac, prefix)   // so backoff survives this peer rotating its RPA
-            if (mac in nonQaulPeers) return
+            if (mac in nonQaulPeers) { noteSkip(prefix?.toHexKey() ?: mac, "non_qaul"); return }
+            val vkey = prefix?.toHexKey() ?: mac
+            noteSighting(vkey, result.rssi, if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) result.primaryPhy else BluetoothDevice.PHY_LE_1M)
             val existing = if (prefix != null) ConnectionPool.getByQaulIdPrefix(prefix) else null
 
             val currentPhy = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) result.primaryPhy
@@ -401,19 +445,22 @@ object BleScanner {
                 if (System.currentTimeMillis() - lastTry > 10_000L) {
                     lastPhyUpgradeAt[key] = System.currentTimeMillis()
                     ConnectionPool.notePhyRequestReason(existing.device.address, "coded_upgrade")
-                    BleTaskScheduler.setPreferredPhy(
-                        existing.device,
-                        BluetoothDevice.PHY_LE_1M_MASK,
-                        BluetoothDevice.PHY_LE_1M_MASK,
-                        BluetoothDevice.PHY_OPTION_NO_PREFERRED
-                    )
+                    val target = existing.device
+                    deferred = {
+                        BleTaskScheduler.setPreferredPhy(
+                            target,
+                            BluetoothDevice.PHY_LE_1M_MASK,
+                            BluetoothDevice.PHY_LE_1M_MASK,
+                            BluetoothDevice.PHY_OPTION_NO_PREFERRED
+                        )
+                    }
                     Log.i(TAG, "Upgrading $mac from Coded to 1M.")
-                    return
+                    return@synchronized
                 }
             }
 
 
-            if (System.currentTimeMillis() < (cooldownUntil[backoffKey(mac)] ?: 0L)) return // recently dropped
+            if (System.currentTimeMillis() < (cooldownUntil[backoffKey(mac)] ?: 0L)) { noteSkip(vkey, "backoff"); return } // recently dropped
             // Stage 1 fill-gate: reject if my slots or the peers's are full, merge (peer unreachable
             // in our TTL=3 gossip view) = accept, redundant (visible in neighbourhood) = accept only if it wouldn't seal the
             // 3-hop ball
@@ -430,19 +477,20 @@ object BleScanner {
                             )
                         }
                     }
+                    noteSkip(vkey, "fill_gate")
                     return
                 }
             }
             fillGateRejected.remove(mac)   // no longer rejected, re-arm the log
-            if (ConnectionPool.getSize() >= BleConstants.MAX_CONNECTIONS) return  // respect the cap
+            if (ConnectionPool.getSize() >= BleConstants.MAX_CONNECTIONS) { noteSkip(vkey, "local_cap"); return }  // respect the cap
             // Admission control: don't start another connect while one is still resolving. Keeps the
             // serial GATT queue from jamming with concurrent connectGatts during a discovery burst.
-            if (ConnectionPool.connectingCount() >= BleConstants.MAX_CONCURRENT_CONNECTING) return
+            if (ConnectionPool.connectingCount() >= BleConstants.MAX_CONCURRENT_CONNECTING) { noteSkip(vkey, "concurrent_limit"); return }
 
             // Test topology: with the allowlist on, only auto-connect to designated neighbours
             if (BleConstants.TEST_NEIGHBOUR_ALLOWLIST.isNotEmpty() &&
                 (prefix == null || !BleConstants.isAllowedNeighbour(prefix))) {
-                return
+                noteSkip(vkey, "allowlist"); return
             }
 
             if (existing != null) {
@@ -452,16 +500,16 @@ object BleScanner {
                 when (existing.role) {
                     // Already CENTRAL → keep it. (If we "should" be peripheral, the peer fixes it by
                     // connecting to us; if asymmetric, we keep this suboptimal-but-connected link.)
-                    BleRole.CENTRAL -> return
+                    BleRole.CENTRAL -> { noteSkip(vkey, "already_central"); return }
                     // PERIPHERAL in the role we SHOULD have → keep it, no churn.
                     // PERIPHERAL but we should be CENTRAL → fall through and connect to fix the role
                     // (creates a dual; the tiebreaker drops the peripheral, leaving us central).
-                    BleRole.PERIPHERAL -> if (!ConnectionPool.localShouldBeCentral(prefix!!)) return
+                    BleRole.PERIPHERAL -> if (!ConnectionPool.localShouldBeCentral(prefix!!)) { noteSkip(vkey, "role_ok_peripheral"); return }
                 }
             } else {
                 // Unknown peer by qaul ID (ID not resolved yet, or no advertised ID) — fall back to
                 // address-level dedup so we don't re-connect to a peer we're mid-handshake with.
-                if (BleManager.isConnected(mac)) return
+                if (BleManager.isConnected(mac)) { noteSkip(vkey, "addr_dedup"); return }
 
                 // If their advertised ID is lower than ours we should be
                 // PERIPHERAL, so don't race their inbound connect with our own outbound one. Wait WRONG_ROLE_DEFER_MS for them to connect to
@@ -470,6 +518,7 @@ object BleScanner {
                     val key = prefix.toHexString()
                     val firstSeen = deferredSince.getOrPut(key) { System.currentTimeMillis() }
                     if (System.currentTimeMillis() - firstSeen < BleConstants.WRONG_ROLE_DEFER_MS) {
+                        noteSkip(vkey, "wrong_role_defer")
                         return   // give them the chance to connect to us first (correct role)
                     }
                     Log.i(TAG, "Defer window lapsed for $mac — connecting outbound (asymmetric fallback)")
@@ -479,7 +528,10 @@ object BleScanner {
             // Connect over the PHY of the advert we're responding to, so the peer's address and PHY
             // match. If this is the long-range (Coded) advert but we can also see this peer up close on
             // 1M, skip it, their 1M advert will drive a faster short range connection instead.
+            //
+            // Coded_sippressed_by_1m helps reveal whether 1m ads ar eevr slipping into farther rnage bands and blocking a coded connection, so far this seems to not be the case
             if (currentPhy == BluetoothDevice.PHY_LE_CODED && seenOn1MRecently(prefix)) {
+                noteSkip(vkey, "coded_suppressed_by_1m")
                 return   // prefer the peer's short-range advert
             }
             // Coded is a last resort. A dual advertising peer is visible on 1M and Coded at the same time, so
@@ -489,6 +541,7 @@ object BleScanner {
                 val key = prefix?.toHexString() ?: mac
                 val firstCodedAt = codedOnlySince.getOrPut(key) { System.currentTimeMillis() }
                 if (System.currentTimeMillis() - firstCodedAt < BleConstants.CODED_ONLY_CONFIRM_MS) {
+                    noteSkip(vkey, "coded_confirming")
                     return   // still waiting to see whether they're also on 1M
                 }
                 Log.i(TAG, "Only seen $mac on Coded for ${BleConstants.CODED_ONLY_CONFIRM_MS}ms — connecting long-range")
@@ -503,8 +556,10 @@ object BleScanner {
                     if (phy == BluetoothDevice.PHY_LE_CODED_MASK) "Coded" else "1M"
                 )
             }
-            BleManager.connect(result.device, BleRole.CENTRAL, phy)
+            deferred = { BleManager.connect(result.device, BleRole.CENTRAL, phy) }
         }
+
+        deferred?.invoke()
     }
 
     /** Record that we saw [result]'s peer on the 1M PHY (short range), keyed by advertised prefix.

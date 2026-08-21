@@ -51,6 +51,12 @@ object BleConstants {
     // Connection settings
     // --------------------------------------------------------------------------------------------
 
+
+    const val ATT_ERR_NO_SLOT = 0x80
+
+    /** Connect budget for a Coded link.*/
+    const val CODED_CONNECT_TIMEOUT_MS = 12_000L
+
     /** Maximum number of simultaneous peer connections. **/
     @Volatile
     var MAX_CONNECTIONS = 4
@@ -136,7 +142,7 @@ object BleConstants {
     const val CODED_ONLY_CONFIRM_MS = NOMINAL_ADVERT_INTERVAL_MS * CODED_ONLY_CONFIRM_INTERVALS
 
     /** Minimum RSSI before a bulk transfer may raise a link from 1M to 2M.  */
-    const val BULK_2M_MIN_RSSI = -80
+    const val BULK_2M_MIN_RSSI = -88
 
     /** Connection admission control: max outbound CENTRAL connects we'll have in flight at once (connected but not yet
      *  qaul id resolved). Auto connect is gated on this. Prevents the scanner from piling on
@@ -189,27 +195,21 @@ object BleConstants {
      *  TODO: tune against real qaul routing-message sizes once measured */
     const val MEDIUM_MESSAGE_MAX_BYTES = 16000
 
-    // Op timeouts. The base values are the short-range budgets validated in close range 4 device
-    // runs. Coded links multiply them by [CODED_TIMEOUT_MULTIPLIER]
+    // Op timeouts, sized from per stage field measurements
     //
     // The problem: a timeout that is too long stalls the  scheduler for
     // every peer until it expires, one that is too short force advances a still live op
 
     /** Watchdog timeout for fast GATT ops (reads, writes, notifies, MTU, descriptor, PHY).
-     *  usually under 300ms on a close idle 1M link, but the budget must cover the worst case, and MTU
-     *  requests were repeatedly observed exceeding 4s under real app load */
-    const val FAST_OP_TIMEOUT_MS = 4_000L
+     *  single ATT round trip, should be under 500ms*/
+    const val FAST_OP_TIMEOUT_MS = 2_000L
 
-    /** Budget for MTU and PHY negotiation. */
-    const val NEGOTIATION_OP_TIMEOUT_MS = 10_000L
+    /** Budget for MTU and PHY negotiation. Both are also single round trip and optional so they can be skipped */
+    const val NEGOTIATION_OP_TIMEOUT_MS = 2_000L
 
     /** Watchdog timeout for service discovery, the slowest non connect op and the most fragile at
      *  range, being many sequential round trips each of which can be lost. */
     const val SERVICE_DISCOVERY_TIMEOUT_MS = 5_000L
-
-    /** Multiplier applied to op/handshake timeouts on a coded  link. Coded spends 8x
-     *  the airtime per bit and needs more retransmissions at range */
-    const val CODED_TIMEOUT_MULTIPLIER = 3
 
     /** Timeout in milliseconds for initial connection before giving up. */
     const val CONNECTION_TIMEOUT_MS = 8_000L
@@ -217,18 +217,39 @@ object BleConstants {
     /** How long with no data before a connection is considered dead and force-disconnected. */
     const val LIVENESS_TIMEOUT_MS = 30_000L
 
+    /** As [LIVENESS_TIMEOUT_MS], for a Coded link. TODO: This is an artifact and needs reviewed */
+    const val CODED_LIVENESS_TIMEOUT_MS = 30_000L
+
     /** How often we check if all connections are still alive */
     const val LIVENESS_CHECK_INTERVAL_MS = 5_000L
 
+    /** How often the unresolved reaper checks. Must be well under [UNRESOLVED_TIMEOUT_MS]. Cheap. */
+    const val UNRESOLVED_CHECK_INTERVAL_MS = 1_000L
+
+    /** Backstop for the whole setup process (connect + discovery + CCCD + identity), measured from
+     *  BleConnection.handshakeStartedAt, e.g from connect().
+     *
+     *  Exists for the links the scheduler watchdogs cannot see. A peripheral leg schedules no
+     *  operations at all, so no per-op watchdog ever arms,
+     *  and without this the only reaper is liveness: 30s, or 90s on Coded. This is too long for any slot to actually sit for.
+     *
+     */
+    const val SETUP_TIMEOUT_MS = 15_000L
+
     /** How long a connection may stay unresolved (qaulId never learned) before the unresolved
-     *  reaper drops it as a stuck handshake / zombie. */
-    const val UNRESOLVED_TIMEOUT_MS = 6_000L
+     *  reaper drops it as a stuck handshake / zombie. Measured from transport ready
+     *  (cccd -> qaulId), */
+    const val UNRESOLVED_TIMEOUT_MS = 3_000L
 
     /** How often an unresolved connection re-sends its SEND_ID. this handles a SEND_ID simply lost over the air, which is the dominant
      *  failure at range. Short enough for several attempts inside [UNRESOLVED_TIMEOUT_MS]. */
-    const val IDENTITY_RETRY_MS = 1_500L
+    const val IDENTITY_RETRY_MS = 800L
 
     const val PING_INTERVAL_MS = 5_000L
+
+    /** How often a Central link refreshes its live RSSI. Heavier operation because it requires a response.
+     * TODO: We could remove a continous refresh and only have it be requested when its checked, however this allows for better telemetry */
+    const val RSSI_REFRESH_MS = 20_000L
 
     /** Show the on-device floating BLE stats overlay (BleDebugOverlay) while BLE is running. For debugging purposes,
      *  set false to disable. Needs the "Draw over other apps" permission, requested on first show. */

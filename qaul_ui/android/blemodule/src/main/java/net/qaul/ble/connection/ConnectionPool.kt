@@ -112,6 +112,12 @@ object ConnectionPool {
                 Triple(c.remoteQaulId?.toHexKey()?.take(6) ?: "unresolved", c.rssi, c.phyLabel)
             }
             val (rx, dup, relayed) = drainGossipStats()
+            // Scan visibility for this interval: who we could see, and why we didnt connect to them.
+            SessionLogger[ctx].scanVisibility(
+                BleScanner.drainScanVisibility().map {
+                    Triple(it.peer, Triple(it.seen, it.rssi, it.phy), it.skips)
+                }
+            )
             SessionLogger[ctx].snapshot(
                 conns.size, nbrs, GpsProvider.last(), rx, dup, relayed, linkState.size,
                 BleTaskScheduler.queueDepths()
@@ -162,7 +168,8 @@ object ConnectionPool {
         try {
             val now = System.currentTimeMillis()
             connections.values.toList().forEach { conn ->
-                val budget = conn.scaleTimeout(BleConstants.LIVENESS_TIMEOUT_MS)
+                val budget = if (conn.isCoded) BleConstants.CODED_LIVENESS_TIMEOUT_MS
+                             else BleConstants.LIVENESS_TIMEOUT_MS
                 if (now - conn.lastActivityAt > budget)
                 {
                     disconnect(conn.device, "liveness_timeout")
@@ -184,16 +191,31 @@ object ConnectionPool {
         try {
             val now = System.currentTimeMillis()
             connections.values.toList().forEach { conn ->
-                // Measured from when the handshake could actually start, not from createdAt
-                // this reaper is only for established links whose handshake never finished
-                val startedAt = conn.handshakeStartedAt
-                val budget = conn.scaleTimeout(BleConstants.UNRESOLVED_TIMEOUT_MS)
-                if (startedAt != null && conn.remoteQaulId == null &&
-                    now - startedAt > budget) {
-                    Log.w(TAG, "Unresolved reaper: ${conn.device.address}/${conn.role} never resolved in ${budget}ms — dropping")
+                if (conn.remoteQaulId != null) return@forEach
+
+                // TWO clocks, because they measure different things and one budget cannot serve both.
+                //
+                //  - identity: from transport-ready, covering the SEND_ID exchange only.
+                //  - setup: from connect(), a loose backstop for the whole handshake. This is the
+                //    only reaper that covers a peripheral link, which schedules no operations and so
+                //    arms no watchdogs;.
+
+
+                val identityAt = conn.transportReadyAt
+                val setupAt = conn.handshakeStartedAt
+
+                val identityExpired = identityAt != null &&
+                        now - identityAt > BleConstants.UNRESOLVED_TIMEOUT_MS
+                val setupExpired = setupAt != null &&
+                        now - setupAt > BleConstants.SETUP_TIMEOUT_MS
+
+                if (identityExpired || setupExpired) {
+                    val why = if (identityExpired) "identity" else "setup"
+                    Log.w(TAG, "Unresolved reaper: ${conn.device.address}/${conn.role} never resolved ($why budget) — dropping")
                     appContext?.let { ctx ->
                         SessionLogger[ctx].attemptEnded(
-                            conn.device.address, null, success = false, error = "unresolved_reaper"
+                            conn.device.address, null, success = false,
+                            error = "unresolved_reaper_$why"
                         )
                     }
                     disconnect(conn.device, "unresolved_reaper")
@@ -216,10 +238,16 @@ object ConnectionPool {
 
     private fun pingAll() {
         try {
+            val now = System.currentTimeMillis()
             connections.values.toList().forEach {
                 it.sendPing()
-                // Refresh live RSSI for field-test telemetry currently (CENTRAL only)
-                if (it.role == BleRole.CENTRAL) BleTaskScheduler.readRemoteRssi(it.device)
+                // Refresh live RSSI (CENTRAL only). Throttled: fires too often if every ping on every link. TODO: This might need adjusted
+                // depending on how fresh RSSI data may need to be in the future
+                if (it.role == BleRole.CENTRAL &&
+                    now - it.rssiReadAt >= BleConstants.RSSI_REFRESH_MS) {
+                    it.rssiReadAt = now
+                    BleTaskScheduler.readRemoteRssi(it.device)
+                }
             }
         } catch (e: Exception) { Log.e(TAG, "pingAll failed", e) }
     }
@@ -252,12 +280,11 @@ object ConnectionPool {
             { if (BleConstants.ANTI_ISLANDING) try { gossipTrigger = "keepalive"; broadcastNeighbourList() } catch (e: Exception) { Log.e(TAG, "keepalive broadcast failed", e) } },
             BleConstants.NEIGHBOUR_KEEPALIVE_MS, BleConstants.NEIGHBOUR_KEEPALIVE_MS, TimeUnit.MILLISECONDS
         )
-        // Unresolved-connection reaper: ENABLED. Drops stuck/zombie handshakes (remoteQaulId == null
-        // after UNRESOLVED_TIMEOUT_MS). Safe to run always — it never targets resolved connections.
+
         unresolvedReaperTask = reaper.scheduleWithFixedDelay(
             { reapUnresolved() },
-            BleConstants.LIVENESS_CHECK_INTERVAL_MS,
-            BleConstants.LIVENESS_CHECK_INTERVAL_MS,
+            BleConstants.UNRESOLVED_CHECK_INTERVAL_MS,
+            BleConstants.UNRESOLVED_CHECK_INTERVAL_MS,
             TimeUnit.MILLISECONDS
         )
 
@@ -491,6 +518,8 @@ object ConnectionPool {
 
     private fun handleQaulIdResolved(device: BluetoothDevice, qaulId: ByteArray) {
         markNeighbourUp(qaulId)
+        // This is a completed handshake, — so we can now clear the retry backoff.
+        BleScanner.noteConnectSuccess(device.address)
 
         val existing = connections.values.firstOrNull{
             it.remoteQaulId?.contentEquals(qaulId) == true && it.device.address != device.address
