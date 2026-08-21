@@ -7,6 +7,7 @@
 use crate::connections::ConnectionModule;
 use crate::node::user_accounts::UserAccount;
 use crate::router_v2::{
+    delegation::DelegationRequest,
     identity::Multikey,
     index::Space,
     management::Addressing,
@@ -497,7 +498,6 @@ mod selection {
 
 mod issuing {
     use super::*;
-    use crate::router_v2::delegation::DelegationRequest;
     use proto::DelegationSubscribeAck;
 
     /// `issued_at` matters: a refresh re-signs with a *new* timeout, and
@@ -1099,5 +1099,208 @@ mod reachability {
         state.sweep_unreachable_delegations(NOW + 1);
 
         assert!(state.delegation_liveness.read().unwrap().is_empty());
+    }
+}
+
+// ----- §10.5 / §11.7 revocation -----
+
+mod revoke {
+    use super::issuing::*;
+    use super::*;
+    use proto::{DelegationRevoke, DelegationSubscribeAck};
+
+    /// §10.5: the revocation is a signature over the same content as the
+    /// entry it cancels, so the delegation signature *is* the revocation.
+    fn revoke_for(
+        state: &RouterV2State,
+        account: &UserAccount,
+        timeout: u64,
+    ) -> DelegationRevoke {
+        let delegation = account.issue_self_delegation(&state.host_mk, timeout);
+        DelegationRevoke {
+            user_id: account.routing_user_id().to_vec(),
+            timeout,
+            revoke_signature: delegation.entry_signature.to_vec(),
+        }
+    }
+
+    /// Gets the user carried in our manifest, as an accepted subscribe would.
+    fn carried(state: &RouterV2State, account: &UserAccount) -> [u8; 8] {
+        let user_id = account.routing_user_id();
+        install_user_with_key(state, user_id, account.multikey());
+        state.handle_delegation_subscribe(
+            addressed_to_us(state, user_id),
+            subscribe_from(state, account, NOW + TTL_MS),
+            NOW,
+        );
+        assert!(state.has_self_delegation(&user_id));
+        user_id
+    }
+
+    #[test]
+    fn a_valid_revoke_removes_the_entry() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = carried(&state, &account);
+
+        state.handle_delegation_revoke(
+            addressed_to_us(&state, user_id),
+            revoke_for(&state, &account, NOW + TTL_MS),
+            NOW + 1,
+        );
+
+        assert!(!state.has_self_delegation(&user_id));
+    }
+
+    #[test]
+    fn a_revoke_with_a_bad_signature_leaves_the_entry() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = carried(&state, &account);
+
+        let mut req = revoke_for(&state, &account, NOW + TTL_MS);
+        req.revoke_signature[0] ^= 0xff;
+        state.handle_delegation_revoke(addressed_to_us(&state, user_id), req, NOW + 1);
+
+        assert!(state.has_self_delegation(&user_id));
+    }
+
+    /// §10.5's replay protection: a revocation only ever cancels the one
+    /// delegation its timeout names.
+    #[test]
+    fn a_revoke_naming_another_timeout_is_a_no_op() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = carried(&state, &account);
+
+        state.handle_delegation_revoke(
+            addressed_to_us(&state, user_id),
+            revoke_for(&state, &account, NOW + TTL_MS + 1),
+            NOW + 1,
+        );
+
+        assert!(
+            state.has_self_delegation(&user_id),
+            "a stale revoke must not cancel a later delegation"
+        );
+    }
+
+    /// §11.7: removal of an already-absent entry is a successful no-op.
+    #[test]
+    fn revoking_an_absent_entry_is_a_successful_no_op() {
+        let (state, mut rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = account.routing_user_id();
+        install_keyless_reachable_user(&state, user_id);
+        state
+            .users
+            .read()
+            .unwrap()
+            .get(&user_id)
+            .unwrap()
+            .write()
+            .unwrap()
+            .public_key = Some(account.multikey());
+
+        state.handle_delegation_revoke(
+            addressed_to_us(&state, user_id),
+            revoke_for(&state, &account, NOW + TTL_MS),
+            NOW,
+        );
+
+        let out = rx.try_recv().expect("an ack should have been sent");
+        let decoded = ManagementMessage::decode(&out.bytes[..]).unwrap();
+        match decoded.body {
+            Some(Body::DelegationRevokeAck(ack)) => assert!(ack.done),
+            other => panic!("expected a revoke ack, got {other:?}"),
+        }
+    }
+
+    /// A revoke for a user whose key we lack parks behind the same §11.5
+    /// fetch as a subscribe, and completes when it lands.
+    #[test]
+    fn a_revoke_parks_when_the_key_is_missing() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = carried(&state, &account);
+        state
+            .users
+            .read()
+            .unwrap()
+            .get(&user_id)
+            .unwrap()
+            .write()
+            .unwrap()
+            .public_key = None;
+
+        state.handle_delegation_revoke(
+            addressed_to_us(&state, user_id),
+            revoke_for(&state, &account, NOW + TTL_MS),
+            NOW + 1,
+        );
+        assert!(state.has_self_delegation(&user_id));
+        assert!(!state.pending_subscribes.read().unwrap().is_empty());
+
+        install_user_with_key(&state, user_id, account.multikey());
+        state.resume_pending_subscribes(&user_id, NOW + 2);
+
+        assert!(!state.has_self_delegation(&user_id));
+    }
+
+    // ----- issuing side -----
+
+    /// §10.3: a broken delegation is queued for §10.5's fast path rather
+    /// than being left purely to the TTL lapse.
+    #[test]
+    fn a_broken_delegation_queues_a_revocation() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = account.routing_user_id();
+        install_reachable_gateway(&state, [1; 8], 10, 10);
+        state.send_delegation_subscribe(request_to(&state, &account, [1; 8], NOW), NOW);
+        let request_id = sole_request_id(&state);
+        state.handle_delegation_subscribe_ack(
+            ack_from([1; 8], user_id, request_id),
+            DelegationSubscribeAck { accepted: true, reason: 0 },
+            NOW,
+        );
+
+        install_gateway(&state, [1; 8], 10, true, false, 10); // local_only → 0
+        state.clear_delegation_state(NOW + 1);
+
+        let queued = state.drain_pending_revocations();
+        assert_eq!(queued.len(), 1);
+        assert_eq!(queued[0].user_id, user_id);
+        assert_eq!(queued[0].target_node_id, [1; 8]);
+        assert_eq!(queued[0].timeout, NOW + TTL_MS);
+        assert!(
+            state.drain_pending_revocations().is_empty(),
+            "draining must not hand the same revocation out twice"
+        );
+    }
+
+    #[test]
+    fn a_revoke_goes_out_addressed_to_the_old_gateway() {
+        let (state, mut rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = account.routing_user_id();
+        install_reachable_gateway(&state, [1; 8], 10, 10);
+
+        let target_mk = state.node_public_key(&[1; 8]).unwrap();
+        assert!(state.send_delegation_revoke(DelegationRequest {
+            user_id,
+            target_node_id: [1; 8],
+            delegation: account.issue_self_delegation(&target_mk, NOW + TTL_MS),
+        }));
+
+        let out = rx.try_recv().expect("a revoke should have been sent");
+        let decoded = ManagementMessage::decode(&out.bytes[..]).unwrap();
+        assert_eq!(decoded.destination, [1u8; 8].to_vec());
+        assert!(decoded.destination_is_node);
+        assert_eq!(decoded.source, user_id.to_vec());
+        match decoded.body {
+            Some(Body::DelegationRevoke(r)) => assert_eq!(r.timeout, NOW + TTL_MS),
+            other => panic!("expected a revoke, got {other:?}"),
+        }
     }
 }
