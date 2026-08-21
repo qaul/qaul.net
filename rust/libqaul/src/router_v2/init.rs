@@ -88,6 +88,11 @@ fn spawn_relay_tick(state: Arc<RouterV2State>, storage_path: String) {
                 state.send_manifest_request(peer, request);
             }
 
+            // §10.7: drop users we can no longer deliver to.
+            if state.sweep_unreachable_delegations(now) {
+                state.host_manifest_snapshot().save_to_path(&storage_path);
+            }
+
             // §10.8
             if state
                 .try_bump_manifest_version(now, BumpTrigger::Accumulated)
