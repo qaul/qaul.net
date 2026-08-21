@@ -89,12 +89,15 @@ object BleTaskScheduler {
             medium = mediumOperationQueue.size,
             bulk = bulkOperationQueue.size,
             pending = op?.let { it::class.simpleName } ?: "none",
+            // Which link the slot is held by. Without it a stalled op cant be tied to the connection .
+            pendingPeer = op?.device?.address,
             pendingMs = if (op != null) System.currentTimeMillis() - pendingOperationSince else 0L
         )
     }
 
     data class QueueDepths(
-        val control: Int, val medium: Int, val bulk: Int, val pending: String, val pendingMs: Long
+        val control: Int, val medium: Int, val bulk: Int, val pending: String,
+        val pendingPeer: String?, val pendingMs: Long
     )
 
     // Tracks GATT connections by device. Touched from the scheduler, GATT callback threads, and
@@ -812,12 +815,10 @@ object BleTaskScheduler {
      */
     private fun timeoutFor(operation: BleOperationType): Long {
         val base = when (operation) {
-            is Connect, is Disconnect -> BleConstants.CONNECTION_TIMEOUT_MS        // connects can legitimately be slow
+            is Connect                -> BleConstants.CONNECTION_TIMEOUT_MS        // connects can legitimately be slow
+            is Disconnect             -> BleConstants.FAST_OP_TIMEOUT_MS // TODO: why does disconnect need a timer
             is ServiceDiscovery       -> BleConstants.SERVICE_DISCOVERY_TIMEOUT_MS // the one slow non connect op 1+ seconds
             // MTU and PHY are NEGOTIATIONS, not data transfers: each is an over-the-air procedure
-            // between the two controllers, and MTU was the op actually observed exceeding 4s under
-            // load (the reason this budget was raised to 10s in the first place). They keep the
-            // generous window.
             is MtuRequest, is PhyRequest -> BleConstants.NEGOTIATION_OP_TIMEOUT_MS
             // Everything else is a single ATT round trip on an established link — sub-300ms when
             // healthy. Giving these the negotiation budget meant one hung read or notify stalled the
@@ -825,18 +826,14 @@ object BleTaskScheduler {
             // links elsewhere. They don't need it, so they don't get it.
             else                      -> BleConstants.FAST_OP_TIMEOUT_MS
         }
-        // Scale for the PHY of each link: a coded op spends far longer on air than the same op on a
-        // close 1M link, so one budget can't serve both.
+        // It now doesnt seem like coded needs much longer for most tasks, only the intial connect takes considerably longer
+        // The blanket x3 was applying a link setup penalty to operations that don't carry one, which would then block for far too long
         //
+        return if (operation is Connect &&
+            ConnectionPool.getByAddress(operation.device.address)?.isCoded == true) {
 
-        //
-        // MTU and PHY are excluded from the multiplier deliberately. Both are short fixed size
-        // control procedures a couple tiny packets, not data transfers, so coded 8x airtime
-        // barely moves their real duration
-        return when (operation) {
-            is MtuRequest, is PhyRequest -> base
-            else -> ConnectionPool.getByAddress(operation.device.address)?.scaleTimeout(base) ?: base
-        }
+            BleConstants.CODED_CONNECT_TIMEOUT_MS
+        } else base
     }
 
     /**
@@ -851,6 +848,12 @@ object BleTaskScheduler {
             synchronized(this) {
                 if (pendingOperation === operation) {
                     Log.e(TAG, "Watchdog: $operation stuck >${timeoutMs}ms (dropped callback?) — force-advancing")
+                    appContext?.let {
+                        SessionLogger[it].op(
+                            operation.device.address, operation::class.simpleName ?: "?",
+                            timeoutMs, ok = false, budget = timeoutMs
+                        )
+                    }
                     cleanupStuckOperation(operation)
                     skipOperation()
                 }
@@ -928,7 +931,6 @@ object BleTaskScheduler {
                         Log.i(TAG, "Connected to $address")
                         appContext?.let { SessionLogger[it].attemptStage(address, "link") }
                         deviceGattMap[gatt.device] = gatt
-                        BleScanner.noteConnectSuccess(address)   // clear any reconnect backoff
                         BleScanner.resumeAfterConnect()   // link established, scan can resume
                         signalOperationComplete<Connect>(gatt.device)
                         // Service discovery is the first step after connecting
@@ -1007,12 +1009,23 @@ object BleTaskScheduler {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.i(TAG, "MTU changed to $mtu for ${gatt.device.address}")
 
-                appContext?.let { SessionLogger[it].attemptStage(gatt.device.address, "mtu") }
+                appContext?.let {
+                    SessionLogger[it].op(
+                        gatt.device.address, "MtuRequest",
+                        System.currentTimeMillis() - pendingOperationSince, ok = true
+                    )
+                }
                 notifyListeners { onMtuChanged(gatt.device, mtu) }
                 // Connection is fully set up — notify listeners - later l2capp could be checked next
                 notifyListeners { onConnectionSetupComplete(gatt) }
             } else {
                 Log.e(TAG, "MTU request failed for ${gatt.device.address}, status: $status")
+                appContext?.let {
+                    SessionLogger[it].op(
+                        gatt.device.address, "MtuRequest",
+                        System.currentTimeMillis() - pendingOperationSince, ok = false
+                    )
+                }
             }
             signalOperationComplete<MtuRequest>(gatt.device)
         }
