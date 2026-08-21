@@ -1143,6 +1143,8 @@ impl Libqaul {
             .delegation_ttl
             .saturating_mul(1000);
 
+        self.revoke_broken_delegations();
+
         for account in UserAccounts::get_all_users(&*self.state) {
             let user_id = account.routing_user_id();
             let Some(target) = router_v2.select_delegation_target(&user_id, now) else {
@@ -1165,6 +1167,40 @@ impl Libqaul {
                 },
                 now,
             );
+        }
+    }
+
+    /// §10.5 explicit revocation: tell a gateway to stop carrying a user
+    fn revoke_broken_delegations(&self) {
+        let Some(router_v2) = self.state.get_router_v2() else {
+            return;
+        };
+        let broken = router_v2.drain_pending_revocations();
+        if broken.is_empty() {
+            return;
+        }
+
+        let accounts = UserAccounts::get_all_users(&*self.state);
+        for revocation in broken {
+            let Some(account) = accounts
+                .iter()
+                .find(|a| a.routing_user_id() == revocation.user_id)
+            else {
+                continue;
+            };
+            let Some(target_mk) = router_v2.node_public_key(&revocation.target_node_id) else {
+                log::debug!(
+                    "router_v2: no key for {:?}, leaving the delegation to lapse (§10.5)",
+                    revocation.target_node_id
+                );
+                continue;
+            };
+
+            router_v2.send_delegation_revoke(router_v2::delegation::DelegationRequest {
+                user_id: revocation.user_id,
+                target_node_id: revocation.target_node_id,
+                delegation: account.issue_self_delegation(&target_mk, revocation.timeout),
+            });
         }
     }
 

@@ -12,7 +12,8 @@ use crate::router_v2::{
 };
 
 use proto::{
-    management_message::Body, DelegationSubscribe, DelegationSubscribeAck, ManagementMessage,
+    management_message::Body, DelegationRevoke, DelegationRevokeAck, DelegationSubscribe,
+    DelegationSubscribeAck, ManagementMessage,
 };
 use qaul_proto::qaul_net_router_management as proto;
 
@@ -85,6 +86,17 @@ pub struct DelegationRequest {
     pub user_id: [u8; 8],
     pub target_node_id: [u8; 8],
     pub delegation: SelfDelegation,
+}
+
+/// A delegation that needs cancelling (§10.5), waiting on a signature from
+/// the layer that holds the account key.
+#[derive(Debug, Clone, Copy)]
+pub struct PendingRevocation {
+    pub user_id: [u8; 8],
+    pub target_node_id: [u8; 8],
+    /// the timeout of the entry being cancelled — what binds the
+    /// revocation to that one delegation
+    pub timeout: u64,
 }
 
 /// A [`DelegationRequest`] that has gone out and is waiting for its ack.
@@ -182,13 +194,77 @@ impl RouterV2State {
         }
 
         let mut subscriptions = self.subscriptions.write().unwrap();
+        let mut revocations = self.pending_revocations.write().unwrap();
         for (user_id, target) in broken {
             tracing::info!(
                 "router_v2 DELEGATION broken: target={target:?} no longer eligible for user={user_id:?}, will re-select (§10.3)"
             );
-            subscriptions.remove(&user_id);
+            if let Some(subscription) = subscriptions.remove(&user_id) {
+                revocations.push(PendingRevocation {
+                    user_id,
+                    target_node_id: target,
+                    timeout: subscription.timeout,
+                });
+            }
         }
         let _ = now_ms;
+    }
+
+    /// The full key we hold for a node, if any.
+    pub fn node_public_key(&self, node_id: &[u8; 8]) -> Option<Multikey> {
+        let nodes = self.nodes.read().unwrap();
+        let node = nodes.get(node_id)?;
+        let key = node.read().unwrap().public_key.clone();
+        key
+    }
+
+    /// Broken delegations waiting to be signed and sent as §11.7 revokes.
+    pub fn drain_pending_revocations(&self) -> Vec<PendingRevocation> {
+        std::mem::take(&mut *self.pending_revocations.write().unwrap())
+    }
+
+    /// per 11.7: cancel a delegation
+    pub fn send_delegation_revoke(&self, req: DelegationRequest) -> bool {
+        let request_id = self
+            .next_request_id
+            .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+
+        let envelope = ManagementMessage {
+            version: MANAGEMENT_VERSION,
+            destination: req.target_node_id.to_vec(),
+            destination_is_node: true,
+            source: req.user_id.to_vec(),
+            source_is_node: false,
+            request_id,
+            body: Some(Body::DelegationRevoke(DelegationRevoke {
+                user_id: req.user_id.to_vec(),
+                timeout: req.delegation.timeout,
+                revoke_signature: req.delegation.entry_signature.to_vec(),
+            })),
+        };
+
+        if !self.forward_management(envelope, req.target_node_id, true) {
+            return false;
+        }
+        tracing::info!(
+            "router_v2 DELEGATION revoke → user={:?} target={:?} (§11.7)",
+            req.user_id,
+            req.target_node_id,
+        );
+        true
+    }
+
+    /// ack, per 11.7
+    pub(crate) fn handle_delegation_revoke_ack(
+        &self,
+        addressing: Addressing,
+        ack: DelegationRevokeAck,
+    ) {
+        tracing::debug!(
+            "delegation: revoke ack from {:?}: done={}",
+            addressing.source,
+            ack.done
+        );
     }
 
     /// 11.6 says to send a subscription, we send it and remember it
