@@ -29,6 +29,7 @@ export 'design_components/chat/room_meta_message.dart';
 export 'design_components/shell/qaul_fab.dart';
 export 'design_components/shell/qaul_loading_indicator.dart';
 export 'design_components/shell/qaul_navbar.dart';
+export 'design_components/shell/qaul_page_header.dart';
 export 'design_components/shell/search_scaffold.dart';
 export 'design_components/users/qaul_avatar.dart';
 export 'design_components/users/user_search_scaffold.dart';
