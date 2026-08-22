@@ -193,6 +193,7 @@ class QaulAccountSettingsSection extends StatelessWidget {
     this.onLogout,
     this.onDeleteAccount,
     this.showPasswordAction = true,
+    this.showHeader = true,
   });
 
   final VoidCallback? onExportAccount;
@@ -200,6 +201,7 @@ class QaulAccountSettingsSection extends StatelessWidget {
   final VoidCallback? onLogout;
   final VoidCallback? onDeleteAccount;
   final bool showPasswordAction;
+  final bool showHeader;
 
   @override
   Widget build(BuildContext context) {
@@ -208,11 +210,13 @@ class QaulAccountSettingsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SettingsSectionHeader(
-          icon: const Icon(Icons.supervisor_account_outlined),
-          label: labels.accountManageAccount,
-        ),
-        const SizedBox(height: 8),
+        if (showHeader) ...[
+          _SettingsSectionHeader(
+            icon: const Icon(Icons.supervisor_account_outlined),
+            label: labels.accountManageAccount,
+          ),
+          const SizedBox(height: 8),
+        ],
         _AccountActionTile(
           icon: Icons.logout,
           label: labels.accountLogout,
