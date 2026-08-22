@@ -30,7 +30,7 @@ pub struct Envelope {
 /// envelop payload
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct EnvelopPayload {
-    #[prost(oneof = "envelop_payload::Payload", tags = "1, 2, 3")]
+    #[prost(oneof = "envelop_payload::Payload", tags = "1, 2, 3, 4")]
     pub payload: ::core::option::Option<envelop_payload::Payload>,
 }
 /// Nested message and enum types in `EnvelopPayload`.
@@ -46,6 +46,10 @@ pub mod envelop_payload {
         /// directed custody routed DTN message (V2, signed immutable route)
         #[prost(message, tag = "3")]
         DtnV2(super::DtnV2Container),
+        /// a signed DTN v2 response carried as a custody payload, so a DELIVERY
+        /// ack can be routed back to an offline sender over the reverse route
+        #[prost(message, tag = "4")]
+        DtnResponseV2(super::DtnResponseV2),
     }
 }
 /// encrypted message data

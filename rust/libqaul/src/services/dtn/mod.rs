@@ -106,6 +106,11 @@ pub struct DtnStorageStateV2 {
 const TIER_UNTRUSTED: u8 = 0;
 const TIER_TRUSTED: u8 = 1;
 const TIER_GRANT: u8 = 2;
+/// A signed DTN response (e.g. a DELIVERY ack) being routed back to an offline
+/// sender over the reverse route. Control traffic: exempt from the grant/PoW
+/// admission gates (it is tied to an already-accepted custody flow and carries
+/// a verifiable signed response), and shed on the short untrusted retention.
+const TIER_CONTROL: u8 = 3;
 
 /// Per-sender ceiling for a grant-less stranger admitted via proof-of-work.
 const V2_UNTRUSTED_PER_SENDER_QUOTA: u64 = 5 * 1024 * 1024;
@@ -1071,6 +1076,129 @@ impl Dtn {
         }
     }
 
+    /// If an inner custody container carries a signed DTN response (an ack
+    /// being routed back to the sender), return it. Used to distinguish control
+    /// traffic from ordinary custody messages.
+    fn extract_ack(inner_container_bytes: &[u8]) -> Option<proto::DtnResponseV2> {
+        let container = proto::Container::decode(inner_container_bytes).ok()?;
+        let envelope = container.envelope?;
+        let payload = proto::EnvelopPayload::decode(&envelope.payload[..]).ok()?;
+        match payload.payload {
+            Some(proto::envelop_payload::Payload::DtnResponseV2(r)) => Some(r),
+            _ => None,
+        }
+    }
+
+    /// Route a signed DELIVERY ack back to the (possibly offline) original
+    /// sender over the reverse of the forward route.
+    ///
+    /// The ack is wrapped as its own custody message — a `DtnV2Container` whose
+    /// inner container carries the signed `DtnResponseV2` and whose route is the
+    /// forward route reversed. It is stored locally (TIER_CONTROL) so the
+    /// retransmit loop keeps retrying until a reverse path exists, and forwarded
+    /// immediately if a next hop is reachable. Custodians treat it as control
+    /// traffic (see the admission bypass in `net_routed_v2`), so it is not
+    /// subject to grant/PoW gates.
+    fn route_delivery_ack(
+        state: &crate::QaulState,
+        user_account: &UserAccount,
+        forward_route: &proto::DtnRoute,
+        original_signature: &[u8],
+    ) {
+        // The original sender is the author of the forward route.
+        let origin = match PublicKey::try_decode_protobuf(&forward_route.sender_public_key) {
+            Ok(k) => PeerId::from_public_key(&k),
+            Err(e) => {
+                log::error!("DtnV2: cannot derive sender for delivery ack: {}", e);
+                return;
+            }
+        };
+
+        let ack = match Self::build_signed_response(
+            user_account,
+            proto::dtn_response_v2::Kind::Delivery,
+            proto::dtn_response_v2::ResponseType::Accepted,
+            proto::dtn_response_v2::Reason::None,
+            original_signature.to_vec(),
+        ) {
+            Some(a) => a,
+            None => return,
+        };
+        // Dedup key for the ack's own custody entry.
+        let ack_dedup = ack.signature.clone();
+
+        // Inner container addressed to the original sender, carrying the ack.
+        let payload = proto::EnvelopPayload {
+            payload: Some(proto::envelop_payload::Payload::DtnResponseV2(ack)),
+        };
+        let inner_envelope = proto::Envelope {
+            sender_id: user_account.id.to_bytes(),
+            receiver_id: origin.to_bytes(),
+            payload: payload.encode_to_vec(),
+        };
+        let inner_sig = match user_account.keys.sign(&inner_envelope.encode_to_vec()) {
+            Ok(s) => s,
+            Err(e) => {
+                log::error!("DtnV2: delivery ack inner signing failed: {}", e);
+                return;
+            }
+        };
+        let inner_container = proto::Container {
+            signature: inner_sig,
+            envelope: Some(inner_envelope),
+        };
+        let inner_bytes = inner_container.encode_to_vec();
+
+        // Reverse route: same hops, reversed order, authored by us (the acker).
+        let mut reversed_hops = forward_route.route_hop.clone();
+        reversed_hops.reverse();
+        let reverse_route = proto::DtnRoute {
+            original_signature: ack_dedup.clone(),
+            route_hop: reversed_hops,
+            sender_public_key: user_account.keys.public().encode_protobuf(),
+            expires_at: None,
+        };
+        let reverse_route_bytes = reverse_route.encode_to_vec();
+        let reverse_route_sig = match user_account.keys.sign(&reverse_route_bytes) {
+            Ok(s) => s,
+            Err(e) => {
+                log::error!("DtnV2: delivery ack route signing failed: {}", e);
+                return;
+            }
+        };
+        let ack_container = proto::DtnV2Container {
+            dtn_route: reverse_route_bytes,
+            dtn_route_sig: reverse_route_sig,
+            envelope: inner_bytes,
+            custody_grant: None,
+            pow: None,
+        };
+
+        // Store our own copy so the retransmit loop keeps retrying the reverse
+        // delivery until a path to the sender exists.
+        let entry_size = ack_container.envelope.len() as u32;
+        let entry = DtnRoutedV2Entry {
+            container_v2_bytes: ack_container.encode_to_vec(),
+            sender_public_key: reverse_route.sender_public_key.clone(),
+            size: entry_size,
+            accepted_at: Timestamp::get_timestamp(),
+            receiver_id: origin.to_bytes(),
+            tier: TIER_CONTROL,
+        };
+        if let Ok(bytes) = bincode::serialize(&entry) {
+            if let Ok(mut v2) = state.services.dtn.v2.write() {
+                if v2.db_ref_routed_v2.insert(ack_dedup, bytes).is_ok() {
+                    let _ = v2.db_ref_routed_v2.flush();
+                    v2.used_size += entry_size as u64;
+                    v2.message_count += 1;
+                }
+            }
+        }
+
+        // Forward now if a next hop (or the sender) is reachable.
+        Self::try_forward_v2(state, user_account, &ack_container, &reverse_route, &origin);
+    }
+
     /// Store a custody grant this node has been given, keyed by the issuing
     /// recipient id, so the originate path can attach it to outgoing messages.
     fn store_held_grant(state: &crate::QaulState, grant: &proto::CustodyGrant) -> bool {
@@ -1577,6 +1705,24 @@ impl Dtn {
                 return;
             }
             V2Precheck::Deliver => {
+                // A delivered container that carries a signed DTN response is a
+                // DELIVERY ack routed back to us (the original sender) — dispatch
+                // it to free our outgoing custody copy, do NOT re-ack it.
+                if let Some(ack) = Self::extract_ack(&container.envelope) {
+                    log::info!("DtnV2: received routed DELIVERY ack");
+                    Self::on_dtn_response_v2(state, &ack);
+                    Self::send_response_v2(
+                        state,
+                        &user_account,
+                        sender_id,
+                        proto::dtn_response_v2::Kind::CustodyRelease,
+                        proto::dtn_response_v2::ResponseType::Accepted,
+                        proto::dtn_response_v2::Reason::None,
+                        &original_signature,
+                    );
+                    return;
+                }
+
                 log::info!("DtnV2: I am the recipient, processing inner container");
                 if let Ok(inner) = proto::Container::decode(&container.envelope[..]) {
                     super::messaging::process::MessagingProcess::process_received_message(
@@ -1585,25 +1731,10 @@ impl Dtn {
                         inner,
                     );
                 }
-                // Authoritative signed DELIVERY ack back to the original sender.
-                // The sender may be offline; a full reverse-custody route is
-                // follow-up work — for now send it direct to the sender id.
-                // TODO(dtn-v2): route the DELIVERY ack back over the reverse of
-                // the forward route so it survives an offline sender.
-                if let Some(sender_pub) =
-                    PublicKey::try_decode_protobuf(&route.sender_public_key).ok()
-                {
-                    let origin = PeerId::from_public_key(&sender_pub);
-                    Self::send_response_v2(
-                        state,
-                        &user_account,
-                        &origin,
-                        proto::dtn_response_v2::Kind::Delivery,
-                        proto::dtn_response_v2::ResponseType::Accepted,
-                        proto::dtn_response_v2::Reason::None,
-                        &original_signature,
-                    );
-                }
+                // Authoritative signed DELIVERY ack, routed back to the (possibly
+                // offline) original sender over the reverse of the forward route
+                // so it survives the sender being offline at delivery time.
+                Self::route_delivery_ack(state, &user_account, &route, &original_signature);
                 // Custody release to the immediate previous holder so it can
                 // free its storage now.
                 Self::send_response_v2(
@@ -1665,6 +1796,52 @@ impl Dtn {
                 );
                 return;
             }
+        }
+
+        // 4b. Control traffic (a DELIVERY ack being routed back to the sender)
+        //     bypasses the grant/PoW admission gates: it is tied to an
+        //     already-accepted custody flow and carries a verifiable signed
+        //     response. The route signature (verified above) authenticates it.
+        //     We store it on the short control retention and forward it on.
+        if Self::extract_ack(&container.envelope).is_some() {
+            let entry_size = container.envelope.len() as u32;
+            let entry = DtnRoutedV2Entry {
+                container_v2_bytes: container.encode_to_vec(),
+                sender_public_key: route.sender_public_key.clone(),
+                size: entry_size,
+                accepted_at: now,
+                receiver_id: envelope_receiver
+                    .as_ref()
+                    .map(|r| r.to_bytes())
+                    .unwrap_or_default(),
+                tier: TIER_CONTROL,
+            };
+            if let Ok(bytes) = bincode::serialize(&entry) {
+                if let Ok(mut v2) = state.services.dtn.v2.write() {
+                    if v2
+                        .db_ref_routed_v2
+                        .insert(original_signature.clone(), bytes)
+                        .is_ok()
+                    {
+                        let _ = v2.db_ref_routed_v2.flush();
+                        v2.used_size += entry_size as u64;
+                        v2.message_count += 1;
+                    }
+                }
+            }
+            Self::send_response_v2(
+                state,
+                &user_account,
+                sender_id,
+                proto::dtn_response_v2::Kind::Receipt,
+                proto::dtn_response_v2::ResponseType::Accepted,
+                proto::dtn_response_v2::Reason::None,
+                &original_signature,
+            );
+            if let Some(recv) = envelope_receiver {
+                Self::try_forward_v2(state, &user_account, &container, &route, &recv);
+            }
+            return;
         }
 
         // 5. Inner-container sender signature verification. The signed route
@@ -2126,10 +2303,9 @@ impl Dtn {
                     .and_then(|c| proto::DtnRoute::decode(&c.dtn_route[..]).ok())
                     .and_then(|r| r.expires_at)
                     .filter(|e| *e > 0);
-                let retention_ms = if v2_entry.tier == TIER_UNTRUSTED {
-                    V2_MAX_RETENTION_MS
-                } else {
-                    V2_TRUSTED_RETENTION_MS
+                let retention_ms = match v2_entry.tier {
+                    TIER_UNTRUSTED | TIER_CONTROL => V2_MAX_RETENTION_MS,
+                    _ => V2_TRUSTED_RETENTION_MS,
                 };
                 let effective_expires_at =
                     route_expiry.unwrap_or_else(|| v2_entry.accepted_at.saturating_add(retention_ms));
@@ -2782,6 +2958,106 @@ mod tests {
             "forged response must leave custody untouched"
         );
         assert_eq!(v2.used_size, 100);
+    }
+
+    // ── Reverse-routed DELIVERY ack (survives an offline sender) ──
+
+    /// Build a control-ack DtnV2Container: an inner container carrying a signed
+    /// DtnResponseV2(DELIVERY) addressed to `origin`, over `custodians`.
+    fn build_ack_container(
+        acker: &Keypair,
+        origin: &PeerId,
+        custodians: Vec<Vec<u8>>,
+    ) -> proto::DtnV2Container {
+        let mut ack = proto::DtnResponseV2 {
+            kind: proto::dtn_response_v2::Kind::Delivery as i32,
+            response_type: proto::dtn_response_v2::ResponseType::Accepted as i32,
+            reason: proto::dtn_response_v2::Reason::None as i32,
+            original_signature: vec![0x99],
+            responder_public_key: acker.public().encode_protobuf(),
+            signature: Vec::new(),
+        };
+        ack.signature = acker.sign(&ack.encode_to_vec()).unwrap();
+        let payload = proto::EnvelopPayload {
+            payload: Some(proto::envelop_payload::Payload::DtnResponseV2(ack)),
+        };
+        let env = proto::Envelope {
+            sender_id: PeerId::from(acker.public()).to_bytes(),
+            receiver_id: origin.to_bytes(),
+            payload: payload.encode_to_vec(),
+        };
+        let inner = proto::Container {
+            signature: acker.sign(&env.encode_to_vec()).unwrap(),
+            envelope: Some(env),
+        };
+        let route = Dtn::build_route(
+            vec![0xAC],
+            &custodians,
+            acker.public().encode_protobuf(),
+            None,
+        );
+        let rb = route.encode_to_vec();
+        let rs = acker.sign(&rb).unwrap();
+        proto::DtnV2Container {
+            dtn_route: rb,
+            dtn_route_sig: rs,
+            envelope: inner.encode_to_vec(),
+            custody_grant: None,
+            pow: None,
+        }
+    }
+
+    // On delivery, the receiver must route a DELIVERY ack back toward the
+    // sender and keep a copy (TIER_CONTROL) so the retransmit loop retries it —
+    // this is what lets the ack survive an offline sender.
+    #[test]
+    fn delivery_routes_ack_back_to_sender() {
+        let (state, account) = make_custody_state();
+        // message addressed to the local account, so it is delivered here
+        let (sender_keys, container_bytes, sig) = signed_inner(&account.keys);
+        let sender_id = PeerId::from(sender_keys.public());
+        let container = build_container_v2(
+            &sender_keys,
+            container_bytes,
+            sig,
+            vec![random_peer().to_bytes()],
+            None,
+            None,
+            None,
+        );
+        Dtn::net_routed_v2(&state, &account.id, &sender_id, &[], container);
+
+        let v2 = state.services.dtn.v2.read().unwrap();
+        let has_control_ack = v2.db_ref_routed_v2.iter().filter_map(|kv| kv.ok()).any(|(_, b)| {
+            bincode::deserialize::<DtnRoutedV2Entry>(&b)
+                .map(|e| e.tier == TIER_CONTROL)
+                .unwrap_or(false)
+        });
+        assert!(has_control_ack, "delivery must store a reverse-routed ack copy");
+    }
+
+    // A custodian forwards a routed DELIVERY ack without a grant or PoW — a
+    // grant-less ordinary message would be rejected, but control traffic is
+    // exempt because it is tied to an already-accepted custody flow.
+    #[test]
+    fn custodian_accepts_control_ack_without_admission() {
+        let (state, account) = make_custody_state();
+        let acker = Keypair::generate_ed25519();
+        let origin = random_peer(); // ultimate sender, not this custodian
+        let container = build_ack_container(&acker, &origin, vec![random_peer().to_bytes()]);
+        Dtn::net_routed_v2(
+            &state,
+            &account.id,
+            &PeerId::from(acker.public()),
+            &[],
+            container,
+        );
+
+        let v2 = state.services.dtn.v2.read().unwrap();
+        let stored = v2.db_ref_routed_v2.get(&vec![0xAC]).unwrap();
+        assert!(stored.is_some(), "control ack must be admitted without grant/PoW");
+        let entry: DtnRoutedV2Entry = bincode::deserialize(&stored.unwrap()).unwrap();
+        assert_eq!(entry.tier, TIER_CONTROL);
     }
 
     // ── Retention ──
