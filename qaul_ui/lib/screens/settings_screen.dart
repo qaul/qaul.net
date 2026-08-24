@@ -73,7 +73,6 @@ class SettingsScreen extends HookConsumerWidget {
       titleIcon: const _SettingsSvgIcon(
         'assets/icons/settings/settings_cog.svg',
       ),
-      actions: const [Icon(Icons.more_vert), SizedBox(width: 12)],
       backgroundColor: qaulSettingsBackgroundColor(context),
       bodyAlignment: Alignment.topCenter,
       scrollHorizontalPadding: 0,
@@ -279,7 +278,6 @@ class _SettingsDetailScreen extends StatelessWidget {
     return ResponsiveScaffold(
       title: title,
       titleIcon: icon,
-      actions: const [Icon(Icons.more_vert), SizedBox(width: 12)],
       backgroundColor: qaulSettingsBackgroundColor(context),
       bodyAlignment: Alignment.topCenter,
       scrollHorizontalPadding: 0,

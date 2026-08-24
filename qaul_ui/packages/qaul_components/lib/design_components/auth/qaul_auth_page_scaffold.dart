@@ -68,8 +68,6 @@ class _QaulAuthHeader extends StatelessWidget implements PreferredSizeWidget {
                   icon: const Icon(Icons.arrow_back_rounded),
                 ),
                 const Spacer(),
-                const Icon(Icons.more_vert),
-                const SizedBox(width: 24),
               ],
             ),
           ),
