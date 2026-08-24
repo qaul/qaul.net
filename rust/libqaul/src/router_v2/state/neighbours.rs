@@ -27,6 +27,15 @@ impl RouterV2State {
             .map(|(peer, _)| *peer)
     }
 
+    /// checks if we can reach the neighbour over internet
+    pub fn has_active_internet_transport(&self) -> bool {
+        self.mirrors
+            .read()
+            .unwrap()
+            .values()
+            .any(|info| info.transports.contains(&ConnectionModule::Internet))
+    }
+
     pub fn neighbour_transport(&self, node_id: &[u8; 8]) -> Option<ConnectionModule> {
         let mirrors = self.mirrors.read().unwrap();
         mirrors
