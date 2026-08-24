@@ -217,6 +217,27 @@ impl RouterV2State {
                 .is_some_and(|weak| weak.upgrade().is_some())
     }
 
+    ///the gateway role follows INTERNET connectivity, per 2.3
+    pub fn sync_gateway_role(&self) -> bool {
+        let desired = self.has_active_internet_transport();
+
+        {
+            let mut manifest = self.manifest.write().unwrap();
+            if manifest.is_gateway == desired {
+                return false;
+            }
+            manifest.set_gateway(desired);
+        }
+
+        if let Some(node) = self.nodes.read().unwrap().get(&self.host_mk.to_id()) {
+            node.write().unwrap().is_gateway = desired;
+        }
+
+        *self.dirty_manifest_flags.write().unwrap() = true;
+        tracing::info!("router_v2: gateway role → {desired} (§2.3)");
+        true
+    }
+
     pub fn try_bump_manifest_version(&self, now_ms: u64, trigger: BumpTrigger) -> Option<u32> {
         let dirty: Vec<[u8; 8]> = self
             .dirty_delegations
@@ -227,7 +248,7 @@ impl RouterV2State {
             .collect();
 
         if trigger == BumpTrigger::Accumulated {
-            if dirty.is_empty() {
+            if dirty.is_empty() && !*self.dirty_manifest_flags.read().unwrap() {
                 return None;
             }
             // `manifest_rate_limit` is seconds; everything else here is ms.
@@ -257,6 +278,7 @@ impl RouterV2State {
         drop(manifest);
 
         self.dirty_delegations.write().unwrap().clear();
+        *self.dirty_manifest_flags.write().unwrap() = false;
         *self.last_manifest_bump_ms.write().unwrap() = now_ms;
 
         tracing::info!(
