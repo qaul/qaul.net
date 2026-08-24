@@ -152,7 +152,6 @@ impl RouterV2State {
         user_id: [u8; 8],
         user_mk: &crate::router_v2::identity::Multikey,
     ) {
-
         let entry = DelegetedEntry {
             user_id,
             timeout: pending.timeout,

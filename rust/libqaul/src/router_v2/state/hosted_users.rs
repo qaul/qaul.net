@@ -5,15 +5,12 @@
 
 use tracing::error;
 
-use crate::{
-    connections::ConnectionModule,
-    router_v2::{
-        identity::Multikey,
-        index::{Space, RESERVED_INDEX},
-        manifest::ManifestLog,
-        table::{Node, User},
-        BumpTrigger, PropagationForm, RouterV2State,
-    },
+use crate::router_v2::{
+    identity::Multikey,
+    index::{Space, RESERVED_INDEX},
+    manifest::ManifestLog,
+    table::{Node, User},
+    BumpTrigger, PropagationForm, RouterV2State,
 };
 
 impl RouterV2State {
@@ -103,13 +100,7 @@ impl RouterV2State {
         if self.hosted_user_ids().len() > 1 {
             return PropagationForm::Node;
         }
-        let has_internet_peer = self
-            .mirrors
-            .read()
-            .unwrap()
-            .values()
-            .any(|info| info.transports.contains(&ConnectionModule::Internet));
-        if has_internet_peer {
+        if self.has_active_internet_transport() {
             return PropagationForm::Node;
         }
 
@@ -120,7 +111,10 @@ impl RouterV2State {
 
     /// Makes sure this node has a [`Node`] record for itself.
     fn ensure_host_node_record(&self, host_node_id: [u8; 8]) {
-        let manifest_version = self.manifest.read().unwrap().manifest_version;
+        let (manifest_version, is_gateway) = {
+            let manifest = self.manifest.read().unwrap();
+            (manifest.manifest_version, manifest.is_gateway)
+        };
         let mut nodes = self.nodes.write().unwrap();
         if nodes.get(&host_node_id).is_some() {
             return;
@@ -132,7 +126,7 @@ impl RouterV2State {
                 public_key: Some(self.host_mk.clone()),
                 manifest_version,
                 advertised_version: 0,
-                is_gateway: false,
+                is_gateway,
                 delegated_users: Vec::new(),
                 manifest_signature: None,
                 retained_chunks: None,

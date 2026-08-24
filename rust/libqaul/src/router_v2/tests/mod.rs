@@ -11,6 +11,7 @@ mod apply_mapping;
 mod delegation;
 mod delta_build;
 mod forwarding;
+mod gateway_role;
 mod handle_index_dump;
 mod handle_node_manifest;
 mod handle_routing_update;
