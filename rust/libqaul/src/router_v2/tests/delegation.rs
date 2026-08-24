@@ -976,7 +976,11 @@ mod reachability {
             local_only: false,
         }));
         user.write().unwrap().routing_entry = Some(Arc::downgrade(&e));
-        state.routing_table.write().unwrap().set(Space::User, idx, e);
+        state
+            .routing_table
+            .write()
+            .unwrap()
+            .set(Space::User, idx, e);
     }
 
     /// The trap: a hosted user never has a routing entry, and under node
@@ -1051,7 +1055,11 @@ mod reachability {
         assert!(state.sweep_unreachable_delegations(NOW + GRACE_MS + 2));
 
         let after = state.manifest.read().unwrap().manifest_version;
-        assert_eq!(after, before + 1, "the forced removal must not be rate-limited");
+        assert_eq!(
+            after,
+            before + 1,
+            "the forced removal must not be rate-limited"
+        );
     }
 
     /// Reachability returning before the grace elapses resets the clock.
@@ -1111,11 +1119,7 @@ mod revoke {
 
     /// §10.5: the revocation is a signature over the same content as the
     /// entry it cancels, so the delegation signature *is* the revocation.
-    fn revoke_for(
-        state: &RouterV2State,
-        account: &UserAccount,
-        timeout: u64,
-    ) -> DelegationRevoke {
+    fn revoke_for(state: &RouterV2State, account: &UserAccount, timeout: u64) -> DelegationRevoke {
         let delegation = account.issue_self_delegation(&state.host_mk, timeout);
         DelegationRevoke {
             user_id: account.routing_user_id().to_vec(),
@@ -1261,7 +1265,10 @@ mod revoke {
         let request_id = sole_request_id(&state);
         state.handle_delegation_subscribe_ack(
             ack_from([1; 8], user_id, request_id),
-            DelegationSubscribeAck { accepted: true, reason: 0 },
+            DelegationSubscribeAck {
+                accepted: true,
+                reason: 0,
+            },
             NOW,
         );
 

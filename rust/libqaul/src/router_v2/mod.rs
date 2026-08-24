@@ -202,6 +202,7 @@ pub struct RouterV2State {
     pub own_manifest_log: RwLock<ManifestLog>,
     /// User ids whose delegation entry has changed since the last bump
     pub dirty_delegations: RwLock<HashSet<[u8; 8]>>,
+    pub dirty_manifest_flags: RwLock<bool>,
     /// per 8.7: the origins we intend to ask our next neighbour about
     pub pending_manifest_requests: RwLock<HashMap<PeerId, HashSet<[u8; 8]>>>,
     /// current requests that are in flight
@@ -263,6 +264,7 @@ impl RouterV2State {
             last_manifest_bump_ms: RwLock::new(0u64),
             own_manifest_log: RwLock::new(ManifestLog::default()),
             dirty_delegations: RwLock::new(HashSet::new()),
+            dirty_manifest_flags: RwLock::new(false),
             pending_manifest_requests: RwLock::new(HashMap::new()),
             outstanding_manifest_requests: RwLock::new(HashMap::new()),
             hosted_profiles: RwLock::new(HashMap::new()),
