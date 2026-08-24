@@ -3,9 +3,14 @@ import 'package:flutter/material.dart';
 import 'qaul_auth_tokens.dart';
 
 class QaulAuthWelcomeSection extends StatelessWidget {
-  const QaulAuthWelcomeSection({super.key, required this.onCreateAccount});
+  const QaulAuthWelcomeSection({
+    super.key,
+    required this.onCreateAccount,
+    this.createAccountIcon,
+  });
 
   final VoidCallback onCreateAccount;
+  final Widget? createAccountIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -28,22 +33,23 @@ class QaulAuthWelcomeSection extends StatelessWidget {
           splashColor: Colors.transparent,
           child: Column(
             children: [
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: kQaulAuthPrimaryTextColor,
-                    width: 2,
+              createAccountIcon ??
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: kQaulAuthPrimaryTextColor,
+                        width: 2,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.accessibility_new,
+                      color: kQaulAuthPrimaryTextColor,
+                      size: 40,
+                    ),
                   ),
-                ),
-                child: const Icon(
-                  Icons.accessibility_new,
-                  color: kQaulAuthPrimaryTextColor,
-                  size: 40,
-                ),
-              ),
               const SizedBox(height: 12),
               const Text(
                 'Create User Profile',

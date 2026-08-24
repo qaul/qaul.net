@@ -164,6 +164,11 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                           )
                         else
                           QaulAuthWelcomeSection(
+                            createAccountIcon: const _AuthSvgIcon(
+                              'assets/icons/auth/avatar_auth.svg',
+                              color: Colors.white,
+                              size: 64,
+                            ),
                             onCreateAccount: () =>
                                 Navigator.pushReplacementNamed(
                               context,
@@ -173,7 +178,9 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                         SizedBox(height: hasAccounts ? kQaulAuthItemGap : 55),
                         if (!hasAccounts) ...[
                           QaulAuthActionRow(
-                            icon: Icons.supervisor_account_outlined,
+                            leading: const _AuthSvgIcon(
+                              'assets/icons/auth/manage_account.svg',
+                            ),
                             label: 'Manage accounts',
                             labelColor: kQaulAuthSecondaryTextColor,
                             onTap: () => _pushManageAccounts(
@@ -189,14 +196,18 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                         ),
                         const SizedBox(height: kQaulAuthItemGap),
                         QaulAuthActionRow(
-                          icon: Icons.open_in_new,
+                          leading: const _AuthSvgIcon(
+                            'assets/icons/auth/qaul-small.svg',
+                            useThemeColor: false,
+                          ),
                           label: 'Learn about qaul',
                           labelColor: kQaulAuthSecondaryTextColor,
                           onTap: () =>
                               launchUrl(Uri.parse(_AuthLanding._tutorialUrl)),
-                          trailing: const Icon(
-                            Icons.open_in_new,
-                            color: kQaulAuthSecondaryTextColor,
+                          trailing: Image.asset(
+                            'assets/icons/auth/extern-link.png',
+                            width: kQaulAuthIconSize,
+                            height: kQaulAuthIconSize,
                           ),
                         ),
                       ],
@@ -330,6 +341,40 @@ class _AuthSectionTitle extends StatelessWidget {
   }
 }
 
+class _AuthSvgIcon extends StatelessWidget {
+  const _AuthSvgIcon(
+    this.assetName, {
+    this.color,
+    this.size = kQaulAuthIconSize,
+    this.useThemeColor = true,
+  });
+
+  final String assetName;
+  final Color? color;
+  final double size;
+  final bool useThemeColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final iconColor =
+        color ??
+        (useThemeColor
+            ? Theme.of(context).brightness == Brightness.dark
+                  ? kQaulAuthSecondaryTextColor
+                  : Colors.black
+            : null);
+
+    return SvgPicture.asset(
+      assetName,
+      width: size,
+      height: size,
+      colorFilter: iconColor == null
+          ? null
+          : ColorFilter.mode(iconColor, BlendMode.srcIn),
+    );
+  }
+}
+
 void _pushManageAccounts(
   BuildContext context, {
   required List<LocalAccount> accounts,
@@ -422,7 +467,9 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
               const SizedBox(height: kQaulAuthItemGap),
             ],
             QaulAuthActionRow(
-              icon: Icons.supervisor_account_outlined,
+              leading: const _AuthSvgIcon(
+                'assets/icons/auth/import-account.svg',
+              ),
               label: 'Import account',
               onTap: () => AccountManagementCoordinator.showRestoreFlow(
                 context,
@@ -431,7 +478,7 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
             ),
             const SizedBox(height: kQaulAuthItemGap),
             QaulAuthActionRow(
-              icon: Icons.person_add_alt,
+              leading: const _AuthSvgIcon('assets/icons/auth/add account.svg'),
               label: 'Create user profile',
               onTap: () => Navigator.pushReplacementNamed(
                 context,
