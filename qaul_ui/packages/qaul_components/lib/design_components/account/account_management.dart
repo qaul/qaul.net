@@ -142,7 +142,7 @@ class _LandingActions extends StatelessWidget {
           onPressed: onCreateAccount,
         ),
         QaulAccountButton(
-          label: labels.accountRestoreAccount,
+          label: 'Import account',
           onPressed: onRestoreAccount,
         ),
         QaulAccountButton(
@@ -160,7 +160,7 @@ class _LandingActions extends StatelessWidget {
           onPressed: onLogin,
         ),
         QaulAccountButton(
-          label: labels.accountRestoreAccount,
+          label: 'Import account',
           onPressed: onRestoreAccount,
         ),
         QaulAccountButton(
@@ -392,7 +392,7 @@ class QaulRestoreAccountDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final labels = _l10n(context);
     return _QaulAccountDialog(
-      title: labels.accountRestoreAccount,
+      title: 'Import account',
       message: labels.accountRestoreDescription,
       primaryLabel: labels.accountRestoreContinue,
       onPrimary: onConfirm,
@@ -412,7 +412,7 @@ class QaulRestoreFilePickerDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final labels = _l10n(context);
     return AlertDialog(
-      title: Text(labels.accountRestoreAccount),
+      title: const Text('Import account'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -92,6 +92,14 @@ class AccountManagementCoordinator {
     );
     if (!context.mounted || account == null) return;
 
+    await loginLocalAccount(context, ref, account);
+  }
+
+  static Future<void> loginLocalAccount(
+    BuildContext context,
+    WidgetRef ref,
+    LocalAccount account,
+  ) async {
     String? password;
     if (account.hasPassword) {
       password = await _askPassword(context);
