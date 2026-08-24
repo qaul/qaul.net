@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_components/qaul_components.dart';
 import 'package:qaul_rpc/qaul_rpc.dart';
@@ -211,12 +210,16 @@ class SettingsScreen extends HookConsumerWidget {
             ),
           if (Platform.isAndroid)
             QaulSettingsMenuItem(
-              icon: const FaIcon(FontAwesomeIcons.android),
-              title: l10n.androidOptions,
+              icon: const _SettingsSvgIcon(
+                'assets/icons/settings/settings_info_privacy.svg',
+              ),
+              title: l10n.aboutBackgroundExecution,
               onTap: () => _pushSettingsDetail(
                 context,
-                icon: const FaIcon(FontAwesomeIcons.android),
-                title: l10n.androidOptions,
+                icon: const _SettingsSvgIcon(
+                  'assets/icons/settings/settings_info_privacy.svg',
+                ),
+                title: l10n.aboutBackgroundExecution,
                 child: const Padding(
                   padding: kQaulSettingsContentPadding,
                   child: _AndroidOptions(),
