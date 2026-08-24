@@ -8,11 +8,13 @@ class QaulAuthAccountTile extends StatelessWidget {
     required this.avatar,
     required this.name,
     required this.onTap,
+    this.trailing,
   });
 
   final Widget avatar;
   final String name;
   final VoidCallback onTap;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +36,10 @@ class QaulAuthAccountTile extends StatelessWidget {
                   style: kQaulAuthAccountTextStyle,
                 ),
               ),
+              if (trailing != null) ...[
+                const SizedBox(width: 8),
+                trailing!,
+              ],
             ],
           ),
         ),

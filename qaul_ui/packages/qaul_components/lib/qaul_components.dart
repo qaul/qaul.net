@@ -1,6 +1,7 @@
 export 'design_components/account/account_management.dart';
 export 'design_components/auth/qaul_auth_account_tile.dart';
 export 'design_components/auth/qaul_auth_action_row.dart';
+export 'design_components/auth/qaul_auth_expand_tile.dart';
 export 'design_components/auth/qaul_auth_more_tile.dart';
 export 'design_components/auth/qaul_auth_page_scaffold.dart';
 export 'design_components/auth/qaul_auth_section_title.dart';

@@ -63,8 +63,52 @@ Widget buildQaulAuthSegmentedListUseCase(BuildContext context) {
           ),
           name: 'Anna K',
           onTap: () {},
+          trailing: IconButton(
+            tooltip: 'Remove account',
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints.tightFor(width: 36, height: 36),
+            icon: const Icon(
+              Icons.delete_outline,
+              color: Color(0x66FF0000),
+              size: kQaulAuthIconSize,
+            ),
+            onPressed: () {},
+          ),
         ),
         QaulAuthMoreTile(onTap: () {}),
+      ],
+    ),
+  );
+}
+
+@widgetbook.UseCase(
+  name: 'Expand accounts',
+  type: QaulAuthExpandTile,
+  path: 'design_components/auth',
+)
+Widget buildQaulAuthExpandTileUseCase(BuildContext context) {
+  return _AuthPreviewFrame(
+    child: QaulAuthSegmentedList(
+      children: [
+        QaulAuthAccountTile(
+          avatar: const QaulAvatar(
+            name: 'anonymous',
+            id: '12D3KooWAnonymous',
+            size: QaulAvatarSize.tiny,
+          ),
+          name: 'anonymous',
+          onTap: () {},
+        ),
+        QaulAuthAccountTile(
+          avatar: const QaulAvatar(
+            name: 'Anna K',
+            id: '12D3KooWAnnaK',
+            size: QaulAvatarSize.tiny,
+          ),
+          name: 'Anna K',
+          onTap: () {},
+        ),
+        QaulAuthExpandTile(onTap: () {}),
       ],
     ),
   );

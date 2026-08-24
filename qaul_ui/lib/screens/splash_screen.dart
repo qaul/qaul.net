@@ -85,7 +85,7 @@ class _AuthAccountLoaderState extends ConsumerState<_AuthAccountLoader> {
   }
 }
 
-class _AuthLanding extends ConsumerWidget {
+class _AuthLanding extends ConsumerStatefulWidget {
   const _AuthLanding({
     required this.state,
     required this.accounts,
@@ -98,22 +98,45 @@ class _AuthLanding extends ConsumerWidget {
   static const _contentPadding = EdgeInsets.fromLTRB(26, 88, 26, 32);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_AuthLanding> createState() => _AuthLandingState();
+}
+
+class _AuthLandingState extends ConsumerState<_AuthLanding> {
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final hasAccounts =
-        state == QaulAccountSessionState.signedOut && accounts.isNotEmpty;
+        widget.state == QaulAccountSessionState.signedOut &&
+        widget.accounts.isNotEmpty;
 
     return Scaffold(
       backgroundColor: kQaulAuthBackgroundColor,
       body: SafeArea(
         child: Scrollbar(
+          controller: _scrollController,
+          thumbVisibility: _showPersistentScrollbar(context),
           child: ListView(
+            controller: _scrollController,
             padding: EdgeInsets.zero,
             children: [
               Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 420),
                   child: Padding(
-                    padding: _contentPadding,
+                    padding: _AuthLanding._contentPadding,
                     child: Column(
                       children: [
                         const Center(
@@ -126,7 +149,7 @@ class _AuthLanding extends ConsumerWidget {
                         const SizedBox(height: 44),
                         if (hasAccounts)
                           _LoginSection(
-                            accounts: accounts,
+                            accounts: widget.accounts,
                             onLogin: (account) =>
                                 AccountManagementCoordinator.loginLocalAccount(
                               context,
@@ -135,7 +158,7 @@ class _AuthLanding extends ConsumerWidget {
                             ),
                             onMore: () => _pushManageAccounts(
                               context,
-                              accounts: accounts,
+                              accounts: widget.accounts,
                               showLogin: true,
                             ),
                           )
@@ -155,7 +178,7 @@ class _AuthLanding extends ConsumerWidget {
                             labelColor: kQaulAuthSecondaryTextColor,
                             onTap: () => _pushManageAccounts(
                               context,
-                              accounts: accounts,
+                              accounts: widget.accounts,
                               showLogin: false,
                             ),
                           ),
@@ -169,7 +192,8 @@ class _AuthLanding extends ConsumerWidget {
                           icon: Icons.open_in_new,
                           label: 'Learn about qaul',
                           labelColor: kQaulAuthSecondaryTextColor,
-                          onTap: () => launchUrl(Uri.parse(_tutorialUrl)),
+                          onTap: () =>
+                              launchUrl(Uri.parse(_AuthLanding._tutorialUrl)),
                           trailing: const Icon(
                             Icons.open_in_new,
                             color: kQaulAuthSecondaryTextColor,
@@ -224,10 +248,12 @@ class _AccountLoginTile extends StatelessWidget {
   const _AccountLoginTile({
     required this.account,
     required this.onTap,
+    this.trailing,
   });
 
   final LocalAccount account;
   final VoidCallback onTap;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -239,6 +265,7 @@ class _AccountLoginTile extends StatelessWidget {
       ),
       name: account.username,
       onTap: onTap,
+      trailing: trailing,
     );
   }
 }
@@ -318,7 +345,7 @@ void _pushManageAccounts(
   );
 }
 
-class _ManageAccountsScreen extends ConsumerWidget {
+class _ManageAccountsScreen extends ConsumerStatefulWidget {
   const _ManageAccountsScreen({
     required this.accounts,
     required this.showLogin,
@@ -328,58 +355,159 @@ class _ManageAccountsScreen extends ConsumerWidget {
   final bool showLogin;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_ManageAccountsScreen> createState() =>
+      _ManageAccountsScreenState();
+}
+
+class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
+  late final ScrollController _scrollController;
+  late List<LocalAccount> _accounts;
+  var _showAllAccounts = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _accounts = List.of(widget.accounts);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final shouldCollapseAccounts = _accounts.length > 2;
+    final visibleAccounts = shouldCollapseAccounts && !_showAllAccounts
+        ? _accounts.take(2)
+        : _accounts;
+
     return QaulAuthPageScaffold(
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(28, 32, 28, 32),
-        children: [
-          if (showLogin && accounts.isNotEmpty) ...[
-            const _AuthSectionTitle(
-              icon: Icons.accessibility_new,
-              label: 'Login',
-            ),
-            const SizedBox(height: kQaulAuthItemGap),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 260),
-              child: SingleChildScrollView(
-                child: QaulAuthSegmentedList(
-                  children: [
-                    for (final account in accounts)
-                      _AccountLoginTile(
-                        account: account,
-                        onTap: () =>
-                            AccountManagementCoordinator.loginLocalAccount(
-                          context,
-                          ref,
-                          account,
-                        ),
+      child: Scrollbar(
+        controller: _scrollController,
+        thumbVisibility: _showPersistentScrollbar(context),
+        child: ListView(
+          controller: _scrollController,
+          padding: const EdgeInsets.fromLTRB(28, 32, 28, 32),
+          children: [
+            if (widget.showLogin && _accounts.isNotEmpty) ...[
+              const _AuthSectionTitle(
+                icon: Icons.accessibility_new,
+                label: 'Login',
+              ),
+              const SizedBox(height: kQaulAuthItemGap),
+              QaulAuthSegmentedList(
+                children: [
+                  for (final account in visibleAccounts)
+                    _AccountLoginTile(
+                      account: account,
+                      onTap: () =>
+                          AccountManagementCoordinator.loginLocalAccount(
+                        context,
+                        ref,
+                        account,
                       ),
-                  ],
-                ),
+                      trailing: _RemoveAccountButton(
+                        onPressed: () => _removeAccount(account),
+                      ),
+                    ),
+                  if (shouldCollapseAccounts && !_showAllAccounts)
+                    QaulAuthExpandTile(
+                      onTap: () => setState(() => _showAllAccounts = true),
+                    ),
+                ],
+              ),
+              const SizedBox(height: kQaulAuthItemGap),
+            ],
+            QaulAuthActionRow(
+              icon: Icons.supervisor_account_outlined,
+              label: 'Import account',
+              onTap: () => AccountManagementCoordinator.showRestoreFlow(
+                context,
+                ref,
               ),
             ),
             const SizedBox(height: kQaulAuthItemGap),
+            QaulAuthActionRow(
+              icon: Icons.person_add_alt,
+              label: 'Create user profile',
+              onTap: () => Navigator.pushReplacementNamed(
+                context,
+                NavigationHelper.createAccount,
+              ),
+            ),
           ],
-          QaulAuthActionRow(
-            icon: Icons.supervisor_account_outlined,
-            label: 'Import account',
-            onTap: () => AccountManagementCoordinator.showRestoreFlow(
-              context,
-              ref,
-            ),
-          ),
-          const SizedBox(height: kQaulAuthItemGap),
-          QaulAuthActionRow(
-            icon: Icons.person_add_alt,
-            label: 'Create user profile',
-            onTap: () => Navigator.pushReplacementNamed(
-              context,
-              NavigationHelper.createAccount,
-            ),
-          ),
-        ],
+        ),
       ),
     );
+  }
+
+  Future<void> _removeAccount(LocalAccount account) async {
+    final removed = await AccountManagementCoordinator.showDeleteLocalAccountFlow(
+      context,
+      ref,
+      account,
+    );
+    if (!mounted || !removed) return;
+
+    setState(() {
+      _accounts.removeWhere(
+        (localAccount) => localAccount.userIdBase58 == account.userIdBase58,
+      );
+      if (_accounts.length <= 2) {
+        _showAllAccounts = false;
+      }
+    });
+  }
+}
+
+class _RemoveAccountButton extends StatefulWidget {
+  const _RemoveAccountButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  State<_RemoveAccountButton> createState() => _RemoveAccountButtonState();
+}
+
+class _RemoveAccountButtonState extends State<_RemoveAccountButton> {
+  var _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: Tooltip(
+        message: 'Remove account',
+        waitDuration: const Duration(milliseconds: 250),
+        child: IconButton(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints.tightFor(width: 36, height: 36),
+          icon: Icon(
+            Icons.delete_outline,
+            color: _isHovered ? Colors.red : const Color(0x66FF0000),
+            size: kQaulAuthIconSize,
+          ),
+          onPressed: widget.onPressed,
+        ),
+      ),
+    );
+  }
+}
+
+bool _showPersistentScrollbar(BuildContext context) {
+  switch (Theme.of(context).platform) {
+    case TargetPlatform.macOS:
+    case TargetPlatform.linux:
+    case TargetPlatform.windows:
+      return true;
+    case TargetPlatform.android:
+    case TargetPlatform.fuchsia:
+    case TargetPlatform.iOS:
+      return false;
   }
 }
 

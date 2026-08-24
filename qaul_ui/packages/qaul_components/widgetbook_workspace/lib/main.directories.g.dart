@@ -146,6 +146,17 @@ final directories = <_widgetbook.WidgetbookNode>[
             ],
           ),
           _widgetbook.WidgetbookComponent(
+            name: 'QaulAuthExpandTile',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Expand accounts',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_auth_qaul_auth_components
+                        .buildQaulAuthExpandTileUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookComponent(
             name: 'QaulAuthPageScaffold',
             useCases: [
               _widgetbook.WidgetbookUseCase(
