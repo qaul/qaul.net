@@ -99,7 +99,7 @@ class SettingsScreen extends HookConsumerWidget {
                   size: 23,
                 ),
                 title: l10n.language,
-                child: const _LanguageSettingsList(),
+                child: const SettingsLanguageList(),
               ),
             ),
           ),
@@ -290,8 +290,26 @@ class _SettingsDetailScreen extends StatelessWidget {
   }
 }
 
-class _LanguageSettingsList extends StatelessWidget {
-  const _LanguageSettingsList();
+class SettingsLanguageScreen extends StatelessWidget {
+  const SettingsLanguageScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return _SettingsDetailScreen(
+      icon: const _SettingsSvgIcon(
+        'assets/icons/settings/settings_language.svg',
+        size: 23,
+      ),
+      title: l10n.language,
+      child: const SettingsLanguageList(),
+    );
+  }
+}
+
+class SettingsLanguageList extends StatelessWidget {
+  const SettingsLanguageList({super.key});
 
   String _languageName(Locale l) => lookupAppLocalizations(l).languageName;
 

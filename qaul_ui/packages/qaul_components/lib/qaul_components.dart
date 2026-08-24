@@ -1,4 +1,12 @@
 export 'design_components/account/account_management.dart';
+export 'design_components/auth/qaul_auth_account_tile.dart';
+export 'design_components/auth/qaul_auth_action_row.dart';
+export 'design_components/auth/qaul_auth_more_tile.dart';
+export 'design_components/auth/qaul_auth_page_scaffold.dart';
+export 'design_components/auth/qaul_auth_section_title.dart';
+export 'design_components/auth/qaul_auth_segmented_list.dart';
+export 'design_components/auth/qaul_auth_tokens.dart';
+export 'design_components/auth/qaul_auth_welcome_section.dart';
 export 'design_components/chat/chat_footer/chat_footer.dart';
 export 'design_components/chat/chat_footer/chat_footer_reply_preview.dart';
 export 'design_components/chat/chat_header.dart';
