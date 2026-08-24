@@ -18,7 +18,6 @@ import '../helpers/user_prefs_helper.dart';
 import '../l10n/app_localizations.dart';
 import '../widgets/widgets.dart';
 
-const _kSettingsTextColor = Color(0xFF999999);
 const _kSettingsIconSize = 25.0;
 
 class _SettingsSvgIcon extends StatelessWidget {
@@ -40,7 +39,7 @@ class _SettingsSvgIcon extends StatelessWidget {
       width: size,
       height: size,
       colorFilter: ColorFilter.mode(
-        IconTheme.of(context).color ?? _kSettingsTextColor,
+        IconTheme.of(context).color ?? kQaulSettingsTextColor,
         BlendMode.srcIn,
       ),
     );
@@ -75,12 +74,12 @@ class SettingsScreen extends HookConsumerWidget {
         'assets/icons/settings/settings_cog.svg',
       ),
       actions: const [Icon(Icons.more_vert), SizedBox(width: 12)],
-      backgroundColor: _settingsBackgroundColor(context),
+      backgroundColor: qaulSettingsBackgroundColor(context),
       bodyAlignment: Alignment.topCenter,
       scrollHorizontalPadding: 0,
       scrollTopPadding: 0,
       wrapWithScrollable: true,
-      body: _SettingsMenuContent(
+      body: QaulSettingsMenuContent(
         child: ValueListenableBuilder<Locale?>(
           valueListenable: UserPrefsHelper.instance.localeNotifier,
           builder: (context, locale, _) {
@@ -89,7 +88,7 @@ class SettingsScreen extends HookConsumerWidget {
               builder: (context, themeMode, _) {
                 return Column(
                   children: [
-                    _SettingsNavigationTile(
+                    QaulSettingsMenuItem(
                       icon: const _SettingsSvgIcon(
                         'assets/icons/settings/settings_language.svg',
                         size: 23,
@@ -108,7 +107,7 @@ class SettingsScreen extends HookConsumerWidget {
                         child: const _LanguageSettingsList(),
                       ),
                     ),
-                    _SettingsNavigationTile(
+                    QaulSettingsMenuItem(
                       icon: const _SettingsSvgIcon(
                         'assets/icons/settings/settings_theme.svg',
                       ),
@@ -123,7 +122,7 @@ class SettingsScreen extends HookConsumerWidget {
                         child: const _ThemeSettingsList(),
                       ),
                     ),
-                    _SettingsNavigationTile(
+                    QaulSettingsMenuItem(
                       icon: const _SettingsSvgIcon(
                         'assets/icons/settings/settings_notificatons.svg',
                       ),
@@ -134,12 +133,12 @@ class SettingsScreen extends HookConsumerWidget {
                           'assets/icons/settings/settings_notificatons.svg',
                         ),
                         title: l10n.notifications,
-                        child: const _SettingsPaddedContent(
+                        child: const QaulSettingsPaddedContent(
                           child: _NotificationOptions(),
                         ),
                       ),
                     ),
-                    _SettingsNavigationTile(
+                    QaulSettingsMenuItem(
                       icon: const _SettingsSvgIcon(
                         'assets/icons/network-outlined.svg',
                         package: 'qaul_components',
@@ -155,7 +154,7 @@ class SettingsScreen extends HookConsumerWidget {
                         child: const _InternetNodesList(),
                       ),
                     ),
-                    _SettingsNavigationTile(
+                    QaulSettingsMenuItem(
                       icon: const _SettingsPngIcon(
                         'assets/icons/settings/settings_usr.png',
                       ),
@@ -168,12 +167,12 @@ class SettingsScreen extends HookConsumerWidget {
                         ),
                         title: 'Account Management',
                         child: user == null
-                            ? const _SettingsPaddedContent(
+                            ? const QaulSettingsPaddedContent(
                                 child: _SettingsPlaceholder(
                                   label: 'Account Management',
                                 ),
                               )
-                            : _SettingsPaddedContent(
+                            : QaulSettingsPaddedContent(
                                 child: QaulAccountSettingsSection(
                                   showHeader: false,
                                   showPasswordAction: false,
@@ -199,7 +198,7 @@ class SettingsScreen extends HookConsumerWidget {
                       ),
                     ),
                     if (Platform.isAndroid)
-                      _SettingsNavigationTile(
+                      QaulSettingsMenuItem(
                         icon: const _SettingsSvgIcon(
                           'assets/icons/settings/settings_info_privacy.svg',
                         ),
@@ -210,20 +209,20 @@ class SettingsScreen extends HookConsumerWidget {
                             'assets/icons/settings/settings_info_privacy.svg',
                           ),
                           title: 'Enhanced Privacy',
-                          child: const _SettingsPaddedContent(
+                          child: const QaulSettingsPaddedContent(
                             child: _EnhancedPrivacyOptions(),
                           ),
                         ),
                       ),
                     if (Platform.isAndroid)
-                      _SettingsNavigationTile(
+                      QaulSettingsMenuItem(
                         icon: const FaIcon(FontAwesomeIcons.android),
                         title: l10n.androidOptions,
                         onTap: () => _pushSettingsDetail(
                           context,
                           icon: const FaIcon(FontAwesomeIcons.android),
                           title: l10n.androidOptions,
-                          child: const _SettingsPaddedContent(
+                          child: const QaulSettingsPaddedContent(
                             child: _AndroidOptions(),
                           ),
                         ),
@@ -235,38 +234,6 @@ class SettingsScreen extends HookConsumerWidget {
           },
         ),
       ),
-    );
-  }
-}
-
-class _SettingsMenuContent extends StatelessWidget {
-  const _SettingsMenuContent({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => child;
-}
-
-class _SettingsDetailContent extends StatelessWidget {
-  const _SettingsDetailContent({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => child;
-}
-
-class _SettingsPaddedContent extends StatelessWidget {
-  const _SettingsPaddedContent({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(28, 4, 28, 0),
-      child: child,
     );
   }
 }
@@ -304,148 +271,6 @@ String _themeLabel(AppLocalizations l10n, ThemeMode mode) {
   }
 }
 
-Color _settingsItemColor(BuildContext context, {bool selected = false}) {
-  if (!selected) return _kSettingsTextColor;
-
-  return Theme.of(context).brightness == Brightness.dark
-      ? Colors.white
-      : Colors.black;
-}
-
-Color _settingsBackgroundColor(BuildContext context) {
-  return Theme.of(context).brightness == Brightness.dark
-      ? Colors.black
-      : Colors.white;
-}
-
-class _SettingsNavigationTile extends StatefulWidget {
-  const _SettingsNavigationTile({
-    required this.icon,
-    required this.title,
-    this.value,
-    this.enabled = true,
-    this.onTap,
-  });
-
-  final Widget icon;
-  final String title;
-  final String? value;
-  final bool enabled;
-  final VoidCallback? onTap;
-
-  @override
-  State<_SettingsNavigationTile> createState() => _SettingsNavigationTileState();
-}
-
-class _SettingsNavigationTileState extends State<_SettingsNavigationTile> {
-  bool _isHovered = false;
-  bool _suppressHoverUntilExit = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = _settingsItemColor(context, selected: _isHovered);
-    final textStyle = Theme.of(context).textTheme.titleSmall?.copyWith(
-          color: color,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 1.8,
-        );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(2),
-          hoverColor: Theme.of(context).brightness == Brightness.dark
-              ? const Color(0xFF181C1E)
-              : const Color(0xFFF2F2F2),
-          onHover: (hovered) {
-            setState(() {
-              if (!hovered) {
-                _suppressHoverUntilExit = false;
-                _isHovered = false;
-                return;
-              }
-
-              _isHovered = !_suppressHoverUntilExit;
-            });
-          },
-          onTap: widget.enabled
-              ? () {
-                  setState(() {
-                    _suppressHoverUntilExit = true;
-                    _isHovered = false;
-                  });
-                  widget.onTap?.call();
-                }
-              : null,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final valueWidth = constraints.maxWidth < 560 ? 160.0 : 300.0;
-
-              return SizedBox(
-                height: 56,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 28),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 48,
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: SizedBox.square(
-                            dimension: 36,
-                            child: Center(
-                              child: IconTheme(
-                                data: IconThemeData(color: color, size: 36),
-                                child: widget.icon,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 18),
-                      Expanded(
-                        child: Text(
-                          widget.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: textStyle,
-                        ),
-                      ),
-                      SizedBox(
-                        width: valueWidth,
-                        child: widget.value == null
-                            ? const SizedBox.shrink()
-                            : Text(
-                                widget.value!,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.end,
-                                style: textStyle,
-                              ),
-                      ),
-                      SizedBox(
-                        width: 44,
-                        child: widget.onTap == null
-                            ? const SizedBox.shrink()
-                            : Align(
-                                alignment: Alignment.centerRight,
-                                child: Icon(Icons.chevron_right, color: color),
-                              ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _SettingsDetailScreen extends StatelessWidget {
   const _SettingsDetailScreen({
     required this.icon,
@@ -463,12 +288,12 @@ class _SettingsDetailScreen extends StatelessWidget {
       title: title,
       titleIcon: icon,
       actions: const [Icon(Icons.more_vert), SizedBox(width: 12)],
-      backgroundColor: _settingsBackgroundColor(context),
+      backgroundColor: qaulSettingsBackgroundColor(context),
       bodyAlignment: Alignment.topCenter,
       scrollHorizontalPadding: 0,
       scrollTopPadding: 0,
       wrapWithScrollable: true,
-      body: _SettingsDetailContent(child: child),
+      body: QaulSettingsDetailContent(child: child),
     );
   }
 }
@@ -490,7 +315,7 @@ class _LanguageSettingsList extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             for (final locale in items)
-              _SettingsOptionTile(
+              QaulSettingsOptionItem(
                 label: locale == null
                     ? _systemDefaultLabel(l10n)
                     : _languageName(locale),
@@ -518,7 +343,7 @@ class _ThemeSettingsList extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             for (final mode in ThemeMode.values)
-              _SettingsOptionTile(
+              QaulSettingsOptionItem(
                 label: _themeLabel(l10n, mode),
                 selected: mode == currentMode,
                 onTap: () => UserPrefsHelper.instance.setThemeMode(mode),
@@ -526,74 +351,6 @@ class _ThemeSettingsList extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-class _SettingsOptionTile extends StatefulWidget {
-  const _SettingsOptionTile({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  State<_SettingsOptionTile> createState() => _SettingsOptionTileState();
-}
-
-class _SettingsOptionTileState extends State<_SettingsOptionTile> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final isActive = widget.selected || _isHovered;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(2),
-          hoverColor: Theme.of(context).brightness == Brightness.dark
-              ? const Color(0xFF181C1E)
-              : const Color(0xFFF2F2F2),
-          onHover: (hovered) => setState(() => _isHovered = hovered),
-          onTap: widget.onTap,
-          child: SizedBox(
-            height: 48,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 28),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      widget.label,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: _settingsItemColor(
-                              context,
-                              selected: isActive,
-                            ),
-                            letterSpacing: 1.8,
-                          ),
-                    ),
-                  ),
-                  if (widget.selected)
-                    Icon(
-                      Icons.check,
-                      size: 20,
-                      color: _settingsItemColor(context, selected: true),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -608,7 +365,7 @@ class _SettingsPlaceholder extends StatelessWidget {
     return Text(
       label,
       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            color: _settingsItemColor(context),
+            color: qaulSettingsItemColor(context),
             fontWeight: FontWeight.w600,
             letterSpacing: 1.8,
           ),
