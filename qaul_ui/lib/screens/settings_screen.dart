@@ -80,158 +80,149 @@ class SettingsScreen extends HookConsumerWidget {
       scrollTopPadding: 0,
       wrapWithScrollable: true,
       body: QaulSettingsMenuContent(
-        child: ValueListenableBuilder<Locale?>(
-          valueListenable: UserPrefsHelper.instance.localeNotifier,
-          builder: (context, locale, _) {
-            return ValueListenableBuilder<ThemeMode>(
+        child: Column(
+          children: [
+            ValueListenableBuilder<Locale?>(
+              valueListenable: UserPrefsHelper.instance.localeNotifier,
+              builder: (context, locale, _) => QaulSettingsMenuItem(
+                icon: const _SettingsSvgIcon(
+                  'assets/icons/settings/settings_language.svg',
+                  size: 23,
+                ),
+                title: l10n.language,
+                value: locale == null
+                    ? _systemDefaultLabel(l10n)
+                    : lookupAppLocalizations(locale).languageName,
+                onTap: () => _pushSettingsDetail(
+                  context,
+                  icon: const _SettingsSvgIcon(
+                    'assets/icons/settings/settings_language.svg',
+                    size: 23,
+                  ),
+                  title: l10n.language,
+                  child: const _LanguageSettingsList(),
+                ),
+              ),
+            ),
+            ValueListenableBuilder<ThemeMode>(
               valueListenable: UserPrefsHelper.instance.themeModeNotifier,
-              builder: (context, themeMode, _) {
-                return Column(
-                  children: [
-                    QaulSettingsMenuItem(
-                      icon: const _SettingsSvgIcon(
-                        'assets/icons/settings/settings_language.svg',
-                        size: 23,
-                      ),
-                      title: l10n.language,
-                      value: locale == null
-                          ? _systemDefaultLabel(l10n)
-                          : lookupAppLocalizations(locale).languageName,
-                      onTap: () => _pushSettingsDetail(
-                        context,
-                        icon: const _SettingsSvgIcon(
-                          'assets/icons/settings/settings_language.svg',
-                          size: 23,
+              builder: (context, themeMode, _) => QaulSettingsMenuItem(
+                icon: const _SettingsSvgIcon(
+                  'assets/icons/settings/settings_theme.svg',
+                ),
+                title: l10n.theme,
+                value: _themeLabel(l10n, themeMode),
+                onTap: () => _pushSettingsDetail(
+                  context,
+                  icon: const _SettingsSvgIcon(
+                    'assets/icons/settings/settings_theme.svg',
+                  ),
+                  title: l10n.theme,
+                  child: const _ThemeSettingsList(),
+                ),
+              ),
+            ),
+            QaulSettingsMenuItem(
+              icon: const _SettingsSvgIcon(
+                'assets/icons/settings/settings_notificatons.svg',
+              ),
+              title: l10n.notifications,
+              onTap: () => _pushSettingsDetail(
+                context,
+                icon: const _SettingsSvgIcon(
+                  'assets/icons/settings/settings_notificatons.svg',
+                ),
+                title: l10n.notifications,
+                child: const QaulSettingsPaddedContent(
+                  child: _NotificationOptions(),
+                ),
+              ),
+            ),
+            QaulSettingsMenuItem(
+              icon: const _SettingsSvgIcon(
+                'assets/icons/network-outlined.svg',
+                package: 'qaul_components',
+              ),
+              title: l10n.network,
+              onTap: () => _pushSettingsDetail(
+                context,
+                icon: const _SettingsSvgIcon(
+                  'assets/icons/network-outlined.svg',
+                  package: 'qaul_components',
+                ),
+                title: l10n.network,
+                child: const _InternetNodesList(),
+              ),
+            ),
+            QaulSettingsMenuItem(
+              icon: const _SettingsPngIcon(
+                'assets/icons/settings/settings_usr.png',
+              ),
+              title: 'Account Management',
+              enabled: user != null,
+              onTap: () => _pushSettingsDetail(
+                context,
+                icon: const _SettingsPngIcon(
+                  'assets/icons/settings/settings_usr.png',
+                ),
+                title: 'Account Management',
+                child: user == null
+                    ? const QaulSettingsPaddedContent(
+                        child: _SettingsPlaceholder(
+                          label: 'Account Management',
                         ),
-                        title: l10n.language,
-                        child: const _LanguageSettingsList(),
-                      ),
-                    ),
-                    QaulSettingsMenuItem(
-                      icon: const _SettingsSvgIcon(
-                        'assets/icons/settings/settings_theme.svg',
-                      ),
-                      title: l10n.theme,
-                      value: _themeLabel(l10n, themeMode),
-                      onTap: () => _pushSettingsDetail(
-                        context,
-                        icon: const _SettingsSvgIcon(
-                          'assets/icons/settings/settings_theme.svg',
-                        ),
-                        title: l10n.theme,
-                        child: const _ThemeSettingsList(),
-                      ),
-                    ),
-                    QaulSettingsMenuItem(
-                      icon: const _SettingsSvgIcon(
-                        'assets/icons/settings/settings_notificatons.svg',
-                      ),
-                      title: l10n.notifications,
-                      onTap: () => _pushSettingsDetail(
-                        context,
-                        icon: const _SettingsSvgIcon(
-                          'assets/icons/settings/settings_notificatons.svg',
-                        ),
-                        title: l10n.notifications,
-                        child: const QaulSettingsPaddedContent(
-                          child: _NotificationOptions(),
-                        ),
-                      ),
-                    ),
-                    QaulSettingsMenuItem(
-                      icon: const _SettingsSvgIcon(
-                        'assets/icons/network-outlined.svg',
-                        package: 'qaul_components',
-                      ),
-                      title: l10n.network,
-                      onTap: () => _pushSettingsDetail(
-                        context,
-                        icon: const _SettingsSvgIcon(
-                          'assets/icons/network-outlined.svg',
-                          package: 'qaul_components',
-                        ),
-                        title: l10n.network,
-                        child: const _InternetNodesList(),
-                      ),
-                    ),
-                    QaulSettingsMenuItem(
-                      icon: const _SettingsPngIcon(
-                        'assets/icons/settings/settings_usr.png',
-                      ),
-                      title: 'Account Management',
-                      enabled: user != null,
-                      onTap: () => _pushSettingsDetail(
-                        context,
-                        icon: const _SettingsPngIcon(
-                          'assets/icons/settings/settings_usr.png',
-                        ),
-                        title: 'Account Management',
-                        child: user == null
-                            ? const QaulSettingsPaddedContent(
-                                child: _SettingsPlaceholder(
-                                  label: 'Account Management',
-                                ),
-                              )
-                            : QaulSettingsPaddedContent(
-                                child: QaulAccountSettingsSection(
-                                  showHeader: false,
-                                  showPasswordAction: false,
-                                  onExportAccount: () =>
-                                      AccountManagementCoordinator
-                                          .showExportFlow(
-                                    context,
-                                    ref,
-                                  ),
-                                  onLogout: () =>
-                                      AccountManagementCoordinator.logout(
-                                    context,
-                                    ref,
-                                  ),
-                                  onDeleteAccount: () =>
-                                      AccountManagementCoordinator
-                                          .showDeleteFlow(
-                                    context,
-                                    ref,
-                                  ),
-                                ),
+                      )
+                    : QaulSettingsPaddedContent(
+                        child: QaulAccountSettingsSection(
+                          showHeader: false,
+                          showPasswordAction: false,
+                          onExportAccount: () =>
+                              AccountManagementCoordinator.showExportFlow(
+                                context,
+                                ref,
                               ),
-                      ),
-                    ),
-                    if (Platform.isAndroid)
-                      QaulSettingsMenuItem(
-                        icon: const _SettingsSvgIcon(
-                          'assets/icons/settings/settings_info_privacy.svg',
-                        ),
-                        title: 'Enhanced Privacy',
-                        onTap: () => _pushSettingsDetail(
-                          context,
-                          icon: const _SettingsSvgIcon(
-                            'assets/icons/settings/settings_info_privacy.svg',
-                          ),
-                          title: 'Enhanced Privacy',
-                          child: const QaulSettingsPaddedContent(
-                            child: _EnhancedPrivacyOptions(),
-                          ),
+                          onLogout: () =>
+                              AccountManagementCoordinator.logout(context, ref),
+                          onDeleteAccount: () =>
+                              AccountManagementCoordinator.showDeleteFlow(
+                                context,
+                                ref,
+                              ),
                         ),
                       ),
-                    if (Platform.isAndroid)
-                      QaulSettingsMenuItem(
-                        icon: const FaIcon(FontAwesomeIcons.android),
-                        title: l10n.androidOptions,
-                        onTap: () => _pushSettingsDetail(
-                          context,
-                          icon: const FaIcon(FontAwesomeIcons.android),
-                          title: l10n.androidOptions,
-                          child: const QaulSettingsPaddedContent(
-                            child: _AndroidOptions(),
-                          ),
-                        ),
-                      ),
-                  ],
-                );
-              },
-            );
-          },
+              ),
+            ),
+            if (Platform.isAndroid)
+              QaulSettingsMenuItem(
+                icon: const _SettingsSvgIcon(
+                  'assets/icons/settings/settings_info_privacy.svg',
+                ),
+                title: 'Enhanced Privacy',
+                onTap: () => _pushSettingsDetail(
+                  context,
+                  icon: const _SettingsSvgIcon(
+                    'assets/icons/settings/settings_info_privacy.svg',
+                  ),
+                  title: 'Enhanced Privacy',
+                  child: const QaulSettingsPaddedContent(
+                    child: _EnhancedPrivacyOptions(),
+                  ),
+                ),
+              ),
+            if (Platform.isAndroid)
+              QaulSettingsMenuItem(
+                icon: const FaIcon(FontAwesomeIcons.android),
+                title: l10n.androidOptions,
+                onTap: () => _pushSettingsDetail(
+                  context,
+                  icon: const FaIcon(FontAwesomeIcons.android),
+                  title: l10n.androidOptions,
+                  child: const QaulSettingsPaddedContent(
+                    child: _AndroidOptions(),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
