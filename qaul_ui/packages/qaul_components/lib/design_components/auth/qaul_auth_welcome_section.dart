@@ -1,0 +1,68 @@
+import 'package:flutter/material.dart';
+
+import 'qaul_auth_tokens.dart';
+
+class QaulAuthWelcomeSection extends StatelessWidget {
+  const QaulAuthWelcomeSection({
+    super.key,
+    required this.onCreateAccount,
+    this.createAccountIcon,
+  });
+
+  final VoidCallback onCreateAccount;
+  final Widget? createAccountIcon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const Text(
+          'Welcome',
+          style: TextStyle(
+            color: kQaulAuthPrimaryTextColor,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.1,
+          ),
+        ),
+        const SizedBox(height: 12),
+        InkWell(
+          onTap: onCreateAccount,
+          borderRadius: BorderRadius.circular(48),
+          hoverColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          child: Column(
+            children: [
+              createAccountIcon ??
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: kQaulAuthPrimaryTextColor,
+                        width: 2,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.accessibility_new,
+                      color: kQaulAuthPrimaryTextColor,
+                      size: 40,
+                    ),
+                  ),
+              const SizedBox(height: 12),
+              const Text(
+                'Create User Profile',
+                style: TextStyle(
+                  color: kQaulAuthSecondaryTextColor,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.1,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}

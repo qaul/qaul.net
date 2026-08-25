@@ -16,6 +16,8 @@ import 'package:qaul_components_widgetbook/use_cases/design/chat/chat_journey.da
     as _qaul_components_widgetbook_use_cases_design_chat_chat_journey;
 import 'package:qaul_components_widgetbook/use_cases/design/chat/reply_journey/reply_journey.dart'
     as _qaul_components_widgetbook_use_cases_design_chat_reply_journey_reply_journey;
+import 'package:qaul_components_widgetbook/use_cases/design_components/auth/qaul_auth_components.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_auth_qaul_auth_components;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/bubble/chat_reply_bubble_preview.dart'
     as _qaul_components_widgetbook_use_cases_design_components_chat_bubble_chat_reply_bubble_preview;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/bubble/chat_timeline.dart'
@@ -129,6 +131,66 @@ final directories = <_widgetbook.WidgetbookNode>[
   _widgetbook.WidgetbookFolder(
     name: 'design_components',
     children: [
+      _widgetbook.WidgetbookFolder(
+        name: 'auth',
+        children: [
+          _widgetbook.WidgetbookComponent(
+            name: 'QaulAuthActionRow',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'States',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_auth_qaul_auth_components
+                        .buildQaulAuthActionRowUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookComponent(
+            name: 'QaulAuthExpandTile',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Expand accounts',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_auth_qaul_auth_components
+                        .buildQaulAuthExpandTileUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookComponent(
+            name: 'QaulAuthPageScaffold',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Header shell',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_auth_qaul_auth_components
+                        .buildQaulAuthPageScaffoldUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookComponent(
+            name: 'QaulAuthSegmentedList',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Login list',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_auth_qaul_auth_components
+                        .buildQaulAuthSegmentedListUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookComponent(
+            name: 'QaulAuthWelcomeSection',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Welcome',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_auth_qaul_auth_components
+                        .buildQaulAuthWelcomeSectionUseCase,
+              ),
+            ],
+          ),
+        ],
+      ),
       _widgetbook.WidgetbookFolder(
         name: 'chat',
         children: [
