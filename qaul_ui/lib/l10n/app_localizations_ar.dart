@@ -434,10 +434,19 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get importAccount => 'Import account';
+
+  @override
   String get inviteUser => 'قم بدعوة المستخدم';
 
   @override
   String get languageName => 'اللغة العربية';
+
+  @override
+  String get login => 'Login';
+
+  @override
+  String get manageAccounts => 'Manage accounts';
 
   @override
   String get notifications => 'إشعارات';
@@ -447,6 +456,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get securePrivateMessageHint => 'رسالة خاصة آمنة';
+
+  @override
+  String get systemDefault => 'System\'s default';
 
   @override
   String get userDocumentation => 'User Documentation';

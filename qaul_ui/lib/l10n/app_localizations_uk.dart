@@ -435,10 +435,19 @@ class AppLocalizationsUk extends AppLocalizations {
   }
 
   @override
+  String get importAccount => 'Import account';
+
+  @override
   String get inviteUser => 'Запросити користувача';
 
   @override
   String get languageName => 'Українська';
+
+  @override
+  String get login => 'Login';
+
+  @override
+  String get manageAccounts => 'Manage accounts';
 
   @override
   String get notifications => 'Сповіщення';
@@ -448,6 +457,9 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get securePrivateMessageHint => 'Безпечне приватне повідомлення';
+
+  @override
+  String get systemDefault => 'System\'s default';
 
   @override
   String get userDocumentation => 'User Documentation';

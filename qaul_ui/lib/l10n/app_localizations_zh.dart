@@ -428,10 +428,19 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get importAccount => 'Import account';
+
+  @override
   String get inviteUser => 'Invite user';
 
   @override
   String get languageName => '简体中文';
+
+  @override
+  String get login => 'Login';
+
+  @override
+  String get manageAccounts => 'Manage accounts';
 
   @override
   String get notifications => 'Notifications';
@@ -441,6 +450,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get securePrivateMessageHint => 'Secure private message';
+
+  @override
+  String get systemDefault => 'System\'s default';
 
   @override
   String get userDocumentation => 'User Documentation';

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/qaul_components_localizations.dart';
+import '../../l10n/qaul_components_localizations_en.dart';
 import 'qaul_auth_tokens.dart';
 
 class QaulAuthWelcomeSection extends StatelessWidget {
@@ -14,11 +16,13 @@ class QaulAuthWelcomeSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final labels =
+        QaulComponentsLocalizations.of(context) ?? QaulComponentsLocalizationsEn();
     return Column(
       children: [
-        const Text(
-          'Welcome',
-          style: TextStyle(
+        Text(
+          labels.authWelcome,
+          style: const TextStyle(
             color: kQaulAuthPrimaryTextColor,
             fontWeight: FontWeight.w800,
             letterSpacing: 1.1,
@@ -51,9 +55,9 @@ class QaulAuthWelcomeSection extends StatelessWidget {
                     ),
                   ),
               const SizedBox(height: 12),
-              const Text(
-                'Create User Profile',
-                style: TextStyle(
+              Text(
+                labels.accountCreateUserProfile,
+                style: const TextStyle(
                   color: kQaulAuthSecondaryTextColor,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.1,
