@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'qaul_settings_tokens.dart';
 
@@ -114,7 +115,16 @@ class _QaulSettingsMenuItemState extends State<QaulSettingsMenuItem> {
                             ? const SizedBox.shrink()
                             : Align(
                                 alignment: Alignment.centerRight,
-                                child: Icon(Icons.chevron_right, color: color),
+                                child: SvgPicture.asset(
+                                  'assets/icons/arrow_right.svg',
+                                  package: 'qaul_components',
+                                  width: 9.206,
+                                  height: 18.407,
+                                  colorFilter: ColorFilter.mode(
+                                    color,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
                               ),
                       ),
                     ],
