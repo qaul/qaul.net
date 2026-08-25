@@ -189,6 +189,12 @@ abstract class QaulComponentsLocalizations {
   /// **'Restore account'**
   String get accountRestoreAccount;
 
+  /// No description provided for @accountImportAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Import account'**
+  String get accountImportAccount;
+
   /// No description provided for @accountLoginExistingAccount.
   ///
   /// In en, this message translates to:
@@ -332,6 +338,18 @@ abstract class QaulComponentsLocalizations {
   /// In en, this message translates to:
   /// **'Set password'**
   String get accountSetPassword;
+
+  /// No description provided for @authWelcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome'**
+  String get authWelcome;
+
+  /// No description provided for @authMoreAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'more'**
+  String get authMoreAccounts;
 
   /// No description provided for @chatMenuReply.
   ///

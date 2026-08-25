@@ -118,6 +118,7 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final hasAccounts =
         widget.state == QaulAccountSessionState.signedOut &&
         widget.accounts.isNotEmpty;
@@ -182,7 +183,7 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                             leading: const _AuthPngIcon(
                               'assets/icons/auth/manage_account.png',
                             ),
-                            label: 'Manage accounts',
+                            label: l10n.manageAccounts,
                             labelColor: kQaulAuthSecondaryTextColor,
                             onTap: () => _pushManageAccounts(
                               context,
@@ -201,7 +202,7 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                             'assets/icons/auth/qaul_small.png',
                             useThemeColor: false,
                           ),
-                          label: 'Learn about qaul',
+                          label: l10n.learnMore,
                           labelColor: kQaulAuthSecondaryTextColor,
                           onTap: () =>
                               launchUrl(Uri.parse(_AuthLanding._tutorialUrl)),
@@ -242,12 +243,12 @@ class _LoginSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _AuthSectionTitle(
-          leading: _AuthPngIcon(
+        _AuthSectionTitle(
+          leading: const _AuthPngIcon(
             'assets/icons/auth/manage_account.png',
             color: kQaulAuthPrimaryTextColor,
           ),
-          label: 'Login',
+          label: AppLocalizations.of(context)!.login,
         ),
         const SizedBox(height: kQaulAuthItemGap),
         QaulAuthSegmentedList(
@@ -320,7 +321,7 @@ class _AuthLanguageTile extends StatelessWidget {
           ),
           label: l10n.language,
           value: locale == null
-              ? _authSystemDefaultLabel(l10n)
+              ? l10n.systemDefault
               : lookupAppLocalizations(locale).languageName,
           onTap: onTap,
           trailing: SvgPicture.asset(
@@ -437,6 +438,7 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final shouldCollapseAccounts = _accounts.length > 2;
     final visibleAccounts = shouldCollapseAccounts && !_showAllAccounts
         ? _accounts.take(2)
@@ -451,12 +453,12 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
           padding: const EdgeInsets.fromLTRB(28, 32, 28, 32),
           children: [
             if (widget.showLogin && _accounts.isNotEmpty) ...[
-              const _AuthSectionTitle(
-                leading: _AuthPngIcon(
+              _AuthSectionTitle(
+                leading: const _AuthPngIcon(
                   'assets/icons/auth/manage_account.png',
                   color: kQaulAuthPrimaryTextColor,
                 ),
-                label: 'Login',
+                label: l10n.login,
               ),
               const SizedBox(height: kQaulAuthItemGap),
               QaulAuthSegmentedList(
@@ -483,7 +485,7 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
               leading: const _AuthPngIcon(
                 'assets/icons/auth/import_account.png',
               ),
-              label: 'Import account',
+              label: l10n.importAccount,
               onTap: () => AccountManagementCoordinator.showRestoreFlow(
                 context,
                 ref,
@@ -492,7 +494,7 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
             const SizedBox(height: kQaulAuthItemGap),
             QaulAuthActionRow(
               leading: const _AuthPngIcon('assets/icons/auth/add_account.png'),
-              label: 'Create user profile',
+              label: l10n.createUserAccount,
               onTap: () => Navigator.pushNamed(
                 context,
                 NavigationHelper.createAccount,
@@ -524,12 +526,6 @@ void _pushAuthLanguage(BuildContext context) {
       builder: (_) => const SettingsLanguageScreen(),
     ),
   );
-}
-
-String _authSystemDefaultLabel(AppLocalizations l10n) {
-  final label = l10n.useSystemDefaultMessage.replaceFirst('Use ', '');
-  if (label.isEmpty) return label;
-  return label[0].toUpperCase() + label.substring(1);
 }
 
 class _SplashLoadingState extends StatelessWidget {

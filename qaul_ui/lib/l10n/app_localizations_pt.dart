@@ -440,10 +440,19 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get importAccount => 'Import account';
+
+  @override
   String get inviteUser => 'Convidar usuário';
 
   @override
   String get languageName => 'Português';
+
+  @override
+  String get login => 'Login';
+
+  @override
+  String get manageAccounts => 'Manage accounts';
 
   @override
   String get notifications => 'Notificações';
@@ -453,6 +462,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get securePrivateMessageHint => 'Mensagem privada segura';
+
+  @override
+  String get systemDefault => 'System\'s default';
 
   @override
   String get userDocumentation => 'User Documentation';

@@ -48,6 +48,9 @@ class QaulComponentsLocalizationsZh extends QaulComponentsLocalizations {
   String get accountRestoreAccount => 'Restore account';
 
   @override
+  String get accountImportAccount => 'Import account';
+
+  @override
   String get accountLoginExistingAccount => 'Login with existing account';
 
   @override
@@ -123,6 +126,12 @@ class QaulComponentsLocalizationsZh extends QaulComponentsLocalizations {
 
   @override
   String get accountSetPassword => 'Set password';
+
+  @override
+  String get authWelcome => 'Welcome';
+
+  @override
+  String get authMoreAccounts => 'more';
 
   @override
   String get chatMenuReply => '回复';

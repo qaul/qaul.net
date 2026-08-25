@@ -438,10 +438,19 @@ class AppLocalizationsFa extends AppLocalizations {
   }
 
   @override
+  String get importAccount => 'Import account';
+
+  @override
   String get inviteUser => 'دعوت از کاربر';
 
   @override
   String get languageName => 'فارسی';
+
+  @override
+  String get login => 'Login';
+
+  @override
+  String get manageAccounts => 'Manage accounts';
 
   @override
   String get notifications => 'اطلاعیه';
@@ -451,6 +460,9 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get securePrivateMessageHint => 'پیام خصوصی امن';
+
+  @override
+  String get systemDefault => 'System\'s default';
 
   @override
   String get userDocumentation => 'User Documentation';

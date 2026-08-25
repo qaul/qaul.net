@@ -919,6 +919,12 @@ abstract class AppLocalizations {
   /// **'Group member {name} was renamed to'**
   String groupMemberRenamedOnJoin(String name);
 
+  /// No description provided for @importAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Import account'**
+  String get importAccount;
+
   /// No description provided for @inviteUser.
   ///
   /// In en, this message translates to:
@@ -930,6 +936,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'English'**
   String get languageName;
+
+  /// No description provided for @login.
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get login;
+
+  /// No description provided for @manageAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage accounts'**
+  String get manageAccounts;
 
   /// No description provided for @notifications.
   ///
@@ -948,6 +966,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Secure private message'**
   String get securePrivateMessageHint;
+
+  /// No description provided for @systemDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'System\'s default'**
+  String get systemDefault;
 
   /// No description provided for @userDocumentation.
   ///

@@ -438,10 +438,19 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get importAccount => 'Import account';
+
+  @override
   String get inviteUser => 'Пригласить пользователя';
 
   @override
   String get languageName => 'Русский';
+
+  @override
+  String get login => 'Login';
+
+  @override
+  String get manageAccounts => 'Manage accounts';
 
   @override
   String get notifications => 'Уведомления';
@@ -451,6 +460,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get securePrivateMessageHint => 'Защищенное личное сообщение';
+
+  @override
+  String get systemDefault => 'System\'s default';
 
   @override
   String get userDocumentation => 'User Documentation';

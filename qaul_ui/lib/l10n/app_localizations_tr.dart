@@ -18,10 +18,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get backButtonTooltip => 'Geri';
 
   @override
-  String get sendTooltip => 'Gönder';
+  String get sendTooltip => 'Mesajı Gönder';
 
   @override
-  String get sendFileTooltip => 'Dosya Gönder';
+  String get sendFileTooltip => 'Dosyayı Gönder';
 
   @override
   String get sendAudioTooltip => 'Sesli mesaj kaydet';
@@ -30,7 +30,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get start => 'Başla';
 
   @override
-  String get createUserAccount => 'Kullnıcı profili oluştur';
+  String get createUserAccount => 'Kullanıcı profili oluştur';
 
   @override
   String get learnMore => 'Qaul hakkında';
@@ -66,7 +66,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get publicNotificationsEnabled => 'Genel Yazı';
 
   @override
-  String get chatNotificationsEnabled => 'Sahbet Mesajları';
+  String get chatNotificationsEnabled => 'Sohbet Mesajları';
 
   @override
   String get notifyOnlyForVerifiedUsers =>
@@ -210,7 +210,7 @@ class AppLocalizationsTr extends AppLocalizations {
       'Kullanıcı adı en az 2 karakter içermeli.';
 
   @override
-  String get pleaseRestartApp => 'Ltüfen uygulamayı yeniden başlatın';
+  String get pleaseRestartApp => 'Lütfen uygulamayı yeniden başlatın';
 
   @override
   String get gotoSupport => 'Desteğe git';
@@ -298,13 +298,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get searchUser => 'Kullanıcı ara...';
 
   @override
-  String get searchChat => 'Search chats...';
+  String get searchChat => 'Sohbetlerde ara...';
 
   @override
-  String get storageUsers => 'Depolama Kullanıcıları';
+  String get storageUsers => 'Kullanıcıları Depola';
 
   @override
-  String get addStorageUser => 'Depolama kullanıcısı ekle';
+  String get addStorageUser => 'Kullanıcıyı depola';
 
   @override
   String get publicNoteHintText => 'Genel not';
@@ -367,7 +367,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get currentVersion => 'şuan kurulu sürüm:';
 
   @override
-  String get editGroupUserNames => 'Edit usernames';
+  String get editGroupUserNames => 'Kullanıcı adlarını düzenle';
 
   @override
   String get emptyNodeName => 'İsimsiz';
@@ -418,7 +418,7 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get groupEventJoinedSuffix => 'has joined the group';
+  String get groupEventJoinedSuffix => 'gruba katıldı';
 
   @override
   String groupEventLeft(String username) {
@@ -432,14 +432,23 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String groupMemberRenamedOnJoin(String name) {
-    return 'Group member $name was renamed to';
+    return 'Grup üyesi $name yeniden adlandırıldı';
   }
+
+  @override
+  String get importAccount => 'Import account';
 
   @override
   String get inviteUser => 'Kullanıcı Davet et';
 
   @override
   String get languageName => 'Türkçe';
+
+  @override
+  String get login => 'Login';
+
+  @override
+  String get manageAccounts => 'Manage accounts';
 
   @override
   String get notifications => 'Bildirimler';
@@ -449,6 +458,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get securePrivateMessageHint => 'Gizli güvenli mesaj';
+
+  @override
+  String get systemDefault => 'System\'s default';
 
   @override
   String get userDocumentation => 'Kullanıcı Dokümanı';

@@ -438,10 +438,19 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String get importAccount => 'Import account';
+
+  @override
   String get inviteUser => 'Undang pengguna';
 
   @override
   String get languageName => 'Bahasa Indonesia';
+
+  @override
+  String get login => 'Login';
+
+  @override
+  String get manageAccounts => 'Manage accounts';
 
   @override
   String get notifications => 'Notifikasi';
@@ -451,6 +460,9 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get securePrivateMessageHint => 'Pesan pribadi aman';
+
+  @override
+  String get systemDefault => 'System\'s default';
 
   @override
   String get userDocumentation => 'Dokumentasi Pengguna';
