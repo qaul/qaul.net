@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
+import 'package:qaul_components/qaul_components.dart'
+    show
+        QaulAuthPageScaffold,
+        kQaulAuthPrimaryTextColor,
+        kQaulAuthSecondaryTextColor;
 import 'package:qaul_rpc/qaul_rpc.dart';
 
 import '../decorators/loading_decorator.dart';
@@ -28,14 +33,33 @@ class CreateAccountScreen extends HookConsumerWidget {
 
     final i10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: SizedBox.expand(
-        child: LoadingDecorator(
-          isLoading: loading.value,
-          backgroundColor: Colors.black54,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 120),
+    return LoadingDecorator(
+      isLoading: loading.value,
+      backgroundColor: Colors.black54,
+      child: QaulAuthPageScaffold(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 120),
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              inputDecorationTheme: const InputDecorationTheme(
+                hintStyle: TextStyle(color: kQaulAuthSecondaryTextColor),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: kQaulAuthSecondaryTextColor),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: kQaulAuthPrimaryTextColor),
+                ),
+                errorBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.red),
+                ),
+                focusedErrorBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.red),
+                ),
+              ),
+              textSelectionTheme: const TextSelectionThemeData(
+                cursorColor: kQaulAuthPrimaryTextColor,
+              ),
+            ),
             child: Column(
               children: [
                 const SizedBox(width: double.maxFinite),
@@ -48,6 +72,9 @@ class CreateAccountScreen extends HookConsumerWidget {
                       child: TextFormField(
                         key: _fieldKey,
                         controller: nameCtrl,
+                        style: const TextStyle(
+                          color: kQaulAuthPrimaryTextColor,
+                        ),
                         validator: (s) => _validateUserName(context, s),
                         onFieldSubmitted: (_) {
                           _submitUsername(context, ref, nameCtrl, loading);
@@ -63,6 +90,10 @@ class CreateAccountScreen extends HookConsumerWidget {
                 QaulButton(
                   key: submitButtonKey,
                   label: i10n.start,
+                  style: const TextStyle(
+                    color: kQaulAuthPrimaryTextColor,
+                    fontSize: 16,
+                  ),
                   onPressed: () =>
                       _submitUsername(context, ref, nameCtrl, loading),
                 ),

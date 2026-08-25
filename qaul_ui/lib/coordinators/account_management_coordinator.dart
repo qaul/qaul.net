@@ -232,61 +232,6 @@ class AccountManagementCoordinator {
     _returnToInitial(navigator, container);
   }
 
-  static Future<bool> showDeleteLocalAccountFlow(
-    BuildContext context,
-    WidgetRef ref,
-    LocalAccount account,
-  ) async {
-    final exportFirst = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => QaulDeleteAccountExportPromptDialog(
-        onCancel: () => Navigator.pop(dialogContext),
-        onExportFirst: () => Navigator.pop(dialogContext, true),
-        onDeleteWithoutExport: () => Navigator.pop(dialogContext, false),
-      ),
-    );
-    if (!context.mounted || exportFirst == null) return false;
-
-    if (exportFirst) {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => QaulExportAccountDialog(
-          onCancel: () => Navigator.pop(dialogContext, false),
-          onConfirm: () => Navigator.pop(dialogContext, true),
-        ),
-      );
-      if (!context.mounted || confirmed != true) return false;
-
-      final outputPath = await FilePicker.platform.getDirectoryPath();
-      if (!context.mounted || outputPath == null) return false;
-
-      final path = await _runWithProgress<String?>(
-        context,
-        () => ref
-            .read(qaulWorkerProvider)
-            .exportAccount(outputPath: outputPath, userId: account.userId),
-      );
-      if (!context.mounted || path == null) return false;
-
-      _showMessage(context, 'Account exported to $path');
-    }
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => QaulDeleteAccountFinalDialog(
-        onCancel: () => Navigator.pop(dialogContext, false),
-        onConfirm: () => Navigator.pop(dialogContext, true),
-      ),
-    );
-    if (!context.mounted || confirmed != true) return false;
-
-    final deleted = await _runWithProgress<bool>(
-      context,
-      () => ref.read(qaulWorkerProvider).deleteAccount(userId: account.userId),
-    );
-    return context.mounted && deleted == true;
-  }
-
   static Future<void> _setPassword(
     BuildContext context,
     WidgetRef ref,

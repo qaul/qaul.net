@@ -63,17 +63,6 @@ Widget buildQaulAuthSegmentedListUseCase(BuildContext context) {
           ),
           name: 'Anna K',
           onTap: () {},
-          trailing: IconButton(
-            tooltip: 'Remove account',
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints.tightFor(width: 36, height: 36),
-            icon: const Icon(
-              Icons.delete_outline,
-              color: Color(0x66FF0000),
-              size: kQaulAuthIconSize,
-            ),
-            onPressed: () {},
-          ),
         ),
         QaulAuthMoreTile(onTap: () {}),
       ],

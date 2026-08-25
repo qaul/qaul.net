@@ -164,10 +164,11 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                           )
                         else
                           QaulAuthWelcomeSection(
-                            createAccountIcon: const _AuthSvgIcon(
-                              'assets/icons/auth/avatar_auth.svg',
+                            createAccountIcon: const _AuthPngIcon(
+                              'assets/icons/auth/avatar_auth.png',
                               color: Colors.white,
-                              size: 64,
+                              width: 65,
+                              height: 65,
                             ),
                             onCreateAccount: () =>
                                 Navigator.pushReplacementNamed(
@@ -178,8 +179,8 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                         SizedBox(height: hasAccounts ? kQaulAuthItemGap : 55),
                         if (!hasAccounts) ...[
                           QaulAuthActionRow(
-                            leading: const _AuthSvgIcon(
-                              'assets/icons/auth/manage_account.svg',
+                            leading: const _AuthPngIcon(
+                              'assets/icons/auth/manage_account.png',
                             ),
                             label: 'Manage accounts',
                             labelColor: kQaulAuthSecondaryTextColor,
@@ -196,8 +197,8 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                         ),
                         const SizedBox(height: kQaulAuthItemGap),
                         QaulAuthActionRow(
-                          leading: const _AuthSvgIcon(
-                            'assets/icons/auth/qaul-small.svg',
+                          leading: const _AuthPngIcon(
+                            'assets/icons/auth/qaul_small.png',
                             useThemeColor: false,
                           ),
                           label: 'Learn about qaul',
@@ -259,12 +260,10 @@ class _AccountLoginTile extends StatelessWidget {
   const _AccountLoginTile({
     required this.account,
     required this.onTap,
-    this.trailing,
   });
 
   final LocalAccount account;
   final VoidCallback onTap;
-  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -276,7 +275,6 @@ class _AccountLoginTile extends StatelessWidget {
       ),
       name: account.username,
       onTap: onTap,
-      trailing: trailing,
     );
   }
 }
@@ -319,9 +317,14 @@ class _AuthLanguageTile extends StatelessWidget {
               ? _authSystemDefaultLabel(l10n)
               : lookupAppLocalizations(locale).languageName,
           onTap: onTap,
-          trailing: const Icon(
-            Icons.chevron_right,
-            color: kQaulAuthSecondaryTextColor,
+          trailing: SvgPicture.asset(
+            'assets/icons/arrow_right.svg',
+            width: 9.206,
+            height: 18.407,
+            colorFilter: const ColorFilter.mode(
+              kQaulAuthSecondaryTextColor,
+              BlendMode.srcIn,
+            ),
           ),
         );
       },
@@ -341,17 +344,19 @@ class _AuthSectionTitle extends StatelessWidget {
   }
 }
 
-class _AuthSvgIcon extends StatelessWidget {
-  const _AuthSvgIcon(
+class _AuthPngIcon extends StatelessWidget {
+  const _AuthPngIcon(
     this.assetName, {
     this.color,
-    this.size = kQaulAuthIconSize,
+    this.width = kQaulAuthIconSize,
+    this.height = kQaulAuthIconSize,
     this.useThemeColor = true,
   });
 
   final String assetName;
   final Color? color;
-  final double size;
+  final double width;
+  final double height;
   final bool useThemeColor;
 
   @override
@@ -364,13 +369,12 @@ class _AuthSvgIcon extends StatelessWidget {
                   : Colors.black
             : null);
 
-    return SvgPicture.asset(
+    return Image.asset(
       assetName,
-      width: size,
-      height: size,
-      colorFilter: iconColor == null
-          ? null
-          : ColorFilter.mode(iconColor, BlendMode.srcIn),
+      width: width,
+      height: height,
+      color: iconColor,
+      colorBlendMode: iconColor == null ? null : BlendMode.srcIn,
     );
   }
 }
@@ -454,9 +458,6 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
                         ref,
                         account,
                       ),
-                      trailing: _RemoveAccountButton(
-                        onPressed: () => _removeAccount(account),
-                      ),
                     ),
                   if (shouldCollapseAccounts && !_showAllAccounts)
                     QaulAuthExpandTile(
@@ -467,8 +468,8 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
               const SizedBox(height: kQaulAuthItemGap),
             ],
             QaulAuthActionRow(
-              leading: const _AuthSvgIcon(
-                'assets/icons/auth/import-account.svg',
+              leading: const _AuthPngIcon(
+                'assets/icons/auth/import_account.png',
               ),
               label: 'Import account',
               onTap: () => AccountManagementCoordinator.showRestoreFlow(
@@ -478,7 +479,7 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
             ),
             const SizedBox(height: kQaulAuthItemGap),
             QaulAuthActionRow(
-              leading: const _AuthSvgIcon('assets/icons/auth/add account.svg'),
+              leading: const _AuthPngIcon('assets/icons/auth/add_account.png'),
               label: 'Create user profile',
               onTap: () => Navigator.pushReplacementNamed(
                 context,
@@ -486,59 +487,6 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _removeAccount(LocalAccount account) async {
-    final removed = await AccountManagementCoordinator.showDeleteLocalAccountFlow(
-      context,
-      ref,
-      account,
-    );
-    if (!mounted || !removed) return;
-
-    setState(() {
-      _accounts.removeWhere(
-        (localAccount) => localAccount.userIdBase58 == account.userIdBase58,
-      );
-      if (_accounts.length <= 2) {
-        _showAllAccounts = false;
-      }
-    });
-  }
-}
-
-class _RemoveAccountButton extends StatefulWidget {
-  const _RemoveAccountButton({required this.onPressed});
-
-  final VoidCallback onPressed;
-
-  @override
-  State<_RemoveAccountButton> createState() => _RemoveAccountButtonState();
-}
-
-class _RemoveAccountButtonState extends State<_RemoveAccountButton> {
-  var _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: Tooltip(
-        message: 'Remove account',
-        waitDuration: const Duration(milliseconds: 250),
-        child: IconButton(
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints.tightFor(width: 36, height: 36),
-          icon: Icon(
-            Icons.delete_outline,
-            color: _isHovered ? Colors.red : const Color(0x66FF0000),
-            size: kQaulAuthIconSize,
-          ),
-          onPressed: widget.onPressed,
         ),
       ),
     );
