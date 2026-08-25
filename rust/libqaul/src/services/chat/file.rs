@@ -455,8 +455,43 @@ impl ChatFile {
         Path::new(filename).extension().and_then(OsStr::to_str)
     }
 
-    /// Create and return the file path for a file
-    fn create_file_path(state: &crate::QaulState, account_id: PeerId, file_id: u64, file_extension: &str) -> PathBuf {
+    /// Validate a file extension for use as a filesystem path component.
+    ///
+    /// Returns `Some(ext)` for a valid extension and `None` otherwise.
+    fn validate_extension(file_extension: &str) -> Option<String> {
+        const MAX_EXT_LEN: usize = 16;
+        let extension = file_extension.trim();
+        if extension.is_empty() {
+            return Some(String::new());
+        }
+        if extension.len() <= MAX_EXT_LEN && extension.chars().all(|c| c.is_ascii_alphanumeric()) {
+            return Some(extension.to_string());
+        }
+        None
+    }
+
+    /// Create and return the file path for a file.
+    ///
+    /// Returns `None` when `file_extension` is unsafe.
+    fn create_file_path(
+        state: &crate::QaulState,
+        account_id: PeerId,
+        file_id: u64,
+        file_extension: &str,
+    ) -> Option<PathBuf> {
+        // reject invalid extensions
+        let extension = match Self::validate_extension(file_extension) {
+            Some(ext) => ext,
+            None => {
+                log::warn!(
+                    "rejecting file {}: unsafe file extension {:?}",
+                    file_id,
+                    file_extension
+                );
+                return None;
+            }
+        };
+
         // create path to file storage directory
         let account_storage_path = crate::storage::Storage::get_account_path(state, account_id);
         let files_storage_path = account_storage_path.join("files");
@@ -466,15 +501,15 @@ impl ChatFile {
             log::error!("creating folder error {}", e.to_string());
         }
 
-        // create file name
+        // create file name using the numeric file_id and the validated extension
         let mut file_name = file_id.to_string();
-        if file_extension.len() > 0 {
-            file_name.push_str(".");
-            file_name.push_str(&file_extension);
+        if !extension.is_empty() {
+            file_name.push('.');
+            file_name.push_str(&extension);
         }
 
         // create file path
-        files_storage_path.join(file_name)
+        Some(files_storage_path.join(file_name))
     }
 
     fn file_content_from_history(file_history: &FileHistory) -> super::rpc_proto::FileContent {
@@ -663,7 +698,10 @@ impl ChatFile {
         let file_id = Self::generate_file_id(group_id, &user_id_bytes, &file_name, size);
 
         // get file path
-        let file_path = Self::create_file_path(state, user_account.id, file_id, extension.as_str());
+        let file_path = match Self::create_file_path(state, user_account.id, file_id, extension.as_str()) {
+            Some(path) => path,
+            None => return Err("invalid file extension".to_string()),
+        };
 
         // TODO: start in new async thread here
 
@@ -985,13 +1023,16 @@ impl ChatFile {
         let file_id_bytes = file_history.file_id.to_be_bytes();
         let iterator = user_files.get_file_chunks(&file_id_bytes);
 
-        // create file
-        let file_path = Self::create_file_path(
+        // create file (reject transfers whose extension is unsafe)
+        let file_path = match Self::create_file_path(
             state,
             user_account.id,
             file_history.file_id,
             &file_history.file_extension,
-        );
+        ) {
+            Some(path) => path,
+            None => return,
+        };
 
         // open a file in write mode
         let mut file: File;
@@ -1084,6 +1125,17 @@ impl ChatFile {
         sent_at: u64,
         file_info: proto_net::ChatFileInfo,
     ) {
+        // reject a file with invalid extension before it is persisted
+        if Self::validate_extension(&file_info.file_extension).is_none() {
+            log::warn!(
+                "rejecting file {} from {}: unsafe file extension {:?}",
+                file_info.file_id,
+                sender_id,
+                file_info.file_extension
+            );
+            return;
+        }
+
         // get db
         let user_files = Self::get_db_ref(state, &user_account.id);
 
@@ -1316,6 +1368,40 @@ mod tests {
             assert_eq!(t.package_count, 0);
             assert!(!t.received);
         }
+    }
+
+    #[test]
+    fn validate_extension_rejects_path_components() {
+        // safe: pass through unchanged
+        assert_eq!(ChatFile::validate_extension("png"), Some("png".to_string()));
+        assert_eq!(ChatFile::validate_extension("MP4"), Some("MP4".to_string()));
+        assert_eq!(ChatFile::validate_extension("7z"), Some("7z".to_string()));
+
+        // safe: no extension (incl. whitespace-only), stored without a suffix
+        assert_eq!(ChatFile::validate_extension(""), Some(String::new()));
+        assert_eq!(ChatFile::validate_extension("   "), Some(String::new()));
+
+        // unsafe: every one of these must be rejected
+        for attack in [
+            "\\..\\..\\escaped.bin", // Windows backslashes
+            "/../../escaped.bin",    // forward-slash traversal
+            "png/../../escaped",     // separator after a plausible extension
+            "..",                    // parent dir
+            "a.b",                   // embedded dot
+            "C:\\Windows",           // drive-absolute
+            "\\\\host\\share",       // UNC prefix
+            "/etc/passwd",           // absolute path
+        ] {
+            assert_eq!(
+                ChatFile::validate_extension(attack),
+                None,
+                "extension {:?} must be rejected",
+                attack
+            );
+        }
+
+        // over-long extensions are rejected even if alphanumeric
+        assert_eq!(ChatFile::validate_extension(&"a".repeat(17)), None);
     }
 
     /// A file becomes `Confirmed` only once a recipient has confirmed *every*
