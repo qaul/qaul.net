@@ -37,69 +37,101 @@ class CreateAccountScreen extends HookConsumerWidget {
       isLoading: loading.value,
       backgroundColor: Colors.black54,
       child: QaulAuthPageScaffold(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 120),
-          child: Theme(
-            data: Theme.of(context).copyWith(
-              inputDecorationTheme: const InputDecorationTheme(
-                hintStyle: TextStyle(color: kQaulAuthSecondaryTextColor),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: kQaulAuthSecondaryTextColor),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: kQaulAuthPrimaryTextColor),
-                ),
-                errorBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.red),
-                ),
-                focusedErrorBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.red),
-                ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(
+                scrollbars: false,
               ),
-              textSelectionTheme: const TextSelectionThemeData(
-                cursorColor: kQaulAuthPrimaryTextColor,
-              ),
-            ),
-            child: Column(
-              children: [
-                const SizedBox(width: double.maxFinite),
-                QaulAvatar.large(),
-                const SizedBox(height: 28),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    return SizedBox(
-                      width: constraints.constrainWidth(400),
-                      child: TextFormField(
-                        key: _fieldKey,
-                        controller: nameCtrl,
-                        style: const TextStyle(
-                          color: kQaulAuthPrimaryTextColor,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(40, 24, 40, 32),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Align(
+                    alignment: const Alignment(0, -0.35),
+                    child: Theme(
+                      data: Theme.of(context).copyWith(
+                        inputDecorationTheme: const InputDecorationTheme(
+                          hintStyle: TextStyle(
+                            color: kQaulAuthSecondaryTextColor,
+                          ),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: kQaulAuthSecondaryTextColor,
+                            ),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: kQaulAuthPrimaryTextColor,
+                            ),
+                          ),
+                          errorBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.red),
+                          ),
+                          focusedErrorBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.red),
+                          ),
                         ),
-                        validator: (s) => _validateUserName(context, s),
-                        onFieldSubmitted: (_) {
-                          _submitUsername(context, ref, nameCtrl, loading);
-                        },
-                        decoration: InputDecoration(
-                          hintText: i10n.createAccountHeading,
+                        textSelectionTheme: const TextSelectionThemeData(
+                          cursorColor: kQaulAuthPrimaryTextColor,
                         ),
                       ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 28),
-                QaulButton(
-                  key: submitButtonKey,
-                  label: i10n.start,
-                  style: const TextStyle(
-                    color: kQaulAuthPrimaryTextColor,
-                    fontSize: 16,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(width: double.maxFinite),
+                          QaulAvatar.large(),
+                          const SizedBox(height: 28),
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              return SizedBox(
+                                width: constraints.constrainWidth(400),
+                                child: TextFormField(
+                                  key: _fieldKey,
+                                  controller: nameCtrl,
+                                  style: const TextStyle(
+                                    color: kQaulAuthPrimaryTextColor,
+                                  ),
+                                  validator: (s) =>
+                                      _validateUserName(context, s),
+                                  onFieldSubmitted: (_) {
+                                    _submitUsername(
+                                      context,
+                                      ref,
+                                      nameCtrl,
+                                      loading,
+                                    );
+                                  },
+                                  decoration: InputDecoration(
+                                    hintText: i10n.createAccountHeading,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 28),
+                          QaulButton(
+                            key: submitButtonKey,
+                            label: i10n.start,
+                            style: const TextStyle(
+                              color: kQaulAuthPrimaryTextColor,
+                              fontSize: 16,
+                            ),
+                            onPressed: () => _submitUsername(
+                              context,
+                              ref,
+                              nameCtrl,
+                              loading,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  onPressed: () =>
-                      _submitUsername(context, ref, nameCtrl, loading),
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
