@@ -171,7 +171,7 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                               height: 65,
                             ),
                             onCreateAccount: () =>
-                                Navigator.pushReplacementNamed(
+                                Navigator.pushNamed(
                               context,
                               NavigationHelper.createAccount,
                             ),
@@ -242,7 +242,13 @@ class _LoginSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _AuthSectionTitle(icon: Icons.accessibility_new, label: 'Login'),
+        const _AuthSectionTitle(
+          leading: _AuthPngIcon(
+            'assets/icons/auth/manage_account.png',
+            color: kQaulAuthPrimaryTextColor,
+          ),
+          label: 'Login',
+        ),
         const SizedBox(height: kQaulAuthItemGap),
         QaulAuthSegmentedList(
           children: [
@@ -333,14 +339,17 @@ class _AuthLanguageTile extends StatelessWidget {
 }
 
 class _AuthSectionTitle extends StatelessWidget {
-  const _AuthSectionTitle({required this.icon, required this.label});
+  const _AuthSectionTitle({
+    required this.leading,
+    required this.label,
+  });
 
-  final IconData icon;
+  final Widget leading;
   final String label;
 
   @override
   Widget build(BuildContext context) {
-    return QaulAuthSectionTitle(icon: icon, label: label);
+    return QaulAuthSectionTitle(leading: leading, label: label);
   }
 }
 
@@ -443,7 +452,10 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
           children: [
             if (widget.showLogin && _accounts.isNotEmpty) ...[
               const _AuthSectionTitle(
-                icon: Icons.accessibility_new,
+                leading: _AuthPngIcon(
+                  'assets/icons/auth/manage_account.png',
+                  color: kQaulAuthPrimaryTextColor,
+                ),
                 label: 'Login',
               ),
               const SizedBox(height: kQaulAuthItemGap),
@@ -481,7 +493,7 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
             QaulAuthActionRow(
               leading: const _AuthPngIcon('assets/icons/auth/add_account.png'),
               label: 'Create user profile',
-              onTap: () => Navigator.pushReplacementNamed(
+              onTap: () => Navigator.pushNamed(
                 context,
                 NavigationHelper.createAccount,
               ),

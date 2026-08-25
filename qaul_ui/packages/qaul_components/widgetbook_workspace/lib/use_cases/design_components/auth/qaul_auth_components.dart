@@ -125,7 +125,11 @@ Widget buildQaulAuthPageScaffoldUseCase(BuildContext context) {
       padding: const EdgeInsets.fromLTRB(28, 32, 28, 32),
       children: [
         const QaulAuthSectionTitle(
-          icon: Icons.accessibility_new,
+          leading: ImageIcon(
+            AssetImage('assets/icons/auth/manage_account.png'),
+            color: kQaulAuthPrimaryTextColor,
+            size: kQaulAuthIconSize,
+          ),
           label: 'Login',
         ),
         const SizedBox(height: kQaulAuthItemGap),
