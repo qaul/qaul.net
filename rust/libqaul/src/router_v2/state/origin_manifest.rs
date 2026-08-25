@@ -16,9 +16,6 @@ use crate::{
     storage::manifest_state::{DelegationEntry, HostManifestState},
 };
 
-/// Grace from the first unreachable observation to removal: the §10.7
-/// budget of 95 s less the 35 s route expiry already spent making the
-/// loss visible.
 const UNREACHABLE_GRACE_MS: u64 = 60_000;
 
 impl RouterV2State {
@@ -159,9 +156,7 @@ impl RouterV2State {
                         liveness.insert(**user_id, now_ms);
                         return false;
                     }
-                    // First unreachable sighting starts the clock rather
-                    // than dropping outright, so a single missed tick does
-                    // not evict an entry.
+
                     let since = *liveness.entry(**user_id).or_insert(now_ms);
                     now_ms.saturating_sub(since) > UNREACHABLE_GRACE_MS
                 })
