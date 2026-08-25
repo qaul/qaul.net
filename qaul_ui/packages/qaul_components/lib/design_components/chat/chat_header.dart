@@ -43,7 +43,7 @@ TextStyle _chatHeaderLineStyle(
     fontSize: fontSize,
     fontWeight: FontWeight.w400,
     height: 1.2,
-    letterSpacing: 0.5,
+    letterSpacing: 1,
     color: _chatHeaderTextColor(theme),
   );
 }

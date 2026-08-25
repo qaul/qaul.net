@@ -26,9 +26,13 @@ export 'design_components/chat/message_presentation_meta.dart'
         MessagePresentationMeta;
 export 'design_components/chat/qaul_chat_bubble.dart';
 export 'design_components/chat/room_meta_message.dart';
+export 'design_components/settings/qaul_settings_menu_item.dart';
+export 'design_components/settings/qaul_settings_option_item.dart';
+export 'design_components/settings/qaul_settings_tokens.dart';
 export 'design_components/shell/qaul_fab.dart';
 export 'design_components/shell/qaul_loading_indicator.dart';
 export 'design_components/shell/qaul_navbar.dart';
+export 'design_components/shell/qaul_page_header.dart';
 export 'design_components/shell/search_scaffold.dart';
 export 'design_components/users/qaul_avatar.dart';
 export 'design_components/users/user_search_scaffold.dart';

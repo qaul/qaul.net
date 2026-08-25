@@ -10,7 +10,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_components/qaul_components.dart' as qc
-    show QaulAvatar, QaulAvatarBadge, QaulAvatarSize;
+    show
+        kQaulPageHeaderControlColor,
+        QaulAvatar,
+        QaulAvatarBadge,
+        QaulAvatarSize,
+        QaulPageHeader;
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
 

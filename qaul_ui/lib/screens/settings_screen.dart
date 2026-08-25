@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_components/qaul_components.dart';
@@ -17,6 +18,48 @@ import '../helpers/user_prefs_helper.dart';
 import '../l10n/app_localizations.dart';
 import '../widgets/widgets.dart';
 
+const _kSettingsIconSize = 25.0;
+
+class _SettingsSvgIcon extends StatelessWidget {
+  const _SettingsSvgIcon(
+    this.assetName, {
+    this.package,
+    this.size = _kSettingsIconSize,
+  });
+
+  final String assetName;
+  final String? package;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return SvgPicture.asset(
+      assetName,
+      package: package,
+      width: size,
+      height: size,
+      colorFilter: ColorFilter.mode(
+        IconTheme.of(context).color ?? kQaulSettingsTextColor,
+        BlendMode.srcIn,
+      ),
+    );
+  }
+}
+
+class _SettingsPngIcon extends StatelessWidget {
+  const _SettingsPngIcon(this.assetName);
+
+  final String assetName;
+
+  @override
+  Widget build(BuildContext context) {
+    return ImageIcon(
+      AssetImage(assetName),
+      size: _kSettingsIconSize,
+    );
+  }
+}
+
 class SettingsScreen extends HookConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -27,50 +70,347 @@ class SettingsScreen extends HookConsumerWidget {
 
     return ResponsiveScaffold(
       title: l10n.settings,
-      icon: Icons.settings,
+      titleIcon: const _SettingsSvgIcon(
+        'assets/icons/settings/settings_cog.svg',
+      ),
+      actions: const [Icon(Icons.more_vert), SizedBox(width: 12)],
+      backgroundColor: qaulSettingsBackgroundColor(context),
+      bodyAlignment: Alignment.topCenter,
+      scrollHorizontalPadding: 0,
+      scrollTopPadding: 0,
       wrapWithScrollable: true,
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          const LanguageSelectDropDown(),
-          const SizedBox(height: 20),
-          const ThemeSelectDropdown(),
-          const SizedBox(height: 20),
-          SettingsSection(
-            name: l10n.notifications,
-            icon: const FaIcon(FontAwesomeIcons.solidBell),
-            content: const _NotificationOptions(),
-          ),
-          const SizedBox(height: 20),
-          SettingsSection(
-            name: l10n.network,
-            icon: const FaIcon(FontAwesomeIcons.networkWired),
-            content: const Padding(
-              padding: EdgeInsets.only(top: 20),
-              child: _InternetNodesList(),
+          ValueListenableBuilder<Locale?>(
+            valueListenable: UserPrefsHelper.instance.localeNotifier,
+            builder: (context, locale, _) => QaulSettingsMenuItem(
+              icon: const _SettingsSvgIcon(
+                'assets/icons/settings/settings_language.svg',
+                size: 23,
+              ),
+              title: l10n.language,
+              value: locale == null
+                  ? _systemDefaultLabel(l10n)
+                  : lookupAppLocalizations(locale).languageName,
+              onTap: () => _pushSettingsDetail(
+                context,
+                icon: const _SettingsSvgIcon(
+                  'assets/icons/settings/settings_language.svg',
+                  size: 23,
+                ),
+                title: l10n.language,
+                child: const _LanguageSettingsList(),
+              ),
             ),
           ),
-          if (user != null) ...[
-            const SizedBox(height: 20),
-            QaulAccountSettingsSection(
-              showPasswordAction: false,
-              onExportAccount: () =>
-                  AccountManagementCoordinator.showExportFlow(context, ref),
-              onLogout: () => AccountManagementCoordinator.logout(context, ref),
-              onDeleteAccount: () =>
-                  AccountManagementCoordinator.showDeleteFlow(context, ref),
+          ValueListenableBuilder<ThemeMode>(
+            valueListenable: UserPrefsHelper.instance.themeModeNotifier,
+            builder: (context, themeMode, _) => QaulSettingsMenuItem(
+              icon: const _SettingsSvgIcon(
+                'assets/icons/settings/settings_theme.svg',
+              ),
+              title: l10n.theme,
+              value: _themeLabel(l10n, themeMode),
+              onTap: () => _pushSettingsDetail(
+                context,
+                icon: const _SettingsSvgIcon(
+                  'assets/icons/settings/settings_theme.svg',
+                ),
+                title: l10n.theme,
+                child: const _ThemeSettingsList(),
+              ),
             ),
-          ],
-          if (Platform.isAndroid) ...[
-            const SizedBox(height: 20),
-            SettingsSection(
-              name: l10n.androidOptions,
+          ),
+          QaulSettingsMenuItem(
+            icon: const _SettingsSvgIcon(
+              'assets/icons/settings/settings_notificatons.svg',
+            ),
+            title: l10n.notifications,
+            onTap: () => _pushSettingsDetail(
+              context,
+              icon: const _SettingsSvgIcon(
+                'assets/icons/settings/settings_notificatons.svg',
+              ),
+              title: l10n.notifications,
+              child: const Padding(
+                padding: kQaulSettingsContentPadding,
+                child: _NotificationOptions(),
+              ),
+            ),
+          ),
+          QaulSettingsMenuItem(
+            icon: const _SettingsSvgIcon(
+              'assets/icons/network-outlined.svg',
+              package: 'qaul_components',
+            ),
+            title: l10n.network,
+            onTap: () => _pushSettingsDetail(
+              context,
+              icon: const _SettingsSvgIcon(
+                'assets/icons/network-outlined.svg',
+                package: 'qaul_components',
+              ),
+              title: l10n.network,
+              child: const _InternetNodesList(),
+            ),
+          ),
+          QaulSettingsMenuItem(
+            icon: const _SettingsPngIcon(
+              'assets/icons/settings/settings_usr.png',
+            ),
+            title: 'Account Management',
+            enabled: user != null,
+            onTap: () => _pushSettingsDetail(
+              context,
+              icon: const _SettingsPngIcon(
+                'assets/icons/settings/settings_usr.png',
+              ),
+              title: 'Account Management',
+              child: user == null
+                  ? const Padding(
+                      padding: kQaulSettingsContentPadding,
+                      child: _SettingsPlaceholder(label: 'Account Management'),
+                    )
+                  : Padding(
+                      padding: kQaulSettingsContentPadding,
+                      child: QaulAccountSettingsSection(
+                        showHeader: false,
+                        showPasswordAction: false,
+                        onExportAccount: () =>
+                            AccountManagementCoordinator.showExportFlow(
+                              context,
+                              ref,
+                            ),
+                        onLogout: () =>
+                            AccountManagementCoordinator.logout(context, ref),
+                        onDeleteAccount: () =>
+                            AccountManagementCoordinator.showDeleteFlow(
+                              context,
+                              ref,
+                            ),
+                      ),
+                    ),
+            ),
+          ),
+          if (Platform.isAndroid)
+            QaulSettingsMenuItem(
+              icon: const _SettingsSvgIcon(
+                'assets/icons/settings/settings_info_privacy.svg',
+              ),
+              title: 'Enhanced Privacy',
+              onTap: () => _pushSettingsDetail(
+                context,
+                icon: const _SettingsSvgIcon(
+                  'assets/icons/settings/settings_info_privacy.svg',
+                ),
+                title: 'Enhanced Privacy',
+                child: const Padding(
+                  padding: kQaulSettingsContentPadding,
+                  child: _EnhancedPrivacyOptions(),
+                ),
+              ),
+            ),
+          if (Platform.isAndroid)
+            QaulSettingsMenuItem(
               icon: const FaIcon(FontAwesomeIcons.android),
-              content: const _AndroidOptions(),
+              title: l10n.androidOptions,
+              onTap: () => _pushSettingsDetail(
+                context,
+                icon: const FaIcon(FontAwesomeIcons.android),
+                title: l10n.androidOptions,
+                child: const Padding(
+                  padding: kQaulSettingsContentPadding,
+                  child: _AndroidOptions(),
+                ),
+              ),
             ),
-          ],
-          const SizedBox(height: 20),
         ],
+      ),
+    );
+  }
+}
+
+void _pushSettingsDetail(
+  BuildContext context, {
+  required Widget icon,
+  required String title,
+  required Widget child,
+}) {
+  Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => _SettingsDetailScreen(
+        icon: icon,
+        title: title,
+        child: child,
+      ),
+    ),
+  );
+}
+
+String _systemDefaultLabel(AppLocalizations l10n) =>
+    l10n.useSystemDefaultMessage
+        .replaceFirst('Use ', '')
+        .replaceFirst('system', 'System');
+
+String _themeLabel(AppLocalizations l10n, ThemeMode mode) {
+  switch (mode) {
+    case ThemeMode.light:
+      return l10n.lightTheme.replaceFirst('Theme', 'mode');
+    case ThemeMode.dark:
+      return l10n.darkTheme.replaceFirst('Theme', 'mode');
+    case ThemeMode.system:
+      return _systemDefaultLabel(l10n);
+  }
+}
+
+class _SettingsDetailScreen extends StatelessWidget {
+  const _SettingsDetailScreen({
+    required this.icon,
+    required this.title,
+    required this.child,
+  });
+
+  final Widget icon;
+  final String title;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ResponsiveScaffold(
+      title: title,
+      titleIcon: icon,
+      actions: const [Icon(Icons.more_vert), SizedBox(width: 12)],
+      backgroundColor: qaulSettingsBackgroundColor(context),
+      bodyAlignment: Alignment.topCenter,
+      scrollHorizontalPadding: 0,
+      scrollTopPadding: 0,
+      wrapWithScrollable: true,
+      body: child,
+    );
+  }
+}
+
+class _LanguageSettingsList extends StatelessWidget {
+  const _LanguageSettingsList();
+
+  String _languageName(Locale l) => lookupAppLocalizations(l).languageName;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final items = <Locale?>[null, ...AppLocalizations.supportedLocales];
+
+    return ValueListenableBuilder<Locale?>(
+      valueListenable: UserPrefsHelper.instance.localeNotifier,
+      builder: (context, currentLocale, _) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final locale in items)
+              QaulSettingsOptionItem(
+                label: locale == null
+                    ? _systemDefaultLabel(l10n)
+                    : _languageName(locale),
+                selected: locale == currentLocale,
+                onTap: () => UserPrefsHelper.instance.setDefaultLocale(locale),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _ThemeSettingsList extends StatelessWidget {
+  const _ThemeSettingsList();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: UserPrefsHelper.instance.themeModeNotifier,
+      builder: (context, currentMode, _) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final mode in ThemeMode.values)
+              QaulSettingsOptionItem(
+                label: _themeLabel(l10n, mode),
+                selected: mode == currentMode,
+                onTap: () => UserPrefsHelper.instance.setThemeMode(mode),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _SettingsPlaceholder extends StatelessWidget {
+  const _SettingsPlaceholder({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            color: qaulSettingsItemColor(context),
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1.8,
+          ),
+    );
+  }
+}
+
+class _EnhancedPrivacyOptions extends StatelessWidget {
+  const _EnhancedPrivacyOptions();
+
+  @override
+  Widget build(BuildContext context) {
+    if (!Platform.isAndroid) return const SizedBox.shrink();
+
+    return const _PrivacyPolicyOption();
+  }
+}
+
+class _PrivacyPolicyOption extends StatelessWidget {
+  const _PrivacyPolicyOption();
+
+  static const privacyPolicyURL =
+      "https://qaul.net/legal/privacy-policy-android/";
+
+  Future<void> _openPrivacyPolicy() async {
+    final uri = Uri.parse(privacyPolicyURL);
+    if (!(await canLaunchUrl(uri))) return;
+    launchUrl(uri);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return DefaultTextStyle(
+      maxLines: 2,
+      style: Theme.of(
+        context,
+      ).textTheme.labelLarge!.copyWith(overflow: TextOverflow.ellipsis),
+      child: InkWell(
+        onTap: _openPrivacyPolicy,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const Icon(Icons.policy),
+              const SizedBox(width: 8),
+              Text(l10n.androidPrivacyPolicy),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -154,6 +494,7 @@ class _InternetNodesList extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final nodes = ref.watch(connectedNodesProvider);
+    final isLoading = useState(true);
 
     final removeNode = useCallback((String nodeAddress) {
       final worker = ref.read(qaulWorkerProvider);
@@ -175,8 +516,35 @@ class _InternetNodesList extends HookConsumerWidget {
       await worker.requestNodes();
     }, []);
 
+    useEffect(() {
+      var isDisposed = false;
+
+      Future<void>(() async {
+        try {
+          await refreshNodes();
+        } finally {
+          if (!isDisposed) {
+            isLoading.value = false;
+          }
+        }
+      });
+
+      return () => isDisposed = true;
+    }, const []);
+
     final textTheme = Theme.of(context).textTheme;
     final l10n = AppLocalizations.of(context);
+
+    if (isLoading.value) {
+      return const Padding(
+        padding: EdgeInsets.fromLTRB(28, 24, 28, 0),
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return CronTaskDecorator(
       callback: refreshNodes,
       schedule: const Duration(milliseconds: 1000),
@@ -185,6 +553,8 @@ class _InternetNodesList extends HookConsumerWidget {
           QaulTable(
             titleIcon: CupertinoIcons.globe,
             title: l10n!.internetNodes,
+            showTitle: false,
+            contentPadding: kQaulSettingsContentPadding,
             addRowLabel: l10n.addNodeCTA,
             rowCount: nodes.length,
             onAddRowPressed: () async {
@@ -472,15 +842,6 @@ class _AndroidOptions extends StatefulWidget {
 }
 
 class _AndroidOptionsState extends State<_AndroidOptions> {
-  static const privacyPolicyURL =
-      "https://qaul.net/legal/privacy-policy-android/";
-
-  void _openPrivacyPolicy() async {
-    final uri = Uri.parse(privacyPolicyURL);
-    if (!(await canLaunchUrl(uri))) return;
-    launchUrl(uri);
-  }
-
   void _showPrivacyDialog() async {
     showDialog(
       context: context,
@@ -499,22 +860,6 @@ class _AndroidOptionsState extends State<_AndroidOptions> {
       ).textTheme.labelLarge!.copyWith(overflow: TextOverflow.ellipsis),
       child: Column(
         children: [
-          InkWell(
-            onTap: _openPrivacyPolicy,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Icon(Icons.policy),
-                  const SizedBox(width: 8),
-                  Text(l10n.androidPrivacyPolicy),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
           InkWell(
             onTap: _showPrivacyDialog,
             child: Padding(

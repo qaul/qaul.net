@@ -38,6 +38,8 @@ import 'package:qaul_components_widgetbook/use_cases/design_components/chat/meta
     as _qaul_components_widgetbook_use_cases_design_components_chat_meta_messages_room_meta_message;
 import 'package:qaul_components_widgetbook/use_cases/design_components/qaul_color_sheet.dart'
     as _qaul_components_widgetbook_use_cases_design_components_qaul_color_sheet;
+import 'package:qaul_components_widgetbook/use_cases/design_components/settings/qaul_settings_components.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_settings_qaul_settings_components;
 import 'package:qaul_components_widgetbook/use_cases/design_components/shell/qaul_fab.dart'
     as _qaul_components_widgetbook_use_cases_design_components_shell_qaul_fab;
 import 'package:qaul_components_widgetbook/use_cases/design_components/shell/qaul_navbar.dart'
@@ -130,6 +132,17 @@ final directories = <_widgetbook.WidgetbookNode>[
       _widgetbook.WidgetbookFolder(
         name: 'chat',
         children: [
+          _widgetbook.WidgetbookComponent(
+            name: 'QaulChatBubble',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Media — separated bubbles',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_chat_bubble_qaul_chat_bubble
+                        .buildMediaSeparatedBubblesUseCase,
+              ),
+            ],
+          ),
           _widgetbook.WidgetbookFolder(
             name: 'bubble',
             children: [
@@ -199,12 +212,6 @@ final directories = <_widgetbook.WidgetbookNode>[
                     builder:
                         _qaul_components_widgetbook_use_cases_design_components_chat_bubble_qaul_chat_bubble
                             .buildInteractiveLongPressUseCase,
-                  ),
-                  _widgetbook.WidgetbookUseCase(
-                    name: 'Media — separated bubbles',
-                    builder:
-                        _qaul_components_widgetbook_use_cases_design_components_chat_bubble_qaul_chat_bubble
-                            .buildMediaSeparatedBubblesUseCase,
                   ),
                   _widgetbook.WidgetbookUseCase(
                     name: 'Outgoing — not sent',
@@ -382,6 +389,50 @@ final directories = <_widgetbook.WidgetbookNode>[
                             .buildRoomMetaMessageDateUseCase,
                   ),
                 ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      _widgetbook.WidgetbookFolder(
+        name: 'settings',
+        children: [
+          _widgetbook.WidgetbookComponent(
+            name: 'QaulPageHeader',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Settings',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_settings_qaul_settings_components
+                        .buildQaulSettingsHeaderUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookComponent(
+            name: 'QaulSettingsMenuItem',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Overview',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_settings_qaul_settings_components
+                        .buildQaulSettingsComponentsOverviewUseCase,
+              ),
+              _widgetbook.WidgetbookUseCase(
+                name: 'States',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_settings_qaul_settings_components
+                        .buildQaulSettingsMenuItemStatesUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookComponent(
+            name: 'QaulSettingsOptionItem',
+            useCases: [
+              _widgetbook.WidgetbookUseCase(
+                name: 'Selectable list',
+                builder:
+                    _qaul_components_widgetbook_use_cases_design_components_settings_qaul_settings_components
+                        .buildQaulSettingsOptionItemUseCase,
               ),
             ],
           ),

@@ -11,6 +11,8 @@ class QaulTable extends StatelessWidget {
     required this.onAddRowPressed,
     this.emptyStateWidget,
     this.addButtonEnabled = true,
+    this.showTitle = true,
+    this.contentPadding = EdgeInsets.zero,
   });
   final IconData titleIcon;
   final String title;
@@ -20,38 +22,51 @@ class QaulTable extends StatelessWidget {
   final VoidCallback onAddRowPressed;
   final Widget? emptyStateWidget;
   final bool addButtonEnabled;
+  final bool showTitle;
+  final EdgeInsetsGeometry contentPadding;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
-        Row(
-          children: [
-            Icon(titleIcon),
-            const SizedBox(width: 8.0),
-            Text(title),
-          ],
-        ),
-        const SizedBox(height: 8.0),
-        if (rowCount == 0)
-          emptyStateWidget ?? Text(l10n.genericEmptyState)
-        else
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            decoration: BoxDecoration(
-              border: Border.symmetric(
-                horizontal: BorderSide(color: Theme.of(context).dividerColor),
-              ),
-            ),
-            child: ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: rowCount,
-              separatorBuilder: (_, _) => const Divider(height: 12.0),
-              itemBuilder: rowBuilder,
-            ),
+        Padding(
+          padding: contentPadding,
+          child: Column(
+            children: [
+              if (showTitle) ...[
+                Row(
+                  children: [
+                    Icon(titleIcon),
+                    const SizedBox(width: 8.0),
+                    Text(title),
+                  ],
+                ),
+                const SizedBox(height: 8.0),
+              ],
+              if (rowCount == 0)
+                emptyStateWidget ?? Text(l10n.genericEmptyState)
+              else
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  decoration: BoxDecoration(
+                    border: Border.symmetric(
+                      horizontal: BorderSide(
+                        color: Theme.of(context).dividerColor,
+                      ),
+                    ),
+                  ),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: rowCount,
+                    separatorBuilder: (_, _) => const Divider(height: 12.0),
+                    itemBuilder: rowBuilder,
+                  ),
+                ),
+            ],
           ),
+        ),
         if (addButtonEnabled) ...[
           const SizedBox(height: 12.0),
           ListTile(
