@@ -4,6 +4,8 @@ const kQaulSettingsTextColor = Color(0xFF999999);
 const kQaulSettingsDarkHoverColor = Color(0xFF181C1E);
 const kQaulSettingsLightHoverColor = Color(0xFFF2F2F2);
 
+const kQaulSettingsContentPadding = EdgeInsets.fromLTRB(28, 4, 28, 0);
+
 Color qaulSettingsItemColor(BuildContext context, {bool selected = false}) {
   if (!selected) return kQaulSettingsTextColor;
 

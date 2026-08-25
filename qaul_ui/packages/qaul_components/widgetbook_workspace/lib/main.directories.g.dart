@@ -409,17 +409,6 @@ final directories = <_widgetbook.WidgetbookNode>[
             ],
           ),
           _widgetbook.WidgetbookComponent(
-            name: 'QaulSettingsMenuContent',
-            useCases: [
-              _widgetbook.WidgetbookUseCase(
-                name: 'Content wrappers',
-                builder:
-                    _qaul_components_widgetbook_use_cases_design_components_settings_qaul_settings_components
-                        .buildQaulSettingsContentUseCase,
-              ),
-            ],
-          ),
-          _widgetbook.WidgetbookComponent(
             name: 'QaulSettingsMenuItem',
             useCases: [
               _widgetbook.WidgetbookUseCase(

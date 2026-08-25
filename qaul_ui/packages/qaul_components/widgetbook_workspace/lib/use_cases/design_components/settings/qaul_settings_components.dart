@@ -50,34 +50,32 @@ Widget buildQaulSettingsMenuItemStatesUseCase(BuildContext context) {
     child: Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 720),
-        child: QaulSettingsMenuContent(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              QaulSettingsMenuItem(
-                icon: const Icon(Icons.translate),
-                title: 'Language',
-                value: 'System\'s default',
-                onTap: () {},
-              ),
-              QaulSettingsMenuItem(
-                icon: const Icon(Icons.palette),
-                title: 'Theme',
-                value: 'Dark mode',
-                onTap: () {},
-              ),
-              QaulSettingsMenuItem(
-                icon: const Icon(Icons.notifications),
-                title: 'Notifications',
-                onTap: () {},
-              ),
-              const QaulSettingsMenuItem(
-                icon: Icon(Icons.info_outline),
-                title: 'Read only',
-                value: 'No action',
-              ),
-            ],
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            QaulSettingsMenuItem(
+              icon: const Icon(Icons.translate),
+              title: 'Language',
+              value: 'System\'s default',
+              onTap: () {},
+            ),
+            QaulSettingsMenuItem(
+              icon: const Icon(Icons.palette),
+              title: 'Theme',
+              value: 'Dark mode',
+              onTap: () {},
+            ),
+            QaulSettingsMenuItem(
+              icon: const Icon(Icons.notifications),
+              title: 'Notifications',
+              onTap: () {},
+            ),
+            const QaulSettingsMenuItem(
+              icon: Icon(Icons.info_outline),
+              title: 'Read only',
+              value: 'No action',
+            ),
+          ],
         ),
       ),
     ),
@@ -91,46 +89,6 @@ Widget buildQaulSettingsMenuItemStatesUseCase(BuildContext context) {
 )
 Widget buildQaulSettingsOptionItemUseCase(BuildContext context) {
   return const _QaulSettingsOptionItemUseCase();
-}
-
-@widgetbook.UseCase(
-  name: 'Content wrappers',
-  type: QaulSettingsMenuContent,
-  path: 'design_components/settings',
-)
-Widget buildQaulSettingsContentUseCase(BuildContext context) {
-  return Material(
-    color: qaulSettingsBackgroundColor(context),
-    child: Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 720),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            QaulSettingsMenuContent(
-              child: QaulSettingsMenuItem(
-                icon: const Icon(Icons.translate),
-                title: 'Menu content',
-                value: 'Full row hover',
-                onTap: () {},
-              ),
-            ),
-            const SizedBox(height: 32),
-            QaulSettingsDetailContent(
-              child: QaulSettingsPaddedContent(
-                child: QaulSettingsOptionItem(
-                  label: 'Detail content with inner padding',
-                  selected: true,
-                  onTap: () {},
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
 }
 
 class _QaulSettingsComponentsOverview extends StatefulWidget {
@@ -161,67 +119,63 @@ class _QaulSettingsComponentsOverviewState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    QaulSettingsMenuContent(
-                      child: Column(
-                        children: [
-                          QaulSettingsMenuItem(
-                            icon: const Icon(Icons.translate),
-                            title: 'Language',
-                            value: _selectedLanguage,
-                            onTap: () {},
-                          ),
-                          QaulSettingsMenuItem(
-                            icon: const Icon(Icons.palette),
-                            title: 'Theme',
-                            value: 'Dark mode',
-                            onTap: () {},
-                          ),
-                          QaulSettingsMenuItem(
-                            icon: const Icon(Icons.notifications),
-                            title: 'Notifications',
-                            onTap: () {},
-                          ),
-                          QaulSettingsMenuItem(
-                            icon: const Icon(Icons.account_tree),
-                            title: 'Network',
-                            onTap: () {},
-                          ),
-                          QaulSettingsMenuItem(
-                            icon: const Icon(Icons.supervisor_account),
-                            title: 'Account Management',
-                            onTap: () {},
-                          ),
-                        ],
-                      ),
+                    Column(
+                      children: [
+                        QaulSettingsMenuItem(
+                          icon: const Icon(Icons.translate),
+                          title: 'Language',
+                          value: _selectedLanguage,
+                          onTap: () {},
+                        ),
+                        QaulSettingsMenuItem(
+                          icon: const Icon(Icons.palette),
+                          title: 'Theme',
+                          value: 'Dark mode',
+                          onTap: () {},
+                        ),
+                        QaulSettingsMenuItem(
+                          icon: const Icon(Icons.notifications),
+                          title: 'Notifications',
+                          onTap: () {},
+                        ),
+                        QaulSettingsMenuItem(
+                          icon: const Icon(Icons.account_tree),
+                          title: 'Network',
+                          onTap: () {},
+                        ),
+                        QaulSettingsMenuItem(
+                          icon: const Icon(Icons.supervisor_account),
+                          title: 'Account Management',
+                          onTap: () {},
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 40),
-                    QaulSettingsDetailContent(
-                      child: QaulSettingsPaddedContent(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            QaulSettingsOptionItem(
-                              label: 'System\'s default',
-                              selected:
-                                  _selectedLanguage == 'System\'s default',
-                              onTap: () => setState(
-                                () => _selectedLanguage = 'System\'s default',
-                              ),
+                    Padding(
+                      padding: kQaulSettingsContentPadding,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          QaulSettingsOptionItem(
+                            label: 'System\'s default',
+                            selected: _selectedLanguage == 'System\'s default',
+                            onTap: () => setState(
+                              () => _selectedLanguage = 'System\'s default',
                             ),
-                            QaulSettingsOptionItem(
-                              label: 'English',
-                              selected: _selectedLanguage == 'English',
-                              onTap: () =>
-                                  setState(() => _selectedLanguage = 'English'),
-                            ),
-                            QaulSettingsOptionItem(
-                              label: 'Deutsch',
-                              selected: _selectedLanguage == 'Deutsch',
-                              onTap: () =>
-                                  setState(() => _selectedLanguage = 'Deutsch'),
-                            ),
-                          ],
-                        ),
+                          ),
+                          QaulSettingsOptionItem(
+                            label: 'English',
+                            selected: _selectedLanguage == 'English',
+                            onTap: () =>
+                                setState(() => _selectedLanguage = 'English'),
+                          ),
+                          QaulSettingsOptionItem(
+                            label: 'Deutsch',
+                            selected: _selectedLanguage == 'Deutsch',
+                            onTap: () =>
+                                setState(() => _selectedLanguage = 'Deutsch'),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -254,25 +208,24 @@ class _QaulSettingsOptionItemUseCaseState
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 720),
-          child: QaulSettingsDetailContent(
-            child: QaulSettingsPaddedContent(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (final option in const [
-                    'System\'s default',
-                    'English',
-                    'Deutsch',
-                    'Italiano',
-                  ])
-                    QaulSettingsOptionItem(
-                      label: option,
-                      selected: _selected == option,
-                      onTap: () => setState(() => _selected = option),
-                    ),
-                ],
-              ),
+          child: Padding(
+            padding: kQaulSettingsContentPadding,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final option in const [
+                  'System\'s default',
+                  'English',
+                  'Deutsch',
+                  'Italiano',
+                ])
+                  QaulSettingsOptionItem(
+                    label: option,
+                    selected: _selected == option,
+                    onTap: () => setState(() => _selected = option),
+                  ),
+              ],
             ),
           ),
         ),

@@ -26,7 +26,6 @@ export 'design_components/chat/message_presentation_meta.dart'
         MessagePresentationMeta;
 export 'design_components/chat/qaul_chat_bubble.dart';
 export 'design_components/chat/room_meta_message.dart';
-export 'design_components/settings/qaul_settings_content.dart';
 export 'design_components/settings/qaul_settings_menu_item.dart';
 export 'design_components/settings/qaul_settings_option_item.dart';
 export 'design_components/settings/qaul_settings_tokens.dart';
