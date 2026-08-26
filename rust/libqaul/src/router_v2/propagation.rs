@@ -49,10 +49,45 @@ pub fn should_propagate(entry: &RoutingEntry, sphere: Sphere) -> bool {
     }
 }
 
+/// check if this node should be introduced as a user or carried in the manifest, per 2.3
+pub fn should_introduce(
+    state: &RouterV2State,
+    space: Space,
+    target_id: &[u8; 8],
+    sphere: Sphere,
+) -> bool {
+    match (sphere, space) {
+        (Sphere::Local, _) => true,
+        (Sphere::Internet, Space::User) => false,
+        (Sphere::Internet, Space::Node) => state
+            .nodes
+            .read()
+            .unwrap()
+            .get(target_id)
+            .is_some_and(|node| node.read().unwrap().is_gateway),
+    }
+}
+
 pub fn compute_outgoing_local_only(stored: bool, outgoing_sphere: Sphere) -> bool {
     match outgoing_sphere {
         Sphere::Internet => false,
         Sphere::Local => stored,
+    }
+}
+
+/// §2.2: "the hop counter is sphere-local"
+pub fn compute_outgoing_hop_count(
+    stored_hop_count: u8,
+    stored_transport: ConnectionModule,
+    outgoing_sphere: Sphere,
+) -> u8 {
+    let crosses_membrane =
+        outgoing_sphere == Sphere::Internet && Sphere::of(stored_transport) == Sphere::Local;
+
+    if crosses_membrane {
+        0
+    } else {
+        stored_hop_count
     }
 }
 
@@ -200,19 +235,23 @@ pub fn tick_relay(state: &RouterV2State, now: u64) {
         version: t.2,
     };
 
-    let user_intros: Vec<Mapping> = state
-        .pending_introductions(Space::User)
-        .into_iter()
-        .map(map_to_intros)
-        .collect();
-    let node_intros: Vec<Mapping> = state
-        .pending_introductions(Space::Node)
-        .into_iter()
-        .map(map_to_intros)
-        .collect();
+    let user_intros = state.pending_introductions(Space::User);
+    let node_intros = state.pending_introductions(Space::Node);
 
     for (peer, neigbour_id, transport) in pairs {
         let sphere_outbound = Sphere::of(transport);
+
+        // §2.3: the membrane applies to index mappings as well as entries.
+        let user_mappings: Vec<Mapping> = user_intros
+            .iter()
+            .filter(|t| should_introduce(state, Space::User, &t.1, sphere_outbound))
+            .map(|t| map_to_intros(*t))
+            .collect();
+        let node_mappings: Vec<Mapping> = node_intros
+            .iter()
+            .filter(|t| should_introduce(state, Space::Node, &t.1, sphere_outbound))
+            .map(|t| map_to_intros(*t))
+            .collect();
 
         let mut user_out = Vec::new();
         let mut node_out = Vec::new();
@@ -227,6 +266,7 @@ pub fn tick_relay(state: &RouterV2State, now: u64) {
             }
 
             let local_only = compute_outgoing_local_only(e.local_only, sphere_outbound);
+            let hop_count = compute_outgoing_hop_count(e.hop_count, e.transport, sphere_outbound);
             match space {
                 Space::Node => {
                     let manifest_version = match &e.target {
@@ -240,7 +280,7 @@ pub fn tick_relay(state: &RouterV2State, now: u64) {
                         abs_idx: *own_idx,
                         seq: e.seq_num.value(),
                         metric: e.metric,
-                        hop_count: e.hop_count,
+                        hop_count,
                         local_only,
                         manifest_version,
                     })
@@ -249,7 +289,7 @@ pub fn tick_relay(state: &RouterV2State, now: u64) {
                     abs_idx: *own_idx,
                     seq: e.seq_num.value(),
                     metric: e.metric,
-                    hop_count: e.hop_count,
+                    hop_count,
                     local_only,
                 }),
             }
@@ -261,14 +301,14 @@ pub fn tick_relay(state: &RouterV2State, now: u64) {
         // empty batch, save ourselves the stress of sending an empty message
         if user_out.is_empty()
             && node_out.is_empty()
-            && user_intros.is_empty()
-            && node_intros.is_empty()
+            && user_mappings.is_empty()
+            && node_mappings.is_empty()
         {
             continue;
         }
         let msg = RoutingUpdate {
-            user_mappings: user_intros.clone(),
-            node_mappings: node_intros.clone(),
+            user_mappings,
+            node_mappings,
             user_entries: user_out,
             node_entries: node_out,
         };
@@ -311,11 +351,16 @@ pub fn on_neighbour_connect(state: &RouterV2State, neighbour: PeerId, transport:
         return;
     }
 
+    let sphere_outbound = Sphere::of(transport);
+
     let user_mappings = {
         let dict = state.user_dict.read().unwrap();
         let users = state.users.read().unwrap();
         let mut mappings = Vec::new();
         for (&idx, &id) in &dict.forward_dir {
+            if !should_introduce(state, Space::User, &id, sphere_outbound) {
+                continue;
+            }
             let version = users
                 .get(&id)
                 .map(|arc| arc.read().unwrap().profile_version)
@@ -335,6 +380,9 @@ pub fn on_neighbour_connect(state: &RouterV2State, neighbour: PeerId, transport:
         let nodes = state.nodes.read().unwrap();
         let mut mappings = Vec::new();
         for (&idx, &id) in &dict.forward_dir {
+            if !should_introduce(state, Space::Node, &id, sphere_outbound) {
+                continue;
+            }
             let version = nodes
                 .get(&id)
                 .map(|arc| arc.read().unwrap().manifest_version)
