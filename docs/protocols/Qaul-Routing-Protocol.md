@@ -126,9 +126,27 @@ bounded TTL and prevents indefinite propagation in pathological chain
 topologies.
 
 The cap applies within a single sphere. End-to-end packet paths that
-traverse multiple spheres MAY exceed 63 cumulative hops. Each gateway
-re-originates routes on the far side of a sphere boundary; the hop
-counter is sphere-local. No global cap is defined.
+traverse multiple spheres MAY exceed 63 cumulative hops. The hop
+counter is sphere-local: when a node relays an entry it learned over a
+Local-sphere transport onto an Internet-sphere transport, it SHALL
+reset the hop count to zero, so the far sphere spends its own 63-hop
+budget rather than the remainder of the near sphere's. No global cap is
+defined.
+
+Only the hop count resets. The `metric` and `seq_num` fields cross the
+boundary unchanged: the metric remains a truthful accumulated path cost
+for gateway selection (Sections 9.2, 10.6), and preserving the origin's
+sequence number is what allows a receiver to compare two gateways
+advertising the same target under the relay-inclusion rule
+(Section 7.2). A relayer does not become the origin of the entries it
+carries across the boundary.
+
+The reset cannot repeat. The propagation rules of Section 2.3 admit no
+entry from the Internet sphere into a Local sphere, so an entry crosses
+a sphere boundary at most once and the cumulative hop count of any
+end-to-end path is bounded by 63 per sphere traversed. The cap remains
+a bounded-TTL backstop; the relay-inclusion rule (Section 7.2) is what
+prevents forwarding loops.
 
 The hop count occupies the lower six bits of a one-byte field on
 the wire (Section 8.3). Bit 7 is the `local_only` flag indicating
@@ -622,6 +640,15 @@ legal path (63 hops, per Section 2.2). The design rule is
 
 The current formula (Section 5.1) has a worst-case path metric of
 63 × (70 + 20) = 5,670, well under the 16-bit cap.
+
+Unlike the hop count, the metric is **not** reset at a sphere boundary
+(Section 2.2), so a path traversing two spheres accumulates both
+spheres' cost into one 16-bit value. Because Section 2.3's propagation
+rules admit no entry from the Internet sphere into a Local sphere, an
+entry crosses at most one boundary and the worst case is therefore two
+spheres: 63 Local hops at 90 plus 63 Internet hops at 15 gives 6,615,
+still far under the cap. A conforming formula MUST satisfy
+`126 × worst_hop_cost ≤ 65,535` for the two-sphere case.
 
 Implementations SHALL saturate accumulation at `u16::MAX` if a
 metric formula would otherwise overflow. The saturated value
