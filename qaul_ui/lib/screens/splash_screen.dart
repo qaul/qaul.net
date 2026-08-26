@@ -255,7 +255,7 @@ class _LoginSection extends StatelessWidget {
       children: [
         _AuthSectionTitle(
           leading: _AuthAssetIcon(
-            'assets/icons/auth/avatar_auth.png',
+            'assets/icons/auth/auth_login.png',
             width: _kAuthSmallPngIconSize,
             height: _kAuthSmallPngIconSize,
             color: qaulAuthPrimaryTextColor(context),
@@ -463,7 +463,7 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
             if (widget.showLogin && _accounts.isNotEmpty) ...[
               _AuthSectionTitle(
                 leading: _AuthAssetIcon(
-                  'assets/icons/auth/avatar_auth.png',
+                  'assets/icons/auth/auth_login.png',
                   width: _kAuthSmallPngIconSize,
                   height: _kAuthSmallPngIconSize,
                   color: qaulAuthPrimaryTextColor(context),

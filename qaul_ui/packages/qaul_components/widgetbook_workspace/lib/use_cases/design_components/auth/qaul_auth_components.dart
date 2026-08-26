@@ -129,7 +129,7 @@ Widget buildQaulAuthPageScaffoldUseCase(BuildContext context) {
       children: [
         QaulAuthSectionTitle(
           leading: _TintedPngAssetIcon(
-            'assets/icons/auth/avatar_auth.png',
+            'assets/icons/auth/auth_login.png',
             color: primaryColor,
           ),
           label: 'Login',
