@@ -90,8 +90,13 @@ pub enum Sphere {
 impl Sphere {
     pub const fn of(module: ConnectionModule) -> Self {
         match module {
+            // per 4.1
             ConnectionModule::Internet => Sphere::Internet,
-            _ => Sphere::Local,
+            ConnectionModule::Lan => Sphere::Local,
+            ConnectionModule::Ble1m => Sphere::Local,
+            ConnectionModule::BleCoded => Sphere::Local,
+            ConnectionModule::Local => Sphere::Local,
+            ConnectionModule::None => Sphere::Local,
         }
     }
 }
