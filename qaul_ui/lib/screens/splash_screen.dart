@@ -42,8 +42,9 @@ class SplashScreen extends ConsumerWidget {
 
         return _AuthAccountLoader(state: state);
       },
-      error: (error, stackTrace) =>
-          const _AuthAccountLoader(state: QaulAccountSessionState.noLocalAccount),
+      error: (error, stackTrace) => const _AuthAccountLoader(
+        state: QaulAccountSessionState.noLocalAccount,
+      ),
       loading: () => const _SplashLoadingState(),
     );
   }
@@ -86,10 +87,7 @@ class _AuthAccountLoaderState extends ConsumerState<_AuthAccountLoader> {
 }
 
 class _AuthLanding extends ConsumerStatefulWidget {
-  const _AuthLanding({
-    required this.state,
-    required this.accounts,
-  });
+  const _AuthLanding({required this.state, required this.accounts});
 
   final QaulAccountSessionState state;
   final List<LocalAccount> accounts;
@@ -124,7 +122,7 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
         widget.accounts.isNotEmpty;
 
     return Scaffold(
-      backgroundColor: kQaulAuthBackgroundColor,
+      backgroundColor: qaulAuthBackgroundColor(context),
       body: SafeArea(
         child: Scrollbar(
           controller: _scrollController,
@@ -153,10 +151,10 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                             accounts: widget.accounts,
                             onLogin: (account) =>
                                 AccountManagementCoordinator.loginLocalAccount(
-                              context,
-                              ref,
-                              account,
-                            ),
+                                  context,
+                                  ref,
+                                  account,
+                                ),
                             onMore: () => _pushManageAccounts(
                               context,
                               accounts: widget.accounts,
@@ -166,13 +164,12 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                         else
                           QaulAuthWelcomeSection(
                             createAccountIcon: const _AuthPngIcon(
-                              'assets/icons/auth/avatar_auth.png',
-                              color: Colors.white,
+                              'assets/icons/auth/avatar_auth.svg',
                               width: 65,
                               height: 65,
+                              usePrimaryColor: true,
                             ),
-                            onCreateAccount: () =>
-                                Navigator.pushNamed(
+                            onCreateAccount: () => Navigator.pushNamed(
                               context,
                               NavigationHelper.createAccount,
                             ),
@@ -181,10 +178,10 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                         if (!hasAccounts) ...[
                           QaulAuthActionRow(
                             leading: const _AuthPngIcon(
-                              'assets/icons/auth/manage_account.png',
+                              'assets/icons/settings/account_management.svg',
                             ),
                             label: l10n.manageAccounts,
-                            labelColor: kQaulAuthSecondaryTextColor,
+                            labelColor: qaulAuthSecondaryTextColor(context),
                             onTap: () => _pushManageAccounts(
                               context,
                               accounts: widget.accounts,
@@ -199,17 +196,18 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                         const SizedBox(height: kQaulAuthItemGap),
                         QaulAuthActionRow(
                           leading: const _AuthPngIcon(
-                            'assets/icons/auth/qaul_small.png',
+                            'assets/icons/auth/qaul_small.svg',
                             useThemeColor: false,
                           ),
                           label: l10n.learnMore,
-                          labelColor: kQaulAuthSecondaryTextColor,
+                          labelColor: qaulAuthSecondaryTextColor(context),
                           onTap: () =>
                               launchUrl(Uri.parse(_AuthLanding._tutorialUrl)),
-                          trailing: Image.asset(
-                            'assets/icons/auth/extern-link.png',
+                          trailing: _AuthPngIcon(
+                            'assets/icons/auth/extern-link.svg',
                             width: kQaulAuthIconSize,
                             height: kQaulAuthIconSize,
+                            color: qaulAuthSecondaryTextColor(context),
                           ),
                         ),
                       ],
@@ -244,9 +242,9 @@ class _LoginSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _AuthSectionTitle(
-          leading: const _AuthPngIcon(
-            'assets/icons/auth/manage_account.png',
-            color: kQaulAuthPrimaryTextColor,
+          leading: _AuthPngIcon(
+            'assets/icons/auth/login_avatar.svg',
+            color: qaulAuthPrimaryTextColor(context),
           ),
           label: AppLocalizations.of(context)!.login,
         ),
@@ -254,7 +252,10 @@ class _LoginSection extends StatelessWidget {
         QaulAuthSegmentedList(
           children: [
             for (final account in visibleAccounts)
-              _AccountLoginTile(account: account, onTap: () => onLogin(account)),
+              _AccountLoginTile(
+                account: account,
+                onTap: () => onLogin(account),
+              ),
             _MoreAccountsTile(onTap: onMore),
           ],
         ),
@@ -264,10 +265,7 @@ class _LoginSection extends StatelessWidget {
 }
 
 class _AccountLoginTile extends StatelessWidget {
-  const _AccountLoginTile({
-    required this.account,
-    required this.onTap,
-  });
+  const _AccountLoginTile({required this.account, required this.onTap});
 
   final LocalAccount account;
   final VoidCallback onTap;
@@ -314,9 +312,9 @@ class _AuthLanguageTile extends StatelessWidget {
             'assets/icons/language.svg',
             width: kQaulAuthIconSize,
             height: kQaulAuthIconSize,
-            colorFilter: const ColorFilter.mode(
-              Colors.white,
-              BlendMode.srcATop,
+            colorFilter: ColorFilter.mode(
+              qaulAuthPrimaryTextColor(context),
+              BlendMode.srcIn,
             ),
           ),
           label: l10n.language,
@@ -328,8 +326,8 @@ class _AuthLanguageTile extends StatelessWidget {
             'assets/icons/arrow_right.svg',
             width: 9.206,
             height: 18.407,
-            colorFilter: const ColorFilter.mode(
-              kQaulAuthSecondaryTextColor,
+            colorFilter: ColorFilter.mode(
+              qaulAuthSecondaryTextColor(context),
               BlendMode.srcIn,
             ),
           ),
@@ -340,10 +338,7 @@ class _AuthLanguageTile extends StatelessWidget {
 }
 
 class _AuthSectionTitle extends StatelessWidget {
-  const _AuthSectionTitle({
-    required this.leading,
-    required this.label,
-  });
+  const _AuthSectionTitle({required this.leading, required this.label});
 
   final Widget leading;
   final String label;
@@ -360,6 +355,7 @@ class _AuthPngIcon extends StatelessWidget {
     this.color,
     this.width = kQaulAuthIconSize,
     this.height = kQaulAuthIconSize,
+    this.usePrimaryColor = false,
     this.useThemeColor = true,
   });
 
@@ -367,6 +363,7 @@ class _AuthPngIcon extends StatelessWidget {
   final Color? color;
   final double width;
   final double height;
+  final bool usePrimaryColor;
   final bool useThemeColor;
 
   @override
@@ -374,17 +371,33 @@ class _AuthPngIcon extends StatelessWidget {
     final iconColor =
         color ??
         (useThemeColor
-            ? Theme.of(context).brightness == Brightness.dark
-                  ? kQaulAuthSecondaryTextColor
-                  : Colors.black
+            ? usePrimaryColor
+                  ? qaulAuthPrimaryTextColor(context)
+                  : qaulAuthSecondaryTextColor(context)
             : null);
+    final isSvg = assetName.toLowerCase().endsWith('.svg');
+    final icon = isSvg
+        ? SvgPicture.asset(
+            assetName,
+            width: width - 2,
+            height: height - 2,
+            colorFilter: iconColor == null
+                ? null
+                : ColorFilter.mode(iconColor, BlendMode.srcIn),
+          )
+        : Image.asset(
+            assetName,
+            color: iconColor,
+            colorBlendMode: iconColor == null ? null : BlendMode.srcIn,
+          );
 
-    return Image.asset(
-      assetName,
+    return SizedBox(
       width: width,
       height: height,
-      color: iconColor,
-      colorBlendMode: iconColor == null ? null : BlendMode.srcIn,
+      child: Padding(
+        padding: const EdgeInsets.all(1),
+        child: icon,
+      ),
     );
   }
 }
@@ -396,10 +409,8 @@ void _pushManageAccounts(
 }) {
   Navigator.of(context).push(
     MaterialPageRoute<void>(
-      builder: (_) => _ManageAccountsScreen(
-        accounts: accounts,
-        showLogin: showLogin,
-      ),
+      builder: (_) =>
+          _ManageAccountsScreen(accounts: accounts, showLogin: showLogin),
     ),
   );
 }
@@ -454,9 +465,9 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
           children: [
             if (widget.showLogin && _accounts.isNotEmpty) ...[
               _AuthSectionTitle(
-                leading: const _AuthPngIcon(
-                  'assets/icons/auth/manage_account.png',
-                  color: kQaulAuthPrimaryTextColor,
+                leading: _AuthPngIcon(
+                  'assets/icons/auth/login_avatar.svg',
+                  color: qaulAuthPrimaryTextColor(context),
                 ),
                 label: l10n.login,
               ),
@@ -468,10 +479,10 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
                       account: account,
                       onTap: () =>
                           AccountManagementCoordinator.loginLocalAccount(
-                        context,
-                        ref,
-                        account,
-                      ),
+                            context,
+                            ref,
+                            account,
+                          ),
                     ),
                   if (shouldCollapseAccounts && !_showAllAccounts)
                     QaulAuthExpandTile(
@@ -483,22 +494,18 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
             ],
             QaulAuthActionRow(
               leading: const _AuthPngIcon(
-                'assets/icons/auth/import_account.png',
+                'assets/icons/auth/import_account.svg',
               ),
               label: l10n.importAccount,
-              onTap: () => AccountManagementCoordinator.showRestoreFlow(
-                context,
-                ref,
-              ),
+              onTap: () =>
+                  AccountManagementCoordinator.showRestoreFlow(context, ref),
             ),
             const SizedBox(height: kQaulAuthItemGap),
             QaulAuthActionRow(
-              leading: const _AuthPngIcon('assets/icons/auth/add_account.png'),
+              leading: const _AuthPngIcon('assets/icons/auth/add_account.svg'),
               label: l10n.createUserAccount,
-              onTap: () => Navigator.pushNamed(
-                context,
-                NavigationHelper.createAccount,
-              ),
+              onTap: () =>
+                  Navigator.pushNamed(context, NavigationHelper.createAccount),
             ),
           ],
         ),
@@ -522,9 +529,7 @@ bool _showPersistentScrollbar(BuildContext context) {
 
 void _pushAuthLanguage(BuildContext context) {
   Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (_) => const SettingsLanguageScreen(),
-    ),
+    MaterialPageRoute<void>(builder: (_) => const SettingsLanguageScreen()),
   );
 }
 

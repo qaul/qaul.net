@@ -18,12 +18,15 @@ class QaulAuthWelcomeSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final labels =
         QaulComponentsLocalizations.of(context) ?? QaulComponentsLocalizationsEn();
+    final primaryColor = qaulAuthPrimaryTextColor(context);
+    final secondaryColor = qaulAuthSecondaryTextColor(context);
+
     return Column(
       children: [
         Text(
           labels.authWelcome,
-          style: const TextStyle(
-            color: kQaulAuthPrimaryTextColor,
+          style: TextStyle(
+            color: primaryColor,
             fontWeight: FontWeight.w800,
             letterSpacing: 1.1,
           ),
@@ -44,21 +47,21 @@ class QaulAuthWelcomeSection extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: kQaulAuthPrimaryTextColor,
+                        color: primaryColor,
                         width: 2,
                       ),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.accessibility_new,
-                      color: kQaulAuthPrimaryTextColor,
+                      color: primaryColor,
                       size: 40,
                     ),
                   ),
               const SizedBox(height: 12),
               Text(
                 labels.accountCreateUserProfile,
-                style: const TextStyle(
-                  color: kQaulAuthSecondaryTextColor,
+                style: TextStyle(
+                  color: secondaryColor,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.1,
                 ),

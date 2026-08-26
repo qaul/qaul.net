@@ -76,72 +76,86 @@ class QaulPageHeader extends StatelessWidget implements PreferredSizeWidget {
           color: _headerTextColor(theme),
         );
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: _headerShellColor(theme),
-        border: Border(
-          bottom: BorderSide(
-            color: _headerDividerColor(theme),
-            width: _kDividerWidth,
-          ),
-        ),
-        boxShadow: [_headerShadow(theme)],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: SizedBox(
-          height: kQaulPageHeaderHeight,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: _kHorizontalPadding,
+    return SafeArea(
+      bottom: false,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: _headerShellColor(theme),
+          border: Border(
+            bottom: BorderSide(
+              color: _headerDividerColor(theme),
+              width: _kDividerWidth,
             ),
-            child: IconTheme(
-              data: const IconThemeData(
-                color: kQaulPageHeaderControlColor,
-                size: _kControlIconSize,
+          ),
+          boxShadow: [_headerShadow(theme)],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: SizedBox(
+            height: kQaulPageHeaderHeight,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: _kHorizontalPadding,
               ),
-              child: Row(
-                children: [
-                  if (showBackButton) ...[
-                    IconButton(
-                      tooltip:
-                          backButtonTooltip ??
-                          MaterialLocalizations.of(context).backButtonTooltip,
-                      onPressed:
-                          onBackPressed ?? () => Navigator.maybePop(context),
-                      icon: const Icon(Icons.arrow_back_rounded),
+              child: IconTheme(
+                data: const IconThemeData(
+                  color: kQaulPageHeaderControlColor,
+                  size: _kControlIconSize,
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (showBackButton) ...[
+                      IconButton(
+                        tooltip:
+                            backButtonTooltip ??
+                            MaterialLocalizations.of(
+                              context,
+                            ).backButtonTooltip,
+                        onPressed:
+                            onBackPressed ?? () => Navigator.maybePop(context),
+                        icon: const Icon(Icons.arrow_back_rounded),
+                      ),
+                      const SizedBox(width: _kBackVisualGap),
+                    ],
+                    if (leadingVisual != null) ...[
+                      leadingVisual!,
+                      const SizedBox(width: _kVisualTitleGap),
+                    ],
+                    Expanded(
+                      child: hasSubtitle
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: titleStyle,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  subtitle!,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: subtitleStyle,
+                                ),
+                              ],
+                            )
+                          : Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: titleStyle,
+                              ),
+                            ),
                     ),
-                    const SizedBox(width: _kBackVisualGap),
+                    if (actions.isNotEmpty) ...actions,
                   ],
-                  if (leadingVisual != null) ...[
-                    leadingVisual!,
-                    const SizedBox(width: _kVisualTitleGap),
-                  ],
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: titleStyle,
-                        ),
-                        if (hasSubtitle) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            subtitle!,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: subtitleStyle,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  if (actions.isNotEmpty) ...actions,
-                ],
+                ),
               ),
             ),
           ),

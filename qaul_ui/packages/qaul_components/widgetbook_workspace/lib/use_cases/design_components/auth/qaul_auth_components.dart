@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:qaul_components/qaul_components.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
@@ -8,7 +9,9 @@ import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
   path: 'design_components/auth',
 )
 Widget buildQaulAuthActionRowUseCase(BuildContext context) {
-  return const _AuthPreviewFrame(
+  final secondaryColor = qaulAuthSecondaryTextColor(context);
+
+  return _AuthPreviewFrame(
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -18,16 +21,16 @@ Widget buildQaulAuthActionRowUseCase(BuildContext context) {
           value: 'System\'s default',
           trailing: Icon(
             Icons.chevron_right,
-            color: kQaulAuthSecondaryTextColor,
+            color: secondaryColor,
           ),
           onTap: _noop,
         ),
-        SizedBox(height: kQaulAuthItemGap),
+        const SizedBox(height: kQaulAuthItemGap),
         QaulAuthActionRow(
           icon: Icons.open_in_new,
           label: 'Learn about qaul',
-          labelColor: kQaulAuthSecondaryTextColor,
-          trailing: Icon(Icons.open_in_new, color: kQaulAuthSecondaryTextColor),
+          labelColor: secondaryColor,
+          trailing: Icon(Icons.open_in_new, color: secondaryColor),
           onTap: _noop,
         ),
       ],
@@ -120,15 +123,18 @@ Widget buildQaulAuthWelcomeSectionUseCase(BuildContext context) {
   path: 'design_components/auth',
 )
 Widget buildQaulAuthPageScaffoldUseCase(BuildContext context) {
+  final primaryColor = qaulAuthPrimaryTextColor(context);
+
   return QaulAuthPageScaffold(
     child: ListView(
       padding: const EdgeInsets.fromLTRB(28, 32, 28, 32),
       children: [
-        const QaulAuthSectionTitle(
-          leading: ImageIcon(
-            AssetImage('assets/icons/auth/manage_account.png'),
-            color: kQaulAuthPrimaryTextColor,
-            size: kQaulAuthIconSize,
+        QaulAuthSectionTitle(
+          leading: SvgPicture.asset(
+            'assets/icons/auth/login_avatar.svg',
+            width: kQaulAuthIconSize,
+            height: kQaulAuthIconSize,
+            colorFilter: ColorFilter.mode(primaryColor, BlendMode.srcIn),
           ),
           label: 'Login',
         ),
@@ -165,7 +171,7 @@ class _AuthPreviewFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: kQaulAuthBackgroundColor,
+      color: qaulAuthBackgroundColor(context),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 420),

@@ -4,6 +4,8 @@ import 'qaul_auth_tokens.dart';
 
 const double _kAuthHeaderHeight = 82;
 const double _kAuthHeaderDividerWidth = 0.5;
+const double _kAuthHeaderHorizontalPadding = 12;
+const double _kAuthHeaderButtonSize = 48;
 
 class QaulAuthPageScaffold extends StatelessWidget {
   const QaulAuthPageScaffold({
@@ -18,34 +20,37 @@ class QaulAuthPageScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kQaulAuthBackgroundColor,
-      appBar: showHeader ? const _QaulAuthHeader() : null,
+      backgroundColor: qaulAuthBackgroundColor(context),
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: child,
-          ),
+        child: Column(
+          children: [
+            if (showHeader) const _QaulAuthHeader(),
+            Expanded(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: child,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _QaulAuthHeader extends StatelessWidget implements PreferredSizeWidget {
+class _QaulAuthHeader extends StatelessWidget {
   const _QaulAuthHeader();
-
-  @override
-  Size get preferredSize => const Size.fromHeight(_kAuthHeaderHeight);
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: kQaulAuthBackgroundColor,
+      decoration: BoxDecoration(
+        color: qaulAuthBackgroundColor(context),
         border: Border(
           bottom: BorderSide(
-            color: Color(0xFF333333),
+            color: qaulAuthHeaderDividerColor(context),
             width: _kAuthHeaderDividerWidth,
           ),
         ),
@@ -55,20 +60,37 @@ class _QaulAuthHeader extends StatelessWidget implements PreferredSizeWidget {
         child: SizedBox(
           height: _kAuthHeaderHeight,
           child: IconTheme(
-            data: const IconThemeData(
-              color: kQaulAuthSecondaryTextColor,
+            data: IconThemeData(
+              color: qaulAuthSecondaryTextColor(context),
               size: 30,
             ),
-            child: Row(
-              children: [
-                const SizedBox(width: 12),
-                IconButton(
-                  tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-                  onPressed: () => Navigator.maybePop(context),
-                  icon: const Icon(Icons.arrow_back_rounded),
-                ),
-                const Spacer(),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: _kAuthHeaderHorizontalPadding,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox.square(
+                    dimension: _kAuthHeaderButtonSize,
+                    child: Center(
+                      child: IconButton(
+                        tooltip: MaterialLocalizations.of(
+                          context,
+                        ).backButtonTooltip,
+                        onPressed: () => Navigator.maybePop(context),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints.tightFor(
+                          width: _kAuthHeaderButtonSize,
+                          height: _kAuthHeaderButtonSize,
+                        ),
+                        icon: const Icon(Icons.arrow_back_rounded),
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                ],
+              ),
             ),
           ),
         ),

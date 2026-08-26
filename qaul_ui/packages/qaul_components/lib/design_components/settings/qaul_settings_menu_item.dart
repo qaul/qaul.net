@@ -66,6 +66,7 @@ class _QaulSettingsMenuItemState extends State<QaulSettingsMenuItem> {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final valueWidth = constraints.maxWidth < 560 ? 160.0 : 300.0;
+              final hasValue = widget.value != null;
 
               return SizedBox(
                 height: 56,
@@ -74,7 +75,7 @@ class _QaulSettingsMenuItemState extends State<QaulSettingsMenuItem> {
                   child: Row(
                     children: [
                       SizedBox(
-                        width: 48,
+                        width: 36,
                         child: Align(
                           alignment: Alignment.center,
                           child: SizedBox.square(
@@ -97,18 +98,17 @@ class _QaulSettingsMenuItemState extends State<QaulSettingsMenuItem> {
                           style: textStyle,
                         ),
                       ),
-                      SizedBox(
-                        width: valueWidth,
-                        child: widget.value == null
-                            ? const SizedBox.shrink()
-                            : Text(
-                                widget.value!,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.end,
-                                style: textStyle,
-                              ),
-                      ),
+                      if (hasValue)
+                        SizedBox(
+                          width: valueWidth,
+                          child: Text(
+                            widget.value!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.end,
+                            style: textStyle,
+                          ),
+                        ),
                       SizedBox(
                         width: 44,
                         child: widget.onTap == null
