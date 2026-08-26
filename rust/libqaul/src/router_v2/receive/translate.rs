@@ -16,25 +16,29 @@ use crate::router_v2::{
 };
 
 impl RouterV2State {
+    pub(crate) fn mirror_id_of(
+        &self,
+        neighbour: PeerId,
+        space: Space,
+        incoming_idx: u16,
+    ) -> Option<[u8; 8]> {
+        let mirrors = self.mirrors.read().unwrap();
+        let neighbour_mirrors = mirrors.get(&neighbour)?;
+        match space {
+            Space::Node => neighbour_mirrors.nodes.id_of(incoming_idx),
+            Space::User => neighbour_mirrors.users.id_of(incoming_idx),
+        }
+    }
+
     pub fn translate_incoming(
         &self,
         neighbour: PeerId,
         space: Space,
         incoming_idx: u16,
     ) -> Result<u16> {
-        let id = {
-            let mirrors = self.mirrors.read().unwrap();
-            let mirrors_for_neighbour = mirrors
-                .get(&neighbour)
-                .ok_or(RoutingV2Error::UnknownMapping(incoming_idx))?;
-            let mirror_dict = match space {
-                Space::Node => &mirrors_for_neighbour.nodes,
-                Space::User => &mirrors_for_neighbour.users,
-            };
-            mirror_dict
-                .id_of(incoming_idx)
-                .ok_or(RoutingV2Error::UnknownMapping(incoming_idx))?
-        };
+        let id = self
+            .mirror_id_of(neighbour, space, incoming_idx)
+            .ok_or(RoutingV2Error::UnknownMapping(incoming_idx))?;
 
         let (dict, alloc) = match space {
             Space::Node => (&self.node_dict, &self.node_allocator),

@@ -9,6 +9,19 @@ use crate::{
 };
 
 impl RouterV2State {
+    /// do we know about this ID?
+    pub(crate) fn is_local_identity(&self, id: [u8; 8], is_node: bool) -> bool {
+        if is_node {
+            id == self.host_mk.to_id()
+        } else {
+            self.users
+                .read()
+                .unwrap()
+                .get(&id)
+                .is_some_and(|u| u.read().unwrap().is_hosted)
+        }
+    }
+
     pub fn next_hop_node_id(&self, next_hop: u16) -> Option<[u8; 8]> {
         let node_entries = &self.node_dict.read().unwrap();
         node_entries.id_of(next_hop)
