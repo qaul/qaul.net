@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:qaul_components/qaul_components.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
+
+const _kAuthPreviewIconSize = 29.0;
 
 @widgetbook.UseCase(
   name: 'States',
@@ -19,10 +20,7 @@ Widget buildQaulAuthActionRowUseCase(BuildContext context) {
           icon: Icons.translate,
           label: 'Language',
           value: 'System\'s default',
-          trailing: Icon(
-            Icons.chevron_right,
-            color: secondaryColor,
-          ),
+          trailing: Icon(Icons.chevron_right, color: secondaryColor),
           onTap: _noop,
         ),
         const SizedBox(height: kQaulAuthItemGap),
@@ -130,11 +128,9 @@ Widget buildQaulAuthPageScaffoldUseCase(BuildContext context) {
       padding: const EdgeInsets.fromLTRB(28, 32, 28, 32),
       children: [
         QaulAuthSectionTitle(
-          leading: SvgPicture.asset(
-            'assets/icons/auth/login_avatar.svg',
-            width: kQaulAuthIconSize,
-            height: kQaulAuthIconSize,
-            colorFilter: ColorFilter.mode(primaryColor, BlendMode.srcIn),
+          leading: _TintedPngAssetIcon(
+            'assets/icons/auth/avatar_auth.png',
+            color: primaryColor,
           ),
           label: 'Login',
         ),
@@ -177,6 +173,26 @@ class _AuthPreviewFrame extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 420),
           child: Padding(padding: const EdgeInsets.all(26), child: child),
         ),
+      ),
+    );
+  }
+}
+
+class _TintedPngAssetIcon extends StatelessWidget {
+  const _TintedPngAssetIcon(this.assetName, {required this.color});
+
+  final String assetName;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColorFiltered(
+      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+      child: Image.asset(
+        assetName,
+        width: _kAuthPreviewIconSize,
+        height: _kAuthPreviewIconSize,
+        fit: BoxFit.contain,
       ),
     );
   }

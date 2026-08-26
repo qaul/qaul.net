@@ -10,7 +10,17 @@ import '../helpers/navigation_helper.dart';
 import '../helpers/user_prefs_helper.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/account_session_provider.dart';
+import '../widgets/widgets.dart' hide QaulAvatar;
 import 'settings_screen.dart';
+
+const _kAuthSmallPngIconSize = 29.0;
+const _kWelcomeAuthIconVisibleSize = 65.0;
+const _kAvatarAuthCanvasSize = 75.0;
+const _kAvatarAuthVisibleSize = 63.0;
+const _kWelcomeAuthIconSize =
+    _kWelcomeAuthIconVisibleSize *
+    _kAvatarAuthCanvasSize /
+    _kAvatarAuthVisibleSize;
 
 class SplashScreen extends ConsumerWidget {
   const SplashScreen() : super(key: widgetKey);
@@ -163,10 +173,10 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                           )
                         else
                           QaulAuthWelcomeSection(
-                            createAccountIcon: const _AuthPngIcon(
-                              'assets/icons/auth/avatar_auth.svg',
-                              width: 65,
-                              height: 65,
+                            createAccountIcon: const _AuthAssetIcon(
+                              'assets/icons/auth/avatar_auth.png',
+                              width: _kWelcomeAuthIconSize,
+                              height: _kWelcomeAuthIconSize,
                               usePrimaryColor: true,
                             ),
                             onCreateAccount: () => Navigator.pushNamed(
@@ -177,8 +187,10 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                         SizedBox(height: hasAccounts ? kQaulAuthItemGap : 55),
                         if (!hasAccounts) ...[
                           QaulAuthActionRow(
-                            leading: const _AuthPngIcon(
-                              'assets/icons/settings/account_management.svg',
+                            leading: const _AuthAssetIcon(
+                              'assets/icons/settings/account_management.png',
+                              width: _kAuthSmallPngIconSize,
+                              height: _kAuthSmallPngIconSize,
                             ),
                             label: l10n.manageAccounts,
                             labelColor: qaulAuthSecondaryTextColor(context),
@@ -195,7 +207,7 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                         ),
                         const SizedBox(height: kQaulAuthItemGap),
                         QaulAuthActionRow(
-                          leading: const _AuthPngIcon(
+                          leading: const _AuthAssetIcon(
                             'assets/icons/auth/qaul_small.svg',
                             useThemeColor: false,
                           ),
@@ -203,7 +215,7 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                           labelColor: qaulAuthSecondaryTextColor(context),
                           onTap: () =>
                               launchUrl(Uri.parse(_AuthLanding._tutorialUrl)),
-                          trailing: _AuthPngIcon(
+                          trailing: _AuthAssetIcon(
                             'assets/icons/auth/extern-link.svg',
                             width: kQaulAuthIconSize,
                             height: kQaulAuthIconSize,
@@ -242,8 +254,10 @@ class _LoginSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _AuthSectionTitle(
-          leading: _AuthPngIcon(
-            'assets/icons/auth/login_avatar.svg',
+          leading: _AuthAssetIcon(
+            'assets/icons/auth/avatar_auth.png',
+            width: _kAuthSmallPngIconSize,
+            height: _kAuthSmallPngIconSize,
             color: qaulAuthPrimaryTextColor(context),
           ),
           label: AppLocalizations.of(context)!.login,
@@ -349,8 +363,8 @@ class _AuthSectionTitle extends StatelessWidget {
   }
 }
 
-class _AuthPngIcon extends StatelessWidget {
-  const _AuthPngIcon(
+class _AuthAssetIcon extends StatelessWidget {
+  const _AuthAssetIcon(
     this.assetName, {
     this.color,
     this.width = kQaulAuthIconSize,
@@ -375,29 +389,12 @@ class _AuthPngIcon extends StatelessWidget {
                   ? qaulAuthPrimaryTextColor(context)
                   : qaulAuthSecondaryTextColor(context)
             : null);
-    final isSvg = assetName.toLowerCase().endsWith('.svg');
-    final icon = isSvg
-        ? SvgPicture.asset(
-            assetName,
-            width: width - 2,
-            height: height - 2,
-            colorFilter: iconColor == null
-                ? null
-                : ColorFilter.mode(iconColor, BlendMode.srcIn),
-          )
-        : Image.asset(
-            assetName,
-            color: iconColor,
-            colorBlendMode: iconColor == null ? null : BlendMode.srcIn,
-          );
-
-    return SizedBox(
+    return QaulTintedAssetIcon(
+      assetName: assetName,
       width: width,
       height: height,
-      child: Padding(
-        padding: const EdgeInsets.all(1),
-        child: icon,
-      ),
+      color: iconColor,
+      svgPadding: 1,
     );
   }
 }
@@ -465,8 +462,10 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
           children: [
             if (widget.showLogin && _accounts.isNotEmpty) ...[
               _AuthSectionTitle(
-                leading: _AuthPngIcon(
-                  'assets/icons/auth/login_avatar.svg',
+                leading: _AuthAssetIcon(
+                  'assets/icons/auth/avatar_auth.png',
+                  width: _kAuthSmallPngIconSize,
+                  height: _kAuthSmallPngIconSize,
                   color: qaulAuthPrimaryTextColor(context),
                 ),
                 label: l10n.login,
@@ -493,7 +492,7 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
               const SizedBox(height: kQaulAuthItemGap),
             ],
             QaulAuthActionRow(
-              leading: const _AuthPngIcon(
+              leading: const _AuthAssetIcon(
                 'assets/icons/auth/import_account.svg',
               ),
               label: l10n.importAccount,
@@ -502,7 +501,9 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
             ),
             const SizedBox(height: kQaulAuthItemGap),
             QaulAuthActionRow(
-              leading: const _AuthPngIcon('assets/icons/auth/add_account.svg'),
+              leading: const _AuthAssetIcon(
+                'assets/icons/auth/add_account.svg',
+              ),
               label: l10n.createUserAccount,
               onTap: () =>
                   Navigator.pushNamed(context, NavigationHelper.createAccount),
