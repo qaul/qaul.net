@@ -93,7 +93,6 @@ pub struct RoutingEntry {
     pub transport: ConnectionModule,
     /// receipt timestamp (ms since epoch)
     pub last_update: u64,
-    ///
     pub hop_count: u8,
     pub local_only: bool,
 }
