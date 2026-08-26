@@ -95,6 +95,21 @@ impl RouterV2State {
             .metric
             .saturating_add(hop_cost(ctx.transport, ctx.rssi_dbm));
 
+        let Some(target_id) = self.mirror_id_of(ctx.neighbour, space, entry.abs_idx) else {
+            info!(
+                "receive-loop drop: no mapping for incoming idx={} (space={space:?}, peer={})",
+                entry.abs_idx, ctx.neighbour
+            );
+            return Ok(EvaluateOutcome::Dropped);
+        };
+        if self.is_local_identity(target_id, space == Space::Node) {
+            info!(
+                "receive-loop drop: entry for our own identity {target_id:?} (space={space:?}, peer={})",
+                ctx.neighbour
+            );
+            return Ok(EvaluateOutcome::Dropped);
+        }
+
         let own_idx = match self.translate_incoming(ctx.neighbour, space, entry.abs_idx) {
             Ok(idx) => idx,
             Err(RoutingV2Error::UnknownMapping(idx)) => {

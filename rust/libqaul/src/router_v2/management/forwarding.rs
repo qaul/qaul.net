@@ -77,15 +77,6 @@ impl RouterV2State {
         ManagementOutcome::None
     }
 
-    /// do we know about this node locally?
-    fn is_local_identity(&self, id: [u8; 8], is_node: bool) -> bool {
-        if is_node {
-            id == self.host_mk.to_id()
-        } else {
-            self.hosted_user_ids().contains(&id)
-        }
-    }
-
     /// checks if the source and request_id pair was forwarded inside FORWARD_MEMORY_MS
     fn remember_forward(&self, source: [u8; 8], request_id: u32, now_ms: u64) -> bool {
         let mut seen = self.management_recent_forwards.write().unwrap();

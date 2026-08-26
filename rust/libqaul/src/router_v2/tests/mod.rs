@@ -29,6 +29,7 @@ mod received;
 mod relay;
 mod self_and_neighbour_registration;
 mod self_delegation;
+mod self_entry_rejection;
 mod sphere;
 mod sweep;
 mod translate;
