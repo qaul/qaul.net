@@ -8,6 +8,7 @@ use tracing::error;
 use crate::router_v2::{
     identity::Multikey,
     index::{Space, RESERVED_INDEX},
+    seq::is_fresher_u32,
     manifest::ManifestLog,
     table::{Node, User},
     BumpTrigger, PropagationForm, RouterV2State,
@@ -25,7 +26,9 @@ impl RouterV2State {
             match users.get(&user_id) {
                 Some(existing) => {
                     let mut u = existing.write().unwrap();
-                    u.profile_version = profile_version;
+                    if is_fresher_u32(profile_version, u.profile_version) {
+                        u.profile_version = profile_version;
+                    }
                     u.is_hosted = true;
                     u.public_key = Some(public_key);
                 }

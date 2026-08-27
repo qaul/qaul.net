@@ -22,24 +22,35 @@ impl RouterV2State {
         }
     }
 
+    pub(crate) fn mark_profile_version_bump(&self, user_id: &[u8; 8]) {
+        let Some(idx) = self.user_dict.read().unwrap().idx_of(user_id) else {
+            return;
+        };
+        self.reintroduction_tracker
+            .write()
+            .unwrap()
+            .mark_version_bump(Space::User, idx);
+        tracing::debug!(
+            "router_v2: user {user_id:?} idx {idx} marked for re-introduction (§3.8 trigger 3)"
+        );
+    }
+
+    /// The `profile_version` we advertise for a user we host (§3.4).
+    pub fn hosted_profile_version(&self, user_id: &[u8; 8]) -> u32 {
+        self.hosted_profiles
+            .read()
+            .unwrap()
+            .get(user_id)
+            .map(|hosted| hosted.profile.version)
+            .unwrap_or(0)
+    }
+
     pub fn next_hop_node_id(&self, next_hop: u16) -> Option<[u8; 8]> {
         let node_entries = &self.node_dict.read().unwrap();
         node_entries.id_of(next_hop)
     }
 
-    /// Resolves a node to a next hop (§9.2), for §11.4 forwarding.
-    ///
-    /// An adjacent node is answered first, and without consulting the
-    /// routing table. Under user form a node originates a *user* entry for
-    /// its hosted user and no node entry for itself (§3.2), so a direct
-    /// neighbour — the one node guaranteed reachable — has no node-space
-    /// routing entry at all. Resolving purely through the table would fail
-    /// for exactly the peers we can always reach.
-    ///
-    /// Beyond that: no delegation-gateway fallback and no nearest-gateway
-    /// default. A non-adjacent node is reachable through its own entry or
-    /// not at all, since defaulting would hand a management message to a
-    /// gateway that is not its destination (§11.4 step 3 says drop).
+    /// Resolves a node to a next hop (§9.2)
     pub fn next_hop_for_node(&self, target: [u8; 8]) -> Option<([u8; 8], ConnectionModule)> {
         if let Some(transport) = self.neighbour_transport(&target) {
             return Some((target, transport));
