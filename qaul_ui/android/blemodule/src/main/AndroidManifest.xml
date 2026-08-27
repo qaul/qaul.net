@@ -8,14 +8,14 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" android:minSdkVersion="31" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" android:minSdkVersion="31" android:targetSdkVersion="33"/>
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <!-- Debug-only: floating BLE stats overlay for on-device testing (BleDebugOverlay).-->
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" android:maxSdkVersion="28"/>
+    <!-- Debug-only: floating BLE stats overlay for on-device testing (BleDebugOverlay).
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /> -->
     <!-- Field test: SessionLogger mirrors its log into public Downloads so a participant can send it
          on with no adb and no in-app action. API 29+ writes its own MediaStore entry needing no
-         permission, so this is only for 26-28, where public storage is still a plain filesystem. -->
+         permission, so this is only for 26-28, where public storage is still a plain filesystem.
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28" />
+        android:maxSdkVersion="28" /> -->
 
 </manifest>
