@@ -9,6 +9,7 @@ use tracing::debug;
 use crate::router_v2::{
     identity::{Multikey, Profile},
     management::Addressing,
+    seq::is_fresher_u32,
     RouterV2State,
 };
 
@@ -55,12 +56,36 @@ pub enum ManagementOutcome {
 }
 
 impl RouterV2State {
-    /// register the signed profile for a user that this node is a host for
+    /// register the signed profile for a user that this node is a host fo
     pub fn register_hosted_profile(&self, user_id: [u8; 8], hosted: HostedProfile) {
+        let version = hosted.profile.version;
+        let multikey = hosted.profile.multikey.clone();
+
         self.hosted_profiles
             .write()
             .unwrap()
             .insert(user_id, hosted);
+
+        let advanced = {
+            let users = self.users.read().unwrap();
+            match users.get(&user_id) {
+                Some(user) => {
+                    let mut u = user.write().unwrap();
+                    u.public_key = Some(multikey);
+                    if is_fresher_u32(version, u.profile_version) {
+                        u.profile_version = version;
+                        true
+                    } else {
+                        false
+                    }
+                }
+                None => false,
+            }
+        };
+
+        if advanced {
+            self.mark_profile_version_bump(&user_id);
+        }
     }
 
     /// Answers a `ProfileRequest` addressed to one of our identities
@@ -198,10 +223,25 @@ impl RouterV2State {
         }
 
         if asked_as_user {
-            if let Some(user) = self.users.read().unwrap().get(&subject) {
-                let mut u = user.write().unwrap();
-                u.public_key = Some(multikey.clone());
-                u.profile_version = p.profile_version;
+            let advanced = {
+                match self.users.read().unwrap().get(&subject) {
+                    Some(user) => {
+                        let mut u = user.write().unwrap();
+                        u.public_key = Some(multikey.clone());
+                        if is_fresher_u32(p.profile_version, u.profile_version) {
+                            u.profile_version = p.profile_version;
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                    None => false,
+                }
+            };
+
+            // §3.8 trigger 3, outside the `users` lock — see the helper.
+            if advanced {
+                self.mark_profile_version_bump(&subject);
             }
         }
 
