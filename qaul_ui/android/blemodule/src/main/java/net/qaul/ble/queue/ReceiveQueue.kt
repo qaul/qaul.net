@@ -650,13 +650,14 @@ class ReceiveQueueMessage {
         // put all received chunks together
         if (!error) {
             for (i in 0 until totalChunks!!) {
-                if (!receivedChunks.containsKey(i.toShort())) {
+                val chunk = receivedChunks[i.toShort()]
+                if (chunk == null) {
                     AppLog.e(TAG, "assembleMessage missing chunk: $i")
                     error = true
                     break
                 } else {
                     // append chunk to message
-                    message += receivedChunks[i.toShort()]!!
+                    message += chunk
                     
                     // DEBUG
                     //AppLog.e(TAG, "assembleMessage chunk $i, size: ${receivedChunks[i.toShort()]!!.size}")
