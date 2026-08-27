@@ -57,7 +57,8 @@ class LibqaulWorker {
   // Field-test routing telemetry (debug only): periodically dump this node's routing table
   // (from the USERS response) to a JSONL file the replay tool ingests, correlated to the BLE
   // logs by q8id prefix. Set false for release builds.
-  static const bool _kFieldTestRouting = true;
+  /// MUST be false in released builds.
+  static const bool _kFieldTestRouting = false;
   File? _routingFile;
 
   void _init() async {
