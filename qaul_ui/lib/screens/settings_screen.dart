@@ -59,9 +59,7 @@ class SettingsScreen extends HookConsumerWidget {
       titleIcon: Icon(
         Icons.settings_outlined,
         size: 25,
-        color: Theme.of(context).brightness == Brightness.dark
-            ? Colors.white
-            : Colors.black,
+        color: qaulSettingsItemColor(context, selected: true),
       ),
       backgroundColor: qaulSettingsBackgroundColor(context),
       bodyAlignment: Alignment.topCenter,
@@ -278,9 +276,7 @@ class _SettingsDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final headerIconColor = Theme.of(context).brightness == Brightness.dark
-        ? Colors.white
-        : Colors.black;
+    final headerIconColor = qaulSettingsItemColor(context, selected: true);
 
     return ResponsiveScaffold(
       title: title,
