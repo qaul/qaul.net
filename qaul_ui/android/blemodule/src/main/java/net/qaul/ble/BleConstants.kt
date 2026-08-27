@@ -52,6 +52,13 @@ object BleConstants {
     // --------------------------------------------------------------------------------------------
 
 
+    /**
+     * Switch for field test logging. Ensure its false in any released build.
+     * DIisables: session logger, downloads mirror and gps provider from starting
+
+     */
+    const val FIELD_TEST = false
+
     const val ATT_ERR_NO_SLOT = 0x80
 
     /** Connect budget for a Coded link.*/
@@ -105,6 +112,9 @@ object BleConstants {
      *  1M (expensive to get wrong, if 1M then fails, re-establishing at range is the
      *  fragile part). Also we need to be wary of coded/1M flipping if on the border of 1Ms reach. */
     const val PHY_UPGRADE_CONFIRM_MS = 10_000L
+
+    /** Minimum link rssi reading to upgrade a Coded link to 1M without any advert evidence */
+    const val PHY_UPGRADE_MIN_RSSI = -80
 
     /** Connection interval requested for an idle link.
      *  Every open link consumes a connection event this often, and the controller must interleave
@@ -183,6 +193,11 @@ object BleConstants {
      *  discoverable only by BLE 5+ scanners). Non-capable devices fall back to legacy automatically. */
     const val DUAL_PHY_ADVERTISING = true
 
+    /** TESTING ONLY: disable 1M advertising.
+
+     */
+    const val CODED_ONLY_TEST = false
+
     /** Target MTU size to negotiate after connecting. Allows larger chunks than the 23-byte default. */
     const val TARGET_MTU = 517
 
@@ -218,7 +233,7 @@ object BleConstants {
     const val LIVENESS_TIMEOUT_MS = 30_000L
 
     /** As [LIVENESS_TIMEOUT_MS], for a Coded link. TODO: This is an artifact and needs reviewed */
-    const val CODED_LIVENESS_TIMEOUT_MS = 30_000L
+    const val CODED_LIVENESS_TIMEOUT_MS = 90_000L
 
     /** How often we check if all connections are still alive */
     const val LIVENESS_CHECK_INTERVAL_MS = 5_000L
@@ -253,7 +268,7 @@ object BleConstants {
 
     /** Show the on-device floating BLE stats overlay (BleDebugOverlay) while BLE is running. For debugging purposes,
      *  set false to disable. Needs the "Draw over other apps" permission, requested on first show. */
-    const val DEBUG_OVERLAY = true
+    const val DEBUG_OVERLAY = false
 
     /** Pause the scan during each connect attempt. DISABLED: confirmed in field logs to restart the
      *  scan often enough (during connect/tiebreaker churn) to trip Android's ~5-startScan/30s limit,

@@ -105,6 +105,8 @@ object ConnectionPool {
      * their PHY, and current GPS fix. For reconstructing the global mesh graph + positions offline.
      */
     private fun logTelemetrySnapshot() {
+        // SessionLogger.write() already no ops when logging is off, but avoids the up stream work of constructing neighbour lists etc
+        if (!BleConstants.FIELD_TEST) return
         val ctx = appContext ?: return
         try {
             val conns = connections.values.toList()
@@ -120,7 +122,10 @@ object ConnectionPool {
             )
             SessionLogger[ctx].snapshot(
                 conns.size, nbrs, GpsProvider.last(), rx, dup, relayed, linkState.size,
-                BleTaskScheduler.queueDepths()
+                BleTaskScheduler.queueDepths(),
+                adv1M = BleAdvertiser.isAdvertising,
+                advCoded = BleAdvertiser.codedAdvertising,
+                pausedForCap = BleAdvertiser.pausedForCap
             )
         } catch (e: Exception) {
             Log.e(TAG, "telemetry snapshot failed", e)
@@ -146,7 +151,8 @@ object ConnectionPool {
         }
         val since = BleScanner.millisSinceLastResult()
         val sinceStr = if (since < 0) "never" else "${since / 1000}s ago"
-        sb.append("scan=${BleScanner.isScanning} adv=${BleAdvertiser.isAdvertising} capPaused=${BleAdvertiser.pausedForCap}\n")
+        sb.append("scan=${BleScanner.isScanning} adv1M=${BleAdvertiser.isAdvertising} " +
+                "advCoded=${BleAdvertiser.codedAdvertising} capPaused=${BleAdvertiser.pausedForCap}\n")
         sb.append("scanResults(total)=${BleScanner.totalScanResults}  lastResult=$sinceStr")
         if (BleConstants.ANTI_ISLANDING) {
             // hop = distinct peers reachable via a neighbour; lists = how many neighbours have sent

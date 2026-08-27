@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import net.qaul.ble.BleConstants
+import net.qaul.ble.test.ble.advertiser.BleAdvertiser
 import net.qaul.ble.test.ble.queue.BleTaskScheduler
 import org.json.JSONArray
 import org.json.JSONObject
@@ -65,6 +66,13 @@ class SessionLogger private constructor(context: Context) {
      * into one unfindable week-long log. `resumed` on the header line marks which happened.
      */
     fun startSession(qaulId: String, clockOffsetMs: Long = 0L) {
+        // Simple single gate for all telemetry. Returning here leaves writer null,, so every call
+        // site across the module becomes a no op, no session file is created, and startMirroring()
+        //below is never reached so nothing is written into the users Downloads folder either.
+        if (!BleConstants.FIELD_TEST) {
+            Log.i(TAG, "Field test logging disabled")
+            return
+        }
         var resumed = false
         synchronized(lock) {
             close()
@@ -115,6 +123,13 @@ class SessionLogger private constructor(context: Context) {
             put("t_liveness", BleConstants.LIVENESS_TIMEOUT_MS)
             put("t_liveness_coded", BleConstants.CODED_LIVENESS_TIMEOUT_MS)
             put("t_rssi_refresh", BleConstants.RSSI_REFRESH_MS)
+            // Can this controller do long range at all? Extended advertising and Coded PHY are
+            // seperate optional Bluetooth 5 features. A device may have neither and
+            // the same flag gates both Coded TX and Coded RX , and some devices may only support RX or only TX
+            val (capable, codedPhy, extAdv) = BleAdvertiser.codedCapabilityNow(appContext)
+            put("coded_capable", capable)
+            put("le_coded_phy", codedPhy)
+            put("le_extended_adv", extAdv)
         })
         Log.i(TAG, "Session ${if (resumed) "resumed" else "started"} → ${file?.absolutePath}")
         startMirroring()
@@ -153,6 +168,8 @@ class SessionLogger private constructor(context: Context) {
      * including a run split by a long break, without re-copying last week's logs on every tick.
      */
     private fun mirrorSweep() {
+
+        if (!BleConstants.FIELD_TEST) return
         try {
             val cutoff = now() - MIRROR_LOOKBACK_MS
             val files = sessionsDir().listFiles { f ->
@@ -292,9 +309,14 @@ class SessionLogger private constructor(context: Context) {
                  gps: Triple<Double, Double, Float>?,
                  gossipRx: Int = 0, gossipDup: Int = 0, gossipRelayed: Int = 0,
                  linkStateSize: Int = 0,
-                 queue: BleTaskScheduler.QueueDepths? = null) = write(JSONObject().apply {
+                 queue: BleTaskScheduler.QueueDepths? = null,
+                 adv1M: Boolean? = null, advCoded: Boolean? = null, // advertiser state, the what and why
+                 pausedForCap: Boolean? = null) = write(JSONObject().apply {
         put("type", "snapshot")
         put("deg", degree)
+        adv1M?.let { put("adv_1m", it) }
+        advCoded?.let { put("adv_coded", it) }
+        pausedForCap?.let { put("adv_paused_cap", it) }
         put("g_rx", gossipRx); put("g_dup", gossipDup)
         put("g_relay", gossipRelayed); put("g_ls", linkStateSize)
         queue?.let { q ->

@@ -201,6 +201,8 @@ object BleScanner {
 
     /** Record that we saw this peer's advert. Called for every qaul scan result. */
     private fun noteSighting(key: String, rssi: Int, phy: Int) {
+        // Disable to avoid build up as its only drained when session logs are on
+        if (!BleConstants.FIELD_TEST) return
         val s = sightings.getOrPut(key) { Sighting() }
         s.count++; s.rssi = rssi; s.lastAt = System.currentTimeMillis()
         s.phy = when (phy) {
@@ -213,6 +215,7 @@ object BleScanner {
 
     /** Record why we saw a peer and chose not to connect to it. */
     private fun noteSkip(key: String, reason: String) {
+        if (!BleConstants.FIELD_TEST) return
         skipReasons.getOrPut(key) { mutableMapOf() }.merge(reason, 1, Int::plus)
     }
 
@@ -482,10 +485,6 @@ object BleScanner {
                 }
             }
             fillGateRejected.remove(mac)   // no longer rejected, re-arm the log
-            if (ConnectionPool.getSize() >= BleConstants.MAX_CONNECTIONS) { noteSkip(vkey, "local_cap"); return }  // respect the cap
-            // Admission control: don't start another connect while one is still resolving. Keeps the
-            // serial GATT queue from jamming with concurrent connectGatts during a discovery burst.
-            if (ConnectionPool.connectingCount() >= BleConstants.MAX_CONCURRENT_CONNECTING) { noteSkip(vkey, "concurrent_limit"); return }
 
             // Test topology: with the allowlist on, only auto-connect to designated neighbours
             if (BleConstants.TEST_NEIGHBOUR_ALLOWLIST.isNotEmpty() &&
@@ -506,7 +505,14 @@ object BleScanner {
                     // (creates a dual; the tiebreaker drops the peripheral, leaving us central).
                     BleRole.PERIPHERAL -> if (!ConnectionPool.localShouldBeCentral(prefix!!)) { noteSkip(vkey, "role_ok_peripheral"); return }
                 }
-            } else {
+            }
+
+            if (ConnectionPool.getSize() >= BleConstants.MAX_CONNECTIONS) { noteSkip(vkey, "local_cap"); return }  // respect the cap
+            // Admission control: don't start another connect while one is still resolving. Keeps the
+            // serial GATT queue from jamming with concurrent connectGatts during a discovery burst.
+            if (ConnectionPool.connectingCount() >= BleConstants.MAX_CONCURRENT_CONNECTING) { noteSkip(vkey, "concurrent_limit"); return }
+
+            if (existing == null) {
                 // Unknown peer by qaul ID (ID not resolved yet, or no advertised ID) — fall back to
                 // address-level dedup so we don't re-connect to a peer we're mid-handshake with.
                 if (BleManager.isConnected(mac)) { noteSkip(vkey, "addr_dedup"); return }
