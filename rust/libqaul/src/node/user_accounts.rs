@@ -263,9 +263,7 @@ impl UserAccounts {
             let routing_id = user.routing_user_id();
             router_v2.register_hosted_user(routing_id, 0, user.multikey());
 
-            // TODO(Phase 11 subtask 1/7): honour an `opt_out_delegation` flag on
-            // UserAccount.
-            Self::publish_self_delegation(state, &router_v2, &user, 0);
+            Self::publish_self_delegation(state, &router_v2, &user);
         }
 
         // display id
@@ -274,12 +272,13 @@ impl UserAccounts {
         user
     }
 
+    /// issue a delegation or refresh it
     pub fn publish_self_delegation(
         state: &QaulState,
         router_v2: &Arc<router_v2::RouterV2State>,
         account: &UserAccount,
-        profile_version: u32,
     ) -> bool {
+        let profile_version = router_v2.hosted_profile_version(&account.routing_user_id());
         let ttl_ms = {
             let config = Configuration::get(state);
             config.v2_routing.delegation_ttl.saturating_mul(1000)

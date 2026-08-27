@@ -376,7 +376,7 @@ impl Libqaul {
                 // to restore. Issue one now rather than leaving the user
                 // unroutable under node form (§3.2, §10.2).
                 if !router_v2.has_self_delegation(&routing_id) {
-                    UserAccounts::publish_self_delegation(&qaul_state, &router_v2, &account, 0);
+                    UserAccounts::publish_self_delegation(&qaul_state, &router_v2, &account);
                 }
             }
         }
@@ -1111,16 +1111,11 @@ impl Libqaul {
 
         for account in UserAccounts::get_all_users(&*self.state) {
             let routing_id = account.routing_user_id();
-            let Some((_, profile_version)) = due.iter().find(|(id, _)| *id == routing_id) else {
+            if !due.iter().any(|(id, _)| *id == routing_id) {
                 continue;
-            };
+            }
 
-            if UserAccounts::publish_self_delegation(
-                &self.state,
-                &router_v2,
-                &account,
-                *profile_version,
-            ) {
+            if UserAccounts::publish_self_delegation(&self.state, &router_v2, &account) {
                 log::info!("router_v2: self-delegation for {routing_id:?} refreshed (§10.4)");
             }
         }
