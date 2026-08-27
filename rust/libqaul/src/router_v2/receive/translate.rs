@@ -150,8 +150,8 @@ impl RouterV2State {
                 }
             }
             Space::User => {
-                // §8.8 step 2: record the introduced version, and schedule a
-                // profile fetch when it is fresher than what we hold.
+                // §8.8 step 2
+                let mut version_advanced = false;
                 let needs_profile = {
                     let mut users = self.users.write().unwrap();
                     match users.get(&mapping.target_id) {
@@ -163,6 +163,7 @@ impl RouterV2State {
                             if is_fresher_u32(mapping.version, version) {
                                 let mut u = user.write().unwrap();
                                 u.profile_version = mapping.version;
+                                version_advanced = true;
                                 true
                             } else if version == mapping.version {
                                 user.read().unwrap().public_key.is_none()
@@ -188,6 +189,10 @@ impl RouterV2State {
                         }
                     }
                 };
+
+                if version_advanced {
+                    self.mark_profile_version_bump(&mapping.target_id);
+                }
 
                 if needs_profile {
                     self.request_profile(mapping.target_id, false, now);
