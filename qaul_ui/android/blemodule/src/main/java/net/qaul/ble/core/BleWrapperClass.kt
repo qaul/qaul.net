@@ -316,7 +316,10 @@ open class BleWrapperClass(context: Activity) {
             // so the session is labelled correctly). Resumes the current file if the app was
             // restarted mid run, see SessionLogger.SESSION_RESUME_GAP_MS.
             SessionLogger[context].startSession(BleConstants.LOCAL_QAUL_ID.toHexKey(), 0L)
-            GpsProvider.start(context)
+            // Location is acquired ONLY for field test telemetry — the mesh itself never needs a
+            // position. If it where left on, permissions would be required and its only ever used
+            // for creating logs stored ONLY on the local device
+            if (BleConstants.FIELD_TEST) GpsProvider.start(context)
             logDeviceCapabilities(context)
             wireBleManagerCallbacks()
             registerBtStateReceiver(context)      // auto recover the engine across Bluetooth toggles
