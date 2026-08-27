@@ -1,16 +1,23 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <title>qaul field-test replay</title>
 <style>
+  /* visually hidden but present for screen readers / accessibility checkers */
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   body{margin:0;background:#0e1116;color:#c9d1d9;font:13px/1.5 -apple-system,system-ui,sans-serif}
   #top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid #21262d}
-  #wrap{display:flex;gap:14px;padding:14px;flex-wrap:wrap}
+  /* nowrap: the canvas has a 1px border on each side, so a width computed as innerWidth-panel-gap
+     overflowed by 2px and the panel wrapped underneath the map. Keep them on one row and let the
+     canvas take whatever is left. */
+  #wrap{display:flex;gap:14px;padding:14px;flex-wrap:nowrap;align-items:flex-start}
+  #wrap > div:first-child{flex:1 1 auto;min-width:0}
   canvas{background:#0a0d12;border:1px solid #21262d;border-radius:8px}
   button,label.btn{background:#21262d;color:#c9d1d9;border:1px solid #30363d;border-radius:6px;padding:6px 11px;cursor:pointer;font-size:12px}
   button:hover,label.btn:hover{background:#30363d}
-  #panel{width:250px}
+  /* fixed column that never shrinks or wraps; scrolls internally if the legend outgrows the map */
+  #panel{width:250px;flex:0 0 250px;max-height:calc(100vh - 130px);overflow-y:auto}
   h1{font-size:14px;margin:0 8px 0 0;display:inline}
   #stats{padding:10px;background:#0a0d12;border:1px solid #21262d;border-radius:6px;font-size:12px}
   #stats b{color:#fff} .ok{color:#3fb950}.bad{color:#f85149}
@@ -42,17 +49,18 @@
   <label class="muted"><input id="rssiEdges" type="checkbox" checked> RSSI edges</label>
   <label class="muted"><input id="rings" type="checkbox"> range rings (observed)</label>
   <label class="muted"><input id="gaps" type="checkbox"> flag in-range gaps</label>
+  <label class="muted"><input id="gpsFix" type="checkbox" checked> drop GPS spikes</label>
   <span id="time">—</span>
 </div>
-<div style="padding:0 14px"><input id="tl" type="range" min="0" max="1000" value="0"></div>
+<div style="padding:0 14px"><label for="tl" class="sr-only">Replay position</label><input id="tl" type="range" min="0" max="1000" value="0" aria-label="Replay position"></div>
 <div id="wrap">
   <div>
     <div style="position:relative">
-      <canvas id="c" width="820" height="560"></canvas>
+      <canvas id="c"></canvas>
       <div id="topopop"></div>
     </div>
     <div class="muted" style="margin-top:6px">component-count over session (red = islanded):</div>
-    <canvas id="spark" width="820" height="60"></canvas>
+    <canvas id="spark" height="60"></canvas>
   </div>
   <div id="panel">
     <div id="stats"></div>
@@ -62,7 +70,9 @@
       <div><span class="dot" style="background:#f85149"></span><span class="dot" style="background:#d29922"></span> islands (distinct colours)</div>
       <div><span class="dot" style="background:#6e7681"></span> present but idle (no edges)</div>
       <div style="margin-top:6px">edge = a neighbour link reported in either device's latest snapshot.</div>
-      <div>positions = GPS if present, else a stable circular layout.</div>
+      <div>positions = GPS if present; a node with no usable fix is placed at the centroid of its
+        connected neighbours and ringed <span style="display:inline-block;width:11px;height:11px;border-radius:50%;border:1.5px dashed #c9d1d9"></span> — an estimate good to radio range, not a measurement.
+        Only a node with no positioned neighbours falls back to the circular layout.</div>
       <div><span class="dot" style="background:#3fb950"></span><span class="dot" style="background:#d29922"></span><span class="dot" style="background:#f85149"></span> RSSI edges: green strong (~−55) → red weak (~−95) · grey = no reading</div>
       <div><span style="display:inline-block;width:11px;height:11px;border-radius:50%;border:2px solid #3fb950"></span> select a node → rings mark nodes it has a route to (colour = hop count); dashed red = present but no route</div>
       <div style="margin-top:6px"><span class="dot" style="background:#d29922"></span> Stage 1 fill-gate reject · <span class="dot" style="background:#f85149"></span> Stage 2 drop — popup over the canvas at the moment it fired, ticks on the sparkline</div>
@@ -73,7 +83,41 @@
   </div>
 </div>
 <script>
-const cv=document.getElementById('c'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+// Canvas is sized to the viewport rather than fixed at 820x560, so the map gets all the width the
+// side panel isn't using. W/H are read by the projection and the layout fallback, so any resize has
+// to re-run finalizeLoad() — see the resize handler at the bottom.
+let W,H;
+function sizeCanvas(){
+  // Width: derive from #wrap, whose width does NOT depend on the canvas (measuring the canvas's own
+  // column would be circular — that column is sized by the canvas). Subtract the fixed panel, the
+  // flex gap, and 2px for the canvas's own 1px borders, which is what was overflowing the row and
+  // wrapping the panel underneath the map.
+  // clientWidth INCLUDES padding, so it must come off explicitly or the canvas is handed #wrap's
+  // own 28px of padding as usable width and overlaps the panel. Read the real values rather than
+  // hard-coding them, so tweaking the CSS can't silently desync this.
+  const wrap=document.getElementById('wrap');
+  const pan=document.getElementById('panel');
+  let availW;
+  if(wrap){
+    const cs=getComputedStyle(wrap);
+    const inner=wrap.clientWidth-parseFloat(cs.paddingLeft||0)-parseFloat(cs.paddingRight||0);
+    const panelW=pan?pan.getBoundingClientRect().width:250;
+    availW=inner-panelW-parseFloat(cs.columnGap||cs.gap||14);
+  } else availW=window.innerWidth-292;
+  W = cv.width = Math.max(420, Math.floor(availW)-3);   // 2px canvas border + 1px rounding safety
+  // Height: measure the chrome above and below instead of a fixed reserve, which was leaving ~100px
+  // of empty page. Everything below the map is the sparkline block; everything above is the toolbar
+  // and the timeline. getElementById, not $ — $ is defined further down and is still in its TDZ on
+  // the first call.
+  const topH=(document.getElementById('top')||{}).offsetHeight||46;
+  const tlEl=document.getElementById('tl');
+  const tlH=(tlEl&&tlEl.parentElement?tlEl.parentElement.offsetHeight:30);
+  const sparkBlock=60+2+24;                                 // spark canvas + border + its caption
+  H = cv.height = Math.max(340, window.innerHeight - topH - tlH - sparkBlock - 28 - 14);
+  const sp=document.getElementById('spark'); if(sp) sp.width=W;
+}
+sizeCanvas();
 const sk=document.getElementById('spark'),skx=sk.getContext('2d');
 const $=id=>document.getElementById(id);
 const PAL=['#3fb950','#f85149','#d29922','#a371f7','#58a6ff','#ec6547','#39c5cf','#db61a2','#7ee787','#ffab70'];
@@ -149,15 +193,86 @@ function ingest(lines){
   }
   finalizeLoad();
 }
+// --- GPS despiking -------------------------------------------------------------------------
+// A phone occasionally emits one wildly wrong fix (tens to hundreds of metres out) and is back on
+// track by the next sample. Left in, a single spike does three things: the node teleports and
+// snaps back, the bounding box stretches so the whole map zooms out to contain a point nobody
+// ever stood on, and — worst — it lands in the observedRange percentiles, inflating the "measured"
+// range the rings and in-range-gap flag are built on.
+//
+// A spike is identified by shape, not by magnitude alone: you have to move implausibly fast to
+// reach the point AND implausibly fast to leave it, while the path that skips it is ordinary. A
+// real walk fails the third test, so it survives. Only single-sample spikes are caught — two bad
+// fixes in a row are indistinguishable from genuine movement, and dropping sustained motion would
+// be far worse than keeping a wobble.
+const MAX_SPEED_MPS = 20;        // ~72 km/h: way above walking, below any plausible spike
+const MAX_EXCURSION_MS = 120000; // how long a bogus excursion may last before we believe it's real
+// Some phones never get a GNSS lock and fall back to cell/wifi positioning, which reports a tower
+// centroid with an accuracy of hundreds of metres. In the field data the moto e20 logged EVERY fix
+// at 400m accuracy: it sits motionless on one tower, then teleports when it re-associates. A fix
+// coarser than this can't say anything useful about links that reach ~200m, and it does real damage
+// by feeding observedRange — a connected pair is recorded as hundreds of metres apart purely
+// because one end's position is invented. Dropping them is more honest than drawing them.
+const MAX_ACC_M = 100;
+let gpsSpikesDropped = 0, gpsCoarseDropped = 0;
+function dropCoarseFixes(snaps){
+  let n=0;
+  for(const s of snaps) if(s.gps && s.gps.acc!=null && s.gps.acc>MAX_ACC_M){ s.gpsSpike=s.gps; s.gps=null; n++; }
+  return n;
+}
+function despikeGps(snaps){
+  const idx=[]; for(let i=0;i<snaps.length;i++) if(snaps[i].gps) idx.push(i);
+  if(idx.length<3) return 0;
+  let dropped=0, a=0;                       // a = index into idx of the last point believed good
+  let k=1;
+  while(k<idx.length){
+    const prev=snaps[idx[a]], cur=snaps[idx[k]];
+    const dtIn=(cur.t-prev.t)/1000;
+    if(dtIn<=0){ a=k; k++; continue; }
+    if(distM(prev.gps,cur.gps)/dtIn <= MAX_SPEED_MPS){ a=k; k++; continue; }   // ordinary movement
+    // Implausible jump. Decide between "bad fix(es)" and "the device really went somewhere" by
+    // asking whether the track comes BACK: scan forward for the first fix that is plausible from
+    // the last good one. If we find it, everything in between was an excursion and gets dropped —
+    // this is what catches a device flinging itself across Berlin and back over several samples,
+    // which the old single-sample test could not see. If nothing returns within
+    // MAX_EXCURSION_MS, treat it as genuine relocation and keep it: losing real movement would be
+    // a far worse failure than leaving a wobble in.
+    let j=k, ret=-1;
+    while(j<idx.length && (snaps[idx[j]].t - prev.t) <= MAX_EXCURSION_MS){
+      const cand=snaps[idx[j]], dt=(cand.t-prev.t)/1000;
+      if(dt>0 && distM(prev.gps,cand.gps)/dt <= MAX_SPEED_MPS){ ret=j; break; }
+      j++;
+    }
+    if(ret>k-1 && ret!==-1){
+      for(let m=k;m<ret;m++){ const s=snaps[idx[m]]; s.gpsSpike=s.gps; s.gps=null; dropped++; }
+      a=ret; k=ret+1;                       // resume from the fix that rejoined the track
+    } else { a=k; k++; }                    // no return within the window — accept as real
+  }
+  return dropped;
+}
+// Undo, so the checkbox can be turned back off without reloading the files.
+function restoreGps(snaps){ for(const s of snaps) if(s.gpsSpike){ s.gps=s.gpsSpike; s.gpsSpike=null; } }
+
 function finalizeLoad(){
   const ids=Object.keys(devices);
   if(!ids.length){ return; }
   userToNode={}; nodeToUser={};
   let lo=Infinity, hi=-Infinity, gpsPts=[];
+  gpsSpikesDropped=0; gpsCoarseDropped=0;
+  const dropSpikes=$('gpsFix') ? $('gpsFix').checked : true;
   for(const id of ids){
     devices[id].snaps.sort((a,b)=>a.t-b.t);
     (devices[id].routes||[]).sort((a,b)=>a.t-b.t);
     for(const rs of (devices[id].routes||[])) for(const e of rs.entries) if(e.mod==='local'){ userToNode[e.to]=e.via; nodeToUser[e.via]=e.to; }
+    // Must run after the sort (it walks in time order) and before anything reads .gps below, so
+    // the bbox, the projection and observedRange are all computed on cleaned positions.
+    restoreGps(devices[id].snaps);
+    // Coarse fixes go first: the despike walks a "last good position" forward, and a 400m-accurate
+    // tower centroid used as that anchor would mis-judge every jump measured against it.
+    if(dropSpikes){
+      gpsCoarseDropped += dropCoarseFixes(devices[id].snaps);
+      gpsSpikesDropped += despikeGps(devices[id].snaps);
+    }
     for(const s of devices[id].snaps){ lo=Math.min(lo,s.t); hi=Math.max(hi,s.t); if(s.gps) gpsPts.push(s.gps); }
   }
   // include topo decisions in the span, in case one lands outside the snapshot range
@@ -212,7 +327,18 @@ function project(id, g){   // g = a gps {lat,lon} or null
 function latestSnap(id,t){ const s=devices[id].snaps; let r=null; for(const x of s){ if(x.t<=t) r=x; else break; } return r; }
 // most recent snapshot at/before t that actually HAD a GPS fix — lets a node hold its last known
 // position through a GPS dropout instead of jumping to the layout fallback.
-function latestGpsSnap(id,t){ const s=devices[id].snaps; let r=null; for(const x of s){ if(x.t<=t){ if(x.gps) r=x; } else break; } return r; }
+// A fix older than this is not a position any more, it's a memory. Holding one indefinitely was
+// making sparse-GPS devices lie: the moto e20 kept 32 surviving fixes after the accuracy filter and
+// clung to one for hours, appearing pinned in a corner while it was actually moving around the
+// mesh; the SM-X210 (12% coverage) freezes through each blackout then teleports. Past this age we
+// report "no fix", which lets the neighbour-centroid inference take over — an estimate that tracks
+// the mesh beats a stale coordinate that doesn't.
+const MAX_FIX_AGE_MS = 90000;
+function latestGpsSnap(id,t){
+  const s=devices[id].snaps; let r=null;
+  for(const x of s){ if(x.t<=t){ if(x.gps) r=x; } else break; }
+  return (r && t-r.t<=MAX_FIX_AGE_MS) ? r : null;
+}
 // most recent routing-table snapshot at/before t for a device (or null)
 function latestRouting(id,t){ const key=nodeToUser[id]||id; const r=devices[key]&&devices[key].routes; if(!r||!r.length) return null; let x=null; for(const s of r){ if(s.t<=t) x=s; else break; } return x; }
 
@@ -238,6 +364,36 @@ function stateAt(t){
   const aset=new Set(all);
   const edges=new Set();
   for(const id of present) for(const n of snapOf[id].nbrs){ if(n.id&&n.id!=='unresolved'&&aset.has(n.id)) edges.add(id<n.id?id+'|'+n.id:n.id+'|'+id); }
+  // POSITION INFERENCE for nodes with no usable fix (GPS never worked, dropped as too coarse, or a
+  // ghost with no log at all). Parking them on the layout circle is misleading twice over: it puts
+  // them somewhere they certainly are not, and it makes them sit still while the mesh moves. But a
+  // BLE neighbour is by definition within radio range — a couple of hundred metres — so the centroid
+  // of its connected neighbours is a genuinely good estimate, and it moves as they do.
+  // Two passes so a fix-less node whose only neighbours are themselves fix-less can still settle
+  // once those have been placed. Marked as `inferred` so it can be drawn as an estimate, not a
+  // measurement — these positions must never be mistaken for GPS.
+  const inferred=new Set();
+  if(useGps){
+    const nbrsOf={};
+    for(const e of edges){ const [a,b]=e.split('|');
+      (nbrsOf[a]=nbrsOf[a]||[]).push(b); (nbrsOf[b]=nbrsOf[b]||[]).push(a); }
+    for(let pass=0; pass<2; pass++){
+      for(const id of all){
+        if(gpsOf[id]) continue;                       // has a real fix — leave it alone
+        if(inferred.has(id)) continue;                // already placed on the previous pass
+        const anchors=(nbrsOf[id]||[])
+          .filter(o => gpsOf[o] || (pass>0 && inferred.has(o)))
+          .map(o => pos[o]).filter(Boolean);
+        if(!anchors.length) continue;                 // nothing to anchor to — keep layout fallback
+        const sx=anchors.reduce((s,p)=>s+p[0],0)/anchors.length;
+        const sy=anchors.reduce((s,p)=>s+p[1],0)/anchors.length;
+        // Deterministic per-id offset so several fix-less nodes sharing anchors don't stack.
+        const ang=(hashStr(id)%360)*Math.PI/180;
+        pos[id]=[sx+Math.cos(ang)*14, sy+Math.sin(ang)*14];
+        inferred.add(id);
+      }
+    }
+  }
   // components (union-find) — over present AND ghost nodes, since a ghost can legitimately be the
   // node joining two otherwise-separate groups. Excluding it would report a false island.
   const par={}; all.forEach(id=>par[id]=id);
@@ -251,7 +407,7 @@ function stateAt(t){
     if(single) mem.forEach(id=>color[id]=0);
     else { const key=mem.reduce((a,b)=>a<b?a:b); const ci=1+(hashStr(key)%(PAL.length-1)); mem.forEach(id=>color[id]=ci); }
   }
-  return {present,pos,edges,color,comps:roots.length,single,snapOf,gpsOf,ghosts};
+  return {present,pos,edges,color,comps:roots.length,single,snapOf,gpsOf,ghosts,inferred};
 }
 
 // ---------- topology-decision popups ----------
@@ -320,6 +476,12 @@ function draw(){
   for(const id of st.present){ const [x,y]=st.pos[id];
     ctx.fillStyle = !linked.has(id) ? '#6e7681' : PAL[st.color[id]%PAL.length];
     ctx.beginPath(); ctx.arc(x,y,10,0,6.28); ctx.fill();
+    // A position inferred from neighbours is an estimate, not a measurement — ring it so it can
+    // never be read as a GPS fix. It tracks the mesh, but only to within radio range.
+    if(st.inferred && st.inferred.has(id)){
+      ctx.setLineDash([2,2]); ctx.strokeStyle='#c9d1d9'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.arc(x,y,13.5,0,6.28); ctx.stroke(); ctx.setLineDash([]);
+    }
     ctx.fillStyle='#0a0d12'; ctx.font='bold 9px system-ui'; ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.fillText(id.slice(0,4), x, y);
   }
@@ -361,7 +523,12 @@ function draw(){
     `components: <b>${st.comps}</b> ${st.present.length?(single?'<span class=ok>✓ connected</span>':'<span class=bad>✗ islanded</span>'):''}<br>`+
     `positions: <b>${useGps?'GPS':'layout (no GPS)'}</b>`+
     (useGps&&observedRange? `<br>observed range (95pct): <b>${Math.round(observedRange)} m</b>`+
-      Object.entries(perPhyRange).map(([k,v])=>`<br>&nbsp;&nbsp;${k}: ${v.p95} m <span class=muted>(max ${v.max}, n=${v.n})</span>`).join('') : '');
+      Object.entries(perPhyRange).map(([k,v])=>`<br>&nbsp;&nbsp;${k}: ${v.p95} m <span class=muted>(max ${v.max}, n=${v.n})</span>`).join('') : '')+
+    // Surfaced rather than silent: if this number is large the filter may be eating real movement,
+    // and the checkbox is right there to compare against the raw track.
+    (useGps&&(gpsSpikesDropped||gpsCoarseDropped)?
+      `<br><span class=muted>GPS filtered: ${gpsSpikesDropped} spikes`+
+      (gpsCoarseDropped?`, ${gpsCoarseDropped} coarse (&gt;${MAX_ACC_M}m)`:'')+`</span>` : '');
   // selected-node link table (per-link GPS distance + PHY)
   if(selected && st.present.includes(selected)){
     const links=[...st.edges].filter(e=>{const[a,b]=e.split('|');return a===selected||b===selected;});
@@ -441,6 +608,16 @@ function loop(ts){ if(playing && tMax>tMin){ const dt=(ts-last)||16; T+=dt*(+$('
 requestAnimationFrame(loop);
 $('play').onclick=()=>{ playing=!playing; $('play').textContent=playing?'⏸ pause':'▶ play'; };
 $('rings').onchange=draw; $('gaps').onchange=draw; $('rssiEdges').onchange=draw;
+// Full re-finalize, not just a redraw: the filter changes the bbox, the projection and the
+// observedRange percentiles, so everything derived from positions has to be recomputed.
+$('gpsFix').onchange=()=>{ if(Object.keys(devices).length) finalizeLoad(); draw(); };
+// Resize: W/H feed the projection and the circular layout fallback, so re-finalize rather than
+// just redraw, or the map keeps the old scale and everything sits off-centre. Debounced because a
+// drag-resize fires continuously and finalizeLoad re-walks every snapshot.
+let rzT=null;
+window.addEventListener('resize',()=>{ clearTimeout(rzT); rzT=setTimeout(()=>{
+  sizeCanvas(); if(Object.keys(devices).length) finalizeLoad(); draw();
+},150); });
 $('map').onchange=e=>{ mapOn=e.target.checked; if(mapOn) computeMapT(); draw(); };
 // pan (drag), zoom (wheel, at cursor), select (click), reset (double-click)
 let md=null, moved=false;
@@ -453,7 +630,10 @@ window.addEventListener('mouseup', ()=>{
     selected=best; draw(); }
   md=null; });
 cv.addEventListener('wheel', ev=>{ ev.preventDefault(); const r=cv.getBoundingClientRect(), cx=ev.clientX-r.left, cy=ev.clientY-r.top;
-  const nz=Math.max(0.3,Math.min(40, zoom*(ev.deltaY<0?1.15:1/1.15)));
+  // Upper bound is high because the base scale is set by the whole-session bounding box: a device
+  // that genuinely travelled across the city makes metres-per-pixel tiny, and inspecting a cluster
+  // of nodes standing metres apart then needs a lot of magnification.
+  const nz=Math.max(0.3,Math.min(2000, zoom*(ev.deltaY<0?1.15:1/1.15)));
   panX=cx-(cx-panX)*(nz/zoom); panY=cy-(cy-panY)*(nz/zoom); zoom=nz; draw(); }, {passive:false});
 cv.addEventListener('dblclick', ()=>{ zoom=1; panX=0; panY=0; draw(); });
 cv.style.cursor='grab';
