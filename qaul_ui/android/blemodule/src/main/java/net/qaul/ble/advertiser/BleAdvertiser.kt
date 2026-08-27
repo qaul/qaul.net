@@ -11,7 +11,6 @@ import android.bluetooth.le.AdvertisingSetCallback
 import android.bluetooth.le.AdvertisingSetParameters
 import android.bluetooth.le.BluetoothLeAdvertiser
 import android.content.Context
-import android.os.Build
 import android.os.ParcelUuid
 import android.util.Log
 import net.qaul.ble.BleConstants
@@ -31,7 +30,21 @@ object BleAdvertiser {
         private set
 
     // Whether this device can run the long-range Coded extended advertising set (BLE 5 hardware).
-    @Volatile private var codedCapable = false
+    /** Is the  Coded advertising set currently running? */
+    @Volatile var codedAdvertising = false
+        private set
+
+    /** Does this device support the Coded advertising?  */
+    @Volatile var codedCapable = false
+        private set
+
+    fun codedCapabilityNow(context: Context): Triple<Boolean, Boolean, Boolean> {
+        val adapter = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
+            ?: return Triple(false, false, false)
+        val coded = adapter.isLeCodedPhySupported
+        val ext = adapter.isLeExtendedAdvertisingSupported
+        return Triple(coded && ext, coded, ext)
+    }
     private fun dualMode() = BleConstants.DUAL_PHY_ADVERTISING && codedCapable
 
     private val advertiseSettings = AdvertiseSettings.Builder()
@@ -62,8 +75,9 @@ object BleAdvertiser {
 
     fun start(context: Context) {
         appContext = context.applicationContext
-        if (isAdvertising) {
-            Log.w(TAG, "Already advertising")
+        // Guard on both sets incase one is down, to avoid duplicates
+        if (isAdvertising || codedAdvertising) {
+            Log.w(TAG, "Already advertising (1M=$isAdvertising coded=$codedAdvertising)")
             return
         }
         val adapter = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
@@ -73,27 +87,34 @@ object BleAdvertiser {
             return
         }
         // Can this device run the long range Coded extended advertising set?
-        codedCapable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-                adapter.isLeCodedPhySupported &&
-                adapter.isLeExtendedAdvertisingSupported
+        codedCapable = codedCapabilityNow(context).first
+        Log.i(TAG, "Coded capability: $codedCapable (${codedCapabilityNow(context)})")
         startAdvertiser()
     }
 
     private fun startAdvertiser() {
         // Always advertise the legacy 1M set, short range, discoverable by EVERY device (including
         // non-BLE-5 ones). isAdvertising tracks this primary set.
-        advertiser?.startAdvertising(advertiseSettings, advertiseData, advertiseCallback)
+        if (BleConstants.CODED_ONLY_TEST) {
+            Log.w(TAG, "CODED_ONLY_TEST: legacy 1M advertising suppressed")
+        } else {
+            advertiser?.startAdvertising(advertiseSettings, advertiseData, advertiseCallback)
+        }
         // Additionally advertise a long-range Coded set so distant BLE-5 peers can also discover us.
         // Only when capable + enabled. failure here doesn't affect the legacy set.
         if (dualMode()) {
             Log.i(TAG, "Also starting long-range Coded advertising set")
             advertiser?.startAdvertisingSet(advertiseSetParameters, advertiseData, null, null, null, advertisingSetCallback)
+        } else if (BleConstants.CODED_ONLY_TEST) {
+            // 1M is blocked and no coded capability, this scenario creates a device who doesnt advertise
+            Log.e(TAG, "CODED_ONLY_TEST on a device without Coded support: NOT ADVERTISING AT ALL. This device will do nothing.")
         }
     }
 
     private fun stopAdvertiser() {
         try { advertiser?.stopAdvertising(advertiseCallback) } catch (_: Exception) {}
-        if (dualMode()) try { advertiser?.stopAdvertisingSet(advertisingSetCallback) } catch (_: Exception) {}
+        try { advertiser?.stopAdvertisingSet(advertisingSetCallback) } catch (_: Exception) {}
+        codedAdvertising = false
     }
 
     fun stop() {
@@ -108,7 +129,7 @@ object BleAdvertiser {
      * nodes stop trying to connect to us. Reversible via [resume], [stop] clears it permanently.
      */
     fun pause() {
-        if (!isAdvertising) return
+        if (!isAdvertising && !codedAdvertising && pausedForCap) return
         stopAdvertiser()
         isAdvertising = false
         pausedForCap = true
@@ -130,8 +151,13 @@ object BleAdvertiser {
 
     // Resume advertising after dropping below the cap. it never restarts advertising after a deliberate [stop] or before the first [start].
     fun resume() {
-        if (isAdvertising || !pausedForCap) return
+        if (!pausedForCap) return
         pausedForCap = false
+        // resuming while either advertiser is still live would stack a duplicate set that nothing can stop afterwards
+        if (isAdvertising || codedAdvertising) {
+            Log.w(TAG, "Resume: already advertising (1M=$isAdvertising coded=$codedAdvertising) — flag cleared only")
+            return
+        }
         startAdvertiser()
         Log.i(TAG, "Advertising resumed (below cap)")
     }
@@ -160,14 +186,17 @@ object BleAdvertiser {
     // isAdvertising, so this callback only logs. a Coded failure must NOT mark us as not advertising.
     private val advertisingSetCallback = object : AdvertisingSetCallback() {
         override fun onAdvertisingSetStarted(advertisingSet: AdvertisingSet?, txPower: Int, status: Int) {
-            if (status == AdvertisingSetCallback.ADVERTISE_SUCCESS) {
+            if (status == ADVERTISE_SUCCESS) {
+                codedAdvertising = true
                 Log.i(TAG, "Long-range Coded advertising set started, txPower=$txPower")
             } else {
+                codedAdvertising = false
                 Log.e(TAG, "Long-range Coded advertising set failed: status=$status (legacy set unaffected)")
             }
         }
 
         override fun onAdvertisingSetStopped(advertisingSet: AdvertisingSet?) {
+            codedAdvertising = false
             Log.i(TAG, "Long-range Coded advertising set stopped")
         }
     }
