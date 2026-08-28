@@ -6,9 +6,12 @@
 
 use crate::router_v2::*;
 use crate::router_v2::{
-    codec::{messages::IndexDump, Header, RoutingMessage},
+    codec::{
+        messages::{IndexDump, Mapping},
+        Header, RoutingMessage,
+    },
     index::Space,
-    propagation::{on_neighbour_connect, should_introduce, tick_relay},
+    propagation::{self, on_neighbour_connect, should_introduce, tick_relay},
     test_utils::*,
 };
 
@@ -252,5 +255,139 @@ fn inline_node_mappings_keep_gateways_on_both_spheres() {
         } else if msg.peer == net {
             assert_eq!(ids, vec![[1; 8]], "only the gateway crosses the membrane");
         }
+    }
+}
+
+// ------------------------------------------------------------- §8.4 chunking
+
+/// A dictionary that fits is one chunk, framed as such.
+#[test]
+fn a_small_dictionary_is_a_single_chunk() {
+    let chunks = propagation::split_index_dump(
+        vec![Mapping {
+            abs_idx: 1,
+            target_id: [1; 8],
+            version: 0,
+        }],
+        vec![Mapping {
+            abs_idx: 2,
+            target_id: [2; 8],
+            version: 0,
+        }],
+    );
+
+    assert_eq!(chunks.len(), 1);
+    assert_eq!(chunks[0].chunk_index, 0);
+    assert_eq!(chunks[0].chunk_count, 1);
+    assert_eq!(chunks[0].user_mappings.len(), 1);
+    assert_eq!(chunks[0].node_mappings.len(), 1);
+}
+
+/// §8.4 sends a dump on every (re)connect, and the message itself is the cue
+/// for the neighbour to introduce itself back — so an empty dictionary still
+/// produces one chunk, not zero.
+#[test]
+fn an_empty_dictionary_still_produces_one_chunk() {
+    let chunks = propagation::split_index_dump(Vec::new(), Vec::new());
+
+    assert_eq!(chunks.len(), 1);
+    assert_eq!(chunks[0].chunk_count, 1);
+    assert!(chunks[0].user_mappings.is_empty());
+    assert!(chunks[0].node_mappings.is_empty());
+}
+
+/// The 3-E case: a dictionary past the payload bound is split rather than
+/// dropped. Every mapping must appear exactly once, in order, with correct
+/// framing on each chunk.
+#[test]
+fn an_oversized_dictionary_is_split_not_dropped() {
+    let total = 10_000;
+    let users: Vec<Mapping> = (0..total)
+        .map(|i| Mapping {
+            abs_idx: i as u16,
+            target_id: [(i % 251) as u8; 8],
+            version: i as u32,
+        })
+        .collect();
+
+    let chunks = propagation::split_index_dump(users.clone(), Vec::new());
+
+    assert!(chunks.len() > 1, "a dictionary this size must chunk");
+    for (i, chunk) in chunks.iter().enumerate() {
+        assert_eq!(chunk.chunk_index, i as u8);
+        assert_eq!(chunk.chunk_count, chunks.len() as u8);
+    }
+
+    let rejoined: Vec<u16> = chunks
+        .iter()
+        .flat_map(|c| c.user_mappings.iter().map(|m| m.abs_idx))
+        .collect();
+    let expected: Vec<u16> = users.iter().map(|m| m.abs_idx).collect();
+    assert_eq!(rejoined, expected, "every mapping survives exactly once");
+}
+
+/// Each emitted chunk has to encode inside the payload bound — that is the
+/// whole point of splitting.
+#[test]
+fn every_chunk_encodes_within_the_payload_bound() {
+    let users: Vec<Mapping> = (0..9_000)
+        .map(|i| Mapping {
+            // Spaced so the delta encoding takes its escape path, the
+            // worst case the split is sized against.
+            abs_idx: (i * 7) as u16,
+            target_id: [1; 8],
+            version: 0,
+        })
+        .collect();
+    let nodes: Vec<Mapping> = (0..9_000)
+        .map(|i| Mapping {
+            abs_idx: (i * 7) as u16,
+            target_id: [2; 8],
+            version: 0,
+        })
+        .collect();
+
+    for chunk in propagation::split_index_dump(users, nodes) {
+        let mut body = Vec::new();
+        chunk.encode(&mut body).expect("encodes");
+        assert!(
+            body.len() <= 60 * 1024,
+            "chunk {} encoded to {} bytes",
+            chunk.chunk_index,
+            body.len()
+        );
+        assert!(u16::try_from(body.len()).is_ok(), "fits payload_len");
+    }
+}
+
+/// A split dump reaches the wire as several framed INDEX_DUMP messages to
+/// the same peer, in ascending chunk order — §8.4 requires the receiver to
+/// process them in order.
+#[test]
+fn on_connect_emits_every_chunk_in_order() {
+    let (state, mut rx) = fresh_state();
+    let peer = fresh_peer();
+    // Distinct ids: `bind` is bidirectional, so reusing an id would unbind
+    // the index it was previously held at and the dictionary would never
+    // grow past the number of distinct ids.
+    for i in 0..6_000u32 {
+        let mut id = [0u8; 8];
+        id[..4].copy_from_slice(&i.to_be_bytes());
+        install_user(&state, id, 0);
+        bind_own_dict(&state, Space::User, i as u16, id);
+    }
+
+    on_neighbour_connect(&state, peer, ConnectionModule::Lan);
+
+    let mut seen = Vec::new();
+    while let Ok(msg) = rx.try_recv() {
+        assert_eq!(msg.peer, peer);
+        seen.push(decode_dump(&msg.bytes));
+    }
+
+    assert!(seen.len() > 1, "6000 mappings must span several chunks");
+    for (i, dump) in seen.iter().enumerate() {
+        assert_eq!(dump.chunk_index, i as u8, "ascending chunk order");
+        assert_eq!(dump.chunk_count, seen.len() as u8);
     }
 }

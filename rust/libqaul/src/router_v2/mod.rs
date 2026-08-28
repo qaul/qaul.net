@@ -134,6 +134,14 @@ pub struct NeighbourInfo {
     pub users: MirrorIndexDictionary,
     pub nodes: MirrorIndexDictionary,
     pub transports: HashSet<ConnectionModule>,
+    pub dump_stale: DumpStaleIndexes,
+}
+
+/// Per-space leftovers of an `INDEX_DUMP` in progress (§8.4).
+#[derive(Debug, Default)]
+pub struct DumpStaleIndexes {
+    pub users: HashSet<u16>,
+    pub nodes: HashSet<u16>,
 }
 
 impl NeighbourInfo {
@@ -145,6 +153,7 @@ impl NeighbourInfo {
             users: MirrorIndexDictionary::default(),
             nodes: MirrorIndexDictionary::default(),
             transports,
+            dump_stale: DumpStaleIndexes::default(),
         }
     }
 }

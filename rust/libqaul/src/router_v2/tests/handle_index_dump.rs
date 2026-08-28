@@ -28,6 +28,8 @@ fn both_sections_populate_mirrors_and_stubs() {
     let peer = add_neighbour(&state);
 
     let dump = IndexDump {
+        chunk_index: 0,
+        chunk_count: 1,
         user_mappings: vec![mapping(5, [1; 8], 42)],
         node_mappings: vec![mapping(9, [2; 8], 99)],
     };
@@ -56,14 +58,11 @@ fn both_sections_populate_mirrors_and_stubs() {
     assert_eq!(n.advertised_version, 99);
 }
 
-/// Regression test for the accumulate-don't-clear decision. §8.4 lets a
-/// sender split an oversized dictionary across several INDEX_DUMPs, and
-/// the message carries no chunk framing, so the receiver cannot tell a
-/// complete dump from chunk 1 of N. Clearing the mirror per §3.6's
-/// literal "SHALL replace" would discard the earlier chunk; this test
-/// fails the moment someone makes that change.
+/// §8.4: chunks of one dump accumulate. Chunk 0 snapshots the mirror for
+/// §3.6's replacement and chunk 1 adds to it, so both survive — clearing on
+/// every message would leave only the last chunk.
 #[test]
-fn second_dump_accumulates_and_does_not_clear_first() {
+fn chunks_of_one_dump_accumulate() {
     let (state, _rx) = fresh_state();
     let peer = add_neighbour(&state);
 
@@ -71,6 +70,8 @@ fn second_dump_accumulates_and_does_not_clear_first() {
         .handle_index_dump(
             peer,
             IndexDump {
+                chunk_index: 0,
+                chunk_count: 2,
                 user_mappings: vec![mapping(5, [1; 8], 1)],
                 node_mappings: vec![mapping(5, [11; 8], 1)],
             },
@@ -82,6 +83,8 @@ fn second_dump_accumulates_and_does_not_clear_first() {
         .handle_index_dump(
             peer,
             IndexDump {
+                chunk_index: 1,
+                chunk_count: 2,
                 user_mappings: vec![mapping(9, [2; 8], 1)],
                 node_mappings: vec![mapping(9, [22; 8], 1)],
             },
@@ -95,6 +98,117 @@ fn second_dump_accumulates_and_does_not_clear_first() {
     assert_eq!(nm.users.id_of(9), Some([2; 8]), "chunk 2 user landed");
     assert_eq!(nm.nodes.id_of(5), Some([11; 8]), "chunk 1 node survived");
     assert_eq!(nm.nodes.id_of(9), Some([22; 8]), "chunk 2 node landed");
+}
+
+/// §3.6: a dump lists every index the sender currently uses, so a *new*
+/// dump replaces the mirror. This is what §3.8 leans on to guarantee that
+/// mappings from a previous session are gone before the new session's
+/// routing updates are processed.
+#[test]
+fn a_new_dump_replaces_what_the_last_one_left() {
+    let (state, _rx) = fresh_state();
+    let peer = add_neighbour(&state);
+
+    state
+        .handle_index_dump(
+            peer,
+            IndexDump {
+                chunk_index: 0,
+                chunk_count: 1,
+                user_mappings: vec![mapping(5, [1; 8], 1)],
+                node_mappings: vec![mapping(5, [11; 8], 1)],
+            },
+            1_000,
+        )
+        .unwrap();
+
+    // A new session that no longer uses index 5.
+    state
+        .handle_index_dump(
+            peer,
+            IndexDump {
+                chunk_index: 0,
+                chunk_count: 1,
+                user_mappings: vec![mapping(9, [2; 8], 1)],
+                node_mappings: vec![mapping(9, [22; 8], 1)],
+            },
+            2_000,
+        )
+        .unwrap();
+
+    let mirrors = state.mirrors.read().unwrap();
+    let nm = mirrors.get(&peer).unwrap();
+    assert_eq!(nm.users.id_of(5), None, "stale user binding pruned");
+    assert_eq!(nm.nodes.id_of(5), None, "stale node binding pruned");
+    assert_eq!(nm.users.id_of(9), Some([2; 8]));
+    assert_eq!(nm.nodes.id_of(9), Some([22; 8]));
+}
+
+/// An index the new dump re-states must survive the prune, even though it
+/// was in the pre-dump snapshot.
+#[test]
+fn a_restated_index_is_not_pruned() {
+    let (state, _rx) = fresh_state();
+    let peer = add_neighbour(&state);
+
+    for now in [1_000, 2_000] {
+        state
+            .handle_index_dump(
+                peer,
+                IndexDump {
+                    chunk_index: 0,
+                    chunk_count: 1,
+                    user_mappings: vec![mapping(5, [1; 8], 1)],
+                    node_mappings: Vec::new(),
+                },
+                now,
+            )
+            .unwrap();
+    }
+
+    let mirrors = state.mirrors.read().unwrap();
+    assert_eq!(mirrors.get(&peer).unwrap().users.id_of(5), Some([1; 8]));
+}
+
+/// A dump that never completes leaves the mirror holding whatever arrived.
+/// §8.4 makes this explicit: the missing bindings are repaired by inline
+/// introduction, the same path as any unknown index.
+#[test]
+fn an_incomplete_dump_prunes_nothing() {
+    let (state, _rx) = fresh_state();
+    let peer = add_neighbour(&state);
+
+    state
+        .handle_index_dump(
+            peer,
+            IndexDump {
+                chunk_index: 0,
+                chunk_count: 1,
+                user_mappings: vec![mapping(5, [1; 8], 1)],
+                node_mappings: Vec::new(),
+            },
+            1_000,
+        )
+        .unwrap();
+
+    // Chunk 0 of 3 arrives; chunks 1 and 2 never do.
+    state
+        .handle_index_dump(
+            peer,
+            IndexDump {
+                chunk_index: 0,
+                chunk_count: 3,
+                user_mappings: vec![mapping(9, [2; 8], 1)],
+                node_mappings: Vec::new(),
+            },
+            2_000,
+        )
+        .unwrap();
+
+    let mirrors = state.mirrors.read().unwrap();
+    let nm = mirrors.get(&peer).unwrap();
+    assert_eq!(nm.users.id_of(5), Some([1; 8]), "not pruned mid-dump");
+    assert_eq!(nm.users.id_of(9), Some([2; 8]));
 }
 
 /// A dump that rebinds a still-live index delegates to `apply_mapping`'s
@@ -136,6 +250,8 @@ fn dump_rebinding_live_index_clears_old_routing_state() {
         .handle_index_dump(
             peer,
             IndexDump {
+                chunk_index: 0,
+                chunk_count: 1,
                 user_mappings: vec![mapping(5, new_id, 1)],
                 node_mappings: Vec::new(),
             },
@@ -175,6 +291,8 @@ fn user_section_is_processed_before_node_section() {
         .handle_index_dump(
             peer,
             IndexDump {
+                chunk_index: 0,
+                chunk_count: 1,
                 user_mappings: vec![mapping(3, [7; 8], 5)],
                 node_mappings: vec![mapping(3, [8; 8], 6)],
             },
@@ -200,6 +318,8 @@ fn unknown_neighbour_is_noop() {
     let peer = fresh_peer(); // never added to mirrors
 
     let dump = IndexDump {
+        chunk_index: 0,
+        chunk_count: 1,
         user_mappings: vec![mapping(5, [1; 8], 42)],
         node_mappings: vec![mapping(9, [2; 8], 99)],
     };
@@ -221,6 +341,8 @@ fn empty_dump_is_harmless() {
         .handle_index_dump(
             peer,
             IndexDump {
+                chunk_index: 0,
+                chunk_count: 1,
                 user_mappings: Vec::new(),
                 node_mappings: Vec::new(),
             },
