@@ -257,6 +257,9 @@ impl RouterV2State {
         options: RoutingV2Options,
     ) -> (Self, mpsc::UnboundedReceiver<OutboundMsg>) {
         let (tx, rx) = mpsc::unbounded_channel::<OutboundMsg>();
+        // §3.7: config carries the cooldown in seconds, the allocator runs on
+        // the same epoch-millisecond clock as the rest of the router.
+        let idx_cooldown_ms = options.idx_cooldown.saturating_mul(1000);
         let state = Self {
             options,
             user_dict: RwLock::new(IndexDictionary::new(None)),
@@ -265,8 +268,8 @@ impl RouterV2State {
             routing_table: Arc::new(RwLock::new(RoutingTable::new())),
             users: Arc::new(RwLock::new(Users::new())),
             nodes: Arc::new(RwLock::new(Nodes::new())),
-            users_allocator: RwLock::new(IndexAllocator::new()),
-            node_allocator: RwLock::new(IndexAllocator::new()),
+            users_allocator: RwLock::new(IndexAllocator::new(idx_cooldown_ms)),
+            node_allocator: RwLock::new(IndexAllocator::new(idx_cooldown_ms)),
             reintroduction_tracker: RwLock::new(ReintroductionTracker::new()),
             seq_num: RwLock::new(SeqNum::new()),
             tx_outbound: tx,

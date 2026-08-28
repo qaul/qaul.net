@@ -12,6 +12,8 @@ use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;
 use flate2::Compression;
 use libp2p::{identity::ed25519, identity::Keypair, PeerId};
+
+use crate::utilities::timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -105,7 +107,7 @@ impl AccountManagement {
                     // separate concerns, so both are released explicitly. The
                     // version bump folds in on the next relay tick (§10.8) —
                     // an ordinary deletion is not one of the two bypasses.
-                    router_v2.unregister_hosted_user(routing_id);
+                    router_v2.unregister_hosted_user(routing_id, Timestamp::get_timestamp());
                     router_v2.remove_self_delegation(&routing_id);
                 }
                 Err(e) => log::warn!("v2: cannot derive routing id for {user_id}: {e}"),
