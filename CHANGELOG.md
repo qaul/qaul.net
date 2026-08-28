@@ -6,6 +6,77 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.0.0 Release Candidate 8] Unreleased
+
+Added
+
+- Onboarding screen redesign
+- Settings page UI redesign
+- lockfile for libqaul for NixOS integration
+
+Changed
+
+- Upgraded UI towards new layout (chat header)
+- upgraded several underlying libraries
+
+Fixed
+
+- fixed many UI bugs and inconsistencies
+
+## [2.0.0 Release Candidate 7] 2026-08-10
+
+Added
+
+- qauld-ctl TUI mode for analytics
+- qauld-ctl command line editing & command history
+
+Changed
+
+- Upgraded UI towards new layout (chat footer, context menu)
+- Updated Turkish translation (thanks to Osman Karagöz)
+- Upgraded and changed several underlaying libraries
+- Made temporal security session-upgrades wall clock independent
+
+Fixed
+
+- Persist UI authentication sessions between restarts
+- 
+- Emoji avatar support
+- qauld-ctl help inconsistency
+
+## [2.0.0 Release Candidate 6] 2026-07-08
+
+Added
+
+- New Bluetooth Low Energy communication stack for Android
+- Added End-to-End encryption session key rotation for temporal security 
+  (backward and forward secrecy)
+- New Turkish translation (thanks to Osman Karagöz)
+- Added Messenger search feature
+- Added qaul test framework and performance analysis with meshnet-lab
+- Added qaul simulator for performance tests
+- Added Bluetooth Low Energy noise transport encryption
+- qauld deamon can be deamonized via -d option
+
+Changed
+
+- Updated Indonesian Translation (thanks to Arif Budiman)
+- matured qauld-ctl
+- created many structural and performance improvements of libqaul
+  - made libqaul transport definition and loading dynamic
+  - many libqaul performance improvements
+- Refactored GUI
+  - New chat-bubble layout
+  - Improved accessibility of main navigation
+  - Made UI data structure more dynamic and responsive
+  - Integrated dynamic and paginated RPC communication with libqaul
+
+Fixed
+
+- fixed mdns timeout
+- internally audited and hardened libqaul
+- fixed various bugs
+
 ## [2.0.0 Release Candidate 5] 2026-03-29
 
 Added
