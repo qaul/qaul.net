@@ -8,8 +8,8 @@ use tracing::error;
 use crate::router_v2::{
     identity::Multikey,
     index::{Space, RESERVED_INDEX},
-    seq::is_fresher_u32,
     manifest::ManifestLog,
+    seq::is_fresher_u32,
     table::{Node, User},
     BumpTrigger, PropagationForm, RouterV2State,
 };

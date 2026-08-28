@@ -80,7 +80,11 @@ fn a_stale_profile_republish_changes_nothing() {
 
     state.register_hosted_profile([1; 8], hosted_profile(mk, 3));
 
-    assert_eq!(state.hosted_profile_version(&[1; 8]), 3, "the map is a cache");
+    assert_eq!(
+        state.hosted_profile_version(&[1; 8]),
+        3,
+        "the map is a cache"
+    );
     let users = state.users.read().unwrap();
     assert_eq!(
         users.get(&[1; 8]).unwrap().read().unwrap().profile_version,
@@ -104,7 +108,10 @@ fn registering_a_hosted_user_does_not_roll_the_version_back() {
     state.register_hosted_user([1; 8], 0, mk);
 
     let users = state.users.read().unwrap();
-    assert_eq!(users.get(&[1; 8]).unwrap().read().unwrap().profile_version, 9);
+    assert_eq!(
+        users.get(&[1; 8]).unwrap().read().unwrap().profile_version,
+        9
+    );
 }
 
 /// §10.1's host-asserted `profile_version` on a manifest entry comes from
@@ -116,7 +123,11 @@ fn hosted_profile_version_is_the_single_source() {
     let mk = fresh_multikey();
     state.register_hosted_user([1; 8], 0, mk.clone());
 
-    assert_eq!(state.hosted_profile_version(&[1; 8]), 0, "nothing published");
+    assert_eq!(
+        state.hosted_profile_version(&[1; 8]),
+        0,
+        "nothing published"
+    );
     state.register_hosted_profile([1; 8], hosted_profile(mk, 4));
     assert_eq!(state.hosted_profile_version(&[1; 8]), 4);
     assert_eq!(state.hosted_profile_version(&[9; 8]), 0, "unknown user");
