@@ -18,7 +18,10 @@ class PermissionHandler(private val context: Context) {
         private const val LOCATION_ENABLE_REQ_CODE = 112
         private const val REQUEST_ENABLE_BT = 113
 
-        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.CHANGE_WIFI_STATE, Manifest.permission.ACCESS_FINE_LOCATION)
+        // ACCESS_FINE_LOCATION is shouldnt be required here. It is capped at maxSdkVersion=30 in the
+        // manifest, so on API 31+ it is undeclared and can never be granted leading to a crash as requesting it returns
+        // an instant denial.
+        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.CHANGE_WIFI_STATE)
     }
 
     private var permissionCallback: ((Boolean) -> Unit)? = null
@@ -44,7 +47,8 @@ class PermissionHandler(private val context: Context) {
             // All permissions are already granted
             permissionCallback?.invoke(true)
         } else {
-            ActivityCompat.requestPermissions(context as Activity, permissionsToRequest.toTypedArray(), LOCATION_PERMISSION_REQ_CODE)
+            // Only use WIFI_PERMISSION_REQUEST_CODE: it is the code onRequestPermissionsResult below matches on
+            ActivityCompat.requestPermissions(context as Activity, permissionsToRequest.toTypedArray(), WIFI_PERMISSION_REQUEST_CODE)
         }
     }
 
