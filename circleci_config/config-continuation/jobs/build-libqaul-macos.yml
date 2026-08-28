@@ -14,6 +14,7 @@ steps:
       command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
   - setup-sccache
   - restore-sccache-cache
+  - pin-rust-deps
   - run:
       name: Build Libqaul *.dylib Library for MacOS
       command: |
@@ -27,13 +28,13 @@ steps:
 
         # Storing pre-compiled dylib
         mv liblibqaul.dylib liblibqaul.dylib.old
-        # compiling CLI tools (qaul-cli, qauld)
+        # compiling CLI tools (qaul-cli, qauld, qauld-ctl)
         cargo build --release
         # Replacing newly compiled dylib with correct one
         mv -f liblibqaul.dylib.old liblibqaul.dylib
 
         mkdir cli-binaries
-        mv qauld qaul-cli cli-binaries
+        mv qauld qaul-cli qauld-ctl cli-binaries
         cd cli-binaries
         zip macos-cli-binaries *
   - persist_to_workspace:

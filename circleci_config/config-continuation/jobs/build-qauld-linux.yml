@@ -10,6 +10,7 @@ steps:
         protoc --version
   - setup-sccache
   - restore-sccache-cache
+  - pin-rust-deps
   - run:
       name: Install cargo-deb package
       command: cd rust && cargo install cargo-deb
@@ -17,11 +18,17 @@ steps:
       name: Build qauld for Linux
       command: cd rust/clients/qauld && cargo deb
   - run:
+      name: Build qauld-ctl for Linux
+      command: cd rust/clients/qauld-ctl && cargo deb
+  - run:
       name: Add ARM Target for Raspberry pi
       command: cd rust && rustup target add armv7-unknown-linux-gnueabihf
   - run:
       name: Build qauld for Raspberry pi
       command: cd rust/clients/qauld && cargo deb --target=armv7-unknown-linux-gnueabihf
+  - run:
+      name: Build qauld-ctl for Raspberry pi
+      command: cd rust/clients/qauld-ctl && cargo deb --target=armv7-unknown-linux-gnueabihf
   - save-sccache-cache
   - persist_to_workspace:
       root: ~/qaul.net

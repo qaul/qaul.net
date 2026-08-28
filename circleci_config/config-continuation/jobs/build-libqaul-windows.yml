@@ -38,7 +38,7 @@ steps:
       command: |
         cd rust/target/release
         mkdir cli-binaries
-        mv qauld qaul-cli cli-binaries
+        mv qauld qaul-cli qauld-ctl cli-binaries
         cd cli-binaries
         tar -a -c -f windows-cli-binaries.zip *
   - persist_to_workspace:

@@ -50,3 +50,21 @@ shlex = "1"
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"
+
+[package.metadata.deb]
+maintainer = "Open Community Projects Association <develop@ocpa.ch>"
+copyright = "2021 Open Community Projects Association <contact@ocpa.ch>, Christoph Wachter & Mathias Jud <contact@wachter-jud.net>"
+license-file = ["../../../LICENSE", "0"]
+extended-description = """\
+qaul – قول project https://qaul.net \
+Internet Independent Wireless Mesh Communication \
+\
+Contains the qauld-ctl daemon control client \
+"""
+depends = "$auto"
+recommends = "qauld"
+section = "network"
+priority = "optional"
+assets = [
+   ["target/release/qauld-ctl", "/usr/bin/", "755"],
+]

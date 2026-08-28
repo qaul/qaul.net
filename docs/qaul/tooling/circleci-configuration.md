@@ -1,39 +1,46 @@
 # CircleCI Config
-> *The list of available tasks performed by CircleCI can be found [here](qaul/tooling/circleci.md)*
 
-The `./circleci_config` folder follows the [FYAML](https://github.com/CircleCI-Public/fyaml) specs
-to leverage circleci's `pack` CLI command.
+> _The list of available tasks performed by CircleCI can be found [here](qaul/tooling/circleci.md)_
+
+The `./circleci_config` folder follows the [FYAML](https://github.com/CircleCI-Public/fyaml) specs, enforced by `./circleci_config/scripts/fyaml_pack.py`.
 
 We also make use of dynamic configuration, which allows for
 a finer control over CircleCI's pipelines.
 
 To learn more about it, check:
-> * [CircleCI CLI Docs on `pack`](https://circleci.com/docs/2.0/local-cli/#packing-a-config)
-> * [FYAML Specification](https://github.com/CircleCI-Public/fyaml/blob/master/fyaml-specification.md)
-> * [Dynamic Configurations on CircleCI](https://circleci.com/docs/2.0/dynamic-config/)
+
+> - [CircleCI CLI Docs on `pack`](https://circleci.com/docs/2.0/local-cli/#packing-a-config)
+> - [FYAML Specification](https://github.com/CircleCI-Public/fyaml/blob/master/fyaml-specification.md)
+> - [Dynamic Configurations on CircleCI](https://circleci.com/docs/2.0/dynamic-config/)
 
 ## Naming conventions for jobs and workflows
+
 Jobs and workflows follow the pattern:
 
 `<ACTION>-<PROJECT>-<PLATFORM - if applicable>`
 
-I.E. a libqaul build job for the linux platform should be found in *./jobs/build-libqaul-linux.yml*.
+I.E. a libqaul build job for the linux platform should be found in _./jobs/build-libqaul-linux.yml_.
 
 ## Regenerating the config.yml file
+
+_IMPORTANT_: Never edit `.circleci/config.yml` or `.circleci/continue-config.yml` directly.
+
 After modifying part of The `./circleci_config` folder structure, run the following command to regenerate the configuration files:
 
 ```shell
 # Ensure that you're in the root dir of this project
 cd qaul.net
 
-# CircleCI CLI must be installed
-circleci version
+# yq and python3 must be installed
+yq --version
+python3 --version
 
 # Run the script found in .scripts/pack.sh
 sh circleci_config/scripts/pack.sh
 ```
 
 ## Folder structure and packing logic
+
 There are two generated configuration files: `config.yml` and `continue-config.yml`.
 
 The former defines CircleCI's entrypoint when a pipeline is triggered, which in turn points
@@ -47,8 +54,10 @@ parent.
 A folder or a file describes a new key, and any contents within it will be nested in this new key.
 
 ### Example
+
 To add a new workflow named 'example-workflow' to the `continue-config.yml` file, add a `example-workflow.yml`
 in `./config-continuation/workflows`. The resulting tree would look similar to:
+
 ```
 .
 └── config-continuation

@@ -1,6 +1,8 @@
-# Build a Debian Installer of the qauld Deamon
+# Build the Debian Installers of the qauld Deamon
 
-Build a Debian installer on Linux of `qauld`, the qaul daemon
+Build Debian installers on Linux of `qauld`, the qaul daemon, and of
+`qauld-ctl`, the client that controls it. Each is packaged separately, so the
+daemon can be installed on a headless machine without the client and vice versa.
 
 ## Install Requirements
 
@@ -23,10 +25,15 @@ cargo deb
 
 # to build an install for the raspberry pi, run:
 cargo deb --target=armv7-unknown-linux-gnueabihf
+
+# do the same for the qauld-ctl control client
+cd ../qauld-ctl
+cargo deb
+cargo deb --target=armv7-unknown-linux-gnueabihf
 ```
 
-You'll find the debian installer in the `rust/target/debian/` directory.
-The Raspberry Pi installer is in the `rust/target/armv7-unknown-linux-gnueabihf/debian/` directory.
+You'll find the debian installers in the `rust/target/debian/` directory.
+The Raspberry Pi installers are in the `rust/target/armv7-unknown-linux-gnueabihf/debian/` directory.
 
 ## Further Customization
 

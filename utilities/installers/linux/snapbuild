@@ -29,7 +29,13 @@ echo "Building Flutter application..."
 lxd init --auto
 snapcraft pack --use-lxd
 
-FILENAME="qaul-$(uname -m)-$VERSION.snap"
+case "$(uname -m)" in
+  x86_64)  ARCH="amd64" ;;
+  aarch64) ARCH="arm64" ;;
+  *)       echo "unsupported architecture: $(uname -m)" >&2; exit 1 ;;
+esac
+
+FILENAME="qaul-$ARCH-$VERSION.snap"
 mv ./*.snap "$FILENAME"
 snapcraft upload "$FILENAME" --release=candidate
 
