@@ -40,7 +40,7 @@ libc = "0.2"
 crossbeam-channel = "0.5"
 bs58 = "0.5"
 futures-ticker = "0.0.3"
-jni = "0.22"
+jni = "0.21"
 serde_yaml_ng = "0.10"
 sled = "0.34.7"
 uuid = { version = "1.13", features = ["v4"] }
