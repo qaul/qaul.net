@@ -14,6 +14,7 @@ steps:
       command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
   - setup-sccache
   - restore-sccache-cache
+  - pin-rust-deps
   - run:
       name: Install build targets for iOS in rust
       command: rustup target add aarch64-apple-ios x86_64-apple-ios

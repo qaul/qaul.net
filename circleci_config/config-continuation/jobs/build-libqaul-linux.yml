@@ -9,6 +9,7 @@ steps:
         protoc --version
   - setup-sccache
   - restore-sccache-cache
+  - pin-rust-deps
   - run:
       name: Build Libqaul for Linux
       command: cd rust && cargo build --release
@@ -18,7 +19,7 @@ steps:
       command: |
         cd rust/target/release
         mkdir cli-binaries
-        mv qauld qaul-cli cli-binaries
+        mv qauld qaul-cli qauld-ctl cli-binaries
         cd cli-binaries
         zip linux-cli-binaries *
   - persist_to_workspace:

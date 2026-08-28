@@ -12,6 +12,7 @@ steps:
       command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
   - setup-sccache
   - restore-sccache-cache
+  - pin-rust-deps
   - run:
       name: Install build targets for android in rust
       command: rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android

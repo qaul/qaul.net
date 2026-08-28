@@ -31,7 +31,7 @@ steps:
         # Windows
         cp rust/target/release/libqaul.dll ./artifacts/
         cp rust/target/release/cli-binaries/windows-cli-binaries.zip ./artifacts/
-        
+
         # SBOMs
         cp sbom.cdx.json ./artifacts
         cp sbom.spdx.json ./artifacts
@@ -72,26 +72,44 @@ steps:
         ARM64_FILE="qauld_arm64.deb"
         ARMHF_FILE="qauld_armhf.deb"
 
+        CTL_AMD64_FILE="qauld-ctl_amd64.deb"
+        CTL_ARM64_FILE="qauld-ctl_arm64.deb"
+        CTL_ARMHF_FILE="qauld-ctl_armhf.deb"
+
         cd artifacts
 
-        # Get debian file names
-        ORIGINAL_AMD64_FILE=$(filename deb | grep "amd64" | cut -f1)
-        ORIGINAL_ARM64_FILE=$(filename deb | grep "arm64" | cut -f1)
-        ORIGINAL_ARMHF_FILE=$(filename deb | grep "armhf" | cut -f1)
-        # Rename original debian file names
-        mv "$ORIGINAL_AMD64_FILE.deb" "$AMD64_FILE"
-        mv "$ORIGINAL_ARM64_FILE.deb" "$ARM64_FILE"
-        mv "$ORIGINAL_ARMHF_FILE.deb" "$ARMHF_FILE"
+        # Renames "<package>_<version>_<arch>.deb" to a stable "<package>_<arch>.deb".
+        rename_deb() { # $1 = package, $2 = arch, $3 = destination file name
+          local matches count
+          matches=$(filename deb | cut -f3 | grep -E "^$1_.*_$2\.deb$" || true)
+          count=$(printf '%s\n' "$matches" | grep -c . || true)
+          if [ "$count" -eq 0 ]; then
+            echo "no debian artifact for $1 ($2); skipping..."
+          elif [ "$count" -gt 1 ]; then
+            echo "ERROR: more than one debian artifact matched $1 ($2):"
+            echo "$matches"
+            exit 1
+          else
+            mv "$matches" "$3"
+            echo "using debian artifact name: $matches -> $3"
+          fi
+        }
 
-        echo "Using debian amd artifact name: $AMD64_FILE"
-        echo "Using debian arm artifact name: $ARM64_FILE"
-        echo "Using debian armhf artifact name: $ARMHF_FILE"
+        rename_deb qauld     amd64 "$AMD64_FILE"
+        rename_deb qauld     arm64 "$ARM64_FILE"
+        rename_deb qauld     armhf "$ARMHF_FILE"
+        rename_deb qauld-ctl amd64 "$CTL_AMD64_FILE"
+        rename_deb qauld-ctl arm64 "$CTL_ARM64_FILE"
+        rename_deb qauld-ctl armhf "$CTL_ARMHF_FILE"
 
         DESCRIPTION=$(cat ../utilities/release-templates/release-template.md \
           | sed "s/TAGNAME/${TAG}/g" \
           | sed "s/DEB_AMD/${AMD64_FILE}/g" \
           | sed "s/DEB_ARM64/${ARM64_FILE}/g" \
           | sed "s/DEB_ARMHF/${ARMHF_FILE}/g" \
+          | sed "s/DEB_CTL_AMD/${CTL_AMD64_FILE}/g" \
+          | sed "s/DEB_CTL_ARM64/${CTL_ARM64_FILE}/g" \
+          | sed "s/DEB_CTL_ARMHF/${CTL_ARMHF_FILE}/g" \
           | sed "s/APKVERSION/${APK_FILE}/g" \
           | sed "s/SNAP_VERSION/${LINUX_FILE}/g" \
           | sed "s/SNAP_ARM_VERSION/${LINUX_ARM_FILE}/g" \

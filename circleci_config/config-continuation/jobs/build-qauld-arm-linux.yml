@@ -9,12 +9,16 @@ steps:
         protoc --version
   - setup-sccache
   - restore-sccache-cache
+  - pin-rust-deps
   - run:
       name: Install cargo-deb package
       command: cd rust && cargo install cargo-deb
   - run:
       name: Build qauld for Linux on arm
       command: cd rust/clients/qauld && cargo deb
+  - run:
+      name: Build qauld-ctl for Linux on arm
+      command: cd rust/clients/qauld-ctl && cargo deb
   - save-sccache-cache
   - persist_to_workspace:
       root: ~/qaul.net
