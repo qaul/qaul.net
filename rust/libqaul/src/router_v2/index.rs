@@ -3,10 +3,7 @@
 
 //! Index allocation per space per entry on each node/user.
 use bitvec::prelude::*;
-use std::{
-    collections::{HashMap, HashSet, VecDeque},
-    time::{Duration, Instant},
-};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 /// Spec §3.5: `0x0000` is reserved in each space for the node's self-reference
 /// and is never returned by the allocator.
@@ -17,17 +14,19 @@ pub struct IndexAllocator {
     /// a monotonic cursor over the 16-bit index range, wrapping from 65,535 back to zero.
     cursor: u16,
     /// a 60s period where the index is not used in allocating
-    cooldown: VecDeque<(u16, Instant)>,
+    cooldown: VecDeque<(u16, u64)>,
     /// the actual indexes used by the node
     occupiers: bitvec::vec::BitVec<u8, Lsb0>,
+    cooldown_ms: u64,
 }
 
 impl IndexAllocator {
-    pub fn new() -> Self {
+    pub fn new(cooldown_ms: u64) -> Self {
         Self {
             cursor: 0,
             cooldown: VecDeque::new(),
             occupiers: BitVec::repeat(false, 65_536),
+            cooldown_ms,
         }
     }
 
@@ -41,10 +40,9 @@ impl IndexAllocator {
     }
 
     /// simply drains the vecedequeue
-    fn remove_expired_idx(&mut self) {
-        let now = Instant::now();
+    fn remove_expired_idx(&mut self, now_ms: u64) {
         while let Some(&(_, released_at)) = self.cooldown.front() {
-            if now.duration_since(released_at) >= Duration::from_secs(60) {
+            if now_ms.saturating_sub(released_at) >= self.cooldown_ms {
                 self.cooldown.pop_front();
             } else {
                 break;
@@ -52,8 +50,8 @@ impl IndexAllocator {
         }
     }
 
-    pub fn allocate(&mut self) -> Option<u16> {
-        self.remove_expired_idx();
+    pub fn allocate(&mut self, now_ms: u64) -> Option<u16> {
+        self.remove_expired_idx(now_ms);
         // the entire 16 biy space
         for _ in 0..65_536 {
             let idx = self.cursor;
@@ -76,9 +74,17 @@ impl IndexAllocator {
         None
     }
 
-    pub fn release(&mut self, idx: u16, now: Instant) {
+    /// Test hook: mark every slot but `keep` occupied, so a single
+    /// candidate's eligibility can be asserted in isolation.
+    #[cfg(test)]
+    pub fn occupy_all_except(&mut self, keep: u16) {
+        self.occupiers.fill(true);
+        self.occupiers.set(keep as usize, false);
+    }
+
+    pub fn release(&mut self, idx: u16, now_ms: u64) {
         self.occupiers.set(idx as usize, false);
-        self.cooldown.push_back((idx, now));
+        self.cooldown.push_back((idx, now_ms));
     }
 }
 
@@ -242,9 +248,13 @@ mod tests {
     use super::*;
     use std::collections::HashSet;
 
+    /// §3.7's 60 s, in the epoch-milliseconds the allocator now runs on.
+    const COOLDOWN_MS: u64 = 60_000;
+    const NOW: u64 = 1_000_000;
+
     #[test]
     fn new_allocator_starts_empty() {
-        let alloc = IndexAllocator::new();
+        let alloc = IndexAllocator::new(COOLDOWN_MS);
         assert_eq!(alloc.cursor, 0);
         assert!(alloc.cooldown.is_empty());
         assert_eq!(alloc.occupiers.count_ones(), 0);
@@ -253,41 +263,41 @@ mod tests {
 
     #[test]
     fn allocate_returns_distinct_indexes() {
-        let mut alloc = IndexAllocator::new();
+        let mut alloc = IndexAllocator::new(COOLDOWN_MS);
         let mut seen = HashSet::new();
         for _ in 0..1_000 {
-            let idx = alloc.allocate().expect("allocate succeeds");
+            let idx = alloc.allocate(NOW).expect("allocate succeeds");
             assert!(seen.insert(idx), "allocator returned duplicate idx: {idx}");
         }
     }
 
     #[test]
     fn allocate_never_returns_reserved_index() {
-        let mut alloc = IndexAllocator::new();
+        let mut alloc = IndexAllocator::new(COOLDOWN_MS);
         for _ in 0..1_000 {
-            let idx = alloc.allocate().expect("allocate succeeds");
+            let idx = alloc.allocate(NOW).expect("allocate succeeds");
             assert_ne!(idx, RESERVED_INDEX, "reserved index must not be returned");
         }
     }
 
     #[test]
     fn allocate_skips_occupied_slots() {
-        let mut alloc = IndexAllocator::new();
+        let mut alloc = IndexAllocator::new(COOLDOWN_MS);
         // Pre-mark slot 5 as occupied.
         alloc.occupiers.set(5, true);
 
         // Cursor starts at 0; allocate must skip 0 (reserved) and 5
         // (occupied), producing the sequence below.
         let seq: Vec<u16> = (0..6)
-            .map(|_| alloc.allocate().expect("allocate succeeds"))
+            .map(|_| alloc.allocate(NOW).expect("allocate succeeds"))
             .collect();
         assert_eq!(seq, vec![1, 2, 3, 4, 6, 7]);
     }
 
     #[test]
     fn allocate_sets_the_occupancy_bit() {
-        let mut alloc = IndexAllocator::new();
-        let idx = alloc.allocate().expect("allocate succeeds");
+        let mut alloc = IndexAllocator::new(COOLDOWN_MS);
+        let idx = alloc.allocate(NOW).expect("allocate succeeds");
         assert!(
             alloc.occupiers[idx as usize],
             "allocated idx must be marked as occupied"
@@ -296,11 +306,11 @@ mod tests {
 
     #[test]
     fn release_clears_bit_and_adds_to_cooldown() {
-        let mut alloc = IndexAllocator::new();
-        let idx = alloc.allocate().expect("allocate succeeds");
+        let mut alloc = IndexAllocator::new(COOLDOWN_MS);
+        let idx = alloc.allocate(NOW).expect("allocate succeeds");
         assert!(alloc.occupiers[idx as usize]);
 
-        alloc.release(idx, Instant::now());
+        alloc.release(idx, NOW);
 
         assert!(
             !alloc.occupiers[idx as usize],
@@ -314,9 +324,9 @@ mod tests {
 
     #[test]
     fn cooldown_blocks_reuse_while_active() {
-        let mut alloc = IndexAllocator::new();
-        let idx = alloc.allocate().expect("allocate succeeds");
-        alloc.release(idx, Instant::now());
+        let mut alloc = IndexAllocator::new(COOLDOWN_MS);
+        let idx = alloc.allocate(NOW).expect("allocate succeeds");
+        alloc.release(idx, NOW);
 
         // Force every other slot to be occupied so the just-released
         // idx is the only otherwise-eligible candidate. With it in
@@ -325,7 +335,7 @@ mod tests {
         alloc.occupiers.set(idx as usize, false);
 
         assert_eq!(
-            alloc.allocate(),
+            alloc.allocate(NOW),
             None,
             "idx in cooldown must not be reallocated even if it is the only free slot"
         );
@@ -333,15 +343,11 @@ mod tests {
 
     #[test]
     fn drain_restores_eligibility_after_cooldown_elapses() {
-        let mut alloc = IndexAllocator::new();
+        let mut alloc = IndexAllocator::new(COOLDOWN_MS);
 
-        // Inject an already-expired entry. checked_sub is used in case
-        // the test machine's monotonic clock has been running for less
-        // than 120 s (rare in CI; impossible on real dev systems).
-        let past = Instant::now()
-            .checked_sub(Duration::from_secs(120))
-            .expect("test host's monotonic clock must be > 2 min old");
-        alloc.cooldown.push_back((42, past));
+        // A synthetic clock makes this exact: released two cooldown
+        // windows ago, so `allocate` must drain it.
+        alloc.cooldown.push_back((42, NOW - 2 * COOLDOWN_MS));
 
         // Force-occupy every slot except 42 so the allocator can only
         // pick 42 if drain successfully removed the expired entry.
@@ -349,7 +355,7 @@ mod tests {
         alloc.occupiers.set(42, false);
 
         assert_eq!(
-            alloc.allocate(),
+            alloc.allocate(NOW),
             Some(42),
             "expired cooldown entry must be drained and the slot reused"
         );
@@ -357,11 +363,10 @@ mod tests {
 
     #[test]
     fn drain_keeps_non_expired_entries() {
-        let mut alloc = IndexAllocator::new();
-        let recent = Instant::now();
-        alloc.cooldown.push_back((42, recent));
+        let mut alloc = IndexAllocator::new(COOLDOWN_MS);
+        alloc.cooldown.push_back((42, NOW));
 
-        alloc.remove_expired_idx();
+        alloc.remove_expired_idx(NOW);
 
         assert!(
             alloc.idx_in_cooldown(42),
@@ -372,16 +377,13 @@ mod tests {
 
     #[test]
     fn drain_pops_expired_but_stops_at_first_fresh() {
-        let mut alloc = IndexAllocator::new();
-        let past = Instant::now()
-            .checked_sub(Duration::from_secs(120))
-            .expect("test host's monotonic clock must be > 2 min old");
-        let recent = Instant::now();
+        let mut alloc = IndexAllocator::new(COOLDOWN_MS);
+        let past = NOW - 2 * COOLDOWN_MS;
         alloc.cooldown.push_back((1, past)); // expired
         alloc.cooldown.push_back((2, past)); // expired
-        alloc.cooldown.push_back((3, recent)); // fresh
+        alloc.cooldown.push_back((3, NOW)); // fresh
 
-        alloc.remove_expired_idx();
+        alloc.remove_expired_idx(NOW);
 
         assert!(!alloc.idx_in_cooldown(1));
         assert!(!alloc.idx_in_cooldown(2));
@@ -391,11 +393,11 @@ mod tests {
 
     #[test]
     fn exhaustion_returns_none() {
-        let mut alloc = IndexAllocator::new();
+        let mut alloc = IndexAllocator::new(COOLDOWN_MS);
         // Every slot occupied; allocate must return None after sweeping
         // the full 16-bit space without finding an eligible candidate.
         alloc.occupiers.fill(true);
-        assert_eq!(alloc.allocate(), None);
+        assert_eq!(alloc.allocate(NOW), None);
     }
 
     #[test]

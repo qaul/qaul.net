@@ -106,10 +106,23 @@ impl RouterV2State {
         if self.has_active_internet_transport() {
             return PropagationForm::Node;
         }
+        if self.holds_foreign_delegation() {
+            return PropagationForm::Node;
+        }
 
-        // TODO(Phase 13): holding a delegation from another user is the third
-        // §3.2 trigger; cross-host delegation does not exist yet.
         PropagationForm::User
+    }
+
+    /// the last trigger er 3.2: when a node carries a manifest entry for a user it
+    /// does not host.
+    fn holds_foreign_delegation(&self) -> bool {
+        let hosted = self.hosted_user_ids();
+        self.manifest
+            .read()
+            .unwrap()
+            .entries()
+            .iter()
+            .any(|entry| !hosted.contains(&entry.user_id))
     }
 
     /// Makes sure this node has a [`Node`] record for itself.
@@ -150,7 +163,7 @@ impl RouterV2State {
         match desired {
             PropagationForm::Node => {
                 for user_id in self.hosted_user_ids() {
-                    if let Some(idx) = self.release_index(Space::User, &user_id) {
+                    if let Some(idx) = self.release_index(Space::User, &user_id, now_ms) {
                         tracing::info!(
                             "router_v2: released user index {idx} for hosted user {user_id:?} (→ node form)"
                         );
@@ -172,10 +185,10 @@ impl RouterV2State {
                 );
             }
             PropagationForm::User => {
-                self.release_index(Space::Node, &self.host_mk.to_id());
+                self.release_index(Space::Node, &self.host_mk.to_id(), now_ms);
 
                 if let Some(user_id) = self.hosted_user_ids().first().copied() {
-                    self.release_index(Space::User, &user_id);
+                    self.release_index(Space::User, &user_id, now_ms);
                     self.user_dict
                         .write()
                         .unwrap()
@@ -200,7 +213,7 @@ impl RouterV2State {
         desired
     }
 
-    pub fn unregister_hosted_user(&self, user_id: [u8; 8]) {
+    pub fn unregister_hosted_user(&self, user_id: [u8; 8], now_ms: u64) {
         let held_reserved = self
             .user_dict
             .read()
@@ -209,12 +222,12 @@ impl RouterV2State {
             .map(|idx| idx == RESERVED_INDEX)
             .unwrap_or(false);
 
-        self.release_index(Space::User, &user_id);
+        self.release_index(Space::User, &user_id, now_ms);
         self.users.write().unwrap().remove(&user_id);
 
         if held_reserved {
             if let Some(next) = self.hosted_user_ids().first().copied() {
-                self.release_index(Space::User, &next);
+                self.release_index(Space::User, &next, now_ms);
                 self.user_dict.write().unwrap().bind(RESERVED_INDEX, next);
                 self.reintroduction_tracker
                     .write()

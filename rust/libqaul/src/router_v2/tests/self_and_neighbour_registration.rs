@@ -185,7 +185,7 @@ fn register_neighbour_node_allocates_index_record_and_mark() {
     let node_id = [77; 8];
     let key = fresh_multikey();
 
-    state.register_neighbour_node(node_id, Some(key));
+    state.register_neighbour_node(node_id, Some(key), 1_000);
 
     let idx = state
         .node_dict
@@ -220,11 +220,11 @@ fn register_neighbour_node_is_idempotent() {
     let (state, _rx) = fresh_state();
     let node_id = [77; 8];
 
-    state.register_neighbour_node(node_id, Some(fresh_multikey()));
+    state.register_neighbour_node(node_id, Some(fresh_multikey()), 1_000);
     let first = state.node_dict.read().unwrap().idx_of(&node_id).unwrap();
 
     for _ in 0..5 {
-        state.register_neighbour_node(node_id, Some(fresh_multikey()));
+        state.register_neighbour_node(node_id, Some(fresh_multikey()), 1_000);
     }
 
     assert_eq!(
@@ -243,14 +243,14 @@ fn register_neighbour_node_upgrades_a_keyless_stub() {
     let (state, _rx) = fresh_state();
     let node_id = [77; 8];
 
-    state.register_neighbour_node(node_id, None);
+    state.register_neighbour_node(node_id, None, 1_000);
     {
         let nodes = state.nodes.read().unwrap();
         let node_arc = nodes.get(&node_id).unwrap();
         assert!(node_arc.read().unwrap().public_key.is_none());
     }
 
-    state.register_neighbour_node(node_id, Some(fresh_multikey()));
+    state.register_neighbour_node(node_id, Some(fresh_multikey()), 1_000);
 
     let nodes = state.nodes.read().unwrap();
     let node_arc = nodes.get(&node_id).unwrap();
@@ -266,8 +266,8 @@ fn register_neighbour_node_never_downgrades_a_known_key() {
     let (state, _rx) = fresh_state();
     let node_id = [77; 8];
 
-    state.register_neighbour_node(node_id, Some(fresh_multikey()));
-    state.register_neighbour_node(node_id, None);
+    state.register_neighbour_node(node_id, Some(fresh_multikey()), 1_000);
+    state.register_neighbour_node(node_id, None, 1_000);
 
     let nodes = state.nodes.read().unwrap();
     let node_arc = nodes.get(&node_id).unwrap();
@@ -283,8 +283,8 @@ fn register_neighbour_node_never_downgrades_a_known_key() {
 fn distinct_neighbours_get_distinct_indexes() {
     let (state, _rx) = fresh_state();
 
-    state.register_neighbour_node([10; 8], None);
-    state.register_neighbour_node([20; 8], None);
+    state.register_neighbour_node([10; 8], None, 1_000);
+    state.register_neighbour_node([20; 8], None, 1_000);
 
     let dict = state.node_dict.read().unwrap();
     let a = dict.idx_of(&[10; 8]).unwrap();
@@ -303,7 +303,7 @@ fn only_the_active_form_holds_a_reserved_binding() {
     let user_id = [42; 8];
 
     state.register_hosted_user(user_id, 1, fresh_multikey());
-    state.register_neighbour_node([77; 8], None);
+    state.register_neighbour_node([77; 8], None, 1_000);
 
     assert_eq!(
         state.user_dict.read().unwrap().id_of(RESERVED_INDEX),
@@ -326,8 +326,8 @@ fn only_the_active_form_holds_a_reserved_binding() {
 fn neighbour_registration_never_touches_the_reserved_slot() {
     let (state, _rx) = fresh_state();
 
-    state.register_neighbour_node([77; 8], None);
-    state.register_neighbour_node([88; 8], None);
+    state.register_neighbour_node([77; 8], None, 1_000);
+    state.register_neighbour_node([88; 8], None, 1_000);
 
     let dict = state.node_dict.read().unwrap();
     assert!(dict.id_of(RESERVED_INDEX).is_none());
