@@ -21,24 +21,24 @@ object BleConstants {
     // --------------------------------------------------------------------------------------------
 
     /** Main service UUID advertised by the GATT server. Scanner filters on this. */
-    val SERVICE_UUID: UUID = UUID.fromString("4db14399-0bd0-4445-9906-47d9c4791cff")
+    val SERVICE_UUID: UUID = UUID.fromString("c7b64399-37d9-4c00-92a0-6d0a87346816")
 
     /** Characteristic used to read the remote device's qaul ID on initial connection. */
-    val READ_CHAR: UUID = UUID.fromString("4db14401-0bd0-4445-9906-47d9c4791cff")
+    val READ_CHAR: UUID = UUID.fromString("c7b64401-37d9-4c00-92a0-6d0a87346816")
 
     /**
      * Characteristic used for message transport.
      * Properties: WRITE (client → server) + NOTIFY (server → client)
      * This single characteristic handles both directions of message traffic.
      */
-    val MSG_CHAR: UUID = UUID.fromString("4db14402-0bd0-4445-9906-47d9c4791cff")
+    val MSG_CHAR: UUID = UUID.fromString("c7b64402-37d9-4c00-92a0-6d0a87346816")
 
     /**
      * Characteristic the central reads to learn the peripheral's L2CAP CoC PSM (a 4-byte
      * big-endian int, dynamically assigned by the OS). The central uses it to open the
      * high-bandwidth L2CAP data channel for file transfer. -1 means L2CAP is unavailable.
      */
-    val PSM_CHAR: UUID = UUID.fromString("4db14403-0bd0-4445-9906-47d9c4791cff")
+    val PSM_CHAR: UUID = UUID.fromString("c7b64403-37d9-4c00-92a0-6d0a87346816")
 
     /**
      * Client Characteristic Configuration Descriptor UUID (standard BLE).
