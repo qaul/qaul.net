@@ -10,7 +10,7 @@ FYAML rules (https://github.com/CircleCI-Public/fyaml):
 """
 
 import json
-import os
+import pathlib
 import subprocess
 import sys
 
@@ -20,7 +20,8 @@ YAML_EXTENSIONS = (".yml", ".yaml")
 def read_yaml(path):
     """Parse one yaml file into python data via yq"""
     result = subprocess.run(
-        ["yq", "--output-format=json", "--indent=0", ".", path],
+        ["yq", "--input-format=yaml", "--output-format=json", "--indent=0", "."],
+        input=path.read_text(encoding="utf-8"),
         capture_output=True,
         text=True,
     )
@@ -33,12 +34,12 @@ def read_yaml(path):
 def pack(directory):
     """Apply the FYAML rules to one directory"""
     packed = {}
-    for name in sorted(os.listdir(directory)):
-        path = os.path.join(directory, name)
-        if os.path.isdir(path):
+    for path in sorted(directory.iterdir(), key=lambda entry: entry.name):
+        name = path.name
+        if path.is_dir():
             key, value = name, pack(path)
         elif name.endswith(YAML_EXTENSIONS):
-            key, value = os.path.splitext(name)[0], read_yaml(path)
+            key, value = path.stem, read_yaml(path)
         else:
             continue
 
@@ -116,8 +117,8 @@ def sort_deep(value):
 def main():
     if len(sys.argv) != 2:
         sys.exit("usage: fyaml_pack.py <fyaml-directory>")
-    directory = sys.argv[1]
-    if not os.path.isdir(directory):
+    directory = pathlib.Path(sys.argv[1]).resolve()
+    if not directory.is_dir():
         sys.exit("not a directory: {}".format(directory))
     json.dump(sort_deep(pack(directory)), sys.stdout)
 

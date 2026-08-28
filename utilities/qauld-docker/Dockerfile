@@ -19,8 +19,8 @@ ENV UID 1000
 ENV PORT 9229
 ENV NAME "Self-hosted Qaul"
 
-COPY --from=builder --chown=${UID}:${GID} /qaul/rust/target/release/qauld /bin
-COPY --from=builder --chown=${UID}:${GID} /qaul/rust/target/release/qauld-ctl /bin
+COPY --from=builder /qaul/rust/target/release/qauld /bin
+COPY --from=builder /qaul/rust/target/release/qauld-ctl /bin
 
 EXPOSE ${PORT}
 USER ${UID}:${GID}
