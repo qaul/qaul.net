@@ -13,6 +13,8 @@ class QaulAuthMoreTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final labels =
         QaulComponentsLocalizations.of(context) ?? QaulComponentsLocalizationsEn();
+    final secondaryColor = qaulAuthSecondaryTextColor(context);
+
     return InkWell(
       onTap: onTap,
       child: SizedBox(
@@ -21,21 +23,21 @@ class QaulAuthMoreTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.add_circle_outline,
-                color: kQaulAuthSecondaryTextColor,
+                color: secondaryColor,
                 size: kQaulAuthIconSize,
               ),
               const SizedBox(width: kQaulAuthAvatarTextGap),
               Expanded(
                 child: Text(
                   labels.authMoreAccounts,
-                  style: kQaulAuthAccountTextStyle,
+                  style: qaulAuthAccountTextStyle(context),
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.keyboard_arrow_down,
-                color: kQaulAuthSecondaryTextColor,
+                color: secondaryColor,
               ),
             ],
           ),

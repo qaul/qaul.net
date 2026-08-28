@@ -15,7 +15,7 @@ class QaulAuthSegmentedList extends StatelessWidget {
           ClipRRect(
             borderRadius: _borderRadiusFor(i, children.length),
             child: Material(
-              color: kQaulAuthRowBackgroundColor,
+              color: qaulAuthRowBackgroundColor(context),
               child: children[i],
             ),
           ),

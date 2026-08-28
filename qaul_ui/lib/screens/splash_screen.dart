@@ -10,7 +10,17 @@ import '../helpers/navigation_helper.dart';
 import '../helpers/user_prefs_helper.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/account_session_provider.dart';
+import '../widgets/widgets.dart' hide QaulAvatar;
 import 'settings_screen.dart';
+
+const _kAuthSmallPngIconSize = 29.0;
+const _kWelcomeAuthIconVisibleSize = 65.0;
+const _kAvatarAuthCanvasSize = 75.0;
+const _kAvatarAuthVisibleSize = 63.0;
+const _kWelcomeAuthIconSize =
+    _kWelcomeAuthIconVisibleSize *
+    _kAvatarAuthCanvasSize /
+    _kAvatarAuthVisibleSize;
 
 class SplashScreen extends ConsumerWidget {
   const SplashScreen() : super(key: widgetKey);
@@ -42,8 +52,9 @@ class SplashScreen extends ConsumerWidget {
 
         return _AuthAccountLoader(state: state);
       },
-      error: (error, stackTrace) =>
-          const _AuthAccountLoader(state: QaulAccountSessionState.noLocalAccount),
+      error: (error, stackTrace) => const _AuthAccountLoader(
+        state: QaulAccountSessionState.noLocalAccount,
+      ),
       loading: () => const _SplashLoadingState(),
     );
   }
@@ -86,10 +97,7 @@ class _AuthAccountLoaderState extends ConsumerState<_AuthAccountLoader> {
 }
 
 class _AuthLanding extends ConsumerStatefulWidget {
-  const _AuthLanding({
-    required this.state,
-    required this.accounts,
-  });
+  const _AuthLanding({required this.state, required this.accounts});
 
   final QaulAccountSessionState state;
   final List<LocalAccount> accounts;
@@ -124,7 +132,7 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
         widget.accounts.isNotEmpty;
 
     return Scaffold(
-      backgroundColor: kQaulAuthBackgroundColor,
+      backgroundColor: qaulAuthBackgroundColor(context),
       body: SafeArea(
         child: Scrollbar(
           controller: _scrollController,
@@ -153,10 +161,10 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                             accounts: widget.accounts,
                             onLogin: (account) =>
                                 AccountManagementCoordinator.loginLocalAccount(
-                              context,
-                              ref,
-                              account,
-                            ),
+                                  context,
+                                  ref,
+                                  account,
+                                ),
                             onMore: () => _pushManageAccounts(
                               context,
                               accounts: widget.accounts,
@@ -165,14 +173,13 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                           )
                         else
                           QaulAuthWelcomeSection(
-                            createAccountIcon: const _AuthPngIcon(
+                            createAccountIcon: const _AuthAssetIcon(
                               'assets/icons/auth/avatar_auth.png',
-                              color: Colors.white,
-                              width: 65,
-                              height: 65,
+                              width: _kWelcomeAuthIconSize,
+                              height: _kWelcomeAuthIconSize,
+                              usePrimaryColor: true,
                             ),
-                            onCreateAccount: () =>
-                                Navigator.pushNamed(
+                            onCreateAccount: () => Navigator.pushNamed(
                               context,
                               NavigationHelper.createAccount,
                             ),
@@ -180,11 +187,13 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                         SizedBox(height: hasAccounts ? kQaulAuthItemGap : 55),
                         if (!hasAccounts) ...[
                           QaulAuthActionRow(
-                            leading: const _AuthPngIcon(
-                              'assets/icons/auth/manage_account.png',
+                            leading: const _AuthAssetIcon(
+                              'assets/icons/settings/account_management.png',
+                              width: _kAuthSmallPngIconSize,
+                              height: _kAuthSmallPngIconSize,
                             ),
                             label: l10n.manageAccounts,
-                            labelColor: kQaulAuthSecondaryTextColor,
+                            labelColor: qaulAuthSecondaryTextColor(context),
                             onTap: () => _pushManageAccounts(
                               context,
                               accounts: widget.accounts,
@@ -198,18 +207,19 @@ class _AuthLandingState extends ConsumerState<_AuthLanding> {
                         ),
                         const SizedBox(height: kQaulAuthItemGap),
                         QaulAuthActionRow(
-                          leading: const _AuthPngIcon(
-                            'assets/icons/auth/qaul_small.png',
+                          leading: const _AuthAssetIcon(
+                            'assets/icons/auth/qaul_small.svg',
                             useThemeColor: false,
                           ),
                           label: l10n.learnMore,
-                          labelColor: kQaulAuthSecondaryTextColor,
+                          labelColor: qaulAuthSecondaryTextColor(context),
                           onTap: () =>
                               launchUrl(Uri.parse(_AuthLanding._tutorialUrl)),
-                          trailing: Image.asset(
-                            'assets/icons/auth/extern-link.png',
+                          trailing: _AuthAssetIcon(
+                            'assets/icons/auth/extern-link.svg',
                             width: kQaulAuthIconSize,
                             height: kQaulAuthIconSize,
+                            color: qaulAuthSecondaryTextColor(context),
                           ),
                         ),
                       ],
@@ -244,9 +254,11 @@ class _LoginSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _AuthSectionTitle(
-          leading: const _AuthPngIcon(
-            'assets/icons/auth/manage_account.png',
-            color: kQaulAuthPrimaryTextColor,
+          leading: _AuthAssetIcon(
+            'assets/icons/auth/auth_login.png',
+            width: _kAuthSmallPngIconSize,
+            height: _kAuthSmallPngIconSize,
+            color: qaulAuthPrimaryTextColor(context),
           ),
           label: AppLocalizations.of(context)!.login,
         ),
@@ -254,7 +266,10 @@ class _LoginSection extends StatelessWidget {
         QaulAuthSegmentedList(
           children: [
             for (final account in visibleAccounts)
-              _AccountLoginTile(account: account, onTap: () => onLogin(account)),
+              _AccountLoginTile(
+                account: account,
+                onTap: () => onLogin(account),
+              ),
             _MoreAccountsTile(onTap: onMore),
           ],
         ),
@@ -264,10 +279,7 @@ class _LoginSection extends StatelessWidget {
 }
 
 class _AccountLoginTile extends StatelessWidget {
-  const _AccountLoginTile({
-    required this.account,
-    required this.onTap,
-  });
+  const _AccountLoginTile({required this.account, required this.onTap});
 
   final LocalAccount account;
   final VoidCallback onTap;
@@ -314,9 +326,9 @@ class _AuthLanguageTile extends StatelessWidget {
             'assets/icons/language.svg',
             width: kQaulAuthIconSize,
             height: kQaulAuthIconSize,
-            colorFilter: const ColorFilter.mode(
-              Colors.white,
-              BlendMode.srcATop,
+            colorFilter: ColorFilter.mode(
+              qaulAuthPrimaryTextColor(context),
+              BlendMode.srcIn,
             ),
           ),
           label: l10n.language,
@@ -328,8 +340,8 @@ class _AuthLanguageTile extends StatelessWidget {
             'assets/icons/arrow_right.svg',
             width: 9.206,
             height: 18.407,
-            colorFilter: const ColorFilter.mode(
-              kQaulAuthSecondaryTextColor,
+            colorFilter: ColorFilter.mode(
+              qaulAuthSecondaryTextColor(context),
               BlendMode.srcIn,
             ),
           ),
@@ -340,10 +352,7 @@ class _AuthLanguageTile extends StatelessWidget {
 }
 
 class _AuthSectionTitle extends StatelessWidget {
-  const _AuthSectionTitle({
-    required this.leading,
-    required this.label,
-  });
+  const _AuthSectionTitle({required this.leading, required this.label});
 
   final Widget leading;
   final String label;
@@ -354,12 +363,13 @@ class _AuthSectionTitle extends StatelessWidget {
   }
 }
 
-class _AuthPngIcon extends StatelessWidget {
-  const _AuthPngIcon(
+class _AuthAssetIcon extends StatelessWidget {
+  const _AuthAssetIcon(
     this.assetName, {
     this.color,
     this.width = kQaulAuthIconSize,
     this.height = kQaulAuthIconSize,
+    this.usePrimaryColor = false,
     this.useThemeColor = true,
   });
 
@@ -367,6 +377,7 @@ class _AuthPngIcon extends StatelessWidget {
   final Color? color;
   final double width;
   final double height;
+  final bool usePrimaryColor;
   final bool useThemeColor;
 
   @override
@@ -374,17 +385,16 @@ class _AuthPngIcon extends StatelessWidget {
     final iconColor =
         color ??
         (useThemeColor
-            ? Theme.of(context).brightness == Brightness.dark
-                  ? kQaulAuthSecondaryTextColor
-                  : Colors.black
+            ? usePrimaryColor
+                  ? qaulAuthPrimaryTextColor(context)
+                  : qaulAuthSecondaryTextColor(context)
             : null);
-
-    return Image.asset(
-      assetName,
+    return QaulTintedAssetIcon(
+      assetName: assetName,
       width: width,
       height: height,
       color: iconColor,
-      colorBlendMode: iconColor == null ? null : BlendMode.srcIn,
+      svgPadding: 1,
     );
   }
 }
@@ -396,10 +406,8 @@ void _pushManageAccounts(
 }) {
   Navigator.of(context).push(
     MaterialPageRoute<void>(
-      builder: (_) => _ManageAccountsScreen(
-        accounts: accounts,
-        showLogin: showLogin,
-      ),
+      builder: (_) =>
+          _ManageAccountsScreen(accounts: accounts, showLogin: showLogin),
     ),
   );
 }
@@ -454,9 +462,11 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
           children: [
             if (widget.showLogin && _accounts.isNotEmpty) ...[
               _AuthSectionTitle(
-                leading: const _AuthPngIcon(
-                  'assets/icons/auth/manage_account.png',
-                  color: kQaulAuthPrimaryTextColor,
+                leading: _AuthAssetIcon(
+                  'assets/icons/auth/auth_login.png',
+                  width: _kAuthSmallPngIconSize,
+                  height: _kAuthSmallPngIconSize,
+                  color: qaulAuthPrimaryTextColor(context),
                 ),
                 label: l10n.login,
               ),
@@ -468,10 +478,10 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
                       account: account,
                       onTap: () =>
                           AccountManagementCoordinator.loginLocalAccount(
-                        context,
-                        ref,
-                        account,
-                      ),
+                            context,
+                            ref,
+                            account,
+                          ),
                     ),
                   if (shouldCollapseAccounts && !_showAllAccounts)
                     QaulAuthExpandTile(
@@ -482,23 +492,21 @@ class _ManageAccountsScreenState extends ConsumerState<_ManageAccountsScreen> {
               const SizedBox(height: kQaulAuthItemGap),
             ],
             QaulAuthActionRow(
-              leading: const _AuthPngIcon(
-                'assets/icons/auth/import_account.png',
+              leading: const _AuthAssetIcon(
+                'assets/icons/auth/import_account.svg',
               ),
               label: l10n.importAccount,
-              onTap: () => AccountManagementCoordinator.showRestoreFlow(
-                context,
-                ref,
-              ),
+              onTap: () =>
+                  AccountManagementCoordinator.showRestoreFlow(context, ref),
             ),
             const SizedBox(height: kQaulAuthItemGap),
             QaulAuthActionRow(
-              leading: const _AuthPngIcon('assets/icons/auth/add_account.png'),
-              label: l10n.createUserAccount,
-              onTap: () => Navigator.pushNamed(
-                context,
-                NavigationHelper.createAccount,
+              leading: const _AuthAssetIcon(
+                'assets/icons/auth/add_account.svg',
               ),
+              label: l10n.createUserAccount,
+              onTap: () =>
+                  Navigator.pushNamed(context, NavigationHelper.createAccount),
             ),
           ],
         ),
@@ -522,9 +530,7 @@ bool _showPersistentScrollbar(BuildContext context) {
 
 void _pushAuthLanguage(BuildContext context) {
   Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (_) => const SettingsLanguageScreen(),
-    ),
+    MaterialPageRoute<void>(builder: (_) => const SettingsLanguageScreen()),
   );
 }
 

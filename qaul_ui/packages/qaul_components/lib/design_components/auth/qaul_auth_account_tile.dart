@@ -33,7 +33,7 @@ class QaulAuthAccountTile extends StatelessWidget {
                   name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: kQaulAuthAccountTextStyle,
+                  style: qaulAuthAccountTextStyle(context),
                 ),
               ),
               if (trailing != null) ...[

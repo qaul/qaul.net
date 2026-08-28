@@ -11,12 +11,12 @@ class QaulAuthExpandTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      child: const SizedBox(
+      child: SizedBox(
         height: kQaulAuthMoreRowHeight,
         child: Center(
           child: Icon(
             Icons.keyboard_arrow_down,
-            color: kQaulAuthSecondaryTextColor,
+            color: qaulAuthSecondaryTextColor(context),
             size: 32,
           ),
         ),

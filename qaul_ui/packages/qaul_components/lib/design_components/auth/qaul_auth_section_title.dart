@@ -18,7 +18,11 @@ class QaulAuthSectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final titleIcon =
         leading ??
-        Icon(icon, color: kQaulAuthPrimaryTextColor, size: kQaulAuthIconSize);
+        Icon(
+          icon,
+          color: qaulAuthPrimaryTextColor(context),
+          size: kQaulAuthIconSize,
+        );
 
     return SizedBox(
       height: kQaulAuthSectionHeaderHeight,
@@ -28,7 +32,7 @@ class QaulAuthSectionTitle extends StatelessWidget {
             width: kQaulAuthIconSize + kQaulAuthAvatarTextGap,
             child: Center(child: titleIcon),
           ),
-          Text(label, style: kQaulAuthLabelTextStyle),
+          Text(label, style: qaulAuthLabelTextStyle(context)),
         ],
       ),
     );

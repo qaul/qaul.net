@@ -17,26 +17,31 @@ import '../l10n/app_localizations.dart';
 import '../widgets/widgets.dart';
 
 const _kSettingsIconSize = 25.0;
+const _kAccountManagementIconSize = 29.0;
 
-class _SettingsPngIcon extends StatelessWidget {
-  const _SettingsPngIcon(
+class _SettingsAssetIcon extends StatelessWidget {
+  const _SettingsAssetIcon(
     this.assetName, {
     this.width = _kSettingsIconSize,
     this.height = _kSettingsIconSize,
+    this.svgPadding = 1,
   });
 
   final String assetName;
   final double width;
   final double height;
+  final double svgPadding;
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset(
-      assetName,
+    final iconColor = IconTheme.of(context).color ?? kQaulSettingsTextColor;
+
+    return QaulTintedAssetIcon(
+      assetName: assetName,
       width: width,
       height: height,
-      color: IconTheme.of(context).color ?? kQaulSettingsTextColor,
-      colorBlendMode: BlendMode.srcIn,
+      color: iconColor,
+      svgPadding: svgPadding,
     );
   }
 }
@@ -51,10 +56,10 @@ class SettingsScreen extends HookConsumerWidget {
 
     return ResponsiveScaffold(
       title: l10n.settings,
-      titleIcon: const _SettingsPngIcon(
-        'assets/icons/settings/settings_cog.png',
-        width: 19,
-        height: 20,
+      titleIcon: Icon(
+        Icons.settings_outlined,
+        size: 25,
+        color: qaulSettingsItemColor(context, selected: true),
       ),
       backgroundColor: qaulSettingsBackgroundColor(context),
       bodyAlignment: Alignment.topCenter,
@@ -66,8 +71,8 @@ class SettingsScreen extends HookConsumerWidget {
           ValueListenableBuilder<Locale?>(
             valueListenable: UserPrefsHelper.instance.localeNotifier,
             builder: (context, locale, _) => QaulSettingsMenuItem(
-              icon: const _SettingsPngIcon(
-                'assets/icons/settings/settings_language.png',
+              icon: const _SettingsAssetIcon(
+                'assets/icons/settings/settings_language.svg',
               ),
               title: l10n.language,
               value: locale == null
@@ -75,8 +80,8 @@ class SettingsScreen extends HookConsumerWidget {
                   : lookupAppLocalizations(locale).languageName,
               onTap: () => _pushSettingsDetail(
                 context,
-                icon: const _SettingsPngIcon(
-                  'assets/icons/settings/settings_language.png',
+                icon: const _SettingsAssetIcon(
+                  'assets/icons/settings/settings_language.svg',
                 ),
                 title: l10n.language,
                 child: const SettingsLanguageList(),
@@ -86,15 +91,15 @@ class SettingsScreen extends HookConsumerWidget {
           ValueListenableBuilder<ThemeMode>(
             valueListenable: UserPrefsHelper.instance.themeModeNotifier,
             builder: (context, themeMode, _) => QaulSettingsMenuItem(
-              icon: const _SettingsPngIcon(
-                'assets/icons/settings/settings_theme.png',
+              icon: const _SettingsAssetIcon(
+                'assets/icons/settings/settings_theme.svg',
               ),
               title: l10n.theme,
               value: _themeLabel(l10n, themeMode),
               onTap: () => _pushSettingsDetail(
                 context,
-                icon: const _SettingsPngIcon(
-                  'assets/icons/settings/settings_theme.png',
+                icon: const _SettingsAssetIcon(
+                  'assets/icons/settings/settings_theme.svg',
                 ),
                 title: l10n.theme,
                 child: const _ThemeSettingsList(),
@@ -102,18 +107,20 @@ class SettingsScreen extends HookConsumerWidget {
             ),
           ),
           QaulSettingsMenuItem(
-            icon: const _SettingsPngIcon(
-              'assets/icons/settings/settings_notificatons.png',
+            icon: const _SettingsAssetIcon(
+              'assets/icons/settings/settings_notificatons.svg',
               width: 23,
               height: 27,
+              svgPadding: 1,
             ),
             title: l10n.notifications,
             onTap: () => _pushSettingsDetail(
               context,
-              icon: const _SettingsPngIcon(
-                'assets/icons/settings/settings_notificatons.png',
+              icon: const _SettingsAssetIcon(
+                'assets/icons/settings/settings_notificatons.svg',
                 width: 23,
                 height: 27,
+                svgPadding: 1,
               ),
               title: l10n.notifications,
               child: const Padding(
@@ -123,33 +130,39 @@ class SettingsScreen extends HookConsumerWidget {
             ),
           ),
           QaulSettingsMenuItem(
-            icon: const _SettingsPngIcon(
-              'assets/icons/settings/settings_network.png',
+            icon: const _SettingsAssetIcon(
+              'assets/icons/settings/settings_network.svg',
               width: 22,
               height: 20,
+              svgPadding: 1,
             ),
             title: l10n.network,
             onTap: () => _pushSettingsDetail(
               context,
-              icon: const _SettingsPngIcon(
-                'assets/icons/settings/settings_network.png',
+              icon: const _SettingsAssetIcon(
+                'assets/icons/settings/settings_network.svg',
                 width: 22,
                 height: 20,
+                svgPadding: 1,
               ),
               title: l10n.network,
               child: const _InternetNodesList(),
             ),
           ),
           QaulSettingsMenuItem(
-            icon: const _SettingsPngIcon(
-              'assets/icons/settings/settings_usr.png',
+            icon: const _SettingsAssetIcon(
+              'assets/icons/settings/account_management.png',
+              width: _kAccountManagementIconSize,
+              height: _kAccountManagementIconSize,
             ),
             title: 'Account Management',
             enabled: user != null,
             onTap: () => _pushSettingsDetail(
               context,
-              icon: const _SettingsPngIcon(
-                'assets/icons/settings/settings_usr.png',
+              icon: const _SettingsAssetIcon(
+                'assets/icons/settings/account_management.png',
+                width: _kAccountManagementIconSize,
+                height: _kAccountManagementIconSize,
               ),
               title: 'Account Management',
               child: user == null
@@ -180,14 +193,14 @@ class SettingsScreen extends HookConsumerWidget {
           ),
           if (Platform.isAndroid)
             QaulSettingsMenuItem(
-              icon: const _SettingsPngIcon(
-                'assets/icons/settings/settings_info_privacy.png',
+              icon: const _SettingsAssetIcon(
+                'assets/icons/settings/settings_info_privacy.svg',
               ),
               title: 'Enhanced Privacy',
               onTap: () => _pushSettingsDetail(
                 context,
-                icon: const _SettingsPngIcon(
-                  'assets/icons/settings/settings_info_privacy.png',
+                icon: const _SettingsAssetIcon(
+                  'assets/icons/settings/settings_info_privacy.svg',
                 ),
                 title: 'Enhanced Privacy',
                 child: const Padding(
@@ -198,14 +211,14 @@ class SettingsScreen extends HookConsumerWidget {
             ),
           if (Platform.isAndroid)
             QaulSettingsMenuItem(
-              icon: const _SettingsPngIcon(
-                'assets/icons/settings/settings_info_privacy.png',
+              icon: const _SettingsAssetIcon(
+                'assets/icons/settings/settings_info_privacy.svg',
               ),
               title: l10n.aboutBackgroundExecution,
               onTap: () => _pushSettingsDetail(
                 context,
-                icon: const _SettingsPngIcon(
-                  'assets/icons/settings/settings_info_privacy.png',
+                icon: const _SettingsAssetIcon(
+                  'assets/icons/settings/settings_info_privacy.svg',
                 ),
                 title: l10n.aboutBackgroundExecution,
                 child: const Padding(
@@ -228,19 +241,16 @@ void _pushSettingsDetail(
 }) {
   Navigator.of(context).push(
     MaterialPageRoute<void>(
-      builder: (_) => _SettingsDetailScreen(
-        icon: icon,
-        title: title,
-        child: child,
-      ),
+      builder: (_) =>
+          _SettingsDetailScreen(icon: icon, title: title, child: child),
     ),
   );
 }
 
-String _systemDefaultLabel(AppLocalizations l10n) =>
-    l10n.useSystemDefaultMessage
-        .replaceFirst('Use ', '')
-        .replaceFirst('system', 'System');
+String _systemDefaultLabel(AppLocalizations l10n) => l10n
+    .useSystemDefaultMessage
+    .replaceFirst('Use ', '')
+    .replaceFirst('system', 'System');
 
 String _themeLabel(AppLocalizations l10n, ThemeMode mode) {
   switch (mode) {
@@ -266,9 +276,14 @@ class _SettingsDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final headerIconColor = qaulSettingsItemColor(context, selected: true);
+
     return ResponsiveScaffold(
       title: title,
-      titleIcon: icon,
+      titleIcon: IconTheme(
+        data: IconThemeData(color: headerIconColor),
+        child: icon,
+      ),
       backgroundColor: qaulSettingsBackgroundColor(context),
       bodyAlignment: Alignment.topCenter,
       scrollHorizontalPadding: 0,
@@ -287,8 +302,8 @@ class SettingsLanguageScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return _SettingsDetailScreen(
-      icon: const _SettingsPngIcon(
-        'assets/icons/settings/settings_language.png',
+      icon: const _SettingsAssetIcon(
+        'assets/icons/settings/settings_language.svg',
       ),
       title: l10n.language,
       child: const SettingsLanguageList(),
@@ -363,10 +378,10 @@ class _SettingsPlaceholder extends StatelessWidget {
     return Text(
       label,
       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            color: qaulSettingsItemColor(context),
-            fontWeight: FontWeight.w600,
-            letterSpacing: 1.8,
-          ),
+        color: qaulSettingsItemColor(context),
+        fontWeight: FontWeight.w600,
+        letterSpacing: 1.8,
+      ),
     );
   }
 }

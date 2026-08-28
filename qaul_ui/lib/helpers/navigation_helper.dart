@@ -21,23 +21,18 @@ class NavigationHelper {
   static const fileHistory = '/fileHistory';
 
   static Route<T> _buildRoute<T>(
-          final RouteSettings settings, final WidgetBuilder page) =>
-      CupertinoPageRoute(builder: page, settings: settings);
+    final RouteSettings settings,
+    final WidgetBuilder page,
+  ) => CupertinoPageRoute(builder: page, settings: settings);
 
   static Route<dynamic> onGenerateRoute(final RouteSettings s) {
     Widget routeWidget = const SizedBox.shrink();
     switch (s.name) {
       case initial:
-        routeWidget = PopScope(
-          canPop: false,
-          child: SplashScreen(),
-        );
+        routeWidget = PopScope(canPop: false, child: SplashScreen());
         break;
       case createAccount:
-        routeWidget = PopScope(
-          canPop: false,
-          child: CreateAccountScreen(),
-        );
+        routeWidget = CreateAccountScreen();
         break;
       case home:
         // WillPopScope handled in build method of HomeScreen -> Custom behavior
@@ -60,7 +55,10 @@ class NavigationHelper {
         break;
       default:
         throw ArgumentError.value(
-            s.name, 'Route name', 'Handle this route in NavigationHelper.');
+          s.name,
+          'Route name',
+          'Handle this route in NavigationHelper.',
+        );
     }
 
     return _buildRoute(s, (context) => routeWidget);

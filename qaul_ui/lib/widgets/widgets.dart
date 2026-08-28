@@ -9,7 +9,8 @@ import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:qaul_components/qaul_components.dart' as qc
+import 'package:qaul_components/qaul_components.dart'
+    as qc
     show
         kQaulPageHeaderControlColor,
         QaulAvatar,
@@ -24,7 +25,6 @@ import '../l10n/app_localizations.dart';
 import '../screens/home/user_details_screen.dart';
 import '../utils.dart';
 
-
 part 'button_factory.dart';
 
 part 'dropdown_builder.dart';
@@ -38,6 +38,8 @@ part 'platform_aware_switch.dart';
 part 'responsive_layout.dart';
 
 part 'theme_select_dropdown.dart';
+
+part 'tinted_asset_icon.dart';
 
 part 'qaul_avatar.dart';
 
