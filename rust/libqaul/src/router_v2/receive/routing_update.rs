@@ -110,7 +110,7 @@ impl RouterV2State {
             return Ok(EvaluateOutcome::Dropped);
         }
 
-        let own_idx = match self.translate_incoming(ctx.neighbour, space, entry.abs_idx) {
+        let own_idx = match self.translate_incoming(ctx.neighbour, space, entry.abs_idx, ctx.now) {
             Ok(idx) => idx,
             Err(RoutingV2Error::UnknownMapping(idx)) => {
                 info!(

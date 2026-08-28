@@ -35,6 +35,7 @@ impl RouterV2State {
         neighbour: PeerId,
         space: Space,
         incoming_idx: u16,
+        now_ms: u64,
     ) -> Result<u16> {
         let id = self
             .mirror_id_of(neighbour, space, incoming_idx)
@@ -53,7 +54,7 @@ impl RouterV2State {
         let mut allocator = alloc.write().unwrap();
         let mut tracker = self.reintroduction_tracker.write().unwrap();
 
-        let Some(allocated_idx) = allocator.allocate() else {
+        let Some(allocated_idx) = allocator.allocate(now_ms) else {
             return Err(RoutingV2Error::AllocatorExhausted);
         };
         self_dict.bind(allocated_idx, id);
@@ -84,7 +85,7 @@ impl RouterV2State {
 
         match mirror_id {
             Some(id) if id != mapping.target_id => {
-                self.release_index(space, &id);
+                self.release_index(space, &id, now);
             }
             Some(_) => {}
             None => {}

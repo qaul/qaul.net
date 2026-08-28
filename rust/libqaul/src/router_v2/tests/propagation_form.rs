@@ -141,7 +141,7 @@ fn leaving_node_form_releases_the_node_reserved_index() {
     state.register_hosted_user([2; 8], 0, fresh_multikey());
     assert_eq!(state.sync_propagation_form(0), PropagationForm::Node);
 
-    state.unregister_hosted_user([2; 8]);
+    state.unregister_hosted_user([2; 8], 1_000);
     assert_eq!(state.sync_propagation_form(0), PropagationForm::User);
 
     assert!(
@@ -168,7 +168,7 @@ fn switching_back_to_user_form_rebinds_reserved_index() {
     state.register_hosted_user([2; 8], 0, fresh_multikey());
     assert_eq!(state.sync_propagation_form(0), PropagationForm::Node);
 
-    state.unregister_hosted_user([2; 8]);
+    state.unregister_hosted_user([2; 8], 1_000);
     assert_eq!(state.sync_propagation_form(0), PropagationForm::User);
 
     assert_eq!(
@@ -233,7 +233,7 @@ fn unregister_releases_index_and_record() {
     let (state, _rx) = fresh_state();
     state.register_hosted_user([1; 8], 0, fresh_multikey());
 
-    state.unregister_hosted_user([1; 8]);
+    state.unregister_hosted_user([1; 8], 1_000);
 
     assert!(state
         .user_dict
@@ -257,7 +257,7 @@ fn unregister_promotes_a_survivor_into_the_reserved_slot() {
         Some([1; 8])
     );
 
-    state.unregister_hosted_user([1; 8]);
+    state.unregister_hosted_user([1; 8], 1_000);
 
     assert_eq!(
         state.user_dict.read().unwrap().id_of(RESERVED_INDEX),
@@ -275,7 +275,7 @@ fn unregister_unindexed_user_leaves_reserved_slot_intact() {
     state.register_hosted_user([2; 8], 0, fresh_multikey());
     assert!(state.user_dict.read().unwrap().idx_of(&[2; 8]).is_none());
 
-    state.unregister_hosted_user([2; 8]);
+    state.unregister_hosted_user([2; 8], 1_000);
 
     assert_eq!(
         state.user_dict.read().unwrap().id_of(RESERVED_INDEX),
@@ -291,11 +291,100 @@ fn unregister_unknown_user_is_a_noop() {
     let (state, _rx) = fresh_state();
     state.register_hosted_user([1; 8], 0, fresh_multikey());
 
-    state.unregister_hosted_user([9; 8]);
+    state.unregister_hosted_user([9; 8], 1_000);
 
     assert_eq!(
         state.user_dict.read().unwrap().id_of(RESERVED_INDEX),
         Some([1; 8])
     );
     assert_eq!(state.hosted_user_ids().len(), 1);
+}
+
+// ------------------------------------------------- §3.2 trigger 3
+
+/// Carrying a delegation for a user this node does not host is §3.2's third
+/// trigger for node form, independent of user count and connectivity.
+#[test]
+fn holding_a_foreign_delegation_forces_node_form() {
+    let (state, _rx) = fresh_state();
+    state.register_hosted_user([1; 8], 0, fresh_multikey());
+    assert_eq!(state.desired_propagation_form(), PropagationForm::User);
+
+    state.record_delegation(manifest::DelegetedEntry {
+        user_id: [9; 8],
+        timeout: u64::MAX,
+        entry_signature: [0u8; 64],
+        profile_version: 0,
+    });
+
+    assert_eq!(state.desired_propagation_form(), PropagationForm::Node);
+}
+
+/// Our own users in our own manifest are self-delegations, not delegations
+/// "from any other user" — they must not trip the trigger, or a single-user
+/// host would leave user form the moment it published its own entry.
+#[test]
+fn a_self_delegation_is_not_a_foreign_delegation() {
+    let (state, _rx) = fresh_state();
+    state.register_hosted_user([1; 8], 0, fresh_multikey());
+
+    state.record_delegation(manifest::DelegetedEntry {
+        user_id: [1; 8],
+        timeout: u64::MAX,
+        entry_signature: [0u8; 64],
+        profile_version: 0,
+    });
+
+    assert_eq!(state.desired_propagation_form(), PropagationForm::User);
+}
+
+/// The race this closes: a host that has just lost INTERNET is no longer a
+/// gateway, but a requester holding its stale manifest can still subscribe,
+/// and `settle_delegation` admits on signature alone. Trigger 3 keeps that
+/// host in node form so its manifest still reaches the wire (§8.3).
+#[test]
+fn a_host_that_stopped_being_a_gateway_stays_in_node_form_while_it_carries_others() {
+    let (state, _rx) = fresh_state();
+    let peer = fresh_peer();
+    state.register_hosted_user([1; 8], 0, fresh_multikey());
+    state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Internet);
+    state.sync_gateway_role();
+    assert_eq!(state.desired_propagation_form(), PropagationForm::Node);
+
+    // A subscribe lands while it is still a gateway.
+    state.record_delegation(manifest::DelegetedEntry {
+        user_id: [9; 8],
+        timeout: u64::MAX,
+        entry_signature: [0u8; 64],
+        profile_version: 0,
+    });
+
+    // The INTERNET transport drops.
+    state.remove_neighbour_transport(peer, ConnectionModule::Internet);
+    state.sync_gateway_role();
+    assert!(!state.host_is_gateway());
+
+    assert_eq!(
+        state.desired_propagation_form(),
+        PropagationForm::Node,
+        "a host carrying someone else's delegation must keep advertising a manifest"
+    );
+}
+
+/// Once the foreign delegation is gone the host falls back to user form.
+#[test]
+fn dropping_the_last_foreign_delegation_returns_to_user_form() {
+    let (state, _rx) = fresh_state();
+    state.register_hosted_user([1; 8], 0, fresh_multikey());
+    state.record_delegation(manifest::DelegetedEntry {
+        user_id: [9; 8],
+        timeout: u64::MAX,
+        entry_signature: [0u8; 64],
+        profile_version: 0,
+    });
+    assert_eq!(state.desired_propagation_form(), PropagationForm::Node);
+
+    state.remove_self_delegation(&[9; 8]);
+
+    assert_eq!(state.desired_propagation_form(), PropagationForm::User);
 }

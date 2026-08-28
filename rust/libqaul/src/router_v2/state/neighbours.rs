@@ -48,7 +48,12 @@ impl RouterV2State {
     }
 
     /// Registers a neighbour as a routable node: ensures a [`Node`]
-    pub fn register_neighbour_node(&self, node_id: [u8; 8], public_key: Option<Multikey>) {
+    pub fn register_neighbour_node(
+        &self,
+        node_id: [u8; 8],
+        public_key: Option<Multikey>,
+        now_ms: u64,
+    ) {
         {
             let mut nodes = self.nodes.write().unwrap();
             match nodes.get(&node_id) {
@@ -81,7 +86,7 @@ impl RouterV2State {
         }
 
         let mut allocator = self.node_allocator.write().unwrap();
-        let Some(idx) = allocator.allocate() else {
+        let Some(idx) = allocator.allocate(now_ms) else {
             tracing::error!("node allocator exhausted registering neighbour {node_id:?}");
             return;
         };

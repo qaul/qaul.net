@@ -158,7 +158,11 @@ pub fn ping_event(state: &crate::QaulState, event: Event, module: ConnectionModu
                     Ok(mk) => {
                         let node_id = mk.to_id();
                         if router_v2.add_neighbour_transport(peer, node_id, module) {
-                            router_v2.register_neighbour_node(node_id, Some(mk));
+                            router_v2.register_neighbour_node(
+                                node_id,
+                                Some(mk),
+                                Timestamp::get_timestamp(),
+                            );
                             propagation::on_neighbour_connect(&router_v2, peer, module);
                         }
                     }

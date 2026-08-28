@@ -386,3 +386,120 @@ fn sweep_on_empty_state_is_a_noop() {
     state.sweep_expired(0);
     state.sweep_expired(u64::MAX);
 }
+
+// ------------------------------------------------- §3.7 cooldown over time
+
+/// The cooldown window comes from `RoutingV2Options::idx_cooldown`, not a
+/// hardcoded constant. §3.7 fixes the duration at 60 s — 35 s of route
+/// expiry plus 25 s of in-flight propagation margin — and that is the
+/// default, but the allocator has to read it from config like every other
+/// timing parameter.
+#[test]
+fn the_cooldown_window_comes_from_config() {
+    let (state, _rx) = fresh_state();
+    assert_eq!(
+        state.options.idx_cooldown, 60,
+        "§3.7: the default cooldown is 60 seconds"
+    );
+}
+
+/// The point of §3.7: an expired route's slot stays blocked for the whole
+/// window so a stale index reference on the wire cannot bind to a freshly
+/// allocated target. Now testable, because the allocator runs on the same
+/// epoch-millisecond clock as the rest of the router.
+#[test]
+fn a_released_index_stays_in_cooldown_for_the_whole_window() {
+    let (state, _rx) = fresh_state();
+    let cooldown_ms = state.options.idx_cooldown * 1000;
+    let now = 1_000_000;
+
+    let user = install_user(&state, [1; 8], 0);
+    let last_update = now - expiry_ms(&state) - 1;
+    install_entry(
+        &state,
+        Space::User,
+        5,
+        [1; 8],
+        TargetRef::User(user),
+        last_update,
+    );
+    state.sweep_expired(now);
+    assert!(state.users_allocator.read().unwrap().idx_in_cooldown(5));
+
+    // Halfway through: still blocked. The allocator only prunes on
+    // `allocate`, so drive it through one.
+    let mut alloc = state.users_allocator.write().unwrap();
+    alloc.allocate(now + cooldown_ms / 2);
+    assert!(
+        alloc.idx_in_cooldown(5),
+        "§3.7: the slot SHALL NOT be allocated during cooldown"
+    );
+
+    // Past the window: eligible again.
+    alloc.allocate(now + cooldown_ms + 1);
+    assert!(
+        !alloc.idx_in_cooldown(5),
+        "after the cooldown expires the slot becomes eligible"
+    );
+}
+
+/// A released slot must not be handed to a different target while it is
+/// cooling — that is the stale-reference hazard §3.7 exists to prevent.
+#[test]
+fn a_cooling_slot_is_not_reallocated_even_when_it_is_the_only_one_free() {
+    let (state, _rx) = fresh_state();
+    let cooldown_ms = state.options.idx_cooldown * 1000;
+    let now = 1_000_000;
+
+    let user = install_user(&state, [1; 8], 0);
+    install_entry(
+        &state,
+        Space::User,
+        5,
+        [1; 8],
+        TargetRef::User(user),
+        now - expiry_ms(&state) - 1,
+    );
+    state.sweep_expired(now);
+
+    let mut alloc = state.users_allocator.write().unwrap();
+    alloc.occupy_all_except(5);
+
+    assert_eq!(
+        alloc.allocate(now + cooldown_ms / 2),
+        None,
+        "the cooling slot must not be rebound to a new target"
+    );
+    assert_eq!(
+        alloc.allocate(now + cooldown_ms + 1),
+        Some(5),
+        "and must become available once the window passes"
+    );
+}
+/// A non-default `idx_cooldown` has to change behaviour, or the config
+/// field is decoration. This fails against a hardcoded 60 s constant.
+#[test]
+fn a_configured_cooldown_replaces_the_default_window() {
+    let opts = crate::storage::configuration::RoutingV2Options {
+        idx_cooldown: 10,
+        ..Default::default()
+    };
+    let kp = libp2p::identity::Keypair::generate_ed25519();
+    let mk = identity::Multikey::from(kp.public());
+    let (state, _rx) = RouterV2State::new(kp, mk, opts);
+
+    let mut alloc = state.users_allocator.write().unwrap();
+    alloc.release(5, 1_000_000);
+    alloc.occupy_all_except(5);
+
+    assert_eq!(
+        alloc.allocate(1_000_000 + 9_000),
+        None,
+        "still inside the configured 10 s window"
+    );
+    assert_eq!(
+        alloc.allocate(1_000_000 + 11_000),
+        Some(5),
+        "a 10 s configured cooldown must expire after 11 s"
+    );
+}
