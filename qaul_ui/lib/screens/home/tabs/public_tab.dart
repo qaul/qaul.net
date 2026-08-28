@@ -119,6 +119,19 @@ class _PublicTabViewState extends ConsumerState<_PublicTabView> {
     await ref.read(feedMessageStoreProvider.notifier).refreshPublic();
   }
 
+  void _openFeedAuthor(User author) {
+    final defaultUser = ref.read(defaultUserProvider);
+    if (defaultUser != null && qaulUserIdsEqual(author.id, defaultUser.id)) {
+      ref.read(homeScreenControllerProvider.notifier).goToTab(TabType.account);
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => UserDetailsScreen(user: author)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen(homeScreenControllerProvider, (previous, next) {
@@ -194,7 +207,8 @@ class _PublicTabViewState extends ConsumerState<_PublicTabView> {
                         fontStyle: FontStyle.italic,
                       ),
                     ),
-                    nameTapRoutesToDetailsScreen: true,
+                    onNameTap: () => _openFeedAuthor(msg.author),
+                    onAvatarTap: () => _openFeedAuthor(msg.author),
                   );
                 },
               ),
