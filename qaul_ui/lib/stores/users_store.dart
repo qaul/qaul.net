@@ -141,7 +141,8 @@ class UsersSearchStore extends Notifier<UsersSearchState> {
     final filtered = result.users
         .where(
           (u) =>
-              (defaultUser == null || !u.id.equals(defaultUser.id)) &&
+              (defaultUser == null ||
+                  !qaulUserIdsEqual(u.id, defaultUser.id)) &&
               !(u.isBlocked ?? false),
         )
         .toList();
@@ -212,8 +213,8 @@ class UsersStore extends Notifier<List<User>> {
   /// Resolves a user by [id] from the store, falling back to
   /// [ChatRoom.members] if not found.
   User? findMemberInRoom(Uint8List id, ChatRoom room) {
-    return state.firstWhereOrNull((u) => u.id.equals(id)) ??
-        room.members.firstWhereOrNull((m) => m.id.equals(id));
+    return state.firstWhereOrNull((u) => qaulUserIdsEqual(u.id, id)) ??
+        room.members.firstWhereOrNull((m) => qaulUserIdsEqual(m.id, id));
   }
 
   /// Resolves the other participant in a direct (1-to-1) chat room.

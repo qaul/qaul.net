@@ -13,6 +13,55 @@ final defaultUserProvider = StateProvider<User?>((ref) => null);
 /// can look up users during message decoding.
 final userLookupProvider = StateProvider<List<User>>((ref) => []);
 
+const _qaulQ8IdStart = 6;
+const _qaulQ8IdEnd = 14;
+
+/// Returns the stable 8-byte q8id used by chat sender ids.
+///
+/// Full qaul user ids embed this q8id at bytes [6..14). Backend chat messages
+/// may already contain only the q8id, so user identity comparisons must first
+/// normalize both sides to avoid rendering local messages as remote messages.
+List<int> qaulComparableUserId(List<int> id) {
+  if (id.length >= _qaulQ8IdEnd) {
+    return id.sublist(_qaulQ8IdStart, _qaulQ8IdEnd);
+  }
+  return id;
+}
+
+bool qaulUserIdsEqual(List<int> a, List<int> b) {
+  final normalizedA = qaulComparableUserId(a);
+  final normalizedB = qaulComparableUserId(b);
+  if (normalizedA.length != normalizedB.length) return false;
+
+  for (var i = 0; i < normalizedA.length; i++) {
+    if (normalizedA[i] != normalizedB[i]) return false;
+  }
+  return true;
+}
+
+Uint8List qaulDirectChatId(List<int> a, List<int> b) {
+  final q8A = qaulComparableUserId(a);
+  final q8B = qaulComparableUserId(b);
+  if (q8A.length != 8 || q8B.length != 8) {
+    throw ArgumentError('Direct chat ids require two q8-compatible user ids');
+  }
+
+  final firstIsA = _compareByteLists(q8A, q8B) <= 0;
+  return Uint8List.fromList([
+    ...(firstIsA ? q8A : q8B),
+    ...(firstIsA ? q8B : q8A),
+  ]);
+}
+
+int _compareByteLists(List<int> a, List<int> b) {
+  final length = a.length < b.length ? a.length : b.length;
+  for (var i = 0; i < length; i++) {
+    final diff = a[i] - b[i];
+    if (diff != 0) return diff;
+  }
+  return a.length - b.length;
+}
+
 class PaginationState {
   const PaginationState({
     required this.hasMore,

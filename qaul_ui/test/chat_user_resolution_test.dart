@@ -149,6 +149,78 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
+  test('matches full user ids with q8 chat sender ids', () {
+    final fullUserId = Uint8List.fromList([
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+    ]);
+    final q8SenderId = Uint8List.fromList(fullUserId.sublist(6, 14));
+    final otherSenderId = Uint8List.fromList([10, 11, 12, 13, 14, 15, 16, 99]);
+
+    expect(qaulUserIdsEqual(fullUserId, q8SenderId), isTrue);
+    expect(qaulUserIdsEqual(fullUserId, otherSenderId), isFalse);
+  });
+
+  test('new direct rooms are calculated from the active local user', () {
+    final activeUser = User(
+      name: 'Active',
+      id: Uint8List.fromList([
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+      ]),
+    );
+    final otherUser = User(
+      name: 'Other',
+      id: Uint8List.fromList([
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+      ]),
+      conversationId: Uint8List.fromList(List.filled(16, 99)),
+    );
+
+    final room = ChatRoom.blank(localUser: activeUser, otherUser: otherUser);
+
+    expect(room.conversationId, qaulDirectChatId(activeUser.id, otherUser.id));
+    expect(room.conversationId, isNot(otherUser.conversationId));
+  });
+
   testWidgets(
     'direct room renders using member fallback when users store is empty',
     (tester) async {

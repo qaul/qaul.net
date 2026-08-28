@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -17,7 +16,9 @@ List<User> _localUsersForPicker(WidgetRef ref) {
   final defaultUser = ref.watch(defaultUserProvider)!;
   return ref
       .watch(usersStoreProvider)
-      .where((u) => !u.id.equals(defaultUser.id) && !(u.isBlocked ?? false))
+      .where(
+        (u) => !qaulUserIdsEqual(u.id, defaultUser.id) && !(u.isBlocked ?? false),
+      )
       .toList()
     ..sort();
 }

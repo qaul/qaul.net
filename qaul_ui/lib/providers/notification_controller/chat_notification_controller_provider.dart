@@ -146,7 +146,7 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
   }
 
   bool _lastMessageIsFromLocalUser(ChatRoom r1) =>
-      localUser.id.equals(r1.lastMessageSenderId ?? []);
+      qaulUserIdsEqual(localUser.id, r1.lastMessageSenderId ?? []);
 
   void _updateLocalCachedChatWith(ChatRoom r) {
     var newChatData = _ChatData(r.idBase58, r.unreadCount);
