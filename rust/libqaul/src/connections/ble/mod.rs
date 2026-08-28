@@ -21,6 +21,7 @@ use crate::connections::transport::{
 use crate::connections::ConnectionModule;
 use crate::node::Node;
 use crate::router::neighbours::Neighbours;
+use crate::router_v2::identity::Multikey;
 use crate::rpc::{sys::Sys, Rpc};
 use crate::services::{feed, messaging};
 use crate::utilities::{qaul_id::QaulId, timestamp::Timestamp};
@@ -432,6 +433,36 @@ impl Ble {
                 log::info!("    Node ID: {}", node_id.to_base58());
                 let rs = state.get_router();
                 Neighbours::update_node(state, &rs, ConnectionModule::Ble1m, node_id, 50, rssi);
+
+                // §4.1 makes BLE 1M a Local-sphere transport, so v2 needs the
+                // neighbour registered too.
+                if let Some(router_v2) = state.get_router_v2() {
+                    match Multikey::try_from_peer_id(&node_id) {
+                        Ok(mk) => {
+                            let routing_id = mk.to_id();
+                            if router_v2.add_neighbour_transport(
+                                node_id,
+                                routing_id,
+                                ConnectionModule::Ble1m,
+                            ) {
+                                router_v2.register_neighbour_node(
+                                    routing_id,
+                                    Some(mk),
+                                    Timestamp::get_timestamp(),
+                                );
+                                // §3.6 sends no INDEX_DUMP over BLE
+                                crate::router_v2::propagation::on_neighbour_connect(
+                                    &router_v2,
+                                    node_id,
+                                    ConnectionModule::Ble1m,
+                                );
+                            }
+                        }
+                        Err(e) => {
+                            log::warn!("v2: cannot derive node_id for BLE peer {node_id}: {e}")
+                        }
+                    }
+                }
             }
             Err(e) => {
                 log::error!("{}", e);
@@ -517,8 +548,13 @@ impl Ble {
             // remove it from neighbours list
             match PeerId::from_bytes(&ble_node.id) {
                 Ok(node_id) => {
+                    // Mirrors the discovery side
                     let rs = state.get_router();
                     rs.neighbours.delete(ConnectionModule::Ble1m, node_id);
+
+                    if let Some(router_v2) = state.get_router_v2() {
+                        router_v2.remove_neighbour_transport(node_id, ConnectionModule::Ble1m);
+                    }
                 }
                 Err(e) => {
                     log::error!("{}", e);
@@ -850,12 +886,7 @@ impl Ble {
                 }
                 Some(proto_net::ble_message::Message::Info(data)) => {
                     log::info!("BLE routing info received");
-                    let received = qaul_info::QaulInfoReceived {
-                        received_from: node_id,
-                        data,
-                    };
-                    let rs = state.get_router();
-                    crate::router::info::RouterInfo::received(state, &rs, received);
+                    Self::routing_info_received(state, node_id, data);
                 }
                 Some(proto_net::ble_message::Message::Feed(data)) => {
                     log::info!("BLE public message received");
@@ -895,6 +926,28 @@ impl Ble {
         }
     }
 
+    /// Hand an inbound BLE routing frame to whichever router is active.
+    fn routing_info_received(state: &crate::QaulState, node_id: PeerId, data: Vec<u8>) {
+        if let Some(router_v2) = state.get_router_v2() {
+            if let Err(e) = router_v2.received(
+                node_id,
+                ConnectionModule::Ble1m,
+                None,
+                &data,
+                Timestamp::get_timestamp(),
+            ) {
+                log::error!("router_v2 received failed for BLE peer {node_id}: {e}");
+            }
+        } else {
+            let received = qaul_info::QaulInfoReceived {
+                received_from: node_id,
+                data,
+            };
+            let rs = state.get_router();
+            crate::router::info::RouterInfo::received(state, &rs, received);
+        }
+    }
+
     /// Process a decrypted BLE message
     #[cfg(feature = "ble-encryption")]
     fn process_decrypted_message(
@@ -906,12 +959,7 @@ impl Ble {
         match ble_message.message {
             Some(proto_net::ble_message::Message::Info(data)) => {
                 log::info!("BLE routing info received (decrypted)");
-                let received = qaul_info::QaulInfoReceived {
-                    received_from: node_id,
-                    data,
-                };
-                let rs = state.get_router();
-                crate::router::info::RouterInfo::received(state, &rs, received);
+                Self::routing_info_received(state, node_id, data);
             }
             Some(proto_net::ble_message::Message::Feed(data)) => {
                 log::info!("BLE public message received (decrypted)");
