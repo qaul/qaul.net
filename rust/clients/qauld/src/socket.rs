@@ -112,10 +112,7 @@ where
 }
 
 /// RPC poller which forwards libqaul response
-fn spawn_rpc_poller(
-    register: Arc<Mutex<HashMap<String, Sender<Bytes>>>>,
-    instance: Arc<Libqaul>,
-) {
+fn spawn_rpc_poller(register: Arc<Mutex<HashMap<String, Sender<Bytes>>>>, instance: Arc<Libqaul>) {
     tokio::spawn(async move {
         let mut futures_ticker = Ticker::new(Duration::from_millis(10));
         loop {
@@ -165,7 +162,7 @@ pub async fn start_server(
         }
 
         let listener = UnixListener::bind(&socket_path)?;
-        fs::set_permissions(&socket_path, Permissions::from_mode(0o666))?;
+        fs::set_permissions(&socket_path, Permissions::from_mode(0o660))?;
         println!("qauld unix socket server started");
 
         loop {
