@@ -10,7 +10,9 @@ use crate::router_v2::{index::Space, test_utils::*};
 fn translate_incoming_unknown_neighbour_returns_unknown_mapping() {
     let (state, _rx) = fresh_state();
     let peer = fresh_peer();
-    let err = state.translate_incoming(peer, Space::User, 5).unwrap_err();
+    let err = state
+        .translate_incoming(peer, Space::User, 5, 1_000)
+        .unwrap_err();
     assert!(matches!(err, RoutingV2Error::UnknownMapping(5)));
 }
 
@@ -18,7 +20,9 @@ fn translate_incoming_unknown_neighbour_returns_unknown_mapping() {
 fn translate_incoming_known_neighbour_unknown_idx_returns_unknown_mapping() {
     let (state, _rx) = fresh_state();
     let peer = add_neighbour(&state);
-    let err = state.translate_incoming(peer, Space::User, 5).unwrap_err();
+    let err = state
+        .translate_incoming(peer, Space::User, 5, 1_000)
+        .unwrap_err();
     assert!(matches!(err, RoutingV2Error::UnknownMapping(5)));
 }
 
@@ -33,7 +37,9 @@ fn translate_incoming_existing_own_binding_returns_existing_idx() {
     bind_mirror(&state, peer, Space::User, 5, id);
     state.user_dict.write().unwrap().bind(99, id);
 
-    let got = state.translate_incoming(peer, Space::User, 5).unwrap();
+    let got = state
+        .translate_incoming(peer, Space::User, 5, 1_000)
+        .unwrap();
     assert_eq!(got, 99);
 
     let pending = state
@@ -54,7 +60,9 @@ fn translate_incoming_fresh_allocates_binds_and_marks_tracker() {
     let id = [11; 8];
     bind_mirror(&state, peer, Space::User, 5, id);
 
-    let allocated_idx = state.translate_incoming(peer, Space::User, 5).unwrap();
+    let allocated_idx = state
+        .translate_incoming(peer, Space::User, 5, 1_000)
+        .unwrap();
 
     let dict = state.user_dict.read().unwrap();
     assert_eq!(dict.idx_of(&id), Some(allocated_idx));
@@ -76,8 +84,12 @@ fn translate_incoming_is_idempotent_for_same_id() {
     let id = [13; 8];
     bind_mirror(&state, peer, Space::User, 5, id);
 
-    let first = state.translate_incoming(peer, Space::User, 5).unwrap();
-    let second = state.translate_incoming(peer, Space::User, 5).unwrap();
+    let first = state
+        .translate_incoming(peer, Space::User, 5, 1_000)
+        .unwrap();
+    let second = state
+        .translate_incoming(peer, Space::User, 5, 1_000)
+        .unwrap();
     assert_eq!(first, second);
 }
 
@@ -91,8 +103,12 @@ fn translate_incoming_spaces_are_independent() {
     bind_mirror(&state, peer, Space::User, 5, user_id);
     bind_mirror(&state, peer, Space::Node, 5, node_id);
 
-    let user_idx = state.translate_incoming(peer, Space::User, 5).unwrap();
-    let node_idx = state.translate_incoming(peer, Space::Node, 5).unwrap();
+    let user_idx = state
+        .translate_incoming(peer, Space::User, 5, 1_000)
+        .unwrap();
+    let node_idx = state
+        .translate_incoming(peer, Space::Node, 5, 1_000)
+        .unwrap();
 
     assert_eq!(
         state.user_dict.read().unwrap().id_of(user_idx),

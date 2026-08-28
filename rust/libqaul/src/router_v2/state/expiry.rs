@@ -3,8 +3,6 @@
 
 //! Route expiry and index release (spec §3.7, §3.8, §7.5).
 
-use std::time::Instant;
-
 use crate::router_v2::{
     index::{Space, RESERVED_INDEX},
     RouterV2State,
@@ -69,12 +67,12 @@ impl RouterV2State {
             tracker.clear_mark(space, idx);
 
             if idx != RESERVED_INDEX {
-                allocator.release(idx, Instant::now());
+                allocator.release(idx, now);
             }
         }
     }
 
-    pub(crate) fn release_index(&self, space: Space, id: &[u8; 8]) -> Option<u16> {
+    pub(crate) fn release_index(&self, space: Space, id: &[u8; 8], now_ms: u64) -> Option<u16> {
         let (dict_lock, alloc_lock) = match space {
             Space::Node => (&self.node_dict, &self.node_allocator),
             Space::User => (&self.user_dict, &self.users_allocator),
@@ -85,7 +83,7 @@ impl RouterV2State {
 
         self.routing_table.write().unwrap().clear(space, idx);
         if idx != RESERVED_INDEX {
-            alloc_lock.write().unwrap().release(idx, Instant::now());
+            alloc_lock.write().unwrap().release(idx, now_ms);
         }
         dict.unbind(idx);
 
