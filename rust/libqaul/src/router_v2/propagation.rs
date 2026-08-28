@@ -17,10 +17,18 @@ use crate::{
             Header, RoutingMessage, PROTOCOL_VERSION,
         },
         index::Space,
+        manifest,
         table::{RoutingEntry, TargetRef},
         OutboundKind, OutboundMsg, RouterV2State, Sphere,
     },
 };
+
+/// §8.4 body overhead: `chunk_index`, `chunk_count`, and the two 2-byte
+/// section counts.
+const DUMP_OVERHEAD: usize = 6;
+const DUMP_MAPPING_BYTES: usize = 15;
+/// how many mappings we can fit ine INDEX_BUMP
+const MAPPINGS_PER_DUMP: usize = (manifest::MAX_BODY - DUMP_OVERHEAD) / DUMP_MAPPING_BYTES;
 
 /// should this stored routing entry be withheld
 /// from a neighbour we're about to send a ROUTING_UPDATE to.
@@ -397,48 +405,83 @@ pub fn on_neighbour_connect(state: &RouterV2State, neighbour: PeerId, transport:
         mappings
     };
 
-    let dump = IndexDump {
-        user_mappings,
-        node_mappings,
-    };
-    let mut body = Vec::new();
-    if let Err(e) = dump.encode(&mut body) {
-        warn!("bootstrap: INDEX_DUMP encode failed: {e}");
-        return;
-    }
-
-    if body.len() > 60 * 1024 {
-        // TODO: chunk into multiple INDEX_DUMPs per §8.4.
-        warn!(
-            "bootstrap: INDEX_DUMP oversize ({} bytes), needs chunking — TODO",
-            body.len()
-        );
-        return;
-    }
-
-    let payload_len: u16 = match body.len().try_into() {
-        Ok(n) => n,
-        Err(_) => {
-            warn!("bootstrap: body exceeds u16 range");
+    for dump in split_index_dump(user_mappings, node_mappings) {
+        let mut body = Vec::new();
+        if let Err(e) = dump.encode(&mut body) {
+            warn!("bootstrap: INDEX_DUMP encode failed: {e}");
             return;
         }
-    };
 
-    let header = Header {
-        version: PROTOCOL_VERSION,
-        message_type: RoutingMessage::IndexDump,
-        payload_len,
-    };
-    let mut frame = Vec::with_capacity(4 + body.len());
-    header.encode(&mut frame);
-    frame.extend(&body);
+        let payload_len: u16 = match body.len().try_into() {
+            Ok(n) => n,
+            Err(_) => {
+                warn!("bootstrap: body exceeds u16 range");
+                return;
+            }
+        };
 
-    if let Err(e) = state.tx_outbound.send(OutboundMsg {
-        kind: OutboundKind::Routing,
-        peer: neighbour,
-        transport,
-        bytes: frame,
-    }) {
-        warn!("bootstrap: outbound send failed for {neighbour:?}: {e}");
+        let header = Header {
+            version: PROTOCOL_VERSION,
+            message_type: RoutingMessage::IndexDump,
+            payload_len,
+        };
+        let mut frame = Vec::with_capacity(4 + body.len());
+        header.encode(&mut frame);
+        frame.extend(&body);
+
+        if let Err(e) = state.tx_outbound.send(OutboundMsg {
+            kind: OutboundKind::Routing,
+            peer: neighbour,
+            transport,
+            bytes: frame,
+        }) {
+            warn!("bootstrap: outbound send failed for {neighbour:?}: {e}");
+            return;
+        }
     }
+}
+
+/// §8.4: split a dictionary across as many `INDEX_DUMP` messages as it takes
+pub fn split_index_dump(
+    user_mappings: Vec<Mapping>,
+    node_mappings: Vec<Mapping>,
+) -> Vec<IndexDump> {
+    let total = user_mappings.len() + node_mappings.len();
+    let chunk_count = total.div_ceil(MAPPINGS_PER_DUMP).max(1);
+
+    if chunk_count > u8::MAX as usize {
+        warn!(
+            "bootstrap: dictionary of {total} mappings needs {chunk_count} chunks, truncating to {}",
+            u8::MAX
+        );
+    }
+    let chunk_count = chunk_count.min(u8::MAX as usize);
+
+    let mut users = user_mappings.into_iter().peekable();
+    let mut nodes = node_mappings.into_iter().peekable();
+    let mut chunks = Vec::with_capacity(chunk_count);
+
+    for chunk_index in 0..chunk_count {
+        let mut room = MAPPINGS_PER_DUMP;
+        let mut user_chunk = Vec::new();
+        let mut node_chunk = Vec::new();
+
+        while room > 0 && users.peek().is_some() {
+            user_chunk.push(users.next().unwrap());
+            room -= 1;
+        }
+        while room > 0 && nodes.peek().is_some() {
+            node_chunk.push(nodes.next().unwrap());
+            room -= 1;
+        }
+
+        chunks.push(IndexDump {
+            chunk_index: chunk_index as u8,
+            chunk_count: chunk_count as u8,
+            user_mappings: user_chunk,
+            node_mappings: node_chunk,
+        });
+    }
+
+    chunks
 }

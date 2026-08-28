@@ -63,6 +63,9 @@ pub struct RoutingUpdate {
 /// The INDEX_DUMP wire message.
 #[derive(Debug)]
 pub struct IndexDump {
+    /// §8.4 chunk framing
+    pub chunk_index: u8,
+    pub chunk_count: u8,
     pub user_mappings: Vec<Mapping>,
     pub node_mappings: Vec<Mapping>,
 }
@@ -194,6 +197,8 @@ impl RoutingUpdate {
 
 impl IndexDump {
     pub fn encode(&self, res: &mut Vec<u8>) -> Result<()> {
+        res.push(self.chunk_index);
+        res.push(self.chunk_count);
         res.extend_from_slice(&(self.user_mappings.len() as u16).to_be_bytes());
         let mut cursor = 0u16;
         for m in &self.user_mappings {
@@ -215,6 +220,14 @@ impl IndexDump {
 
     pub fn decode(msg: &[u8]) -> Result<IndexDump> {
         let mut buf = msg;
+
+        let chunk_index = read_u8(&mut buf)?;
+        let chunk_count = read_u8(&mut buf)?;
+        // §8.4: a receiver discards a message whose `chunk_count` is zero or
+        // whose `chunk_index` is not less than `chunk_count`.
+        if chunk_count == 0 || chunk_index >= chunk_count {
+            return Err(CodecError::Malformed);
+        }
 
         let n_user = read_u16_be(&mut buf)? as usize;
         let mut cursor = 0u16;
@@ -249,6 +262,8 @@ impl IndexDump {
         }
 
         Ok(IndexDump {
+            chunk_index,
+            chunk_count,
             user_mappings,
             node_mappings,
         })
@@ -1478,14 +1493,20 @@ mod proptests {
 
         #[test]
         fn index_dump_round_trips(
+            chunk_count in 1u8..=u8::MAX,
+            chunk_offset in 0u8..u8::MAX,
             user_mappings in arb_mapping_vec(200),
             node_mappings in arb_mapping_vec(200),
         ) {
-            let dump = IndexDump { user_mappings, node_mappings };
+            // §8.4 requires chunk_index < chunk_count.
+            let chunk_index = chunk_offset % chunk_count;
+            let dump = IndexDump { chunk_index, chunk_count, user_mappings, node_mappings };
             let mut buf = Vec::new();
             dump.encode(&mut buf).unwrap();
             let decoded = IndexDump::decode(&buf).unwrap();
 
+            prop_assert_eq!(decoded.chunk_index, dump.chunk_index);
+            prop_assert_eq!(decoded.chunk_count, dump.chunk_count);
             prop_assert_eq!(decoded.user_mappings.len(), dump.user_mappings.len());
             prop_assert_eq!(decoded.node_mappings.len(), dump.node_mappings.len());
             for (a, b) in decoded.user_mappings.iter().zip(dump.user_mappings.iter()) {
