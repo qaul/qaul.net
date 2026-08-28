@@ -390,7 +390,10 @@ Two mechanisms populate a receiver's view of a sender's dictionaries:
    `INDEX_DUMP` message (Section 8.4) listing every index it currently
    uses and the corresponding 8-byte ID. The receiver SHALL replace
    any cached mappings for that sender's index spaces with the
-   contents of the dump.
+   contents of the dump. Where the dump is split across several
+   messages, the replacement happens on the first chunk and the
+   remaining chunks accumulate onto it, per the chunk rules of
+   Section 8.4.
 
 2. **Inline introduction on first reference or rebinding.** The
    sender SHALL introduce a binding inline in the routing message
@@ -1025,6 +1028,12 @@ over LAN or INTERNET transports. It is not sent over BLE transports.
 ```
   Common header (4 bytes)
 
+  +-+-+-+-+-+-+-+-+
+  |  chunk_index  |                                  (1 byte)
+  +-+-+-+-+-+-+-+-+
+  |  chunk_count  |                                  (1 byte)
+  +-+-+-+-+-+-+-+-+
+
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
   |       n_user_mappings         |                  (2 bytes)
   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1044,6 +1053,12 @@ over LAN or INTERNET transports. It is not sent over BLE transports.
       [4]  manifest_version
 ```
 
+`chunk_index` is zero-based and `chunk_count` is the total number of
+messages the dump is split into. A dump that fits in one message
+carries `chunk_index = 0`, `chunk_count = 1`. A receiver SHALL
+discard a message whose `chunk_count` is zero or whose `chunk_index`
+is not less than `chunk_count`.
+
 `INDEX_DUMP` uses the same delta encoding as ROUTING_UPDATE
 mappings (Section 8.3): within each section, the sender SHALL
 transmit mappings in ascending order of absolute index; each
@@ -1057,9 +1072,35 @@ If a sender's full dictionary would exceed the 64 KiB payload
 limit, the sender splits it across multiple `INDEX_DUMP` messages.
 Each chunk independently resets the delta cursor to zero and
 independently carries both sections, with section counts and
-deltas reflecting only the contents of that chunk. Ordering
-between chunks is not significant; ordering within a chunk's
-section is fixed by the delta encoding.
+deltas reflecting only the contents of that chunk. Ordering within
+a chunk's section is fixed by the delta encoding.
+
+#### Replacement and chunking
+
+Section 3.6 requires a receiver to *replace* its cached mappings for
+a sender with the contents of that sender's dump. `chunk_index` is
+what makes that rule implementable alongside chunking:
+
+* On receiving a chunk with `chunk_index = 0`, the receiver SHALL
+  clear its mirror dictionaries for that sender before applying the
+  chunk's mappings.
+* On receiving a chunk with `chunk_index > 0`, the receiver SHALL
+  apply the chunk's mappings without clearing, accumulating onto the
+  state established by the preceding chunks.
+
+Chunks of one dump SHALL therefore be transmitted in ascending
+`chunk_index` order and processed in the order received. This is
+safe because `INDEX_DUMP` travels only over LAN and INTERNET
+transports (Section 4.1), both of which are reliable ordered
+streams; it is never sent over BLE, where no such guarantee exists.
+
+A receiver that observes a `chunk_index = 0` while a previous dump
+from the same sender is still incomplete SHALL treat the new chunk
+as the start of a fresh dump and discard the partial state. A dump
+left incomplete — fewer than `chunk_count` chunks arrive — leaves
+the mirror holding whatever chunks did arrive; the mappings it lacks
+are repaired by inline introduction (Section 3.6, mechanism 2),
+which is the same recovery path as any missing binding.
 
 ### 8.5. NODE_MANIFEST
 

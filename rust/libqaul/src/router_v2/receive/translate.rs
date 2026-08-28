@@ -229,6 +229,28 @@ impl RouterV2State {
             msg.node_mappings.len(),
         );
 
+        let is_first = msg.chunk_index == 0;
+        let is_last = msg.chunk_index.saturating_add(1) >= msg.chunk_count;
+
+        {
+            let mut mirrors = self.mirrors.write().unwrap();
+            let Some(info) = mirrors.get_mut(&neighbour) else {
+                debug!("index_dump: no mirror for {neighbour}, dropping");
+                return Ok(());
+            };
+            if is_first {
+                // A fresh chunk 0 supersedes any dump still in flight.
+                info.dump_stale.users = info.users.indexes();
+                info.dump_stale.nodes = info.nodes.indexes();
+            }
+            for mapping in &msg.user_mappings {
+                info.dump_stale.users.remove(&mapping.abs_idx);
+            }
+            for mapping in &msg.node_mappings {
+                info.dump_stale.nodes.remove(&mapping.abs_idx);
+            }
+        }
+
         for mapping in msg.user_mappings {
             if let Err(e) = self.apply_mapping(neighbour, Space::User, mapping, now) {
                 warn!("index_dump: apply_mapping user failed: {e}");
@@ -240,6 +262,29 @@ impl RouterV2State {
                 warn!("index_dump: apply_mapping node failed: {e}");
             }
         }
+
+        if is_last {
+            self.prune_stale_mirror(neighbour);
+        }
         Ok(())
+    }
+
+    /// §3.6: drop mirror bindings
+    fn prune_stale_mirror(&self, neighbour: PeerId) {
+        let mut mirrors = self.mirrors.write().unwrap();
+        let Some(info) = mirrors.get_mut(&neighbour) else {
+            return;
+        };
+
+        for idx in std::mem::take(&mut info.dump_stale.users) {
+            if let Some(id) = info.users.unbind(idx) {
+                debug!("index_dump: dropped stale user mirror {idx} → {id:?} from {neighbour}");
+            }
+        }
+        for idx in std::mem::take(&mut info.dump_stale.nodes) {
+            if let Some(id) = info.nodes.unbind(idx) {
+                debug!("index_dump: dropped stale node mirror {idx} → {id:?} from {neighbour}");
+            }
+        }
     }
 }

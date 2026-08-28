@@ -167,6 +167,15 @@ impl MirrorIndexDictionary {
     pub fn clear(&mut self) {
         self.forward_dir.clear();
     }
+
+    /// all bounded indicies
+    pub fn indexes(&self) -> HashSet<u16> {
+        self.forward_dir.keys().copied().collect()
+    }
+
+    pub fn unbind(&mut self, idx: u16) -> Option<[u8; 8]> {
+        self.forward_dir.remove(&idx)
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

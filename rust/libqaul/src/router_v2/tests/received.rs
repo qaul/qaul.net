@@ -208,6 +208,8 @@ fn index_dump_is_dispatched_to_handler() {
     let target_id = [4; 8];
 
     let dump = IndexDump {
+        chunk_index: 0,
+        chunk_count: 1,
         user_mappings: vec![Mapping {
             abs_idx: 12,
             target_id: dumped_id,

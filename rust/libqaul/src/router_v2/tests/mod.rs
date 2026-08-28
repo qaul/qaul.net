@@ -22,6 +22,7 @@ mod neighbour_transport;
 mod next_hop;
 mod on_neighbour_connect;
 mod phase10_regressions;
+mod profile_version;
 mod propagation;
 mod propagation_form;
 mod rate_limits;
