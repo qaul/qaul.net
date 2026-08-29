@@ -135,14 +135,16 @@ impl ConnectionTableState {
         config: &crate::storage::configuration::RoutingOptions,
     ) {
         for entry in info {
-            let hc;
-            if entry.hc[0] < 255 {
-                hc = entry.hc[0] + 1;
-            } else {
-                return;
-            }
+            // `hc` is an unvalidated proto `bytes` field; a neighbour can send
+            // an entry with an empty hop count. Skip such entries instead of
+            // indexing [0] (which panics and crashes the routing receive path).
+            let hc = match entry.hc.first() {
+                Some(&h) if h < 255 => h + 1,
+                Some(_) => return, // hop count saturated: stop processing
+                None => continue,  // malformed entry: skip it
+            };
 
-            let total_rtt = entry.rtt + rtt;
+            let total_rtt = entry.rtt.saturating_add(rtt);
             let neighbour = NeighbourEntry {
                 id: neighbour_id,
                 rtt: total_rtt,
@@ -464,14 +466,16 @@ impl ConnectionTable {
         for entry in info {
             // calculate hop count
             // if hop count is > 255, return
-            let hc;
-            if entry.hc[0] < 255 {
-                hc = entry.hc[0] + 1;
-            } else {
-                return;
-            }
+            // `hc` is an unvalidated proto `bytes` field; a neighbour can send
+            // an entry with an empty hop count. Skip such entries instead of
+            // indexing [0] (which panics and crashes the routing receive path).
+            let hc = match entry.hc.first() {
+                Some(&h) if h < 255 => h + 1,
+                Some(_) => return, // hop count saturated: stop processing
+                None => continue,  // malformed entry: skip it
+            };
 
-            let total_rtt = entry.rtt + rtt;
+            let total_rtt = entry.rtt.saturating_add(rtt);
             // fill structure
             let neighbour = NeighbourEntry {
                 id: neighbour_id,
@@ -861,5 +865,49 @@ impl ConnectionTable {
 
         // return list
         connections_list
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::router::router_net_proto::RoutingInfoEntry;
+    use crate::storage::configuration::RoutingOptions;
+    use crate::utilities::qaul_id::QaulId;
+
+    // A neighbour can send a routing entry whose `hc` (a proto `bytes` field)
+    // is empty. The receive path must skip it rather than index `entry.hc[0]`,
+    // which panicked and crashed the whole routing-receive path — a remote DoS
+    // reachable from any peer. The valid entry after the malformed one must
+    // still be processed (skip the bad entry, don't abort the table).
+    #[test]
+    fn empty_hop_count_entry_is_skipped_without_panic() {
+        let state = ConnectionTableState::new();
+        let config = RoutingOptions::default();
+        let valid_q8id = QaulId::to_q8id(PeerId::random());
+
+        let info = vec![
+            // malformed: empty hop count
+            RoutingInfoEntry { user: vec![1, 2, 3, 4, 5, 6, 7, 8], rtt: 0, hc: vec![], pgid: 1 },
+            // valid, comes after the malformed one
+            RoutingInfoEntry { user: valid_q8id.clone(), rtt: 10, hc: vec![1], pgid: 1 },
+        ];
+
+        // must not panic
+        state.fill_received_routing_info(ConnectionModule::Lan, PeerId::random(), 5, &info, &config);
+
+        // the valid entry was still processed => the bad entry was skipped, not aborting the loop
+        assert!(state.lan.read().unwrap().table.contains_key(&valid_q8id));
+    }
+
+    // A saturated hop count (255) stops processing (preserved behaviour) and
+    // must not panic.
+    #[test]
+    fn saturated_hop_count_does_not_panic() {
+        let state = ConnectionTableState::new();
+        let config = RoutingOptions::default();
+        let info = vec![RoutingInfoEntry { user: vec![9; 8], rtt: 0, hc: vec![255], pgid: 1 }];
+        state.fill_received_routing_info(ConnectionModule::Lan, PeerId::random(), 5, &info, &config);
+        assert!(state.lan.read().unwrap().table.is_empty());
     }
 }
