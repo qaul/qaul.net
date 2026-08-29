@@ -136,6 +136,17 @@ impl DataBase {
             // get data base structure
             let mut database = state.database.inner.write().unwrap();
 
+            // Re-check under the write lock (double-checked locking): another
+            // thread may have opened this account's DB between our read-lock miss
+            // above and acquiring this write lock. Without this, both threads
+            // call `sled::open` on the same path; sled's exclusive per-process
+            // flock rejects the second open, whose `.expect()` then panics WHILE
+            // HOLDING this write lock, poisoning the storage RwLock for the whole
+            // node. Returning the already-open handle avoids the race entirely.
+            if let Some(db) = database.users.get(&account_id.to_bytes()) {
+                return db.clone();
+            }
+
             // create path
             let path = Path::new(database.path.as_str());
             let db_folder = path.join(account_id.to_base58());
@@ -218,5 +229,40 @@ impl DbUsers {
 
         // open tree from data base
         db.open_tree("users").unwrap()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::DataBase;
+    use libp2p::PeerId;
+
+    // Concurrent first-open of the same account DB must not double-open sled
+    // (its per-process exclusive flock) and panic inside `.expect()` while
+    // holding the storage write lock — that poisons the RwLock and takes down
+    // all storage. With the double-checked lock, late threads return the
+    // already-open handle. Without the fix this reliably panics (the slow sled
+    // open widens the race window), failing the test via the scope.
+    #[test]
+    fn concurrent_first_open_does_not_poison_storage_lock() {
+        let dir = tempfile::tempdir().unwrap();
+        let state = crate::QaulState::new_for_simulation();
+        {
+            let mut db = state.database.inner.write().unwrap();
+            db.path = dir.path().to_str().unwrap().to_string();
+        }
+        let account = PeerId::random();
+
+        std::thread::scope(|scope| {
+            for _ in 0..8 {
+                scope.spawn(|| {
+                    let _db = DataBase::get_user_db(&state, account);
+                });
+            }
+        });
+
+        // lock is still usable (not poisoned) and the account DB opened exactly once
+        let db = state.database.inner.read().unwrap();
+        assert!(db.users.contains_key(&account.to_bytes()));
     }
 }
