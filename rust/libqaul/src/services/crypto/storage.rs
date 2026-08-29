@@ -97,13 +97,37 @@ impl RotationMeta {
         if nonce <= self.draining_recv_base {
             return;
         }
+        // A nonce past the known drain target is never needed by
+        // `drain_complete` (which only checks `(base, target]`), so ignore it.
+        if let Some(target) = self.draining_recv_target {
+            if nonce > target {
+                return;
+            }
+        }
         let bit = nonce - self.draining_recv_base - 1;
         let byte = (bit / 8) as usize;
+        // Hard cap on bitmap growth. The nonce comes off the wire, and while
+        // the drain target is still unknown (`None`) an attacker holding the
+        // session key could stamp a huge nonce and size this bitmap to gigabytes
+        // (single-packet OOM). A real in-flight drain tail is tiny; anything
+        // beyond the cap is bogus and dropped.
+        if byte >= Self::MAX_DRAIN_BITMAP_BYTES {
+            log::warn!(
+                "drain nonce {} exceeds bitmap cap, ignoring (base {})",
+                nonce,
+                self.draining_recv_base
+            );
+            return;
+        }
         if byte >= self.draining_recv_seen.len() {
             self.draining_recv_seen.resize(byte + 1, 0);
         }
         self.draining_recv_seen[byte] |= 1u8 << (bit % 8);
     }
+
+    /// Maximum size of the drain bitmap (1 MiB = ~8.4M in-flight nonces). Bounds
+    /// memory against an attacker-chosen nonce before the drain target is known.
+    const MAX_DRAIN_BITMAP_BYTES: usize = 1 << 20;
 
     /// Whether every nonce in `(draining_recv_base, target]` has been
     /// received, i.e. the draining session has fully drained. Returns
@@ -870,5 +894,39 @@ mod legacy_state_decode_tests {
         assert_eq!(loaded.pre_index_out, 5);
         assert_eq!(loaded.pre_index_in_seen, vec![0b1011]);
         assert_eq!(loaded.pre_bytes_accounted, 4096);
+    }
+}
+
+#[cfg(test)]
+mod rotation_meta_drain_tests {
+    use super::RotationMeta;
+
+    // A drain nonce past the known target is outside the drain window and must
+    // be ignored, never sizing the bitmap from it.
+    #[test]
+    fn drain_ignores_nonce_beyond_target() {
+        let mut m = RotationMeta::default();
+        m.draining_recv_base = 0;
+        m.draining_recv_target = Some(4);
+        m.mark_drain_received(1u64 << 40);
+        assert!(
+            m.draining_recv_seen.is_empty(),
+            "out-of-window nonce must not allocate"
+        );
+        m.mark_drain_received(3);
+        assert!(m.drain_nonce_seen(3));
+    }
+
+    // With the drain target still unknown (None), a peer-chosen huge nonce must
+    // not size the bitmap to gigabytes — the hard cap bounds it. This is the
+    // single-packet OOM guard.
+    #[test]
+    fn drain_caps_bitmap_when_target_unknown() {
+        let mut m = RotationMeta::default();
+        m.draining_recv_base = 0;
+        m.draining_recv_target = None;
+        m.mark_drain_received(1u64 << 40); // ~128 GB allocation without the cap
+        assert!(m.draining_recv_seen.len() <= RotationMeta::MAX_DRAIN_BITMAP_BYTES);
+        assert!(m.draining_recv_seen.is_empty());
     }
 }
