@@ -62,6 +62,11 @@ pub struct RoutingInfoEntry {
     /// propagation id
     #[prost(uint32, tag = "5")]
     pub pgid: u32,
+    /// advertised signed-profile version, so a receiver can detect that an
+    /// already-known user's profile changed and re-request it. 0 = unknown /
+    /// legacy peer. Backward compatible: an absent field decodes to 0.
+    #[prost(uint32, tag = "6")]
+    pub version: u32,
 }
 /// User information table
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
