@@ -29,8 +29,11 @@ message EnvelopPayload {
         Encrypted encrypted = 1;
         // DTN message
         bytes dtn = 2;
-        // directed custody routed DTN message
-        DtnRoutedV2 dtn_routed_v2 = 3;
+        // directed custody routed DTN message (V2, signed immutable route)
+        DtnV2Container dtn_v2 = 3;
+        // a signed DTN v2 response carried as a custody payload, so a DELIVERY
+        // ack can be routed back to an offline sender over the reverse route
+        DtnResponseV2 dtn_response_v2 = 4;
     }
 }
 
@@ -83,6 +86,8 @@ message Messaging {
         GroupInviteMessage group_invite_message = 5;
         // common message
         CommonMessage common_message = 6;
+        // signed dtn response message (V2)
+        DtnResponseV2 dtn_response_v2 = 7;
     }
 }
 
@@ -167,32 +172,139 @@ message Dtn {
     oneof message {
         // message container
         bytes container = 1;
-        // message received response
+        // message received response (V1, unauthenticated)
         DtnResponse response = 2;
-        // directed custody routed DTN message
-        DtnRoutedV2 routed_v2 = 3;
+        // directed custody routed DTN message (V2, signed immutable route)
+        DtnV2Container container_v2 = 3;
+        // signed DTN response (V2)
+        DtnResponseV2 response_v2 = 4;
     }
 }
 
-// DTN source routed message (V2)
-message DtnRoutedV2 {
-    // the original encrypted container bytes
-    bytes container = 1;
-    // ordered list of custody user IDs
-    repeated bytes custody_route = 2;
-    // index of the first custody entry that has not yet taken custody
-    uint32 next_route_index = 3;
-    // signature of the original message (used for dedup)
-    bytes original_signature = 4;
-    // public key of the original sender (protobuf-encoded)
-    bytes sender_public_key = 5;
-    // expiry timestamp (milliseconds since epoch), 0 = no expiry
-    uint64 expires_at = 6;
-    // remaining allowed handoffs before message is dropped
-    uint32 remaining_handoffs = 7;
+// DTN v2 custody container.
+//
+// The route is authored and signed once by the sender and is immutable in
+// transit: custodians verify `dtn_route_sig` over `dtn_route` against the
+// sender's key and never rewrite it. Traversal is stateless (a custodian finds
+// itself in the route), so there is no cursor or handoff counter on the wire.
+message DtnV2Container {
+    // encoded DtnRoute (the signed blob)
+    bytes dtn_route = 1;
+    // sender's signature over `dtn_route` bytes
+    bytes dtn_route_sig = 2;
+    // the original message container bytes (signed inner message)
+    bytes envelope = 3;
+    // optional recipient-signed custody grant (primary admission gate)
+    CustodyGrant custody_grant = 4;
+    // optional proof-of-work stamp (grant-less untrusted pool)
+    PowStamp pow = 5;
 }
 
-// DTN response
+// DTN routing information, signed by the sender.
+message DtnRoute {
+    // signature of the original message (dedup / end-to-end key)
+    bytes original_signature = 1;
+    // custody route as hop entries, ordered by hop ascending.
+    // Position gives the order; there is no explicit hop number. Several
+    // interchangeable custodian ids may share one hop.
+    repeated RouteHop route_hop = 2;
+    // public key of the original sender (protobuf-encoded)
+    bytes sender_public_key = 3;
+    // optional expiry (ms since epoch). Retention is otherwise custodian-local.
+    optional uint64 expires_at = 4;
+}
+
+// one custodian candidate within a hop
+message RouteEntry {
+    // custodian qaul id
+    bytes id = 1;
+    // extension point for future relay / connectivity information
+}
+
+// one hop: a set of interchangeable custodian candidates
+message RouteHop {
+    repeated RouteEntry route_entry = 1;
+}
+
+// Recipient-signed custody grant (capability).
+//
+// The recipient authorizes a specific sender to have messages held in custody
+// on its behalf. A custodian accepts a grant-bearing message only if the grant
+// is signed by the recipient named in the inner container, names this sender,
+// and the deposit fits `quota_bytes`. Rotating `epoch` revokes older grants.
+message CustodyGrant {
+    // sender authorized to deposit (qaul id)
+    bytes grantee = 1;
+    // recipient that issued and signed this grant (qaul id)
+    bytes recipient = 2;
+    // recipient's public key (protobuf-encoded), used to verify `signature`
+    bytes recipient_public_key = 3;
+    // per-sender custody budget this grant authorizes
+    uint64 quota_bytes = 4;
+    // grant epoch; a higher epoch from the same recipient supersedes lower ones
+    uint32 epoch = 5;
+    // optional expiry (ms since epoch), 0 = no expiry
+    uint64 not_after = 6;
+    // recipient's signature over the grant fields (signature field empty)
+    bytes signature = 7;
+}
+
+// Proof-of-work stamp for the grant-less untrusted pool.
+//
+// Verified bound to (original_signature, custodian_id, day) so a stamp cannot be
+// reused across custodians or days. A one-machine Sybil flood pays
+// difficulty x identities x custodians and does not scale.
+message PowStamp {
+    // solution nonce
+    uint64 nonce = 1;
+    // required leading zero bits in the bound hash
+    uint32 difficulty = 2;
+}
+
+// Signed DTN response (V2).
+message DtnResponseV2 {
+    // what this response asserts
+    enum Kind {
+        // receiver -> sender: authoritative "delivered", stops retransmission
+        DELIVERY = 0;
+        // receiver -> last custodian: custody release, free storage now
+        CUSTODY_RELEASE = 1;
+        // custodian -> previous holder: accepted into custody (receipt)
+        RECEIPT = 2;
+        // custodian -> sender: dropped (denied / expired / full)
+        DROP_REPORT = 3;
+    }
+    // accepted / rejected
+    enum ResponseType {
+        ACCEPTED = 0;
+        REJECTED = 1;
+    }
+    // rejection / drop reason
+    enum Reason {
+        NONE = 0;
+        USER_NOT_ACCEPTED = 1;
+        OVERALL_QUOTA = 2;
+        USER_QUOTA = 3;
+        // no valid custody grant and no acceptable proof-of-work
+        NO_GRANT = 4;
+        // grant-less deposit requires a proof-of-work stamp
+        POW_REQUIRED = 5;
+        // sender is blocked by this custodian
+        BLOCKED = 6;
+    }
+    Kind kind = 1;
+    ResponseType response_type = 2;
+    Reason reason = 3;
+    // the referenced message (original message signature)
+    bytes original_signature = 4;
+    // responder public key (protobuf-encoded); verifies `signature` and must
+    // hash to the responder identity the verifier expects
+    bytes responder_public_key = 5;
+    // responder's signature over the response fields (signature field empty)
+    bytes signature = 6;
+}
+
+// DTN response (V1, unauthenticated — retained for legacy V1 custody)
 message DtnResponse {
     // the enum definition of the type
     enum ResponseType {

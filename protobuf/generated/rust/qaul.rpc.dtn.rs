@@ -5,7 +5,7 @@ pub struct Dtn {
     /// message type
     #[prost(
         oneof = "dtn::Message",
-        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14"
+        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18"
     )]
     pub message: ::core::option::Option<dtn::Message>,
 }
@@ -56,6 +56,18 @@ pub mod dtn {
         /// dtn set custody enabled response
         #[prost(message, tag = "14")]
         DtnSetCustodyEnabledResponse(super::DtnSetCustodyEnabledResponse),
+        /// dtn issue custody grant request
+        #[prost(message, tag = "15")]
+        DtnIssueGrantRequest(super::DtnIssueGrantRequest),
+        /// dtn issue custody grant response
+        #[prost(message, tag = "16")]
+        DtnIssueGrantResponse(super::DtnIssueGrantResponse),
+        /// dtn import custody grant request
+        #[prost(message, tag = "17")]
+        DtnImportGrantRequest(super::DtnImportGrantRequest),
+        /// dtn import custody grant response
+        #[prost(message, tag = "18")]
+        DtnImportGrantResponse(super::DtnImportGrantResponse),
     }
 }
 /// Dtn State Request
@@ -184,6 +196,57 @@ pub struct DtnSetCustodyEnabledRequest {
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct DtnSetCustodyEnabledResponse {
     /// whether the request was successful
+    #[prost(bool, tag = "1")]
+    pub status: bool,
+    /// error or status message
+    #[prost(string, tag = "2")]
+    pub message: ::prost::alloc::string::String,
+}
+/// Request to issue a recipient-signed custody grant to a sender.
+///
+/// The local user (recipient) authorizes `grantee` to have messages held in
+/// custody on its behalf, up to `quota_bytes`. The response returns the signed
+/// CustodyGrant bytes, which the grantee attaches to its DtnV2Container.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DtnIssueGrantRequest {
+    /// sender authorized to deposit (qaul id bytes)
+    #[prost(bytes = "vec", tag = "1")]
+    pub grantee: ::prost::alloc::vec::Vec<u8>,
+    /// per-sender custody budget this grant authorizes
+    #[prost(uint64, tag = "2")]
+    pub quota_bytes: u64,
+    /// grant epoch (higher supersedes lower from the same recipient)
+    #[prost(uint32, tag = "3")]
+    pub epoch: u32,
+    /// optional expiry (ms since epoch), 0 = no expiry
+    #[prost(uint64, tag = "4")]
+    pub not_after: u64,
+}
+/// Response carrying the signed custody grant.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DtnIssueGrantResponse {
+    /// whether the grant was issued
+    #[prost(bool, tag = "1")]
+    pub status: bool,
+    /// encoded CustodyGrant protobuf bytes
+    #[prost(bytes = "vec", tag = "2")]
+    pub grant: ::prost::alloc::vec::Vec<u8>,
+    /// error or status message
+    #[prost(string, tag = "3")]
+    pub message: ::prost::alloc::string::String,
+}
+/// Request to import a custody grant this node has been given by a recipient,
+/// so the originate path can attach it to outgoing custody messages.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DtnImportGrantRequest {
+    /// encoded CustodyGrant protobuf bytes
+    #[prost(bytes = "vec", tag = "1")]
+    pub grant: ::prost::alloc::vec::Vec<u8>,
+}
+/// Response to a grant import request.
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct DtnImportGrantResponse {
+    /// whether the grant was accepted and stored
     #[prost(bool, tag = "1")]
     pub status: bool,
     /// error or status message
