@@ -29,6 +29,11 @@ class TestChatRoomListNotifier extends ChatRoomListNotifier {
   List<ChatRoom> build() => [buildGroupChat()];
 }
 
+class TestUnreadChatRoomListNotifier extends ChatRoomListNotifier {
+  @override
+  List<ChatRoom> build() => [buildGroupChat().copyWith(unreadCount: 3)];
+}
+
 void main() {
   late Key chatKey;
 
@@ -161,6 +166,54 @@ void main() {
 
     expect(find.byType(ChatHeader), findsNothing);
     expect(find.text('Open chat'), findsOneWidget);
+  });
+
+  testWidgets('opening a chat clears that room unread count locally', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1024, 768);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    late WidgetRef capturedRef;
+    final wut = ProviderScope(
+      overrides: [
+        defaultUserProvider.overrideWith((_) => defaultUser),
+        chatNotificationControllerProvider.overrideWithValue(
+          NullChatNotificationController(),
+        ),
+        chatRoomsProvider.overrideWith(TestUnreadChatRoomListNotifier.new),
+        qaulWorkerProvider.overrideWith((ref) => StubLibqaulWorker(ref)),
+      ],
+      child: materialAppWithLocalizations(
+        Consumer(
+          builder: (context, ref, _) {
+            capturedRef = ref;
+            return Builder(
+              builder: (context) => TextButton(
+                onPressed: () => openChat(
+                  ref.read(chatRoomsProvider).single,
+                  ref: ref,
+                  context: context,
+                  user: defaultUser,
+                ),
+                child: const Text('Open chat'),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(wut);
+    expect(capturedRef.read(chatRoomsProvider).single.unreadCount, 3);
+
+    await tester.tap(find.text('Open chat'));
+    await tester.pump();
+
+    expect(capturedRef.read(chatRoomsProvider).single.unreadCount, 0);
+    expect(capturedRef.read(currentOpenChatRoom)!.unreadCount, 0);
   });
 
   testResponsiveWidgets(

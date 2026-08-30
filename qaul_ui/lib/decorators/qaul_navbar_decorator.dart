@@ -60,12 +60,10 @@ class _ConnectedNavBar extends ConsumerStatefulWidget {
 
 class _ConnectedNavBarState extends ConsumerState<_ConnectedNavBar> {
   PublicNotificationController? _publicController;
-  ChatNotificationController? _chatController;
 
   @override
   void dispose() {
     _publicController?.newNotificationCount.removeListener(_onNotificationChanged);
-    _chatController?.newNotificationCount.removeListener(_onNotificationChanged);
     super.dispose();
   }
 
@@ -77,13 +75,10 @@ class _ConnectedNavBarState extends ConsumerState<_ConnectedNavBar> {
   Widget build(BuildContext context) {
     final publicController = ref.read(publicNotificationControllerProvider);
     final chatController = ref.read(chatNotificationControllerProvider);
-    if (_publicController != publicController || _chatController != chatController) {
+    if (_publicController != publicController) {
       _publicController?.newNotificationCount.removeListener(_onNotificationChanged);
-      _chatController?.newNotificationCount.removeListener(_onNotificationChanged);
       _publicController = publicController;
-      _chatController = chatController;
       publicController.newNotificationCount.addListener(_onNotificationChanged);
-      chatController.newNotificationCount.addListener(_onNotificationChanged);
     }
 
     final currentTab = ref.watch(homeScreenControllerProvider);
@@ -112,7 +107,9 @@ class _ConnectedNavBarState extends ConsumerState<_ConnectedNavBar> {
     };
 
     final publicCount = publicController.newNotificationCount.value;
-    final chatCount = chatController.newNotificationCount.value;
+    final chatCount = ref
+        .watch(chatRoomsProvider)
+        .fold<int>(0, (total, room) => total + room.unreadCount);
 
     return QaulNavBar(
       vertical: widget.vertical,
@@ -131,7 +128,7 @@ class _ConnectedNavBarState extends ConsumerState<_ConnectedNavBar> {
       },
       avatarChild: avatarChild,
       publicNotificationCount: publicCount,
-      chatNotificationCount: chatCount,
+      chatNotificationCount: chatCount > 0 ? chatCount : null,
       tabTooltips: tabTooltips,
     );
   }
