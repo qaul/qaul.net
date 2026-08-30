@@ -4,10 +4,8 @@ class _RecordAudioDialog extends StatefulHookConsumerWidget {
   const _RecordAudioDialog({
     required this.room,
     required this.onSendPressed,
-    this.partialMessage,
   });
   final ChatRoom room;
-  final String? partialMessage;
   final Function(File f, types.PartialText desc) onSendPressed;
 
   @override

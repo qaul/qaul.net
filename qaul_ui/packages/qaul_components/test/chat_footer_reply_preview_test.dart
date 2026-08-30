@@ -140,4 +140,86 @@ void main() {
     expect(await previewColor(ThemeData.dark()), const Color(0xFF2C2C2E));
     expect(await previewColor(ThemeData.light()), const Color(0xFFE5E5EA));
   });
+
+  testWidgets('hides attachment actions without callbacks', (tester) async {
+    await tester.pumpWidget(
+      app(
+        controller: TextEditingController(),
+      ),
+    );
+
+    expect(find.byTooltip('Voice message'), findsNothing);
+    expect(find.byTooltip('Photo'), findsNothing);
+    expect(find.byTooltip('More'), findsNothing);
+
+    await tester.enterText(find.byType(TextField), 'hello');
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('chat-footer-send')), findsOneWidget);
+    expect(find.byTooltip('More'), findsNothing);
+  });
+
+  testWidgets('runs voice and camera callbacks directly', (tester) async {
+    var voiceCount = 0;
+    var cameraCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.bottomCenter,
+            child: ChatFooter(
+              placeholder: 'Secure private message',
+              onVoicePressed: () => voiceCount++,
+              onCameraPressed: () => cameraCount++,
+              voiceTooltip: 'Voice message',
+              cameraTooltip: 'Photo',
+              attachmentsTooltip: 'More',
+              applyBottomSafeArea: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byTooltip('More'), findsNothing);
+
+    await tester.tap(find.byTooltip('Voice message'));
+    await tester.tap(find.byTooltip('Photo'));
+
+    expect(voiceCount, 1);
+    expect(cameraCount, 1);
+  });
+
+  testWidgets('opens attachment menu from plus action', (tester) async {
+    var attachmentCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.bottomCenter,
+            child: ChatFooter(
+              placeholder: 'Secure private message',
+              onAttachmentPressed: () => attachmentCount++,
+              attachmentsTooltip: 'More',
+              applyBottomSafeArea: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const ValueKey('chat-footer-more')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('attachment')), findsOneWidget);
+    expect(find.byKey(const ValueKey('emoji')), findsNothing);
+    expect(find.byKey(const ValueKey('location')), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('attachment')));
+    await tester.pumpAndSettle();
+
+    expect(attachmentCount, 1);
+  });
 }
