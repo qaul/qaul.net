@@ -121,6 +121,9 @@ impl RoutingTableState {
                     rtt: min_conn.rtt,
                     hc: vec![min_conn.hc],
                     pgid: user.pgid,
+                    // populated from the profile store by `fill_routing_versions`
+                    // just before the announcement is sent.
+                    version: 0,
                 };
                 table.entry.push(table_entry);
             }
