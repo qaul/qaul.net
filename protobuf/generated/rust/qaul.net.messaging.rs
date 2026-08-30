@@ -30,7 +30,7 @@ pub struct Envelope {
 /// envelop payload
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct EnvelopPayload {
-    #[prost(oneof = "envelop_payload::Payload", tags = "1, 2, 3")]
+    #[prost(oneof = "envelop_payload::Payload", tags = "1, 2, 3, 4")]
     pub payload: ::core::option::Option<envelop_payload::Payload>,
 }
 /// Nested message and enum types in `EnvelopPayload`.
@@ -46,6 +46,15 @@ pub mod envelop_payload {
         /// directed custody routed DTN message
         #[prost(message, tag = "3")]
         DtnRoutedV2(super::DtnRoutedV2),
+        /// Signed-but-not-session-encrypted payload. Carries a
+        /// CommonMessage whose content is already encrypted at the
+        /// application layer (group-file envelope: the body is encrypted
+        /// once under a per-file key). The Envelope signature still
+        /// authenticates the sender; payload confidentiality is the
+        /// application's responsibility. Used to avoid re-encrypting a
+        /// large file body once per group member.
+        #[prost(bytes, tag = "4")]
+        Plain(::prost::alloc::vec::Vec<u8>),
     }
 }
 /// encrypted message data
