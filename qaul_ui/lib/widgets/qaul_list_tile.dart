@@ -9,6 +9,8 @@ class QaulListTile extends StatelessWidget {
     this.trailingIcon,
     this.trailingMetadata,
     this.onTap,
+    this.onNameTap,
+    this.onAvatarTap,
     this.useUserColorOnName = false,
     this.tapRoutesToDetailsScreen = false,
     this.nameTapRoutesToDetailsScreen = false,
@@ -25,6 +27,8 @@ class QaulListTile extends StatelessWidget {
     Widget? trailingIcon,
     Widget? trailingMetadata,
     VoidCallback? onTap,
+    VoidCallback? onNameTap,
+    VoidCallback? onAvatarTap,
     bool isThreeLine = false,
     bool useUserColorOnName = false,
     bool tapRoutesToDetailsScreen = false,
@@ -40,6 +44,8 @@ class QaulListTile extends StatelessWidget {
       trailingIcon: trailingIcon,
       trailingMetadata: trailingMetadata,
       onTap: onTap,
+      onNameTap: onNameTap,
+      onAvatarTap: onAvatarTap,
       tapRoutesToDetailsScreen: tapRoutesToDetailsScreen,
       nameTapRoutesToDetailsScreen: nameTapRoutesToDetailsScreen,
       avatarTapRoutesToDetailsScreen: avatarTapRoutesToDetailsScreen,
@@ -86,6 +92,10 @@ class QaulListTile extends StatelessWidget {
 
   /// Override the behavior of tapping this tile, regardless of the value of [tapRoutesToDetailsScreen]
   final VoidCallback? onTap;
+
+  final VoidCallback? onNameTap;
+
+  final VoidCallback? onAvatarTap;
 
   /// If set to [true], when [onTap] is [null], tapping on the [QaulListTile]
   /// will open the [UserDetailsScreen] for this [user].
@@ -134,13 +144,15 @@ class QaulListTile extends StatelessWidget {
         ? null
         : () => _navigateToUserDetailsScreen(context, user!);
 
-    final onNameTapFallback = !nameTapRoutesToDetailsScreen
-        ? null
-        : () => _navigateToUserDetailsScreen(context, user!);
+    final onNameTapFallback = onNameTap ??
+        (!nameTapRoutesToDetailsScreen
+            ? null
+            : () => _navigateToUserDetailsScreen(context, user!));
 
-    final onAvatarTapFallback = !avatarTapRoutesToDetailsScreen
-        ? null
-        : () => _navigateToUserDetailsScreen(context, user!);
+    final onAvatarTapFallback = onAvatarTap ??
+        (!avatarTapRoutesToDetailsScreen
+            ? null
+            : () => _navigateToUserDetailsScreen(context, user!));
 
     Widget leading =
         user != null ? QaulAvatar.small(user: user) : QaulAvatar.groupSmall();

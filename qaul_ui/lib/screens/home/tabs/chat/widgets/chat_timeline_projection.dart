@@ -128,7 +128,7 @@ ChatTimelineProjection? buildChatTimelineProjection({
         senderIdBase58: m.senderIdBase58,
         sentAt: m.sentAt,
         isText: m.content is TextMessageContent,
-        isOutgoing: m.senderId.equals(signedInUser.id),
+        isOutgoing: qaulUserIdsEqual(m.senderId, signedInUser.id),
         qaulBubbleBaseWithoutLayout: bubbleBaseById[m.messageIdBase58]
             ?.copyWith(edges: const []),
       ),
@@ -187,7 +187,7 @@ QaulChatBubbleMessage? _qaulBubbleBaseForMessage(
                   message.status == MessageState.confirmedByAll
               ? MessageStatus.read
               : MessageStatus.notSent),
-    messageType: message.senderId.equals(signedInUser.id)
+    messageType: qaulUserIdsEqual(message.senderId, signedInUser.id)
         ? MessageType.primary
         : MessageType.secondary,
     edges: const [],
@@ -223,7 +223,7 @@ List<DuplicateUsernameOnJoinNotification> _detectDuplicateUsernamesForRoom({
     }
     final author = resolveAuthor(m, l10n);
     final roomUser = room.members.firstWhereOrNull(
-      (member) => member.id.equals(author.id),
+      (member) => qaulUserIdsEqual(member.id, author.id),
     );
     joins.add(
       GroupJoinEventSnapshot(

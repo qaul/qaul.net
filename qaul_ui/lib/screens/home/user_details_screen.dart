@@ -69,7 +69,10 @@ class UserDetailsScreen extends HookConsumerWidget {
                       label: l10n.newChatTooltip,
                       onPressed: () {
                         final defaultUser = ref.watch(defaultUserProvider)!;
-                        final newRoom = ChatRoom.blank(otherUser: user);
+                        final newRoom = ChatRoom.blank(
+                          localUser: defaultUser,
+                          otherUser: user,
+                        );
                         Navigator.pop(context);
                         openChat(
                           newRoom,
@@ -111,7 +114,10 @@ class UserDetailsScreen extends HookConsumerWidget {
                       label: l10n.newChatTooltip,
                       onPressed: () {
                         final defaultUser = ref.watch(defaultUserProvider)!;
-                        final newRoom = ChatRoom.blank(otherUser: user);
+                        final newRoom = ChatRoom.blank(
+                          localUser: defaultUser,
+                          otherUser: user,
+                        );
                         Navigator.pop(context);
                         openChat(
                           newRoom,

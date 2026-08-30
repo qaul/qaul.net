@@ -60,12 +60,26 @@ class ChatRoom with EquatableMixin implements Comparable {
 
   final String idBase58;
 
-  factory ChatRoom.blank({required User otherUser}) {
-    assert(otherUser.conversationId != null);
+  factory ChatRoom.blank({required User otherUser, User? localUser}) {
+    final conversationId = localUser == null
+        ? otherUser.conversationId
+        : qaulDirectChatId(localUser.id, otherUser.id);
+    if (conversationId == null || conversationId.length != 16) {
+      throw ArgumentError.value(
+        conversationId,
+        'conversationId',
+        'Direct chats require a 16-byte conversation id',
+      );
+    }
     return ChatRoom(
-      conversationId: otherUser.conversationId!,
+      conversationId: Uint8List.fromList(conversationId),
       name: otherUser.name,
       members: [
+        if (localUser != null)
+          ChatRoomUser(
+            localUser,
+            joinedAt: DateTime.utc(1970),
+          ),
         ChatRoomUser(
           otherUser,
           joinedAt: DateTime.utc(1970),

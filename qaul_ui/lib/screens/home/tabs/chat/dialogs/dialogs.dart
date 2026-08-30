@@ -243,7 +243,9 @@ class _InviteDetailsDialog extends HookConsumerWidget {
       Navigator.pop(context);
     }, []);
 
-    final sender = users.firstWhereOrNull((s) => s.id.equals(invite.senderId));
+    final sender = users.firstWhereOrNull(
+      (s) => qaulUserIdsEqual(s.id, invite.senderId),
+    );
 
     final l10n = AppLocalizations.of(context)!;
     return QaulDialog(

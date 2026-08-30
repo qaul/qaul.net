@@ -132,7 +132,7 @@ class ChatScreen extends StatefulHookConsumerWidget {
           // Don't show for users who only had pending invites
           if (room != null) {
             final roomUser = room.members.firstWhereOrNull(
-              (member) => member.id.equals(author.id),
+              (member) => qaulUserIdsEqual(member.id, author.id),
             );
             if (roomUser?.invitationState == InvitationState.sent) {
               // User only had a pending invite, don't show "joined" message
@@ -149,7 +149,7 @@ class ChatScreen extends StatefulHookConsumerWidget {
           // Don't show for users who only had pending invites
           if (room != null) {
             final roomUser = room.members.firstWhereOrNull(
-              (member) => member.id.equals(author.id),
+              (member) => qaulUserIdsEqual(member.id, author.id),
             );
             if (roomUser?.invitationState == InvitationState.sent) {
               // User only had a pending invite, don't show "left" message
@@ -618,7 +618,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   User _author(Message e, AppLocalizations l10n) {
-    if (e.senderId.equals(user.id)) return user;
+    if (qaulUserIdsEqual(e.senderId, user.id)) return user;
     final store = ref.read(usersStoreProvider.notifier);
     return store.findMemberInRoom(e.senderId, room) ??
         User(name: l10n.unknown, id: e.senderId);

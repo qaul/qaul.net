@@ -202,7 +202,10 @@ class _ChatState extends _BaseTabState<_Chat> {
         MaterialPageRoute(builder: (_) => const _CreateNewRoomDialog()),
       );
       if (newChat is User) {
-        final newRoom = ChatRoom.blank(otherUser: newChat);
+        final newRoom = ChatRoom.blank(
+          localUser: defaultUser,
+          otherUser: newChat,
+        );
         setOpenChat(newRoom, newChat);
       } else if (newChat is ChatRoom) {
         setOpenChat(newChat);
