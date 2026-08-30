@@ -162,7 +162,7 @@ pub async fn start_server(
         }
 
         let listener = UnixListener::bind(&socket_path)?;
-        fs::set_permissions(&socket_path, Permissions::from_mode(0o660))?;
+        fs::set_permissions(&socket_path, Permissions::from_mode(0o600))?;
         println!("qauld unix socket server started");
 
         loop {
