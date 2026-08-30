@@ -8,6 +8,107 @@ class SendMessageIntent extends Intent {
   const SendMessageIntent();
 }
 
+class _ChatTextFooter extends StatefulWidget {
+  const _ChatTextFooter({
+    super.key,
+    required this.onSendPressed,
+    required this.hintText,
+    this.onAttachmentPressed,
+    this.onPickImagePressed,
+    this.onSendAudioPressed,
+    this.initialText,
+    this.disabledMessage,
+    this.isDisabled = false,
+  });
+
+  final void Function(types.PartialText) onSendPressed;
+  final VoidCallback? onAttachmentPressed;
+  final VoidCallback? onPickImagePressed;
+  final VoidCallback? onSendAudioPressed;
+  final String? initialText;
+  final bool isDisabled;
+  final String? disabledMessage;
+  final String hintText;
+
+  @override
+  State<_ChatTextFooter> createState() => _ChatTextFooterState();
+}
+
+class _ChatTextFooterState extends State<_ChatTextFooter> {
+  late final TextEditingController _textController;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController = TextEditingController(text: widget.initialText);
+  }
+
+  @override
+  void didUpdateWidget(covariant _ChatTextFooter oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialText == widget.initialText ||
+        widget.initialText == null) {
+      return;
+    }
+
+    _textController.value = TextEditingValue(
+      text: widget.initialText!,
+      selection: TextSelection.collapsed(offset: widget.initialText!.length),
+    );
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  void _handleSend(String text) {
+    if (widget.isDisabled) return;
+    widget.onSendPressed(types.PartialText(text: text));
+    _textController.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final footer = ChatFooter(
+      controller: _textController,
+      placeholder: widget.hintText,
+      onSend: _handleSend,
+      onVoicePressed: widget.isDisabled ? null : widget.onSendAudioPressed,
+      onCameraPressed: widget.isDisabled ? null : widget.onPickImagePressed,
+      onAttachmentPressed: widget.isDisabled ? null : widget.onAttachmentPressed,
+      sendTooltip: AppLocalizations.of(context)!.sendTooltip,
+      voiceTooltip: AppLocalizations.of(context)!.sendAudioTooltip,
+      cameraTooltip: AppLocalizations.of(context)!.sendFileTooltip,
+      attachmentsTooltip: AppLocalizations.of(context)!.sendFileTooltip,
+    );
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Opacity(
+          opacity: widget.isDisabled ? 0.3 : 1,
+          child: footer,
+        ),
+        if (widget.isDisabled && widget.disabledMessage != null)
+          Container(
+            color: Colors.black54,
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+            child: Text(
+              widget.disabledMessage!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 /// The original [Input] class from flutter_chat_ui provided no customization for
 /// the spacing of the Send button spacing.
 ///
@@ -18,30 +119,12 @@ class _CustomInput extends StatefulWidget {
     required this.onSendPressed,
     required this.sendButtonVisibilityMode,
     required this.hintText,
-    this.onAttachmentPressed,
-    this.onPickImagePressed,
-    this.onSendAudioPressed,
-    this.initialText,
-    this.disabledMessage,
-    this.isDisabled = false,
     this.isTextRequired = true,
   });
 
   final void Function(types.PartialText) onSendPressed;
 
-  final Function({types.PartialText? text})? onAttachmentPressed;
-
-  final Function({types.PartialText? text})? onPickImagePressed;
-
-  final Function({types.PartialText? text})? onSendAudioPressed;
-
   final SendButtonVisibilityMode sendButtonVisibilityMode;
-
-  final String? initialText;
-
-  final bool isDisabled;
-
-  final String? disabledMessage;
 
   final String hintText;
 
@@ -61,7 +144,7 @@ class _CustomInputState extends State<_CustomInput> {
   void initState() {
     super.initState();
 
-    _textController = TextEditingController(text: widget.initialText);
+    _textController = TextEditingController();
 
     if (widget.sendButtonVisibilityMode == SendButtonVisibilityMode.editing) {
       _sendButtonVisible = _textController.text.trim() != '';
@@ -87,20 +170,6 @@ class _CustomInputState extends State<_CustomInput> {
     }
   }
 
-  void _sendFilePressed(Function({types.PartialText? text})? callback) {
-    if (callback == null) return;
-
-    final trimmedText = _textController.text.trim();
-    if (trimmedText == '') {
-      callback();
-      return;
-    }
-
-    final partialText = types.PartialText(text: trimmedText);
-    callback(text: partialText);
-    _textController.clear();
-  }
-
   void _handleTextControllerChange() {
     setState(() {
       _sendButtonVisible = _textController.text.trim() != '';
@@ -111,128 +180,72 @@ class _CustomInputState extends State<_CustomInput> {
   Widget build(BuildContext context) {
     final query = MediaQuery.of(context);
 
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        Opacity(
-          opacity: widget.isDisabled ? 0.3 : 1,
-          child: IgnorePointer(
-            ignoring: widget.isDisabled,
-            child: GestureDetector(
-              onTap: () => _inputFocusNode.requestFocus(),
-              child: Shortcuts(
-                shortcuts: {
-                  LogicalKeySet(LogicalKeyboardKey.enter):
-                      const SendMessageIntent(),
-                  LogicalKeySet(
-                          LogicalKeyboardKey.enter, LogicalKeyboardKey.alt):
-                      const NewLineIntent(),
-                  LogicalKeySet(
-                          LogicalKeyboardKey.enter, LogicalKeyboardKey.shift):
-                      const NewLineIntent(),
-                },
-                child: Actions(
-                  actions: {
-                    SendMessageIntent: CallbackAction<SendMessageIntent>(
-                      onInvoke: (SendMessageIntent intent) =>
-                          _handleSendPressed(),
-                    ),
-                    NewLineIntent: CallbackAction<NewLineIntent>(
-                      onInvoke: (NewLineIntent intent) {
-                        final newValue = '${_textController.text}\r\n';
-                        _textController.value = TextEditingValue(
-                          text: newValue,
-                          selection: TextSelection.fromPosition(
-                            TextPosition(offset: newValue.length),
-                          ),
-                        );
-                        return null;
-                      },
-                    ),
-                  },
-                  child: Focus(
-                    autofocus: true,
-                    child: Material(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.transparent,
-                      child: Container(
-                        padding: EdgeInsets.fromLTRB(
-                          24 + query.padding.left,
-                          20,
-                          24 + query.padding.right,
-                          20 + query.viewInsets.bottom + query.padding.bottom,
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _textController,
-                                style: const TextStyle(fontSize: 17),
-                                decoration: InputDecoration(
-                                  labelText: widget.hintText,
-                                  suffixIcon: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (widget.onAttachmentPressed != null)
-                                        _AttachmentButton(
-                                          onPressed: () => _sendFilePressed(
-                                              widget.onAttachmentPressed),
-                                          tooltip: AppLocalizations.of(context)!.sendFileTooltip,    
-                                        ),
-                                      if (widget.onPickImagePressed != null)
-                                        _AttachmentButton(
-                                          icon: Icons.add_a_photo,
-                                          onPressed: () => _sendFilePressed(
-                                              widget.onPickImagePressed),
-                                          tooltip: AppLocalizations.of(context)!.sendFileTooltip,    
-                                        ),
-                                      if (widget.onSendAudioPressed != null)
-                                        _AttachmentButton(
-                                          icon: Icons.mic_none,
-                                          onPressed: widget.onSendAudioPressed,
-                                          tooltip: AppLocalizations.of(context)!.sendAudioTooltip,
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                                focusNode: _inputFocusNode,
-                                keyboardType: TextInputType.multiline,
-                                maxLines: 5,
-                                minLines: 1,
-                                textCapitalization:
-                                    TextCapitalization.sentences,
-                              ),
-                            ),
-                            const SizedBox(width: 16.0),
-                            Visibility(
-                              visible: _sendButtonVisible,
-                              child: SendMessageButton(
-                                  onPressed: _handleSendPressed),
-                            ),
-                          ],
-                        ),
+    return GestureDetector(
+      onTap: () => _inputFocusNode.requestFocus(),
+      child: Shortcuts(
+        shortcuts: {
+          LogicalKeySet(LogicalKeyboardKey.enter): const SendMessageIntent(),
+          LogicalKeySet(LogicalKeyboardKey.enter, LogicalKeyboardKey.alt):
+              const NewLineIntent(),
+          LogicalKeySet(LogicalKeyboardKey.enter, LogicalKeyboardKey.shift):
+              const NewLineIntent(),
+        },
+        child: Actions(
+          actions: {
+            SendMessageIntent: CallbackAction<SendMessageIntent>(
+              onInvoke: (SendMessageIntent intent) => _handleSendPressed(),
+            ),
+            NewLineIntent: CallbackAction<NewLineIntent>(
+              onInvoke: (NewLineIntent intent) {
+                final newValue = '${_textController.text}\r\n';
+                _textController.value = TextEditingValue(
+                  text: newValue,
+                  selection: TextSelection.fromPosition(
+                    TextPosition(offset: newValue.length),
+                  ),
+                );
+                return null;
+              },
+            ),
+          },
+          child: Focus(
+            autofocus: true,
+            child: Material(
+              borderRadius: BorderRadius.circular(20),
+              color: Colors.transparent,
+              child: Container(
+                padding: EdgeInsets.fromLTRB(
+                  24 + query.padding.left,
+                  20,
+                  24 + query.padding.right,
+                  20 + query.viewInsets.bottom + query.padding.bottom,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _textController,
+                        style: const TextStyle(fontSize: 17),
+                        decoration: InputDecoration(labelText: widget.hintText),
+                        focusNode: _inputFocusNode,
+                        keyboardType: TextInputType.multiline,
+                        maxLines: 5,
+                        minLines: 1,
+                        textCapitalization: TextCapitalization.sentences,
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 16.0),
+                    Visibility(
+                      visible: _sendButtonVisible,
+                      child: SendMessageButton(onPressed: _handleSendPressed),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
         ),
-        if (widget.isDisabled && widget.disabledMessage != null)
-          Container(
-            color: Colors.black54,
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-            child: Text(
-              widget.disabledMessage!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          )
-      ],
+      ),
     );
   }
 }
@@ -253,36 +266,6 @@ class SendMessageButton extends StatelessWidget {
         onPressed: onPressed,
         padding: EdgeInsets.zero,
         tooltip: AppLocalizations.of(context)!.sendTooltip,
-      ),
-    );
-  }
-}
-
-class _AttachmentButton extends StatelessWidget {
-  const _AttachmentButton({
-    this.onPressed,
-    this.icon = Icons.attach_file,
-    this.tooltip,
-  });
-
-  final void Function()? onPressed;
-
-  final IconData icon;
-
-  final String? tooltip;
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 24,
-      height: 24,
-      margin: const EdgeInsets.only(right: 16),
-      child: IconButton(
-        color: Theme.of(context).iconTheme.color,
-        icon: Icon(icon),
-        splashRadius: 24,
-        onPressed: onPressed,
-        padding: EdgeInsets.zero,
-        tooltip: tooltip,
       ),
     );
   }
