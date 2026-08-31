@@ -86,9 +86,10 @@ fn an_entry_for_our_own_hosted_user_is_rejected() {
     );
 }
 
-/// The committed entry is what `next_hop_for_user` prefers over any
-/// delegation gateway, so a stored self-entry would misroute locally
-/// addressed traffic out to a neighbour.
+/// A stored self-entry would misroute locally addressed traffic out to a
+/// neighbour, since `next_hop_for_user` prefers a committed entry over any
+/// delegation gateway. With the entry rejected, the user still resolves —
+/// via §4.1's `Local` transport — and resolves *locally*.
 #[test]
 fn our_own_user_keeps_no_routing_entry_back_reference() {
     let (state, _rx) = fresh_state();
@@ -106,7 +107,11 @@ fn our_own_user_keeps_no_routing_entry_back_reference() {
         user.read().unwrap().routing_entry.is_none(),
         "commit_routing_entry must not run for our own user"
     );
-    assert!(state.next_hop_for_user(hosted).is_none());
+    assert_eq!(
+        state.next_hop_for_user(hosted),
+        Some((state.host_mk.to_id(), ConnectionModule::Local)),
+        "a hosted user resolves to loopback, never out to a neighbour"
+    );
 }
 
 /// The rejection runs before `translate_incoming`, which allocates and binds

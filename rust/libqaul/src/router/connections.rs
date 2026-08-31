@@ -943,13 +943,29 @@ mod tests {
 
         let info = vec![
             // malformed: empty hop count
-            RoutingInfoEntry { user: vec![1, 2, 3, 4, 5, 6, 7, 8], rtt: 0, hc: vec![], pgid: 1 },
+            RoutingInfoEntry {
+                user: vec![1, 2, 3, 4, 5, 6, 7, 8],
+                rtt: 0,
+                hc: vec![],
+                pgid: 1,
+            },
             // valid, comes after the malformed one
-            RoutingInfoEntry { user: valid_q8id.clone(), rtt: 10, hc: vec![1], pgid: 1 },
+            RoutingInfoEntry {
+                user: valid_q8id.clone(),
+                rtt: 10,
+                hc: vec![1],
+                pgid: 1,
+            },
         ];
 
         // must not panic
-        state.fill_received_routing_info(ConnectionModule::Lan, PeerId::random(), 5, &info, &config);
+        state.fill_received_routing_info(
+            ConnectionModule::Lan,
+            PeerId::random(),
+            5,
+            &info,
+            &config,
+        );
 
         // the valid entry was still processed => the bad entry was skipped, not aborting the loop
         assert!(state.lan.read().unwrap().table.contains_key(&valid_q8id));
@@ -961,8 +977,19 @@ mod tests {
     fn saturated_hop_count_does_not_panic() {
         let state = ConnectionTableState::new();
         let config = RoutingOptions::default();
-        let info = vec![RoutingInfoEntry { user: vec![9; 8], rtt: 0, hc: vec![255], pgid: 1 }];
-        state.fill_received_routing_info(ConnectionModule::Lan, PeerId::random(), 5, &info, &config);
+        let info = vec![RoutingInfoEntry {
+            user: vec![9; 8],
+            rtt: 0,
+            hc: vec![255],
+            pgid: 1,
+        }];
+        state.fill_received_routing_info(
+            ConnectionModule::Lan,
+            PeerId::random(),
+            5,
+            &info,
+            &config,
+        );
         assert!(state.lan.read().unwrap().table.is_empty());
     }
 }
