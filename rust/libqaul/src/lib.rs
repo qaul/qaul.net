@@ -256,7 +256,7 @@ impl Libqaul {
         // check if we need to upgrade our stored data
         if upgrade::Upgrade::init(storage_path.clone()) == false {
             println!("upgrade to new version failed");
-            std::process::exit(0);
+            std::process::exit(1);
         }
 
         // check configuration options
