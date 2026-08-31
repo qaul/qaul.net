@@ -31,6 +31,13 @@ impl RouterV2State {
             return ForwardingDecision::HandoffToDTN;
         };
 
+        if self.is_local_identity(recipient_id, false) {
+            return ForwardingDecision::Forward {
+                peer: self.host_mk.to_peer_id(),
+                transport: ConnectionModule::Local,
+            };
+        }
+
         // Step 1: the recipient is known
         if let Some((next_hop_node, transport)) = self.next_hop_for_user(recipient_id) {
             match self.peer_of_node(&next_hop_node) {
