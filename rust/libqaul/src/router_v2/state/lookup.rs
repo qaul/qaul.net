@@ -64,6 +64,10 @@ impl RouterV2State {
     }
 
     pub fn next_hop_for_user(&self, recipient: [u8; 8]) -> Option<([u8; 8], ConnectionModule)> {
+        if self.is_local_identity(recipient, false) {
+            return Some((self.host_mk.to_id(), ConnectionModule::Local));
+        }
+
         let users = self.users.read().unwrap();
         if let Some(user) = users.get(&recipient) {
             let user = user.read().unwrap();

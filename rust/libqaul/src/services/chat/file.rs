@@ -702,10 +702,11 @@ impl ChatFile {
         let file_id = Self::generate_file_id(group_id, &user_id_bytes, &file_name, size);
 
         // get file path
-        let file_path = match Self::create_file_path(state, user_account.id, file_id, extension.as_str()) {
-            Some(path) => path,
-            None => return Err("invalid file extension".to_string()),
-        };
+        let file_path =
+            match Self::create_file_path(state, user_account.id, file_id, extension.as_str()) {
+                Some(path) => path,
+                None => return Err("invalid file extension".to_string()),
+            };
 
         // TODO: start in new async thread here
 
