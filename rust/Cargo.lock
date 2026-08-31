@@ -2893,6 +2893,7 @@ dependencies = [
  "prost",
  "qaul-proto",
  "qaul_info",
+ "qaul_management",
  "qaul_messaging",
  "rand 0.9.5",
  "regex",
@@ -3883,6 +3884,17 @@ dependencies = [
  "rand 0.9.5",
  "smallvec",
  "unsigned-varint 0.8.0",
+ "varint_prefixed_codec",
+]
+
+[[package]]
+name = "qaul_management"
+version = "1.0.0"
+dependencies = [
+ "asynchronous-codec",
+ "futures",
+ "libp2p",
+ "log",
  "varint_prefixed_codec",
 ]
 
