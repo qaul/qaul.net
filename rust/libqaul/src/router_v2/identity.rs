@@ -41,6 +41,10 @@ impl Multikey {
         id
     }
 
+    pub fn to_peer_id(&self) -> PeerId {
+        PeerId::from(self.0.clone())
+    }
+
     /// Recovers the public key embedded in a `PeerId`.
     // TODO: resolve an ID to a key is the §11.5 profile fetch
     pub fn try_from_peer_id(peer: &PeerId) -> Result<Self> {

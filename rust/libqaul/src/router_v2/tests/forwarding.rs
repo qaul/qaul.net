@@ -323,3 +323,122 @@ fn a_recipient_without_a_recoverable_key_hands_off_to_dtn() {
         "an unrecoverable key must not fall through to the gateway default route"
     );
 }
+
+// ------------------------------------------------- §4.1 Local transport
+
+/// §4.1: "Loopback for users hosted on the receiving node itself." A message
+/// addressed to one of our own users is delivered in-process, not routed.
+#[test]
+fn a_hosted_user_resolves_to_the_local_transport() {
+    let (state, _rx) = fresh_state();
+    let keys = Keypair::generate_ed25519();
+    let user_mk = Multikey::from(keys.public());
+    let user_peer = user_mk.to_peer_id();
+    state.register_hosted_user(user_mk.to_id(), 0, user_mk.clone());
+
+    match state.resolve_forwarding(user_peer) {
+        ForwardingDecision::Forward { peer, transport } => {
+            assert_eq!(transport, ConnectionModule::Local);
+            assert_eq!(
+                peer,
+                state.host_mk.to_peer_id(),
+                "loopback is addressed to this node"
+            );
+        }
+        ForwardingDecision::HandoffToDTN => {
+            panic!("a user we host must never be handed to DTN")
+        }
+    }
+}
+
+/// The gateway case is the sharp one: §9.2 lets a gateway treat absence from
+/// its directory as authoritative and hand off to DTN immediately, so without
+/// the local check a gateway would post its own users' mail to DTN.
+#[test]
+fn a_gateway_does_not_hand_its_own_user_to_dtn() {
+    let (state, _rx) = fresh_state();
+    let keys = Keypair::generate_ed25519();
+    let user_mk = Multikey::from(keys.public());
+    state.register_hosted_user(user_mk.to_id(), 0, user_mk.clone());
+
+    state.add_neighbour_transport(fresh_peer(), [77; 8], ConnectionModule::Internet);
+    state.sync_gateway_role();
+    assert!(state.host_is_gateway());
+
+    assert!(
+        matches!(
+            state.resolve_forwarding(user_mk.to_peer_id()),
+            ForwardingDecision::Forward {
+                transport: ConnectionModule::Local,
+                ..
+            }
+        ),
+        "the gateway short-circuit must not swallow a locally hosted user"
+    );
+}
+
+/// And the leaf case: without the local check, anycast would forward a
+/// message addressed to our own user out to a gateway.
+#[test]
+fn a_leaf_does_not_anycast_its_own_user_to_a_gateway() {
+    let (state, _rx) = fresh_state();
+    let keys = Keypair::generate_ed25519();
+    let user_mk = Multikey::from(keys.public());
+    state.register_hosted_user(user_mk.to_id(), 0, user_mk.clone());
+
+    // A reachable gateway that anycast would otherwise pick.
+    let gw = fresh_peer();
+    state.add_neighbour_transport(gw, [5; 8], ConnectionModule::Lan);
+    install_node(&state, [5; 8], 0, true);
+    bind_own_dict(&state, Space::Node, 9, [5; 8]);
+    state.routing_table.write().unwrap().set(
+        Space::Node,
+        9,
+        entry(
+            TargetRef::Node(state.nodes.read().unwrap().get(&[5; 8]).unwrap()),
+            9,
+            10,
+            ConnectionModule::Lan,
+        ),
+    );
+
+    assert!(matches!(
+        state.resolve_forwarding(user_mk.to_peer_id()),
+        ForwardingDecision::Forward {
+            transport: ConnectionModule::Local,
+            ..
+        }
+    ));
+}
+
+/// A user we merely know about is not ours — the local check keys on
+/// `is_hosted`, so ordinary routing is untouched.
+#[test]
+fn a_remote_user_is_not_treated_as_local() {
+    let (state, _rx) = fresh_state();
+    let keys = Keypair::generate_ed25519();
+    let user_mk = Multikey::from(keys.public());
+    install_user(&state, user_mk.to_id(), 0);
+
+    assert!(
+        matches!(
+            state.resolve_forwarding(user_mk.to_peer_id()),
+            ForwardingDecision::HandoffToDTN
+        ),
+        "no route and no gateway still means DTN"
+    );
+}
+
+/// `next_hop_for_user` answers the same way, so DTN's reachability check
+/// (`has_route_to_user`) stops taking custody of mail for our own users.
+#[test]
+fn next_hop_for_user_reports_a_hosted_user_as_reachable() {
+    let (state, _rx) = fresh_state();
+    state.register_hosted_user([1; 8], 0, fresh_multikey());
+
+    assert_eq!(
+        state.next_hop_for_user([1; 8]),
+        Some((state.host_mk.to_id(), ConnectionModule::Local))
+    );
+    assert_eq!(state.next_hop_for_user([9; 8]), None, "unknown user");
+}
