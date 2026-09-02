@@ -16,10 +16,13 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" android:maxSdkVersion="28"/>
 
     <!-- Android 10 and higher -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- FIELD TEST: background location-->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <!-- Android 12 and higher -->
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation"/>
+    <!-- FIELD TEST: neverForLocation removed -->
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"/>
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
 
@@ -39,6 +42,8 @@
     <!-- Android 14 requires specific foreground service types to be defined; see: https://developer.android.com/about/versions/14/changes/fgs-types-required -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />
+    <!-- FIELD TEST: API 34+ requires this for locaiotn while screen off -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 
     <!-- Android 13 requires notification permission for foreground service notifications -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -66,7 +71,7 @@
         <service
                 android:name=".FlutterBackgroundService"
                 android:enabled="true"
-                android:foregroundServiceType="connectedDevice|remoteMessaging"
+                android:foregroundServiceType="connectedDevice|remoteMessaging|location"
                 android:exported="false"/>
 
         <service
