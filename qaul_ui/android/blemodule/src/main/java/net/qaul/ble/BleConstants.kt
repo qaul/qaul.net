@@ -53,11 +53,11 @@ object BleConstants {
 
 
     /**
-     * Switch for field test logging. Ensure its false in any released build.
-     * DIisables: session logger, downloads mirror and gps provider from starting
+     * Switch for field test logging. Ensure it's false in any released build.
+     * Disables: session logger, downloads mirror and gps provider from starting
 
      */
-    const val FIELD_TEST = false
+    const val FIELD_TEST = true
 
     const val ATT_ERR_NO_SLOT = 0x80
 
@@ -268,7 +268,7 @@ object BleConstants {
 
     /** Show the on-device floating BLE stats overlay (BleDebugOverlay) while BLE is running. For debugging purposes,
      *  set false to disable. Needs the "Draw over other apps" permission, requested on first show. */
-    const val DEBUG_OVERLAY = false
+    const val DEBUG_OVERLAY = true
 
     /** Pause the scan during each connect attempt. DISABLED: confirmed in field logs to restart the
      *  scan often enough (during connect/tiebreaker churn) to trip Android's ~5-startScan/30s limit,

@@ -8,6 +8,7 @@ import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import net.qaul.ble.AppLog
+import net.qaul.ble.BleConstants
 
 class PermissionHandler(private val context: Context) {
     companion object {
@@ -17,6 +18,7 @@ class PermissionHandler(private val context: Context) {
 
         private const val LOCATION_ENABLE_REQ_CODE = 112
         private const val REQUEST_ENABLE_BT = 113
+        private const val BACKGROUND_LOCATION_REQ_CODE = 115
 
         // ACCESS_FINE_LOCATION is shouldnt be required here. It is capped at maxSdkVersion=30 in the
         // manifest, so on API 31+ it is undeclared and can never be granted leading to a crash as requesting it returns
@@ -77,7 +79,34 @@ class PermissionHandler(private val context: Context) {
 
     fun requestBLEPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_ADVERTISE), BLE_PERMISSION_REQ_CODE_12)
+            val permissions = mutableListOf(
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.BLUETOOTH_ADVERTISE
+            )
+
+            if (BleConstants.FIELD_TEST) {
+                permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+            ActivityCompat.requestPermissions(context as Activity, permissions.toTypedArray(), BLE_PERMISSION_REQ_CODE_12)
         }
+    }
+
+    /**
+     * FIELD TEST: background location, so GPS traces continue with the screen off.
+     *
+     * Must be a separate request made only after foreground location is already granted
+     */
+    fun requestBackgroundLocationIfNeeded() {
+        if (!BleConstants.FIELD_TEST) return
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return
+        if (!hasLocationPermission()) return
+        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        if (granted == PackageManager.PERMISSION_GRANTED) return
+        ActivityCompat.requestPermissions(
+            context as Activity,
+            arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+            BACKGROUND_LOCATION_REQ_CODE
+        )
     }
 }

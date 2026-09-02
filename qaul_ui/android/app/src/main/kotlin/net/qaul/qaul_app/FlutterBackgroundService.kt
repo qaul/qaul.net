@@ -1,5 +1,6 @@
 package net.qaul.qaul_app
 
+import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -7,7 +8,9 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING
 import android.graphics.Color
 import android.net.wifi.WifiManager
@@ -17,6 +20,8 @@ import android.os.PowerManager
 import androidx.annotation.Nullable
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import androidx.core.content.ContextCompat
+import net.qaul.ble.BleConstants
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
@@ -85,6 +90,16 @@ class FlutterBackgroundService : Service() {
         }
     }
 
+    /**
+     * FIELD TEST: the location service type, but only once ACCESS_FINE_LOCATION is actually
+     * granted.  Returning 0 here degrades to no background GPS instead of crashing.
+     */
+    private fun fieldTestLocationType(): Int {
+        if (!BleConstants.FIELD_TEST) return 0
+        val granted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+        return if (granted == PackageManager.PERMISSION_GRANTED) FOREGROUND_SERVICE_TYPE_LOCATION else 0
+    }
+
     private fun startService() {
         acquireWifiLock()
         acquireWakeLock()
@@ -98,7 +113,8 @@ class FlutterBackgroundService : Service() {
                     this,
                     NOTIFICATION_ID,
                     notification,
-                    FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE or FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING
+                    FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE or FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING or
+                        fieldTestLocationType()
                 )
             } else {
                 // For API level 29 to 33, only include CONNECTED_DEVICE

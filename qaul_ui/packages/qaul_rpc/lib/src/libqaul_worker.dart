@@ -58,7 +58,7 @@ class LibqaulWorker {
   // (from the USERS response) to a JSONL file the replay tool ingests, correlated to the BLE
   // logs by q8id prefix. Set false for release builds.
   /// MUST be false in released builds.
-  static const bool _kFieldTestRouting = false;
+  static const bool _kFieldTestRouting = true;
   File? _routingFile;
 
   void _init() async {
