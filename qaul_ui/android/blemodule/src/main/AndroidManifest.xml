@@ -3,19 +3,24 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:minSdkVersion="31" android:targetSdkVersion="33" android:usesPermissionFlags="neverForLocation"
+    <!-- FIELD TEST: neverForLocation is removed -->
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:minSdkVersion="31" android:targetSdkVersion="33"
         tools:targetApi="s" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" android:minSdkVersion="31" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" android:minSdkVersion="31" android:targetSdkVersion="33"/>
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30"/>
+    <!-- FIELD TEST: maxSdkVersion cap removed, Release builds cap this at 30 -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" android:maxSdkVersion="28"/>
-    <!-- Debug-only: floating BLE stats overlay for on-device testing (BleDebugOverlay).
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /> -->
+    <!-- FIELD TEST: location updates continue while the screen is off / app backgrounded.
+         Must be granted separately in settings.-->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <!-- Debug-only: floating BLE stats overlay for on-device testing (BleDebugOverlay).-->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <!-- Field test: SessionLogger mirrors its log into public Downloads so a participant can send it
          on with no adb and no in-app action. API 29+ writes its own MediaStore entry needing no
-         permission, so this is only for 26-28, where public storage is still a plain filesystem.
+         permission, so this is only for 26-28, where public storage is still a plain filesystem. -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28" /> -->
+        android:maxSdkVersion="28" />
 
 </manifest>

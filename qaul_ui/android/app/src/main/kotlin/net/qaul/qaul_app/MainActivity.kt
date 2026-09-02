@@ -143,6 +143,14 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    /**
+     * FIELD-TEST: ask for background location once foreground location is in place
+     */
+    override fun onResume() {
+        super.onResume()
+        permissionHandler.requestBackgroundLocationIfNeeded()
+    }
+
     private fun requestNotificationPermissionThenStartService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
