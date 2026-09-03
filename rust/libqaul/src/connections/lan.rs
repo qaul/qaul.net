@@ -40,6 +40,7 @@ use crate::services::feed::proto_net;
 use crate::services::feed::Feed;
 use crate::storage::configuration::Configuration;
 use qaul_info::{QaulInfo, QaulInfoEvent};
+use qaul_management::{QaulManagement, QaulManagementEvent};
 use qaul_messaging::{QaulMessaging, QaulMessagingEvent};
 
 #[derive(NetworkBehaviour)]
@@ -49,6 +50,8 @@ pub struct QaulLanBehaviour {
     pub mdns: mdns::tokio::Behaviour,
     pub ping: ping::Behaviour,
     pub qaul_info: QaulInfo,
+    /// router_v2 management sub-protocol per section 11.
+    pub qaul_management: QaulManagement,
     pub qaul_messaging: QaulMessaging,
 }
 
@@ -57,6 +60,9 @@ impl QaulLanBehaviour {
         match event {
             QaulLanEvent::QaulInfo(ev) => {
                 self.qaul_info_event(state, ev);
+            }
+            QaulLanEvent::QaulManagement(ev) => {
+                self.qaul_management_event(state, ev);
             }
             QaulLanEvent::QaulMessaging(ev) => {
                 self.qaul_messaging_event(state, ev);
@@ -74,6 +80,9 @@ impl QaulLanBehaviour {
     }
     fn qaul_info_event(&mut self, state: &crate::QaulState, event: QaulInfoEvent) {
         events::qaul_info_event(state, event, ConnectionModule::Lan);
+    }
+    fn qaul_management_event(&mut self, state: &crate::QaulState, event: QaulManagementEvent) {
+        events::qaul_management_event(state, event, ConnectionModule::Lan);
     }
     fn qaul_messaging_event(&mut self, state: &crate::QaulState, event: QaulMessagingEvent) {
         events::qaul_messaging_event(state, event, ConnectionModule::Lan);
@@ -126,6 +135,7 @@ pub enum QaulLanEvent {
     Mdns(mdns::Event),
     Ping(ping::Event),
     QaulInfo(QaulInfoEvent),
+    QaulManagement(QaulManagementEvent),
     QaulMessaging(QaulMessagingEvent),
 }
 
@@ -150,6 +160,12 @@ impl From<ping::Event> for QaulLanEvent {
 impl From<QaulInfoEvent> for QaulLanEvent {
     fn from(event: QaulInfoEvent) -> Self {
         Self::QaulInfo(event)
+    }
+}
+
+impl From<QaulManagementEvent> for QaulLanEvent {
+    fn from(event: QaulManagementEvent) -> Self {
+        Self::QaulManagement(event)
     }
 }
 
@@ -251,7 +267,12 @@ impl Transport for Lan {
         Ok(())
     }
 
-    fn send_qaul_info_message(&mut self, _state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>) {
+    fn send_qaul_info_message(
+        &mut self,
+        _state: &crate::QaulState,
+        peer_id: PeerId,
+        data: Vec<u8>,
+    ) {
         if !self.is_enabled() {
             return;
         }
@@ -261,7 +282,31 @@ impl Transport for Lan {
             .send_qaul_info_message(peer_id, data);
     }
 
-    fn send_qaul_messaging_message(&mut self, _state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>) {
+    fn send_qaul_management_message(
+        &mut self,
+        _state: &crate::QaulState,
+        peer_id: PeerId,
+        data: Vec<u8>,
+    ) {
+        if !self.is_enabled() {
+            return;
+        }
+        log::debug!(
+            "management: handing {} bytes to the qaul_management behaviour for {peer_id}",
+            data.len()
+        );
+        self.swarm
+            .behaviour_mut()
+            .qaul_management
+            .send_qaul_management_message(peer_id, data);
+    }
+
+    fn send_qaul_messaging_message(
+        &mut self,
+        _state: &crate::QaulState,
+        peer_id: PeerId,
+        data: Vec<u8>,
+    ) {
         if !self.is_enabled() {
             return;
         }
@@ -271,14 +316,16 @@ impl Transport for Lan {
             .send_qaul_messaging_message(peer_id, data);
     }
 
-    fn publish_floodsub(&mut self, _state: &crate::QaulState, topic: floodsub::Topic, data: Vec<u8>) {
+    fn publish_floodsub(
+        &mut self,
+        _state: &crate::QaulState,
+        topic: floodsub::Topic,
+        data: Vec<u8>,
+    ) {
         if !self.is_enabled() {
             return;
         }
-        self.swarm
-            .behaviour_mut()
-            .floodsub
-            .publish(topic, data);
+        self.swarm.behaviour_mut().floodsub.publish(topic, data);
     }
 
     fn listeners(&self) -> Vec<Multiaddr> {
@@ -318,6 +365,7 @@ impl Lan {
             mdns,
             ping: ping::Behaviour::new(ping_config),
             qaul_info: QaulInfo::new(Node::get_id(state)),
+            qaul_management: QaulManagement::new(Node::get_id(state)),
             qaul_messaging: QaulMessaging::new(Node::get_id(state)),
         };
         behaviour.floodsub.subscribe(Node::get_topic(state));

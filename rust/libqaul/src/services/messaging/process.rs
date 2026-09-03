@@ -74,9 +74,12 @@ impl MessagingProcess {
                 );
 
                 // send confirm message
-                if let Err(e) =
-                    super::Messaging::send_confirmation(state, &user_account.id, sender_id, signature)
-                {
+                if let Err(e) = super::Messaging::send_confirmation(
+                    state,
+                    &user_account.id,
+                    sender_id,
+                    signature,
+                ) {
                     log::error!("send confirmation failed {}", e);
                 }
             }
@@ -90,11 +93,7 @@ impl MessagingProcess {
                 // before it gets folded into the unconfirmed-table update,
                 // so the event always fires regardless of whether the
                 // signature was still tracked locally.
-                crate::rpc::subscribe::emit_dtn_delivery_response(
-                    state,
-                    sender_id,
-                    &dtn_response,
-                );
+                crate::rpc::subscribe::emit_dtn_delivery_response(state, sender_id, &dtn_response);
 
                 // update unconfirmed table
                 super::Messaging::on_confirmed_message(
@@ -116,9 +115,12 @@ impl MessagingProcess {
 
                 // send confirm message
                 // TODO: pass on user_account
-                if let Err(e) =
-                    super::Messaging::send_confirmation(state, &user_account.id, sender_id, signature)
-                {
+                if let Err(e) = super::Messaging::send_confirmation(
+                    state,
+                    &user_account.id,
+                    sender_id,
+                    signature,
+                ) {
                     log::error!("send confirmation failed {}", e);
                 }
             }
@@ -205,13 +207,23 @@ impl MessagingProcess {
                     )) => {
                         // TODO: pass on user_account
                         // process group message
-                        group::Group::net(state, &sender_id, &user_account.id, &group_message.content);
+                        group::Group::net(
+                            state,
+                            &sender_id,
+                            &user_account.id,
+                            &group_message.content,
+                        );
                     }
                     Some(super::proto::common_message::Payload::RtcMessage(ref _rtc_message)) => {
                         #[cfg(feature = "rtc")]
                         {
                             // process message in RTC module
-                            rtc::Rtc::net(state, sender_id, &user_account.id, &_rtc_message.content);
+                            rtc::Rtc::net(
+                                state,
+                                sender_id,
+                                &user_account.id,
+                                &_rtc_message.content,
+                            );
                         }
                         #[cfg(not(feature = "rtc"))]
                         {
@@ -244,9 +256,12 @@ impl MessagingProcess {
 
                 // TODO: hand over user_account
                 // send confirm message
-                if let Err(e) =
-                    super::Messaging::send_confirmation(state, &user_account.id, sender_id, signature)
-                {
+                if let Err(e) = super::Messaging::send_confirmation(
+                    state,
+                    &user_account.id,
+                    sender_id,
+                    signature,
+                ) {
                     log::error!("send confirmation failed {}", e);
                 }
             }
@@ -258,7 +273,11 @@ impl MessagingProcess {
     }
 
     /// process received message
-    pub fn process_received_message(state: &crate::QaulState, user_account: UserAccount, container: super::proto::Container) {
+    pub fn process_received_message(
+        state: &crate::QaulState,
+        user_account: UserAccount,
+        container: super::proto::Container,
+    ) {
         // check envelop
         let envelope;
         match container.envelope {
@@ -348,7 +367,13 @@ impl MessagingProcess {
                         dtn::Dtn::net(state, &receiver_id, &sender_id, &container.signature, &dtn);
                     }
                     Some(super::proto::envelop_payload::Payload::DtnRoutedV2(routed_v2)) => {
-                        dtn::Dtn::net_routed_v2(state, &receiver_id, &sender_id, &container.signature, routed_v2);
+                        dtn::Dtn::net_routed_v2(
+                            state,
+                            &receiver_id,
+                            &sender_id,
+                            &container.signature,
+                            routed_v2,
+                        );
                     }
                     _ => {
                         log::error!("unknown envelop payload");

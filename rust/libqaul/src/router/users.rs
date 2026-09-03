@@ -124,14 +124,20 @@ impl Users {
                 let id = match PeerId::from_bytes(&user_data.id) {
                     Ok(p) => p,
                     Err(e) => {
-                        log::error!("Users::init_from_tree: invalid PeerId in stored user: {}", e);
+                        log::error!(
+                            "Users::init_from_tree: invalid PeerId in stored user: {}",
+                            e
+                        );
                         continue;
                     }
                 };
                 let key = match PublicKey::try_decode_protobuf(&user_data.key) {
                     Ok(k) => k,
                     Err(e) => {
-                        log::error!("Users::init_from_tree: invalid PublicKey in stored user: {}", e);
+                        log::error!(
+                            "Users::init_from_tree: invalid PublicKey in stored user: {}",
+                            e
+                        );
                         continue;
                     }
                 };
@@ -168,20 +174,23 @@ impl Users {
         let q8id = QaulId::bytes_to_q8id(id_bytes.clone());
 
         // save user to the data base
-        DbUsers::add_user(state, UserData {
-            id: id_bytes,
-            key: user.key.encode_protobuf(),
-            name: user.name.clone(),
-            verified: user.verified,
-            blocked: user.blocked,
-            bio: user.bio.clone(),
-            avatar: user.avatar.clone(),
-            version: user.version,
-            updated_at: user.updated_at,
-            signed_profile_bytes: user.signed_profile_bytes.clone(),
-            signed_profile_signature: user.signed_profile_signature.clone(),
-            preferred_custody_route: user.preferred_custody_route.clone(),
-        });
+        DbUsers::add_user(
+            state,
+            UserData {
+                id: id_bytes,
+                key: user.key.encode_protobuf(),
+                name: user.name.clone(),
+                verified: user.verified,
+                blocked: user.blocked,
+                bio: user.bio.clone(),
+                avatar: user.avatar.clone(),
+                version: user.version,
+                updated_at: user.updated_at,
+                signed_profile_bytes: user.signed_profile_bytes.clone(),
+                signed_profile_signature: user.signed_profile_signature.clone(),
+                preferred_custody_route: user.preferred_custody_route.clone(),
+            },
+        );
 
         // add user to the users table
         let searchable_user = {
@@ -424,16 +433,25 @@ impl Users {
             return;
         }
         // add user (new) with its advertised capabilities
-        Self::add(state, router, User {
-            id, key, name,
-            verified: false, blocked: false,
-            capabilities,
-            bio: String::new(), avatar: Vec::new(),
-            version: 0, updated_at: 0,
-            signed_profile_bytes: Vec::new(),
-            signed_profile_signature: Vec::new(),
-            preferred_custody_route: Vec::new(),
-        });
+        Self::add(
+            state,
+            router,
+            User {
+                id,
+                key,
+                name,
+                verified: false,
+                blocked: false,
+                capabilities,
+                bio: String::new(),
+                avatar: Vec::new(),
+                version: 0,
+                updated_at: 0,
+                signed_profile_bytes: Vec::new(),
+                signed_profile_signature: Vec::new(),
+                preferred_custody_route: Vec::new(),
+            },
+        );
     }
 
     /// check missed users from ids
@@ -497,7 +515,10 @@ impl Users {
     ///
     /// This is a wrapper function for the PeerIds for the function
     /// `get_user_info_table_by_q8ids(q8ids)`
-    pub fn _get_user_info_table_by_ids(router: &super::RouterState, ids: &[PeerId]) -> router_net_proto::UserInfoTable {
+    pub fn _get_user_info_table_by_ids(
+        router: &super::RouterState,
+        ids: &[PeerId],
+    ) -> router_net_proto::UserInfoTable {
         let q8ids = ids
             .iter()
             .map(|id| QaulId::to_q8id(id.to_owned()))
@@ -508,7 +529,10 @@ impl Users {
 
     /// create and send the user info table for the
     /// RouterInfo message which is sent regularly to neighbours
-    pub fn get_user_info_table_by_q8ids(router: &super::RouterState, q8ids: &[Vec<u8>]) -> router_net_proto::UserInfoTable {
+    pub fn get_user_info_table_by_q8ids(
+        router: &super::RouterState,
+        q8ids: &[Vec<u8>],
+    ) -> router_net_proto::UserInfoTable {
         let store = match router.users.inner.read() {
             Ok(s) => s,
             Err(e) => {
@@ -536,10 +560,12 @@ impl Users {
 
                 // Include signed profile if available
                 if !value.signed_profile_bytes.is_empty() {
-                    table.signed_profiles.push(router_net_proto::SignedUserProfile {
-                        profile: value.signed_profile_bytes.clone(),
-                        signature: value.signed_profile_signature.clone(),
-                    });
+                    table
+                        .signed_profiles
+                        .push(router_net_proto::SignedUserProfile {
+                            profile: value.signed_profile_bytes.clone(),
+                            signature: value.signed_profile_signature.clone(),
+                        });
                 }
             }
         }
@@ -547,7 +573,11 @@ impl Users {
     }
 
     /// add new users from the received bytes of a UserInfoTable
-    pub fn add_user_info_table(state: &crate::QaulState, router: &super::RouterState, users: &[router_net_proto::UserInfo]) {
+    pub fn add_user_info_table(
+        state: &crate::QaulState,
+        router: &super::RouterState,
+        users: &[router_net_proto::UserInfo],
+    ) {
         // loop through it and add it to the users list
         for value in users {
             let id_result = PeerId::from_bytes(&value.id);
@@ -579,11 +609,7 @@ impl Users {
     /// hook — lets unit tests simulate having received a `UserInfo`
     /// without running the full routing stack.
     #[cfg(test)]
-    pub fn set_capabilities_for_tests(
-        router: &super::RouterState,
-        user_id: &PeerId,
-        caps: u32,
-    ) {
+    pub fn set_capabilities_for_tests(router: &super::RouterState, user_id: &PeerId, caps: u32) {
         let id_bytes = user_id.to_bytes();
         let q8id_vec = QaulId::bytes_to_q8id(id_bytes);
         let mut store = router.users.inner.write().unwrap();
@@ -685,8 +711,7 @@ impl Users {
             return Err("signature verification failed".to_string());
         }
 
-        let id = PeerId::from_bytes(&profile.id)
-            .map_err(|e| format!("invalid PeerId: {}", e))?;
+        let id = PeerId::from_bytes(&profile.id).map_err(|e| format!("invalid PeerId: {}", e))?;
         if id != key.to_peer_id() {
             return Err("PeerId does not match public key".to_string());
         }
@@ -738,21 +763,27 @@ impl Users {
                     };
 
                     if should_update {
-                        Self::add(state, router, User {
-                            id, key,
-                            name: profile.name.clone(),
-                            verified, blocked,
-                            // caps are learned from UserInfo, not the
-                            // signed profile; default 0 here.
-                            capabilities: 0,
-                            bio: profile.bio.clone(),
-                            avatar: profile.avatar.clone(),
-                            version: profile.version,
-                            updated_at: profile.updated_at,
-                            preferred_custody_route: profile.preferred_custody_route.clone(),
-                            signed_profile_bytes: signed.profile.clone(),
-                            signed_profile_signature: signed.signature.clone(),
-                        });
+                        Self::add(
+                            state,
+                            router,
+                            User {
+                                id,
+                                key,
+                                name: profile.name.clone(),
+                                verified,
+                                blocked,
+                                // caps are learned from UserInfo, not the
+                                // signed profile; default 0 here.
+                                capabilities: 0,
+                                bio: profile.bio.clone(),
+                                avatar: profile.avatar.clone(),
+                                version: profile.version,
+                                updated_at: profile.updated_at,
+                                preferred_custody_route: profile.preferred_custody_route.clone(),
+                                signed_profile_bytes: signed.profile.clone(),
+                                signed_profile_signature: signed.signature.clone(),
+                            },
+                        );
                     }
                 }
                 Err(e) => {
@@ -775,7 +806,11 @@ impl Users {
     }
 
     /// get security number
-    fn get_security_number(router: &super::RouterState, my_user: &PeerId, user_id: &[u8]) -> Result<Vec<u8>, String> {
+    fn get_security_number(
+        router: &super::RouterState,
+        my_user: &PeerId,
+        user_id: &[u8],
+    ) -> Result<Vec<u8>, String> {
         let q8id = QaulId::bytes_as_q8id(user_id);
         let my_user_bytes = my_user.to_bytes();
         let q8id_my = QaulId::bytes_as_q8id(&my_user_bytes);
@@ -813,7 +848,13 @@ impl Users {
     }
 
     /// Process incoming RPC request messages
-    pub fn rpc(state: &crate::QaulState, router: &super::RouterState, data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
+    pub fn rpc(
+        state: &crate::QaulState,
+        router: &super::RouterState,
+        data: Vec<u8>,
+        user_id: Vec<u8>,
+        request_id: String,
+    ) {
         match proto::Users::decode(&data[..]) {
             Ok(users) => {
                 match users.message {
@@ -878,20 +919,29 @@ impl Users {
                                 user_result.blocked = updated_user.blocked;
 
                                 // persist the updated entity
-                                DbUsers::add_user(state, UserData {
-                                    id: user_id.to_bytes(),
-                                    key: user_result.key.encode_protobuf(),
-                                    name: user_result.name.clone(),
-                                    verified: updated_user.verified,
-                                    blocked: updated_user.blocked,
-                                    bio: user_result.bio.clone(),
-                                    avatar: user_result.avatar.clone(),
-                                    version: user_result.version,
-                                    updated_at: user_result.updated_at,
-                                    signed_profile_bytes: user_result.signed_profile_bytes.clone(),
-                                    signed_profile_signature: user_result.signed_profile_signature.clone(),
-                                    preferred_custody_route: user_result.preferred_custody_route.clone(),
-                                });
+                                DbUsers::add_user(
+                                    state,
+                                    UserData {
+                                        id: user_id.to_bytes(),
+                                        key: user_result.key.encode_protobuf(),
+                                        name: user_result.name.clone(),
+                                        verified: updated_user.verified,
+                                        blocked: updated_user.blocked,
+                                        bio: user_result.bio.clone(),
+                                        avatar: user_result.avatar.clone(),
+                                        version: user_result.version,
+                                        updated_at: user_result.updated_at,
+                                        signed_profile_bytes: user_result
+                                            .signed_profile_bytes
+                                            .clone(),
+                                        signed_profile_signature: user_result
+                                            .signed_profile_signature
+                                            .clone(),
+                                        preferred_custody_route: user_result
+                                            .preferred_custody_route
+                                            .clone(),
+                                    },
+                                );
 
                                 // acknowledge the update by echoing back the
                                 // updated user entry (carries the request_id)
@@ -1016,7 +1066,14 @@ impl Users {
     ///
     /// Only completes successfully if there is a default user account, otherwise it always returns
     /// an empty list.
-    fn build_user_list(state: &crate::QaulState, router: &super::RouterState, filter: UserFilter, offset: u32, limit: u32, request_id: String) {
+    fn build_user_list(
+        state: &crate::QaulState,
+        router: &super::RouterState,
+        filter: UserFilter,
+        offset: u32,
+        limit: u32,
+        request_id: String,
+    ) {
         let users = router.users.inner.read().unwrap();
 
         let user_list = if let Some(account) = UserAccounts::get_default_user(state) {
@@ -1076,7 +1133,7 @@ enum UserFilter {
 }
 
 /// user structure
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct User {
     pub id: PeerId,
     pub key: PublicKey,
@@ -1181,7 +1238,11 @@ pub struct UserData {
     pub preferred_custody_route: Vec<Vec<u8>>,
 }
 
-fn send_users_rpc_message(state: &crate::QaulState, message: proto::users::Message, request_id: String) {
+fn send_users_rpc_message(
+    state: &crate::QaulState,
+    message: proto::users::Message,
+    request_id: String,
+) {
     let proto_message = proto::Users {
         message: Some(message),
     };

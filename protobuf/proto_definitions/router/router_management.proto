@@ -1,0 +1,104 @@
+syntax = "proto3";
+package qaul.net.router_management;
+
+// Network management sub-protocol (spec section 11).
+//
+// A thin end-to-end addressed-message layer carrying control messages that
+// are not reachability: profile fetch (11.5), and in a later phase
+// delegation subscribe (11.6) and revoke (11.7). It depends on the routing
+// protocol for delivery but performs no routing of its own — each hop
+// forwards using an ordinary routing-table next-hop lookup (11.2, 11.4).
+
+// The envelope every management message is wrapped in (11.3).
+message ManagementMessage {
+    // sub-protocol version
+    uint32 version = 1;
+    // 8-byte ID of the recipient (section 3.3)
+    bytes destination = 2;
+    // selects the index space the destination lives in (section 3.5)
+    bool destination_is_node = 3;
+    // 8-byte ID of the requester
+    bytes source = 4;
+    bool source_is_node = 5;
+    // correlates a response to its request; echoed unchanged by the
+    // responder
+    uint32 request_id = 6;
+
+    oneof body {
+        ProfileRequest profile_request = 7;
+        ProfileResponse profile_response = 8;
+        DelegationSubscribe delegation_subscribe = 9;
+        DelegationSubscribeAck delegation_subscribe_ack = 10;
+        DelegationRevoke delegation_revoke = 11;
+        DelegationRevokeAck delegation_revoke_ack = 12;
+    }
+}
+
+// Profile fetch (11.5).
+message ProfileRequest {
+    // the requester's cached profile_version for the subject, or 0 if it
+    // holds none
+    uint32 cached_version = 1;
+}
+
+message ProfileResponse {
+    bool found = 1;
+    Profile profile = 2;
+}
+
+message Profile {
+    // full multikey-encoded public key (section 3.3)
+    bytes multikey = 1;
+    uint32 profile_version = 2;
+    // may be empty
+    string name = 3;
+    // the subject's ed25519 signature over
+    // (multikey || profile_version || name)
+    bytes self_signature = 4;
+
+    // Feature-capability bitset. A qaul extension, not part of section
+    // 11.5.
+    uint32 capabilities = 5;
+
+    // The subject's extended profile (avatar, bio, updated_at, preferred
+    // custody route) carried verbatim from v1
+    bytes signed_profile = 6;
+    // The subject's signature over the bytes of field 6.
+    bytes signed_profile_signature = 7;
+}
+
+// Cross-host delegation subscribe (11.6)
+message DelegationSubscribe {
+    // 8-byte ID of the delegating user (section 3.3)
+    bytes user_id = 1;
+    // absolute expiry of the delegation
+    uint64 timeout = 2;
+    // the user's ed25519 signature over
+    // (target_full_multikey || timeout), per section 10.1
+    bytes entry_signature = 3;
+}
+
+enum RejectReason {
+    NONE = 0;
+    AT_CAPACITY = 1;
+    POLICY = 2;
+}
+
+message DelegationSubscribeAck {
+    bool accepted = 1;
+    RejectReason reason = 2;
+}
+
+// Cross-host delegation revoke (11.7).
+message DelegationRevoke {
+    bytes user_id = 1;
+    // identifies which delegation entry is being revoked
+    uint64 timeout = 2;
+    // per section 10.5
+    bytes revoke_signature = 3;
+}
+
+// Removing an entry that is already absent is a successful no-op
+message DelegationRevokeAck {
+    bool done = 1;
+}
