@@ -3,6 +3,7 @@
 
 //! This file describes how messages are propagated between nodes.
 
+use std::collections::HashSet;
 use std::sync::Arc;
 
 use libp2p::PeerId;
@@ -243,8 +244,15 @@ pub fn tick_relay(state: &RouterV2State, now: u64) {
         version: t.2,
     };
 
+    // Draining the tracker hands us the only outstanding copy of each mark,
+    // so anything the sphere filter withholds from *every* peer has to be
+    // put back — otherwise the index is never introduced to anyone and the
+    // receiver drops each entry that references it as an unknown mapping,
+    // permanently (§3.6).
     let user_intros = state.pending_introductions(Space::User);
     let node_intros = state.pending_introductions(Space::Node);
+    let mut user_sent: HashSet<u16> = HashSet::new();
+    let mut node_sent: HashSet<u16> = HashSet::new();
 
     for (peer, neigbour_id, transport) in pairs {
         let sphere_outbound = Sphere::of(transport);
@@ -260,6 +268,9 @@ pub fn tick_relay(state: &RouterV2State, now: u64) {
             .filter(|t| should_introduce(state, Space::Node, &t.1, sphere_outbound))
             .map(|t| map_to_intros(*t))
             .collect();
+
+        user_sent.extend(user_mappings.iter().map(|m| m.abs_idx));
+        node_sent.extend(node_mappings.iter().map(|m| m.abs_idx));
 
         let mut user_out = Vec::new();
         let mut node_out = Vec::new();
@@ -345,6 +356,31 @@ pub fn tick_relay(state: &RouterV2State, now: u64) {
         }) {
             warn!("relay tick: outbound channel send failed for {peer:?}: {e}");
         }
+    }
+
+    requeue_unsent_introductions(state, &user_intros, &user_sent, Space::User);
+    requeue_unsent_introductions(state, &node_intros, &node_sent, Space::Node);
+}
+
+fn requeue_unsent_introductions(
+    state: &RouterV2State,
+    intros: &[(u16, [u8; 8], u32)],
+    sent: &HashSet<u16>,
+    space: Space,
+) {
+    let unsent: Vec<u16> = intros
+        .iter()
+        .map(|t| t.0)
+        .filter(|idx| !sent.contains(idx))
+        .collect();
+    if unsent.is_empty() {
+        return;
+    }
+
+    let mut tracker = state.reintroduction_tracker.write().unwrap();
+    for idx in unsent {
+        debug!("relay tick: {space:?} idx {idx} reached no peer, re-marking (§3.6)");
+        tracker.mark_first_time(space, idx);
     }
 }
 
