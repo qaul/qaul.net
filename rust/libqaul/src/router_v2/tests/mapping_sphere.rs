@@ -391,3 +391,93 @@ fn on_connect_emits_every_chunk_in_order() {
         assert_eq!(dump.chunk_count, seen.len() as u8);
     }
 }
+
+/// Regression: `pending_introductions` drains, so an intro the §2.3 filter
+/// withholds from *every* peer must be put back. Losing it means the index
+/// is never introduced, and the receiver drops every entry referencing it
+/// as an unknown mapping — permanently.
+///
+/// Found by a live three-node run, not by the per-peer tests above: those
+/// always had a LAN peer that accepted the intro.
+#[test]
+fn an_intro_filtered_for_every_peer_is_re_marked() {
+    let (state, _rx) = fresh_state();
+    // Only an Internet peer, so a user intro can reach nobody.
+    state.add_neighbour_transport(fresh_peer(), [10; 8], ConnectionModule::Internet);
+
+    install_user(&state, [1; 8], 0);
+    bind_own_dict(&state, Space::User, 20, [1; 8]);
+    state
+        .reintroduction_tracker
+        .write()
+        .unwrap()
+        .mark_first_time(Space::User, 20);
+
+    tick_relay(&state, 1_000);
+
+    assert_eq!(
+        state.pending_introductions(Space::User),
+        vec![(20, [1; 8], 0)],
+        "an intro that reached no peer must still be pending"
+    );
+}
+
+/// The same hazard for node space: a node not yet known to be a gateway is
+/// filtered off the Internet sphere, and would otherwise never be
+/// introduced even after it becomes one.
+#[test]
+fn a_non_gateway_node_intro_survives_to_be_introduced_later() {
+    let (state, _rx) = fresh_state();
+    state.add_neighbour_transport(fresh_peer(), [10; 8], ConnectionModule::Internet);
+
+    let node = install_node(&state, [5; 8], 0, false);
+    bind_own_dict(&state, Space::Node, 21, [5; 8]);
+    state
+        .reintroduction_tracker
+        .write()
+        .unwrap()
+        .mark_first_time(Space::Node, 21);
+
+    tick_relay(&state, 1_000);
+    assert_eq!(
+        state.pending_introductions(Space::Node),
+        vec![(21, [5; 8], 0)],
+        "withheld while it is not a gateway"
+    );
+
+    // It becomes a gateway; the mark must still be there to act on.
+    node.write().unwrap().is_gateway = true;
+    state
+        .reintroduction_tracker
+        .write()
+        .unwrap()
+        .mark_first_time(Space::Node, 21);
+    tick_relay(&state, 2_000);
+    assert!(
+        state.pending_introductions(Space::Node).is_empty(),
+        "once it is a gateway the intro goes out and the mark clears"
+    );
+}
+
+/// A mark that did reach a peer must not be re-queued, or every index would
+/// be re-introduced on every tick forever.
+#[test]
+fn a_delivered_intro_is_not_re_marked() {
+    let (state, _rx) = fresh_state();
+    state.add_neighbour_transport(fresh_peer(), [10; 8], ConnectionModule::Lan);
+
+    install_user(&state, [1; 8], 0);
+    bind_own_dict(&state, Space::User, 20, [1; 8]);
+    state
+        .reintroduction_tracker
+        .write()
+        .unwrap()
+        .mark_first_time(Space::User, 20);
+
+    tick_relay(&state, 1_000);
+
+    assert!(
+        state.pending_introductions(Space::User).is_empty(),
+        "a delivered intro must clear"
+    );
+}
