@@ -31,6 +31,10 @@ struct CliArguments {
     /// Stop the daemon with `kill $(cat qauld.pid)`.
     #[arg(short, long)]
     daemonize: bool,
+    /// run the v2 routing protocol. it simpley overrides `v.routing_enabled` in the
+    /// config file
+    #[arg(long)]
+    routing_v2: bool,
 }
 
 /// create a default user account for zero configuration Community Node startups
@@ -137,6 +141,12 @@ async fn run(cli_arguments: CliArguments, storage_path: String) {
         }
         if let Some(v) = cli_arguments.port {
             def_config.insert("port".to_string(), v.to_string());
+        }
+        let env_v2 = std::env::var("QAUL_ROUTING_V2")
+            .map(|v| matches!(v.as_str(), "1" | "true" | "yes"))
+            .unwrap_or(false);
+        if cli_arguments.routing_v2 || env_v2 {
+            def_config.insert("routing_v2".to_string(), "true".to_string());
         }
     }
 
