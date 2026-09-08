@@ -9,7 +9,7 @@ use prost::Message;
 use tracing::debug;
 
 use crate::router_v2::{
-    management::{profile::ManagementOutcome, Addressing},
+    management::{profile::ManagementOutcome, Addressing, ForwardKey},
     RouterV2State,
 };
 
@@ -18,7 +18,7 @@ use qaul_proto::qaul_net_router_management as proto;
 
 use super::MANAGEMENT_VERSION;
 
-/// How long a forwarded `(source, request_id)` is remembered
+/// How long a forwarded [`ForwardKey`] is remembered
 const FORWARD_MEMORY_MS: u64 = 5_000;
 
 impl RouterV2State {
@@ -64,10 +64,17 @@ impl RouterV2State {
         }
 
         // §11.4 step 2.
-        if !self.remember_forward(source, envelope.request_id, now_ms) {
+        let key: ForwardKey = (
+            source,
+            destination,
+            envelope.request_id,
+            is_response(&envelope.body),
+        );
+        if !self.remember_forward(key, now_ms) {
             debug!(
-                "management: already forwarded request {} from {source:?}, dropping to break a loop",
-                envelope.request_id
+                "management: already forwarded request {} from {source:?} to {destination:?} \
+                 (is_response={}), dropping to break a loop",
+                envelope.request_id, key.3
             );
             return ManagementOutcome::None;
         }
@@ -77,11 +84,12 @@ impl RouterV2State {
         ManagementOutcome::None
     }
 
-    /// checks if the source and request_id pair was forwarded inside FORWARD_MEMORY_MS
-    fn remember_forward(&self, source: [u8; 8], request_id: u32, now_ms: u64) -> bool {
+    /// `true` when this exact message has not been forwarded inside
+    /// `FORWARD_MEMORY_MS`
+    fn remember_forward(&self, key: ForwardKey, now_ms: u64) -> bool {
         let mut seen = self.management_recent_forwards.write().unwrap();
         seen.retain(|_, at| now_ms < at.saturating_add(FORWARD_MEMORY_MS));
-        seen.insert((source, request_id), now_ms).is_none()
+        seen.insert(key, now_ms).is_none()
     }
 
     /// §11.4 step 1: the message is addressed to us, so act on its body.
@@ -135,4 +143,14 @@ impl RouterV2State {
 
 fn as_id(bytes: &[u8]) -> Option<[u8; 8]> {
     bytes.try_into().ok()
+}
+
+/// Whether this envelope answers a request rather than making one, per: 11.2
+fn is_response(body: &Option<Body>) -> bool {
+    matches!(
+        body,
+        Some(Body::ProfileResponse(_))
+            | Some(Body::DelegationSubscribeAck(_))
+            | Some(Body::DelegationRevokeAck(_))
+    )
 }
