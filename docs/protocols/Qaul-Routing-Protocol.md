@@ -2200,6 +2200,34 @@ On receiving a `ManagementMessage`, a node:
 A response body is addressed to the original `source`, carries
 the same `request_id`, and is forwarded the same way.
 
+#### Source addressing
+
+Because a response is routed to the requester's `source` by the same
+next-hop lookup as the request, a request whose `source` names an
+identity the mesh carries no entry for is answerable only by an
+adjacent responder. A node SHALL therefore set `source` and
+`source_is_node` to the identity under which it propagates
+(Section 3.2):
+
+* In **user form** — the node hosts exactly one user, has no INTERNET
+  transport and holds no foreign delegation — `source` is that hosted
+  user's ID and `source_is_node` is 0.
+* In **node form**, `source` is the node's own ID and
+  `source_is_node` is 1.
+
+This makes a response routable exactly when the request was: the
+propagated identity is, by construction, the one for which the
+sphere holds a routing entry (Section 9.1). Sourcing a request from
+a node ID while propagating in user form leaves the requester
+addressable only through a neighbour's direct adjacency, so the
+exchange succeeds at one hop and fails at two.
+
+The rule constrains the envelope only. Where a body names a subject
+of its own — `DelegationSubscribe.user_id` and
+`DelegationRevoke.user_id` (Sections 11.6, 11.7) — that field
+carries the semantic identity and is unaffected by which identity
+addressed the envelope.
+
 ### 11.5. Profile Fetch
 
     message ProfileRequest  { uint32 cached_version = 1; }
@@ -2218,7 +2246,10 @@ A node fetches a profile when it holds an 8-byte ID but needs the
 subject's full key (to verify a signature) or a fresher profile
 than it has cached. The `ProfileRequest` is addressed to the
 subject (the envelope `destination`); `cached_version` is the
-requester's cached `profile_version`, or 0 if none.
+requester's cached `profile_version`, or 0 if none. The envelope's
+`source` follows the source-addressing rule of Section 11.4, which
+is what allows the `ProfileResponse` to travel more than one hop
+back.
 
 The subject's host answers with a `ProfileResponse`. A node that
 holds the requested profile cached MAY answer on the subject's

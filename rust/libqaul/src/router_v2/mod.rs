@@ -26,7 +26,7 @@ use crate::{
         index::{
             IndexAllocator, IndexDictionary, MirrorIndexDictionary, ReintroductionTracker, Space,
         },
-        management::{delegation::PendingDelegation, profile::HostedProfile},
+        management::{delegation::PendingDelegation, profile::HostedProfile, ForwardKey},
         manifest::{ChunkAssembler, Manifest, ManifestLog},
         seq::SeqNum,
         table::{Nodes, RoutingTable, Users},
@@ -223,9 +223,9 @@ pub struct RouterV2State {
     pub outstanding_manifest_requests: RwLock<HashMap<([u8; 8], PeerId), u64>>,
     /// profiles this node hosts
     pub hosted_profiles: RwLock<HashMap<[u8; 8], HostedProfile>>,
-    /// `(source, request_id)` of recently forwarded management messages,
+    /// Recently forwarded management messages keyed by [`ForwardKey`],
     /// with the time forwarded.
-    pub management_recent_forwards: RwLock<HashMap<([u8; 8], u32), u64>>,
+    pub management_recent_forwards: RwLock<HashMap<ForwardKey, u64>>,
     /// §11.5 profile fetches that are waiting for response.
     /// key is (subject, is_node)
     pub management_in_flight: RwLock<HashMap<([u8; 8], bool), u64>>,
@@ -293,7 +293,11 @@ impl RouterV2State {
             declined_targets: RwLock::new(HashMap::new()),
             delegation_liveness: RwLock::new(HashMap::new()),
             pending_revocations: RwLock::new(Vec::new()),
-            next_request_id: AtomicU32::new(1),
+            // Seeded randomly for the same reason §6.1 seeds sequence
+            // numbers randomly: a fixed start makes counters on
+            // symmetrically-placed nodes advance in lockstep, so their
+            // request_ids coincide every round rather than occasionally.
+            next_request_id: AtomicU32::new(rand::random::<u32>()),
             manifest_request_window: RwLock::new(HashMap::new()),
             manifest_serve_window: RwLock::new(HashMap::new()),
             propagation_form: RwLock::new(PropagationForm::User),

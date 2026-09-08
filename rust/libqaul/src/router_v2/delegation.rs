@@ -229,12 +229,15 @@ impl RouterV2State {
             .next_request_id
             .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
 
+        // §11.4: the envelope carries the identity we propagate
+        let (source, source_is_node) = self.propagated_identity();
+
         let envelope = ManagementMessage {
             version: MANAGEMENT_VERSION,
             destination: req.target_node_id.to_vec(),
             destination_is_node: true,
-            source: req.user_id.to_vec(),
-            source_is_node: false,
+            source: source.to_vec(),
+            source_is_node,
             request_id,
             body: Some(Body::DelegationRevoke(DelegationRevoke {
                 user_id: req.user_id.to_vec(),
@@ -274,12 +277,15 @@ impl RouterV2State {
             .next_request_id
             .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
 
+        // §11.4, as for revoke
+        let (source, source_is_node) = self.propagated_identity();
+
         let envelope = ManagementMessage {
             version: MANAGEMENT_VERSION,
             destination: req.target_node_id.to_vec(),
             destination_is_node: true,
-            source: req.user_id.to_vec(),
-            source_is_node: false,
+            source: source.to_vec(),
+            source_is_node,
             request_id,
             body: Some(Body::DelegationSubscribe(DelegationSubscribe {
                 user_id: req.user_id.to_vec(),

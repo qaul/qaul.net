@@ -396,6 +396,14 @@ fn install_reachable_gateway(state: &RouterV2State, id: [u8; 8], idx: u16, metri
     install_gateway(state, id, idx, true, true, metric);
 }
 
+/// The §2.4 issuer of a cross-host delegation: a non-gateway host, in user
+/// form, hosting the delegating account. Registering the account is what
+/// binds it at the reserved user index, so `propagated_identity` (§11.4)
+/// resolves to the user rather than falling back to the node id.
+fn install_hosted_issuer(state: &RouterV2State, account: &UserAccount) {
+    state.register_hosted_user(account.routing_user_id(), 0, account.multikey());
+}
+
 // ----- §10.3 gateway selection, issuing side -----
 
 mod selection {
@@ -547,6 +555,7 @@ mod issuing {
     fn a_subscribe_goes_out_and_is_remembered() {
         let (state, mut rx) = fresh_state();
         let account = fresh_account();
+        install_hosted_issuer(&state, &account);
         install_reachable_gateway(&state, [1; 8], 10, 20);
 
         assert!(state.send_delegation_subscribe(request_to(&state, &account, [1; 8], NOW), NOW));
@@ -555,8 +564,9 @@ mod issuing {
         let decoded = ManagementMessage::decode(&out.bytes[..]).unwrap();
         assert_eq!(decoded.destination, [1u8; 8].to_vec());
         assert!(decoded.destination_is_node);
-        // §11.6 is an exchange between a user and a gateway, so the user is
-        // the source — that is what routes the ack back to the signer.
+        // §11.4: the source is this node's propagated identity, which in user
+        // form is the hosted user — here the same id as the signer, but for
+        // an addressing reason, not because §11.6 names the signer.
         assert_eq!(decoded.source, account.routing_user_id().to_vec());
         assert!(!decoded.source_is_node);
         assert!(matches!(decoded.body, Some(Body::DelegationSubscribe(_))));
@@ -1291,6 +1301,7 @@ mod revoke {
         let (state, mut rx) = fresh_state();
         let account = fresh_account();
         let user_id = account.routing_user_id();
+        install_hosted_issuer(&state, &account);
         install_reachable_gateway(&state, [1; 8], 10, 10);
 
         let target_mk = state.node_public_key(&[1; 8]).unwrap();

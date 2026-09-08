@@ -98,6 +98,20 @@ impl RouterV2State {
             .collect()
     }
 
+    /// The identity this node is addressable as on the management
+    /// sub-protocol (§11.4 source addressing), as `(id, is_node)`.
+    pub fn propagated_identity(&self) -> ([u8; 8], bool) {
+        let host_id = self.host_mk.to_id();
+        if *self.propagation_form.read().unwrap() != PropagationForm::User {
+            return (host_id, true);
+        }
+
+        match self.user_dict.read().unwrap().id_of(RESERVED_INDEX) {
+            Some(user_id) => (user_id, false),
+            None => (host_id, true),
+        }
+    }
+
     /// The form this node *should* be propagating in right now (spec §3.2).
     pub fn desired_propagation_form(&self) -> PropagationForm {
         if self.hosted_user_ids().len() > 1 {

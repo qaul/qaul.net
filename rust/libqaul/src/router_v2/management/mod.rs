@@ -15,6 +15,11 @@ use prost::Message;
 use proto::{management_message::Body, ManagementMessage, ProfileRequest};
 use qaul_proto::qaul_net_router_management as proto;
 
+/// to identify a management message for §11.4 forward-loop suppression:
+/// `(source, destination, request_id, is_response)`.
+
+pub type ForwardKey = ([u8; 8], [u8; 8], u32, bool);
+
 /// addressing half of a §11.3 envelope, body is not included
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Addressing {
@@ -79,12 +84,14 @@ impl RouterV2State {
             .next_request_id
             .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
 
+        let (source, source_is_node) = self.propagated_identity();
+
         let envelope = ManagementMessage {
             version: MANAGEMENT_VERSION,
             destination: subject.to_vec(),
             destination_is_node: is_node,
-            source: self.host_mk.to_id().to_vec(),
-            source_is_node: true,
+            source: source.to_vec(),
+            source_is_node,
             request_id,
             body: Some(Body::ProfileRequest(ProfileRequest { cached_version })),
         };
