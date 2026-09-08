@@ -334,10 +334,18 @@ impl Libqaul {
         // Also initialize global router state for backward compatibility
         Router::init(&*qaul_state);
 
-        let config_v2 = {
-            let config = storage.config.read().unwrap();
-            config.v2_routing.clone()
-        };
+        let mut config_v2 = storage::configuration::Configuration::get(&qaul_state)
+            .v2_routing
+            .clone();
+
+        if !config_v2.enabled {
+            if let Some(flag) = qaul_state.default_configs.get("routing_v2") {
+                if matches!(flag.as_str(), "1" | "true" | "yes") {
+                    config_v2.enabled = true;
+                    log::info!("routing v2 forced on for this run (--routing-v2 / QAUL_ROUTING_V2); config.yaml left unchanged");
+                }
+            }
+        }
 
         let mut router_v2_rx = None;
         if config_v2.enabled {
