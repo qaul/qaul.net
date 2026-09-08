@@ -21,6 +21,10 @@ Color _headerDividerColor(ThemeData theme) {
 Color _headerTextColor(ThemeData theme) => theme.colorScheme.onSurface;
 
 BoxShadow _headerShadow(ThemeData theme) {
+  if (theme.platform == TargetPlatform.iOS) {
+    return const BoxShadow(color: Colors.transparent);
+  }
+
   return theme.brightness == Brightness.dark
       ? const BoxShadow(
           offset: Offset(0, 10),
@@ -40,6 +44,7 @@ class QaulPageHeader extends StatelessWidget implements PreferredSizeWidget {
     this.onBackPressed,
     this.backButtonTooltip,
     this.showBackButton = true,
+    this.height = kQaulPageHeaderHeight,
   });
 
   final String title;
@@ -49,13 +54,16 @@ class QaulPageHeader extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onBackPressed;
   final String? backButtonTooltip;
   final bool showBackButton;
+  final double height;
 
   @override
-  Size get preferredSize => const Size.fromHeight(kQaulPageHeaderHeight);
+  Size get preferredSize => Size.fromHeight(height);
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isIOS = theme.platform == TargetPlatform.iOS;
+    final horizontalPadding = isIOS ? 16.0 : _kHorizontalPadding;
     final hasSubtitle = subtitle != null && subtitle!.isNotEmpty;
     final titleStyle = (theme.textTheme.titleMedium ?? const TextStyle())
         .copyWith(
@@ -92,11 +100,9 @@ class QaulPageHeader extends StatelessWidget implements PreferredSizeWidget {
         child: Material(
           color: Colors.transparent,
           child: SizedBox(
-            height: kQaulPageHeaderHeight,
+            height: height,
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: _kHorizontalPadding,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
               child: IconTheme(
                 data: const IconThemeData(
                   color: kQaulPageHeaderControlColor,
@@ -109,9 +115,7 @@ class QaulPageHeader extends StatelessWidget implements PreferredSizeWidget {
                       IconButton(
                         tooltip:
                             backButtonTooltip ??
-                            MaterialLocalizations.of(
-                              context,
-                            ).backButtonTooltip,
+                            MaterialLocalizations.of(context).backButtonTooltip,
                         onPressed:
                             onBackPressed ?? () => Navigator.maybePop(context),
                         icon: const Icon(Icons.arrow_back_rounded),

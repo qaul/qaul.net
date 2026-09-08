@@ -24,16 +24,23 @@ class SearchScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasTitle = title != null;
     final topPadding = MediaQuery.paddingOf(context).top;
+    final searchHeight = Theme.of(context).platform == TargetPlatform.iOS
+        ? 44.0
+        : 40.0;
     final searchBar = PreferredSize(
-      preferredSize: Size(double.maxFinite, 40 + topPadding),
+      preferredSize: Size(
+        double.maxFinite,
+        searchHeight + (hasTitle ? 0 : topPadding),
+      ),
       child: SafeArea(
-        top: true,
+        top: !hasTitle,
         bottom: false,
         left: false,
         right: false,
         child: SizedBox(
-          height: 40,
+          height: searchHeight,
           child: TextField(
             controller: controller,
             decoration: InputDecoration(
@@ -59,7 +66,7 @@ class SearchScaffold extends StatelessWidget {
     );
 
     return Scaffold(
-      appBar: title == null
+      appBar: !hasTitle
           ? searchBar
           : AppBar(
               title: Text(title!),

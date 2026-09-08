@@ -23,10 +23,15 @@ class _QaulSettingsOptionItemState extends State<QaulSettingsOptionItem> {
 
   @override
   Widget build(BuildContext context) {
+    final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+    final verticalPadding = isIOS ? 2.0 : 4.0;
+    final rowHeight = isIOS ? 44.0 : 48.0;
+    final horizontalPadding = isIOS ? 20.0 : 28.0;
+    final letterSpacing = isIOS ? 1.0 : 1.8;
     final isActive = widget.selected || _isHovered;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.symmetric(vertical: verticalPadding),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -35,9 +40,9 @@ class _QaulSettingsOptionItemState extends State<QaulSettingsOptionItem> {
           onHover: (hovered) => setState(() => _isHovered = hovered),
           onTap: widget.onTap,
           child: SizedBox(
-            height: 48,
+            height: rowHeight,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 28),
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
               child: Row(
                 children: [
                   Expanded(
@@ -49,7 +54,7 @@ class _QaulSettingsOptionItemState extends State<QaulSettingsOptionItem> {
                           context,
                           selected: isActive,
                         ),
-                        letterSpacing: 1.8,
+                        letterSpacing: letterSpacing,
                       ),
                     ),
                   ),

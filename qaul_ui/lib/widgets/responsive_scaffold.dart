@@ -29,20 +29,21 @@ class ResponsiveScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: !hasAppBar
           ? null
           : qc.QaulPageHeader(
               title: title ?? '',
-              leadingVisual: titleIcon ??
+              leadingVisual:
+                  titleIcon ??
                   (icon == null
                       ? null
-                      : Icon(
-                          icon,
-                          color: qc.kQaulPageHeaderControlColor,
-                        )),
+                      : Icon(icon, color: qc.kQaulPageHeaderControlColor)),
               actions: actions ?? const [],
+              height: isIOS ? 64 : 82,
             ),
       body: Align(
         alignment: bodyAlignment,
@@ -53,11 +54,11 @@ class ResponsiveScaffold extends StatelessWidget {
             if (!wrapWithScrollable) return SizedBox(width: width, child: body);
 
             final maxWidth = constraints.maxWidth;
-            final horizontalPadding =
-                EdgeInsets.symmetric(horizontal: (maxWidth - width) / 2);
+            final horizontalPadding = EdgeInsets.symmetric(
+              horizontal: (maxWidth - width) / 2,
+            );
 
-            final viewPadding = MediaQuery.of(context)
-                .viewPadding
+            final viewPadding = MediaQuery.of(context).viewPadding
                 .copyWith(
                   left: scrollHorizontalPadding,
                   right: scrollHorizontalPadding,

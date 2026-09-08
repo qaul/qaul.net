@@ -29,15 +29,24 @@ class _QaulSettingsMenuItemState extends State<QaulSettingsMenuItem> {
 
   @override
   Widget build(BuildContext context) {
+    final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+    final rowHeight = isIOS ? 48.0 : 56.0;
+    final horizontalPadding = isIOS ? 20.0 : 28.0;
+    final iconBoxSize = isIOS ? 30.0 : 36.0;
+    final iconSize = isIOS ? 28.0 : 36.0;
+    final gap = isIOS ? 14.0 : 18.0;
+    final trailingWidth = isIOS ? 32.0 : 44.0;
+    final verticalPadding = isIOS ? 2.0 : 4.0;
+    final letterSpacing = isIOS ? 1.0 : 1.8;
     final color = qaulSettingsItemColor(context, selected: _isHovered);
     final textStyle = Theme.of(context).textTheme.titleSmall?.copyWith(
       color: color,
       fontWeight: FontWeight.w600,
-      letterSpacing: 1.8,
+      letterSpacing: letterSpacing,
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.symmetric(vertical: verticalPadding),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -69,27 +78,30 @@ class _QaulSettingsMenuItemState extends State<QaulSettingsMenuItem> {
               final hasValue = widget.value != null;
 
               return SizedBox(
-                height: 56,
+                height: rowHeight,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 28),
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
                   child: Row(
                     children: [
                       SizedBox(
-                        width: 36,
+                        width: iconBoxSize,
                         child: Align(
                           alignment: Alignment.center,
                           child: SizedBox.square(
-                            dimension: 36,
+                            dimension: iconBoxSize,
                             child: Center(
                               child: IconTheme(
-                                data: IconThemeData(color: color, size: 36),
+                                data: IconThemeData(
+                                  color: color,
+                                  size: iconSize,
+                                ),
                                 child: widget.icon,
                               ),
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 18),
+                      SizedBox(width: gap),
                       Expanded(
                         child: Text(
                           widget.title,
@@ -110,7 +122,7 @@ class _QaulSettingsMenuItemState extends State<QaulSettingsMenuItem> {
                           ),
                         ),
                       SizedBox(
-                        width: 44,
+                        width: trailingWidth,
                         child: widget.onTap == null
                             ? const SizedBox.shrink()
                             : Align(
