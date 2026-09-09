@@ -963,6 +963,12 @@ impl Libqaul {
                 }
             }
             EventType::RoutingInfo => {
+                // v1 route emission. `qaul_info_event` already branches the
+                // receive side to v2; guarding the send side completes the
+                // pair.
+                if self.state.get_router_v2().is_some() {
+                    return;
+                }
                 if let Some((neighbour_id, connection_module, data)) =
                     RouterInfo::check_scheduler(&*self.state, &router)
                 {
@@ -991,9 +997,14 @@ impl Libqaul {
                 }
             }
             EventType::RoutingTable => {
-                let table = router
-                    .connections
-                    .create_routing_table(&router.configuration);
+                // when v2 is active, it does not write to v1's connection table, so the RPC
+                // surface reads an empty map unless we rebuild it from v2
+                let table = match self.state.get_router_v2() {
+                    Some(v2) => v2.create_v1_routing_table(Timestamp::get_timestamp()),
+                    None => router
+                        .connections
+                        .create_routing_table(&router.configuration),
+                };
                 router.routing_table.set(table);
             }
             EventType::Messaging => {
