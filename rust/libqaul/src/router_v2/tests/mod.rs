@@ -34,3 +34,4 @@ mod self_entry_rejection;
 mod sphere;
 mod sweep;
 mod translate;
+mod v1_bridge;

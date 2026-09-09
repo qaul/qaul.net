@@ -10,3 +10,4 @@ pub mod lookup;
 pub mod neighbours;
 pub mod origin_manifest;
 pub mod pull;
+pub mod v1_bridge;

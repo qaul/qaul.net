@@ -167,12 +167,30 @@ impl Router {
                         RoutingTable::rpc_send_routing_table(state, router_state, request_id);
                     }
                     Some(proto::router::Message::ConnectionsRequest(_request)) => {
-                        // send connections list
-                        ConnectionTable::rpc_send_connections_list(state, router_state, request_id);
+                        // send connections list. Under v2 these come from the bridge
+                        match state.get_router_v2() {
+                            Some(v2) => v2.rpc_send_connections_list(
+                                state,
+                                request_id,
+                                crate::utilities::timestamp::Timestamp::get_timestamp(),
+                            ),
+                            None => ConnectionTable::rpc_send_connections_list(
+                                state,
+                                router_state,
+                                request_id,
+                            ),
+                        }
                     }
                     Some(proto::router::Message::NeighboursRequest(_request)) => {
                         // send neighbours list
-                        Neighbours::rpc_send_neighbours_list(state, router_state, request_id);
+                        match state.get_router_v2() {
+                            Some(v2) => v2.rpc_send_neighbours_list(state, request_id),
+                            None => Neighbours::rpc_send_neighbours_list(
+                                state,
+                                router_state,
+                                request_id,
+                            ),
+                        }
                     }
                     _ => {}
                 }
