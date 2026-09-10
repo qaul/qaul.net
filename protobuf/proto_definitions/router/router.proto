@@ -11,6 +11,11 @@ message Router {
         ConnectionsList connections_list = 4;
         NeighboursRequest neighbours_request = 5;
         NeighboursList neighbours_list = 6;
+        // router_v2 native views. See docs/proposals/v1-to-v2-cutover.md §8.
+        RouterV2Request router_v2_request = 7;
+        RouterV2Status router_v2_status = 8;
+        RouterV2Table router_v2_table = 9;
+        RouterV2Neighbours router_v2_neighbours = 10;
     }
 }
 
@@ -115,4 +120,104 @@ message NeighboursEntry {
     bytes node_id = 1;
     // rtt to this neighbour
     uint32 rtt = 2;
+}
+
+
+// ---------------------------------------------------------------------------
+// router_v2 native views
+//
+// v2 holds state that has no v1 shape: two index spaces, a path metric rather
+// than a round-trip time, the local_only sphere flag, per-neighbour mirror
+// dictionaries. These messages expose it directly rather than flattening it
+// into the v1 routing table. See docs/proposals/v1-to-v2-cutover.md §8.
+// ---------------------------------------------------------------------------
+
+// which v2 view the client wants
+message RouterV2Request {
+    RouterV2View view = 1;
+}
+
+enum RouterV2View {
+    STATUS = 0;
+    TABLE = 1;
+    NEIGHBOURS = 2;
+}
+
+// the two independent index spaces of spec section 3.5
+enum IndexSpace {
+    USER_SPACE = 0;
+    NODE_SPACE = 1;
+}
+
+// what this node currently is
+message RouterV2Status {
+    // 8-byte routing id, sha256(multikey)[..8] per spec section 3.3
+    bytes node_id = 1;
+    // propagation form, spec section 3.2: false = user entry, true = node entry
+    bool is_node_form = 2;
+    // gateway role, spec section 2.3
+    bool is_gateway = 3;
+    // this node's sequence number, spec section 6
+    uint32 seq_num = 4;
+    // own committed manifest version, spec section 10.8
+    uint32 manifest_version = 5;
+    uint32 manifest_entries = 6;
+    // oldest servable version in the delta log, spec section 10.9
+    uint32 manifest_log_base = 7;
+    uint32 neighbours = 8;
+    uint32 user_entries = 9;
+    uint32 node_entries = 10;
+    uint32 user_dict_size = 11;
+    uint32 node_dict_size = 12;
+    // indexes awaiting re-introduction, spec section 3.8
+    uint32 pending_user_intros = 13;
+    uint32 pending_node_intros = 14;
+    // spec section 11.5 fetches awaiting a response
+    uint32 profile_fetches_in_flight = 15;
+    // spec section 10.8 pulls awaiting a response
+    uint32 manifest_requests_outstanding = 16;
+}
+
+// the real v2 routing table, both index spaces
+message RouterV2Table {
+    repeated RouterV2Entry entries = 1;
+}
+
+message RouterV2Entry {
+    IndexSpace space = 1;
+    // our own index for this target, spec section 3.5
+    uint32 index = 2;
+    bytes target_id = 3;
+    uint32 seq_num = 4;
+    // accumulated path cost, spec section 5
+    uint32 metric = 5;
+    // masked to the low six bits, spec section 7.4
+    uint32 hop_count = 6;
+    // reached only over Local-sphere transports, spec section 7.4
+    bool local_only = 7;
+    uint32 next_hop_index = 8;
+    bytes next_hop_id = 9;
+    ConnectionModule transport = 10;
+    // milliseconds since this entry was last refreshed
+    uint64 age_ms = 11;
+}
+
+message RouterV2Neighbours {
+    repeated RouterV2Neighbour neighbours = 1;
+}
+
+message RouterV2Neighbour {
+    bytes peer_id = 1;
+    bytes node_id = 2;
+    // a neighbour may be reachable on several transports, spec section 4.2
+    repeated ConnectionModule transports = 3;
+    // real ping measurement, unlike the path metric
+    uint32 rtt_micros = 4;
+    // mirror dictionary sizes, spec section 3.6. A small mirror against a
+    // large peer dictionary is what produces UnknownMapping drops.
+    uint32 user_mirror_size = 5;
+    uint32 node_mirror_size = 6;
+    // bindings an in-flight INDEX_DUMP has not yet confirmed, spec section 8.4
+    uint32 dump_stale_users = 7;
+    uint32 dump_stale_nodes = 8;
 }
