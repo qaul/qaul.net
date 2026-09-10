@@ -118,6 +118,13 @@ impl RouterV2State {
         }
     }
 
+    /// Records the transport's latest ping measurement for a neighbour.
+    pub fn set_neighbour_rtt(&self, peer: PeerId, rtt_micros: u32) {
+        if let Some(info) = self.mirrors.write().unwrap().get_mut(&peer) {
+            info.rtt_micros = rtt_micros;
+        }
+    }
+
     pub fn remove_neighbour_transport(&self, peer: PeerId, transport: ConnectionModule) {
         let mut mirrors = self.mirrors.write().unwrap();
         let now_empty = if let Some(info) = mirrors.get_mut(&peer) {

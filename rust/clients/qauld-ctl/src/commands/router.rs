@@ -1,4 +1,8 @@
-use crate::{cli::RouterSubcmd, commands::RpcCommand, proto::Modules};
+use crate::{
+    cli::{RouterSubcmd, RouterV2Subcmd},
+    commands::RpcCommand,
+    proto::Modules,
+};
 use prost::Message;
 
 use proto::{router, ConnectionModule, Router};
@@ -12,6 +16,13 @@ impl RouterSubcmd {
             Ok(ConnectionModule::Ble) => "BLE",
             Ok(ConnectionModule::Local) => "Local",
             _ => "None",
+        }
+    }
+
+    fn space_name(&self, space: i32) -> &'static str {
+        match proto::IndexSpace::try_from(space) {
+            Ok(proto::IndexSpace::NodeSpace) => "node",
+            _ => "user",
         }
     }
 
@@ -103,6 +114,15 @@ impl RpcCommand for RouterSubcmd {
                 message: Some(router::Message::ConnectionsRequest(
                     proto::ConnectionsRequest {},
                 )),
+            },
+            RouterSubcmd::V2 { view } => Router {
+                message: Some(router::Message::RouterV2Request(proto::RouterV2Request {
+                    view: match view {
+                        RouterV2Subcmd::Status => proto::RouterV2View::Status as i32,
+                        RouterV2Subcmd::Table => proto::RouterV2View::Table as i32,
+                        RouterV2Subcmd::Neighbours => proto::RouterV2View::Neighbours as i32,
+                    },
+                })),
             },
         };
 
@@ -197,6 +217,166 @@ impl RpcCommand for RouterSubcmd {
                     self.print_connections("BLE", &r.ble);
                     self.print_connections("Local", &r.local);
                     println!("");
+                }
+            }
+            Some(router::Message::RouterV2Status(r)) => {
+                if json {
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&serde_json::json!({
+                            "node_id": bs58::encode(&r.node_id).into_string(),
+                            "propagation_form": if r.is_node_form { "node" } else { "user" },
+                            "is_gateway": r.is_gateway,
+                            "seq_num": r.seq_num,
+                            "manifest_version": r.manifest_version,
+                            "manifest_entries": r.manifest_entries,
+                            "manifest_log_base": r.manifest_log_base,
+                            "neighbours": r.neighbours,
+                            "user_entries": r.user_entries,
+                            "node_entries": r.node_entries,
+                            "user_dict_size": r.user_dict_size,
+                            "node_dict_size": r.node_dict_size,
+                            "pending_user_intros": r.pending_user_intros,
+                            "pending_node_intros": r.pending_node_intros,
+                            "profile_fetches_in_flight": r.profile_fetches_in_flight,
+                            "manifest_requests_outstanding": r.manifest_requests_outstanding,
+                        }))?
+                    );
+                } else {
+                    println!("\nrouter_v2 status\n");
+                    println!(
+                        "  node id            {}",
+                        bs58::encode(&r.node_id).into_string()
+                    );
+                    println!(
+                        "  propagation form   {} (§3.2)",
+                        if r.is_node_form {
+                            "node entry"
+                        } else {
+                            "user entry"
+                        }
+                    );
+                    println!(
+                        "  gateway            {} (§2.3)",
+                        if r.is_gateway { "yes" } else { "no" }
+                    );
+                    println!("  seq num            {}", r.seq_num);
+                    println!();
+                    println!(
+                        "  own manifest       v{}, {} entr{}, log_base {}",
+                        r.manifest_version,
+                        r.manifest_entries,
+                        if r.manifest_entries == 1 { "y" } else { "ies" },
+                        r.manifest_log_base
+                    );
+                    println!("  neighbours         {}", r.neighbours);
+                    println!(
+                        "  routing entries    {} user / {} node",
+                        r.user_entries, r.node_entries
+                    );
+                    println!(
+                        "  dictionaries       {} user / {} node",
+                        r.user_dict_size, r.node_dict_size
+                    );
+                    println!(
+                        "  pending intros     {} user / {} node (§3.8)",
+                        r.pending_user_intros, r.pending_node_intros
+                    );
+                    println!(
+                        "  in flight          {} profile fetch(es), {} manifest request(s)",
+                        r.profile_fetches_in_flight, r.manifest_requests_outstanding
+                    );
+                    println!();
+                }
+            }
+            Some(router::Message::RouterV2Table(r)) => {
+                if json {
+                    let entries: Vec<serde_json::Value> = r
+                        .entries
+                        .iter()
+                        .map(|e| {
+                            serde_json::json!({
+                                "space": self.space_name(e.space),
+                                "index": e.index,
+                                "target_id": bs58::encode(&e.target_id).into_string(),
+                                "seq_num": e.seq_num,
+                                "metric": e.metric,
+                                "hop_count": e.hop_count,
+                                "local_only": e.local_only,
+                                "next_hop_index": e.next_hop_index,
+                                "next_hop_id": bs58::encode(&e.next_hop_id).into_string(),
+                                "transport": self.module_name(e.transport),
+                                "age_ms": e.age_ms,
+                            })
+                        })
+                        .collect();
+                    println!("{}", serde_json::to_string_pretty(&entries)?);
+                } else {
+                    println!("\nrouter_v2 routing table\n");
+                    if r.entries.is_empty() {
+                        println!("  (empty)\n");
+                    } else {
+                        println!("  space | idx | target        | seq   | metric | hops | local | transport | via           | age");
+                        for e in &r.entries {
+                            println!(
+                                "  {:5} | {:3} | {:13} | {:5} | {:6} | {:4} | {:5} | {:9} | {:13} | {}s",
+                                self.space_name(e.space),
+                                e.index,
+                                bs58::encode(&e.target_id).into_string(),
+                                e.seq_num,
+                                e.metric,
+                                e.hop_count,
+                                if e.local_only { "yes" } else { "no" },
+                                self.module_name(e.transport),
+                                bs58::encode(&e.next_hop_id).into_string(),
+                                e.age_ms / 1000,
+                            );
+                        }
+                        println!();
+                    }
+                }
+            }
+            Some(router::Message::RouterV2Neighbours(r)) => {
+                if json {
+                    let ns: Vec<serde_json::Value> = r.neighbours.iter().map(|n| serde_json::json!({
+                        "peer_id": bs58::encode(&n.peer_id).into_string(),
+                        "node_id": bs58::encode(&n.node_id).into_string(),
+                        "transports": n.transports.iter().map(|t| self.module_name(*t)).collect::<Vec<_>>(),
+                        "rtt_micros": n.rtt_micros,
+                        "user_mirror_size": n.user_mirror_size,
+                        "node_mirror_size": n.node_mirror_size,
+                        "dump_stale_users": n.dump_stale_users,
+                        "dump_stale_nodes": n.dump_stale_nodes,
+                    })).collect();
+                    println!("{}", serde_json::to_string_pretty(&ns)?);
+                } else {
+                    println!("\nrouter_v2 neighbours\n");
+                    if r.neighbours.is_empty() {
+                        println!("  (none)\n");
+                    } else {
+                        for n in &r.neighbours {
+                            let transports: Vec<&str> =
+                                n.transports.iter().map(|t| self.module_name(*t)).collect();
+                            println!(
+                                "  node {} via peer {}",
+                                bs58::encode(&n.node_id).into_string(),
+                                bs58::encode(&n.peer_id).into_string()
+                            );
+                            println!("    transports    {}", transports.join(", "));
+                            println!("    rtt           {} µs", n.rtt_micros);
+                            println!(
+                                "    mirrors       {} user / {} node binding(s) (§3.6)",
+                                n.user_mirror_size, n.node_mirror_size
+                            );
+                            if n.dump_stale_users > 0 || n.dump_stale_nodes > 0 {
+                                println!(
+                                    "    dump pending  {} user / {} node unconfirmed (§8.4)",
+                                    n.dump_stale_users, n.dump_stale_nodes
+                                );
+                            }
+                        }
+                        println!();
+                    }
                 }
             }
             _ => {

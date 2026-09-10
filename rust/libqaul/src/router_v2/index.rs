@@ -174,6 +174,15 @@ impl MirrorIndexDictionary {
         self.forward_dir.clear();
     }
 
+    /// How many bindings this mirror holds.
+    pub fn len(&self) -> usize {
+        self.forward_dir.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.forward_dir.is_empty()
+    }
+
     /// all bounded indicies
     pub fn indexes(&self) -> HashSet<u16> {
         self.forward_dir.keys().copied().collect()
@@ -232,6 +241,14 @@ impl ReintroductionTracker {
 
     pub fn clear_mark(&mut self, space: Space, idx: u16) -> bool {
         self.set_for(space).remove(&idx)
+    }
+
+    /// How many indexes await re-introduction, without draining them.
+    pub fn pending_len(&self, space: Space) -> usize {
+        match space {
+            Space::Node => self.node_pending.len(),
+            Space::User => self.user_pending.len(),
+        }
     }
 
     /// get indices ready for reintroduction
