@@ -11,3 +11,4 @@ pub mod neighbours;
 pub mod origin_manifest;
 pub mod pull;
 pub mod v1_bridge;
+pub mod v2_inspect;

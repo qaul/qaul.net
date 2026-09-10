@@ -144,8 +144,7 @@ impl RouterV2State {
             for transport in &info.transports {
                 let entry = proto::NeighboursEntry {
                     node_id: peer.to_bytes(),
-                    // v2 measures cost as the §5 metric, not round-trip time.
-                    rtt: 0,
+                    rtt: info.rtt_micros,
                 };
                 match transport {
                     ConnectionModule::Lan => lan.push(entry),
@@ -205,7 +204,7 @@ impl RouterV2State {
         );
     }
 
-    fn send_router_rpc(
+    pub(crate) fn send_router_rpc(
         &self,
         state: &crate::QaulState,
         request_id: String,

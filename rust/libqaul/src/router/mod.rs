@@ -192,6 +192,27 @@ impl Router {
                             ),
                         }
                     }
+                    Some(proto::router::Message::RouterV2Request(request)) => {
+                        // v2-native views (docs/proposals/v1-to-v2-cutover.md §8).
+                        // Only meaningful when v2 is the active router.
+                        let Some(v2) = state.get_router_v2() else {
+                            log::debug!("router v2 view requested while v1 is active");
+                            return;
+                        };
+                        let now = crate::utilities::timestamp::Timestamp::get_timestamp();
+                        match proto::RouterV2View::try_from(request.view) {
+                            Ok(proto::RouterV2View::Status) => {
+                                v2.rpc_send_v2_status(state, request_id)
+                            }
+                            Ok(proto::RouterV2View::Table) => {
+                                v2.rpc_send_v2_table(state, request_id, now)
+                            }
+                            Ok(proto::RouterV2View::Neighbours) => {
+                                v2.rpc_send_v2_neighbours(state, request_id)
+                            }
+                            Err(_) => log::debug!("unknown router v2 view {}", request.view),
+                        }
+                    }
                     _ => {}
                 }
             }
