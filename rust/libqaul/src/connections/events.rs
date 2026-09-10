@@ -165,6 +165,8 @@ pub fn ping_event(state: &crate::QaulState, event: Event, module: ConnectionModu
                             );
                             propagation::on_neighbour_connect(&router_v2, peer, module);
                         }
+                        // Every ping refreshes it, not just the first.
+                        router_v2.set_neighbour_rtt(peer, rtt_micros.unwrap_or(u32::MAX));
                     }
                     Err(e) => log::warn!("v2: cannot derive node_id for {peer}: {e}"),
                 }
