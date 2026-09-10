@@ -2,7 +2,7 @@
 /// router rpc message container
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Router {
-    #[prost(oneof = "router::Message", tags = "1, 2, 3, 4, 5, 6")]
+    #[prost(oneof = "router::Message", tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10")]
     pub message: ::core::option::Option<router::Message>,
 }
 /// Nested message and enum types in `Router`.
@@ -21,6 +21,15 @@ pub mod router {
         NeighboursRequest(super::NeighboursRequest),
         #[prost(message, tag = "6")]
         NeighboursList(super::NeighboursList),
+        /// router_v2 native views. See docs/proposals/v1-to-v2-cutover.md §8.
+        #[prost(message, tag = "7")]
+        RouterV2Request(super::RouterV2Request),
+        #[prost(message, tag = "8")]
+        RouterV2Status(super::RouterV2Status),
+        #[prost(message, tag = "9")]
+        RouterV2Table(super::RouterV2Table),
+        #[prost(message, tag = "10")]
+        RouterV2Neighbours(super::RouterV2Neighbours),
     }
 }
 /// UI request for routing table list
@@ -129,6 +138,122 @@ pub struct NeighboursEntry {
     #[prost(uint32, tag = "2")]
     pub rtt: u32,
 }
+/// which v2 view the client wants
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RouterV2Request {
+    #[prost(enumeration = "RouterV2View", tag = "1")]
+    pub view: i32,
+}
+/// what this node currently is
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RouterV2Status {
+    /// 8-byte routing id, sha256(multikey)\[..8\] per spec section 3.3
+    #[prost(bytes = "vec", tag = "1")]
+    pub node_id: ::prost::alloc::vec::Vec<u8>,
+    /// propagation form, spec section 3.2: false = user entry, true = node entry
+    #[prost(bool, tag = "2")]
+    pub is_node_form: bool,
+    /// gateway role, spec section 2.3
+    #[prost(bool, tag = "3")]
+    pub is_gateway: bool,
+    /// this node's sequence number, spec section 6
+    #[prost(uint32, tag = "4")]
+    pub seq_num: u32,
+    /// own committed manifest version, spec section 10.8
+    #[prost(uint32, tag = "5")]
+    pub manifest_version: u32,
+    #[prost(uint32, tag = "6")]
+    pub manifest_entries: u32,
+    /// oldest servable version in the delta log, spec section 10.9
+    #[prost(uint32, tag = "7")]
+    pub manifest_log_base: u32,
+    #[prost(uint32, tag = "8")]
+    pub neighbours: u32,
+    #[prost(uint32, tag = "9")]
+    pub user_entries: u32,
+    #[prost(uint32, tag = "10")]
+    pub node_entries: u32,
+    #[prost(uint32, tag = "11")]
+    pub user_dict_size: u32,
+    #[prost(uint32, tag = "12")]
+    pub node_dict_size: u32,
+    /// indexes awaiting re-introduction, spec section 3.8
+    #[prost(uint32, tag = "13")]
+    pub pending_user_intros: u32,
+    #[prost(uint32, tag = "14")]
+    pub pending_node_intros: u32,
+    /// spec section 11.5 fetches awaiting a response
+    #[prost(uint32, tag = "15")]
+    pub profile_fetches_in_flight: u32,
+    /// spec section 10.8 pulls awaiting a response
+    #[prost(uint32, tag = "16")]
+    pub manifest_requests_outstanding: u32,
+}
+/// the real v2 routing table, both index spaces
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RouterV2Table {
+    #[prost(message, repeated, tag = "1")]
+    pub entries: ::prost::alloc::vec::Vec<RouterV2Entry>,
+}
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RouterV2Entry {
+    #[prost(enumeration = "IndexSpace", tag = "1")]
+    pub space: i32,
+    /// our own index for this target, spec section 3.5
+    #[prost(uint32, tag = "2")]
+    pub index: u32,
+    #[prost(bytes = "vec", tag = "3")]
+    pub target_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(uint32, tag = "4")]
+    pub seq_num: u32,
+    /// accumulated path cost, spec section 5
+    #[prost(uint32, tag = "5")]
+    pub metric: u32,
+    /// masked to the low six bits, spec section 7.4
+    #[prost(uint32, tag = "6")]
+    pub hop_count: u32,
+    /// reached only over Local-sphere transports, spec section 7.4
+    #[prost(bool, tag = "7")]
+    pub local_only: bool,
+    #[prost(uint32, tag = "8")]
+    pub next_hop_index: u32,
+    #[prost(bytes = "vec", tag = "9")]
+    pub next_hop_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(enumeration = "ConnectionModule", tag = "10")]
+    pub transport: i32,
+    /// milliseconds since this entry was last refreshed
+    #[prost(uint64, tag = "11")]
+    pub age_ms: u64,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RouterV2Neighbours {
+    #[prost(message, repeated, tag = "1")]
+    pub neighbours: ::prost::alloc::vec::Vec<RouterV2Neighbour>,
+}
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RouterV2Neighbour {
+    #[prost(bytes = "vec", tag = "1")]
+    pub peer_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(bytes = "vec", tag = "2")]
+    pub node_id: ::prost::alloc::vec::Vec<u8>,
+    /// a neighbour may be reachable on several transports, spec section 4.2
+    #[prost(enumeration = "ConnectionModule", repeated, tag = "3")]
+    pub transports: ::prost::alloc::vec::Vec<i32>,
+    /// real ping measurement, unlike the path metric
+    #[prost(uint32, tag = "4")]
+    pub rtt_micros: u32,
+    /// mirror dictionary sizes, spec section 3.6. A small mirror against a
+    /// large peer dictionary is what produces UnknownMapping drops.
+    #[prost(uint32, tag = "5")]
+    pub user_mirror_size: u32,
+    #[prost(uint32, tag = "6")]
+    pub node_mirror_size: u32,
+    /// bindings an in-flight INDEX_DUMP has not yet confirmed, spec section 8.4
+    #[prost(uint32, tag = "7")]
+    pub dump_stale_users: u32,
+    #[prost(uint32, tag = "8")]
+    pub dump_stale_nodes: u32,
+}
 /// Connection modules
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
@@ -161,6 +286,62 @@ impl ConnectionModule {
             "INTERNET" => Some(Self::Internet),
             "BLE" => Some(Self::Ble),
             "LOCAL" => Some(Self::Local),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum RouterV2View {
+    Status = 0,
+    Table = 1,
+    Neighbours = 2,
+}
+impl RouterV2View {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            Self::Status => "STATUS",
+            Self::Table => "TABLE",
+            Self::Neighbours => "NEIGHBOURS",
+        }
+    }
+    /// Creates an enum from field names used in the ProtoBuf definition.
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "STATUS" => Some(Self::Status),
+            "TABLE" => Some(Self::Table),
+            "NEIGHBOURS" => Some(Self::Neighbours),
+            _ => None,
+        }
+    }
+}
+/// the two independent index spaces of spec section 3.5
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum IndexSpace {
+    UserSpace = 0,
+    NodeSpace = 1,
+}
+impl IndexSpace {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            Self::UserSpace => "USER_SPACE",
+            Self::NodeSpace => "NODE_SPACE",
+        }
+    }
+    /// Creates an enum from field names used in the ProtoBuf definition.
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "USER_SPACE" => Some(Self::UserSpace),
+            "NODE_SPACE" => Some(Self::NodeSpace),
             _ => None,
         }
     }
