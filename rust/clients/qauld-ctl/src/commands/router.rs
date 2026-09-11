@@ -19,6 +19,21 @@ impl RouterSubcmd {
         }
     }
 
+    /// Renders an absolute epoch-ms deadline as a human interval.
+    fn relative(deadline_ms: u64, now_ms: u64) -> String {
+        if deadline_ms <= now_ms {
+            return "EXPIRED".into();
+        }
+        let secs = (deadline_ms - now_ms) / 1000;
+        if secs < 60 {
+            format!("in {secs}s")
+        } else if secs < 3600 {
+            format!("in {}m", secs / 60)
+        } else {
+            format!("in {}h {}m", secs / 3600, (secs % 3600) / 60)
+        }
+    }
+
     fn space_name(&self, space: i32) -> &'static str {
         match proto::IndexSpace::try_from(space) {
             Ok(proto::IndexSpace::NodeSpace) => "node",
@@ -121,6 +136,8 @@ impl RpcCommand for RouterSubcmd {
                         RouterV2Subcmd::Status => proto::RouterV2View::Status as i32,
                         RouterV2Subcmd::Table => proto::RouterV2View::Table as i32,
                         RouterV2Subcmd::Neighbours => proto::RouterV2View::Neighbours as i32,
+                        RouterV2Subcmd::Manifests => proto::RouterV2View::Manifests as i32,
+                        RouterV2Subcmd::Delegations => proto::RouterV2View::Delegations as i32,
                     },
                 })),
             },
@@ -377,6 +394,165 @@ impl RpcCommand for RouterSubcmd {
                         }
                         println!();
                     }
+                }
+            }
+            Some(router::Message::RouterV2Manifests(r)) => {
+                if json {
+                    let origins: Vec<serde_json::Value> = r
+                        .origins
+                        .iter()
+                        .map(|o| {
+                            serde_json::json!({
+                                "node_id": bs58::encode(&o.node_id).into_string(),
+                                "committed_version": o.committed_version,
+                                "advertised_version": o.advertised_version,
+                                "is_gateway": o.is_gateway,
+                                "learn_sphere": o.learn_sphere,
+                                "delegated_users": o.delegated_users,
+                                "trusted_users": o.trusted_users,
+                                "log_base": o.log_base,
+                                "has_signature": o.has_signature,
+                            })
+                        })
+                        .collect();
+                    println!("{}", serde_json::to_string_pretty(&origins)?);
+                } else {
+                    println!("\nrouter_v2 manifests\n");
+                    if r.origins.is_empty() {
+                        println!("  (none held)\n");
+                    } else {
+                        println!("  origin        | committed | advertised | gw  | sphere   | users | trusted | signed");
+                        for o in &r.origins {
+                            println!(
+                                "  {:13} | {:9} | {:10} | {:3} | {:8} | {:5} | {:7} | {}",
+                                bs58::encode(&o.node_id).into_string(),
+                                o.committed_version,
+                                o.advertised_version,
+                                if o.is_gateway { "yes" } else { "no" },
+                                if o.learn_sphere.is_empty() {
+                                    "-"
+                                } else {
+                                    &o.learn_sphere
+                                },
+                                o.delegated_users,
+                                o.trusted_users,
+                                if o.has_signature { "yes" } else { "no" },
+                            );
+                        }
+                        let stale: Vec<&proto::RouterV2ManifestOrigin> = r
+                            .origins
+                            .iter()
+                            .filter(|o| o.advertised_version != o.committed_version)
+                            .collect();
+                        let untrusted: Vec<&proto::RouterV2ManifestOrigin> = r
+                            .origins
+                            .iter()
+                            .filter(|o| o.trusted_users < o.delegated_users)
+                            .collect();
+                        if !stale.is_empty() {
+                            println!("\n  {} origin(s) advertise a version we have not committed — a pull is due or in flight (§10.8)", stale.len());
+                        }
+                        if !untrusted.is_empty() {
+                            println!("  {} origin(s) hold delegated users that are stored but not trusted — profile fetch has not resolved (§8.8 step 5)", untrusted.len());
+                        }
+                        println!();
+                    }
+                }
+            }
+            Some(router::Message::RouterV2Delegations(r)) => {
+                if json {
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&serde_json::json!({
+                            "manifest_version": r.manifest_version,
+                            "is_gateway": r.is_gateway,
+                            "log_base": r.log_base,
+                            "entries": r.entries.iter().map(|e| serde_json::json!({
+                                "user_id": bs58::encode(&e.user_id).into_string(),
+                                "timeout": e.timeout,
+                                "profile_version": e.profile_version,
+                                "is_hosted": e.is_hosted,
+                            })).collect::<Vec<_>>(),
+                            "subscriptions": r.subscriptions.iter().map(|s| serde_json::json!({
+                                "user_id": bs58::encode(&s.user_id).into_string(),
+                                "target_node_id": bs58::encode(&s.target_node_id).into_string(),
+                                "timeout": s.timeout,
+                                "acked_at_ms": s.acked_at_ms,
+                            })).collect::<Vec<_>>(),
+                            "outstanding": r.outstanding.iter().map(|o| serde_json::json!({
+                                "request_id": o.request_id,
+                                "user_id": bs58::encode(&o.user_id).into_string(),
+                                "target_node_id": bs58::encode(&o.target_node_id).into_string(),
+                                "sent_at_ms": o.sent_at_ms,
+                            })).collect::<Vec<_>>(),
+                            "declined": r.declined.iter().map(|d| serde_json::json!({
+                                "user_id": bs58::encode(&d.user_id).into_string(),
+                                "node_id": bs58::encode(&d.node_id).into_string(),
+                                "at_ms": d.at_ms,
+                            })).collect::<Vec<_>>(),
+                        }))?
+                    );
+                } else {
+                    let now = std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .map(|d| d.as_millis() as u64)
+                        .unwrap_or(0);
+                    println!("\nrouter_v2 delegations\n");
+                    println!(
+                        "  own manifest   v{}, gateway {}, log_base {}",
+                        r.manifest_version,
+                        if r.is_gateway { "yes" } else { "no" },
+                        r.log_base
+                    );
+                    println!("\n  entries ({}):", r.entries.len());
+                    if r.entries.is_empty() {
+                        println!("    (none)");
+                    }
+                    for e in &r.entries {
+                        println!(
+                            "    {} | {:10} | expires {} | profile_version {}",
+                            bs58::encode(&e.user_id).into_string(),
+                            if e.is_hosted { "self" } else { "cross-host" },
+                            Self::relative(e.timeout, now),
+                            e.profile_version,
+                        );
+                    }
+                    println!("\n  subscriptions ({}):", r.subscriptions.len());
+                    if r.subscriptions.is_empty() {
+                        println!("    (none)");
+                    }
+                    for s in &r.subscriptions {
+                        println!(
+                            "    {} -> {} | expires {}",
+                            bs58::encode(&s.user_id).into_string(),
+                            bs58::encode(&s.target_node_id).into_string(),
+                            Self::relative(s.timeout, now)
+                        );
+                    }
+                    println!("\n  outstanding ({}):", r.outstanding.len());
+                    if r.outstanding.is_empty() {
+                        println!("    (none)");
+                    }
+                    for o in &r.outstanding {
+                        println!(
+                            "    req {} | {} -> {}",
+                            o.request_id,
+                            bs58::encode(&o.user_id).into_string(),
+                            bs58::encode(&o.target_node_id).into_string()
+                        );
+                    }
+                    println!("\n  declined ({}):", r.declined.len());
+                    if r.declined.is_empty() {
+                        println!("    (none)");
+                    }
+                    for d in &r.declined {
+                        println!(
+                            "    {} refused by {}",
+                            bs58::encode(&d.user_id).into_string(),
+                            bs58::encode(&d.node_id).into_string()
+                        );
+                    }
+                    println!();
                 }
             }
             _ => {
