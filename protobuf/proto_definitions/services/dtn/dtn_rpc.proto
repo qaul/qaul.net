@@ -33,6 +33,14 @@ message DTN {
         DtnSetCustodyEnabledRequest dtn_set_custody_enabled_request = 13;
         // dtn set custody enabled response
         DtnSetCustodyEnabledResponse dtn_set_custody_enabled_response = 14;
+        // dtn issue custody grant request
+        DtnIssueGrantRequest dtn_issue_grant_request = 15;
+        // dtn issue custody grant response
+        DtnIssueGrantResponse dtn_issue_grant_response = 16;
+        // dtn import custody grant request
+        DtnImportGrantRequest dtn_import_grant_request = 17;
+        // dtn import custody grant response
+        DtnImportGrantResponse dtn_import_grant_response = 18;
     }
 }
 
@@ -137,6 +145,47 @@ message DtnSetCustodyEnabledRequest {
 // Response to custody enable/disable request
 message DtnSetCustodyEnabledResponse {
     // whether the request was successful
+    bool status = 1;
+    // error or status message
+    string message = 2;
+}
+
+// Request to issue a recipient-signed custody grant to a sender.
+//
+// The local user (recipient) authorizes `grantee` to have messages held in
+// custody on its behalf, up to `quota_bytes`. The response returns the signed
+// CustodyGrant bytes, which the grantee attaches to its DtnV2Container.
+message DtnIssueGrantRequest {
+    // sender authorized to deposit (qaul id bytes)
+    bytes grantee = 1;
+    // per-sender custody budget this grant authorizes
+    uint64 quota_bytes = 2;
+    // grant epoch (higher supersedes lower from the same recipient)
+    uint32 epoch = 3;
+    // optional expiry (ms since epoch), 0 = no expiry
+    uint64 not_after = 4;
+}
+
+// Response carrying the signed custody grant.
+message DtnIssueGrantResponse {
+    // whether the grant was issued
+    bool status = 1;
+    // encoded CustodyGrant protobuf bytes
+    bytes grant = 2;
+    // error or status message
+    string message = 3;
+}
+
+// Request to import a custody grant this node has been given by a recipient,
+// so the originate path can attach it to outgoing custody messages.
+message DtnImportGrantRequest {
+    // encoded CustodyGrant protobuf bytes
+    bytes grant = 1;
+}
+
+// Response to a grant import request.
+message DtnImportGrantResponse {
+    // whether the grant was accepted and stored
     bool status = 1;
     // error or status message
     string message = 2;
