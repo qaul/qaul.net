@@ -301,7 +301,10 @@ impl RouterInfo {
         let node_id = Node::get_id(state);
 
         // create routing table
-        let routes = router.routing_table.create_routing_info(neighbour, last_sent);
+        let mut routes = router.routing_table.create_routing_info(neighbour, last_sent);
+        // stamp each entry with the profile version we hold, so the receiver can
+        // detect an already-known user whose profile has been updated.
+        Users::fill_routing_versions(router, &mut routes);
 
         // create latest Feed ids table
         let feeds = router_net_proto::FeedIdsTable {
@@ -581,12 +584,16 @@ impl RouterInfo {
 
                                     match routes {
                                         Some(router_net_proto::RoutingInfoTable { entry }) => {
-                                            //check missed user ids
-                                            let user_ids = entry
+                                            // request users we don't know yet OR
+                                            // whose advertised profile version is
+                                            // newer than the one we hold (so a
+                                            // profile update on a known user
+                                            // propagates, not just new users).
+                                            let advertised = entry
                                                 .iter()
-                                                .map(|e| e.user.clone())
+                                                .map(|e| (e.user.clone(), e.version))
                                                 .collect::<Vec<_>>();
-                                            let missed_users = Users::get_missed_ids(router, &user_ids);
+                                            let missed_users = Users::get_stale_ids(router, &advertised);
                                             if !missed_users.is_empty() {
                                                 UserRequester::add(
                                                     router,

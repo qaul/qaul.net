@@ -450,6 +450,55 @@ impl Users {
         missed
     }
 
+    /// Select advertised users whose profile we are missing OR is stale.
+    ///
+    /// A user is (re-)requested when we do not know them at all, or when the
+    /// advertised profile `version` is newer than the one we hold. This is what
+    /// lets a profile *update* on an already-known user propagate: the previous
+    /// presence-only selection (`get_missed_ids`) silently dropped every version
+    /// bump for peers already in the table, so existing contacts never saw a
+    /// name/avatar/bio change.
+    pub fn get_stale_ids(
+        router: &super::RouterState,
+        advertised: &[(Vec<u8>, u32)],
+    ) -> Vec<Vec<u8>> {
+        let users = router.users.inner.read().unwrap();
+        Self::select_stale(advertised, |id| users.users.get(id).map(|u| u.version))
+    }
+
+    /// Pure selection used by [`get_stale_ids`], separated so it can be unit
+    /// tested without a full `RouterState`. `local_version` returns the version
+    /// we currently hold for an id, or `None` if the user is unknown.
+    fn select_stale<F: Fn(&[u8]) -> Option<u32>>(
+        advertised: &[(Vec<u8>, u32)],
+        local_version: F,
+    ) -> Vec<Vec<u8>> {
+        advertised
+            .iter()
+            .filter(|(id, version)| match local_version(id.as_slice()) {
+                None => true,
+                Some(known) => *version > known,
+            })
+            .map(|(id, _)| id.clone())
+            .collect()
+    }
+
+    /// Fill the `version` of each advertised routing entry from the profile
+    /// version we currently hold, so a receiving peer can detect that an
+    /// already-known user's profile changed. Called just before an outgoing
+    /// routing announcement is sent.
+    pub fn fill_routing_versions(
+        router: &super::RouterState,
+        table: &mut router_net_proto::RoutingInfoTable,
+    ) {
+        let users = router.users.inner.read().unwrap();
+        for entry in table.entry.iter_mut() {
+            if let Some(user) = users.users.get(entry.user.as_slice()) {
+                entry.version = user.version;
+            }
+        }
+    }
+
     /// get the public key of a known user
     pub fn get_pub_key(router: &super::RouterState, user_id: &PeerId) -> Option<PublicKey> {
         let user_id_bytes = user_id.to_bytes();
@@ -1434,6 +1483,39 @@ mod tests {
     // ---------------------------------------------------------------
     // Test cases
     // ---------------------------------------------------------------
+
+    // Regression: a profile *update* on an already-known user must propagate.
+    // The old presence-only selection (`get_missed_ids`) dropped every version
+    // bump for peers already in the table, so existing contacts never saw a
+    // name/avatar/bio change. Version-aware selection must re-request a known
+    // user whose advertised version is newer than the one we hold.
+    #[test]
+    fn stale_selection_requests_outdated_known_user() {
+        let (map, ids) = make_users(2);
+        let known_bumped = QaulId::to_q8id(ids[0]); // held at v0, advertised at v2
+        let known_same = QaulId::to_q8id(ids[1]); // held at v0, advertised at v0
+        let unknown = QaulId::to_q8id(gen_peer().0); // not in our table
+
+        let advertised = vec![
+            (known_bumped.clone(), 2),
+            (known_same.clone(), 0),
+            (unknown.clone(), 0),
+        ];
+        let selected = Users::select_stale(&advertised, |id| map.get(id).map(|u| u.version));
+
+        assert!(
+            selected.contains(&known_bumped),
+            "a version bump on a known user must be re-requested (the bug)"
+        );
+        assert!(
+            !selected.contains(&known_same),
+            "a same-version known user must not be re-requested"
+        );
+        assert!(
+            selected.contains(&unknown),
+            "an unknown user must still be requested"
+        );
+    }
 
     #[test]
     fn no_pagination_backwards_compat() {

@@ -62,6 +62,10 @@ message RoutingInfoEntry {
     bytes hc = 3;
     // propagation id
     uint32 pgid = 5;
+    // advertised signed-profile version, so a receiver can detect that an
+    // already-known user's profile changed and re-request it. 0 = unknown /
+    // legacy peer. Backward compatible: an absent field decodes to 0.
+    uint32 version = 6;
 }
 
 
