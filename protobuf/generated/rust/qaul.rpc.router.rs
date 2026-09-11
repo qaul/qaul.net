@@ -2,7 +2,7 @@
 /// router rpc message container
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Router {
-    #[prost(oneof = "router::Message", tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10")]
+    #[prost(oneof = "router::Message", tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12")]
     pub message: ::core::option::Option<router::Message>,
 }
 /// Nested message and enum types in `Router`.
@@ -30,6 +30,10 @@ pub mod router {
         RouterV2Table(super::RouterV2Table),
         #[prost(message, tag = "10")]
         RouterV2Neighbours(super::RouterV2Neighbours),
+        #[prost(message, tag = "11")]
+        RouterV2Manifests(super::RouterV2Manifests),
+        #[prost(message, tag = "12")]
+        RouterV2Delegations(super::RouterV2Delegations),
     }
 }
 /// UI request for routing table list
@@ -254,6 +258,105 @@ pub struct RouterV2Neighbour {
     #[prost(uint32, tag = "8")]
     pub dump_stale_nodes: u32,
 }
+/// manifests this node holds for other origins, spec section 10.8
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RouterV2Manifests {
+    #[prost(message, repeated, tag = "1")]
+    pub origins: ::prost::alloc::vec::Vec<RouterV2ManifestOrigin>,
+}
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RouterV2ManifestOrigin {
+    #[prost(bytes = "vec", tag = "1")]
+    pub node_id: ::prost::alloc::vec::Vec<u8>,
+    /// the signature-verified version we hold and can serve
+    #[prost(uint32, tag = "2")]
+    pub committed_version: u32,
+    /// freshest version heard in an advertisement; ahead of committed means a
+    /// pull is due or in flight
+    #[prost(uint32, tag = "3")]
+    pub advertised_version: u32,
+    #[prost(bool, tag = "4")]
+    pub is_gateway: bool,
+    /// sphere the manifest was learned over: "", "local" or "internet".
+    /// Governs the serve-side seal of spec section 10.8.
+    #[prost(string, tag = "5")]
+    pub learn_sphere: ::prost::alloc::string::String,
+    #[prost(uint32, tag = "6")]
+    pub delegated_users: u32,
+    /// of those, how many are trusted enough to feed route selection.
+    /// trusted < delegated means entries are stored but unusable, which is
+    /// the signature of a profile fetch that never resolved.
+    #[prost(uint32, tag = "7")]
+    pub trusted_users: u32,
+    #[prost(uint32, tag = "8")]
+    pub log_base: u32,
+    #[prost(bool, tag = "9")]
+    pub has_signature: bool,
+}
+/// this node's own manifest and its outgoing delegation state
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RouterV2Delegations {
+    #[prost(uint32, tag = "1")]
+    pub manifest_version: u32,
+    #[prost(bool, tag = "2")]
+    pub is_gateway: bool,
+    #[prost(uint32, tag = "3")]
+    pub log_base: u32,
+    #[prost(message, repeated, tag = "4")]
+    pub entries: ::prost::alloc::vec::Vec<RouterV2ManifestEntry>,
+    #[prost(message, repeated, tag = "5")]
+    pub subscriptions: ::prost::alloc::vec::Vec<RouterV2Subscription>,
+    #[prost(message, repeated, tag = "6")]
+    pub outstanding: ::prost::alloc::vec::Vec<RouterV2OutstandingSubscribe>,
+    #[prost(message, repeated, tag = "7")]
+    pub declined: ::prost::alloc::vec::Vec<RouterV2DeclinedTarget>,
+}
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RouterV2ManifestEntry {
+    #[prost(bytes = "vec", tag = "1")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
+    /// absolute expiry, ms since epoch, spec section 10.4
+    #[prost(uint64, tag = "2")]
+    pub timeout: u64,
+    /// host-asserted hint, spec section 10.1
+    #[prost(uint32, tag = "3")]
+    pub profile_version: u32,
+    /// true for a user we host (self-delegation), false for one delegated to
+    /// us by another host (cross-host)
+    #[prost(bool, tag = "4")]
+    pub is_hosted: bool,
+}
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RouterV2Subscription {
+    #[prost(bytes = "vec", tag = "1")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(bytes = "vec", tag = "2")]
+    pub target_node_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(uint64, tag = "3")]
+    pub timeout: u64,
+    #[prost(uint64, tag = "4")]
+    pub acked_at_ms: u64,
+}
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RouterV2OutstandingSubscribe {
+    #[prost(uint32, tag = "1")]
+    pub request_id: u32,
+    #[prost(bytes = "vec", tag = "2")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(bytes = "vec", tag = "3")]
+    pub target_node_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(uint64, tag = "4")]
+    pub sent_at_ms: u64,
+}
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
+pub struct RouterV2DeclinedTarget {
+    #[prost(bytes = "vec", tag = "1")]
+    pub user_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(bytes = "vec", tag = "2")]
+    pub node_id: ::prost::alloc::vec::Vec<u8>,
+    #[prost(uint64, tag = "3")]
+    pub at_ms: u64,
+}
 /// Connection modules
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
@@ -296,6 +399,8 @@ pub enum RouterV2View {
     Status = 0,
     Table = 1,
     Neighbours = 2,
+    Manifests = 3,
+    Delegations = 4,
 }
 impl RouterV2View {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -307,6 +412,8 @@ impl RouterV2View {
             Self::Status => "STATUS",
             Self::Table => "TABLE",
             Self::Neighbours => "NEIGHBOURS",
+            Self::Manifests => "MANIFESTS",
+            Self::Delegations => "DELEGATIONS",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
@@ -315,6 +422,8 @@ impl RouterV2View {
             "STATUS" => Some(Self::Status),
             "TABLE" => Some(Self::Table),
             "NEIGHBOURS" => Some(Self::Neighbours),
+            "MANIFESTS" => Some(Self::Manifests),
+            "DELEGATIONS" => Some(Self::Delegations),
             _ => None,
         }
     }

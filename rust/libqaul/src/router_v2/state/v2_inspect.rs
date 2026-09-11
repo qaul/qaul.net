@@ -4,9 +4,20 @@
 //! The v2-native inspector
 
 use crate::{
-    router::proto,
-    router_v2::{index::Space, RouterV2State},
+    QaulState, router::proto, router_v2::{self, RouterV2State, index::Space},
 };
+
+/// One origin's manifest state
+struct OriginSnapshot {
+    id: [u8; 8],
+    committed: u32,
+    advertised: u32,
+    is_gateway: bool,
+    learn_sphere: Option<router_v2::Sphere>,
+    log_base: u32,
+    has_signature: bool,
+    delegated: Vec<[u8; 8]>,
+}
 
 impl RouterV2State {
     /// §8.2: what this node currently is.
@@ -66,9 +77,6 @@ impl RouterV2State {
 
     /// §8.2: the routing table as v2 actually holds it, both index spaces.
     pub fn rpc_send_v2_table(&self, state: &crate::QaulState, request_id: String, now_ms: u64) {
-        // Snapshot both dictionaries before touching the routing table.
-        // `retire_expired` takes the dictionary before the table, so reading
-        // them in the opposite order would invert the lock ordering.
         let user_dict = self.user_dict.read().unwrap().forward_dir.clone();
         let node_dict = self.node_dict.read().unwrap().forward_dir.clone();
 
@@ -149,6 +157,145 @@ impl RouterV2State {
             state,
             request_id,
             proto::router::Message::RouterV2Neighbours(proto::RouterV2Neighbours { neighbours }),
+        );
+    }
+}
+
+impl RouterV2State {
+    /// §8.3: manifests held for other origins.
+    pub fn rpc_send_v2_manifests(&self, state: &QaulState, request_id: String) {
+        let snapshot: Vec<OriginSnapshot> = {
+            let nodes = self.nodes.read().unwrap();
+            nodes
+                .iter()
+                .map(|(id, arc)| {
+                    let node = arc.read().unwrap();
+                    OriginSnapshot {
+                        id: *id,
+                        committed: node.manifest_version,
+                        advertised: node.advertised_version,
+                        is_gateway: node.is_gateway,
+                        learn_sphere: node.learn_sphere,
+                        log_base: node.manifest_log.log_base,
+                        has_signature: node.manifest_signature.is_some(),
+                        delegated: node.delegated_users.iter().map(|d| d.user_id).collect(),
+                    }
+                })
+                .collect()
+        };
+
+        let mut origins = Vec::with_capacity(snapshot.len());
+        for origin in snapshot {
+            let trusted = {
+                let users = self.users.read().unwrap();
+                origin
+                    .delegated
+                    .iter()
+                    .filter(|user_id| {
+                        users.get(user_id).is_some_and(|arc| {
+                            arc.read().unwrap().delegation_gateways.iter().any(|weak| {
+                                weak.upgrade()
+                                    .is_some_and(|node| node.read().unwrap().id == origin.id)
+                            })
+                        })
+                    })
+                    .count() as u32
+            };
+
+            origins.push(proto::RouterV2ManifestOrigin {
+                node_id: origin.id.to_vec(),
+                committed_version: origin.committed,
+                advertised_version: origin.advertised,
+                is_gateway: origin.is_gateway,
+                learn_sphere: match origin.learn_sphere {
+                    Some(crate::router_v2::Sphere::Local) => "local".into(),
+                    Some(crate::router_v2::Sphere::Internet) => "internet".into(),
+                    None => String::new(),
+                },
+                delegated_users: origin.delegated.len() as u32,
+                trusted_users: trusted,
+                log_base: origin.log_base,
+                has_signature: origin.has_signature,
+            });
+        }
+        origins.sort_by(|a, b| a.node_id.cmp(&b.node_id));
+
+        self.send_router_rpc(
+            state,
+            request_id,
+            proto::router::Message::RouterV2Manifests(proto::RouterV2Manifests { origins }),
+        );
+    }
+
+    /// §8.3: our own manifest plus the outgoing cross-host delegation state.
+    pub fn rpc_send_v2_delegations(&self, state: &QaulState, request_id: String) {
+        let hosted = self.hosted_user_ids();
+
+        let (manifest_version, is_gateway, entries) = {
+            let manifest = self.manifest.read().unwrap();
+            let entries: Vec<proto::RouterV2ManifestEntry> = manifest
+                .entries()
+                .iter()
+                .map(|e| proto::RouterV2ManifestEntry {
+                    user_id: e.user_id.to_vec(),
+                    timeout: e.timeout,
+                    profile_version: e.profile_version,
+                    is_hosted: hosted.contains(&e.user_id),
+                })
+                .collect();
+            (manifest.manifest_version, manifest.is_gateway, entries)
+        };
+
+        let subscriptions = self
+            .subscriptions
+            .read()
+            .unwrap()
+            .iter()
+            .map(|(user_id, s)| proto::RouterV2Subscription {
+                user_id: user_id.to_vec(),
+                target_node_id: s.target_node_id.to_vec(),
+                timeout: s.timeout,
+                acked_at_ms: s.acked_at_ms,
+            })
+            .collect();
+
+        let outstanding = self
+            .outstanding_subscribes
+            .read()
+            .unwrap()
+            .iter()
+            .map(|(request_id, o)| proto::RouterV2OutstandingSubscribe {
+                request_id: *request_id,
+                user_id: o.request.user_id.to_vec(),
+                target_node_id: o.request.target_node_id.to_vec(),
+                sent_at_ms: o.sent_at_ms,
+            })
+            .collect();
+
+        let declined = self
+            .declined_targets
+            .read()
+            .unwrap()
+            .iter()
+            .map(|((user_id, node_id), at)| proto::RouterV2DeclinedTarget {
+                user_id: user_id.to_vec(),
+                node_id: node_id.to_vec(),
+                at_ms: *at,
+            })
+            .collect();
+
+        self.send_router_rpc(
+            state,
+            request_id,
+            proto::router::Message::RouterV2Delegations(proto::RouterV2Delegations {
+                manifest_version,
+                is_gateway,
+                log_base: self.own_manifest_log.read().unwrap().log_base,
+                entries,
+                subscriptions,
+                outstanding,
+                declined,
+            }),
         );
     }
 }

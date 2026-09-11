@@ -210,6 +210,12 @@ impl Router {
                             Ok(proto::RouterV2View::Neighbours) => {
                                 v2.rpc_send_v2_neighbours(state, request_id)
                             }
+                            Ok(proto::RouterV2View::Manifests) => {
+                                v2.rpc_send_v2_manifests(state, request_id)
+                            }
+                            Ok(proto::RouterV2View::Delegations) => {
+                                v2.rpc_send_v2_delegations(state, request_id)
+                            }
                             Err(_) => log::debug!("unknown router v2 view {}", request.view),
                         }
                     }
