@@ -384,18 +384,46 @@ impl Configuration {
         let path = Path::new(storage_path);
         let config_path = path.join("config.yaml");
 
+        // A present-but-unparseable config must NOT be silently discarded: the
+        // default path regenerates the node identity and drops every user
+        // account (see `Node::new`, which regenerates when `initialized == 0`).
+        // Rename the bad file aside so the identity/accounts stay recoverable,
+        // then start with defaults. A genuinely missing file is normal first run.
+        let backup_corrupt = |reason: &str| {
+            if config_path.exists() {
+                let backup = path.join("config.yaml.corrupt");
+                match fs::rename(&config_path, &backup) {
+                    Ok(()) => log::error!(
+                        "config {} — preserved corrupt file at {:?}, using defaults",
+                        reason,
+                        backup
+                    ),
+                    Err(re) => log::error!(
+                        "config {} — could NOT back up corrupt config to {:?}: {}",
+                        reason,
+                        backup,
+                        re
+                    ),
+                }
+            } else {
+                log::error!("no configuration file found, creating one.");
+            }
+        };
+
         match Config::builder()
             .add_source(File::with_name(&config_path.to_str().unwrap()))
             .build()
         {
-            Err(_) => {
-                log::error!("no configuration file found, creating one.");
+            // Missing file OR present-but-malformed (e.g. truncated by an
+            // interrupted write) both surface as a build error.
+            Err(e) => {
+                backup_corrupt(&format!("unparseable: {}", e));
                 Configuration::default()
             }
             Ok(c) => match c.try_deserialize::<Configuration>() {
                 Ok(config) => config,
                 Err(e) => {
-                    log::error!("failed to deserialize configuration: {}, using defaults", e);
+                    backup_corrupt(&format!("failed to deserialize: {}", e));
                     Configuration::default()
                 }
             },
@@ -405,16 +433,35 @@ impl Configuration {
     /// Save configuration to a specific path (instance-based)
     pub fn save_to_path(&self, storage_path: &str) {
         // create yaml configuration format
-        let yaml = serde_yaml_ng::to_string(self).expect("Couldn't encode into YAML values.");
+        let yaml = match serde_yaml_ng::to_string(self) {
+            Ok(y) => y,
+            Err(e) => {
+                log::error!("could not encode configuration to YAML: {}", e);
+                return;
+            }
+        };
 
         // create path to config file
         let path = Path::new(storage_path);
         let config_path = path.join("config.yaml");
+        let tmp_path = path.join("config.yaml.tmp");
 
         log::trace!("Writing to Path {:?}, {:?}", path, config_path);
 
-        fs::write(config_path.clone(), yaml)
-            .expect(&format!("Could not write config to {:?}.", config_path));
+        // Atomic write: write to a temp file, then rename it over the real one.
+        // A crash / kill / disk-full mid-write can otherwise leave config.yaml
+        // truncated, which fails to parse on next boot and (previously) reset the
+        // whole config to defaults — permanently destroying the node identity and
+        // all user accounts. `rename` is atomic, so config.yaml is always either
+        // the old or the new complete file, never a partial one.
+        if let Err(e) = fs::write(&tmp_path, yaml) {
+            log::error!("could not write config temp file {:?}: {}", tmp_path, e);
+            return;
+        }
+        if let Err(e) = fs::rename(&tmp_path, &config_path) {
+            log::error!("could not persist config to {:?}: {}", config_path, e);
+            let _ = fs::remove_file(&tmp_path);
+        }
     }
 
     /// Initialize configuration, loading from disk into QaulState.
@@ -539,5 +586,52 @@ impl Configuration {
 
         fs::write(config_path.clone(), yaml)
             .expect(&format!("Could not write config to {:?}.", config_path));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Configuration;
+    use std::fs;
+
+    // A present-but-unparseable config must be preserved (backed up), not
+    // silently discarded — otherwise the default path regenerates the node
+    // identity and drops every user account (permanent data loss).
+    #[test]
+    fn corrupt_config_is_backed_up_not_silently_lost() {
+        let dir = tempfile::tempdir().unwrap();
+        let p = dir.path().to_str().unwrap();
+        let cfg_path = dir.path().join("config.yaml");
+        // valid YAML but wrong shape -> fails to deserialize into Configuration
+        let garbage = b"unexpected_field: 123\n";
+        fs::write(&cfg_path, garbage).unwrap();
+
+        let cfg = Configuration::load_or_create(p);
+        // the node can still start on defaults
+        assert_eq!(cfg.node.initialized, 0);
+        // ...but the original file is preserved for recovery, not discarded
+        let backup = dir.path().join("config.yaml.corrupt");
+        assert!(backup.exists(), "corrupt config must be backed up");
+        assert_eq!(fs::read(&backup).unwrap(), garbage);
+    }
+
+    // save must be atomic (temp file + rename, no partial leftover) and
+    // round-trip the node identity, so an interrupted write can't truncate
+    // config.yaml.
+    #[test]
+    fn save_is_atomic_and_round_trips() {
+        let dir = tempfile::tempdir().unwrap();
+        let p = dir.path().to_str().unwrap();
+        let mut cfg = Configuration::default();
+        cfg.node.initialized = 1;
+        cfg.node.id = "test-node-id".to_string();
+        cfg.save_to_path(p);
+
+        assert!(!dir.path().join("config.yaml.tmp").exists(), "temp file must be renamed away");
+        assert!(dir.path().join("config.yaml").exists());
+
+        let loaded = Configuration::load_or_create(p);
+        assert_eq!(loaded.node.initialized, 1);
+        assert_eq!(loaded.node.id, "test-node-id");
     }
 }
