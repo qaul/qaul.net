@@ -3,11 +3,14 @@ part of 'chat_tab_test.dart';
 class StubLibqaulWorker implements LibqaulWorker {
   StubLibqaulWorker(this.ref);
 
+  static final sentTexts = <String>[];
+
   final Ref ref;
   final _logger = Logger('StubLibqaulWorker');
 
   @override
   Future<void> sendMessage(Uint8List chatId, String content) async {
+    sentTexts.add(content);
     _logger.info('sending message "$content" to chat id: "$chatId"');
     final room = ref.read(currentOpenChatRoom);
 
