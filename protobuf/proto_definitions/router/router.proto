@@ -16,6 +16,8 @@ message Router {
         RouterV2Status router_v2_status = 8;
         RouterV2Table router_v2_table = 9;
         RouterV2Neighbours router_v2_neighbours = 10;
+        RouterV2Manifests router_v2_manifests = 11;
+        RouterV2Delegations router_v2_delegations = 12;
     }
 }
 
@@ -141,6 +143,8 @@ enum RouterV2View {
     STATUS = 0;
     TABLE = 1;
     NEIGHBOURS = 2;
+    MANIFESTS = 3;
+    DELEGATIONS = 4;
 }
 
 // the two independent index spaces of spec section 3.5
@@ -220,4 +224,72 @@ message RouterV2Neighbour {
     // bindings an in-flight INDEX_DUMP has not yet confirmed, spec section 8.4
     uint32 dump_stale_users = 7;
     uint32 dump_stale_nodes = 8;
+}
+
+
+// manifests this node holds for other origins, spec section 10.8
+message RouterV2Manifests {
+    repeated RouterV2ManifestOrigin origins = 1;
+}
+
+message RouterV2ManifestOrigin {
+    bytes node_id = 1;
+    // the signature-verified version we hold and can serve
+    uint32 committed_version = 2;
+    // freshest version heard in an advertisement; ahead of committed means a
+    // pull is due or in flight
+    uint32 advertised_version = 3;
+    bool is_gateway = 4;
+    // sphere the manifest was learned over: "", "local" or "internet".
+    // Governs the serve-side seal of spec section 10.8.
+    string learn_sphere = 5;
+    uint32 delegated_users = 6;
+    // of those, how many are trusted enough to feed route selection.
+    // trusted < delegated means entries are stored but unusable, which is
+    // the signature of a profile fetch that never resolved.
+    uint32 trusted_users = 7;
+    uint32 log_base = 8;
+    bool has_signature = 9;
+}
+
+// this node's own manifest and its outgoing delegation state
+message RouterV2Delegations {
+    uint32 manifest_version = 1;
+    bool is_gateway = 2;
+    uint32 log_base = 3;
+    repeated RouterV2ManifestEntry entries = 4;
+    repeated RouterV2Subscription subscriptions = 5;
+    repeated RouterV2OutstandingSubscribe outstanding = 6;
+    repeated RouterV2DeclinedTarget declined = 7;
+}
+
+message RouterV2ManifestEntry {
+    bytes user_id = 1;
+    // absolute expiry, ms since epoch, spec section 10.4
+    uint64 timeout = 2;
+    // host-asserted hint, spec section 10.1
+    uint32 profile_version = 3;
+    // true for a user we host (self-delegation), false for one delegated to
+    // us by another host (cross-host)
+    bool is_hosted = 4;
+}
+
+message RouterV2Subscription {
+    bytes user_id = 1;
+    bytes target_node_id = 2;
+    uint64 timeout = 3;
+    uint64 acked_at_ms = 4;
+}
+
+message RouterV2OutstandingSubscribe {
+    uint32 request_id = 1;
+    bytes user_id = 2;
+    bytes target_node_id = 3;
+    uint64 sent_at_ms = 4;
+}
+
+message RouterV2DeclinedTarget {
+    bytes user_id = 1;
+    bytes node_id = 2;
+    uint64 at_ms = 3;
 }

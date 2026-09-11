@@ -592,6 +592,11 @@ pub enum RouterV2Subcmd {
     Table,
     /// neighbours with their per-neighbour mirror-dictionary state
     Neighbours,
+    /// manifests held for other origins: committed vs advertised version,
+    /// and how many delegated users are actually trusted
+    Manifests,
+    /// this node's own manifest and its outgoing cross-host delegation state
+    Delegations,
 }
 
 #[derive(Args, Debug)]

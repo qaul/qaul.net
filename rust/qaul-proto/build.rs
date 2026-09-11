@@ -18,6 +18,12 @@ fn main() {
     let to = Path::new("../../protobuf/generated/rust");
     let proto_root = &["../../protobuf/proto_definitions"];
 
+    // Without this, cargo has no idea the .proto files are inputs: it only
+    // watches files inside the crate. Editing a definition would then leave
+    // the generated Rust stale until this crate happened to rebuild for some
+    // unrelated reason, which fails as a confusing "type not found".
+    println!("cargo:rerun-if-changed=../../protobuf/proto_definitions");
+
     // --- Pass 1: compile common.proto by itself so qaul.common.rs is generated ---
     match prost_build::Config::new().compile_protos(&["common/common.proto"], proto_root) {
         Ok(_) => {
