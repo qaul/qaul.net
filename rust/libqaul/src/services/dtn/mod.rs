@@ -1071,10 +1071,10 @@ impl Dtn {
             Some(ua) => ua,
             None => {
                 log::error!("DtnRoutedV2: user account not found for {}", user_id.to_base58());
-                if let Some(default_user) = UserAccounts::get_default_user(state) {
+                if let Some(local_user) = UserAccounts::get_authenticated_user(state) {
                     Self::send_v2_response(
                         state,
-                        &default_user,
+                        &local_user,
                         sender_id,
                         &routed_v2.original_signature,
                         proto::dtn_response::ResponseType::Rejected,
@@ -1674,8 +1674,8 @@ impl Dtn {
         for (_sig, v2_entry) in &to_forward {
             if let Ok(routed_v2) = proto::DtnRoutedV2::decode(&v2_entry.routed_v2_bytes[..]) {
                 if let Ok(recv_id) = PeerId::from_bytes(&v2_entry.receiver_id) {
-                    // We need a user account to send from. Use the first local account.
-                    if let Some(user_account) = UserAccounts::get_default_user(state) {
+                    // We need a user account to send from. Use the signed-in local account.
+                    if let Some(user_account) = UserAccounts::get_authenticated_user(state) {
                         Self::try_forward_v2(state, &user_account, &routed_v2, &recv_id);
                     }
                 }

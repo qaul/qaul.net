@@ -1355,7 +1355,7 @@ impl Crypto {
 
     /// Handle a `TriggerRotationRequest`.
     ///
-    /// Resolves the caller's default user account, validates the
+    /// Resolves the signed-in local user account, validates the
     /// `remote_id` bytes, and delegates to `perform_rotation`. When
     /// rotation is disabled in the current configuration the request
     /// is rejected even though `perform_rotation` itself does not
@@ -1406,10 +1406,10 @@ impl Crypto {
             }
         };
 
-        let user_account = match UserAccounts::get_default_user(state) {
+        let user_account = match UserAccounts::get_authenticated_user(state) {
             Some(u) => u,
             None => {
-                out.error = "no default user account".into();
+                out.error = "no signed-in user account".into();
                 return send(out);
             }
         };

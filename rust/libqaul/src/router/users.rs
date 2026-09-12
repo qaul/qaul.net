@@ -1014,12 +1014,12 @@ impl Users {
 
     /// Build users list from those found in the users store.
     ///
-    /// Only completes successfully if there is a default user account, otherwise it always returns
+    /// Only completes successfully if there is a signed-in user account, otherwise it always returns
     /// an empty list.
     fn build_user_list(state: &crate::QaulState, router: &super::RouterState, filter: UserFilter, offset: u32, limit: u32, request_id: String) {
         let users = router.users.inner.read().unwrap();
 
-        let user_list = if let Some(account) = UserAccounts::get_default_user(state) {
+        let user_list = if let Some(account) = UserAccounts::get_authenticated_user(state) {
             let online_users = RoutingTable::get_online_users_info(router);
             build_user_list_from(
                 &users.users,
@@ -1052,7 +1052,7 @@ impl Users {
         limit: u32,
         request_id: String,
     ) {
-        let user_list = if let Some(account) = UserAccounts::get_default_user(state) {
+        let user_list = if let Some(account) = UserAccounts::get_authenticated_user(state) {
             Self::build_user_search_list(router, query, online_only, offset, limit, &account.id)
         } else {
             empty_user_list(offset, limit)

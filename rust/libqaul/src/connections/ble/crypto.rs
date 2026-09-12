@@ -113,8 +113,8 @@ impl BleCryptoModule {
     ) -> Option<proto_net::NoiseHandshake> {
         log::info!("BLE crypto: initiating handshake with {:?}", small_id);
 
-        // Get the default user account
-        let user_account = match UserAccounts::get_default_user(state) {
+        // Get the signed-in user account
+        let user_account = match UserAccounts::get_authenticated_user(state) {
             Some(account) => account,
             None => {
                 log::error!("BLE crypto: no user account available for handshake");
@@ -190,8 +190,8 @@ impl BleCryptoModule {
     ) -> Result<proto_net::NoiseHandshake, String> {
         log::info!("BLE crypto: processing handshake 1 from {:?}", small_id);
 
-        // Get the default user account
-        let user_account = match UserAccounts::get_default_user(qaul_state) {
+        // Get the signed-in user account
+        let user_account = match UserAccounts::get_authenticated_user(qaul_state) {
             Some(account) => account,
             None => {
                 return Err("No user account available".to_string());
