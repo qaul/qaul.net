@@ -21,6 +21,22 @@ void main() {
     id: Uint8List.fromList('testUserId'.codeUnits),
   );
 
+  ChatRoom makeRoom(String id, int unreadCount) => ChatRoom(
+    conversationId: Uint8List.fromList(id.codeUnits),
+    name: id,
+    unreadCount: unreadCount,
+  );
+
+  GroupInvite makeInvite(String id) => GroupInvite(
+    senderId: Uint8List.fromList('sender'.codeUnits),
+    receivedAt: DateTime(2026, 1, 1),
+    groupDetails: ChatRoom(
+      conversationId: Uint8List.fromList(id.codeUnits),
+      name: id,
+      isDirectChat: false,
+    ),
+  );
+
   setUp(() {
     SharedPreferences.setMockInitialValues({});
   });
@@ -210,6 +226,138 @@ void main() {
       await tester.pump();
 
       expect(find.text('2'), findsOneWidget);
+    });
+
+    testWidgets('chat badge reflects total unread rooms', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(400, 800));
+      final container = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith((_) => testUser),
+          publicNotificationControllerProvider.overrideWith(
+            (ref) => StubPublicNotificationController(ref),
+          ),
+          chatNotificationControllerProvider.overrideWith(
+            (ref) => StubChatNotificationController(ref),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      container.read(chatRoomsProvider.notifier)
+        ..add(makeRoom('roomA', 2))
+        ..add(makeRoom('roomB', 3));
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: QaulApp.lightTheme,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Material(
+              child: QaulNavBarDecorator(
+                child: (pageViewKey) => SizedBox(key: pageViewKey),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('5'), findsOneWidget);
+    });
+
+    testWidgets('chat badge includes pending group invites', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(400, 800));
+      final container = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith((_) => testUser),
+          publicNotificationControllerProvider.overrideWith(
+            (ref) => StubPublicNotificationController(ref),
+          ),
+          chatNotificationControllerProvider.overrideWith(
+            (ref) => StubChatNotificationController(ref),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      container.read(chatRoomsProvider.notifier).add(makeRoom('roomA', 2));
+      final invite = makeInvite('invitedRoom');
+      container.read(groupInvitesProvider.notifier).add(invite);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: QaulApp.lightTheme,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Material(
+              child: QaulNavBarDecorator(
+                child: (pageViewKey) => SizedBox(key: pageViewKey),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('3'), findsOneWidget);
+
+      container.read(groupInvitesProvider.notifier).retainAll(const []);
+      await tester.pump();
+
+      expect(find.text('2'), findsOneWidget);
+    });
+
+    testWidgets('opening chat tab does not clear unread chat badge', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(400, 800));
+      final container = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith((_) => testUser),
+          publicNotificationControllerProvider.overrideWith(
+            (ref) => StubPublicNotificationController(ref),
+          ),
+          chatNotificationControllerProvider.overrideWith(
+            (ref) => StubChatNotificationController(ref),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final unreadRoom = makeRoom('roomA', 4);
+      container.read(chatRoomsProvider.notifier).add(unreadRoom);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: QaulApp.lightTheme,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Material(
+              child: QaulNavBarDecorator(
+                child: (pageViewKey) => SizedBox(key: pageViewKey),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('4'), findsOneWidget);
+
+      tester.widget<QaulNavBar>(find.byType(QaulNavBar)).onTabSelected(
+        TabType.chat,
+      );
+      await tester.pump();
+
+      expect(find.text('4'), findsOneWidget);
+
+      container.read(chatRoomsProvider.notifier).replacePreservingOrder(
+        unreadRoom.copyWith(unreadCount: 0),
+      );
+      await tester.pump();
+
+      expect(find.text('4'), findsNothing);
     });
 
     testWidgets('selecting overflow menu item navigates to route', (tester) async {

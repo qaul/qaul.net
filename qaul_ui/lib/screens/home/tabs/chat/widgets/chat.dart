@@ -71,7 +71,14 @@ Future<void> openChat(
   required User user,
   User? otherUser,
 }) async {
-  ref.read(currentOpenChatRoom.notifier).state = room;
+  final openedRoom = room.unreadCount > 0
+      ? room.copyWith(unreadCount: 0)
+      : room;
+  final chatRoomsState = ref.read(chatRoomsProvider.notifier);
+  if (chatRoomsState.contains(room)) {
+    chatRoomsState.replacePreservingOrder(openedRoom);
+  }
+  ref.read(currentOpenChatRoom.notifier).state = openedRoom;
 
   bool isMobile =
       MediaQuery.of(context).size.width < Responsiveness.kTabletBreakpoint;
