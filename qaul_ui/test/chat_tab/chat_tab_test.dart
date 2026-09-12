@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:local_notifications/src/local_notifications.dart';
@@ -125,7 +126,37 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(StubLibqaulWorker.sentTexts, ['hello footer']);
-    expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, '');
+    expect(
+      tester.widget<TextField>(find.byType(TextField)).controller!.text,
+      '',
+    );
+  });
+
+  testWidgets('chat footer sends on Enter and breaks line on Shift+Enter', (
+    tester,
+  ) async {
+    await pumpChatScreen(tester, buildGroupChat());
+
+    final field = find.byType(TextField);
+    await tester.tap(field);
+    await tester.enterText(field, 'first line');
+    await tester.pump();
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
+    await tester.pump();
+
+    expect(StubLibqaulWorker.sentTexts, isEmpty);
+    expect(tester.widget<TextField>(field).controller!.text, 'first line\n');
+
+    await tester.enterText(field, 'first line\nsecond line');
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+
+    expect(StubLibqaulWorker.sentTexts, ['first line\nsecond line']);
+    expect(tester.widget<TextField>(field).controller!.text, '');
   });
 
   testWidgets('chat footer prevents empty sends', (tester) async {
@@ -159,6 +190,21 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(StubLibqaulWorker.sentTexts, isEmpty);
+  });
+
+  testWidgets('disabled room ignores pointers on the chat footer', (
+    tester,
+  ) async {
+    await pumpChatScreen(
+      tester,
+      buildGroupChat(status: ChatRoomStatus.deactivated),
+    );
+
+    final field = find.byType(TextField);
+    await tester.tap(field, warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<TextField>(field).focusNode?.hasFocus, isNot(isTrue));
   });
 
   testWidgets('group header menu opens group settings', (tester) async {

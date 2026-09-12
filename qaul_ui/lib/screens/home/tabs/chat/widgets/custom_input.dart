@@ -52,6 +52,33 @@ class _ChatTextFooterState extends State<_ChatTextFooter> {
     _textController.clear();
   }
 
+  /// Hardware-keyboard send. [ChatFooter] only wires its send button, so Enter
+  /// has to go through the same trim/empty rules the button applies.
+  void _handleSendPressed() {
+    final trimmedText = _textController.text.trim();
+    if (trimmedText == '') return;
+    _handleSend(trimmedText);
+  }
+
+  void _insertNewLine() {
+    final value = _textController.value;
+    final selection = value.selection;
+
+    if (!selection.isValid) {
+      final newValue = '${value.text}\n';
+      _textController.value = TextEditingValue(
+        text: newValue,
+        selection: TextSelection.collapsed(offset: newValue.length),
+      );
+      return;
+    }
+
+    _textController.value = TextEditingValue(
+      text: value.text.replaceRange(selection.start, selection.end, '\n'),
+      selection: TextSelection.collapsed(offset: selection.start + 1),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final footer = ChatFooter(
@@ -60,7 +87,9 @@ class _ChatTextFooterState extends State<_ChatTextFooter> {
       onSend: _handleSend,
       onVoicePressed: widget.isDisabled ? null : widget.onSendAudioPressed,
       onCameraPressed: widget.isDisabled ? null : widget.onPickImagePressed,
-      onAttachmentPressed: widget.isDisabled ? null : widget.onAttachmentPressed,
+      onAttachmentPressed: widget.isDisabled
+          ? null
+          : widget.onAttachmentPressed,
       sendTooltip: AppLocalizations.of(context)!.sendTooltip,
       voiceTooltip: AppLocalizations.of(context)!.sendAudioTooltip,
       cameraTooltip: AppLocalizations.of(context)!.sendFileTooltip,
@@ -72,7 +101,36 @@ class _ChatTextFooterState extends State<_ChatTextFooter> {
       children: [
         Opacity(
           opacity: widget.isDisabled ? 0.3 : 1,
-          child: footer,
+          child: IgnorePointer(
+            ignoring: widget.isDisabled,
+            child: Shortcuts(
+              shortcuts: {
+                LogicalKeySet(LogicalKeyboardKey.enter):
+                    const SendMessageIntent(),
+                LogicalKeySet(
+                  LogicalKeyboardKey.enter,
+                  LogicalKeyboardKey.shift,
+                ): const NewLineIntent(),
+                LogicalKeySet(LogicalKeyboardKey.enter, LogicalKeyboardKey.alt):
+                    const NewLineIntent(),
+              },
+              child: Actions(
+                actions: {
+                  SendMessageIntent: CallbackAction<SendMessageIntent>(
+                    onInvoke: (SendMessageIntent intent) =>
+                        _handleSendPressed(),
+                  ),
+                  NewLineIntent: CallbackAction<NewLineIntent>(
+                    onInvoke: (NewLineIntent intent) {
+                      _insertNewLine();
+                      return null;
+                    },
+                  ),
+                },
+                child: Focus(autofocus: true, child: footer),
+              ),
+            ),
+          ),
         ),
         if (widget.isDisabled && widget.disabledMessage != null)
           Container(
@@ -209,9 +267,7 @@ class _CustomInputState extends State<_CustomInput> {
                       child: TextField(
                         controller: _textController,
                         style: const TextStyle(fontSize: 17),
-                        decoration: InputDecoration(
-                          labelText: widget.hintText,
-                        ),
+                        decoration: InputDecoration(labelText: widget.hintText),
                         focusNode: _inputFocusNode,
                         keyboardType: TextInputType.multiline,
                         maxLines: 5,
