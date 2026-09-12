@@ -107,9 +107,13 @@ class _ConnectedNavBarState extends ConsumerState<_ConnectedNavBar> {
     };
 
     final publicCount = publicController.newNotificationCount.value;
-    final chatCount = ref
+    // Pending group invites are not part of any room's unread count, so they
+    // are added on top of the unread message total.
+    final unreadMessages = ref
         .watch(chatRoomsProvider)
         .fold<int>(0, (total, room) => total + room.unreadCount);
+    final pendingInvites = ref.watch(groupInvitesProvider).length;
+    final chatCount = unreadMessages + pendingInvites;
 
     return QaulNavBar(
       vertical: widget.vertical,
