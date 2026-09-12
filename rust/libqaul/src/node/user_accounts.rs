@@ -127,11 +127,6 @@ impl UserAccounts {
         self.users.iter().find(|u| u.id == account_id).cloned()
     }
 
-    /// Get default user account (inner logic).
-    pub fn get_default_user_inner(&self) -> Option<UserAccount> {
-        self.users.first().cloned()
-    }
-
     /// Get all user accounts (inner logic).
     pub fn get_all_inner(&self) -> Vec<UserAccount> {
         self.users.clone()
@@ -351,24 +346,18 @@ impl UserAccounts {
         accounts.len_inner()
     }
 
-    /// Return the default user.
-    /// The first registered user account is returned.
-    pub fn get_default_user(state: &crate::QaulState) -> Option<UserAccount> {
-        let accounts = state.user_accounts.inner.read().unwrap();
-        accounts.get_default_user_inner()
-    }
-
-    /// Unlike `get_default_user`, this is session-aware so the UI reflects the logged account details.
+    /// Return the local user account that is currently signed in, if such exists.
+    /// Otherwise, returns the first registered account so single-account nodes keep working.
     pub fn get_authenticated_user(state: &crate::QaulState) -> Option<UserAccount> {
         let accounts = state.user_accounts.inner.read().unwrap();
         let authed = state.auth.authenticated_users.read().unwrap();
         let ids: Vec<Vec<u8>> = accounts.users.iter().map(|u| u.id.to_bytes()).collect();
-        Self::default_account_index(&ids, &authed, Timestamp::get_timestamp())
-            .map(|i| accounts.users[i].clone())
+        Self::default_account_index(&ids, &authed, Timestamp::get_timestamp()).map(|i| accounts.users[i].clone())
     }
 
-    /// Index of the first account with a live authenticated session, else 0
-    /// (or None when there are no accounts).
+    /// When an account is available, returns the index of the first authenticated account.
+    /// Returns `0` (the index of the default account) if there isn't an active auth session.
+    /// Returns None when there are no accounts in the node.
     fn default_account_index(
         ids: &[Vec<u8>],
         authed: &BTreeMap<Vec<u8>, u64>,
@@ -491,7 +480,7 @@ impl UserAccounts {
                                 };
                             }
                             None => {
-                                // there is no default user so send this information
+                                // there is no user account so send this information
                                 proto_message = proto::UserAccounts {
                                     message: Some(
                                         proto::user_accounts::Message::DefaultUserAccount(
