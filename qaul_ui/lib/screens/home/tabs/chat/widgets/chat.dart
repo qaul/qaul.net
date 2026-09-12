@@ -216,6 +216,80 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
+  void _openSendFileDialog(File file, ChatRoom room) {
+    showModalBottomSheet(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      builder: (context) {
+        final dialog = _SendFileDialog(
+          file,
+          room: room,
+          onSendPressed: (description) {
+            final worker = ref.read(qaulWorkerProvider);
+            worker.sendFile(
+              pathName: file.path,
+              conversationId: room.conversationId,
+              description: description.text,
+            );
+          },
+        );
+        if (!Platform.isIOS) return dialog;
+
+        final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+        return SingleChildScrollView(
+          child: Container(
+            padding: EdgeInsets.only(bottom: bottomPadding),
+            child: dialog,
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _openPhotoPicker(ChatRoom room) async {
+    File? file;
+    if (Platform.isAndroid || Platform.isIOS) {
+      final result = await ImagePicker().pickImage(source: ImageSource.camera);
+      if (result != null) file = File(result.path);
+    } else {
+      final result = await FilePicker.platform.pickFiles(type: FileType.image);
+      if (result?.files.single.path != null) {
+        file = File(result!.files.single.path!);
+      }
+    }
+
+    if (file == null || !mounted) return;
+    _openSendFileDialog(file, room);
+  }
+
+  Future<void> _openAttachmentPicker(ChatRoom room) async {
+    final result = await FilePicker.platform.pickFiles();
+    if (result?.files.single.path == null || !mounted) return;
+    _openSendFileDialog(File(result!.files.single.path!), room);
+  }
+
+  void _openAudioRecorder(ChatRoom room) {
+    showModalBottomSheet(
+      context: context,
+      enableDrag: false,
+      isDismissible: false,
+      builder: (_) {
+        return _RecordAudioDialog(
+          room: room,
+          onSendPressed: (file, description) {
+            final worker = ref.read(qaulWorkerProvider);
+            worker.sendFile(
+              pathName: file.path,
+              conversationId: room.conversationId,
+              description: description.text,
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget _buildChatHeader({
     required ChatRoom room,
     required AppLocalizations l10n,
@@ -372,151 +446,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   emptyState: Center(child: Text(l10n.chatEmptyState)),
                   bubbleBuilder: _bubbleBuilder,
                   systemMessageBuilder: _buildSystemMessage,
-                  customBottomWidget: _CustomInput(
+                  customBottomWidget: _ChatTextFooter(
                     isDisabled: room.status != ChatRoomStatus.active,
                     disabledMessage:
                         room.status != ChatRoomStatus.inviteAccepted
                         ? null
                         : 'Please wait for the admin to confirm your acceptance to send messages',
-                    sendButtonVisibilityMode: SendButtonVisibilityMode.editing,
                     hintText: _chatRenderMode == ChatRenderMode.group
                         ? l10n.groupChatMessageHint
                         : l10n.securePrivateMessageHint,
                     onSendPressed: sendMessage,
-                    onAttachmentPressed: (room.messages?.isEmpty ?? true)
-                        ? null
-                        : ({types.PartialText? text}) async {
-                            FilePickerResult? result;
-                            try {
-                              result = await FilePicker.platform.pickFiles();
-                            } catch (e) {
-                              debugPrint(e.toString());
-                            }
-
-                            if (result != null &&
-                                result.files.single.path != null) {
-                              File file = File(result.files.single.path!);
-
-                              if (!context.mounted) return;
-                              showModalBottomSheet(
-                                context: context,
-                                useSafeArea: true,
-                                isScrollControlled: true,
-                                builder: (context) {
-                                  final dialog = _SendFileDialog(
-                                    file,
-                                    room: room,
-                                    partialMessage: text?.text,
-                                    onSendPressed: (description) {
-                                      final worker = ref.read(
-                                        qaulWorkerProvider,
-                                      );
-                                      worker.sendFile(
-                                        pathName: file.path,
-                                        conversationId: room.conversationId,
-                                        description: description.text,
-                                      );
-                                    },
-                                  );
-                                  if (!Platform.isIOS) {
-                                    return dialog;
-                                  }
-
-                                  final bottomPadding = MediaQuery.of(
-                                    context,
-                                  ).viewInsets.bottom;
-                                  return SingleChildScrollView(
-                                    child: Container(
-                                      padding: EdgeInsets.only(
-                                        bottom: bottomPadding,
-                                      ),
-                                      child: dialog,
-                                    ),
-                                  );
-                                },
-                              );
-                            }
-                          },
-                    onPickImagePressed: !(Platform.isAndroid || Platform.isIOS)
-                        ? null
-                        : (room.messages?.isEmpty ?? true)
-                        ? null
-                        : ({types.PartialText? text}) async {
-                            final result = await ImagePicker().pickImage(
-                              source: ImageSource.camera,
-                            );
-
-                            if (result != null) {
-                              File file = File(result.path);
-
-                              if (!context.mounted) return;
-                              showModalBottomSheet(
-                                context: context,
-                                useSafeArea: true,
-                                isScrollControlled: true,
-                                builder: (context) {
-                                  final dialog = _SendFileDialog(
-                                    file,
-                                    room: room,
-                                    partialMessage: text?.text,
-                                    onSendPressed: (description) {
-                                      final worker = ref.read(
-                                        qaulWorkerProvider,
-                                      );
-                                      worker.sendFile(
-                                        pathName: file.path,
-                                        conversationId: room.conversationId,
-                                        description: description.text,
-                                      );
-                                    },
-                                  );
-                                  if (!Platform.isIOS) {
-                                    return dialog;
-                                  }
-
-                                  final bottomPadding = MediaQuery.of(
-                                    context,
-                                  ).viewInsets.bottom;
-                                  return SingleChildScrollView(
-                                    child: Container(
-                                      padding: EdgeInsets.only(
-                                        bottom: bottomPadding,
-                                      ),
-                                      child: dialog,
-                                    ),
-                                  );
-                                },
-                              );
-                            }
-                          },
-                    // the record package is not supported on Linux
                     onSendAudioPressed: Platform.isLinux
                         ? null
-                        : (room.messages?.isEmpty ?? true)
-                        ? null
-                        : ({types.PartialText? text}) async {
-                            // ignore: use_build_context_synchronously
-                            if (!context.mounted) return;
-                            showModalBottomSheet(
-                              context: context,
-                              enableDrag: false,
-                              isDismissible: false,
-                              builder: (_) {
-                                return _RecordAudioDialog(
-                                  room: room,
-                                  partialMessage: text?.text,
-                                  onSendPressed: (file, description) {
-                                    final worker = ref.read(qaulWorkerProvider);
-                                    worker.sendFile(
-                                      pathName: file.path,
-                                      conversationId: room.conversationId,
-                                      description: description.text,
-                                    );
-                                  },
-                                );
-                              },
-                            );
-                          },
+                        : () => _openAudioRecorder(room),
+                    onPickImagePressed: () => _openPhotoPicker(room),
+                    onAttachmentPressed: () => _openAttachmentPicker(room),
                   ),
                   onMessageTap: (context, message) async {
                     if (message is! types.FileMessage ||
