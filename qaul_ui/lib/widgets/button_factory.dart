@@ -6,6 +6,10 @@ class IconButtonFactory extends StatelessWidget {
     this.onPressed,
     this.icon = Icons.arrow_back_ios_rounded,
   });
+
+  static const double _buttonSize = 40.0;
+  static const double _splashRadius = 20.0;
+
   final VoidCallback? onPressed;
   final IconData icon;
 
@@ -16,12 +20,29 @@ class IconButtonFactory extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l18ns = AppLocalizations.of(context)!;
-    return IconButton(
-      splashRadius: 24,
-      tooltip: l18ns.backButtonTooltip,
-      icon: Icon(icon),
-      onPressed:
-          onPressed != null ? onPressed! : () => Navigator.maybePop(context),
+    return Center(
+      child: SizedBox.square(
+        dimension: _buttonSize,
+        child: IconButton(
+          splashRadius: _splashRadius,
+          tooltip: l18ns.backButtonTooltip,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints.tightFor(
+            width: _buttonSize,
+            height: _buttonSize,
+          ),
+          style: IconButton.styleFrom(
+            fixedSize: const Size.square(_buttonSize),
+            minimumSize: const Size.square(_buttonSize),
+            maximumSize: const Size.square(_buttonSize),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          icon: Icon(icon),
+          onPressed: onPressed != null
+              ? onPressed!
+              : () => Navigator.maybePop(context),
+        ),
+      ),
     );
   }
 }
@@ -51,10 +72,7 @@ class QaulButton extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(10.0),
-        child: Text(
-          label,
-          style: style ?? const TextStyle(fontSize: 16),
-        ),
+        child: Text(label, style: style ?? const TextStyle(fontSize: 16)),
       ),
     );
   }

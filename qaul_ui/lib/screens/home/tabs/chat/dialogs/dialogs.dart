@@ -16,15 +16,8 @@ class _CreateNewRoomDialog extends StatelessWidget {
           separatorBuilder: (_, _) => const Divider(height: 12.0),
           itemBuilder: (context, i) {
             if (i == 0) {
-              return ListTile(
-                leading: Stack(
-                  alignment: AlignmentDirectional.topStart,
-                  children: [
-                    QaulAvatar.groupSmall(),
-                    const Icon(Icons.add, size: 12),
-                  ],
-                ),
-                title: Text(l10n.createNewGroup),
+              return _CreateGroupListItem(
+                label: l10n.createNewGroup,
                 onTap: () async {
                   final result = await Navigator.push(
                     context,
@@ -42,6 +35,46 @@ class _CreateNewRoomDialog extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+class _CreateGroupListItem extends StatelessWidget {
+  const _CreateGroupListItem({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Stack(
+              alignment: AlignmentDirectional.topStart,
+              children: [
+                QaulAvatar.groupSmall(),
+                const Icon(Icons.add, size: 12),
+              ],
+            ),
+            const SizedBox(width: 20),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge!.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

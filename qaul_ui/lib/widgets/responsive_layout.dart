@@ -14,6 +14,10 @@ class ResponsiveLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (Platform.isIOS || Platform.isAndroid) {
+      return mobileBody;
+    }
+
     return LayoutBuilder(
       builder: (context, constraints) {
         if (Responsiveness.isTablet(context)) {

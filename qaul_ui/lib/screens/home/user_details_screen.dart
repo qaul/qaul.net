@@ -1,4 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -17,10 +19,7 @@ import '../../widgets/widgets.dart';
 import 'tabs/chat/widgets/chat.dart';
 
 class UserDetailsScreen extends HookConsumerWidget {
-  const UserDetailsScreen({
-    super.key,
-    required this.user,
-  });
+  const UserDetailsScreen({super.key, required this.user});
   final User user;
 
   @override
@@ -47,106 +46,112 @@ class UserDetailsScreen extends HookConsumerWidget {
       if (res is! bool || !res) return;
 
       final usersStore = ref.read(usersStoreProvider.notifier);
-      blocked ? await usersStore.unblockUser(user) : await usersStore.blockUser(user);
+      blocked
+          ? await usersStore.unblockUser(user)
+          : await usersStore.blockUser(user);
       if (!context.mounted) return;
       Navigator.pop(context);
     }, [l10n, ref, context.mounted]);
 
     return Scaffold(
-        appBar: AppBar(leading: const IconButtonFactory()),
-        body: ListView(
-          padding: MediaQuery.of(context)
-              .viewPadding
-              .add(const EdgeInsets.fromLTRB(16, 32, 16, 8)),
-          children: [
-            UserDetailsHeading(user),
-            ResponsiveLayout(
-              mobileBody: Column(
-                children: [
-                  SizedBox(
-                    width: 280,
+      appBar: AppBar(leading: const IconButtonFactory()),
+      body: ListView(
+        padding: EdgeInsets.fromLTRB(
+          16 + MediaQuery.of(context).viewPadding.left,
+          Platform.isIOS ? 20 : 32,
+          16 + MediaQuery.of(context).viewPadding.right,
+          8 + MediaQuery.of(context).viewPadding.bottom,
+        ),
+        children: [
+          UserDetailsHeading(user),
+          ResponsiveLayout(
+            mobileBody: Column(
+              children: [
+                SizedBox(
+                  width: 280,
+                  child: QaulButton(
+                    label: l10n.newChatTooltip,
+                    onPressed: () {
+                      final defaultUser = ref.watch(defaultUserProvider)!;
+                      final newRoom = ChatRoom.blank(otherUser: user);
+                      Navigator.pop(context);
+                      openChat(
+                        newRoom,
+                        ref: ref,
+                        context: context,
+                        user: defaultUser,
+                        otherUser: user,
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: 280,
+                  child: DisabledStateDecorator(
+                    isDisabled: blocked,
                     child: QaulButton(
-                      label: l10n.newChatTooltip,
-                      onPressed: () {
-                        final defaultUser = ref.watch(defaultUserProvider)!;
-                        final newRoom = ChatRoom.blank(otherUser: user);
-                        Navigator.pop(context);
-                        openChat(
-                          newRoom,
-                          ref: ref,
-                          context: context,
-                          user: defaultUser,
-                          otherUser: user,
-                        );
-                      },
+                      onPressed: blocked ? null : onVerifyUserPressed,
+                      label: verified ? l10n.unverify : l10n.verify,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: 280,
-                    child: DisabledStateDecorator(
-                      isDisabled: blocked,
-                      child: QaulButton(
-                        onPressed: blocked ? null : onVerifyUserPressed,
-                        label: verified ? l10n.unverify : l10n.verify,
-                      ),
-                    ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: 280,
+                  child: QaulButton(
+                    onPressed: onBlockUserPressed,
+                    label: blocked ? l10n.unblockUser : l10n.blockUser,
                   ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: 280,
+                ),
+              ],
+            ),
+            tabletBody: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 480,
+                  child: QaulButton(
+                    label: l10n.newChatTooltip,
+                    onPressed: () {
+                      final defaultUser = ref.watch(defaultUserProvider)!;
+                      final newRoom = ChatRoom.blank(otherUser: user);
+                      Navigator.pop(context);
+                      openChat(
+                        newRoom,
+                        ref: ref,
+                        context: context,
+                        user: defaultUser,
+                        otherUser: user,
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: 480,
+                  child: DisabledStateDecorator(
+                    isDisabled: blocked,
                     child: QaulButton(
-                      onPressed: onBlockUserPressed,
-                      label: blocked ? l10n.unblockUser : l10n.blockUser,
+                      onPressed: blocked ? null : onVerifyUserPressed,
+                      label: verified ? l10n.unverify : l10n.verify,
                     ),
                   ),
-                ],
-              ),
-              tabletBody: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 480,
-                    child: QaulButton(
-                      label: l10n.newChatTooltip,
-                      onPressed: () {
-                        final defaultUser = ref.watch(defaultUserProvider)!;
-                        final newRoom = ChatRoom.blank(otherUser: user);
-                        Navigator.pop(context);
-                        openChat(
-                          newRoom,
-                          ref: ref,
-                          context: context,
-                          user: defaultUser,
-                          otherUser: user,
-                        );
-                      },
-                    ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: 480,
+                  child: QaulButton(
+                    onPressed: onBlockUserPressed,
+                    label: blocked ? l10n.unblockUser : l10n.blockUser,
                   ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: 480,
-                    child: DisabledStateDecorator(
-                      isDisabled: blocked,
-                      child: QaulButton(
-                        onPressed: blocked ? null : onVerifyUserPressed,
-                        label: verified ? l10n.unverify : l10n.verify,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: 480,
-                    child: QaulButton(
-                      onPressed: onBlockUserPressed,
-                      label: blocked ? l10n.unblockUser : l10n.blockUser,
-                    ),
-                  ),
-                ],
-              ),
-            )
-          ],
-        ));
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   bool get verified => (user.isVerified ?? false);
@@ -205,21 +210,21 @@ class _VerifyUserDialog extends HookConsumerWidget {
           : null,
     );
 
-    final fetchSecurityNo = useCallback(
-      () async {
-        isLoading.value = true;
-        final no =
-            await ref.read(usersStoreProvider.notifier).getUserSecurityNumber(user);
-        if (no != null && no.userId.equals(user.id)) {
-          securityNo.value = no;
-        }
-        isLoading.value = false;
-      },
-      [],
-    );
+    final fetchSecurityNo = useCallback(() async {
+      isLoading.value = true;
+      final no = await ref
+          .read(usersStoreProvider.notifier)
+          .getUserSecurityNumber(user);
+      if (no != null && no.userId.equals(user.id)) {
+        securityNo.value = no;
+      }
+      isLoading.value = false;
+    }, []);
 
     useEffect(() {
-      if (!(securityNo.value?.userId.equals(user.id) ?? false)) fetchSecurityNo();
+      if (!(securityNo.value?.userId.equals(user.id) ?? false)) {
+        fetchSecurityNo();
+      }
       return () {};
     }, []);
 
@@ -257,9 +262,7 @@ class _VerifyUserDialog extends HookConsumerWidget {
 }
 
 class _SecurityNumberDisplay extends StatelessWidget {
-  const _SecurityNumberDisplay({
-    required this.securityNo,
-  });
+  const _SecurityNumberDisplay({required this.securityNo});
 
   final SecurityNumber securityNo;
 
@@ -284,17 +287,17 @@ class _SecurityNumberDisplay extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: _buildSecurityCodeRow(0)
-                      .intersperse(const SizedBox(width: 16))
-                      .toList(),
+                  children: _buildSecurityCodeRow(
+                    0,
+                  ).intersperse(const SizedBox(width: 16)).toList(),
                 ),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: _buildSecurityCodeRow(1)
-                      .intersperse(const SizedBox(width: 16))
-                      .toList(),
+                  children: _buildSecurityCodeRow(
+                    1,
+                  ).intersperse(const SizedBox(width: 16)).toList(),
                 ),
               ],
             ),
