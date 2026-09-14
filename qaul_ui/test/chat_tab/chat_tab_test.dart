@@ -284,11 +284,12 @@ void main() {
     );
   }
 
-  ChatRoom directRoomWith(User user) {
+  ChatRoom directRoomWith(User user, {DateTime? lastMessageTime}) {
     return ChatRoom(
       name: user.name,
       conversationId: user.conversationId ??
           Uint8List.fromList('${user.name}-conversation'.codeUnits),
+      lastMessageTime: lastMessageTime,
       members: [
         ChatRoomUser(defaultUser, joinedAt: DateTime(2000)),
         ChatRoomUser(user, joinedAt: DateTime(2000)),
@@ -365,14 +366,21 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Forward to'), findsOneWidget);
-    expect(find.byKey(const ValueKey('forward-recipient-search')), findsOneWidget);
-    expect(find.text('Groups'), findsOneWidget);
-    expect(find.text('Group Chat'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('forward-user-search-toggle')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('forward-group-search-toggle')),
+      findsOneWidget,
+    );
     expect(find.text('Users / Contacts'), findsOneWidget);
     expect(find.text(otherUser.name), findsOneWidget);
+    expect(find.text('Groups'), findsOneWidget);
+    expect(find.text('Group Chat'), findsOneWidget);
     expect(
-      tester.getTopLeft(find.text('Groups')).dy,
-      lessThan(tester.getTopLeft(find.text('Users / Contacts')).dy),
+      tester.getTopLeft(find.text('Users / Contacts')).dy,
+      lessThan(tester.getTopLeft(find.text('Groups')).dy),
     );
   });
 
@@ -416,7 +424,7 @@ void main() {
     );
   });
 
-  testWidgets('recipient search filters users and groups', (tester) async {
+  testWidgets('recipient searches filter their own sections', (tester) async {
     await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);
 
     final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
@@ -428,14 +436,88 @@ void main() {
     await tester.tap(find.text('Forward'));
     await tester.pumpAndSettle();
 
+    await tester.tap(find.byKey(const ValueKey('forward-group-search-toggle')));
+    await tester.pumpAndSettle();
     await tester.enterText(
-      find.byKey(const ValueKey('forward-recipient-search')),
+      find.byKey(const ValueKey('forward-group-search')),
       'group',
     );
     await tester.pumpAndSettle();
 
     expect(find.text('Group Chat'), findsOneWidget);
-    expect(find.text(otherUser.name), findsNothing);
+    expect(find.text(otherUser.name), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('forward-user-search-toggle')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('forward-user-search')),
+      'other',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(otherUser.name), findsOneWidget);
+    expect(find.text('Group Chat'), findsOneWidget);
+  });
+
+  testWidgets('forward selector shows five most recent users and groups', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(414, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final users = List.generate(
+      6,
+      (index) => testUser(
+        'Recent User $index',
+        conversationId: Uint8List.fromList('user-$index'.codeUnits),
+      ),
+    );
+    final groups = List.generate(
+      6,
+      (index) => ChatRoom(
+        name: 'Recent Group $index',
+        conversationId: Uint8List.fromList('group-$index'.codeUnits),
+        isDirectChat: false,
+        lastMessageTime: DateTime(2026, 1, index + 1),
+      ),
+    );
+    TestUsersStore.users = users;
+    TestChatRoomListNotifier.rooms = [
+      ...groups,
+      for (var index = 0; index < users.length; index++)
+        directRoomWith(
+          users[index],
+          lastMessageTime: DateTime(2026, 1, index + 1),
+        ),
+    ];
+
+    await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);
+
+    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+    chat.onMessageLongPress!(
+      tester.element(find.byType(chat_ui.Chat)),
+      forwardTargetMessage(),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Forward'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Recent User 5'), findsOneWidget);
+    expect(find.text('Recent User 1'), findsOneWidget);
+    expect(find.text('Recent User 0'), findsNothing);
+    expect(
+      tester.getTopLeft(find.text('Recent User 5')).dy,
+      lessThan(tester.getTopLeft(find.text('Recent User 1')).dy),
+    );
+    expect(find.text('Recent Group 5'), findsOneWidget);
+    expect(find.text('Recent Group 1'), findsOneWidget);
+    expect(find.text('Recent Group 0'), findsNothing);
+    expect(
+      tester.getTopLeft(find.text('Recent Group 5')).dy,
+      lessThan(tester.getTopLeft(find.text('Recent Group 1')).dy),
+    );
   });
 
   testWidgets('selecting a recipient opens chat with forwarded text draft', (
