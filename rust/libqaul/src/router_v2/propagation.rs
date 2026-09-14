@@ -152,15 +152,12 @@ pub fn tick_origin(state: &RouterV2State, now_ms: u64) {
 
     let origin_space = state.sync_propagation_form(now_ms).origin_space();
 
-    let intros = state
-        .pending_introductions(origin_space)
-        .into_iter()
-        .map(|intro| Mapping {
-            abs_idx: intro.0,
-            target_id: intro.1,
-            version: intro.2,
-        })
-        .collect::<Vec<Mapping>>();
+    // Kept as tuples so the §2.3 filter below can see each target's id.
+    // `tick_relay` has filtered its mappings since 2-B; this path did not,
+    // so a gateway shipped node mappings for its non-gateway Local-sphere
+    // neighbours straight across an INTERNET link every origin cycle.
+    let intros = state.pending_introductions(origin_space);
+    let mut sent: HashSet<u16> = HashSet::new();
 
     let pairs: Vec<(PeerId, ConnectionModule)> = {
         let mirrors = state.mirrors.read().unwrap();
@@ -176,12 +173,25 @@ pub fn tick_origin(state: &RouterV2State, now_ms: u64) {
     for (peer, transport) in pairs {
         let sphere_outgoing = Sphere::of(transport);
         let local_only = sphere_outgoing == Sphere::Local;
+
+        // §2.3: the membrane applies to index mappings as well as entries.
+        let mappings: Vec<Mapping> = intros
+            .iter()
+            .filter(|intro| should_introduce(state, origin_space, &intro.1, sphere_outgoing))
+            .map(|intro| Mapping {
+                abs_idx: intro.0,
+                target_id: intro.1,
+                version: intro.2,
+            })
+            .collect();
+        sent.extend(mappings.iter().map(|m| m.abs_idx));
+
         let msg = build_origin_update(
             new_seq,
             origin_space,
             own_manifest_version,
             local_only,
-            intros.clone(),
+            mappings,
         );
 
         let mut body = Vec::new();
@@ -208,6 +218,10 @@ pub fn tick_origin(state: &RouterV2State, now_ms: u64) {
             warn!("origin tick: outbound channel send failed for {peer:?}: {e}");
         }
     }
+
+    // Draining the tracker took the only outstanding copy of each mark, so
+    // anything the filter withheld from every peer has to go back.
+    requeue_unsent_introductions(state, &intros, &sent, origin_space);
 }
 
 /// orchestrates outbound routing updates every 1s
