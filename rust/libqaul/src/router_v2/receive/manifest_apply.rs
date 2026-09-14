@@ -193,9 +193,13 @@ impl RouterV2State {
         let is_gateway = (completed_manifest.flags & 0x01) != 0;
         let delegated_users = self.delegated_users_from_entries(&completed_manifest.entries);
 
+        let mut advertisement_changed = false;
         let nodes = self.nodes.read().unwrap();
         if let Some(node_arc) = nodes.get(&origin_node_id) {
             let mut node = node_arc.write().unwrap();
+            // §3.8 trigger 3
+            advertisement_changed = node.manifest_version != completed_manifest.manifest_version
+                || node.is_gateway != is_gateway;
             node.manifest_version = completed_manifest.manifest_version;
             node.is_gateway = is_gateway;
             node.delegated_users = delegated_users;
@@ -214,6 +218,10 @@ impl RouterV2State {
                 .reset_to(completed_manifest.manifest_version);
         }
         drop(nodes);
+
+        if advertisement_changed {
+            self.mark_manifest_version_bump(&origin_node_id);
+        }
 
         self.refresh_delegation_trust(&origin_node_id, now);
 
@@ -300,8 +308,9 @@ impl RouterV2State {
         // Step 5: commit.
         let is_gateway = flags != 0;
         let delegated_users = self.delegated_users_from_entries(&scratch);
-        {
+        let advertisement_changed = {
             let mut node = node_arc.write().unwrap();
+            let changed = node.manifest_version != msg.to_version || node.is_gateway != is_gateway;
             node.manifest_version = msg.to_version;
             node.is_gateway = is_gateway;
             node.delegated_users = delegated_users;
@@ -319,6 +328,11 @@ impl RouterV2State {
             let tombstone_ttl_ms = self.options.delegation_ttl.saturating_mul(1000);
             node.manifest_log
                 .compact(now, tombstone_ttl_ms, self.options.delta_log_cap);
+            changed
+        };
+
+        if advertisement_changed {
+            self.mark_manifest_version_bump(&origin_node_id);
         }
 
         info!(
