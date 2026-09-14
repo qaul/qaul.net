@@ -35,6 +35,20 @@ impl RouterV2State {
         );
     }
 
+    /// trigger for a node space: whenever manifest_version or is_gateway changes
+    pub(crate) fn mark_manifest_version_bump(&self, node_id: &[u8; 8]) {
+        let Some(idx) = self.node_dict.read().unwrap().idx_of(node_id) else {
+            return;
+        };
+        self.reintroduction_tracker
+            .write()
+            .unwrap()
+            .mark_version_bump(Space::Node, idx);
+        tracing::debug!(
+            "router_v2: node {node_id:?} idx {idx} marked for re-introduction (§3.8 trigger 3)"
+        );
+    }
+
     /// The `profile_version` we advertise for a user we host (§3.4).
     pub fn hosted_profile_version(&self, user_id: &[u8; 8]) -> u32 {
         self.hosted_profiles
