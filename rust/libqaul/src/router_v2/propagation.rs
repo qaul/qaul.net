@@ -258,11 +258,6 @@ pub fn tick_relay(state: &RouterV2State, now: u64) {
         version: t.2,
     };
 
-    // Draining the tracker hands us the only outstanding copy of each mark,
-    // so anything the sphere filter withholds from *every* peer has to be
-    // put back — otherwise the index is never introduced to anyone and the
-    // receiver drops each entry that references it as an unknown mapping,
-    // permanently (§3.6).
     let user_intros = state.pending_introductions(Space::User);
     let node_intros = state.pending_introductions(Space::Node);
     let mut user_sent: HashSet<u16> = HashSet::new();
@@ -434,23 +429,31 @@ pub fn on_neighbour_connect(state: &RouterV2State, neighbour: PeerId, transport:
     };
 
     let node_mappings = {
-        let dict = state.node_dict.read().unwrap();
+        let bindings: Vec<(u16, [u8; 8])> = {
+            let dict = state.node_dict.read().unwrap();
+            dict.forward_dir
+                .iter()
+                .map(|(&idx, &id)| (idx, id))
+                .collect()
+        };
+
+        let eligible: Vec<(u16, [u8; 8])> = bindings
+            .into_iter()
+            .filter(|(_, id)| should_introduce(state, Space::Node, id, sphere_outbound))
+            .collect();
+
         let nodes = state.nodes.read().unwrap();
-        let mut mappings = Vec::new();
-        for (&idx, &id) in &dict.forward_dir {
-            if !should_introduce(state, Space::Node, &id, sphere_outbound) {
-                continue;
-            }
-            let version = nodes
-                .get(&id)
-                .map(|arc| arc.read().unwrap().manifest_version)
-                .unwrap_or(0);
-            mappings.push(Mapping {
+        let mut mappings: Vec<Mapping> = eligible
+            .into_iter()
+            .map(|(idx, id)| Mapping {
                 abs_idx: idx,
                 target_id: id,
-                version,
-            });
-        }
+                version: nodes
+                    .get(&id)
+                    .map(|arc| arc.read().unwrap().manifest_version)
+                    .unwrap_or(0),
+            })
+            .collect();
         mappings.sort_by_key(|m| m.abs_idx);
         mappings
     };
