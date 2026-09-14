@@ -11,7 +11,7 @@ use crate::router_v2::{
         Header, RoutingMessage,
     },
     index::Space,
-    propagation::{self, on_neighbour_connect, should_introduce, tick_relay},
+    propagation::{self, on_neighbour_connect, should_introduce, tick_origin, tick_relay},
     test_utils::*,
 };
 
@@ -422,13 +422,17 @@ fn an_intro_filtered_for_every_peer_is_re_marked() {
     );
 }
 
-/// The same hazard for node space: a node not yet known to be a gateway is
-/// filtered off the Internet sphere, and would otherwise never be
-/// introduced even after it becomes one.
+/// The §2.3 membrane plus §3.8 trigger 3, together. A node introduced to the
+/// Local sphere while it is not yet a gateway counts as *delivered*, so the
+/// requeue path does not cover it; only a re-mark when it becomes a gateway
+/// gets its index across the membrane.
 #[test]
-fn a_non_gateway_node_intro_survives_to_be_introduced_later() {
-    let (state, _rx) = fresh_state();
-    state.add_neighbour_transport(fresh_peer(), [10; 8], ConnectionModule::Internet);
+fn a_node_that_becomes_a_gateway_is_re_introduced_across_the_membrane() {
+    let (state, mut rx) = fresh_state();
+    let lan = fresh_peer();
+    let net = fresh_peer();
+    state.add_neighbour_transport(lan, [10; 8], ConnectionModule::Lan);
+    state.add_neighbour_transport(net, [11; 8], ConnectionModule::Internet);
 
     let node = install_node(&state, [5; 8], 0, false);
     bind_own_dict(&state, Space::Node, 21, [5; 8]);
@@ -439,23 +443,35 @@ fn a_non_gateway_node_intro_survives_to_be_introduced_later() {
         .mark_first_time(Space::Node, 21);
 
     tick_relay(&state, 1_000);
-    assert_eq!(
-        state.pending_introductions(Space::Node),
-        vec![(21, [5; 8], 0)],
-        "withheld while it is not a gateway"
-    );
+    while rx.try_recv().is_ok() {}
 
-    // It becomes a gateway; the mark must still be there to act on.
-    node.write().unwrap().is_gateway = true;
-    state
-        .reintroduction_tracker
-        .write()
-        .unwrap()
-        .mark_first_time(Space::Node, 21);
-    tick_relay(&state, 2_000);
     assert!(
         state.pending_introductions(Space::Node).is_empty(),
-        "once it is a gateway the intro goes out and the mark clears"
+        "it reached the LAN peer, so it is delivered and will not be re-queued"
+    );
+
+    // It becomes a gateway. In production this is the manifest commit path
+    // calling `mark_manifest_version_bump`; here we invoke the same function.
+    node.write().unwrap().is_gateway = true;
+    state.mark_manifest_version_bump(&[5; 8]);
+
+    tick_relay(&state, 2_000);
+
+    let mut crossed = false;
+    while let Ok(msg) = rx.try_recv() {
+        let (header, body) = Header::decode(&msg.bytes).expect("frame header");
+        if header.message_type != RoutingMessage::RoutingUpdate {
+            continue;
+        }
+        let update = codec::messages::RoutingUpdate::decode(&body[..header.payload_len as usize])
+            .expect("RoutingUpdate body");
+        if msg.peer == net && update.node_mappings.iter().any(|m| m.target_id == [5; 8]) {
+            crossed = true;
+        }
+    }
+    assert!(
+        crossed,
+        "now that it is a gateway its index must reach the Internet peer"
     );
 }
 
@@ -479,5 +495,106 @@ fn a_delivered_intro_is_not_re_marked() {
     assert!(
         state.pending_introductions(Space::User).is_empty(),
         "a delivered intro must clear"
+    );
+}
+
+// ------------------------------------------------------- §2.3 on the origin tick
+//
+// `tick_origin` built its inline mappings once and attached them to every
+// peer unfiltered, so a gateway leaked node mappings for its non-gateway
+// Local-sphere neighbours across INTERNET on every origin cycle. The receiver
+// creates a `Node` record and fires a MANIFEST_REQUEST per leaked mapping,
+// which is exactly the unbounded foreign state §2.3 exists to prevent.
+
+/// Collects the node mappings each peer received in an origin update.
+fn origin_node_mappings(
+    rx: &mut tokio::sync::mpsc::UnboundedReceiver<OutboundMsg>,
+) -> std::collections::HashMap<libp2p::PeerId, Vec<[u8; 8]>> {
+    let mut out: std::collections::HashMap<libp2p::PeerId, Vec<[u8; 8]>> =
+        std::collections::HashMap::new();
+    while let Ok(msg) = rx.try_recv() {
+        let (header, body) = Header::decode(&msg.bytes).expect("frame header");
+        if header.message_type != RoutingMessage::RoutingUpdate {
+            continue;
+        }
+        let update = codec::messages::RoutingUpdate::decode(&body[..header.payload_len as usize])
+            .expect("RoutingUpdate body");
+        let mut ids: Vec<[u8; 8]> = update.node_mappings.iter().map(|m| m.target_id).collect();
+        ids.sort();
+        out.entry(msg.peer).or_default().extend(ids);
+    }
+    out
+}
+
+#[test]
+fn origin_node_mappings_are_filtered_over_the_internet() {
+    let (state, mut rx) = fresh_state();
+    let lan = fresh_peer();
+    let net = fresh_peer();
+    state.add_neighbour_transport(lan, [10; 8], ConnectionModule::Lan);
+    state.add_neighbour_transport(net, [11; 8], ConnectionModule::Internet);
+    // An INTERNET transport makes us a gateway (§2.3), which is also what
+    // puts `tick_origin` into node form (§3.2).
+    state.sync_gateway_role();
+
+    install_node(&state, [1; 8], 5, true); // a gateway
+    install_node(&state, [2; 8], 6, false); // a plain village node
+    bind_own_dict(&state, Space::Node, 20, [1; 8]);
+    bind_own_dict(&state, Space::Node, 21, [2; 8]);
+    {
+        let mut tracker = state.reintroduction_tracker.write().unwrap();
+        tracker.mark_first_time(Space::Node, 20);
+        tracker.mark_first_time(Space::Node, 21);
+    }
+
+    tick_origin(&state, 1_000);
+
+    let seen = origin_node_mappings(&mut rx);
+    let lan_ids = seen.get(&lan).expect("the LAN peer got an origin update");
+    let net_ids = seen
+        .get(&net)
+        .expect("the Internet peer got an origin update");
+
+    assert!(
+        lan_ids.contains(&[2; 8]),
+        "a non-gateway belongs in its own Local sphere"
+    );
+    assert!(
+        !net_ids.contains(&[2; 8]),
+        "a non-gateway must not cross the membrane (§2.3)"
+    );
+    assert!(
+        net_ids.contains(&[1; 8]),
+        "a gateway is exactly what may cross"
+    );
+}
+
+/// The drain hazard that produced `requeue_unsent_introductions` for
+/// `tick_relay` applies identically here: the tracker hands out the only
+/// copy of each mark.
+#[test]
+fn an_origin_intro_filtered_for_every_peer_is_re_marked() {
+    let (state, _rx) = fresh_state();
+    state.add_neighbour_transport(fresh_peer(), [11; 8], ConnectionModule::Internet);
+    state.sync_gateway_role();
+
+    install_node(&state, [2; 8], 6, false);
+    bind_own_dict(&state, Space::Node, 21, [2; 8]);
+    state
+        .reintroduction_tracker
+        .write()
+        .unwrap()
+        .mark_first_time(Space::Node, 21);
+
+    tick_origin(&state, 1_000);
+
+    let pending: Vec<u16> = state
+        .pending_introductions(Space::Node)
+        .iter()
+        .map(|t| t.0)
+        .collect();
+    assert!(
+        pending.contains(&21),
+        "withheld from every peer, so it must still be pending"
     );
 }
