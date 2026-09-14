@@ -454,3 +454,75 @@ fn entry_for_user_with_unknown_key_is_stored_but_untrusted() {
         .delegation_gateways
         .is_empty());
 }
+
+// ---------- §3.8 trigger 3, node space ----------
+//
+// A node mapping carries `manifest_version` and, through the manifest it
+// announces, the target's gateway status. Both are what the §2.3 membrane
+// filters on, so a change to either has to re-introduce the index — otherwise
+// a node that becomes a gateway after its mapping was already delivered to
+// Local-sphere peers is never introduced to Internet peers, and its entries
+// are dropped there as unknown mappings forever.
+
+#[test]
+fn committing_a_manifest_marks_the_origin_index_for_re_introduction() {
+    let (state, mut _rx) = fresh_state();
+    let (host_kp, host_mk) = keypair_and_multikey();
+    let (_, host_id) = setup_self_origin(&state, &host_mk);
+    // our own index for the origin, which is what downstream peers see
+    bind_own_dict(&state, index::Space::Node, 30, host_id);
+    // start from a clean tracker: registration marks may already be pending
+    let _ = state.pending_introductions(index::Space::Node);
+
+    let chunks = build_signed_manifest(&host_kp, &host_mk, 5, true, Vec::new());
+    state
+        .handle_node_manifest(
+            chunks.into_iter().next().unwrap(),
+            500,
+            ConnectionModule::Lan,
+        )
+        .unwrap();
+
+    let pending: Vec<u16> = state
+        .pending_introductions(index::Space::Node)
+        .iter()
+        .map(|t| t.0)
+        .collect();
+    assert!(
+        pending.contains(&30),
+        "a committed manifest changes what the mapping advertises (§3.8 trigger 3)"
+    );
+}
+
+#[test]
+fn re_committing_the_same_version_does_not_re_mark() {
+    let (state, mut _rx) = fresh_state();
+    let (host_kp, host_mk) = keypair_and_multikey();
+    let (_, host_id) = setup_self_origin(&state, &host_mk);
+    bind_own_dict(&state, index::Space::Node, 30, host_id);
+
+    let apply = |version: u32| {
+        let chunks = build_signed_manifest(&host_kp, &host_mk, version, true, Vec::new());
+        state
+            .handle_node_manifest(
+                chunks.into_iter().next().unwrap(),
+                500,
+                ConnectionModule::Lan,
+            )
+            .unwrap();
+    };
+
+    apply(5);
+    let _ = state.pending_introductions(index::Space::Node);
+
+    apply(5);
+    let pending: Vec<u16> = state
+        .pending_introductions(index::Space::Node)
+        .iter()
+        .map(|t| t.0)
+        .collect();
+    assert!(
+        !pending.contains(&30),
+        "nothing the mapping carries changed, so re-introducing would be pure noise"
+    );
+}

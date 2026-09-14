@@ -4,7 +4,9 @@
 //! The v2-native inspector
 
 use crate::{
-    QaulState, router::proto, router_v2::{self, RouterV2State, index::Space},
+    router::proto,
+    router_v2::{self, index::Space, RouterV2State},
+    QaulState,
 };
 
 /// One origin's manifest state
