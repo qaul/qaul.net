@@ -10,11 +10,13 @@ class SendMessageIntent extends Intent {
 
 class _ChatTextFooter extends StatefulWidget {
   const _ChatTextFooter({
+    super.key,
     required this.onSendPressed,
     required this.hintText,
     this.onAttachmentPressed,
     this.onPickImagePressed,
     this.onSendAudioPressed,
+    this.initialText,
     this.disabledMessage,
     this.isDisabled = false,
   });
@@ -23,6 +25,7 @@ class _ChatTextFooter extends StatefulWidget {
   final VoidCallback? onAttachmentPressed;
   final VoidCallback? onPickImagePressed;
   final VoidCallback? onSendAudioPressed;
+  final String? initialText;
   final bool isDisabled;
   final String? disabledMessage;
   final String hintText;
@@ -37,7 +40,21 @@ class _ChatTextFooterState extends State<_ChatTextFooter> {
   @override
   void initState() {
     super.initState();
-    _textController = TextEditingController();
+    _textController = TextEditingController(text: widget.initialText);
+  }
+
+  @override
+  void didUpdateWidget(covariant _ChatTextFooter oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialText == widget.initialText ||
+        widget.initialText == null) {
+      return;
+    }
+
+    _textController.value = TextEditingValue(
+      text: widget.initialText!,
+      selection: TextSelection.collapsed(offset: widget.initialText!.length),
+    );
   }
 
   @override
