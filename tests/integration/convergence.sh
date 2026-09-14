@@ -42,6 +42,9 @@ while :; do
     sleep 1
 done
 
+# "-" when a node never reached the milestone, otherwise "13s"
+fmt() { [[ -z ${1:-} ]] && printf -- '-' || printf '%ss' "$1"; }
+
 echo
 echo "all figures are seconds since the daemons started"
 printf '%-14s %12s %12s %12s\n' node neighbour-at routing-at users-at
@@ -49,9 +52,7 @@ printf '%-14s %12s %12s %12s\n' -------------- ------------ ------------ -------
 for d in "${DIRS[@]}"; do
     id=$(basename "$d")
     printf '%-14s %12s %12s %12s\n' "$id" \
-        "${t_neighbour[$id]:+${t_neighbour[$id]}s}${t_neighbour[$id]:--}" \
-        "${t_routing[$id]:+${t_routing[$id]}s}${t_routing[$id]:--}" \
-        "${t_users[$id]:+${t_users[$id]}s}${t_users[$id]:--}"
+        "$(fmt "${t_neighbour[$id]:-}")" "$(fmt "${t_routing[$id]:-}")" "$(fmt "${t_users[$id]:-}")"
 done
 
 slowest=0
