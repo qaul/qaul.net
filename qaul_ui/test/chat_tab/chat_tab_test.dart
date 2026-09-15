@@ -195,6 +195,44 @@ void main() {
     expect(StubLibqaulWorker.sentTexts, isEmpty);
   });
 
+  testWidgets('copies a text message from the long-press menu', (tester) async {
+    String? copiedText;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (call) async {
+          if (call.method == 'Clipboard.setData') {
+            copiedText =
+                (call.arguments as Map<Object?, Object?>)['text'] as String?;
+          }
+          return null;
+        });
+    addTearDown(
+      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, null),
+    );
+
+    await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);
+
+    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+    chat.onMessageLongPress!(
+      tester.element(find.byType(chat_ui.Chat)),
+      types.TextMessage(
+        id: 'copy-target',
+        author: types.User(id: otherUser.idBase58),
+        text: 'Text to copy',
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ChatMessageContextMenu), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('next-page')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Copy'));
+    await tester.pumpAndSettle();
+
+    expect(copiedText, 'Text to copy');
+    expect(find.text('Message copied'), findsOneWidget);
+  });
+
   testWidgets('disabled room blocks chat footer sending', (tester) async {
     await pumpChatScreen(
       tester,
