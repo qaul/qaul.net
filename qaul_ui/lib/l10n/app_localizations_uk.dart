@@ -315,6 +315,12 @@ class AppLocalizationsUk extends AppLocalizations {
   String get chatEmptyState => 'Тут ще немає повідомлень';
 
   @override
+  String get copy => 'Копіювати';
+
+  @override
+  String get messageCopied => 'Повідомлення скопійовано';
+
+  @override
   String get securityNumber => 'Номер безпеки';
 
   @override

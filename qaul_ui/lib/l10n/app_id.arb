@@ -33,6 +33,8 @@
     "blockUserConfirmationMessage": "Apakah Anda ingin memblokir pengguna ini?",
     "chatEmptyMessageHint": "Pesan Anda...",
     "chatEmptyState": "Belum ada pesan di sini",
+    "copy": "Salin",
+    "messageCopied": "Pesan disalin",
     "connections": "Koneksi",
     "continueDialogButton": "Lanjutkan",
     "createButtonHint": "Buat",
