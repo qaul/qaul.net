@@ -181,23 +181,11 @@ impl RouterV2State {
             self.remove_self_delegation(user_id);
         }
 
-        // §10.8 exempts this from the 60 s rate limit: a manifest that keeps
-        // advertising an undeliverable user black-holes traffic addressed to
-        // them, which is exactly what §10.7 exists to prevent. Flapping is
-        // bounded on the other side — a dropped user only comes back by
-        // subscribing again (§11.6), and that re-add rides the ordinary
-        // rate-limited accumulated bump.
         self.try_bump_manifest_version(now_ms, BumpTrigger::ForcedRemoval)
             .is_some()
     }
 
     /// Can we still deliver to this delegated user?
-    ///
-    /// A user we host is reachable by definition. It also never has a
-    /// routing entry — `register_hosted_user` leaves it `None`, and under
-    /// node form §3.2 gives hosted users no user index at all — so testing
-    /// one the same way as a foreign entry would drop our own users from
-    /// our own manifest on the first tick after startup.
     fn delegated_user_is_reachable(&self, user_id: &[u8; 8]) -> bool {
         let users = self.users.read().unwrap();
         let Some(user) = users.get(user_id) else {
@@ -271,6 +259,10 @@ impl RouterV2State {
 
         self.resign_own_manifest(&mut manifest);
         drop(manifest);
+
+        if let Some(node) = self.nodes.read().unwrap().get(&self.host_mk.to_id()) {
+            node.write().unwrap().manifest_version = new_version;
+        }
 
         self.dirty_delegations.write().unwrap().clear();
         *self.dirty_manifest_flags.write().unwrap() = false;

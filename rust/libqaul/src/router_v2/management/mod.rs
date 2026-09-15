@@ -17,7 +17,6 @@ use qaul_proto::qaul_net_router_management as proto;
 
 /// to identify a management message for §11.4 forward-loop suppression:
 /// `(source, destination, request_id, is_response)`.
-
 pub type ForwardKey = ([u8; 8], [u8; 8], u32, bool);
 
 /// addressing half of a §11.3 envelope, body is not included
@@ -93,15 +92,67 @@ impl RouterV2State {
             source: source.to_vec(),
             source_is_node,
             request_id,
-            body: Some(Body::ProfileRequest(ProfileRequest { cached_version })),
+            body: Some(Body::ProfileRequest(ProfileRequest {
+                cached_version,
+                subject: Vec::new(),
+            })),
         };
 
-        if self.forward_management(envelope, subject, is_node) {
+        let sent = self.forward_management(envelope, subject, is_node)
+            || (!is_node && self.request_profile_via_host(subject, cached_version));
+
+        if sent {
             self.management_in_flight
                 .write()
                 .unwrap()
                 .insert((subject, is_node), now_ms);
         }
+    }
+
+    /// Asks a host carrying `subject` in its manifest for that user's profile.
+    fn request_profile_via_host(&self, subject: [u8; 8], cached_version: u32) -> bool {
+        let hosts: Vec<[u8; 8]> = {
+            let nodes = self.nodes.read().unwrap();
+            nodes
+                .iter()
+                .filter(|(_, node)| {
+                    node.read()
+                        .unwrap()
+                        .delegated_users
+                        .iter()
+                        .any(|delegated| delegated.user_id == subject)
+                })
+                .map(|(id, _)| *id)
+                .collect()
+        };
+
+        for host in hosts {
+            let request_id = self
+                .next_request_id
+                .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            let (source, source_is_node) = self.propagated_identity();
+
+            let envelope = ManagementMessage {
+                version: MANAGEMENT_VERSION,
+                destination: host.to_vec(),
+                destination_is_node: true,
+                source: source.to_vec(),
+                source_is_node,
+                request_id,
+                body: Some(Body::ProfileRequest(ProfileRequest {
+                    cached_version,
+                    subject: subject.to_vec(),
+                })),
+            };
+
+            if self.forward_management(envelope, host, true) {
+                debug!(
+                    "management: profile for {subject:?} requested via carrying host {host:?} (§11.5)"
+                );
+                return true;
+            }
+        }
+        false
     }
 
     /// Sends an envelope one hop toward its destination (§11.4 step 2).
@@ -147,8 +198,13 @@ impl RouterV2State {
     }
 
     /// drops messages that were not answered: 11.2 and 14
+    ///
+    /// §11.2 is best-effort with no acknowledgement, so a request lost in
+    /// flight is only detected by this sweep — the window is the whole
+    /// recovery latency, which is why it is its own parameter rather than the
+    /// §10.8 manifest one it used to borrow.
     pub fn clear_management_msgs(&self, now_ms: u64) {
-        let timeout_ms = self.options.manifest_request_timeout.saturating_mul(1000);
+        let timeout_ms = self.options.management_request_timeout.saturating_mul(1000);
         let mut in_flight = self.management_in_flight.write().unwrap();
         in_flight.retain(|(subject, is_node), sent_at| {
             let live = now_ms < sent_at.saturating_add(timeout_ms);

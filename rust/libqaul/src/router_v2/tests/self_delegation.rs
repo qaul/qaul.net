@@ -475,3 +475,38 @@ fn default_host_state_restores_as_a_clean_origin() {
     assert_eq!(state.manifest.read().unwrap().manifest_version, 0);
     assert!(state.manifest.read().unwrap().entries().is_empty());
 }
+
+// ---------- §10.8 advertise-only-committed, on our own record ----------
+
+/// The inline node mapping and `INDEX_DUMP` read a version from the `Node`
+/// record, while the node entry reads it from the manifest. A bump that
+/// updated only the manifest left our own index advertising a stale version —
+/// under-advertising our committed state, which §10.8 forbids.
+#[test]
+fn a_bump_keeps_our_own_node_record_in_step() {
+    let (state, _rx) = fresh_state();
+    let host_id = state.host_mk.to_id();
+
+    // the self record, as `ensure_host_node_record` would create it
+    install_node(&state, host_id, 0, false);
+
+    state.dirty_delegations.write().unwrap().insert([1; 8]);
+    let new_version = state
+        .try_bump_manifest_version(1_000, crate::router_v2::BumpTrigger::FormTransition)
+        .expect("a form transition bumps unconditionally");
+
+    let recorded = state
+        .nodes
+        .read()
+        .unwrap()
+        .get(&host_id)
+        .unwrap()
+        .read()
+        .unwrap()
+        .manifest_version;
+
+    assert_eq!(
+        recorded, new_version,
+        "the record a mapping is built from must match the manifest an entry is built from"
+    );
+}
