@@ -316,6 +316,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get chatEmptyState => 'Henüz burada mesaj yok';
 
   @override
+  String get copy => 'Kopyala';
+
+  @override
+  String get messageCopied => 'Mesaj kopyalandı';
+
+  @override
   String get securityNumber => 'Güvenlik Numarası';
 
   @override

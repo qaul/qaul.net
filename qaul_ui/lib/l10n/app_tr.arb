@@ -98,6 +98,8 @@
     "publicNoteHintText": "Genel not",
     "createButtonHint": "Oluştur",
     "chatEmptyState": "Henüz burada mesaj yok",
+    "copy": "Kopyala",
+    "messageCopied": "Mesaj kopyalandı",
     "securityNumber": "Güvenlik Numarası",
     "securityNumberDialogDesc": "Lütfen doğrulamaya çalıştığınız kişinin, sizi doğrulamaya çalışırken ekranında aynı güvenlik numarasını gördüğünden emin olun.",
     "groupStateEventCreated": "Grup oluşturuldu",

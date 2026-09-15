@@ -320,6 +320,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get chatEmptyState => 'Nenhuma mensagem disponível';
 
   @override
+  String get copy => 'Copiar';
+
+  @override
+  String get messageCopied => 'Mensagem copiada';
+
+  @override
   String get securityNumber => 'Número de Segurança';
 
   @override

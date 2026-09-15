@@ -318,6 +318,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get chatEmptyState => 'Noch keine Mitteilungen';
 
   @override
+  String get copy => 'Kopieren';
+
+  @override
+  String get messageCopied => 'Nachricht kopiert';
+
+  @override
   String get securityNumber => 'Sicherheits-Nummer';
 
   @override

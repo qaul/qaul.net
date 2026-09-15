@@ -314,6 +314,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get chatEmptyState => 'لا توجد رسائل هنا حتى الآن';
 
   @override
+  String get copy => 'نسخ';
+
+  @override
+  String get messageCopied => 'تم نسخ الرسالة';
+
+  @override
   String get securityNumber => 'رقم سرى';
 
   @override

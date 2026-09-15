@@ -35,6 +35,8 @@
     "blockUserConfirmationMessage": "Möchtest du diesen Kontakt blockieren?",
     "chatEmptyMessageHint": "Deine Mitteilung...",
     "chatEmptyState": "Noch keine Mitteilungen",
+    "copy": "Kopieren",
+    "messageCopied": "Nachricht kopiert",
     "connections": "Verbindungen",
     "continueDialogButton": "Weiter",
     "createButtonHint": "Erstellen",

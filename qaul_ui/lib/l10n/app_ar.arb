@@ -32,6 +32,8 @@
   "cancelDialogButton": "إلغ",
   "chatEmptyMessageHint": "رسالتك ...",
   "chatEmptyState": "لا توجد رسائل هنا حتى الآن",
+  "copy": "نسخ",
+  "messageCopied": "تم نسخ الرسالة",
   "chatNavButtonTooltip": "دردشة",
   "chatNotificationsEnabled": "تمكين / تعطيل إشعارات الدردشة:",
   "connections": "الوصلات",

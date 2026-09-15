@@ -318,6 +318,12 @@ class AppLocalizationsId extends AppLocalizations {
   String get chatEmptyState => 'Belum ada pesan di sini';
 
   @override
+  String get copy => 'Salin';
+
+  @override
+  String get messageCopied => 'Pesan disalin';
+
+  @override
   String get securityNumber => 'Nomor Keamanan';
 
   @override

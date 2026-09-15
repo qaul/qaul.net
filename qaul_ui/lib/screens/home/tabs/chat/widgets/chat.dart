@@ -210,7 +210,8 @@ class ChatScreen extends StatefulHookConsumerWidget {
   }
 }
 
-class _ChatScreenState extends ConsumerState<ChatScreen> {
+class _ChatScreenState extends ConsumerState<ChatScreen>
+    with SingleTickerProviderStateMixin {
   ChatRoom get room => widget.room;
 
   User get user => widget.user;
@@ -232,6 +233,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   String? _activeRoomIdBase58;
   String? _forwardDraftRoomIdBase58;
   String? _selectedContextMenuMessageId;
+  OverlayEntry? _copyFeedbackEntry;
+  Timer? _copyFeedbackTimer;
+  late final AnimationController _copyFeedbackFadeController;
+  int _copyRequestVersion = 0;
 
   void _handleMessageLongPress(
     BuildContext messageContext,
@@ -261,6 +266,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       setState(() => _selectedContextMenuMessageId = null);
                       _openForwardRecipientSelector(message.text);
                     },
+                    onCopy: () => _copyMessage(
+                      dialogContext,
+                      messageContext,
+                      message.text,
+                    ),
                   ),
                 ),
               ),
@@ -276,6 +286,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   List<ChatMessageContextMenuElement> _buildForwardContextMenuElements({
     required VoidCallback onForward,
+    required VoidCallback onCopy,
   }) {
     return [
       const ChatMessageReactionRow(
@@ -310,11 +321,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         iconAsset: ChatMessageContextMenuIcons.share,
         enabled: false,
       ),
-      const ChatMessageContextMenuAction(
+      ChatMessageContextMenuAction(
         id: 'copy',
-        label: 'Copy',
+        label: AppLocalizations.of(context)!.copy,
         iconAsset: ChatMessageContextMenuIcons.copy,
-        enabled: false,
+        onPressed: onCopy,
       ),
       const ChatMessageContextMenuAction(
         id: 'delete',
@@ -457,6 +468,106 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
+  Future<void> _copyMessage(
+    BuildContext dialogContext,
+    BuildContext messageContext,
+    String text,
+  ) async {
+    final requestVersion = ++_copyRequestVersion;
+    _clearCopyFeedback();
+    final messageRect = _messageRectInOverlay(messageContext);
+    Navigator.pop(dialogContext);
+
+    await Clipboard.setData(ClipboardData(text: text));
+    if (!mounted ||
+        requestVersion != _copyRequestVersion ||
+        messageRect == null) {
+      return;
+    }
+
+    _showCopyFeedback(messageRect);
+  }
+
+  Rect? _messageRectInOverlay(BuildContext messageContext) {
+    final messageBox = messageContext.findRenderObject() as RenderBox?;
+    final overlay = Overlay.of(context, rootOverlay: true);
+    final overlayBox = overlay.context.findRenderObject() as RenderBox?;
+    if (messageBox == null || overlayBox == null || !messageBox.attached) {
+      return null;
+    }
+
+    return messageBox.localToGlobal(Offset.zero, ancestor: overlayBox) &
+        messageBox.size;
+  }
+
+  void _showCopyFeedback(Rect messageRect) {
+    final overlay = Overlay.of(context, rootOverlay: true);
+    final overlayBox = overlay.context.findRenderObject() as RenderBox?;
+    if (overlayBox == null) return;
+
+    _clearCopyFeedback();
+
+    const feedbackWidth = 140.0;
+    const feedbackHeight = 52.0;
+    const viewportPadding = 16.0;
+    final left = (messageRect.right - feedbackWidth)
+        .clamp(
+          viewportPadding,
+          overlayBox.size.width - feedbackWidth - viewportPadding,
+        )
+        .toDouble();
+    final top = (messageRect.top + (messageRect.height - feedbackHeight) / 2)
+        .clamp(
+          viewportPadding,
+          overlayBox.size.height - feedbackHeight - viewportPadding,
+        )
+        .toDouble();
+
+    _copyFeedbackEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        left: left,
+        top: top,
+        child: IgnorePointer(
+          child: FadeTransition(
+            key: const ValueKey('copy-feedback-fade'),
+            opacity: _copyFeedbackFadeController,
+            child: const _CopyFeedbackToast(),
+          ),
+        ),
+      ),
+    );
+    overlay.insert(_copyFeedbackEntry!);
+    _copyFeedbackTimer = Timer(const Duration(seconds: 2), () {
+      final entry = _copyFeedbackEntry;
+      _copyFeedbackFadeController.reverse().whenComplete(() {
+        if (_copyFeedbackEntry != entry) return;
+        _copyFeedbackEntry?.remove();
+        _copyFeedbackEntry = null;
+      });
+    });
+  }
+
+  void _clearCopyFeedback() {
+    _copyFeedbackTimer?.cancel();
+    _copyFeedbackEntry?.remove();
+    _copyFeedbackEntry = null;
+    _copyFeedbackFadeController
+      ..stop()
+      ..value = 1;
+  }
+
+  void _invalidateCopyFeedback() {
+    _copyRequestVersion++;
+    _clearCopyFeedback();
+  }
+
+  @override
+  void dispose() {
+    _clearCopyFeedback();
+    _copyFeedbackFadeController.dispose();
+    super.dispose();
+  }
+
   Widget _buildChatHeader({
     required ChatRoom room,
     required AppLocalizations l10n,
@@ -511,6 +622,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    _copyFeedbackFadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+      value: 1,
+    );
     _activeRoomIdBase58 = room.idBase58;
     _consumeForwardDraft(room);
     _scheduleUpdateCurrentOpenChat();
@@ -526,6 +642,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void didUpdateWidget(covariant ChatScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.room == room) return;
+    if (oldWidget.room.idBase58 != room.idBase58) {
+      _invalidateCopyFeedback();
+    }
     _consumeForwardDraft(room);
     _updateMenuOptionsBasedOnRoomType(resolveChatRenderMode(room));
     _scheduleUpdateCurrentOpenChat();
@@ -540,6 +659,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
 
     if (_activeRoomIdBase58 != room.idBase58) {
+      _invalidateCopyFeedback();
       _activeRoomIdBase58 = room.idBase58;
       _consumeForwardDraft(room);
     }
@@ -855,6 +975,42 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (mode == ChatRenderMode.direct && _overflowMenuOptions.isNotEmpty) {
       _overflowMenuOptions.clear();
     }
+  }
+}
+
+class _CopyFeedbackToast extends StatelessWidget {
+  const _CopyFeedbackToast();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      key: const ValueKey('copy-feedback-toast'),
+      decoration: BoxDecoration(
+        color: const Color(0xFF282828),
+        border: Border.all(color: const Color(0xFF999999)),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 140, minHeight: 52),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+          child: Text(
+            AppLocalizations.of(context)!.messageCopied,
+            maxLines: 1,
+            softWrap: false,
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'Roboto',
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              height: 1.3,
+              letterSpacing: 0.2,
+              decoration: TextDecoration.none,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

@@ -35,6 +35,8 @@
   "cancelDialogButton": "СКАСУВАТИ",
   "chatEmptyMessageHint": "Ваше повідомлення…",
   "chatEmptyState": "Тут ще немає повідомлень",
+  "copy": "Копіювати",
+  "messageCopied": "Повідомлення скопійовано",
   "chatNavButtonTooltip": "Розмови",
   "chatNotificationsEnabled": "Увімкнути сповіщення чату:",
   "connections": "З'єднання",
