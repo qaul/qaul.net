@@ -16,6 +16,11 @@ enum class OpLane { CONTROL, MEDIUM, BULK }
 
 sealed class BleOperationType {
     abstract val device: BluetoothDevice
+
+    /**
+     * WTime in ms when this op was enqueued. Help identify ops getting stuck in the queue for a long time
+     */
+    var enqueuedAt: Long = 0L
 }
 data class Connect(
     override val device: BluetoothDevice,

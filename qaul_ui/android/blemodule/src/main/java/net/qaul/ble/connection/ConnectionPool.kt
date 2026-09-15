@@ -445,6 +445,19 @@ object ConnectionPool {
     /**
      * Log a completed bulk transfer
      */
+    /**
+     * A link settled on an MTU. Called from both roles
+     */
+    fun noteMtu(address: String, negotiated: Int) {
+        val conn = connections[address] ?: return
+        conn.onMtuNegotiated(negotiated)
+        val ctx = appContext ?: return
+        SessionLogger[ctx].mtuNegotiated(
+            conn.remoteQaulId?.toHexKey()?.take(6) ?: address,
+            BleConstants.TARGET_MTU, negotiated, conn.chunkSize
+        )
+    }
+
     fun logTransfer(address: String, direction: String, transport: String, sizeBytes: Int, ms: Long) {
         val ctx = appContext ?: return
         val conn = connections[address]
@@ -845,7 +858,7 @@ object ConnectionPool {
         }
 
         override fun onMtuChanged(device: BluetoothDevice, newMtu: Int) {
-            connections[device.address]?.onMtuNegotiated(newMtu)
+            noteMtu(device.address, newMtu)
         }
 
         override fun onPhyUpdated(device: BluetoothDevice, txPhy: Int, rxPhy: Int) {
