@@ -89,6 +89,7 @@ class L2capChannel(
      */
     fun send(data: ByteArray, onComplete: (() -> Unit)? = null) {
         writer.execute {
+            activeSends.incrementAndGet()
             try {
                 val start = TimeSource.Monotonic.markNow()
                 output.writeInt(data.size)
@@ -102,6 +103,7 @@ class L2capChannel(
                 Log.e(TAG, "[$label] write failed: ${e.message}")
                 close()
             } finally {
+                activeSends.decrementAndGet()
                 onComplete?.invoke()
             }
         }
@@ -118,6 +120,12 @@ class L2capChannel(
     }
 
     companion object {
+        /**
+         * L2CAP bulk writes in flight across every channel. Sampled when a scheduler operation
+         * completes in logs, so that CONTROL lane latency can be split by whether bulk was actually moving at the same time.
+         */
+        val activeSends = java.util.concurrent.atomic.AtomicInteger(0)
+
         private const val MAX_MESSAGE = 16 * 1024 * 1024   // 16 MB sanity cap on a single frame
 
         /** Inbound frames above this escalate the link's connection priority for their duration.

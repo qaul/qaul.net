@@ -123,6 +123,16 @@ class SessionLogger private constructor(context: Context) {
             put("t_liveness", BleConstants.LIVENESS_TIMEOUT_MS)
             put("t_liveness_coded", BleConstants.CODED_LIVENESS_TIMEOUT_MS)
             put("t_rssi_refresh", BleConstants.RSSI_REFRESH_MS)
+            // Test switches. Included so a run gets attributed to its exact configuration
+            put("op_telemetry", BleConstants.OP_TELEMETRY)
+            put("l2cap_enabled", BleConstants.L2CAP_ENABLED)
+            put("coded_only_test", BleConstants.CODED_ONLY_TEST)
+            put("max_connections", BleConstants.MAX_CONNECTIONS)
+            put("idle_conn_priority", BleConstants.IDLE_CONNECTION_PRIORITY)
+            put("max_escalated_links", BleConstants.MAX_ESCALATED_LINKS)
+            put("target_mtu", BleConstants.TARGET_MTU)
+            put("max_chunk_size", BleConstants.MAX_CHUNK_SIZE)
+            put("setup_high_priority", BleConstants.SETUP_HIGH_PRIORITY)
             // Can this controller do long range at all? Extended advertising and Coded PHY are
             // seperate optional Bluetooth 5 features. A device may have neither and
             // the same flag gates both Coded TX and Coded RX , and some devices may only support RX or only TX
@@ -269,6 +279,27 @@ class SessionLogger private constructor(context: Context) {
         rssi?.let { put("rssi", it) }   // omitted until RSSI is plumbed through
     })
 
+    /**
+     * The connection parameters a link actually settled on, from the onConnectionUpdated callback.
+     *
+     * [status] is 0 on success
+     */
+    fun connParams(peerId: String, intervalMs: Double, latency: Int, timeoutMs: Int, status: Int) =
+        write(JSONObject().apply {
+            put("type", "conn_params"); put("peer", peerId)
+            put("interval_ms", intervalMs); put("latency", latency); put("timeout_ms", timeoutMs)
+            put("status", status)
+        })
+
+    /**
+     * The MTU the link actually ended up with, and the chunk size derived from it.
+     */
+    fun mtuNegotiated(peerId: String, requested: Int, negotiated: Int, chunkSize: Int) =
+        write(JSONObject().apply {
+            put("type", "mtu"); put("peer", peerId)
+            put("requested", requested); put("negotiated", negotiated); put("chunk", chunkSize)
+        })
+
     fun disconnect(peerId: String, reason: String, heldMs: Long) = write(JSONObject().apply {
         put("type", "disconnect"); put("peer", peerId); put("reason", reason); put("held_ms", heldMs)
     })
@@ -408,8 +439,12 @@ class SessionLogger private constructor(context: Context) {
             put("connecting", connecting)
         })
 
-    /** A scheduler operation finished or was killed by its watchdog.*/
-    fun op(mac: String, op: String, ms: Long, ok: Boolean, budget: Long? = null) =
+    /**
+     * A scheduler operation finished or was killed by its watchdog.
+     */
+    fun op(mac: String, op: String, ms: Long, ok: Boolean, budget: Long? = null,
+           lane: String? = null, waitMs: Long? = null, qdepth: Int? = null,
+           xfers: Int? = null, escalated: Int? = null, phy: String? = null) =
         write(JSONObject().apply {
             put("type", "op")
             put("mac", mac)
@@ -417,6 +452,12 @@ class SessionLogger private constructor(context: Context) {
             put("ms", ms)
             put("ok", ok)
             budget?.let { put("budget", it) }
+            waitMs?.let { put("wait_ms", it) }
+            lane?.let { put("lane", it) }
+            qdepth?.let { put("qdepth", it) }
+            xfers?.let { put("xfers", it) }
+            escalated?.let { put("escalated", it) }
+            phy?.let { put("phy", it) }
         })
 
     fun currentFilePath(): String? = file?.absolutePath
