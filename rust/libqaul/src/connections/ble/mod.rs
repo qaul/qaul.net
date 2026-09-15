@@ -213,64 +213,85 @@ impl Ble {
     /// info request received
     fn info_received(state: &crate::QaulState, message: proto::BleInfoResponse) {
         //ble.devices.extend(message.device);
+        // collect all devices from both the deprecated field and the new repeated field
+        #[allow(deprecated)]
+        let mut all_devices: Vec<proto::BleDeviceInfo> = message.devices;
+        #[allow(deprecated)]
         if let Some(device) = message.device {
-            // log received info
-            log::info!("=========================");
-            log::info!("BLE info received");
-            log::info!("-------------------------");
-            log::info!("This Devices ID");
-            let node_id = Node::get_id(state);
-            log::info!("- Node ID: {}", node_id.to_base58());
-            log::info!("- Small Node ID: {:?}", QaulId::to_q8id(node_id));
-            log::info!("-------------------------");
-            log::info!("BLE Supported: {}", device.ble_support);
-            log::info!("ID: {}", device.id);
-            log::info!("Name: {}", device.name);
-            log::info!("Bluetooth Enabled: {}", device.bluetooth_on);
-            log::info!("Advertisement Extended: {}", device.adv_extended);
-            if device.adv_extended {
-                log::info!("    bytes: {}", device.adv_extended_bytes);
-            }
-            log::info!("2M supported: {}", device.le_2m);
-            log::info!("LE coded supported: {}", device.le_coded);
-            log::info!("LE audio supported: {}", device.le_audio);
-            log::info!(
-                "LE periodic advertisement supported: {}",
-                device.le_periodic_adv_support
-            );
-            log::info!(
-                "LE multiple advertisement supported: {}",
-                device.le_multiple_adv_support
-            );
-            log::info!(
-                "offload filter supported: {}",
-                device.offload_filter_support
-            );
-            log::info!(
-                "offload scan batching supported: {}",
-                device.offload_scan_batching_support
-            );
-            log::info!("=========================");
-
-            // save to state
-            {
-                let mut ble = state.connections.ble.inner.write().unwrap();
-                ble.devices.push(device);
-            }
+            log::info!("BLE info received via deprecated 'device' field:");
+            all_devices.push(device);
 
             // Honour the persisted enabled/disabled flag — if BLE was
             // turned off in a previous session the module should stay
             // dormant on boot until an operator re-enables it via the
-            // Transports RPC.
-            let active = crate::storage::configuration::Configuration::get(state).ble.active;
-            if active {
-                Self::module_start(state);
-            } else {
-                log::info!("BLE transport disabled by configuration");
-            }
-        } else {
-            log::error!("No Bluetooth device available.");
+            // Transports RPC.           
         }
+
+        if all_devices.is_empty() {
+            log::error!("No Bluetooth device available.");
+            return;
+        }
+
+        log::info!("=========================");
+        log::info!("BLE info received");
+        log::info!("-------------------------");
+        log::info!("This Devices ID");
+        let node_id = Node::get_id(state);
+        log::info!("- Node ID: {}", node_id.to_base58());
+        log::info!("- Small Node ID: {:?}", QaulId::to_q8id(node_id));
+        log::info!("-------------------------");
+        log::info!("Total BLE devices found: {}", all_devices.len());
+
+        for (i, device) in all_devices.iter().enumerate() {
+            log::info!("--- Device {} ---", i + 1);
+            Self::log_device_info(device);
+        }
+        log::info!("=========================");
+
+        // save to state
+        {
+            let mut ble = state.connections.ble.inner.write().unwrap();
+            ble.devices.extend(all_devices); // Why do we extend instead of replacing?
+        }
+
+        let active = crate::storage::configuration::Configuration::get(state).ble.active;
+        if active {
+            Self::module_start(state);
+        } else {
+            log::info!("BLE transport disabled by configuration");
+        }
+
+    }
+
+    /// Log the details of a single BLE device
+    fn log_device_info(device: &proto::BleDeviceInfo) {
+        log::info!("BLE Supported: {}", device.ble_support);
+        log::info!("ID: {}", device.id);
+        log::info!("Name: {}", device.name);
+        log::info!("Bluetooth Enabled: {}", device.bluetooth_on);
+        log::info!("Advertisement Extended: {}", device.adv_extended);
+        if device.adv_extended {
+            log::info!("    bytes: {}", device.adv_extended_bytes);
+        }
+        log::info!("2M supported: {}", device.le_2m);
+        log::info!("LE coded supported: {}", device.le_coded);
+        log::info!("LE audio supported: {}", device.le_audio);
+        log::info!(
+            "LE periodic advertisement supported: {}",
+            device.le_periodic_adv_support
+        );
+        log::info!(
+            "LE multiple advertisement supported: {}",
+            device.le_multiple_adv_support
+        );
+        log::info!(
+            "offload filter supported: {}",
+            device.offload_filter_support
+        );
+        log::info!(
+            "offload scan batching supported: {}",
+            device.offload_scan_batching_support
+        );
     }
 
     /// start module
@@ -287,6 +308,7 @@ impl Ble {
         let start_request = proto::BleStartRequest {
             qaul_id,
             power_setting: proto::BlePowerSetting::LowLatency.into(),
+            device_id: String::new(),
         };
         let message = proto::Ble {
             message: Some(proto::ble::Message::StartRequest(start_request)),
