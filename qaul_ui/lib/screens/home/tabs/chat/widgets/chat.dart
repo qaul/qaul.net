@@ -243,6 +243,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   OverlayEntry? _copyFeedbackEntry;
   Timer? _copyFeedbackTimer;
   late final AnimationController _copyFeedbackFadeController;
+  int _copyRequestVersion = 0;
 
   void _handleMessageLongPress(
     BuildContext messageContext,
@@ -480,11 +481,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     BuildContext messageContext,
     String text,
   ) async {
+    final requestVersion = ++_copyRequestVersion;
+    _clearCopyFeedback();
     final messageRect = _messageRectInOverlay(messageContext);
     Navigator.pop(dialogContext);
 
     await Clipboard.setData(ClipboardData(text: text));
-    if (!mounted || messageRect == null) return;
+    if (!mounted ||
+        requestVersion != _copyRequestVersion ||
+        messageRect == null) {
+      return;
+    }
 
     _showCopyFeedback(messageRect);
   }
@@ -506,11 +513,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     final overlayBox = overlay.context.findRenderObject() as RenderBox?;
     if (overlayBox == null) return;
 
-    _copyFeedbackTimer?.cancel();
-    _copyFeedbackEntry?.remove();
-    _copyFeedbackFadeController
-      ..stop()
-      ..value = 1;
+    _clearCopyFeedback();
 
     const feedbackWidth = 140.0;
     const feedbackHeight = 52.0;
@@ -552,10 +555,23 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     });
   }
 
-  @override
-  void dispose() {
+  void _clearCopyFeedback() {
     _copyFeedbackTimer?.cancel();
     _copyFeedbackEntry?.remove();
+    _copyFeedbackEntry = null;
+    _copyFeedbackFadeController
+      ..stop()
+      ..value = 1;
+  }
+
+  void _invalidateCopyFeedback() {
+    _copyRequestVersion++;
+    _clearCopyFeedback();
+  }
+
+  @override
+  void dispose() {
+    _clearCopyFeedback();
     _copyFeedbackFadeController.dispose();
     super.dispose();
   }
@@ -634,6 +650,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   void didUpdateWidget(covariant ChatScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.room == room) return;
+    if (oldWidget.room.idBase58 != room.idBase58) {
+      _invalidateCopyFeedback();
+    }
     _consumeForwardDraft(room);
     _updateMenuOptionsBasedOnRoomType(resolveChatRenderMode(room));
     _scheduleUpdateCurrentOpenChat();
@@ -648,6 +667,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     }
 
     if (_activeRoomIdBase58 != room.idBase58) {
+      _invalidateCopyFeedback();
       _activeRoomIdBase58 = room.idBase58;
       _consumeForwardDraft(room);
     }
