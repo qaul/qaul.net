@@ -277,7 +277,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(copiedText, 'Text to copy');
-    expect(find.text('Message copied'), findsOneWidget);
+    expect(find.text('Message Copied'), findsOneWidget);
+    expect(
+      tester.getSize(find.byKey(const ValueKey('copy-feedback-toast'))),
+      const Size(140, 52),
+    );
   });
 
   testWidgets('disabled room blocks chat footer sending', (tester) async {

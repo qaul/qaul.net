@@ -507,8 +507,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     _copyFeedbackTimer?.cancel();
     _copyFeedbackEntry?.remove();
 
-    const feedbackWidth = 180.0;
-    const feedbackHeight = 72.0;
+    const feedbackWidth = 140.0;
+    const feedbackHeight = 52.0;
     const viewportPadding = 16.0;
     final left = (messageRect.right - feedbackWidth)
         .clamp(
@@ -970,21 +970,26 @@ class _CopyFeedbackToast extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
+      key: const ValueKey('copy-feedback-toast'),
       decoration: BoxDecoration(
         color: const Color(0xFF282828),
         border: Border.all(color: const Color(0xFF999999)),
         borderRadius: BorderRadius.circular(24),
       ),
       child: const SizedBox(
-        width: 180,
-        height: 72,
-        child: Center(
+        width: 140,
+        height: 52,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 18),
           child: Text(
-            'Message copied',
+            'Message Copied',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontFamily: 'Roboto',
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              height: 1.3,
+              letterSpacing: 0.2,
               decoration: TextDecoration.none,
             ),
           ),
