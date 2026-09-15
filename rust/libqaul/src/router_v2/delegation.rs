@@ -377,7 +377,7 @@ impl RouterV2State {
     /// Expires unanswered subscribes, stale refusals and lapsed
     /// subscriptions.
     pub fn clear_delegation_state(&self, now_ms: u64) {
-        let timeout_ms = self.options.manifest_request_timeout.saturating_mul(1000);
+        let timeout_ms = self.options.management_request_timeout.saturating_mul(1000);
 
         let timed_out: Vec<([u8; 8], [u8; 8])> = {
             let mut outstanding = self.outstanding_subscribes.write().unwrap();
