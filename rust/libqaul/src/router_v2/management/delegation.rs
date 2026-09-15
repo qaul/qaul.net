@@ -221,8 +221,17 @@ impl RouterV2State {
     }
 
     /// drops subscriptions that their "fetch" never returned anything
+    ///
+    /// Deliberately a multiple of the management timeout: a parked subscribe is
+    /// waiting on a §11.5 profile fetch, so giving it the same window would let
+    /// it expire in a race with the very request it is waiting for, and with
+    /// the one retry after that.
     pub(crate) fn clear_pending_subscribes(&self, now_ms: u64) {
-        let window_ms = self.options.manifest_request_timeout.saturating_mul(1000);
+        let window_ms = self
+            .options
+            .management_request_timeout
+            .saturating_mul(3)
+            .saturating_mul(1000);
         let mut pending = self.pending_subscribes.write().unwrap();
 
         for parked in pending.values_mut() {

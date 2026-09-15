@@ -39,6 +39,17 @@ message ProfileRequest {
     // the requester's cached profile_version for the subject, or 0 if it
     // holds none
     uint32 cached_version = 1;
+    // The subject whose profile is wanted, when the envelope is addressed to
+    // a node that carries the subject rather than to the subject itself.
+    //
+    // A user known only through a host's manifest has no routing entry of its
+    // own (spec sections 2.3 and 3.2), so a request addressed to the subject
+    // cannot be delivered — and without the profile the manifest entry can
+    // never be trusted, so it never gains one either. Naming the subject here
+    // lets the requester address the host instead, which is always routable.
+    //
+    // Empty means the subject is the envelope destination, as before.
+    bytes subject = 2;
 }
 
 message ProfileResponse {
