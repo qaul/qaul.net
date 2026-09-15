@@ -101,7 +101,9 @@ impl RpcCommand for TransportsSubcmd {
                         println!("transport '{}' updated", r.id);
                     } else {
                         eprintln!("transport '{}' update FAILED: {}", r.id, r.error);
-                        return Err(format!("transport '{}' update failed: {}", r.id, r.error).into());
+                        return Err(
+                            format!("transport '{}' update failed: {}", r.id, r.error).into()
+                        );
                     }
                 }
                 Some(proto::transports::Message::ListRequest(_))

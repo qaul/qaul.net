@@ -172,12 +172,10 @@ impl RoutingTableState {
 
 impl RoutingTable {
     /// get online users info
-    pub fn get_online_users_info(router: &super::RouterState) -> BTreeMap<Vec<u8>, Vec<RoutingConnectionEntry>> {
-        let routing_table = router
-            .routing_table
-            .inner
-            .read()
-            .unwrap();
+    pub fn get_online_users_info(
+        router: &super::RouterState,
+    ) -> BTreeMap<Vec<u8>, Vec<RoutingConnectionEntry>> {
+        let routing_table = router.routing_table.inner.read().unwrap();
         let mut users: BTreeMap<Vec<u8>, Vec<RoutingConnectionEntry>> = BTreeMap::new();
         for (user_id, user) in routing_table.table.iter() {
             if !user.connections.is_empty() {
@@ -188,12 +186,12 @@ impl RoutingTable {
     }
 
     /// send protobuf RPC routing table list
-    pub fn rpc_send_routing_table(state: &crate::QaulState, router: &super::RouterState, request_id: String) {
-        let routing_table = router
-            .routing_table
-            .inner
-            .read()
-            .unwrap();
+    pub fn rpc_send_routing_table(
+        state: &crate::QaulState,
+        router: &super::RouterState,
+        request_id: String,
+    ) {
+        let routing_table = router.routing_table.inner.read().unwrap();
         let mut table_list = Vec::with_capacity(routing_table.table.len());
 
         // loop through all user table entries
@@ -210,7 +208,7 @@ impl RoutingTable {
                 match connection.module {
                     ConnectionModule::Lan => module = proto::ConnectionModule::Lan as i32,
                     ConnectionModule::Internet => module = proto::ConnectionModule::Internet as i32,
-                    ConnectionModule::Ble => module = proto::ConnectionModule::Ble as i32,
+                    ConnectionModule::Ble1m => module = proto::ConnectionModule::Ble as i32,
                     ConnectionModule::Local => module = proto::ConnectionModule::Local as i32,
                     _ => module = proto::ConnectionModule::None as i32,
                 }
@@ -287,7 +285,7 @@ impl RoutingTable {
     fn rank_routing_connection(connection: &RoutingConnectionEntry) -> u8 {
         match connection.module {
             ConnectionModule::None => return 0,
-            ConnectionModule::Ble => return 1,
+            ConnectionModule::Ble1m | ConnectionModule::BleCoded => return 1,
             ConnectionModule::Internet => return 2,
             ConnectionModule::Lan => return 3,
             ConnectionModule::Local => return 4,

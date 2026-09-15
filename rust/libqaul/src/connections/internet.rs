@@ -52,6 +52,7 @@ use crate::services::feed::Feed;
 use crate::storage::configuration::Configuration;
 use crate::utilities::timestamp::Timestamp;
 use qaul_info::{QaulInfo, QaulInfoEvent};
+use qaul_management::{QaulManagement, QaulManagementEvent};
 use qaul_messaging::{QaulMessaging, QaulMessagingEvent};
 
 #[derive(NetworkBehaviour)]
@@ -61,6 +62,9 @@ pub struct QaulInternetBehaviour {
     pub identify: identify::Behaviour,
     pub ping: ping::Behaviour,
     pub qaul_info: QaulInfo,
+    /// §11 management sub-protocol. A behaviour of its own per §11.2,
+    /// so control messages never share a pipe with routing info.
+    pub qaul_management: QaulManagement,
     pub qaul_messaging: QaulMessaging,
 }
 
@@ -69,6 +73,9 @@ impl QaulInternetBehaviour {
         match event {
             QaulInternetEvent::QaulInfo(ev) => {
                 self.qaul_info_event(state, ev);
+            }
+            QaulInternetEvent::QaulManagement(ev) => {
+                self.qaul_management_event(state, ev);
             }
             QaulInternetEvent::QaulMessaging(ev) => {
                 self.qaul_messaging_event(state, ev);
@@ -87,6 +94,9 @@ impl QaulInternetBehaviour {
 
     fn qaul_info_event(&mut self, state: &crate::QaulState, event: QaulInfoEvent) {
         events::qaul_info_event(state, event, ConnectionModule::Internet);
+    }
+    fn qaul_management_event(&mut self, state: &crate::QaulState, event: QaulManagementEvent) {
+        events::qaul_management_event(state, event, ConnectionModule::Internet);
     }
     fn qaul_messaging_event(&mut self, state: &crate::QaulState, event: QaulMessagingEvent) {
         events::qaul_messaging_event(state, event, ConnectionModule::Internet);
@@ -218,12 +228,19 @@ impl InternetReConnections {
 }
 
 /// Add a connection entry to the connections map (shared inner logic).
-fn add_connection_impl(connections: &mut BTreeMap<String, PeerId>, address: String, peer_id: &PeerId) {
+fn add_connection_impl(
+    connections: &mut BTreeMap<String, PeerId>,
+    address: String,
+    peer_id: &PeerId,
+) {
     connections.insert(address, peer_id.clone());
 }
 
 /// Get PeerId from address in the connections map (shared inner logic).
-fn peerid_from_address_impl(connections: &BTreeMap<String, PeerId>, address: String) -> Option<PeerId> {
+fn peerid_from_address_impl(
+    connections: &BTreeMap<String, PeerId>,
+    address: String,
+) -> Option<PeerId> {
     connections.get(&address).cloned()
 }
 
@@ -291,6 +308,7 @@ pub enum QaulInternetEvent {
     Identify(identify::Event),
     Ping(ping::Event),
     QaulInfo(QaulInfoEvent),
+    QaulManagement(QaulManagementEvent),
     QaulMessaging(QaulMessagingEvent),
 }
 
@@ -315,6 +333,12 @@ impl From<ping::Event> for QaulInternetEvent {
 impl From<QaulInfoEvent> for QaulInternetEvent {
     fn from(event: QaulInfoEvent) -> Self {
         Self::QaulInfo(event)
+    }
+}
+
+impl From<QaulManagementEvent> for QaulInternetEvent {
+    fn from(event: QaulManagementEvent) -> Self {
+        Self::QaulManagement(event)
     }
 }
 
@@ -422,7 +446,12 @@ impl Transport for Internet {
         Ok(())
     }
 
-    fn send_qaul_info_message(&mut self, _state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>) {
+    fn send_qaul_info_message(
+        &mut self,
+        _state: &crate::QaulState,
+        peer_id: PeerId,
+        data: Vec<u8>,
+    ) {
         if !self.is_enabled() {
             return;
         }
@@ -432,7 +461,31 @@ impl Transport for Internet {
             .send_qaul_info_message(peer_id, data);
     }
 
-    fn send_qaul_messaging_message(&mut self, _state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>) {
+    fn send_qaul_management_message(
+        &mut self,
+        _state: &crate::QaulState,
+        peer_id: PeerId,
+        data: Vec<u8>,
+    ) {
+        if !self.is_enabled() {
+            return;
+        }
+        log::debug!(
+            "management: handing {} bytes to the qaul_management behaviour for {peer_id}",
+            data.len()
+        );
+        self.swarm
+            .behaviour_mut()
+            .qaul_management
+            .send_qaul_management_message(peer_id, data);
+    }
+
+    fn send_qaul_messaging_message(
+        &mut self,
+        _state: &crate::QaulState,
+        peer_id: PeerId,
+        data: Vec<u8>,
+    ) {
         if !self.is_enabled() {
             return;
         }
@@ -442,14 +495,16 @@ impl Transport for Internet {
             .send_qaul_messaging_message(peer_id, data);
     }
 
-    fn publish_floodsub(&mut self, _state: &crate::QaulState, topic: floodsub::Topic, data: Vec<u8>) {
+    fn publish_floodsub(
+        &mut self,
+        _state: &crate::QaulState,
+        topic: floodsub::Topic,
+        data: Vec<u8>,
+    ) {
         if !self.is_enabled() {
             return;
         }
-        self.swarm
-            .behaviour_mut()
-            .floodsub
-            .publish(topic, data);
+        self.swarm.behaviour_mut().floodsub.publish(topic, data);
     }
 
     fn listeners(&self) -> Vec<Multiaddr> {
@@ -486,6 +541,7 @@ impl Internet {
             )),
             ping: ping::Behaviour::new(ping_config),
             qaul_info: QaulInfo::new(Node::get_id(state)),
+            qaul_management: QaulManagement::new(Node::get_id(state)),
             qaul_messaging: QaulMessaging::new(Node::get_id(state)),
         };
         behaviour.floodsub.subscribe(Node::get_topic(state));
@@ -520,10 +576,8 @@ impl Internet {
         if active {
             // listen on configured addresses
             for listen in &config.internet.listen {
-                match Swarm::listen_on(
-                    &mut swarm,
-                    listen.parse().expect("can get a local socket"),
-                ) {
+                match Swarm::listen_on(&mut swarm, listen.parse().expect("can get a local socket"))
+                {
                     Ok(listener_id) => {
                         log::info!(
                             "INTERNET listening on `{}` with ID {:?}",

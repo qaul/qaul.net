@@ -103,13 +103,14 @@ impl MessagingRetransmit {
                         if let Ok(container) =
                             super::proto::Container::decode(&unconfirmed_message.container[..])
                         {
-                            let receiver = match PeerId::from_bytes(&unconfirmed_message.receiver_id) {
-                                Ok(r) => r,
-                                Err(e) => {
-                                    log::error!("Failed to parse receiver PeerId: {}", e);
-                                    continue;
-                                }
-                            };
+                            let receiver =
+                                match PeerId::from_bytes(&unconfirmed_message.receiver_id) {
+                                    Ok(r) => r,
+                                    Err(e) => {
+                                        log::error!("Failed to parse receiver PeerId: {}", e);
+                                        continue;
+                                    }
+                                };
 
                             // If this message's session has rotated away from the
                             // one its stored ciphertext used (the receiver may
@@ -136,7 +137,8 @@ impl MessagingRetransmit {
                                     if let (Some(c), Some(s)) = (cur, sent) {
                                         if c != s {
                                             let _ = unconfirmed.unconfirmed.remove(&signature);
-                                            let _ = unconfirmed.outbound_plaintext.remove(&signature);
+                                            let _ =
+                                                unconfirmed.outbound_plaintext.remove(&signature);
                                             updated = true;
                                             to_reencrypt.push(pt);
                                             continue;
