@@ -278,10 +278,25 @@ void main() {
 
     expect(copiedText, 'Text to copy');
     expect(find.text('Message Copied'), findsOneWidget);
-    expect(
-      tester.getSize(find.byKey(const ValueKey('copy-feedback-toast'))),
-      const Size(140, 52),
+    final feedbackSize = tester.getSize(
+      find.byKey(const ValueKey('copy-feedback-toast')),
     );
+    expect(feedbackSize.width, greaterThanOrEqualTo(140));
+    expect(feedbackSize.height, greaterThanOrEqualTo(52));
+
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      tester
+          .widget<FadeTransition>(
+            find.byKey(const ValueKey('copy-feedback-fade')),
+          )
+          .opacity
+          .value,
+      lessThan(1),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('copy-feedback-toast')), findsNothing);
   });
 
   testWidgets('disabled room blocks chat footer sending', (tester) async {

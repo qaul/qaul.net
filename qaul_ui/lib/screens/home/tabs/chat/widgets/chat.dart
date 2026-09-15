@@ -217,7 +217,8 @@ class ChatScreen extends StatefulHookConsumerWidget {
   }
 }
 
-class _ChatScreenState extends ConsumerState<ChatScreen> {
+class _ChatScreenState extends ConsumerState<ChatScreen>
+    with SingleTickerProviderStateMixin {
   ChatRoom get room => widget.room;
 
   User get user => widget.user;
@@ -241,6 +242,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   String? _selectedContextMenuMessageId;
   OverlayEntry? _copyFeedbackEntry;
   Timer? _copyFeedbackTimer;
+  late final AnimationController _copyFeedbackFadeController;
 
   void _handleMessageLongPress(
     BuildContext messageContext,
@@ -506,6 +508,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     _copyFeedbackTimer?.cancel();
     _copyFeedbackEntry?.remove();
+    _copyFeedbackFadeController
+      ..stop()
+      ..value = 1;
 
     const feedbackWidth = 140.0;
     const feedbackHeight = 52.0;
@@ -527,13 +532,23 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       builder: (context) => Positioned(
         left: left,
         top: top,
-        child: const IgnorePointer(child: _CopyFeedbackToast()),
+        child: IgnorePointer(
+          child: FadeTransition(
+            key: const ValueKey('copy-feedback-fade'),
+            opacity: _copyFeedbackFadeController,
+            child: const _CopyFeedbackToast(),
+          ),
+        ),
       ),
     );
     overlay.insert(_copyFeedbackEntry!);
     _copyFeedbackTimer = Timer(const Duration(seconds: 2), () {
-      _copyFeedbackEntry?.remove();
-      _copyFeedbackEntry = null;
+      final entry = _copyFeedbackEntry;
+      _copyFeedbackFadeController.reverse().whenComplete(() {
+        if (_copyFeedbackEntry != entry) return;
+        _copyFeedbackEntry?.remove();
+        _copyFeedbackEntry = null;
+      });
     });
   }
 
@@ -541,6 +556,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void dispose() {
     _copyFeedbackTimer?.cancel();
     _copyFeedbackEntry?.remove();
+    _copyFeedbackFadeController.dispose();
     super.dispose();
   }
 
@@ -598,6 +614,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    _copyFeedbackFadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+      value: 1,
+    );
     _activeRoomIdBase58 = room.idBase58;
     _consumeForwardDraft(room);
     _scheduleUpdateCurrentOpenChat();
@@ -976,13 +997,14 @@ class _CopyFeedbackToast extends StatelessWidget {
         border: Border.all(color: const Color(0xFF999999)),
         borderRadius: BorderRadius.circular(24),
       ),
-      child: const SizedBox(
-        width: 140,
-        height: 52,
-        child: Padding(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 140, minHeight: 52),
+        child: const Padding(
           padding: EdgeInsets.symmetric(horizontal: 24, vertical: 18),
           child: Text(
             'Message Copied',
+            maxLines: 1,
+            softWrap: false,
             style: TextStyle(
               color: Colors.white,
               fontFamily: 'Roboto',
