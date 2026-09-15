@@ -329,7 +329,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       ),
       ChatMessageContextMenuAction(
         id: 'copy',
-        label: 'Copy',
+        label: AppLocalizations.of(context)!.copy,
         iconAsset: ChatMessageContextMenuIcons.copy,
         onPressed: onCopy,
       ),
@@ -999,10 +999,10 @@ class _CopyFeedbackToast extends StatelessWidget {
       ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(minWidth: 140, minHeight: 52),
-        child: const Padding(
+        child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 24, vertical: 18),
           child: Text(
-            'Message Copied',
+            AppLocalizations.of(context)!.messageCopied,
             maxLines: 1,
             softWrap: false,
             style: TextStyle(

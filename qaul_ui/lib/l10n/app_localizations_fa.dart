@@ -318,6 +318,12 @@ class AppLocalizationsFa extends AppLocalizations {
   String get chatEmptyState => 'هنوز هیچ پیامی در اینجا وجود ندارد';
 
   @override
+  String get copy => 'کپی';
+
+  @override
+  String get messageCopied => 'پیام کپی شد';
+
+  @override
   String get securityNumber => 'شماره امنیتی';
 
   @override
