@@ -36,7 +36,10 @@ mod envelope {
             source: vec![9, 10, 11, 12, 13, 14, 15, 16],
             source_is_node: true,
             request_id: 42,
-            body: Some(Body::ProfileRequest(ProfileRequest { cached_version: 7 })),
+            body: Some(Body::ProfileRequest(ProfileRequest {
+                cached_version: 7,
+                subject: Vec::new(),
+            })),
         }
     }
 
@@ -389,7 +392,7 @@ mod request_profile {
         assert!(rx.try_recv().is_err());
 
         // past the timeout, the sweep clears it
-        let timeout_ms = state.options.manifest_request_timeout * 1_000;
+        let timeout_ms = state.options.management_request_timeout * 1_000;
         state.clear_management_msgs(1_000 + timeout_ms + 1);
 
         state.request_profile(subject, false, 1_000 + timeout_ms + 2);
@@ -531,7 +534,10 @@ mod source_addressing {
             source: source.to_vec(),
             source_is_node,
             request_id: 77,
-            body: Some(Body::ProfileRequest(ProfileRequest { cached_version: 0 })),
+            body: Some(Body::ProfileRequest(ProfileRequest {
+                cached_version: 0,
+                subject: Vec::new(),
+            })),
         };
         state.on_management_received(neighbour, &envelope.encode_to_vec(), 1_000);
 
@@ -627,7 +633,10 @@ mod forward_dedup {
                 profile: None,
             })
         } else {
-            Body::ProfileRequest(ProfileRequest { cached_version: 0 })
+            Body::ProfileRequest(ProfileRequest {
+                cached_version: 0,
+                subject: Vec::new(),
+            })
         };
         ManagementMessage {
             version: 1,
@@ -715,4 +724,247 @@ mod forward_dedup {
             (0..100).any(|_| fresh_state().0.next_request_id.load(Ordering::Relaxed) != first);
         assert!(any_different, "next_request_id seed appears to be constant");
     }
+}
+
+// ---------- §11.5 fallback: asking the carrying host ----------
+//
+// A user known only through a host's manifest has no routing entry of its own
+// (§2.3 keeps user entries out of the Internet sphere; §3.2 gives a node-form
+// host's users none at all). A subject-addressed ProfileRequest is therefore
+// undeliverable — and without the profile the manifest entry can never be
+// trusted (§8.8 step 5), so it never gains a route either. Asking the host
+// breaks the cycle: a node entry is routable where a user entry does not exist.
+
+mod profile_via_host {
+    use super::*;
+    use crate::router_v2::{
+        management::{
+            profile::{HostedProfile, SignedProfileBlob},
+            Addressing,
+        },
+        manifest::ManifestLog,
+        table::{DelegatedUser, Node, User},
+    };
+
+    const SUBJECT: [u8; 8] = [7; 8];
+    const HOST: [u8; 8] = [8; 8];
+    const REQUESTER: [u8; 8] = [9; 8];
+
+    /// The stuck state: a user that exists only inside a host's manifest, with
+    /// no routing entry and no delegation gateway — it cannot have one until
+    /// it is trusted, and cannot be trusted without the profile.
+    fn manifest_only_user(state: &RouterV2State) {
+        state.users.write().unwrap().insert(
+            SUBJECT,
+            User {
+                id: SUBJECT,
+                public_key: None,
+                profile_version: 0,
+                routing_entry: None,
+                delegation_gateways: Vec::new(),
+                is_hosted: false,
+            },
+        );
+        let user = state.users.read().unwrap().get(&SUBJECT).unwrap();
+
+        state.nodes.write().unwrap().insert(
+            HOST,
+            Node {
+                id: HOST,
+                public_key: None,
+                manifest_version: 1,
+                advertised_version: 1,
+                is_gateway: false,
+                delegated_users: vec![DelegatedUser {
+                    user_id: SUBJECT,
+                    user,
+                    delegation_timeout: u64::MAX,
+                    entry_signature: [0; 64],
+                    profile_version: 0,
+                }],
+                manifest_signature: None,
+                retained_chunks: None,
+                learn_sphere: Some(crate::router_v2::Sphere::Local),
+                manifest_log: ManifestLog::default(),
+            },
+        );
+    }
+
+    #[test]
+    fn a_manifest_only_user_is_requested_through_its_carrying_host() {
+        let (state, mut rx) = fresh_state();
+        manifest_only_user(&state);
+        // the host is a direct neighbour, so it is reachable in node space
+        state.add_neighbour_transport(fresh_peer(), HOST, ConnectionModule::Lan);
+
+        state.request_profile(SUBJECT, false, 1_000);
+
+        let out = rx.try_recv().expect("the fallback must send something");
+        let decoded = ManagementMessage::decode(&out.bytes[..]).unwrap();
+        assert_eq!(
+            decoded.destination,
+            HOST.to_vec(),
+            "addressed to the host, which is routable"
+        );
+        assert!(decoded.destination_is_node);
+        match decoded.body {
+            Some(Body::ProfileRequest(r)) => assert_eq!(
+                r.subject,
+                SUBJECT.to_vec(),
+                "the body has to name the subject, since the destination no longer implies it"
+            ),
+            other => panic!("expected a ProfileRequest, got {other:?}"),
+        }
+        assert!(
+            state
+                .management_in_flight
+                .read()
+                .unwrap()
+                .contains_key(&(SUBJECT, false)),
+            "in flight stays keyed on the subject, so the response still matches"
+        );
+    }
+
+    /// With no host carrying the subject there is nothing to fall back to, and
+    /// nothing must be recorded — otherwise the subject is pinned for the whole
+    /// in-flight window for a request that never went out.
+    #[test]
+    fn an_unreachable_subject_with_no_carrying_host_sends_nothing() {
+        let (state, mut rx) = fresh_state();
+
+        state.request_profile(SUBJECT, false, 1_000);
+
+        assert!(rx.try_recv().is_err());
+        assert!(state.management_in_flight.read().unwrap().is_empty());
+    }
+
+    /// The responder half: a request addressed to us as a node, but naming a
+    /// user in its body, must be answered with that user's profile rather than
+    /// with our node profile.
+    #[test]
+    fn a_host_answers_a_request_naming_a_subject_in_the_body() {
+        let (state, mut rx) = fresh_state();
+
+        let kp = Keypair::generate_ed25519();
+        let mk = Multikey::from(kp.public());
+        let carried = mk.to_id();
+        state.register_hosted_user(carried, 1, mk.clone());
+        let mut profile = Profile {
+            multikey: mk,
+            version: 1,
+            name: "carried".into(),
+            self_signature: [0u8; 64],
+        };
+        profile.self_signature = kp.sign(&profile.sign_input()).unwrap().try_into().unwrap();
+        state.register_hosted_profile(
+            carried,
+            HostedProfile {
+                profile,
+                signed: SignedProfileBlob::default(),
+            },
+        );
+
+        // the requester is a direct neighbour, so the reply can be routed
+        state.add_neighbour_transport(fresh_peer(), REQUESTER, ConnectionModule::Lan);
+
+        state.handle_profile_request(
+            Addressing {
+                destination: state.host_mk.to_id(),
+                destination_is_node: true,
+                source: REQUESTER,
+                source_is_node: true,
+                request_id: 5,
+            },
+            ProfileRequest {
+                cached_version: 0,
+                subject: carried.to_vec(),
+            },
+        );
+
+        let out = rx.try_recv().expect("a reply must go out");
+        let decoded = ManagementMessage::decode(&out.bytes[..]).unwrap();
+        match decoded.body {
+            Some(Body::ProfileResponse(r)) => {
+                assert!(r.found);
+                assert_eq!(
+                    r.profile.expect("profile present").name,
+                    "carried",
+                    "the named subject's profile, not this node's own"
+                );
+            }
+            other => panic!("expected a ProfileResponse, got {other:?}"),
+        }
+    }
+
+    /// An empty `subject` keeps the original meaning: the envelope destination
+    /// is the subject, and a node-addressed request gets the node profile.
+    #[test]
+    fn an_empty_subject_still_means_the_envelope_destination() {
+        let (state, mut rx) = fresh_state();
+        state.add_neighbour_transport(fresh_peer(), REQUESTER, ConnectionModule::Lan);
+
+        state.handle_profile_request(
+            Addressing {
+                destination: state.host_mk.to_id(),
+                destination_is_node: true,
+                source: REQUESTER,
+                source_is_node: true,
+                request_id: 6,
+            },
+            ProfileRequest {
+                cached_version: 0,
+                subject: Vec::new(),
+            },
+        );
+
+        let out = rx.try_recv().expect("a reply must go out");
+        let decoded = ManagementMessage::decode(&out.bytes[..]).unwrap();
+        match decoded.body {
+            Some(Body::ProfileResponse(r)) => {
+                let profile = r.profile.expect("profile present");
+                assert_eq!(
+                    profile.multikey,
+                    state.host_mk.encode(),
+                    "our node profile, as before"
+                );
+            }
+            other => panic!("expected a ProfileResponse, got {other:?}"),
+        }
+    }
+}
+
+// ---------- §14: management has its own window ----------
+
+/// The §10.8 manifest pull is a neighbour-to-neighbour exchange; a §11 request
+/// is end-to-end and far quicker. Both used one number, so a profile fetch lost
+/// in flight cost the requester the manifest window — measured at 10 s, which
+/// hit two thirds of the nodes on a 9-node grid.
+#[test]
+fn the_management_sweep_uses_its_own_window_not_the_manifest_one() {
+    let options = crate::storage::configuration::RoutingV2Options {
+        management_request_timeout: 2,
+        manifest_request_timeout: 30,
+        ..Default::default()
+    };
+    let host_kp = Keypair::generate_ed25519();
+    let host_mk = Multikey::from(host_kp.public());
+    let (state, _rx) = RouterV2State::new(host_kp, host_mk, options);
+
+    state
+        .management_in_flight
+        .write()
+        .unwrap()
+        .insert(([1; 8], false), 1_000);
+
+    state.clear_management_msgs(1_000 + 1_999);
+    assert!(
+        !state.management_in_flight.read().unwrap().is_empty(),
+        "still inside its own window"
+    );
+
+    state.clear_management_msgs(1_000 + 2_001);
+    assert!(
+        state.management_in_flight.read().unwrap().is_empty(),
+        "swept at the management window, not the far longer manifest one"
+    );
 }

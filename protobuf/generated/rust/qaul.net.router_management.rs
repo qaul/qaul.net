@@ -42,12 +42,24 @@ pub mod management_message {
     }
 }
 /// Profile fetch (11.5).
-#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ProfileRequest {
     /// the requester's cached profile_version for the subject, or 0 if it
     /// holds none
     #[prost(uint32, tag = "1")]
     pub cached_version: u32,
+    /// The subject whose profile is wanted, when the envelope is addressed to
+    /// a node that carries the subject rather than to the subject itself.
+    ///
+    /// A user known only through a host's manifest has no routing entry of its
+    /// own (spec sections 2.3 and 3.2), so a request addressed to the subject
+    /// cannot be delivered — and without the profile the manifest entry can
+    /// never be trusted, so it never gains one either. Naming the subject here
+    /// lets the requester address the host instead, which is always routable.
+    ///
+    /// Empty means the subject is the envelope destination, as before.
+    #[prost(bytes = "vec", tag = "2")]
+    pub subject: ::prost::alloc::vec::Vec<u8>,
 }
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ProfileResponse {

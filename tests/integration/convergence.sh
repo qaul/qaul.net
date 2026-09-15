@@ -25,7 +25,7 @@ while :; do
         status=$(sudo qauld-ctl -d "$d" router v2 status 2>/dev/null)
         neighbours=$(awk '/^  neighbours/{print $2}' <<<"$status")
         entries=$(awk '/^  routing entries/{print $3}' <<<"$status")
-        users=$(sudo qauld-ctl -d "$d" users online 2>/dev/null | grep -c "^[0-9] |")
+        users=$(sudo qauld-ctl -d "$d" users online 2>/dev/null | grep -c "^[0-9][0-9]* |")
 
         [[ -z ${t_neighbour[$id]:-} && ${neighbours:-0} -ge 1 ]] && t_neighbour[$id]=$t
         [[ -z ${t_routing[$id]:-}   && ${entries:-0}    -ge $((N-1)) ]] && t_routing[$id]=$t

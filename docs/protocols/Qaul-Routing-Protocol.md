@@ -2429,6 +2429,17 @@ The following are deferred to a future version of this protocol:
 | Manifest serve rate             | 4 / s per neighbour |
 | Manifest tombstone retention    | delegation TTL (6 hours) |
 | Delta-log record cap            | 4,096 per origin |
+| Management request timeout      | 5 seconds       |
+
+The management request timeout is the window a requester waits for a
+response before the subject may be retried (Section 11.2). It is
+deliberately separate from the manifest request timeout: a manifest pull
+is a neighbour-to-neighbour exchange, whereas a management request is
+end-to-end and much quicker — bounded in practice by per-hop queueing
+rather than by processing. Because Section 11.2 provides no
+acknowledgement, a request lost in flight is detected only when this
+window elapses, so the value is the whole recovery latency and should be
+sized to the deployment's diameter rather than to its manifest traffic.
 
 Neighbour ping interval is determined by the transport layer and is
 not specified here.
