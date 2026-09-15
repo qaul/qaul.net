@@ -4,7 +4,9 @@
 use super::super::BleRpc;
 use super::utils::BleDeviceState;
 use crate::{
-    ble::ble_uuids::{main_service_uuid, msg_char, read_char},
+    ble::ble_uuids::{
+        main_service_uuid, msg_char, read_char, QAUL_ID_ADVERT_BYTES, QAUL_MANUFACTURER_ID,
+    },
     ble::utils,
     rpc::{process_received_message, proto_sys::ble::Message::*, proto_sys::*, utils::*},
 };
@@ -94,9 +96,21 @@ impl IdleBleService {
         // ------------------------- SET UP ADVERTISEMENT -----------------------------------
         // ==================================================================================
 
+        // A truncated qaul ID for pre connection decisions, role tiebreaker, ignore list etc
+        let mut manufacturer_data = std::collections::BTreeMap::new();
+        manufacturer_data.insert(
+            QAUL_MANUFACTURER_ID,
+            qaul_id
+                .iter()
+                .take(QAUL_ID_ADVERT_BYTES)
+                .copied()
+                .collect::<Vec<u8>>(),
+        );
+
         let le_advertisement = Advertisement {
             advertisement_type: bluer::adv::Type::Peripheral,
             service_uuids: vec![main_service_uuid()].into_iter().collect(),
+            manufacturer_data,
             tx_power: advert_mode,
             discoverable: Some(true),
             local_name: Some(utils::get_random_string(5)),
