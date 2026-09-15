@@ -285,6 +285,8 @@ pub struct RoutingV2Options {
     pub manifest_rate_limit: u64,
     /// time before another MANIFEST_REQUEST ccan be requested with another neighbour
     pub manifest_request_timeout: u64,
+    /// how long a management req waits for its response before retry
+    pub management_request_timeout: u64,
     /// max MANIFEST_REQUESTs a node may send per second, per neighbour
     pub manifest_request_rate: u32,
     /// max manifest responses a node may emit per second, per neighbour
@@ -307,6 +309,7 @@ impl Default for RoutingV2Options {
             manifest_rate_limit: 60,
             delegation_referesh: 10800,
             manifest_request_timeout: 10,
+            management_request_timeout: 5,
             manifest_request_rate: 4,
             manifest_serve_rate: 4,
             delta_log_cap: 4096,

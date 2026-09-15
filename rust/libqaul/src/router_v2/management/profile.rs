@@ -13,7 +13,7 @@ use crate::router_v2::{
     RouterV2State,
 };
 
-use proto::{management_message::Body, Profile as ProtoProfile, ProfileResponse};
+use proto::{management_message::Body, Profile as ProtoProfile, ProfileRequest, ProfileResponse};
 use qaul_proto::qaul_net_router_management as proto;
 
 /// same as v1's `SignedUserProfile`
@@ -89,10 +89,17 @@ impl RouterV2State {
     }
 
     /// Answers a `ProfileRequest` addressed to one of our identities
-    pub(crate) fn handle_profile_request(&self, addressing: Addressing, _cached_version: u32) {
-        let subject = addressing.destination;
+    pub(crate) fn handle_profile_request(&self, addressing: Addressing, request: ProfileRequest) {
+        // §11.5
+        let subject = match <[u8; 8]>::try_from(request.subject.as_slice()) {
+            Ok(named) => named,
+            Err(_) => addressing.destination,
+        };
 
-        let hosted = if addressing.destination_is_node {
+        // a named subject is always a user
+        let answer_as_node = addressing.destination_is_node && request.subject.is_empty();
+
+        let hosted = if answer_as_node {
             // A node has no extended profile: no avatar, no bio, no name.
             self.sign_node_profile().map(|profile| HostedProfile {
                 profile,

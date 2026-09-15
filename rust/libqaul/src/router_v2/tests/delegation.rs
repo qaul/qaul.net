@@ -266,7 +266,7 @@ fn a_subscribe_for_an_unreachable_subject_parks_without_a_fetch() {
     assert!(state.management_in_flight.read().unwrap().is_empty());
     assert!(!state.pending_subscribes.read().unwrap().is_empty());
 
-    let window_ms = state.options.manifest_request_timeout * 1000;
+    let window_ms = state.options.management_request_timeout * 3 * 1000;
     state.clear_pending_subscribes(NOW + window_ms + 1);
     assert!(state.pending_subscribes.read().unwrap().is_empty());
 }
@@ -317,7 +317,7 @@ fn a_parked_subscribe_expires_when_the_fetch_never_returns() {
     let req = subscribe_from(&state, &account, NOW + TTL_MS);
     state.handle_delegation_subscribe(addressed_to_us(&state, user_id), req, NOW);
 
-    let window_ms = state.options.manifest_request_timeout * 1000;
+    let window_ms = state.options.management_request_timeout * 3 * 1000;
     state.clear_pending_subscribes(NOW + window_ms - 1);
     assert!(!state.pending_subscribes.read().unwrap().is_empty());
 
@@ -673,7 +673,7 @@ mod issuing {
             "a subscribe in flight blocks a second one"
         );
 
-        let window = state.options.manifest_request_timeout * 1000;
+        let window = state.options.management_request_timeout * 1000;
         state.clear_delegation_state(NOW + window + 1);
 
         assert!(state.outstanding_subscribes.read().unwrap().is_empty());

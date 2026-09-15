@@ -110,7 +110,7 @@ impl RouterV2State {
 
         match envelope.body {
             Some(Body::ProfileRequest(req)) => {
-                self.handle_profile_request(addressing, req.cached_version);
+                self.handle_profile_request(addressing, req);
                 ManagementOutcome::None
             }
             Some(Body::ProfileResponse(resp)) => self.handle_profile_response(resp, now_ms),
