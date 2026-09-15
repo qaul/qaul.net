@@ -59,6 +59,16 @@ object BleConstants {
      */
     const val FIELD_TEST = true
 
+    /**
+     * Log a line for every completed scheduler operation (only when [FIELD_TEST] is also on).
+     *
+     * This is the high volume part of the session log: a bulk transfer produces one line per chunk,
+     * so it grows files far faster than anything else. Turn it on for runs that study the scheduler
+     * itself, per operation timings, queue wait by lane, setup chain costs etc.
+     *
+     */
+    const val OP_TELEMETRY = false
+
     const val ATT_ERR_NO_SLOT = 0x80
 
     /** Connect budget for a Coded link.*/
@@ -198,8 +208,25 @@ object BleConstants {
      */
     const val CODED_ONLY_TEST = false
 
+    /**
+     * TESTING ONLY:
+     *
+     * This is the configuration that actually exercises the single global operation slot. With
+     * L2CAP on, bulk rides its own per-link socket and never touches the scheduler, so the slot
+     * stays nearidle and says nothing about head of line blocking. It also helps approximate a large
+     * mesh, where routing and gossip volume dominates and none of that can use L2CAP.
+     */
+    const val L2CAP_ENABLED = true
+
+
     /** Target MTU size to negotiate after connecting. Allows larger chunks than the 23-byte default. */
     const val TARGET_MTU = 517
+
+    /**
+     * Hard cap on bytes per chunk, independent of the negotiated MTU
+     *
+     */
+    const val MAX_CHUNK_SIZE = 509
 
     /** Default chunk size in bytes (Android default MTU 23 - 3 bytes GATT overhead = 20). */
     const val DEFAULT_CHUNK_SIZE = 20

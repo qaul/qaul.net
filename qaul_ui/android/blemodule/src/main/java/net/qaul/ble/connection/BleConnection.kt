@@ -72,6 +72,9 @@ class BleConnection(
     private val TAG = "BleConnection"
 
     private val sendQueue = SendQueue(BleConstants.LOCAL_QAUL_ID)
+
+    /** Bytes per chunk this link is actually using, derived from the negotiated MTU. Logged. */
+    val chunkSize: Int get() = sendQueue.chunkSize
     private val receiveQueue = ReceiveQueue()
 
     // High-bandwidth L2CAP data channel. Owned for BOTH roles: the CENTRAL opens it after
@@ -94,15 +97,31 @@ class BleConnection(
         when (role) {
             BleRole.CENTRAL -> {
                 BleTaskScheduler.connect(device, connectPhy)   // open on the discovered PHY (1M or Coded)
-                // Connection interval. High (7.5-15ms) on every link saturates the controller radio schedule once several links are up
-                // Balanced (~30-50ms) is the idle default, allows for at least 4 connections. We could raise to high while a bulk transfer is in flight.
-                BleTaskScheduler.requestConnectionPriority(device, BleConstants.IDLE_CONNECTION_PRIORITY)
-                // Order matters: the scheduler is serial, do identity first, so both ends
-                // resolve as early as possible, READ_CHAR gives us the peer's qaul ID, and notifications open the path the peer needs to receive ours.
+                // Connection interval. High (11.25-15ms) held on every link saturates the radio
+                // schedule once several links are up. Balanced (~30-50ms) is the idle default and
+                // allows at least 4 connections.
+                //
+                // However, the idea is that the setup stage can be the exception, starting at high and
+                // then downgrading to balanced afterwards
+                //
+                // There's more to test here though, it seems android already brings a link up at 7.5ms,
+                // and then high will resolve to 15 making things slower and we must wait for the extra priority request
+                // However, the stack drops the link to a slower balanced interval partway through discovery automatically.
+               // More attention to the mechanics of this stage may provide more optimised strategies
+
+                BleTaskScheduler.requestConnectionPriority(device, BleConstants.HIGH_LOAD_CONNECTION_PRIORITY)
+
+                // MTU also needs looked at, the idea for now is to do it first so that we need less round trips.
+
+                // Then identity as early as possible: READ_CHAR gives us the peer's qaul ID, and
+                // notifications open the path the peer needs to send us theirs.
+
+                BleTaskScheduler.requestMtu(device, BleConstants.TARGET_MTU)
+
                 BleTaskScheduler.discoverServices(device)
+
                 BleTaskScheduler.enableNotifications(device, BleConstants.MSG_CHAR)
                 BleTaskScheduler.readCharacteristic(device, BleConstants.READ_CHAR) // Gets qaul id
-                BleTaskScheduler.requestMtu(device, BleConstants.TARGET_MTU)
                 BleTaskScheduler.readCharacteristic(device, BleConstants.PSM_CHAR)  // Gets L2CAP PSM
                 // Keep the connection on the PHY we opened it on. This is a request, the controller negotiates down if unsupported and
                 // onPhyUpdate logs what is actually agreed
@@ -123,6 +142,8 @@ class BleConnection(
                         BluetoothDevice.PHY_OPTION_NO_PREFERRED
                     )
                 }
+                // Drop back to the idle interval behind the setup chain. Can be upgraded again later through the normal bulk escalation path.
+                BleTaskScheduler.requestConnectionPriority(device, BleConstants.IDLE_CONNECTION_PRIORITY)
             }
             BleRole.PERIPHERAL -> {
                 // If peripheral then we are connected TO so nothing should happen here
@@ -377,7 +398,7 @@ class BleConnection(
      */
     fun onMtuNegotiated(mtu: Int) {
         // TODO: Look into the cap at 495 bytes, the optimal ATT payload for exactly 2 DLE LL packets, does this matter?
-        sendQueue.chunkSize = minOf(mtu - 3, 509)
+        sendQueue.chunkSize = minOf(mtu - 3, BleConstants.MAX_CHUNK_SIZE)
         Log.i(TAG, "Chunk size updated to ${sendQueue.chunkSize} for ${device.address}")
         if (role == BleRole.CENTRAL){
             flushSendQueue()

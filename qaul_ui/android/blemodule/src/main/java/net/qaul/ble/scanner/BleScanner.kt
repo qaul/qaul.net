@@ -109,8 +109,19 @@ object BleScanner {
             .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
         if (adapter.isLeExtendedAdvertisingSupported) {
             // setLegacy(false) = report legacy AND extended (so we keep legacy visibility).
-            settingsBuilder.setLegacy(false).setPhy(ScanSettings.PHY_LE_ALL_SUPPORTED)
-            Log.i(TAG, "Extended scanning enabled")
+            settingsBuilder.setLegacy(false)
+            if (BleConstants.CODED_ONLY_TEST) {
+
+                settingsBuilder.setPhy(BluetoothDevice.PHY_LE_CODED) // Forcing coded phy here on a device that doesnt actually support could break scanner
+                Log.w(TAG, "CODED_ONLY_TEST: scanning Coded PHY only, 1M adverts will not be seen")
+            } else {
+                settingsBuilder.setPhy(ScanSettings.PHY_LE_ALL_SUPPORTED)
+                Log.i(TAG, "Extended scanning enabled")
+            }
+        } else if (BleConstants.CODED_ONLY_TEST) {
+            // No extended scanning means no Coded scanning either: this device can only ever see
+            // 1M adverts, which nobody is sending in this mode. It will discover nothing.
+            Log.e(TAG, "CODED_ONLY_TEST on a device without extended scanning: DISCOVERING NOTHING.")
         }
         val scanSettings = settingsBuilder.build()
 

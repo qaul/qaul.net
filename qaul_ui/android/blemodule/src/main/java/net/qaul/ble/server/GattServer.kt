@@ -86,6 +86,12 @@ object GattServer {
      * Insecure (no bonding) is fine because qaul encrypts at its own layer. Requires API 29+.
      */
     private fun startL2capServer() {
+        if (!BleConstants.L2CAP_ENABLED) {
+            // Leaves l2capPsm at -1, so every central takes the same GATT fallback a device
+            // without L2CAP support already takes. it forces all bulk through the scheduler's BULK lane and the single operation slot.
+            Log.w(TAG, "L2CAP_ENABLED=false: not listening, all bulk will go over GATT")
+            return
+        }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             Log.w(TAG, "L2CAP CoC requires API 29+, skipping — centrals will see PSM = -1")
             return
@@ -136,13 +142,14 @@ object GattServer {
     /**
      * Drop a client we've discovered is gone, e.g. a notify hit a dead binder (DeadObjectException).
      * The normal path is onConnectionStateChange(DISCONNECTED), but Android sometimes drops that
-     * server side callback, leaving a stale subscription that keeps failing. Removing it here makes
-     * subsequent queued notifies to this device skip fast via the isSubscribed() check.
+     * server side callback, leaving a stale subscription that keeps failing. The notifies already
+     * queued for it are purged too, rather than each being dispatched just to fail.
      */
     fun markClientGone(device: BluetoothDevice) {
         if (subscribedDevices.remove(device)) {
             Log.w(TAG, "Dropped stale subscription for ${device.address} (client gone)")
         }
+        BleTaskScheduler.purgeOperationsForDevice(device)
     }
 
     // Service definition
@@ -390,6 +397,7 @@ object GattServer {
                 } else if (value.contentEquals(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE)) {
                     subscribedDevices.remove(device)
                     Log.i(TAG, "${device.address} disabled notifications")
+                    BleTaskScheduler.purgeOperationsForDevice(device)
                 }
                 if (responseNeeded) {
                     respond(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null)
@@ -403,7 +411,7 @@ object GattServer {
 
         override fun onMtuChanged(device: BluetoothDevice, mtu: Int) {
             Log.i(TAG, "MTU changed to $mtu for ${device.address}")
-            ConnectionPool.getByAddress(device.address)?.onMtuNegotiated(mtu)
+            ConnectionPool.noteMtu(device.address, mtu)
         }
 
         override fun onNotificationSent(device: BluetoothDevice, status: Int) {

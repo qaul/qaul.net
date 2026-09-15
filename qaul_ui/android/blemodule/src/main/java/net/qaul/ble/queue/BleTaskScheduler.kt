@@ -13,12 +13,14 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import net.qaul.ble.BleConstants
+import net.qaul.ble.test.ble.l2cap.L2capChannel
 import net.qaul.ble.test.ble.manager.BleManager
 import net.qaul.ble.test.ble.manager.ConnectionEventListener
 import net.qaul.ble.test.ble.scanner.BleScanner
 import net.qaul.ble.test.ble.server.GattServer
 import net.qaul.ble.test.ble.server.GattServer.isSubscribed
 import net.qaul.ble.test.ble.util.isIndicatable
+import net.qaul.ble.test.ble.util.toHexKey
 import net.qaul.ble.test.ble.util.isNotifiable
 import net.qaul.ble.test.ble.util.isReadable
 import net.qaul.ble.test.ble.util.isWritable
@@ -62,14 +64,15 @@ object BleTaskScheduler {
     }
     @Volatile private var watchdogTask: ScheduledFuture<*>? = null
 
-    /** Which lane an operation belongs in. Only MSG_CHAR payload ops have a lane everything else (connect,
-     *  discover, MTU, etc) is CONTROL. */
+    /** The lane an op rides. Extracted so telemetry can report it without re-deriving the rule. */
+    fun laneOf(op: BleOperationType): OpLane = when (op) {
+        is CharacteristicWrite -> if (op.characteristicUuid == BleConstants.MSG_CHAR) op.lane else OpLane.CONTROL
+        is NotifyCharacteristicChange -> if (op.characteristicUuid == BleConstants.MSG_CHAR) op.lane else OpLane.CONTROL
+        else -> OpLane.CONTROL
+    }
+
     private fun queueForOperation(op: BleOperationType): ConcurrentLinkedQueue<BleOperationType> {
-        val lane = when (op) {
-            is CharacteristicWrite -> if (op.characteristicUuid == BleConstants.MSG_CHAR) op.lane else OpLane.CONTROL
-            is NotifyCharacteristicChange -> if (op.characteristicUuid == BleConstants.MSG_CHAR) op.lane else OpLane.CONTROL
-            else -> OpLane.CONTROL
-        }
+        val lane = laneOf(op)
         return when (lane) {
             OpLane.CONTROL -> bleOperationQueue
             OpLane.MEDIUM -> mediumOperationQueue
@@ -152,11 +155,11 @@ object BleTaskScheduler {
     }
 
     /**
-     * Remove every queued operation for [device] from both queues. Called when a device is torn down
+     * Remove every queued operation for [device] from all three queues. Called when a device is torn down
      * or disconnects, so stale ops to a dead link don't each stall the queue. The watchdog covers the currently pending op.
      */
     @Synchronized
-    private fun purgeOperationsForDevice(device: BluetoothDevice) {
+    fun purgeOperationsForDevice(device: BluetoothDevice) {
         val before = bleOperationQueue.size + mediumOperationQueue.size + bulkOperationQueue.size
         bleOperationQueue.removeIf { it.device == device }
         mediumOperationQueue.removeIf { it.device == device }
@@ -321,6 +324,7 @@ object BleTaskScheduler {
 
     @Synchronized
     private fun scheduleOperation(operation: BleOperationType) {
+        operation.enqueuedAt = System.currentTimeMillis()   // start of the queue wait measurement
         queueForOperation(operation).add(operation)
         if (isBulkOp(operation)) bulkSendStarted(operation.device)
         if (pendingOperation == null) {
@@ -463,8 +467,29 @@ object BleTaskScheduler {
         bulkDowngradeTasks.remove(device)?.cancel(false)
     }
 
+    // Trampoline guard. skipOperation() calls executeNext(), and every operation that fails fast
+    // (dead subscription, refused notify, no GATT client etc) skipsx
+    // immediately. so a queue full of ops for a lost peer used to recurse once per op and
+    // explode the stack on occasion. For the most part this was already protected by a disconnected peers pending ops
+    // being removed from the queues, but this is not always the case so we add extra protection here.
+    @Volatile private var dispatching = false
+    @Volatile private var dispatchAgain = false
+
     @Synchronized
     private fun executeNext() {
+        if (dispatching) { dispatchAgain = true; return }
+        dispatching = true
+        try {
+            do {
+                dispatchAgain = false
+                executeNextOnce()
+            } while (dispatchAgain)
+        } finally {
+            dispatching = false
+        }
+    }
+
+    private fun executeNextOnce() {
         if (pendingOperation != null) {
             Log.e(TAG, "doNextOperation called while operation already pending, aborting")
             return
@@ -696,14 +721,16 @@ object BleTaskScheduler {
             }
             is ConnectionPriorityRequest -> with(operation) {
                 val gatt = deviceGattMap[device]
-                if (gatt != null) {
-                    @SuppressLint("MissingPermission")
-                    val accepted = gatt.requestConnectionPriority(priority)
-                    Log.i(TAG, "requestConnectionPriority($priority) for ${device.address}: accepted=$accepted")
-                } else {
+                if (gatt == null) {
                     Log.e(TAG, "requestConnectionPriority: no GATT for ${device.address}")
+                    skipOperation()
+                    return
                 }
-                // No callback exists for this operation, release the queue immediately
+                @SuppressLint("MissingPermission")
+                val accepted = gatt.requestConnectionPriority(priority)
+                Log.i(TAG, "requestConnectionPriority($priority) for ${device.address}: accepted=$accepted")
+                // Release the slot immediately rather than waiting for onConnectionUpdated. The
+                // parameter change takes ~350ms to land.
                 skipOperation()
             }
             is PhyRequest -> with(operation) {
@@ -786,7 +813,10 @@ object BleTaskScheduler {
         }
     }
 
-    private inline fun <reified T : BleOperationType> signalOperationComplete(device: BluetoothDevice? = null) {
+    private inline fun <reified T : BleOperationType> signalOperationComplete(
+        device: BluetoothDevice? = null,
+        ok: Boolean = true
+    ) {
         synchronized(this) {
             if (pendingOperation !is T) {
                 Log.e(TAG, "Rogue callback signalled completion, ignoring: expected ${T::class.simpleName}, got $pendingOperation")
@@ -796,10 +826,41 @@ object BleTaskScheduler {
                 Log.e(TAG, "Rogue callback: device mismatch, expected $device, got ${pendingOperation?.device}")
                 return
             }
+            logOpCompleted(pendingOperation, ok)
             bulkSendEnded(pendingOperation)
             pendingOperation = null
             if (hasPendingOps()) executeNext() else disarmWatchdog()
         }
+    }
+
+    /**
+     * Every scheduler operation, logged at its single completion point.
+     *
+     * wait_ms (enqueue to dispatch) and ms (dispatch to completion) answer different questions and
+     * both are needed: a long wait with a shallow queue means blocking by one slow op,
+     * a long wait with a deep queue means the slot is saturated, and a short wait with a long ms
+     * means the radio is the limit and the scheduler isnt the thing causing trouble. Split any of them by lane and by
+     * xfers to see whether BULK is delaying CONTROL and MEDIUM.
+     */
+    private fun logOpCompleted(op: BleOperationType?, ok: Boolean) {
+        if (!BleConstants.FIELD_TEST || !BleConstants.OP_TELEMETRY) return
+        val operation = op ?: return
+        val ctx = appContext ?: return
+        val now = System.currentTimeMillis()
+        SessionLogger[ctx].op(
+            mac = operation.device.address,
+            op = operation::class.simpleName ?: "?",
+            ms = now - pendingOperationSince,
+            ok = ok,
+            lane = laneOf(operation).name,
+            waitMs = if (operation.enqueuedAt > 0L) pendingOperationSince - operation.enqueuedAt else null,
+            qdepth = bleOperationQueue.size + mediumOperationQueue.size + bulkOperationQueue.size,
+            xfers = L2capChannel.activeSends.get(),
+            escalated = escalatedDevices.size,
+            // Without this a slow op is unattributable: a Coded link is legitimately ~8x slower
+            // per byte, so a flat timeout that suits 1M will cut Coded operations off mid-flight.
+            phy = if (ConnectionPool.getByAddress(operation.device.address)?.isCoded == true) "Coded" else "1M/2M"
+        )
     }
 
     @Synchronized
@@ -851,7 +912,12 @@ object BleTaskScheduler {
                     appContext?.let {
                         SessionLogger[it].op(
                             operation.device.address, operation::class.simpleName ?: "?",
-                            timeoutMs, ok = false, budget = timeoutMs
+                            timeoutMs, ok = false, budget = timeoutMs,
+                            lane = laneOf(operation).name,
+                            waitMs = if (operation.enqueuedAt > 0L) pendingOperationSince - operation.enqueuedAt else null,
+                            qdepth = bleOperationQueue.size + mediumOperationQueue.size + bulkOperationQueue.size,
+                            xfers = L2capChannel.activeSends.get(),
+                            escalated = escalatedDevices.size
                         )
                     }
                     cleanupStuckOperation(operation)
@@ -979,9 +1045,40 @@ object BleTaskScheduler {
                 Log.e(TAG, "Service discovery failed for ${gatt.device.address}, status: $status")
                 scheduleOperation(Disconnect(gatt.device))
             }
-            signalOperationComplete<ServiceDiscovery>(gatt.device)
+            signalOperationComplete<ServiceDiscovery>(gatt.device, ok = status == BluetoothGatt.GATT_SUCCESS)
         }
         // Only central gets this currently, can peripheral call phy update?
+        /**
+         * The link's connection parameters changed. Not part of the public SDK — BluetoothGattCallback
+         * declares this method but hides it
+         *
+         * Telemetry only: it never completes an operation, since priority requests release the slot
+         * immediately. Fires on any parameter change, including ones the peer initiated.
+         */
+        @androidx.annotation.Keep
+        @androidx.annotation.RequiresApi(Build.VERSION_CODES.O)
+        fun onConnectionUpdated(
+            gatt: BluetoothGatt, interval: Int, latency: Int, timeout: Int, status: Int
+        ) {
+            val addr = gatt.device.address
+            val intervalMs = interval * 1.25
+            val timeoutMs = timeout * 10
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                Log.i(TAG, "Conn params for $addr: interval=${intervalMs}ms latency=$latency " +
+                        "timeout=${timeoutMs}ms")
+            } else {
+                // 0x3b is UNACCEPT_CONN_INTERVAL: the peer refused the interval we asked for.
+                Log.w(TAG, "Conn params update failed for $addr status=$status " +
+                        "(interval=${intervalMs}ms timeout=${timeoutMs}ms)")
+            }
+            appContext?.let { ctx ->
+                SessionLogger[ctx].connParams(
+                    ConnectionPool.getByAddress(addr)?.remoteQaulId?.toHexKey()?.take(6) ?: addr,
+                    intervalMs, latency, timeoutMs, status
+                )
+            }
+        }
+
         override fun onPhyUpdate(gatt: BluetoothGatt, txPhy: Int, rxPhy: Int, status: Int) {
             fun phyName(phy: Int) = when (phy) {
                 BluetoothDevice.PHY_LE_1M -> "1M"
@@ -995,37 +1092,25 @@ object BleTaskScheduler {
             } else {
                 Log.e(TAG, "PHY update failed for ${gatt.device.address}, status=$status — device may not support 2M PHY")
             }
-            signalOperationComplete<PhyRequest>(gatt.device)
+            signalOperationComplete<PhyRequest>(gatt.device, ok = status == BluetoothGatt.GATT_SUCCESS)
         }
 
         override fun onReadRemoteRssi(gatt: BluetoothGatt, rssi: Int, status: Int) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 notifyListeners { onRssiRead(gatt.device, rssi) }
             }
-            signalOperationComplete<ReadRssi>(gatt.device)
+            signalOperationComplete<ReadRssi>(gatt.device, ok = status == BluetoothGatt.GATT_SUCCESS)
         }
 
         override fun onMtuChanged(gatt: BluetoothGatt, mtu: Int, status: Int) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Log.i(TAG, "MTU changed to $mtu for ${gatt.device.address}")
 
-                appContext?.let {
-                    SessionLogger[it].op(
-                        gatt.device.address, "MtuRequest",
-                        System.currentTimeMillis() - pendingOperationSince, ok = true
-                    )
-                }
                 notifyListeners { onMtuChanged(gatt.device, mtu) }
-                // Connection is fully set up — notify listeners - later l2capp could be checked next
-                notifyListeners { onConnectionSetupComplete(gatt) }
             } else {
                 Log.e(TAG, "MTU request failed for ${gatt.device.address}, status: $status")
-                appContext?.let {
-                    SessionLogger[it].op(
-                        gatt.device.address, "MtuRequest",
-                        System.currentTimeMillis() - pendingOperationSince, ok = false
-                    )
-                }
+                signalOperationComplete<MtuRequest>(gatt.device, ok = false)
+                return
             }
             signalOperationComplete<MtuRequest>(gatt.device)
         }
@@ -1063,7 +1148,12 @@ object BleTaskScheduler {
             } else {
                 Log.e(TAG, "Read failed for ${characteristic.uuid}, status: $status")
             }
-            signalOperationComplete<CharacteristicRead>(gatt.device)
+            // PSM_CHAR is the last operation in the setup chain, so this is where setup genuinely
+            // ends , at least for now lol.
+            if (characteristic.uuid == BleConstants.PSM_CHAR) {
+                notifyListeners { onConnectionSetupComplete(gatt) }
+            }
+            signalOperationComplete<CharacteristicRead>(gatt.device, ok = status == BluetoothGatt.GATT_SUCCESS)
 
         }
 
@@ -1075,7 +1165,7 @@ object BleTaskScheduler {
             if (status != BluetoothGatt.GATT_SUCCESS) {
                 Log.e(TAG, "Write failed for ${characteristic.uuid}, status: $status")
             }
-            signalOperationComplete<CharacteristicWrite>(gatt.device)
+            signalOperationComplete<CharacteristicWrite>(gatt.device, ok = status == BluetoothGatt.GATT_SUCCESS)
         }
 
         @Deprecated("Deprecated for Android 13+")
@@ -1143,7 +1233,7 @@ object BleTaskScheduler {
             } else {
                 Log.e(TAG, "Descriptor read failed for ${descriptor.uuid}, status: $status")
             }
-            signalOperationComplete<DescriptorRead>(gatt.device)
+            signalOperationComplete<DescriptorRead>(gatt.device, ok = status == BluetoothGatt.GATT_SUCCESS)
         }
 
         override fun onDescriptorWrite(
@@ -1186,12 +1276,9 @@ object BleTaskScheduler {
     // Gatt server callback helpers
 
     fun notificationSent(device: BluetoothDevice, status: Int) {
-        if (status == BluetoothGatt.GATT_SUCCESS) {
-            signalOperationComplete<NotifyCharacteristicChange>(device)
-        } else {
-            Log.e(TAG, "Notification send failed for ${device.address}, status: $status")
-            signalOperationComplete<NotifyCharacteristicChange>(device)
-        }
+        val ok = status == BluetoothGatt.GATT_SUCCESS
+        if (!ok) Log.e(TAG, "Notification send failed for ${device.address}, status: $status")
+        signalOperationComplete<NotifyCharacteristicChange>(device, ok = ok)
     }
 
 
