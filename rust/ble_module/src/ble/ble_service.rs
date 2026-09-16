@@ -59,10 +59,11 @@ enum BleMainLoopEvent {
 }
 
 impl IdleBleService {
-    /// Initialize a new BleService.
+    /// Initialize a new BleService with a specific BLE device.
     ///
-    /// Gets default Bluetooth adapter and initializes a Bluer session
-    pub async fn new() -> Result<QaulBleService, Box<dyn Error>> {
+    /// Finds the Bluetooth adapter matching `device_id` and initializes a Bluer session.
+    /// Returns an error if no adapter with the given ID is found.
+    pub async fn new(device_id: &str) -> Result<QaulBleService, Box<dyn Error>> {
         let device_state = BleDeviceState::new();
         let session = bluer::Session::new().await?;
         let agent = bluer::agent::Agent {
@@ -70,7 +71,8 @@ impl IdleBleService {
             ..Default::default()
         };
         let _ = session.register_agent(agent).await?;
-        let adapter = session.default_adapter().await?;
+        // Find the adapter matching the requested device_id
+        let adapter = Self::find_adapter_by_id(&session, device_id).await?;
         adapter.set_powered(true).await?;
         Ok(QaulBleService::Idle(IdleBleService {
             ble_handles: vec![],
@@ -81,6 +83,28 @@ impl IdleBleService {
             send_queue_map: Mutex::new(HashMap::new()),
             device_state,
         }))
+    }
+
+    /// Find a Bluetooth adapter whose address matches `device_id`.
+    /// Falls back to the default adapter if `device_id` is empty.
+    async fn find_adapter_by_id(
+        session: &Session,
+        device_id: &str,
+    ) -> Result<Adapter, Box<dyn Error>> {
+        if device_id.is_empty() {
+            return Ok(session.default_adapter().await?);
+        }
+
+        let adapter_names = session.adapter_names().await?;
+        for name in &adapter_names {
+            let adapter = session.adapter(name)?;
+            let addr = format!("{}", adapter.address().await?);
+            if addr == device_id {
+                return Ok(adapter);
+            }
+        }
+
+        Err(format!("BLE device with ID '{}' not found", device_id).into())
     }
 
     /// Starts BLE advertisement, scan, and listen.

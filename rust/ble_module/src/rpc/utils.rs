@@ -47,6 +47,14 @@ impl BleResultSender {
         }))
     }
 
+    pub fn send_start_error(&mut self, error: BleError, error_message: String) {
+        self.send_ble_sys_msg(proto_sys::ble::Message::StartResult(BleStartResult {
+            success: false,
+            error_reason: error.into(),
+            error_message,
+        }));
+    }
+
     pub fn send_device_found(&mut self, qaul_id: Vec<u8>, rssi: i32) {
         self.send_ble_sys_msg(proto_sys::ble::Message::DeviceDiscovered(
             BleDeviceDiscovered { qaul_id, rssi },
