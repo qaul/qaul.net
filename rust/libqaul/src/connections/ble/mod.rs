@@ -244,7 +244,7 @@ impl Ble {
         // save to state
         {
             let mut ble = state.connections.ble.inner.write().unwrap();
-            ble.devices.extend(all_devices); // Why do we extend instead of replacing?
+            ble.devices = all_devices;
         }
 
         // Honour the persisted enabled/disabled flag — if BLE was
@@ -294,17 +294,34 @@ impl Ble {
     pub fn module_start(state: &crate::QaulState) {
         log::info!("BLE send start request");
 
-        let qaul_id;
+        let configured_id = crate::storage::configuration::Configuration::get(state)
+            .ble
+            .device_id
+            .clone();
+
+        let (qaul_id, mut device_id);
         {
             let ble = state.connections.ble.inner.read().unwrap();
             qaul_id = ble.ble_id.clone();
+
+            device_id = configured_id;
+            if device_id.is_empty() {
+                log::info!("No specific BLE device ID configured, using first available device");
+                device_id = ble
+                    .devices
+                    .first()
+                    .map(|d| d.id.clone())
+                    .unwrap_or_default();
+            } else {
+                log::info!("Using configured BLE device ID: {}", device_id);
+            }
         }
 
         // create message
         let start_request = proto::BleStartRequest {
             qaul_id,
             power_setting: proto::BlePowerSetting::LowLatency.into(),
-            device_id: String::new(),
+            device_id,
         };
         let message = proto::Ble {
             message: Some(proto::ble::Message::StartRequest(start_request)),
