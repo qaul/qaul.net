@@ -212,19 +212,12 @@ impl Ble {
 
     /// info request received
     fn info_received(state: &crate::QaulState, message: proto::BleInfoResponse) {
-        //ble.devices.extend(message.device);
         // collect all devices from both the deprecated field and the new repeated field
-        #[allow(deprecated)]
         let mut all_devices: Vec<proto::BleDeviceInfo> = message.devices;
         #[allow(deprecated)]
         if let Some(device) = message.device {
             log::info!("BLE info received via deprecated 'device' field:");
             all_devices.push(device);
-
-            // Honour the persisted enabled/disabled flag — if BLE was
-            // turned off in a previous session the module should stay
-            // dormant on boot until an operator re-enables it via the
-            // Transports RPC.           
         }
 
         if all_devices.is_empty() {
@@ -254,13 +247,16 @@ impl Ble {
             ble.devices.extend(all_devices); // Why do we extend instead of replacing?
         }
 
+        // Honour the persisted enabled/disabled flag — if BLE was
+        // turned off in a previous session the module should stay
+        // dormant on boot until an operator re-enables it via the
+        // Transports RPC.   
         let active = crate::storage::configuration::Configuration::get(state).ble.active;
         if active {
             Self::module_start(state);
         } else {
             log::info!("BLE transport disabled by configuration");
         }
-
     }
 
     /// Log the details of a single BLE device
