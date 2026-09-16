@@ -29,6 +29,7 @@ class ChatTimeline extends StatelessWidget {
     this.padding = const EdgeInsets.all(16),
     this.onTextMessageLongPressStart,
     this.selectedTextMessageId,
+    this.mentionLabels = const [],
   }) : _mode = ChatRenderMode.direct;
 
   /// Creates a group chat timeline. Sender identity is derived from each
@@ -41,6 +42,7 @@ class ChatTimeline extends StatelessWidget {
     this.padding = const EdgeInsets.all(16),
     this.onTextMessageLongPressStart,
     this.selectedTextMessageId,
+    this.mentionLabels = const [],
   }) : _mode = ChatRenderMode.group;
 
   final ChatUser currentUser;
@@ -60,6 +62,9 @@ class ChatTimeline extends StatelessWidget {
 
   /// Message currently highlighted by a screen-owned contextual selection.
   final String? selectedTextMessageId;
+
+  /// Names that should be rendered as mentions in text bubbles.
+  final List<String> mentionLabels;
 
   final ChatRenderMode _mode;
 
@@ -231,6 +236,7 @@ class ChatTimeline extends StatelessWidget {
             mode: _mode,
             clock: effectiveClock,
             isSelected: message.id == selectedTextMessageId,
+            mentionLabels: mentionLabels,
           );
 
           children.add(
