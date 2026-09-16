@@ -132,6 +132,32 @@ Widget buildIncomingLongUseCase(BuildContext context) {
   );
 }
 
+@widgetbook.UseCase(
+  name: 'Incoming — mentions',
+  type: QaulChatBubble,
+  path: 'design_components/chat/bubble',
+)
+Widget buildIncomingMentionsUseCase(BuildContext context) {
+  return widgetbookChatComponentFrame(
+    context,
+    alignment: Alignment.centerLeft,
+    child: QaulChatBubble(
+      message: QaulChatBubbleMessage(
+        content: 'Writing @Third Member and then addressing @all',
+        sentAt: _clock.subtract(const Duration(minutes: 18)),
+        receivedAt: _clock.subtract(const Duration(minutes: 18)),
+        status: MessageStatus.sent,
+        messageType: MessageType.secondary,
+        edges: const [TailEdge.bottomStart],
+        senderIdBase58: 'group-member',
+        mentionLabels: const ['Group Member', 'Third Member'],
+      ),
+      clock: _clock,
+      showTimestamp: true,
+    ),
+  );
+}
+
 @widgetbook.UseCase(name: 'Media — separated bubbles', type: QaulChatBubble)
 Widget buildMediaSeparatedBubblesUseCase(BuildContext context) {
   return widgetbookChatComponentFrame(
