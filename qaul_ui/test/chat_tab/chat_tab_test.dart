@@ -176,6 +176,52 @@ void main() {
     expect(StubLibqaulWorker.sentTexts, isEmpty);
   });
 
+  testWidgets('group chat suggests and inserts a mentioned member', (
+    tester,
+  ) async {
+    await pumpChatScreen(tester, buildGroupChat());
+
+    final field = find.byType(TextField);
+    await tester.enterText(field, '@oth');
+    await tester.pump();
+
+    expect(
+      find.byKey(ValueKey('chat-mention-suggestion-${otherUser.idBase58}')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('chat-mention-suggestion-all')),
+      findsNothing,
+    );
+
+    await tester.tap(
+      find.byKey(ValueKey('chat-mention-suggestion-${otherUser.idBase58}')),
+    );
+    await tester.pump();
+
+    expect(tester.widget<TextField>(field).controller!.text, '@otherUser ');
+    expect(
+      find.byKey(ValueKey('chat-mention-suggestion-${otherUser.idBase58}')),
+      findsNothing,
+    );
+
+    await tester.tap(find.byTooltip('Send'));
+    await tester.pumpAndSettle();
+    expect(StubLibqaulWorker.sentTexts, ['@otherUser']);
+  });
+
+  testWidgets('direct chat does not open mention suggestions', (tester) async {
+    await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);
+
+    await tester.enterText(find.byType(TextField), '@');
+    await tester.pump();
+
+    expect(
+      find.byKey(ValueKey('chat-mention-suggestion-${otherUser.idBase58}')),
+      findsNothing,
+    );
+  });
+
   testWidgets('disabled room blocks chat footer sending', (tester) async {
     await pumpChatScreen(
       tester,
