@@ -11,7 +11,10 @@ pub mod internet;
 pub mod lan;
 pub mod transport;
 
-use libp2p::Multiaddr;
+use std::collections::HashMap;
+use std::sync::RwLock;
+
+use libp2p::{Multiaddr, PeerId};
 use prost::Message;
 use serde::{Deserialize, Serialize};
 
@@ -88,6 +91,8 @@ pub struct ConnectionsState {
     pub internet: internet::InternetState,
     /// BLE module state.
     pub ble: ble::BleModuleState,
+    /// Consecutive ping failures per neighbour, shared by LAN and Internet.
+    pub ping_failures: PingFailureTracker,
 }
 
 impl ConnectionsState {
@@ -96,7 +101,42 @@ impl ConnectionsState {
         Self {
             internet: internet::InternetState::new(),
             ble: ble::BleModuleState::new(),
+            ping_failures: PingFailureTracker::new(),
         }
+    }
+}
+
+/// Consecutive reported ping failures per neighbour, per transport.
+pub struct PingFailureTracker {
+    failures: RwLock<HashMap<(ConnectionModule, PeerId), u32>>,
+}
+
+impl PingFailureTracker {
+    /// Create an empty tracker.
+    pub fn new() -> Self {
+        Self {
+            failures: std::sync::RwLock::new(std::collections::HashMap::new()),
+        }
+    }
+
+    /// Record one reported failure.
+    pub fn record_failure(&self, module: ConnectionModule, peer: PeerId, threshold: u32) -> bool {
+        if threshold == 0 {
+            return false;
+        }
+        let mut failures = self.failures.write().unwrap();
+        let count = failures.entry((module, peer)).or_insert(0);
+        *count += 1;
+        if *count >= threshold {
+            failures.remove(&(module, peer));
+            return true;
+        }
+        false
+    }
+
+    /// Drop any count held for this neighbour.
+    pub fn forget(&self, module: ConnectionModule, peer: PeerId) {
+        self.failures.write().unwrap().remove(&(module, peer));
     }
 }
 
@@ -671,5 +711,70 @@ impl Connections {
             request_id,
             Vec::new(),
         );
+    }
+}
+
+#[cfg(test)]
+mod ping_failure_tests {
+    use super::{ConnectionModule, PingFailureTracker};
+    use libp2p::PeerId;
+
+    #[test]
+    fn fires_at_the_threshold_and_only_once_per_run() {
+        let tracker = PingFailureTracker::new();
+        let peer = PeerId::random();
+
+        assert!(!tracker.record_failure(ConnectionModule::Lan, peer, 2));
+        assert!(tracker.record_failure(ConnectionModule::Lan, peer, 2));
+        // the count is cleared when it fires, so the next failure starts a new run
+        assert!(!tracker.record_failure(ConnectionModule::Lan, peer, 2));
+        assert!(tracker.record_failure(ConnectionModule::Lan, peer, 2));
+    }
+
+    #[test]
+    fn a_success_resets_the_count() {
+        let tracker = PingFailureTracker::new();
+        let peer = PeerId::random();
+
+        assert!(!tracker.record_failure(ConnectionModule::Lan, peer, 2));
+        tracker.forget(ConnectionModule::Lan, peer);
+        // only consecutive failures count, so this is the first of a new run
+        assert!(!tracker.record_failure(ConnectionModule::Lan, peer, 2));
+    }
+
+    #[test]
+    fn counts_are_per_transport() {
+        let tracker = PingFailureTracker::new();
+        let peer = PeerId::random();
+
+        assert!(!tracker.record_failure(ConnectionModule::Lan, peer, 2));
+        // the same peer over another transport is a separate neighbour entry
+        assert!(!tracker.record_failure(ConnectionModule::Internet, peer, 2));
+        assert!(tracker.record_failure(ConnectionModule::Lan, peer, 2));
+    }
+
+    #[test]
+    fn counts_are_per_peer() {
+        let tracker = PingFailureTracker::new();
+        let (a, b) = (PeerId::random(), PeerId::random());
+
+        assert!(!tracker.record_failure(ConnectionModule::Lan, a, 2));
+        assert!(!tracker.record_failure(ConnectionModule::Lan, b, 2));
+        assert!(tracker.record_failure(ConnectionModule::Lan, a, 2));
+    }
+
+    #[test]
+    fn a_threshold_of_one_fires_immediately() {
+        let tracker = PingFailureTracker::new();
+        assert!(tracker.record_failure(ConnectionModule::Lan, PeerId::random(), 1));
+    }
+
+    #[test]
+    fn a_threshold_of_zero_never_fires() {
+        let tracker = PingFailureTracker::new();
+        let peer = PeerId::random();
+        for _ in 0..10 {
+            assert!(!tracker.record_failure(ConnectionModule::Lan, peer, 0));
+        }
     }
 }

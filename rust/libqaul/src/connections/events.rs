@@ -13,6 +13,7 @@ use qaul_management::QaulManagementEvent;
 use qaul_messaging::QaulMessagingEvent;
 
 use crate::connections::ConnectionModule;
+use crate::storage::configuration::Configuration;
 use crate::router::router_net_proto;
 use crate::router::users::Users;
 use crate::router::{info::RouterInfo, neighbours::Neighbours};
@@ -136,7 +137,11 @@ pub fn qaul_messaging_event(
 }
 
 /// Handle incoming ping event
-pub fn ping_event(state: &crate::QaulState, event: Event, module: ConnectionModule) {
+pub fn ping_event(
+    state: &crate::QaulState,
+    event: Event,
+    module: ConnectionModule,
+) -> Option<libp2p::PeerId> {
     match event {
         Event {
             peer,
@@ -149,6 +154,9 @@ pub fn ping_event(state: &crate::QaulState, event: Event, module: ConnectionModu
                 connection,
                 duration.as_secs() * 1000 + (duration.subsec_nanos() as u64 / 1_000_000 as u64)
             );
+
+            // only *consecutive* failures should retire a neighbour
+            state.connections.ping_failures.forget(module, peer);
 
             let rtt_micros = u32::try_from(
                 duration.as_secs() * 1_000_000 + (duration.subsec_nanos() / 1_000) as u64,
@@ -189,6 +197,7 @@ pub fn ping_event(state: &crate::QaulState, event: Event, module: ConnectionModu
             connection: _,
         } => {
             log::debug!("PingFailure::Timeout to {}", peer);
+            return unreachable_neighbour(state, module, peer);
         }
         Event {
             peer,
@@ -196,13 +205,40 @@ pub fn ping_event(state: &crate::QaulState, event: Event, module: ConnectionModu
             connection: _,
         } => {
             log::debug!("PingFailure::Other {} error: {}", peer, error);
+            return unreachable_neighbour(state, module, peer);
         }
         Event {
             peer,
             result: Result::Err(Failure::Unsupported),
             connection: _,
         } => {
+            // Not a reachability signal: the peer is answering, it just does not
+            // speak the ping protocol. Disconnecting it would be wrong.
             log::debug!("PingFailure::Unsupported by peer {}", peer);
         }
     }
+    None
+}
+
+/// check one reported ping failure and decide whether the neighbour is gone.
+fn unreachable_neighbour(
+    state: &crate::QaulState,
+    module: ConnectionModule,
+    peer: libp2p::PeerId,
+) -> Option<libp2p::PeerId> {
+    let threshold = Configuration::get(state).routing.neighbour_ping_failures;
+    if !state
+        .connections
+        .ping_failures
+        .record_failure(module, peer, threshold)
+    {
+        return None;
+    }
+    log::info!(
+        "{:?}: {} missed {} consecutive pings, closing the connection to retire it (section 4)",
+        module,
+        peer,
+        threshold
+    );
+    Some(peer)
 }
