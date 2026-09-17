@@ -442,7 +442,10 @@ impl RpcCommand for RouterSubcmd {
                         let stale: Vec<&proto::RouterV2ManifestOrigin> = r
                             .origins
                             .iter()
-                            .filter(|o| o.advertised_version != o.committed_version)
+                            .filter(|o| {
+                                let ahead = o.advertised_version.wrapping_sub(o.committed_version);
+                                ahead != 0 && ahead < u32::MAX / 2
+                            })
                             .collect();
                         let untrusted: Vec<&proto::RouterV2ManifestOrigin> = r
                             .origins
