@@ -69,7 +69,12 @@ pub struct QaulInternetBehaviour {
 }
 
 impl QaulInternetBehaviour {
-    pub fn process_events(&mut self, state: &crate::QaulState, event: QaulInternetEvent) {
+    /// Dispatch one behaviour event.
+    pub fn process_events(
+        &mut self,
+        state: &crate::QaulState,
+        event: QaulInternetEvent,
+    ) -> Option<libp2p::PeerId> {
         match event {
             QaulInternetEvent::QaulInfo(ev) => {
                 self.qaul_info_event(state, ev);
@@ -81,7 +86,7 @@ impl QaulInternetBehaviour {
                 self.qaul_messaging_event(state, ev);
             }
             QaulInternetEvent::Ping(ev) => {
-                self.ping_event(state, ev);
+                return self.ping_event(state, ev);
             }
             QaulInternetEvent::Identify(ev) => {
                 self.identify_event(ev);
@@ -90,6 +95,7 @@ impl QaulInternetBehaviour {
                 self.floodsub_event(state, ev);
             }
         }
+        None
     }
 
     fn qaul_info_event(&mut self, state: &crate::QaulState, event: QaulInfoEvent) {
@@ -101,8 +107,12 @@ impl QaulInternetBehaviour {
     fn qaul_messaging_event(&mut self, state: &crate::QaulState, event: QaulMessagingEvent) {
         events::qaul_messaging_event(state, event, ConnectionModule::Internet);
     }
-    fn ping_event(&mut self, state: &crate::QaulState, event: ping::Event) {
-        events::ping_event(state, event, ConnectionModule::Internet);
+    fn ping_event(
+        &mut self,
+        state: &crate::QaulState,
+        event: ping::Event,
+    ) -> Option<libp2p::PeerId> {
+        events::ping_event(state, event, ConnectionModule::Internet)
     }
 
     fn identify_event(&mut self, event: identify::Event) {
@@ -527,8 +537,9 @@ impl Internet {
         let mut ping_config = ping::Config::new();
 
         let config = Configuration::get(state);
-        ping_config =
-            ping_config.with_interval(Duration::from_secs(config.routing.ping_neighbour_period));
+        ping_config = ping_config
+            .with_interval(Duration::from_secs(config.routing.ping_neighbour_period))
+            .with_timeout(Duration::from_secs(config.routing.ping_timeout));
 
         log::trace!("Internet.init() ping_config");
 

@@ -205,6 +205,7 @@ impl Default for DebugOption {
 /// because rtt is measured as micro seconds
 /// * routing options
 #[derive(Debug, Deserialize, Clone, Serialize)]
+#[serde(default)]
 pub struct RoutingOptions {
     //Sending the table every 10 seconds to direct neighbours.
     pub sending_table_period: u64,
@@ -214,6 +215,9 @@ pub struct RoutingOptions {
     pub hop_count_penalty: u64,
     //How long a route is stored until it is removed.
     pub maintain_period_limit: u64,
+    //How long to wait for a single ping reply before counting it as failed.
+    pub ping_timeout: u64,
+    pub neighbour_ping_failures: u32,
 }
 
 impl Default for RoutingOptions {
@@ -223,6 +227,8 @@ impl Default for RoutingOptions {
             ping_neighbour_period: 5,   //5  seconds, unit: seconds
             hop_count_penalty: 10,      //10 seconds, unit: second
             maintain_period_limit: 300, //5min, unit: second
+            ping_timeout: 5,            //5  seconds, unit: seconds
+            neighbour_ping_failures: 2, //count, not a duration
         }
     }
 }
