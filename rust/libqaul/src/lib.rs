@@ -726,6 +726,7 @@ impl Libqaul {
                             }
                             libp2p::swarm::SwarmEvent::ConnectionClosed{peer_id, num_established, ..} => {
                                 log::trace!("lan connection closed: {:?}", peer_id);
+                                self.state.connections.ping_failures.forget(ConnectionModule::Lan, peer_id);
                                 // we're using this to guard against if a peer holds multiple connections
                                 // so that it doesn't remove when others are still connected
                                 if num_established == 0 {
@@ -738,7 +739,9 @@ impl Libqaul {
 
                             },
                             libp2p::swarm::SwarmEvent::Behaviour(behaviour) => {
-                                lan.swarm.behaviour_mut().process_events(&*self.state, behaviour);
+                                if let Some(peer_id) = lan.swarm.behaviour_mut().process_events(&*self.state, behaviour) {
+                                    let _ = lan.swarm.disconnect_peer_id(peer_id);
+                                }
                             }
                             _ => {}
                         }
@@ -772,6 +775,7 @@ impl Libqaul {
                             }
                             libp2p::swarm::SwarmEvent::ConnectionClosed{peer_id, endpoint, num_established, ..} => {
                                 log::trace!("internet connection closed: {:?}", peer_id);
+                                self.state.connections.ping_failures.forget(ConnectionModule::Internet, peer_id);
                                 if num_established == 0 {
                                         if let Some(r_v2) = self.state.get_router_v2() {
                                             r_v2.remove_neighbour_transport(peer_id, ConnectionModule::Internet);
@@ -790,7 +794,9 @@ impl Libqaul {
                                 }
                             }
                             libp2p::swarm::SwarmEvent::Behaviour(behaviour) => {
-                                internet.swarm.behaviour_mut().process_events(&*self.state, behaviour);
+                                if let Some(peer_id) = internet.swarm.behaviour_mut().process_events(&*self.state, behaviour) {
+                                    let _ = internet.swarm.disconnect_peer_id(peer_id);
+                                }
                             }
                             _ => {}
                         }
