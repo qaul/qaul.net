@@ -631,11 +631,18 @@ class _DeletedMessageMarker extends StatelessWidget {
                       ),
                     ),
                     if (isOutgoing && message.status != MessageStatus.notSent)
-                      Text(
-                        message.status == MessageStatus.read ? ' ✓✓' : ' ✓',
-                        style: TextStyle(
-                          color: foreground.withValues(alpha: 0.75),
-                          fontSize: 11,
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(start: 3),
+                        child: Icon(
+                          message.status == MessageStatus.read
+                              ? Icons.done_all
+                              : Icons.check,
+                          size: 14,
+                          color: foreground.withValues(
+                            alpha: message.status == MessageStatus.read
+                                ? 0.9
+                                : 0.8,
+                          ),
                         ),
                       ),
                   ],
