@@ -14,6 +14,8 @@ import 'package:qaul_components_widgetbook/use_cases/design/account/account_mana
     as _qaul_components_widgetbook_use_cases_design_account_account_management;
 import 'package:qaul_components_widgetbook/use_cases/design/chat/chat_journey.dart'
     as _qaul_components_widgetbook_use_cases_design_chat_chat_journey;
+import 'package:qaul_components_widgetbook/use_cases/design/chat/delete_journey/delete_journey.dart'
+    as _qaul_components_widgetbook_use_cases_design_chat_delete_journey_delete_journey;
 import 'package:qaul_components_widgetbook/use_cases/design/chat/mention_journey/mention_journey.dart'
     as _qaul_components_widgetbook_use_cases_design_chat_mention_journey_mention_journey;
 import 'package:qaul_components_widgetbook/use_cases/design/chat/reply_journey/reply_journey.dart'
@@ -103,6 +105,28 @@ final directories = <_widgetbook.WidgetbookNode>[
                 builder:
                     _qaul_components_widgetbook_use_cases_design_chat_chat_journey
                         .buildChatJourneyPlusMenuUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookFolder(
+            name: 'delete_journey',
+            children: [
+              _widgetbook.WidgetbookComponent(
+                name: 'ChatDeleteJourney',
+                useCases: [
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Direct chat',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_chat_delete_journey_delete_journey
+                            .buildDirectDeleteJourneyUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Group chat',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_chat_delete_journey_delete_journey
+                            .buildGroupDeleteJourneyUseCase,
+                  ),
+                ],
               ),
             ],
           ),
