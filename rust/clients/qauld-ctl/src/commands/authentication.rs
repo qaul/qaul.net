@@ -63,8 +63,8 @@ impl RpcCommand for AuthSubcmd {
     }
 
     fn decode_response(&self, data: &[u8], json: bool) -> Result<(), Box<dyn std::error::Error>> {
-        let envelope = proto::AuthRpc::decode(data)
-            .map_err(|e| format!("auth: malformed response: {e}"))?;
+        let envelope =
+            proto::AuthRpc::decode(data).map_err(|e| format!("auth: malformed response: {e}"))?;
         match envelope.message {
             Some(proto::auth_rpc::Message::AuthChallenge(c)) => {
                 if json {

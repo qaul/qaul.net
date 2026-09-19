@@ -17,6 +17,7 @@ use std::{fmt, sync::RwLock};
 use super::messaging::{proto, MessagingServiceType};
 use crate::node::user_accounts::{UserAccount, UserAccounts};
 use crate::router::users::Users;
+use crate::router_v2;
 use crate::rpc::Rpc;
 use crate::storage::configuration::Configuration;
 use crate::storage::database::DataBase;
@@ -51,7 +52,6 @@ pub struct DtnStorageState {
     /// saved as `Vec<u8>`
     pub db_ref_id: sled::Tree,
 }
-
 
 /// DTN V2 routed message entry stored in sled
 #[derive(Serialize, Deserialize, Clone)]
@@ -221,8 +221,7 @@ impl DtnModuleState {
                 for (sender, quota) in &sender_quotas {
                     match bincode::serialize(quota) {
                         Ok(quota_bytes) => {
-                            if let Err(e) =
-                                db_ref_sender_quotas.insert(sender.clone(), quota_bytes)
+                            if let Err(e) = db_ref_sender_quotas.insert(sender.clone(), quota_bytes)
                             {
                                 log::error!("Failed to rebuild sender quota: {}", e);
                             }
@@ -296,14 +295,17 @@ impl DtnModuleState {
         use sled::Transactional;
         let sig = dtn_response.signature.clone();
         let org_sig = entry.org_sig.clone();
-        let res: sled::transaction::TransactionResult<(), ()> =
-            (&state.db_ref, &state.db_ref_id).transaction(|(db_ref, db_ref_id)| {
+        let res: sled::transaction::TransactionResult<(), ()> = (&state.db_ref, &state.db_ref_id)
+            .transaction(|(db_ref, db_ref_id)| {
                 db_ref.remove(sig.as_slice())?;
                 db_ref_id.remove(org_sig.as_slice())?;
                 Ok(())
             });
         if let Err(e) = res {
-            log::error!("dtn on_dtn_response tree removal transaction failed: {:?}", e);
+            log::error!(
+                "dtn on_dtn_response tree removal transaction failed: {:?}",
+                e
+            );
             return;
         }
         let _ = state.db_ref.flush();
@@ -394,7 +396,11 @@ impl Dtn {
         };
 
         // check already received
-        if storage_state.db_ref_id.contains_key(org_sig).unwrap_or(false) {
+        if storage_state
+            .db_ref_id
+            .contains_key(org_sig)
+            .unwrap_or(false)
+        {
             return (
                 super::messaging::proto::dtn_response::ResponseType::Accepted as i32,
                 super::messaging::proto::dtn_response::Reason::None as i32,
@@ -402,7 +408,7 @@ impl Dtn {
         }
 
         let user_profile;
-        match Configuration::get_user(state,user_account.id.to_string()) {
+        match Configuration::get_user(state, user_account.id.to_string()) {
             Some(user_prof) => {
                 user_profile = user_prof.clone();
             }
@@ -465,15 +471,14 @@ impl Dtn {
             use sled::Transactional;
             let sig = signature.clone();
             let org = org_sig.clone();
-            let res: sled::transaction::TransactionResult<(), ()> = (
-                &storage_state.db_ref,
-                &storage_state.db_ref_id,
-            )
-                .transaction(|(db_ref, db_ref_id)| {
-                    db_ref.insert(sig.as_slice(), message_entry_bytes.as_slice())?;
-                    db_ref_id.insert(org.as_slice(), sig.as_slice())?;
-                    Ok(())
-                });
+            let res: sled::transaction::TransactionResult<(), ()> =
+                (&storage_state.db_ref, &storage_state.db_ref_id).transaction(
+                    |(db_ref, db_ref_id)| {
+                        db_ref.insert(sig.as_slice(), message_entry_bytes.as_slice())?;
+                        db_ref_id.insert(org.as_slice(), sig.as_slice())?;
+                        Ok(())
+                    },
+                );
             match res {
                 Ok(()) => {
                     let _ = storage_state.db_ref.flush();
@@ -511,8 +516,14 @@ impl Dtn {
     }
 
     /// process DTN messages from network
-    pub fn net(state: &crate::QaulState, user_id: &PeerId, sender_id: &PeerId, signature: &Vec<u8>, dtn_payload: &Vec<u8>) {
-        if let Some(user_account) = UserAccounts::get_by_id(state,*user_id) {
+    pub fn net(
+        state: &crate::QaulState,
+        user_id: &PeerId,
+        sender_id: &PeerId,
+        signature: &Vec<u8>,
+        dtn_payload: &Vec<u8>,
+    ) {
+        if let Some(user_account) = UserAccounts::get_by_id(state, *user_id) {
             match proto::Container::decode(&dtn_payload[..]) {
                 Ok(container) => {
                     let envelope = match container.envelope.as_ref() {
@@ -604,17 +615,13 @@ impl Dtn {
                         }
                     };
                     let unconfrimed_len = unconfirmed.unconfirmed.len();
-                    let (used_size_v2, dtn_message_count_v2) =
-                        match state.services.dtn.v2.read() {
-                            Ok(v2) => (v2.used_size, v2.message_count),
-                            Err(e) => {
-                                log::error!(
-                                    "DTN RPC: failed to acquire V2 read lock: {}",
-                                    e
-                                );
-                                return;
-                            }
-                        };
+                    let (used_size_v2, dtn_message_count_v2) = match state.services.dtn.v2.read() {
+                        Ok(v2) => (v2.used_size, v2.message_count),
+                        Err(e) => {
+                            log::error!("DTN RPC: failed to acquire V2 read lock: {}", e);
+                            return;
+                        }
+                    };
 
                     let proto_message = proto_rpc::Dtn {
                         message: Some(proto_rpc::dtn::Message::DtnStateResponse(
@@ -638,7 +645,7 @@ impl Dtn {
                     );
                 }
                 Some(proto_rpc::dtn::Message::DtnConfigRequest(_req)) => {
-                    match Configuration::get_user(state,my_user_id.to_string()) {
+                    match Configuration::get_user(state, my_user_id.to_string()) {
                         Some(user_profile) => {
                             let mut users: Vec<Vec<u8>> = Vec::new();
                             // create users list
@@ -681,7 +688,7 @@ impl Dtn {
                     let mut status = true;
                     let mut message: String = "".to_string();
 
-                    match Configuration::get_user(state,my_user_id.to_string()) {
+                    match Configuration::get_user(state, my_user_id.to_string()) {
                         Some(user_profile) => {
                             // CHANGE: save it to user account and not to configuration directly
 
@@ -706,7 +713,11 @@ impl Dtn {
                             if status {
                                 let mut opt = user_profile.storage.clone();
                                 opt.users.push(user_id_string);
-                                Configuration::update_user_storage(state,my_user_id.to_string(), &opt);
+                                Configuration::update_user_storage(
+                                    state,
+                                    my_user_id.to_string(),
+                                    &opt,
+                                );
                                 Configuration::save(state);
                             }
 
@@ -733,7 +744,7 @@ impl Dtn {
                     let mut status = true;
                     let mut message: String = "".to_string();
 
-                    match Configuration::get_user(state,my_user_id.to_string()) {
+                    match Configuration::get_user(state, my_user_id.to_string()) {
                         Some(user_profile) => {
                             // CHANGE: save it to user_account and not to configuration directly
 
@@ -763,7 +774,11 @@ impl Dtn {
                             if let Some(i) = idx {
                                 let mut opt = user_profile.storage.clone();
                                 opt.users.remove(i);
-                                Configuration::update_user_storage(state, my_user_id.to_string(), &opt);
+                                Configuration::update_user_storage(
+                                    state,
+                                    my_user_id.to_string(),
+                                    &opt,
+                                );
                                 Configuration::save(state);
                             }
 
@@ -787,10 +802,11 @@ impl Dtn {
                     }
                 }
                 Some(proto_rpc::dtn::Message::DtnSetTotalSizeRequest(req)) => {
-                    match Configuration::get_user(state,my_user_id.to_string()) {
+                    match Configuration::get_user(state, my_user_id.to_string()) {
                         // CHANGE: save it in user profile, not to configuration directly.
                         Some(_user_profile) => {
-                            Configuration::update_total_size(state,
+                            Configuration::update_total_size(
+                                state,
                                 my_user_id.to_string(),
                                 req.total_size,
                             );
@@ -877,7 +893,10 @@ impl Dtn {
         for user_bytes in &req.custody_route {
             if let Ok(uid) = PeerId::from_bytes(user_bytes) {
                 if uid == my_user_id || uid == receiver_id {
-                    send_response(false, "custodians must not include sender or receiver".to_string());
+                    send_response(
+                        false,
+                        "custodians must not include sender or receiver".to_string(),
+                    );
                     return;
                 }
             } else {
@@ -968,10 +987,9 @@ impl Dtn {
                 };
                 if let Ok(entry_bytes) = bincode::serialize(&v2_entry) {
                     if let Ok(mut v2) = state.services.dtn.v2.write() {
-                        let _ = v2.db_ref_routed_v2.insert(
-                            routed_v2.original_signature.clone(),
-                            entry_bytes,
-                        );
+                        let _ = v2
+                            .db_ref_routed_v2
+                            .insert(routed_v2.original_signature.clone(), entry_bytes);
                         let _ = v2.db_ref_routed_v2.flush();
                         v2.used_size += entry_size as u64;
                         v2.message_count += 1;
@@ -1015,11 +1033,7 @@ impl Dtn {
             Some(user_profile) => {
                 let mut storage = user_profile.storage.clone();
                 storage.dtn_v2_custody_enabled = req.enabled;
-                Configuration::update_user_storage(
-                    state,
-                    my_user_id.to_string(),
-                    &storage,
-                );
+                Configuration::update_user_storage(state, my_user_id.to_string(), &storage);
                 Configuration::save(state);
                 send_response(true, "".to_string());
             }
@@ -1029,14 +1043,27 @@ impl Dtn {
         }
     }
 
+    /// Whether we hold a route to this specific user.
+    fn has_route_to_user(state: &crate::QaulState, user_id: &PeerId) -> bool {
+        match state.get_router_v2() {
+            Some(v2) => router_v2::identity::id_from_peer_id(user_id)
+                .and_then(|id| v2.next_hop_for_user(id))
+                .is_some(),
+            None => state
+                .get_router()
+                .routing_table
+                .get_route_to_user(*user_id)
+                .is_some(),
+        }
+    }
+
     pub fn select_custody_target(
         state: &crate::QaulState,
         routed_v2: &proto::DtnRoutedV2,
         receiver_id: &PeerId,
     ) -> Option<PeerId> {
-        let rs = state.get_router();
         // Check if recipient is directly reachable
-        if rs.routing_table.get_route_to_user(*receiver_id).is_some() {
+        if Self::has_route_to_user(state, receiver_id) {
             return Some(*receiver_id);
         }
 
@@ -1048,7 +1075,7 @@ impl Dtn {
         }
         for i in start..len {
             if let Ok(custodian_id) = PeerId::from_bytes(&routed_v2.custody_route[i]) {
-                if rs.routing_table.get_route_to_user(custodian_id).is_some() {
+                if Self::has_route_to_user(state, &custodian_id) {
                     return Some(custodian_id);
                 }
             }
@@ -1065,12 +1092,18 @@ impl Dtn {
         _signature: &[u8],
         routed_v2: proto::DtnRoutedV2,
     ) {
-        log::info!("Received DtnRoutedV2 message from {}", sender_id.to_base58());
+        log::info!(
+            "Received DtnRoutedV2 message from {}",
+            sender_id.to_base58()
+        );
 
         let user_account = match UserAccounts::get_by_id(state, *user_id) {
             Some(ua) => ua,
             None => {
-                log::error!("DtnRoutedV2: user account not found for {}", user_id.to_base58());
+                log::error!(
+                    "DtnRoutedV2: user account not found for {}",
+                    user_id.to_base58()
+                );
                 if let Some(default_user) = UserAccounts::get_default_user(state) {
                     Self::send_v2_response(
                         state,
@@ -1290,13 +1323,14 @@ impl Dtn {
             let v2 = match state.services.dtn.v2.read() {
                 Ok(s) => s,
                 Err(e) => {
-                    log::error!("DtnRoutedV2: failed to acquire read lock for quota check: {}", e);
+                    log::error!(
+                        "DtnRoutedV2: failed to acquire read lock for quota check: {}",
+                        e
+                    );
                     return;
                 }
             };
-            if let Ok(Some(quota_bytes)) = v2
-                .db_ref_sender_quotas
-                .get(&routed_v2.sender_public_key)
+            if let Ok(Some(quota_bytes)) = v2.db_ref_sender_quotas.get(&routed_v2.sender_public_key)
             {
                 if let Ok(quota) = bincode::deserialize::<SenderQuotaEntry>(&quota_bytes) {
                     if quota.used_bytes + (routed_v2.container.len() as u64) > V2_PER_SENDER_QUOTA {
@@ -1321,7 +1355,10 @@ impl Dtn {
             let v2 = match state.services.dtn.v2.read() {
                 Ok(s) => s,
                 Err(e) => {
-                    log::error!("DtnRoutedV2: failed to acquire read lock for overall quota: {}", e);
+                    log::error!(
+                        "DtnRoutedV2: failed to acquire read lock for overall quota: {}",
+                        e
+                    );
                     return;
                 }
             };
@@ -1406,9 +1443,8 @@ impl Dtn {
             v2.message_count += 1;
 
             // Update sender quota
-            let mut quota = if let Ok(Some(quota_bytes)) = v2
-                .db_ref_sender_quotas
-                .get(&routed_v2.sender_public_key)
+            let mut quota = if let Ok(Some(quota_bytes)) =
+                v2.db_ref_sender_quotas.get(&routed_v2.sender_public_key)
             {
                 bincode::deserialize::<SenderQuotaEntry>(&quota_bytes).unwrap_or_default()
             } else {
@@ -1543,18 +1579,17 @@ impl Dtn {
         let mut v2 = match state.services.dtn.v2.write() {
             Ok(s) => s,
             Err(e) => {
-                log::error!("DtnRoutedV2: failed to acquire write lock for response: {}", e);
+                log::error!(
+                    "DtnRoutedV2: failed to acquire write lock for response: {}",
+                    e
+                );
                 return;
             }
         };
-        if let Ok(Some(entry_bytes)) = v2
-            .db_ref_routed_v2
-            .get(&dtn_response.signature)
-        {
+        if let Ok(Some(entry_bytes)) = v2.db_ref_routed_v2.get(&dtn_response.signature) {
             if let Ok(entry) = bincode::deserialize::<DtnRoutedV2Entry>(&entry_bytes) {
                 // Only remove on acceptance
-                if dtn_response.response_type
-                    == proto::dtn_response::ResponseType::Accepted as i32
+                if dtn_response.response_type == proto::dtn_response::ResponseType::Accepted as i32
                 {
                     // Remove from V2 storage
                     let _ = v2.db_ref_routed_v2.remove(&dtn_response.signature);
@@ -1594,7 +1629,10 @@ impl Dtn {
         let v2 = match state.services.dtn.v2.read() {
             Ok(s) => s,
             Err(e) => {
-                log::error!("DtnRoutedV2: failed to acquire read lock for retransmit: {}", e);
+                log::error!(
+                    "DtnRoutedV2: failed to acquire read lock for retransmit: {}",
+                    e
+                );
                 return;
             }
         };
@@ -1606,8 +1644,7 @@ impl Dtn {
         for entry in v2.db_ref_routed_v2.iter() {
             if let Ok((sig, entry_bytes)) = entry {
                 if let Ok(v2_entry) = bincode::deserialize::<DtnRoutedV2Entry>(&entry_bytes) {
-                    if let Ok(routed_v2) =
-                        proto::DtnRoutedV2::decode(&v2_entry.routed_v2_bytes[..])
+                    if let Ok(routed_v2) = proto::DtnRoutedV2::decode(&v2_entry.routed_v2_bytes[..])
                     {
                         // Check expiry. Entries whose sender specified no
                         // expiry (expires_at == 0) are still bounded by the
@@ -1634,7 +1671,10 @@ impl Dtn {
             let mut v2 = match state.services.dtn.v2.write() {
                 Ok(s) => s,
                 Err(e) => {
-                    log::error!("DtnRoutedV2: failed to acquire write lock for cleanup: {}", e);
+                    log::error!(
+                        "DtnRoutedV2: failed to acquire write lock for cleanup: {}",
+                        e
+                    );
                     return;
                 }
             };
@@ -2448,11 +2488,7 @@ mod tests {
     }
 
     /// Insert a V2 entry with its quota record, as acceptance does.
-    fn store_v2_entry(
-        state: &crate::QaulState,
-        sig: &[u8],
-        entry: &DtnRoutedV2Entry,
-    ) {
+    fn store_v2_entry(state: &crate::QaulState, sig: &[u8], entry: &DtnRoutedV2Entry) {
         let mut v2 = ok(state.services.dtn.v2.write(), "v2 write lock");
         let entry_bytes = ok(bincode::serialize(entry), "serialize entry");
         ok(
@@ -2533,8 +2569,7 @@ mod tests {
             "get stale quota",
         );
         if let Some(bytes) = quota_bytes {
-            let quota: SenderQuotaEntry =
-                ok(bincode::deserialize(&bytes), "decode stale quota");
+            let quota: SenderQuotaEntry = ok(bincode::deserialize(&bytes), "decode stale quota");
             assert_eq!(quota.used_bytes, 0);
             assert_eq!(quota.message_count, 0);
         }
@@ -2603,23 +2638,19 @@ mod tests {
         assert_eq!(v2.used_size, 220);
         assert_eq!(v2.message_count, 3);
 
-        let quota_a: SenderQuotaEntry = match ok(
-            v2.db_ref_sender_quotas.get(&sender_a),
-            "get quota A",
-        ) {
-            Some(bytes) => ok(bincode::deserialize(&bytes), "decode quota A"),
-            None => panic!("quota for sender A missing after rebuild"),
-        };
+        let quota_a: SenderQuotaEntry =
+            match ok(v2.db_ref_sender_quotas.get(&sender_a), "get quota A") {
+                Some(bytes) => ok(bincode::deserialize(&bytes), "decode quota A"),
+                None => panic!("quota for sender A missing after rebuild"),
+            };
         assert_eq!(quota_a.used_bytes, 150);
         assert_eq!(quota_a.message_count, 2);
 
-        let quota_b: SenderQuotaEntry = match ok(
-            v2.db_ref_sender_quotas.get(&sender_b),
-            "get quota B",
-        ) {
-            Some(bytes) => ok(bincode::deserialize(&bytes), "decode quota B"),
-            None => panic!("quota for sender B missing after rebuild"),
-        };
+        let quota_b: SenderQuotaEntry =
+            match ok(v2.db_ref_sender_quotas.get(&sender_b), "get quota B") {
+                Some(bytes) => ok(bincode::deserialize(&bytes), "decode quota B"),
+                None => panic!("quota for sender B missing after rebuild"),
+            };
         assert_eq!(quota_b.used_bytes, 70);
         assert_eq!(quota_b.message_count, 1);
 
@@ -2722,10 +2753,7 @@ mod tests {
 
         let v2 = ok(state.services.dtn.v2.read(), "v2 read lock");
         assert!(
-            !ok(
-                v2.db_ref_routed_v2.contains_key(&signature),
-                "contains key"
-            ),
+            !ok(v2.db_ref_routed_v2.contains_key(&signature), "contains key"),
             "blocked sender's message must not be stored"
         );
         assert_eq!(v2.message_count, 0);
@@ -2749,10 +2777,7 @@ mod tests {
 
         let v2 = ok(state.services.dtn.v2.read(), "v2 read lock");
         assert!(
-            ok(
-                v2.db_ref_routed_v2.contains_key(&signature),
-                "contains key"
-            ),
+            ok(v2.db_ref_routed_v2.contains_key(&signature), "contains key"),
             "non-blocked sender's message must be stored"
         );
         assert_eq!(v2.message_count, 1);

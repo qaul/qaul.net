@@ -96,7 +96,11 @@ impl FeedResponserState {
 impl FeedResponser {
     /// Add a message to the ring buffer for sending.
     /// Delegates to the provided RouterState instance.
-    pub fn add(router: &super::RouterState, neighbour_id: &PeerId, feeds: &[(Vec<u8>, Vec<u8>, String, u64)]) {
+    pub fn add(
+        router: &super::RouterState,
+        neighbour_id: &PeerId,
+        feeds: &[(Vec<u8>, Vec<u8>, String, u64)],
+    ) {
         router.feed_responser.add(neighbour_id, feeds);
     }
 }

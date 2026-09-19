@@ -135,7 +135,8 @@ impl BleCryptoModule {
         };
 
         // Create crypto state
-        let state_crypto = Self::create_crypto_state::<X25519>(true, &user_account.keys, remote_key)?;
+        let state_crypto =
+            Self::create_crypto_state::<X25519>(true, &user_account.keys, remote_key)?;
         let session_id = state_crypto.session_id;
 
         // Create handshake
@@ -545,7 +546,6 @@ fn ble_crypto(state: &crate::QaulState) -> &RwLock<BleCryptoModule> {
 }
 
 impl BleCrypto {
-
     /// Check if a session is established for the given small_id
     pub fn is_session_established(state: &crate::QaulState, small_id: &[u8]) -> bool {
         let crypto = ble_crypto(state).read().unwrap();
