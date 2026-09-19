@@ -1,17 +1,21 @@
 // Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! # DTN Routed V2 Integration Tests
+//! # DTN v2 Custody Integration Tests
 //!
-//! Tests the directed custody routing message types end-to-end:
-//! - Protobuf encode/decode through the full envelope chain
-//! - V2 storage entry serialization via bincode (as used in sled)
-//! - Expiry and handoff validation logic
-//! - Single flat route message construction and round-trip
-//! - Duplicate detection via sled (temporary DB)
-//! - Quota tracking via sled (temporary DB)
+//! Exercises the redesigned custody wire format end-to-end at the boundaries
+//! an external crate can reach:
+//! - the signed, immutable `DtnV2Container` / `DtnRoute` through the full
+//!   envelope chain and the `Dtn` oneof,
+//! - the signed `DtnResponseV2`,
+//! - sled storage of the custody entry (with its admission `tier`),
+//! - duplicate detection and per-sender quota bookkeeping.
+//!
+//! The crypto/admission logic itself (grant + proof-of-work verification,
+//! stateless traversal, signed-response handling) lives in the unit tests
+//! inside `services/dtn/mod.rs`, which can reach the private helpers.
 
-use libp2p::identity::Keypair;
+use libp2p::identity::{Keypair, PublicKey};
 use libp2p::PeerId;
 use prost::Message;
 use serde::{Deserialize, Serialize};
@@ -19,146 +23,200 @@ use serde::{Deserialize, Serialize};
 /// Protobuf types from qaul-proto (public crate)
 use qaul_proto::qaul_net_messaging as proto;
 
-/// Mirror of DtnRoutedV2Entry from libqaul (not publicly exported).
-/// We redefine it here to test the sled storage layer independently.
+/// Mirror of `DtnRoutedV2Entry` from libqaul (not publicly exported), so we can
+/// exercise the sled storage layer independently.
 #[derive(Serialize, Deserialize, Clone)]
 struct DtnRoutedV2Entry {
-    routed_v2_bytes: Vec<u8>,
+    container_v2_bytes: Vec<u8>,
     sender_public_key: Vec<u8>,
     size: u32,
     accepted_at: u64,
     receiver_id: Vec<u8>,
+    tier: u8,
 }
 
-/// Mirror of SenderQuotaEntry.
+/// Mirror of `SenderQuotaEntry`.
 #[derive(Default, Serialize, Deserialize, Clone)]
 struct SenderQuotaEntry {
     used_bytes: u64,
     message_count: u32,
 }
 
-/// Per-sender quota limit (same as in libqaul).
-const V2_PER_SENDER_QUOTA: u64 = 10 * 1024 * 1024;
+const TIER_GRANT: u8 = 2;
 
 fn random_peer() -> PeerId {
-    let keys = Keypair::generate_ed25519();
-    PeerId::from(keys.public())
+    PeerId::from(Keypair::generate_ed25519().public())
 }
 
-/// Build a DtnRoutedV2 with a properly signed inner Container.
-fn build_test_v2(
-    receiver: &PeerId,
-    custodians: Vec<PeerId>,
-    expires_at: u64,
-    remaining_handoffs: u32,
-) -> proto::DtnRoutedV2 {
+/// Build a signed inner Container for `receiver`.
+/// Returns (sender_keys, container_bytes, original_signature).
+fn signed_inner(receiver: &PeerId) -> (Keypair, Vec<u8>, Vec<u8>) {
     let keys = Keypair::generate_ed25519();
     let sender = PeerId::from(keys.public());
     let envelope = proto::Envelope {
         sender_id: sender.to_bytes(),
         receiver_id: receiver.to_bytes(),
-        payload: vec![],
+        payload: vec![1, 2, 3],
     };
-
-    // Sign the envelope properly
-    let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
-    envelope.encode(&mut envelope_buf).unwrap();
-    let signature = keys.sign(&envelope_buf).unwrap();
-
+    let mut buf = Vec::with_capacity(envelope.encoded_len());
+    envelope.encode(&mut buf).unwrap();
+    let signature = keys.sign(&buf).unwrap();
     let container = proto::Container {
         signature: signature.clone(),
         envelope: Some(envelope),
     };
-
-    let custody_route: Vec<Vec<u8>> = custodians.iter().map(|c| c.to_bytes()).collect();
-
-    proto::DtnRoutedV2 {
-        container: container.encode_to_vec(),
-        custody_route,
-        next_route_index: 0,
-        original_signature: signature,
-        sender_public_key: keys.public().encode_protobuf(),
-        expires_at,
-        remaining_handoffs,
-    }
+    (keys, container.encode_to_vec(), signature)
 }
 
-// ── Full envelope chain tests ──
+/// Build a signed `DtnV2Container` (one RouteHop per custodian).
+fn build_container_v2(
+    receiver: &PeerId,
+    custodians: Vec<PeerId>,
+    expires_at: Option<u64>,
+) -> (proto::DtnV2Container, Keypair) {
+    let (keys, container_bytes, signature) = signed_inner(receiver);
+    let route_hop = custodians
+        .iter()
+        .map(|c| proto::RouteHop {
+            route_entry: vec![proto::RouteEntry { id: c.to_bytes() }],
+        })
+        .collect();
+    let route = proto::DtnRoute {
+        original_signature: signature,
+        route_hop,
+        sender_public_key: keys.public().encode_protobuf(),
+        expires_at,
+    };
+    let dtn_route = route.encode_to_vec();
+    let dtn_route_sig = keys.sign(&dtn_route).unwrap();
+    (
+        proto::DtnV2Container {
+            dtn_route,
+            dtn_route_sig,
+            envelope: container_bytes,
+            custody_grant: None,
+            pow: None,
+        },
+        keys,
+    )
+}
+
+// ── Wire round-trips ──
 
 #[test]
-fn v2_message_survives_full_envelope_chain() {
+fn v2_container_survives_full_envelope_chain() {
     let receiver = random_peer();
     let sender = random_peer();
     let custodian = random_peer();
+    let (container_v2, _keys) = build_container_v2(&receiver, vec![custodian], None);
 
-    let v2 = build_test_v2(&receiver, vec![custodian], 0, 5);
-
-    // Wrap in EnvelopPayload
     let payload = proto::EnvelopPayload {
-        payload: Some(proto::envelop_payload::Payload::DtnRoutedV2(v2.clone())),
+        payload: Some(proto::envelop_payload::Payload::DtnV2(container_v2)),
     };
-    let payload_bytes = payload.encode_to_vec();
-
-    // Wrap in Envelope
     let envelope = proto::Envelope {
         sender_id: sender.to_bytes(),
         receiver_id: receiver.to_bytes(),
-        payload: payload_bytes,
+        payload: payload.encode_to_vec(),
     };
-
-    // Wrap in Container
     let container = proto::Container {
         signature: vec![0xDE, 0xAD],
         envelope: Some(envelope),
     };
-    let container_bytes = container.encode_to_vec();
+    let bytes = container.encode_to_vec();
 
-    // Now decode the whole chain
-    let decoded_container = proto::Container::decode(&container_bytes[..]).unwrap();
+    let decoded_container = proto::Container::decode(&bytes[..]).unwrap();
     let decoded_envelope = decoded_container.envelope.unwrap();
-    assert_eq!(
-        PeerId::from_bytes(&decoded_envelope.receiver_id).unwrap(),
-        receiver
-    );
-
     let decoded_payload = proto::EnvelopPayload::decode(&decoded_envelope.payload[..]).unwrap();
     match decoded_payload.payload {
-        Some(proto::envelop_payload::Payload::DtnRoutedV2(decoded_v2)) => {
-            assert_eq!(decoded_v2.remaining_handoffs, 5);
-            assert_eq!(decoded_v2.custody_route.len(), 1);
-            assert_eq!(decoded_v2.custody_route[0], custodian.to_bytes());
-
-            // Decode the inner container to get the ultimate receiver
-            let inner = proto::Container::decode(&decoded_v2.container[..]).unwrap();
-            let inner_recv =
-                PeerId::from_bytes(&inner.envelope.unwrap().receiver_id).unwrap();
+        Some(proto::envelop_payload::Payload::DtnV2(c)) => {
+            let route = proto::DtnRoute::decode(&c.dtn_route[..]).unwrap();
+            assert_eq!(route.route_hop.len(), 1);
+            assert_eq!(route.route_hop[0].route_entry[0].id, custodian.to_bytes());
+            // inner receiver survives
+            let inner = proto::Container::decode(&c.envelope[..]).unwrap();
+            let inner_recv = PeerId::from_bytes(&inner.envelope.unwrap().receiver_id).unwrap();
             assert_eq!(inner_recv, receiver);
         }
-        _ => panic!("Expected DtnRoutedV2 payload"),
+        _ => panic!("Expected DtnV2 payload"),
     }
 }
 
 #[test]
-fn v2_message_in_dtn_oneof() {
+fn v2_container_in_dtn_oneof() {
     let receiver = random_peer();
-    let v2 = build_test_v2(&receiver, vec![random_peer()], 0, 3);
-
-    // Wrap in Dtn message (the other transport path)
+    let (container_v2, _keys) = build_container_v2(&receiver, vec![random_peer()], None);
     let dtn = proto::Dtn {
-        message: Some(proto::dtn::Message::RoutedV2(v2.clone())),
+        message: Some(proto::dtn::Message::ContainerV2(container_v2)),
     };
-    let encoded = dtn.encode_to_vec();
-    let decoded = proto::Dtn::decode(&encoded[..]).unwrap();
-
+    let decoded = proto::Dtn::decode(&dtn.encode_to_vec()[..]).unwrap();
     match decoded.message {
-        Some(proto::dtn::Message::RoutedV2(decoded_v2)) => {
-            assert_eq!(decoded_v2.remaining_handoffs, 3);
+        Some(proto::dtn::Message::ContainerV2(c)) => {
+            assert!(!c.dtn_route_sig.is_empty());
         }
-        _ => panic!("Expected RoutedV2 variant"),
+        _ => panic!("Expected ContainerV2 variant"),
     }
 }
 
-// ── Sled storage tests ──
+// The route is signed by the sender and must verify against the embedded key —
+// this is what makes the route immutable in transit.
+#[test]
+fn v2_route_signature_verifies() {
+    let receiver = random_peer();
+    let (container_v2, keys) = build_container_v2(&receiver, vec![random_peer()], None);
+    let route = proto::DtnRoute::decode(&container_v2.dtn_route[..]).unwrap();
+    let key = PublicKey::try_decode_protobuf(&route.sender_public_key).unwrap();
+    assert_eq!(key, keys.public());
+    assert!(key.verify(&container_v2.dtn_route, &container_v2.dtn_route_sig));
+
+    // tampering the route breaks the signature
+    let mut tampered = container_v2.dtn_route.clone();
+    tampered[0] ^= 0xFF;
+    assert!(!key.verify(&tampered, &container_v2.dtn_route_sig));
+}
+
+// A signed DtnResponseV2 round-trips through the Dtn oneof and verifies.
+#[test]
+fn v2_signed_response_round_trip() {
+    let keys = Keypair::generate_ed25519();
+    let responder = PeerId::from(keys.public());
+    let mut resp = proto::DtnResponseV2 {
+        kind: proto::dtn_response_v2::Kind::Delivery as i32,
+        response_type: proto::dtn_response_v2::ResponseType::Accepted as i32,
+        reason: proto::dtn_response_v2::Reason::None as i32,
+        original_signature: vec![0xAB],
+        responder_public_key: keys.public().encode_protobuf(),
+        signature: Vec::new(),
+    };
+    resp.signature = keys.sign(&resp.encode_to_vec()).unwrap();
+
+    let dtn = proto::Dtn {
+        message: Some(proto::dtn::Message::ResponseV2(resp.clone())),
+    };
+    let decoded = proto::Dtn::decode(&dtn.encode_to_vec()[..]).unwrap();
+    match decoded.message {
+        Some(proto::dtn::Message::ResponseV2(r)) => {
+            let key = PublicKey::try_decode_protobuf(&r.responder_public_key).unwrap();
+            let mut unsigned = r.clone();
+            unsigned.signature = Vec::new();
+            assert!(key.verify(&unsigned.encode_to_vec(), &r.signature));
+            assert_eq!(PeerId::from_public_key(&key), responder);
+        }
+        _ => panic!("Expected ResponseV2 variant"),
+    }
+}
+
+#[test]
+fn v2_route_expiry_is_optional() {
+    let receiver = random_peer();
+    let (with_expiry, _) = build_container_v2(&receiver, vec![random_peer()], Some(1234));
+    let (no_expiry, _) = build_container_v2(&receiver, vec![random_peer()], None);
+    let r1 = proto::DtnRoute::decode(&with_expiry.dtn_route[..]).unwrap();
+    let r2 = proto::DtnRoute::decode(&no_expiry.dtn_route[..]).unwrap();
+    assert_eq!(r1.expires_at, Some(1234));
+    assert_eq!(r2.expires_at, None);
+}
+
+// ── Sled storage ──
 
 #[test]
 fn v2_sled_store_and_retrieve() {
@@ -166,70 +224,45 @@ fn v2_sled_store_and_retrieve() {
     let tree = db.open_tree("v2-messages").unwrap();
 
     let receiver = random_peer();
-    let v2 = build_test_v2(&receiver, vec![random_peer()], 0, 5);
-    let sig = v2.original_signature.clone();
-    let v2_bytes = v2.encode_to_vec();
+    let (container_v2, keys) = build_container_v2(&receiver, vec![random_peer()], None);
+    let route = proto::DtnRoute::decode(&container_v2.dtn_route[..]).unwrap();
+    let sig = route.original_signature.clone();
+    let bytes = container_v2.encode_to_vec();
 
     let entry = DtnRoutedV2Entry {
-        routed_v2_bytes: v2_bytes.clone(),
-        sender_public_key: v2.sender_public_key.clone(),
-        size: v2_bytes.len() as u32,
+        container_v2_bytes: bytes.clone(),
+        sender_public_key: keys.public().encode_protobuf(),
+        size: container_v2.envelope.len() as u32,
         accepted_at: 12345,
         receiver_id: receiver.to_bytes(),
+        tier: TIER_GRANT,
     };
-
-    // Store
-    tree.insert(&sig, bincode::serialize(&entry).unwrap())
-        .unwrap();
+    tree.insert(&sig, bincode::serialize(&entry).unwrap()).unwrap();
     tree.flush().unwrap();
 
-    // Retrieve and decode
     let stored = tree.get(&sig).unwrap().unwrap();
     let decoded: DtnRoutedV2Entry = bincode::deserialize(&stored).unwrap();
-    assert_eq!(decoded.size, v2_bytes.len() as u32);
     assert_eq!(decoded.accepted_at, 12345);
-
-    let inner_v2 = proto::DtnRoutedV2::decode(&decoded.routed_v2_bytes[..]).unwrap();
-    assert_eq!(inner_v2.remaining_handoffs, 5);
+    assert_eq!(decoded.tier, TIER_GRANT);
+    // the stored container still decodes
+    assert!(proto::DtnV2Container::decode(&decoded.container_v2_bytes[..]).is_ok());
 }
 
 #[test]
 fn v2_sled_duplicate_detection() {
     let db = sled::Config::new().temporary(true).open().unwrap();
     let tree = db.open_tree("v2-dedup").unwrap();
-
     let sig = vec![0xDE, 0xAD, 0xBE, 0xEF];
-
-    // First message accepted
-    tree.insert(&sig, b"message-data").unwrap();
-    assert!(tree.contains_key(&sig).unwrap());
-
-    // Second message with same sig should be detected
-    let is_dup = tree.contains_key(&sig).unwrap();
-    assert!(is_dup, "duplicate should be detected");
+    tree.insert(&sig, b"entry").unwrap();
+    assert!(tree.contains_key(&sig).unwrap(), "duplicate must be detected");
 }
 
 #[test]
 fn v2_sled_quota_tracking_lifecycle() {
     let db = sled::Config::new().temporary(true).open().unwrap();
     let quotas = db.open_tree("v2-quotas").unwrap();
-    let messages = db.open_tree("v2-msgs").unwrap();
-
     let sender_key = vec![0xAA, 0xBB];
-    let sig1 = vec![0x01];
-    let sig2 = vec![0x02];
 
-    // Accept message 1 (size: 100)
-    let entry1 = DtnRoutedV2Entry {
-        routed_v2_bytes: vec![0; 100],
-        sender_public_key: sender_key.clone(),
-        size: 100,
-        accepted_at: 1000,
-        receiver_id: vec![],
-    };
-    messages
-        .insert(&sig1, bincode::serialize(&entry1).unwrap())
-        .unwrap();
     let quota = SenderQuotaEntry {
         used_bytes: 100,
         message_count: 1,
@@ -238,184 +271,28 @@ fn v2_sled_quota_tracking_lifecycle() {
         .insert(&sender_key, bincode::serialize(&quota).unwrap())
         .unwrap();
 
-    // Accept message 2 (size: 200)
-    let entry2 = DtnRoutedV2Entry {
-        routed_v2_bytes: vec![0; 200],
-        sender_public_key: sender_key.clone(),
-        size: 200,
-        accepted_at: 2000,
-        receiver_id: vec![],
-    };
-    messages
-        .insert(&sig2, bincode::serialize(&entry2).unwrap())
-        .unwrap();
+    // add a second message
     let stored = quotas.get(&sender_key).unwrap().unwrap();
-    let mut quota: SenderQuotaEntry = bincode::deserialize(&stored).unwrap();
-    quota.used_bytes += 200;
-    quota.message_count += 1;
+    let mut q: SenderQuotaEntry = bincode::deserialize(&stored).unwrap();
+    q.used_bytes += 200;
+    q.message_count += 1;
     quotas
-        .insert(&sender_key, bincode::serialize(&quota).unwrap())
+        .insert(&sender_key, bincode::serialize(&q).unwrap())
         .unwrap();
+    let q: SenderQuotaEntry =
+        bincode::deserialize(&quotas.get(&sender_key).unwrap().unwrap()).unwrap();
+    assert_eq!(q.used_bytes, 300);
+    assert_eq!(q.message_count, 2);
 
-    // Verify quota
-    let stored = quotas.get(&sender_key).unwrap().unwrap();
-    let quota: SenderQuotaEntry = bincode::deserialize(&stored).unwrap();
-    assert_eq!(quota.used_bytes, 300);
-    assert_eq!(quota.message_count, 2);
-
-    // Forward message 1 (simulate acceptance) — remove and update quota
-    let removed = messages.remove(&sig1).unwrap().unwrap();
-    let removed_entry: DtnRoutedV2Entry = bincode::deserialize(&removed).unwrap();
-    let stored = quotas.get(&sender_key).unwrap().unwrap();
-    let mut quota: SenderQuotaEntry = bincode::deserialize(&stored).unwrap();
-    quota.used_bytes -= removed_entry.size as u64;
-    quota.message_count -= 1;
+    // free the first message
+    let mut q = q;
+    q.used_bytes -= 100;
+    q.message_count -= 1;
     quotas
-        .insert(&sender_key, bincode::serialize(&quota).unwrap())
+        .insert(&sender_key, bincode::serialize(&q).unwrap())
         .unwrap();
-
-    // Verify updated quota
-    let stored = quotas.get(&sender_key).unwrap().unwrap();
-    let quota: SenderQuotaEntry = bincode::deserialize(&stored).unwrap();
-    assert_eq!(quota.used_bytes, 200);
-    assert_eq!(quota.message_count, 1);
-}
-
-#[test]
-fn v2_per_sender_quota_enforcement() {
-    let db = sled::Config::new().temporary(true).open().unwrap();
-    let quotas = db.open_tree("v2-quota-enforce").unwrap();
-
-    let sender_key = vec![0xCC];
-
-    // Sender near quota limit
-    let quota = SenderQuotaEntry {
-        used_bytes: V2_PER_SENDER_QUOTA - 100,
-        message_count: 50,
-    };
-    quotas
-        .insert(&sender_key, bincode::serialize(&quota).unwrap())
-        .unwrap();
-
-    // Small message should fit
-    let stored = quotas.get(&sender_key).unwrap().unwrap();
-    let q: SenderQuotaEntry = bincode::deserialize(&stored).unwrap();
-    assert!(
-        q.used_bytes + 50 <= V2_PER_SENDER_QUOTA,
-        "50-byte message should fit"
-    );
-
-    // Large message should not fit
-    assert!(
-        q.used_bytes + 200 > V2_PER_SENDER_QUOTA,
-        "200-byte message should be rejected"
-    );
-}
-
-// ── Expiry and handoff validation tests ──
-
-#[test]
-fn v2_expired_messages_detected_in_storage_scan() {
-    let db = sled::Config::new().temporary(true).open().unwrap();
-    let tree = db.open_tree("v2-expiry").unwrap();
-
-    let receiver = random_peer();
-
-    // Expired message
-    let expired_v2 = build_test_v2(&receiver, vec![random_peer()], 1, 5);
-    let expired_entry = DtnRoutedV2Entry {
-        routed_v2_bytes: expired_v2.encode_to_vec(),
-        sender_public_key: expired_v2.sender_public_key.clone(),
-        size: 10,
-        accepted_at: 0,
-        receiver_id: receiver.to_bytes(),
-    };
-    tree.insert(
-        &expired_v2.original_signature,
-        bincode::serialize(&expired_entry).unwrap(),
-    )
-    .unwrap();
-
-    // Non-expired message
-    let valid_v2 = build_test_v2(&receiver, vec![random_peer()], u64::MAX, 5);
-    let valid_entry = DtnRoutedV2Entry {
-        routed_v2_bytes: valid_v2.encode_to_vec(),
-        sender_public_key: valid_v2.sender_public_key.clone(),
-        size: 10,
-        accepted_at: 0,
-        receiver_id: receiver.to_bytes(),
-    };
-    tree.insert(
-        &valid_v2.original_signature,
-        bincode::serialize(&valid_entry).unwrap(),
-    )
-    .unwrap();
-
-    // Scan and classify
-    let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
-        .as_millis() as u64;
-
-    let mut expired_sigs = Vec::new();
-    let mut valid_count = 0;
-
-    for entry in tree.iter() {
-        let (sig, bytes) = entry.unwrap();
-        let stored: DtnRoutedV2Entry = bincode::deserialize(&bytes).unwrap();
-        let v2 = proto::DtnRoutedV2::decode(&stored.routed_v2_bytes[..]).unwrap();
-        if v2.expires_at > 0 && now > v2.expires_at {
-            expired_sigs.push(sig.to_vec());
-        } else {
-            valid_count += 1;
-        }
-    }
-
-    assert_eq!(expired_sigs.len(), 1);
-    assert_eq!(valid_count, 1);
-
-    // Remove expired
-    for sig in &expired_sigs {
-        tree.remove(sig).unwrap();
-    }
-    assert_eq!(tree.len(), 1);
-}
-
-#[test]
-fn v2_flat_route_construction_and_advancement() {
-    let c1 = random_peer();
-    let c2 = random_peer();
-    let c3 = random_peer();
-    let _receiver = random_peer();
-
-    let mut v2 = proto::DtnRoutedV2 {
-        container: vec![],
-        custody_route: vec![c1.to_bytes(), c2.to_bytes(), c3.to_bytes()],
-        next_route_index: 0,
-        original_signature: vec![0xAA],
-        sender_public_key: vec![],
-        expires_at: 0,
-        remaining_handoffs: 6,
-    };
-
-    // Simulate forwarding to c2 (index 1)
-    let target = c2;
-    v2.remaining_handoffs = v2.remaining_handoffs.saturating_sub(1);
-    for (i, user_bytes) in v2.custody_route.iter().enumerate() {
-        if let Ok(uid) = PeerId::from_bytes(user_bytes) {
-            if uid == target && i as u32 >= v2.next_route_index {
-                v2.next_route_index = (i as u32) + 1;
-                break;
-            }
-        }
-    }
-
-    assert_eq!(v2.remaining_handoffs, 5);
-    assert_eq!(v2.next_route_index, 2); // past c2, c3 still eligible
-
-    // Encode and decode — verify state persists
-    let encoded = v2.encode_to_vec();
-    let decoded = proto::DtnRoutedV2::decode(&encoded[..]).unwrap();
-    assert_eq!(decoded.next_route_index, 2);
-    assert_eq!(decoded.remaining_handoffs, 5);
+    let q: SenderQuotaEntry =
+        bincode::deserialize(&quotas.get(&sender_key).unwrap().unwrap()).unwrap();
+    assert_eq!(q.used_bytes, 200);
+    assert_eq!(q.message_count, 1);
 }

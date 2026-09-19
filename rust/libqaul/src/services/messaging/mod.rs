@@ -799,16 +799,16 @@ impl Messaging {
         }
     }
 
-    /// Pack, sign and schedule a DtnRoutedV2 message for sending
-    pub fn send_dtn_routed_v2_message(
+    /// Pack, sign and schedule a DtnV2Container custody message for sending
+    pub fn send_dtn_v2_message(
         state: &crate::QaulState,
         user_account: &UserAccount,
         target_id: &PeerId,
-        routed_v2: proto::DtnRoutedV2,
+        container_v2: proto::DtnV2Container,
     ) -> Result<Vec<u8>, String> {
-        // Create envelope payload with DtnRoutedV2
+        // Create envelope payload with the V2 custody container
         let dtn_payload = proto::EnvelopPayload {
-            payload: Some(proto::envelop_payload::Payload::DtnRoutedV2(routed_v2)),
+            payload: Some(proto::envelop_payload::Payload::DtnV2(container_v2)),
         };
         let envelope = proto::Envelope {
             sender_id: user_account.id.to_bytes(),
