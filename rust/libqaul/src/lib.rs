@@ -129,6 +129,11 @@ impl QaulState {
         *self.node.write().unwrap() = node_identity;
     }
 
+    /// Replace the user accounts with the ones loaded from configuration.
+    pub fn replace_user_accounts(&self, accounts: node::user_accounts::UserAccounts) {
+        *self.user_accounts.inner.write().unwrap() = accounts;
+    }
+
     /// Get a snapshot of the current router state.
     pub fn get_router(&self) -> Arc<router::RouterState> {
         self.router.read().unwrap().clone()
@@ -324,6 +329,13 @@ impl Libqaul {
             let config = storage.config.read().unwrap();
             Arc::new(NodeModule::new(&config))
         };
+
+        qaul_state.replace_node(node.node.clone());
+
+        {
+            let config = storage.config.read().unwrap();
+            qaul_state.replace_user_accounts(UserAccounts::create_from_config(&config));
+        }
 
         // initialize router module (instance-based)
         let router = {
