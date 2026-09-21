@@ -13,7 +13,6 @@ use qaul_management::QaulManagementEvent;
 use qaul_messaging::QaulMessagingEvent;
 
 use crate::connections::ConnectionModule;
-use crate::storage::configuration::Configuration;
 use crate::router::router_net_proto;
 use crate::router::users::Users;
 use crate::router::{info::RouterInfo, neighbours::Neighbours};
@@ -21,6 +20,7 @@ use crate::router_v2::identity::Multikey;
 use crate::router_v2::management::profile::ManagementOutcome;
 use crate::router_v2::propagation;
 use crate::services::messaging::Messaging;
+use crate::storage::configuration::Configuration;
 use crate::utilities::timestamp::Timestamp;
 
 /// Handle incoming QaulInfo behaviour events
