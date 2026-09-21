@@ -968,3 +968,147 @@ fn the_management_sweep_uses_its_own_window_not_the_manifest_one() {
         "swept at the management window, not the far longer manifest one"
     );
 }
+
+// ---------- §11.2 re-issue sweep ----------
+
+/// `refresh_delegation_trust` only runs when a manifest or a profile arrives.
+/// These cover the sweep that re-drives it when the first §11.5 fetch never
+/// landed, which otherwise leaves the entry stored but never trusted.
+mod trust_sweep {
+    use super::*;
+    use crate::router_v2::{
+        manifest::ManifestLog,
+        table::{DelegatedUser, Node, User},
+    };
+
+    const SUBJECT: [u8; 8] = [7; 8];
+    const HOST: [u8; 8] = [8; 8];
+
+    /// The sweep's interval is six management timeouts; anything earlier than
+    /// that is inside the first window and must not fire.
+    fn interval_ms(state: &RouterV2State) -> u64 {
+        state.options.management_request_timeout * 6 * 1000
+    }
+
+    /// A host carrying one delegated user, reachable in node space. `keyed`
+    /// decides whether we already hold the user's public key.
+    fn carried_user(state: &RouterV2State, keyed: bool, timeout: u64) {
+        if keyed {
+            install_user(state, SUBJECT, 0);
+        } else {
+            state.users.write().unwrap().insert(
+                SUBJECT,
+                User {
+                    id: SUBJECT,
+                    public_key: None,
+                    profile_version: 0,
+                    routing_entry: None,
+                    delegation_gateways: Vec::new(),
+                    is_hosted: false,
+                },
+            );
+        }
+        let user = state.users.read().unwrap().get(&SUBJECT).unwrap();
+
+        state.nodes.write().unwrap().insert(
+            HOST,
+            Node {
+                id: HOST,
+                public_key: Some(fresh_multikey()),
+                manifest_version: 1,
+                advertised_version: 1,
+                is_gateway: false,
+                delegated_users: vec![DelegatedUser {
+                    user_id: SUBJECT,
+                    user,
+                    delegation_timeout: timeout,
+                    entry_signature: [0; 64],
+                    profile_version: 0,
+                }],
+                manifest_signature: None,
+                retained_chunks: None,
+                learn_sphere: Some(crate::router_v2::Sphere::Local),
+                manifest_log: ManifestLog::default(),
+            },
+        );
+
+        // the host is a direct neighbour, so it is reachable in node space
+        state.add_neighbour_transport(fresh_peer(), HOST, ConnectionModule::Lan);
+    }
+
+    #[test]
+    fn a_missing_key_is_re_requested() {
+        let (state, mut rx) = fresh_state();
+        carried_user(&state, false, u64::MAX);
+
+        state.sweep_delegation_trust(interval_ms(&state));
+
+        let out = rx.try_recv().expect("the sweep should re-issue the fetch");
+        let decoded = ManagementMessage::decode(&out.bytes[..]).unwrap();
+        assert!(matches!(decoded.body, Some(Body::ProfileRequest(_))));
+    }
+
+    #[test]
+    fn nothing_is_sent_before_the_first_interval_elapses() {
+        let (state, mut rx) = fresh_state();
+        carried_user(&state, false, u64::MAX);
+
+        state.sweep_delegation_trust(interval_ms(&state) - 1);
+
+        assert!(rx.try_recv().is_err(), "swept inside the interval");
+    }
+
+    #[test]
+    fn a_second_sweep_inside_the_interval_is_a_no_op() {
+        let (state, mut rx) = fresh_state();
+        carried_user(&state, false, u64::MAX);
+        let first = interval_ms(&state);
+
+        state.sweep_delegation_trust(first);
+        while rx.try_recv().is_ok() {}
+
+        state.sweep_delegation_trust(first + 1);
+        assert!(rx.try_recv().is_err(), "re-swept inside the interval");
+    }
+
+    #[test]
+    fn the_fetch_is_re_issued_on_the_next_interval() {
+        let (state, mut rx) = fresh_state();
+        carried_user(&state, false, u64::MAX);
+        let first = interval_ms(&state);
+
+        state.sweep_delegation_trust(first);
+        while rx.try_recv().is_ok() {}
+
+        // the in-flight guard expires on its own timer, as it does on the tick
+        let later = first + interval_ms(&state);
+        state.clear_management_msgs(later);
+        state.sweep_delegation_trust(later);
+
+        assert!(rx.try_recv().is_ok(), "the fetch should be re-issued");
+    }
+
+    #[test]
+    fn a_key_we_already_hold_is_not_re_requested() {
+        let (state, mut rx) = fresh_state();
+        carried_user(&state, true, u64::MAX);
+
+        state.sweep_delegation_trust(interval_ms(&state));
+
+        // a key that fails verification will fail again; only a missing key
+        // is worth asking for
+        assert!(rx.try_recv().is_err(), "re-asked for a key we hold");
+    }
+
+    #[test]
+    fn an_expired_delegation_is_not_re_requested() {
+        let (state, mut rx) = fresh_state();
+        let now = interval_ms(&state);
+        // §10.4: an expired delegation is never trusted, so its key is moot
+        carried_user(&state, false, now - 1);
+
+        state.sweep_delegation_trust(now);
+
+        assert!(rx.try_recv().is_err(), "re-asked for an expired delegation");
+    }
+}
