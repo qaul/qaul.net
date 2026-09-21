@@ -121,6 +121,48 @@ impl RouterV2State {
         }
     }
 
+    /// §11.2: re-issue the profile fetches a failed first attempt left behind.
+    pub(crate) fn sweep_delegation_trust(&self, now_ms: u64) {
+        let interval = self
+            .options
+            .management_request_timeout
+            .saturating_mul(6)
+            .saturating_mul(1000);
+        if now_ms < self.last_trust_sweep_ms.read().unwrap().saturating_add(interval) {
+            return;
+        }
+        *self.last_trust_sweep_ms.write().unwrap() = now_ms;
+
+        let origins: Vec<([u8; 8], Vec<[u8; 8]>)> = {
+            let nodes = self.nodes.read().unwrap();
+            nodes
+                .iter()
+                .map(|(id, arc)| {
+                    let node = arc.read().unwrap();
+                    let pending = node
+                        .delegated_users
+                        .iter()
+                        // §10.4: an expired delegation is never trusted, so
+                        // re-asking for its key achieves nothing.
+                        .filter(|d| d.delegation_timeout > now_ms)
+                        .map(|d| d.user_id)
+                        .collect();
+                    (*id, pending)
+                })
+                .collect()
+        };
+
+        for (origin, users) in origins {
+            // Only a missing key is worth re-asking for
+            let missing_key = users
+                .iter()
+                .any(|user_id| self.get_resource_mk(user_id, Space::User).is_none());
+            if missing_key {
+                self.refresh_delegation_trust(&origin, now_ms);
+            }
+        }
+    }
+
     fn delegated_users_from_entries(&self, entries: &[ManifestEntry]) -> Vec<DelegatedUser> {
         let mut users = self.users.write().unwrap();
         entries

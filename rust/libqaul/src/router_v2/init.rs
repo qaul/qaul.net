@@ -82,6 +82,8 @@ fn spawn_relay_tick(state: Arc<RouterV2State>, storage_path: String) {
             state.drop_manifest_req_timeout(now);
 
             state.clear_management_msgs(now);
+            // §11.2: re-ask for profiles whose first fetch never landed.
+            state.sweep_delegation_trust(now);
             state.clear_pending_subscribes(now);
             state.clear_delegation_state(now);
             for (peer, request) in state.drain_manifest_reqs(now) {
