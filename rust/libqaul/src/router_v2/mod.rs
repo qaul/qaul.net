@@ -243,6 +243,8 @@ pub struct RouterV2State {
     pub(crate) delegation_liveness: RwLock<HashMap<[u8; 8], u64>>,
     /// §10.5 revocations waiting for the layer above to sign and send
     pub(crate) pending_revocations: RwLock<Vec<PendingRevocation>>,
+    /// §11.2: when the delegation-trust re-issue sweep last ran
+    pub(crate) last_trust_sweep_ms: RwLock<u64>,
     /// §11.3 request_id source
     pub next_request_id: AtomicU32,
     /// spec section 14 sliding windows
@@ -295,10 +297,7 @@ impl RouterV2State {
             declined_targets: RwLock::new(HashMap::new()),
             delegation_liveness: RwLock::new(HashMap::new()),
             pending_revocations: RwLock::new(Vec::new()),
-            // Seeded randomly for the same reason §6.1 seeds sequence
-            // numbers randomly: a fixed start makes counters on
-            // symmetrically-placed nodes advance in lockstep, so their
-            // request_ids coincide every round rather than occasionally.
+            last_trust_sweep_ms: RwLock::new(0),
             next_request_id: AtomicU32::new(rand::random::<u32>()),
             manifest_request_window: RwLock::new(HashMap::new()),
             manifest_serve_window: RwLock::new(HashMap::new()),
