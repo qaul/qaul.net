@@ -132,7 +132,7 @@ class SessionLogger private constructor(context: Context) {
             put("max_escalated_links", BleConstants.MAX_ESCALATED_LINKS)
             put("target_mtu", BleConstants.TARGET_MTU)
             put("max_chunk_size", BleConstants.MAX_CHUNK_SIZE)
-            put("setup_high_priority", BleConstants.SETUP_HIGH_PRIORITY)
+
             // Can this controller do long range at all? Extended advertising and Coded PHY are
             // seperate optional Bluetooth 5 features. A device may have neither and
             // the same flag gates both Coded TX and Coded RX , and some devices may only support RX or only TX

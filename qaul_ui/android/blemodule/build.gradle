@@ -45,11 +45,17 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    buildFeatures { buildConfig true }
+    // Field-test telemetry is opt in: build with -PfieldTest=true. Default is off
+    def fieldTest = (project.findProperty("fieldTest") ?: "false").toString().toBoolean()
     buildTypes {
+        debug {
+            buildConfigField "boolean", "FIELD_TEST", "${fieldTest}"
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "boolean", "FIELD_TEST", "${fieldTest}"
         }
     }
     compileOptions {
@@ -61,21 +67,6 @@ android {
     }
 
 }
-
-sourceSets {
-    main.java.srcDirs += "${protobuf.generatedFilesBaseDir}/main/javalite"
-    main.java.srcDirs += "$projectDir/src/main/proto"
-    main {
-        java {
-            srcDirs += file("${protobuf.generatedFilesBaseDir}/main/javalite")
-        }
-    }
-}
-
-processResources {
-    exclude('**/*.proto')
-}
-
 
 dependencies {
     implementation project(':libqaul')

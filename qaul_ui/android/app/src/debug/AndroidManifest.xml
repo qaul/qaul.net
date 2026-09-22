@@ -1,6 +1,33 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools">
     <!-- Flutter needs it to communicate with the running application
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- FIELD TEST (debug builds only) Only requested at runtime when built with -PfieldTest=true -->
+
+    <!-- GPS tagging: while backgrounded / screen off -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"
+        tools:remove="android:maxSdkVersion"/>
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
+
+    <!-- Scan results are used for location telemetry -->
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+        tools:remove="android:usesPermissionFlags"/>
+
+    <!-- BleDebugOverlay -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+
+    <!-- SessionLogger mirrors its log into public Downloads folder on device -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28"/>
+
+    <application>
+        <service
+                android:name=".FlutterBackgroundService"
+                android:foregroundServiceType="connectedDevice|remoteMessaging|location"
+                tools:replace="android:foregroundServiceType"/>
+    </application>
 </manifest>
