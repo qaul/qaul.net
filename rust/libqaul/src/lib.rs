@@ -36,7 +36,7 @@ pub mod utilities;
 use connections::{
     ble::{Ble, BleTransport},
     internet::Internet,
-    transport::Transport,
+    transport::{Transport, TransportStatus},
     ConnectionModule, Connections, ConnectionsModule,
 };
 use node::{Node, NodeModule};
@@ -644,8 +644,24 @@ impl Libqaul {
         let router = self.state.get_router();
         loop {
             let evt = {
-                let lan_fut = lan.swarm.next().fuse();
-                let internet_fut = internet.swarm.next().fuse();
+                let lan_active = matches!(lan.status(), TransportStatus::Running);
+                let lan_fut = async {
+                    if lan_active {
+                        lan.swarm.next().await
+                    } else {
+                        std::future::pending().await
+                    }
+                }
+                .fuse();
+                let internet_active = matches!(internet.status(), TransportStatus::Running);
+                let internet_fut = async {
+                    if internet_active {
+                        internet.swarm.next().await
+                    } else {
+                        std::future::pending().await
+                    }
+                }
+                .fuse();
                 let rpc_fut = rpc_ticker.next().fuse();
                 let sys_fut = sys_ticker.next().fuse();
                 let flooding_fut = flooding_ticker.next().fuse();
