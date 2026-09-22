@@ -22,7 +22,7 @@ use crate::storage::configuration::InternetPeer;
 use ble::{Ble, BleTransport};
 use internet::Internet;
 use lan::Lan;
-pub use transport::Transport;
+pub use transport::{Transport, TransportStatus};
 
 /// Import protobuf message definition
 pub use qaul_proto::qaul_rpc_connections as proto;
@@ -251,7 +251,12 @@ impl Connections {
                                         ) {
                                             connected = internet.swarm.is_connected(&peer_id);
                                         }
-                                        if connected == false {
+                                        // Store the peer either way, but do not
+                                        // dial on a transport that is switched
+                                        // off; it connects when it is enabled.
+                                        if connected == false
+                                            && matches!(internet.status(), TransportStatus::Running)
+                                        {
                                             Internet::peer_dial(address, &mut internet.swarm);
                                         }
                                     }
@@ -414,7 +419,10 @@ impl Connections {
                                     > = nodes_entry.address.clone().parse();
                                     match address_result {
                                         Ok(address) => {
-                                            Internet::peer_dial(address, &mut internet.swarm);
+                                            if matches!(internet.status(), TransportStatus::Running)
+                                            {
+                                                Internet::peer_dial(address, &mut internet.swarm);
+                                            }
                                         }
                                         Err(e) => {
                                             log::error!("failed to parse multiaddr '{}': {}", nodes_entry.address, e);
