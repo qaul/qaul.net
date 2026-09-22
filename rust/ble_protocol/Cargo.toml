@@ -1,0 +1,11 @@
+[package]
+name = "ble_protocol"
+version = "0.1.0"
+authors = ["qaul community <contact@qaul.net>"]
+edition = "2021"
+license = "AGPL-3.0"
+description = "qaul BLE wire protocol: framing, flow control and message queues"
+
+# Deliberately dependency-free. This crate aims to be reusable regardless of platform
+# as there is no I/O, ble radio use etc.
+[dependencies]
