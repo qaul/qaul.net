@@ -251,9 +251,6 @@ impl Connections {
                                         ) {
                                             connected = internet.swarm.is_connected(&peer_id);
                                         }
-                                        // Store the peer either way, but do not
-                                        // dial on a transport that is switched
-                                        // off; it connects when it is enabled.
                                         if connected == false
                                             && matches!(internet.status(), TransportStatus::Running)
                                         {
