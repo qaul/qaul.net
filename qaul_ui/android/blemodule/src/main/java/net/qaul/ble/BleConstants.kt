@@ -53,11 +53,10 @@ object BleConstants {
 
 
     /**
-     * Switch for field test logging. Ensure it's false in any released build.
-     * Disables: session logger, downloads mirror and gps provider from starting
-
+     * Switch for field test logging: session logger, downloads mirror and GPS provider.
+     * Off unless built with -PfieldTest=true (see blemodule/build.gradle).
      */
-    const val FIELD_TEST = true
+    val FIELD_TEST = BuildConfig.FIELD_TEST
 
     /**
      * Log a line for every completed scheduler operation (only when [FIELD_TEST] is also on).
@@ -293,9 +292,9 @@ object BleConstants {
      * TODO: We could remove a continous refresh and only have it be requested when its checked, however this allows for better telemetry */
     const val RSSI_REFRESH_MS = 20_000L
 
-    /** Show the on-device floating BLE stats overlay (BleDebugOverlay) while BLE is running. For debugging purposes,
-     *  set false to disable. Needs the "Draw over other apps" permission, requested on first show. */
-    const val DEBUG_OVERLAY = true
+    /** Show the on-device floating BLE stats overlay (BleDebugOverlay) while BLE is running. Follows
+     *  [FIELD_TEST]. Needs the "Draw over other apps" permission, requested on first show. */
+    val DEBUG_OVERLAY = FIELD_TEST
 
     /** Pause the scan during each connect attempt. DISABLED: confirmed in field logs to restart the
      *  scan often enough (during connect/tiebreaker churn) to trip Android's ~5-startScan/30s limit,
