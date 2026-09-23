@@ -24,7 +24,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28"/>
 
-    <application>
+    <application android:allowBackup="false">
         <service
                 android:name=".FlutterBackgroundService"
                 android:foregroundServiceType="connectedDevice|remoteMessaging|location"
