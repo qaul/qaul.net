@@ -136,3 +136,115 @@ pub fn decode(bytes: &[u8]) -> Result<Frame<'_>, FrameError> {
         payload: &bytes[CHUNK_HEADER_SIZE..],
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::flc::FlcMessage;
+
+    /// Captured from a real Android node with btmon: an ATT Write
+    /// command to MSG_CHAR carrying SEND_QAUL_ID and the devices q8id.
+    
+    const ANDROID_SEND_QAUL_ID: [u8; 9] = [0x01, 0xab, 0x59, 0x7b, 0xa8, 0x80, 0x6c, 0x04, 0x43];
+
+    #[test]
+    fn decodes_android_send_qaul_id_capture() {
+        match decode(&ANDROID_SEND_QAUL_ID).expect("captured frame should decode") {
+            Frame::Flc(FlcMessage::SendQaulId(id)) => {
+                assert_eq!(id, &ANDROID_SEND_QAUL_ID[1..]);
+            }
+            other => panic!("expected SendQaulId, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn decodes_a_data_chunk() {
+        // queue index 3, resend set, chunk index 0x105 = 261
+        let b0 = (3 << 3) | (1 << 2) | 0x01;
+        let bytes = [b0, 0x05, 0xde, 0xad];
+        assert_eq!(
+            decode(&bytes).unwrap(),
+            Frame::Chunk {
+                header: ChunkHeader {
+                    queue_index: 3,
+                    resend: true,
+                    chunk_index: 261,
+                },
+                payload: &[0xde, 0xad],
+            }
+        );
+    }
+
+    #[test]
+    fn chunk_header_round_trips() {
+        for queue_index in 1..=29u8 {
+            for chunk_index in [0u16, 1, 255, 256, MAX_CHUNK_INDEX] {
+                for resend in [false, true] {
+                    let header = ChunkHeader {
+                        queue_index,
+                        resend,
+                        chunk_index,
+                    };
+                    let bytes = header.encode().expect("valid header should encode");
+                    match decode(&bytes).unwrap() {
+                        Frame::Chunk { header: got, .. } => assert_eq!(got, header),
+                        other => panic!("expected chunk, got {other:?}"),
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn chunk_header_rejects_out_of_range_values() {
+        // 10 bit chunk index
+        assert_eq!(
+            ChunkHeader {
+                queue_index: 1,
+                resend: false,
+                chunk_index: MAX_CHUNK_INDEX + 1,
+            }
+            .encode(),
+            None
+        );
+        // queue index 0 is reserved: it would be read back as flow control
+        assert_eq!(
+            ChunkHeader {
+                queue_index: 0,
+                resend: false,
+                chunk_index: 0,
+            }
+            .encode(),
+            None
+        );
+    }
+
+    #[test]
+    fn empty_input_is_too_short() {
+        assert_eq!(
+            decode(&[]),
+            Err(FrameError::TooShort {
+                expected: 1,
+                actual: 0
+            })
+        );
+    }
+
+    #[test]
+    fn type_byte_above_0x07_is_read_as_a_chunk() {
+        // The header has no room for an FLC type of 0x08: that bit pattern is
+        // queue index 1, so it decodes as a data chunk. This is why FlcType stops
+        // at 0x07, and why a ninth flow control message would need a new framing
+        // scheme on both platforms.
+        let bytes = [0x08, 0x00, 0x99];
+        match decode(&bytes).unwrap() {
+            Frame::Chunk { header, payload } => {
+                assert_eq!(header.queue_index, 1);
+                assert_eq!(header.chunk_index, 0);
+                assert!(!header.resend);
+                assert_eq!(payload, &[0x99]);
+            }
+            other => panic!("expected a chunk, got {other:?}"),
+        }
+    }
+}

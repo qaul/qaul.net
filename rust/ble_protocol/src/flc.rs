@@ -47,6 +47,17 @@ impl FlcType {
     }
 }
 
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct NeighbourUpdate<'a> {
+    pub origin: &'a [u8],
+    pub seq: u16,
+    pub ttl: u8,
+    pub sealed: bool,
+    pub neighbours: Vec<&'a [u8]>,
+}
+
+
 /// A decoded flow control message. Payloads borrow from the received frame.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum FlcMessage<'a> {
@@ -189,4 +200,104 @@ impl<'a> FlcMessage<'a> {
         }
         out
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::frame::{decode, Frame};
+
+    /// Encode a message, decode it again, and check nothing changed on the way.
+    fn round_trip(message: FlcMessage<'_>) {
+        let bytes = message.encode();
+        match decode(&bytes).expect("encoded message should decode") {
+            Frame::Flc(decoded) => assert_eq!(decoded, message),
+            other => panic!("expected an FLC frame, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn send_qaul_id_matches_android_bytes() {
+        // Same capture as frame.rs, checked from the encoding side: our bytes
+        // must be byte for byte what a real Android node put on the wire.
+        let id = [0xab, 0x59, 0x7b, 0xa8, 0x80, 0x6c, 0x04, 0x43];
+        assert_eq!(
+            FlcMessage::SendQaulId(&id).encode(),
+            vec![0x01, 0xab, 0x59, 0x7b, 0xa8, 0x80, 0x6c, 0x04, 0x43]
+        );
+    }
+
+    #[test]
+    fn missing_chunks_indices_are_big_endian() {
+        // 258 = 0x0102 — high byte first, matching FlcCreate.createRequestChunks.
+        assert_eq!(
+            FlcMessage::MissingChunks(vec![1, 258]).encode(),
+            vec![0x02, 0x00, 0x01, 0x01, 0x02]
+        );
+    }
+
+    #[test]
+    fn every_type_round_trips() {
+        let id = [1, 2, 3, 4, 5, 6, 7, 8];
+        round_trip(FlcMessage::RequestQaulId);
+        round_trip(FlcMessage::SendQaulId(&id));
+        round_trip(FlcMessage::MissingChunks(vec![0, 1, 258, 1023]));
+        round_trip(FlcMessage::AckSuccess { queue_index: 7 });
+        round_trip(FlcMessage::AckError {
+            queue_index: 7,
+            error_code: 3,
+        });
+        round_trip(FlcMessage::MissingAckMessages { queue_index: 29 });
+        round_trip(FlcMessage::LivenessPing);
+    }
+
+    #[test]
+    fn wrong_length_payloads_are_rejected() {
+        // a qaul ID is exactly 8 bytes
+        assert!(FlcMessage::parse(FlcType::SendQaulId, &[1, 2, 3]).is_err());
+        // chunk indices come in pairs...
+        assert!(FlcMessage::parse(FlcType::MissingChunks, &[0x00]).is_err());
+        // ...and there must be at least one
+        assert!(FlcMessage::parse(FlcType::MissingChunks, &[]).is_err());
+        // ACK_ERROR carries both a queue index and a reason code
+        assert!(FlcMessage::parse(FlcType::AckError, &[1]).is_err());
+    }
+
+    #[test]
+    fn neighbour_update_round_trips() {
+        round_trip(FlcMessage::SendNeighbours(NeighbourUpdate {
+            origin: &[0xaa, 0xbb, 0xcc, 0xdd, 0xee],
+            seq: 0xBEEF,
+            ttl: 3,
+            sealed: true,
+            neighbours: vec![&[1, 2, 3, 4, 5], &[6, 7, 8, 9, 10]],
+        }));
+    }
+
+    #[test]
+    fn neighbour_update_with_no_neighbours_is_valid() {
+        // A node that has just started, or has lost every link, still gossips:
+        // an empty list is how peers learn it currently has no neighbours.
+        round_trip(FlcMessage::SendNeighbours(NeighbourUpdate {
+            origin: &[1, 2, 3, 4, 5],
+            seq: 1,
+            ttl: 1,
+            sealed: false,
+            neighbours: vec![],
+        }));
+    }
+
+    #[test]
+    fn neighbour_update_body_must_be_whole_prefixes() {
+        // 9 byte header (origin 5 + seq 2 + ttl 1 + flags 1) followed by 2 stray
+        // bytes: not a whole number of 5 byte prefixes, so this must be rejected
+        // rather than silently dropping the remainder.
+        let ragged = [1, 2, 3, 4, 5, 0x00, 0x01, 3, 0x00, 0x99, 0x98];
+        assert!(FlcMessage::parse(FlcType::SendNeighbours, &ragged).is_err());
+
+        // Shorter than the header itself is malformed too.
+        assert!(FlcMessage::parse(FlcType::SendNeighbours, &[1, 2, 3]).is_err());
+    }
+
+
 }
