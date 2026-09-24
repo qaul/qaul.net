@@ -26,7 +26,11 @@ use crate::{
         index::{
             IndexAllocator, IndexDictionary, MirrorIndexDictionary, ReintroductionTracker, Space,
         },
-        management::{delegation::PendingDelegation, profile::HostedProfile, ForwardKey},
+        management::{
+            delegation::PendingDelegation,
+            profile::{CachedProfile, HostedProfile},
+            ForwardKey,
+        },
         manifest::{ChunkAssembler, Manifest, ManifestLog},
         seq::SeqNum,
         table::{Nodes, RoutingTable, Users},
@@ -225,6 +229,8 @@ pub struct RouterV2State {
     pub outstanding_manifest_requests: RwLock<HashMap<([u8; 8], PeerId), u64>>,
     /// profiles this node hosts
     pub hosted_profiles: RwLock<HashMap<[u8; 8], HostedProfile>>,
+    /// verified profiles for users we do not host per 11.5
+    pub cached_profiles: RwLock<HashMap<[u8; 8], CachedProfile>>,
     /// Recently forwarded management messages keyed by [`ForwardKey`],
     /// with the time forwarded.
     pub management_recent_forwards: RwLock<HashMap<ForwardKey, u64>>,
@@ -289,6 +295,7 @@ impl RouterV2State {
             pending_manifest_requests: RwLock::new(HashMap::new()),
             outstanding_manifest_requests: RwLock::new(HashMap::new()),
             hosted_profiles: RwLock::new(HashMap::new()),
+            cached_profiles: RwLock::new(HashMap::new()),
             management_recent_forwards: RwLock::new(HashMap::new()),
             management_in_flight: RwLock::new(HashMap::new()),
             pending_subscribes: RwLock::new(HashMap::new()),
