@@ -318,6 +318,9 @@ class AppLocalizationsUk extends AppLocalizations {
   String get copy => 'Копіювати';
 
   @override
+  String get share => 'Поділитися';
+
+  @override
   String get messageCopied => 'Повідомлення скопійовано';
 
   @override

@@ -42,6 +42,7 @@ import '../../../../../widgets/widgets.dart';
 import '../../../user_details_screen.dart';
 import '../../tab.dart';
 import 'conditional/conditional.dart';
+import 'message_share_service.dart';
 
 part 'audio_message_widget.dart';
 
@@ -73,6 +74,8 @@ class _ForwardDraft {
 final _pendingForwardDraftProvider = StateProvider<_ForwardDraft?>(
   (_) => null,
 );
+
+final _log = Logger('ChatScreen');
 
 ChatRenderMode resolveChatRenderMode(ChatRoom room) =>
     room.isGroupChatRoom ? ChatRenderMode.group : ChatRenderMode.direct;
@@ -124,6 +127,7 @@ class ChatScreen extends StatefulHookConsumerWidget {
     super.key,
     this.otherUser,
     this.initialMessageText,
+    this.messageShareService,
   });
 
   final ChatRoom room;
@@ -135,6 +139,9 @@ class ChatScreen extends StatefulHookConsumerWidget {
   final User? otherUser;
 
   final String? initialMessageText;
+
+  /// Overrides system sharing in tests.
+  final MessageShareService? messageShareService;
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -272,6 +279,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                       messageContext,
                       message.text,
                     ),
+                    onShare: () => _shareMessage(
+                      dialogContext,
+                      messageContext,
+                      message.text,
+                    ),
                   ),
                 ),
               ),
@@ -288,6 +300,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   List<ChatMessageContextMenuElement> _buildForwardContextMenuElements({
     required VoidCallback onForward,
     required VoidCallback onCopy,
+    required VoidCallback onShare,
   }) {
     return [
       const ChatMessageReactionRow(
@@ -316,11 +329,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
         iconAsset: ChatMessageContextMenuIcons.info,
         enabled: false,
       ),
-      const ChatMessageContextMenuAction(
+      ChatMessageContextMenuAction(
         id: 'share',
-        label: 'Share',
+        label: AppLocalizations.of(context)!.share,
         iconAsset: ChatMessageContextMenuIcons.share,
-        enabled: false,
+        onPressed: onShare,
       ),
       ChatMessageContextMenuAction(
         id: 'copy',
@@ -487,6 +500,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     }
 
     _showCopyFeedback(messageRect);
+  }
+
+  Future<void> _shareMessage(
+    BuildContext dialogContext,
+    BuildContext messageContext,
+    String text,
+  ) async {
+    final messageRect = _messageRectInOverlay(messageContext);
+    Navigator.pop(dialogContext);
+
+    if (text.trim().isEmpty) return;
+
+    try {
+      await (widget.messageShareService ?? const SystemMessageShareService())
+          .shareText(text: text, sharePositionOrigin: messageRect);
+    } on Object catch (error, stackTrace) {
+      _log.warning('Could not open the system share sheet', error, stackTrace);
+    }
   }
 
   Rect? _messageRectInOverlay(BuildContext messageContext) {

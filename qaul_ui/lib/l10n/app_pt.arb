@@ -37,6 +37,7 @@
   "chatEmptyMessageHint": "Sua Mensagem...",
   "chatEmptyState": "Nenhuma mensagem disponível",
   "copy": "Copiar",
+  "share": "Compartilhar",
   "messageCopied": "Mensagem copiada",
   "chatNavButtonTooltip": "Conversas",
   "chatNotificationsEnabled": "Ativar/Desativar notificações do chat:",

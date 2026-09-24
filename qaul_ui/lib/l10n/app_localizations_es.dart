@@ -319,6 +319,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get copy => 'Copiar';
 
   @override
+  String get share => 'Compartir';
+
+  @override
   String get messageCopied => 'Mensaje copiado';
 
   @override
