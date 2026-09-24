@@ -948,6 +948,7 @@ mod tests {
                 rtt: 0,
                 hc: vec![],
                 pgid: 1,
+                version: 0,
             },
             // valid, comes after the malformed one
             RoutingInfoEntry {
@@ -955,6 +956,7 @@ mod tests {
                 rtt: 10,
                 hc: vec![1],
                 pgid: 1,
+                version: 0,
             },
         ];
 
@@ -982,6 +984,7 @@ mod tests {
             rtt: 0,
             hc: vec![255],
             pgid: 1,
+            version: 0,
         }];
         state.fill_received_routing_info(
             ConnectionModule::Lan,
