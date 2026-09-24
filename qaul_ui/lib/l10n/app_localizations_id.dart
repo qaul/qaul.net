@@ -321,6 +321,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get copy => 'Salin';
 
   @override
+  String get share => 'Bagikan';
+
+  @override
   String get messageCopied => 'Pesan disalin';
 
   @override

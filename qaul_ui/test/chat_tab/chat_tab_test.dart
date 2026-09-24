@@ -21,6 +21,7 @@ import 'package:qaul_rpc/src/generated/services/chat/chat.pb.dart';
 import 'package:qaul_ui/l10n/app_localizations.dart';
 import 'package:qaul_ui/providers/providers.dart';
 import 'package:qaul_ui/screens/home/tabs/chat/widgets/chat.dart';
+import 'package:qaul_ui/screens/home/tabs/chat/widgets/message_share_service.dart';
 import 'package:qaul_ui/screens/home/tabs/tab.dart';
 import 'package:qaul_ui/screens/home/user_details_screen.dart';
 import 'package:qaul_ui/stores/stores.dart';
@@ -50,6 +51,20 @@ class TestUsersStore extends UsersStore {
 class TestUnreadChatRoomListNotifier extends ChatRoomListNotifier {
   @override
   List<ChatRoom> build() => [buildGroupChat().copyWith(unreadCount: 3)];
+}
+
+class FakeMessageShareService implements MessageShareService {
+  String? sharedText;
+  Rect? sharePositionOrigin;
+
+  @override
+  Future<void> shareText({
+    required String text,
+    required Rect? sharePositionOrigin,
+  }) async {
+    sharedText = text;
+    this.sharePositionOrigin = sharePositionOrigin;
+  }
 }
 
 Message textMessage({
@@ -91,6 +106,7 @@ void main() {
     WidgetTester tester,
     ChatRoom room, {
     User? otherUser,
+    MessageShareService? messageShareService,
   }) async {
     final wut = ProviderScope(
       overrides: [
@@ -103,7 +119,12 @@ void main() {
         qaulWorkerProvider.overrideWith((ref) => StubLibqaulWorker(ref)),
       ],
       child: materialAppWithLocalizations(
-        ChatScreen(room, defaultUser, otherUser: otherUser),
+        ChatScreen(
+          room,
+          defaultUser,
+          otherUser: otherUser,
+          messageShareService: messageShareService,
+        ),
       ),
     );
 
@@ -373,6 +394,46 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('copy-feedback-toast')), findsNothing);
+  });
+
+  testWidgets('shares a text message from the long-press menu', (
+    tester,
+  ) async {
+    final messageShareService = FakeMessageShareService();
+    final targetMessage = Message(
+      senderId: otherUser.id,
+      messageId: Uint8List.fromList('share-target'.codeUnits),
+      content: TextMessageContent('Text to share'),
+      index: 1,
+      sentAt: DateTime(2000),
+      receivedAt: DateTime(2000),
+    );
+    await pumpChatScreen(
+      tester,
+      buildDirectChat(messages: [targetMessage]),
+      otherUser: otherUser,
+      messageShareService: messageShareService,
+    );
+
+    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+    final bubble = find.byKey(const ValueKey('chat-bubble-surface'));
+    final bubbleRect = tester.getRect(bubble);
+    chat.onMessageLongPress!(tester.element(bubble), chat.messages.single);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('next-page')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Share'));
+    await tester.pumpAndSettle();
+
+    expect(messageShareService.sharedText, 'Text to share');
+    expect(messageShareService.sharePositionOrigin, isNotNull);
+    final origin = messageShareService.sharePositionOrigin!;
+    final overlayRect = tester.getRect(find.byType(Overlay));
+    expect(origin.left, closeTo(bubbleRect.left - overlayRect.left, 0.01));
+    expect(origin.top, closeTo(bubbleRect.top - overlayRect.top, 0.01));
+    expect(origin.width, closeTo(bubbleRect.width, 0.01));
+    expect(origin.height, closeTo(bubbleRect.height, 0.01));
   });
 
   testWidgets('clears copied feedback when the active room changes', (

@@ -53,6 +53,7 @@ dependencies:
   utils: { "path": "packages/utils" }
   flutter_markdown_plus: ^1.0.0
   record: ^6.0.0
+  share_plus: ^11.1.0
   audioplayers: ^6.1.1
   app_links: ^7.0.0
   open_filex: ^4.7.0

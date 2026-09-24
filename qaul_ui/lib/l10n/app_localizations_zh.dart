@@ -312,6 +312,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get copy => '复制';
 
   @override
+  String get share => '分享';
+
+  @override
   String get messageCopied => '消息已复制';
 
   @override
@@ -752,6 +755,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get copy => '複製';
+
+  @override
+  String get share => '分享';
 
   @override
   String get messageCopied => '訊息已複製';

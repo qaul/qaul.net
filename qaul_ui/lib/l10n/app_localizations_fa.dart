@@ -321,6 +321,9 @@ class AppLocalizationsFa extends AppLocalizations {
   String get copy => 'کپی';
 
   @override
+  String get share => 'اشتراک‌گذاری';
+
+  @override
   String get messageCopied => 'پیام کپی شد';
 
   @override
