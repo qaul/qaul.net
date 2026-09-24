@@ -37,6 +37,16 @@ pub struct HostedProfile {
     pub signed: SignedProfileBlob,
 }
 
+/// A verified profile for a user this node does **not** host.
+
+#[derive(Debug, Clone)]
+pub struct CachedProfile {
+    pub profile: Profile,
+    pub signed: SignedProfileBlob,
+    /// the capabilities of the user, not this node's
+    pub capabilities: u32,
+}
+
 /// What the caller must do after a management message was processed.
 #[derive(Debug, Clone)]
 pub enum ManagementOutcome {
@@ -99,18 +109,35 @@ impl RouterV2State {
         // a named subject is always a user
         let answer_as_node = addressing.destination_is_node && request.subject.is_empty();
 
-        let hosted = if answer_as_node {
+        let held = if answer_as_node {
             // A node has no extended profile: no avatar, no bio, no name.
-            self.sign_node_profile().map(|profile| HostedProfile {
+            self.sign_node_profile().map(|profile| CachedProfile {
                 profile,
                 signed: SignedProfileBlob::default(),
+                capabilities: self.local_capabilities(),
             })
         } else {
-            let profiles = self.hosted_profiles.read().unwrap();
-            profiles.get(&subject).cloned()
+            let hosted = {
+                let profiles = self.hosted_profiles.read().unwrap();
+                profiles.get(&subject).cloned()
+            };
+            match hosted {
+                // a user we host: our own capabilities are the right ones
+                Some(HostedProfile { profile, signed }) => Some(CachedProfile {
+                    profile,
+                    signed,
+                    capabilities: self.local_capabilities(),
+                }),
+                None => None, // A/B stub: pre-fix serve path
+            }
         };
 
-        let Some(HostedProfile { profile, signed }) = hosted else {
+        let Some(CachedProfile {
+            profile,
+            signed,
+            capabilities,
+        }) = held
+        else {
             debug!(
                 "management: no profile available for {subject:?}, cannot answer request {}",
                 addressing.request_id
@@ -125,7 +152,7 @@ impl RouterV2State {
                 profile_version: profile.version,
                 name: profile.name,
                 self_signature: profile.self_signature.to_vec(),
-                capabilities: self.local_capabilities(),
+                capabilities,
                 signed_profile: signed.profile,
                 signed_profile_signature: signed.signature,
             }),
@@ -252,6 +279,20 @@ impl RouterV2State {
             }
         }
 
+        if asked_as_user {
+            self.cached_profiles.write().unwrap().insert(
+                subject,
+                CachedProfile {
+                    profile: rebuilt,
+                    signed: SignedProfileBlob {
+                        profile: p.signed_profile.clone(),
+                        signature: p.signed_profile_signature.clone(),
+                    },
+                    capabilities: p.capabilities,
+                },
+            );
+        }
+
         self.refresh_trust_for_subject(&subject, now_ms);
 
         // §11.6 subscribes parked on this key can now be decided.
@@ -266,10 +307,6 @@ impl RouterV2State {
                 name: p.name,
                 profile_version: p.profile_version,
                 capabilities: p.capabilities,
-                // Deliberately not verified here: the blob is v1's shape and
-                // v1 already owns a verifier for it. Passing it on unchecked
-                // is safe because that verifier is the gate — nothing is
-                // written from it before it passes.
                 signed: SignedProfileBlob {
                     profile: p.signed_profile,
                     signature: p.signed_profile_signature,

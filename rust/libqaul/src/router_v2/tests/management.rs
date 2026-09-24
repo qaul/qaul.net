@@ -1112,3 +1112,232 @@ mod trust_sweep {
         assert!(rx.try_recv().is_err(), "re-asked for an expired delegation");
     }
 }
+
+// ---------- §11.5 answering on a carried user's behalf ----------
+
+/// A gateway carries users it does not host. §11.6 makes it fetch their
+/// profiles to validate the delegation signature, and §11.5 lets it answer for
+/// them afterwards. Without keeping that profile the carried user is never
+/// trusted past the membrane and never reachable.
+mod carried_profile {
+    use super::*;
+    use crate::router_v2::management::{
+        profile::{CachedProfile, HostedProfile, SignedProfileBlob},
+        Addressing,
+    };
+
+    const REQUESTER: [u8; 8] = [9; 8];
+
+    /// A signed profile for a fresh identity, plus the keypair behind it.
+    fn signed_profile(name: &str) -> (Keypair, Multikey, Profile) {
+        let kp = Keypair::generate_ed25519();
+        let mk = Multikey::from(kp.public());
+        let mut profile = Profile {
+            multikey: mk.clone(),
+            version: 1,
+            name: name.into(),
+            self_signature: [0u8; 64],
+        };
+        profile.self_signature = kp.sign(&profile.sign_input()).unwrap().try_into().unwrap();
+        (kp, mk, profile)
+    }
+
+    fn ask_for(state: &RouterV2State, subject: [u8; 8], request_id: u32) {
+        state.handle_profile_request(
+            Addressing {
+                destination: state.host_mk.to_id(),
+                destination_is_node: true,
+                source: REQUESTER,
+                source_is_node: true,
+                request_id,
+            },
+            ProfileRequest {
+                cached_version: 0,
+                subject: subject.to_vec(),
+            },
+        );
+    }
+
+    #[test]
+    fn a_cached_profile_answers_for_a_user_we_do_not_host() {
+        let (state, mut rx) = fresh_state();
+        let (_kp, mk, profile) = signed_profile("carried");
+        let carried = mk.to_id();
+
+        state.cached_profiles.write().unwrap().insert(
+            carried,
+            CachedProfile {
+                profile,
+                signed: SignedProfileBlob::default(),
+                capabilities: 7,
+            },
+        );
+        state.add_neighbour_transport(fresh_peer(), REQUESTER, ConnectionModule::Lan);
+
+        ask_for(&state, carried, 11);
+
+        let out = rx.try_recv().expect("the cache must be able to answer");
+        let decoded = ManagementMessage::decode(&out.bytes[..]).unwrap();
+        match decoded.body {
+            Some(Body::ProfileResponse(r)) => {
+                assert!(r.found);
+                let p = r.profile.expect("profile present");
+                assert_eq!(p.name, "carried");
+                assert_eq!(
+                    p.capabilities, 7,
+                    "the subject's own capabilities, not this node's"
+                );
+            }
+            other => panic!("expected a ProfileResponse, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn a_hosted_profile_still_wins_over_the_cache() {
+        let (state, mut rx) = fresh_state();
+        let (kp, mk, mut hosted) = signed_profile("hosted");
+        let subject = mk.to_id();
+        state.register_hosted_user(subject, 1, mk.clone());
+        state.register_hosted_profile(
+            subject,
+            HostedProfile {
+                profile: hosted.clone(),
+                signed: SignedProfileBlob::default(),
+            },
+        );
+
+        // a stale cache entry for the same id must not shadow what we host
+        hosted.name = "stale".into();
+        hosted.self_signature = kp.sign(&hosted.sign_input()).unwrap().try_into().unwrap();
+        state.cached_profiles.write().unwrap().insert(
+            subject,
+            CachedProfile {
+                profile: hosted,
+                signed: SignedProfileBlob::default(),
+                capabilities: 7,
+            },
+        );
+        state.add_neighbour_transport(fresh_peer(), REQUESTER, ConnectionModule::Lan);
+
+        ask_for(&state, subject, 12);
+
+        let out = rx.try_recv().expect("a reply must go out");
+        let decoded = ManagementMessage::decode(&out.bytes[..]).unwrap();
+        match decoded.body {
+            Some(Body::ProfileResponse(r)) => {
+                assert_eq!(r.profile.expect("profile present").name, "hosted");
+            }
+            other => panic!("expected a ProfileResponse, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn an_unknown_subject_is_still_unanswerable() {
+        let (state, mut rx) = fresh_state();
+        state.add_neighbour_transport(fresh_peer(), REQUESTER, ConnectionModule::Lan);
+
+        ask_for(&state, [3; 8], 13);
+
+        assert!(rx.try_recv().is_err(), "answered for a subject we never held");
+    }
+
+    #[test]
+    fn a_solicited_response_is_cached() {
+        let (state, _rx) = fresh_state();
+        let (_kp, mk, profile) = signed_profile("learned");
+        let subject = mk.to_id();
+        install_user(&state, subject, 0);
+        // mark it asked-for, as request_profile would
+        state
+            .management_in_flight
+            .write()
+            .unwrap()
+            .insert((subject, false), 1_000);
+
+        state.handle_profile_response(
+            ProfileResponse {
+                found: true,
+                profile: Some(ProtoProfile {
+                    multikey: mk.encode(),
+                    profile_version: profile.version,
+                    name: profile.name.clone(),
+                    self_signature: profile.self_signature.to_vec(),
+                    capabilities: 7,
+                    signed_profile: Vec::new(),
+                    signed_profile_signature: Vec::new(),
+                }),
+            },
+            1_000,
+        );
+
+        let cached = state.cached_profiles.read().unwrap();
+        let entry = cached.get(&subject).expect("a verified profile is kept");
+        assert_eq!(entry.profile.name, "learned");
+        assert_eq!(entry.capabilities, 7);
+    }
+
+    #[test]
+    fn an_unsolicited_response_is_not_cached() {
+        let (state, _rx) = fresh_state();
+        let (_kp, mk, profile) = signed_profile("unsolicited");
+        let subject = mk.to_id();
+        install_user(&state, subject, 0);
+        // management_in_flight deliberately left empty: nobody asked
+
+        state.handle_profile_response(
+            ProfileResponse {
+                found: true,
+                profile: Some(ProtoProfile {
+                    multikey: mk.encode(),
+                    profile_version: profile.version,
+                    name: profile.name.clone(),
+                    self_signature: profile.self_signature.to_vec(),
+                    capabilities: 7,
+                    signed_profile: Vec::new(),
+                    signed_profile_signature: Vec::new(),
+                }),
+            },
+            1_000,
+        );
+
+        assert!(
+            state.cached_profiles.read().unwrap().is_empty(),
+            "an unrequested profile must not enter the cache"
+        );
+    }
+
+    #[test]
+    fn a_profile_whose_signature_does_not_verify_is_not_cached() {
+        let (state, _rx) = fresh_state();
+        let (_kp, mk, profile) = signed_profile("forged");
+        let subject = mk.to_id();
+        install_user(&state, subject, 0);
+        state
+            .management_in_flight
+            .write()
+            .unwrap()
+            .insert((subject, false), 1_000);
+
+        state.handle_profile_response(
+            ProfileResponse {
+                found: true,
+                profile: Some(ProtoProfile {
+                    multikey: mk.encode(),
+                    profile_version: profile.version,
+                    // a name the signature was not made over
+                    name: "tampered".into(),
+                    self_signature: profile.self_signature.to_vec(),
+                    capabilities: 7,
+                    signed_profile: Vec::new(),
+                    signed_profile_signature: Vec::new(),
+                }),
+            },
+            1_000,
+        );
+
+        assert!(
+            state.cached_profiles.read().unwrap().is_empty(),
+            "§11.5 SHALL: an unverified profile must never be cached or served"
+        );
+    }
+}
