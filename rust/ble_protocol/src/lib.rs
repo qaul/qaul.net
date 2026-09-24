@@ -12,15 +12,10 @@
 //! is the Android module (ReceiveQueue.kt / SendQueue.kt / FlcCreate.kt)
 
 
+pub mod constants;
 pub mod flc;
 pub mod frame;
 
+pub use constants::{QAUL_ID_ADVERT_BYTES, QAUL_ID_BYTES};
 pub use flc::{FlcMessage, FlcType, NeighbourUpdate};
 pub use frame::{ChunkHeader, Frame, FrameError};
-
-/// Number of leading qaul ID bytes used as a peer hint, both in advertisements
-/// and in `SEND_NEIGHBOURS` entries. Mirrors `BleConstants.QAUL_ID_ADVERT_BYTES`.
-pub const QAUL_ID_ADVERT_BYTES: usize = 5;
-
-/// Full qaul node ID length in bytes ("q8id"), as carried by `SEND_QAUL_ID`.
-pub const QAUL_ID_BYTES: usize = 8;
