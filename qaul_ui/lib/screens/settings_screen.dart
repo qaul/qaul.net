@@ -11,7 +11,6 @@ import 'package:utils/utils.dart';
 
 import '../coordinators/account_management_coordinator.dart';
 import '../decorators/cron_task_decorator.dart';
-import '../dialogs/android_background_execution_dialog.dart';
 import '../helpers/user_prefs_helper.dart';
 import '../l10n/app_localizations.dart';
 import '../widgets/widgets.dart';
@@ -223,7 +222,7 @@ class SettingsScreen extends HookConsumerWidget {
                 title: l10n.aboutBackgroundExecution,
                 child: const Padding(
                   padding: kQaulSettingsContentPadding,
-                  child: _AndroidOptions(),
+                  child: _AndroidBackgroundExecutionContent(),
                 ),
               ),
             ),
@@ -855,50 +854,22 @@ class _AddNodeDialog extends HookWidget {
   );
 }
 
-class _AndroidOptions extends StatefulWidget {
-  const _AndroidOptions();
-
-  @override
-  State<_AndroidOptions> createState() => _AndroidOptionsState();
-}
-
-class _AndroidOptionsState extends State<_AndroidOptions> {
-  void _showPrivacyDialog() async {
-    showDialog(
-      context: context,
-      builder: (context) => const AndroidBackgroundExecutionDialog(),
-    );
-  }
+class _AndroidBackgroundExecutionContent extends StatelessWidget {
+  const _AndroidBackgroundExecutionContent();
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return DefaultTextStyle(
-      maxLines: 2,
-      style: Theme.of(
-        context,
-      ).textTheme.labelLarge!.copyWith(overflow: TextOverflow.ellipsis),
-      child: Column(
-        children: [
-          InkWell(
-            onTap: _showPrivacyDialog,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Icon(Icons.info),
-                  const SizedBox(width: 8),
-                  Text(l10n.aboutBackgroundExecution),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 40),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l10n.backgroundExecutionDialog1),
+        const SizedBox(height: 16),
+        Text(l10n.backgroundExecutionDialog2),
+        const SizedBox(height: 16),
+        Text(l10n.backgroundExecutionDialog3),
+      ],
     );
   }
 }
