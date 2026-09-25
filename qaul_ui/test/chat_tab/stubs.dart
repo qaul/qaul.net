@@ -216,6 +216,15 @@ class StubLibqaulWorker implements LibqaulWorker {
   Future<void> removeNode(String address) => throw UnimplementedError();
 
   @override
+  Future<List<NetworkTransport>> requestTransports() => Future.value([]);
+
+  @override
+  Future<bool> setTransportEnabled(
+    String id, {
+    required bool enabled,
+  }) => Future.value(true);
+
+  @override
   Future<bool> removeUserFromGroup(User user, ChatRoom room) =>
       throw UnimplementedError();
 
