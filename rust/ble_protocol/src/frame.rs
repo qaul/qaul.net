@@ -7,6 +7,7 @@
 //!
 //! Mirrors `ReceiveQueue.messageHeader()` in the Android module.
 
+use crate::constants::QAUL_ID_BYTES;
 use crate::flc::{FlcMessage, FlcType};
 
 /// Size of a data chunk header in bytes.
@@ -54,6 +55,87 @@ impl ChunkHeader {
     }
 }
 
+/// The 19 byte header carried by chunk 0 of every message.
+///
+/// ```text
+/// 0–1   chunk header           (chunk index is always 0)
+/// 2     large message indicator
+/// 3–4   message size          
+/// 5–6   total chunks         
+/// 7–10  CRC-32 of the message 
+/// 11–18 qaul id
+/// ```
+///
+/// Mirrors `getFirstHeader()` in SendQueue.kt. `frame::decode` does not treat
+/// chunk 0 specially: it returns an ordinary `Frame::Chunk`, and the receive
+/// side calls [`FirstChunkHeader::parse`] on that chunk to read the rest.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FirstChunkHeader {
+    /// Bytes 0–1. `chunk.chunk_index` must be 0.
+    pub chunk: ChunkHeader,
+    /// 0 if this message is not part of a larger one.
+    pub large_message_indicator: u8,
+    pub message_size: u16,
+    pub total_chunks: u16,
+    pub crc: u32,
+    pub qaul_id: [u8; QAUL_ID_BYTES],
+}
+
+impl FirstChunkHeader {
+    /// Bytes 2–18: everything after the ordinary 2 byte chunk header.
+    const EXTRA: usize = FIRST_CHUNK_HEADER_SIZE - CHUNK_HEADER_SIZE;
+
+    /// Pack the header into its 19 bytes.
+    ///
+    /// Returns `None` if the chunk header is out of range, or is not chunk 0.
+    pub fn encode(&self) -> Option<[u8; FIRST_CHUNK_HEADER_SIZE]> {
+        if self.chunk.chunk_index != 0 {
+            return None;
+        }
+        let mut out = [0u8; FIRST_CHUNK_HEADER_SIZE];
+        out[0..2].copy_from_slice(&self.chunk.encode()?);
+        out[2] = self.large_message_indicator;
+        out[3..5].copy_from_slice(&self.message_size.to_be_bytes());
+        out[5..7].copy_from_slice(&self.total_chunks.to_be_bytes());
+        out[7..11].copy_from_slice(&self.crc.to_be_bytes());
+        out[11..19].copy_from_slice(&self.qaul_id);
+        Some(out)
+    }
+
+    /// Read the first chunk header from a chunk that `frame::decode` has
+    /// already split into its 2 byte `ChunkHeader` and payload.
+    ///
+    /// Returns the header, and the part of the payload that is actual message
+    /// data (everything after byte 18). That slice borrows from `payload`.
+    pub fn parse(chunk: ChunkHeader, payload: &[u8]) -> Result<(Self, &[u8]), FrameError> {
+        if chunk.chunk_index != 0 {
+            return Err(FrameError::NotFirstChunk(chunk.chunk_index));
+        }
+        if payload.len() < Self::EXTRA {
+            return Err(FrameError::TooShort {
+                expected: FIRST_CHUNK_HEADER_SIZE,
+                actual: CHUNK_HEADER_SIZE + payload.len(),
+            });
+        }
+
+        // `payload` starts at byte 2 of the chunk, so every offset here is the
+        // wire offset minus 2.
+        let (extra, data) = payload.split_at(Self::EXTRA);
+        let mut qaul_id = [0u8; QAUL_ID_BYTES];
+        qaul_id.copy_from_slice(&extra[9..17]);
+
+        let header = FirstChunkHeader {
+            chunk,
+            large_message_indicator: extra[0],
+            message_size: u16::from_be_bytes([extra[1], extra[2]]),
+            total_chunks: u16::from_be_bytes([extra[3], extra[4]]),
+            crc: u32::from_be_bytes([extra[5], extra[6], extra[7], extra[8]]),
+            qaul_id,
+        };
+        Ok((header, data))
+    }
+}
+
 /// A frame received on the MSG characteristic.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Frame<'a> {
@@ -81,6 +163,8 @@ pub enum FrameError {
         flc_type: FlcType,
         len: usize,
     },
+    /// A first chunk header was requested from a chunk that is not chunk 0.
+    NotFirstChunk(u16),
 }
 
 impl core::fmt::Display for FrameError {
@@ -92,6 +176,9 @@ impl core::fmt::Display for FrameError {
             FrameError::UnknownFlcType(t) => write!(f, "unknown flow control type {t:#04x}"),
             FrameError::MalformedFlc { flc_type, len } => {
                 write!(f, "malformed {flc_type:?} flow control message ({len} payload bytes)")
+            }
+            FrameError::NotFirstChunk(index) => {
+                write!(f, "chunk {index} has no first chunk header; only chunk 0 does")
             }
         }
     }
@@ -246,5 +333,89 @@ mod tests {
             }
             other => panic!("expected a chunk, got {other:?}"),
         }
+    }
+
+    fn sample_first_header() -> FirstChunkHeader {
+        FirstChunkHeader {
+            chunk: ChunkHeader {
+                queue_index: 5,
+                resend: false,
+                chunk_index: 0,
+            },
+            large_message_indicator: 0x12,
+            message_size: 0x0102,
+            total_chunks: 0x0003,
+            crc: 0x1234_5678,
+            qaul_id: [1, 2, 3, 4, 5, 6, 7, 8],
+        }
+    }
+
+    #[test]
+    fn first_chunk_header_byte_layout() {
+
+        let q5 = 5 << 3; // queue index 5, resend 0, chunk index 0
+        assert_eq!(
+            sample_first_header().encode().unwrap(),
+            [
+                q5, 0x00, // chunk header
+                0x12, // large message indicator
+                0x01, 0x02, // message size
+                0x00, 0x03, // total chunks
+                0x12, 0x34, 0x56, 0x78, // crc
+                1, 2, 3, 4, 5, 6, 7, 8, // qaul id
+            ]
+        );
+    }
+
+    #[test]
+    fn first_chunk_header_round_trips_through_decode_and_parse() {
+        // Build a whole chunk 0: header plus some message data...
+        let mut chunk = sample_first_header().encode().unwrap().to_vec();
+        chunk.extend_from_slice(b"hello");
+
+        // ...then read it back the way the receive side will: frame::decode
+        // first, FirstChunkHeader::parse second.
+        match decode(&chunk).unwrap() {
+            Frame::Chunk { header, payload } => {
+                let (parsed, data) = FirstChunkHeader::parse(header, payload).unwrap();
+                assert_eq!(parsed, sample_first_header());
+                assert_eq!(data, b"hello");
+            }
+            other => panic!("expected a chunk, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn first_chunk_header_only_exists_on_chunk_0() {
+        let later = ChunkHeader {
+            queue_index: 5,
+            resend: false,
+            chunk_index: 1,
+        };
+        assert_eq!(
+            FirstChunkHeader::parse(later, &[0; 20]),
+            Err(FrameError::NotFirstChunk(1))
+        );
+
+        let mut header = sample_first_header();
+        header.chunk.chunk_index = 1;
+        assert_eq!(header.encode(), None);
+    }
+
+    #[test]
+    fn first_chunk_header_rejects_a_truncated_chunk() {
+        let chunk_0 = ChunkHeader {
+            queue_index: 5,
+            resend: false,
+            chunk_index: 0,
+        };
+        // 10 payload bytes: the 17 bytes after the chunk header are incomplete.
+        assert_eq!(
+            FirstChunkHeader::parse(chunk_0, &[0; 10]),
+            Err(FrameError::TooShort {
+                expected: FIRST_CHUNK_HEADER_SIZE,
+                actual: 12
+            })
+        );
     }
 }
