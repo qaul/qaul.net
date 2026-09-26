@@ -152,6 +152,27 @@
       }
     }
   },
+  "@dtnStorageDefaultHint": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@dtnStorageMaxError": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@dtnStorageMinError": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "about": "About",
   "aboutBackgroundExecution": "About the background execution",
   "accept": "Accept",
@@ -187,6 +208,13 @@
   "darkTheme": "Dark Theme",
   "decline": "Decline",
   "deleteLogs": "Delete logs",
+  "dtnStorageCustomSize": "Custom",
+  "dtnStorageDefaultHint": "Default: {size}",
+  "dtnStorageDescription": "Space qaul may use on this device to hold messages for people who are currently offline, until they can be delivered.",
+  "dtnStorageLowerWarning": "Messages already stored won't be removed immediately. New ones will be refused until enough space frees up.",
+  "dtnStorageMaxError": "Maximum is {size}",
+  "dtnStorageMinError": "Minimum is {size}",
+  "dtnStorageSizeTitle": "Temporary Message Storage for Other Users",
   "editGroupUserNames": "Edit usernames",
   "emptyChatsList": "No chat rooms yet",
   "emptyNodeName": "No name",
@@ -258,7 +286,9 @@
   "publicNotificationsEnabled": "Public Posts",
   "removeUser": "Remove user",
   "removeUserDialogContent": "Are you sure you'd like to remove this user from the group?",
+  "resetToDefault": "Reset to default",
   "routingDataTable": "Routing Data Table",
+  "saveButton": "SAVE",
   "searchUser": "Search user...",
   "searchChat": "Search chats...",
   "securePrivateMessageHint": "Secure private message",
@@ -270,6 +300,7 @@
   "settings": "Settings",
   "showAllFiles": "Show All Files",
   "start": "Start",
+  "storage": "Storage",
   "storageUsers": "Storage Users",
   "submitPostTooltip": "Submit",
   "support": "Support",

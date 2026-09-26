@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qaul_components/qaul_components.dart';
@@ -17,6 +18,13 @@ import '../widgets/widgets.dart';
 
 const _kSettingsIconSize = 25.0;
 const _kAccountManagementIconSize = 29.0;
+
+// DTN storage capacity bounds, in MB. libqaul does not validate the value yet,
+// so these are enforced here.
+const _kDtnStorageMinMb = 1;
+const _kDtnStorageMaxMb = 100 * 1024;
+const _kDtnStorageDefaultMb = 1024;
+const _kDtnStoragePresetsMb = [256, 512, 1024, 2048, 5120];
 
 class _SettingsAssetIcon extends StatelessWidget {
   const _SettingsAssetIcon(
@@ -52,6 +60,14 @@ class SettingsScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final user = ref.watch(defaultUserProvider);
+    final dtnConfig = ref.watch(dtnConfigurationProvider);
+
+    useEffect(() {
+      if (user != null) {
+        Future<void>(() => ref.read(qaulWorkerProvider).getDTNConfiguration());
+      }
+      return null;
+    }, [user?.idBase58]);
 
     return ResponsiveScaffold(
       title: l10n.settings,
@@ -146,6 +162,26 @@ class SettingsScreen extends HookConsumerWidget {
               ),
               title: l10n.network,
               child: const _NetworkOptions(),
+            ),
+          ),
+          QaulSettingsMenuItem(
+            icon: const Icon(Icons.sd_storage_outlined, size: _kSettingsIconSize),
+            title: l10n.storage,
+            value: dtnConfig == null
+                ? null
+                : storageSizeLabel(dtnConfig.totalSize),
+            enabled: user != null,
+            onTap: () => _pushSettingsDetail(
+              context,
+              icon: const Icon(
+                Icons.sd_storage_outlined,
+                size: _kSettingsIconSize,
+              ),
+              title: l10n.storage,
+              child: const Padding(
+                padding: kQaulSettingsContentPadding,
+                child: _StorageOptions(),
+              ),
             ),
           ),
           QaulSettingsMenuItem(
@@ -1017,6 +1053,256 @@ class _AddNodeDialog extends HookWidget {
     contentPadding: const EdgeInsets.all(12),
     floatingLabelBehavior: FloatingLabelBehavior.always,
   );
+}
+
+class _StorageOptions extends HookConsumerWidget {
+  const _StorageOptions();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final config = ref.watch(dtnConfigurationProvider);
+    final isLoading = useState(config == null);
+    final isSaving = useState(false);
+
+    useEffect(() {
+      var isDisposed = false;
+
+      Future<void>(() async {
+        try {
+          await ref.read(qaulWorkerProvider).getDTNConfiguration();
+        } finally {
+          if (!isDisposed) isLoading.value = false;
+        }
+      });
+
+      return () => isDisposed = true;
+    }, const []);
+
+    final l10n = AppLocalizations.of(context)!;
+
+    if (isLoading.value) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 24),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (config == null) return Text(l10n.genericErrorMessage);
+
+    return _StorageSizeOption(
+      title: l10n.dtnStorageSizeTitle,
+      description: l10n.dtnStorageDescription,
+      value: storageSizeLabel(config.totalSize),
+      isSaving: isSaving.value,
+      onTap: () async {
+        final newSize = await showDialog<int>(
+          context: context,
+          builder: (_) => _DtnStorageSizeDialog(currentSize: config.totalSize),
+        );
+        if (newSize == null || newSize == config.totalSize) return;
+
+        isSaving.value = true;
+        try {
+          final success =
+              await ref.read(qaulWorkerProvider).setDTNTotalSize(newSize);
+          if (!success && context.mounted) _showStorageError(context);
+        } on ArgumentError catch (e) {
+          if (context.mounted) {
+            _showStorageError(context, e.invalidValue?.toString());
+          }
+        } catch (_) {
+          if (context.mounted) _showStorageError(context);
+        } finally {
+          if (context.mounted) isSaving.value = false;
+        }
+      },
+    );
+  }
+
+  static void _showStorageError(BuildContext context, [String? error]) {
+    final l10n = AppLocalizations.of(context)!;
+    final message = error?.isNotEmpty == true
+        ? error!
+        : l10n.genericErrorMessage;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+}
+
+class _StorageSizeOption extends StatelessWidget {
+  const _StorageSizeOption({
+    required this.title,
+    required this.description,
+    required this.value,
+    required this.isSaving,
+    required this.onTap,
+  });
+
+  final String title;
+  final String description;
+  final String value;
+  final bool isSaving;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return InkWell(
+      onTap: isSaving ? null : onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: qaulSettingsItemColor(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            if (isSaving)
+              const SizedBox.square(
+                dimension: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            else
+              Text(value, style: textTheme.titleMedium),
+            const Icon(Icons.chevron_right),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Pops with the chosen size in MB, or `null` if dismissed.
+class _DtnStorageSizeDialog extends HookWidget {
+  const _DtnStorageSizeDialog({required this.currentSize});
+
+  final int currentSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final sizeCtrl = useTextEditingController(text: '$currentSize');
+    final sizeFocus = useFocusNode();
+    useListenable(sizeCtrl);
+
+    final size = int.tryParse(sizeCtrl.text);
+    final error = _validate(l10n, size);
+    final isPreset = _kDtnStoragePresetsMb.contains(size);
+
+    void setSize(int value) {
+      sizeCtrl.value = TextEditingValue(
+        text: '$value',
+        selection: TextSelection.collapsed(offset: '$value'.length),
+      );
+    }
+
+    return AlertDialog(
+      title: Text(l10n.dtnStorageSizeTitle),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // used to force the dialog to fill the available horizontal space
+            const Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [SizedBox(width: double.maxFinite)],
+            ),
+            Text(l10n.dtnStorageDescription),
+            const SizedBox(height: 20),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final preset in _kDtnStoragePresetsMb)
+                  ChoiceChip(
+                    label: Text(storageSizeLabel(preset)),
+                    selected: size == preset,
+                    onSelected: (_) => setSize(preset),
+                  ),
+                ChoiceChip(
+                  label: Text(l10n.dtnStorageCustomSize),
+                  selected: !isPreset,
+                  onSelected: (_) => sizeFocus.requestFocus(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: sizeCtrl,
+              focusNode: sizeFocus,
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(
+                  '$_kDtnStorageMaxMb'.length,
+                ),
+              ],
+              decoration: InputDecoration(
+                isDense: true,
+                suffixText: 'MB',
+                border: const OutlineInputBorder(),
+                contentPadding: const EdgeInsets.all(12),
+                errorText: error,
+                helperText: l10n.dtnStorageDefaultHint(
+                  storageSizeLabel(_kDtnStorageDefaultMb),
+                ),
+              ),
+            ),
+            if (error == null && size! < currentSize) ...[
+              const SizedBox(height: 12),
+              Text(
+                l10n.dtnStorageLowerWarning,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: size == _kDtnStorageDefaultMb
+              ? null
+              : () => setSize(_kDtnStorageDefaultMb),
+          child: Text(l10n.resetToDefault),
+        ),
+        TextButton(
+          child: Text(l10n.cancelDialogButton),
+          onPressed: () => Navigator.pop(context),
+        ),
+        TextButton(
+          onPressed: error == null && size != currentSize
+              ? () => Navigator.pop(context, size)
+              : null,
+          child: Text(l10n.saveButton),
+        ),
+      ],
+    );
+  }
+
+  static String? _validate(AppLocalizations l10n, int? size) {
+    if (size == null || size < _kDtnStorageMinMb) {
+      return l10n.dtnStorageMinError(storageSizeLabel(_kDtnStorageMinMb));
+    }
+    if (size > _kDtnStorageMaxMb) {
+      return l10n.dtnStorageMaxError(storageSizeLabel(_kDtnStorageMaxMb));
+    }
+    return null;
+  }
 }
 
 class _AndroidBackgroundExecutionContent extends StatelessWidget {

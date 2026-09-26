@@ -372,6 +372,35 @@ class AppLocalizationsUk extends AppLocalizations {
   String get currentVersion => 'currently installed version:';
 
   @override
+  String get dtnStorageCustomSize => 'Custom';
+
+  @override
+  String dtnStorageDefaultHint(String size) {
+    return 'Default: $size';
+  }
+
+  @override
+  String get dtnStorageDescription =>
+      'Space qaul may use on this device to hold messages for people who are currently offline, until they can be delivered.';
+
+  @override
+  String get dtnStorageLowerWarning =>
+      'Messages already stored won\'t be removed immediately. New ones will be refused until enough space frees up.';
+
+  @override
+  String dtnStorageMaxError(String size) {
+    return 'Maximum is $size';
+  }
+
+  @override
+  String dtnStorageMinError(String size) {
+    return 'Minimum is $size';
+  }
+
+  @override
+  String get dtnStorageSizeTitle => 'Temporary Message Storage for Other Users';
+
+  @override
   String get editGroupUserNames => 'Edit usernames';
 
   @override
@@ -462,7 +491,16 @@ class AppLocalizationsUk extends AppLocalizations {
   String get previousVersion => 'formerly installed version:';
 
   @override
+  String get resetToDefault => 'Reset to default';
+
+  @override
+  String get saveButton => 'SAVE';
+
+  @override
   String get securePrivateMessageHint => 'Безпечне приватне повідомлення';
+
+  @override
+  String get storage => 'Storage';
 
   @override
   String get systemDefault => 'System\'s default';
