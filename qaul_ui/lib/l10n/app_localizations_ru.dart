@@ -318,6 +318,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get chatEmptyState => 'Здесь еще нет сообщений';
 
   @override
+  String get copy => 'Копировать';
+
+  @override
+  String get messageCopied => 'Сообщение скопировано';
+
+  @override
   String get securityNumber => 'Номер безопасности';
 
   @override

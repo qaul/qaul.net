@@ -52,6 +52,21 @@ class TestUnreadChatRoomListNotifier extends ChatRoomListNotifier {
   List<ChatRoom> build() => [buildGroupChat().copyWith(unreadCount: 3)];
 }
 
+Message textMessage({
+  required String id,
+  required User sender,
+  required String text,
+}) {
+  return Message(
+    senderId: sender.id,
+    messageId: Uint8List.fromList(id.codeUnits),
+    content: TextMessageContent(text),
+    index: 1,
+    sentAt: DateTime(2000),
+    receivedAt: DateTime(2000),
+  );
+}
+
 void main() {
   late Key chatKey;
 
@@ -242,6 +257,168 @@ void main() {
     );
   });
 
+  testWidgets('copies a text message from the long-press menu', (tester) async {
+    String? copiedText;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (call) async {
+          if (call.method == 'Clipboard.setData') {
+            copiedText =
+                (call.arguments as Map<Object?, Object?>)['text'] as String?;
+          }
+          return null;
+        });
+    addTearDown(
+      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, null),
+    );
+
+    final targetMessage = Message(
+      senderId: otherUser.id,
+      messageId: Uint8List.fromList('copy-target'.codeUnits),
+      content: TextMessageContent('Text to copy'),
+      index: 1,
+      sentAt: DateTime(2000),
+      receivedAt: DateTime(2000),
+    );
+    await pumpChatScreen(
+      tester,
+      buildDirectChat(messages: [targetMessage]),
+      otherUser: otherUser,
+    );
+
+    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+    final bubble = find.byKey(const ValueKey('chat-bubble-surface'));
+    final bubbleRect = tester.getRect(bubble);
+    chat.onMessageLongPress!(tester.element(bubble), chat.messages.single);
+    await tester.pumpAndSettle();
+
+    final contextMenu = find.byType(ChatMessageContextMenu);
+    expect(contextMenu, findsOneWidget);
+    final contextMenuRect = tester.getRect(contextMenu);
+    final overlayRect = tester.getRect(find.byType(Overlay));
+    const menuGap = 8.0;
+    const menuViewportPadding = 16.0;
+    final minimumLeft = overlayRect.left + menuViewportPadding;
+    final maximumLeft =
+        overlayRect.right - contextMenuRect.width - menuViewportPadding;
+    final shouldAlignRight =
+        bubbleRect.center.dx >= overlayRect.center.dx;
+    final preferredLeft = shouldAlignRight
+        ? bubbleRect.right - contextMenuRect.width
+        : bubbleRect.left;
+    final expectedMenuLeft = preferredLeft.clamp(minimumLeft, maximumLeft);
+    final minimumTop = overlayRect.top + menuViewportPadding;
+    final maximumTop =
+        overlayRect.bottom - contextMenuRect.height - menuViewportPadding;
+    final belowMessage = bubbleRect.bottom + menuGap;
+    final preferredTop = belowMessage <= maximumTop
+        ? belowMessage
+        : bubbleRect.top - contextMenuRect.height - menuGap;
+    final expectedMenuTop = preferredTop.clamp(minimumTop, maximumTop);
+    expect(contextMenuRect.left, closeTo(expectedMenuLeft, 0.01));
+    expect(contextMenuRect.top, closeTo(expectedMenuTop, 0.01));
+
+    await tester.tap(find.byKey(const ValueKey('next-page')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Copy'));
+    await tester.pumpAndSettle();
+
+    expect(copiedText, 'Text to copy');
+    expect(find.text('Message Copied'), findsOneWidget);
+    final feedbackSize = tester.getSize(
+      find.byKey(const ValueKey('copy-feedback-toast')),
+    );
+    expect(feedbackSize.width, greaterThanOrEqualTo(140));
+    expect(feedbackSize.height, greaterThanOrEqualTo(52));
+    final feedbackOverlayRect = tester.getRect(find.byType(Overlay));
+    final toastRect = tester.getRect(
+      find.byKey(const ValueKey('copy-feedback-toast')),
+    );
+    const feedbackWidth = 140.0;
+    const feedbackHeight = 52.0;
+    const viewportPadding = 16.0;
+    final expectedLeft =
+        (bubbleRect.right - feedbackOverlayRect.left - feedbackWidth)
+        .clamp(
+          viewportPadding,
+          feedbackOverlayRect.width - feedbackWidth - viewportPadding,
+        );
+    final expectedTop =
+        (bubbleRect.top -
+                feedbackOverlayRect.top +
+                (bubbleRect.height - feedbackHeight) / 2)
+            .clamp(
+              viewportPadding,
+              feedbackOverlayRect.height - feedbackHeight - viewportPadding,
+            );
+    expect(
+      toastRect.left,
+      closeTo(feedbackOverlayRect.left + expectedLeft, 0.01),
+    );
+    expect(
+      toastRect.top,
+      closeTo(feedbackOverlayRect.top + expectedTop, 0.01),
+    );
+
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      tester
+          .widget<FadeTransition>(
+            find.byKey(const ValueKey('copy-feedback-fade')),
+          )
+          .opacity
+          .value,
+      lessThan(1),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('copy-feedback-toast')), findsNothing);
+  });
+
+  testWidgets('clears copied feedback when the active room changes', (
+    tester,
+  ) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (call) async {
+          return null;
+        });
+    addTearDown(
+      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, null),
+    );
+
+    final targetMessage = textMessage(
+      id: 'copy-room-change-target',
+      sender: otherUser,
+      text: 'Text to copy',
+    );
+    await pumpChatScreen(
+      tester,
+      buildDirectChat(messages: [targetMessage]),
+      otherUser: otherUser,
+    );
+
+    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+    chat.onMessageLongPress!(
+      tester.element(find.byKey(const ValueKey('chat-bubble-surface'))),
+      chat.messages.single,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('next-page')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Copy'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('copy-feedback-toast')), findsOneWidget);
+
+    ProviderScope.containerOf(
+      tester.element(find.byType(chat_ui.Chat)),
+    ).read(currentOpenChatRoom.notifier).state = buildGroupChat();
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('copy-feedback-toast')), findsNothing);
+  });
+
   testWidgets('disabled room blocks chat footer sending', (tester) async {
     await pumpChatScreen(
       tester,
@@ -294,21 +471,6 @@ void main() {
     author: types.User(id: otherUser.idBase58, firstName: otherUser.name),
     text: 'forward this text',
   );
-
-  Message textMessage({
-    required String id,
-    required User sender,
-    required String text,
-  }) {
-    return Message(
-      senderId: sender.id,
-      messageId: Uint8List.fromList(id.codeUnits),
-      content: TextMessageContent(text),
-      index: 1,
-      sentAt: DateTime(2000),
-      receivedAt: DateTime(2000),
-    );
-  }
 
   BoxBorder? bubbleBorder(WidgetTester tester) {
     final decoration = tester

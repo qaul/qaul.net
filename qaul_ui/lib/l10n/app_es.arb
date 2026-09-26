@@ -36,6 +36,8 @@
   "cancelDialogButton": "CANCELAR",
   "chatEmptyMessageHint": "Tu mensaje...",
   "chatEmptyState": "Aún no hay mensajes aquí",
+  "copy": "Copiar",
+  "messageCopied": "Mensaje copiado",
   "chatNavButtonTooltip": "Chat",
   "chatNotificationsEnabled": "Mensajes de chat",
   "connections": "Conexiones",

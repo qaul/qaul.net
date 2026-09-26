@@ -721,6 +721,18 @@ abstract class AppLocalizations {
   /// **'No messages here yet'**
   String get chatEmptyState;
 
+  /// No description provided for @copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copy;
+
+  /// No description provided for @messageCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Message Copied'**
+  String get messageCopied;
+
   /// No description provided for @securityNumber.
   ///
   /// In en, this message translates to:

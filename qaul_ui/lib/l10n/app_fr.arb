@@ -98,6 +98,8 @@
     "publicNoteHintText": "Avis public",
     "createButtonHint": "Créer",
     "chatEmptyState": "Aucun message pour le moment",
+    "copy": "Copier",
+    "messageCopied": "Message copié",
     "securityNumber": "Numéro de sécurité",
     "securityNumberDialogDesc": "Veuillez vous assurer que la personne que vous essayez de vérifier voit le même numéro de sécurité sur son écran lorsqu'elle tente de vous vérifier.",
     "groupStateEventCreated": "Le groupe a été créé",

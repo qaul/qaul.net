@@ -309,6 +309,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get chatEmptyState => '无消息';
 
   @override
+  String get copy => '复制';
+
+  @override
+  String get messageCopied => '消息已复制';
+
+  @override
   String get securityNumber => '安全码';
 
   @override
@@ -743,6 +749,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get chatEmptyState => '無消息';
+
+  @override
+  String get copy => '複製';
+
+  @override
+  String get messageCopied => '訊息已複製';
 
   @override
   String get securityNumber => '安全碼';
