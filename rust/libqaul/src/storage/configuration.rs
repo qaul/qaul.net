@@ -205,6 +205,7 @@ impl Default for DebugOption {
 /// because rtt is measured as micro seconds
 /// * routing options
 #[derive(Debug, Deserialize, Clone, Serialize)]
+#[serde(default)]
 pub struct RoutingOptions {
     //Sending the table every 10 seconds to direct neighbours.
     pub sending_table_period: u64,
@@ -214,6 +215,9 @@ pub struct RoutingOptions {
     pub hop_count_penalty: u64,
     //How long a route is stored until it is removed.
     pub maintain_period_limit: u64,
+    //How long to wait for a single ping reply before counting it as failed.
+    pub ping_timeout: u64,
+    pub neighbour_ping_failures: u32,
 }
 
 impl Default for RoutingOptions {
@@ -223,6 +227,8 @@ impl Default for RoutingOptions {
             ping_neighbour_period: 5,   //5  seconds, unit: seconds
             hop_count_penalty: 10,      //10 seconds, unit: second
             maintain_period_limit: 300, //5min, unit: second
+            ping_timeout: 5,            //5  seconds, unit: seconds
+            neighbour_ping_failures: 2, //count, not a duration
         }
     }
 }
@@ -255,6 +261,65 @@ impl Default for CryptoRotation {
         CryptoRotation {
             enabled: false,
             volume_messages: 1 << 20, // 2^20 ≈ 1,048,576
+        }
+    }
+}
+
+/// Routing Configuration Options for new router
+///
+/// The following options can be configured:
+/// All time units are in seconds
+#[derive(Debug, Deserialize, Clone, Serialize)]
+#[serde(default)]
+pub struct RoutingV2Options {
+    /// time for each node's own self-entry origin update
+    pub origin_interval_time: u64,
+    /// interval at which a node batches updates to its neighbours
+    pub relay_interval: u64,
+    ///tTime without a fresh-seq update before a routing entry is removed and its index released
+    pub route_expiry_ms: u64,
+    /// time after an index slot is released before the allocator rebinds it to a different target
+    pub idx_cooldown: u64,
+    /// circcular distance above which an incoming seq num is treated as a reboot instead of
+    /// normal advance
+    pub reboot_for_seq_num: u16,
+    /// absolute expiry on a delegation entry
+    pub delegation_ttl: u64,
+    /// interval at which a delegating user re-issues a fresh delegation entry
+    pub delegation_referesh: u64,
+    /// min interval between origin `manifest_version` bumps
+    pub manifest_rate_limit: u64,
+    /// time before another MANIFEST_REQUEST ccan be requested with another neighbour
+    pub manifest_request_timeout: u64,
+    /// how long a management req waits for its response before retry
+    pub management_request_timeout: u64,
+    /// max MANIFEST_REQUESTs a node may send per second, per neighbour
+    pub manifest_request_rate: u32,
+    /// max manifest responses a node may emit per second, per neighbour
+    pub manifest_serve_rate: u32,
+    /// Per-origin delta-log record cap (§10.9).
+    pub delta_log_cap: usize,
+    /// enable using the v2 router or stick to v1
+    pub enabled: bool,
+}
+
+impl Default for RoutingV2Options {
+    fn default() -> Self {
+        RoutingV2Options {
+            origin_interval_time: 10,
+            relay_interval: 1,
+            route_expiry_ms: 35_000,
+            idx_cooldown: 60,
+            reboot_for_seq_num: 100,
+            delegation_ttl: 21600,
+            manifest_rate_limit: 60,
+            delegation_referesh: 10800,
+            manifest_request_timeout: 10,
+            management_request_timeout: 5,
+            manifest_request_rate: 4,
+            manifest_serve_rate: 4,
+            delta_log_cap: 4096,
+            enabled: false,
         }
     }
 }
@@ -356,6 +421,8 @@ pub struct Configuration {
     pub handshake_extras: HandshakeExtras,
     #[serde(default)]
     pub crypto_rotation: CryptoRotation,
+    #[serde(default)]
+    pub v2_routing: RoutingV2Options,
 }
 
 impl Default for Configuration {
@@ -370,6 +437,7 @@ impl Default for Configuration {
             routing: RoutingOptions::default(),
             handshake_extras: HandshakeExtras::default(),
             crypto_rotation: CryptoRotation::default(),
+            v2_routing: RoutingV2Options::default(),
         }
     }
 }

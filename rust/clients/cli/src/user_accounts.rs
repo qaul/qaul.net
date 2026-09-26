@@ -385,7 +385,9 @@ impl UserAccounts {
             match Self::get_my_account(state) {
                 Some(account) => account.id_base58.clone(),
                 None => {
-                    println!("No default user account. Usage: account export [user_id] [output_path]");
+                    println!(
+                        "No default user account. Usage: account export [user_id] [output_path]"
+                    );
                     return;
                 }
             }
@@ -497,8 +499,7 @@ impl UserAccounts {
 
                                 // save it to state
                                 ua_state.my_user_account = Some(my_user_account);
-                                ua_state.initialiation =
-                                    MyUserAccountInitialiation::Initialized;
+                                ua_state.initialiation = MyUserAccountInitialiation::Initialized;
                             } else {
                                 log::error!("unexpected message configuration");
                             }
@@ -511,8 +512,7 @@ impl UserAccounts {
                             println!("");
 
                             // save it to state
-                            ua_state.initialiation =
-                                MyUserAccountInitialiation::NoDefaultAccount;
+                            ua_state.initialiation = MyUserAccountInitialiation::NoDefaultAccount;
                         }
                     }
                     Some(proto::user_accounts::Message::MyUserAccount(proto_myuseraccount)) => {

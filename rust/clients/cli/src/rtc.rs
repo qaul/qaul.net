@@ -169,7 +169,12 @@ impl Rtc {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(state, buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
+        Rpc::send_message(
+            state,
+            buf,
+            super::rpc::proto::Modules::Rtc.into(),
+            "".to_string(),
+        );
     }
 
     /// accept session
@@ -191,7 +196,12 @@ impl Rtc {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(state, buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
+        Rpc::send_message(
+            state,
+            buf,
+            super::rpc::proto::Modules::Rtc.into(),
+            "".to_string(),
+        );
     }
 
     /// decline session
@@ -213,7 +223,12 @@ impl Rtc {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(state, buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
+        Rpc::send_message(
+            state,
+            buf,
+            super::rpc::proto::Modules::Rtc.into(),
+            "".to_string(),
+        );
     }
 
     /// end session
@@ -235,7 +250,12 @@ impl Rtc {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(state, buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
+        Rpc::send_message(
+            state,
+            buf,
+            super::rpc::proto::Modules::Rtc.into(),
+            "".to_string(),
+        );
     }
 
     /// send session
@@ -268,7 +288,12 @@ impl Rtc {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(state, buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
+        Rpc::send_message(
+            state,
+            buf,
+            super::rpc::proto::Modules::Rtc.into(),
+            "".to_string(),
+        );
     }
 
     /// session list
@@ -286,7 +311,12 @@ impl Rtc {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(state, buf, super::rpc::proto::Modules::Rtc.into(), "".to_string());
+        Rpc::send_message(
+            state,
+            buf,
+            super::rpc::proto::Modules::Rtc.into(),
+            "".to_string(),
+        );
     }
 
     /// Process received RPC message

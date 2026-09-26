@@ -156,7 +156,9 @@ impl RpcCommand for ConnectionsSubcmd {
                     }
                 }
                 other => {
-                    return Err(format!("connections: unexpected response variant: {other:?}").into());
+                    return Err(
+                        format!("connections: unexpected response variant: {other:?}").into(),
+                    );
                 }
             },
             Err(error) => {

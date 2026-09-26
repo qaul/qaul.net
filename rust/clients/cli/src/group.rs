@@ -561,13 +561,14 @@ impl Group {
                     Some(proto::group::Message::GroupCreateResponse(create_group_response)) => {
                         println!("====================================");
                         println!("Group was created or updated");
-                        let group_id_bytes: [u8; 16] = match create_group_response.group_id.try_into() {
-                            Ok(b) => b,
-                            Err(e) => {
-                                log::error!("invalid group id bytes: {:?}", e);
-                                return;
-                            }
-                        };
+                        let group_id_bytes: [u8; 16] =
+                            match create_group_response.group_id.try_into() {
+                                Ok(b) => b,
+                                Err(e) => {
+                                    log::error!("invalid group id bytes: {:?}", e);
+                                    return;
+                                }
+                            };
                         let group_id = uuid::Uuid::from_bytes(group_id_bytes);
                         println!("\tid: {}", group_id.to_string());
                     }
@@ -581,13 +582,14 @@ impl Group {
                         };
                         println!("====================================");
                         println!("Group Rename status: {}", result.status);
-                        let group_id_bytes: [u8; 16] = match rename_group_response.group_id.try_into() {
-                            Ok(b) => b,
-                            Err(e) => {
-                                log::error!("invalid group id bytes: {:?}", e);
-                                return;
-                            }
-                        };
+                        let group_id_bytes: [u8; 16] =
+                            match rename_group_response.group_id.try_into() {
+                                Ok(b) => b,
+                                Err(e) => {
+                                    log::error!("invalid group id bytes: {:?}", e);
+                                    return;
+                                }
+                            };
                         let group_id = uuid::Uuid::from_bytes(group_id_bytes);
                         println!("\tid: {}", group_id.to_string());
                         if !result.status {
@@ -606,13 +608,14 @@ impl Group {
                         };
                         println!("====================================");
                         println!("Group Invite status: {}", result.status);
-                        let group_id_bytes: [u8; 16] = match invite_group_response.group_id.try_into() {
-                            Ok(b) => b,
-                            Err(e) => {
-                                log::error!("invalid group id bytes: {:?}", e);
-                                return;
-                            }
-                        };
+                        let group_id_bytes: [u8; 16] =
+                            match invite_group_response.group_id.try_into() {
+                                Ok(b) => b,
+                                Err(e) => {
+                                    log::error!("invalid group id bytes: {:?}", e);
+                                    return;
+                                }
+                            };
                         let group_id = uuid::Uuid::from_bytes(group_id_bytes);
                         println!("\tid: {}", group_id.to_string());
                         if !result.status {
@@ -629,13 +632,14 @@ impl Group {
                         };
                         println!("====================================");
                         println!("Reply Group Invite status: {}", result.status);
-                        let group_id_bytes: [u8; 16] = match reply_group_response.group_id.try_into() {
-                            Ok(b) => b,
-                            Err(e) => {
-                                log::error!("invalid group id bytes: {:?}", e);
-                                return;
-                            }
-                        };
+                        let group_id_bytes: [u8; 16] =
+                            match reply_group_response.group_id.try_into() {
+                                Ok(b) => b,
+                                Err(e) => {
+                                    log::error!("invalid group id bytes: {:?}", e);
+                                    return;
+                                }
+                            };
                         let group_id = uuid::Uuid::from_bytes(group_id_bytes);
                         println!("\tid: {}", group_id.to_string());
                         if !result.status {
@@ -654,13 +658,14 @@ impl Group {
                         };
                         println!("====================================");
                         println!("Group Remove Member status: {}", result.status);
-                        let group_id_bytes: [u8; 16] = match remove_member_response.group_id.try_into() {
-                            Ok(b) => b,
-                            Err(e) => {
-                                log::error!("invalid group id bytes: {:?}", e);
-                                return;
-                            }
-                        };
+                        let group_id_bytes: [u8; 16] =
+                            match remove_member_response.group_id.try_into() {
+                                Ok(b) => b,
+                                Err(e) => {
+                                    log::error!("invalid group id bytes: {:?}", e);
+                                    return;
+                                }
+                            };
                         let group_id = uuid::Uuid::from_bytes(group_id_bytes);
                         println!("\tid: {}", group_id.to_string());
                         if !result.status {
@@ -671,7 +676,8 @@ impl Group {
                         // group
                         println!("====================================");
                         println!("Group Information");
-                        let group_id_bytes: [u8; 16] = match group_info_response.group_id.try_into() {
+                        let group_id_bytes: [u8; 16] = match group_info_response.group_id.try_into()
+                        {
                             Ok(b) => b,
                             Err(e) => {
                                 log::error!("invalid group id bytes: {:?}", e);

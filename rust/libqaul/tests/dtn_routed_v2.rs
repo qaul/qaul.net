@@ -130,8 +130,7 @@ fn v2_message_survives_full_envelope_chain() {
 
             // Decode the inner container to get the ultimate receiver
             let inner = proto::Container::decode(&decoded_v2.container[..]).unwrap();
-            let inner_recv =
-                PeerId::from_bytes(&inner.envelope.unwrap().receiver_id).unwrap();
+            let inner_recv = PeerId::from_bytes(&inner.envelope.unwrap().receiver_id).unwrap();
             assert_eq!(inner_recv, receiver);
         }
         _ => panic!("Expected DtnRoutedV2 payload"),
