@@ -14,6 +14,8 @@ import 'package:qaul_components_widgetbook/use_cases/design/account/account_mana
     as _qaul_components_widgetbook_use_cases_design_account_account_management;
 import 'package:qaul_components_widgetbook/use_cases/design/chat/chat_journey.dart'
     as _qaul_components_widgetbook_use_cases_design_chat_chat_journey;
+import 'package:qaul_components_widgetbook/use_cases/design/chat/mention_journey/mention_journey.dart'
+    as _qaul_components_widgetbook_use_cases_design_chat_mention_journey_mention_journey;
 import 'package:qaul_components_widgetbook/use_cases/design/chat/reply_journey/reply_journey.dart'
     as _qaul_components_widgetbook_use_cases_design_chat_reply_journey_reply_journey;
 import 'package:qaul_components_widgetbook/use_cases/design_components/auth/qaul_auth_components.dart'
@@ -32,6 +34,8 @@ import 'package:qaul_components_widgetbook/use_cases/design_components/chat/foot
     as _qaul_components_widgetbook_use_cases_design_components_chat_footer_chat_footer_reply_preview;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/header/chat_header.dart'
     as _qaul_components_widgetbook_use_cases_design_components_chat_header_chat_header;
+import 'package:qaul_components_widgetbook/use_cases/design_components/chat/mentions/chat_mentions.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_chat_mentions_chat_mentions;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/meta_messages/duplicate_username_meta_message.dart'
     as _qaul_components_widgetbook_use_cases_design_components_chat_meta_messages_duplicate_username_meta_message;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/meta_messages/group_join_meta_message.dart'
@@ -99,6 +103,22 @@ final directories = <_widgetbook.WidgetbookNode>[
                 builder:
                     _qaul_components_widgetbook_use_cases_design_chat_chat_journey
                         .buildChatJourneyPlusMenuUseCase,
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookFolder(
+            name: 'mention_journey',
+            children: [
+              _widgetbook.WidgetbookComponent(
+                name: 'ChatMentionJourneyDesignStory',
+                useCases: [
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Group flow',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_chat_mention_journey_mention_journey
+                            .buildGroupMentionJourneyUseCase,
+                  ),
+                ],
               ),
             ],
           ),
@@ -264,6 +284,12 @@ final directories = <_widgetbook.WidgetbookNode>[
                             .buildIncomingLongUseCase,
                   ),
                   _widgetbook.WidgetbookUseCase(
+                    name: 'Incoming — mentions',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_bubble_qaul_chat_bubble
+                            .buildIncomingMentionsUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
                     name: 'Incoming — short',
                     builder:
                         _qaul_components_widgetbook_use_cases_design_components_chat_bubble_qaul_chat_bubble
@@ -320,6 +346,34 @@ final directories = <_widgetbook.WidgetbookNode>[
                     builder:
                         _qaul_components_widgetbook_use_cases_design_components_chat_context_menu_chat_message_context_menu
                             .buildManyActionsContextMenuUseCase,
+                  ),
+                ],
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookFolder(
+            name: 'mentions',
+            children: [
+              _widgetbook.WidgetbookComponent(
+                name: 'ChatMentionSuggestionList',
+                useCases: [
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Composer — selected mention',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_mentions_chat_mentions
+                            .buildSelectedChatMentionUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Filtered members',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_mentions_chat_mentions
+                            .buildFilteredChatMentionSuggestionsUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Group members',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_mentions_chat_mentions
+                            .buildChatMentionSuggestionsUseCase,
                   ),
                 ],
               ),

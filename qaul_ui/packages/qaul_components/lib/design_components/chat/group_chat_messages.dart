@@ -56,6 +56,7 @@ class ChatMessageRenderer {
     required ChatRenderMode mode,
     required DateTime clock,
     bool isSelected = false,
+    List<String> mentionLabels = const [],
   }) {
     final display = presentation.bubbleDisplay;
     if (display == null) return const SizedBox.shrink();
@@ -65,6 +66,7 @@ class ChatMessageRenderer {
         presentation: presentation,
         clock: clock,
         isSelected: isSelected,
+        mentionLabels: mentionLabels,
       );
     }
 
@@ -73,6 +75,7 @@ class ChatMessageRenderer {
       clock: clock,
       horizontalGutter: true,
       isSelected: isSelected,
+      mentionLabels: mentionLabels,
     );
   }
 
@@ -122,11 +125,13 @@ class DirectTextMessageItem extends StatelessWidget {
     required this.clock,
     this.horizontalGutter = true,
     this.isSelected = false,
+    this.mentionLabels = const [],
   });
 
   final MessagePresentation presentation;
   final DateTime clock;
   final bool isSelected;
+  final List<String> mentionLabels;
 
   /// When true, applies a 16px gutter on the trailing edge for primary
   /// (outgoing) bubbles and on the leading edge for secondary (incoming).
@@ -144,7 +149,7 @@ class DirectTextMessageItem extends StatelessWidget {
         end: horizontalGutter && isPrimary ? 16 : 0,
       ),
       child: QaulChatBubble(
-        message: display.message,
+        message: display.message.copyWith(mentionLabels: mentionLabels),
         clock: clock,
         showTimestamp: presentation.meta.showTimestamp,
         isSelected: isSelected,
@@ -159,11 +164,13 @@ class GroupTextMessageItem extends StatelessWidget {
     required this.presentation,
     required this.clock,
     this.isSelected = false,
+    this.mentionLabels = const [],
   });
 
   final MessagePresentation presentation;
   final DateTime clock;
   final bool isSelected;
+  final List<String> mentionLabels;
 
   @override
   Widget build(BuildContext context) {
@@ -185,7 +192,7 @@ class GroupTextMessageItem extends StatelessWidget {
       showSenderName: false,
       showSenderAvatar: presentation.meta.showAvatar,
       child: QaulChatBubble(
-        message: bubbleMessage,
+        message: bubbleMessage.copyWith(mentionLabels: mentionLabels),
         clock: clock,
         showTimestamp: presentation.meta.showTimestamp,
         isSelected: isSelected,

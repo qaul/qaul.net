@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../styles/qaul_color_sheet.dart';
+import 'chat_mentions.dart';
 import 'chat_message.dart';
 import 'chat_reply_bubble_preview.dart';
 
@@ -88,6 +89,7 @@ class QaulChatBubbleMessage extends ChatMessage {
     this.senderDisplayName,
     this.senderDisplayNameColor,
     this.replyPreview,
+    this.mentionLabels = const [],
   });
 
   final String content;
@@ -102,6 +104,7 @@ class QaulChatBubbleMessage extends ChatMessage {
   final String? senderDisplayName;
   final Color? senderDisplayNameColor;
   final ChatReplyPreviewData? replyPreview;
+  final List<String> mentionLabels;
 
   QaulChatBubbleMessage copyWith({
     Key? key,
@@ -117,6 +120,7 @@ class QaulChatBubbleMessage extends ChatMessage {
     String? senderDisplayName,
     Color? senderDisplayNameColor,
     ChatReplyPreviewData? replyPreview,
+    List<String>? mentionLabels,
   }) {
     return QaulChatBubbleMessage(
       key: key ?? this.key,
@@ -133,6 +137,7 @@ class QaulChatBubbleMessage extends ChatMessage {
       senderDisplayNameColor:
           senderDisplayNameColor ?? this.senderDisplayNameColor,
       replyPreview: replyPreview ?? this.replyPreview,
+      mentionLabels: mentionLabels ?? this.mentionLabels,
     );
   }
 
@@ -285,9 +290,13 @@ class QaulChatBubble extends StatelessWidget {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final content = message.content.trim();
-                  final messageSpan = TextSpan(
-                    style: ChatBubbleStyle.textStyle,
+                  final messageSpan = buildChatMentionTextSpan(
                     text: content,
+                    style: ChatBubbleStyle.textStyle,
+                    mentionLabels: message.mentionLabels,
+                    mentionBackgroundColor: chatMentionBubbleBackground(
+                      Theme.of(context).brightness,
+                    ),
                   );
                   const gap = ChatBubbleStyle.gapBetweenTextAndDate;
                   final timeLabelPainter = TextPainter(

@@ -15,6 +15,7 @@ class _ChatTextFooter extends StatefulWidget {
     this.onAttachmentPressed,
     this.onPickImagePressed,
     this.onSendAudioPressed,
+    this.mentionSuggestions = const [],
     this.disabledMessage,
     this.isDisabled = false,
   });
@@ -23,6 +24,7 @@ class _ChatTextFooter extends StatefulWidget {
   final VoidCallback? onAttachmentPressed;
   final VoidCallback? onPickImagePressed;
   final VoidCallback? onSendAudioPressed;
+  final List<ChatMentionSuggestion> mentionSuggestions;
   final bool isDisabled;
   final String? disabledMessage;
   final String hintText;
@@ -32,16 +34,39 @@ class _ChatTextFooter extends StatefulWidget {
 }
 
 class _ChatTextFooterState extends State<_ChatTextFooter> {
-  late final TextEditingController _textController;
+  late final ChatMentionTextEditingController _textController;
+  _ActiveMention? _activeMention;
 
   @override
   void initState() {
     super.initState();
-    _textController = TextEditingController();
+    _textController = ChatMentionTextEditingController(
+      mentionLabels: widget.mentionSuggestions.map(
+        (suggestion) => suggestion.label,
+      ),
+    );
+    _textController.addListener(_handleTextChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant _ChatTextFooter oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final oldMentionLabels = oldWidget.mentionSuggestions
+        .map((suggestion) => suggestion.label)
+        .toList(growable: false);
+    final mentionLabels = widget.mentionSuggestions
+        .map((suggestion) => suggestion.label)
+        .toList(growable: false);
+    if (!listEquals(oldMentionLabels, mentionLabels)) {
+      _textController.mentionLabels = widget.mentionSuggestions.map(
+        (suggestion) => suggestion.label,
+      );
+    }
   }
 
   @override
   void dispose() {
+    _textController.removeListener(_handleTextChanged);
     _textController.dispose();
     super.dispose();
   }
@@ -50,6 +75,67 @@ class _ChatTextFooterState extends State<_ChatTextFooter> {
     if (widget.isDisabled) return;
     widget.onSendPressed(types.PartialText(text: text));
     _textController.clear();
+  }
+
+  void _handleTextChanged() {
+    final activeMention = _activeMentionAtCursor(_textController.value);
+    if (_activeMention == activeMention) return;
+    setState(() => _activeMention = activeMention);
+  }
+
+  _ActiveMention? _activeMentionAtCursor(TextEditingValue value) {
+    if (widget.mentionSuggestions.isEmpty ||
+        !value.selection.isValid ||
+        !value.selection.isCollapsed) {
+      return null;
+    }
+
+    final cursor = value.selection.baseOffset;
+    if (cursor <= 0) return null;
+    final text = value.text;
+    var index = cursor - 1;
+    while (index >= 0) {
+      final character = text[index];
+      if (character == '@') {
+        final validPrefix = index == 0 || _isMentionBoundary(text[index - 1]);
+        return validPrefix
+            ? _ActiveMention(start: index, end: cursor)
+            : null;
+      }
+      if (_isMentionBoundary(character)) return null;
+      index -= 1;
+    }
+    return null;
+  }
+
+  List<ChatMentionSuggestion> get _visibleMentionSuggestions {
+    final activeMention = _activeMention;
+    if (activeMention == null) return const [];
+    final query = _textController.text
+        .substring(activeMention.start + 1, activeMention.end)
+        .toLowerCase();
+    return widget.mentionSuggestions
+        .where((suggestion) => suggestion.label.toLowerCase().contains(query))
+        .toList(growable: false);
+  }
+
+  void _selectMention(ChatMentionSuggestion suggestion) {
+    final activeMention = _activeMention;
+    if (activeMention == null) return;
+
+    final text = _textController.text;
+    final suffixStartsWithSpace =
+        activeMention.end < text.length &&
+        _isMentionBoundary(text[activeMention.end]);
+    final replacement =
+        '@${suggestion.label}${suffixStartsWithSpace ? '' : ' '}';
+    _textController.value = TextEditingValue(
+      text:
+          '${text.substring(0, activeMention.start)}$replacement${text.substring(activeMention.end)}',
+      selection: TextSelection.collapsed(
+        offset: activeMention.start + replacement.length,
+      ),
+    );
   }
 
   /// Hardware-keyboard send. [ChatFooter] only wires its send button, so Enter
@@ -127,7 +213,20 @@ class _ChatTextFooterState extends State<_ChatTextFooter> {
                     },
                   ),
                 },
-                child: Focus(autofocus: true, child: footer),
+                child: Focus(
+                  autofocus: true,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (_visibleMentionSuggestions.isNotEmpty)
+                        ChatMentionSuggestionList(
+                          suggestions: _visibleMentionSuggestions,
+                          onSelected: _selectMention,
+                        ),
+                      footer,
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -149,6 +248,22 @@ class _ChatTextFooterState extends State<_ChatTextFooter> {
     );
   }
 }
+
+class _ActiveMention {
+  const _ActiveMention({required this.start, required this.end});
+
+  final int start;
+  final int end;
+
+  @override
+  bool operator ==(Object other) =>
+      other is _ActiveMention && other.start == start && other.end == end;
+
+  @override
+  int get hashCode => Object.hash(start, end);
+}
+
+bool _isMentionBoundary(String value) => RegExp(r'\s').hasMatch(value);
 
 /// The original [Input] class from flutter_chat_ui provided no customization for
 /// the spacing of the Send button spacing.

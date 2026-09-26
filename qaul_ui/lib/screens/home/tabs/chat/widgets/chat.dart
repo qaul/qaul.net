@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -462,6 +463,22 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     hintText: _chatRenderMode == ChatRenderMode.group
                         ? l10n.groupChatMessageHint
                         : l10n.securePrivateMessageHint,
+                    mentionSuggestions: _chatRenderMode == ChatRenderMode.group
+                        ? [
+                            for (final member in room.members)
+                              if (member.idBase58 != user.idBase58 &&
+                                  member.name.trim().isNotEmpty)
+                                ChatMentionSuggestion(
+                                  id: member.idBase58,
+                                  label: member.name,
+                                ),
+                            const ChatMentionSuggestion(
+                              id: 'all',
+                              label: 'all',
+                              isEveryone: true,
+                            ),
+                          ]
+                        : const [],
                     onSendPressed: sendMessage,
                     onSendAudioPressed: Platform.isLinux
                         ? null
@@ -651,6 +668,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         presentation: presentation,
         mode: _chatRenderMode,
         clock: DateTime.now(),
+        mentionLabels: _chatRenderMode == ChatRenderMode.group
+            ? room.members.map((member) => member.name).toList()
+            : const [],
       );
     }
 
