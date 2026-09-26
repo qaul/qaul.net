@@ -292,7 +292,32 @@ void main() {
     chat.onMessageLongPress!(tester.element(bubble), chat.messages.single);
     await tester.pumpAndSettle();
 
-    expect(find.byType(ChatMessageContextMenu), findsOneWidget);
+    final contextMenu = find.byType(ChatMessageContextMenu);
+    expect(contextMenu, findsOneWidget);
+    final contextMenuRect = tester.getRect(contextMenu);
+    final overlayRect = tester.getRect(find.byType(Overlay));
+    const menuGap = 8.0;
+    const menuViewportPadding = 16.0;
+    final minimumLeft = overlayRect.left + menuViewportPadding;
+    final maximumLeft =
+        overlayRect.right - contextMenuRect.width - menuViewportPadding;
+    final shouldAlignRight =
+        bubbleRect.center.dx >= overlayRect.center.dx;
+    final preferredLeft = shouldAlignRight
+        ? bubbleRect.right - contextMenuRect.width
+        : bubbleRect.left;
+    final expectedMenuLeft = preferredLeft.clamp(minimumLeft, maximumLeft);
+    final minimumTop = overlayRect.top + menuViewportPadding;
+    final maximumTop =
+        overlayRect.bottom - contextMenuRect.height - menuViewportPadding;
+    final belowMessage = bubbleRect.bottom + menuGap;
+    final preferredTop = belowMessage <= maximumTop
+        ? belowMessage
+        : bubbleRect.top - contextMenuRect.height - menuGap;
+    final expectedMenuTop = preferredTop.clamp(minimumTop, maximumTop);
+    expect(contextMenuRect.left, closeTo(expectedMenuLeft, 0.01));
+    expect(contextMenuRect.top, closeTo(expectedMenuTop, 0.01));
+
     await tester.tap(find.byKey(const ValueKey('next-page')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Copy'));
@@ -305,28 +330,35 @@ void main() {
     );
     expect(feedbackSize.width, greaterThanOrEqualTo(140));
     expect(feedbackSize.height, greaterThanOrEqualTo(52));
-    final overlayRect = tester.getRect(find.byType(Overlay));
+    final feedbackOverlayRect = tester.getRect(find.byType(Overlay));
     final toastRect = tester.getRect(
       find.byKey(const ValueKey('copy-feedback-toast')),
     );
     const feedbackWidth = 140.0;
     const feedbackHeight = 52.0;
     const viewportPadding = 16.0;
-    final expectedLeft = (bubbleRect.right - overlayRect.left - feedbackWidth)
+    final expectedLeft =
+        (bubbleRect.right - feedbackOverlayRect.left - feedbackWidth)
         .clamp(
           viewportPadding,
-          overlayRect.width - feedbackWidth - viewportPadding,
+          feedbackOverlayRect.width - feedbackWidth - viewportPadding,
         );
     final expectedTop =
         (bubbleRect.top -
-                overlayRect.top +
+                feedbackOverlayRect.top +
                 (bubbleRect.height - feedbackHeight) / 2)
             .clamp(
               viewportPadding,
-              overlayRect.height - feedbackHeight - viewportPadding,
+              feedbackOverlayRect.height - feedbackHeight - viewportPadding,
             );
-    expect(toastRect.left, closeTo(overlayRect.left + expectedLeft, 0.01));
-    expect(toastRect.top, closeTo(overlayRect.top + expectedTop, 0.01));
+    expect(
+      toastRect.left,
+      closeTo(feedbackOverlayRect.left + expectedLeft, 0.01),
+    );
+    expect(
+      toastRect.top,
+      closeTo(feedbackOverlayRect.top + expectedTop, 0.01),
+    );
 
     await tester.pump(const Duration(seconds: 2));
     await tester.pump(const Duration(milliseconds: 100));

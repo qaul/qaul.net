@@ -251,37 +251,49 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   ) {
     if (message is! types.TextMessage) return;
 
+    final messageRect = _messageRectInOverlay(messageContext);
     setState(() => _selectedContextMenuMessageId = message.id);
 
     showDialog<void>(
       context: context,
+      useSafeArea: false,
       barrierColor: Colors.black38,
       builder: (dialogContext) {
+        final menu = GestureDetector(
+          onTap: () {},
+          child: ChatMessageContextMenu(
+            elements: _buildForwardContextMenuElements(
+              onForward: () {
+                Navigator.pop(dialogContext);
+                setState(() => _selectedContextMenuMessageId = null);
+                _openForwardRecipientSelector(message.text);
+              },
+              onCopy: () => _copyMessage(
+                dialogContext,
+                messageContext,
+                message.text,
+              ),
+            ),
+          ),
+        );
+
         return GestureDetector(
           onTap: () {
             Navigator.pop(dialogContext);
           },
           child: Material(
             color: Colors.transparent,
-            child: Center(
-              child: GestureDetector(
-                onTap: () {},
-                child: ChatMessageContextMenu(
-                  elements: _buildForwardContextMenuElements(
-                    onForward: () {
-                      Navigator.pop(dialogContext);
-                      setState(() => _selectedContextMenuMessageId = null);
-                      _openForwardRecipientSelector(message.text);
-                    },
-                    onCopy: () => _copyMessage(
-                      dialogContext,
-                      messageContext,
-                      message.text,
+            child: messageRect == null
+                ? Center(child: menu)
+                : CustomSingleChildLayout(
+                    delegate: _MessageContextMenuLayoutDelegate(
+                      messageRect: messageRect,
+                      viewportPadding:
+                          MediaQuery.paddingOf(dialogContext) +
+                          const EdgeInsets.all(16),
                     ),
+                    child: menu,
                   ),
-                ),
-              ),
-            ),
           ),
         );
       },
@@ -1003,6 +1015,52 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       _overflowMenuOptions.clear();
     }
   }
+}
+
+class _MessageContextMenuLayoutDelegate extends SingleChildLayoutDelegate {
+  const _MessageContextMenuLayoutDelegate({
+    required this.messageRect,
+    required this.viewportPadding,
+  });
+
+  static const _gap = 8.0;
+
+  final Rect messageRect;
+  final EdgeInsets viewportPadding;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
+      constraints.loosen().tighten(width: ChatMessageContextMenu.width);
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    final minimumLeft = viewportPadding.left;
+    final maximumLeft = (size.width - childSize.width - viewportPadding.right)
+        .clamp(minimumLeft, double.infinity)
+        .toDouble();
+    final shouldAlignRight = messageRect.center.dx >= size.width / 2;
+    final preferredLeft = shouldAlignRight
+        ? messageRect.right - childSize.width
+        : messageRect.left;
+    final left = preferredLeft.clamp(minimumLeft, maximumLeft).toDouble();
+
+    final minimumTop = viewportPadding.top;
+    final maximumTop = (size.height - childSize.height - viewportPadding.bottom)
+        .clamp(minimumTop, double.infinity)
+        .toDouble();
+    final belowMessage = messageRect.bottom + _gap;
+    final preferredTop = belowMessage <= maximumTop
+        ? belowMessage
+        : messageRect.top - childSize.height - _gap;
+    final top = preferredTop.clamp(minimumTop, maximumTop).toDouble();
+
+    return Offset(left, top);
+  }
+
+  @override
+  bool shouldRelayout(_MessageContextMenuLayoutDelegate oldDelegate) =>
+      messageRect != oldDelegate.messageRect ||
+      viewportPadding != oldDelegate.viewportPadding;
 }
 
 class _CopyFeedbackToast extends StatelessWidget {
