@@ -145,7 +145,7 @@ class SettingsScreen extends HookConsumerWidget {
                 svgPadding: 1,
               ),
               title: l10n.network,
-              child: const _InternetNodesList(),
+              child: const _NetworkOptions(),
             ),
           ),
           QaulSettingsMenuItem(
@@ -508,6 +508,172 @@ class _NotificationOptionsState extends State<_NotificationOptions> {
   }
 }
 
+class _NetworkOptions extends HookConsumerWidget {
+  const _NetworkOptions();
+
+  static const _transportIds = ['ble', 'lan', 'internet'];
+
+  static const _fallbackLabels = {
+    'ble': 'BLE',
+    'lan': 'LAN',
+    'internet': 'Internet',
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final transports = useState<List<NetworkTransport>>([]);
+    final isLoading = useState(true);
+    final updatingTransportIds = useState(<String>{});
+
+    final refreshTransports = useCallback(() async {
+      final refreshedTransports =
+          await ref.read(qaulWorkerProvider).requestTransports();
+      if (refreshedTransports == null || !context.mounted) return false;
+
+      transports.value = refreshedTransports;
+      return true;
+    }, []);
+
+    useEffect(() {
+      var isDisposed = false;
+
+      Future<void>(() async {
+        try {
+          final didRefresh = await refreshTransports();
+          if (!didRefresh && !isDisposed && context.mounted) {
+            _showTransportError(context);
+          }
+        } catch (_) {
+          if (!isDisposed && context.mounted) _showTransportError(context);
+        } finally {
+          if (!isDisposed) isLoading.value = false;
+        }
+      });
+
+      return () => isDisposed = true;
+    }, const []);
+
+    final transportsById = {
+      for (final transport in transports.value) transport.id: transport,
+    };
+    final visibleTransportIds = _transportIds.where(
+      (id) => id != 'ble' || Platform.isAndroid || Platform.isLinux,
+    );
+    final l10n = AppLocalizations.of(context)!;
+
+    return Column(
+      children: [
+        Padding(
+          padding: kQaulSettingsContentPadding,
+          child: SettingsSection(
+            name: l10n.connections,
+            icon: const Icon(Icons.compare_arrows),
+            content: isLoading.value
+                ? const Center(child: CircularProgressIndicator())
+                : Column(
+                    children: visibleTransportIds.map((id) {
+                      final transport = transportsById[id];
+                      final isUpdating = updatingTransportIds.value.contains(id);
+                      final canToggle = transport != null &&
+                          transport.supportsRuntimeToggle &&
+                          !isUpdating;
+
+                      return _TransportOption(
+                        label: transport?.label.isNotEmpty == true
+                            ? transport!.label
+                            : _fallbackLabels[id]!,
+                        value: transport?.enabled ?? false,
+                        enabled: canToggle,
+                        onChanged: (value) async {
+                          if (transport == null || !canToggle) return;
+
+                          updatingTransportIds.value = {
+                            ...updatingTransportIds.value,
+                            id,
+                          };
+                          try {
+                            final result = await ref
+                                .read(qaulWorkerProvider)
+                                .setTransportEnabled(
+                                id,
+                                enabled: value,
+                              );
+
+                            if (result?.success != true) {
+                              if (context.mounted) {
+                                _showTransportError(context, result?.error);
+                              }
+                              return;
+                            }
+
+                            if (!await refreshTransports() && context.mounted) {
+                              _showTransportError(context);
+                            }
+                          } catch (_) {
+                            if (context.mounted) _showTransportError(context);
+                          } finally {
+                            if (context.mounted) {
+                              updatingTransportIds.value = {
+                                ...updatingTransportIds.value.where(
+                                  (updatingId) => updatingId != id,
+                                ),
+                              };
+                            }
+                          }
+                        },
+                      );
+                    }).toList(),
+                  ),
+          ),
+        ),
+        const _InternetNodesList(),
+      ],
+    );
+  }
+
+  static void _showTransportError(BuildContext context, [String? error]) {
+    final l10n = AppLocalizations.of(context)!;
+    final message = error?.isNotEmpty == true
+        ? error!
+        : l10n.genericErrorMessage;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+}
+
+class _TransportOption extends StatelessWidget {
+  const _TransportOption({
+    required this.label,
+    required this.value,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  final String label;
+  final bool value;
+  final bool enabled;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(label),
+          ),
+        ),
+        PlatformAwareSwitch(
+          value: value,
+          onChanged: enabled ? onChanged : null,
+        ),
+      ],
+    );
+  }
+}
+
 class _InternetNodesList extends HookConsumerWidget {
   const _InternetNodesList();
 
@@ -573,7 +739,6 @@ class _InternetNodesList extends HookConsumerWidget {
           QaulTable(
             titleIcon: CupertinoIcons.globe,
             title: l10n!.internetNodes,
-            showTitle: false,
             contentPadding: kQaulSettingsContentPadding,
             addRowLabel: l10n.addNodeCTA,
             rowCount: nodes.length,

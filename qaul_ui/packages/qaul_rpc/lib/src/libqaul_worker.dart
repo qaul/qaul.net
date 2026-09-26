@@ -16,6 +16,7 @@ import 'package:uuid/uuid.dart';
 import '../qaul_rpc.dart';
 import 'generated/connections/ble/ble_rpc.pb.dart';
 import 'generated/connections/connections.pb.dart';
+import 'generated/connections/transports.pb.dart';
 import 'generated/node/account_management.pb.dart';
 import 'generated/node/node.pb.dart';
 import 'generated/node/user_accounts.pb.dart';
@@ -403,6 +404,28 @@ class LibqaulWorker {
     );
     await _sendMessage(Modules.CONNECTIONS, msg);
   }
+
+  // -------------------
+  // TRANSPORTS Requests
+  // -------------------
+  Future<List<NetworkTransport>?> requestTransports() =>
+      _sendRequest<List<NetworkTransport>>(
+      module: Modules.TRANSPORTS,
+      data: Transports(listRequest: TransportsListRequest()),
+      adapter: _payload<List<NetworkTransport>>,
+    );
+
+  Future<TransportSetEnabledResult?> setTransportEnabled(
+    String id, {
+    required bool enabled,
+  }) =>
+      _sendRequest<TransportSetEnabledResult>(
+      module: Modules.TRANSPORTS,
+      data: Transports(
+        setEnabled: TransportSetEnabled(id: id, enabled: enabled),
+      ),
+      adapter: _payload<TransportSetEnabledResult>,
+    );
 
   // -------------------
   // USERACCOUNTS Requests

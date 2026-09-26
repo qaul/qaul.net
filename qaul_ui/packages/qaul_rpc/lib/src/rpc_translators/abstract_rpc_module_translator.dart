@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 
 import '../generated/connections/ble/ble_rpc.pb.dart';
 import '../generated/connections/connections.pb.dart';
+import '../generated/connections/transports.pb.dart';
 import '../generated/node/account_management.pb.dart';
 import '../generated/node/node.pb.dart';
 import '../generated/node/user_accounts.pb.dart';
@@ -33,6 +34,8 @@ part 'authentication_translator.dart';
 part 'chat_translator.dart';
 
 part 'connection_translator.dart';
+
+part 'transport_translator.dart';
 
 part 'debug_translator.dart';
 
@@ -76,6 +79,7 @@ abstract class RpcModuleTranslator {
     AuthenticationTranslator(),
     ChatTranslator(),
     ConnectionTranslator(),
+    TransportTranslator(),
     DebugTranslator(),
     DTNTranslator(),
     FeedTranslator(),

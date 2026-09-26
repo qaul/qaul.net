@@ -10,6 +10,7 @@ import 'package:logging/logging.dart';
 import 'package:qaul_components/qaul_components.dart'
     show ChatFooter, ChatHeader, QaulComponentsLocalizations;
 import 'package:qaul_rpc/qaul_rpc.dart';
+import 'package:qaul_rpc/src/generated/connections/transports.pb.dart';
 import 'package:qaul_rpc/src/generated/services/chat/chat.pb.dart';
 import 'package:qaul_ui/l10n/app_localizations.dart';
 import 'package:qaul_ui/providers/providers.dart';
