@@ -436,6 +436,43 @@ void main() {
     expect(origin.height, closeTo(bubbleRect.height, 0.01));
   });
 
+  testWidgets('clips the share origin of a message taller than the screen', (
+    tester,
+  ) async {
+    final messageShareService = FakeMessageShareService();
+    final targetMessage = Message(
+      senderId: otherUser.id,
+      messageId: Uint8List.fromList('tall-share-target'.codeUnits),
+      content: TextMessageContent(List.filled(200, 'Long line').join('\n')),
+      index: 1,
+      sentAt: DateTime(2000),
+      receivedAt: DateTime(2000),
+    );
+    await pumpChatScreen(
+      tester,
+      buildDirectChat(messages: [targetMessage]),
+      otherUser: otherUser,
+      messageShareService: messageShareService,
+    );
+
+    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+    final bubble = find.byKey(const ValueKey('chat-bubble-surface'));
+    final overlayRect = tester.getRect(find.byType(Overlay));
+    expect(tester.getRect(bubble).height, greaterThan(overlayRect.height));
+    chat.onMessageLongPress!(tester.element(bubble), chat.messages.single);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('next-page')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Share'));
+    await tester.pumpAndSettle();
+
+    final origin = messageShareService.sharePositionOrigin!;
+    final overlayBounds = Offset.zero & overlayRect.size;
+    expect(origin.isEmpty, isFalse);
+    expect(overlayBounds.intersect(origin), origin);
+  });
+
   testWidgets('clears copied feedback when the active room changes', (
     tester,
   ) async {

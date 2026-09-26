@@ -526,14 +526,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     BuildContext messageContext,
     String text,
   ) async {
-    final messageRect = _messageRectInOverlay(messageContext);
+    final shareOrigin = _shareOriginInOverlay(messageContext);
     Navigator.pop(dialogContext);
 
     if (text.trim().isEmpty) return;
 
     try {
       await (widget.messageShareService ?? const SystemMessageShareService())
-          .shareText(text: text, sharePositionOrigin: messageRect);
+          .shareText(text: text, sharePositionOrigin: shareOrigin);
     } on Object catch (error, stackTrace) {
       _log.warning('Could not open the system share sheet', error, stackTrace);
     }
@@ -549,6 +549,25 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
     return messageBox.localToGlobal(Offset.zero, ancestor: overlayBox) &
         messageBox.size;
+  }
+
+  /// The iPad share popover rejects origins that are empty or extend past the
+  /// screen, so clip the message to its visible part.
+  Rect? _shareOriginInOverlay(BuildContext messageContext) {
+    final overlay = Overlay.of(context, rootOverlay: true);
+    final overlayBox = overlay.context.findRenderObject() as RenderBox?;
+    if (overlayBox == null || !overlayBox.hasSize) return null;
+
+    final screenRect = Offset.zero & overlayBox.size;
+    final visibleRect =
+        _messageRectInOverlay(messageContext)?.intersect(screenRect);
+    if (visibleRect != null &&
+        visibleRect.width > 0 &&
+        visibleRect.height > 0) {
+      return visibleRect;
+    }
+
+    return Rect.fromCenter(center: screenRect.center, width: 1, height: 1);
   }
 
   void _showCopyFeedback(Rect messageRect) {
