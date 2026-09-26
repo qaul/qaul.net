@@ -22,6 +22,12 @@ pub struct GroupAccountDb {
     /// invited DB ref
     /// bincode of `GroupInvited`
     pub invited: sled::Tree,
+    /// group CRDT operation log (membership/metadata).
+    ///
+    /// key: `group_id ++ op_id`
+    /// value: encoded `qaul.net.group.GroupOp` (already signature-
+    /// verified before storage). See `crdt_store.rs`.
+    pub ops: sled::Tree,
 }
 
 /// qaul Chat Conversation Storage
@@ -115,6 +121,7 @@ impl GroupStorageState {
                 return GroupAccountDb {
                     groups: group_account_db.groups.clone(),
                     invited: group_account_db.invited.clone(),
+                    ops: group_account_db.ops.clone(),
                 };
             }
         }
@@ -127,8 +134,9 @@ impl GroupStorageState {
     fn create_groupaccountdb(&self, account_id: PeerId, db: &sled::Db) -> GroupAccountDb {
         let groups: sled::Tree = db.open_tree("groups").unwrap();
         let invited: sled::Tree = db.open_tree("invited").unwrap();
+        let ops: sled::Tree = db.open_tree("group_ops").unwrap();
 
-        let group_account_db = GroupAccountDb { groups, invited };
+        let group_account_db = GroupAccountDb { groups, invited, ops };
 
         let mut group_storage = self.inner.write().unwrap();
         group_storage
@@ -159,6 +167,7 @@ impl GroupStorage {
                 return GroupAccountDb {
                     groups: group_account_db.groups.clone(),
                     invited: group_account_db.invited.clone(),
+                    ops: group_account_db.ops.clone(),
                 };
             }
         }
@@ -170,6 +179,7 @@ impl GroupStorage {
         GroupAccountDb {
             groups: group_account_db.groups.clone(),
             invited: group_account_db.invited.clone(),
+            ops: group_account_db.ops.clone(),
         }
     }
 
@@ -211,8 +221,15 @@ impl GroupStorage {
                 db.open_tree("__fallback_invited").expect("critical: cannot open fallback invited tree")
             }
         };
+        let ops: sled::Tree = match db.open_tree("group_ops") {
+            Ok(tree) => tree,
+            Err(e) => {
+                log::error!("failed to open group_ops tree: {}", e);
+                db.open_tree("__fallback_group_ops").expect("critical: cannot open fallback group_ops tree")
+            }
+        };
 
-        let group_account_db = GroupAccountDb { groups, invited };
+        let group_account_db = GroupAccountDb { groups, invited, ops };
 
         // add account to state (scope the write lock so it is released before search init)
         {
