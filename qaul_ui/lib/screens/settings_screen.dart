@@ -522,12 +522,17 @@ class _NetworkOptions extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final transports = ref.watch(networkTransportsProvider);
+    final transports = useState<List<NetworkTransport>>([]);
     final isLoading = useState(true);
     final updatingTransportIds = useState(<String>{});
 
     final refreshTransports = useCallback(() async {
-      await ref.read(qaulWorkerProvider).requestTransports();
+      final refreshedTransports =
+          await ref.read(qaulWorkerProvider).requestTransports();
+      if (refreshedTransports == null || !context.mounted) return false;
+
+      transports.value = refreshedTransports;
+      return true;
     }, []);
 
     useEffect(() {
@@ -535,7 +540,12 @@ class _NetworkOptions extends HookConsumerWidget {
 
       Future<void>(() async {
         try {
-          await refreshTransports();
+          final didRefresh = await refreshTransports();
+          if (!didRefresh && !isDisposed && context.mounted) {
+            _showTransportError(context);
+          }
+        } catch (_) {
+          if (!isDisposed && context.mounted) _showTransportError(context);
         } finally {
           if (!isDisposed) isLoading.value = false;
         }
@@ -545,8 +555,11 @@ class _NetworkOptions extends HookConsumerWidget {
     }, const []);
 
     final transportsById = {
-      for (final transport in transports) transport.id: transport,
+      for (final transport in transports.value) transport.id: transport,
     };
+    final visibleTransportIds = _transportIds.where(
+      (id) => id != 'ble' || Platform.isAndroid || Platform.isLinux,
+    );
     final l10n = AppLocalizations.of(context)!;
 
     return Column(
@@ -559,7 +572,7 @@ class _NetworkOptions extends HookConsumerWidget {
             content: isLoading.value
                 ? const Center(child: CircularProgressIndicator())
                 : Column(
-                    children: _transportIds.map((id) {
+                    children: visibleTransportIds.map((id) {
                       final transport = transportsById[id];
                       final isUpdating = updatingTransportIds.value.contains(id);
                       final canToggle = transport != null &&
@@ -579,16 +592,34 @@ class _NetworkOptions extends HookConsumerWidget {
                             ...updatingTransportIds.value,
                             id,
                           };
-                          await ref.read(qaulWorkerProvider).setTransportEnabled(
+                          try {
+                            final result = await ref
+                                .read(qaulWorkerProvider)
+                                .setTransportEnabled(
                                 id,
                                 enabled: value,
                               );
-                          if (context.mounted) {
-                            updatingTransportIds.value = {
-                              ...updatingTransportIds.value.where(
-                                (updatingId) => updatingId != id,
-                              ),
-                            };
+
+                            if (result?.success != true) {
+                              if (context.mounted) {
+                                _showTransportError(context, result?.error);
+                              }
+                              return;
+                            }
+
+                            if (!await refreshTransports() && context.mounted) {
+                              _showTransportError(context);
+                            }
+                          } catch (_) {
+                            if (context.mounted) _showTransportError(context);
+                          } finally {
+                            if (context.mounted) {
+                              updatingTransportIds.value = {
+                                ...updatingTransportIds.value.where(
+                                  (updatingId) => updatingId != id,
+                                ),
+                              };
+                            }
                           }
                         },
                       );
@@ -599,6 +630,16 @@ class _NetworkOptions extends HookConsumerWidget {
         const _InternetNodesList(),
       ],
     );
+  }
+
+  static void _showTransportError(BuildContext context, [String? error]) {
+    final l10n = AppLocalizations.of(context)!;
+    final message = error?.isNotEmpty == true
+        ? error!
+        : l10n.genericErrorMessage;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 }
 
