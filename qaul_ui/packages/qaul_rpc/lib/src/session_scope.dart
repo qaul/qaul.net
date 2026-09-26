@@ -32,7 +32,6 @@ final qaulRpcSessionScopedProviders = <ProviderOrFamily>[
   // Node / connectivity state, reported by the daemon per signed-in account.
   bleStatusProvider,
   connectedNodesProvider,
-  networkTransportsProvider,
   dtnConfigurationProvider,
   nodeInfoProvider,
 ];

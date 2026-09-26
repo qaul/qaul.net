@@ -1,18 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:hooks_riverpod/legacy.dart';
 
 import '../generated/connections/transports.pb.dart';
-
-final networkTransportsProvider =
-    StateProvider<List<NetworkTransport>>((ref) => []);
-
-/// Keeps [networkTransportsProvider] in sync after future-based RPC calls.
-void syncNetworkTransports(
-  StateController<List<NetworkTransport>> notifier,
-  List<NetworkTransport> transports,
-) {
-  notifier.state = transports;
-}
 
 class NetworkTransport extends Equatable {
   const NetworkTransport({

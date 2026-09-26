@@ -24,13 +24,4 @@ class TransportTranslator extends RpcModuleTranslator {
         return super.decodeMessageBytes(data, ref);
     }
   }
-
-  @override
-  Future<void> processResponse(RpcTranslatorResponse res, Ref ref) async {
-    if (res.module != type || res.data is! List<NetworkTransport>) return;
-    syncNetworkTransports(
-      ref.read(networkTransportsProvider.notifier),
-      res.data as List<NetworkTransport>,
-    );
-  }
 }

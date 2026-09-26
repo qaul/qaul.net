@@ -408,36 +408,24 @@ class LibqaulWorker {
   // -------------------
   // TRANSPORTS Requests
   // -------------------
-  Future<List<NetworkTransport>> requestTransports() async {
-    final result = await _sendRequest<List<NetworkTransport>>(
+  Future<List<NetworkTransport>?> requestTransports() =>
+      _sendRequest<List<NetworkTransport>>(
       module: Modules.TRANSPORTS,
       data: Transports(listRequest: TransportsListRequest()),
       adapter: _payload<List<NetworkTransport>>,
     );
-    final transports = result ?? [];
-    syncNetworkTransports(
-      _ref.read(networkTransportsProvider.notifier),
-      transports,
-    );
-    return transports;
-  }
 
-  Future<bool> setTransportEnabled(
+  Future<TransportSetEnabledResult?> setTransportEnabled(
     String id, {
     required bool enabled,
-  }) async {
-    final result = await _sendRequest<TransportSetEnabledResult>(
+  }) =>
+      _sendRequest<TransportSetEnabledResult>(
       module: Modules.TRANSPORTS,
       data: Transports(
         setEnabled: TransportSetEnabled(id: id, enabled: enabled),
       ),
       adapter: _payload<TransportSetEnabledResult>,
     );
-
-    if (result?.success != true) return false;
-    await requestTransports();
-    return true;
-  }
 
   // -------------------
   // USERACCOUNTS Requests
