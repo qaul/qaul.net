@@ -1009,23 +1009,29 @@ impl Messaging {
     }
 
     /// received message from qaul_messaging behaviour
-    pub fn received(state: &crate::QaulState, received: QaulMessagingReceived) {
+    ///
+    /// `transport` is the connection module the message arrived on.
+    pub fn received(
+        state: &crate::QaulState,
+        received: QaulMessagingReceived,
+        transport: ConnectionModule,
+    ) {
         // decode message container
         match proto::Container::decode(&received.data[..]) {
             Ok(container) => {
-                let receiver_id = match container.envelope.as_ref() {
-                    Some(envelope) => match PeerId::from_bytes(&envelope.receiver_id) {
-                        Ok(receiver_id) => receiver_id,
-                        Err(e) => {
-                            log::error!(
-                                "invalid peer ID of message {}: {}",
-                                bs58::encode(&container.signature).into_string(),
-                                e
-                            );
-                            return;
-                        }
-                    },
-                    None => return,
+                let Some(envelope) = container.envelope.as_ref() else {
+                    return;
+                };
+                let receiver_id = match PeerId::from_bytes(&envelope.receiver_id) {
+                    Ok(receiver_id) => receiver_id,
+                    Err(e) => {
+                        log::error!(
+                            "invalid peer ID of message {}: {}",
+                            bs58::encode(&container.signature).into_string(),
+                            e
+                        );
+                        return;
+                    }
                 };
 
                 // check if message is local user account
@@ -1038,6 +1044,12 @@ impl Messaging {
 
                     // schedule it for further sending otherwise
                     None => {
+                        state.metrics.message_forwarded(
+                            transport,
+                            &envelope.sender_id,
+                            &envelope.receiver_id,
+                            received.data.len(),
+                        );
                         state.services.messaging.schedule_message(receiver_id, container, true, true, false, false)
                     }
                 }

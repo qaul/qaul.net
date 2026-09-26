@@ -25,6 +25,7 @@ use crate::utilities::filelogger::FileLoggerState;
 // crate modules
 pub mod api;
 pub mod connections;
+pub mod metrics;
 pub mod node;
 pub mod router;
 pub mod rpc;
@@ -92,6 +93,8 @@ pub struct QaulState {
     pub default_configs: BTreeMap<String, String>,
     /// Whether the instance has finished initializing (event loop started).
     pub initialized: AtomicBool,
+    /// Node metrics (counters and histograms, reset on restart)
+    pub metrics: metrics::MetricsState,
 }
 
 /// Per-request RPC context threaded through the generated `dispatch::<S, T>`.
@@ -155,6 +158,7 @@ impl QaulState {
             filelogger: FileLoggerState::new(),
             default_configs: BTreeMap::new(),
             initialized: AtomicBool::new(false),
+            metrics: metrics::MetricsState::new(),
         }
     }
 
@@ -184,6 +188,7 @@ impl QaulState {
             filelogger: FileLoggerState::new(),
             default_configs,
             initialized: AtomicBool::new(false),
+            metrics: metrics::MetricsState::new(),
         }
     }
 }
@@ -329,6 +334,16 @@ impl Libqaul {
             // Router::init() already stored real RouterState into QaulState.
             qaul_state.replace_node(Arc::clone(&node.node));
             qaul_state.filelogger.enable(config.debug.log);
+
+            // metrics: an explicit config choice wins, otherwise the
+            // client's startup default decides (off when not given)
+            let client_default = qaul_state
+                .default_configs
+                .get("metrics")
+                .is_some_and(|v| v == "true");
+            qaul_state
+                .metrics
+                .set_enabled(config.metrics.enabled.unwrap_or(client_default));
         }
 
         // Bring back the sessions of accounts that were left logged in
@@ -960,7 +975,7 @@ impl Libqaul {
                                 received_from: neighbour_id,
                                 data,
                             };
-                            Messaging::received(&*self.state, message);
+                            Messaging::received(&*self.state, message, ConnectionModule::Local);
                         }
                         ConnectionModule::None => {}
                     }

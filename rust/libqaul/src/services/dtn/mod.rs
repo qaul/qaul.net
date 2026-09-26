@@ -15,6 +15,7 @@ use std::collections::HashMap;
 use std::{fmt, sync::RwLock};
 
 use super::messaging::{proto, MessagingServiceType};
+use crate::metrics::{DtnVersion, PairStats, PeerPair};
 use crate::node::user_accounts::{UserAccount, UserAccounts};
 use crate::router::users::Users;
 use crate::rpc::Rpc;
@@ -316,6 +317,29 @@ impl DtnModuleState {
         let state = self.inner.read().unwrap();
         (state.used_size, state.message_counts)
     }
+
+    /// V2 messages in custody, grouped by sender and receiver.
+    pub fn v2_storage_by_pair(&self) -> HashMap<PeerPair, PairStats> {
+        let mut pairs: HashMap<PeerPair, PairStats> = HashMap::new();
+        let v2 = self.v2.read().unwrap();
+        for entry in v2.db_ref_routed_v2.iter() {
+            let Ok((_, entry_bytes)) = entry else {
+                continue;
+            };
+            let Ok(v2_entry) = bincode::deserialize::<DtnRoutedV2Entry>(&entry_bytes) else {
+                continue;
+            };
+            let sender_id = match PublicKey::try_decode_protobuf(&v2_entry.sender_public_key) {
+                Ok(key) => PeerId::from_public_key(&key).to_bytes(),
+                Err(_) => Vec::new(),
+            };
+            pairs
+                .entry((sender_id, v2_entry.receiver_id))
+                .or_default()
+                .add(v2_entry.size as u64);
+        }
+        pairs
+    }
 }
 
 /// qaul Delayed
@@ -381,14 +405,14 @@ impl Dtn {
         receiver_id: &PeerId,
         org_sig: &Vec<u8>,
         dtn_payload: &Vec<u8>,
-    ) -> (i32, i32) {
+    ) -> (proto::dtn_response::ResponseType, proto::dtn_response::Reason) {
         let mut storage_state = match state.services.dtn.inner.write() {
             Ok(s) => s,
             Err(e) => {
                 log::error!("DTN: failed to acquire write lock: {}", e);
                 return (
-                    super::messaging::proto::dtn_response::ResponseType::Rejected as i32,
-                    super::messaging::proto::dtn_response::Reason::None as i32,
+                    proto::dtn_response::ResponseType::Rejected,
+                    proto::dtn_response::Reason::None,
                 );
             }
         };
@@ -396,8 +420,8 @@ impl Dtn {
         // check already received
         if storage_state.db_ref_id.contains_key(org_sig).unwrap_or(false) {
             return (
-                super::messaging::proto::dtn_response::ResponseType::Accepted as i32,
-                super::messaging::proto::dtn_response::Reason::None as i32,
+                proto::dtn_response::ResponseType::Accepted,
+                proto::dtn_response::Reason::None,
             );
         }
 
@@ -409,8 +433,8 @@ impl Dtn {
             None => {
                 log::error!("dtn module: user profile no exists");
                 return (
-                    super::messaging::proto::dtn_response::ResponseType::Rejected as i32,
-                    super::messaging::proto::dtn_response::Reason::UserNotAccepted as i32,
+                    proto::dtn_response::ResponseType::Rejected,
+                    proto::dtn_response::Reason::UserNotAccepted,
                 );
             }
         }
@@ -420,8 +444,8 @@ impl Dtn {
         let total_limit = (user_profile.storage.size_total as u64) * 1024 * 1024;
         if new_size > total_limit {
             return (
-                super::messaging::proto::dtn_response::ResponseType::Rejected as i32,
-                super::messaging::proto::dtn_response::Reason::OverallQuota as i32,
+                proto::dtn_response::ResponseType::Rejected,
+                proto::dtn_response::Reason::OverallQuota,
             );
         }
 
@@ -451,8 +475,8 @@ impl Dtn {
                 Err(e) => {
                     log::error!("DTN: failed to serialize message entry: {}", e);
                     return (
-                        super::messaging::proto::dtn_response::ResponseType::Rejected as i32,
-                        super::messaging::proto::dtn_response::Reason::None as i32,
+                        proto::dtn_response::ResponseType::Rejected,
+                        proto::dtn_response::Reason::None,
                     );
                 }
             };
@@ -481,12 +505,13 @@ impl Dtn {
                     // entry is committed — now account for its storage
                     storage_state.message_counts = storage_state.message_counts + 1;
                     storage_state.used_size = new_size;
+                    state.metrics.dtn_stored(DtnVersion::V1, dtn_payload.len());
                 }
                 Err(e) => {
                     log::error!("dtn entry store transaction failed: {:?}", e);
                     return (
-                        super::messaging::proto::dtn_response::ResponseType::Rejected as i32,
-                        super::messaging::proto::dtn_response::Reason::None as i32,
+                        proto::dtn_response::ResponseType::Rejected,
+                        proto::dtn_response::Reason::None,
                     );
                 }
             }
@@ -505,8 +530,8 @@ impl Dtn {
         }
 
         (
-            super::messaging::proto::dtn_response::ResponseType::Accepted as i32,
-            super::messaging::proto::dtn_response::Reason::None as i32,
+            proto::dtn_response::ResponseType::Accepted,
+            proto::dtn_response::Reason::None,
         )
     }
 
@@ -523,34 +548,34 @@ impl Dtn {
                         }
                     };
 
-                    let mut res: (i32, i32) = (
-                        super::messaging::proto::dtn_response::ResponseType::Accepted as i32,
-                        super::messaging::proto::dtn_response::Reason::None as i32,
-                    );
-
                     //if container.envelope.receiver_id
                     if let Ok(receiver_id) = PeerId::from_bytes(&envelope.receiver_id) {
-                        if receiver_id == *user_id {
+                        let (response_type, reason) = if receiver_id == *user_id {
                             // by process geneal message, the confirm message is transfered to the original sender.
                             super::messaging::process::MessagingProcess::process_received_message(
                                 state,
                                 user_account.clone(),
                                 container,
                             );
+                            (
+                                proto::dtn_response::ResponseType::Accepted,
+                                proto::dtn_response::Reason::None,
+                            )
                         } else {
-                            res = Self::process_storage_node_message(
+                            Self::process_storage_node_message(
                                 state,
                                 &user_account,
                                 &receiver_id,
                                 signature,
                                 dtn_payload,
-                            );
-                        }
+                            )
+                        };
+                        state.metrics.dtn_custody(DtnVersion::V1, response_type, reason);
 
                         // we send DTN response message
                         let dnt_response = super::messaging::proto::DtnResponse {
-                            response_type: res.0,
-                            reason: res.1,
+                            response_type: response_type as i32,
+                            reason: reason as i32,
                             signature: signature.clone(),
                         };
                         let send_message = proto::Messaging {
@@ -1404,6 +1429,7 @@ impl Dtn {
 
             v2.used_size += entry_size as u64;
             v2.message_count += 1;
+            state.metrics.dtn_stored(DtnVersion::V2, entry_size as usize);
 
             // Update sender quota
             let mut quota = if let Ok(Some(quota_bytes)) = v2
@@ -1483,6 +1509,7 @@ impl Dtn {
         response_type: proto::dtn_response::ResponseType,
         reason: proto::dtn_response::Reason,
     ) {
+        state.metrics.dtn_custody(DtnVersion::V2, response_type, reason);
         let dtn_response = proto::DtnResponse {
             response_type: response_type as i32,
             reason: reason as i32,

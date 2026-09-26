@@ -9,6 +9,7 @@
 use libp2p::PeerId;
 use prost::Message;
 
+use crate::metrics::ReceiveOutcome;
 use crate::node::user_accounts::UserAccount;
 use crate::router;
 use crate::services::chat::{self, rpc_proto, ChatFile, ChatStorage};
@@ -259,107 +260,69 @@ impl MessagingProcess {
 
     /// process received message
     pub fn process_received_message(state: &crate::QaulState, user_account: UserAccount, container: super::proto::Container) {
-        // check envelop
-        let envelope;
-        match container.envelope {
-            Some(v) => envelope = v,
-            _ => {
-                log::error!("No Envelope in Message Container");
-                return;
+        let outcome = match Self::verify_and_dispatch(state, user_account, container) {
+            Ok(()) => ReceiveOutcome::Ok,
+            Err(outcome) => {
+                log::error!("received message dropped: {:?}", outcome);
+                outcome
             }
-        }
+        };
+        state.metrics.message_received(outcome);
+    }
 
-        // check sender_id
-        let sender_id;
-        match PeerId::from_bytes(&envelope.sender_id) {
-            Ok(v) => {
-                sender_id = v;
-            }
-            _ => {
-                log::error!("Error retrieving PeerId");
-                return;
-            }
-        }
-
-        // check key
-        let key;
-        let rs = state.get_router();
-        match router::users::Users::get_pub_key(&rs, &sender_id) {
-            Some(v) => {
-                key = v;
-            }
-            _ => {
-                log::error!("No key found for user {}", sender_id.to_base58());
-                return;
-            }
-        }
+    /// Verify a received message and hand its payload to the owning service.
+    fn verify_and_dispatch(
+        state: &crate::QaulState,
+        user_account: UserAccount,
+        container: super::proto::Container,
+    ) -> Result<(), ReceiveOutcome> {
+        let envelope = container.envelope.ok_or(ReceiveOutcome::NoEnvelope)?;
+        let sender_id =
+            PeerId::from_bytes(&envelope.sender_id).map_err(|_| ReceiveOutcome::InvalidId)?;
 
         // verify sign
+        let rs = state.get_router();
+        let key = router::users::Users::get_pub_key(&rs, &sender_id)
+            .ok_or(ReceiveOutcome::UnknownSender)?;
         let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
         envelope
             .encode(&mut envelope_buf)
             .expect("Vec<u8> provides capacity as needed");
         if !key.verify(&envelope_buf, &container.signature) {
-            log::error!("verification failed");
-            return;
+            return Err(ReceiveOutcome::VerifyFailed);
         }
 
-        // check receiver_id
-        let receiver_id;
-        match PeerId::from_bytes(&envelope.receiver_id) {
-            Ok(v) => {
-                receiver_id = v;
-            }
-            _ => {
-                log::error!("Error retrieving PeerId");
-                return;
-            }
-        }
+        let receiver_id =
+            PeerId::from_bytes(&envelope.receiver_id).map_err(|_| ReceiveOutcome::InvalidId)?;
+        let payload = super::proto::EnvelopPayload::decode(&envelope.payload[..])
+            .map_err(|_| ReceiveOutcome::DecodeError)?;
 
-        match super::proto::EnvelopPayload::decode(&envelope.payload[..]) {
-            Ok(payload) => {
-                match payload.payload {
-                    Some(super::proto::envelop_payload::Payload::Encrypted(encrypted)) => {
-                        // decrypt data
-                        let decrypted: Vec<u8>;
-                        match Crypto::decrypt(
-                            state,
-                            encrypted,
-                            user_account.clone(),
-                            sender_id.clone(),
-                            &container.signature,
-                        ) {
-                            Some(decryption_result) => decrypted = decryption_result,
-                            None => {
-                                log::error!("decryption error");
-                                return;
-                            }
-                        }
-
-                        Self::on_decrypted_message(
-                            state,
-                            &sender_id,
-                            user_account,
-                            &decrypted,
-                            &container.signature,
-                        );
-                    }
-                    Some(super::proto::envelop_payload::Payload::Dtn(dtn)) => {
-                        dtn::Dtn::net(state, &receiver_id, &sender_id, &container.signature, &dtn);
-                    }
-                    Some(super::proto::envelop_payload::Payload::DtnRoutedV2(routed_v2)) => {
-                        dtn::Dtn::net_routed_v2(state, &receiver_id, &sender_id, &container.signature, routed_v2);
-                    }
-                    _ => {
-                        log::error!("unknown envelop payload");
-                        return;
-                    }
-                }
+        match payload.payload {
+            Some(super::proto::envelop_payload::Payload::Encrypted(encrypted)) => {
+                let decrypted = Crypto::decrypt(
+                    state,
+                    encrypted,
+                    user_account.clone(),
+                    sender_id,
+                    &container.signature,
+                )
+                .ok_or(ReceiveOutcome::DecryptFailed)?;
+                Self::on_decrypted_message(
+                    state,
+                    &sender_id,
+                    user_account,
+                    &decrypted,
+                    &container.signature,
+                );
             }
-            _ => {
-                log::error!("envelop payload decode error");
-                return;
+            Some(super::proto::envelop_payload::Payload::Dtn(dtn)) => {
+                dtn::Dtn::net(state, &receiver_id, &sender_id, &container.signature, &dtn);
             }
+            Some(super::proto::envelop_payload::Payload::DtnRoutedV2(routed_v2)) => {
+                dtn::Dtn::net_routed_v2(state, &receiver_id, &sender_id, &container.signature, routed_v2);
+            }
+            None => return Err(ReceiveOutcome::DecodeError),
         }
+        Ok(())
     }
 }

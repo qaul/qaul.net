@@ -198,6 +198,17 @@ impl Default for DebugOption {
     }
 }
 
+/// Metrics Configuration Options
+///
+/// `enabled` is unset until a user or client chooses. While unset,
+/// the startup default decides: clients pass `metrics = "true"` in
+/// their default configs (qauld, qaul-cli), everything else is off.
+#[derive(Debug, Deserialize, Clone, Serialize, Default)]
+pub struct MetricsOption {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<bool>,
+}
+
 /// Routing Configuration Options
 ///
 /// The following options can be configured:
@@ -356,6 +367,10 @@ pub struct Configuration {
     pub handshake_extras: HandshakeExtras,
     #[serde(default)]
     pub crypto_rotation: CryptoRotation,
+    /// Node instrumentation. `#[serde(default)]` so existing
+    /// `config.yaml` files (which predate this section) load unset.
+    #[serde(default)]
+    pub metrics: MetricsOption,
 }
 
 impl Default for Configuration {
@@ -370,6 +385,7 @@ impl Default for Configuration {
             routing: RoutingOptions::default(),
             handshake_extras: HandshakeExtras::default(),
             crypto_rotation: CryptoRotation::default(),
+            metrics: MetricsOption::default(),
         }
     }
 }
@@ -511,6 +527,19 @@ impl Configuration {
     pub fn get_debug_log(state: &crate::QaulState) -> bool {
         let config_mutable = state.config.inner.read().unwrap();
         config_mutable.debug.log
+    }
+
+    /// Persist the metrics collection choice.
+    /// Only writes `config.yaml` when the choice changed.
+    pub fn set_metrics_enabled(state: &crate::QaulState, enabled: bool) {
+        {
+            let mut config_mutable = state.config.inner.write().unwrap();
+            if config_mutable.metrics.enabled == Some(enabled) {
+                return;
+            }
+            config_mutable.metrics.enabled = Some(enabled);
+        }
+        Self::save(state);
     }
 
     /// Returns true/false whether this node has been initialized,

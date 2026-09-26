@@ -132,6 +132,8 @@ async fn run(cli_arguments: CliArguments, storage_path: String) {
     // create default config
     let mut def_config: BTreeMap<String, String> = BTreeMap::new();
     {
+        // metrics are on by default for qauld
+        def_config.insert("metrics".to_string(), "true".to_string());
         if let Some(v) = cli_arguments.name.as_deref() {
             def_config.insert("name".to_string(), v.to_string());
         }
