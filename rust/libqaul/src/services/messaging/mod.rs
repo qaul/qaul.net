@@ -747,6 +747,76 @@ impl Messaging {
         }
     }
 
+    /// pack, sign and schedule an already-application-encrypted payload
+    /// **without** per-recipient session encryption.
+    ///
+    /// `data` is a serialized `CommonMessage` whose content is already
+    /// encrypted at the application layer (group-file envelope: the body
+    /// is encrypted once under a per-file key). The Envelope is still
+    /// signed, so the receiver authenticates the sender; it routes the
+    /// `Plain` payload through the same post-decrypt dispatch as a
+    /// normal message. This lets a large file body be produced once and
+    /// sent to each member without N× re-encryption.
+    pub fn pack_and_send_plain_data(
+        state: &crate::QaulState,
+        user_account: &UserAccount,
+        receiver: &PeerId,
+        data: Vec<u8>,
+        message_id: &[u8],
+        message_needs_confirmation: bool,
+    ) -> Result<Vec<u8>, String> {
+        log::trace!(
+            "pack_and_send_plain_data to {} ({} bytes)",
+            receiver.to_base58(),
+            data.len()
+        );
+
+        let envelop_payload = proto::EnvelopPayload {
+            payload: Some(proto::envelop_payload::Payload::Plain(data)),
+        };
+
+        let envelope = proto::Envelope {
+            sender_id: user_account.id.to_bytes(),
+            receiver_id: receiver.to_bytes(),
+            payload: envelop_payload.encode_to_vec(),
+        };
+
+        let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());
+        envelope
+            .encode(&mut envelope_buf)
+            .expect("Vec<u8> provides capacity as needed");
+
+        if let Ok(signature) = user_account.keys.sign(&envelope_buf) {
+            let container = proto::Container {
+                signature: signature.clone(),
+                envelope: Some(envelope),
+            };
+
+            if message_needs_confirmation {
+                state.services.messaging.save_unconfirmed_message(
+                    MessagingServiceType::ChatFile,
+                    message_id,
+                    receiver,
+                    &container,
+                    false,
+                );
+            }
+
+            state.services.messaging.schedule_message(
+                receiver.clone(),
+                container,
+                message_needs_confirmation,
+                false,
+                false,
+                false,
+            );
+
+            Ok(signature)
+        } else {
+            Err("messaging signing error".to_string())
+        }
+    }
+
     /// pack, sign and schedule a message for sending
     pub fn send_dtn_message(
         state: &crate::QaulState,

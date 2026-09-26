@@ -31,6 +31,14 @@ message EnvelopPayload {
         bytes dtn = 2;
         // directed custody routed DTN message
         DtnRoutedV2 dtn_routed_v2 = 3;
+        // Signed-but-not-session-encrypted payload. Carries a
+        // CommonMessage whose content is already encrypted at the
+        // application layer (group-file envelope: the body is encrypted
+        // once under a per-file key). The Envelope signature still
+        // authenticates the sender; payload confidentiality is the
+        // application's responsibility. Used to avoid re-encrypting a
+        // large file body once per group member.
+        bytes plain = 4;
     }
 }
 
