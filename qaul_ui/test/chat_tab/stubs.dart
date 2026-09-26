@@ -213,6 +213,9 @@ class StubLibqaulWorker implements LibqaulWorker {
   Future<bool> removeDTNUser(Uint8List userId) => throw UnimplementedError();
 
   @override
+  Future<bool> setDTNTotalSize(int megabytes) => throw UnimplementedError();
+
+  @override
   Future<void> removeNode(String address) => throw UnimplementedError();
 
   @override

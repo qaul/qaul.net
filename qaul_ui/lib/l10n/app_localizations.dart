@@ -829,6 +829,48 @@ abstract class AppLocalizations {
   /// **'currently installed version:'**
   String get currentVersion;
 
+  /// No description provided for @dtnStorageCustomSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get dtnStorageCustomSize;
+
+  /// No description provided for @dtnStorageDefaultHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Default: {size}'**
+  String dtnStorageDefaultHint(String size);
+
+  /// No description provided for @dtnStorageDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Space qaul may use on this device to hold messages for people who are currently offline, until they can be delivered.'**
+  String get dtnStorageDescription;
+
+  /// No description provided for @dtnStorageLowerWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages already stored won\'t be removed immediately. New ones will be refused until enough space frees up.'**
+  String get dtnStorageLowerWarning;
+
+  /// No description provided for @dtnStorageMaxError.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum is {size}'**
+  String dtnStorageMaxError(String size);
+
+  /// No description provided for @dtnStorageMinError.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum is {size}'**
+  String dtnStorageMinError(String size);
+
+  /// No description provided for @dtnStorageSizeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporary Message Storage for Other Users'**
+  String get dtnStorageSizeTitle;
+
   /// No description provided for @editGroupUserNames.
   ///
   /// In en, this message translates to:
@@ -979,11 +1021,29 @@ abstract class AppLocalizations {
   /// **'formerly installed version:'**
   String get previousVersion;
 
+  /// No description provided for @resetToDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to default'**
+  String get resetToDefault;
+
+  /// No description provided for @saveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'SAVE'**
+  String get saveButton;
+
   /// No description provided for @securePrivateMessageHint.
   ///
   /// In en, this message translates to:
   /// **'Secure private message'**
   String get securePrivateMessageHint;
+
+  /// No description provided for @storage.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage'**
+  String get storage;
 
   /// No description provided for @systemDefault.
   ///

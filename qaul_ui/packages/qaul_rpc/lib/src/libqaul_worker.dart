@@ -859,6 +859,26 @@ class LibqaulWorker {
     return result ?? false;
   }
 
+  /// Sets the storage capacity (in MB) for DTN messages held on behalf of
+  /// other users, then refreshes [dtnConfigurationProvider].
+  ///
+  /// Throws an [ArgumentError] carrying libqaul's message if it rejects the value.
+  Future<bool> setDTNTotalSize(int megabytes) async {
+    final msg = DTN(
+      dtnSetTotalSizeRequest: DtnSetTotalSizeRequest(totalSize: megabytes),
+    );
+    final result = await _sendRequest<bool>(
+      module: Modules.DTN,
+      data: msg,
+      adapter: (res) {
+        if (res.data is bool) return res.data as bool;
+        return null;
+      },
+    );
+    if (result == true) await getDTNConfiguration();
+    return result ?? false;
+  }
+
   // -------------------
   Future<void> setLibqaulLogging(bool enabled) async {
     final msg = Debug(logToFile: LogToFile(enable: enabled));
