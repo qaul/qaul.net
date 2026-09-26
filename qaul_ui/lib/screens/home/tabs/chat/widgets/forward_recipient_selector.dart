@@ -178,7 +178,10 @@ class _ForwardRecipientSelectorScreenState
     );
 
     if (Responsiveness.isMobile(context)) {
-      Navigator.pushReplacement(
+      _markChatRoomOpened(ref, room);
+      // Replace both this selector and the source chat so that leaving the
+      // target chat returns to the chat list instead of a stale chat screen.
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
           builder: (_) => ChatScreen(
@@ -189,6 +192,9 @@ class _ForwardRecipientSelectorScreenState
           ),
           settings: const RouteSettings(name: _kChatRouteName),
         ),
+        (route) =>
+            route.settings.name != _kChatRouteName &&
+            route.settings.name != _kForwardRecipientRouteName,
       );
       return;
     }

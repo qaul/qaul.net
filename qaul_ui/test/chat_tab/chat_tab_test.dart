@@ -597,6 +597,78 @@ void main() {
         'forward this text');
   });
 
+  testWidgets('mobile forward replaces the source chat and back returns home', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(414, 736);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final room = buildDirectChat();
+    final wut = ProviderScope(
+      overrides: [
+        defaultUserProvider.overrideWith((_) => defaultUser),
+        chatNotificationControllerProvider.overrideWithValue(
+          NullChatNotificationController(),
+        ),
+        chatRoomsProvider.overrideWith(TestChatRoomListNotifier.new),
+        usersStoreProvider.overrideWith(() => TestUsersStore()),
+        qaulWorkerProvider.overrideWith((ref) => StubLibqaulWorker(ref)),
+      ],
+      child: MaterialApp(
+        localizationsDelegates: [
+          ...AppLocalizations.localizationsDelegates,
+          QaulComponentsLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      ChatScreen(room, defaultUser, otherUser: otherUser),
+                  settings: const RouteSettings(name: '/chat'),
+                ),
+              );
+            },
+            child: const Text('Open chat'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(wut);
+    await tester.tap(find.text('Open chat'));
+    await tester.pumpAndSettle();
+
+    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+    chat.onMessageLongPress!(
+      tester.element(find.byType(chat_ui.Chat)),
+      forwardTargetMessage(),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Forward'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Group Chat'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ChatScreen, skipOffstage: false), findsOneWidget);
+    expect(find.text('Group Chat'), findsOneWidget);
+    expect(
+      tester.widget<TextField>(find.byType(TextField)).controller!.text,
+      'forward this text',
+    );
+
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ChatScreen, skipOffstage: false), findsNothing);
+    expect(find.text('Open chat'), findsOneWidget);
+  });
+
   testWidgets('chat header close pops the mobile chat route', (tester) async {
     tester.view.physicalSize = const Size(414, 736);
     tester.view.devicePixelRatio = 1;

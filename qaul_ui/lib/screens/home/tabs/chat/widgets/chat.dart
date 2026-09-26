@@ -79,14 +79,9 @@ ChatRenderMode resolveChatRenderMode(ChatRoom room) =>
 
 const _kChatRouteName = '/chat';
 
-Future<void> openChat(
-  ChatRoom room, {
-  required WidgetRef ref,
-  required BuildContext context,
-  required User user,
-  User? otherUser,
-  String? initialMessageText,
-}) async {
+const _kForwardRecipientRouteName = '/chat/forward';
+
+void _markChatRoomOpened(WidgetRef ref, ChatRoom room) {
   final openedRoom = room.unreadCount > 0
       ? room.copyWith(unreadCount: 0)
       : room;
@@ -95,6 +90,17 @@ Future<void> openChat(
     chatRoomsState.replacePreservingOrder(openedRoom);
   }
   ref.read(currentOpenChatRoom.notifier).state = openedRoom;
+}
+
+Future<void> openChat(
+  ChatRoom room, {
+  required WidgetRef ref,
+  required BuildContext context,
+  required User user,
+  User? otherUser,
+  String? initialMessageText,
+}) async {
+  _markChatRoomOpened(ref, room);
 
   bool isMobile =
       MediaQuery.of(context).size.width < Responsiveness.kTabletBreakpoint;
@@ -337,6 +343,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           defaultUser: defaultUser,
           forwardedText: messageText,
         ),
+        settings: const RouteSettings(name: _kForwardRecipientRouteName),
       ),
     );
   }
