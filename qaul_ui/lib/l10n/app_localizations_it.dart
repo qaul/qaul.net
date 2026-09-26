@@ -320,6 +320,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get copy => 'Copia';
 
   @override
+  String get share => 'Condividi';
+
+  @override
   String get messageCopied => 'Messaggio copiato';
 
   @override

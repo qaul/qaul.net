@@ -319,6 +319,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get copy => 'Kopyala';
 
   @override
+  String get share => 'Paylaş';
+
+  @override
   String get messageCopied => 'Mesaj kopyalandı';
 
   @override

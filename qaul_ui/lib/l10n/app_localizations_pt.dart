@@ -323,6 +323,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get copy => 'Copiar';
 
   @override
+  String get share => 'Compartilhar';
+
+  @override
   String get messageCopied => 'Mensagem copiada';
 
   @override

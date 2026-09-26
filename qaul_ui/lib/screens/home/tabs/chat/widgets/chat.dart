@@ -42,6 +42,7 @@ import '../../../../../widgets/widgets.dart';
 import '../../../user_details_screen.dart';
 import '../../tab.dart';
 import 'conditional/conditional.dart';
+import 'message_share_service.dart';
 
 part 'audio_message_widget.dart';
 
@@ -73,6 +74,8 @@ class _ForwardDraft {
 final _pendingForwardDraftProvider = StateProvider<_ForwardDraft?>(
   (_) => null,
 );
+
+final _log = Logger('ChatScreen');
 
 ChatRenderMode resolveChatRenderMode(ChatRoom room) =>
     room.isGroupChatRoom ? ChatRenderMode.group : ChatRenderMode.direct;
@@ -130,6 +133,7 @@ class ChatScreen extends StatefulHookConsumerWidget {
     super.key,
     this.otherUser,
     this.initialMessageText,
+    this.messageShareService,
   });
 
   final ChatRoom room;
@@ -141,6 +145,9 @@ class ChatScreen extends StatefulHookConsumerWidget {
   final User? otherUser;
 
   final String? initialMessageText;
+
+  /// Overrides system sharing in tests.
+  final MessageShareService? messageShareService;
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -273,6 +280,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                 messageContext,
                 message.text,
               ),
+              onShare: () => _shareMessage(
+                dialogContext,
+                messageContext,
+                message.text,
+              ),
             ),
           ),
         );
@@ -306,6 +318,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   List<ChatMessageContextMenuElement> _buildForwardContextMenuElements({
     required VoidCallback onForward,
     required VoidCallback onCopy,
+    required VoidCallback onShare,
   }) {
     return [
       const ChatMessageReactionRow(
@@ -334,11 +347,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
         iconAsset: ChatMessageContextMenuIcons.info,
         enabled: false,
       ),
-      const ChatMessageContextMenuAction(
+      ChatMessageContextMenuAction(
         id: 'share',
-        label: 'Share',
+        label: AppLocalizations.of(context)!.share,
         iconAsset: ChatMessageContextMenuIcons.share,
-        enabled: false,
+        onPressed: onShare,
       ),
       ChatMessageContextMenuAction(
         id: 'copy',
@@ -508,6 +521,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     _showCopyFeedback(messageRect);
   }
 
+  Future<void> _shareMessage(
+    BuildContext dialogContext,
+    BuildContext messageContext,
+    String text,
+  ) async {
+    final shareOrigin = _shareOriginInOverlay(messageContext);
+    Navigator.pop(dialogContext);
+
+    if (text.trim().isEmpty) return;
+
+    try {
+      await (widget.messageShareService ?? const SystemMessageShareService())
+          .shareText(text: text, sharePositionOrigin: shareOrigin);
+    } on Object catch (error, stackTrace) {
+      _log.warning('Could not open the system share sheet', error, stackTrace);
+    }
+  }
+
   Rect? _messageRectInOverlay(BuildContext messageContext) {
     final messageBox = messageContext.findRenderObject() as RenderBox?;
     final overlay = Overlay.of(context, rootOverlay: true);
@@ -518,6 +549,25 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
     return messageBox.localToGlobal(Offset.zero, ancestor: overlayBox) &
         messageBox.size;
+  }
+
+  /// The iPad share popover rejects origins that are empty or extend past the
+  /// screen, so clip the message to its visible part.
+  Rect? _shareOriginInOverlay(BuildContext messageContext) {
+    final overlay = Overlay.of(context, rootOverlay: true);
+    final overlayBox = overlay.context.findRenderObject() as RenderBox?;
+    if (overlayBox == null || !overlayBox.hasSize) return null;
+
+    final screenRect = Offset.zero & overlayBox.size;
+    final visibleRect =
+        _messageRectInOverlay(messageContext)?.intersect(screenRect);
+    if (visibleRect != null &&
+        visibleRect.width > 0 &&
+        visibleRect.height > 0) {
+      return visibleRect;
+    }
+
+    return Rect.fromCenter(center: screenRect.center, width: 1, height: 1);
   }
 
   void _showCopyFeedback(Rect messageRect) {

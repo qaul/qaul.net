@@ -321,6 +321,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get copy => 'Копировать';
 
   @override
+  String get share => 'Поделиться';
+
+  @override
   String get messageCopied => 'Сообщение скопировано';
 
   @override

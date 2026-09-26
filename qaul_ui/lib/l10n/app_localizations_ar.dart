@@ -317,6 +317,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get copy => 'نسخ';
 
   @override
+  String get share => 'مشاركة';
+
+  @override
   String get messageCopied => 'تم نسخ الرسالة';
 
   @override

@@ -37,6 +37,7 @@
   "chatEmptyMessageHint": "輸入你的信息...",
   "chatEmptyState": "無消息",
   "copy": "複製",
+  "share": "分享",
   "messageCopied": "訊息已複製",
   "chatNavButtonTooltip": "聊天",
   "chatNotificationsEnabled": "啟用/禁用聊天通知：",

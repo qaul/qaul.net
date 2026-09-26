@@ -321,6 +321,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get copy => 'Kopieren';
 
   @override
+  String get share => 'Teilen';
+
+  @override
   String get messageCopied => 'Nachricht kopiert';
 
   @override
