@@ -1,0 +1,6 @@
+Communicate with the people around you, without any Internet or communication infrastructure.
+
+Send encrypted chat messages, create chat groups, send photos, voice messages & files. Broadcast public messages to everyone.
+
+Communicate directly from device to device via Bluetooth, over your local wifi network, or via Internet overlay.
+Everyone connected to the mesh can be reached directly and you can still send messages to people not currently present.
