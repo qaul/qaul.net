@@ -4,6 +4,7 @@ class StubLibqaulWorker implements LibqaulWorker {
   StubLibqaulWorker(this.ref);
 
   static final sentTexts = <String>[];
+  static final sentFiles = <({String path, String description})>[];
 
   final Ref ref;
   final _logger = Logger('StubLibqaulWorker');
@@ -259,7 +260,9 @@ class StubLibqaulWorker implements LibqaulWorker {
     required String pathName,
     required Uint8List conversationId,
     required String description,
-  }) => throw UnimplementedError();
+  }) async {
+    sentFiles.add((path: pathName, description: description));
+  }
 
   @override
   Future<bool> sendPublicMessage(String content) => throw UnimplementedError();

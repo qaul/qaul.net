@@ -9,6 +9,7 @@ import Flutter
   ) -> Bool {
     let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
     let libqaulChannel = FlutterMethodChannel(name: "libqaul", binaryMessenger: controller.binaryMessenger)
+    let attachmentClipboardChannel = FlutterMethodChannel(name: "qaul/attachment_clipboard", binaryMessenger: controller.binaryMessenger)
     if #available(iOS 10.0, *) {
       UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
     }
@@ -55,6 +56,27 @@ import Flutter
       } else {
           result(FlutterMethodNotImplemented);
       }
+    })
+
+    attachmentClipboardChannel.setMethodCallHandler({
+      (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
+      guard call.method == "copyFile" else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      guard let args = call.arguments as? Dictionary<String, Any>,
+            let path = args["path"] as? String,
+            FileManager.default.fileExists(atPath: path) else {
+        result(FlutterError(code: "file_not_found", message: "The attachment is no longer available", details: nil))
+        return
+      }
+
+      if let image = UIImage(contentsOfFile: path) {
+        UIPasteboard.general.image = image
+      } else {
+        UIPasteboard.general.setValue(URL(fileURLWithPath: path).absoluteString, forPasteboardType: "public.file-url")
+      }
+      result(nil)
     })
 
     GeneratedPluginRegistrant.register(with: self)

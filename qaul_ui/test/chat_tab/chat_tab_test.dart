@@ -55,6 +55,8 @@ class TestUnreadChatRoomListNotifier extends ChatRoomListNotifier {
 
 class FakeMessageShareService implements MessageShareService {
   String? sharedText;
+  final sharedFiles = <({String name, String path})>[];
+  final copiedFiles = <({String name, String path})>[];
   Rect? sharePositionOrigin;
 
   @override
@@ -64,6 +66,24 @@ class FakeMessageShareService implements MessageShareService {
   }) async {
     sharedText = text;
     this.sharePositionOrigin = sharePositionOrigin;
+  }
+
+  @override
+  Future<void> shareFile({
+    required String filePath,
+    required String fileName,
+    required Rect? sharePositionOrigin,
+  }) async {
+    sharedFiles.add((name: fileName, path: filePath));
+    this.sharePositionOrigin = sharePositionOrigin;
+  }
+
+  @override
+  Future<void> copyFile({
+    required String filePath,
+    required String fileName,
+  }) async {
+    copiedFiles.add((name: fileName, path: filePath));
   }
 }
 
@@ -97,6 +117,7 @@ void main() {
   setUp(() {
     chatKey = UniqueKey();
     StubLibqaulWorker.sentTexts.clear();
+    StubLibqaulWorker.sentFiles.clear();
     TestChatRoomListNotifier.rooms = [buildGroupChat()];
     TestUsersStore.users = [otherUser];
     SharedPreferences.setMockInitialValues({});
@@ -339,8 +360,6 @@ void main() {
     expect(contextMenuRect.left, closeTo(expectedMenuLeft, 0.01));
     expect(contextMenuRect.top, closeTo(expectedMenuTop, 0.01));
 
-    await tester.tap(find.byKey(const ValueKey('next-page')));
-    await tester.pumpAndSettle();
     await tester.tap(find.text('Copy'));
     await tester.pumpAndSettle();
 
@@ -421,8 +440,6 @@ void main() {
     chat.onMessageLongPress!(tester.element(bubble), chat.messages.single);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const ValueKey('next-page')));
-    await tester.pumpAndSettle();
     await tester.tap(find.text('Share'));
     await tester.pumpAndSettle();
 
@@ -462,8 +479,6 @@ void main() {
     chat.onMessageLongPress!(tester.element(bubble), chat.messages.single);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const ValueKey('next-page')));
-    await tester.pumpAndSettle();
     await tester.tap(find.text('Share'));
     await tester.pumpAndSettle();
 
@@ -501,8 +516,6 @@ void main() {
       tester.element(find.byKey(const ValueKey('chat-bubble-surface'))),
       chat.messages.single,
     );
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('next-page')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Copy'));
     await tester.pumpAndSettle();
@@ -618,21 +631,133 @@ void main() {
 
     expect(find.byType(ChatMessageContextMenu), findsOneWidget);
     expect(find.text('Forward'), findsOneWidget);
-    expect(find.text('Reply'), findsOneWidget);
-    expect(find.text('Edit'), findsOneWidget);
-    expect(find.byTooltip('Love'), findsOneWidget);
-    expect(find.byTooltip('Like'), findsOneWidget);
-    expect(find.byTooltip('Fire'), findsOneWidget);
+    expect(find.text('Share'), findsOneWidget);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Reply'), findsNothing);
+    expect(find.text('Edit'), findsNothing);
+    expect(find.text('Info'), findsNothing);
+    expect(find.text('Delete'), findsNothing);
   });
 
-  testWidgets('attachment long press selects it and exposes Copy', (tester) async {
+  testWidgets('shares attachments from the long-press menu', (tester) async {
+    final messageShareService = FakeMessageShareService();
+    await pumpChatScreen(
+      tester,
+      buildDirectChat(),
+      otherUser: otherUser,
+      messageShareService: messageShareService,
+    );
+
+    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+    final attachmentMessages = <types.Message>[
+      types.FileMessage(
+        id: 'file',
+        author: types.User(id: otherUser.idBase58),
+        name: 'document.pdf',
+        size: 1,
+        uri: '/tmp/document.pdf',
+      ),
+      types.ImageMessage(
+        id: 'image',
+        author: types.User(id: otherUser.idBase58),
+        name: 'photo.jpg',
+        size: 1,
+        uri: '/tmp/photo.jpg',
+      ),
+      types.AudioMessage(
+        id: 'audio',
+        author: types.User(id: otherUser.idBase58),
+        duration: Duration.zero,
+        name: 'recording.mp3',
+        size: 1,
+        uri: '/tmp/recording.mp3',
+      ),
+      types.VideoMessage(
+        id: 'video',
+        author: types.User(id: otherUser.idBase58),
+        name: 'clip.mp4',
+        size: 1,
+        uri: '/tmp/clip.mp4',
+      ),
+    ];
+
+    for (final message in attachmentMessages) {
+      chat.onMessageLongPress!(
+        tester.element(find.byType(chat_ui.Chat)),
+        message,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ChatMessageContextMenu), findsOneWidget);
+      expect(find.text('Forward'), findsOneWidget);
+      expect(find.text('Share'), findsOneWidget);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Reply'), findsNothing);
+      expect(find.text('Edit'), findsNothing);
+      expect(find.text('Info'), findsNothing);
+      expect(find.text('Delete'), findsNothing);
+
+      await tester.tap(find.text('Share'));
+      await tester.pumpAndSettle();
+    }
+
+    expect(messageShareService.sharedFiles, [
+      (name: 'document.pdf', path: '/tmp/document.pdf'),
+      (name: 'photo.jpg', path: '/tmp/photo.jpg'),
+      (name: 'recording.mp3', path: '/tmp/recording.mp3'),
+      (name: 'clip.mp4', path: '/tmp/clip.mp4'),
+    ]);
+  });
+
+  testWidgets('forwards an attachment from the long-press menu', (tester) async {
     await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);
+
+    final attachment = File(
+      '${Directory.systemTemp.path}/qaul-forward-document.pdf',
+    );
+    attachment.writeAsStringSync('forward me');
+    addTearDown(() {
+      if (attachment.existsSync()) attachment.deleteSync();
+    });
 
     final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
     chat.onMessageLongPress!(
       tester.element(find.byType(chat_ui.Chat)),
       types.FileMessage(
-        id: 'attachment-target',
+        id: 'forward-file',
+        author: types.User(id: otherUser.idBase58),
+        name: 'document.pdf',
+        size: 1,
+        uri: attachment.path,
+        metadata: const {'description': 'Forwarded caption'},
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Forward'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Group Chat'));
+    await tester.pumpAndSettle();
+
+    expect(StubLibqaulWorker.sentFiles, isEmpty);
+    expect(find.text('document.pdf'), findsOneWidget);
+    expect(find.text('Forwarded caption'), findsOneWidget);
+  });
+
+  testWidgets('copies an attachment file instead of its name', (tester) async {
+    final messageShareService = FakeMessageShareService();
+    await pumpChatScreen(
+      tester,
+      buildDirectChat(),
+      otherUser: otherUser,
+      messageShareService: messageShareService,
+    );
+
+    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+    chat.onMessageLongPress!(
+      tester.element(find.byType(chat_ui.Chat)),
+      types.ImageMessage(
+        id: 'copy-image',
         author: types.User(id: otherUser.idBase58),
         name: 'photo.jpg',
         size: 1,
@@ -640,10 +765,12 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    await tester.tap(find.text('Copy'));
+    await tester.pumpAndSettle();
 
-    expect(find.byType(ChatMessageContextMenu), findsOneWidget);
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Forward'), findsNothing);
+    expect(messageShareService.copiedFiles, [
+      (name: 'photo.jpg', path: '/tmp/photo.jpg'),
+    ]);
   });
 
   testWidgets('text message long press highlights the selected bubble', (

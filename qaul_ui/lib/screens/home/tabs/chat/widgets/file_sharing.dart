@@ -5,10 +5,14 @@ class _SendFileDialog extends HookConsumerWidget {
     this.file, {
     required this.room,
     required this.onSendPressed,
+    this.displayName,
+    this.initialDescription,
   });
   final File file;
   final ChatRoom room;
   final Function(types.PartialText) onSendPressed;
+  final String? displayName;
+  final String? initialDescription;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,7 +31,7 @@ class _SendFileDialog extends HookConsumerWidget {
                 children: [
                   Text(fileSize(file.lengthSync())),
                   Text(
-                    basename(file.path),
+                    displayName ?? basename(file.path),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -44,6 +48,7 @@ class _SendFileDialog extends HookConsumerWidget {
         const SizedBox(height: 8),
         _CustomInput(
           isTextRequired: false,
+          initialText: initialDescription,
           hintText: AppLocalizations.of(context)!.chatEmptyMessageHint,
           onSendPressed: (desc) {
             final worker = ref.read(qaulWorkerProvider);

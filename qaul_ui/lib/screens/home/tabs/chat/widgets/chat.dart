@@ -64,6 +64,18 @@ part 'chat_timeline_projection.dart';
 
 typedef OnSendPressed = void Function(String rawText);
 
+class ForwardAttachment {
+  const ForwardAttachment({
+    required this.path,
+    required this.name,
+    this.description,
+  });
+
+  final String path;
+  final String name;
+  final String? description;
+}
+
 class _ForwardDraft {
   const _ForwardDraft({required this.roomIdBase58, required this.text});
 
@@ -74,6 +86,16 @@ class _ForwardDraft {
 final _pendingForwardDraftProvider = StateProvider<_ForwardDraft?>(
   (_) => null,
 );
+
+class _ForwardRecipientSelection {
+  const _ForwardRecipientSelection({
+    required this.room,
+    this.attachment,
+  });
+
+  final ChatRoom room;
+  final ForwardAttachment? attachment;
+}
 
 final _log = Logger('ChatScreen');
 
@@ -136,6 +158,7 @@ class ChatScreen extends StatefulHookConsumerWidget {
     super.key,
     this.otherUser,
     this.initialMessageText,
+    this.initialForwardAttachment,
     this.messageShareService,
   });
 
@@ -148,6 +171,9 @@ class ChatScreen extends StatefulHookConsumerWidget {
   final User? otherUser;
 
   final String? initialMessageText;
+
+  /// Attachment waiting for the user confirmation after forwarding.
+  final ForwardAttachment? initialForwardAttachment;
 
   /// Overrides system sharing in tests.
   final MessageShareService? messageShareService;
@@ -260,13 +286,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     types.Message message,
   ) {
     final text = message is types.TextMessage ? message.text : null;
-    final attachmentName = switch (message) {
-      types.FileMessage() => message.name,
-      types.ImageMessage() => message.name,
-      types.AudioMessage() => message.name,
+    final attachment = switch (message) {
+      types.FileMessage() => (name: message.name, uri: message.uri),
+      types.ImageMessage() => (name: message.name, uri: message.uri),
+      types.AudioMessage() => (name: message.name, uri: message.uri),
+      types.VideoMessage() => (name: message.name, uri: message.uri),
       _ => null,
     };
-    if (text == null && attachmentName == null) return;
+    if (text == null && attachment == null) return;
 
     final messageRect = _messageRectInOverlay(messageContext);
     setState(() => _selectedContextMenuMessageId = message.id);
@@ -281,17 +308,40 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
           child: ChatMessageContextMenu(
             elements: text == null
                 ? _buildAttachmentContextMenuElements(
-                    onCopy: () => _copyMessage(
+                    onCopy: () => _copyAttachment(
                       dialogContext,
                       messageContext,
-                      attachmentName!,
+                      attachment!,
                     ),
+                    onForward: _isReceivingAttachment(message)
+                        ? null
+                        : () {
+                            Navigator.pop(dialogContext);
+                            setState(
+                              () => _selectedContextMenuMessageId = null,
+                            );
+                            _openForwardRecipientSelector(
+                              attachment: ForwardAttachment(
+                                path: attachment!.uri,
+                                name: attachment.name,
+                                description:
+                                    message.metadata?['description'] as String?,
+                              ),
+                            );
+                          },
+                    onShare: _isReceivingAttachment(message)
+                        ? null
+                        : () => _shareAttachment(
+                            dialogContext,
+                            messageContext,
+                            attachment!,
+                          ),
                   )
                 : _buildForwardContextMenuElements(
                     onForward: () {
                       Navigator.pop(dialogContext);
                       setState(() => _selectedContextMenuMessageId = null);
-                      _openForwardRecipientSelector(text);
+                      _openForwardRecipientSelector(text: text);
                     },
                     onCopy: () => _copyMessage(
                       dialogContext,
@@ -339,32 +389,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     required VoidCallback onShare,
   }) {
     return [
-      ChatMessageReactionRow(
-        reactions: [
-          ChatMessageQuickReaction(
-            child: Text('\u{2764}\u{FE0F}'),
-            semanticLabel: 'Love',
-          ),
-          ChatMessageQuickReaction(
-            child: Text('\u{1F44D}'),
-            semanticLabel: 'Like',
-          ),
-          ChatMessageQuickReaction(
-            child: Text('\u{1F525}'),
-            semanticLabel: 'Fire',
-          ),
-        ],
-        enabled: false,
-      ),
-      const ChatMessageContextMenuAction.reply(enabled: false),
       ChatMessageContextMenuAction.forward(onPressed: onForward),
-      const ChatMessageContextMenuAction.edit(enabled: false),
-      const ChatMessageContextMenuAction(
-        id: 'info',
-        label: 'Info',
-        iconAsset: ChatMessageContextMenuIcons.info,
-        enabled: false,
-      ),
       ChatMessageContextMenuAction(
         id: 'share',
         label: AppLocalizations.of(context)!.share,
@@ -377,19 +402,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
         iconAsset: ChatMessageContextMenuIcons.copy,
         onPressed: onCopy,
       ),
-      const ChatMessageContextMenuAction(
-        id: 'delete',
-        label: 'Delete',
-        iconAsset: ChatMessageContextMenuIcons.delete,
-        enabled: false,
-      ),
     ];
   }
 
   List<ChatMessageContextMenuElement> _buildAttachmentContextMenuElements({
     required VoidCallback onCopy,
+    VoidCallback? onForward,
+    VoidCallback? onShare,
   }) {
     return [
+      if (onForward != null)
+        ChatMessageContextMenuAction.forward(onPressed: onForward),
+      if (onShare != null)
+        ChatMessageContextMenuAction(
+          id: 'share',
+          label: AppLocalizations.of(context)!.share,
+          iconAsset: ChatMessageContextMenuIcons.share,
+          onPressed: onShare,
+        ),
       ChatMessageContextMenuAction(
         id: 'copy',
         label: AppLocalizations.of(context)!.copy,
@@ -399,23 +429,50 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     ];
   }
 
-  Future<void> _openForwardRecipientSelector(String messageText) async {
+  Future<void> _openForwardRecipientSelector({
+    String? text,
+    ForwardAttachment? attachment,
+  }) async {
     final defaultUser = ref.read(defaultUserProvider);
     if (defaultUser == null) return;
 
-    await Navigator.push(
+    final isMobile =
+        Platform.isIOS ||
+        Platform.isAndroid ||
+        MediaQuery.of(context).size.width < Responsiveness.kTabletBreakpoint;
+    final selection = await Navigator.push<_ForwardRecipientSelection>(
       context,
       MaterialPageRoute(
         builder: (_) => _ForwardRecipientSelectorScreen(
           defaultUser: defaultUser,
-          forwardedText: messageText,
+          forwardedText: text,
+          forwardedAttachment: attachment,
         ),
         settings: const RouteSettings(name: _kForwardRecipientRouteName),
       ),
     );
+    if (isMobile || !mounted || selection?.attachment == null) return;
+
+    // The recipient selector must finish popping before opening the send
+    // confirmation. Otherwise its route can dismiss the confirmation too.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _showForwardedAttachmentDraft(selection!.room, selection.attachment!);
+    });
   }
 
   void _consumeForwardDraft(ChatRoom room) {
+    final initialAttachment = widget.initialForwardAttachment;
+    if (initialAttachment != null &&
+        _forwardDraftRoomIdBase58 != room.idBase58) {
+      _initialComposerText = widget.initialMessageText;
+      _forwardDraftRoomIdBase58 = room.idBase58;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _showForwardedAttachmentDraft(room, initialAttachment);
+      });
+      return;
+    }
+
     final pending = ref.read(_pendingForwardDraftProvider);
     if (pending != null && pending.roomIdBase58 == room.idBase58) {
       _initialComposerText = pending.text;
@@ -434,6 +491,23 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     _initialComposerText = widget.initialMessageText;
     _forwardDraftRoomIdBase58 =
         widget.initialMessageText == null ? null : room.idBase58;
+  }
+
+  void _showForwardedAttachmentDraft(
+    ChatRoom room,
+    ForwardAttachment attachment,
+  ) {
+    final file = File(attachment.path);
+    if (!file.existsSync()) {
+      _log.warning('Could not forward an attachment that is not local');
+      return;
+    }
+    _openSendFileDialog(
+      file,
+      room,
+      displayName: attachment.name,
+      initialDescription: attachment.description,
+    );
   }
 
   void _handleClick(String value) {
@@ -458,7 +532,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     );
   }
 
-  void _openSendFileDialog(File file, ChatRoom room) {
+  void _openSendFileDialog(
+    File file,
+    ChatRoom room, {
+    String? displayName,
+    String? initialDescription,
+  }) {
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
@@ -467,6 +546,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
         final dialog = _SendFileDialog(
           file,
           room: room,
+          displayName: displayName,
+          initialDescription: initialDescription,
           onSendPressed: (description) {
             final worker = ref.read(qaulWorkerProvider);
             worker.sendFile(
@@ -568,6 +649,52 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     } on Object catch (error, stackTrace) {
       _log.warning('Could not open the system share sheet', error, stackTrace);
     }
+  }
+
+  Future<void> _shareAttachment(
+    BuildContext dialogContext,
+    BuildContext messageContext,
+    ({String name, String uri}) attachment,
+  ) async {
+    final shareOrigin = _shareOriginInOverlay(messageContext);
+    Navigator.pop(dialogContext);
+
+    try {
+      await (widget.messageShareService ?? const SystemMessageShareService())
+          .shareFile(
+            filePath: attachment.uri,
+            fileName: attachment.name,
+            sharePositionOrigin: shareOrigin,
+          );
+    } on Object catch (error, stackTrace) {
+      _log.warning('Could not share attachment', error, stackTrace);
+    }
+  }
+
+  Future<void> _copyAttachment(
+    BuildContext dialogContext,
+    BuildContext messageContext,
+    ({String name, String uri}) attachment,
+  ) async {
+    final requestVersion = ++_copyRequestVersion;
+    _clearCopyFeedback();
+    final messageRect = _messageRectInOverlay(messageContext);
+    Navigator.pop(dialogContext);
+
+    try {
+      await (widget.messageShareService ?? const SystemMessageShareService())
+          .copyFile(filePath: attachment.uri, fileName: attachment.name);
+    } on Object catch (error, stackTrace) {
+      _log.warning('Could not copy attachment', error, stackTrace);
+      return;
+    }
+
+    if (!mounted ||
+        requestVersion != _copyRequestVersion ||
+        messageRect == null) {
+      return;
+    }
+    _showCopyFeedback(messageRect);
   }
 
   Rect? _messageRectInOverlay(BuildContext messageContext) {
@@ -1115,6 +1242,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   }
 
   bool _isReceivingFile(types.FileMessage message) {
+    return _isReceivingAttachment(message);
+  }
+
+  bool _isReceivingAttachment(types.Message message) {
     var isReceiving = false;
     if (message.metadata?.containsKey('messageState') ?? false) {
       final s = MessageState.fromJson(message.metadata!['messageState']);

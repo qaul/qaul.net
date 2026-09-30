@@ -539,18 +539,21 @@ class _QaulChatBubbleSurface extends StatelessWidget {
           minWidth: ChatBubbleStyle.minBubbleWidth,
           maxWidth: maxBubbleWidth,
         ),
-        child: DecoratedBox(
+        child: Container(
           key: const ValueKey('chat-bubble-surface'),
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: borderRadius,
-            border: isSelected
-                ? Border.all(
+          ),
+          foregroundDecoration: isSelected
+              ? BoxDecoration(
+                  borderRadius: borderRadius,
+                  border: Border.all(
                     color: sheet.chatBubbleSelectionOutline,
                     width: ChatBubbleStyle.selectedOutlineWidth,
-                  )
-                : null,
-          ),
+                  ),
+                )
+              : null,
           child: ClipRRect(
             borderRadius: borderRadius.resolve(Directionality.of(context)),
             child: Column(
