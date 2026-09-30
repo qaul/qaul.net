@@ -3,11 +3,13 @@ part of 'chat.dart';
 class _ForwardRecipientSelectorScreen extends StatefulHookConsumerWidget {
   const _ForwardRecipientSelectorScreen({
     required this.defaultUser,
-    required this.forwardedText,
-  });
+    this.forwardedText,
+    this.forwardedAttachment,
+  }) : assert(forwardedText != null || forwardedAttachment != null);
 
   final User defaultUser;
-  final String forwardedText;
+  final String? forwardedText;
+  final _ForwardAttachment? forwardedAttachment;
 
   @override
   ConsumerState<_ForwardRecipientSelectorScreen> createState() =>
@@ -175,6 +177,7 @@ class _ForwardRecipientSelectorScreenState
     ref.read(_pendingForwardDraftProvider.notifier).state = _ForwardDraft(
       roomIdBase58: room.idBase58,
       text: widget.forwardedText,
+      attachment: widget.forwardedAttachment,
     );
 
     final isMobile =

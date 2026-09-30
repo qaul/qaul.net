@@ -108,6 +108,7 @@ void main() {
   setUp(() {
     chatKey = UniqueKey();
     StubLibqaulWorker.sentTexts.clear();
+    StubLibqaulWorker.sentFiles.clear();
     TestChatRoomListNotifier.rooms = [buildGroupChat()];
     TestUsersStore.users = [otherUser];
     SharedPreferences.setMockInitialValues({});
@@ -686,9 +687,20 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(ChatMessageContextMenu), findsOneWidget);
+      expect(find.text('Forward'), findsOneWidget);
+      expect(find.text('Reply'), findsOneWidget);
+      expect(find.text('Edit'), findsOneWidget);
+      expect(find.byTooltip('Love'), findsOneWidget);
+      expect(find.byTooltip('Like'), findsOneWidget);
+      expect(find.byTooltip('Fire'), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('next-page')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Info'), findsOneWidget);
       expect(find.text('Share'), findsOneWidget);
       expect(find.text('Copy'), findsOneWidget);
-      expect(find.text('Forward'), findsNothing);
+      expect(find.text('Delete'), findsOneWidget);
 
       await tester.tap(find.text('Share'));
       await tester.pumpAndSettle();
@@ -699,6 +711,32 @@ void main() {
       (name: 'photo.jpg', path: '/tmp/photo.jpg'),
       (name: 'recording.mp3', path: '/tmp/recording.mp3'),
       (name: 'clip.mp4', path: '/tmp/clip.mp4'),
+    ]);
+  });
+
+  testWidgets('forwards an attachment from the long-press menu', (tester) async {
+    await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);
+
+    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+    chat.onMessageLongPress!(
+      tester.element(find.byType(chat_ui.Chat)),
+      types.FileMessage(
+        id: 'forward-file',
+        author: types.User(id: otherUser.idBase58),
+        name: 'document.pdf',
+        size: 1,
+        uri: '/tmp/document.pdf',
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Forward'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Group Chat'));
+    await tester.pumpAndSettle();
+
+    expect(StubLibqaulWorker.sentFiles, [
+      (path: '/tmp/document.pdf', description: ''),
     ]);
   });
 
