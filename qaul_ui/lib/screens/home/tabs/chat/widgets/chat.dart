@@ -751,6 +751,34 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     _scheduleUpdateCurrentOpenChat();
   }
 
+  /// Resolves this screen's room when chat routes can be stacked.
+  ///
+  /// [currentOpenChatRoom] may belong to another chat stacked above this one,
+  /// so it is only used when it matches this screen's room. A brand-new direct
+  /// chat is not in [chatRoomsProvider] until the room list is polled again,
+  /// and its messages are only merged into [currentOpenChatRoom] until then.
+  ChatRoom _resolveStackedRoom({
+    required List<ChatRoom> rooms,
+    required ChatRoom? currentRoom,
+  }) {
+    final roomId = widget.room.idBase58;
+    final listedRoom = rooms.firstWhereOrNull(
+      (item) => item.idBase58 == roomId,
+    );
+    final openRoom = currentRoom?.idBase58 == roomId ? currentRoom : null;
+
+    if (listedRoom == null) return openRoom ?? widget.room;
+    // A room that just appeared in the list has no messages until the next
+    // message fetch; keep showing the ones already loaded for the open room.
+    if (listedRoom.messages == null && openRoom?.messages != null) {
+      return listedRoom.copyWith(
+        lastMessageIndex: openRoom!.lastMessageIndex,
+        messages: openRoom.messages,
+      );
+    }
+    return listedRoom;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isMobileChat =
@@ -760,8 +788,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     final currentRoom = ref.watch(currentOpenChatRoom);
     final rooms = ref.watch(chatRoomsProvider);
     final room = isMobileChat
-        ? rooms.firstWhereOrNull((item) => item.idBase58 == widget.room.idBase58) ??
-              widget.room
+        ? _resolveStackedRoom(rooms: rooms, currentRoom: currentRoom)
         : currentRoom;
 
     if (room == null) {
