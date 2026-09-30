@@ -48,10 +48,16 @@ class _QaulSettingsMenuItemState extends State<QaulSettingsMenuItem> {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: verticalPadding),
       child: Material(
-        color: Colors.transparent,
+        color: _isHovered
+            ? qaulSettingsHoverColor(context)
+            : Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(2),
-          hoverColor: qaulSettingsHoverColor(context),
+          hoverColor: Colors.transparent,
+          focusColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          splashFactory: NoSplash.splashFactory,
           onHover: (hovered) {
             setState(() {
               if (!hovered) {
