@@ -49,7 +49,60 @@ message Group {
         // username) and returns a GroupListResponse ranked by relevance, with
         // more recently active rooms breaking ties.
         GroupSearchRequest group_search_request = 17;
+        // CRDT membership/metadata view (read the derived state)
+        GroupCrdtViewRequest group_crdt_view_request = 18;
+        GroupCrdtViewResponse group_crdt_view_response = 19;
+
+        // CRDT compaction (admin: collapse tombstone history)
+        GroupCrdtCompactRequest group_crdt_compact_request = 20;
+        GroupCrdtCompactResponse group_crdt_compact_response = 21;
     }
+}
+
+// Trigger a CRDT compaction for a group: raise the epoch and collapse
+// op history below the floor, preserving the live view. Admin-only.
+message GroupCrdtCompactRequest {
+    bytes group_id = 1;
+    // ops strictly below this lamport are collapsed / no longer
+    // accepted. 0 = let libqaul choose the current max lamport.
+    uint64 below = 2;
+}
+
+message GroupCrdtCompactResponse {
+    bytes group_id = 1;
+    GroupResult result = 2;
+    // epoch and op_count after compaction
+    uint64 epoch = 3;
+    uint32 op_count = 4;
+}
+
+// Read the converged CRDT view of a group's membership & metadata.
+message GroupCrdtViewRequest {
+    bytes group_id = 1;
+}
+
+// One member in the derived CRDT view.
+message GroupCrdtMember {
+    bytes user_id = 1;
+    // 0 = member, 255 = admin
+    int32 role = 2;
+}
+
+// The derived CRDT view.
+message GroupCrdtViewResponse {
+    bytes group_id = 1;
+    // false when the group is unknown or predates the CRDT (no founder)
+    bool found = 2;
+    // group founder (bootstrap admin)
+    bytes founder = 3;
+    // derived metadata name (empty if unset)
+    string name = 4;
+    // number of ops retained in the op set
+    uint32 op_count = 5;
+    // present members with their effective role
+    repeated GroupCrdtMember members = 6;
+    // current compaction epoch
+    uint64 epoch = 7;
 }
 
 // Group Result
