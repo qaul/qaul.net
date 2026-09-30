@@ -105,25 +105,28 @@ Future<void> openChat(
 }) async {
   _markChatRoomOpened(ref, room);
 
-  bool isMobile =
+  final isMobile =
+      Platform.isIOS ||
+      Platform.isAndroid ||
       MediaQuery.of(context).size.width < Responsiveness.kTabletBreakpoint;
   if (!isMobile) {
     ref.read(homeScreenControllerProvider.notifier).goToTab(TabType.chat);
     return;
   }
 
-  await Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => ChatScreen(
-        room,
-        user,
-        otherUser: otherUser,
-        initialMessageText: initialMessageText,
-      ),
-      settings: const RouteSettings(name: _kChatRouteName),
+  final route = MaterialPageRoute(
+    builder: (context) => ChatScreen(
+      room,
+      user,
+      otherUser: otherUser,
+      initialMessageText: initialMessageText,
     ),
+    settings: const RouteSettings(name: _kChatRouteName),
   );
+  // Public owns a nested Navigator. In the compact layout the conversation
+  // must be above HomeScreen itself, otherwise the bottom navigation bar
+  // remains visible below the chat footer.
+  await Navigator.of(context, rootNavigator: true).push(route);
 }
 
 class ChatScreen extends StatefulHookConsumerWidget {
@@ -256,7 +259,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     BuildContext messageContext,
     types.Message message,
   ) {
-    if (message is! types.TextMessage) return;
+    final text = message is types.TextMessage ? message.text : null;
+    final attachmentName = switch (message) {
+      types.FileMessage() => message.name,
+      types.ImageMessage() => message.name,
+      types.AudioMessage() => message.name,
+      _ => null,
+    };
+    if (text == null && attachmentName == null) return;
 
     final messageRect = _messageRectInOverlay(messageContext);
     setState(() => _selectedContextMenuMessageId = message.id);
@@ -269,23 +279,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
         final menu = GestureDetector(
           onTap: () {},
           child: ChatMessageContextMenu(
-            elements: _buildForwardContextMenuElements(
-              onForward: () {
-                Navigator.pop(dialogContext);
-                setState(() => _selectedContextMenuMessageId = null);
-                _openForwardRecipientSelector(message.text);
-              },
-              onCopy: () => _copyMessage(
-                dialogContext,
-                messageContext,
-                message.text,
-              ),
-              onShare: () => _shareMessage(
-                dialogContext,
-                messageContext,
-                message.text,
-              ),
-            ),
+            elements: text == null
+                ? _buildAttachmentContextMenuElements(
+                    onCopy: () => _copyMessage(
+                      dialogContext,
+                      messageContext,
+                      attachmentName!,
+                    ),
+                  )
+                : _buildForwardContextMenuElements(
+                    onForward: () {
+                      Navigator.pop(dialogContext);
+                      setState(() => _selectedContextMenuMessageId = null);
+                      _openForwardRecipientSelector(text);
+                    },
+                    onCopy: () => _copyMessage(
+                      dialogContext,
+                      messageContext,
+                      text,
+                    ),
+                    onShare: () => _shareMessage(
+                      dialogContext,
+                      messageContext,
+                      text,
+                    ),
+                  ),
           ),
         );
 
@@ -321,22 +339,22 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     required VoidCallback onShare,
   }) {
     return [
-      const ChatMessageReactionRow(
-        enabled: false,
+      ChatMessageReactionRow(
         reactions: [
           ChatMessageQuickReaction(
-            child: Text('❤️'),
+            child: Text('\u{2764}\u{FE0F}'),
             semanticLabel: 'Love',
           ),
           ChatMessageQuickReaction(
-            child: Text('👍'),
+            child: Text('\u{1F44D}'),
             semanticLabel: 'Like',
           ),
           ChatMessageQuickReaction(
-            child: Text('🔥'),
+            child: Text('\u{1F525}'),
             semanticLabel: 'Fire',
           ),
         ],
+        enabled: false,
       ),
       const ChatMessageContextMenuAction.reply(enabled: false),
       ChatMessageContextMenuAction.forward(onPressed: onForward),
@@ -364,6 +382,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
         label: 'Delete',
         iconAsset: ChatMessageContextMenuIcons.delete,
         enabled: false,
+      ),
+    ];
+  }
+
+  List<ChatMessageContextMenuElement> _buildAttachmentContextMenuElements({
+    required VoidCallback onCopy,
+  }) {
+    return [
+      ChatMessageContextMenuAction(
+        id: 'copy',
+        label: AppLocalizations.of(context)!.copy,
+        iconAsset: ChatMessageContextMenuIcons.copy,
+        onPressed: onCopy,
       ),
     ];
   }
@@ -722,7 +753,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
   @override
   Widget build(BuildContext context) {
-    final room = ref.watch(currentOpenChatRoom);
+    final isMobileChat =
+        Platform.isIOS ||
+        Platform.isAndroid ||
+        MediaQuery.of(context).size.width < Responsiveness.kTabletBreakpoint;
+    final currentRoom = ref.watch(currentOpenChatRoom);
+    final rooms = ref.watch(chatRoomsProvider);
+    final room = isMobileChat
+        ? rooms.firstWhereOrNull((item) => item.idBase58 == widget.room.idBase58) ??
+              widget.room
+        : currentRoom;
 
     if (room == null) {
       return Scaffold(body: const QaulLoadingIndicator());
@@ -764,8 +804,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     final chatBackgroundColor = QaulColorSheet(
       Theme.of(context).brightness,
     ).background;
-    final showBackButton =
-        MediaQuery.of(context).size.width < Responsiveness.kTabletBreakpoint;
+    final showBackButton = isMobileChat;
     _chatRenderMode = resolveChatRenderMode(room);
 
     return Scaffold(
@@ -1033,7 +1072,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
         mode: _chatRenderMode,
         clock: DateTime.now(),
         mentionLabels: _chatRenderMode == ChatRenderMode.group
-            ? room.members.map((member) => member.name).toList()
+            ? ['all', ...room.members.map((member) => member.name)]
             : const [],
         isSelected: message.id == _selectedContextMenuMessageId,
       );
@@ -1044,6 +1083,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       presentation: presentation,
       mode: _chatRenderMode,
       clock: DateTime.now(),
+      isSelected: message.id == _selectedContextMenuMessageId,
     );
   }
 

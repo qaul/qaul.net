@@ -185,8 +185,9 @@ TextSpan buildChatMentionTextSpan({
   Iterable<String> mentionLabels = const [],
   Color? mentionBackgroundColor,
 }) {
-  final labels = <String>{'all'}
-    ..addAll(mentionLabels.where((label) => label.trim().isNotEmpty));
+  final labels = mentionLabels
+      .where((label) => label.trim().isNotEmpty)
+      .toSet();
   final sortedLabels = labels.toList()
     ..sort((left, right) => right.length.compareTo(left.length));
 

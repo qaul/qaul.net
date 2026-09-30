@@ -9,7 +9,7 @@ const _kNormalColor = Color(0xFF999999);
 const _kDisabledDarkColor = Color(0xFF5F5F5F);
 const _kDisabledLightColor = Color(0xFFC7C7C7);
 const _kMenuPageSize = 5;
-const _kRowHeight = 49.0;
+const _kRowHeight = 44.0;
 
 abstract final class ChatMessageContextMenuStyle {
   static const quickReactionFontSize = 27.0;
@@ -166,7 +166,7 @@ class ChatMessageContextMenu extends StatefulWidget {
 
   final List<ChatMessageContextMenuElement> elements;
 
-  static const double width = 200;
+  static const double width = 180;
 
   @override
   State<ChatMessageContextMenu> createState() => _ChatMessageContextMenuState();
@@ -377,7 +377,10 @@ class _MessageAction extends StatelessWidget {
         icon: SizedBox(
           width: 27,
           height: 27,
-          child: _MenuSvg(asset: action.iconAsset),
+          child: _MenuSvg(
+            asset: action.iconAsset,
+            color: action.enabled ? palette.active : palette.disabled,
+          ),
         ),
         label: Padding(
           padding: const EdgeInsets.only(left: 12),
@@ -455,7 +458,10 @@ class _IconOnlyButton extends StatelessWidget {
         style: ButtonStyle(iconColor: palette.foreground),
         icon: SizedBox.square(
           dimension: iconSize,
-          child: _MenuSvg(asset: asset),
+          child: _MenuSvg(
+            asset: asset,
+            color: onPressed == null ? palette.disabled : palette.active,
+          ),
         ),
         padding: EdgeInsets.zero,
         constraints: BoxConstraints.tightFor(width: size, height: size),
@@ -493,13 +499,13 @@ class _HoverBuilderState extends State<_HoverBuilder> {
 
 /// Paints a menu icon in the foreground color resolved by its enclosing button.
 class _MenuSvg extends StatelessWidget {
-  const _MenuSvg({required this.asset});
+  const _MenuSvg({required this.asset, required this.color});
 
   final String asset;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    final color = IconTheme.of(context).color ?? _kNormalColor;
     return SvgPicture.asset(
       asset,
       package: _kComponentsPackage,
