@@ -260,13 +260,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     types.Message message,
   ) {
     final text = message is types.TextMessage ? message.text : null;
-    final attachmentName = switch (message) {
-      types.FileMessage() => message.name,
-      types.ImageMessage() => message.name,
-      types.AudioMessage() => message.name,
+    final attachment = switch (message) {
+      types.FileMessage() => (name: message.name, uri: message.uri),
+      types.ImageMessage() => (name: message.name, uri: message.uri),
+      types.AudioMessage() => (name: message.name, uri: message.uri),
+      types.VideoMessage() => (name: message.name, uri: message.uri),
       _ => null,
     };
-    if (text == null && attachmentName == null) return;
+    if (text == null && attachment == null) return;
 
     final messageRect = _messageRectInOverlay(messageContext);
     setState(() => _selectedContextMenuMessageId = message.id);
@@ -284,8 +285,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                     onCopy: () => _copyMessage(
                       dialogContext,
                       messageContext,
-                      attachmentName!,
+                      attachment!.name,
                     ),
+                    onShare: _isReceivingAttachment(message)
+                        ? null
+                        : () => _shareAttachment(
+                            dialogContext,
+                            messageContext,
+                            attachment!,
+                          ),
                   )
                 : _buildForwardContextMenuElements(
                     onForward: () {
@@ -388,8 +396,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
   List<ChatMessageContextMenuElement> _buildAttachmentContextMenuElements({
     required VoidCallback onCopy,
+    VoidCallback? onShare,
   }) {
     return [
+      ChatMessageContextMenuAction(
+        id: 'share',
+        label: AppLocalizations.of(context)!.share,
+        iconAsset: ChatMessageContextMenuIcons.share,
+        enabled: onShare != null,
+        onPressed: onShare,
+      ),
       ChatMessageContextMenuAction(
         id: 'copy',
         label: AppLocalizations.of(context)!.copy,
@@ -567,6 +583,26 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
           .shareText(text: text, sharePositionOrigin: shareOrigin);
     } on Object catch (error, stackTrace) {
       _log.warning('Could not open the system share sheet', error, stackTrace);
+    }
+  }
+
+  Future<void> _shareAttachment(
+    BuildContext dialogContext,
+    BuildContext messageContext,
+    ({String name, String uri}) attachment,
+  ) async {
+    final shareOrigin = _shareOriginInOverlay(messageContext);
+    Navigator.pop(dialogContext);
+
+    try {
+      await (widget.messageShareService ?? const SystemMessageShareService())
+          .shareFile(
+            filePath: attachment.uri,
+            fileName: attachment.name,
+            sharePositionOrigin: shareOrigin,
+          );
+    } on Object catch (error, stackTrace) {
+      _log.warning('Could not share attachment', error, stackTrace);
     }
   }
 
@@ -1115,6 +1151,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   }
 
   bool _isReceivingFile(types.FileMessage message) {
+    return _isReceivingAttachment(message);
+  }
+
+  bool _isReceivingAttachment(types.Message message) {
     var isReceiving = false;
     if (message.metadata?.containsKey('messageState') ?? false) {
       final s = MessageState.fromJson(message.metadata!['messageState']);

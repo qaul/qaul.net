@@ -55,6 +55,7 @@ class TestUnreadChatRoomListNotifier extends ChatRoomListNotifier {
 
 class FakeMessageShareService implements MessageShareService {
   String? sharedText;
+  final sharedFiles = <({String name, String path})>[];
   Rect? sharePositionOrigin;
 
   @override
@@ -63,6 +64,16 @@ class FakeMessageShareService implements MessageShareService {
     required Rect? sharePositionOrigin,
   }) async {
     sharedText = text;
+    this.sharePositionOrigin = sharePositionOrigin;
+  }
+
+  @override
+  Future<void> shareFile({
+    required String filePath,
+    required String fileName,
+    required Rect? sharePositionOrigin,
+  }) async {
+    sharedFiles.add((name: fileName, path: filePath));
     this.sharePositionOrigin = sharePositionOrigin;
   }
 }
@@ -625,25 +636,70 @@ void main() {
     expect(find.byTooltip('Fire'), findsOneWidget);
   });
 
-  testWidgets('attachment long press selects it and exposes Copy', (tester) async {
-    await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);
+  testWidgets('shares attachments from the long-press menu', (tester) async {
+    final messageShareService = FakeMessageShareService();
+    await pumpChatScreen(
+      tester,
+      buildDirectChat(),
+      otherUser: otherUser,
+      messageShareService: messageShareService,
+    );
 
     final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
-    chat.onMessageLongPress!(
-      tester.element(find.byType(chat_ui.Chat)),
+    final attachmentMessages = <types.Message>[
       types.FileMessage(
-        id: 'attachment-target',
+        id: 'file',
+        author: types.User(id: otherUser.idBase58),
+        name: 'document.pdf',
+        size: 1,
+        uri: '/tmp/document.pdf',
+      ),
+      types.ImageMessage(
+        id: 'image',
         author: types.User(id: otherUser.idBase58),
         name: 'photo.jpg',
         size: 1,
         uri: '/tmp/photo.jpg',
       ),
-    );
-    await tester.pumpAndSettle();
+      types.AudioMessage(
+        id: 'audio',
+        author: types.User(id: otherUser.idBase58),
+        duration: Duration.zero,
+        name: 'recording.mp3',
+        size: 1,
+        uri: '/tmp/recording.mp3',
+      ),
+      types.VideoMessage(
+        id: 'video',
+        author: types.User(id: otherUser.idBase58),
+        name: 'clip.mp4',
+        size: 1,
+        uri: '/tmp/clip.mp4',
+      ),
+    ];
 
-    expect(find.byType(ChatMessageContextMenu), findsOneWidget);
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Forward'), findsNothing);
+    for (final message in attachmentMessages) {
+      chat.onMessageLongPress!(
+        tester.element(find.byType(chat_ui.Chat)),
+        message,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ChatMessageContextMenu), findsOneWidget);
+      expect(find.text('Share'), findsOneWidget);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Forward'), findsNothing);
+
+      await tester.tap(find.text('Share'));
+      await tester.pumpAndSettle();
+    }
+
+    expect(messageShareService.sharedFiles, [
+      (name: 'document.pdf', path: '/tmp/document.pdf'),
+      (name: 'photo.jpg', path: '/tmp/photo.jpg'),
+      (name: 'recording.mp3', path: '/tmp/recording.mp3'),
+      (name: 'clip.mp4', path: '/tmp/clip.mp4'),
+    ]);
   });
 
   testWidgets('text message long press highlights the selected bubble', (
