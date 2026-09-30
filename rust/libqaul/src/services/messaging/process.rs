@@ -344,6 +344,21 @@ impl MessagingProcess {
                             &container.signature,
                         );
                     }
+                    Some(super::proto::envelop_payload::Payload::Plain(plain)) => {
+                        // Signed-but-not-session-encrypted payload (the
+                        // Envelope signature was already verified above).
+                        // It carries a CommonMessage whose content is
+                        // application-encrypted (group-file envelope), so
+                        // route it through the same dispatch as a
+                        // decrypted message.
+                        Self::on_decrypted_message(
+                            state,
+                            &sender_id,
+                            user_account,
+                            &plain,
+                            &container.signature,
+                        );
+                    }
                     Some(super::proto::envelop_payload::Payload::Dtn(dtn)) => {
                         dtn::Dtn::net(state, &receiver_id, &sender_id, &container.signature, &dtn);
                     }
