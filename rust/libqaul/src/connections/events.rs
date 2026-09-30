@@ -32,7 +32,7 @@ pub fn qaul_info_event(state: &crate::QaulState, event: QaulInfoEvent, _module: 
 }
 
 /// Handle incoming QaulMessaging behaviour events
-pub fn qaul_messaging_event(state: &crate::QaulState, event: QaulMessagingEvent, _module: ConnectionModule) {
+pub fn qaul_messaging_event(state: &crate::QaulState, event: QaulMessagingEvent, module: ConnectionModule) {
     match event {
         // received a messaging message
         QaulMessagingEvent::Message(message) => {
@@ -42,7 +42,7 @@ pub fn qaul_messaging_event(state: &crate::QaulState, event: QaulMessagingEvent,
             );
 
             // forward to messaging module
-            Messaging::received(state, message);
+            Messaging::received(state, message, module);
         }
     }
 }
@@ -65,6 +65,7 @@ pub fn ping_event(state: &crate::QaulState, event: Event, module: ConnectionModu
             let rtt_micros = u32::try_from(
                 duration.as_secs() * 1_000_000 + (duration.subsec_nanos() / 1_000) as u64,
             );
+            state.metrics.neighbour_rtt(module, duration);
             let rs = state.get_router();
             let micros = rtt_micros.unwrap_or(u32::MAX);
             Neighbours::update_node(state, &rs, module, peer, micros);

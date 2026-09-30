@@ -19,6 +19,7 @@ use std::fmt;
 /// Re-export of qaul-proto::qaul_rpc — this is the QaulRpc envelope.
 pub use qaul_proto::qaul_rpc as proto;
 
+pub mod prometheus;
 pub mod transport;
 
 pub use transport::RpcTransport;

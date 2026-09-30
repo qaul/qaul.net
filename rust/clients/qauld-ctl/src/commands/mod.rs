@@ -20,6 +20,7 @@ mod debug;
 mod dtn;
 mod feed;
 mod group;
+mod metrics;
 mod node;
 mod router;
 #[cfg(feature = "rtc")]

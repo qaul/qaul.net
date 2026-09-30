@@ -835,7 +835,7 @@ impl Ble {
                         received_from: node_id,
                         data,
                     };
-                    messaging::Messaging::received(state, received);
+                    messaging::Messaging::received(state, received, ConnectionModule::Ble);
                 }
                 Some(proto_net::ble_message::Message::Identification(identification)) => {
                     log::info!("BLE identification received");
@@ -886,7 +886,7 @@ impl Ble {
                     received_from: node_id,
                     data,
                 };
-                messaging::Messaging::received(state, received);
+                messaging::Messaging::received(state, received, ConnectionModule::Ble);
             }
             Some(proto_net::ble_message::Message::Identification(identification)) => {
                 log::info!("BLE identification received (decrypted)");

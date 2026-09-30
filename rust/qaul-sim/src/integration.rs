@@ -37,6 +37,7 @@ mod tests {
             routing: RoutingOptions::default(),
             handshake_extras: HandshakeExtras::default(),
             crypto_rotation: CryptoRotation::default(),
+            metrics: Default::default(),
         }
     }
 

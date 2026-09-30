@@ -79,4 +79,8 @@ enum Modules {
     //
     // export / delete / restore local user accounts
     ACCOUNT_MANAGEMENT = 19;
+    // Node instrumentation
+    //
+    // node-wide metrics snapshot and per-peer breakdowns
+    METRICS = 20;
 }

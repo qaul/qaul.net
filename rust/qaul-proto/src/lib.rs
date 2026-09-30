@@ -23,6 +23,10 @@ pub mod qaul_rpc_debug {
     include!("../../../protobuf/generated/rust/qaul.rpc.debug.rs");
 }
 #[allow(clippy::all)]
+pub mod qaul_rpc_metrics {
+    include!("../../../protobuf/generated/rust/qaul.rpc.metrics.rs");
+}
+#[allow(clippy::all)]
 pub mod qaul_rpc_subscribe {
     include!("../../../protobuf/generated/rust/qaul.rpc.subscribe.rs");
 }
