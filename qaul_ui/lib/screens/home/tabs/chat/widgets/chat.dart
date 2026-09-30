@@ -389,32 +389,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     required VoidCallback onShare,
   }) {
     return [
-      ChatMessageReactionRow(
-        reactions: [
-          ChatMessageQuickReaction(
-            child: Text('\u{2764}\u{FE0F}'),
-            semanticLabel: 'Love',
-          ),
-          ChatMessageQuickReaction(
-            child: Text('\u{1F44D}'),
-            semanticLabel: 'Like',
-          ),
-          ChatMessageQuickReaction(
-            child: Text('\u{1F525}'),
-            semanticLabel: 'Fire',
-          ),
-        ],
-        enabled: false,
-      ),
-      const ChatMessageContextMenuAction.reply(enabled: false),
       ChatMessageContextMenuAction.forward(onPressed: onForward),
-      const ChatMessageContextMenuAction.edit(enabled: false),
-      const ChatMessageContextMenuAction(
-        id: 'info',
-        label: 'Info',
-        iconAsset: ChatMessageContextMenuIcons.info,
-        enabled: false,
-      ),
       ChatMessageContextMenuAction(
         id: 'share',
         label: AppLocalizations.of(context)!.share,
@@ -426,12 +401,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
         label: AppLocalizations.of(context)!.copy,
         iconAsset: ChatMessageContextMenuIcons.copy,
         onPressed: onCopy,
-      ),
-      const ChatMessageContextMenuAction(
-        id: 'delete',
-        label: 'Delete',
-        iconAsset: ChatMessageContextMenuIcons.delete,
-        enabled: false,
       ),
     ];
   }
@@ -442,53 +411,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     VoidCallback? onShare,
   }) {
     return [
-      ChatMessageReactionRow(
-        reactions: [
-          ChatMessageQuickReaction(
-            child: Text('\u{2764}\u{FE0F}'),
-            semanticLabel: 'Love',
-          ),
-          ChatMessageQuickReaction(
-            child: Text('\u{1F44D}'),
-            semanticLabel: 'Like',
-          ),
-          ChatMessageQuickReaction(
-            child: Text('\u{1F525}'),
-            semanticLabel: 'Fire',
-          ),
-        ],
-        enabled: false,
-      ),
-      const ChatMessageContextMenuAction.reply(enabled: false),
-      ChatMessageContextMenuAction.forward(
-        enabled: onForward != null,
-        onPressed: onForward,
-      ),
-      const ChatMessageContextMenuAction.edit(enabled: false),
-      const ChatMessageContextMenuAction(
-        id: 'info',
-        label: 'Info',
-        iconAsset: ChatMessageContextMenuIcons.info,
-        enabled: false,
-      ),
-      ChatMessageContextMenuAction(
-        id: 'share',
-        label: AppLocalizations.of(context)!.share,
-        iconAsset: ChatMessageContextMenuIcons.share,
-        enabled: onShare != null,
-        onPressed: onShare,
-      ),
+      if (onForward != null)
+        ChatMessageContextMenuAction.forward(onPressed: onForward),
+      if (onShare != null)
+        ChatMessageContextMenuAction(
+          id: 'share',
+          label: AppLocalizations.of(context)!.share,
+          iconAsset: ChatMessageContextMenuIcons.share,
+          onPressed: onShare,
+        ),
       ChatMessageContextMenuAction(
         id: 'copy',
         label: AppLocalizations.of(context)!.copy,
         iconAsset: ChatMessageContextMenuIcons.copy,
         onPressed: onCopy,
-      ),
-      const ChatMessageContextMenuAction(
-        id: 'delete',
-        label: 'Delete',
-        iconAsset: ChatMessageContextMenuIcons.delete,
-        enabled: false,
       ),
     ];
   }

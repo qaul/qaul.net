@@ -360,8 +360,6 @@ void main() {
     expect(contextMenuRect.left, closeTo(expectedMenuLeft, 0.01));
     expect(contextMenuRect.top, closeTo(expectedMenuTop, 0.01));
 
-    await tester.tap(find.byKey(const ValueKey('next-page')));
-    await tester.pumpAndSettle();
     await tester.tap(find.text('Copy'));
     await tester.pumpAndSettle();
 
@@ -442,8 +440,6 @@ void main() {
     chat.onMessageLongPress!(tester.element(bubble), chat.messages.single);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const ValueKey('next-page')));
-    await tester.pumpAndSettle();
     await tester.tap(find.text('Share'));
     await tester.pumpAndSettle();
 
@@ -483,8 +479,6 @@ void main() {
     chat.onMessageLongPress!(tester.element(bubble), chat.messages.single);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const ValueKey('next-page')));
-    await tester.pumpAndSettle();
     await tester.tap(find.text('Share'));
     await tester.pumpAndSettle();
 
@@ -522,8 +516,6 @@ void main() {
       tester.element(find.byKey(const ValueKey('chat-bubble-surface'))),
       chat.messages.single,
     );
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('next-page')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Copy'));
     await tester.pumpAndSettle();
@@ -639,11 +631,12 @@ void main() {
 
     expect(find.byType(ChatMessageContextMenu), findsOneWidget);
     expect(find.text('Forward'), findsOneWidget);
-    expect(find.text('Reply'), findsOneWidget);
-    expect(find.text('Edit'), findsOneWidget);
-    expect(find.byTooltip('Love'), findsOneWidget);
-    expect(find.byTooltip('Like'), findsOneWidget);
-    expect(find.byTooltip('Fire'), findsOneWidget);
+    expect(find.text('Share'), findsOneWidget);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Reply'), findsNothing);
+    expect(find.text('Edit'), findsNothing);
+    expect(find.text('Info'), findsNothing);
+    expect(find.text('Delete'), findsNothing);
   });
 
   testWidgets('shares attachments from the long-press menu', (tester) async {
@@ -697,19 +690,12 @@ void main() {
 
       expect(find.byType(ChatMessageContextMenu), findsOneWidget);
       expect(find.text('Forward'), findsOneWidget);
-      expect(find.text('Reply'), findsOneWidget);
-      expect(find.text('Edit'), findsOneWidget);
-      expect(find.byTooltip('Love'), findsOneWidget);
-      expect(find.byTooltip('Like'), findsOneWidget);
-      expect(find.byTooltip('Fire'), findsOneWidget);
-
-      await tester.tap(find.byKey(const ValueKey('next-page')));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Info'), findsOneWidget);
       expect(find.text('Share'), findsOneWidget);
       expect(find.text('Copy'), findsOneWidget);
-      expect(find.text('Delete'), findsOneWidget);
+      expect(find.text('Reply'), findsNothing);
+      expect(find.text('Edit'), findsNothing);
+      expect(find.text('Info'), findsNothing);
+      expect(find.text('Delete'), findsNothing);
 
       await tester.tap(find.text('Share'));
       await tester.pumpAndSettle();
@@ -778,8 +764,6 @@ void main() {
         uri: '/tmp/photo.jpg',
       ),
     );
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('next-page')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Copy'));
     await tester.pumpAndSettle();
