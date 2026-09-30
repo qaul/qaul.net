@@ -29,7 +29,7 @@ void main() {
       final span = buildChatMentionTextSpan(
         text: 'Writing @Third Member and @all.',
         style: style,
-        mentionLabels: const ['Third Member'],
+        mentionLabels: const ['Third Member', 'all'],
         mentionBackgroundColor: const Color(0xFF333333),
       );
 
@@ -41,6 +41,16 @@ void main() {
       expect(children[1].style!.backgroundColor, const Color(0xFF333333));
       expect(children[3].toPlainText(), '@all');
       expect(children[3].style!.fontWeight, FontWeight.w700);
+    });
+
+    test('does not emphasize @all unless it is supplied as a mention', () {
+      final span = buildChatMentionTextSpan(
+        text: 'Direct chat @all',
+        style: style,
+      );
+
+      expect(span.children, isNull);
+      expect(span.toPlainText(), 'Direct chat @all');
     });
 
     test('does not emphasize a mention embedded in another word', () {

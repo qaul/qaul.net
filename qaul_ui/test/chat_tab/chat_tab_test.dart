@@ -269,7 +269,7 @@ void main() {
   testWidgets('direct chat does not open mention suggestions', (tester) async {
     await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);
 
-    await tester.enterText(find.byType(TextField), '@');
+    await tester.enterText(find.byType(TextField), '@all');
     await tester.pump();
 
     expect(
@@ -620,15 +620,30 @@ void main() {
     expect(find.text('Forward'), findsOneWidget);
     expect(find.text('Reply'), findsOneWidget);
     expect(find.text('Edit'), findsOneWidget);
-    await tester.tap(find.text('Reply'));
-    await tester.pumpAndSettle();
-    expect(find.byType(ChatMessageContextMenu), findsOneWidget);
-    expect(find.text('Forward to'), findsNothing);
+    expect(find.byTooltip('Love'), findsOneWidget);
+    expect(find.byTooltip('Like'), findsOneWidget);
+    expect(find.byTooltip('Fire'), findsOneWidget);
+  });
 
-    await tester.tap(find.text('Edit'));
+  testWidgets('attachment long press selects it and exposes Copy', (tester) async {
+    await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);
+
+    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+    chat.onMessageLongPress!(
+      tester.element(find.byType(chat_ui.Chat)),
+      types.FileMessage(
+        id: 'attachment-target',
+        author: types.User(id: otherUser.idBase58),
+        name: 'photo.jpg',
+        size: 1,
+        uri: '/tmp/photo.jpg',
+      ),
+    );
     await tester.pumpAndSettle();
+
     expect(find.byType(ChatMessageContextMenu), findsOneWidget);
-    expect(find.text('Forward to'), findsNothing);
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Forward'), findsNothing);
   });
 
   testWidgets('text message long press highlights the selected bubble', (
@@ -857,7 +872,7 @@ void main() {
         'forward this text');
   });
 
-  testWidgets('mobile forward replaces the source chat and back returns home', (
+  testWidgets('mobile forward preserves the source chat when going back', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(414, 736);
@@ -915,7 +930,7 @@ void main() {
     await tester.tap(find.text('Group Chat'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(ChatScreen, skipOffstage: false), findsOneWidget);
+    expect(find.byType(ChatScreen, skipOffstage: false), findsNWidgets(2));
     expect(find.text('Group Chat'), findsOneWidget);
     expect(
       tester.widget<TextField>(find.byType(TextField)).controller!.text,
@@ -925,8 +940,86 @@ void main() {
     await tester.tap(find.byTooltip('Back'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(ChatScreen, skipOffstage: false), findsNothing);
+    expect(find.byType(ChatScreen), findsOneWidget);
+    expect(find.text(otherUser.name), findsOneWidget);
+    expect(find.text('Open chat'), findsNothing);
+
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+
     expect(find.text('Open chat'), findsOneWidget);
+  });
+
+  testWidgets('compact public profile chat returns to the public navigator', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(414, 736);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final room = buildDirectChat();
+    final wut = ProviderScope(
+      overrides: [
+        defaultUserProvider.overrideWith((_) => defaultUser),
+        chatNotificationControllerProvider.overrideWithValue(
+          NullChatNotificationController(),
+        ),
+        chatRoomsProvider.overrideWith(TestChatRoomListNotifier.new),
+        usersStoreProvider.overrideWith(() => TestUsersStore()),
+        qaulWorkerProvider.overrideWith((ref) => StubLibqaulWorker(ref)),
+      ],
+      child: MaterialApp(
+        localizationsDelegates: [
+          ...AppLocalizations.localizationsDelegates,
+          QaulComponentsLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Consumer(
+          builder: (context, ref, _) => Navigator(
+            onGenerateRoute: (_) => MaterialPageRoute<void>(
+              builder: (publicContext) => TextButton(
+                onPressed: () {
+                  Navigator.of(publicContext).push(
+                    MaterialPageRoute<void>(
+                      builder: (profileContext) => TextButton(
+                        onPressed: () {
+                          Navigator.of(profileContext).pop();
+                          openChat(
+                            room,
+                            ref: ref,
+                            context: profileContext,
+                            user: defaultUser,
+                            otherUser: otherUser,
+                          );
+                        },
+                        child: const Text('Start chat'),
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('Public home'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(wut);
+    await tester.tap(find.text('Public home'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Start chat'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ChatScreen), findsOneWidget);
+    expect(find.text('Public home'), findsNothing);
+
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ChatScreen), findsNothing);
+    expect(find.text('Public home'), findsOneWidget);
   });
 
   testWidgets('chat header close pops the mobile chat route', (tester) async {
