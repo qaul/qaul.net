@@ -56,6 +56,7 @@ class TestUnreadChatRoomListNotifier extends ChatRoomListNotifier {
 class FakeMessageShareService implements MessageShareService {
   String? sharedText;
   final sharedFiles = <({String name, String path})>[];
+  final copiedFiles = <({String name, String path})>[];
   Rect? sharePositionOrigin;
 
   @override
@@ -75,6 +76,14 @@ class FakeMessageShareService implements MessageShareService {
   }) async {
     sharedFiles.add((name: fileName, path: filePath));
     this.sharePositionOrigin = sharePositionOrigin;
+  }
+
+  @override
+  Future<void> copyFile({
+    required String filePath,
+    required String fileName,
+  }) async {
+    copiedFiles.add((name: fileName, path: filePath));
   }
 }
 
@@ -717,6 +726,14 @@ void main() {
   testWidgets('forwards an attachment from the long-press menu', (tester) async {
     await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);
 
+    final attachment = File(
+      '${Directory.systemTemp.path}/qaul-forward-document.pdf',
+    );
+    attachment.writeAsStringSync('forward me');
+    addTearDown(() {
+      if (attachment.existsSync()) attachment.deleteSync();
+    });
+
     final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
     chat.onMessageLongPress!(
       tester.element(find.byType(chat_ui.Chat)),
@@ -725,7 +742,8 @@ void main() {
         author: types.User(id: otherUser.idBase58),
         name: 'document.pdf',
         size: 1,
-        uri: '/tmp/document.pdf',
+        uri: attachment.path,
+        metadata: const {'description': 'Forwarded caption'},
       ),
     );
     await tester.pumpAndSettle();
@@ -735,8 +753,39 @@ void main() {
     await tester.tap(find.text('Group Chat'));
     await tester.pumpAndSettle();
 
-    expect(StubLibqaulWorker.sentFiles, [
-      (path: '/tmp/document.pdf', description: ''),
+    expect(StubLibqaulWorker.sentFiles, isEmpty);
+    expect(find.text('document.pdf'), findsOneWidget);
+    expect(find.text('Forwarded caption'), findsOneWidget);
+  });
+
+  testWidgets('copies an attachment file instead of its name', (tester) async {
+    final messageShareService = FakeMessageShareService();
+    await pumpChatScreen(
+      tester,
+      buildDirectChat(),
+      otherUser: otherUser,
+      messageShareService: messageShareService,
+    );
+
+    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+    chat.onMessageLongPress!(
+      tester.element(find.byType(chat_ui.Chat)),
+      types.ImageMessage(
+        id: 'copy-image',
+        author: types.User(id: otherUser.idBase58),
+        name: 'photo.jpg',
+        size: 1,
+        uri: '/tmp/photo.jpg',
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('next-page')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Copy'));
+    await tester.pumpAndSettle();
+
+    expect(messageShareService.copiedFiles, [
+      (name: 'photo.jpg', path: '/tmp/photo.jpg'),
     ]);
   });
 

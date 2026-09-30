@@ -174,12 +174,6 @@ class _ForwardRecipientSelectorScreenState
   }
 
   void _selectRoom(ChatRoom room, {User? otherUser}) {
-    ref.read(_pendingForwardDraftProvider.notifier).state = _ForwardDraft(
-      roomIdBase58: room.idBase58,
-      text: widget.forwardedText,
-      attachment: widget.forwardedAttachment,
-    );
-
     final isMobile =
         Platform.isIOS ||
         Platform.isAndroid ||
@@ -195,7 +189,10 @@ class _ForwardRecipientSelectorScreenState
             room,
             widget.defaultUser,
             otherUser: otherUser,
-            initialMessageText: widget.forwardedText,
+            initialMessageText: widget.forwardedAttachment == null
+                ? widget.forwardedText
+                : null,
+            initialForwardAttachment: widget.forwardedAttachment,
           ),
           settings: const RouteSettings(name: _kChatRouteName),
         ),
@@ -203,9 +200,22 @@ class _ForwardRecipientSelectorScreenState
       return;
     }
 
+    final forwardedText = widget.forwardedText;
+    if (forwardedText != null) {
+      ref.read(_pendingForwardDraftProvider.notifier).state = _ForwardDraft(
+        roomIdBase58: room.idBase58,
+        text: forwardedText,
+      );
+    }
     ref.read(currentOpenChatRoom.notifier).state = room;
     ref.read(homeScreenControllerProvider.notifier).goToTab(TabType.chat);
-    Navigator.pop(context);
+    Navigator.pop(
+      context,
+      _ForwardRecipientSelection(
+        room: room,
+        attachment: widget.forwardedAttachment,
+      ),
+    );
   }
 }
 

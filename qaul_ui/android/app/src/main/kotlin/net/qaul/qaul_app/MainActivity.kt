@@ -1,9 +1,12 @@
 package net.qaul.qaul_app
 
 import android.Manifest
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import java.io.File
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -23,9 +26,11 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "libqaul"
+    private val ATTACHMENT_CLIPBOARD_CHANNEL = "qaul/attachment_clipboard"
     private var bleWrapperClass: BleWrapperClass? = null
     private var flutterEngine: FlutterEngine? = null
 
@@ -140,6 +145,37 @@ class MainActivity : FlutterActivity() {
 
                 else -> result.notImplemented()
             }
+        }
+
+        MethodChannel(
+                FlutterEngine.dartExecutor.binaryMessenger, ATTACHMENT_CLIPBOARD_CHANNEL
+        ).setMethodCallHandler { call, result ->
+            if (call.method != "copyFile") {
+                result.notImplemented()
+                return@setMethodCallHandler
+            }
+
+            val path = call.argument<String>("path")
+            val name = call.argument<String>("name")
+            if (path.isNullOrBlank() || name.isNullOrBlank()) {
+                result.error("invalid_arguments", "A file path and name are required", null)
+                return@setMethodCallHandler
+            }
+
+            val file = File(path)
+            if (!file.isFile) {
+                result.error("file_not_found", "The attachment is no longer available", null)
+                return@setMethodCallHandler
+            }
+
+            val uri = FileProvider.getUriForFile(
+                    this,
+                    "${applicationContext.packageName}.attachmentprovider",
+                    file
+            )
+            val clipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+            clipboard.setPrimaryClip(ClipData.newUri(contentResolver, name, uri))
+            result.success(null)
         }
     }
 
