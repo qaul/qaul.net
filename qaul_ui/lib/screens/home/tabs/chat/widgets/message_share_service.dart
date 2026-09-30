@@ -1,5 +1,3 @@
-import 'dart:ui' show Rect;
-
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 

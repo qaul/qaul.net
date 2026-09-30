@@ -9,7 +9,7 @@ class _ForwardRecipientSelectorScreen extends StatefulHookConsumerWidget {
 
   final User defaultUser;
   final String? forwardedText;
-  final _ForwardAttachment? forwardedAttachment;
+  final ForwardAttachment? forwardedAttachment;
 
   @override
   ConsumerState<_ForwardRecipientSelectorScreen> createState() =>

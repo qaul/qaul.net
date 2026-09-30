@@ -64,8 +64,8 @@ part 'chat_timeline_projection.dart';
 
 typedef OnSendPressed = void Function(String rawText);
 
-class _ForwardAttachment {
-  const _ForwardAttachment({
+class ForwardAttachment {
+  const ForwardAttachment({
     required this.path,
     required this.name,
     this.description,
@@ -94,7 +94,7 @@ class _ForwardRecipientSelection {
   });
 
   final ChatRoom room;
-  final _ForwardAttachment? attachment;
+  final ForwardAttachment? attachment;
 }
 
 final _log = Logger('ChatScreen');
@@ -173,7 +173,7 @@ class ChatScreen extends StatefulHookConsumerWidget {
   final String? initialMessageText;
 
   /// Attachment waiting for the user confirmation after forwarding.
-  final _ForwardAttachment? initialForwardAttachment;
+  final ForwardAttachment? initialForwardAttachment;
 
   /// Overrides system sharing in tests.
   final MessageShareService? messageShareService;
@@ -321,9 +321,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                               () => _selectedContextMenuMessageId = null,
                             );
                             _openForwardRecipientSelector(
-                              attachment: _ForwardAttachment(
+                              attachment: ForwardAttachment(
                                 path: attachment!.uri,
-                                name: attachment!.name,
+                                name: attachment.name,
                                 description:
                                     message.metadata?['description'] as String?,
                               ),
@@ -431,7 +431,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
   Future<void> _openForwardRecipientSelector({
     String? text,
-    _ForwardAttachment? attachment,
+    ForwardAttachment? attachment,
   }) async {
     final defaultUser = ref.read(defaultUserProvider);
     if (defaultUser == null) return;
@@ -495,7 +495,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
   void _showForwardedAttachmentDraft(
     ChatRoom room,
-    _ForwardAttachment attachment,
+    ForwardAttachment attachment,
   ) {
     final file = File(attachment.path);
     if (!file.existsSync()) {
