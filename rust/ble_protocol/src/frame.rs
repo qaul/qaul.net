@@ -78,7 +78,7 @@ pub struct FirstChunkHeader {
     pub message_size: u16,
     pub total_chunks: u16,
     pub crc: u32,
-    pub qaul_id: [u8; QAUL_ID_BYTES],
+    pub qaul_id: [u8; QAUL_ID_BYTES], //TODO: I dont think we need to provide qaul id at any point, it should already be resolved after connecting
 }
 
 impl FirstChunkHeader {
