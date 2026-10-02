@@ -533,7 +533,7 @@ impl Libqaul {
             };
 
             let env_logger = Box::new(
-                pretty_env_logger::formatted_builder()
+                pretty_env_logger::formatted_timed_builder()
                     .parse_filters(&env_log_level)
                     .build(),
             );

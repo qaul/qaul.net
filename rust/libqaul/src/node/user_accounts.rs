@@ -427,7 +427,8 @@ impl UserAccounts {
         let accounts = state.user_accounts.inner.read().unwrap();
         let authed = state.auth.authenticated_users.read().unwrap();
         let ids: Vec<Vec<u8>> = accounts.users.iter().map(|u| u.id.to_bytes()).collect();
-        Self::default_account_index(&ids, &authed, Timestamp::get_timestamp()).map(|i| accounts.users[i].clone())
+        Self::default_account_index(&ids, &authed, Timestamp::get_timestamp())
+            .map(|i| accounts.users[i].clone())
     }
 
     /// When an account is available, returns the index of the first authenticated account.
