@@ -745,8 +745,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       if (!mounted) return;
       showModalBottomSheet<void>(
         context: context,
-        useSafeArea: false,
+        useSafeArea: true,
         isScrollControlled: true,
+        barrierColor: Colors.transparent,
         backgroundColor: Colors.transparent,
         builder: (sheetContext) => _MessageInfoSheet(
           message: message,

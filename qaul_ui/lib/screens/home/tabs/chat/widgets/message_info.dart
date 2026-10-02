@@ -41,14 +41,14 @@ class _MessageInfoSheet extends StatelessWidget {
     return SizedBox(
       key: const ValueKey('message-info-sheet'),
       width: double.infinity,
-      height: size.height,
+      height: size.height * 0.5,
       child: Material(
         color: Colors.black,
         child: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.fromLTRB(
               horizontalPadding,
-              56,
+              24,
               horizontalPadding,
               32,
             ),
