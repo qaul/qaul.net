@@ -35,6 +35,7 @@ class _MessageInfoSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final size = MediaQuery.sizeOf(context);
     final horizontalPadding = size.width >= 600 ? 62.0 : 32.0;
 
@@ -43,7 +44,7 @@ class _MessageInfoSheet extends StatelessWidget {
       width: double.infinity,
       height: size.height * 0.5,
       child: Material(
-        color: Colors.black,
+        color: colorScheme.surface,
         child: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.fromLTRB(
@@ -61,7 +62,7 @@ class _MessageInfoSheet extends StatelessWidget {
                       child: Text(
                         'Info',
                         style: theme.textTheme.headlineMedium?.copyWith(
-                          color: Colors.white,
+                          color: colorScheme.onSurface,
                           fontWeight: FontWeight.w400,
                         ),
                       ),
@@ -70,10 +71,10 @@ class _MessageInfoSheet extends StatelessWidget {
                       key: const ValueKey('close-message-info'),
                       tooltip: 'Close',
                       onPressed: onClosePressed,
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.close,
                         size: 48,
-                        color: Color(0xFF999999),
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -123,12 +124,14 @@ class _MessageInfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
     final valueText = Text(
       value,
       key: valueKey,
       textAlign: TextAlign.end,
-      style: theme.bodyMedium?.copyWith(color: Colors.white),
+      style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
     );
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -138,7 +141,9 @@ class _MessageInfoRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: theme.bodyMedium?.copyWith(color: Colors.white70),
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
           const SizedBox(width: 24),
