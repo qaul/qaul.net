@@ -380,11 +380,20 @@ fn on_connect_emits_every_chunk_in_order() {
     on_neighbour_connect(&state, peer, ConnectionModule::Lan);
 
     let mut seen = Vec::new();
+    let mut origin_updates = 0;
     while let Ok(msg) = rx.try_recv() {
         assert_eq!(msg.peer, peer);
-        seen.push(decode_dump(&msg.bytes));
+        // The dump is now followed by our own entry, so filter by type
+        // rather than assuming everything on the wire is a chunk.
+        let (header, _) = Header::decode(&msg.bytes).expect("frame header");
+        match header.message_type {
+            RoutingMessage::IndexDump => seen.push(decode_dump(&msg.bytes)),
+            RoutingMessage::RoutingUpdate => origin_updates += 1,
+            other => panic!("unexpected message type {other:?}"),
+        }
     }
 
+    assert_eq!(origin_updates, 1, "one origin update, after the chunks");
     assert!(seen.len() > 1, "6000 mappings must span several chunks");
     for (i, dump) in seen.iter().enumerate() {
         assert_eq!(dump.chunk_index, i as u8, "ascending chunk order");

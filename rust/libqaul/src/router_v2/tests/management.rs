@@ -363,6 +363,9 @@ mod request_profile {
         let host_user = Multikey::from(host_kp.public());
         let host_user_id = host_user.to_id();
         state.register_hosted_user(host_user_id, 1, host_user);
+        // Binding the hosted user now originates to the neighbour (§3.8), which
+        // is setup noise here — this test is about §11.4 source addressing.
+        while rx.try_recv().is_ok() {}
 
         state.request_profile(subject, false, 1_000);
 
