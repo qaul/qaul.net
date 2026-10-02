@@ -1100,7 +1100,10 @@ impl Dtn {
         let user_account = match UserAccounts::get_by_id(state, *user_id) {
             Some(ua) => ua,
             None => {
-                log::error!("DtnRoutedV2: user account not found for {}", user_id.to_base58());
+                log::error!(
+                    "DtnRoutedV2: user account not found for {}",
+                    user_id.to_base58()
+                );
                 if let Some(local_user) = UserAccounts::get_authenticated_user(state) {
                     Self::send_v2_response(
                         state,

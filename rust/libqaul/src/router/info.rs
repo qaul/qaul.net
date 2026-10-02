@@ -313,7 +313,9 @@ impl RouterInfo {
         let node_id = Node::get_id(state);
 
         // create routing table
-        let mut routes = router.routing_table.create_routing_info(neighbour, last_sent);
+        let mut routes = router
+            .routing_table
+            .create_routing_info(neighbour, last_sent);
         // stamp each entry with the profile version we hold, so the receiver can
         // detect an already-known user whose profile has been updated.
         Users::fill_routing_versions(router, &mut routes);
@@ -615,7 +617,8 @@ impl RouterInfo {
                                                 .iter()
                                                 .map(|e| (e.user.clone(), e.version))
                                                 .collect::<Vec<_>>();
-                                            let missed_users = Users::get_stale_ids(router, &advertised);
+                                            let missed_users =
+                                                Users::get_stale_ids(router, &advertised);
                                             if !missed_users.is_empty() {
                                                 UserRequester::add(
                                                     router,

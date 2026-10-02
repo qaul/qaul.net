@@ -1100,6 +1100,28 @@ mod trust_sweep {
         assert!(rx.try_recv().is_err(), "re-asked for a key we hold");
     }
 
+    /// The relay tick's first sweep runs before any manifest has arrived. If
+    /// that no-op consumed the interval, the backstop stayed blind for the
+    /// whole of convergence, which is exactly when it is needed.
+    #[test]
+    fn a_sweep_with_nothing_to_re_drive_keeps_its_window() {
+        let (state, mut rx) = fresh_state();
+        let first = interval_ms(&state);
+
+        // nothing is known yet, so this sweep has nothing to ask for
+        state.sweep_delegation_trust(first);
+        assert!(rx.try_recv().is_err(), "swept with nothing known");
+
+        // a manifest arrives a millisecond later
+        carried_user(&state, false, u64::MAX);
+        state.sweep_delegation_trust(first + 1);
+
+        assert!(
+            rx.try_recv().is_ok(),
+            "the no-op sweep consumed the interval"
+        );
+    }
+
     #[test]
     fn an_expired_delegation_is_not_re_requested() {
         let (state, mut rx) = fresh_state();
@@ -1238,7 +1260,10 @@ mod carried_profile {
 
         ask_for(&state, [3; 8], 13);
 
-        assert!(rx.try_recv().is_err(), "answered for a subject we never held");
+        assert!(
+            rx.try_recv().is_err(),
+            "answered for a subject we never held"
+        );
     }
 
     #[test]
@@ -1338,6 +1363,145 @@ mod carried_profile {
         assert!(
             state.cached_profiles.read().unwrap().is_empty(),
             "§11.5 SHALL: an unverified profile must never be cached or served"
+        );
+    }
+}
+
+// ---------- §11.5 re-driving a keyless user's fetch ----------
+
+/// `commit_routing_entry` and the inline-introduction path each fetch a
+/// profile when an entry *arrives*, and neither fires again. Before
+/// `sweep_user_profiles`, a fetch that went unanswered was retried only when
+/// the next entry for that user happened to arrive, one origin cycle later.
+/// `sweep_delegation_trust` does not cover it: that walks
+/// `Node::delegated_users`, which is empty on a mesh with no gateways.
+mod user_profile_sweep {
+    use super::*;
+
+    fn entry(
+        target: TargetRef,
+        next_hop: u16,
+        transport: ConnectionModule,
+    ) -> Arc<RwLock<RoutingEntry>> {
+        Arc::new(RwLock::new(RoutingEntry {
+            target_index: 0,
+            target,
+            seq_num: SeqNum::from(0u16),
+            metric: 10,
+            next_hop,
+            transport,
+            last_update: 0,
+            hop_count: 0,
+            local_only: false,
+        }))
+    }
+
+    /// A foreign user we hold a route to. `keyed` decides whether we already
+    /// hold the key, which is the only thing the fetch is for.
+    fn routable_user(state: &RouterV2State, keyed: bool) -> [u8; 8] {
+        let peer = fresh_peer();
+        let neighbour_id = [9u8; 8];
+        state.add_neighbour_transport(peer, neighbour_id, ConnectionModule::Lan);
+        bind_own_dict(state, Space::Node, 100, neighbour_id);
+
+        let subject = [3u8; 8];
+        let user = install_user(state, subject, 0);
+        if !keyed {
+            user.write().unwrap().public_key = None;
+        }
+        let e = entry(TargetRef::User(user.clone()), 100, ConnectionModule::Lan);
+        user.write().unwrap().routing_entry = Some(Arc::downgrade(&e));
+        state.routing_table.write().unwrap().set(Space::User, 40, e);
+        subject
+    }
+
+    #[test]
+    fn a_routable_user_without_a_key_is_re_asked() {
+        let (state, mut rx) = fresh_state();
+        let subject = routable_user(&state, false);
+
+        state.sweep_user_profiles(1_000);
+
+        let out = rx.try_recv().expect("the sweep should re-issue the fetch");
+        let decoded = ManagementMessage::decode(&out.bytes[..]).unwrap();
+        assert_eq!(decoded.destination, subject.to_vec());
+        assert!(matches!(decoded.body, Some(Body::ProfileRequest(_))));
+    }
+
+    #[test]
+    fn a_key_we_already_hold_is_not_re_asked() {
+        let (state, mut rx) = fresh_state();
+        routable_user(&state, true);
+
+        state.sweep_user_profiles(1_000);
+
+        assert!(rx.try_recv().is_err(), "re-asked for a key we hold");
+    }
+
+    /// §11.5: we answer for our own identities, so asking the network for one
+    /// is never right.
+    #[test]
+    fn a_user_we_host_is_not_re_asked() {
+        let (state, mut rx) = fresh_state();
+        let subject = routable_user(&state, false);
+        state
+            .users
+            .read()
+            .unwrap()
+            .get(&subject)
+            .unwrap()
+            .write()
+            .unwrap()
+            .is_hosted = true;
+
+        state.sweep_user_profiles(1_000);
+
+        assert!(
+            rx.try_recv().is_err(),
+            "asked the network for a user we host"
+        );
+    }
+
+    /// With no live route there is nothing to ask through, and an answer would
+    /// make nothing reachable.
+    #[test]
+    fn a_user_whose_route_expired_is_not_re_asked() {
+        let (state, mut rx) = fresh_state();
+        routable_user(&state, false);
+        // §7.5 expiry drops the table's Arc, leaving the user's Weak dead
+        state.routing_table.write().unwrap().clear(Space::User, 40);
+
+        state.sweep_user_profiles(1_000);
+
+        assert!(
+            rx.try_recv().is_err(),
+            "asked for a user with no live route"
+        );
+    }
+
+    /// The sweep runs on every relay tick, so the in-flight guard is the only
+    /// thing between it and one request per second per subject.
+    #[test]
+    fn the_in_flight_guard_bounds_the_retry_rate() {
+        let (state, mut rx) = fresh_state();
+        routable_user(&state, false);
+
+        state.sweep_user_profiles(1_000);
+        assert!(rx.try_recv().is_ok(), "the first sweep should ask");
+
+        state.sweep_user_profiles(1_001);
+        assert!(
+            rx.try_recv().is_err(),
+            "asked again inside the in-flight window"
+        );
+
+        // the guard lifts on its own timer, as it does on the tick
+        let later = 1_000 + state.options.management_request_timeout * 1000;
+        state.clear_management_msgs(later);
+        state.sweep_user_profiles(later);
+        assert!(
+            rx.try_recv().is_ok(),
+            "the fetch should be re-issued once the guard lifts"
         );
     }
 }
