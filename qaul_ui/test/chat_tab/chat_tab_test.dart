@@ -639,6 +639,54 @@ void main() {
     expect(find.text('Delete'), findsNothing);
   });
 
+  testWidgets('message info shows sender, status, dates and message ID', (
+    tester,
+  ) async {
+    final message = Message(
+      senderId: otherUser.id,
+      messageId: Uint8List.fromList('message-info'.codeUnits),
+      content: TextMessageContent('Show information about me'),
+      index: 1,
+      status: MessageState.confirmed,
+      sentAt: DateTime(2026, 10, 2, 12, 30),
+      receivedAt: DateTime(2026, 10, 2, 12, 31),
+    );
+    await pumpChatScreen(
+      tester,
+      buildDirectChat(messages: [message]),
+      otherUser: otherUser,
+    );
+
+    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+    final bubble = find.byKey(const ValueKey('chat-bubble-surface'));
+    chat.onMessageLongPress!(tester.element(bubble), chat.messages.single);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Info'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('message-info-sheet')), findsOneWidget);
+    expect(
+      tester.getSize(find.byKey(const ValueKey('message-info-sheet'))).height,
+      closeTo(tester.getSize(find.byType(Overlay)).height * 0.5, 0.01),
+    );
+    expect(find.text('Info'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('message-info-sheet')),
+        matching: find.text(otherUser.name),
+      ),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('message-info-status')), findsOneWidget);
+    expect(find.text('Confirmed'), findsOneWidget);
+    expect(find.text(message.messageIdBase58), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('close-message-info')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('message-info-sheet')), findsNothing);
+  });
+
   testWidgets('shares attachments from the long-press menu', (tester) async {
     final messageShareService = FakeMessageShareService();
     await pumpChatScreen(
