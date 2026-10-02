@@ -128,7 +128,7 @@ impl RouterV2State {
                     signed,
                     capabilities: self.local_capabilities(),
                 }),
-                None => None, // A/B stub: pre-fix serve path
+                None => self.cached_profiles.read().unwrap().get(&subject).cloned(),
             }
         };
 
