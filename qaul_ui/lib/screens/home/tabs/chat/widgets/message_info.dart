@@ -35,44 +35,56 @@ class _MessageInfoSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = theme.colorScheme;
+    final size = MediaQuery.sizeOf(context);
+    final horizontalPadding = size.width >= 600 ? 62.0 : 32.0;
 
     return SafeArea(
       top: false,
       child: Align(
         alignment: Alignment.bottomCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 560),
+        child: Container(
+          width: double.infinity,
+          height: size.height * 0.92,
+          margin: const EdgeInsets.symmetric(horizontal: 32),
+          color: Colors.black,
           child: Material(
-            color: colors.surface,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(24),
-            ),
+            color: Colors.transparent,
             child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 16, 24, 28),
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  36,
+                  horizontalPadding,
+                  32,
+                ),
                 child: Column(
                   key: const ValueKey('message-info-sheet'),
-                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
                         Expanded(
                           child: Text(
-                            'Message info',
-                            style: theme.textTheme.titleLarge,
+                            'Info',
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
                         ),
                         IconButton(
                           key: const ValueKey('close-message-info'),
                           tooltip: 'Close',
                           onPressed: onClosePressed,
-                          icon: const Icon(Icons.close),
+                          icon: const Icon(
+                            Icons.close,
+                            size: 48,
+                            color: Color(0xFF999999),
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 28),
                     _MessageInfoRow(label: 'Sender', value: senderName),
                     _MessageInfoRow(label: 'Type', value: _contentType()),
                     _MessageInfoRow(
@@ -119,11 +131,12 @@ class _MessageInfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context).textTheme;
     final valueText = Text(
       value,
       key: valueKey,
       textAlign: TextAlign.end,
-      style: Theme.of(context).textTheme.bodyMedium,
+      style: theme.bodyMedium?.copyWith(color: Colors.white),
     );
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -131,7 +144,10 @@ class _MessageInfoRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
+            child: Text(
+              label,
+              style: theme.bodyMedium?.copyWith(color: Colors.white70),
+            ),
           ),
           const SizedBox(width: 24),
           Flexible(

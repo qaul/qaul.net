@@ -666,7 +666,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('message-info-sheet')), findsOneWidget);
-    expect(find.text('Message info'), findsOneWidget);
+    expect(find.text('Info'), findsOneWidget);
     expect(
       find.descendant(
         of: find.byKey(const ValueKey('message-info-sheet')),
