@@ -60,6 +60,8 @@ part 'forward_recipient_selector.dart';
 
 part 'image_message_widget.dart';
 
+part 'message_info.dart';
+
 part 'chat_timeline_projection.dart';
 
 typedef OnSendPressed = void Function(String rawText);
@@ -271,6 +273,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
   final Map<String, String> _overflowMenuOptions = {};
   Map<String, MessagePresentation> _messagePresentations = {};
+  Map<String, Message> _domainMessagesById = {};
   ChatRenderMode _chatRenderMode = ChatRenderMode.direct;
   String? _initialComposerText;
   String? _activeRoomIdBase58;
@@ -294,6 +297,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       _ => null,
     };
     if (text == null && attachment == null) return;
+    final messageInfo = _domainMessagesById[message.id];
 
     final messageRect = _messageRectInOverlay(messageContext);
     setState(() => _selectedContextMenuMessageId = message.id);
@@ -336,6 +340,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                             messageContext,
                             attachment!,
                           ),
+                    onInfo: messageInfo == null
+                        ? null
+                        : () => _openMessageInfo(
+                            dialogContext,
+                            messageInfo,
+                            message.author.firstName ??
+                                AppLocalizations.of(context)!.unknown,
+                          ),
                   )
                 : _buildForwardContextMenuElements(
                     onForward: () {
@@ -353,6 +365,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                       messageContext,
                       text,
                     ),
+                    onInfo: messageInfo == null
+                        ? null
+                        : () => _openMessageInfo(
+                            dialogContext,
+                            messageInfo,
+                            message.author.firstName ??
+                                AppLocalizations.of(context)!.unknown,
+                          ),
                   ),
           ),
         );
@@ -387,8 +407,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     required VoidCallback onForward,
     required VoidCallback onCopy,
     required VoidCallback onShare,
+    VoidCallback? onInfo,
   }) {
     return [
+      if (onInfo != null)
+        ChatMessageContextMenuAction(
+          id: 'info',
+          label: 'Info',
+          iconAsset: ChatMessageContextMenuIcons.info,
+          onPressed: onInfo,
+        ),
       ChatMessageContextMenuAction.forward(onPressed: onForward),
       ChatMessageContextMenuAction(
         id: 'share',
@@ -409,8 +437,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     required VoidCallback onCopy,
     VoidCallback? onForward,
     VoidCallback? onShare,
+    VoidCallback? onInfo,
   }) {
     return [
+      if (onInfo != null)
+        ChatMessageContextMenuAction(
+          id: 'info',
+          label: 'Info',
+          iconAsset: ChatMessageContextMenuIcons.info,
+          onPressed: onInfo,
+        ),
       if (onForward != null)
         ChatMessageContextMenuAction.forward(onPressed: onForward),
       if (onShare != null)
@@ -695,6 +731,30 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       return;
     }
     _showCopyFeedback(messageRect);
+  }
+
+  void _openMessageInfo(
+    BuildContext dialogContext,
+    Message message,
+    String senderName,
+  ) {
+    Navigator.pop(dialogContext);
+    setState(() => _selectedContextMenuMessageId = null);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      showModalBottomSheet<void>(
+        context: context,
+        useSafeArea: true,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (sheetContext) => _MessageInfoSheet(
+          message: message,
+          senderName: senderName,
+          onClosePressed: () => Navigator.pop(sheetContext),
+        ),
+      );
+    });
   }
 
   Rect? _messageRectInOverlay(BuildContext messageContext) {
@@ -1162,8 +1222,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       ref: ref,
       resolveAuthor: _author,
     );
-    if (projection == null) return null;
+    if (projection == null) {
+      _domainMessagesById = {};
+      return null;
+    }
     _messagePresentations = projection.presentations;
+    _domainMessagesById = {
+      for (final message in room.messages!) message.messageIdBase58: message,
+    };
     return projection.internalMessages;
   }
 
