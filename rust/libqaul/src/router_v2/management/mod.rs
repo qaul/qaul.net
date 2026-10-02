@@ -198,11 +198,30 @@ impl RouterV2State {
     }
 
     /// drops messages that were not answered: 11.2 and 14
-    ///
-    /// §11.2 is best-effort with no acknowledgement, so a request lost in
-    /// flight is only detected by this sweep — the window is the whole
-    /// recovery latency, which is why it is its own parameter rather than the
-    /// §10.8 manifest one it used to borrow.
+    pub(crate) fn sweep_user_profiles(&self, now_ms: u64) {
+        let pending: Vec<[u8; 8]> = {
+            let users = self.users.read().unwrap();
+            users
+                .iter()
+                .filter_map(|(id, arc)| {
+                    let user = arc.read().unwrap();
+                    // A key we hold needs nothing
+                    if user.public_key.is_some() || user.is_hosted {
+                        return None;
+                    }
+                    user.routing_entry
+                        .as_ref()
+                        .and_then(|weak| weak.upgrade())
+                        .map(|_| *id)
+                })
+                .collect()
+        };
+
+        for user_id in pending {
+            self.request_profile(user_id, false, now_ms);
+        }
+    }
+
     pub fn clear_management_msgs(&self, now_ms: u64) {
         let timeout_ms = self.options.management_request_timeout.saturating_mul(1000);
         let mut in_flight = self.management_in_flight.write().unwrap();

@@ -695,7 +695,10 @@ mod tests {
         cfg.node.id = "test-node-id".to_string();
         cfg.save_to_path(p);
 
-        assert!(!dir.path().join("config.yaml.tmp").exists(), "temp file must be renamed away");
+        assert!(
+            !dir.path().join("config.yaml.tmp").exists(),
+            "temp file must be renamed away"
+        );
         assert!(dir.path().join("config.yaml").exists());
 
         let loaded = Configuration::load_or_create(p);

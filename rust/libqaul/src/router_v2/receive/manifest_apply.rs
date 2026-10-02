@@ -109,12 +109,6 @@ impl RouterV2State {
         );
 
         // §11.5: fetch the keys we are missing, which is what lets these
-        // entries become trusted on a later pass.
-        //
-        // Deliberately after every guard above has been dropped —
-        // `request_profile` takes `users` and, through `next_hop_for_user`,
-        // reads `nodes` again. Calling it inside the loop that found these
-        // ids would nest those locks.
         drop(node_arc);
         for user_id in unverifiable {
             self.request_profile(user_id, false, now);
@@ -128,10 +122,15 @@ impl RouterV2State {
             .management_request_timeout
             .saturating_mul(6)
             .saturating_mul(1000);
-        if now_ms < self.last_trust_sweep_ms.read().unwrap().saturating_add(interval) {
+        if now_ms
+            < self
+                .last_trust_sweep_ms
+                .read()
+                .unwrap()
+                .saturating_add(interval)
+        {
             return;
         }
-        *self.last_trust_sweep_ms.write().unwrap() = now_ms;
 
         let origins: Vec<([u8; 8], Vec<[u8; 8]>)> = {
             let nodes = self.nodes.read().unwrap();
@@ -152,14 +151,20 @@ impl RouterV2State {
                 .collect()
         };
 
+        let mut re_drove = false;
         for (origin, users) in origins {
             // Only a missing key is worth re-asking for
             let missing_key = users
                 .iter()
                 .any(|user_id| self.get_resource_mk(user_id, Space::User).is_none());
             if missing_key {
+                re_drove = true;
                 self.refresh_delegation_trust(&origin, now_ms);
             }
+        }
+
+        if re_drove {
+            *self.last_trust_sweep_ms.write().unwrap() = now_ms;
         }
     }
 

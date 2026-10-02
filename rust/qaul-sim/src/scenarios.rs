@@ -15,6 +15,8 @@ pub fn default_config() -> RoutingOptions {
         ping_neighbour_period: 5,
         hop_count_penalty: 10,
         maintain_period_limit: 300,
+        ping_timeout: 5,
+        neighbour_ping_failures: 2,
     }
 }
 
