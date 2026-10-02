@@ -5,7 +5,10 @@
 
 use crate::router_v2::*;
 use crate::router_v2::{
-    codec::{messages::IndexDump, Header, RoutingMessage},
+    codec::{
+        messages::{IndexDump, RoutingUpdate},
+        Header, RoutingMessage,
+    },
     index::Space,
     propagation::on_neighbour_connect,
     test_utils::*,
@@ -17,6 +20,14 @@ fn decode_dump_body(bytes: &[u8]) -> IndexDump {
     assert_eq!(header.message_type, RoutingMessage::IndexDump);
     let payload = &body_slice[..header.payload_len as usize];
     IndexDump::decode(payload).expect("IndexDump body")
+}
+
+/// Decode a framed OutboundMsg body into a RoutingUpdate.
+fn decode_update_body(bytes: &[u8]) -> RoutingUpdate {
+    let (header, body_slice) = Header::decode(bytes).expect("frame header");
+    assert_eq!(header.message_type, RoutingMessage::RoutingUpdate);
+    let payload = &body_slice[..header.payload_len as usize];
+    RoutingUpdate::decode(payload).expect("RoutingUpdate body")
 }
 
 /// A node with nothing bound still emits a dump — the message itself is
@@ -44,7 +55,26 @@ fn empty_state_still_sends_an_empty_dump() {
         "no self-binding exists until a propagation form is established"
     );
 
-    assert!(rx.try_recv().is_err(), "one dump per neighbour");
+    // The dump is followed by our own entry, so the neighbour does not wait
+    // for the ten-second origin tick to hear about us.
+    let origin = rx.try_recv().expect("an origin update follows the dump");
+    let update = decode_update_body(&origin.bytes);
+    assert_eq!(
+        update.user_entries.len(),
+        1,
+        "user form originates a user entry"
+    );
+    assert_eq!(update.user_entries[0].metric, 0);
+    assert_eq!(update.user_entries[0].hop_count, 0);
+    assert!(
+        update.user_mappings.is_empty(),
+        "no self-binding exists yet, so there is nothing to introduce"
+    );
+
+    assert!(
+        rx.try_recv().is_err(),
+        "one dump and one origin per neighbour"
+    );
 }
 
 /// Once a hosted user takes the user-space reserved slot, the dump carries
@@ -68,6 +98,116 @@ fn user_form_dump_carries_the_hosted_user_self_binding() {
         dump.node_mappings.is_empty(),
         "node-space reserved slot stays unbound in user form"
     );
+}
+
+/// §7.1's origin phase is every ten seconds and `spawn_origin_tick` eats its
+/// first tick, so without this a neighbour that appeared at t=2s heard
+/// nothing about us until t=10s.
+#[test]
+fn the_origin_update_introduces_our_own_entry() {
+    let (state, mut rx) = fresh_state();
+    let peer = fresh_peer();
+    let user_id = [42; 8];
+    state.register_hosted_user(user_id, 7, fresh_multikey());
+
+    on_neighbour_connect(&state, peer, ConnectionModule::Lan);
+
+    let _dump = rx.try_recv().expect("the dump comes first");
+    let update = decode_update_body(&rx.try_recv().expect("then the origin update").bytes);
+
+    assert_eq!(update.user_entries.len(), 1);
+    assert_eq!(update.user_entries[0].abs_idx, 0);
+    assert_eq!(update.user_entries[0].metric, 0, "§7.1: metric zero");
+    assert_eq!(update.user_entries[0].hop_count, 0, "§7.1: hop count zero");
+
+    // §8.3: the inline mapping is what lets the receiver resolve index 0
+    assert_eq!(update.user_mappings.len(), 1);
+    assert_eq!(update.user_mappings[0].abs_idx, 0);
+    assert_eq!(update.user_mappings[0].target_id, user_id);
+    assert_eq!(update.user_mappings[0].version, 7);
+}
+
+/// §6.1 ties the increment to the origin cycle: "The sequence number is
+/// incremented by one at each origin update cycle (every ten seconds)". A
+/// neighbour-connect emission is not a cycle, so it reuses the current value.
+/// §7.2 then drops the duplicate at any neighbour that already holds it,
+/// which is also what stops a flapping link driving a sequence-number storm.
+#[test]
+fn the_origin_update_does_not_increment_the_sequence_number() {
+    let (state, mut rx) = fresh_state();
+    let peer = fresh_peer();
+    state.register_hosted_user([42; 8], 0, fresh_multikey());
+
+    let before = state.seq_num.read().unwrap().value();
+
+    on_neighbour_connect(&state, peer, ConnectionModule::Lan);
+
+    let _dump = rx.try_recv().expect("the dump comes first");
+    let update = decode_update_body(&rx.try_recv().expect("then the origin update").bytes);
+
+    assert_eq!(
+        update.user_entries[0].seq, before,
+        "sent at the current seq"
+    );
+    assert_eq!(
+        state.seq_num.read().unwrap().value(),
+        before,
+        "the origin cycle owns the increment, not this path"
+    );
+}
+
+/// §2.3: the entry crossing into the Local sphere is marked local_only, the
+/// same as the origin tick marks it.
+#[test]
+fn the_origin_update_carries_the_sphere_flag() {
+    let (state, mut rx) = fresh_state();
+    state.register_hosted_user([42; 8], 0, fresh_multikey());
+
+    on_neighbour_connect(&state, fresh_peer(), ConnectionModule::Lan);
+    let _ = rx.try_recv();
+    let lan = decode_update_body(&rx.try_recv().expect("lan origin update").bytes);
+    assert!(lan.user_entries[0].local_only, "LAN is the Local sphere");
+
+    on_neighbour_connect(&state, fresh_peer(), ConnectionModule::Internet);
+    let _ = rx.try_recv();
+    let internet = decode_update_body(&rx.try_recv().expect("internet origin update").bytes);
+    assert!(
+        !internet.user_entries[0].local_only,
+        "INTERNET is not the Local sphere"
+    );
+}
+
+/// The complement of the connect-time emission. At startup the neighbour is
+/// registered about 10ms *before* the hosted user reaches the reserved index,
+/// so the connect-time update has no self-binding to introduce and the
+/// receiver drops our entry as an unknown mapping (§8.3). Binding the user has
+/// to originate as well, or nothing about us reaches the neighbour until the
+/// ten-second origin tick.
+#[test]
+fn binding_the_hosted_user_originates_to_existing_neighbours() {
+    let (state, mut rx) = fresh_state();
+    let peer = fresh_peer();
+    state.add_neighbour_transport(peer, [9; 8], ConnectionModule::Lan);
+    while rx.try_recv().is_ok() {}
+
+    let user_id = [42; 8];
+    state.register_hosted_user(user_id, 3, fresh_multikey());
+
+    let msg = rx
+        .try_recv()
+        .expect("binding the hosted user must originate");
+    assert_eq!(msg.peer, peer);
+    let update = decode_update_body(&msg.bytes);
+    assert_eq!(update.user_entries.len(), 1);
+    assert_eq!(update.user_entries[0].abs_idx, 0);
+    assert_eq!(
+        update.user_mappings.len(),
+        1,
+        "the freshly bound self-binding is what has to be introduced"
+    );
+    assert_eq!(update.user_mappings[0].abs_idx, 0);
+    assert_eq!(update.user_mappings[0].target_id, user_id);
+    assert_eq!(update.user_mappings[0].version, 3);
 }
 
 #[test]
@@ -140,7 +280,16 @@ fn ble1m_transport_skips_send() {
 
     on_neighbour_connect(&state, peer, ConnectionModule::Ble1m);
 
-    assert!(rx.try_recv().is_err(), "BLE must not receive INDEX_DUMP");
+    // §8.4 forbids the dump, but §8.3 leaves inline introductions as BLE's
+    // only mapping path, so the origin update still goes out.
+    let msg = rx.try_recv().expect("BLE still gets an origin update");
+    let (header, _) = Header::decode(&msg.bytes).expect("frame header");
+    assert_eq!(
+        header.message_type,
+        RoutingMessage::RoutingUpdate,
+        "BLE must not receive INDEX_DUMP"
+    );
+    assert!(rx.try_recv().is_err(), "nothing else goes over BLE");
 }
 
 #[test]
@@ -153,10 +302,16 @@ fn ble_coded_transport_skips_send() {
 
     on_neighbour_connect(&state, peer, ConnectionModule::BleCoded);
 
-    assert!(
-        rx.try_recv().is_err(),
+    let msg = rx
+        .try_recv()
+        .expect("BLE-coded still gets an origin update");
+    let (header, _) = Header::decode(&msg.bytes).expect("frame header");
+    assert_eq!(
+        header.message_type,
+        RoutingMessage::RoutingUpdate,
         "BLE-coded must not receive INDEX_DUMP"
     );
+    assert!(rx.try_recv().is_err(), "nothing else goes over BLE-coded");
 }
 
 /// dict has an idx→id binding but no matching User record — the

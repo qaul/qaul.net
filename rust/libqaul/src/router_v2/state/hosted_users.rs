@@ -9,6 +9,7 @@ use crate::router_v2::{
     identity::Multikey,
     index::{Space, RESERVED_INDEX},
     manifest::ManifestLog,
+    propagation::originate_to_all_neighbours,
     seq::is_fresher_u32,
     table::{Node, User},
     BumpTrigger, PropagationForm, RouterV2State,
@@ -84,6 +85,8 @@ impl RouterV2State {
                 "router_v2: hosted user {user_id:?} bound at user index {idx} (profile_version={profile_version}, reserved={})",
                 idx == RESERVED_INDEX
             );
+
+            originate_to_all_neighbours(self);
         }
     }
 

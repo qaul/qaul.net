@@ -62,5 +62,6 @@ for d in "${DIRS[@]}"; do
     [[ -n $v && $v -gt $slowest ]] && slowest=$v
 done
 printf '\nfull mesh discovery: %ss\n' "$slowest"
-echo "note: the first origin tick is at t=10s (router_v2/init.rs spawn_origin_tick),"
-echo "      so ~10s of any routing figure is startup delay, not propagation."
+echo "note: a node now originates its own entry as soon as its identity is bound"
+echo "      and as each neighbour appears, so routing figures are propagation."
+echo "      Per spec 7.1 that is roughly one relay hop per second."

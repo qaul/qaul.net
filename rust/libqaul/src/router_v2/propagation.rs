@@ -17,7 +17,7 @@ use crate::{
             messages::{IndexDump, Mapping, NodeEntry, RoutingUpdate, UserEntry},
             Header, RoutingMessage, PROTOCOL_VERSION,
         },
-        index::Space,
+        index::{Space, RESERVED_INDEX},
         manifest,
         table::{RoutingEntry, TargetRef},
         OutboundKind, OutboundMsg, RouterV2State, Sphere,
@@ -393,14 +393,100 @@ fn requeue_unsent_introductions(
     }
 }
 
+pub(crate) fn originate_to_neighbour(
+    state: &RouterV2State,
+    peer: PeerId,
+    transport: ConnectionModule,
+) {
+    let seq = state.seq_num.read().unwrap().value();
+    let form = *state.propagation_form.read().unwrap();
+    let origin_space = form.origin_space();
+    let own_manifest_version = state.manifest.read().unwrap().manifest_version;
+
+    let self_binding = match origin_space {
+        Space::User => state.user_dict.read().unwrap().id_of(RESERVED_INDEX),
+        Space::Node => state.node_dict.read().unwrap().id_of(RESERVED_INDEX),
+    };
+
+    let intros = match self_binding {
+        Some(own_id) => {
+            let version = match origin_space {
+                Space::Node => own_manifest_version,
+                Space::User => state
+                    .users
+                    .read()
+                    .unwrap()
+                    .get(&own_id)
+                    .map(|user| user.read().unwrap().profile_version)
+                    .unwrap_or(0),
+            };
+            vec![Mapping {
+                abs_idx: RESERVED_INDEX,
+                target_id: own_id,
+                version,
+            }]
+        }
+        None => Vec::new(),
+    };
+
+    let msg = build_origin_update(
+        seq,
+        origin_space,
+        own_manifest_version,
+        Sphere::of(transport) == Sphere::Local,
+        intros,
+    );
+
+    let mut body = Vec::new();
+    if let Err(e) = msg.encode(&mut body) {
+        warn!("neighbour origin: encode failed for {peer:?}/{transport:?}: {e}");
+        return;
+    }
+
+    let header = Header {
+        version: PROTOCOL_VERSION,
+        message_type: RoutingMessage::RoutingUpdate,
+        payload_len: body.len() as u16,
+    };
+    let mut bytes = Vec::with_capacity(body.len() + 4);
+    header.encode(&mut bytes);
+    bytes.extend(body);
+
+    if let Err(e) = state.tx_outbound.send(OutboundMsg {
+        kind: OutboundKind::Routing,
+        peer,
+        transport,
+        bytes,
+    }) {
+        warn!("neighbour origin: outbound channel send failed for {peer:?}: {e}");
+    }
+}
+
+pub(crate) fn originate_to_all_neighbours(state: &RouterV2State) {
+    let pairs: Vec<(PeerId, ConnectionModule)> = {
+        let mirrors = state.mirrors.read().unwrap();
+        mirrors
+            .iter()
+            .flat_map(|(peer, info)| {
+                let peer = *peer;
+                info.transports.iter().map(move |t| (peer, *t))
+            })
+            .collect()
+    };
+
+    for (peer, transport) in pairs {
+        originate_to_neighbour(state, peer, transport);
+    }
+}
+
 /// Sends an INDEX_DUMP when a neighbour connects
 pub fn on_neighbour_connect(state: &RouterV2State, neighbour: PeerId, transport: ConnectionModule) {
     if matches!(
         transport,
         ConnectionModule::Ble1m | ConnectionModule::BleCoded
     ) {
-        // Per §8.4: no INDEX_DUMP on BLE.
-        // TODO: NODE_MANIFEST send when identity plumbing exists.
+        // Per §8.4 no INDEX_DUMP goes over BLE
+        originate_to_neighbour(state, neighbour, transport);
         return;
     }
 
@@ -492,6 +578,8 @@ pub fn on_neighbour_connect(state: &RouterV2State, neighbour: PeerId, transport:
             return;
         }
     }
+
+    originate_to_neighbour(state, neighbour, transport);
 }
 
 /// §8.4: split a dictionary across as many `INDEX_DUMP` messages as it takes
