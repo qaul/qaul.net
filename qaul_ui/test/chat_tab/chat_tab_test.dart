@@ -666,6 +666,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('message-info-sheet')), findsOneWidget);
+    expect(
+      tester.getSize(find.byKey(const ValueKey('message-info-sheet'))).height,
+      tester.getSize(find.byType(Overlay)).height,
+    );
     expect(find.text('Info'), findsOneWidget);
     expect(
       find.descendant(

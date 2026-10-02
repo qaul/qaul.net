@@ -38,76 +38,68 @@ class _MessageInfoSheet extends StatelessWidget {
     final size = MediaQuery.sizeOf(context);
     final horizontalPadding = size.width >= 600 ? 62.0 : 32.0;
 
-    return SafeArea(
-      top: false,
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          width: double.infinity,
-          height: size.height * 0.92,
-          margin: const EdgeInsets.symmetric(horizontal: 32),
-          color: Colors.black,
-          child: Material(
-            color: Colors.transparent,
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  horizontalPadding,
-                  36,
-                  horizontalPadding,
-                  32,
-                ),
-                child: Column(
-                  key: const ValueKey('message-info-sheet'),
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return SizedBox(
+      key: const ValueKey('message-info-sheet'),
+      width: double.infinity,
+      height: size.height,
+      child: Material(
+        color: Colors.black,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+              horizontalPadding,
+              56,
+              horizontalPadding,
+              32,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'Info',
-                            style: theme.textTheme.headlineMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
+                    Expanded(
+                      child: Text(
+                        'Info',
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w400,
                         ),
-                        IconButton(
-                          key: const ValueKey('close-message-info'),
-                          tooltip: 'Close',
-                          onPressed: onClosePressed,
-                          icon: const Icon(
-                            Icons.close,
-                            size: 48,
-                            color: Color(0xFF999999),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                    const SizedBox(height: 28),
-                    _MessageInfoRow(label: 'Sender', value: senderName),
-                    _MessageInfoRow(label: 'Type', value: _contentType()),
-                    _MessageInfoRow(
-                      label: 'Status',
-                      value: _statusLabel(),
-                      valueKey: const ValueKey('message-info-status'),
-                    ),
-                    _MessageInfoRow(
-                      label: 'Sent',
-                      value: _formatTimestamp(context, message.sentAt),
-                    ),
-                    _MessageInfoRow(
-                      label: 'Received',
-                      value: _formatTimestamp(context, message.receivedAt),
-                    ),
-                    _MessageInfoRow(
-                      label: 'Message ID',
-                      value: message.messageIdBase58,
-                      selectable: true,
+                    IconButton(
+                      key: const ValueKey('close-message-info'),
+                      tooltip: 'Close',
+                      onPressed: onClosePressed,
+                      icon: const Icon(
+                        Icons.close,
+                        size: 48,
+                        color: Color(0xFF999999),
+                      ),
                     ),
                   ],
                 ),
-              ),
+                const SizedBox(height: 28),
+                _MessageInfoRow(label: 'Sender', value: senderName),
+                _MessageInfoRow(label: 'Type', value: _contentType()),
+                _MessageInfoRow(
+                  label: 'Status',
+                  value: _statusLabel(),
+                  valueKey: const ValueKey('message-info-status'),
+                ),
+                _MessageInfoRow(
+                  label: 'Sent',
+                  value: _formatTimestamp(context, message.sentAt),
+                ),
+                _MessageInfoRow(
+                  label: 'Received',
+                  value: _formatTimestamp(context, message.receivedAt),
+                ),
+                _MessageInfoRow(
+                  label: 'Message ID',
+                  value: message.messageIdBase58,
+                  selectable: true,
+                ),
+              ],
             ),
           ),
         ),
