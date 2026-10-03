@@ -12,7 +12,7 @@
 
 use libqaul::storage::configuration::{
     Ble, Configuration, CryptoRotation, DebugOption, HandshakeExtras, Internet, InternetPeer, Lan,
-    Node, RoutingOptions, StorageOptions, UserAccount,
+    Node, RoutingOptions, RoutingV2Options, StorageOptions, UserAccount,
 };
 use tempfile::TempDir;
 
@@ -51,9 +51,12 @@ fn create_test_config() -> Configuration {
             ping_neighbour_period: 5,
             hop_count_penalty: 10,
             maintain_period_limit: 300,
+            ping_timeout: 5,
+            neighbour_ping_failures: 2,
         },
         crypto_rotation: CryptoRotation::default(),
         handshake_extras: HandshakeExtras::default(),
+        v2_routing: RoutingV2Options::default(),
         ble: Ble::default(),
     }
 }

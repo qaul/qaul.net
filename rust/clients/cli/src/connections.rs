@@ -52,7 +52,11 @@ impl Connections {
                     let mut address_str = address.to_string();
                     address_str.push(' ');
                     if let Some(name) = args_str.strip_prefix(address_str.as_str()) {
-                        Self::internet_node_rename(state, String::from(address), String::from(name));
+                        Self::internet_node_rename(
+                            state,
+                            String::from(address),
+                            String::from(name),
+                        );
                     } else {
                         log::error!("usage: connections nodes rename address name");
                     }

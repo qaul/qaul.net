@@ -15,6 +15,8 @@ use std::path::{Path, PathBuf};
 
 pub mod old_config;
 
+use crate::storage::configuration::RoutingV2Options;
+
 use super::backup;
 
 /// # Version Upgrade Logic
@@ -130,6 +132,9 @@ impl VersionUpgrade {
                 ping_neighbour_period: old_cfg.routing.ping_neighbour_period,
                 hop_count_penalty: old_cfg.routing.hop_count_penalty,
                 maintain_period_limit: old_cfg.routing.maintain_period_limit,
+                // upgrade path: the ping-failure options postdate this version,
+                // so take their defaults.
+                ..Default::default()
             };
 
             // create new configuration structure
@@ -148,6 +153,7 @@ impl VersionUpgrade {
                 // older configs, so seed with conservative defaults.
                 handshake_extras: crate::storage::configuration::HandshakeExtras::default(),
                 crypto_rotation: crate::storage::configuration::CryptoRotation::default(),
+                v2_routing: RoutingV2Options::default(),
             };
 
             // save new configuration to file

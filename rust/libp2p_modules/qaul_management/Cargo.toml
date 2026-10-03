@@ -1,0 +1,16 @@
+[package]
+name = "qaul_management"
+edition = "2021"
+description = "qaul network management sub-protocol for libp2p"
+version = "1.0.0"
+authors = ["qaul community <contact@qaul.net>"]
+license = "AGPL"
+
+[dependencies]
+libp2p = { version = "0.56.0", features = ["tokio", "macros", "floodsub", "identify", "mdns", "noise", "ping", "tcp", "yamux", "quic"] }
+futures = "0.3"
+log = "0.4"
+asynchronous-codec = "0.7"
+
+# internal references
+varint_prefixed_codec = { path = "../varint_prefixed_codec" }

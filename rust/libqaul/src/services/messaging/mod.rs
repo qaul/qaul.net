@@ -11,7 +11,7 @@ use prost::Message;
 use serde::{Deserialize, Serialize};
 use sled;
 use std::collections::VecDeque;
-use std::sync::RwLock;
+use std::sync::{Arc, RwLock};
 
 #[cfg(emulate)]
 mod network_emul;
@@ -23,6 +23,8 @@ use super::chat::{ChatFile, ChatStorage};
 use super::crypto::Crypto;
 use crate::connections::ConnectionModule;
 use crate::node::user_accounts::{UserAccount, UserAccounts};
+use crate::router_v2::forwarding::ForwardingDecision;
+use crate::router_v2::RouterV2State;
 use crate::storage::database::DataBase;
 use crate::utilities::timestamp::Timestamp;
 use process::MessagingProcess;
@@ -31,6 +33,31 @@ use qaul_messaging::QaulMessagingReceived;
 /// Import protobuf message definition
 pub use qaul_proto::qaul_net_messaging as proto;
 
+/// Resolves the next hop for `receiver` under whichever routing protocol is
+/// active. `router_v2` is `Some` exactly when v2 is enabled, so it doubles as
+/// the version flag.
+///
+/// Both protocols agree on the contract that matters to callers: `None` means
+/// "no route right now", and the caller either drops the message or schedules
+/// it through DTN. v2 reaches that answer via
+/// [`ForwardingDecision::HandoffToDTN`], which already covers an unknown
+/// recipient, a recipient whose key is not recoverable from its `PeerId`, and
+/// a next hop that stopped being a neighbour between lookup and send.
+fn resolve_route(
+    routing_table: &crate::router::table::RoutingTableState,
+    router_v2: Option<&Arc<RouterV2State>>,
+    receiver: PeerId,
+) -> Option<(PeerId, ConnectionModule)> {
+    match router_v2 {
+        Some(v2) => match v2.resolve_forwarding(receiver) {
+            ForwardingDecision::Forward { peer, transport } => Some((peer, transport)),
+            ForwardingDecision::HandoffToDTN => None,
+        },
+        None => routing_table
+            .get_route_to_user(receiver)
+            .map(|route| (route.node, route.module)),
+    }
+}
 
 /// Messaging Scheduling Structure
 pub struct ScheduledMessage {
@@ -41,7 +68,6 @@ pub struct ScheduledMessage {
     scheduled_dtn: bool,
     is_dtn: bool,
 }
-
 
 // TODO: check if it wouldn't be easier to store
 // the message
@@ -274,6 +300,7 @@ impl MessagingState {
     pub fn check_scheduler(
         &self,
         routing_table: &crate::router::table::RoutingTableState,
+        router_v2: Option<&Arc<RouterV2State>>,
     ) -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
         let message_item: Option<ScheduledMessage>;
         {
@@ -282,10 +309,12 @@ impl MessagingState {
         }
 
         if let Some(message) = message_item {
-            if let Some(route) = routing_table.get_route_to_user(message.receiver) {
+            if let Some((neighbour, transport)) =
+                resolve_route(routing_table, router_v2, message.receiver)
+            {
                 self.on_scheduled_message(&message.container.signature);
                 let data = message.container.encode_to_vec();
-                return Some((route.node, route.module, data));
+                return Some((neighbour, transport, data));
             }
         }
 
@@ -320,7 +349,10 @@ impl MessagingState {
             }
         };
         let unconfirmed = self.unconfirmed.write().unwrap();
-        if let Err(e) = unconfirmed.unconfirmed.insert(container.signature.clone(), entry_bytes) {
+        if let Err(e) = unconfirmed
+            .unconfirmed
+            .insert(container.signature.clone(), entry_bytes)
+        {
             log::error!("{}", e);
         }
         if let Err(e) = unconfirmed.unconfirmed.flush() {
@@ -439,7 +471,10 @@ impl MessagingState {
         }
         mutate(&mut msg);
         let serialized = bincode::serialize(&msg).unwrap();
-        if let Err(_e) = unconfirmed.unconfirmed.insert(signature.to_vec(), serialized) {
+        if let Err(_e) = unconfirmed
+            .unconfirmed
+            .insert(signature.to_vec(), serialized)
+        {
             log::error!("error updating unconfirmed table");
         } else if let Err(_e) = unconfirmed.unconfirmed.flush() {
             log::error!("error updating unconfirmed table");
@@ -490,13 +525,14 @@ impl Messaging {
 
                 match v {
                     Some(unconfirmed_bytes) => {
-                        let unconfirmed: UnConfirmedMessage = match bincode::deserialize(&unconfirmed_bytes) {
-                            Ok(u) => u,
-                            Err(e) => {
-                                log::error!("Failed to deserialize unconfirmed message: {}", e);
-                                return;
-                            }
-                        };
+                        let unconfirmed: UnConfirmedMessage =
+                            match bincode::deserialize(&unconfirmed_bytes) {
+                                Ok(u) => u,
+                                Err(e) => {
+                                    log::error!("Failed to deserialize unconfirmed message: {}", e);
+                                    return;
+                                }
+                            };
 
                         // check message and decide what to do
                         match unconfirmed.message_type {
@@ -602,15 +638,18 @@ impl Messaging {
         // reaches Transport. Probing before encrypt avoids cloning `data` on
         // the common (already-established) path — file chunks can be tens of KB.
         if Crypto::session_pending_handshake(state, user_account, receiver.clone()) {
-            state.services.messaging.enqueue_pending_plaintext(PendingPlaintext {
-                user_id: user_account.id.to_bytes(),
-                receiver_id: receiver.to_bytes(),
-                data,
-                message_type,
-                message_id: message_id.to_vec(),
-                needs_confirmation: message_needs_confirmation,
-                queued_at: Timestamp::get_timestamp(),
-            });
+            state
+                .services
+                .messaging
+                .enqueue_pending_plaintext(PendingPlaintext {
+                    user_id: user_account.id.to_bytes(),
+                    receiver_id: receiver.to_bytes(),
+                    data,
+                    message_type,
+                    message_id: message_id.to_vec(),
+                    needs_confirmation: message_needs_confirmation,
+                    queued_at: Timestamp::get_timestamp(),
+                });
             log::debug!(
                 "queued outbound message for {} (peer handshake in progress)",
                 receiver.to_base58()
@@ -633,7 +672,8 @@ impl Messaging {
 
         // encrypt data
         let encrypted_message: proto::Encrypted;
-        let encryption_result = Crypto::encrypt(state, data, user_account.to_owned(), receiver.clone());
+        let encryption_result =
+            Crypto::encrypt(state, data, user_account.to_owned(), receiver.clone());
 
         match encryption_result {
             Some(encrypted) => {
@@ -898,7 +938,9 @@ impl Messaging {
     ///
     /// Check if there is a message scheduled for sending.
     ///
-    pub fn check_scheduler(state: &crate::QaulState) -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
+    pub fn check_scheduler(
+        state: &crate::QaulState,
+    ) -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
         let message_item: Option<ScheduledMessage>;
 
         // get scheduled messaging buffer
@@ -908,17 +950,23 @@ impl Messaging {
         }
 
         if let Some(message) = message_item {
-            // check for route
+            // check for route, under whichever routing protocol is active
             let rs = state.get_router();
-            if let Some(route) = rs.routing_table.get_route_to_user(message.receiver) {
+            let router_v2 = state.get_router_v2();
+            if let Some((neighbour, transport)) =
+                resolve_route(&rs.routing_table, router_v2.as_ref(), message.receiver)
+            {
                 // update unconfirmed table set scheduled flag.
-                state.services.messaging.on_scheduled_message(&message.container.signature);
+                state
+                    .services
+                    .messaging
+                    .on_scheduled_message(&message.container.signature);
 
                 // create binary message
                 let data = message.container.encode_to_vec();
 
                 // return information
-                return Some((route.node, route.module, data));
+                return Some((neighbour, transport, data));
             } else {
                 // user is offline we schedule through DTN service
                 if !message.is_forward
@@ -973,7 +1021,7 @@ impl Messaging {
             bs58::encode(signature).into_string()
         );
 
-        if let Some(user) = UserAccounts::get_by_id(state,user_id.clone()) {
+        if let Some(user) = UserAccounts::get_by_id(state, user_id.clone()) {
             // create timestamp
             let timestamp = Timestamp::get_timestamp();
 
@@ -1029,7 +1077,7 @@ impl Messaging {
                 };
 
                 // check if message is local user account
-                match UserAccounts::get_by_id(state,receiver_id) {
+                match UserAccounts::get_by_id(state, receiver_id) {
                     // we are the receiving node,
                     // process and save the message
                     Some(user_account) => {
@@ -1037,9 +1085,14 @@ impl Messaging {
                     }
 
                     // schedule it for further sending otherwise
-                    None => {
-                        state.services.messaging.schedule_message(receiver_id, container, true, true, false, false)
-                    }
+                    None => state.services.messaging.schedule_message(
+                        receiver_id,
+                        container,
+                        true,
+                        true,
+                        false,
+                        false,
+                    ),
                 }
             }
             Err(e) => log::error!("Messaging container decoding error: {}", e),

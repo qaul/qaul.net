@@ -577,6 +577,26 @@ pub enum RouterSubcmd {
     Neighbours,
     /// request and display connections table, with all known connections per connection module.
     Connections,
+    /// router_v2 native views: state v1 has no vocabulary for.
+    V2 {
+        #[command(subcommand)]
+        view: RouterV2Subcmd,
+    },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum RouterV2Subcmd {
+    /// node identity, propagation form, gateway role, and state counts
+    Status,
+    /// the v2 routing table: both index spaces, with metric and local_only
+    Table,
+    /// neighbours with their per-neighbour mirror-dictionary state
+    Neighbours,
+    /// manifests held for other origins: committed vs advertised version,
+    /// and how many delegated users are actually trusted
+    Manifests,
+    /// this node's own manifest and its outgoing cross-host delegation state
+    Delegations,
 }
 
 #[derive(Args, Debug)]
