@@ -1,3 +1,4 @@
+import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 
 import '../../styles/qaul_color_sheet.dart';
@@ -61,6 +62,14 @@ class ChatBubbleStyle {
     color: Colors.white,
   );
 
+  /// Matches WhatsApp's treatment of messages containing only one or two
+  /// emoji: the fewer emoji there are, the larger they appear.
+  static TextStyle emojiOnlyTextStyle(int emojiCount) => textStyle.copyWith(
+    fontSize: emojiCount == 1 ? 64 : 48,
+    height: 1,
+    letterSpacing: 0,
+  );
+
   static const timeStyle = TextStyle(
     fontSize: 11,
     fontWeight: FontWeight.w400,
@@ -69,6 +78,52 @@ class ChatBubbleStyle {
     color: Colors.white70,
   );
 }
+
+/// Returns the number of emoji in [content] when it consists exclusively of
+/// one or two emoji grapheme clusters; otherwise returns null.
+///
+/// Emoji may contain multiple Unicode code points (for example skin tones,
+/// flags, and joined sequences), so count grapheme clusters rather than
+/// individual runes.
+int? emojiOnlyMessageCount(String content) {
+  final trimmed = content.trim();
+  if (trimmed.isEmpty || trimmed != content) return null;
+
+  final emoji = trimmed.characters.toList(growable: false);
+  if (emoji.isEmpty || emoji.length > 2) return null;
+
+  return emoji.every(_isEmojiCluster) ? emoji.length : null;
+}
+
+bool _isEmojiCluster(String cluster) {
+  final runes = cluster.runes.toList(growable: false);
+  final isKeycap = runes.contains(0x20E3);
+
+  return runes.isNotEmpty &&
+      runes.every(
+        (rune) =>
+            _isEmojiBase(rune) ||
+            _isEmojiModifier(rune) ||
+            (isKeycap && _isKeycapBase(rune)),
+      ) &&
+      (runes.any(_isEmojiBase) || isKeycap);
+}
+
+bool _isEmojiBase(int rune) =>
+    (rune >= 0x00A9 && rune <= 0x00AE) ||
+    (rune >= 0x203C && rune <= 0x3299) ||
+    (rune >= 0x1F000 && rune <= 0x1FAFF);
+
+bool _isEmojiModifier(int rune) =>
+    rune == 0x200D ||
+    rune == 0x20E3 ||
+    rune == 0xFE0E ||
+    rune == 0xFE0F ||
+    (rune >= 0x1F3FB && rune <= 0x1F3FF) ||
+    (rune >= 0xE0020 && rune <= 0xE007F);
+
+bool _isKeycapBase(int rune) =>
+    rune == 0x23 || rune == 0x2A || (rune >= 0x30 && rune <= 0x39);
 
 // ---------------------------------------------------------------------------
 // QaulChatBubbleMessage
@@ -290,9 +345,13 @@ class QaulChatBubble extends StatelessWidget {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final content = message.content.trim();
+                  final emojiCount = emojiOnlyMessageCount(content);
+                  final messageTextStyle = emojiCount == null
+                      ? ChatBubbleStyle.textStyle
+                      : ChatBubbleStyle.emojiOnlyTextStyle(emojiCount);
                   final messageSpan = buildChatMentionTextSpan(
                     text: content,
-                    style: ChatBubbleStyle.textStyle,
+                    style: messageTextStyle,
                     mentionLabels: message.mentionLabels,
                     mentionBackgroundColor: chatMentionBubbleBackground(
                       Theme.of(context).brightness,
@@ -327,8 +386,8 @@ class QaulChatBubble extends StatelessWidget {
                   );
                   painter.layout(maxWidth: maxMessageWidth);
                   final lineHeight =
-                      textScaler.scale(ChatBubbleStyle.textStyle.fontSize!) *
-                      (ChatBubbleStyle.textStyle.height ?? 1.2);
+                      textScaler.scale(messageTextStyle.fontSize!) *
+                      (messageTextStyle.height ?? 1.2);
                   final fitsOnOneLine = painter.height <= lineHeight * 1.1;
 
                   final timeRow = Row(
@@ -378,13 +437,23 @@ class QaulChatBubble extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Flexible(
-                          child: RichText(
-                            textAlign: TextAlign.left,
-                            textWidthBasis: TextWidthBasis.longestLine,
-                            textScaler: textScaler,
-                            text: messageSpan,
+                          child: emojiCount == null
+                              ? RichText(
+                                  textAlign: TextAlign.left,
+                                  textWidthBasis: TextWidthBasis.longestLine,
+                                  textScaler: textScaler,
+                                  text: messageSpan,
+                                )
+                              : Transform.translate(
+                                  offset: const Offset(0, 3),
+                                  child: RichText(
+                                    textAlign: TextAlign.left,
+                                    textWidthBasis: TextWidthBasis.longestLine,
+                                    textScaler: textScaler,
+                                    text: messageSpan,
+                                  ),
+                                ),
                           ),
-                        ),
                         const SizedBox(width: gap),
                         timeRow,
                       ],
