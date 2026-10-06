@@ -219,7 +219,7 @@ mod tests {
         assert_eq!(feed(&mut msg, &c[3]), waiting(&[2])); // 2 lost
         assert_eq!(feed(&mut msg, &c[4]), waiting(&[])); // not asked again
         assert_eq!(feed(&mut msg, &c[2]), waiting(&[])); // resend fills it
-        // Kotlin would re-request 3 and 4 here, as its index went back to 2.
+        // A later chunk still reveals no gaps, whatever order chunks arrive in.
         assert_eq!(feed(&mut msg, &c[5]), complete(100));
     }
 

@@ -16,6 +16,7 @@ pub mod constants;
 mod crc;
 pub mod flc;
 pub mod frame;
+pub mod link;
 pub mod queue;
 
 pub use constants::{QAUL_ID_ADVERT_BYTES, QAUL_ID_BYTES};

@@ -53,6 +53,11 @@ impl SendQueue {
         }
     }
 
+    /// Change the chunk size after an MTU negotiation.
+    pub fn set_chunk_size(&mut self, chunk_size: usize) {
+        self.chunk_size = chunk_size;
+    }
+
     /// Queue a message from libqaul. Later it will be sent by `start_next_message`.
     pub fn add_message(&mut self, message: Vec<u8>, message_id: String) {
         self.waiting.push_back(Waiting { message, message_id });
