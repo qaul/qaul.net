@@ -632,3 +632,45 @@ fn local_only_empty_slot_uses_incoming_value() {
             .local_only
     );
 }
+
+/// A fetch issued before a route to the subject existed could not have been
+/// answered — §11.2 drops a request with no route, and one sent over a route
+/// still forming goes unanswered. The in-flight guard then suppressed every
+/// retry until `management_request_timeout` expired, which is the whole of the
+/// 4-7s gap measured between routing and user convergence on every topology.
+/// Committing a route for a user whose key is still missing has to re-ask.
+#[test]
+fn a_route_commit_re_asks_for_a_key_still_missing() {
+    let (state, _rx) = fresh_state();
+    let target = [21u8; 8];
+    let (peer, user) = setup_user_target(&state, 300, 40, target);
+    // the missing key is the whole reason for the fetch
+    user.write().unwrap().public_key = None;
+
+    // an attempt made before this route existed, still inside its timeout
+    state
+        .management_in_flight
+        .write()
+        .unwrap()
+        .insert((target, false), 1_000);
+
+    state
+        .apply_user_entry(
+            &default_ctx(peer, 1_100),
+            wire_user_entry(300, 5, 10, 0, true),
+        )
+        .expect("the entry is accepted");
+
+    // request_profile re-stamps the guard when it sends, so the new timestamp
+    // is proof the stale one was cleared and the fetch went out again.
+    assert_eq!(
+        state
+            .management_in_flight
+            .read()
+            .unwrap()
+            .get(&(target, false))
+            .copied(),
+        Some(1_100),
+        "the commit must clear the pre-route attempt and re-ask"
+    );
+}
