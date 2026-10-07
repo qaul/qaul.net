@@ -315,6 +315,40 @@ impl Libqaul {
                     let listen_ipv6 = format!("/ip6/::/tcp/{}", port);
                     vec![listen_ipv4_quic, listen_ipv4, listen_ipv6_quic, listen_ipv6]
                 };
+                // Asking for a port and then not listening on it is never what
+                // was meant. `do_listen` defaults to false, so without this the
+                // addresses were rewritten and nothing ever bound them.
+                config.internet.do_listen = true;
+            }
+        }
+
+        // INTERNET peers to dial. The transport has no discovery, so without
+        // these a node can only be reached, never reach out.
+        if let Some(peers) = qaul_state.default_configs.get("internet_peers") {
+            let mut config = qaul_state.config.inner.write().unwrap();
+            for address in peers.split(',').map(str::trim).filter(|a| !a.is_empty()) {
+                if config.internet.peers.iter().any(|p| p.address == address) {
+                    continue;
+                }
+                config
+                    .internet
+                    .peers
+                    .push(storage::configuration::InternetPeer {
+                        address: address.to_string(),
+                        name: String::from("configured on the command line"),
+                        enabled: true,
+                    });
+            }
+            config.internet.active = true;
+        }
+
+        // Turning the LAN transport off is how a node is made reachable only
+        // across the §2.3 membrane: LAN discovery is mDNS, which would
+        // otherwise pair up any two processes that can see each other.
+        if let Some(flag) = qaul_state.default_configs.get("lan_active") {
+            if matches!(flag.as_str(), "0" | "false" | "no") {
+                qaul_state.config.inner.write().unwrap().lan.active = false;
+                log::info!("LAN transport disabled for this run (--no-lan)");
             }
         }
 
