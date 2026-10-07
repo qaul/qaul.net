@@ -35,22 +35,6 @@ struct CliArguments {
     /// config file
     #[arg(long)]
     routing_v2: bool,
-    /// Dial this peer over the INTERNET transport, as a multiaddr such as
-    /// `/ip4/10.0.0.2/udp/9229/quic-v1`. Repeatable.
-    ///
-    /// The INTERNET transport has no discovery mechanism, so its peers are
-    /// always configured. This passes them per run instead of requiring an
-    /// edit to `config.yaml`, which is what makes a gateway topology
-    /// reproducible on someone else's machine.
-    #[arg(long = "internet-peer", value_name = "MULTIADDR")]
-    internet_peers: Vec<String>,
-    /// Disable the LAN transport for this run.
-    ///
-    /// LAN discovery is mDNS, so two processes on one host find each other
-    /// whether or not that is wanted. Turning it off is what lets a node be
-    /// reachable *only* across the §2.3 gateway membrane.
-    #[arg(long)]
-    no_lan: bool,
 }
 
 /// create a default user account for zero configuration Community Node startups
@@ -163,17 +147,6 @@ async fn run(cli_arguments: CliArguments, storage_path: String) {
             .unwrap_or(false);
         if cli_arguments.routing_v2 || env_v2 {
             def_config.insert("routing_v2".to_string(), "true".to_string());
-        }
-        if !cli_arguments.internet_peers.is_empty() {
-            // One string because default_configs is a String->String map; the
-            // separator cannot appear in a multiaddr.
-            def_config.insert(
-                "internet_peers".to_string(),
-                cli_arguments.internet_peers.join(","),
-            );
-        }
-        if cli_arguments.no_lan {
-            def_config.insert("lan_active".to_string(), "false".to_string());
         }
     }
 
