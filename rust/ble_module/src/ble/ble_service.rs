@@ -272,13 +272,15 @@ impl IdleBleService {
                             }
                         }
                         AdapterEvent::DeviceRemoved(addr) => {
-                            device_state_for_stream.find_device_by_mac(addr).map(|device| {
-                                device_result_sender.send_device_unavailable(
-                                    device.qaul_id.clone(),
-                                    adapter.clone(),
-                                    addr,
-                                );
-                            });
+                            device_state_for_stream
+                                .find_device_by_mac(addr)
+                                .map(|device| {
+                                    device_result_sender.send_device_unavailable(
+                                        device.qaul_id.clone(),
+                                        adapter.clone(),
+                                        addr,
+                                    );
+                                });
                             None
                         }
                         AdapterEvent::PropertyChanged(_) => None,
@@ -788,11 +790,27 @@ impl IdleBleService {
 
     /// Check if bluetooth is powered on by the device.
     pub async fn is_ble_enabled() -> bool {
-        let session = bluer::Session::new().await.unwrap();
-        let adapter = session.default_adapter().await.unwrap();
-        let ble_enabled: bool = adapter.is_powered().await.unwrap();
-        drop(session);
-        return ble_enabled;
+        let session = match bluer::Session::new().await {
+            Ok(session) => session,
+            Err(err) => {
+                log::debug!("BLE unavailable: no bluetooth session ({err})");
+                return false;
+            }
+        };
+        let adapter = match session.default_adapter().await {
+            Ok(adapter) => adapter,
+            Err(err) => {
+                log::debug!("BLE unavailable: no default adapter ({err})");
+                return false;
+            }
+        };
+        match adapter.is_powered().await {
+            Ok(powered) => powered,
+            Err(err) => {
+                log::debug!("BLE unavailable: adapter state unreadable ({err})");
+                false
+            }
+        }
     }
 }
 
@@ -852,5 +870,21 @@ fn get_filter() -> bluer::DiscoveryFilter {
         uuids: qaul_uuids,
         transport: bluer::DiscoveryTransport::Le,
         ..Default::default()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::IdleBleService;
+
+    /// Regression: these three DBus lookups were `unwrap()`s, so a host with
+    /// no `org.bluez` panicked a tokio worker at startup — every meshnet-lab
+    /// node did, and so would any machine without BlueZ running.
+    ///
+    /// The returned value depends on the host, so it is deliberately not
+    /// asserted. What matters is that asking the question cannot panic.
+    #[tokio::test]
+    async fn is_ble_enabled_answers_without_a_bluetooth_stack() {
+        let _ = IdleBleService::is_ble_enabled().await;
     }
 }
