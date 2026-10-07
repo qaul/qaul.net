@@ -262,6 +262,10 @@ impl RouterV2State {
         );
 
         if let Some(user_id) = needs_profile {
+            self.management_in_flight
+                .write()
+                .unwrap()
+                .remove(&(user_id, false));
             self.request_profile(user_id, false, ctx.now);
         }
     }

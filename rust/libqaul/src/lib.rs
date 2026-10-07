@@ -10,7 +10,8 @@ use filetime::FileTime;
 use futures::prelude::*;
 use futures::{future::FutureExt, pin_mut, select};
 use futures_ticker::Ticker;
-use std::collections::BTreeMap;
+use libp2p::PeerId;
+use std::collections::{BTreeMap, HashMap};
 use std::fs::File;
 use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -319,36 +320,6 @@ impl Libqaul {
                 // was meant. `do_listen` defaults to false, so without this the
                 // addresses were rewritten and nothing ever bound them.
                 config.internet.do_listen = true;
-            }
-        }
-
-        // INTERNET peers to dial. The transport has no discovery, so without
-        // these a node can only be reached, never reach out.
-        if let Some(peers) = qaul_state.default_configs.get("internet_peers") {
-            let mut config = qaul_state.config.inner.write().unwrap();
-            for address in peers.split(',').map(str::trim).filter(|a| !a.is_empty()) {
-                if config.internet.peers.iter().any(|p| p.address == address) {
-                    continue;
-                }
-                config
-                    .internet
-                    .peers
-                    .push(storage::configuration::InternetPeer {
-                        address: address.to_string(),
-                        name: String::from("configured on the command line"),
-                        enabled: true,
-                    });
-            }
-            config.internet.active = true;
-        }
-
-        // Turning the LAN transport off is how a node is made reachable only
-        // across the §2.3 membrane: LAN discovery is mDNS, which would
-        // otherwise pair up any two processes that can see each other.
-        if let Some(flag) = qaul_state.default_configs.get("lan_active") {
-            if matches!(flag.as_str(), "0" | "false" | "no") {
-                qaul_state.config.inner.write().unwrap().lan.active = false;
-                log::info!("LAN transport disabled for this run (--no-lan)");
             }
         }
 
@@ -669,6 +640,7 @@ impl Libqaul {
         let mut router_v2_ticker = Ticker::new(Duration::from_millis(100));
         // per 10.4 refresh. The cadence is 3 h
         let mut delegation_refresh_ticker = Ticker::new(Duration::from_secs(300));
+        let mut delegation_setup_ticker = Ticker::new(Duration::from_secs(5));
         // No rotation ticker: session rotation is clock-free. Draining
         // sessions are retired by nonce in the decrypt path (see
         // `after_decrypt_rotation`), not by a periodic wall-clock scan.
@@ -698,6 +670,7 @@ impl Libqaul {
             &mut retransmit_ticker,
             &mut router_v2_ticker,
             &mut delegation_refresh_ticker,
+            &mut delegation_setup_ticker,
         )
         .await;
     }
@@ -723,9 +696,11 @@ impl Libqaul {
         retransmit_ticker: &mut Ticker,
         router_v2_ticker: &mut Ticker,
         delegation_refresh_ticker: &mut Ticker,
+        delegation_setup_ticker: &mut Ticker,
     ) {
         // Take a snapshot of the router state once; it doesn't change after init.
         let router = self.state.get_router();
+        let mut lan_redial_at: HashMap<PeerId, u64> = HashMap::new();
         loop {
             let evt = {
                 let lan_active = matches!(lan.status(), TransportStatus::Running);
@@ -759,6 +734,7 @@ impl Libqaul {
                 let messaging_fut = messaging_ticker.next().fuse();
                 let router_v2_fut = router_v2_ticker.next().fuse();
                 let delegation_refresh_fut = delegation_refresh_ticker.next().fuse();
+                let delegation_setup_fut = delegation_setup_ticker.next().fuse();
                 let retransmit_fut = retransmit_ticker.next().fuse();
 
                 pin_mut!(
@@ -777,6 +753,7 @@ impl Libqaul {
                     messaging_fut,
                     router_v2_fut,
                     delegation_refresh_fut,
+                    delegation_setup_fut,
                     retransmit_fut,
                 );
 
@@ -877,12 +854,14 @@ impl Libqaul {
                     _messaging_event = messaging_fut => Some(EventType::Messaging),
                     _router_v2_event = router_v2_fut => Some(EventType::RouterV2Outbound),
                     _delegation_refresh_event = delegation_refresh_fut => Some(EventType::DelegationRefresh),
+                    _delegation_setup_event = delegation_setup_fut => Some(EventType::DelegationSetup),
                     _retransmit_event = retransmit_fut => Some(EventType::Retransmit),
                 }
             };
 
             if let Some(event) = evt {
-                self.handle_event(event, lan, internet, ble).await;
+                self.handle_event(event, lan, internet, ble, &mut lan_redial_at)
+                    .await;
             }
         }
     }
@@ -894,7 +873,10 @@ impl Libqaul {
         lan: &mut connections::lan::Lan,
         internet: &mut connections::internet::Internet,
         ble: &mut BleTransport,
+        lan_redial_at: &mut std::collections::HashMap<libp2p::PeerId, u64>,
     ) {
+        /// Minimum gap between LAN redial attempts for the same peer.
+        const LAN_REDIAL_INTERVAL_MS: u64 = 5_000;
         // Reuse the router snapshot taken in event_loop() instead of cloning the Arc again.
         let router = self.state.get_router();
         match event {
@@ -1063,6 +1045,26 @@ impl Libqaul {
                     Internet::peer_redial(&addr, &mut internet.swarm).await;
                     self.state.connections.internet.set_redialed(&addr);
                 }
+
+                if matches!(lan.status(), TransportStatus::Running) {
+                    let now = Timestamp::get_timestamp();
+                    let disconnected: Vec<PeerId> = lan
+                        .swarm
+                        .behaviour()
+                        .mdns
+                        .discovered_nodes()
+                        .copied()
+                        .filter(|peer| !lan.swarm.is_connected(peer))
+                        .collect();
+                    for peer in disconnected {
+                        if lan_redial_at.get(&peer).is_some_and(|due| now < *due) {
+                            continue;
+                        }
+                        lan_redial_at.insert(peer, now.saturating_add(LAN_REDIAL_INTERVAL_MS));
+                        log::debug!("lan redial: {peer:?} is discovered but not connected");
+                        let _ = lan.swarm.dial(peer);
+                    }
+                }
             }
             EventType::RoutingTable => {
                 // when v2 is active, it does not write to v1's connection table, so the RPC
@@ -1128,10 +1130,6 @@ impl Libqaul {
                                 );
                             }
                             transport => {
-                                // TEMP(smoke test): byte 1 of the frame is the
-                                // routing message type (0x01 ROUTING_UPDATE,
-                                // 0x02 INDEX_DUMP, 0x03 NODE_MANIFEST,
-                                // 0x04 MANIFEST_DELTA, 0x05 MANIFEST_REQUEST).
                                 log::info!(
                                     "router_v2 SEND → peer={} transport={:?} type={:#04x} bytes={}",
                                     msg.peer,
@@ -1180,6 +1178,9 @@ impl Libqaul {
             }
             EventType::DelegationRefresh => {
                 self.refresh_self_delegations();
+                self.ensure_cross_host_delegations();
+            }
+            EventType::DelegationSetup => {
                 self.ensure_cross_host_delegations();
             }
         }
@@ -1353,6 +1354,7 @@ enum EventType {
     Retransmit,
     RouterV2Outbound,
     DelegationRefresh,
+    DelegationSetup,
 }
 
 /// Legacy entry point — removed in favor of `Libqaul::new()` + `Libqaul::run()`.
