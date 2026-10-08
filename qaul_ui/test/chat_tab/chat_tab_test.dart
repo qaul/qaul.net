@@ -14,6 +14,7 @@ import 'package:qaul_components/qaul_components.dart'
         ChatFooter,
         ChatHeader,
         ChatMessageContextMenu,
+        QaulLoadingIndicator,
         QaulComponentsLocalizations;
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_rpc/src/generated/connections/transports.pb.dart';
@@ -186,6 +187,168 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(UserDetailsScreen), findsOneWidget);
+  });
+
+  testWidgets('chat list shows a loader until its first page resolves', (
+    tester,
+  ) async {
+    final wut = ProviderScope(
+      overrides: [
+        defaultUserProvider.overrideWith((_) => defaultUser),
+        chatNotificationControllerProvider.overrideWithValue(
+          NullChatNotificationController(),
+        ),
+        qaulWorkerProvider.overrideWith((ref) => StubLibqaulWorker(ref)),
+      ],
+      child: materialAppWithLocalizations(BaseTab.chat(key: chatKey)),
+    );
+
+    await tester.pumpWidget(wut);
+
+    expect(find.byType(QaulLoadingIndicator), findsOneWidget);
+    expect(find.text('No chat rooms yet'), findsNothing);
+
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byType(QaulLoadingIndicator), findsNothing);
+    expect(find.text('No chat rooms yet'), findsOneWidget);
+  });
+
+  testWidgets('desktop room switches replace the chat list without animation', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 760);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final firstRoom = buildDirectChat(
+      messages: [
+        textMessage(id: 'first-message', sender: otherUser, text: 'First'),
+      ],
+    );
+    final secondRoom = buildGroupChat(
+      messages: [
+        textMessage(id: 'second-message', sender: otherUser, text: 'Second'),
+      ],
+    );
+    TestChatRoomListNotifier.rooms = [firstRoom, secondRoom];
+
+    await pumpChatScreen(tester, firstRoom, otherUser: otherUser);
+    await tester.pump();
+
+    final firstChatElement = tester.element(find.byType(chat_ui.Chat));
+    final container = ProviderScope.containerOf(firstChatElement);
+    container.read(currentOpenChatRoom.notifier).state = secondRoom;
+    await tester.pump();
+
+    final chatList = find.byKey(
+      ValueKey('chat-list-${secondRoom.idBase58}-loaded'),
+    );
+    expect(chatList, findsOneWidget);
+    expect(tester.element(chatList), isNot(same(firstChatElement)));
+
+    final transitionFinder = find.descendant(
+      of: chatList,
+      matching: find.byWidgetPredicate(
+        (widget) =>
+            widget is SizeTransition && widget.sizeFactor.isAnimating ||
+            widget is FadeTransition && widget.opacity.isAnimating,
+      ),
+    );
+    const frameTimes = [
+      0,
+      16,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      350,
+      400,
+      500,
+      600,
+      700,
+    ];
+    var previousTime = 0;
+    for (final time in frameTimes) {
+      await tester.pump(Duration(milliseconds: time - previousTime));
+      expect(transitionFinder, findsNothing);
+      previousTime = time;
+    }
+  });
+
+  testWidgets('first room load shows a loader without animating messages', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 760);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final room = buildDirectChat(messages: null);
+    TestChatRoomListNotifier.rooms = [room];
+
+    await pumpChatScreen(tester, room, otherUser: otherUser);
+    await tester.pump();
+
+    final loadingChatList = find.byKey(
+      ValueKey('chat-list-${room.idBase58}-loading'),
+    );
+    expect(loadingChatList, findsOneWidget);
+    expect(find.byType(QaulLoadingIndicator), findsOneWidget);
+    expect(find.text('No messages yet'), findsNothing);
+
+    final loadingChatElement = tester.element(loadingChatList);
+    final loadedRoom = room.copyWith(
+      messages: [
+        textMessage(id: 'loaded-message', sender: otherUser, text: 'Loaded'),
+      ],
+    );
+    ProviderScope.containerOf(loadingChatElement)
+        .read(currentOpenChatRoom.notifier)
+        .state = loadedRoom;
+    await tester.pump();
+
+    final loadedChatList = find.byKey(
+      ValueKey('chat-list-${room.idBase58}-loaded'),
+    );
+    expect(loadedChatList, findsOneWidget);
+    expect(tester.element(loadedChatList), isNot(same(loadingChatElement)));
+    expect(find.byType(QaulLoadingIndicator), findsNothing);
+    expect(find.text('Loaded', findRichText: true), findsOneWidget);
+
+    final transitionFinder = find.descendant(
+      of: loadedChatList,
+      matching: find.byWidgetPredicate(
+        (widget) =>
+            widget is SizeTransition && widget.sizeFactor.isAnimating ||
+            widget is FadeTransition && widget.opacity.isAnimating,
+      ),
+    );
+    const frameTimes = [
+      0,
+      16,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      350,
+      400,
+      500,
+      600,
+      700,
+    ];
+    var previousTime = 0;
+    for (final time in frameTimes) {
+      await tester.pump(Duration(milliseconds: time - previousTime));
+      expect(transitionFinder, findsNothing);
+      previousTime = time;
+    }
   });
 
   testWidgets('group chat renders ChatHeader with menu', (tester) async {
