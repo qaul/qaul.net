@@ -96,6 +96,35 @@ impl RouterV2State {
         changed
     }
 
+    /// §10.1: advance the `profile_version` the existing manifest entry carries
+    pub(crate) fn refresh_manifest_profile_version(
+        &self,
+        user_id: &[u8; 8],
+        profile_version: u32,
+    ) -> bool {
+        let existing = {
+            let manifest = self.manifest.read().unwrap();
+            manifest
+                .entries()
+                .iter()
+                .find(|e| e.user_id == *user_id)
+                .map(|e| (e.timeout, e.entry_signature, e.profile_version))
+        };
+        let Some((timeout, entry_signature, current)) = existing else {
+            return false;
+        };
+        if current == profile_version {
+            return false;
+        }
+
+        self.record_delegation(DelegetedEntry {
+            user_id: *user_id,
+            timeout,
+            entry_signature,
+            profile_version,
+        })
+    }
+
     /// whether this user already has an entry in our own manifest
     pub fn has_self_delegation(&self, user_id: &[u8; 8]) -> bool {
         self.manifest
