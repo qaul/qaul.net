@@ -218,3 +218,51 @@ fn the_helper_marks_a_bound_index() {
         vec![(20, [1; 8], 3)]
     );
 }
+
+/// §10.1: the manifest carries each delegated user's `profile_version`, so a
+/// hosted user's profile change has to advance that entry too.
+///
+/// It did not. In node form (§3.2) the user holds no routing index, so
+/// `mark_profile_version_bump` returns early and the inline-mapping path
+/// above is unavailable — the manifest was the only route left and nothing
+/// took it. The manifest went on advertising the old version at an unchanged
+/// `manifest_version`, so §10.8's pull never fired and no neighbour could
+/// learn the new profile. Reproduced on a three-node gateway lab: profile at
+/// v2, manifest entry still at v1, versions agreeing on both sides.
+#[test]
+fn a_hosted_profile_change_advances_its_manifest_entry() {
+    let (state, _rx) = fresh_state();
+    let mk = fresh_multikey();
+    let user_id = [1; 8];
+    state.register_hosted_user(user_id, 0, mk.clone());
+    state.register_hosted_profile(user_id, hosted_profile(mk.clone(), 1));
+
+    // the entry a published self-delegation leaves behind
+    state.record_delegation(crate::router_v2::manifest::DelegetedEntry {
+        user_id,
+        timeout: u64::MAX,
+        entry_signature: [7; 64],
+        profile_version: 1,
+    });
+    state.dirty_delegations.write().unwrap().clear();
+
+    state.register_hosted_profile(user_id, hosted_profile(mk, 2));
+
+    let carried = state
+        .manifest
+        .read()
+        .unwrap()
+        .entries()
+        .iter()
+        .find(|e| e.user_id == user_id)
+        .map(|e| e.profile_version);
+    assert_eq!(
+        carried,
+        Some(2),
+        "the manifest entry must carry the new profile version"
+    );
+    assert!(
+        state.dirty_delegations.read().unwrap().contains(&user_id),
+        "and be marked, or the next §10.8 bump leaves it out"
+    );
+}
