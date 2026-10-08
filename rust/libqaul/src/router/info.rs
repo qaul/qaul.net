@@ -29,10 +29,7 @@ use std::{
 use crate::{
     connections::ConnectionModule,
     node::Node,
-    router::{
-        router_net_proto,
-        users::Users,
-    },
+    router::{router_net_proto, users::Users},
     utilities::timestamp::Timestamp,
 };
 
@@ -199,7 +196,10 @@ impl RouterInfo {
     /// and checks if there is any timeout.
     /// If it finds a timeout it returns the node id
     /// to send a routing information to.
-    pub fn check_scheduler(state: &crate::QaulState, router: &super::RouterState) -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
+    pub fn check_scheduler(
+        state: &crate::QaulState,
+        router: &super::RouterState,
+    ) -> Option<(PeerId, ConnectionModule, Vec<u8>)> {
         let mut found_neighbour: Option<PeerId> = None;
         let mut neighbour_last_sent: u64 = 0;
         let mut neighbour_is_first: bool = false;
@@ -261,7 +261,13 @@ impl RouterInfo {
                 }
 
                 // create routing information
-                let data = Self::create(state, router, node_id.clone(), neighbour_last_sent, neighbour_is_first);
+                let data = Self::create(
+                    state,
+                    router,
+                    node_id.clone(),
+                    neighbour_last_sent,
+                    neighbour_is_first,
+                );
 
                 // create result
                 return Some((node_id, module, data));
@@ -297,11 +303,19 @@ impl RouterInfo {
 
     /// Create routing information for a neighbour node,
     /// encode the information and return the byte code.
-    pub fn create(state: &crate::QaulState, router: &super::RouterState, neighbour: PeerId, last_sent: u64, is_first: bool) -> Vec<u8> {
+    pub fn create(
+        state: &crate::QaulState,
+        router: &super::RouterState,
+        neighbour: PeerId,
+        last_sent: u64,
+        is_first: bool,
+    ) -> Vec<u8> {
         let node_id = Node::get_id(state);
 
         // create routing table
-        let mut routes = router.routing_table.create_routing_info(neighbour, last_sent);
+        let mut routes = router
+            .routing_table
+            .create_routing_info(neighbour, last_sent);
         // stamp each entry with the profile version we hold, so the receiver can
         // detect an already-known user whose profile has been updated.
         Users::fill_routing_versions(router, &mut routes);
@@ -412,7 +426,10 @@ impl RouterInfo {
     }
 
     /// create_feed_response
-    pub fn create_feed_response(state: &crate::QaulState, messages: &[(Vec<u8>, Vec<u8>, String, u64)]) -> Vec<u8> {
+    pub fn create_feed_response(
+        state: &crate::QaulState,
+        messages: &[(Vec<u8>, Vec<u8>, String, u64)],
+    ) -> Vec<u8> {
         let node_id = Node::get_id(state);
 
         // create latest Feed ids table
@@ -515,7 +532,10 @@ impl RouterInfo {
     }
 
     /// create_user_response
-    pub fn create_user_response(state: &crate::QaulState, users: &router_net_proto::UserInfoTable) -> Vec<u8> {
+    pub fn create_user_response(
+        state: &crate::QaulState,
+        users: &router_net_proto::UserInfoTable,
+    ) -> Vec<u8> {
         let node_id = Node::get_id(state);
         let timestamp = Timestamp::get_timestamp();
 
@@ -557,7 +577,11 @@ impl RouterInfo {
     }
 
     /// process received qaul_info message
-    pub fn received(state: &crate::QaulState, router: &super::RouterState, received: QaulInfoReceived) {
+    pub fn received(
+        state: &crate::QaulState,
+        router: &super::RouterState,
+        received: QaulInfoReceived,
+    ) {
         // decode message to structure
         let decoding_result = router_net_proto::RouterInfoContainer::decode(&received.data[..]);
 
@@ -593,7 +617,8 @@ impl RouterInfo {
                                                 .iter()
                                                 .map(|e| (e.user.clone(), e.version))
                                                 .collect::<Vec<_>>();
-                                            let missed_users = Users::get_stale_ids(router, &advertised);
+                                            let missed_users =
+                                                Users::get_stale_ids(router, &advertised);
                                             if !missed_users.is_empty() {
                                                 UserRequester::add(
                                                     router,
@@ -614,7 +639,8 @@ impl RouterInfo {
                                     }
                                     match feeds {
                                         Some(router_net_proto::FeedIdsTable { ids }) => {
-                                            let missing_ids = state.services.feed.process_received_feed_ids(&ids);
+                                            let missing_ids =
+                                                state.services.feed.process_received_feed_ids(&ids);
                                             if !missing_ids.is_empty() {
                                                 FeedRequester::add(
                                                     router,
@@ -634,9 +660,14 @@ impl RouterInfo {
                                 if let Ok(message) = message_info {
                                     match message.feeds {
                                         Some(table) => {
-                                            let feeds = state.services.feed.get_messages_by_ids(&table.ids);
+                                            let feeds =
+                                                state.services.feed.get_messages_by_ids(&table.ids);
                                             if !feeds.is_empty() {
-                                                FeedResponser::add(router, &received.received_from, &feeds);
+                                                FeedResponser::add(
+                                                    router,
+                                                    &received.received_from,
+                                                    &feeds,
+                                                );
                                             }
                                         }
                                         _ => {}
@@ -664,7 +695,8 @@ impl RouterInfo {
                                                 );
                                             }
                                             // check missed users
-                                            let missed_users = Users::get_missed_ids(router, &user_ids);
+                                            let missed_users =
+                                                Users::get_missed_ids(router, &user_ids);
                                             if !missed_users.is_empty() {
                                                 UserRequester::add(
                                                     router,
@@ -681,7 +713,8 @@ impl RouterInfo {
                                 let message_info =
                                     router_net_proto::UserIdTable::decode(&content.content[..]);
                                 if let Ok(message) = message_info {
-                                    let table = Users::get_user_info_table_by_q8ids(router, &message.ids);
+                                    let table =
+                                        Users::get_user_info_table_by_q8ids(router, &message.ids);
                                     UserResponser::add(router, &received.received_from, &table);
                                 }
                             }
@@ -691,7 +724,11 @@ impl RouterInfo {
                                 if let Ok(message) = message_info {
                                     // Process signed profiles first (verified, preferred)
                                     if !message.signed_profiles.is_empty() {
-                                        Users::add_signed_user_info_table(state, router, &message.signed_profiles);
+                                        Users::add_signed_user_info_table(
+                                            state,
+                                            router,
+                                            &message.signed_profiles,
+                                        );
                                     }
                                     // Fall back to legacy unsigned info for any remaining unknowns
                                     if !message.info.is_empty() {

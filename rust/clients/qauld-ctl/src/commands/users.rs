@@ -219,7 +219,13 @@ impl RpcCommand for UsersSubcmd {
                             }
                             Err(e) => log::error!("{}", e),
                         }
-                        print_extended_profile(&user.bio, &user.avatar, user.profile_version, user.profile_updated_at, &user.preferred_custody_route);
+                        print_extended_profile(
+                            &user.bio,
+                            &user.avatar,
+                            user.profile_version,
+                            user.profile_updated_at,
+                            &user.preferred_custody_route,
+                        );
                         if user.connections.len() > 0 {
                             println!("  Connections: module | hc | rtt | via");
                             for cnn in user.connections {
@@ -296,7 +302,13 @@ impl RpcCommand for UsersSubcmd {
                         );
                         println!("Group ID: {}", group_id);
                         println!("Public Key: {}", user.key_base58);
-                        print_extended_profile(&user.bio, &user.avatar, user.profile_version, user.profile_updated_at, &user.preferred_custody_route);
+                        print_extended_profile(
+                            &user.bio,
+                            &user.avatar,
+                            user.profile_version,
+                            user.profile_updated_at,
+                            &user.preferred_custody_route,
+                        );
 
                         if user.connections.len() > 0 {
                             println!("Connections: module | hc | rtt | via");

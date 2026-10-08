@@ -150,10 +150,21 @@ impl Group {
     }
 
     /// update group member
-    pub fn update_group_member(state: &crate::QaulState, account_id: &PeerId, group_id: &[u8], member: &GroupMember) {
-        GroupStorage::with_group_mut(state, account_id, group_id, GroupSaveReason::MembershipChanged, |group| {
-            group.members.insert(member.user_id.clone(), member.clone());
-        });
+    pub fn update_group_member(
+        state: &crate::QaulState,
+        account_id: &PeerId,
+        group_id: &[u8],
+        member: &GroupMember,
+    ) {
+        GroupStorage::with_group_mut(
+            state,
+            account_id,
+            group_id,
+            GroupSaveReason::MembershipChanged,
+            |group| {
+                group.members.insert(member.user_id.clone(), member.clone());
+            },
+        );
     }
 
     /// Send an already encoded messaging payload to all remote group members.
@@ -193,7 +204,12 @@ impl Group {
     }
 
     /// Send packed notify message directly
-    pub fn send_notify_message(state: &crate::QaulState, user_account: &UserAccount, receiver: &PeerId, data: Vec<u8>) {
+    pub fn send_notify_message(
+        state: &crate::QaulState,
+        user_account: &UserAccount,
+        receiver: &PeerId,
+        data: Vec<u8>,
+    ) {
         // pack group container into messaging message
         let proto_message = proto::Messaging {
             message: Some(proto::messaging::Message::GroupInviteMessage(
@@ -362,7 +378,9 @@ impl Group {
                 Some(proto_net::group_container::Message::Removed(removed)) => {
                     log::trace!("group::on_removed");
                     // remove user from group and deactivate group
-                    if let Err(error) = Member::on_removed(state, &sender_id, &receiver_id, &removed) {
+                    if let Err(error) =
+                        Member::on_removed(state, &sender_id, &receiver_id, &removed)
+                    {
                         log::error!("group on_removed error {}", error);
                     }
                 }
@@ -380,7 +398,12 @@ impl Group {
                 }
                 Some(proto_net::group_container::Message::GroupInfo(group_info)) => {
                     log::trace!("group info arrived");
-                    manage::GroupManage::on_group_notify(state, *sender_id, *receiver_id, &group_info);
+                    manage::GroupManage::on_group_notify(
+                        state,
+                        *sender_id,
+                        *receiver_id,
+                        &group_info,
+                    );
                 }
                 None => {
                     log::error!("group message from {} was empty", sender_id.to_base58())
@@ -476,7 +499,8 @@ impl Group {
                         }
                     }
                     Some(proto_rpc::group::Message::GroupInfoRequest(group_info_req)) => {
-                        match GroupManage::group_info(state, &my_user_id, &group_info_req.group_id) {
+                        match GroupManage::group_info(state, &my_user_id, &group_info_req.group_id)
+                        {
                             Ok(res) => {
                                 let proto_message = proto_rpc::Group {
                                     message: Some(proto_rpc::group::Message::GroupInfoResponse(
@@ -609,9 +633,12 @@ impl Group {
                         let mut status = true;
                         let mut message: String = "".to_string();
 
-                        if let Err(err) =
-                            Member::reply_invite(state, &my_user_id, &reply_req.group_id, reply_req.accept)
-                        {
+                        if let Err(err) = Member::reply_invite(
+                            state,
+                            &my_user_id,
+                            &reply_req.group_id,
+                            reply_req.accept,
+                        ) {
                             status = false;
                             message = err.clone();
                             log::error!("Get group info error, {}", err);
