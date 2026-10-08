@@ -22,6 +22,21 @@ Finder _findMessageRichText(String content) {
 }
 
 void main() {
+  group('emojiOnlyMessageCount', () {
+    test('recognizes one or two standalone emoji clusters', () {
+      expect(emojiOnlyMessageCount('😀'), 1);
+      expect(emojiOnlyMessageCount('😀🎉'), 2);
+      expect(emojiOnlyMessageCount('👩🏽‍💻'), 1);
+      expect(emojiOnlyMessageCount('🇧🇷🇨🇭'), 2);
+    });
+
+    test('rejects text, spaces, and three or more emoji', () {
+      expect(emojiOnlyMessageCount('😀 hello'), isNull);
+      expect(emojiOnlyMessageCount(' 😀'), isNull);
+      expect(emojiOnlyMessageCount('😀🎉❤️'), isNull);
+    });
+  });
+
   group('computeChatBubbleDisplayItems', () {
     test('links messages from same sender and same minute', () {
       final base = DateTime(2026, 4, 19, 19, 23);
@@ -404,6 +419,44 @@ void main() {
   });
 
   group('QaulChatBubble content', () {
+    testWidgets('enlarges messages containing only one or two emoji', (
+      tester,
+    ) async {
+      final clock = DateTime(2026, 1, 1, 12, 0);
+
+      Future<TextStyle?> messageStyleFor(String content) async {
+        final message = QaulChatBubbleMessage(
+          content: content,
+          sentAt: clock,
+          receivedAt: clock,
+          status: MessageStatus.sent,
+          messageType: MessageType.secondary,
+          edges: const [],
+        );
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: QaulChatBubble(
+                message: message,
+                clock: clock,
+                showTimestamp: false,
+              ),
+            ),
+          ),
+        );
+
+        return tester
+            .widget<RichText>(_findMessageRichText(content))
+            .text
+            .style;
+      }
+
+      expect((await messageStyleFor('😀'))!.fontSize, 64);
+      expect((await messageStyleFor('😀🎉'))!.fontSize, 48);
+      expect((await messageStyleFor('😀🎉❤️'))!.fontSize, 16);
+      expect((await messageStyleFor('😀 hello'))!.fontSize, 16);
+    });
+
     testWidgets('preserves internal newlines (trim only)', (tester) async {
       final clock = DateTime(2026, 1, 1, 12, 0);
       final message = QaulChatBubbleMessage(
