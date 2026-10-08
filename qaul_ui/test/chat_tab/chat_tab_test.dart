@@ -189,6 +189,32 @@ void main() {
     expect(find.byType(UserDetailsScreen), findsOneWidget);
   });
 
+  testWidgets('chat list shows a loader until its first page resolves', (
+    tester,
+  ) async {
+    final wut = ProviderScope(
+      overrides: [
+        defaultUserProvider.overrideWith((_) => defaultUser),
+        chatNotificationControllerProvider.overrideWithValue(
+          NullChatNotificationController(),
+        ),
+        qaulWorkerProvider.overrideWith((ref) => StubLibqaulWorker(ref)),
+      ],
+      child: materialAppWithLocalizations(BaseTab.chat(key: chatKey)),
+    );
+
+    await tester.pumpWidget(wut);
+
+    expect(find.byType(QaulLoadingIndicator), findsOneWidget);
+    expect(find.text('No chat rooms yet'), findsNothing);
+
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byType(QaulLoadingIndicator), findsNothing);
+    expect(find.text('No chat rooms yet'), findsOneWidget);
+  });
+
   testWidgets('desktop room switches replace the chat list without animation', (
     tester,
   ) async {
