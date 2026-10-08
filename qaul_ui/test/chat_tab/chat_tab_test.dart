@@ -188,6 +188,71 @@ void main() {
     expect(find.byType(UserDetailsScreen), findsOneWidget);
   });
 
+  testWidgets('desktop room switches replace the chat list without animation', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 760);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final firstRoom = buildDirectChat(
+      messages: [
+        textMessage(id: 'first-message', sender: otherUser, text: 'First'),
+      ],
+    );
+    final secondRoom = buildGroupChat(
+      messages: [
+        textMessage(id: 'second-message', sender: otherUser, text: 'Second'),
+      ],
+    );
+    TestChatRoomListNotifier.rooms = [firstRoom, secondRoom];
+
+    await pumpChatScreen(tester, firstRoom, otherUser: otherUser);
+    await tester.pump();
+
+    final firstChatElement = tester.element(find.byType(chat_ui.Chat));
+    final container = ProviderScope.containerOf(firstChatElement);
+    container.read(currentOpenChatRoom.notifier).state = secondRoom;
+    await tester.pump();
+
+    final chatList = find.byKey(
+      ValueKey('chat-list-${secondRoom.idBase58}'),
+    );
+    expect(chatList, findsOneWidget);
+    expect(tester.element(chatList), isNot(same(firstChatElement)));
+
+    final transitionFinder = find.descendant(
+      of: chatList,
+      matching: find.byWidgetPredicate(
+        (widget) =>
+            widget is SizeTransition && widget.sizeFactor.isAnimating ||
+            widget is FadeTransition && widget.opacity.isAnimating,
+      ),
+    );
+    const frameTimes = [
+      0,
+      16,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      350,
+      400,
+      500,
+      600,
+      700,
+    ];
+    var previousTime = 0;
+    for (final time in frameTimes) {
+      await tester.pump(Duration(milliseconds: time - previousTime));
+      expect(transitionFinder, findsNothing);
+      previousTime = time;
+    }
+  });
+
   testWidgets('group chat renders ChatHeader with menu', (tester) async {
     await pumpChatScreen(tester, buildGroupChat());
 

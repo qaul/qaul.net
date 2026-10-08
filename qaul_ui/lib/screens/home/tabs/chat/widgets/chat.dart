@@ -981,6 +981,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                 top: false,
                 bottom: false,
                 child: Chat(
+                  key: ValueKey('chat-list-${room.idBase58}'),
                   showUserAvatars: false,
                   showUserNames: false,
                   user: user.toInternalUser(),
