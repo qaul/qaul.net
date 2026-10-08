@@ -95,6 +95,11 @@ impl RouterV2State {
 
         if advanced {
             self.mark_profile_version_bump(&user_id);
+            // The line above only marks a routing index, which a user in node
+            // form (§3.2) does not have. The manifest carries this user's
+            // profile_version too (§10.1) and is the only way the change
+            // reaches anyone in that form.
+            self.refresh_manifest_profile_version(&user_id, version);
         }
     }
 
