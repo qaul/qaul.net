@@ -14,6 +14,7 @@ dependencies:
   intl: any
 
   badges: ^3.1.2
+  characters: ^1.4.0
   flutter_svg: ^2.2.3
   unorm_dart: ^0.3.2
   utils: { "path": "../utils" }
