@@ -47,7 +47,10 @@ from lib.topology import load_node_ids
 
 TOPOLOGY = "topologies/line-5.json"
 NODE_IDS = load_node_ids(TOPOLOGY)
-DISCOVERY_WAIT = 200
+# Polled ceiling, not a sleep. Measured user discovery is 4-14s across 9-25
+# nodes on this harness, so 60s is >4x the worst case. Was 200s, which no
+# regression short of total failure could exceed.
+DISCOVERY_WAIT = 60
 PROPAGATION_WAIT = 120
 POLL_INTERVAL = 5
 PUBSUB_WARMUP = 30  # seconds after routing convergence before applying loss

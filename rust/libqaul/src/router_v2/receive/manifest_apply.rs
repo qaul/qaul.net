@@ -17,6 +17,7 @@ use crate::{
         identity::{ChunkSigningCtx, Multikey},
         index::Space,
         manifest::{canonical_entry_bytes, Manifest},
+        seq::is_fresher_u32,
         table::{DelegatedUser, User},
         Result, RouterV2State, Sphere,
     },
@@ -228,6 +229,23 @@ impl RouterV2State {
             return Ok(());
         };
 
+        let committed = self
+            .nodes
+            .read()
+            .unwrap()
+            .get(&origin_node_id)
+            .map(|node_arc| node_arc.read().unwrap().manifest_version);
+        if let Some(committed) = committed {
+            if !is_fresher_u32(msg.manifest_version, committed) {
+                debug!(
+                    "node_manifest chunk from {origin_node_id:?} dropped: version {} not fresher \
+                     than committed {committed} (§8.8)",
+                    msg.manifest_version
+                );
+                return Ok(());
+            }
+        }
+
         // §8.8 step 5, byte-exact stored discipline
         let completed_manifest = {
             let mut assembler = self.chunk_assembler.write().unwrap();
@@ -244,9 +262,23 @@ impl RouterV2State {
         let nodes = self.nodes.read().unwrap();
         if let Some(node_arc) = nodes.get(&origin_node_id) {
             let mut node = node_arc.write().unwrap();
-            // §3.8 trigger 3
-            advertisement_changed = node.manifest_version != completed_manifest.manifest_version
-                || node.is_gateway != is_gateway;
+            // §8.8 step 4: the completed manifest must be strictly fresher than what
+            // we committed. The signature proves the origin authored this version, not
+            // that it is the latest version it authored, so without this an older but
+            // genuinely signed manifest rolls `delegated_users`, `is_gateway` and the
+            // delta-log base back to it. Re-checked here because the pre-assembly check
+            // above ran before the chunks completed, under a lock we had since dropped.
+            if !is_fresher_u32(completed_manifest.manifest_version, node.manifest_version) {
+                debug!(
+                    "node_manifest from {origin_node_id:?} discarded: completed version {} not \
+                     fresher than committed {} (§8.8)",
+                    completed_manifest.manifest_version, node.manifest_version
+                );
+                return Ok(());
+            }
+            // §3.8 trigger 3: strictly fresher by the check above, so the version always
+            // moved and there is always a re-introduction to make.
+            advertisement_changed = true;
             node.manifest_version = completed_manifest.manifest_version;
             node.is_gateway = is_gateway;
             node.delegated_users = delegated_users;

@@ -40,19 +40,29 @@ def topo_name(path: str) -> str:
 # These account for the mDNS query_interval bug (default 300s) which means
 # a single missed mDNS packet adds up to 300s of delay. Until the mDNS fix
 # in lan.rs is applied, these must be generous.
+# Ceilings for polled convergence, not sleeps. Measured user discovery on this
+# harness is 4-10s at 9 nodes, 12-13s at 16-20 and 14s at 25 nodes, so 60s is
+# >4x the worst case: loose enough not to flake, tight enough to fail on a real
+# regression. The 200-400s values these replaced could not fail.
 DISCOVERY_WAITS = {
-    "line-5":     200,
-    "line-10":    400,
-    "grid4-3x3":  200,
-    "grid4-5x5":  250,
-    "grid8-4x4":  200,
+    "line-5":     60,
+    "line-10":    60,
+    "grid4-3x3":  60,
+    "grid4-5x5":  60,
+    "grid8-4x4":  60,
 }
+
+DEFAULT_DISCOVERY_WAIT = 60
+
+# Convergence lands in the 4-14s range, so a 5s poll quantised every
+# measurement to the nearest 5s. 1s keeps the numbers meaningful.
+CONVERGENCE_POLL_INTERVAL_S = 1
 
 
 def discovery_wait_for(topo_file: str) -> int:
-    """Return the discovery wait for a topology, with a sensible default."""
+    """Return the discovery wait ceiling for a topology, with a default."""
     name = topo_name(topo_file)
-    return DISCOVERY_WAITS.get(name, 200)
+    return DISCOVERY_WAITS.get(name, DEFAULT_DISCOVERY_WAIT)
 
 
 # ---------------------------------------------------------------------------
@@ -115,11 +125,19 @@ def converged_network(request):
 
     sorted_ids = sorted(node_ids)
     observer = Node(sorted_ids[0])
-    deadline = time.time() + wait
+    t0 = time.time()
+    deadline = t0 + wait
     while time.time() < deadline:
         if len(observer.known_users()) >= len(node_ids):
+            log.info(
+                "%s converged: %d users in %.1fs (ceiling %ds)",
+                name,
+                len(node_ids),
+                time.time() - t0,
+                wait,
+            )
             break
-        time.sleep(5)
+        time.sleep(CONVERGENCE_POLL_INTERVAL_S)
     else:
         known = len(observer.known_users())
         try:
