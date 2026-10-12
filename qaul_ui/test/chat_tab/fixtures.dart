@@ -11,7 +11,7 @@ final otherUser = User(
 );
 
 ChatRoom buildGroupChat({
-  List<Message>? messages,
+  List<Message>? messages = const [],
   ChatRoomStatus status = ChatRoomStatus.active,
 }) => ChatRoom(
   name: 'Group Chat',
@@ -26,7 +26,7 @@ ChatRoom buildGroupChat({
 );
 
 ChatRoom buildDirectChat({
-  List<Message>? messages,
+  List<Message>? messages = const [],
   ChatRoomStatus status = ChatRoomStatus.active,
 }) => ChatRoom(
   name: otherUser.name,

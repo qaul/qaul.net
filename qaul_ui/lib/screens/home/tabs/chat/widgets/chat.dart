@@ -1021,6 +1021,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     ).background;
     final showBackButton = isMobileChat;
     _chatRenderMode = resolveChatRenderMode(room);
+    final isLoadingMessages = room.messages == null;
+    final chatMessages = isLoadingMessages
+        ? const <types.Message>[]
+        : messages(room, l10n: l10n, renderMode: _chatRenderMode)!;
 
     return Scaffold(
       backgroundColor: chatBackgroundColor,
@@ -1042,6 +1046,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                 top: false,
                 bottom: false,
                 child: Chat(
+                  key: ValueKey(
+                    'chat-list-${room.idBase58}-${isLoadingMessages ? 'loading' : 'loaded'}',
+                  ),
                   showUserAvatars: false,
                   showUserNames: false,
                   user: user.toInternalUser(),
@@ -1050,9 +1057,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                   groupMessagesThreshold: const Duration(
                     days: 365,
                   ).inMilliseconds,
-                  messages:
-                      messages(room, l10n: l10n, renderMode: _chatRenderMode) ??
-                      [],
+                  messages: chatMessages,
                   onSendPressed: sendMessage,
                   inputOptions: const InputOptions(
                     sendButtonVisibilityMode: SendButtonVisibilityMode.always,
@@ -1064,7 +1069,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                     if (user == null) return const SizedBox();
                     return QaulAvatar.small(user: user, badgeEnabled: false);
                   },
-                  emptyState: Center(child: Text(l10n.chatEmptyState)),
+                  emptyState: isLoadingMessages
+                      ? const Center(child: QaulLoadingIndicator())
+                      : Center(child: Text(l10n.chatEmptyState)),
                   bubbleBuilder: _bubbleBuilder,
                   systemMessageBuilder: _buildSystemMessage,
                   customBottomWidget: _ChatTextFooter(
