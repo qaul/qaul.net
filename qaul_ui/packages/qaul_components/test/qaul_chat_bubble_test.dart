@@ -28,6 +28,38 @@ void main() {
       expect(emojiOnlyMessageCount('😀🎉'), 2);
       expect(emojiOnlyMessageCount('👩🏽‍💻'), 1);
       expect(emojiOnlyMessageCount('🇧🇷🇨🇭'), 2);
+      expect(emojiOnlyMessageCount('❤️'), 1);
+      expect(emojiOnlyMessageCount('⚽'), 1);
+      expect(emojiOnlyMessageCount('#️⃣'), 1);
+      expect(emojiOnlyMessageCount('👨‍👩‍👧'), 1);
+      expect(emojiOnlyMessageCount('🏴󠁧󠁢󠁥󠁮󠁧󠁿'), 1);
+      expect(emojiOnlyMessageCount('☝🏽'), 1);
+    });
+
+    test('rejects letters and symbols that are not emoji', () {
+      for (final content in [
+        'はい',
+        'ア',
+        'ㅋㅋ',
+        'ㅠㅠ',
+        '€',
+        '€€',
+        '™',
+        '©',
+        '→',
+        '↔',
+        '✓',
+        '①',
+        '∞',
+        '«',
+        '〜',
+        '­',
+        '❤︎',
+        '🇧',
+        '1',
+      ]) {
+        expect(emojiOnlyMessageCount(content), isNull, reason: content);
+      }
     });
 
     test('rejects text, spaces, and three or more emoji', () {
