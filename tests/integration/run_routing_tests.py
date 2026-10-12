@@ -51,38 +51,44 @@ from test_route_stability import test_routing_table_is_stable
 #   paths exist via other nodes. Expiration tests are most meaningful on
 #   line topologies where each route has exactly one path.
 # ---------------------------------------------------------------------------
+# Discovery ceilings are polled, not slept. Measured user discovery on this
+# harness is 4-10s at 9 nodes, 12-13s at 16-20 and 14s at 25 nodes, so 60s is
+# >4x the worst case: loose enough not to flake, tight enough to fail on a
+# real regression. The 90-400s values these replaced could not fail.
+DISCOVERY_TIMEOUT_S = 60
+
 TOPOLOGIES = [
     {
         "file": "topologies/line-5.json",
-        "discovery_wait": 120,
+        "discovery_wait": DISCOVERY_TIMEOUT_S,
         "stability_duration": 120,
         "neighbour_wait": 30,
         "run_expiration": True,
     },
     {
         "file": "topologies/line-10.json",
-        "discovery_wait": 200,
+        "discovery_wait": DISCOVERY_TIMEOUT_S,
         "stability_duration": 120,
         "neighbour_wait": 30,
         "run_expiration": True,
     },
     {
         "file": "topologies/grid4-3x3.json",
-        "discovery_wait": 120,
+        "discovery_wait": DISCOVERY_TIMEOUT_S,
         "stability_duration": 120,
         "neighbour_wait": 30,
         "run_expiration": False,
     },
     {
         "file": "topologies/grid4-5x5.json",
-        "discovery_wait": 180,
+        "discovery_wait": DISCOVERY_TIMEOUT_S,
         "stability_duration": 120,
         "neighbour_wait": 30,
         "run_expiration": False,
     },
     {
         "file": "topologies/grid8-4x4.json",
-        "discovery_wait": 90,
+        "discovery_wait": DISCOVERY_TIMEOUT_S,
         "stability_duration": 120,
         "neighbour_wait": 30,
         "run_expiration": False,

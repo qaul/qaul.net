@@ -526,3 +526,188 @@ fn re_committing_the_same_version_does_not_re_mark() {
         "nothing the mapping carries changed, so re-introducing would be pure noise"
     );
 }
+
+// ---------- §8.8 step 4: freshness of the completed manifest ----------
+//
+// The chunk signature proves the origin authored that version, not that it is
+// the latest version the origin authored. A manifest the origin genuinely
+// signed earlier therefore verifies perfectly and must still be refused, or it
+// rolls the committed delegation set back to whatever it held at that version.
+
+/// Commit v5, then replay a genuinely signed v3. The older manifest must not
+/// overwrite the newer committed state.
+#[test]
+fn older_signed_manifest_does_not_roll_back_committed_state() {
+    let (state, mut _rx) = fresh_state();
+    let (host_kp, host_mk) = keypair_and_multikey();
+    let (_, host_id) = setup_self_origin(&state, &host_mk);
+
+    let (user_kp, user_mk) = keypair_and_multikey();
+    let user_id = install_user_with_key(&state, &user_mk);
+
+    // v5: gateway, carrying one delegation.
+    let v5 = build_signed_manifest(
+        &host_kp,
+        &host_mk,
+        5,
+        true,
+        vec![sign_entry(&user_kp, &host_mk, user_id, 1_000_000)],
+    );
+    state
+        .handle_node_manifest(v5.into_iter().next().unwrap(), 500, ConnectionModule::Lan)
+        .unwrap();
+
+    // v3: the state before that delegation existed, and before the gateway bit.
+    let v3 = build_signed_manifest(&host_kp, &host_mk, 3, false, vec![]);
+    state
+        .handle_node_manifest(v3.into_iter().next().unwrap(), 600, ConnectionModule::Lan)
+        .unwrap();
+
+    let nodes = state.nodes.read().unwrap();
+    let node_arc = nodes.get(&host_id).unwrap();
+    let node = node_arc.read().unwrap();
+    assert_eq!(node.manifest_version, 5, "committed version rolled back");
+    assert!(node.is_gateway, "gateway flag rolled back");
+    assert_eq!(
+        node.delegated_users.len(),
+        1,
+        "delegation set rolled back — a revoked entry would have been resurrected"
+    );
+    assert_eq!(node.delegated_users[0].user_id, user_id);
+}
+
+/// §8.8 says *strictly* fresher, so re-delivering the committed version is a
+/// discard too.
+#[test]
+fn equal_version_manifest_is_discarded() {
+    let (state, mut _rx) = fresh_state();
+    let (host_kp, host_mk) = keypair_and_multikey();
+    let (_, host_id) = setup_self_origin(&state, &host_mk);
+
+    let (user_kp, user_mk) = keypair_and_multikey();
+    let user_id = install_user_with_key(&state, &user_mk);
+
+    let v5 = build_signed_manifest(
+        &host_kp,
+        &host_mk,
+        5,
+        true,
+        vec![sign_entry(&user_kp, &host_mk, user_id, 1_000_000)],
+    );
+    state
+        .handle_node_manifest(v5.into_iter().next().unwrap(), 500, ConnectionModule::Lan)
+        .unwrap();
+
+    // Same version, emptied entry set: a well-formed signature over v5 with
+    // different contents is exactly what the freshness rule has to refuse.
+    let v5_again = build_signed_manifest(&host_kp, &host_mk, 5, false, vec![]);
+    state
+        .handle_node_manifest(
+            v5_again.into_iter().next().unwrap(),
+            600,
+            ConnectionModule::Lan,
+        )
+        .unwrap();
+
+    let nodes = state.nodes.read().unwrap();
+    let node_arc = nodes.get(&host_id).unwrap();
+    let node = node_arc.read().unwrap();
+    assert_eq!(node.manifest_version, 5);
+    assert!(node.is_gateway);
+    assert_eq!(node.delegated_users.len(), 1);
+}
+
+/// A fresher manifest still commits over an older one — the check must not be
+/// so broad that it blocks ordinary §10.8 synchronization.
+#[test]
+fn fresher_manifest_still_commits() {
+    let (state, mut _rx) = fresh_state();
+    let (host_kp, host_mk) = keypair_and_multikey();
+    let (_, host_id) = setup_self_origin(&state, &host_mk);
+
+    let v3 = build_signed_manifest(&host_kp, &host_mk, 3, false, vec![]);
+    state
+        .handle_node_manifest(v3.into_iter().next().unwrap(), 500, ConnectionModule::Lan)
+        .unwrap();
+
+    let (user_kp, user_mk) = keypair_and_multikey();
+    let user_id = install_user_with_key(&state, &user_mk);
+    let v4 = build_signed_manifest(
+        &host_kp,
+        &host_mk,
+        4,
+        true,
+        vec![sign_entry(&user_kp, &host_mk, user_id, 1_000_000)],
+    );
+    state
+        .handle_node_manifest(v4.into_iter().next().unwrap(), 600, ConnectionModule::Lan)
+        .unwrap();
+
+    let nodes = state.nodes.read().unwrap();
+    let node_arc = nodes.get(&host_id).unwrap();
+    let node = node_arc.read().unwrap();
+    assert_eq!(node.manifest_version, 4);
+    assert!(node.is_gateway);
+    assert_eq!(node.delegated_users.len(), 1);
+}
+
+/// The assembler keyed partials by origin alone and its fallback arm replaced a
+/// partial at any other version, so one stale chunk could discard a fresher
+/// multi-chunk assembly mid-flight and leave the pull unfinished.
+#[test]
+fn stale_chunk_does_not_discard_a_fresher_assembly_in_flight() {
+    let (state, mut _rx) = fresh_state();
+    let (host_kp, host_mk) = keypair_and_multikey();
+    let (_, host_id) = setup_self_origin(&state, &host_mk);
+
+    // Commit v5 so there is a committed version for the stale chunk to lose to.
+    let v5 = build_signed_manifest(&host_kp, &host_mk, 5, false, vec![]);
+    state
+        .handle_node_manifest(v5.into_iter().next().unwrap(), 500, ConnectionModule::Lan)
+        .unwrap();
+
+    // 731 entries exceeds one chunk at 84 bytes per entry in a 60 KiB body.
+    // Entry signatures do not need to verify here: the chunk signature is what
+    // gates assembly, and this test is about the assembly surviving.
+    let bulk: Vec<ManifestEntry> = (0..731u32)
+        .map(|i| {
+            let mut user_id = [0u8; 8];
+            user_id[..4].copy_from_slice(&i.to_be_bytes());
+            ManifestEntry {
+                user_id,
+                timeout: 1_000_000,
+                entry_signature: [0u8; 64],
+                profile_version: 0,
+            }
+        })
+        .collect();
+    let v6 = build_signed_manifest(&host_kp, &host_mk, 6, false, bulk);
+    assert_eq!(v6.len(), 2, "fixture must produce a multi-chunk manifest");
+    let mut v6 = v6.into_iter();
+    let v6_first = v6.next().unwrap();
+    let v6_second = v6.next().unwrap();
+
+    // Chunk 0 of v6 arrives and is held as a partial.
+    state
+        .handle_node_manifest(v6_first, 600, ConnectionModule::Lan)
+        .unwrap();
+
+    // A stale v4 chunk lands between the two halves.
+    let v4 = build_signed_manifest(&host_kp, &host_mk, 4, false, vec![]);
+    state
+        .handle_node_manifest(v4.into_iter().next().unwrap(), 650, ConnectionModule::Lan)
+        .unwrap();
+
+    // Chunk 1 of v6 completes the assembly, which must still be intact.
+    state
+        .handle_node_manifest(v6_second, 700, ConnectionModule::Lan)
+        .unwrap();
+
+    let nodes = state.nodes.read().unwrap();
+    let node_arc = nodes.get(&host_id).unwrap();
+    let node = node_arc.read().unwrap();
+    assert_eq!(
+        node.manifest_version, 6,
+        "the stale chunk discarded the in-flight v6 assembly"
+    );
+}

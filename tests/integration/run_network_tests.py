@@ -28,16 +28,22 @@ from test_direct_messages import test_direct_message_unicast
 from test_feed_distribution import test_feed_messages_reach_all_nodes
 from test_degraded_links import test_feed_delivery_under_packet_loss
 
+# Discovery ceilings are polled, not slept. Measured user discovery on this
+# harness is 4-10s at 9 nodes, 12-13s at 16-20 and 14s at 25 nodes, so 60s is
+# >4x the worst case: loose enough not to flake, tight enough to fail on a
+# real regression. The 90-400s values these replaced could not fail.
+DISCOVERY_TIMEOUT_S = 60
+
 TOPOLOGIES = [
-    {"file": "topologies/line-5.json",   "discovery_wait": 200, "degraded_loss_percents": [30, 50, 80]},
-    {"file": "topologies/line-10.json",  "discovery_wait": 400, "degraded_loss_percents": [30, 50, 80]},
-    {"file": "topologies/grid4-3x3.json","discovery_wait": 200, "degraded_loss_percents": []},
-    {"file": "topologies/grid4-5x5.json","discovery_wait": 250, "degraded_loss_percents": []},
-    {"file": "topologies/grid8-4x4.json","discovery_wait": 200, "degraded_loss_percents": []},
+    {"file": "topologies/line-5.json",   "discovery_wait": DISCOVERY_TIMEOUT_S, "degraded_loss_percents": [30, 50, 80]},
+    {"file": "topologies/line-10.json",  "discovery_wait": DISCOVERY_TIMEOUT_S, "degraded_loss_percents": [30, 50, 80]},
+    {"file": "topologies/grid4-3x3.json","discovery_wait": DISCOVERY_TIMEOUT_S, "degraded_loss_percents": []},
+    {"file": "topologies/grid4-5x5.json","discovery_wait": DISCOVERY_TIMEOUT_S, "degraded_loss_percents": []},
+    {"file": "topologies/grid8-4x4.json","discovery_wait": DISCOVERY_TIMEOUT_S, "degraded_loss_percents": []},
 ]
 
 
-def wait_for_convergence(node_ids: list[str], timeout: int = 200):
+def wait_for_convergence(node_ids: list[str], timeout: int = DISCOVERY_TIMEOUT_S):
     """Wait until the observer node sees all peers in its users list."""
     sorted_ids = sorted(node_ids)
     observer = Node(sorted_ids[0])
@@ -50,7 +56,8 @@ def wait_for_convergence(node_ids: list[str], timeout: int = 200):
             elapsed = round(time.time() - t_start, 1)
             print(f"  all users known after ~{elapsed}s")
             return
-        time.sleep(5)
+        # Convergence is a 4-14s event; a 5s poll reported it to the nearest 5s.
+        time.sleep(1)
 
     known = len(observer.known_users())
     raise TimeoutError(f"only {known}/{len(node_ids)} users after {timeout}s")

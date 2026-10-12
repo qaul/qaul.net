@@ -38,7 +38,9 @@ def test_all_nodes_appear_in_routing_table(topology_network):
 
         if len(first_seen) >= expected:
             break
-        time.sleep(5)
+        # Convergence is a 2-14s event on this harness; a 5s poll reported it
+        # to the nearest 5s, which is coarser than the thing being measured.
+        time.sleep(1)
 
     missing = expected - len(first_seen)
     assert missing == 0, (
