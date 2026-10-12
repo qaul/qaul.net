@@ -6,12 +6,11 @@
 //! qaul BLE module for Linux
 #[macro_use]
 extern crate log;
-use crate::ble::ble_service::IdleBleService;
 use rpc::{msg_loop::listen_for_sys_msgs, utils::BleResultSender, BleRpc};
 use std::thread;
 use tokio::runtime;
 
-mod ble;
+pub mod ble;
 pub mod rpc;
 
 /// initialize and start the ble_module in an own thread
@@ -33,7 +32,7 @@ pub fn init(sys_rpc_callback: Box<dyn FnMut(Vec<u8>) + Send>, rpc_receiver: rpc:
 }
 
 pub async fn is_ble_enabled() -> bool {
-    return IdleBleService::is_ble_enabled().await;
+    ble::radio::is_ble_enabled().await
 }
 
 /// Start the setup and main loop of this library

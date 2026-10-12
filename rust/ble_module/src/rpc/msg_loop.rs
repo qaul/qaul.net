@@ -2,112 +2,129 @@
 // This software is published under the AGPLv3 license.
 
 use bytes::Bytes;
-use std::error::Error;
+use std::{error::Error, time::Duration};
+use tokio::time::{interval, MissedTickBehavior};
 
 use crate::{
-    ble::ble_service::{get_device_info, IdleBleService, QaulBleService},
-    rpc::{proto_sys::ble::Message::*, proto_sys::*, utils::*, SysRpcReceiver},
+    ble::{gatt_server::ServerEvent, radio::{Running, get_device_info}},
+    rpc::{proto_sys::{ble::Message::*, *}, utils::*, SysRpcReceiver},
 };
 
 use super::BleRpc;
 
-/// Manages all sys messages defined in the 'ble.proto' file.
+/// The BLE module's one loop: handles libqaul's requests, the GATT server's
+/// events and the tick for as long as the module runs.
 pub async fn listen_for_sys_msgs(
     mut rpc_receiver: BleRpc,
-    internal_sender: BleResultSender,
+    mut internal_sender: BleResultSender,
 ) -> Result<(), Box<dyn Error>> {
-    let mut local_sender_handle = internal_sender.clone();
+    let mut running: Option<Running> = None;
+    let mut tick = interval(Duration::from_secs(1));
+    tick.set_missed_tick_behavior(MissedTickBehavior::Skip);
     loop {
-        let evt = rpc_receiver.recv().await;
-        match evt {
-            None => {
-                log::info!("Qaul 'sys' message channel closed. Shutting down gracefully.");
-                break;
-            }
-            Some(msg) => {
-                if msg.message.is_none() {
-                    continue;
-                }
-                match msg.message.unwrap() {
-                    StartRequest(req) => {
-                        let device_id = req.device_id;
-                        let ble_service = match IdleBleService::new(&device_id).await {
-                            Ok(svc) => svc,
-                            Err(err) => {
-                                log::error!("BLE device '{}' unavailable: {}", device_id, err);
-                                local_sender_handle.send_start_error(
-                                    BleError::DeviceUnavailable,
-                                    format!("BLE device '{}' unavailable: {}", device_id, err),
-                                );
-                                continue;
-                            }
-                        };
-                        match ble_service {
-                            QaulBleService::Idle(svc) => {
-                                let internal_sender_1 = local_sender_handle.clone();
+        tokio::select! {
+            evt = rpc_receiver.recv() => { 
+                match evt {
+                    None => {
+                        log::info!("Qaul 'sys' message channel closed. Shutting down gracefully.");
+                        break;
+                    }
+                    Some(msg) => {
+                        if msg.message.is_none() {
+                            continue;
+                        }
+                        match msg.message.unwrap() {
+                            StartRequest(req) => {
+                                if running.is_some(){
+                                    log::warn!(
+                                        "Received Start Request, but bluetooth service is already running!"
+                                    );
+                                    internal_sender.send_result_already_running();
+                                    continue;
+                                }
+                                let device_id = req.device_id;
                                 let qaul_id = Bytes::from(req.qaul_id);
-                                let handle = tokio::task::spawn_local(async move {
-                                    let ble_service = svc
-                                        .advertise_scan_listen(
-                                            qaul_id,
-                                            None,
-                                            internal_sender_1,
-                                            rpc_receiver,
-                                        )
-                                        .await;
-
-                                    match ble_service {
-                                        QaulBleService::Idle(_) => {
-                                            log::error!(
-                                                "Failed to start BLE module (advertisement or GATT setup failed)"
-                                            );
-                                            local_sender_handle.send_start_error(
-                                                BleError::UnknownError,
-                                                "Failed to configure BLE advertisement or GATT application".into(),
-                                            );
+                                running = match Running::start(&device_id, qaul_id).await {
+                                    Ok(r) => {
+                                        log::info!(
+                                            "BLE service started successfully on device '{}'",
+                                            device_id
+                                        );
+                                        internal_sender.send_start_successful();
+                                        Some(r)
+                                    },
+                                    Err(err) => {
+                                        log::error!("BLE device '{}' unavailable: {}", device_id, err);
+                                        internal_sender.send_start_error(
+                                            BleError::DeviceUnavailable,
+                                            format!("BLE device '{}' unavailable: {}", device_id, err),
+                                        );
+                                        continue;
+                                    }
+                                };
+                                
+                            }
+                            StopRequest(_) => {
+                                if running.take().is_some() {
+                                    internal_sender.send_stop_successful();
+                                }
+                                else {
+                                    internal_sender.send_result_not_running();
+                                }
+                            }
+                            DirectSend(req) => {
+                                internal_sender.send_direct_send_error(
+                                    req.message_id,
+                                    "not implemented yet".into(),
+                                );
+                            }
+                            InfoRequest(_) => {
+                                let mut sender_handle_clone = internal_sender.clone();
+                                tokio::task::spawn_local(async move {
+                                    match get_device_info().await {
+                                        Ok(info) => {
+                                            sender_handle_clone.send_ble_sys_msg(InfoResponse(info))
                                         }
-                                        QaulBleService::Started(svc) => {
-                                            log::info!(
-                                                "BLE service started successfully on device '{}'",
-                                                device_id
-                                            );
-                                            local_sender_handle.send_start_successful();
-                                            svc.spawn_handles().await;
+                                        Err(err) => {
+                                            log::error!("Error getting device info: {:#?}", &err)
                                         }
                                     }
                                 });
-                                let _ = handle.await;
-                                break;
                             }
-                            QaulBleService::Started(_) => {
-                                log::warn!(
-                                    "Received Start Request, but bluetooth service is already running!"
-                                );
-                                local_sender_handle.send_result_already_running();
-                            }
+                            _ => (),
                         }
                     }
-                    // This streams were mearged into IdleBleService stream.
-                    // The events are recieved by the main loop and handled there.
-                    StopRequest(_) => {}
-                    DirectSend(_) => {}
-                    InfoRequest(_) => {
-                        let mut sender_handle_clone = internal_sender.clone();
-                        tokio::task::spawn_local(async move {
-                            match get_device_info().await {
-                                Ok(info) => {
-                                    sender_handle_clone.send_ble_sys_msg(InfoResponse(info))
-                                }
-                                Err(err) => {
-                                    log::error!("Error getting device info: {:#?}", &err)
-                                }
-                            }
-                        });
-                    }
-                    _ => (),
                 }
             }
+            evt = next_event(&mut running) => match evt {
+                Some(ServerEvent::Subscribed { address, mtu, outbox }) => {
+                    log::info!("{} subscribed, MTU {}", address, mtu);
+                    if let Some(r) = running.as_mut() {
+                        r.outboxes.insert(address, outbox);
+                    }
+                }
+                Some(ServerEvent::FrameReceived { address, bytes }) => {
+                    log::info!("{} sent {} bytes: {:02x?}", address, bytes.len(), bytes);
+                }
+                Some(ServerEvent::Gone { address }) => {
+                    log::info!("{} gone", address);
+                    if let Some(r) = running.as_mut() {
+                        r.outboxes.remove(&address);
+                    }
+                }
+                None => log::warn!("GATT server event channel closed"),
+            },
+            _ = tick.tick() => {}
         }
     }
     Ok(())
+}
+
+/// The next event from the GATT server, or never while BLE is stopped, so
+/// the loop's `select!` always has a future for this branch.
+async fn next_event(running: &mut Option<Running>) -> Option<ServerEvent> {
+    match running {
+        Some(r) => r.events.recv().await,
+        None => std::future::pending().await,
+    }
 }
