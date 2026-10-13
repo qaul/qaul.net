@@ -29,7 +29,14 @@ def start_qaul():
     subprocess.run(["sudo", "pkill", "-SIGKILL", "-x", "qauld"], capture_output=True)
     subprocess.run(["sudo", "sh", "-c", "rm -f /tmp/qaul-*.pid"], capture_output=True)
     time.sleep(2)
-    subprocess.run(["sudo", f"{MESHNET_LAB}/software.py", "start", "qaul"], check=True)
+    # -E matters: qaul_start.sh launches `qauld --name=...` with no routing flag,
+    # so QAUL_ROUTING_V2 reaching the process is the only thing that selects v2.
+    # sudo defaults to env_reset, and without this every node in every python
+    # harness silently ran v1 while the ceilings were calibrated against v2.
+    # ip netns exec preserves the environment, so -E here carries all the way down.
+    subprocess.run(
+        ["sudo", "-E", f"{MESHNET_LAB}/software.py", "start", "qaul"], check=True
+    )
 
 
 def stop_qaul():
