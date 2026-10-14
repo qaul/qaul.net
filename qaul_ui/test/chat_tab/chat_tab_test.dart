@@ -92,14 +92,16 @@ Message textMessage({
   required String id,
   required User sender,
   required String text,
+  DateTime? sentAt,
 }) {
+  final timestamp = sentAt ?? DateTime(2000);
   return Message(
     senderId: sender.id,
     messageId: Uint8List.fromList(id.codeUnits),
     content: TextMessageContent(text),
     index: 1,
-    sentAt: DateTime(2000),
-    receivedAt: DateTime(2000),
+    sentAt: timestamp,
+    receivedAt: timestamp,
   );
 }
 
@@ -129,6 +131,7 @@ void main() {
     ChatRoom room, {
     User? otherUser,
     MessageShareService? messageShareService,
+    Brightness brightness = Brightness.light,
   }) async {
     final wut = ProviderScope(
       overrides: [
@@ -147,6 +150,7 @@ void main() {
           otherUser: otherUser,
           messageShareService: messageShareService,
         ),
+        theme: ThemeData(brightness: brightness),
       ),
     );
 
@@ -213,6 +217,87 @@ void main() {
 
     expect(find.byType(QaulLoadingIndicator), findsNothing);
     expect(find.text('No chat rooms yet'), findsOneWidget);
+  });
+
+  testWidgets('date dividers keep a 12px gap around day changes', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    const dayOneText = 'Message on the first day';
+    const dayTwoText = 'Message on the second day';
+    final dayOne = DateTime(2026, 1, 10, 12);
+    final dayTwo = DateTime(2026, 1, 11, 12);
+
+    for (final brightness in Brightness.values) {
+      for (final secondSender in [defaultUser, otherUser]) {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+
+        final firstMessage = textMessage(
+          id: 'day-one-${brightness.name}-${secondSender.idBase58}',
+          sender: defaultUser,
+          text: dayOneText,
+          sentAt: dayOne,
+        );
+        final secondMessage = textMessage(
+          id: 'day-two-${brightness.name}-${secondSender.idBase58}',
+          sender: secondSender,
+          text: dayTwoText,
+          sentAt: dayTwo,
+        );
+        await pumpChatScreen(
+          tester,
+          buildDirectChat(
+            messages: [firstMessage, secondMessage],
+          ),
+          otherUser: otherUser,
+          brightness: brightness,
+        );
+        await tester.pump();
+
+        final firstBubble = find.byKey(
+          Key('scroll-${firstMessage.messageIdBase58}'),
+        );
+        final secondBubble = find.byKey(
+          Key('scroll-${secondMessage.messageIdBase58}'),
+        );
+        final dayOneHeader = find.text('Saturday, January 10, 2026');
+        final dayTwoHeader = find.text('Sunday, January 11, 2026');
+
+        expect(firstBubble, findsOneWidget);
+        expect(secondBubble, findsOneWidget);
+        expect(dayOneHeader, findsOneWidget);
+        expect(dayTwoHeader, findsOneWidget);
+
+        final firstBubbleRect = tester.getRect(firstBubble);
+        final dayOneHeaderRect = tester.getRect(dayOneHeader);
+        final dayTwoHeaderRect = tester.getRect(dayTwoHeader);
+        final secondBubbleRect = tester.getRect(secondBubble);
+
+        expect(
+          firstBubbleRect.top - dayOneHeaderRect.bottom,
+          closeTo(12, 1),
+        );
+        expect(
+          dayTwoHeaderRect.top - firstBubbleRect.bottom,
+          closeTo(12, 1),
+        );
+        expect(
+          secondBubbleRect.top - dayTwoHeaderRect.bottom,
+          closeTo(12, 1),
+        );
+
+        final dateHeaderText = tester.widget<Text>(dayTwoHeader);
+        expect(
+          dateHeaderText.style?.color,
+          brightness == Brightness.dark ? Colors.white : Colors.black,
+        );
+      }
+    }
   });
 
   testWidgets('desktop room switches replace the chat list without animation', (
