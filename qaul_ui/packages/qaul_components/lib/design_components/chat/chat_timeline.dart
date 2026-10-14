@@ -159,21 +159,19 @@ class ChatTimeline extends StatelessWidget {
 
     final children = <Widget>[];
     var isFirst = true;
+    var dateDividerPrecedesNextBubble = false;
 
     for (final entry in entries) {
       switch (entry) {
         case _DateDividerEntry(:final date):
-          final topPad = isFirst ? 0.0 : kChatBubbleSeparatedGap;
           children.add(
             Padding(
-              padding: EdgeInsets.only(top: topPad),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: RoomMetaMessage.date(date: date),
-              ),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: RoomMetaMessage.date(date: date),
             ),
           );
           isFirst = false;
+          dateDividerPrecedesNextBubble = true;
 
         case _MetaEntry(:final message):
           final topPad = isFirst ? 0.0 : kChatBubbleSeparatedGap;
@@ -186,6 +184,7 @@ class ChatTimeline extends StatelessWidget {
             ),
           );
           isFirst = false;
+          dateDividerPrecedesNextBubble = false;
 
         case _GroupJoinMetaEntry(:final message):
           final topPad = isFirst ? 0.0 : kChatBubbleSeparatedGap;
@@ -199,6 +198,7 @@ class ChatTimeline extends StatelessWidget {
             ),
           );
           isFirst = false;
+          dateDividerPrecedesNextBubble = false;
 
         case _DuplicateUsernameMetaEntry(:final message):
           final topPad = isFirst ? 0.0 : kChatBubbleSeparatedGap;
@@ -213,6 +213,7 @@ class ChatTimeline extends StatelessWidget {
             ),
           );
           isFirst = false;
+          dateDividerPrecedesNextBubble = false;
 
         case _TextEntry(:final message):
           final computation = computedMap[message.id];
@@ -237,6 +238,7 @@ class ChatTimeline extends StatelessWidget {
             clock: effectiveClock,
             isSelected: message.id == selectedTextMessageId,
             mentionLabels: mentionLabels,
+            topSpacingOverride: dateDividerPrecedesNextBubble ? 0 : null,
           );
 
           children.add(
@@ -253,6 +255,7 @@ class ChatTimeline extends StatelessWidget {
             ),
           );
           isFirst = false;
+          dateDividerPrecedesNextBubble = false;
       }
     }
 

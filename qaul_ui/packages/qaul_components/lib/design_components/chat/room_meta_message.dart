@@ -18,7 +18,14 @@ class RoomMetaMessage extends ChatMessage {
   @override
   Widget build(BuildContext context) {
     final text = label ?? _formatDateLabel(context, date!);
-    return Center(child: Text(text, style: chatMetaTextStyle(context)));
+    return Center(
+      child: Text(
+        text,
+        style: date == null
+            ? chatMetaTextStyle(context)
+            : chatDateDividerTextStyle(context),
+      ),
+    );
   }
 }
 

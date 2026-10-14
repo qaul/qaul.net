@@ -57,6 +57,7 @@ class ChatMessageRenderer {
     required DateTime clock,
     bool isSelected = false,
     List<String> mentionLabels = const [],
+    double? topSpacingOverride,
   }) {
     final display = presentation.bubbleDisplay;
     if (display == null) return const SizedBox.shrink();
@@ -67,6 +68,7 @@ class ChatMessageRenderer {
         clock: clock,
         isSelected: isSelected,
         mentionLabels: mentionLabels,
+        topSpacingOverride: topSpacingOverride,
       );
     }
 
@@ -76,6 +78,7 @@ class ChatMessageRenderer {
       horizontalGutter: true,
       isSelected: isSelected,
       mentionLabels: mentionLabels,
+      topSpacingOverride: topSpacingOverride,
     );
   }
 
@@ -126,12 +129,14 @@ class DirectTextMessageItem extends StatelessWidget {
     this.horizontalGutter = true,
     this.isSelected = false,
     this.mentionLabels = const [],
+    this.topSpacingOverride,
   });
 
   final MessagePresentation presentation;
   final DateTime clock;
   final bool isSelected;
   final List<String> mentionLabels;
+  final double? topSpacingOverride;
 
   /// When true, applies a 16px gutter on the trailing edge for primary
   /// (outgoing) bubbles and on the leading edge for secondary (incoming).
@@ -144,7 +149,7 @@ class DirectTextMessageItem extends StatelessWidget {
     final isPrimary = presentation.isPrimary;
     return Padding(
       padding: EdgeInsetsDirectional.only(
-        top: presentation.meta.topSpacing,
+        top: topSpacingOverride ?? presentation.meta.topSpacing,
         start: horizontalGutter && !isPrimary ? 16 : 0,
         end: horizontalGutter && isPrimary ? 16 : 0,
       ),
@@ -165,12 +170,14 @@ class GroupTextMessageItem extends StatelessWidget {
     required this.clock,
     this.isSelected = false,
     this.mentionLabels = const [],
+    this.topSpacingOverride,
   });
 
   final MessagePresentation presentation;
   final DateTime clock;
   final bool isSelected;
   final List<String> mentionLabels;
+  final double? topSpacingOverride;
 
   @override
   Widget build(BuildContext context) {
@@ -187,7 +194,7 @@ class GroupTextMessageItem extends StatelessWidget {
         : display.message;
 
     return GroupMessageShell(
-      marginTop: presentation.meta.topSpacing,
+      marginTop: topSpacingOverride ?? presentation.meta.topSpacing,
       sender: sender,
       showSenderName: false,
       showSenderAvatar: presentation.meta.showAvatar,
