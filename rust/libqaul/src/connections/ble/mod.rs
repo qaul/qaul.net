@@ -400,7 +400,9 @@ impl Ble {
         log::info!("BLE send stop request");
 
         // create stop message
-        let message = proto::BleStopRequest {};
+        let message = proto::Ble {
+            message: Some(proto::ble::Message::StopRequest(proto::BleStopRequest {})),
+        };
 
         // encode message
         let mut buf = Vec::with_capacity(message.encoded_len());
