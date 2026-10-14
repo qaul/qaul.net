@@ -575,7 +575,7 @@ class _ComposerPill extends StatelessWidget {
   }
 }
 
-class _ComposerTextField extends StatelessWidget {
+class _ComposerTextField extends StatefulWidget {
   const _ComposerTextField({
     super.key,
     required this.footer,
@@ -590,23 +590,56 @@ class _ComposerTextField extends StatelessWidget {
   final FocusNode focusNode;
 
   @override
+  State<_ComposerTextField> createState() => _ComposerTextFieldState();
+}
+
+class _ComposerTextFieldState extends State<_ComposerTextField> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    return ScrollConfiguration(
+      behavior: const _ComposerScrollBehavior().copyWith(scrollbars: false),
+      child: RawScrollbar(
+        controller: _scrollController,
+        thumbVisibility: true,
+        thickness: 5,
+        radius: const Radius.circular(20),
+        thumbColor: const Color(0xFFB1B2B5),
+        crossAxisMargin: 3,
+        mainAxisMargin: 10,
+        padding: EdgeInsets.zero,
+        scrollbarOrientation: ScrollbarOrientation.right,
+        child: _buildTextField(),
+      ),
+    );
+  }
+
+  /// Share the editable viewport with the persistent overflow indicator.
+  Widget _buildTextField() {
     return TextField(
-      controller: controller,
-      focusNode: focusNode,
+      controller: widget.controller,
+      focusNode: widget.focusNode,
+      scrollController: _scrollController,
       minLines: 1,
       maxLines: 5,
-      style: _fieldValueStyle(theme),
+      style: _fieldValueStyle(widget.theme),
       decoration: InputDecoration(
         isDense: true,
         hint: SizedBox(
           width: double.infinity,
           child: Text(
-            footer.placeholder,
+            widget.footer.placeholder,
             maxLines: 1,
             softWrap: false,
             overflow: TextOverflow.ellipsis,
-            style: _fieldHintStyle(theme),
+            style: _fieldHintStyle(widget.theme),
           ),
         ),
         border: InputBorder.none,
@@ -624,6 +657,19 @@ class _ComposerTextField extends StatelessWidget {
       textInputAction: TextInputAction.newline,
     );
   }
+}
+
+class _ComposerScrollBehavior extends MaterialScrollBehavior {
+  const _ComposerScrollBehavior();
+
+  // EditableText re-enables scrollbars for multiline fields in its own copyWith.
+  // Keep its desktop scrollbar disabled so only the composer thumb is painted.
+  @override
+  Widget buildScrollbar(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) => child;
 }
 
 class _TextActions extends StatelessWidget {
