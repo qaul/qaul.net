@@ -83,6 +83,10 @@ pub enum Modules {
     ///
     /// export / delete / restore local user accounts
     AccountManagement = 19,
+    /// Node instrumentation
+    ///
+    /// node-wide metrics snapshot and per-peer breakdowns
+    Metrics = 20,
 }
 impl Modules {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -111,6 +115,7 @@ impl Modules {
             Self::Transports => "TRANSPORTS",
             Self::Crypto => "CRYPTO",
             Self::AccountManagement => "ACCOUNT_MANAGEMENT",
+            Self::Metrics => "METRICS",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
@@ -136,6 +141,7 @@ impl Modules {
             "TRANSPORTS" => Some(Self::Transports),
             "CRYPTO" => Some(Self::Crypto),
             "ACCOUNT_MANAGEMENT" => Some(Self::AccountManagement),
+            "METRICS" => Some(Self::Metrics),
             _ => None,
         }
     }

@@ -21,6 +21,11 @@ use std::sync::RwLock;
 /// Effectively unbounded (~100 years)
 const SESSION_TTL_SECS: u64 = 86400 * 365 * 100;
 
+/// RPC error code: the caller identity in the request envelope is invalid
+const ERROR_INVALID_CALLER: u32 = 1;
+/// RPC error code: the caller has no authenticated session
+const ERROR_UNAUTHENTICATED: u32 = 3;
+
 /// Protobuf message definitions for authentication RPC
 pub use qaul_proto::qaul_rpc_authentication as proto;
 /// Shared RPC response / error types used by the generated service dispatch.
@@ -222,6 +227,29 @@ impl Authentication {
         }
     }
 
+    /// Identity of the caller, taken from the request context (the
+    /// outer envelope), not from the request body.
+    pub fn caller_id(ctx: &crate::RequestContext<'_>) -> Result<PeerId, RpcError> {
+        PeerId::from_bytes(&ctx.user_id).map_err(|_| RpcError {
+            code: ERROR_INVALID_CALLER,
+            message: "Invalid caller identity".to_string(),
+            details: String::new(),
+        })
+    }
+
+    /// Identity of the caller, if it has an active authenticated session.
+    pub fn require_session(ctx: &crate::RequestContext<'_>) -> Result<PeerId, RpcError> {
+        let peer_id = Self::caller_id(ctx)?;
+        if !Self::is_authenticated(ctx.state, peer_id) {
+            return Err(RpcError {
+                code: ERROR_UNAUTHENTICATED,
+                message: "authentication required".to_string(),
+                details: String::new(),
+            });
+        }
+        Ok(peer_id)
+    }
+
     /// Check if a user has an active authenticated session
     pub fn is_authenticated(state: &crate::QaulState, user_id: PeerId) -> bool {
         let now = Timestamp::get_timestamp();
@@ -385,11 +413,7 @@ impl proto::AuthRpcService<crate::RequestContext<'_>> for Authentication {
         ctx: &crate::RequestContext<'_>,
         _req: proto::LogoutRequest,
     ) -> Result<Ack, RpcError> {
-        let peer_id = PeerId::from_bytes(&ctx.user_id).map_err(|_| RpcError {
-            code: 1,
-            message: "Invalid caller identity".to_string(),
-            details: String::new(),
-        })?;
+        let peer_id = Self::caller_id(ctx)?;
 
         Self::logout(ctx.state, peer_id);
         Ok(Ack {})
@@ -401,11 +425,7 @@ impl proto::AuthRpcService<crate::RequestContext<'_>> for Authentication {
         ctx: &crate::RequestContext<'_>,
         _req: proto::SessionStatusRequest,
     ) -> Result<proto::SessionStatusResponse, RpcError> {
-        let peer_id = PeerId::from_bytes(&ctx.user_id).map_err(|_| RpcError {
-            code: 1,
-            message: "Invalid caller identity".to_string(),
-            details: String::new(),
-        })?;
+        let peer_id = Self::caller_id(ctx)?;
 
         Ok(proto::SessionStatusResponse {
             authenticated: Self::is_authenticated(ctx.state, peer_id),
