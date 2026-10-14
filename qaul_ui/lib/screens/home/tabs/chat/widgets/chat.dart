@@ -1073,7 +1073,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                   emptyState: isLoadingMessages
                       ? const Center(child: QaulLoadingIndicator())
                       : Center(child: Text(l10n.chatEmptyState)),
-                  bubbleBuilder: _bubbleBuilder,
+                  bubbleBuilder:
+                      (
+                        child, {
+                        required message,
+                        required nextMessageInGroup,
+                      }) =>
+                          _bubbleBuilder(
+                            child,
+                            message: message,
+                            nextMessageInGroup: nextMessageInGroup,
+                            followsDateHeader: _messageFollowsDateHeader(
+                              message,
+                              chatMessages,
+                            ),
+                          ),
                   systemMessageBuilder: _buildSystemMessage,
                   customBottomWidget: _ChatTextFooter(
                     key: ValueKey(
@@ -1313,6 +1327,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     Widget child, {
     required types.Message message,
     required bool nextMessageInGroup,
+    required bool followsDateHeader,
   }) {
     if (message.type == types.MessageType.custom) {
       return Container(
@@ -1339,6 +1354,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
             ? ['all', ...room.members.map((member) => member.name)]
             : const [],
         isSelected: message.id == _selectedContextMenuMessageId,
+        topSpacingOverride: followsDateHeader ? 0 : null,
       );
     }
 
@@ -1348,7 +1364,35 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       mode: _chatRenderMode,
       clock: DateTime.now(),
       isSelected: message.id == _selectedContextMenuMessageId,
+      topSpacingOverride: followsDateHeader ? 0 : null,
     );
+  }
+
+  bool _messageFollowsDateHeader(
+    types.Message message,
+    List<types.Message> chatMessages,
+  ) {
+    final messageIndex = chatMessages.indexWhere(
+      (candidate) => candidate.id == message.id,
+    );
+    if (messageIndex == -1 || message.createdAt == null) return false;
+
+    // flutter_chat_ui adds a header before the oldest message and before a
+    // newer message when it is separated from the previous one by a day.
+    if (messageIndex == chatMessages.length - 1) return true;
+
+    final previousMessage = chatMessages[messageIndex + 1];
+    if (previousMessage.createdAt == null) return false;
+
+    final messageDate = DateTime.fromMillisecondsSinceEpoch(
+      message.createdAt!,
+    );
+    final previousDate = DateTime.fromMillisecondsSinceEpoch(
+      previousMessage.createdAt!,
+    );
+    return messageDate.day != previousDate.day ||
+        message.createdAt! - previousMessage.createdAt! >=
+            const Duration(days: 365).inMilliseconds;
   }
 
   bool _isReceivingFile(types.FileMessage message) {

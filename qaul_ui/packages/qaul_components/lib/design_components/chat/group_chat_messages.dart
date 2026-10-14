@@ -88,6 +88,7 @@ class ChatMessageRenderer {
     required ChatRenderMode mode,
     required DateTime clock,
     bool isSelected = false,
+    double? topSpacingOverride,
   }) {
     final display = presentation.bubbleDisplay;
     if (display == null) return child;
@@ -103,7 +104,7 @@ class ChatMessageRenderer {
     if (mode != ChatRenderMode.group || presentation.isPrimary) {
       return Padding(
         padding: EdgeInsetsDirectional.only(
-          top: presentation.meta.topSpacing,
+          top: topSpacingOverride ?? presentation.meta.topSpacing,
           end: presentation.isPrimary ? 16 : 0,
           start: presentation.isPrimary ? 0 : 16,
         ),
@@ -112,7 +113,7 @@ class ChatMessageRenderer {
     }
 
     return GroupMessageShell(
-      marginTop: presentation.meta.topSpacing,
+      marginTop: topSpacingOverride ?? presentation.meta.topSpacing,
       sender: presentation.sender,
       showSenderName: presentation.meta.showSenderName,
       showSenderAvatar: presentation.meta.showAvatar,

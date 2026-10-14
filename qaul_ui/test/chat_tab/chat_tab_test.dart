@@ -14,8 +14,10 @@ import 'package:qaul_components/qaul_components.dart'
         ChatFooter,
         ChatHeader,
         ChatMessageContextMenu,
+        QaulChatBubble,
         QaulLoadingIndicator,
-        QaulComponentsLocalizations;
+        QaulComponentsLocalizations,
+        kChatBubbleLinkedGap;
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_rpc/src/generated/connections/transports.pb.dart';
 import 'package:qaul_rpc/src/generated/services/chat/chat.pb.dart';
@@ -229,6 +231,7 @@ void main() {
 
     const dayOneText = 'Message on the first day';
     const dayTwoText = 'Message on the second day';
+    const sameDayFollowUpText = 'Message after the date divider';
     final dayOne = DateTime(2026, 1, 10, 12);
     final dayTwo = DateTime(2026, 1, 11, 12);
 
@@ -249,27 +252,41 @@ void main() {
           text: dayTwoText,
           sentAt: dayTwo,
         );
+        final sameDayFollowUp = textMessage(
+          id: 'same-day-follow-up-${brightness.name}-${secondSender.idBase58}',
+          sender: secondSender,
+          text: sameDayFollowUpText,
+          sentAt: dayTwo.add(const Duration(seconds: 30)),
+        );
         await pumpChatScreen(
           tester,
           buildDirectChat(
-            messages: [firstMessage, secondMessage],
+            messages: [firstMessage, secondMessage, sameDayFollowUp],
           ),
           otherUser: otherUser,
           brightness: brightness,
         );
         await tester.pump();
 
-        final firstBubble = find.byKey(
-          Key('scroll-${firstMessage.messageIdBase58}'),
+        final firstBubble = find.byWidgetPredicate(
+          (widget) =>
+              widget is QaulChatBubble && widget.message.content == dayOneText,
         );
-        final secondBubble = find.byKey(
-          Key('scroll-${secondMessage.messageIdBase58}'),
+        final secondBubble = find.byWidgetPredicate(
+          (widget) =>
+              widget is QaulChatBubble && widget.message.content == dayTwoText,
+        );
+        final sameDayFollowUpBubble = find.byWidgetPredicate(
+          (widget) =>
+              widget is QaulChatBubble &&
+              widget.message.content == sameDayFollowUpText,
         );
         final dayOneHeader = find.text('Saturday, January 10, 2026');
         final dayTwoHeader = find.text('Sunday, January 11, 2026');
 
         expect(firstBubble, findsOneWidget);
         expect(secondBubble, findsOneWidget);
+        expect(sameDayFollowUpBubble, findsOneWidget);
         expect(dayOneHeader, findsOneWidget);
         expect(dayTwoHeader, findsOneWidget);
 
@@ -277,6 +294,7 @@ void main() {
         final dayOneHeaderRect = tester.getRect(dayOneHeader);
         final dayTwoHeaderRect = tester.getRect(dayTwoHeader);
         final secondBubbleRect = tester.getRect(secondBubble);
+        final sameDayFollowUpBubbleRect = tester.getRect(sameDayFollowUpBubble);
 
         expect(
           firstBubbleRect.top - dayOneHeaderRect.bottom,
@@ -289,6 +307,10 @@ void main() {
         expect(
           secondBubbleRect.top - dayTwoHeaderRect.bottom,
           closeTo(12, 1),
+        );
+        expect(
+          sameDayFollowUpBubbleRect.top - secondBubbleRect.bottom,
+          closeTo(kChatBubbleLinkedGap, 1),
         );
 
         final dateHeaderText = tester.widget<Text>(dayTwoHeader);
