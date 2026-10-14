@@ -45,6 +45,14 @@ pub struct ChatFileInfo {
     /// file data chunk size
     #[prost(uint32, tag = "8")]
     pub data_chunk_size: u32,
+    /// Group-file envelope marker + binding. When non-empty, this file
+    /// is envelope-encrypted: the chunked data is the file *body
+    /// ciphertext* (encrypted once under a per-file key delivered
+    /// separately via FileKeyEnvelope), and this is its SHA-256 digest.
+    /// The receiver waits for the matching key, verifies the digest,
+    /// then decrypts. Empty for legacy per-recipient-encrypted files.
+    #[prost(bytes = "vec", tag = "9")]
+    pub body_digest: ::prost::alloc::vec::Vec<u8>,
 }
 /// Chat File Data Message
 #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]

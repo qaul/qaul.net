@@ -9,6 +9,7 @@ use libp2p::PeerId;
 use prost::Message;
 
 pub mod file;
+pub mod file_envelope;
 pub mod message;
 pub mod search;
 pub mod storage;
