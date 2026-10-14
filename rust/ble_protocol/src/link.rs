@@ -22,8 +22,7 @@ use std::time::{Duration, Instant};
 
 use crate::{ChunkHeader, Frame};
 use crate::constants::{
-    DEFAULT_CHUNK_SIZE, LIVENESS_TIMEOUT_MS, MAX_CHUNK_SIZE, MEDIUM_MESSAGE_MAX_BYTES,
-    PING_INTERVAL_MS, QAUL_ID_BYTES,
+    DEFAULT_CHUNK_SIZE, IDENTITY_RETRY_MS, LIVENESS_TIMEOUT_MS, MAX_CHUNK_SIZE, MEDIUM_MESSAGE_MAX_BYTES, PING_INTERVAL_MS, QAUL_ID_BYTES, UNRESOLVED_TIMEOUT_MS,
 };
 use crate::flc::FlcMessage;
 use crate::frame::decode;
@@ -81,6 +80,10 @@ pub struct Link {
     peer_id: Option<[u8; QAUL_ID_BYTES]>,
     /// Whether frames can reach the peer yet. Until then everything waits.
     ready: bool,
+    /// When the transport became ready. The unresolved reaper counts from here.
+    ready_at: Option<Instant>,
+    /// When our SEND_QAUL_ID last went out.
+    id_sent_at: Option<Instant>,
     /// When the last frame arrived from the peer. Starts when the transport is ready.
     last_received: Option<Instant>,
     /// When we last sent a liveness ping.
@@ -100,6 +103,8 @@ impl Link {
             our_id,
             peer_id: None,
             ready: false,
+            ready_at: None,
+            id_sent_at: None,
             last_received: None,
             last_ping: None,
             id_sent: false,
@@ -116,6 +121,7 @@ impl Link {
             LinkEvent::TransportReady => {
                 self.ready = true;
                 self.last_received = Some(now);
+                self.ready_at = Some(now);
             },
             LinkEvent::MtuChanged(mtu) => self.on_mtu_changed(mtu),
             LinkEvent::PeerIdRead(id) => self.identify(id, &mut actions),
@@ -128,7 +134,7 @@ impl Link {
             }
             LinkEvent::Tick => self.on_tick(now, &mut actions),
         }
-        self.flush(&mut actions);
+        self.flush(&mut actions, now);
         actions
     }
 
@@ -136,6 +142,23 @@ impl Link {
         // The clocks only start once the transport is ready.
         if !self.ready {
             return;
+        }
+
+        if self.peer_id.is_none() {
+            // Mirrors Android's reapUnresolved: no peer ID this long after ready, drop the link.
+            let unresolved_timeout = Duration::from_millis(UNRESOLVED_TIMEOUT_MS);
+            if self.ready_at.is_some_and(|ready| now.duration_since(ready) >= unresolved_timeout) {
+                actions.push(LinkAction::Close);
+                return;
+            }
+
+            // Mirrors Android's retryUnresolvedIdentity: resend ours, in case the exchange was
+            // lost both ways (we can't tell whether ours arrived). flush does the sending. TODO: this and the android
+            // one may be kind of useless if we only send based on theirs not arriving instead of ours.
+            let retry = Duration::from_millis(IDENTITY_RETRY_MS);
+            if self.id_sent_at.is_some_and(|sent| now.duration_since(sent) >= retry) {
+                self.id_sent = false;
+            }
         }
 
         // Mirrors Androids reapLiveness: nothing heard for too long, the link is dead.
@@ -206,7 +229,6 @@ impl Link {
                 for chunk in self.send_queue.resend_chunks(&missing) {
                     self.outbox.push_back((chunk, Lane::Medium)); // TODO: the messages own lane, never Control
                 }
-
             }
             _ => {} // ignoring other FLCs for now
         }
@@ -242,7 +264,7 @@ impl Link {
     }
 
     /// Send whatever can be sent. Mirrors `flushSendQueue` + `getChunks`.
-    fn flush(&mut self, actions: &mut Vec<LinkAction>) {
+    fn flush(&mut self, actions: &mut Vec<LinkAction>, now: Instant) {
         // 1. Not ready yet: send nothing, everything stays queued.
 
         if !self.ready {
@@ -254,6 +276,7 @@ impl Link {
         if !self.id_sent {
             self.outbox.push_front((FlcMessage::SendQaulId(&self.our_id).encode(), Lane::Control));
             self.id_sent = true;
+            self.id_sent_at = Some(now);
         }
 
         // 3. Drain everything in the outbox so far, in order.
@@ -435,13 +458,25 @@ mod tests {
         (FlcMessage::LivenessPing.encode(), Lane::Control)
     }
 
+    /// A link that is ready at `t0` and has the peer's ID, so only liveness applies.
+    fn identified(t0: Instant) -> Link {
+        let mut a = Link::new(ID_A);
+        a.handle(LinkEvent::TransportReady, t0);
+        a.handle(LinkEvent::Received(FlcMessage::SendQaulId(&ID_B).encode()), t0);
+        a
+    }
+
+    fn our_id() -> (Vec<u8>, Lane) {
+        (FlcMessage::SendQaulId(&ID_A).encode(), Lane::Control)
+    }
+
     #[test]
     fn pings_every_interval_once_ready() {
         let t0 = Instant::now();
         let mut a = Link::new(ID_A);
         assert_eq!(a.handle(LinkEvent::Tick, t0), vec![], "no clocks before ready");
 
-        a.handle(LinkEvent::TransportReady, t0);
+        let mut a = identified(t0);
         assert_eq!(frames(&a.handle(LinkEvent::Tick, t0)), vec![ping()]);
         assert_eq!(frames(&a.handle(LinkEvent::Tick, t0 + Duration::from_secs(1))), vec![]);
         assert_eq!(frames(&a.handle(LinkEvent::Tick, t0 + Duration::from_secs(6))), vec![ping()]);
@@ -450,16 +485,42 @@ mod tests {
     #[test]
     fn silent_link_is_closed() {
         let t0 = Instant::now();
+        let mut a = identified(t0);
+        assert_eq!(a.handle(LinkEvent::Tick, t0 + Duration::from_secs(31)), vec![LinkAction::Close]);
+    }
+
+    #[test]
+    fn unresolved_link_resends_its_id() {
+        let t0 = Instant::now();
+        let mut a = Link::new(ID_A);
+        a.handle(LinkEvent::TransportReady, t0); // our ID goes out here
+        assert_eq!(frames(&a.handle(LinkEvent::Tick, t0 + Duration::from_millis(500))), vec![ping()]);
+        let t1 = t0 + Duration::from_millis(IDENTITY_RETRY_MS);
+        assert_eq!(frames(&a.handle(LinkEvent::Tick, t1)), vec![our_id()]);
+    }
+
+    #[test]
+    fn unresolved_link_is_closed() {
+        let t0 = Instant::now();
         let mut a = Link::new(ID_A);
         a.handle(LinkEvent::TransportReady, t0);
-        assert_eq!(a.handle(LinkEvent::Tick, t0 + Duration::from_secs(31)), vec![LinkAction::Close]);
+        let t1 = t0 + Duration::from_millis(UNRESOLVED_TIMEOUT_MS);
+        assert_eq!(a.handle(LinkEvent::Tick, t1), vec![LinkAction::Close]);
+    }
+
+    #[test]
+    fn identified_link_is_neither_retried_nor_reaped() {
+        let t0 = Instant::now();
+        let mut a = identified(t0);
+        a.handle(LinkEvent::Tick, t0);
+        let t1 = t0 + Duration::from_millis(UNRESOLVED_TIMEOUT_MS);
+        assert_eq!(a.handle(LinkEvent::Tick, t1), vec![]);
     }
 
     #[test]
     fn anything_received_keeps_the_link_alive() {
         let t0 = Instant::now();
-        let mut a = Link::new(ID_A);
-        a.handle(LinkEvent::TransportReady, t0);
+        let mut a = identified(t0);
         let ping = FlcMessage::LivenessPing.encode();
         a.handle(LinkEvent::Received(ping), t0 + Duration::from_secs(20));
         let actions = a.handle(LinkEvent::Tick, t0 + Duration::from_secs(31));
