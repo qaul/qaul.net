@@ -4,9 +4,14 @@
 use crate::{
     ble::{
         ble_uuids::{main_service_uuid, QAUL_ID_ADVERT_BYTES, QAUL_MANUFACTURER_ID},
-        gatt_server::{serve, ServerEvent},
+        gatt_server::serve,
+        scanner::scan,
     },
     rpc::proto_sys::{BleDeviceInfo, BleInfoResponse},
+};
+use ble_protocol::{
+    engine::{Engine, Peer, Role},
+    QAUL_ID_BYTES,
 };
 use bluer::{
     adv::{Advertisement, AdvertisementHandle},
@@ -15,7 +20,7 @@ use bluer::{
 };
 use bytes::Bytes;
 use std::{
-    collections::{BTreeMap, HashMap, HashSet},
+    collections::{BTreeMap, HashMap},
     error::Error,
     time::Duration,
 };
@@ -28,6 +33,52 @@ const ADVERT_TX_POWER_DBM: i16 = 20;
 /// Android's NOMINAL_ADVERT_INTERVAL_MS also assumes.
 const ADVERT_INTERVAL: Duration = Duration::from_millis(100);
 
+/// What the radio side tells the loop. One channel for all of them, so the loop sees one ordered stream.
+#[derive(Debug)]
+pub enum RadioEvent {
+    /// The phone wrote one frame to MSG_CHAR. Can arrive before `Subscribed`,
+    /// because Android writes SEND_ID first.
+    FrameReceived { address: Address, bytes: Vec<u8> },
+    /// The phone subscribed to notifications on MSG_CHAR. Frames sent on
+    /// `outbox` are notified to it by its sender task.
+    Subscribed {
+        address: Address,
+        mtu: usize,
+        outbox: mpsc::Sender<Vec<u8>>,
+    },
+    /// Scanner saw this advert, pass to engine for connection decision making
+    Advert {
+        address: Address,
+        id_prefix:  [u8; QAUL_ID_ADVERT_BYTES], 
+        rssi: i16
+    },
+
+    /// The phone's notify pipe failed. May repeat, so the loop must ignore a
+    /// `Gone` for an unknown address.
+    Gone { address: Address },
+}
+
+/// How the engine names a link on Linux: the phones address and our role on it. 
+/// The same phone could be linked in both roles at once, so the address alone isn't unique.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct PeerKey {
+    pub address: Address,
+    pub role: Role,
+}
+
+impl PeerKey {
+    /// A phone connected to our GATT server.
+    pub fn peripheral(address: Address) -> Self {
+        Self { address, role: Role::Peripheral }
+    }
+}
+
+impl Peer for PeerKey {
+    fn role(&self) -> Role {
+        self.role
+    }
+}
+
 /// Everything that exists only while BLE is on. Dropping it takes the
 /// service off air.
 pub struct Running {
@@ -35,12 +86,19 @@ pub struct Running {
     adapter: Adapter,
     _advert: AdvertisementHandle,
     _app: ApplicationHandle,
-    pub events: mpsc::Receiver<ServerEvent>,
-    pub outboxes: HashMap<Address, mpsc::Sender<Vec<u8>>>,
+    pub events: mpsc::Receiver<RadioEvent>,
+    pub outboxes: HashMap<PeerKey, mpsc::Sender<Vec<u8>>>,
+    /// The protocol state. Lives here so a restart always begins with no links.
+    pub engine: Engine<PeerKey>,
 }
 
 impl Running {
     pub async fn start(device_id: &str, qaul_id: Bytes) -> Result<Running, Box<dyn Error>> {
+        // Checked first, so a bad ID fails before anything goes on air.
+        let our_id: [u8; QAUL_ID_BYTES] = qaul_id[..]
+            .try_into()
+            .map_err(|_| format!("qaul id must be {} bytes, got {}", QAUL_ID_BYTES, qaul_id.len()))?;
+
         let session = bluer::Session::new().await?;
         let agent = bluer::agent::Agent {
             request_default: false,
@@ -79,18 +137,39 @@ impl Running {
 
         /***** Setup GATT server *******/
 
-        let (server_tx, server_rx) = tokio::sync::mpsc::channel::<ServerEvent>(64);
+        let (events_tx, events_rx) = tokio::sync::mpsc::channel::<RadioEvent>(64);
 
-        let app = serve(&adapter, qaul_id, server_tx).await?;
+        let app = serve(&adapter, qaul_id, events_tx.clone()).await?;
+
+        /***** Start scanning *******/
+
+        scan(&adapter, events_tx).await?;
 
         Ok(Running{
             _session: session,
             adapter,
             _advert: advert,
             _app: app,
-            events: server_rx,
+            events: events_rx,
             outboxes: HashMap::new(),
+            engine: Engine::new(our_id),
         })
+    }
+
+    /// Stop talking to `peer`: end its send task and have BlueZ drop the
+    /// connection, which closing our notify pipe alone doesn't do.
+    ///
+    /// Note: does this drop the whole BLE connection to that address? so a link
+    /// in the other role over the same connection goes with it?
+    pub fn disconnect(&mut self, peer: PeerKey) {
+        self.outboxes.remove(&peer);
+        let adapter = self.adapter.clone();
+        let address = peer.address;
+        tokio::task::spawn_local(async move {
+            if let Err(err) = adapter.remove_device(address).await {
+                log::debug!("remove_device {}: {}", address, err);
+            }
+        });
     }
 
     /// Find a Bluetooth adapter whose address matches `device_id`.
@@ -184,18 +263,6 @@ pub async fn get_device_info() -> Result<BleInfoResponse, Box<dyn Error>> {
     Ok(response)
 }
 
-
-/// Scan filter for qaul adverts. Unused until the central role is ported.
-#[allow(dead_code)]
-fn get_filter() -> bluer::DiscoveryFilter {
-    let mut qaul_uuids = HashSet::new();
-    qaul_uuids.insert(main_service_uuid());
-    bluer::DiscoveryFilter {
-        uuids: qaul_uuids,
-        transport: bluer::DiscoveryTransport::Le,
-        ..Default::default()
-    }
-}
 
 
    

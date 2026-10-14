@@ -75,6 +75,13 @@ impl BleResultSender {
         ))
     }
 
+    /// Tells libqaul only; dropping the BLE connection is the radio's job.
+    pub fn send_peer_unavailable(&mut self, qaul_id: Vec<u8>) {
+        self.send_ble_sys_msg(proto_sys::ble::Message::DeviceUnavailable(
+            BleDeviceUnavailable { qaul_id },
+        ))
+    }
+
     pub fn send_direct_received(&mut self, from: Vec<u8>, data: Vec<u8>) {
         self.send_ble_sys_msg(proto_sys::ble::Message::DirectReceived(
             proto_sys::BleDirectReceived { from, data },

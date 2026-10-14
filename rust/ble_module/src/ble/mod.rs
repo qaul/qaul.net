@@ -4,6 +4,9 @@
 #[allow(unused)]
 pub mod ble_service;
 #[allow(unused)]
-mod ble_uuids;
+pub mod ble_uuids;
+pub mod gatt_server;
+pub mod scanner;
+pub mod radio;
 #[allow(unused)]
 mod utils;
