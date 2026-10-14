@@ -1,8 +1,9 @@
-//! Serves a Bluetooth GATT application using the IO programming model.
+//! Serves qaul's GATT application: writes arrive by callback, notifications
+//! go out over one IO pipe per subscribed phone.
 
 use bluer::{
     Adapter, Address, gatt::{
-        CharacteristicReader, CharacteristicWriter, local::{
+        CharacteristicWriter, local::{
             Application, ApplicationHandle, Characteristic, CharacteristicControl, CharacteristicControlEvent, CharacteristicNotify, CharacteristicNotifyMethod, CharacteristicRead, CharacteristicWrite, CharacteristicWriteMethod, Service, characteristic_control,
         },
     },
@@ -13,32 +14,15 @@ use tokio::{
     sync::mpsc,
 };
 
-use crate::ble::ble_uuids::{main_service_uuid, msg_char};
+use crate::ble::{
+    ble_uuids::{main_service_uuid, msg_char},
+    radio::RadioEvent,
+};
 
 use super::ble_uuids::{psm_char, read_char};
 
 /// PSM_CHAR value: -1 means "no L2CAP channel offered", matching Android.
 const NO_L2CAP_PSM: i32 = -1;
-
-
-
-/// What the GATT server tells the event loop about each connected phone.
-#[derive(Debug)]
-pub enum ServerEvent {
-    /// The phone wrote one frame to MSG_CHAR. Can arrive before `Subscribed`,
-    /// because Android writes SEND_ID first.
-    FrameReceived { address: Address, bytes: Vec<u8> },
-    /// The phone subscribed to notifications on MSG_CHAR. Frames sent on
-    /// `outbox` are notified to it by its sender task.
-    Subscribed {
-        address: Address,
-        mtu: usize,
-        outbox: mpsc::Sender<Vec<u8>>,
-    },
-    /// The phone's reader ended or its sender failed in osme way. Both sides may report
-    /// it, so the loop must ignore a `Gone` for an unknown address.
-    Gone { address: Address },
-}
 
 fn read_characteristic(qaul_id: Bytes) -> Characteristic {
     Characteristic {
@@ -73,15 +57,29 @@ fn psm_characteristic() -> Characteristic {
     }
 } 
 
-/// MSG_CHAR: carries frames in both directions, write and notify, the returned control is what we check for incoming data.
-fn msg_characteristic() -> (Characteristic, CharacteristicControl) {
+/// MSG_CHAR: carries frames in both directions. Writes arrive through a
+/// callback; the returned control hands out each phone's notify pipe.
+///
+/// Writes use a callback, not an IO pipe: needs investigation but the first write when the I/O
+/// pipe was set up seemed to rarely succeed, which is the qaul id being sent so not ideal.
+fn msg_characteristic(events: mpsc::Sender<RadioEvent>) -> (Characteristic, CharacteristicControl) {
     let (control, handle) = characteristic_control();
     let characteristic = Characteristic {
         uuid: msg_char(),
         write: Some(CharacteristicWrite {
                 write: true,
                 write_without_response: true,
-                method: CharacteristicWriteMethod::Io,
+                method: CharacteristicWriteMethod::Fun(Box::new(move |bytes, req| {
+                    let events = events.clone();
+                    async move {
+                        if !bytes.is_empty() {
+                            let address = req.device_address;
+                            let _ = events.send(RadioEvent::FrameReceived { address, bytes }).await;
+                        }
+                        Ok(())
+                    }
+                    .boxed()
+                })),
                 ..Default::default()}),
         notify: Some(CharacteristicNotify {
                     notify: true,
@@ -99,11 +97,11 @@ fn msg_characteristic() -> (Characteristic, CharacteristicControl) {
 pub async fn serve(
     adapter: &Adapter,
     qaul_id: Bytes,
-    events: mpsc::Sender<ServerEvent>,
+    events: mpsc::Sender<RadioEvent>,
 ) -> bluer::Result<ApplicationHandle> {
     let read = read_characteristic(qaul_id);
     let psm = psm_characteristic();
-    let (msg, control) = msg_characteristic();
+    let (msg, control) = msg_characteristic(events.clone());
 
     let app = Application {
         services: vec![Service {
@@ -124,22 +122,15 @@ pub async fn serve(
 
 /// Takes each phone's line off of MSG_CHAR's control stream and starts a task
 /// per pipe. Ends when the GATT application is removed or the loop is gone.
-async fn run_control(mut control: CharacteristicControl, events: mpsc::Sender<ServerEvent>) {
+async fn run_control(mut control: CharacteristicControl, events: mpsc::Sender<RadioEvent>) {
     while let Some(evt) = control.next().await {
         match evt {
-            CharacteristicControlEvent::Write(req) => {
-                let address = req.device_address();
-                match req.accept() {
-                    Ok(reader) => {
-                        tokio::task::spawn_local(read_frames(address, reader, events.clone()));
-                    }
-                    Err(err) => log::warn!("MSG_CHAR write from {} not accepted: {}", address, err),
-                }
-            }
+            // Only sent for CharacteristicWriteMethod::Io, writes use a callback.
+            CharacteristicControlEvent::Write(_) => {}
             CharacteristicControlEvent::Notify(writer) => {
                 let address = writer.device_address();
                 let (outbox, outbox_rx) = mpsc::channel(64);
-                let subscribed = ServerEvent::Subscribed {
+                let subscribed = RadioEvent::Subscribed {
                     address,
                     mtu: writer.mtu(),
                     outbox,
@@ -153,29 +144,10 @@ async fn run_control(mut control: CharacteristicControl, events: mpsc::Sender<Se
     }
 }
 
-/// Forwards each write from one phone to the loop as a frame. A failed or
-/// empty read means the phone has gone.
-async fn read_frames(address: Address, reader: CharacteristicReader, events: mpsc::Sender<ServerEvent>) {
-    loop {
-        let bytes = match reader.recv().await {
-            Ok(bytes) if !bytes.is_empty() => bytes,
-            Ok(_) => break,
-            Err(err) => {
-                log::debug!("MSG_CHAR reader for {} ended: {}", address, err);
-                break;
-            }
-        };
-        if events.send(ServerEvent::FrameReceived { address, bytes }).await.is_err() {
-            return;
-        }
-    }
-    let _ = events.send(ServerEvent::Gone { address }).await;
-}
-
-async fn send_frames(address: Address, writer: CharacteristicWriter, mut outbox_rx: mpsc::Receiver<Vec<u8>>, events: mpsc::Sender<ServerEvent>) {
+async fn send_frames(address: Address, writer: CharacteristicWriter, mut outbox_rx: mpsc::Receiver<Vec<u8>>, events: mpsc::Sender<RadioEvent>) {
     while let Some(frame) = outbox_rx.recv().await {
         if writer.send(&frame).await.is_err() {
-            let _ = events.send(ServerEvent::Gone { address }).await; // tell the engine the phone is gone
+            let _ = events.send(RadioEvent::Gone { address }).await; // tell the engine the phone is gone
             break;
         }
     }
