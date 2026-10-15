@@ -563,6 +563,48 @@ void main() {
     });
   });
 
+  for (final systemScale in [1.0, 2.0]) {
+    testWidgets('desktop bubble zoom is not capped (system: $systemScale)', (tester) async {
+      final clock = DateTime(2026, 1, 1, 12);
+      final scaler = QaulTextScaler(
+        systemTextScaler: TextScaler.linear(systemScale),
+        zoom: 2.5,
+      );
+      for (final content in ['Zoomed message', '😀', '😀🎉']) {
+        await tester.pumpWidget(MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(size: const Size(390, 844), textScaler: scaler),
+            child: Material(
+              child: Center(
+                child: SizedBox(
+                  width: 390,
+                  child: QaulChatBubble(
+                    message: QaulChatBubbleMessage(
+                      content: content,
+                      sentAt: clock,
+                      receivedAt: clock,
+                      status: MessageStatus.sent,
+                      messageType: MessageType.primary,
+                      edges: const [],
+                    ),
+                    clock: clock,
+                    showTimestamp: true,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ));
+        final expectedScale = (systemScale > 1.3 ? 1.3 : systemScale) * 2.5;
+        final rich = tester.widget<RichText>(_findMessageRichText(content));
+        final timestamp = tester.widget<Text>(find.text('Now'));
+        expect(rich.textScaler.scale(16), closeTo(16 * expectedScale, 0.001));
+        expect(timestamp.textScaler!.scale(11), closeTo(11 * expectedScale, 0.001));
+        expect(tester.takeException(), isNull);
+      }
+    });
+  }
+
   group('QaulChatBubble reply preview', () {
     Widget app(QaulChatBubbleMessage message, DateTime clock) {
       return MaterialApp(

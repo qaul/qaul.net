@@ -14,6 +14,7 @@ import 'package:qaul_components/qaul_components.dart'
         ChatFooter,
         ChatHeader,
         ChatMessageContextMenu,
+        QaulTextScaler,
         QaulLoadingIndicator,
         QaulComponentsLocalizations;
 import 'package:qaul_rpc/qaul_rpc.dart';
@@ -129,6 +130,7 @@ void main() {
     ChatRoom room, {
     User? otherUser,
     MessageShareService? messageShareService,
+    TextScaler? textScaler,
   }) async {
     final wut = ProviderScope(
       overrides: [
@@ -141,17 +143,101 @@ void main() {
         qaulWorkerProvider.overrideWith((ref) => StubLibqaulWorker(ref)),
       ],
       child: materialAppWithLocalizations(
-        ChatScreen(
-          room,
-          defaultUser,
-          otherUser: otherUser,
-          messageShareService: messageShareService,
+        Builder(
+          builder: (context) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+            child: ChatScreen(
+              room,
+              defaultUser,
+              otherUser: otherUser,
+              messageShareService: messageShareService,
+            ),
+          ),
         ),
       ),
     );
 
     await tester.pumpWidget(wut);
     await tester.pump();
+  }
+
+  testWidgets('desktop split view at 2.5x has no overflow', (tester) async {
+    tester.view.physicalSize = const Size(1200, 760);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final room = buildDirectChat(messages: [
+      textMessage(id: 'split-message', sender: otherUser, text: 'Desktop message'),
+    ]);
+    TestChatRoomListNotifier.rooms = [room, buildGroupChat()];
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        defaultUserProvider.overrideWith((_) => defaultUser),
+        chatNotificationControllerProvider.overrideWithValue(NullChatNotificationController()),
+        chatRoomsProvider.overrideWith(TestChatRoomListNotifier.new),
+        usersStoreProvider.overrideWith(TestUsersStore.new),
+        qaulWorkerProvider.overrideWith((ref) => StubLibqaulWorker(ref)),
+      ],
+      child: materialAppWithLocalizations(Builder(
+        builder: (context) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: const QaulTextScaler(systemTextScaler: TextScaler.noScaling, zoom: 2.5),
+          ),
+          child: BaseTab.chat(key: chatKey),
+        ),
+      )),
+    ));
+    await tester.pump();
+    await tester.tap(find.text(otherUser.name));
+    await tester.pump();
+    expect(find.byType(ChatScreen), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final width in [390.0, 600.0, 1200.0]) {
+    for (final isGroup in [false, true]) {
+      testWidgets('chat at 2.5x has no overflow ($width, group: $isGroup)', (tester) async {
+        tester.view.physicalSize = Size(width, 760);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final messages = [
+          textMessage(
+            id: 'outgoing',
+            sender: defaultUser,
+            text: 'A long outgoing message that wraps across lines',
+          ),
+          textMessage(
+            id: 'incoming',
+            sender: otherUser,
+            text: 'A long incoming message that wraps across lines',
+          ),
+        ];
+        final room = isGroup
+            ? buildGroupChat(messages: messages)
+            : buildDirectChat(messages: messages);
+        TestChatRoomListNotifier.rooms = [room];
+        await pumpChatScreen(
+          tester,
+          room,
+          otherUser: isGroup ? null : otherUser,
+          textScaler: const QaulTextScaler(
+            systemTextScaler: TextScaler.noScaling,
+            zoom: 2.5,
+          ),
+        );
+        await tester.pump(const Duration(milliseconds: 350));
+        expect(tester.takeException(), isNull);
+        final field = find.descendant(
+          of: find.byType(ChatFooter),
+          matching: find.byType(TextField),
+        );
+        expect(MediaQuery.textScalerOf(tester.element(field)).scale(17), 42.5);
+        await tester.enterText(field, List.filled(10, 'Long draft message').join('\n'));
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+      });
+    }
   }
 
   testWidgets('direct chat renders ChatHeader and opens peer details', (
