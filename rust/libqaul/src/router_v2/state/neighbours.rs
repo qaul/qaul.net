@@ -125,6 +125,18 @@ impl RouterV2State {
         }
     }
 
+    /// records the radio's latest RSSI for a neighbour
+    pub fn set_neighbour_rssi(&self, peer: PeerId, rssi_dbm: Option<i8>) {
+        if let Some(info) = self.mirrors.write().unwrap().get_mut(&peer) {
+            info.rssi_dbm = rssi_dbm;
+        }
+    }
+
+    /// The stored RSSI for a neighbour, for the receive path's hop cost.
+    pub fn neighbour_rssi(&self, peer: &PeerId) -> Option<i8> {
+        self.mirrors.read().unwrap().get(peer)?.rssi_dbm
+    }
+
     pub fn remove_neighbour_transport(&self, peer: PeerId, transport: ConnectionModule) {
         let mut mirrors = self.mirrors.write().unwrap();
         let now_empty = if let Some(info) = mirrors.get_mut(&peer) {

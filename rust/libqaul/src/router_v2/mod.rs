@@ -140,6 +140,7 @@ pub struct NeighbourInfo {
     pub transports: HashSet<ConnectionModule>,
     pub dump_stale: DumpStaleIndexes,
     pub rtt_micros: u32,
+    pub rssi_dbm: Option<i8>,
 }
 
 /// Per-space leftovers of an `INDEX_DUMP` in progress (§8.4).
@@ -160,6 +161,7 @@ impl NeighbourInfo {
             transports,
             dump_stale: DumpStaleIndexes::default(),
             rtt_micros: 0,
+            rssi_dbm: None,
         }
     }
 }
