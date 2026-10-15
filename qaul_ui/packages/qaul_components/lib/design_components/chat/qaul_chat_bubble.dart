@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../styles/qaul_color_sheet.dart';
+import '../../styles/qaul_text_scaler.dart';
 import 'chat_mentions.dart';
 import 'chat_message.dart';
 import 'chat_reply_bubble_preview.dart';
@@ -28,9 +29,16 @@ const double kChatBubbleWidthBreakpoint = 500.0;
 const double kChatBubbleMaxTextScaleFactor = 1.3;
 
 TextScaler chatBubbleTextScaler(BuildContext context) {
-  return MediaQuery.textScalerOf(
-    context,
-  ).clamp(maxScaleFactor: kChatBubbleMaxTextScaleFactor);
+  final scaler = MediaQuery.textScalerOf(context);
+  if (scaler is QaulTextScaler) {
+    return QaulTextScaler(
+      systemTextScaler: scaler.systemTextScaler.clamp(
+        maxScaleFactor: kChatBubbleMaxTextScaleFactor,
+      ),
+      zoom: scaler.zoom,
+    );
+  }
+  return scaler.clamp(maxScaleFactor: kChatBubbleMaxTextScaleFactor);
 }
 
 class ChatBubbleStyle {
