@@ -31,6 +31,7 @@ from lib.network import (
     clear_topology,
     start_qaul,
     stop_qaul,
+    wait_for_local_accounts,
     wait_for_nodes,
 )
 from lib.node import Node
@@ -100,14 +101,6 @@ def poll_until(predicate, timeout: int, interval: float = POLL_INTERVAL_S):
         time.sleep(interval)
 
 
-def local_user_id(node: Node) -> str:
-    """Return the qaul user ID of the node's own local account."""
-    for user in node.known_users():
-        if any(c["module"] == "LOCAL" for c in user["connections"]):
-            return user["id"]
-    raise ValueError(f"No LOCAL user found on node {node.id}")
-
-
 def distant_pair(node_ids: list[str]) -> tuple[str, str]:
     """Return the (first, last) node IDs when sorted — topologically the farthest pair."""
     sorted_ids = sorted(node_ids)
@@ -145,7 +138,7 @@ def test_user_discovery(node_ids: list[str], discovery_timeout: int) -> dict:
     node_first = Node(first_id)
     node_last = Node(last_id)
 
-    id_last = local_user_id(node_last)
+    id_last = node_last.local_user_id()
     print(f"    polling {first_id} for {last_id}'s user (ceiling {discovery_timeout}s)...")
 
     ok, measured = poll_until(
@@ -188,7 +181,7 @@ def test_message_routing(
     # have happened before we send. test_user_discovery normally established
     # this already; polling the same condition costs nothing when it holds and
     # keeps this test standalone when it is run on its own.
-    id_sender = local_user_id(node_sender)
+    id_sender = node_sender.local_user_id()
     ok, discovery_measured = poll_until(
         lambda: id_sender in node_receiver.known_user_ids(), discovery_timeout
     )
@@ -252,6 +245,9 @@ def run_topology(config: dict) -> dict:
         apply_topology(topo_file)
         start_qaul()
         wait_for_nodes(node_ids, timeout=60)
+        # "node info answers" is not "ready": the own account and its Local
+        # connection land about a second later, and the tests resolve it.
+        wait_for_local_accounts(node_ids, timeout=60)
         print(f"  all {len(node_ids)} nodes up")
     except Exception as e:
         record["tests"]["setup"] = {"passed": False, "notes": str(e)}
