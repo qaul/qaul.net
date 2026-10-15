@@ -1,6 +1,20 @@
 import concurrent.futures
 import json
+import os
 import subprocess
+
+
+SUDO = ["sudo", "-n"]
+
+
+def _needs_sudo(socket_path: str) -> bool:
+    """True when the socket is not ours to open. Connecting needs read+write."""
+    return not os.access(socket_path, os.R_OK | os.W_OK)
+
+
+class SudoUnavailable(RuntimeError):
+    """sudo could not authenticate, so no node is reachable by any caller.
+    """
 
 
 def batch_query(nodes: dict, method: str, *args, max_workers: int = 32) -> dict:
@@ -44,13 +58,18 @@ class Node:
 
     def _run(self, *args) -> str:
         """Execute a qauld-ctl command, return stdout."""
-        cmd = ["qauld-ctl", "--socket", self.socket] + list(args)
+        base = ["qauld-ctl", "--socket", self.socket] + list(args)
+        cmd = SUDO + base if _needs_sudo(self.socket) else base
         res = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
 
         if res.returncode != 0:
-            raise RuntimeError(
-                f"qauld-ctl failed on node {self.id}: {res.stderr.strip()}"
-            )
+            err = res.stderr.strip()
+            if "password is required" in err or "terminal is required" in err:
+                raise SudoUnavailable(
+                    "sudo has no cached credentials, so qauld.sock (0600, root) "
+                    "cannot be opened on any node. Run `sudo -v` first."
+                )
+            raise RuntimeError(f"qauld-ctl failed on node {self.id}: {err}")
 
         return res.stdout.strip()
 
@@ -65,6 +84,8 @@ class Node:
         try:
             self._run_json("node", "info")
             return True
+        except SudoUnavailable:
+            raise 
         except Exception:
             return False
 
