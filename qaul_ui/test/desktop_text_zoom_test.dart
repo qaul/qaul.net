@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:qaul_ui/helpers/user_prefs_helper.dart';
+import 'package:qaul_ui/l10n/app_localizations.dart';
 import 'package:qaul_ui/widgets/desktop_text_zoom.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
@@ -63,11 +64,17 @@ void main() {
       addTearDown(controller.dispose);
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(platform: platform),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         builder: (context, child) => DesktopTextZoom(child: child!),
         home: Scaffold(body: TextField(controller: controller)),
       ));
       await tester.tap(find.byType(TextField));
       await tester.pump();
+      final popup = find.byKey(const ValueKey('desktop-text-zoom-popup'));
+      bool popupVisible() =>
+          popup.evaluate().isNotEmpty && tester.widget<AnimatedOpacity>(popup).opacity == 1;
+      expect(popupVisible(), isFalse);
 
       double effectiveScale() => MediaQuery.textScalerOf(
         tester.element(find.byType(TextField)),
@@ -79,6 +86,7 @@ void main() {
         await tester.runAsync(() => UserPrefsHelper.instance.setTextScale(2.5));
         await tester.pump();
         expect(effectiveScale(), 1);
+        expect(popupVisible(), isFalse);
         await press(tester, platform, LogicalKeyboardKey.minus);
         expect(UserPrefsHelper.instance.textScale, 2.5);
         return;
@@ -86,6 +94,8 @@ void main() {
 
       await press(tester, platform, LogicalKeyboardKey.equal);
       expect(effectiveScale(), 1.1);
+      expect(popupVisible(), isTrue);
+      expect(find.text('110%'), findsOneWidget);
       await press(tester, platform, LogicalKeyboardKey.equal, shift: true);
       expect(effectiveScale(), 1.2);
       await press(tester, platform, LogicalKeyboardKey.add);
@@ -94,6 +104,7 @@ void main() {
       expect(effectiveScale(), 1.2);
       await press(tester, platform, LogicalKeyboardKey.digit0);
       expect(effectiveScale(), 1);
+      expect(popupVisible(), isFalse);
       for (var i = 0; i < 20; i++) {
         await press(tester, platform, LogicalKeyboardKey.numpadAdd);
       }
@@ -102,6 +113,22 @@ void main() {
         await press(tester, platform, LogicalKeyboardKey.numpadSubtract);
       }
       expect(effectiveScale(), 0.6);
+      expect(popupVisible(), isTrue);
+      expect(find.text('60%'), findsOneWidget);
+      await tester.pump(DesktopTextZoom.popupDuration);
+      expect(popupVisible(), isFalse);
+      expect(effectiveScale(), 0.6);
+      await press(tester, platform, LogicalKeyboardKey.equal);
+      expect(find.text('70%'), findsOneWidget);
+      await tester.pump(DesktopTextZoom.popupDuration - const Duration(milliseconds: 500));
+      await press(tester, platform, LogicalKeyboardKey.minus);
+      await tester.pump(const Duration(seconds: 2));
+      expect(find.text('60%'), findsOneWidget);
+      await tester.tap(find.text('Reset to default'));
+      await tester.pump();
+      expect(effectiveScale(), 1);
+      expect(popupVisible(), isFalse);
+      await press(tester, platform, LogicalKeyboardKey.equal);
       await press(tester, platform, LogicalKeyboardKey.numpad0);
       expect(effectiveScale(), 1);
       expect(controller.text, 'Unsent draft');
