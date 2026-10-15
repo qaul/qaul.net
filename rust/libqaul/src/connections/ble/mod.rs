@@ -401,7 +401,15 @@ impl Ble {
     ///
     /// This function adds a newly discovered and identified
     /// node to all necessary node lists:
-    ///
+    fn decode_rssi(raw: i32) -> Option<i8> {
+        if (-127..0).contains(&raw) {
+            Some(raw as i8)
+        } else {
+            log::debug!("BLE rssi {raw} is not a usable reading, treating as unknown");
+            None
+        }
+    }
+
     /// * BLE translation table
     /// * BLE Neighbours list
     fn node_discovered(
@@ -457,6 +465,7 @@ impl Ble {
                                     ConnectionModule::Ble1m,
                                 );
                             }
+                            router_v2.set_neighbour_rssi(node_id, rssi);
                         }
                         Err(e) => {
                             log::warn!("v2: cannot derive node_id for BLE peer {node_id}: {e}")
@@ -521,7 +530,12 @@ impl Ble {
                 QaulId::bytes_to_log_string(&node.id)
             );
             // add it to translation table
-            Self::node_discovered(state, message.qaul_id, node.id, Some(message.rssi as i8));
+            Self::node_discovered(
+                state,
+                message.qaul_id,
+                node.id,
+                Self::decode_rssi(message.rssi),
+            );
         } else {
             log::info!("BLE discovered Node ID unknown");
             // confirm node
@@ -929,10 +943,11 @@ impl Ble {
     /// Hand an inbound BLE routing frame to whichever router is active.
     fn routing_info_received(state: &crate::QaulState, node_id: PeerId, data: Vec<u8>) {
         if let Some(router_v2) = state.get_router_v2() {
+            let rssi = router_v2.neighbour_rssi(&node_id);
             if let Err(e) = router_v2.received(
                 node_id,
                 ConnectionModule::Ble1m,
-                None,
+                rssi,
                 &data,
                 Timestamp::get_timestamp(),
             ) {
@@ -1341,5 +1356,55 @@ impl Transport for BleTransport {
 
     fn external_addresses(&self) -> Vec<Multiaddr> {
         Vec::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Ble;
+
+    /// The BLE module reports an unknown RSSI as 999 (`ble_service.rs:436`).
+    /// The field is i32 on the wire, and `999 as i8` truncates to -25 dBm,
+    /// which lands in §5.1's strongest bucket. Scoring an unmeasurable link as
+    /// the best possible one is worse than scoring it as unknown.
+    #[test]
+    fn the_unknown_sentinel_is_not_mistaken_for_a_strong_signal() {
+        assert_eq!(999_i32 as i8, -25, "this is the truncation being guarded");
+        assert_eq!(
+            Ble::decode_rssi(999),
+            None,
+            "the sentinel must decode to no reading, not -25 dBm"
+        );
+    }
+
+    #[test]
+    fn real_readings_pass_through() {
+        assert_eq!(Ble::decode_rssi(-40), Some(-40));
+        assert_eq!(Ble::decode_rssi(-70), Some(-70));
+        assert_eq!(Ble::decode_rssi(-95), Some(-95));
+    }
+
+    /// 0 dBm is not something a radio reports, and it is also the module's
+    /// placeholder for a device whose RSSI has not been filled in yet.
+    #[test]
+    fn zero_is_treated_as_no_reading() {
+        assert_eq!(Ble::decode_rssi(0), None);
+    }
+
+    #[test]
+    fn range_boundaries() {
+        assert_eq!(Ble::decode_rssi(-1), Some(-1), "weakest negative accepted");
+        assert_eq!(Ble::decode_rssi(-127), Some(-127), "lowest accepted");
+        assert_eq!(Ble::decode_rssi(-128), None, "below the accepted range");
+        assert_eq!(Ble::decode_rssi(1), None, "positive is not a reading");
+    }
+
+    /// Nothing outside the range may produce a value, however it would have
+    /// truncated. 255 and 256 are the cases a cast handles most surprisingly.
+    #[test]
+    fn out_of_range_never_yields_a_value() {
+        for raw in [255, 256, 1_000, -1_000, i32::MAX, i32::MIN] {
+            assert_eq!(Ble::decode_rssi(raw), None, "raw {raw} must not decode");
+        }
     }
 }

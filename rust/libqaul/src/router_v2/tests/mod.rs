@@ -28,6 +28,7 @@ mod propagation_form;
 mod rate_limits;
 mod received;
 mod relay;
+mod rssi_metric;
 mod self_and_neighbour_registration;
 mod self_delegation;
 mod self_entry_rejection;
