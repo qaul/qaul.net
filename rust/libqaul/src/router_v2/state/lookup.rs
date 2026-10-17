@@ -3,6 +3,8 @@
 
 //! Routing lookups over the committed table (spec §8.3, §9.2).
 
+use std::collections::HashSet;
+
 use crate::{
     connections::ConnectionModule,
     router_v2::{index, index::Space, RouterV2State},
@@ -144,7 +146,28 @@ impl RouterV2State {
             let mut tracker = self.reintroduction_tracker.write().unwrap();
             tracker.take_pending(space)
         };
+        self.resolve_introductions(space, pending)
+    }
 
+    pub(crate) fn take_introduction(&self, space: Space, idx: u16) -> Option<(u16, [u8; 8], u32)> {
+        let was_marked = self
+            .reintroduction_tracker
+            .write()
+            .unwrap()
+            .clear_mark(space, idx);
+        if !was_marked {
+            return None;
+        }
+        self.resolve_introductions(space, HashSet::from([idx]))
+            .into_iter()
+            .next()
+    }
+
+    fn resolve_introductions(
+        &self,
+        space: Space,
+        pending: HashSet<u16>,
+    ) -> Vec<(u16, [u8; 8], u32)> {
         let mut res: Vec<(u16, [u8; 8], u32)> = Vec::with_capacity(pending.len());
 
         match space {
