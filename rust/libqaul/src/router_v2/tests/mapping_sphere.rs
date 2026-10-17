@@ -536,7 +536,7 @@ fn origin_node_mappings(
 }
 
 #[test]
-fn origin_node_mappings_are_filtered_over_the_internet() {
+fn origin_update_carries_no_mapping_for_a_target_it_does_not_reference() {
     let (state, mut rx) = fresh_state();
     let lan = fresh_peer();
     let net = fresh_peer();
@@ -564,18 +564,32 @@ fn origin_node_mappings_are_filtered_over_the_internet() {
         .get(&net)
         .expect("the Internet peer got an origin update");
 
-    assert!(
-        lan_ids.contains(&[2; 8]),
-        "a non-gateway belongs in its own Local sphere"
-    );
-    assert!(
-        !net_ids.contains(&[2; 8]),
-        "a non-gateway must not cross the membrane (§2.3)"
-    );
-    assert!(
-        net_ids.contains(&[1; 8]),
-        "a gateway is exactly what may cross"
-    );
+    // §7.1's origin update describes only this node, so per §3.8 the sole
+    // index it may introduce is its own reserved one. Neither of the other
+    // nodes appears in it at all, which closes the 2-B membrane leak by
+    // omission instead of by filtering, and leaves both marks for the relay
+    // batch that does reference them. The membrane itself is still enforced
+    // on that path, by `inline_node_mappings_keep_gateways_on_both_spheres`.
+    for (label, ids) in [("LAN", lan_ids), ("INTERNET", net_ids)] {
+        assert!(
+            !ids.contains(&[1; 8]),
+            "{label}: a gateway is still not referenced by an origin update"
+        );
+        assert!(
+            !ids.contains(&[2; 8]),
+            "{label}: a non-gateway must never cross the membrane (§2.3)"
+        );
+    }
+
+    {
+        let tracker = state.reintroduction_tracker.read().unwrap();
+        assert_eq!(
+            tracker.pending_len(Space::Node),
+            2,
+            "both unreferenced marks survive; only the reserved index this \
+             update does reference was consumed"
+        );
+    }
 }
 
 /// The drain hazard that produced `requeue_unsent_introductions` for

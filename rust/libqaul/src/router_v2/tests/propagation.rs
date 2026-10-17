@@ -6,9 +6,10 @@
 use crate::router_v2::*;
 use crate::router_v2::{
     codec::{messages::RoutingUpdate, Header, RoutingMessage},
-    index::Space,
+    index::{Space, RESERVED_INDEX},
     propagation::{
         blocked_by_split_horizon, compute_outgoing_local_only, should_propagate, tick_origin,
+        tick_relay,
     },
     seq::SeqNum,
     table::{RoutingEntry, TargetRef},
@@ -238,51 +239,77 @@ fn tick_origin_multi_transport_neighbour_pushes_one_per_transport() {
 /// Pending introductions must be attached to every neighbour's message
 /// in the mapping section corresponding to the origin space.
 #[test]
-fn tick_origin_attaches_pending_introductions_to_mapping_section() {
+fn tick_origin_introduces_only_its_own_reserved_index() {
     let (state, mut rx) = fresh_state();
     let peer = fresh_peer();
     state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan);
 
-    // Set up an introduction: install a user, bind dict, mark tracker.
-    let user_id = [11; 8];
-    install_user(&state, user_id, 3);
-    state.user_dict.write().unwrap().bind(5, user_id);
+    // This node's own identity, the one target a §7.1 origin entry describes.
+    let own_user = [9; 8];
+    install_user(&state, own_user, 2);
     state
-        .reintroduction_tracker
+        .user_dict
         .write()
         .unwrap()
-        .mark_first_time(Space::User, 5);
+        .bind(RESERVED_INDEX, own_user);
+
+    // Another target, bound and marked. An origin update never references
+    // it, so under §3.8 it has no business carrying its mapping.
+    let other_user = [11; 8];
+    install_user(&state, other_user, 3);
+    state.user_dict.write().unwrap().bind(5, other_user);
+    {
+        let mut tracker = state.reintroduction_tracker.write().unwrap();
+        tracker.mark_first_time(Space::User, RESERVED_INDEX);
+        tracker.mark_first_time(Space::User, 5);
+    }
 
     tick_origin(&state, 0);
 
     let msg = rx.try_recv().expect("one outbound");
     let update = decode_frame(&msg.bytes);
-    assert_eq!(update.user_mappings.len(), 1);
-    assert!(update.node_mappings.is_empty());
-    assert_eq!(update.user_mappings[0].abs_idx, 5);
-    assert_eq!(update.user_mappings[0].target_id, user_id);
-    assert_eq!(update.user_mappings[0].version, 3);
+    assert_eq!(
+        update.user_mappings.len(),
+        1,
+        "only the reserved self-index is referenced, so only it may be introduced"
+    );
+    assert_eq!(update.user_mappings[0].abs_idx, RESERVED_INDEX);
+    assert_eq!(update.user_mappings[0].target_id, own_user);
+    assert_eq!(update.user_mappings[0].version, 2);
+
+    // The point of the fix: the other mark survives for the relay batch that
+    // does reference index 5. Consuming it here left that batch with no
+    // mapping, so the receiver dropped the entry per §3.6 and nothing
+    // retried it.
+    assert!(
+        state
+            .pending_introductions(Space::User)
+            .iter()
+            .any(|(idx, _, _)| *idx == 5),
+        "a mark for an index the origin update never references must stay pending"
+    );
 }
 
-/// Two neighbours + one introduction → the *same* mapping section
-/// appears in *both* outbound messages. Drain the tracker only once,
-/// but attach to all neighbours (§3.8).
 #[test]
-fn tick_origin_same_intros_attached_to_all_neighbours() {
+fn tick_origin_reserved_index_is_introduced_to_all_neighbours() {
     let (state, mut rx) = fresh_state();
     let peer_a = fresh_peer();
     let peer_b = fresh_peer();
     state.add_neighbour_transport(peer_a, [10; 8], ConnectionModule::Lan);
     state.add_neighbour_transport(peer_b, [20; 8], ConnectionModule::Lan);
 
-    let user_id = [1; 8];
-    install_user(&state, user_id, 7);
-    state.user_dict.write().unwrap().bind(3, user_id);
+    let own_user = [1; 8];
+    install_user(&state, own_user, 7);
+    state
+        .user_dict
+        .write()
+        .unwrap()
+        .bind(RESERVED_INDEX, own_user);
     state
         .reintroduction_tracker
         .write()
         .unwrap()
-        .mark_first_time(Space::User, 3);
+        .mark_first_time(Space::User, RESERVED_INDEX);
 
     tick_origin(&state, 0);
 
@@ -294,8 +321,59 @@ fn tick_origin_same_intros_attached_to_all_neighbours() {
     let u2 = decode_frame(&m2.bytes);
     assert_eq!(u1.user_mappings.len(), 1);
     assert_eq!(u2.user_mappings.len(), 1);
-    assert_eq!(u1.user_mappings[0].target_id, user_id);
-    assert_eq!(u2.user_mappings[0].target_id, user_id);
+    assert_eq!(u1.user_mappings[0].target_id, own_user);
+    assert_eq!(u2.user_mappings[0].target_id, own_user);
+}
+
+/// Regression, the line-10 stall: the 10 s origin task and the 1 s relay
+/// task drained the same §3.8 tracker. When both fired in the same instant
+/// the origin update took the mark for a relayed target and cleared it, so
+/// the relay batch that referenced that index went out with no mapping. The
+/// receiver then dropped the entry, which is what §3.6 requires of it, and
+/// nothing retried it because `tick_relay` takes `relay_queue`
+/// destructively. The far node waited a full origin cycle.
+#[test]
+fn an_origin_tick_leaves_the_relay_batch_its_mapping() {
+    let (state, mut rx) = fresh_state();
+    let peer = fresh_peer();
+    state.add_neighbour_transport(peer, [42; 8], ConnectionModule::Lan);
+
+    // A relayed target this node has just allocated an index for.
+    let relayed = [33; 8];
+    install_user(&state, relayed, 4);
+    bind_own_dict(&state, Space::User, 7, relayed);
+    state
+        .reintroduction_tracker
+        .write()
+        .unwrap()
+        .mark_first_time(Space::User, 7);
+
+    // Both ticks in the same instant, origin first: the collision that bit.
+    // Everything the origin tick emitted is drained away, so what remains is
+    // only what the relay batch chose to say. Asserting over both messages
+    // together would pass even when the origin update is the one carrying
+    // the mapping, which is the very thing that broke.
+    tick_origin(&state, 1_000);
+    while rx.try_recv().is_ok() {}
+
+    tick_relay(&state, 1_000);
+
+    let mut relay_carried_it = false;
+    while let Ok(msg) = rx.try_recv() {
+        let update = decode_frame(&msg.bytes);
+        if update
+            .user_mappings
+            .iter()
+            .any(|m| m.abs_idx == 7 && m.target_id == relayed)
+        {
+            relay_carried_it = true;
+        }
+    }
+
+    assert!(
+        relay_carried_it,
+        "the mapping for a relayed index must still reach the peer after an origin tick"
+    );
 }
 
 /// tick_origin increments seq_num by exactly one per invocation. The

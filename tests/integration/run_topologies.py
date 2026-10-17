@@ -79,6 +79,24 @@ TOPOLOGIES = [
         "discovery_timeout": DISCOVERY_TIMEOUT_S,
         "propagation_timeout": PROPAGATION_TIMEOUT_S,
     },
+    # Long lines, to probe the §2.2 diameter claim. These carry their own
+    # ceilings because the frontier advances about one hop per relay tick on
+    # this harness: all nodes start within a hundredth of a second, so their
+    # 1 s tickers run in lockstep and every hop pays a full window, where
+    # §7.1 expects 0.5 s per hop on average. 19 hops therefore needs ~19 s and
+    # 49 hops ~49 s before the §11 profile fetch is added on top, so the
+    # shared 60 s ceiling would fail line-50 on arithmetic rather than on
+    # behaviour.
+    {
+        "file": "topologies/line-20.json",
+        "discovery_timeout": 90,
+        "propagation_timeout": 60,
+    },
+    {
+        "file": "topologies/line-50.json",
+        "discovery_timeout": 180,
+        "propagation_timeout": 120,
+    },
 ]
 
 POLL_INTERVAL_S = 1.0

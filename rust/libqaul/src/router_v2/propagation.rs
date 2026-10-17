@@ -152,11 +152,10 @@ pub fn tick_origin(state: &RouterV2State, now_ms: u64) {
 
     let origin_space = state.sync_propagation_form(now_ms).origin_space();
 
-    // Kept as tuples so the §2.3 filter below can see each target's id.
-    // `tick_relay` has filtered its mappings since 2-B; this path did not,
-    // so a gateway shipped node mappings for its non-gateway Local-sphere
-    // neighbours straight across an INTERNET link every origin cycle.
-    let intros = state.pending_introductions(origin_space);
+    let intros: Vec<(u16, [u8; 8], u32)> = state
+        .take_introduction(origin_space, RESERVED_INDEX)
+        .into_iter()
+        .collect();
     let mut sent: HashSet<u16> = HashSet::new();
 
     let pairs: Vec<(PeerId, ConnectionModule)> = {
