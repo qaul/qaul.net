@@ -73,7 +73,12 @@ impl Ble {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(state, buf, super::rpc::proto::Modules::Ble.into(), "".to_string());
+        Rpc::send_message(
+            state,
+            buf,
+            super::rpc::proto::Modules::Ble.into(),
+            "".to_string(),
+        );
     }
 
     /// Print BLE module information

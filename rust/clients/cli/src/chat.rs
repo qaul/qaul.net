@@ -53,7 +53,11 @@ impl Chat {
                     // get message string
                     if let Some(message) = command_string.strip_prefix(group_id_str) {
                         // send message
-                        Self::send_chat_message(state, group_id, message.to_string().trim().to_string());
+                        Self::send_chat_message(
+                            state,
+                            group_id,
+                            message.to_string().trim().to_string(),
+                        );
                         println!("chat message sent [{}] {}", group_id_str, message);
                         return;
                     } else {
@@ -169,7 +173,12 @@ impl Chat {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(state, buf, super::rpc::proto::Modules::Chat.into(), "".to_string());
+        Rpc::send_message(
+            state,
+            buf,
+            super::rpc::proto::Modules::Chat.into(),
+            "".to_string(),
+        );
     }
 
     /// Request chat conversation via rpc
@@ -194,7 +203,12 @@ impl Chat {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(state, buf, super::rpc::proto::Modules::Chat.into(), "".to_string());
+        Rpc::send_message(
+            state,
+            buf,
+            super::rpc::proto::Modules::Chat.into(),
+            "".to_string(),
+        );
     }
 
     /// Send a search request via rpc
@@ -210,7 +224,12 @@ impl Chat {
             .encode(&mut buf)
             .expect("Vec<u8> provides capacity as needed");
 
-        Rpc::send_message(state, buf, super::rpc::proto::Modules::Chat.into(), "".to_string());
+        Rpc::send_message(
+            state,
+            buf,
+            super::rpc::proto::Modules::Chat.into(),
+            "".to_string(),
+        );
     }
 
     fn analyze_content(content: &Vec<u8>) -> Result<Vec<String>, String> {
@@ -285,7 +304,8 @@ impl Chat {
                     Some(proto::chat::Message::ConversationList(proto_conversation)) => {
                         // Conversation table
                         println!("");
-                        let group_id_bytes: [u8; 16] = match proto_conversation.group_id.try_into() {
+                        let group_id_bytes: [u8; 16] = match proto_conversation.group_id.try_into()
+                        {
                             Ok(b) => b,
                             Err(e) => {
                                 log::error!("invalid group id bytes: {:?}", e);

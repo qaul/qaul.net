@@ -134,7 +134,6 @@ pub struct Router {}
 impl Router {
     /// Initialize the qaul router
     pub fn init(qaul_state: &crate::QaulState) {
-
         // Initialize the RouterState and store it in QaulState.
         RouterState::init_into_qaul_state(qaul_state);
 
@@ -145,7 +144,6 @@ impl Router {
 
         // initialize users table (database-backed)
         Users::init_with_state(qaul_state, &rs);
-
     }
 
     /// Get router configuration from an explicit state reference
@@ -155,7 +153,12 @@ impl Router {
 
     /// Process incoming RPC request messages and send them to
     /// the submodules
-    pub fn rpc(state: &crate::QaulState, router_state: &RouterState, data: Vec<u8>, request_id: String) {
+    pub fn rpc(
+        state: &crate::QaulState,
+        router_state: &RouterState,
+        data: Vec<u8>,
+        request_id: String,
+    ) {
         match proto::Router::decode(&data[..]) {
             Ok(router) => {
                 match router.message {
@@ -164,12 +167,57 @@ impl Router {
                         RoutingTable::rpc_send_routing_table(state, router_state, request_id);
                     }
                     Some(proto::router::Message::ConnectionsRequest(_request)) => {
-                        // send connections list
-                        ConnectionTable::rpc_send_connections_list(state, router_state, request_id);
+                        // send connections list. Under v2 these come from the bridge
+                        match state.get_router_v2() {
+                            Some(v2) => v2.rpc_send_connections_list(
+                                state,
+                                request_id,
+                                crate::utilities::timestamp::Timestamp::get_timestamp(),
+                            ),
+                            None => ConnectionTable::rpc_send_connections_list(
+                                state,
+                                router_state,
+                                request_id,
+                            ),
+                        }
                     }
                     Some(proto::router::Message::NeighboursRequest(_request)) => {
                         // send neighbours list
-                        Neighbours::rpc_send_neighbours_list(state, router_state, request_id);
+                        match state.get_router_v2() {
+                            Some(v2) => v2.rpc_send_neighbours_list(state, request_id),
+                            None => Neighbours::rpc_send_neighbours_list(
+                                state,
+                                router_state,
+                                request_id,
+                            ),
+                        }
+                    }
+                    Some(proto::router::Message::RouterV2Request(request)) => {
+                        // v2-native views (docs/proposals/v1-to-v2-cutover.md §8).
+                        // Only meaningful when v2 is the active router.
+                        let Some(v2) = state.get_router_v2() else {
+                            log::debug!("router v2 view requested while v1 is active");
+                            return;
+                        };
+                        let now = crate::utilities::timestamp::Timestamp::get_timestamp();
+                        match proto::RouterV2View::try_from(request.view) {
+                            Ok(proto::RouterV2View::Status) => {
+                                v2.rpc_send_v2_status(state, request_id)
+                            }
+                            Ok(proto::RouterV2View::Table) => {
+                                v2.rpc_send_v2_table(state, request_id, now)
+                            }
+                            Ok(proto::RouterV2View::Neighbours) => {
+                                v2.rpc_send_v2_neighbours(state, request_id)
+                            }
+                            Ok(proto::RouterV2View::Manifests) => {
+                                v2.rpc_send_v2_manifests(state, request_id)
+                            }
+                            Ok(proto::RouterV2View::Delegations) => {
+                                v2.rpc_send_v2_delegations(state, request_id)
+                            }
+                            Err(_) => log::debug!("unknown router v2 view {}", request.view),
+                        }
                     }
                     _ => {}
                 }

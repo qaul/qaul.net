@@ -22,7 +22,10 @@ use qaul_proto::qaul_common::{Ack, RpcError};
 pub struct Debug {}
 
 impl DebugService<crate::RequestContext<'_>> for Debug {
-    fn heartbeat(_ctx: &crate::RequestContext<'_>, _req: HeartbeatRequest) -> Result<HeartbeatResponse, RpcError> {
+    fn heartbeat(
+        _ctx: &crate::RequestContext<'_>,
+        _req: HeartbeatRequest,
+    ) -> Result<HeartbeatResponse, RpcError> {
         Ok(HeartbeatResponse {})
     }
 
@@ -51,13 +54,19 @@ impl DebugService<crate::RequestContext<'_>> for Debug {
         Ok(Ack {})
     }
 
-    fn storage_path(ctx: &crate::RequestContext<'_>, _req: StoragePathRequest) -> Result<StoragePathResponse, RpcError> {
+    fn storage_path(
+        ctx: &crate::RequestContext<'_>,
+        _req: StoragePathRequest,
+    ) -> Result<StoragePathResponse, RpcError> {
         Ok(StoragePathResponse {
             storage_path: Storage::get_path(ctx.state),
         })
     }
 
-    fn delete_libqaul_logs(_ctx: &crate::RequestContext<'_>, _req: DeleteLibqaulLogsRequest) -> Result<Ack, RpcError> {
+    fn delete_libqaul_logs(
+        _ctx: &crate::RequestContext<'_>,
+        _req: DeleteLibqaulLogsRequest,
+    ) -> Result<Ack, RpcError> {
         // TODO: implement log deletion
         Err(RpcError {
             code: 2,

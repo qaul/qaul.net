@@ -11,8 +11,8 @@ use std::time::Duration;
 
 use crossterm::{
     event::{
-        DisableMouseCapture, EnableMouseCapture, Event as CtEvent, EventStream, KeyCode,
-        KeyEvent, KeyEventKind, KeyModifiers,
+        DisableMouseCapture, EnableMouseCapture, Event as CtEvent, EventStream, KeyCode, KeyEvent,
+        KeyEventKind, KeyModifiers,
     },
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},

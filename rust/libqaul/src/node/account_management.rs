@@ -12,6 +12,8 @@ use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;
 use flate2::Compression;
 use libp2p::{identity::ed25519, identity::Keypair, PeerId};
+
+use crate::utilities::timestamp::Timestamp;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -19,6 +21,7 @@ use tar::{Archive, Builder};
 
 use crate::router::connections::ConnectionTable;
 use crate::router::users::Users;
+use crate::router_v2::identity::Multikey;
 use crate::rpc::authentication::Authentication;
 use crate::services::chat::file::AllFiles;
 use crate::services::chat::ChatStorage;
@@ -31,10 +34,10 @@ use crate::storage::Storage;
 use super::user_accounts::UserAccounts;
 use crate::rpc::Rpc;
 
-/// Protobuf message definitions for the account-management RPC.
-pub use qaul_proto::qaul_rpc_account_management as proto;
 /// Shared RPC response / error types used by the generated service dispatch.
 use qaul_proto::qaul_common::{Ack, RpcError};
+/// Protobuf message definitions for the account-management RPC.
+pub use qaul_proto::qaul_rpc_account_management as proto;
 
 /// Manifest included in every export archive.
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -94,6 +97,22 @@ impl AccountManagement {
         let router = state.get_router();
         ConnectionTable::remove_local_user(&router, user_id);
         Users::remove(state, &router, user_id);
+
+        // 5b. we do the same for router_v2. which derives from the PeerId rather than the account
+        if let Some(router_v2) = state.get_router_v2() {
+            match Multikey::try_from_peer_id(&user_id) {
+                Ok(mk) => {
+                    let routing_id = mk.to_id();
+                    // Index space (§3.5) and manifest membership (§10.3) are
+                    // separate concerns, so both are released explicitly. The
+                    // version bump folds in on the next relay tick (§10.8) —
+                    // an ordinary deletion is not one of the two bypasses.
+                    router_v2.unregister_hosted_user(routing_id, Timestamp::get_timestamp());
+                    router_v2.remove_self_delegation(&routing_id);
+                }
+                Err(e) => log::warn!("v2: cannot derive routing id for {user_id}: {e}"),
+            }
+        }
 
         // 6. Remove authentication session (no-op if not logged in)
         Authentication::logout(state, user_id);
@@ -294,8 +313,9 @@ impl AccountManagement {
     // ---------------------------------------------------------------
 
     fn parse_peer_id(base58: &str) -> Result<PeerId, String> {
-        let bytes =
-            bs58::decode(base58).into_vec().map_err(|e| format!("Invalid base58 '{}': {}", base58, e))?;
+        let bytes = bs58::decode(base58)
+            .into_vec()
+            .map_err(|e| format!("Invalid base58 '{}': {}", base58, e))?;
         PeerId::from_bytes(&bytes).map_err(|e| format!("Invalid PeerId '{}': {}", base58, e))
     }
 
@@ -358,24 +378,19 @@ impl AccountManagement {
             export_date: humantime::format_rfc3339(std::time::SystemTime::now()).to_string(),
             user_id: user_id_base58.clone(),
         };
-        let manifest_yaml =
-            serde_yaml_ng::to_string(&manifest).map_err(|e| e.to_string())?;
-        fs::write(staging_dir.join("manifest.yaml"), manifest_yaml)
-            .map_err(|e| e.to_string())?;
+        let manifest_yaml = serde_yaml_ng::to_string(&manifest).map_err(|e| e.to_string())?;
+        fs::write(staging_dir.join("manifest.yaml"), manifest_yaml).map_err(|e| e.to_string())?;
 
         // Write account.yaml
-        let account_yaml =
-            serde_yaml_ng::to_string(exported_account).map_err(|e| e.to_string())?;
-        fs::write(staging_dir.join("account.yaml"), account_yaml)
-            .map_err(|e| e.to_string())?;
+        let account_yaml = serde_yaml_ng::to_string(exported_account).map_err(|e| e.to_string())?;
+        fs::write(staging_dir.join("account.yaml"), account_yaml).map_err(|e| e.to_string())?;
 
         // Copy entire user directory
         let user_dir = Path::new(&storage_path).join(&user_id_base58);
         if user_dir.exists() {
             let dest = staging_dir.join(&user_id_base58);
-            Self::copy_dir_all(&user_dir, &dest).map_err(|e| {
-                format!("Failed to copy user directory: {}", e)
-            })?;
+            Self::copy_dir_all(&user_dir, &dest)
+                .map_err(|e| format!("Failed to copy user directory: {}", e))?;
         }
 
         // Create tar.gz archive
@@ -390,8 +405,8 @@ impl AccountManagement {
     }
 
     fn create_tar_gz(source_dir: &Path, output_file: &Path) -> Result<(), String> {
-        let file =
-            fs::File::create(output_file).map_err(|e| format!("Failed to create archive: {}", e))?;
+        let file = fs::File::create(output_file)
+            .map_err(|e| format!("Failed to create archive: {}", e))?;
         let enc = GzEncoder::new(file, Compression::default());
         let mut tar = Builder::new(enc);
         tar.append_dir_all(".", source_dir)
@@ -404,8 +419,8 @@ impl AccountManagement {
     }
 
     fn extract_archive(archive_path: &Path, dest_dir: &Path) -> Result<(), String> {
-        let file = fs::File::open(archive_path)
-            .map_err(|e| format!("Failed to open archive: {}", e))?;
+        let file =
+            fs::File::open(archive_path).map_err(|e| format!("Failed to open archive: {}", e))?;
         let dec = GzDecoder::new(file);
         let mut archive = Archive::new(dec);
         archive
@@ -469,7 +484,8 @@ impl AccountManagement {
             user_id,
             request_id: request_id.clone(),
         };
-        let response_bytes = proto::dispatch::<crate::RequestContext, AccountManagement>(&ctx, data);
+        let response_bytes =
+            proto::dispatch::<crate::RequestContext, AccountManagement>(&ctx, data);
         Rpc::send_message(
             state,
             response_bytes,
@@ -519,7 +535,10 @@ impl proto::AccountManagementService<crate::RequestContext<'_>> for AccountManag
         })
     }
 
-    fn delete(ctx: &crate::RequestContext<'_>, _req: proto::DeleteAccountRequest) -> Result<Ack, RpcError> {
+    fn delete(
+        ctx: &crate::RequestContext<'_>,
+        _req: proto::DeleteAccountRequest,
+    ) -> Result<Ack, RpcError> {
         let peer_id = PeerId::from_bytes(&ctx.user_id)
             .map_err(|_| rpc_error("invalid caller identity".to_string()))?;
 

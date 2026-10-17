@@ -84,7 +84,12 @@ impl Feed {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(state, buf, super::rpc::proto::Modules::Feed.into(), "".to_string());
+        Rpc::send_message(
+            state,
+            buf,
+            super::rpc::proto::Modules::Feed.into(),
+            "".to_string(),
+        );
     }
 
     /// request feed list via rpc
@@ -106,7 +111,12 @@ impl Feed {
             .expect("Vec<u8> provides capacity as needed");
 
         // send message
-        Rpc::send_message(state, buf, super::rpc::proto::Modules::Feed.into(), "".to_string());
+        Rpc::send_message(
+            state,
+            buf,
+            super::rpc::proto::Modules::Feed.into(),
+            "".to_string(),
+        );
     }
 
     /// request paginated feed list via rpc
@@ -125,7 +135,12 @@ impl Feed {
             .encode(&mut buf)
             .expect("Vec<u8> provides capacity as needed");
 
-        Rpc::send_message(state, buf, super::rpc::proto::Modules::Feed.into(), "".to_string());
+        Rpc::send_message(
+            state,
+            buf,
+            super::rpc::proto::Modules::Feed.into(),
+            "".to_string(),
+        );
     }
 
     /// Process received RPC message

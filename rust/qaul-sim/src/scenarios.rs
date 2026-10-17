@@ -15,6 +15,8 @@ pub fn default_config() -> RoutingOptions {
         ping_neighbour_period: 5,
         hop_count_penalty: 10,
         maintain_period_limit: 300,
+        ping_timeout: 5,
+        neighbour_ping_failures: 2,
     }
 }
 
@@ -252,10 +254,16 @@ mod tests {
         let mut rng = rand::rng();
         let ticks = sim.ticks_to_convergence(20, &mut rng);
         assert!(ticks.is_some(), "Internet relay should converge");
-        println!("5-node internet relay converged in {} ticks", ticks.unwrap());
+        println!(
+            "5-node internet relay converged in {} ticks",
+            ticks.unwrap()
+        );
 
         let m = sim.metrics();
-        let internet_routes = m.routes_by_module.iter().find(|(name, _)| name == "INTERNET");
+        let internet_routes = m
+            .routes_by_module
+            .iter()
+            .find(|(name, _)| name == "INTERNET");
         assert!(internet_routes.is_some(), "Should have INTERNET routes");
     }
 
@@ -283,7 +291,10 @@ mod tests {
         // In a 5-node line, max hop count should be 4 (node 0 to node 4)
         assert!(m.max_hop_count >= 2, "Max hops should be >= 2 in a line");
         assert!(m.avg_hop_count > 0.0, "Average hops should be > 0");
-        println!("5-node line: avg_hops={:.2}, max_hops={}", m.avg_hop_count, m.max_hop_count);
+        println!(
+            "5-node line: avg_hops={:.2}, max_hops={}",
+            m.avg_hop_count, m.max_hop_count
+        );
     }
 
     #[test]
@@ -383,9 +394,12 @@ mod tests {
         let result = sim.nodes[0]
             .services
             .messaging
-            .check_scheduler(&sim.nodes[0].router.routing_table);
+            .check_scheduler(&sim.nodes[0].router.routing_table, None);
 
-        assert!(result.is_some(), "Scheduler should find a route to receiver");
+        assert!(
+            result.is_some(),
+            "Scheduler should find a route to receiver"
+        );
 
         let (next_hop, _module, data) = result.unwrap();
         // The next hop should be node 1 (intermediate in the line)
@@ -399,7 +413,7 @@ mod tests {
         let result2 = sim.nodes[0]
             .services
             .messaging
-            .check_scheduler(&sim.nodes[0].router.routing_table);
+            .check_scheduler(&sim.nodes[0].router.routing_table, None);
         assert!(result2.is_none(), "Queue should be empty after pop");
     }
 
@@ -416,10 +430,7 @@ mod tests {
                 content: format!("msg {}", i),
                 time: 1000 + i,
             };
-            sim.nodes[0]
-                .services
-                .feed
-                .save_message(vec![i as u8], msg);
+            sim.nodes[0].services.feed.save_message(vec![i as u8], msg);
         }
 
         // Paginate: first 3
@@ -472,7 +483,11 @@ mod tests {
         // The unconfirmed tree should no longer have this entry
         let unconfirmed = sim.nodes[0].services.messaging.unconfirmed.read().unwrap();
         assert!(
-            unconfirmed.unconfirmed.get(&container.signature).unwrap().is_none(),
+            unconfirmed
+                .unconfirmed
+                .get(&container.signature)
+                .unwrap()
+                .is_none(),
             "Message should be removed after confirmation"
         );
     }

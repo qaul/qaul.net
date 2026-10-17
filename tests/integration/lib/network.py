@@ -20,16 +20,14 @@ def clear_topology():
 
 def start_qaul():
     """Start qauld in all namespaces.
-
-    Kills any stale qauld processes first. software.py start qaul is a no-op
-    when processes are already running (PID file check), and stop_qaul() cannot
-    kill processes whose namespaces have already been deleted (get_remote_mapping
-    returns empty). A hard pkill here guarantees a clean slate every time.
     """
     subprocess.run(["sudo", "pkill", "-SIGKILL", "-x", "qauld"], capture_output=True)
     subprocess.run(["sudo", "sh", "-c", "rm -f /tmp/qaul-*.pid"], capture_output=True)
     time.sleep(2)
-    subprocess.run(["sudo", f"{MESHNET_LAB}/software.py", "start", "qaul"], check=True)
+    
+    subprocess.run(
+        ["sudo", "-E", f"{MESHNET_LAB}/software.py", "start", "qaul"], check=True
+    )
 
 
 def stop_qaul():
@@ -37,11 +35,43 @@ def stop_qaul():
     subprocess.run(["sudo", f"{MESHNET_LAB}/software.py", "stop", "qaul"], check=True)
 
 
+def wait_for_local_accounts(node_ids: list[str], timeout: int = 60):
+    """Block until every node publishes its own account over the Local transport.
+    """
+    from lib.node import Node, SudoUnavailable
+
+    deadline = time.time() + timeout
+    remaining = set(node_ids)
+    max_workers = min(len(node_ids), 32)
+
+    def ready(nid: str) -> bool:
+        Node(nid).local_user_id()
+        return True
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
+        while remaining and time.time() < deadline:
+            futures = {pool.submit(ready, nid): nid for nid in sorted(remaining)}
+            for future in concurrent.futures.as_completed(futures):
+                nid = futures[future]
+                try:
+                    if future.result():
+                        remaining.discard(nid)
+                except SudoUnavailable:
+                    raise
+                except Exception:
+                    pass
+            if remaining:
+                time.sleep(1)
+
+    if remaining:
+        raise TimeoutError(
+            f"{len(remaining)} node(s) never published a local account after "
+            f"{timeout}s: {sorted(remaining)}"
+        )
+
+
 def kill_node(node_id: str):
     """Kill the qauld process for a single node.
-
-    meshnet-lab starts qauld with --name=test-<node_id> and writes no PID
-    file, so we find the process via pgrep.
     """
     result = subprocess.run(
         ["pgrep", "-f", f"qauld --name=test-{node_id}"],
@@ -53,7 +83,7 @@ def kill_node(node_id: str):
 
 def wait_for_nodes(node_ids: list[str], timeout: int = 30):
     """Block until all nodes are reachable via qauld-ctl, checking in parallel."""
-    from lib.node import Node
+    from lib.node import Node, SudoUnavailable
 
     deadline = time.time() + timeout
     remaining = set(node_ids)
@@ -71,6 +101,8 @@ def wait_for_nodes(node_ids: list[str], timeout: int = 30):
                     try:
                         if future.result():
                             remaining.discard(nid)
+                    except SudoUnavailable:
+                        raise  # not a dead node; do not burn the whole timeout
                     except Exception:
                         pass
             except concurrent.futures.TimeoutError:
