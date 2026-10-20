@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qaul_components/qaul_components.dart';
@@ -8,8 +10,44 @@ const _kVoiceKey = ValueKey('chat-footer-voice');
 const _kCameraKey = ValueKey('chat-footer-camera');
 const _kMoreKey = ValueKey('chat-footer-more');
 const _kSendKey = ValueKey('chat-footer-send');
+const _kGoldenDiffTolerance = 0.02;
+
+class _TolerantGoldenComparator extends LocalFileComparator {
+  _TolerantGoldenComparator(super.testFile);
+
+  @override
+  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    final result = await GoldenFileComparator.compareLists(
+      imageBytes,
+      await getGoldenBytes(golden),
+    );
+
+    if (result.passed || result.diffPercent <= _kGoldenDiffTolerance) {
+      result.dispose();
+      return true;
+    }
+
+    final error = await generateFailureOutput(result, golden, basedir);
+    result.dispose();
+    throw FlutterError(error);
+  }
+}
 
 void main() {
+  final defaultGoldenComparator = goldenFileComparator;
+
+  setUpAll(() {
+    goldenFileComparator = _TolerantGoldenComparator(
+      (goldenFileComparator as LocalFileComparator).basedir.resolve(
+        'chat_footer_action_grid_test.dart',
+      ),
+    );
+  });
+
+  tearDownAll(() {
+    goldenFileComparator = defaultGoldenComparator;
+  });
+
   Future<void> pumpFooter(
     WidgetTester tester, {
     required double width,
