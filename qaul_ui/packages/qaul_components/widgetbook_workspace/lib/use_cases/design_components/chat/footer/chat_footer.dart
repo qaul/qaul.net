@@ -5,6 +5,7 @@ import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 /// English default matches [app_en.arb] `securePrivateMessageHint` (integrators
 /// should pass `AppLocalizations.of(context).securePrivateMessageHint`).
 const String _kPlaceholderEn = 'Secure private message';
+const double _kPhoneFooterWidth = 360;
 
 Widget _frameFooter(BuildContext context, Widget child) {
   final sheet = QaulColorSheet(Theme.of(context).brightness);
@@ -14,7 +15,10 @@ Widget _frameFooter(BuildContext context, Widget child) {
       child: Column(
         children: [
           const Expanded(child: SizedBox.expand()),
-          child,
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: SizedBox(width: _kPhoneFooterWidth, child: child),
+          ),
         ],
       ),
     ),
