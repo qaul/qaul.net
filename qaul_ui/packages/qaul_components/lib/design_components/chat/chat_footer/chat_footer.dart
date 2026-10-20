@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../styles/qaul_color_sheet.dart';
+import '../../../styles/qaul_emoji.dart';
 import 'chat_footer_reply_preview.dart';
 
 const Color _kActionIconColor = Color(0xFF999999);
@@ -129,6 +130,7 @@ Color _inputBorderColor(Brightness brightness, bool isFocused) {
 TextStyle _fieldBaseTextStyle() {
   return const TextStyle(
     fontFamily: 'Roboto',
+    fontFamilyFallback: kQaulEmojiFontFamilyFallback,
     fontSize: _kFieldFontSize,
     fontWeight: FontWeight.w400,
     height: 1.25,

@@ -26,6 +26,8 @@ import 'package:qaul_components_widgetbook/use_cases/design_components/chat/bubb
     as _qaul_components_widgetbook_use_cases_design_components_chat_bubble_chat_reply_bubble_preview;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/bubble/chat_timeline.dart'
     as _qaul_components_widgetbook_use_cases_design_components_chat_bubble_chat_timeline;
+import 'package:qaul_components_widgetbook/use_cases/design_components/chat/bubble/emoji_only_bubble.dart'
+    as _qaul_components_widgetbook_use_cases_design_components_chat_bubble_emoji_only_bubble;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/bubble/qaul_chat_bubble.dart'
     as _qaul_components_widgetbook_use_cases_design_components_chat_bubble_qaul_chat_bubble;
 import 'package:qaul_components_widgetbook/use_cases/design_components/chat/context_menu/chat_message_context_menu.dart'
@@ -302,6 +304,18 @@ final directories = <_widgetbook.WidgetbookNode>[
                 name: 'QaulChatBubble',
                 useCases: [
                   _widgetbook.WidgetbookUseCase(
+                    name: 'Emoji-only — catalog',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_bubble_emoji_only_bubble
+                            .buildEmojiOnlyCatalogUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Emoji-only — layouts',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_bubble_emoji_only_bubble
+                            .buildEmojiOnlyLayoutsUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
                     name: 'Incoming — long',
                     builder:
                         _qaul_components_widgetbook_use_cases_design_components_chat_bubble_qaul_chat_bubble
@@ -370,34 +384,6 @@ final directories = <_widgetbook.WidgetbookNode>[
                     builder:
                         _qaul_components_widgetbook_use_cases_design_components_chat_context_menu_chat_message_context_menu
                             .buildManyActionsContextMenuUseCase,
-                  ),
-                ],
-              ),
-            ],
-          ),
-          _widgetbook.WidgetbookFolder(
-            name: 'mentions',
-            children: [
-              _widgetbook.WidgetbookComponent(
-                name: 'ChatMentionSuggestionList',
-                useCases: [
-                  _widgetbook.WidgetbookUseCase(
-                    name: 'Composer — selected mention',
-                    builder:
-                        _qaul_components_widgetbook_use_cases_design_components_chat_mentions_chat_mentions
-                            .buildSelectedChatMentionUseCase,
-                  ),
-                  _widgetbook.WidgetbookUseCase(
-                    name: 'Filtered members',
-                    builder:
-                        _qaul_components_widgetbook_use_cases_design_components_chat_mentions_chat_mentions
-                            .buildFilteredChatMentionSuggestionsUseCase,
-                  ),
-                  _widgetbook.WidgetbookUseCase(
-                    name: 'Group members',
-                    builder:
-                        _qaul_components_widgetbook_use_cases_design_components_chat_mentions_chat_mentions
-                            .buildChatMentionSuggestionsUseCase,
                   ),
                 ],
               ),
@@ -483,6 +469,34 @@ final directories = <_widgetbook.WidgetbookNode>[
                     builder:
                         _qaul_components_widgetbook_use_cases_design_components_chat_header_chat_header
                             .buildChatHeaderGroupUseCase,
+                  ),
+                ],
+              ),
+            ],
+          ),
+          _widgetbook.WidgetbookFolder(
+            name: 'mentions',
+            children: [
+              _widgetbook.WidgetbookComponent(
+                name: 'ChatMentionSuggestionList',
+                useCases: [
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Composer — selected mention',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_mentions_chat_mentions
+                            .buildSelectedChatMentionUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Filtered members',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_mentions_chat_mentions
+                            .buildFilteredChatMentionSuggestionsUseCase,
+                  ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'Group members',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_mentions_chat_mentions
+                            .buildChatMentionSuggestionsUseCase,
                   ),
                 ],
               ),
@@ -638,6 +652,17 @@ final directories = <_widgetbook.WidgetbookNode>[
   _widgetbook.WidgetbookFolder(
     name: 'styles',
     children: [
+      _widgetbook.WidgetbookComponent(
+        name: 'EmojiFontCatalog',
+        useCases: [
+          _widgetbook.WidgetbookUseCase(
+            name: 'Bundled emoji font',
+            builder:
+                _qaul_components_widgetbook_use_cases_design_components_chat_bubble_emoji_only_bubble
+                    .buildEmojiFontCatalogUseCase,
+          ),
+        ],
+      ),
       _widgetbook.WidgetbookComponent(
         name: 'QaulColorSheet',
         useCases: [

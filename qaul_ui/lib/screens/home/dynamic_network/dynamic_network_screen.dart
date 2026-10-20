@@ -15,7 +15,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hooks_riverpod/legacy.dart';
 import 'package:qaul_components/qaul_components.dart'
-    show kQaulAvatarEmojiFontFamilyFallback;
+    show kQaulEmojiFontFamilyFallback;
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:utils/utils.dart';
 
@@ -231,7 +231,7 @@ class _NetworkNodeComponent extends BodyComponent
           style: TextStyle(
             fontSize: radius,
             fontFamilyFallback:
-                isEmoji ? kQaulAvatarEmojiFontFamilyFallback : null,
+                isEmoji ? kQaulEmojiFontFamilyFallback : null,
             height: isEmoji ? 1 : 0.7 + 0.0625 * radius,
           ),
         ),
