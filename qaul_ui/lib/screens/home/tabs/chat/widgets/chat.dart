@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' as ui show TextDirection;
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:collection/collection.dart';
@@ -298,6 +299,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     };
     if (text == null && attachment == null) return;
     final messageInfo = _domainMessagesById[message.id];
+    final isOutgoing =
+        _messagePresentations[message.id]?.isPrimary ??
+        message.author.id == user.idBase58;
 
     final messageRect = _messageRectInOverlay(messageContext);
     setState(() => _selectedContextMenuMessageId = message.id);
@@ -388,6 +392,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                 : CustomSingleChildLayout(
                     delegate: _MessageContextMenuLayoutDelegate(
                       messageRect: messageRect,
+                      isOutgoing: isOutgoing,
+                      textDirection: Directionality.of(dialogContext),
                       viewportPadding:
                           MediaQuery.paddingOf(dialogContext) +
                           const EdgeInsets.all(16),
@@ -1342,12 +1348,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 class _MessageContextMenuLayoutDelegate extends SingleChildLayoutDelegate {
   const _MessageContextMenuLayoutDelegate({
     required this.messageRect,
+    required this.isOutgoing,
+    required this.textDirection,
     required this.viewportPadding,
   });
 
   static const _gap = 8.0;
 
   final Rect messageRect;
+  final bool isOutgoing;
+  final ui.TextDirection textDirection;
   final EdgeInsets viewportPadding;
 
   @override
@@ -1360,7 +1370,10 @@ class _MessageContextMenuLayoutDelegate extends SingleChildLayoutDelegate {
     final maximumLeft = (size.width - childSize.width - viewportPadding.right)
         .clamp(minimumLeft, double.infinity)
         .toDouble();
-    final shouldAlignRight = messageRect.center.dx >= size.width / 2;
+    final shouldAlignRight = switch (textDirection) {
+      ui.TextDirection.ltr => isOutgoing,
+      ui.TextDirection.rtl => !isOutgoing,
+    };
     final preferredLeft = shouldAlignRight
         ? messageRect.right - childSize.width
         : messageRect.left;
@@ -1382,6 +1395,8 @@ class _MessageContextMenuLayoutDelegate extends SingleChildLayoutDelegate {
   @override
   bool shouldRelayout(_MessageContextMenuLayoutDelegate oldDelegate) =>
       messageRect != oldDelegate.messageRect ||
+      isOutgoing != oldDelegate.isOutgoing ||
+      textDirection != oldDelegate.textDirection ||
       viewportPadding != oldDelegate.viewportPadding;
 }
 
