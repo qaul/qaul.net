@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../l10n/qaul_components_l10n_ext.dart';
+import '../../styles/chat_surface_shadows.dart';
 import '../../styles/qaul_color_sheet.dart';
 import '../users/qaul_avatar.dart';
 
@@ -46,16 +47,6 @@ TextStyle _chatHeaderLineStyle(
     letterSpacing: 1,
     color: _chatHeaderTextColor(theme),
   );
-}
-
-BoxShadow _chatHeaderShadow(ThemeData theme) {
-  return theme.brightness == Brightness.dark
-      ? const BoxShadow(
-          offset: Offset(0, 10),
-          blurRadius: 7,
-          color: Color(0x66000000),
-        )
-      : const BoxShadow(blurRadius: 5, color: Color(0x33000000));
 }
 
 class _ChatHeaderOverflowMenuButton extends StatelessWidget {
@@ -252,7 +243,10 @@ class ChatHeader extends StatelessWidget {
             width: _kChatHeaderDividerWidth,
           ),
         ),
-        boxShadow: [_chatHeaderShadow(theme)],
+        boxShadow: chatSurfaceShadows(
+          theme.brightness,
+          direction: ChatSurfaceShadowDirection.below,
+        ),
       ),
       child: Material(
         color: Colors.transparent,

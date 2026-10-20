@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../styles/chat_surface_shadows.dart';
 import '../../../styles/qaul_color_sheet.dart';
 import 'chat_footer_reply_preview.dart';
 
@@ -93,16 +94,6 @@ class _AttachmentMenuLayoutConfig {
     return slots.clamp(minPaginatedSlots, maxVisibleSlots);
   }
 }
-
-const List<BoxShadow> _kFooterShadowsDark = [
-  BoxShadow(offset: Offset(0, 0), blurRadius: 5, color: Color(0x66000000)),
-  BoxShadow(offset: Offset(0, -10), blurRadius: 7, color: Color(0x99000000)),
-];
-
-const List<BoxShadow> _kFooterShadowsLight = [
-  BoxShadow(offset: Offset(0, 0), blurRadius: 5, color: Color(0x33000000)),
-  BoxShadow(offset: Offset(0, -10), blurRadius: 7, color: Color(0x66000000)),
-];
 
 Color _inputFillColor(Brightness brightness, Color shell) {
   if (brightness == Brightness.dark) {
@@ -367,9 +358,10 @@ class _ChatFooterState extends State<ChatFooter> {
     final sheet = QaulColorSheet(theme.brightness);
     final shell = sheet.background;
     final fillColor = _inputFillColor(theme.brightness, shell);
-    final shadows = theme.brightness == Brightness.dark
-        ? _kFooterShadowsDark
-        : _kFooterShadowsLight;
+    final shadows = chatSurfaceShadows(
+      theme.brightness,
+      direction: ChatSurfaceShadowDirection.above,
+    );
     final hasAttachmentMenu = _attachmentActions().isNotEmpty;
 
     final inner = Padding(

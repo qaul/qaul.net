@@ -3,6 +3,41 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:qaul_components/qaul_components.dart';
 
 void main() {
+  test('uses symmetrical shared chat surface shadows', () {
+    for (final brightness in Brightness.values) {
+      final header = chatSurfaceShadows(
+        brightness,
+        direction: ChatSurfaceShadowDirection.below,
+      );
+      final footer = chatSurfaceShadows(
+        brightness,
+        direction: ChatSurfaceShadowDirection.above,
+      );
+
+      expect(header, hasLength(2));
+      expect(header.first, footer.first);
+      expect(
+        header.first,
+        BoxShadow(
+          offset: Offset.zero,
+          blurRadius: 5,
+          color: brightness == Brightness.dark
+              ? const Color(0x66000000)
+              : const Color(0x33000000),
+        ),
+      );
+      expect(header.last.offset, const Offset(0, 10));
+      expect(footer.last.offset, const Offset(0, -10));
+      expect(header.last.blurRadius, 7);
+      expect(
+        header.last.color,
+        brightness == Brightness.dark
+            ? const Color(0x99000000)
+            : const Color(0x66000000),
+      );
+    }
+  });
+
   Future<BorderSide> headerDivider(WidgetTester tester, ThemeData theme) async {
     await tester.pumpWidget(
       MaterialApp(
