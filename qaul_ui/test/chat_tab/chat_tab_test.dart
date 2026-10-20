@@ -626,7 +626,7 @@ void main() {
     },
   );
 
-  testWidgets('sent message context menus open on the left in RTL locales', (
+  testWidgets('sent message context menus stay aligned with sent RTL bubbles', (
     tester,
   ) async {
     final message = textMessage(
@@ -647,7 +647,7 @@ void main() {
 
     final overlayRect = tester.getRect(find.byType(Overlay));
     final menuRect = tester.getRect(find.byType(ChatMessageContextMenu));
-    expect(menuRect.center.dx, lessThan(overlayRect.center.dx));
+    expect(menuRect.center.dx, greaterThan(overlayRect.center.dx));
   });
 
   testWidgets('shares a text message from the long-press menu', (tester) async {
