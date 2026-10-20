@@ -503,7 +503,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get saveButton => 'SAVE';
 
   @override
-  String get securePrivateMessageHint => 'Pesan pribadi aman';
+  String get privateMessageHint => 'Pesan pribadi';
 
   @override
   String get storage => 'Storage';

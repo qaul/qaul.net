@@ -35,6 +35,7 @@
   "blockUserConfirmationMessage": "你確定要封鎖這個用戶嗎？",
   "cancelDialogButton": "取消",
   "chatEmptyMessageHint": "輸入你的信息...",
+  "privateMessageHint": "私人訊息",
   "chatEmptyState": "無消息",
   "copy": "複製",
   "share": "分享",

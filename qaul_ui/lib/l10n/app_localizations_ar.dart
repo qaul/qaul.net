@@ -499,7 +499,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get saveButton => 'SAVE';
 
   @override
-  String get securePrivateMessageHint => 'رسالة خاصة آمنة';
+  String get privateMessageHint => 'رسالة خاصة';
 
   @override
   String get storage => 'Storage';

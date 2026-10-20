@@ -95,7 +95,7 @@
     "removeUserDialogContent": "Sicher, dass du diesen Benutzer aus der Gruppe entfernen willst?",
     "routingDataTable": "Routing-Tabelle",
     "searchUser": "In Kontakten suchen...",
-    "securePrivateMessageHint": "verschlüsselte private Nachricht",
+    "privateMessageHint": "Private Nachricht",
     "securityNumber": "Sicherheits-Nummer",
     "securityNumberDialogDesc": "Bitte versichere dich, dass die Person, die du verifizerien möchtest, die exakt gleiche Sicherheitsnummer angezeigt bekommt, wenn sie versucht dich zu verifizieren.",
     "sendLogs": "Log-Einträge senden",

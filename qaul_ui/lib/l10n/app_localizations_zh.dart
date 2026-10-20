@@ -493,7 +493,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get saveButton => 'SAVE';
 
   @override
-  String get securePrivateMessageHint => 'Secure private message';
+  String get privateMessageHint => '私人消息';
 
   @override
   String get storage => 'Storage';
@@ -842,4 +842,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get languageName => '繁體中文';
+
+  @override
+  String get privateMessageHint => '私人訊息';
 }
