@@ -55,6 +55,7 @@ fn create_test_config() -> Configuration {
         crypto_rotation: CryptoRotation::default(),
         handshake_extras: HandshakeExtras::default(),
         ble: Ble::default(),
+        metrics: Default::default(),
     }
 }
 

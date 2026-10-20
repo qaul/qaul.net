@@ -125,6 +125,9 @@ impl Rpc {
                         // qaul-cli drives account management through libqaul's
                         // node API directly, not over RPC; ignore responses.
                     }
+                    Ok(proto::Modules::Metrics) => {
+                        // metrics are read with qauld-ctl; ignore responses.
+                    }
                     Ok(proto::Modules::None) => {}
                     Err(_) => {}
                 }

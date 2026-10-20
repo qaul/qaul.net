@@ -78,6 +78,7 @@ pub(crate) async fn run(
         Commands::Router(r) => Box::new(r.command) as Box<dyn RpcCommand>,
         Commands::Crypto(c) => Box::new(c.command) as Box<dyn RpcCommand>,
         Commands::Debug(d) => Box::new(d.command) as Box<dyn RpcCommand>,
+        Commands::Metrics(m) => Box::new(m.command) as Box<dyn RpcCommand>,
         Commands::Connections(c) => Box::new(c.command) as Box<dyn RpcCommand>,
         Commands::Dtn(d) => Box::new(d.command) as Box<dyn RpcCommand>,
         Commands::Transports(t) => Box::new(t.command) as Box<dyn RpcCommand>,

@@ -1,0 +1,171 @@
+syntax = "proto3";
+package qaul.rpc.metrics;
+
+import "common/common.proto";
+
+// Libqaul RPC Metrics Messages
+//
+// Node instrumentation. `Snapshot` returns every node-wide indicator
+// in a flat, OpenTelemetry-shaped model that maps 1:1 to Prometheus.
+// The remaining requests are "custom metrics": per-peer breakdowns
+// that would explode label cardinality in a timeseries database.
+// Custom metrics require an authenticated session.
+message Metrics {
+    oneof message {
+        // request the node-wide snapshot
+        SnapshotRequest snapshot_request = 1;
+        // node-wide snapshot
+        SnapshotResponse snapshot_response = 2;
+
+        // enable / disable metrics collection (persisted)
+        SetEnabledRequest set_enabled_request = 3;
+
+        // DTN messages stored on this node, by sender and receiver
+        DtnStorageRequest dtn_storage_request = 4;
+        DtnStorageResponse dtn_storage_response = 5;
+
+        // messages forwarded by this node, by sender and receiver
+        TransitPeersRequest transit_peers_request = 6;
+        TransitPeersResponse transit_peers_response = 7;
+
+        // disk used by the calling user's database
+        UserStorageRequest user_storage_request = 8;
+        UserStorageResponse user_storage_response = 9;
+
+        // Acknowledgement response
+        qaul.common.Ack ack = 10;
+        // RPC error response
+        qaul.common.RpcError error = 11;
+    }
+}
+
+service MetricsService {
+    rpc Snapshot(SnapshotRequest) returns (SnapshotResponse);
+    rpc SetEnabled(SetEnabledRequest) returns (qaul.common.Ack);
+    rpc DtnStorage(DtnStorageRequest) returns (DtnStorageResponse);
+    rpc TransitPeers(TransitPeersRequest) returns (TransitPeersResponse);
+    rpc UserStorage(UserStorageRequest) returns (UserStorageResponse);
+}
+
+// Request the node-wide metrics snapshot
+message SnapshotRequest {
+}
+
+// Node-wide metrics snapshot
+message SnapshotResponse {
+    // whether metrics collection is currently enabled
+    bool enabled = 1;
+    // when the counters started (node start), unix nanoseconds.
+    // Counters reset on restart; exporters use this to detect resets.
+    uint64 start_time_unix_nano = 2;
+    // when this snapshot was taken, unix nanoseconds
+    uint64 time_unix_nano = 3;
+    // all metrics
+    repeated Metric metrics = 4;
+}
+
+// Kind of a metric, subset of the OpenTelemetry data model
+enum MetricKind {
+    METRIC_KIND_UNSPECIFIED = 0;
+    // monotonic counter, reset on restart
+    COUNTER = 1;
+    // explicit-bucket histogram
+    HISTOGRAM = 2;
+}
+
+// A single metric with all its data points
+message Metric {
+    // dotted OpenTelemetry-style name, e.g. "qaul.neighbour.rtt"
+    string name = 1;
+    // human readable description
+    string description = 2;
+    // UCUM unit, e.g. "us", "By", "{message}"
+    string unit = 3;
+    // metric kind
+    MetricKind kind = 4;
+    // one data point per attribute combination
+    repeated DataPoint points = 5;
+}
+
+// Key / value attribute of a data point
+message Attribute {
+    string key = 1;
+    string value = 2;
+}
+
+// A data point of a metric
+message DataPoint {
+    // attributes (labels) of this data point
+    repeated Attribute attributes = 1;
+    oneof value {
+        // value of a COUNTER
+        uint64 counter = 2;
+        // value of a HISTOGRAM
+        Histogram histogram = 3;
+    }
+}
+
+// Explicit-bucket histogram
+//
+// `bucket_counts` has one more entry than `bounds`: bucket i counts
+// values in (bounds[i-1], bounds[i]], the last bucket counts values
+// above the last bound. Counts are per bucket, not cumulative.
+message Histogram {
+    repeated double bounds = 1;
+    repeated uint64 bucket_counts = 2;
+    double sum = 3;
+    uint64 count = 4;
+}
+
+// Enable or disable metrics collection
+message SetEnabledRequest {
+    bool enabled = 1;
+}
+
+// Request DTN storage breakdown
+message DtnStorageRequest {
+}
+
+// DTN messages stored on this node
+message DtnStorageResponse {
+    // V1 DTN messages: totals only, V1 does not record the sender
+    uint32 v1_message_count = 1;
+    uint64 v1_bytes = 2;
+    // V2 DTN messages, grouped by sender and receiver
+    repeated PeerPairStats v2 = 3;
+}
+
+// Request the transit breakdown
+message TransitPeersRequest {
+}
+
+// Messages forwarded by this node since start
+message TransitPeersResponse {
+    // one entry per sender / receiver pair
+    repeated PeerPairStats pairs = 1;
+    // pairs not tracked individually because the table was full
+    uint64 overflow_message_count = 2;
+    uint64 overflow_bytes = 3;
+}
+
+// Message count and bytes between a sender and a receiver
+message PeerPairStats {
+    // qaul ID of the sender
+    bytes sender_id = 1;
+    // qaul ID of the receiver
+    bytes receiver_id = 2;
+    uint64 message_count = 3;
+    uint64 bytes = 4;
+}
+
+// Request the disk usage of the calling user's database
+message UserStorageRequest {
+}
+
+// Disk usage of the calling user's database
+message UserStorageResponse {
+    // qaul ID of the user
+    bytes user_id = 1;
+    // bytes used on disk by the user's database
+    uint64 bytes = 2;
+}

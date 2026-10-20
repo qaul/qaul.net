@@ -29,6 +29,7 @@ use crate::services::chat::ChatFile;
 use crate::services::dtn::Dtn;
 use crate::services::feed::Feed;
 use crate::services::group::Group;
+use crate::metrics::rpc::Metrics;
 use debug::Debug;
 
 #[cfg(feature = "rtc")]
@@ -172,7 +173,11 @@ impl Rpc {
 
         match QaulRpc::decode(&data[..]) {
             Ok(message) => {
-                match Modules::try_from(message.module) {
+                let module = Modules::try_from(message.module);
+                if let Ok(module) = module {
+                    state.metrics.rpc_request(module);
+                }
+                match module {
                     Ok(Modules::Node) => {
                         Self::increase_message_counter(state);
                         Node::rpc(
@@ -302,6 +307,9 @@ impl Rpc {
                             message.user_id,
                             message.request_id,
                         );
+                    }
+                    Ok(Modules::Metrics) => {
+                        Metrics::rpc(state, message.data, message.user_id, message.request_id);
                     }
                     Ok(Modules::None) => {
                         log::error!("Message Modules::None received");

@@ -60,6 +60,11 @@ pub enum Commands {
     /// validate the daemon is reachable and behaving. Ported from the
     /// legacy `qaul-cli` `debug` subcommands.
     Debug(DebugArgs),
+    /// Node metrics: counters, histograms and per-peer breakdowns.
+    ///
+    /// `dtn`, `transit` and `storage` require an authenticated session
+    /// (see `auth`).
+    Metrics(MetricsArgs),
     /// Manage statically-configured internet peer nodes
     ///
     /// Ported from the legacy `qaul-cli` `connections` subcommands.
@@ -184,6 +189,41 @@ pub enum DebugSubcmd {
     // NOTE: `rpc sent` and `rpc queued` from qaul-cli read libqaul-side
     // counters in-process. They need a new Debug RPC message to work over
     // qauld's socket — deferred to a follow-up PR.
+}
+
+#[derive(Args, Debug)]
+pub struct MetricsArgs {
+    #[command(subcommand)]
+    pub command: MetricsSubcmd,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum MetricsSubcmd {
+    /// print the node-wide metrics snapshot
+    Snapshot {
+        /// output format; the global `--json` flag takes precedence
+        #[arg(long, value_enum, default_value = "table")]
+        format: MetricsFormat,
+    },
+    /// enable metrics collection (persisted)
+    Enable,
+    /// disable metrics collection (persisted)
+    Disable,
+    /// DTN messages stored on this node, by sender and receiver
+    Dtn,
+    /// messages forwarded by this node, by sender and receiver
+    Transit,
+    /// disk used by the current user's database
+    Storage,
+}
+
+#[derive(Copy, Clone, Debug, ValueEnum)]
+pub enum MetricsFormat {
+    /// human readable table
+    Table,
+    /// Prometheus text exposition format, e.g. for a node_exporter
+    /// textfile collector
+    Prometheus,
 }
 
 #[derive(Args, Debug)]

@@ -58,8 +58,12 @@ async fn main() {
     let path = std::env::current_dir().unwrap();
     let storage_path = path.as_path().to_str().unwrap().to_string();
 
+    // metrics are on by default for qaul-cli
+    let mut def_config = std::collections::BTreeMap::new();
+    def_config.insert("metrics".to_string(), "true".to_string());
+
     // start libqaul in new thread and get instance
-    let instance = libqaul::api::start_instance_in_thread(storage_path, None);
+    let instance = libqaul::api::start_instance_in_thread(storage_path, Some(def_config));
 
     // wait until libqaul finished initializing
     while !instance.is_initialized() {
