@@ -1,0 +1,77 @@
+{
+ "name": "communities-3x10",
+ "hub": "0000",
+ "community_count": 3,
+ "members_per_community": 10,
+ "communities": [
+  {
+   "index": 0,
+   "gateway": "0001",
+   "members": [
+    "0001",
+    "0002",
+    "0003",
+    "0004",
+    "0005",
+    "0006",
+    "0007",
+    "0008",
+    "0009",
+    "000a"
+   ],
+   "lattice_width": 4,
+   "links": 13,
+   "max_member_degree": 4,
+   "gateway_degree_with_hub": 3,
+   "diameter": 5
+  },
+  {
+   "index": 1,
+   "gateway": "000b",
+   "members": [
+    "000b",
+    "000c",
+    "000d",
+    "000e",
+    "000f",
+    "0010",
+    "0011",
+    "0012",
+    "0013",
+    "0014"
+   ],
+   "lattice_width": 4,
+   "links": 13,
+   "max_member_degree": 4,
+   "gateway_degree_with_hub": 3,
+   "diameter": 5
+  },
+  {
+   "index": 2,
+   "gateway": "0015",
+   "members": [
+    "0015",
+    "0016",
+    "0017",
+    "0018",
+    "0019",
+    "001a",
+    "001b",
+    "001c",
+    "001d",
+    "001e"
+   ],
+   "lattice_width": 4,
+   "links": 13,
+   "max_member_degree": 4,
+   "gateway_degree_with_hub": 3,
+   "diameter": 5
+  }
+ ],
+ "totals": {
+  "nodes": 31,
+  "links": 42,
+  "community_links": 39,
+  "hub_links": 3
+ }
+}

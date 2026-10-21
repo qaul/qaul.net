@@ -1,0 +1,174 @@
+{
+ "name": "communities-10x5",
+ "hub": "0000",
+ "community_count": 10,
+ "members_per_community": 5,
+ "communities": [
+  {
+   "index": 0,
+   "gateway": "0001",
+   "members": [
+    "0001",
+    "0002",
+    "0003",
+    "0004",
+    "0005"
+   ],
+   "lattice_width": 3,
+   "links": 5,
+   "max_member_degree": 3,
+   "gateway_degree_with_hub": 3,
+   "diameter": 3
+  },
+  {
+   "index": 1,
+   "gateway": "0006",
+   "members": [
+    "0006",
+    "0007",
+    "0008",
+    "0009",
+    "000a"
+   ],
+   "lattice_width": 3,
+   "links": 5,
+   "max_member_degree": 3,
+   "gateway_degree_with_hub": 3,
+   "diameter": 3
+  },
+  {
+   "index": 2,
+   "gateway": "000b",
+   "members": [
+    "000b",
+    "000c",
+    "000d",
+    "000e",
+    "000f"
+   ],
+   "lattice_width": 3,
+   "links": 5,
+   "max_member_degree": 3,
+   "gateway_degree_with_hub": 3,
+   "diameter": 3
+  },
+  {
+   "index": 3,
+   "gateway": "0010",
+   "members": [
+    "0010",
+    "0011",
+    "0012",
+    "0013",
+    "0014"
+   ],
+   "lattice_width": 3,
+   "links": 5,
+   "max_member_degree": 3,
+   "gateway_degree_with_hub": 3,
+   "diameter": 3
+  },
+  {
+   "index": 4,
+   "gateway": "0015",
+   "members": [
+    "0015",
+    "0016",
+    "0017",
+    "0018",
+    "0019"
+   ],
+   "lattice_width": 3,
+   "links": 5,
+   "max_member_degree": 3,
+   "gateway_degree_with_hub": 3,
+   "diameter": 3
+  },
+  {
+   "index": 5,
+   "gateway": "001a",
+   "members": [
+    "001a",
+    "001b",
+    "001c",
+    "001d",
+    "001e"
+   ],
+   "lattice_width": 3,
+   "links": 5,
+   "max_member_degree": 3,
+   "gateway_degree_with_hub": 3,
+   "diameter": 3
+  },
+  {
+   "index": 6,
+   "gateway": "001f",
+   "members": [
+    "001f",
+    "0020",
+    "0021",
+    "0022",
+    "0023"
+   ],
+   "lattice_width": 3,
+   "links": 5,
+   "max_member_degree": 3,
+   "gateway_degree_with_hub": 3,
+   "diameter": 3
+  },
+  {
+   "index": 7,
+   "gateway": "0024",
+   "members": [
+    "0024",
+    "0025",
+    "0026",
+    "0027",
+    "0028"
+   ],
+   "lattice_width": 3,
+   "links": 5,
+   "max_member_degree": 3,
+   "gateway_degree_with_hub": 3,
+   "diameter": 3
+  },
+  {
+   "index": 8,
+   "gateway": "0029",
+   "members": [
+    "0029",
+    "002a",
+    "002b",
+    "002c",
+    "002d"
+   ],
+   "lattice_width": 3,
+   "links": 5,
+   "max_member_degree": 3,
+   "gateway_degree_with_hub": 3,
+   "diameter": 3
+  },
+  {
+   "index": 9,
+   "gateway": "002e",
+   "members": [
+    "002e",
+    "002f",
+    "0030",
+    "0031",
+    "0032"
+   ],
+   "lattice_width": 3,
+   "links": 5,
+   "max_member_degree": 3,
+   "gateway_degree_with_hub": 3,
+   "diameter": 3
+  }
+ ],
+ "totals": {
+  "nodes": 51,
+  "links": 60,
+  "community_links": 50,
+  "hub_links": 10
+ }
+}

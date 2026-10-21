@@ -233,3 +233,44 @@ class Node:
             "--since-ms",
             str(since_ms),
         )
+
+    # ---------------- community-hub / overhead setup ----------------
+
+    def addresses(self) -> list[str]:
+        """Every multiaddress this node can be reached on.
+
+        The internet listener binds an ephemeral port, so the resolved
+        address is only knowable at runtime - which is why the hub's
+        address is read from here rather than pinned in config.
+        """
+        return self.node_info().get("addresses", [])
+
+    def transports(self) -> dict:
+        """Every registered transport with its current status."""
+        return self._run_json("transports", "list")
+
+    def disable_transport(self, transport: str) -> str:
+        """Stop a transport (`lan`, `internet`, `ble`). Persisted to config."""
+        return self._run("transports", "disable", "--id", transport)
+
+    def enable_transport(self, transport: str) -> str:
+        """Start a transport (`lan`, `internet`, `ble`). Persisted to config."""
+        return self._run("transports", "enable", "--id", transport)
+
+    def internet_peers(self) -> dict:
+        """The statically configured internet peer list."""
+        return self._run_json("connections", "nodes", "list")
+
+    def add_internet_peer(self, address: str, name: str = "hub") -> str:
+        """Add an internet peer. libqaul stores it enabled and dials it."""
+        return self._run(
+            "connections", "nodes", "add", "--address", address, "--name", name
+        )
+
+    def router_v2_status(self) -> dict:
+        """v2 node identity, propagation form, gateway role, state counts."""
+        return self._run_json("router", "v2", "status")
+
+    def router_v2_table(self) -> dict:
+        """The v2 routing table: both index spaces, with metric and local_only."""
+        return self._run_json("router", "v2", "table")

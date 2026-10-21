@@ -1,0 +1,56 @@
+{
+ "name": "communities-3x3",
+ "hub": "0000",
+ "community_count": 3,
+ "members_per_community": 3,
+ "communities": [
+  {
+   "index": 0,
+   "gateway": "0001",
+   "members": [
+    "0001",
+    "0002",
+    "0003"
+   ],
+   "lattice_width": 2,
+   "links": 2,
+   "max_member_degree": 2,
+   "gateway_degree_with_hub": 3,
+   "diameter": 2
+  },
+  {
+   "index": 1,
+   "gateway": "0004",
+   "members": [
+    "0004",
+    "0005",
+    "0006"
+   ],
+   "lattice_width": 2,
+   "links": 2,
+   "max_member_degree": 2,
+   "gateway_degree_with_hub": 3,
+   "diameter": 2
+  },
+  {
+   "index": 2,
+   "gateway": "0007",
+   "members": [
+    "0007",
+    "0008",
+    "0009"
+   ],
+   "lattice_width": 2,
+   "links": 2,
+   "max_member_degree": 2,
+   "gateway_degree_with_hub": 3,
+   "diameter": 2
+  }
+ ],
+ "totals": {
+  "nodes": 10,
+  "links": 9,
+  "community_links": 6,
+  "hub_links": 3
+ }
+}
