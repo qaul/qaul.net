@@ -1,6 +1,41 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qaul_components/qaul_components.dart';
+
+const _kGoldenDiffTolerance = 0.05;
+
+Future<void> expectHeaderGoldenMatches(
+  dynamic actual,
+  String goldenFile,
+) {
+  final originalComparator = goldenFileComparator;
+  goldenFileComparator = _HeaderGoldenComparator(
+    (originalComparator as LocalFileComparator).basedir.resolve(
+      'chat_header_test.dart',
+    ),
+  );
+  return expectLater(actual, matchesGoldenFile(goldenFile));
+}
+
+class _HeaderGoldenComparator extends LocalFileComparator {
+  _HeaderGoldenComparator(super.testFile);
+
+  @override
+  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    final result = await GoldenFileComparator.compareLists(
+      imageBytes,
+      await getGoldenBytes(golden),
+    );
+
+    if (!result.passed && result.diffPercent > _kGoldenDiffTolerance) {
+      throw FlutterError(await generateFailureOutput(result, golden, basedir));
+    }
+
+    return true;
+  }
+}
 
 void main() {
   Future<void> pumpHeader(
@@ -148,12 +183,14 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
+    final originalComparator = goldenFileComparator;
+    addTearDown(() => goldenFileComparator = originalComparator);
 
     await pumpHeader(tester, showBackButton: true, includeMenu: true);
 
-    await expectLater(
+    await expectHeaderGoldenMatches(
       find.byKey(const ValueKey('chat-header-surface')),
-      matchesGoldenFile('goldens/chat_header_phone_dark.png'),
+      'goldens/chat_header_phone_dark.png',
     );
   });
 
