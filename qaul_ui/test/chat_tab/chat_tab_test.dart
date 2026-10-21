@@ -58,6 +58,7 @@ class FakeMessageShareService implements MessageShareService {
   String? sharedText;
   final sharedFiles = <({String name, String path})>[];
   final copiedFiles = <({String name, String path})>[];
+  final savedFiles = <({String name, String path})>[];
   Rect? sharePositionOrigin;
 
   @override
@@ -85,6 +86,14 @@ class FakeMessageShareService implements MessageShareService {
     required String fileName,
   }) async {
     copiedFiles.add((name: fileName, path: filePath));
+  }
+
+  @override
+  Future<void> saveFile({
+    required String filePath,
+    required String fileName,
+  }) async {
+    savedFiles.add((name: fileName, path: filePath));
   }
 }
 
@@ -901,6 +910,7 @@ void main() {
 
       expect(find.byType(ChatMessageContextMenu), findsOneWidget);
       expect(find.text('Forward'), findsOneWidget);
+      expect(find.text('Save'), findsOneWidget);
       expect(find.text('Share'), findsOneWidget);
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Reply'), findsNothing);
@@ -908,11 +918,19 @@ void main() {
       expect(find.text('Info'), findsNothing);
       expect(find.text('Delete'), findsNothing);
 
-      await tester.tap(find.text('Share'));
+      final labels = ['Forward', 'Save', 'Share', 'Copy'];
+      for (var index = 1; index < labels.length; index++) {
+        expect(
+          tester.getTopLeft(find.text(labels[index])).dy,
+          greaterThan(tester.getTopLeft(find.text(labels[index - 1])).dy),
+        );
+      }
+
+      await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
     }
 
-    expect(messageShareService.sharedFiles, [
+    expect(messageShareService.savedFiles, [
       (name: 'document.pdf', path: '/tmp/document.pdf'),
       (name: 'photo.jpg', path: '/tmp/photo.jpg'),
       (name: 'recording.mp3', path: '/tmp/recording.mp3'),
