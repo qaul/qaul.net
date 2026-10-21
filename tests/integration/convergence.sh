@@ -27,6 +27,7 @@ probe() {
     entries=$(awk '/^  routing entries/{print $3}' <<<"$status")
     users=$(sudo qauld-ctl -d "$d" users online 2>/dev/null | grep -c "^[0-9][0-9]* |")
     printf '%s %s %s\n' "${neighbours:-0}" "${entries:-0}" "${users:-0}" > "$out"
+    return
 }
 
 while :; do
@@ -64,7 +65,7 @@ while :; do
 done
 
 # "-" when a node never reached the milestone, otherwise "13s"
-fmt() { [[ -z ${1:-} ]] && printf -- '-' || printf '%ss' "$1"; }
+fmt() { [[ -z ${1:-} ]] && printf -- '-' || printf '%ss' "$1"; return; }
 
 echo
 echo "all figures are seconds since the daemons started"

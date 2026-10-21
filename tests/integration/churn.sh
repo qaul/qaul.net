@@ -20,13 +20,13 @@ case "$MODE" in
   *) echo "usage: churn.sh cut <a> <b> [hold] | kill <id> [hold]"; exit 1 ;;
 esac
 
-[ "$(id -u)" -eq 0 ] || { echo "must run as root (sudo -E)"; exit 1; }
+[[ "$(id -u)" -eq 0 ]] || { echo "must run as root (sudo -E)"; exit 1; }
 
 OUT=${OUT:-/root/qaul-churn-$(date +%F-%H%M)}
-[ -n "${SUDO_USER:-}" ] && OUT=${OUT//\/root\//$(getent passwd "$SUDO_USER" | cut -d: -f6)/}
+[[ -n "${SUDO_USER:-}" ]] && OUT=${OUT//\/root\//$(getent passwd "$SUDO_USER" | cut -d: -f6)/}
 mkdir -p "$OUT"
 DIRS=(/tmp/qaul-*/)
-[ -d "${DIRS[0]}" ] || { echo "no /tmp/qaul-*/ dirs; start the lab first"; exit 1; }
+[[ -d "${DIRS[0]}" ]] || { echo "no /tmp/qaul-*/ dirs; start the lab first"; exit 1; }
 START=$(date +%s)
 
 sample() {
@@ -45,6 +45,7 @@ sample() {
   printf 't=%-4s phase=%-9s nb=%-3s entries=%-3s users=%-3s vias=%-3s metrics=%s\n' \
     "$t" "$phase" "${nb:-?}" "${entries:-?}" "${users:-?}" "${vias:-?}" "${metrics:-none}" \
     >> "$OUT/$id.log"
+  return
 }
 
 record() {
@@ -52,12 +53,13 @@ record() {
   for ((i=0; i<secs; i++)); do
     t=$(( $(date +%s) - START ))
     for d in "${DIRS[@]}"; do
-      [ -d "$d" ] || continue
+      [[ -d "$d" ]] || continue
       sample "$d" "$(basename "$d")" "$phase" "$t" &
     done
     wait
     sleep 1
   done
+  return
 }
 
 echo "recording baseline (10s), output in $OUT"
@@ -82,7 +84,7 @@ case "$MODE" in
     for n in "$A" "$B"; do
       base=$(awk '/phase=baseline/{for(i=1;i<=NF;i++) if ($i ~ /^nb=/) {split($i,a,"="); v=a[2]}} END{print v}' "$OUT/qaul-$n.log")
       last=$(awk '/phase=restored/{for(i=1;i<=NF;i++) if ($i ~ /^nb=/) {split($i,a,"="); v=a[2]}} END{print v}' "$OUT/qaul-$n.log")
-      if [ "$base" != "$last" ]; then
+      if [[ "$base" != "$last" ]]; then
         echo "WARNING: $n did not regain its adjacency (baseline nb=$base, now nb=$last)."
         echo "         The mesh is NOT back to its original topology — restart the lab"
         echo "         before the next run or it will measure a different graph."
@@ -91,10 +93,14 @@ case "$MODE" in
     ;;
   kill)
     pid=$(cat "/tmp/qaul-$K.pid" 2>/dev/null)
-    [ -n "${pid:-}" ] || { echo "no pid file for $K"; exit 1; }
+    [[ -n "${pid:-}" ]] || { echo "no pid file for $K"; exit 1; }
     echo "killing $K (pid $pid) at t=$(( $(date +%s) - START ))s"
     kill -9 "$pid" && rm -f "/tmp/qaul-$K.pid"
     record killed "$HOLD"
+    ;;
+  *)
+    echo "internal error: mode '$MODE' passed validation but is not handled here" >&2
+    exit 1
     ;;
 esac
 

@@ -33,10 +33,11 @@ teardown() {
   rm -f /tmp/qaul-*.pid
   rm -rf /tmp/qaul-0*
   sleep 1
+  return
 }
 
-[ -d "$LAB" ]  || { echo "no meshnet-lab at $LAB (set LAB=)"; exit 1; }
-[ -x "$CONV" ] || { echo "no convergence.sh at $CONV (set CONV=)"; exit 1; }
+[[ -d "$LAB" ]]  || { echo "no meshnet-lab at $LAB (set LAB=)"; exit 1; }
+[[ -x "$CONV" ]] || { echo "no convergence.sh at $CONV (set CONV=)"; exit 1; }
 mkdir -p "$OUT"
 cd "$LAB" || exit 1
 
@@ -77,7 +78,7 @@ printf '\n========== summary ==========\n'
 for spec in "${SPECS[@]}"; do
   name="${spec%%:*}"; rest="${spec#*:}"; nodes="${rest##*:}"
   f="$OUT/$name.txt"
-  if [ -f "$f" ]; then
+  if [[ -f "$f" ]]; then
     mesh=$(sed -n 's/^full mesh discovery: //p' "$f")
     routing=$(sed -n 's/^routing converged: //p' "$f")
     spread=$(awk '/^qaul-/ && $3 != "-" {gsub(/s/,"",$3); if (min==""||$3<min) min=$3; if ($3>max) max=$3} END {if (min=="") print "n/a"; else print min"-"max"s"}' "$f")
