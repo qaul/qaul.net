@@ -52,6 +52,7 @@ export 'l10n/qaul_components_localizations.dart';
 export 'models/account.dart';
 export 'models/chat_message.dart';
 export 'models/chat_user.dart';
+export 'styles/chat_surface_shadows.dart';
 export 'styles/qaul_app_theme.dart';
 export 'styles/qaul_color_sheet.dart';
 export 'styles/qaul_emoji.dart';

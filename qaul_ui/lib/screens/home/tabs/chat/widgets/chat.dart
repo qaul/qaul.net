@@ -1019,6 +1019,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     final chatBackgroundColor = QaulColorSheet(
       Theme.of(context).brightness,
     ).background;
+    final chatHeaderHeight =
+        MediaQuery.paddingOf(context).top + kChatHeaderToolbarHeight;
     final showBackButton = isMobileChat;
     _chatRenderMode = resolveChatRenderMode(room);
     final isLoadingMessages = room.messages == null;
@@ -1029,180 +1031,193 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     return Scaffold(
       backgroundColor: chatBackgroundColor,
       resizeToAvoidBottomInset: true,
-      body: Column(
+      body: Stack(
         children: [
-          _buildChatHeader(
-            room: room,
-            l10n: l10n,
-            directPeer: directPeer,
-            closeChat: closeChat,
-            showBackButton: showBackButton,
-          ),
-          Expanded(
-            child: CronTaskDecorator(
-              callback: () => refreshCurrentRoom(),
-              schedule: const Duration(milliseconds: 300),
-              child: SafeArea(
-                top: false,
-                bottom: false,
-                child: Chat(
-                  key: ValueKey(
-                    'chat-list-${room.idBase58}-${isLoadingMessages ? 'loading' : 'loaded'}',
-                  ),
-                  showUserAvatars: false,
-                  showUserNames: false,
-                  user: user.toInternalUser(),
-                  useTopSafeAreaInset: false,
-                  dateHeaderThreshold: const Duration(days: 365).inMilliseconds,
-                  groupMessagesThreshold: const Duration(
-                    days: 365,
-                  ).inMilliseconds,
-                  messages: chatMessages,
-                  onSendPressed: sendMessage,
-                  inputOptions: const InputOptions(
-                    sendButtonVisibilityMode: SendButtonVisibilityMode.always,
-                  ),
-                  avatarBuilder: (id) {
-                    var user = room.members.firstWhereOrNull(
-                      (u) => id.id == u.idBase58,
-                    );
-                    if (user == null) return const SizedBox();
-                    return QaulAvatar.small(user: user, badgeEnabled: false);
-                  },
-                  emptyState: isLoadingMessages
-                      ? const Center(child: QaulLoadingIndicator())
-                      : Center(child: Text(l10n.chatEmptyState)),
-                  bubbleBuilder: _bubbleBuilder,
-                  systemMessageBuilder: _buildSystemMessage,
-                  customBottomWidget: _ChatTextFooter(
+          Positioned.fill(
+            child: Padding(
+              padding: EdgeInsets.only(top: chatHeaderHeight),
+              child: CronTaskDecorator(
+                callback: () => refreshCurrentRoom(),
+                schedule: const Duration(milliseconds: 300),
+                child: SafeArea(
+                  top: false,
+                  bottom: false,
+                  child: Chat(
                     key: ValueKey(
-                      '${room.idBase58}:${_initialComposerText ?? ''}',
+                      'chat-list-${room.idBase58}-${isLoadingMessages ? 'loading' : 'loaded'}',
                     ),
-                    isDisabled: room.status != ChatRoomStatus.active,
-                    disabledMessage:
-                        room.status != ChatRoomStatus.inviteAccepted
-                        ? null
-                        : 'Please wait for the admin to confirm your acceptance to send messages',
-                    hintText: _chatRenderMode == ChatRenderMode.group
-                        ? l10n.groupChatMessageHint
-                        : l10n.securePrivateMessageHint,
-                    mentionSuggestions: _chatRenderMode == ChatRenderMode.group
-                        ? [
-                            for (final member in room.members)
-                              if (member.idBase58 != user.idBase58 &&
-                                  member.name.trim().isNotEmpty)
-                                ChatMentionSuggestion(
-                                  id: member.idBase58,
-                                  label: member.name,
-                                ),
-                            const ChatMentionSuggestion(
-                              id: 'all',
-                              label: 'all',
-                              isEveryone: true,
-                            ),
-                          ]
-                        : const [],
-                    initialText: _initialComposerText,
+                    showUserAvatars: false,
+                    showUserNames: false,
+                    user: user.toInternalUser(),
+                    useTopSafeAreaInset: false,
+                    dateHeaderThreshold: const Duration(
+                      days: 365,
+                    ).inMilliseconds,
+                    groupMessagesThreshold: const Duration(
+                      days: 365,
+                    ).inMilliseconds,
+                    messages: chatMessages,
                     onSendPressed: sendMessage,
-                    onSendAudioPressed: Platform.isLinux
-                        ? null
-                        : () => _openAudioRecorder(room),
-                    onPickImagePressed: () => _openPhotoPicker(room),
-                    onAttachmentPressed: () => _openAttachmentPicker(room),
-                  ),
-                  onMessageLongPress: _handleMessageLongPress,
-                  onMessageTap: (context, message) async {
-                    if (message is! types.FileMessage ||
-                        _isReceivingFile(message)) {
-                      return;
-                    }
-                    if (Platform.isIOS || Platform.isAndroid) {
-                      OpenFilex.open(message.uri);
-                      return;
-                    }
-
-                    final file = Uri.file(message.uri);
-
-                    final parentDirectory = File.fromUri(file).parent.uri;
-
-                    for (final uri in [file, parentDirectory]) {
-                      if (await canLaunchUrl(uri)) {
-                        launchUrl(uri);
+                    inputOptions: const InputOptions(
+                      sendButtonVisibilityMode: SendButtonVisibilityMode.always,
+                    ),
+                    avatarBuilder: (id) {
+                      var user = room.members.firstWhereOrNull(
+                        (u) => id.id == u.idBase58,
+                      );
+                      if (user == null) return const SizedBox();
+                      return QaulAvatar.small(user: user, badgeEnabled: false);
+                    },
+                    emptyState: isLoadingMessages
+                        ? const Center(child: QaulLoadingIndicator())
+                        : Center(child: Text(l10n.chatEmptyState)),
+                    bubbleBuilder: _bubbleBuilder,
+                    systemMessageBuilder: _buildSystemMessage,
+                    customBottomWidget: _ChatTextFooter(
+                      key: ValueKey(
+                        '${room.idBase58}:${_initialComposerText ?? ''}',
+                      ),
+                      isDisabled: room.status != ChatRoomStatus.active,
+                      disabledMessage:
+                          room.status != ChatRoomStatus.inviteAccepted
+                          ? null
+                          : 'Please wait for the admin to confirm your acceptance to send messages',
+                      hintText: _chatRenderMode == ChatRenderMode.group
+                          ? l10n.groupChatMessageHint
+                          : l10n.securePrivateMessageHint,
+                      mentionSuggestions:
+                          _chatRenderMode == ChatRenderMode.group
+                          ? [
+                              for (final member in room.members)
+                                if (member.idBase58 != user.idBase58 &&
+                                    member.name.trim().isNotEmpty)
+                                  ChatMentionSuggestion(
+                                    id: member.idBase58,
+                                    label: member.name,
+                                  ),
+                              const ChatMentionSuggestion(
+                                id: 'all',
+                                label: 'all',
+                                isEveryone: true,
+                              ),
+                            ]
+                          : const [],
+                      initialText: _initialComposerText,
+                      onSendPressed: sendMessage,
+                      onSendAudioPressed: Platform.isLinux
+                          ? null
+                          : () => _openAudioRecorder(room),
+                      onPickImagePressed: () => _openPhotoPicker(room),
+                      onAttachmentPressed: () => _openAttachmentPicker(room),
+                    ),
+                    onMessageLongPress: _handleMessageLongPress,
+                    onMessageTap: (context, message) async {
+                      if (message is! types.FileMessage ||
+                          _isReceivingFile(message)) {
                         return;
                       }
-                    }
-                  },
-                  textMessageBuilder:
-                      (
-                        message, {
-                        required int messageWidth,
-                        required bool showName,
-                      }) {
-                        return TextMessage(
+                      if (Platform.isIOS || Platform.isAndroid) {
+                        OpenFilex.open(message.uri);
+                        return;
+                      }
+
+                      final file = Uri.file(message.uri);
+
+                      final parentDirectory = File.fromUri(file).parent.uri;
+
+                      for (final uri in [file, parentDirectory]) {
+                        if (await canLaunchUrl(uri)) {
+                          launchUrl(uri);
+                          return;
+                        }
+                      }
+                    },
+                    textMessageBuilder:
+                        (
+                          message, {
+                          required int messageWidth,
+                          required bool showName,
+                        }) {
+                          return TextMessage(
+                            message: message,
+                            usePreviewData: true,
+                            hideBackgroundOnEmojiMessages: true,
+                            showName: false,
+                            emojiEnlargementBehavior:
+                                EmojiEnlargementBehavior.multi,
+                          );
+                        },
+                    fileMessageBuilder: (message, {required int messageWidth}) {
+                      return SizedBox(
+                        width: messageWidth.toDouble(),
+                        child: FileMessageWidget(
                           message: message,
-                          usePreviewData: true,
-                          hideBackgroundOnEmojiMessages: true,
-                          showName: false,
-                          emojiEnlargementBehavior:
-                              EmojiEnlargementBehavior.multi,
-                        );
-                      },
-                  fileMessageBuilder: (message, {required int messageWidth}) {
-                    return SizedBox(
-                      width: messageWidth.toDouble(),
-                      child: FileMessageWidget(
-                        message: message,
-                        isDefaultUser: message.author.id == user.idBase58,
+                          isDefaultUser: message.author.id == user.idBase58,
+                        ),
+                      );
+                    },
+                    imageMessageBuilder:
+                        (message, {required int messageWidth}) {
+                          return ImageMessageWidget(
+                            message: message,
+                            messageWidth: messageWidth,
+                            isDefaultUser: message.author.id == user.idBase58,
+                          );
+                        },
+                    audioMessageBuilder:
+                        (message, {required int messageWidth}) {
+                          return AudioMessageWidget(
+                            message: message,
+                            messageWidth: messageWidth,
+                            isDefaultUser: message.author.id == user.idBase58,
+                          );
+                        },
+                    customDateHeaderText: (dt) => DateFormat(
+                      'EEEE, MMMM d, yyyy',
+                      'en',
+                    ).format(dt.toLocal()),
+                    theme: DefaultChatTheme(
+                      userAvatarNameColors: [
+                        colorGenerationStrategy(
+                          directPeer?.idBase58 ??
+                              otherUser?.idBase58 ??
+                              room.idBase58,
+                        ),
+                      ],
+                      backgroundColor: chatBackgroundColor,
+                      messageInsetsVertical: 0,
+                      messageInsetsHorizontal: 0,
+                      dateDividerTextStyle: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w300,
+                        height: 1.2,
+                        color: Colors.white,
                       ),
-                    );
-                  },
-                  imageMessageBuilder: (message, {required int messageWidth}) {
-                    return ImageMessageWidget(
-                      message: message,
-                      messageWidth: messageWidth,
-                      isDefaultUser: message.author.id == user.idBase58,
-                    );
-                  },
-                  audioMessageBuilder: (message, {required int messageWidth}) {
-                    return AudioMessageWidget(
-                      message: message,
-                      messageWidth: messageWidth,
-                      isDefaultUser: message.author.id == user.idBase58,
-                    );
-                  },
-                  customDateHeaderText: (dt) => DateFormat(
-                    'EEEE, MMMM d, yyyy',
-                    'en',
-                  ).format(dt.toLocal()),
-                  theme: DefaultChatTheme(
-                    userAvatarNameColors: [
-                      colorGenerationStrategy(
-                        directPeer?.idBase58 ??
-                            otherUser?.idBase58 ??
-                            room.idBase58,
+                      bubbleMargin: EdgeInsets.zero,
+                      sentMessageBodyTextStyle: const TextStyle(
+                        fontSize: 17,
+                        color: Colors.white,
                       ),
-                    ],
-                    backgroundColor: chatBackgroundColor,
-                    messageInsetsVertical: 0,
-                    messageInsetsHorizontal: 0,
-                    dateDividerTextStyle: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w300,
-                      height: 1.2,
-                      color: Colors.white,
-                    ),
-                    bubbleMargin: EdgeInsets.zero,
-                    sentMessageBodyTextStyle: const TextStyle(
-                      fontSize: 17,
-                      color: Colors.white,
-                    ),
-                    receivedMessageBodyTextStyle: const TextStyle(
-                      fontSize: 17,
-                      color: Colors.black,
+                      receivedMessageBodyTextStyle: const TextStyle(
+                        fontSize: 17,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                 ),
               ),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _buildChatHeader(
+              room: room,
+              l10n: l10n,
+              directPeer: directPeer,
+              closeChat: closeChat,
+              showBackButton: showBackButton,
             ),
           ),
         ],
