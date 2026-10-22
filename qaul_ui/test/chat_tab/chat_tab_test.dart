@@ -129,6 +129,7 @@ void main() {
     ChatRoom room, {
     User? otherUser,
     MessageShareService? messageShareService,
+    ForwardAttachment? initialForwardAttachment,
   }) async {
     final wut = ProviderScope(
       overrides: [
@@ -146,12 +147,102 @@ void main() {
           defaultUser,
           otherUser: otherUser,
           messageShareService: messageShareService,
+          initialForwardAttachment: initialForwardAttachment,
         ),
       ),
     );
 
     await tester.pumpWidget(wut);
     await tester.pump();
+  }
+
+  void expectSingleLineFileName(WidgetTester tester, String name) {
+    final finder = find.byWidgetPredicate(
+      (widget) => widget is Text && widget.semanticsLabel == name,
+    );
+    expect(finder, findsOneWidget);
+    final text = tester.widget<Text>(finder);
+    expect(text.maxLines, 1);
+    expect(text.data, endsWith('.pdf'));
+    if (name.length >= 120) {
+      expect(text.data, contains('…'));
+    } else {
+      expect(text.data, name);
+    }
+    final context = tester.element(finder);
+    final painter = TextPainter(
+      text: TextSpan(text: text.data, style: text.style),
+      textScaler: MediaQuery.textScalerOf(context),
+      textDirection: Directionality.of(context),
+    )..layout();
+    expect(painter.computeLineMetrics(), hasLength(1));
+    expect(
+      painter.width,
+      lessThanOrEqualTo(tester.getSize(finder).width + 0.01),
+    );
+    painter.dispose();
+    expect(tester.takeException(), isNull);
+  }
+
+  for (final name in ['a.pdf', '${'a' * 116}.pdf']) {
+    for (final width in [390.0, 1280.0]) {
+      testWidgets(
+        'send sheet fits file name (${name.length} characters, $width)',
+        (tester) async {
+          tester.view.physicalSize = Size(width, 844);
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          final directory = Directory.systemTemp.createTempSync(
+            'qaul-filename-test-',
+          );
+          final file = File('${directory.path}/attachment.pdf')
+            ..writeAsStringSync('file');
+          addTearDown(() => directory.deleteSync(recursive: true));
+          await pumpChatScreen(
+            tester,
+            buildDirectChat(),
+            otherUser: otherUser,
+            initialForwardAttachment: ForwardAttachment(
+              path: file.path,
+              name: name,
+            ),
+          );
+          await tester.pumpAndSettle();
+          expectSingleLineFileName(tester, name);
+        },
+      );
+    }
+
+    for (final scale in [1.0, 2.5]) {
+      testWidgets(
+        'file bubble fits file name (${name.length} characters, ${scale}x)',
+        (tester) async {
+          await tester.pumpWidget(
+            materialAppWithLocalizations(
+              MediaQuery(
+                data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+                child: Center(
+                  child: SizedBox(
+                    width: scale == 1 ? 272 : 392,
+                    child: FileMessageWidget(
+                      message: types.FileMessage(
+                        id: 'test-file',
+                        author: types.User(id: otherUser.idBase58),
+                        name: name,
+                        uri: '/unused.pdf',
+                        size: 10,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          expectSingleLineFileName(tester, name);
+        },
+      );
+    }
   }
 
   testWidgets('direct chat renders ChatHeader and opens peer details', (
