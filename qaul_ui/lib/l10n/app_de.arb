@@ -6,6 +6,7 @@
     "backButtonTooltip": "Zurück",
     "sendTooltip": "Senden",
     "sendFileTooltip": "Datei Senden",
+    "sendPhotoTooltip": "Foto senden",
     "sendAudioTooltip": "Nehmen Sie eine Audionachricht auf",
     "start": "Start",
     "createUserAccount": "Profil erstellen",

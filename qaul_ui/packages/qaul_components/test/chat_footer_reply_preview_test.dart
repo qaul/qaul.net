@@ -142,11 +142,7 @@ void main() {
   });
 
   testWidgets('hides attachment actions without callbacks', (tester) async {
-    await tester.pumpWidget(
-      app(
-        controller: TextEditingController(),
-      ),
-    );
+    await tester.pumpWidget(app(controller: TextEditingController()));
 
     expect(find.byTooltip('Voice message'), findsNothing);
     expect(find.byTooltip('Photo'), findsNothing);
@@ -182,7 +178,7 @@ void main() {
       ),
     );
 
-    expect(find.byTooltip('More'), findsNothing);
+    expect(find.byTooltip('More'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Voice message'));
     await tester.tap(find.byTooltip('Photo'));
@@ -191,35 +187,61 @@ void main() {
     expect(cameraCount, 1);
   });
 
-  testWidgets('opens attachment menu from plus action', (tester) async {
-    var attachmentCount = 0;
+  testWidgets(
+    'opens voice, photo and attachment actions from plus while typing',
+    (tester) async {
+      var voiceCount = 0;
+      var photoCount = 0;
+      var attachmentCount = 0;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Align(
-            alignment: Alignment.bottomCenter,
-            child: ChatFooter(
-              placeholder: 'Secure private message',
-              onAttachmentPressed: () => attachmentCount++,
-              attachmentsTooltip: 'More',
-              applyBottomSafeArea: false,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Align(
+              alignment: Alignment.bottomCenter,
+              child: ChatFooter(
+                placeholder: 'Secure private message',
+                controller: TextEditingController(text: 'A draft'),
+                onVoicePressed: () => voiceCount++,
+                onCameraPressed: () => photoCount++,
+                onAttachmentPressed: () => attachmentCount++,
+                voiceTooltip: 'Voice message',
+                cameraTooltip: 'Photo',
+                attachmentsTooltip: 'More',
+                applyBottomSafeArea: false,
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    await tester.tap(find.byKey(const ValueKey('chat-footer-more')));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('chat-footer-more')));
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('attachment')), findsOneWidget);
-    expect(find.byKey(const ValueKey('emoji')), findsNothing);
-    expect(find.byKey(const ValueKey('location')), findsNothing);
+      expect(find.byKey(const ValueKey('voice')), findsOneWidget);
+      expect(find.byKey(const ValueKey('photo')), findsOneWidget);
+      expect(find.byKey(const ValueKey('attachment')), findsOneWidget);
+      expect(find.byKey(const ValueKey('emoji')), findsNothing);
+      expect(find.byKey(const ValueKey('location')), findsNothing);
 
-    await tester.tap(find.byKey(const ValueKey('attachment')));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('voice')));
+      await tester.pumpAndSettle();
+      expect(voiceCount, 1);
+      expect(find.byKey(const ValueKey('voice')), findsNothing);
 
-    expect(attachmentCount, 1);
-  });
+      await tester.tap(find.byKey(const ValueKey('chat-footer-more')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('photo')));
+      await tester.pumpAndSettle();
+      expect(photoCount, 1);
+      expect(find.byKey(const ValueKey('photo')), findsNothing);
+
+      await tester.tap(find.byKey(const ValueKey('chat-footer-more')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('attachment')));
+      await tester.pumpAndSettle();
+
+      expect(attachmentCount, 1);
+    },
+  );
 }

@@ -6,6 +6,7 @@
     "backButtonTooltip": "Назад",
     "sendTooltip": "Отправить",
     "sendFileTooltip": "Отправить файл",
+    "sendPhotoTooltip": "Отправить фото",
     "sendAudioTooltip": "Записать аудиосообщение",  
     "start": "Пуск",
     "createUserAccount": "Создать профиль пользователя",

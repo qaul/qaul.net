@@ -24,6 +24,10 @@ const double _kFieldInputVertical = 12;
 const double _kFieldFontSize = 17;
 const double _kIconWidth = 15;
 const double _kIconHeight = 20;
+const double _kVoiceAssetWidth = 14;
+const double _kVoiceAssetHeight = 24;
+const double _kPhotoAssetWidth = 22;
+const double _kPhotoAssetHeight = 20.2;
 const double _kSendAssetWidth = 26.25;
 const double _kSendAssetHeight = 22.5;
 const double _kPlusCircleSize = 28;
@@ -225,9 +229,7 @@ class _ChatFooterState extends State<ChatFooter> {
   void initState() {
     super.initState();
     _ownedController = TextEditingController();
-    _isAttachmentMenuOpen =
-        widget.initialAttachmentMenuOpen &&
-        _effectiveController.text.trim().isEmpty;
+    _isAttachmentMenuOpen = widget.initialAttachmentMenuOpen;
     _effectiveController.addListener(_handleTextChanged);
     _inputFocusNode = FocusNode()..addListener(_handleFocusChanged);
     _attachmentActionsSignature = _attachmentActionSignature(
@@ -328,6 +330,28 @@ class _ChatFooterState extends State<ChatFooter> {
 
   List<_FooterAttachmentAction> _attachmentActions() {
     return [
+      if (widget.onVoicePressed != null)
+        _FooterAttachmentAction(
+          id: 'voice',
+          icon: const _ChatFooterSvgIcon(
+            asset: _kMicrophoneSvg,
+            width: _kVoiceAssetWidth,
+            height: _kVoiceAssetHeight,
+          ),
+          tooltip: widget.voiceTooltip,
+          onPressed: () => _handleAttachmentAction(widget.onVoicePressed),
+        ),
+      if (widget.onCameraPressed != null)
+        _FooterAttachmentAction(
+          id: 'photo',
+          icon: const _ChatFooterSvgIcon(
+            asset: _kPhotosSvg,
+            width: _kPhotoAssetWidth,
+            height: _kPhotoAssetHeight,
+          ),
+          tooltip: widget.cameraTooltip,
+          onPressed: () => _handleAttachmentAction(widget.onCameraPressed),
+        ),
       if (widget.onAttachmentPressed != null ||
           widget.onMoreAttachmentsPressed != null)
         _FooterAttachmentAction(
@@ -400,7 +424,9 @@ class _ChatFooterState extends State<ChatFooter> {
             focusNode: _inputFocusNode,
             textFieldKey: _composerTextFieldKey,
             onSendPressed: _handleSend,
-            onMorePressed: hasAttachmentMenu ? _handleMoreAttachmentsPressed : null,
+            onMorePressed: hasAttachmentMenu
+                ? _handleMoreAttachmentsPressed
+                : null,
           ),
           if (_isAttachmentMenuOpen) ...[
             const SizedBox(height: _kAttachmentMenuTopSpacing),
