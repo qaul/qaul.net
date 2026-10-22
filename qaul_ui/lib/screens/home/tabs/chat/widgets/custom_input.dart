@@ -112,9 +112,7 @@ class _ChatTextFooterState extends State<_ChatTextFooter> {
       final character = text[index];
       if (character == '@') {
         final validPrefix = index == 0 || _isMentionBoundary(text[index - 1]);
-        return validPrefix
-            ? _ActiveMention(start: index, end: cursor)
-            : null;
+        return validPrefix ? _ActiveMention(start: index, end: cursor) : null;
       }
       if (_isMentionBoundary(character)) return null;
       index -= 1;
@@ -192,7 +190,7 @@ class _ChatTextFooterState extends State<_ChatTextFooter> {
           : widget.onAttachmentPressed,
       sendTooltip: AppLocalizations.of(context)!.sendTooltip,
       voiceTooltip: AppLocalizations.of(context)!.sendAudioTooltip,
-      cameraTooltip: AppLocalizations.of(context)!.sendFileTooltip,
+      cameraTooltip: AppLocalizations.of(context)!.sendPhotoTooltip,
       attachmentsTooltip: AppLocalizations.of(context)!.sendFileTooltip,
     );
 

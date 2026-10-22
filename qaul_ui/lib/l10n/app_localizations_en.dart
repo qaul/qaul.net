@@ -24,6 +24,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sendFileTooltip => 'Send File';
 
   @override
+  String get sendPhotoTooltip => 'Send photo';
+
+  @override
   String get sendAudioTooltip => 'Record audio message';
 
   @override

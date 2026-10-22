@@ -6,6 +6,7 @@
   "backButtonTooltip": "بازگشت",
   "sendTooltip": "ارسال",
   "sendFileTooltip": "ارسال پرونده",
+  "sendPhotoTooltip": "ارسال عکس",
   "sendAudioTooltip": "ضبط پیام صوتی",
   "start": "شروع",
   "createUserAccount": "ایجاد نمایه کاربر",

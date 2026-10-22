@@ -151,6 +151,12 @@ abstract class AppLocalizations {
   /// **'Send File'**
   String get sendFileTooltip;
 
+  /// No description provided for @sendPhotoTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Send photo'**
+  String get sendPhotoTooltip;
+
   /// No description provided for @sendAudioTooltip.
   ///
   /// In en, this message translates to:
