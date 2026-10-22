@@ -16,21 +16,21 @@ const String _kSendSvg = 'assets/icons/send.svg';
 const String _kEmoticonSvg = 'assets/icons/emoticon.svg';
 const String _kGeolocationSvg = 'assets/icons/geolocation.svg';
 
-const double _kHorizontalPadding = 16;
+const double _kFooterHorizontalPadding = 20;
 const double _kTopPadding = 12;
 const double _kBottomPadding = 24;
 const double _kFieldInputHorizontal = 16;
 const double _kFieldInputVertical = 12;
 const double _kFieldFontSize = 17;
-const double _kIconWidth = 15;
-const double _kIconHeight = 20;
+const double _kMicrophoneWidth = 14;
+const double _kMicrophoneHeight = 24;
+const double _kCameraWidth = 22;
+const double _kCameraHeight = 20.2;
 const double _kSendAssetWidth = 26.25;
 const double _kSendAssetHeight = 22.5;
-const double _kPlusCircleSize = 28;
-const double _kPlusAssetSize = 24;
-const double _kTextActionSpacing = 20;
-const double _kAttachmentIconSpacing = 24;
-const double _kActionButtonMinSize = 40;
+const double _kPlusAssetSize = 25;
+const double _kActionSlotSize = 45;
+const double _kActionSlotPitch = 44;
 const double _kAttachmentMenuTopSpacing = 12;
 const double _kReplyPreviewBottomSpacing = 12;
 const double _kAttachmentMenuItemMaxSize = 45;
@@ -39,7 +39,6 @@ const double _kAttachmentMenuArrowSize = 35;
 const double _kAttachmentMenuItemRadius = 10;
 const double _kAttachmentMenuItemSpacing = 20;
 const double _kTypedActionRowBottomPadding = 4;
-const double _kTypedActionRowRightPadding = 16;
 const int _kAttachmentMenuMaxVisibleActions = 6;
 const int _kAttachmentMenuMinPaginatedSlots = 3;
 const _AttachmentMenuLayoutConfig _kAttachmentMenuLayout =
@@ -376,9 +375,9 @@ class _ChatFooterState extends State<ChatFooter> {
 
     final inner = Padding(
       padding: const EdgeInsets.fromLTRB(
-        _kHorizontalPadding,
+        _kFooterHorizontalPadding,
         _kTopPadding,
-        _kHorizontalPadding,
+        _kFooterHorizontalPadding,
         _kBottomPadding,
       ),
       child: Column(
@@ -400,7 +399,9 @@ class _ChatFooterState extends State<ChatFooter> {
             focusNode: _inputFocusNode,
             textFieldKey: _composerTextFieldKey,
             onSendPressed: _handleSend,
-            onMorePressed: hasAttachmentMenu ? _handleMoreAttachmentsPressed : null,
+            onMorePressed: hasAttachmentMenu
+                ? _handleMoreAttachmentsPressed
+                : null,
           ),
           if (_isAttachmentMenuOpen) ...[
             const SizedBox(height: _kAttachmentMenuTopSpacing),
@@ -463,11 +464,9 @@ class _ComposerPill extends StatelessWidget {
     final text = controller.text;
     if (text.contains('\n') || text.contains('\r')) return true;
 
-    const inlineActionsWidth =
-        _kPlusCircleSize +
-        _kTextActionSpacing +
-        _kActionButtonMinSize +
-        _kHorizontalPadding;
+    final inlineActionsWidth = onMorePressed == null
+        ? _kActionSlotSize
+        : _kActionSlotPitch + _kActionSlotSize;
     final inlineTextWidth =
         maxWidth -
         inlineActionsWidth -
@@ -487,6 +486,7 @@ class _ComposerPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
+      key: const ValueKey('chat-footer-composer-pill'),
       decoration: BoxDecoration(
         color: fillColor,
         borderRadius: BorderRadius.circular(_kInputBorderRadius),
@@ -518,7 +518,6 @@ class _ComposerPill extends StatelessWidget {
                       ),
                       Padding(
                         padding: const EdgeInsets.only(
-                          right: _kTypedActionRowRightPadding,
                           bottom: _kTypedActionRowBottomPadding,
                         ),
                         child: Align(
@@ -546,16 +545,11 @@ class _ComposerPill extends StatelessWidget {
                       ),
                     ),
                     if (hasText)
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          right: _kHorizontalPadding,
-                        ),
-                        child: _TextActions(
-                          onMore: onMorePressed,
-                          onPressed: onSendPressed,
-                          attachmentsTooltip: footer.attachmentsTooltip,
-                          tooltip: footer.sendTooltip,
-                        ),
+                      _TextActions(
+                        onMore: onMorePressed,
+                        onPressed: onSendPressed,
+                        attachmentsTooltip: footer.attachmentsTooltip,
+                        tooltip: footer.sendTooltip,
                       )
                     else
                       _AttachmentActions(
@@ -643,17 +637,12 @@ class _TextActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasMoreAction = onMore != null;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (hasMoreAction) ...[
-          _PlusInCircleButton(onPressed: onMore, tooltip: attachmentsTooltip),
-          const SizedBox(width: _kTextActionSpacing),
-        ],
-        _SendButton(onPressed: onPressed, tooltip: tooltip),
-      ],
-    );
+    final actions = [
+      if (onMore != null)
+        _PlusInCircleButton(onPressed: onMore, tooltip: attachmentsTooltip),
+      _SendButton(onPressed: onPressed, tooltip: tooltip),
+    ];
+    return _ActionSlotGrid(actions: actions);
   }
 }
 
@@ -667,17 +656,19 @@ class _SendButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return _wrapTooltip(
       tooltip,
-      IconButton(
+      Material(
+        color: Colors.transparent,
         key: const ValueKey('chat-footer-send'),
-        onPressed: onPressed,
-        icon: const _ChatFooterSvgIcon(
-          asset: _kSendSvg,
-          width: _kSendAssetWidth,
-          height: _kSendAssetHeight,
+        child: InkWell(
+          onTap: onPressed,
+          child: const Center(
+            child: _ChatFooterSvgIcon(
+              asset: _kSendSvg,
+              width: _kSendAssetWidth,
+              height: _kSendAssetHeight,
+            ),
+          ),
         ),
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-        visualDensity: VisualDensity.compact,
       ),
     );
   }
@@ -708,12 +699,18 @@ class _AttachmentActions extends StatelessWidget {
           asset: _kMicrophoneSvg,
           onPressed: onVoice,
           tooltip: voiceTooltip,
+          key: const ValueKey('chat-footer-voice'),
+          width: _kMicrophoneWidth,
+          height: _kMicrophoneHeight,
         ),
       if (onCamera != null)
         _svgIconButton(
           asset: _kPhotosSvg,
           onPressed: onCamera,
           tooltip: cameraTooltip,
+          key: const ValueKey('chat-footer-camera'),
+          width: _kCameraWidth,
+          height: _kCameraHeight,
         ),
       if (onMore != null)
         _PlusInCircleButton(onPressed: onMore, tooltip: attachmentsTooltip),
@@ -721,33 +718,58 @@ class _AttachmentActions extends StatelessWidget {
 
     if (actions.isEmpty) return const SizedBox.shrink();
 
-    return Padding(
-      padding: const EdgeInsets.only(right: _kHorizontalPadding),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (var index = 0; index < actions.length; index++) ...[
-            if (index > 0) const SizedBox(width: _kAttachmentIconSpacing),
-            actions[index],
-          ],
-        ],
-      ),
-    );
+    return _ActionSlotGrid(actions: actions);
   }
 
   Widget _svgIconButton({
     required String asset,
     required VoidCallback? onPressed,
+    required Key key,
+    required double width,
+    required double height,
     String? tooltip,
   }) {
     return _wrapTooltip(
       tooltip,
-      IconButton(
-        onPressed: onPressed,
-        icon: _ChatFooterSvgIcon(asset: asset),
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-        visualDensity: VisualDensity.compact,
+      Material(
+        color: Colors.transparent,
+        child: InkWell(
+          key: key,
+          onTap: onPressed,
+          child: Center(
+            child: _ChatFooterSvgIcon(
+              asset: asset,
+              width: width,
+              height: height,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionSlotGrid extends StatelessWidget {
+  const _ActionSlotGrid({required this.actions});
+
+  final List<Widget> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    if (actions.isEmpty) return const SizedBox.shrink();
+    return SizedBox(
+      width: _kActionSlotSize + (actions.length - 1) * _kActionSlotPitch,
+      height: _kActionSlotSize,
+      child: Stack(
+        children: [
+          for (var index = 0; index < actions.length; index++)
+            Positioned(
+              right: (actions.length - 1 - index) * _kActionSlotPitch,
+              width: _kActionSlotSize,
+              height: _kActionSlotSize,
+              child: actions[index],
+            ),
+        ],
       ),
     );
   }
@@ -962,8 +984,8 @@ class _AttachmentSubmenuButton extends StatelessWidget {
 class _ChatFooterSvgIcon extends StatelessWidget {
   const _ChatFooterSvgIcon({
     required this.asset,
-    this.width = _kIconWidth,
-    this.height = _kIconHeight,
+    required this.width,
+    required this.height,
   });
 
   final String asset;
@@ -998,15 +1020,11 @@ class _PlusInCircleButton extends StatelessWidget {
           key: const ValueKey('chat-footer-more'),
           onTap: onPressed,
           customBorder: const CircleBorder(),
-          child: const SizedBox(
-            width: _kPlusCircleSize,
-            height: _kPlusCircleSize,
-            child: Center(
-              child: _ChatFooterSvgIcon(
-                asset: _kPlusSvg,
-                width: _kPlusAssetSize,
-                height: _kPlusAssetSize,
-              ),
+          child: const Center(
+            child: _ChatFooterSvgIcon(
+              asset: _kPlusSvg,
+              width: _kPlusAssetSize,
+              height: _kPlusAssetSize,
             ),
           ),
         ),
