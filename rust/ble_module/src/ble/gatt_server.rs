@@ -2,10 +2,8 @@
 //! go out over one IO pipe per subscribed phone.
 
 use bluer::{
-    Adapter, Address, gatt::{
-        CharacteristicWriter, local::{
-            Application, ApplicationHandle, Characteristic, CharacteristicControl, CharacteristicControlEvent, CharacteristicNotify, CharacteristicNotifyMethod, CharacteristicRead, CharacteristicWrite, CharacteristicWriteMethod, Service, characteristic_control,
-        },
+    Adapter, gatt::local::{
+        Application, ApplicationHandle, Characteristic, CharacteristicControl, CharacteristicControlEvent, CharacteristicNotify, CharacteristicNotifyMethod, CharacteristicRead, CharacteristicWrite, CharacteristicWriteMethod, Service, characteristic_control,
     },
 };
 use bytes::Bytes;
@@ -16,7 +14,7 @@ use tokio::{
 
 use crate::ble::{
     ble_uuids::{main_service_uuid, msg_char},
-    radio::RadioEvent,
+    radio::{send_frames, PeerKey, RadioEvent},
 };
 
 use super::ble_uuids::{psm_char, read_char};
@@ -73,8 +71,8 @@ fn msg_characteristic(events: mpsc::Sender<RadioEvent>) -> (Characteristic, Char
                     let events = events.clone();
                     async move {
                         if !bytes.is_empty() {
-                            let address = req.device_address;
-                            let _ = events.send(RadioEvent::FrameReceived { address, bytes }).await;
+                            let peer = PeerKey::peripheral(req.device_address);
+                            let _ = events.send(RadioEvent::FrameReceived { peer, bytes }).await;
                         }
                         Ok(())
                     }
@@ -128,27 +126,18 @@ async fn run_control(mut control: CharacteristicControl, events: mpsc::Sender<Ra
             // Only sent for CharacteristicWriteMethod::Io, writes use a callback.
             CharacteristicControlEvent::Write(_) => {}
             CharacteristicControlEvent::Notify(writer) => {
-                let address = writer.device_address();
+                let peer = PeerKey::peripheral(writer.device_address());
                 let (outbox, outbox_rx) = mpsc::channel(64);
                 let subscribed = RadioEvent::Subscribed {
-                    address,
+                    peer,
                     mtu: writer.mtu(),
                     outbox,
                 };
                 if events.send(subscribed).await.is_err() {
                     break;
                 }
-                tokio::task::spawn_local(send_frames(address, writer, outbox_rx, events.clone()));
+                tokio::task::spawn_local(send_frames(peer, writer, outbox_rx, events.clone()));
             }
-        }
-    }
-}
-
-async fn send_frames(address: Address, writer: CharacteristicWriter, mut outbox_rx: mpsc::Receiver<Vec<u8>>, events: mpsc::Sender<RadioEvent>) {
-    while let Some(frame) = outbox_rx.recv().await {
-        if writer.send(&frame).await.is_err() {
-            let _ = events.send(RadioEvent::Gone { address }).await; // tell the engine the phone is gone
-            break;
         }
     }
 }

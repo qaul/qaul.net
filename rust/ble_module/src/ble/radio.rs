@@ -4,6 +4,7 @@
 use crate::{
     ble::{
         ble_uuids::{main_service_uuid, QAUL_ID_ADVERT_BYTES, QAUL_MANUFACTURER_ID},
+        gatt_client,
         gatt_server::serve,
         scanner::scan,
     },
@@ -15,7 +16,7 @@ use ble_protocol::{
 };
 use bluer::{
     adv::{Advertisement, AdvertisementHandle},
-    gatt::local::ApplicationHandle,
+    gatt::{local::ApplicationHandle, CharacteristicWriter},
     Adapter, Address, Session,
 };
 use bytes::Bytes;
@@ -24,7 +25,7 @@ use std::{
     error::Error,
     time::Duration,
 };
-use tokio::sync::mpsc;
+use tokio::sync::{mpsc, watch};
 
 /// Requested advert power. Mirrors Android's TX_POWER_HIGH/MAX, the controller clamps it
 const ADVERT_TX_POWER_DBM: i16 = 20;
@@ -38,11 +39,11 @@ const ADVERT_INTERVAL: Duration = Duration::from_millis(100);
 pub enum RadioEvent {
     /// The phone wrote one frame to MSG_CHAR. Can arrive before `Subscribed`,
     /// because Android writes SEND_ID first.
-    FrameReceived { address: Address, bytes: Vec<u8> },
+    FrameReceived { peer: PeerKey, bytes: Vec<u8> },
     /// The phone subscribed to notifications on MSG_CHAR. Frames sent on
     /// `outbox` are notified to it by its sender task.
     Subscribed {
-        address: Address,
+        peer: PeerKey,
         mtu: usize,
         outbox: mpsc::Sender<Vec<u8>>,
     },
@@ -53,9 +54,12 @@ pub enum RadioEvent {
         rssi: i16
     },
 
-    /// The phone's notify pipe failed. May repeat, so the loop must ignore a
-    /// `Gone` for an unknown address.
-    Gone { address: Address },
+    /// We read the phone's qaul ID from its READ_CHAR (central only).
+    PeerIdRead { peer: PeerKey, id: [u8; QAUL_ID_BYTES] },
+    /// A connect we started didn't produce a link (central only).
+    ConnectFailed { peer: PeerKey },
+    /// The phone's sending or recieving pipe failed.
+    Gone { peer: PeerKey },
 }
 
 /// How the engine names a link on Linux: the phones address and our role on it. 
@@ -71,6 +75,11 @@ impl PeerKey {
     pub fn peripheral(address: Address) -> Self {
         Self { address, role: Role::Peripheral }
     }
+
+    /// A phone we connected to as GATT client.
+    pub fn central(address: Address) -> Self {
+        Self { address, role: Role::Central }
+    }
 }
 
 impl Peer for PeerKey {
@@ -79,14 +88,37 @@ impl Peer for PeerKey {
     }
 }
 
+/// Writes each frame from a peers outbox to its pipe, in order. Shared by both roles: the servers 
+/// notify pipe and the clients write pipe are the same type.
+/// Ends when the loop drops the outbox, or reports `Gone` when the pipe fails.
+pub(crate) async fn send_frames(
+    peer: PeerKey,
+    writer: CharacteristicWriter,
+    mut outbox_rx: mpsc::Receiver<Vec<u8>>,
+    events: mpsc::Sender<RadioEvent>,
+) {
+    while let Some(frame) = outbox_rx.recv().await {
+        if let Err(err) = writer.send(&frame).await {
+            log::warn!("{} ({:?}) send failed: {}", peer.address, peer.role, err);
+            let _ = events.send(RadioEvent::Gone { peer }).await;
+            break;
+        }
+    }
+}
+
 /// Everything that exists only while BLE is on. Dropping it takes the
 /// service off air.
 pub struct Running {
     _session: Session,
     adapter: Adapter,
-    _advert: AdvertisementHandle,
+    advertisement: Advertisement,
+    advert: AdvertisementHandle,
     _app: ApplicationHandle,
     pub events: mpsc::Receiver<RadioEvent>,
+    /// Handed to each central connect we start, so its tasks report on events
+    events_tx: mpsc::Sender<RadioEvent>,
+    /// True stops the scanner.
+    scan_paused: watch::Sender<bool>,
     pub outboxes: HashMap<PeerKey, mpsc::Sender<Vec<u8>>>,
     /// The protocol state. Lives here so a restart always begins with no links.
     pub engine: Engine<PeerKey>,
@@ -133,7 +165,7 @@ impl Running {
             ..Default::default()
         };
 
-        let advert = adapter.advertise(le_advertisement).await?;
+        let advert = adapter.advertise(le_advertisement.clone()).await?;
 
         /***** Setup GATT server *******/
 
@@ -143,17 +175,46 @@ impl Running {
 
         /***** Start scanning *******/
 
-        scan(&adapter, events_tx).await?;
+        let (scan_paused, scan_paused_rx) = watch::channel(false);
+        scan(&adapter, events_tx.clone(), scan_paused_rx).await?;
 
         Ok(Running{
             _session: session,
             adapter,
-            _advert: advert,
+            advertisement: le_advertisement,
+            advert,
             _app: app,
             events: events_rx,
+            events_tx,
+            scan_paused,
             outboxes: HashMap::new(),
             engine: Engine::new(our_id),
         })
+    }
+
+    /// Start connecting to `peer` as central. The result comes back on `events`.
+    pub fn connect(&self, peer: PeerKey) {
+        gatt_client::connect(self.adapter.clone(), peer.address, self.events_tx.clone());
+    }
+
+    /// No scanning while one of our connects is in flight, from Connect until Subscribed or ConnectFailed. 
+    /// Measured: the kernel holds the connect until blueZ's scan round ends which can be up to 10s, then it 
+    /// takes 20–100 ms. Only tells the scanner when it changes.
+    pub fn update_scan_pause(&self) {
+        let pause = self.engine.is_connecting();
+        self.scan_paused.send_if_modified(|paused: &mut bool| {
+            let changed = *paused != pause;
+            *paused = pause;
+            changed
+        });
+    }
+
+    /// Put our advert back on air. A central connecting through the advert ends it. The advertising
+    /// set is terminated unlike Android which automatically restarts the set. Without this there
+    /// can be at most one peripheral connection. 
+    pub async fn readvertise(&mut self) -> Result<(), bluer::Error> {
+        self.advert = self.adapter.advertise(self.advertisement.clone()).await?;
+        Ok(())
     }
 
     /// Stop talking to `peer`: end its send task and have BlueZ drop the

@@ -6,6 +6,7 @@ pub mod ble_service;
 #[allow(unused)]
 pub mod ble_uuids;
 pub mod gatt_server;
+pub mod gatt_client;
 pub mod scanner;
 pub mod radio;
 #[allow(unused)]

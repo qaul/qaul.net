@@ -1,10 +1,10 @@
 //! Finds nearby qaul nodes by their adverts and reports each one to the loop.
 
-use std::collections::HashSet;
+use std::{collections::HashSet, pin::Pin};
 
 use bluer::{Adapter, AdapterEvent, Address};
-use futures::StreamExt;
-use tokio::sync::mpsc;
+use futures::{Stream, StreamExt};
+use tokio::sync::{mpsc, watch};
 
 use crate::ble::{
     ble_uuids::{main_service_uuid, QAUL_ID_ADVERT_BYTES, QAUL_MANUFACTURER_ID},
@@ -13,17 +13,22 @@ use crate::ble::{
 
 /// Scan for qaul adverts and report each one as RadioEvent::Advert.
 /// Scanning stops when the loop drops its events receiver.
-pub async fn scan(adapter: &Adapter, events: mpsc::Sender<RadioEvent>) -> bluer::Result<()> {
-    adapter.set_discovery_filter(get_filter()).await?;
-    //dropping the stream is what stops the scan
-    let stream = adapter.discover_devices_with_changes().await?;
+///
+/// While `paused` is true the scanner is switched off. 
+pub async fn scan(
+    adapter: &Adapter,
+    events: mpsc::Sender<RadioEvent>,
+    mut paused: watch::Receiver<bool>,
+) -> bluer::Result<()> {
+    //adapter.set_discovery_filter(get_filter()).await?;    Currently disabled see below
+
+    let mut stream = Some(Box::pin(adapter.discover_devices_with_changes().await?));
 
     let adapter = adapter.clone();
     tokio::task::spawn_local(async move {
-        let mut stream = std::pin::pin!(stream);
         loop {
             tokio::select! {
-                evt = stream.next() => match evt {
+                evt = next_event(&mut stream) => match evt {
                     // Also sent for each property change, so roughly once per advert.
                     Some(AdapterEvent::DeviceAdded(address)) => {
                         let Some((id_prefix, rssi)) = read_advert(&adapter, address).await else {
@@ -38,6 +43,25 @@ pub async fn scan(adapter: &Adapter, events: mpsc::Sender<RadioEvent>) -> bluer:
                     Some(_) => {}
                     None => break,
                 },
+                changed = paused.changed() => {
+                    // Running dropped its sender so BLE stopped.
+                    if changed.is_err() {
+                        break;
+                    }
+                    if *paused.borrow_and_update() {
+                        log::info!("scan paused while connecting");
+                        stream = None;
+                    } else if stream.is_none() {
+                        match adapter.discover_devices_with_changes().await {
+                            Ok(new) => {
+                                log::info!("scan resumed");
+                                stream = Some(Box::pin(new));
+                            }
+                            // the one issue: Stays off until the next pause and resume.
+                            Err(err) => log::warn!("resuming scan failed: {}", err),
+                        }
+                    }
+                }
                 // The loop dropped its receiver, BLE stopped.
                 _ = events.closed() => break,
             }
@@ -45,6 +69,14 @@ pub async fn scan(adapter: &Adapter, events: mpsc::Sender<RadioEvent>) -> bluer:
     });
 
     Ok(())
+}
+
+/// The next scan event, or never while paused.
+async fn next_event<S: Stream<Item = AdapterEvent>>(stream: &mut Option<Pin<Box<S>>>) -> Option<AdapterEvent> {
+    match stream {
+        Some(s) => s.next().await,
+        None => std::future::pending().await,
+    }
 }
 
 /// The qaul ID prefix and signal strength from `address`'s latest advert, or
@@ -59,6 +91,8 @@ async fn read_advert(adapter: &Adapter, address: Address) -> Option<([u8; QAUL_I
     Some((id_prefix, rssi))
 }
 
+
+/// CURRENTLY FILTERING SEEMS TO CAUSE A SEGFAULT ON BLUEZ. This needs investigated further.
 /// Scan filter for qaul adverts.
 fn get_filter() -> bluer::DiscoveryFilter {
     let mut qaul_uuids = HashSet::new();
@@ -66,7 +100,7 @@ fn get_filter() -> bluer::DiscoveryFilter {
     bluer::DiscoveryFilter {
         uuids: qaul_uuids,
         transport: bluer::DiscoveryTransport::Le,
-        duplicate_data: true,
+        duplicate_data: false,
         ..Default::default()
     }
 }

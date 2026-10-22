@@ -368,6 +368,7 @@ name = "ble_module"
 version = "0.2.0"
 dependencies = [
  "async-trait",
+ "ble_protocol",
  "bluer",
  "bytes",
  "crossbeam-channel",
