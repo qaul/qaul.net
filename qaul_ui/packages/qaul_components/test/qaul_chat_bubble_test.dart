@@ -753,4 +753,109 @@ void main() {
       );
     });
   });
+
+  group('QaulChatBubble media', () {
+    Future<void> pumpMedia(
+      WidgetTester tester, {
+      required MessageType messageType,
+      required Size viewport,
+      required Size mediaSize,
+    }) {
+      final clock = DateTime(2026, 1, 1, 12);
+      final message = QaulChatBubbleMessage(
+        content: '',
+        sentAt: clock,
+        receivedAt: clock,
+        status: MessageStatus.sent,
+        messageType: messageType,
+        edges: const [],
+      );
+
+      return tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(size: viewport),
+            child: Material(
+              child: QaulChatBubble.media(
+                message: message,
+                clock: clock,
+                child: SizedBox(
+                  key: ValueKey('portrait-media'),
+                  width: mediaSize.width,
+                  height: mediaSize.height,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('sizes media bubbles to the painted image width', (tester) async {
+      const cases = [
+        (
+          name: 'phone portrait 3:4',
+          viewport: Size(390, 844),
+          media: Size(228, 304),
+        ),
+        (
+          name: 'phone portrait 9:16',
+          viewport: Size(390, 844),
+          media: Size(171, 304),
+        ),
+        (
+          name: 'phone landscape 16:9',
+          viewport: Size(390, 844),
+          media: Size(272, 153),
+        ),
+        (
+          name: 'phone square',
+          viewport: Size(390, 844),
+          media: Size(272, 272),
+        ),
+        (
+          name: 'desktop portrait 3:4',
+          viewport: Size(1280, 800),
+          media: Size(330, 440),
+        ),
+        (
+          name: 'desktop portrait 9:16',
+          viewport: Size(1280, 800),
+          media: Size(247.5, 440),
+        ),
+        (
+          name: 'desktop landscape 16:9',
+          viewport: Size(1280, 800),
+          media: Size(392, 220.5),
+        ),
+        (
+          name: 'desktop square',
+          viewport: Size(1280, 800),
+          media: Size(392, 392),
+        ),
+      ];
+
+      for (final mediaCase in cases) {
+        for (final messageType in MessageType.values) {
+          await pumpMedia(
+            tester,
+            messageType: messageType,
+            viewport: mediaCase.viewport,
+            mediaSize: mediaCase.media,
+          );
+
+          final bubble = tester.getRect(
+            find.byKey(const ValueKey('chat-bubble-surface')),
+          );
+          final media = tester.getRect(
+            find.byKey(const ValueKey('portrait-media')),
+          );
+          final timestamp = tester.getRect(find.text('Now'));
+
+          expect(bubble.width, media.width, reason: mediaCase.name);
+          expect(timestamp.right, lessThanOrEqualTo(bubble.right));
+        }
+      }
+    });
+  });
 }

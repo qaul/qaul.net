@@ -1164,10 +1164,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                     );
                   },
                   audioMessageBuilder: (message, {required int messageWidth}) {
-                    return AudioMessageWidget(
-                      message: message,
-                      messageWidth: messageWidth,
-                      isDefaultUser: message.author.id == user.idBase58,
+                    return SizedBox(
+                      width: messageWidth.toDouble(),
+                      child: AudioMessageWidget(
+                        message: message,
+                        messageWidth: messageWidth,
+                        isDefaultUser: message.author.id == user.idBase58,
+                      ),
                     );
                   },
                   customDateHeaderText: (dt) => DateFormat(
