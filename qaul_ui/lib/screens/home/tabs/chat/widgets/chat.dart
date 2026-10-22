@@ -317,6 +317,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                       messageContext,
                       attachment!,
                     ),
+                    onSave: () => _saveAttachment(
+                      dialogContext,
+                      attachment!,
+                    ),
                     onForward: _isReceivingAttachment(message)
                         ? null
                         : () {
@@ -435,11 +439,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
   List<ChatMessageContextMenuElement> _buildAttachmentContextMenuElements({
     required VoidCallback onCopy,
+    required VoidCallback onSave,
     VoidCallback? onForward,
     VoidCallback? onShare,
     VoidCallback? onInfo,
   }) {
     return [
+      if (onForward != null)
+        ChatMessageContextMenuAction.forward(onPressed: onForward),
+      ChatMessageContextMenuAction(
+        id: 'save',
+        label: 'Save',
+        iconAsset: ChatMessageContextMenuIcons.download,
+        onPressed: onSave,
+      ),
       if (onInfo != null)
         ChatMessageContextMenuAction(
           id: 'info',
@@ -447,8 +460,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
           iconAsset: ChatMessageContextMenuIcons.info,
           onPressed: onInfo,
         ),
-      if (onForward != null)
-        ChatMessageContextMenuAction.forward(onPressed: onForward),
       if (onShare != null)
         ChatMessageContextMenuAction(
           id: 'share',
@@ -731,6 +742,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       return;
     }
     _showCopyFeedback(messageRect);
+  }
+
+  Future<void> _saveAttachment(
+    BuildContext dialogContext,
+    ({String name, String uri}) attachment,
+  ) async {
+    Navigator.pop(dialogContext);
+
+    try {
+      await (widget.messageShareService ?? const SystemMessageShareService())
+          .saveFile(filePath: attachment.uri, fileName: attachment.name);
+    } on Object catch (error, stackTrace) {
+      _log.warning('Could not save attachment', error, stackTrace);
+    }
   }
 
   void _openMessageInfo(

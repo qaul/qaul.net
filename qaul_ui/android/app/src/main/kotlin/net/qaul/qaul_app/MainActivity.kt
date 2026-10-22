@@ -3,9 +3,14 @@ package net.qaul.qaul_app
 import android.Manifest
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.ContentValues
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.MediaScannerConnection
+import android.os.Environment
+import android.provider.MediaStore
+import android.webkit.MimeTypeMap
 import java.io.File
 
 import io.flutter.embedding.android.FlutterActivity
@@ -31,6 +36,7 @@ import androidx.core.content.FileProvider
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "libqaul"
     private val ATTACHMENT_CLIPBOARD_CHANNEL = "qaul/attachment_clipboard"
+    private val ATTACHMENT_SAVER_CHANNEL = "qaul/attachment_saver"
     private var bleWrapperClass: BleWrapperClass? = null
     private var flutterEngine: FlutterEngine? = null
 
@@ -176,6 +182,93 @@ class MainActivity : FlutterActivity() {
             val clipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
             clipboard.setPrimaryClip(ClipData.newUri(contentResolver, name, uri))
             result.success(null)
+        }
+
+        MethodChannel(
+                FlutterEngine.dartExecutor.binaryMessenger, ATTACHMENT_SAVER_CHANNEL
+        ).setMethodCallHandler { call, result ->
+            if (call.method != "saveFile") {
+                result.notImplemented()
+                return@setMethodCallHandler
+            }
+
+            val path = call.argument<String>("path")
+            val name = call.argument<String>("name")
+            if (path.isNullOrBlank() || name.isNullOrBlank()) {
+                result.error("invalid_arguments", "A file path and name are required", null)
+                return@setMethodCallHandler
+            }
+
+            saveAttachment(File(path), name, result)
+        }
+    }
+
+    private fun saveAttachment(file: File, name: String, result: MethodChannel.Result) {
+        if (!file.isFile) {
+            result.error("file_not_found", "The attachment is no longer available", null)
+            return
+        }
+
+        val extension = MimeTypeMap.getFileExtensionFromUrl(file.name).lowercase()
+        val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
+                ?: "application/octet-stream"
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            val downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            if (!downloads.exists() && !downloads.mkdirs()) {
+                result.error("save_failed", "Could not create the Downloads directory", null)
+                return
+            }
+            val destination = File(downloads, name)
+            try {
+                file.copyTo(destination, overwrite = false)
+                MediaScannerConnection.scanFile(this, arrayOf(destination.path), arrayOf(mimeType), null)
+                result.success(null)
+            } catch (error: Exception) {
+                result.error("save_failed", "Could not save the attachment", error.message)
+            }
+            return
+        }
+
+        val (collection, directory) = when {
+            mimeType.startsWith("image/") -> Pair(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    Environment.DIRECTORY_PICTURES
+            )
+            mimeType.startsWith("video/") -> Pair(
+                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                    Environment.DIRECTORY_MOVIES
+            )
+            mimeType.startsWith("audio/") -> Pair(
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    Environment.DIRECTORY_MUSIC
+            )
+            else -> Pair(MediaStore.Downloads.EXTERNAL_CONTENT_URI, Environment.DIRECTORY_DOWNLOADS)
+        }
+        val values = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, name)
+            put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
+            put(MediaStore.MediaColumns.RELATIVE_PATH, "$directory/qaul")
+            put(MediaStore.MediaColumns.IS_PENDING, 1)
+        }
+        val uri = contentResolver.insert(collection, values)
+        if (uri == null) {
+            result.error("save_failed", "Could not create the saved attachment", null)
+            return
+        }
+
+        try {
+            contentResolver.openOutputStream(uri).use { output ->
+                requireNotNull(output)
+                file.inputStream().use { input -> input.copyTo(output) }
+            }
+            values.clear()
+            values.put(MediaStore.MediaColumns.IS_PENDING, 0)
+            contentResolver.update(uri, values, null, null)
+            result.success(null)
+        } catch (error: Exception) {
+            contentResolver.delete(uri, null, null)
+            result.error("save_failed", "Could not save the attachment", error.message)
         }
     }
 

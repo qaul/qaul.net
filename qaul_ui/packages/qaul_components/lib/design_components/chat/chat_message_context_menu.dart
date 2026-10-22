@@ -21,6 +21,7 @@ abstract final class ChatMessageContextMenuIcons {
   static const forward = 'assets/icons/sub_menu/forward_arrow.svg';
   static const edit = 'assets/icons/sub_menu/edit.svg';
   static const info = 'assets/icons/sub_menu/info.svg';
+  static const download = 'assets/icons/sub_menu/download.svg';
   static const share = 'assets/icons/sub_menu/share.svg';
   static const copy = 'assets/icons/sub_menu/copy.svg';
   static const delete = 'assets/icons/sub_menu/delete.svg';
