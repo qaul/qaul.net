@@ -27,6 +27,7 @@ pub trait Peer: Copy + Eq + Hash {
 pub enum EngineEvent<P> {
     PeerReady { peer: P, mtu: usize },        // phone subscribed / central finished discovery
     Frame     { peer: P, bytes: Vec<u8> }, // received a frame
+    PeerIdRead { peer: P, id: [u8; QAUL_ID_BYTES] },  /// We read the peer's qaul ID from its READ_CHAR (central only).
     PeerGone  { peer: P },
     Send      { to: [u8; QAUL_ID_BYTES], message: Vec<u8>, message_id: Vec<u8> },
     /// A qaul advert was heard; `peer` is the key we'd use if we connect.
@@ -46,6 +47,25 @@ pub enum EngineAction<P> {
     Connect    { peer: P },                   // → start a central connection
     Deliver    { from: [u8; QAUL_ID_BYTES], message: Vec<u8> },
     SendResult { message_id: Vec<u8>, success: bool },
+}
+
+/// One link as the engine sees it, for status logs and debug views.
+#[derive(Debug, PartialEq)]
+pub struct LinkSnapshot<P> {
+    pub peer: P,
+    /// The peers qaul id once identified.
+    pub id: Option<[u8; QAUL_ID_BYTES]>,
+    /// Frames can reach the peer.
+    pub ready: bool,
+}
+
+/// What the engine knows right now. Data only: each platform decides how to show it.
+#[derive(Debug, PartialEq)]
+pub struct Snapshot<P> {
+    pub our_id: [u8; QAUL_ID_BYTES],
+    pub links: Vec<LinkSnapshot<P>>,
+    /// Connects asked for that haven't become a link or failed yet.
+    pub connecting: usize,
 }
 
 pub struct Engine<P> {
@@ -78,7 +98,12 @@ impl<P: Peer> Engine<P> {
             EngineEvent::Frame { peer, bytes } => {
                 let link = self.link_for(peer);
                 let link_actions = link.handle(LinkEvent::Received(bytes), now); // Be careful with borrowing self and link
-                out.extend(self.on_link_actions(peer, link_actions));   
+                out.extend(self.on_link_actions(peer, link_actions));
+            }
+            EngineEvent::PeerIdRead { peer, id } => {
+                // link_for, like Frame: the ID lands even if the read beats PeerReady.
+                let link_actions = self.link_for(peer).handle(LinkEvent::PeerIdRead(id), now);
+                out.extend(self.on_link_actions(peer, link_actions));
             }
             EngineEvent::PeerGone { peer } => {
                 self.connecting.remove(&peer);
@@ -170,6 +195,26 @@ impl<P: Peer> Engine<P> {
         out
     }
 
+    /// A connect we started hasn't finished yet. Platforms should pause scanning meanwhile: Linux waits for the 
+    /// scan round to end before it even starts connecting, in theory Androids scan starves connectGatt.
+    pub fn is_connecting(&self) -> bool {
+        !self.connecting.is_empty()
+    }
+
+    /// The current state, for logs and debug views. Read only.
+    pub fn snapshot(&self) -> Snapshot<P> {
+        let links = self
+            .links
+            .iter()
+            .map(|(peer, link)| LinkSnapshot {
+                peer: *peer,
+                id: self.ids.get(peer).copied(),
+                ready: link.is_ready(),
+            })
+            .collect();
+        Snapshot { our_id: self.qaul_id, links, connecting: self.connecting.len() }
+    }
+
     /// BLE is stopping: close every link, fail every unfinished message and
     /// report every identified peer as down.
     pub fn shutdown(&mut self) -> Vec<EngineAction<P>>{
@@ -185,8 +230,23 @@ impl<P: Peer> Engine<P> {
 
     /// Rules 1–3: should we connect to this advert's sender now?
     fn should_connect(&self, peer: P, id_prefix: [u8; QAUL_ID_ADVERT_BYTES]) -> bool {
-        
-        todo!()
+        // 1. Check if we are connected already (either role)
+        if self.ids.values().any(|id| id.starts_with(&id_prefix)) {
+            return false;
+        }
+
+        // 2. Check theres isnt already a connection in progress
+        // One at a time: prallel connect may be possible on linux but buys little and is needed on android
+        if !self.connecting.is_empty() || self.links.contains_key(&peer) {
+            return false;
+        }
+
+        // 3. If we have the lower id_prefix, we can connect as central
+        if self.qaul_id[..QAUL_ID_ADVERT_BYTES] < id_prefix[..] {
+            return true;
+        }
+
+        false
     }
 }
 
@@ -367,6 +427,88 @@ mod tests {
         );
         assert!(a.links.is_empty());
         assert_eq!(a.shutdown(), vec![]);
+    }
+
+    /// How A would address B's advert as a central: same phone as PEER_B, other role.
+    const CENTRAL_B: TestPeer = TestPeer(7, Role::Central);
+
+    /// An advert from the node with `id`, heard under `peer`.
+    fn advert(peer: TestPeer, id: &[u8; QAUL_ID_BYTES]) -> EngineEvent<TestPeer> {
+        let id_prefix = id[..QAUL_ID_ADVERT_BYTES].try_into().unwrap();
+        EngineEvent::Discovered { peer, id_prefix, rssi: -60 }
+    }
+
+    #[test]
+    fn lower_id_connects() {
+        let mut a = Engine::new(ID_A);
+        assert_eq!(a.handle(advert(CENTRAL_B, &ID_B), now()), vec![EngineAction::Connect { peer: CENTRAL_B }]);
+    }
+
+    #[test]
+    fn higher_id_waits_to_be_connected_to() {
+        let mut b = Engine::new(ID_B);
+        assert_eq!(b.handle(advert(TestPeer(9, Role::Central), &ID_A), now()), vec![]);
+    }
+
+    #[test]
+    fn node_linked_in_the_other_role_is_ignored() {
+        // A knows ID_B through PEER_B, so B's advert under a new key changes nothing.
+        let (mut a, _b) = connected();
+        assert_eq!(a.handle(advert(CENTRAL_B, &ID_B), now()), vec![]);
+    }
+
+    #[test]
+    fn linked_but_unidentified_peer_is_ignored() {
+        // Connected, but B's SEND_ID hasn't arrived, so only the key can tell.
+        let mut a = Engine::new(ID_A);
+        a.handle(advert(CENTRAL_B, &ID_B), now());
+        a.handle(EngineEvent::PeerReady { peer: CENTRAL_B, mtu: 247 }, now());
+        assert_eq!(a.handle(advert(CENTRAL_B, &ID_B), now()), vec![]);
+    }
+
+    #[test]
+    fn one_connect_at_a_time() {
+        const ID_C: [u8; QAUL_ID_BYTES] = [3; QAUL_ID_BYTES];
+        let central_c = TestPeer(8, Role::Central);
+        let mut a = Engine::new(ID_A);
+        a.handle(advert(CENTRAL_B, &ID_B), now());
+        assert_eq!(a.handle(advert(central_c, &ID_C), now()), vec![]);
+
+        // Once the first attempt is over, the next advert gets its turn.
+        a.handle(EngineEvent::ConnectFailed { peer: CENTRAL_B }, now());
+        assert_eq!(a.handle(advert(central_c, &ID_C), now()), vec![EngineAction::Connect { peer: central_c }]);
+    }
+
+    #[test]
+    fn connecting_from_connect_until_ready_or_failed() {
+        let mut a = Engine::new(ID_A);
+        assert!(!a.is_connecting());
+        a.handle(advert(CENTRAL_B, &ID_B), now());
+        assert!(a.is_connecting());
+        a.handle(EngineEvent::PeerReady { peer: CENTRAL_B, mtu: 512 }, now());
+        assert!(!a.is_connecting());
+
+        let mut a = Engine::new(ID_A);
+        a.handle(advert(CENTRAL_B, &ID_B), now());
+        a.handle(EngineEvent::ConnectFailed { peer: CENTRAL_B }, now());
+        assert!(!a.is_connecting());
+    }
+
+    #[test]
+    fn snapshot_shows_each_link_identity_and_readiness() {
+        let mut a = Engine::new(ID_A);
+        let empty = a.snapshot();
+        assert_eq!((empty.our_id, empty.links.len(), empty.connecting), (ID_A, 0, 0));
+
+        // Identified by its SEND_ID, but not ready to receive yet.
+        a.handle(hello(&ID_B), now());
+        assert_eq!(
+            a.snapshot().links,
+            vec![LinkSnapshot { peer: PEER_B, id: Some(ID_B), ready: false }]
+        );
+
+        a.handle(EngineEvent::PeerReady { peer: PEER_B, mtu: 247 }, now());
+        assert!(a.snapshot().links[0].ready);
     }
 
     #[test]

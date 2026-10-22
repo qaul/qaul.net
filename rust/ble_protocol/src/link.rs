@@ -114,6 +114,11 @@ impl Link {
         }
     }
 
+    /// True once frames can reach the peer (TransportReady).
+    pub fn is_ready(&self) -> bool {
+        self.ready
+    }
+
     /// Handle one event and return what to do about it.
     pub fn handle(&mut self, event: LinkEvent, now: Instant) -> Vec<LinkAction> {
         let mut actions = Vec::new();
