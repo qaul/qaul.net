@@ -609,7 +609,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   Future<void> _openPhotoPicker(ChatRoom room) async {
     File? file;
     if (Platform.isAndroid || Platform.isIOS) {
-      final result = await ImagePicker().pickImage(source: ImageSource.camera);
+      final result = await ImagePicker().pickImage(
+        source: ImageSource.camera,
+        maxWidth: 1024.0,
+        maxHeight: 1024.0,
+        imageQuality: 60,
+      );
       if (result != null) file = File(result.path);
     } else {
       final result = await FilePicker.platform.pickFiles(type: FileType.image);
