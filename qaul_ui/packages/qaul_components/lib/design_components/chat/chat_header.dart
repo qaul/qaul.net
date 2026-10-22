@@ -7,13 +7,15 @@ import '../users/qaul_avatar.dart';
 const Color _kChatHeaderControlColor = Color(0xFF999999);
 const double _kChatHeaderDividerWidth = 0.5;
 
-const double kChatHeaderToolbarHeight = kToolbarHeight;
+const double kChatHeaderToolbarHeight = 58.6;
 const double kChatHeaderAvatarSize = 40;
-const double _kHorizontalPadding = 12;
-const double _kBackAvatarGap = 4;
-const double _kAvatarTitleGap = 12;
+const double _kContentStartInset = 20;
+const double _kBackButtonStartInset = 10;
+const double _kControlTapTargetSize = 40;
+const double _kHeaderTrailingInset = 8;
+const double _kAvatarTitleGap = 9;
 const double _kTitleSubtitleGap = 4;
-const double _kHeaderControlIconSize = 30;
+const double _kHeaderControlIconSize = 20;
 
 class ChatHeaderMenuEntry {
   const ChatHeaderMenuEntry({required this.id, required this.label});
@@ -43,7 +45,7 @@ TextStyle _chatHeaderLineStyle(
     fontSize: fontSize,
     fontWeight: FontWeight.w400,
     height: 1.2,
-    letterSpacing: 1,
+    letterSpacing: 0.5,
     color: _chatHeaderTextColor(theme),
   );
 }
@@ -69,17 +71,22 @@ class _ChatHeaderOverflowMenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PopupMenuButton<String>(
-      tooltip: MaterialLocalizations.of(context).showMenuTooltip,
-      onSelected: onSelected,
-      itemBuilder: (context) => [
-        for (final entry in entries)
-          PopupMenuItem<String>(value: entry.id, child: Text(entry.label)),
-      ],
-      icon: const Icon(
-        Icons.more_vert,
-        size: _kHeaderControlIconSize,
-        color: _kChatHeaderControlColor,
+    return SizedBox.square(
+      dimension: _kControlTapTargetSize,
+      child: PopupMenuButton<String>(
+        key: const ValueKey('chat-header-overflow-menu'),
+        padding: EdgeInsets.zero,
+        tooltip: MaterialLocalizations.of(context).showMenuTooltip,
+        onSelected: onSelected,
+        itemBuilder: (context) => [
+          for (final entry in entries)
+            PopupMenuItem<String>(value: entry.id, child: Text(entry.label)),
+        ],
+        icon: const Icon(
+          Icons.more_vert,
+          size: _kHeaderControlIconSize,
+          color: _kChatHeaderControlColor,
+        ),
       ),
     );
   }
@@ -184,26 +191,37 @@ class ChatHeader extends StatelessWidget {
     final header = SizedBox(
       height: kChatHeaderToolbarHeight,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: _kHorizontalPadding),
+        padding: EdgeInsetsDirectional.only(
+          start: showBackButton ? _kBackButtonStartInset : _kContentStartInset,
+          end: _kHeaderTrailingInset,
+        ),
         child: Row(
           children: [
-            if (showBackButton) ...[
-              IconButton(
-                tooltip:
-                    backButtonTooltip ??
-                    MaterialLocalizations.of(context).backButtonTooltip,
-                onPressed: onBackPressed,
-                icon: const Icon(
-                  Icons.arrow_back_rounded,
-                  size: _kHeaderControlIconSize,
-                  color: _kChatHeaderControlColor,
+            if (showBackButton)
+              SizedBox.square(
+                dimension: _kControlTapTargetSize,
+                child: IconButton(
+                  key: const ValueKey('chat-header-back-button'),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints.tightFor(
+                    width: _kControlTapTargetSize,
+                    height: _kControlTapTargetSize,
+                  ),
+                  tooltip:
+                      backButtonTooltip ??
+                      MaterialLocalizations.of(context).backButtonTooltip,
+                  onPressed: onBackPressed,
+                  icon: const Icon(
+                    Icons.arrow_back_rounded,
+                    size: _kHeaderControlIconSize,
+                    color: _kChatHeaderControlColor,
+                  ),
                 ),
               ),
-              const SizedBox(width: _kBackAvatarGap),
-            ],
             _AvatarWithOnlineBadge(
               showOnline: _showOnlineDot,
               child: SizedBox.square(
+                key: const ValueKey('chat-header-avatar'),
                 dimension: kChatHeaderAvatarSize,
                 child: avatar,
               ),

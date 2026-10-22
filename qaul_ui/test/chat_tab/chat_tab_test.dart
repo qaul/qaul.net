@@ -129,6 +129,7 @@ void main() {
     ChatRoom room, {
     User? otherUser,
     MessageShareService? messageShareService,
+    TextDirection textDirection = TextDirection.ltr,
   }) async {
     final wut = ProviderScope(
       overrides: [
@@ -141,11 +142,14 @@ void main() {
         qaulWorkerProvider.overrideWith((ref) => StubLibqaulWorker(ref)),
       ],
       child: materialAppWithLocalizations(
-        ChatScreen(
-          room,
-          defaultUser,
-          otherUser: otherUser,
-          messageShareService: messageShareService,
+        Directionality(
+          textDirection: textDirection,
+          child: ChatScreen(
+            room,
+            defaultUser,
+            otherUser: otherUser,
+            messageShareService: messageShareService,
+          ),
         ),
       ),
     );
@@ -578,9 +582,75 @@ void main() {
     expect(find.byKey(const ValueKey('copy-feedback-toast')), findsNothing);
   });
 
-  testWidgets('shares a text message from the long-press menu', (
+  testWidgets(
+    'received message context menus open on the left in group chats',
+    (tester) async {
+      final message = textMessage(
+        id: 'received-group-menu',
+        sender: otherUser,
+        text: 'Received group message',
+      );
+      await pumpChatScreen(tester, buildGroupChat(messages: [message]));
+
+      final bubble = find.byKey(const ValueKey('chat-bubble-surface'));
+      await tester.longPress(bubble);
+      await tester.pumpAndSettle();
+
+      final overlayRect = tester.getRect(find.byType(Overlay));
+      final menuRect = tester.getRect(find.byType(ChatMessageContextMenu));
+      expect(menuRect.center.dx, lessThan(overlayRect.center.dx));
+    },
+  );
+
+  testWidgets(
+    'sent message context menus open on the right in direct chats',
+    (tester) async {
+      final message = textMessage(
+        id: 'sent-direct-menu',
+        sender: defaultUser,
+        text: 'Sent direct message',
+      );
+      await pumpChatScreen(
+        tester,
+        buildDirectChat(messages: [message]),
+        otherUser: otherUser,
+      );
+
+      final bubble = find.byKey(const ValueKey('chat-bubble-surface'));
+      await tester.longPress(bubble);
+      await tester.pumpAndSettle();
+
+      final overlayRect = tester.getRect(find.byType(Overlay));
+      final menuRect = tester.getRect(find.byType(ChatMessageContextMenu));
+      expect(menuRect.center.dx, greaterThan(overlayRect.center.dx));
+    },
+  );
+
+  testWidgets('sent message context menus stay aligned with sent RTL bubbles', (
     tester,
   ) async {
+    final message = textMessage(
+      id: 'sent-rtl-menu',
+      sender: defaultUser,
+      text: 'Sent RTL message',
+    );
+    await pumpChatScreen(
+      tester,
+      buildDirectChat(messages: [message]),
+      otherUser: otherUser,
+      textDirection: TextDirection.rtl,
+    );
+
+    final bubble = find.byKey(const ValueKey('chat-bubble-surface'));
+    await tester.longPress(bubble);
+    await tester.pumpAndSettle();
+
+    final overlayRect = tester.getRect(find.byType(Overlay));
+    final menuRect = tester.getRect(find.byType(ChatMessageContextMenu));
+    expect(menuRect.center.dx, greaterThan(overlayRect.center.dx));
+  });
+
+  testWidgets('shares a text message from the long-press menu', (tester) async {
     final messageShareService = FakeMessageShareService();
     final targetMessage = Message(
       senderId: otherUser.id,
