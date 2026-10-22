@@ -12,8 +12,9 @@ part 'screenshot_comparator.dart';
 
 part 'test_responsive_widgets.dart';
 
-Widget materialAppWithLocalizations(Widget wut) {
+Widget materialAppWithLocalizations(Widget wut, {ThemeData? theme}) {
   return MaterialApp(
+    theme: theme,
     localizationsDelegates: [
       ...AppLocalizations.localizationsDelegates,
       QaulComponentsLocalizations.delegate,
