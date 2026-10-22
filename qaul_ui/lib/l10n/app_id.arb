@@ -89,7 +89,7 @@
     "removeUserDialogContent": "Apakah Anda yakin ingin menghapus pengguna ini dari grup?",
     "routingDataTable": "Tabel Data Routing",
     "searchUser": "Cari pengguna...",
-    "securePrivateMessageHint": "Pesan pribadi aman",
+    "privateMessageHint": "Pesan pribadi",
     "securityNumber": "Nomor Keamanan",
     "securityNumberDialogDesc": "Pastikan orang yang ingin Anda verifikasi melihat nomor keamanan yang sama di layar mereka saat mencoba memverifikasi Anda.",
     "sendLogs": "Kirim Log",

@@ -1033,11 +1033,11 @@ abstract class AppLocalizations {
   /// **'SAVE'**
   String get saveButton;
 
-  /// No description provided for @securePrivateMessageHint.
+  /// No description provided for @privateMessageHint.
   ///
   /// In en, this message translates to:
-  /// **'Secure private message'**
-  String get securePrivateMessageHint;
+  /// **'Private message'**
+  String get privateMessageHint;
 
   /// No description provided for @storage.
   ///

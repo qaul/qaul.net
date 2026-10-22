@@ -162,7 +162,7 @@ void main() {
     expect(find.byType(ChatHeader), findsOneWidget);
     expect(find.byType(ChatFooter), findsOneWidget);
     expect(find.text(otherUser.name), findsOneWidget);
-    expect(find.text('Secure private message'), findsOneWidget);
+    expect(find.text('Private message'), findsOneWidget);
     expect(
       find.byTooltip('Record audio message'),
       Platform.isLinux ? findsNothing : findsOneWidget,

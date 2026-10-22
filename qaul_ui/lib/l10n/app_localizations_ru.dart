@@ -503,7 +503,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get saveButton => 'SAVE';
 
   @override
-  String get securePrivateMessageHint => 'Защищенное личное сообщение';
+  String get privateMessageHint => 'Личное сообщение';
 
   @override
   String get storage => 'Storage';

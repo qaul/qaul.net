@@ -173,7 +173,7 @@
     "languageName": "Türkçe",
     "notifications": "Bildirimler",
     "previousVersion": "önceki kurulu sürüm:",
-    "securePrivateMessageHint": "Gizli güvenli mesaj",
+    "privateMessageHint": "Özel mesaj",
     "userDocumentation": "Kullanıcı Dokümanı",
     "searchChat": "Sohbetlerde ara...",
     "editGroupUserNames": "Kullanıcı adlarını düzenle",

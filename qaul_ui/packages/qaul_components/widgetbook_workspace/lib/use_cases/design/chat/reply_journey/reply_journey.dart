@@ -312,7 +312,7 @@ class _ReplyJourneyScreen extends StatelessWidget {
         : ChatReplyJourney.direct(
             currentUser: chatFixtureCurrentUser,
             initialMessages: messages,
-            placeholder: 'Secure private message',
+            placeholder: 'Private message',
             clock: _replyJourneyClock,
             currentUserReplyLabel: 'You',
             quickReactions: _replyQuickReactions,

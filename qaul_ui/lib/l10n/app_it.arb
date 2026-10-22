@@ -110,7 +110,7 @@
   "removeUserDialogContent": "Sei sicuro di voler rimuovere questo contatto dal gruppo?",
   "routingDataTable": "Tabella di routing",
   "searchUser": "Cerca nei contatti...",
-  "securePrivateMessageHint": "Messaggio criptato",
+  "privateMessageHint": "Messaggio privato",
   "securityNumber": "Codice di sicurezza",
   "securityNumberDialogDesc": "Assicurati che la persona che vuoi verificare riceva lo stesso numero di sicurezza quando prova a verificarti.",
   "sendFileTooltip": "Invia file",

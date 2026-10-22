@@ -353,9 +353,7 @@ class _ChatDeleteJourneyState extends State<ChatDeleteJourney> {
             ),
             ChatFooter(
               controller: _composerController,
-              placeholder: _isGroup
-                  ? 'Secure private message'
-                  : 'Private message',
+              placeholder: _isGroup ? 'Group chat message' : 'Private message',
               onSend: (_) {},
               onMoreAttachmentsPressed: () {},
               sendTooltip: 'Send',

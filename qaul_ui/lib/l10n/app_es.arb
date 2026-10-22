@@ -110,7 +110,7 @@
   "removeUserDialogContent": "¿Está seguro de que desea eliminar a este usuario del grupo?",
   "routingDataTable": "Tabla de datos de enrutamiento",
   "searchUser": "Buscar usuario...",
-  "securePrivateMessageHint": "Mensaje privado seguro",
+  "privateMessageHint": "Mensaje privado",
   "securityNumber": "Número de seguridad",
   "securityNumberDialogDesc": "Asegúrate de que la persona que intentas verificar vea el mismo número de seguridad en su pantalla cuando intenta verificarte.",
   "sendFileTooltip": "Enviar Archivo",

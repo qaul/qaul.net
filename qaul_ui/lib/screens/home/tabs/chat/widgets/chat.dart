@@ -1085,7 +1085,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                         : 'Please wait for the admin to confirm your acceptance to send messages',
                     hintText: _chatRenderMode == ChatRenderMode.group
                         ? l10n.groupChatMessageHint
-                        : l10n.securePrivateMessageHint,
+                        : l10n.privateMessageHint,
                     mentionSuggestions: _chatRenderMode == ChatRenderMode.group
                         ? [
                             for (final member in room.members)

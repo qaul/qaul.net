@@ -503,7 +503,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get saveButton => 'SAVE';
 
   @override
-  String get securePrivateMessageHint => 'پیام خصوصی امن';
+  String get privateMessageHint => 'پیام خصوصی';
 
   @override
   String get storage => 'Storage';

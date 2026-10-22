@@ -110,7 +110,7 @@
     "groupEventLeft": "\"{username}\" имеет вышел группу",
     "groupEventRemoved": "\"{username}\" имеет был удален из группу",
     "groupEventInviteAccepted": "\"{username}\" имеет принял приглашение группу",
-    "securePrivateMessageHint": "Защищенное личное сообщение",
+    "privateMessageHint": "Личное сообщение",
     "groupChatMessageHint": "Сообщение группового чата",
     "inviteUser": "Пригласить пользователя",
     "notifications": "Уведомления",

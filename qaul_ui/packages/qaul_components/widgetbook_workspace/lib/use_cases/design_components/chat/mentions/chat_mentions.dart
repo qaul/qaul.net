@@ -65,7 +65,7 @@ Widget buildSelectedChatMentionUseCase(BuildContext context) {
         text: 'Writing @Group Member',
         mentionLabels: const ['Group Member'],
       ),
-      placeholder: 'Secure private message',
+      placeholder: 'Private message',
       onSend: (_) {},
       onMoreAttachmentsPressed: () {},
       sendTooltip: 'Send',

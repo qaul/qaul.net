@@ -105,7 +105,7 @@
   "removeUserDialogContent": "آیا مطمئن هستید که می خواهید این کاربر را از گروه حذف کنید؟",
   "routingDataTable": "جدول داده های مسیریابی",
   "searchUser": "جستجوی کاربر ...",
-  "securePrivateMessageHint": "پیام خصوصی امن",
+  "privateMessageHint": "پیام خصوصی",
   "securityNumber": "شماره امنیتی",
   "securityNumberDialogDesc": "لطفاً مطمئن شوید که شخصی که می‌خواهید تأیید کنید، هنگام تلاش برای تأیید شما، همان شماره امنیتی را روی صفحه خود ببیند.",
   "sendFileTooltip": "ارسال پرونده",
