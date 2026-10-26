@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -22,6 +23,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get sendFileTooltip => 'Отправить файл';
+
+  @override
+  String get sendPhotoTooltip => 'Send Photo';
 
   @override
   String get sendAudioTooltip => 'Записать аудиосообщение';

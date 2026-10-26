@@ -192,7 +192,7 @@ class _ChatTextFooterState extends State<_ChatTextFooter> {
           : widget.onAttachmentPressed,
       sendTooltip: AppLocalizations.of(context)!.sendTooltip,
       voiceTooltip: AppLocalizations.of(context)!.sendAudioTooltip,
-      cameraTooltip: AppLocalizations.of(context)!.sendFileTooltip,
+      cameraTooltip: AppLocalizations.of(context)!.sendPhotoTooltip,
       attachmentsTooltip: AppLocalizations.of(context)!.sendFileTooltip,
     );
 
