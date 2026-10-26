@@ -17,7 +17,7 @@ const String _kEmoticonSvg = 'assets/icons/emoticon.svg';
 const String _kGeolocationSvg = 'assets/icons/geolocation.svg';
 
 const double _kHorizontalPadding = 16;
-const double _kTopPadding = 12;
+const double _kTopPadding = 4;
 const double _kBottomPadding = 24;
 const double _kFieldInputHorizontal = 16;
 const double _kFieldInputVertical = 12;
@@ -487,6 +487,7 @@ class _ComposerPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
+      key: const ValueKey('chat-footer-composer-pill'),
       decoration: BoxDecoration(
         color: fillColor,
         borderRadius: BorderRadius.circular(_kInputBorderRadius),

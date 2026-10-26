@@ -67,6 +67,50 @@ void main() {
     expect(lightDivider.color, const Color(0xFFD1D1D6));
   });
 
+  testWidgets('keeps a 4px inset below the footer divider', (tester) async {
+    Future<void> expectTopInset({
+      required double width,
+      required ThemeData theme,
+      ChatFooterReplyPreviewData? replyPreview,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            body: Align(
+              alignment: Alignment.bottomCenter,
+              child: SizedBox(
+                width: width,
+                child: ChatFooter(
+                  placeholder: 'Secure private message',
+                  replyPreview: replyPreview,
+                  applyBottomSafeArea: false,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final footerTop = tester
+          .getTopLeft(find.byKey(const ValueKey('chat-footer-surface')))
+          .dy;
+      final firstElement = replyPreview == null
+          ? find.byKey(const ValueKey('chat-footer-composer-pill'))
+          : find.byKey(const ValueKey('chat-footer-reply-preview'));
+      final firstElementTop = tester.getTopLeft(firstElement).dy;
+
+      expect(firstElementTop - footerTop, closeTo(4, 0.5));
+    }
+
+    for (final width in [360.0, 390.0]) {
+      for (final theme in [ThemeData.light(), ThemeData.dark()]) {
+        await expectTopInset(width: width, theme: theme);
+        await expectTopInset(width: width, theme: theme, replyPreview: reply);
+      }
+    }
+  });
+
   testWidgets('renders reply target above an editable composer', (
     tester,
   ) async {
