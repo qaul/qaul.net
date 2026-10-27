@@ -64,11 +64,10 @@ pub enum Commands {
     ///
     /// Ported from the legacy `qaul-cli` `connections` subcommands.
     Connections(ConnectionsArgs),
-    /// Delay-Tolerant Networking storage controls (V1)
+    /// Delay-Tolerant Networking storage controls and V2 custody routing
     ///
-    /// Ported from the legacy `qaul-cli` `dtn` subcommands. V2 source-
-    /// routed DTN (custody routing) is a separate feature on the
-    /// `feat/dtn-custody-routing` branch and is not in this build.
+    /// Ported from the legacy `qaul-cli` `dtn` subcommands; `custody` and
+    /// `send-routed` drive V2 source-routed DTN.
     Dtn(DtnArgs),
     /// Manage network transports (LAN, Internet, BLE)
     ///
@@ -398,6 +397,26 @@ pub enum AccountSubcmd {
         #[arg(short = 'c', long = "custody-route", value_delimiter = ',')]
         custody_route: Option<Vec<String>>,
     },
+    /// export the default user account to a `.qaul_export` archive.
+    /// The archive contains the account's private keys.
+    Export {
+        /// existing directory to write the archive into
+        /// (omit = the daemon's storage directory)
+        #[arg(short, long)]
+        output: Option<String>,
+    },
+    /// permanently delete the default user account and all of its data
+    Delete {
+        /// confirm the deletion
+        #[arg(long)]
+        yes: bool,
+    },
+    /// restore a user account from a `.qaul_export` archive
+    Restore {
+        /// path to the `.qaul_export` archive
+        #[arg(short, long)]
+        archive: String,
+    },
 }
 
 #[derive(Args, Debug)]
@@ -412,6 +431,15 @@ pub enum UsersSubcmd {
     List,
     /// display all online users known to this router
     Online,
+    /// search known users by name (an empty query lists all users)
+    Search {
+        /// name to search for
+        #[arg(short, long, default_value = "")]
+        query: String,
+        /// only include users that are currently online
+        #[arg(long)]
+        online: bool,
+    },
     /// verify user with {User ID}
     Verify {
         /// Specify the User ID to verify
@@ -485,7 +513,20 @@ pub enum GroupSubcmd {
         name: String,
     },
     /// list all available groups
-    List,
+    List {
+        /// page offset
+        #[arg(short, long, default_value = "0")]
+        offset: u32,
+        /// maximum number of groups to return (0 = all)
+        #[arg(short, long, default_value = "0")]
+        limit: u32,
+    },
+    /// search groups by name (an empty query lists all groups)
+    Search {
+        /// name to search for
+        #[arg(short, long, default_value = "")]
+        query: String,
+    },
     /// shows the group information
     Info {
         /// the group id
@@ -502,7 +543,14 @@ pub enum GroupSubcmd {
         user_id: String,
     },
     /// list received pending invitations
-    Invited,
+    Invited {
+        /// page offset
+        #[arg(short, long, default_value = "0")]
+        offset: u32,
+        /// maximum number of invitations to return (0 = all)
+        #[arg(short, long, default_value = "0")]
+        limit: u32,
+    },
     /// accept group invitation
     Accept {
         /// the group id
@@ -560,6 +608,12 @@ pub enum ChatSubcmd {
         /// the index of the chat to get the messages from
         #[arg(short, long, default_value = "0")]
         index: u64,
+    },
+    /// search chat messages across all conversations
+    Search {
+        /// text to search for
+        #[arg(short, long)]
+        query: String,
     },
 }
 
