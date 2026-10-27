@@ -10,7 +10,8 @@ use prost::Message;
 use proto::{
     group, Group, GroupCreateRequest, GroupInfoRequest, GroupInviteMemberRequest,
     GroupInvitedRequest, GroupListRequest, GroupMemberRole, GroupMemberState,
-    GroupRemoveMemberRequest, GroupRenameRequest, GroupReplyInviteRequest, GroupStatus,
+    GroupRemoveMemberRequest, GroupRenameRequest, GroupReplyInviteRequest, GroupSearchRequest,
+    GroupStatus,
 };
 use proto_chat::{chat_content_message, ChatContentMessage, GroupEventType};
 
@@ -118,11 +119,11 @@ impl RpcCommand for GroupSubcmd {
 
                 Ok((proto_message.encode_to_vec(), Modules::Group))
             }
-            GroupSubcmd::List => {
+            GroupSubcmd::List { offset, limit } => {
                 let proto_message = Group {
                     message: Some(group::Message::GroupListRequest(GroupListRequest {
-                        offset: 0,
-                        limit: 0,
+                        offset: *offset,
+                        limit: *limit,
                     })),
                 };
 
@@ -133,11 +134,23 @@ impl RpcCommand for GroupSubcmd {
 
                 Ok((buf, Modules::Group))
             }
-            GroupSubcmd::Invited => {
+            GroupSubcmd::Search { query } => {
+                // answered with a GroupListResponse
                 let proto_message = Group {
-                    message: Some(group::Message::GroupInvitedRequest(GroupInvitedRequest {
+                    message: Some(group::Message::GroupSearchRequest(GroupSearchRequest {
+                        query: query.trim().to_string(),
                         offset: 0,
                         limit: 0,
+                    })),
+                };
+
+                Ok((proto_message.encode_to_vec(), Modules::Group))
+            }
+            GroupSubcmd::Invited { offset, limit } => {
+                let proto_message = Group {
+                    message: Some(group::Message::GroupInvitedRequest(GroupInvitedRequest {
+                        offset: *offset,
+                        limit: *limit,
                     })),
                 };
 
@@ -512,5 +525,53 @@ impl RpcCommand for GroupSubcmd {
             }
         };
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn decode_request(buf: &[u8]) -> group::Message {
+        Group::decode(buf).unwrap().message.unwrap()
+    }
+
+    #[test]
+    fn list_and_invited_pass_pagination() {
+        let (buf, _) = GroupSubcmd::List {
+            offset: 2,
+            limit: 5,
+        }
+        .encode_request()
+        .unwrap();
+        match decode_request(&buf) {
+            group::Message::GroupListRequest(r) => assert_eq!((r.offset, r.limit), (2, 5)),
+            other => panic!("unexpected message {:?}", other),
+        }
+
+        let (buf, _) = GroupSubcmd::Invited {
+            offset: 1,
+            limit: 3,
+        }
+        .encode_request()
+        .unwrap();
+        match decode_request(&buf) {
+            group::Message::GroupInvitedRequest(r) => assert_eq!((r.offset, r.limit), (1, 3)),
+            other => panic!("unexpected message {:?}", other),
+        }
+    }
+
+    #[test]
+    fn search_encodes_trimmed_query() {
+        let (buf, module) = GroupSubcmd::Search {
+            query: " team ".to_string(),
+        }
+        .encode_request()
+        .unwrap();
+        assert_eq!(module, Modules::Group);
+        match decode_request(&buf) {
+            group::Message::GroupSearchRequest(r) => assert_eq!(r.query, "team"),
+            other => panic!("unexpected message {:?}", other),
+        }
     }
 }
