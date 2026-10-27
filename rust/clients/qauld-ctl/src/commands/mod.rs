@@ -10,6 +10,7 @@
 
 pub use qauld_rpc::{id_string_to_bin, uuid_string_to_bin, RpcCommand};
 
+mod account_management;
 mod authentication;
 mod ble;
 mod chat;

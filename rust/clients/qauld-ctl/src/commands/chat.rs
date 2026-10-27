@@ -11,7 +11,7 @@ use qaul_proto::qaul_rpc_chat as proto;
 
 use proto::{
     chat, chat_content_message, Chat, ChatContentMessage, ChatConversationRequest, ChatMessageSend,
-    GroupEventType, MessageStatus,
+    ChatSearchRequest, GroupEventType, MessageStatus,
 };
 
 impl ChatSubcmd {
@@ -111,6 +111,20 @@ impl RpcCommand for ChatSubcmd {
 
                 Ok((proto_message.encode_to_vec(), Modules::Chat))
             }
+            ChatSubcmd::Search { query } => {
+                let query = query.trim();
+                if query.is_empty() {
+                    return Err("chat search: query must not be empty".into());
+                }
+
+                let proto_message = Chat {
+                    message: Some(chat::Message::SearchRequest(ChatSearchRequest {
+                        query: query.to_string(),
+                    })),
+                };
+
+                Ok((proto_message.encode_to_vec(), Modules::Chat))
+            }
         }
     }
 
@@ -193,10 +207,86 @@ impl RpcCommand for ChatSubcmd {
                     }
                 }
             }
+            Some(chat::Message::SearchResult(results)) => {
+                // group ids are UUIDs, fall back to base58 for anything else
+                let group_id_string = |id: &Vec<u8>| match Uuid::from_slice(id) {
+                    Ok(uuid) => uuid.to_string(),
+                    Err(_) => bs58::encode(id).into_string(),
+                };
+
+                if json {
+                    let items: Vec<serde_json::Value> = results
+                        .items
+                        .iter()
+                        .map(|item| {
+                            serde_json::json!({
+                                "message_id": bs58::encode(&item.message_id).into_string(),
+                                "group_id": group_id_string(&item.group_id),
+                                "sender_id": bs58::encode(&item.sender_id).into_string(),
+                                "content": item.content,
+                                "sent_at": item.sent_at,
+                            })
+                        })
+                        .collect();
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&serde_json::json!({
+                            "query": results.query,
+                            "items": items,
+                        }))?
+                    );
+                } else {
+                    println!();
+                    println!("Search results for \"{}\":", results.query);
+                    println!();
+                    if results.items.is_empty() {
+                        println!("  (no results)");
+                    }
+                    for item in results.items {
+                        println!(
+                            "  [{}] group:{} from:{} at:{}",
+                            bs58::encode(&item.message_id).into_string(),
+                            group_id_string(&item.group_id),
+                            bs58::encode(&item.sender_id).into_string(),
+                            item.sent_at,
+                        );
+                        println!("    {}", item.content);
+                        println!();
+                    }
+                }
+            }
             _ => {
                 return Err("unprocessable RPC chat message".into());
             }
         };
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn search_encodes_query() {
+        let (buf, module) = ChatSubcmd::Search {
+            query: " needle ".to_string(),
+        }
+        .encode_request()
+        .unwrap();
+        assert_eq!(module, Modules::Chat);
+        match Chat::decode(&buf[..]).unwrap().message {
+            Some(chat::Message::SearchRequest(r)) => assert_eq!(r.query, "needle"),
+            other => panic!("unexpected message {:?}", other),
+        }
+    }
+
+    #[test]
+    fn search_rejects_empty_query() {
+        let res = ChatSubcmd::Search {
+            query: "   ".to_string(),
+        }
+        .encode_request();
+        assert!(res.is_err());
     }
 }

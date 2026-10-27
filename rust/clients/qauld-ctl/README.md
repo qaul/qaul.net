@@ -50,11 +50,12 @@ On Windows, `--socket host:port` (default `127.0.0.1:9199`).
 Run `qauld-ctl <group> --help` for the full surface. The top-level groups are:
 
 - `node` — node identity/details
-- `account` — local user account: create, password, login/logout, status, update profile
-- `users` — directory of network-known users (list, get, verify, block, security number)
+- `account` — local user account: create, password, login/logout, status, update profile,
+  export / delete / restore
+- `users` — directory of network-known users (list, search, get, verify, block, security number)
 - `feed` — public broadcast feed
-- `group` — group chat management
-- `chat` — send / list / search messages
+- `group` — group chat management (list / search / invited, with `--offset`/`--limit` paging)
+- `chat` — send messages, read a conversation, search messages
 - `file` — chat file transfer
 - `router` — routing table info
 - `connections` — statically configured internet peers
@@ -80,6 +81,24 @@ qauld-ctl --dir /var/lib/qauld account update -n Alice2 -b "hi" \
   --avatar /path/to/avatar.png -c <peer-id>
 # wipe the custody route again:
 qauld-ctl --dir /var/lib/qauld account update -c clear
+```
+
+Back up and restore an account. `export` and `delete` act on the default
+account; paths are resolved on the client side, so relative paths work. The
+archive contains the account's private keys:
+
+```sh
+qauld-ctl --dir /var/lib/qauld account export -o ~/backups
+qauld-ctl --dir /var/lib/qauld account delete --yes
+qauld-ctl --dir /var/lib/qauld account restore -a ~/backups/<file>.qaul_export
+```
+
+Search users, groups and messages:
+
+```sh
+qauld-ctl --dir /var/lib/qauld users search -q alice --online
+qauld-ctl --dir /var/lib/qauld group search -q team
+qauld-ctl --dir /var/lib/qauld --json chat search -q "meeting"
 ```
 
 Inspect transports and toggle one off:

@@ -13,7 +13,7 @@ use proto::{
     user_accounts, CreateUserAccount, SetPasswordRequest, UpdateProfileRequest, UserAccounts,
 };
 
-use super::id_string_to_bin;
+use super::{account_management, id_string_to_bin};
 
 /// Decodes a `GetDefaultUserAccount` response payload and returns the user's raw id bytes.
 /// Returns an empty Vec if the account doesn't exist or decoding fails.
@@ -142,18 +142,33 @@ impl RpcCommand for AccountSubcmd {
             .encode_request(),
             AccountSubcmd::Logout => AuthSubcmd::Logout.encode_request(),
             AccountSubcmd::Status => AuthSubcmd::Status.encode_request(),
+            AccountSubcmd::Export { output } => {
+                account_management::encode_export(output.as_deref())
+            }
+            AccountSubcmd::Delete { yes } => account_management::encode_delete(*yes),
+            AccountSubcmd::Restore { archive } => account_management::encode_restore(archive),
         }
     }
 
     fn decode_response(&self, data: &[u8], json: bool) -> Result<(), Box<dyn std::error::Error>> {
-        // `account login` rides the auth proto (challenge-response), not the
-        // user-accounts proto — decode it through the auth implementation.
-        if let AccountSubcmd::Login { username, password } = self {
-            return AuthSubcmd::Login {
-                username: username.clone(),
-                password: password.clone(),
+        // Session subcommands ride the auth proto and export / delete /
+        // restore the account-management proto, not the user-accounts proto.
+        match self {
+            AccountSubcmd::Login { username, password } => {
+                return AuthSubcmd::Login {
+                    username: username.clone(),
+                    password: password.clone(),
+                }
+                .decode_response(data, json);
             }
-            .decode_response(data, json);
+            AccountSubcmd::Logout => return AuthSubcmd::Logout.decode_response(data, json),
+            AccountSubcmd::Status => return AuthSubcmd::Status.decode_response(data, json),
+            AccountSubcmd::Export { .. }
+            | AccountSubcmd::Delete { .. }
+            | AccountSubcmd::Restore { .. } => {
+                return account_management::decode_response(data, json);
+            }
+            _ => {}
         }
         let user_accounts = UserAccounts::decode(data)?;
         match user_accounts.message {
@@ -259,9 +274,21 @@ mod tests {
     /// `qauld-ctl shell`). They now delegate to the auth flow and never panic.
     #[test]
     fn session_subcommands_do_not_panic() {
-        // Logout/Status have no wire message; they return a graceful Err.
-        assert!(AccountSubcmd::Logout.encode_request().is_err());
-        assert!(AccountSubcmd::Status.encode_request().is_err());
+        use qaul_proto::qaul_rpc_authentication::{auth_rpc, AuthRpc};
+
+        let (buf, module) = AccountSubcmd::Logout.encode_request().unwrap();
+        assert_eq!(module, Modules::Auth);
+        assert!(matches!(
+            AuthRpc::decode(&buf[..]).unwrap().message,
+            Some(auth_rpc::Message::LogoutRequest(_))
+        ));
+
+        let (buf, module) = AccountSubcmd::Status.encode_request().unwrap();
+        assert_eq!(module, Modules::Auth);
+        assert!(matches!(
+            AuthRpc::decode(&buf[..]).unwrap().message,
+            Some(auth_rpc::Message::SessionStatusRequest(_))
+        ));
 
         // Login encodes an AuthRequest routed to the Auth module.
         let res = AccountSubcmd::Login {
