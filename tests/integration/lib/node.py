@@ -274,3 +274,38 @@ class Node:
     def router_v2_table(self) -> dict:
         """The v2 routing table: both index spaces, with metric and local_only."""
         return self._run_json("router", "v2", "table")
+
+    def router_v2_manifests(self) -> dict:
+        """Manifests held for other origins: the cross-sphere user directory."""
+        return self._run_json("router", "v2", "manifests")
+
+    def create_group(self, name: str) -> str:
+        """Create a group and return its id, looked up by name afterwards.
+
+        `group create` reports success but the id is easier to read back
+        from the list than to parse out of the response.
+        """
+        self._run("group", "create", "--name", name)
+        for group in self.groups():
+            if group.get("name") == name:
+                return group["group_id"]
+        raise RuntimeError(f"group {name!r} not in the list after create")
+
+    def invite_to_group(self, group_id: str, user_id: str) -> str:
+        """Invite a user by id.
+
+        The only way to address a user that is not in `users list`, which is
+        exactly the cross-sphere case: under section 2.3 a member never
+        learns a foreign user entry, so discovery-by-listing cannot be the
+        addressing path.
+        """
+        return self._run(
+            "group", "invite", "--group-id", group_id, "--user-id", user_id
+        )
+
+    def invitations(self) -> list[dict]:
+        """Pending group invitations received by this node."""
+        return self._run_json("group", "invited")
+
+    def accept_invitation(self, group_id: str) -> str:
+        return self._run("group", "accept", "--group-id", group_id)
