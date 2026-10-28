@@ -40,3 +40,6 @@ utilities/installers/macos/*.dmg
 utilities/installers/macos/*.jsonsed
 __pycache__/
 .improvements.md
+
+tests/integration/runs/
+tests/integration/results/

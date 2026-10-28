@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Start qauld on an already-applied topology and wait until it is usable.
 
-The step between `network.py apply` and `setup_communities.py`: without it
+The step between `network.py apply` and `phases.py`: without it
 every qauld-ctl call hits a stale socket from the previous run and fails
 with ConnectionRefused (the socket file survives, the daemon does not).
 
@@ -19,7 +19,8 @@ import os
 import subprocess
 import sys
 
-sys.path.insert(0, ".")
+# lib/ is one level up, shared with the rest of tests/integration.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lib.network import start_qaul, stop_qaul, wait_for_local_accounts, wait_for_nodes
 
@@ -76,7 +77,7 @@ def main() -> None:
         print(f"\nnote: {len(stale)} node dir(s) in /tmp belong to an earlier run "
               f"and are ignored (the reducer keys off --roles), e.g. {sorted(stale)[:3]}")
 
-    print(f"\n{len(node_ids)} nodes up. next: ./setup_communities.py --roles {args.roles}")
+    print(f"\n{len(node_ids)} nodes up. next: ./phases.py --roles {args.roles}")
 
 
 if __name__ == "__main__":

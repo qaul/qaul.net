@@ -4,6 +4,9 @@ Each topology file is a meshnet-lab JSON file that defines a simulated mesh netw
 The files are used by `run_topologies.py` to run correctness tests across different
 network shapes.
 
+The community/hub topologies, their roles files and their generator are not here:
+they live with their suite in [`../communities/topologies/`](../communities/).
+
 ---
 
 ## line-5

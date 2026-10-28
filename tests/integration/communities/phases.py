@@ -28,17 +28,19 @@ never have a LAN neighbour at all:
      having an active internet transport and never configured.
 
 Usage:
-    ./setup_communities.py --roles ... --phase 1
-    ./setup_communities.py --roles ... --phase 2 [--dump-tables]
-    ./setup_communities.py --roles ... --verify-only
+    ./phases.py --roles ... --phase 1
+    ./phases.py --roles ... --phase 2 [--dump-tables]
+    ./phases.py --roles ... --verify-only
 """
 
 import argparse
 import json
+import os
 import sys
 import time
 
-sys.path.insert(0, ".")
+# lib/ is one level up, shared with the rest of tests/integration.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lib.node import Node
 
@@ -78,7 +80,7 @@ def gateway_role(status: dict) -> bool | None:
     return None
 
 
-def verify(roles: dict, quiet: bool = False) -> bool:
+def verify(roles: dict, quiet: bool = False, v1: bool = False) -> bool:
     hub_id = roles["hub"]
     gateways = [c["gateway"] for c in roles["communities"]]
     ok = True
@@ -92,6 +94,14 @@ def verify(roles: dict, quiet: bool = False) -> bool:
         mark = "ok" if len(internet_neighbours) == expected else "MISMATCH"
         print(f"  hub {hub_id}: {len(internet_neighbours)}/{expected} "
               f"internet neighbours [{mark}]")
+
+    # is_gateway is a v2 concept (sync_gateway_role). v1 has no sphere model
+    # and so no gateway role to assert: on that arm the internet neighbour
+    # count above is the whole check.
+    if v1:
+        if not quiet:
+            print("  gateway role: n/a on v1 (no sphere model)")
+        return ok
 
     unknown_field = False
     for gateway in gateways:
@@ -117,18 +127,22 @@ def verify(roles: dict, quiet: bool = False) -> bool:
     return ok
 
 
-def dump_tables(roles: dict) -> None:
+def dump_tables(roles: dict, v1: bool = False) -> None:
     """Print the hub's v2 table - the direct membrane check.
 
     No user entry may cross to the Internet sphere, so the hub's user
     space must be empty and its node space must hold gateways only.
     """
     hub_id = roles["hub"]
+    if v1:
+        print(f"\n-- hub {hub_id} router table (v1) --")
+        print(json.dumps(Node(hub_id).router_table(), indent=1)[:2000])
+        return
     print(f"\n-- hub {hub_id} router v2 table (membrane check) --")
     print(json.dumps(Node(hub_id).router_v2_table(), indent=1)[:2000])
 
 
-def phase1(roles: dict) -> bool:
+def phase1(roles: dict, v1: bool = False) -> bool:
     """Switch the hub's LAN off while it still has no links.
 
     Asserting the table is empty here is the whole point: it proves the
@@ -142,8 +156,13 @@ def phase1(roles: dict) -> bool:
 
     neighbours = hub.router_neighbours()
     lan = neighbours.get("lan") or []
-    table = hub.router_v2_table()
-    users = [e for e in table if e.get("space") == "user"]
+    # `router table` is the v1 view and answers on both arms; the v2 table
+    # additionally tags entries with their index space, so user entries can
+    # be counted exactly rather than inferred.
+    if v1:
+        users = hub.router_table()
+    else:
+        users = [e for e in hub.router_v2_table() if e.get("space") == "user"]
 
     ok = not lan and not users
     print(f"  LAN neighbours   {len(lan)} [{'ok' if not lan else 'SHOULD BE 0'}]")
@@ -156,14 +175,20 @@ def phase1(roles: dict) -> bool:
         print("\nphase 1 done. now add the hub links and run phase 2:")
         print(f"  sudo $MESHNET_LAB/network.py apply "
               f"topologies/{roles['name']}.json")
-        print(f"  ./setup_communities.py --roles ... --phase 2")
+        print(f"  ./phases.py --roles ... --phase 2")
     return ok
 
 
-def setup(roles: dict, settle: int) -> bool:
+def setup(roles: dict, settle: int, v1: bool = False,
+          reverse: bool = False) -> bool:
     hub_id = roles["hub"]
     hub = Node(hub_id)
     gateways = [c["gateway"] for c in roles["communities"]]
+    # The first gateway to dial is the one whose node binding the hub loses to
+    # the reserved-index sweep, so dial order is the independent variable when
+    # testing that claim.
+    if reverse:
+        gateways = list(reversed(gateways))
 
     # Phase 1 already switched LAN off. Re-asserted here because a phase-2
     # run against a hub that still has LAN up would measure a bridge.
@@ -183,15 +208,18 @@ def setup(roles: dict, settle: int) -> bool:
     if len(candidates) > 1:
         print(f"  other candidates: {candidates[1:]}")
 
-    for gateway in gateways:
+    print(f"dial order: {' -> '.join(gateways)}"
+          + ("  (reversed)" if reverse else ""))
+    for position, gateway in enumerate(gateways):
         Node(gateway).add_internet_peer(address, "hub")
-        print(f"gateway {gateway}: peered to hub")
+        print(f"gateway {gateway}: peered to hub"
+              + ("   <- dialed first" if position == 0 else ""))
 
     print(f"waiting {settle}s for the internet dials to settle")
     time.sleep(settle)
 
     print("verifying:")
-    return verify(roles)
+    return verify(roles, v1=v1)
 
 
 def main() -> None:
@@ -202,6 +230,11 @@ def main() -> None:
     ap.add_argument("--phase", type=int, choices=(1, 2), default=2)
     ap.add_argument("--verify-only", action="store_true")
     ap.add_argument("--dump-tables", action="store_true")
+    ap.add_argument("--reverse", action="store_true",
+                    help="dial the gateways in reverse order (phase 2)")
+    ap.add_argument("--v1", action="store_true",
+                    help="v1 arm: skip the v2-only gateway-role assertion and "
+                         "read the v1 routing table")
     args = ap.parse_args()
 
     with open(args.roles) as f:
@@ -209,14 +242,14 @@ def main() -> None:
 
     if args.verify_only:
         print("verifying:")
-        ok = verify(roles)
+        ok = verify(roles, v1=args.v1)
     elif args.phase == 1:
-        ok = phase1(roles)
+        ok = phase1(roles, v1=args.v1)
     else:
-        ok = setup(roles, args.settle)
+        ok = setup(roles, args.settle, v1=args.v1, reverse=args.reverse)
 
     if args.dump_tables:
-        dump_tables(roles)
+        dump_tables(roles, v1=args.v1)
 
     if not ok:
         raise SystemExit("setup incomplete - see above")

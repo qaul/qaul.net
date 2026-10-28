@@ -17,7 +17,7 @@ Two instruments, deliberately kept separate:
                     running the protocol, not routing in isolation.
 
 Transport maps to sphere: Lan/Ble are the Local sphere, Internet is the
-Internet sphere, so "cross-membrane" is simply the Internet rows (spec
+Internet sphere, so "cross-membrane" is simply the  Internet rows (spec
 section 2.3).
 
 Usage:
@@ -39,7 +39,8 @@ import time
 import sys
 from collections import defaultdict
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# lib/ is one level up, shared with the rest of tests/integration.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 SUDO = ["sudo", "-n"]
 
@@ -217,6 +218,53 @@ def read_frames(node_id: str, start, end) -> list[dict]:
     return frames
 
 
+def sphere_of(transport: str) -> str:
+    return "Local" if transport in LOCAL_SPHERE_TRANSPORTS else "Internet"
+
+
+# Bringing up the spheres costs far more than running them: phase 2 sets off
+# index dumps, manifest exchange and the gateway role flip, and the Internet
+# sphere peaks ~40x its steady rate before settling. A window that starts
+# inside that burst reports a steady-state figure that is simply wrong, so
+# the window is split into thirds and the thirds have to agree.
+STATIONARITY_TOLERANCE = 0.15
+
+
+def stationarity(frames: dict, start, end, bins: int = 3) -> dict:
+    """Outbound B/s per sphere for each of `bins` equal slices of the window."""
+    window_s = (end - start).total_seconds()
+    width = window_s / bins
+    totals: dict = defaultdict(lambda: [0] * bins)
+
+    for node_frames in frames.values():
+        for frame in node_frames:
+            if frame["direction"] != "SEND":
+                continue
+            offset = (frame["ts"] - start).total_seconds()
+            index = min(int(offset / width), bins - 1)
+            totals[sphere_of(frame["transport"])][index] += frame["bytes"]
+
+    return {sphere: [b / width for b in buckets] for sphere, buckets in totals.items()}
+
+
+def report_stationarity(rates: dict) -> list[str]:
+    """Print the per-third rates; return the spheres that failed."""
+    print("\n-- window stationarity (outbound B/s per third) --")
+    drifted = []
+    for sphere in ("Local", "Internet"):
+        buckets = rates.get(sphere)
+        if not buckets:
+            continue
+        low, high = min(buckets), max(buckets)
+        spread = (high - low) / high if high else 0.0
+        flag = "ok" if spread <= STATIONARITY_TOLERANCE else "DRIFT"
+        if flag == "DRIFT":
+            drifted.append(sphere)
+        print(f"  {sphere:<9} " + "  ".join(f"{b:>8.1f}" for b in buckets)
+              + f"   spread {spread * 100:>5.1f}% [{flag}]")
+    return drifted
+
+
 def fmt(value: float) -> str:
     return f"{value:,.1f}"
 
@@ -239,6 +287,8 @@ def do_reduce(roles: dict, pre: dict, post: dict, json_out: str | None) -> None:
     with concurrent.futures.ThreadPoolExecutor(max_workers=min(len(node_ids), 32)) as pool:
         futures = {pool.submit(read_frames, nid, start, end): nid for nid in node_ids}
         frames = {futures[f]: f.result() for f in concurrent.futures.as_completed(futures)}
+
+    drift = report_stationarity(stationarity(frames, start, end))
 
     # (direction, transport, type) -> [frames, bytes]
     by_key: dict[tuple, list] = defaultdict(lambda: [0, 0])
@@ -388,8 +438,21 @@ def do_reduce(roles: dict, pre: dict, post: dict, json_out: str | None) -> None:
         print(f"  no counter pair for {len(missing)} node(s): {sorted(missing)[:5]}")
     report["wire"] = wire_rows
 
+    report["stationarity"] = {
+        "tolerance": STATIONARITY_TOLERANCE,
+        "drifted": drift,
+        "rates": stationarity(frames, start, end),
+    }
+
     print("\nThe membrane is not a byte count - the logs carry frame sizes,"
           "\nnot contents. Assert it separately:  ./overhead.py membrane --roles ...")
+
+    if drift:
+        print(f"\nWARNING: {', '.join(drift)} drifted more than "
+              f"{STATIONARITY_TOLERANCE * 100:.0f}% across the window, so the rates "
+              "above\nare not a steady state - most likely the window opened inside "
+              "the\nbring-up burst, which decays about 180s after phase 2. Inspect with"
+              "\n  ./overhead.py timeline --roles ...\nthen re-sample a later window.")
 
     if json_out:
         parent = os.path.dirname(json_out)
@@ -398,6 +461,58 @@ def do_reduce(roles: dict, pre: dict, post: dict, json_out: str | None) -> None:
         with open(json_out, "w") as f:
             json.dump(report, f, indent=1)
         print(f"\nwrote {json_out}")
+
+
+# --------------------------------------------------------------------------
+# timeline
+# --------------------------------------------------------------------------
+
+
+def do_timeline(roles: dict, bucket: int) -> None:
+    """Outbound B/s per sphere over the whole log, bucketed.
+
+    Reads the logs end to end rather than a sampled window, so it shows the
+    bring-up burst and where it decays - which is how a stationary window
+    gets chosen in the first place.
+    """
+    node_ids = all_node_ids(roles)
+    far_past = datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
+    far_future = datetime.datetime.max.replace(tzinfo=datetime.timezone.utc)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=min(len(node_ids), 32)) as pool:
+        futures = {pool.submit(read_frames, nid, far_past, far_future): nid
+                   for nid in node_ids}
+        frames = {futures[f]: f.result() for f in concurrent.futures.as_completed(futures)}
+
+    sends = [f for node_frames in frames.values() for f in node_frames
+             if f["direction"] == "SEND"]
+    if not sends:
+        raise SystemExit("no SEND frames in any log; is RUST_LOG set to debug?")
+
+    sends.sort(key=lambda f: f["ts"])
+    t0 = sends[0]["ts"]
+    totals: dict = defaultdict(lambda: defaultdict(lambda: [0, 0]))
+    for frame in sends:
+        index = int((frame["ts"] - t0).total_seconds()) // bucket
+        slot = totals[index][sphere_of(frame["transport"])]
+        slot[0] += 1
+        slot[1] += frame["bytes"]
+
+    links = roles["totals"]["links"]
+    print(f"\n=== {roles['name']} — {bucket}s buckets from first SEND "
+          f"({t0.isoformat()}) ===")
+    print(f"{'t+s':>7} {'Local B/s':>11} {'B/s/link':>9} {'Internet B/s':>13} "
+          f"{'Int fr/s':>9} {'Int B/fr':>9}")
+    for index in sorted(totals):
+        local = totals[index]["Local"]
+        net = totals[index]["Internet"]
+        print(f"{index * bucket:>7} {local[1] / bucket:>11.1f} "
+              f"{local[1] / bucket / links:>9.2f} {net[1] / bucket:>13.1f} "
+              f"{net[0] / bucket:>9.2f} "
+              f"{(net[1] / net[0] if net[0] else 0):>9.1f}")
+
+    print("\nThe last bucket is partial. Pick a window that starts after the"
+          "\nLocal and Internet columns have both gone flat.")
 
 
 # --------------------------------------------------------------------------
@@ -557,6 +672,11 @@ def main() -> None:
     p_membrane = sub.add_parser("membrane", help="assert the 2.3 membrane held")
     p_membrane.add_argument("--roles", required=True)
 
+    p_timeline = sub.add_parser(
+        "timeline", help="outbound B/s per sphere over the whole log")
+    p_timeline.add_argument("--roles", required=True)
+    p_timeline.add_argument("--bucket", type=int, default=60)
+
     args = ap.parse_args()
     roles = load_roles(args.roles)
 
@@ -574,6 +694,8 @@ def main() -> None:
         do_sample(all_node_ids(roles), args.out)
     elif args.mode == "membrane":
         do_membrane(roles)
+    elif args.mode == "timeline":
+        do_timeline(roles, args.bucket)
     else:
         with open(args.pre) as f:
             pre = json.load(f)
