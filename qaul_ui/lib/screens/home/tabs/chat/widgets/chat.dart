@@ -1016,9 +1016,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
     final l10n = AppLocalizations.of(context)!;
     final directPeer = _directChatPeer(room);
-    final chatBackgroundColor = QaulColorSheet(
-      Theme.of(context).brightness,
-    ).background;
+    final chatBackgroundColor = Theme.of(context).scaffoldBackgroundColor;
     final showBackButton = isMobileChat;
     _chatRenderMode = resolveChatRenderMode(room);
     final isLoadingMessages = room.messages == null;
