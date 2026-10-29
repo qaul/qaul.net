@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'qaul_color_sheet.dart';
 import 'qaul_emoji.dart';
 
 /// Light/dark [ThemeData] aligned with [QaulApp] for Widgetbook and the host app.
@@ -69,6 +70,7 @@ abstract final class QaulAppTheme {
     ),
     brightness: Brightness.dark,
     primarySwatch: Colors.lightBlue,
+    scaffoldBackgroundColor: const QaulColorSheet(Brightness.dark).background,
     visualDensity: VisualDensity.adaptivePlatformDensity,
     iconTheme: const IconThemeData(color: Colors.white),
     navigationBarTheme: const NavigationBarThemeData(

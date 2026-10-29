@@ -82,6 +82,7 @@ class QaulApp extends PlatformAwareBuilder {
     ),
     brightness: Brightness.dark,
     primarySwatch: Colors.lightBlue,
+    scaffoldBackgroundColor: const QaulColorSheet(Brightness.dark).background,
     visualDensity: VisualDensity.adaptivePlatformDensity,
     iconTheme: const IconThemeData(color: Colors.white),
     navigationBarTheme: const NavigationBarThemeData(

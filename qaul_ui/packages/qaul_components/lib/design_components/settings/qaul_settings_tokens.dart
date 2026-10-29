@@ -15,9 +15,7 @@ Color qaulSettingsItemColor(BuildContext context, {bool selected = false}) {
 }
 
 Color qaulSettingsBackgroundColor(BuildContext context) {
-  return Theme.of(context).brightness == Brightness.dark
-      ? Colors.black
-      : Colors.white;
+  return Theme.of(context).scaffoldBackgroundColor;
 }
 
 Color qaulSettingsHoverColor(BuildContext context) {
