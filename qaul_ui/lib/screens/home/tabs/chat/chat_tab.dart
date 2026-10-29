@@ -282,9 +282,7 @@ class _ChatState extends _BaseTabState<_Chat> {
                                       Intl.defaultLocale ?? 'en',
                                     ),
                                   ),
-                            style: theme.bodySmall!.copyWith(
-                              fontStyle: FontStyle.italic,
-                            ),
+                            style: theme.bodySmall,
                           ),
                           const Icon(Icons.chevron_right),
                         ],
@@ -322,9 +320,7 @@ class _ChatState extends _BaseTabState<_Chat> {
                                     Intl.defaultLocale ?? 'en',
                                   ),
                                 ),
-                          style: theme.bodySmall!.copyWith(
-                            fontStyle: FontStyle.italic,
-                          ),
+                          style: theme.bodySmall,
                         ),
                         const Icon(Icons.chevron_right),
                       ],

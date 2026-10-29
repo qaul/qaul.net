@@ -190,9 +190,7 @@ class _PublicTabViewState extends ConsumerState<_PublicTabView> {
                     content: Text(msg.content ?? '', style: theme.bodyLarge),
                     trailingMetadata: Text(
                       msg.sentTimestamp,
-                      style: theme.bodySmall!.copyWith(
-                        fontStyle: FontStyle.italic,
-                      ),
+                      style: theme.bodySmall,
                     ),
                     nameTapRoutesToDetailsScreen: true,
                   );
