@@ -136,6 +136,37 @@ impl FirstChunkHeader {
     }
 }
 
+/// One part of a message too big for one queue index, decoded from the large message indicator 
+/// (byte 2 of the first chunk header). A message is split into at most 4 parts, each sent as a standard message.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct LargePart {
+    /// Which large message this part belongs to, 1..=15.
+    pub index: u8,
+    /// How many parts the message has, 1..=4.
+    pub total: u8,
+    /// Which part this is, 0..=3.
+    pub part: u8,
+}
+
+impl LargePart {
+    /// Decode the indicator byte. Returns None if it is 0, an ordinary message.
+    pub fn from_indicator(byte: u8) -> Option<Self> {
+        if byte == 0 {
+            return None;
+        }
+        let total = match (byte >> 2) & 0x03 {
+            0 => 4,
+            total => total,
+        };
+        Some(Self { index: byte >> 4, total, part: byte & 0x03 })
+    }
+
+    /// Encode as the indicator byte.
+    pub fn to_indicator(&self) -> u8 {
+        (self.index << 4) | ((self.total & 0x03) << 2) | (self.part & 0x03)
+    }
+}
+
 /// A frame received on the MSG characteristic.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Frame<'a> {
@@ -417,5 +448,43 @@ mod tests {
                 actual: 12
             })
         );
+    }
+
+    fn large(index: u8, total: u8, part: u8) -> LargePart {
+        LargePart { index, total, part }
+    }
+
+    #[test]
+    fn indicator_zero_is_an_ordinary_message() {
+        assert_eq!(LargePart::from_indicator(0x00), None);
+    }
+
+    #[test]
+    fn indicator_decodes_index_total_and_part() {
+        // Kotlin: (3 shl 4) or (2 shl 2) or 1
+        assert_eq!(LargePart::from_indicator(0x39), Some(large(3, 2, 1)));
+    }
+
+    #[test]
+    fn indicator_total_bits_zero_mean_four_parts() {
+        assert_eq!(LargePart::from_indicator(0x52), Some(large(5, 4, 2)));
+    }
+
+    #[test]
+    fn indicator_round_trips() {
+        for p in [large(1, 1, 0), large(3, 2, 1), large(15, 3, 2), large(2, 4, 3), large(15, 4, 0)] {
+            assert_eq!(LargePart::from_indicator(p.to_indicator()), Some(p));
+        }
+    }
+
+    #[test]
+    fn four_parts_do_not_touch_the_index() {
+        assert_eq!(large(2, 4, 0).to_indicator(), 0x20);
+    }
+
+    #[test]
+    fn kotlin_four_part_indicator_shifts_the_index_but_still_decodes() {
+        // Kotlin's index 2, 4 parts, part 1: (2 shl 4) or (4 shl 2) or 1 = 0x31
+        assert_eq!(LargePart::from_indicator(0x31), Some(large(3, 4, 1)));
     }
 }

@@ -79,6 +79,10 @@ impl SendQueueMessage {
         &self.message_id
     }
 
+    pub fn large_message_indicator(&self) -> u8 {
+        self.large_message_indicator
+    }
+
     /// Every chunk, in order, for the first send.
     pub fn get_all_chunks(&self) -> Vec<Vec<u8>> {
         (0..self.total_chunks)

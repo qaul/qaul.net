@@ -8,27 +8,25 @@
 //! I/O: the caller feeds in events with the current time and this carries out the
 //! actions that come back. the caller turns `Transmit` into a GATT write or a notify.
 //!
-//! # TODO: Ordering rules for the caller
+//! # One frame at a time
 //!
-//! the link only guarantees the order of frames within each lane. The caller's
-//! scheduler must:
-//!
-//! 1. Enqueue every action from one handle call before dispatching any of
-//!    them. Otherwise an idle scheduler sends whichever frame arrives first,
-//!    and a bulk chunk can go out ahead of an ACK in the same batch.
+//! Frames wait here in one queue per lane, and only one frame is sent out at a
+//! time: the next comes once the caller reports `FrameSent`. so an ACK waits for at most one bulk chunk,
+//! not for every chunk queued before it. [ This Doesnt Work ]
+//! per link: there's no global slot shared between links like in Android
 
 use std::collections::VecDeque;
 use std::time::{Duration, Instant};
 
 use crate::{ChunkHeader, Frame};
 use crate::constants::{
-    DEFAULT_CHUNK_SIZE, IDENTITY_RETRY_MS, LIVENESS_TIMEOUT_MS, MAX_CHUNK_SIZE, MEDIUM_MESSAGE_MAX_BYTES, PING_INTERVAL_MS, QAUL_ID_BYTES, UNRESOLVED_TIMEOUT_MS,
+    DEFAULT_CHUNK_SIZE, IDENTITY_RETRY_MS, LIVENESS_TIMEOUT_MS, MAX_CHUNK_SIZE, MEDIUM_MESSAGE_MAX_BYTES, PING_INTERVAL_MS, QAUL_ID_BYTES, SETUP_TIMEOUT_MS, UNRESOLVED_TIMEOUT_MS,
 };
 use crate::flc::FlcMessage;
 use crate::frame::decode;
 use crate::queue::receive_queue::{ReceiveEvent, ReceiveQueue};
 use crate::queue::send_queue::SendQueue;
-use crate::queue::send_queue::SendEvent;
+use crate::queue::send_queue::{SendEvent, SendFailure};
 
 /// Which scheduler lane a frame goes out on, highest priority first.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -57,6 +55,8 @@ pub enum LinkEvent {
     Send { message: Vec<u8>, message_id: String },
     /// Time has passed. Drives the liveness ping and timeout
     Tick,
+    /// The last `Transmit` has been handed to the radio, the pipe can take the next one.
+    FrameSent,
 }
 
 /// Something the caller should do.
@@ -66,8 +66,8 @@ pub enum LinkAction {
     Transmit { bytes: Vec<u8>, lane: Lane },
     /// A message from the peer arrived intact: hand it to libqaul.
     Deliver { message: Vec<u8>, from: [u8; QAUL_ID_BYTES] },
-    /// A message we sent was delivered or failed.
-    MessageResult { message_id: String, success: bool },
+    /// A message we sent was delivered or failed, and why.
+    MessageResult { message_id: String, result: Result<(), SendFailure> },
     /// We now know who the peer is. Emitted once per link.
     PeerIdentified([u8; QAUL_ID_BYTES]),
     /// The link is dead, caller should disconnect it.
@@ -92,13 +92,35 @@ pub struct Link {
     id_sent: bool,
     send_queue: SendQueue,
     receive_queue: ReceiveQueue,
-    /// Frames waiting to be transmitted, oldest first. Flow control goes here
-    /// so it can be held until the transport is ready.
-    outbox: VecDeque<(Vec<u8>, Lane)>,
+    /// Frames waiting to be transmitted, one queue per lane, oldest first. Everything is held here until the transport is ready.
+    lanes: [VecDeque<Vec<u8>>; 3],
+    /// A `Transmit` is out and the caller hasn't reported `FrameSent` yet.
+    in_flight: bool,
+    /// Time when this link was created
+    created_at: Instant,
+    /// Every `Transmit` this link has handed out, for the status line.
+    frames_sent: u64,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct LinkStats {
+    /// Frames waiting in each lane: Control, Medium, Bulk.
+    pub lanes: [usize; 3],
+    /// A `Transmit` is out and its `FrameSent` hasn't come back yet.
+    pub in_flight: bool,
+    /// Every `Transmit` handed out since the link was made.
+    pub frames_sent: u64,
+    /// Messages holding a queue index: started and not ACKed yet (max 29).
+    pub sending: usize,
+    /// Messages not started yet, holding no queue index.
+    pub waiting: usize,
+}
+
+/// The lanes, highest priority first.
+const LANES: [Lane; 3] = [Lane::Control, Lane::Medium, Lane::Bulk];
+
 impl Link {
-    pub fn new(our_id: [u8; QAUL_ID_BYTES]) -> Self {
+    pub fn new(our_id: [u8; QAUL_ID_BYTES], now: Instant) -> Self {
         Self {
             our_id,
             peer_id: None,
@@ -110,13 +132,27 @@ impl Link {
             id_sent: false,
             send_queue: SendQueue::new(our_id, DEFAULT_CHUNK_SIZE),
             receive_queue: ReceiveQueue::new(),
-            outbox: VecDeque::new(),
+            lanes: Default::default(),
+            in_flight: false,
+            created_at: now,
+            frames_sent: 0,
         }
     }
 
     /// True once frames can reach the peer (TransportReady).
     pub fn is_ready(&self) -> bool {
         self.ready
+    }
+
+    /// How busy the send side is right now.
+    pub fn stats(&self) -> LinkStats {
+        LinkStats {
+            lanes: self.lanes.each_ref().map(VecDeque::len),
+            in_flight: self.in_flight,
+            frames_sent: self.frames_sent,
+            sending: self.send_queue.sending_count(),
+            waiting: self.send_queue.waiting_count(),
+        }
     }
 
     /// Handle one event and return what to do about it.
@@ -138,6 +174,7 @@ impl Link {
                 self.send_queue.add_message(message, message_id)
             }
             LinkEvent::Tick => self.on_tick(now, &mut actions),
+            LinkEvent::FrameSent => self.in_flight = false,
         }
         self.flush(&mut actions, now);
         actions
@@ -146,6 +183,11 @@ impl Link {
     fn on_tick(&mut self, now: Instant, actions: &mut Vec<LinkAction>) {
         // The clocks only start once the transport is ready.
         if !self.ready {
+            // Mirrors Android's setup timeout. TODO: Re assess usefulness
+            let setup_timeout = Duration::from_millis(SETUP_TIMEOUT_MS);
+            if now.duration_since(self.created_at) >= setup_timeout {
+                actions.push(LinkAction::Close);
+            }
             return;
         }
 
@@ -186,7 +228,7 @@ impl Link {
         self.send_queue
             .fail_all()
             .into_iter()
-            .map(|message_id| LinkAction::MessageResult { message_id, success: false })
+            .map(|message_id| LinkAction::MessageResult { message_id, result: Err(SendFailure::LinkGone) })
             .collect()
     }
 
@@ -205,7 +247,18 @@ impl Link {
     }
 
     fn queue_flc(&mut self, flc: FlcMessage) {
-        self.outbox.push_back((flc.encode(), Lane::Control));
+        self.queue(flc.encode(), Lane::Control);
+    }
+
+    fn queue(&mut self, bytes: Vec<u8>, lane: Lane) {
+        self.lanes[lane as usize].push_back(bytes);
+    }
+
+    /// The oldest frame of the highest lane that has one.
+    fn next_frame(&mut self) -> Option<(Vec<u8>, Lane)> {
+        LANES
+            .into_iter()
+            .find_map(|lane| Some((self.lanes[lane as usize].pop_front()?, lane)))
     }
 
     /// A frame arrived from the peer. Mirrors `onChunkReceived`.
@@ -232,7 +285,7 @@ impl Link {
             FlcMessage::AckError { queue_index, .. } => self.on_ack(queue_index, false, actions),
             FlcMessage::MissingChunks (missing) => {
                 for chunk in self.send_queue.resend_chunks(&missing) {
-                    self.outbox.push_back((chunk, Lane::Medium)); // TODO: the messages own lane, never Control
+                    self.queue(chunk, Lane::Medium); // TODO: the messages own lane, never Control
                 }
             }
             _ => {} // ignoring other FLCs for now
@@ -241,8 +294,8 @@ impl Link {
 
     fn on_ack(&mut self, queue_index: u8, success: bool, actions: &mut Vec<LinkAction>) {
         match self.send_queue.on_ack(queue_index, success) {
-            Some(SendEvent::Delivered { message_id }) => actions.push(LinkAction::MessageResult { message_id, success: true }),
-            Some(SendEvent::Failed { message_id }) => actions.push(LinkAction::MessageResult { message_id, success: false }),
+            Some(SendEvent::Delivered { message_id }) => actions.push(LinkAction::MessageResult { message_id, result: Ok(()) }),
+            Some(SendEvent::Failed { message_id, reason }) => actions.push(LinkAction::MessageResult { message_id, result: Err(reason) }),
             _ => {}   
         }
     }
@@ -265,6 +318,9 @@ impl Link {
                 self.queue_flc(flc);
                 actions.push(LinkAction::Deliver { message, from: qaul_id });
             }
+            ReceiveEvent::PartReceived { queue_index } => {
+                self.queue_flc(FlcMessage::AckSuccess { queue_index });
+            }
         }
     }
 
@@ -279,31 +335,36 @@ impl Link {
         // 2. Our SEND_QAUL_ID first, if it has not gone out.
 
         if !self.id_sent {
-            self.outbox.push_front((FlcMessage::SendQaulId(&self.our_id).encode(), Lane::Control));
+            let id = FlcMessage::SendQaulId(&self.our_id).encode();
+            self.lanes[Lane::Control as usize].push_front(id);
             self.id_sent = true;
             self.id_sent_at = Some(now);
         }
 
-        // 3. Drain everything in the outbox so far, in order.
-        self.outbox.drain(..).for_each(|(bytes, lane)| {
-            actions.push(LinkAction::Transmit { bytes, lane });
-        });
-
-        // 4. Start one waiting message, like getChunks does per flush:
-        
+        // 3. Start one waiting message, like getChunks does per flush. Its chunks
+        //    wait in their lane like everything else.
         for event in self.send_queue.start_next_message() {
             match event {
                 SendEvent::Chunks(chunks) => {
                     let size: usize = chunks.iter().map(|c| c.len()).sum();
                     let lane = if size <= MEDIUM_MESSAGE_MAX_BYTES { Lane::Medium } else { Lane::Bulk };
                     for chunk in chunks {
-                        actions.push(LinkAction::Transmit { bytes: chunk, lane });
+                        self.queue(chunk, lane);
                     }
                 }
-                SendEvent::Failed { message_id } => {
-                    actions.push(LinkAction::MessageResult { message_id, success: false });
+                SendEvent::Failed { message_id, reason } => {
+                    actions.push(LinkAction::MessageResult { message_id, result: Err(reason) });
                 }
                 SendEvent::Delivered { .. } => unreachable!("start_next_message never delivers"),
+            }
+        }
+
+        // 4. If the pipe is free, hand it the next highest priority frame.
+        if !self.in_flight {
+            if let Some((bytes, lane)) = self.next_frame() {
+                self.in_flight = true;
+                self.frames_sent += 1;
+                actions.push(LinkAction::Transmit { bytes, lane });
             }
         }
     }
@@ -341,11 +402,24 @@ mod tests {
             .collect()
     }
 
+    /// Handle `event`, then report each frame sent as soon as it goes out, like an
+    /// always free pipe, until the link has nothing left to send. Returns everything it did.
+    fn handle_all(link: &mut Link, event: LinkEvent, at: Instant) -> Vec<LinkAction> {
+        let mut actions = link.handle(event, at);
+        loop {
+            let more = link.handle(LinkEvent::FrameSent, at);
+            if more.is_empty() {
+                return actions;
+            }
+            actions.extend(more);
+        }
+    }
+
     /// Hand each frame to `link` as if it arrived over the air; collect everything it does.
     fn feed(link: &mut Link, frames: &[(Vec<u8>, Lane)]) -> Vec<LinkAction> {
         frames
             .iter()
-            .flat_map(|(bytes, _)| link.handle(LinkEvent::Received(bytes.clone()), now()))
+            .flat_map(|(bytes, _)| handle_all(link, LinkEvent::Received(bytes.clone()), now()))
             .collect()
     }
 
@@ -359,10 +433,10 @@ mod tests {
 
     /// Two links whose transports are up and who have exchanged qaul IDs.
     fn connected() -> (Link, Link) {
-        let mut a = Link::new(ID_A);
-        let mut b = Link::new(ID_B);
-        let a_hello = frames(&a.handle(LinkEvent::TransportReady, now()));
-        let b_hello = frames(&b.handle(LinkEvent::TransportReady, now()));
+        let mut a = Link::new(ID_A, now());
+        let mut b = Link::new(ID_B, now());
+        let a_hello = frames(&handle_all(&mut a, LinkEvent::TransportReady, now()));
+        let b_hello = frames(&handle_all(&mut b, LinkEvent::TransportReady, now()));
         assert!(feed(&mut b, &a_hello).contains(&LinkAction::PeerIdentified(ID_A)));
         assert!(feed(&mut a, &b_hello).contains(&LinkAction::PeerIdentified(ID_B)));
         (a, b)
@@ -370,10 +444,10 @@ mod tests {
 
     #[test]
     fn nothing_goes_out_until_the_transport_is_ready() {
-        let mut a = Link::new(ID_A);
+        let mut a = Link::new(ID_A, now());
         assert!(a.handle(send(body(10), "m"), now()).is_empty());
 
-        let sent = frames(&a.handle(LinkEvent::TransportReady, now()));
+        let sent = frames(&handle_all(&mut a, LinkEvent::TransportReady, now()));
         // Our qaul ID first, on the control lane, then the held message.
         assert_eq!(decode(&sent[0].0), Ok(Frame::Flc(FlcMessage::SendQaulId(&ID_A[..]))));
         assert_eq!(sent[0].1, Lane::Control);
@@ -383,16 +457,16 @@ mod tests {
 
     #[test]
     fn mtu_sets_the_chunk_size() {
-        let mut a = Link::new(ID_A);
-        a.handle(LinkEvent::TransportReady, now());
+        let mut a = Link::new(ID_A, now());
+        handle_all(&mut a, LinkEvent::TransportReady, now());
         a.handle(LinkEvent::MtuChanged(517), now());
         // 400 bytes fit in one 509 byte chunk; at the default 20 it would take 23.
-        assert_eq!(frames(&a.handle(send(body(400), "m"), now())).len(), 1);
+        assert_eq!(frames(&handle_all(&mut a, send(body(400), "m"), now())).len(), 1);
     }
 
     #[test]
     fn peer_is_identified_once() {
-        let mut b = Link::new(ID_B);
+        let mut b = Link::new(ID_B, now());
         let hello = vec![(FlcMessage::SendQaulId(&ID_A).encode(), Lane::Control)];
         assert_eq!(feed(&mut b, &hello), vec![LinkAction::PeerIdentified(ID_A)]);
         assert_eq!(feed(&mut b, &hello), vec![]);
@@ -410,13 +484,13 @@ mod tests {
     fn message_round_trip_between_two_links() {
         let (mut a, mut b) = connected();
 
-        let chunks = frames(&a.handle(send(body(100), "m"), now()));
+        let chunks = frames(&handle_all(&mut a, send(body(100), "m"), now()));
         let at_b = feed(&mut b, &chunks);
         assert!(at_b.contains(&LinkAction::Deliver { message: body(100), from: ID_A }));
 
         // B's ACK goes back to A, which reports the message delivered.
         let at_a = feed(&mut a, &frames(&at_b));
-        assert_eq!(at_a, vec![LinkAction::MessageResult { message_id: "m".into(), success: true }]);
+        assert_eq!(at_a, vec![LinkAction::MessageResult { message_id: "m".into(), result: Ok(()) }]);
     }
 
     #[test]
@@ -424,7 +498,7 @@ mod tests {
         let (mut a, mut b) = connected();
 
         // 100 bytes at the default chunk size is 7 chunks. Chunk 2 is lost.
-        let chunks = frames(&a.handle(send(body(100), "m"), now()));
+        let chunks = frames(&handle_all(&mut a, send(body(100), "m"), now()));
         let arrived: Vec<_> = chunks
             .into_iter()
             .filter(|(bytes, _)| chunk_header(bytes).map(|h| h.chunk_index) != Some(2))
@@ -445,17 +519,17 @@ mod tests {
         let at_b = feed(&mut b, &resend);
         assert!(at_b.contains(&LinkAction::Deliver { message: body(100), from: ID_A }));
         let at_a = feed(&mut a, &frames(&at_b));
-        assert_eq!(at_a, vec![LinkAction::MessageResult { message_id: "m".into(), success: true }]);
+        assert_eq!(at_a, vec![LinkAction::MessageResult { message_id: "m".into(), result: Ok(()) }]);
     }
 
     #[test]
     fn disconnect_fails_every_unfinished_message() {
-        let mut a = Link::new(ID_A);
+        let mut a = Link::new(ID_A, now());
         a.handle(LinkEvent::TransportReady, now());
         a.handle(send(body(10), "in flight"), now());
         assert_eq!(
             a.disconnect(),
-            vec![LinkAction::MessageResult { message_id: "in flight".into(), success: false }]
+            vec![LinkAction::MessageResult { message_id: "in flight".into(), result: Err(SendFailure::LinkGone) }]
         );
     }
 
@@ -465,8 +539,8 @@ mod tests {
 
     /// A link that is ready at `t0` and has the peer's ID, so only liveness applies.
     fn identified(t0: Instant) -> Link {
-        let mut a = Link::new(ID_A);
-        a.handle(LinkEvent::TransportReady, t0);
+        let mut a = Link::new(ID_A, t0);
+        handle_all(&mut a, LinkEvent::TransportReady, t0);
         a.handle(LinkEvent::Received(FlcMessage::SendQaulId(&ID_B).encode()), t0);
         a
     }
@@ -478,13 +552,14 @@ mod tests {
     #[test]
     fn pings_every_interval_once_ready() {
         let t0 = Instant::now();
-        let mut a = Link::new(ID_A);
+        let mut a = Link::new(ID_A, t0);
         assert_eq!(a.handle(LinkEvent::Tick, t0), vec![], "no clocks before ready");
 
         let mut a = identified(t0);
-        assert_eq!(frames(&a.handle(LinkEvent::Tick, t0)), vec![ping()]);
-        assert_eq!(frames(&a.handle(LinkEvent::Tick, t0 + Duration::from_secs(1))), vec![]);
-        assert_eq!(frames(&a.handle(LinkEvent::Tick, t0 + Duration::from_secs(6))), vec![ping()]);
+        let mut tick = |at| frames(&handle_all(&mut a, LinkEvent::Tick, at));
+        assert_eq!(tick(t0), vec![ping()]);
+        assert_eq!(tick(t0 + Duration::from_secs(1)), vec![]);
+        assert_eq!(tick(t0 + Duration::from_secs(6)), vec![ping()]);
     }
 
     #[test]
@@ -497,20 +572,52 @@ mod tests {
     #[test]
     fn unresolved_link_resends_its_id() {
         let t0 = Instant::now();
-        let mut a = Link::new(ID_A);
-        a.handle(LinkEvent::TransportReady, t0); // our ID goes out here
-        assert_eq!(frames(&a.handle(LinkEvent::Tick, t0 + Duration::from_millis(500))), vec![ping()]);
-        let t1 = t0 + Duration::from_millis(IDENTITY_RETRY_MS);
-        assert_eq!(frames(&a.handle(LinkEvent::Tick, t1)), vec![our_id()]);
+        let mut a = Link::new(ID_A, t0);
+        handle_all(&mut a, LinkEvent::TransportReady, t0); // our ID goes out here
+        let mut tick = |at| frames(&handle_all(&mut a, LinkEvent::Tick, at));
+        assert_eq!(tick(t0 + Duration::from_millis(500)), vec![ping()]);
+        assert_eq!(tick(t0 + Duration::from_millis(IDENTITY_RETRY_MS)), vec![our_id()]);
     }
 
     #[test]
     fn unresolved_link_is_closed() {
         let t0 = Instant::now();
-        let mut a = Link::new(ID_A);
+        let mut a = Link::new(ID_A, t0);
         a.handle(LinkEvent::TransportReady, t0);
         let t1 = t0 + Duration::from_millis(UNRESOLVED_TIMEOUT_MS);
         assert_eq!(a.handle(LinkEvent::Tick, t1), vec![LinkAction::Close]);
+    }
+
+    #[test]
+    fn unready_link_is_closed_after_setup_timeout() {
+        let t0 = Instant::now();
+        let mut a = Link::new(ID_A, t0);
+        let timeout = Duration::from_millis(SETUP_TIMEOUT_MS);
+        assert_eq!(a.handle(LinkEvent::Tick, t0 + timeout - Duration::from_millis(1)), vec![]);
+        assert_eq!(a.handle(LinkEvent::Tick, t0 + timeout), vec![LinkAction::Close]);
+    }
+
+    #[test]
+    fn ready_link_is_not_closed_by_setup_timeout() {
+        let t0 = Instant::now();
+        let t1 = t0 + Duration::from_secs(1);
+        let mut a = Link::new(ID_A, t0);
+        handle_all(&mut a, LinkEvent::TransportReady, t1);
+        a.handle(LinkEvent::Received(FlcMessage::SendQaulId(&ID_B).encode()), t1);
+        let later = t0 + Duration::from_millis(SETUP_TIMEOUT_MS + 1_000);
+        assert!(!a.handle(LinkEvent::Tick, later).contains(&LinkAction::Close));
+    }
+
+    #[test]
+    fn stats_show_what_is_queued_and_in_flight() {
+        let mut a = Link::new(ID_A, now());
+        handle_all(&mut a, LinkEvent::TransportReady, now()); // our SEND_ID
+        // 100 bytes at the default chunk size is 7 chunks: one goes out, 6 wait.
+        a.handle(send(body(100), "m"), now());
+        assert_eq!(
+            a.stats(),
+            LinkStats { lanes: [0, 6, 0], in_flight: true, frames_sent: 2, sending: 1, waiting: 0 }
+        );
     }
 
     #[test]
@@ -530,5 +637,40 @@ mod tests {
         a.handle(LinkEvent::Received(ping), t0 + Duration::from_secs(20));
         let actions = a.handle(LinkEvent::Tick, t0 + Duration::from_secs(31));
         assert!(!actions.contains(&LinkAction::Close));
+    }
+
+    #[test]
+    fn only_one_frame_is_out_at_a_time() {
+        let mut a = identified(now());
+        // 3 chunks, but the pipe gets them one by one.
+        assert_eq!(frames(&a.handle(send(body(50), "m"), now())).len(), 1);
+        assert_eq!(frames(&a.handle(LinkEvent::Tick, now())), vec![], "ping waits for the pipe");
+        assert_eq!(frames(&a.handle(LinkEvent::FrameSent, now())).len(), 1);
+    }
+
+    #[test]
+    fn control_frame_overtakes_bulk_already_queued() {
+        let mut a = identified(now());
+        // The pipe takes the first bulk chunk; ~800 more wait in the bulk lane.
+        let first = frames(&a.handle(send(body(MEDIUM_MESSAGE_MAX_BYTES + 1), "big"), now()));
+        assert_eq!(first.iter().map(|(_, lane)| *lane).collect::<Vec<_>>(), vec![Lane::Bulk]);
+
+        // Meanwhile B's small message arrives whole, so A owes it an ACK.
+        let mut b = Link::new(ID_B, now());
+        b.handle(send(body(10), "small"), now());
+        let from_b = frames(&handle_all(&mut b, LinkEvent::TransportReady, now()));
+        let at_a = feed_no_send(&mut a, &from_b);
+        assert!(at_a.contains(&LinkAction::Deliver { message: body(10), from: ID_B }));
+
+        // The first chunk is through: the ACK goes next, ahead of the rest of the bulk.
+        let next = frames(&a.handle(LinkEvent::FrameSent, now()));
+        assert_eq!(next.len(), 1);
+        assert_eq!(next[0].1, Lane::Control);
+        assert!(matches!(decode(&next[0].0), Ok(Frame::Flc(FlcMessage::AckSuccess { .. }))));
+    }
+
+    /// Like `feed`, but the pipe stays busy: nothing is reported sent.
+    fn feed_no_send(link: &mut Link, frames: &[(Vec<u8>, Lane)]) -> Vec<LinkAction> {
+        frames.iter().flat_map(|(bytes, _)| link.handle(LinkEvent::Received(bytes.clone()), now())).collect()
     }
 }

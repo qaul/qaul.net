@@ -37,10 +37,12 @@ const ADVERT_INTERVAL: Duration = Duration::from_millis(100);
 /// What the radio side tells the loop. One channel for all of them, so the loop sees one ordered stream.
 #[derive(Debug)]
 pub enum RadioEvent {
-    /// The phone wrote one frame to MSG_CHAR. Can arrive before `Subscribed`,
+    /// The peer wrote one frame to MSG_CHAR. Can arrive before `Subscribed`,
     /// because Android writes SEND_ID first.
     FrameReceived { peer: PeerKey, bytes: Vec<u8> },
-    /// The phone subscribed to notifications on MSG_CHAR. Frames sent on
+    /// A frame was sent to the radio, tell engine so that the next may be retrieved from this peer's link
+    FrameSent { peer: PeerKey },
+    /// The peer subscribed to notifications on MSG_CHAR. Frames sent on
     /// `outbox` are notified to it by its sender task.
     Subscribed {
         peer: PeerKey,
@@ -54,16 +56,16 @@ pub enum RadioEvent {
         rssi: i16
     },
 
-    /// We read the phone's qaul ID from its READ_CHAR (central only).
+    /// We read the peer's qaul ID from its READ_CHAR (central only).
     PeerIdRead { peer: PeerKey, id: [u8; QAUL_ID_BYTES] },
     /// A connect we started didn't produce a link (central only).
     ConnectFailed { peer: PeerKey },
-    /// The phone's sending or recieving pipe failed.
+    /// The peer's sending or recieving pipe failed.
     Gone { peer: PeerKey },
 }
 
-/// How the engine names a link on Linux: the phones address and our role on it. 
-/// The same phone could be linked in both roles at once, so the address alone isn't unique.
+/// How the engine names a link on Linux: the peer address and our role on it. 
+/// The same peer could be linked in both roles at once, so the address alone isn't unique.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct PeerKey {
     pub address: Address,
@@ -103,6 +105,7 @@ pub(crate) async fn send_frames(
             let _ = events.send(RadioEvent::Gone { peer }).await;
             break;
         }
+        let _ = events.send(RadioEvent::FrameSent { peer }).await;
     }
 }
 

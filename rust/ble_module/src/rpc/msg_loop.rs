@@ -3,7 +3,7 @@
 
 use ble_protocol::engine::{EngineAction, EngineEvent, Peer, Role, Snapshot};
 use bytes::Bytes;
-use std::{error::Error, time::{Duration, Instant}};
+use std::{collections::HashMap, error::Error, time::{Duration, Instant}};
 use tokio::time::{interval, MissedTickBehavior};
 
 use crate::{
@@ -30,6 +30,8 @@ pub async fn listen_for_sys_msgs(
     status.set_missed_tick_behavior(MissedTickBehavior::Skip);
     // Adverts heard since the last status line: 0 means the scanner hears nothing.
     let mut adverts_heard: usize = 0;
+    // Each links frames_sent from the last status line, so it can show the rate.
+    let mut last_sent: HashMap<PeerKey, u64> = HashMap::new();
     loop {
         tokio::select! {
             evt = rpc_receiver.recv() => { 
@@ -138,6 +140,12 @@ pub async fn listen_for_sys_msgs(
                         execute(r, engine_actions, &mut internal_sender);
                     }
                 }
+                Some(RadioEvent::FrameSent { peer }) => {
+                    if let Some(r) = running.as_mut() {
+                        let engine_actions = r.engine.handle(EngineEvent::FrameSent { peer }, Instant::now());
+                        execute(r, engine_actions, &mut internal_sender); // May return the next frame to send if any.
+                    }
+                }
                 Some(RadioEvent::Advert{address, id_prefix, rssi}) => {
                     // Debug:one per advert, every ~100 ms per phone.
                     log::debug!("{} advert {:02x?} rssi {}", address, id_prefix, rssi);
@@ -185,7 +193,7 @@ pub async fn listen_for_sys_msgs(
             }
             _ = status.tick() => {
                 if let Some(r) = running.as_ref() {
-                    log::info!("{}", status_line(&r.engine.snapshot(), adverts_heard));
+                    log::info!("{}", status_line(&r.engine.snapshot(), adverts_heard, &mut last_sent));
                 }
                 adverts_heard = 0;
             }
@@ -196,7 +204,11 @@ pub async fn listen_for_sys_msgs(
 
 /// One line summing up BLE
 /// IDs are shown as their advertised prefix; "up" counts links libqaul has been told about.
-fn status_line(snapshot: &Snapshot<PeerKey>, adverts_heard: usize) -> String {
+///
+/// Per link: `lanes=control/medium/bulk` frames waiting, `tx=+N` frames sent since the
+/// last line (`*` while one is out awaiting FrameSent), `idx` messages holding a
+/// queue index (of 29) and `wait` messages not started yet.
+fn status_line(snapshot: &Snapshot<PeerKey>, adverts_heard: usize, last_sent: &mut HashMap<PeerKey, u64>) -> String {
     let up = snapshot.links.iter().filter(|link| link.id.is_some()).count();
     // Sorted, so the same links print in the same order every time.
     let mut links: Vec<String> = snapshot
@@ -205,10 +217,27 @@ fn status_line(snapshot: &Snapshot<PeerKey>, adverts_heard: usize) -> String {
         .map(|link| {
             let id = link.id.map_or("unresolved".to_string(), |id| id_prefix(&id));
             let ready = if link.ready { "" } else { " (not ready)" };
-            format!("{}/{:?}/{}{}", link.peer.address, link.peer.role(), id, ready)
+            let s = &link.stats;
+            // A new link under a reused key starts from 0 again, hence saturating.
+            let tx = s.frames_sent.saturating_sub(last_sent.get(&link.peer).copied().unwrap_or(0));
+            format!(
+                "{}/{:?}/{}{} [lanes={}/{}/{} tx=+{}{} idx={} wait={}]",
+                link.peer.address,
+                link.peer.role(),
+                id,
+                ready,
+                s.lanes[0],
+                s.lanes[1],
+                s.lanes[2],
+                tx,
+                if s.in_flight { "*" } else { "" },
+                s.sending,
+                s.waiting,
+            )
         })
         .collect();
     links.sort();
+    *last_sent = snapshot.links.iter().map(|link| (link.peer, link.stats.frames_sent)).collect();
     format!(
         "BLE me={} adverts={} connecting={} links={} up={} | {}",
         id_prefix(&snapshot.our_id),
@@ -273,11 +302,13 @@ fn execute(r: &mut Running, actions: Vec<EngineAction<PeerKey>>, sender: &mut Bl
             EngineAction::Deliver { from, message } => {
                 sender.send_direct_received(from.to_vec(), message)
             }
-            EngineAction::SendResult { message_id, success: true } => {
+            EngineAction::SendResult { message_id, result: Ok(()) } => {
                 sender.send_direct_send_success(message_id)
             }
-            EngineAction::SendResult { message_id, success: false } => {
-                sender.send_direct_send_error(message_id, "BLE link failed".into())
+            EngineAction::SendResult { message_id, result: Err(reason) } => {
+                let id: String = message_id.iter().map(|b| format!("{b:02x}")).collect();
+                log::warn!("send {} failed: {:?}", id, reason);
+                sender.send_direct_send_error(message_id, format!("{reason:?}"))
             }
         }
     }

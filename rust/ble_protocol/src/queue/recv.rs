@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use crate::{frame::{ChunkHeader, FirstChunkHeader}};
+use crate::{frame::{ChunkHeader, FirstChunkHeader, LargePart}};
 use crate::crc::crc32; 
 
 pub struct ReceiveQueueMessage {
@@ -22,7 +22,8 @@ pub struct ReceiveQueueMessage {
 pub enum ChunkOutcome {
     Duplicate,
     Incomplete { newly_missing: Vec<u16> }, /// `newly_missing` holds only the gaps this chunk revealed, to be requested once, `missing_after_stall()` gives every gap still open.
-    Complete { message: Vec<u8>, qaul_id: [u8; 8] },
+    /// `part` is `Some` if this message is one part of a larger one.
+    Complete { message: Vec<u8>, qaul_id: [u8; 8], part: Option<LargePart> },
     Failed(ReceiveError),
 }
 
@@ -118,9 +119,8 @@ impl ReceiveQueueMessage {
             return ChunkOutcome::Failed(ReceiveError::CrcMismatch);
         }
 
-        // large message part check will be here
-
-        ChunkOutcome::Complete { message, qaul_id: first.qaul_id }
+        let part = LargePart::from_indicator(first.large_message_indicator);
+        ChunkOutcome::Complete { message, qaul_id: first.qaul_id, part }
     }
 
     /// Every chunk still missing, for the engine to re request on a timer. 
@@ -175,7 +175,7 @@ mod tests {
     }
 
     fn complete(len: usize) -> ChunkOutcome {
-        ChunkOutcome::Complete { message: body(len), qaul_id: ID }
+        ChunkOutcome::Complete { message: body(len), qaul_id: ID, part: None }
     }
 
     #[test]

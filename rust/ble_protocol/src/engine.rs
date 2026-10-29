@@ -3,6 +3,8 @@ use std::hash::Hash;
 
 use crate::QAUL_ID_ADVERT_BYTES;
 use crate::link::{LinkAction, LinkEvent};
+pub use crate::link::LinkStats;
+pub use crate::queue::send_queue::SendFailure;
 use crate::{QAUL_ID_BYTES, link::Link};
 
 // Sans I/O engine for driving all ble protocol elements
@@ -25,16 +27,21 @@ pub trait Peer: Copy + Eq + Hash {
 /// Engine events are the engines input, something that I/O wants done.
 #[derive(Debug, PartialEq)]
 pub enum EngineEvent<P> {
-    PeerReady { peer: P, mtu: usize },        // phone subscribed / central finished discovery
-    Frame     { peer: P, bytes: Vec<u8> }, // received a frame
-    PeerIdRead { peer: P, id: [u8; QAUL_ID_BYTES] },  /// We read the peer's qaul ID from its READ_CHAR (central only).
-    PeerGone  { peer: P },
-    Send      { to: [u8; QAUL_ID_BYTES], message: Vec<u8>, message_id: Vec<u8> },
+    /// Peer subscribed / central finished discovery
+    PeerReady { peer: P, mtu: usize },        
+    /// Received a frame, process.
+    Frame { peer: P, bytes: Vec<u8> }, 
+    /// We read the peer's qaul ID from its READ_CHAR (central only).
+    PeerIdRead { peer: P, id: [u8; QAUL_ID_BYTES] },
+    PeerGone { peer: P },
+    Send { to: [u8; QAUL_ID_BYTES], message: Vec<u8>, message_id: Vec<u8> },
     /// A qaul advert was heard; `peer` is the key we'd use if we connect.
     Discovered {peer: P, id_prefix: [u8; QAUL_ID_ADVERT_BYTES], rssi: i16},
     /// A `Connect` we asked for didn't produce a link.
     ConnectFailed { peer: P },
     Tick,
+    /// Last transmit for a link was sent to the radio, we can now retrieve the next
+    FrameSent { peer:P }, 
 }
 
 /// Engine Actions are the engines output, data ready for use in the ble_module.
@@ -46,7 +53,7 @@ pub enum EngineAction<P> {
     PeerDown   { id: [u8; QAUL_ID_BYTES] },   // → send_device_unavailable
     Connect    { peer: P },                   // → start a central connection
     Deliver    { from: [u8; QAUL_ID_BYTES], message: Vec<u8> },
-    SendResult { message_id: Vec<u8>, success: bool },
+    SendResult { message_id: Vec<u8>, result: Result<(), SendFailure> },
 }
 
 /// One link as the engine sees it, for status logs and debug views.
@@ -57,6 +64,8 @@ pub struct LinkSnapshot<P> {
     pub id: Option<[u8; QAUL_ID_BYTES]>,
     /// Frames can reach the peer.
     pub ready: bool,
+    /// How busy its send side is.
+    pub stats: LinkStats,
 }
 
 /// What the engine knows right now. Data only: each platform decides how to show it.
@@ -90,19 +99,19 @@ impl<P: Peer> Engine<P> {
             EngineEvent::PeerReady {peer, mtu} => {
                 // A connect we started has finished.
                 self.connecting.remove(&peer);
-                let link = self.link_for(peer);
+                let link = self.link_for(peer, now);
                 let mut link_actions = link.handle(LinkEvent::MtuChanged(mtu), now);
                 link_actions.extend(link.handle(LinkEvent::TransportReady, now));
                 out.extend(self.on_link_actions(peer, link_actions));
             }
             EngineEvent::Frame { peer, bytes } => {
-                let link = self.link_for(peer);
+                let link = self.link_for(peer, now);
                 let link_actions = link.handle(LinkEvent::Received(bytes), now); // Be careful with borrowing self and link
                 out.extend(self.on_link_actions(peer, link_actions));
             }
             EngineEvent::PeerIdRead { peer, id } => {
                 // link_for, like Frame: the ID lands even if the read beats PeerReady.
-                let link_actions = self.link_for(peer).handle(LinkEvent::PeerIdRead(id), now);
+                let link_actions = self.link_for(peer, now).handle(LinkEvent::PeerIdRead(id), now);
                 out.extend(self.on_link_actions(peer, link_actions));
             }
             EngineEvent::PeerGone { peer } => {
@@ -113,12 +122,12 @@ impl<P: Peer> Engine<P> {
             EngineEvent::Send { to, message, message_id } => {
                 let Some(peer) = self.ids.iter().find_map(|(p, id)| (*id == to).then_some(*p)) else {
                     // not identified (or never connected) so this message fails
-                    out.push(EngineAction::SendResult { message_id, success: false });
+                    out.push(EngineAction::SendResult { message_id, result: Err(SendFailure::NotIdentified) });
                     return out;
                 };
                 let Some(link) = self.links.get_mut(&peer) else {
                     // link doesnt exist, we dont create as this isnt an allowed setup link step
-                    out.push(EngineAction::SendResult { message_id, success: false });
+                    out.push(EngineAction::SendResult { message_id, result: Err(SendFailure::NoLink) });
                     return out;
                 };
                 let link_actions = link.handle(LinkEvent::Send{message, message_id: to_hex(&message_id)}, now); // Be careful with borrowing self and link
@@ -145,15 +154,21 @@ impl<P: Peer> Engine<P> {
                     out.extend(self.on_link_actions(peer, actions));  
                 }
             }
+            EngineEvent::FrameSent { peer} => {
+                if let Some(link) = self.links.get_mut(&peer){
+                    let link_actions = link.handle(LinkEvent::FrameSent, now);
+                    out.extend(self.on_link_actions(peer, link_actions));  
+                };
+            }
         }
         out
     }
 
     /// The peer's Link, created on its first event of any kind as it could be SEND_QAUL_ID before subscribe
     /// (Android alway writes SEND_QAUL_ID before it subscribes).
-    fn link_for(&mut self, peer: P) -> &mut Link {
+    fn link_for(&mut self, peer: P, now: Instant) -> &mut Link {
         let our_id = self.qaul_id;
-        self.links.entry(peer).or_insert_with(|| Link::new(our_id))
+        self.links.entry(peer).or_insert_with(|| Link::new(our_id, now))
     }
 
     /// Turn what a peer's Link asked for into engine actions.
@@ -170,8 +185,8 @@ impl<P: Peer> Engine<P> {
                 LinkAction::Deliver { message, from } => {
                     out.push(EngineAction::Deliver { from, message })
                 }
-                LinkAction::MessageResult { message_id, success } => {
-                    out.push(EngineAction::SendResult { message_id: from_hex(&message_id), success })
+                LinkAction::MessageResult { message_id, result } => {
+                    out.push(EngineAction::SendResult { message_id: from_hex(&message_id), result })
                 }
                 LinkAction::Close => {
                     out.push(EngineAction::Disconnect { peer });
@@ -210,6 +225,7 @@ impl<P: Peer> Engine<P> {
                 peer: *peer,
                 id: self.ids.get(peer).copied(),
                 ready: link.is_ready(),
+                stats: link.stats(),
             })
             .collect();
         Snapshot { our_id: self.qaul_id, links, connecting: self.connecting.len() }
@@ -305,18 +321,22 @@ mod tests {
         while !from_a.is_empty() || !from_b.is_empty() {
             let mut next_a = Vec::new();
             let mut next_b = Vec::new();
+            // Each Transmit is delivered, then reported sent like a free pipe would,
+            // which hands the sender its next frame.
             for action in from_a.drain(..) {
                 match action {
-                    EngineAction::Transmit { bytes, .. } => {
-                        next_b.extend(b.handle(EngineEvent::Frame { peer: PEER_A, bytes }, now()))
+                    EngineAction::Transmit { peer, bytes } => {
+                        next_b.extend(b.handle(EngineEvent::Frame { peer: PEER_A, bytes }, now()));
+                        next_a.extend(a.handle(EngineEvent::FrameSent { peer }, now()));
                     }
                     other => seen_a.push(other),
                 }
             }
             for action in from_b.drain(..) {
                 match action {
-                    EngineAction::Transmit { bytes, .. } => {
-                        next_a.extend(a.handle(EngineEvent::Frame { peer: PEER_B, bytes }, now()))
+                    EngineAction::Transmit { peer, bytes } => {
+                        next_a.extend(a.handle(EngineEvent::Frame { peer: PEER_B, bytes }, now()));
+                        next_b.extend(b.handle(EngineEvent::FrameSent { peer }, now()));
                     }
                     other => seen_b.push(other),
                 }
@@ -354,14 +374,29 @@ mod tests {
         let send = EngineEvent::Send { to: ID_B, message: vec![5; 10], message_id: vec![0xab] };
         assert_eq!(a.handle(send, now()), vec![]);
 
-        // Same link (not a fresh one): our SEND_ID, then the held message, and no second PeerUp.
+        // Same link (not a fresh one): our SEND_ID first, and no second PeerUp.
         let sent = a.handle(EngineEvent::PeerReady { peer: PEER_B, mtu: 247 }, now());
         assert_eq!(
-            sent[0],
-            EngineAction::Transmit { peer: PEER_B, bytes: FlcMessage::SendQaulId(&ID_A).encode() }
+            sent,
+            vec![EngineAction::Transmit { peer: PEER_B, bytes: FlcMessage::SendQaulId(&ID_A).encode() }]
         );
-        assert!(sent.len() > 1);
-        assert!(sent.iter().all(|action| matches!(action, EngineAction::Transmit { .. })));
+
+        // Once the pipe takes it, the held message follows.
+        let next = a.handle(EngineEvent::FrameSent { peer: PEER_B }, now());
+        assert!(matches!(
+            next.as_slice(),
+            [EngineAction::Transmit { peer: PEER_B, bytes }] if matches!(crate::frame::decode(bytes), Ok(crate::Frame::Chunk { .. }))
+        ));
+    }
+
+    #[test]
+    fn late_frame_sent_for_a_removed_link_is_ignored() {
+        let mut a = Engine::new(ID_A);
+        a.handle(hello(&ID_B), now());
+        a.handle(EngineEvent::PeerGone { peer: PEER_B }, now());
+        // send_frames can finish its last write after the link is gone.
+        assert_eq!(a.handle(EngineEvent::FrameSent { peer: PEER_B }, now()), vec![]);
+        assert!(a.links.is_empty(), "no new link from a late report");
     }
 
     #[test]
@@ -370,7 +405,7 @@ mod tests {
         let send = EngineEvent::Send { to: ID_B, message: vec![1, 2, 3], message_id: vec![0xab] };
         assert_eq!(
             a.handle(send, now()),
-            vec![EngineAction::SendResult { message_id: vec![0xab], success: false }]
+            vec![EngineAction::SendResult { message_id: vec![0xab], result: Err(SendFailure::NotIdentified) }]
         );
     }
 
@@ -381,7 +416,7 @@ mod tests {
         let from_a = a.handle(send, now());
         let (seen_a, seen_b) = pump(&mut a, &mut b, from_a, Vec::new());
         assert_eq!(seen_b, vec![EngineAction::Deliver { from: ID_A, message: vec![5; 600] }]);
-        assert_eq!(seen_a, vec![EngineAction::SendResult { message_id: vec![0x00, 0xab], success: true }]);
+        assert_eq!(seen_a, vec![EngineAction::SendResult { message_id: vec![0x00, 0xab], result: Ok(()) }]);
     }
 
     #[test]
@@ -412,6 +447,18 @@ mod tests {
     }
 
     #[test]
+    fn stray_frame_link_that_never_gets_ready_is_dropped() {
+        // A peer that went Gone keeps writing: its frame makes a new link that never becomes ready.
+        let mut a = Engine::new(ID_A);
+        let t0 = now();
+        a.handle(EngineEvent::Frame { peer: PEER_B, bytes: FlcMessage::LivenessPing.encode() }, t0);
+        let later = t0 + Duration::from_millis(crate::constants::SETUP_TIMEOUT_MS);
+        // Never identified, so no PeerDown: libqaul was never told it was up.
+        assert_eq!(a.handle(EngineEvent::Tick, later), vec![EngineAction::Disconnect { peer: PEER_B }]);
+        assert!(a.links.is_empty());
+    }
+
+    #[test]
     fn shutdown_closes_every_link_and_keeps_its_promises() {
         let (mut a, _b) = connected();
         let send = EngineEvent::Send { to: ID_B, message: vec![5; 10], message_id: vec![0xab] };
@@ -421,7 +468,7 @@ mod tests {
             a.shutdown(),
             vec![
                 EngineAction::Disconnect { peer: PEER_B },
-                EngineAction::SendResult { message_id: vec![0xab], success: false },
+                EngineAction::SendResult { message_id: vec![0xab], result: Err(SendFailure::LinkGone) },
                 EngineAction::PeerDown { id: ID_B },
             ]
         );
@@ -502,10 +549,9 @@ mod tests {
 
         // Identified by its SEND_ID, but not ready to receive yet.
         a.handle(hello(&ID_B), now());
-        assert_eq!(
-            a.snapshot().links,
-            vec![LinkSnapshot { peer: PEER_B, id: Some(ID_B), ready: false }]
-        );
+        let links = a.snapshot().links;
+        assert_eq!(links.len(), 1);
+        assert_eq!((links[0].peer, links[0].id, links[0].ready), (PEER_B, Some(ID_B), false));
 
         a.handle(EngineEvent::PeerReady { peer: PEER_B, mtu: 247 }, now());
         assert!(a.snapshot().links[0].ready);

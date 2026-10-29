@@ -7,7 +7,7 @@
 
 use std::collections::BTreeMap;
 
-use crate::frame::ChunkHeader;
+use crate::frame::{ChunkHeader, LargePart};
 use crate::queue::recv::{ChunkOutcome, ReceiveError, ReceiveQueueMessage};
 
 /// What the caller should do after a chunk has been handled.
@@ -20,19 +20,48 @@ pub enum ReceiveEvent {
     /// A whole message arrived and checked out. Send an ACK_SUCCESS for the
     /// `queue_index` and hand the message to libqaul
     Received { queue_index: u8, message: Vec<u8>, qaul_id: [u8; 8] },
+    /// One part of a large message arrived and checked out, but other parts are
+    /// still missing. So send an ACK_SUCCESS for the index, but deliver nothing yet.
+    PartReceived { queue_index: u8 },
     /// The message on `queue_index` failed, send an ACK_ERROR
     Failed { queue_index: u8, error: ReceiveError },
+}
+
+/// The parts of one large message received so far.
+struct ReceiveLargeMessage {
+    /// How many parts the message has, 1..=4.
+    total: u8,
+    /// Each part's bytes, by part number. Only the entry's up to 'total' are used.
+    parts: [Option<Vec<u8>>; 4],
+}
+
+impl ReceiveLargeMessage {
+    fn new(total: u8) -> Self {
+        Self { total, parts: Default::default() }
+    }
+
+    /// Store one part. Returns the whole message once every part is in.
+    fn add(&mut self, part: u8, bytes: Vec<u8>) -> Option<Vec<u8>> {
+        self.parts[usize::from(part)] = Some(bytes);
+        let parts = &self.parts[..usize::from(self.total)];
+        if parts.iter().any(Option::is_none) {
+            return None;
+        }
+        Some(parts.iter().flatten().flatten().copied().collect())
+    }
 }
 
 pub struct ReceiveQueue {
     /// The message currently being received on each queue index (1..=29).
     /// An index with no entry has not been used on this link yet.
     receive_queues: BTreeMap<u8, ReceiveQueueMessage>,
+    /// Large messages with some parts received, keyed by their large index.
+    large_message_queue: BTreeMap<u8, ReceiveLargeMessage>,
 }
 
 impl ReceiveQueue {
     pub fn new() -> Self {
-        Self { receive_queues: BTreeMap::new() }
+        Self { receive_queues: BTreeMap::new(), large_message_queue: BTreeMap::new() }
     }
 
     /// Handle one data chunk (queue index 1..=29) from this link.
@@ -69,12 +98,39 @@ impl ReceiveQueue {
             ChunkOutcome::Duplicate => ReceiveEvent::Nothing,
             ChunkOutcome::Incomplete { newly_missing } if newly_missing.is_empty() => ReceiveEvent::Nothing,
             ChunkOutcome::Incomplete { newly_missing } => ReceiveEvent::NeedChunks { queue_index, chunks: newly_missing },
-            ChunkOutcome::Complete { message, qaul_id } => {
+            ChunkOutcome::Complete { message, qaul_id, part: None } => {
                 ReceiveEvent::Received { queue_index, message, qaul_id }
+            }
+            ChunkOutcome::Complete { message, qaul_id, part: Some(part) } => {
+                self.add_large_message_part(queue_index, part, message, qaul_id)
             }
             ChunkOutcome::Failed (error) => {
                 ReceiveEvent::Failed { queue_index, error }
             }
+        }
+    }
+
+    /// Store a part of a large message.
+    // TODO: a large message that never gets all its parts stays here until its index is reused.
+    fn add_large_message_part(&mut self, queue_index: u8, part: LargePart, bytes: Vec<u8>, qaul_id: [u8; 8]) -> ReceiveEvent {
+        // Check part is within range, if not, best to still ACK to avoid resends.
+        if part.part >= part.total {
+            return ReceiveEvent::PartReceived { queue_index };
+        }
+
+        // A different total means the index was reused by a new message, start over.
+        // TODO: This is a simplistic check that could still lead to messages getting mixed and corrupted
+        let large = self.large_message_queue.entry(part.index).or_insert_with(|| ReceiveLargeMessage::new(part.total));
+        if large.total != part.total {
+            *large = ReceiveLargeMessage::new(part.total);
+        }
+
+        match large.add(part.part, bytes) {
+            Some(message) => {
+                self.large_message_queue.remove(&part.index);
+                ReceiveEvent::Received { queue_index, message, qaul_id }
+            }
+            None => ReceiveEvent::PartReceived { queue_index },
         }
     }
 }
@@ -198,6 +254,74 @@ mod tests {
             assert_eq!(feed(&mut queue, &a, i, false), ReceiveEvent::Nothing);
         }
         assert_eq!(feed(&mut queue, &a, 5, false), received(3, 100));
+    }
+
+    /// One part of a large message, as its own message on `queue_index`.
+    fn part(queue_index: u8, indicator: u8, bytes: &[u8]) -> SendQueueMessage {
+        SendQueueMessage::new(ID, "msg".into(), queue_index, indicator, bytes.to_vec(), 25).unwrap()
+    }
+
+    /// Feed every chunk of `msg` in order, returning what the last one gave.
+    fn feed_all(queue: &mut ReceiveQueue, msg: &SendQueueMessage) -> ReceiveEvent {
+        let mut last = ReceiveEvent::Nothing;
+        for i in 0..msg.total_chunks() {
+            last = feed(queue, msg, i, false);
+        }
+        last
+    }
+
+    #[test]
+    fn large_message_parts_out_of_order_are_joined() {
+        let whole = body(150);
+        let parts: Vec<&[u8]> = whole.chunks(50).collect();
+        let mut queue = ReceiveQueue::new();
+        // Large index 1, 3 parts: (1 << 4) | (3 << 2) | part
+        assert_eq!(feed_all(&mut queue, &part(3, 0x1E, parts[2])), ReceiveEvent::PartReceived { queue_index: 3 });
+        assert_eq!(feed_all(&mut queue, &part(4, 0x1C, parts[0])), ReceiveEvent::PartReceived { queue_index: 4 });
+        assert_eq!(
+            feed_all(&mut queue, &part(5, 0x1D, parts[1])),
+            ReceiveEvent::Received { queue_index: 5, message: whole, qaul_id: ID }
+        );
+        assert!(queue.large_message_queue.is_empty());
+    }
+
+    #[test]
+    fn kotlin_four_part_message_is_joined() {
+        let whole = body(120);
+        let mut queue = ReceiveQueue::new();
+        // Kotlin's large index 2 with 4 parts: (2 shl 4) or (4 shl 2) or part = 0x30 | part
+        for (i, bytes) in whole.chunks(30).enumerate().take(3) {
+            let event = feed_all(&mut queue, &part(i as u8 + 1, 0x30 | i as u8, bytes));
+            assert_eq!(event, ReceiveEvent::PartReceived { queue_index: i as u8 + 1 });
+        }
+        assert_eq!(
+            feed_all(&mut queue, &part(4, 0x33, &whole[90..])),
+            ReceiveEvent::Received { queue_index: 4, message: whole, qaul_id: ID }
+        );
+    }
+
+    #[test]
+    fn reused_large_index_with_a_new_total_starts_over() {
+        let mut queue = ReceiveQueue::new();
+        // An old message on large index 1 with 2 parts, part 0 only.
+        feed_all(&mut queue, &part(3, 0x18, &body(40)));
+        // A new message on large index 1 with 3 parts.
+        let whole = body(90);
+        let parts: Vec<&[u8]> = whole.chunks(30).collect();
+        feed_all(&mut queue, &part(4, 0x1C, parts[0]));
+        feed_all(&mut queue, &part(5, 0x1D, parts[1]));
+        assert_eq!(
+            feed_all(&mut queue, &part(6, 0x1E, parts[2])),
+            ReceiveEvent::Received { queue_index: 6, message: whole, qaul_id: ID }
+        );
+    }
+
+    #[test]
+    fn part_number_past_its_total_is_acked_and_dropped() {
+        let mut queue = ReceiveQueue::new();
+        // Large index 1, 2 parts, part 3.
+        assert_eq!(feed_all(&mut queue, &part(3, 0x1B, &body(40))), ReceiveEvent::PartReceived { queue_index: 3 });
+        assert!(queue.large_message_queue.is_empty());
     }
 }
 

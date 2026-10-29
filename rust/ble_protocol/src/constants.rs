@@ -54,6 +54,11 @@ pub const TARGET_MTU: usize = 517;
 /// **[universal]** Due to the wire format
 pub const MAX_PART_SIZE: usize = u16::MAX as usize;
 
+/// Most parts a large message can be split into.
+///
+/// **[universal]** Due to the wire format (2 bit part number)
+pub const MAX_LARGE_PARTS: usize = 4;
+
 /// Messages at or below this size ride the MEDIUM lane (routing updates, chat),
 /// keeping them ahead of large transfers on BULK.
 ///
@@ -112,6 +117,11 @@ pub const NEIGHBOUR_KEEPALIVE_MS: u64 = 15_000;
 /// **[universal]** Must stay comfortably above [`NEIGHBOUR_KEEPALIVE_MS`] so a
 /// single lost keepalive does not expire a live neighbour.
 pub const LINK_STATE_TIMEOUT_MS: u64 = 45_000;
+
+/// How long a connection is allowed to take to setup, otherwise drop it.
+/// 
+/// **[android]**
+pub const SETUP_TIMEOUT_MS: u64 = 15_000;
 
 #[cfg(test)]
 mod tests {
