@@ -1,7 +1,9 @@
 # Cross-Community Messaging Failure
 
-**Status:** open · **Found:** 2026-10-27 · **Updated:** 2026-10-27 (code review and
-log forensics, see [Related defects](#related-defects-found-in-the-same-review) and
+**Status:** the headline failure is **fixed by Phase 1a** (2026-10-28, verified on
+the lab; not yet committed). The related defects stay open. · **Found:** 2026-10-27 ·
+**Updated:** 2026-10-28 (code review, log forensics, Phase 0 and 1a; see
+[Related defects](#related-defects-found-in-the-same-review) and
 [Fix plan](#fix-plan)) · **Component:** router_v2 (#880)
 
 A leaf node cannot deliver a message to a user in another community, measured on a
@@ -342,7 +344,9 @@ wrong). Line references are to `rust/libqaul/src/` unless stated.
 **Observed** — the cause of the failure above. `Users::get_pub_key`
 (`router/users.rs:521`) reads only the local directory; both handshake legs use it
 (`services/crypto/noise.rs:51`, `:281`). The key it fails to find is inlined in the
-`PeerId` it was given.
+`PeerId` it was given. The recipient's signature check
+(`services/messaging/process.rs:306`) has the same lookup, so even a message that
+was sent would have been dropped on arrival. **Fixed by Phase 1a.**
 
 #### 2. Management forwarding has no nearest-gateway fallback
 
@@ -362,7 +366,8 @@ provide that: `qaul_info` is a `OneShotHandler` (`libp2p_modules/qaul_info/src/l
 that opens one substream per frame, up to 8 concurrently (`max_dial_negotiated`
 default, libp2p-swarm 0.47.1), and `NotifyHandler::Any` (`:59`) may spread a peer's
 frames across connections. A dump that lands after a newer introduction prunes it
-(`router_v2/receive/translate.rs:274-288`).
+(`router_v2/receive/translate.rs:274-288`). **Fixed on the lab by Phase 2a**
+(2026-10-29, 2 runs); not yet for QUIC under packet loss.
 
 #### 4. A node never re-introduces its own node index 0
 
@@ -445,6 +450,28 @@ reach at 31 nodes; within reach after a partition merge at the design scale.
   ignore.
 - `relay_interval`, `origin_interval_time` and `reboot_for_seq_num` are read nowhere.
 
+#### 14. Inline mappings carry foreign identities across the membrane
+
+**Observed** (2026-10-28, run `communities-3x10-v2-20261028T072027Z`). Over a
+Local-sphere transport `should_introduce` sends every mapping
+(`router_v2/propagation.rs:62-78`, `(Sphere::Local, _) => true`). Unlike
+`should_propagate`, it never asks where the target was learned. A gateway that
+learns a node or user over Internet allocates its own index for it, and its next
+relay batch introduces that index to its LAN neighbours. The entries stay behind,
+but the identities cross. On every gateway's two LAN members:
+
+- node mappings for both foreign gateways and the hub, from which they queue
+  manifest pulls that their gateway refuses — 42 `Sealed` refusals in the run;
+- the hub's user mapping, from which they create a user record and issue a profile
+  fetch that can never route — the only management drops in the run that never
+  recover.
+
+It stops one hop in: a member that holds a mapping but no entry never allocates an
+index of its own, so it has nothing to introduce onward. No foreign manifest or user
+entry crosses — the serve-side seal holds — so this is identifier leakage and wasted
+traffic, not broken containment. The hub's user mapping exists in the first place
+only because of the origin-path leak (defect 5).
+
 ## Fix plan
 
 Ordered to unblock the headline failure first and to make the lab trustworthy before
@@ -470,32 +497,171 @@ half a day, M one to two days, L longer.
   run also showed 455 `management: no route` drops across all 31 nodes, which
   Phase 1b should account for.
 
-**Phase 1a — send across communities (S). Defect 1.**
+**Phase 1a — send across communities (S). Defect 1. Implemented and verified
+2026-10-28.**
 
-- Make `Users::get_pub_key` fall back to the key inlined in the `PeerId` when the
-  directory misses: identity multihash only, decoded the way
-  `Multikey::try_from_peer_id` already does. That covers both handshake legs.
-- Test: a KK handshake to, and from, a `PeerId` absent from the directory.
-- Lab: `crossing.py` should reach the message leg. Watch for the next wall —
-  the group service or the UI may also want a directory entry for display. This
-  phase alone may close the documented failure.
+- `Users::resolve_pub_key` (`router/users.rs`) returns the directory's key, else
+  the one inlined in the `PeerId`. The inline key is decoded with
+  `Multikey::try_from_peer_id`, so only identity-multihash IDs qualify. The key is
+  not stored: holding a user's ID does not make it a known user, so `users list`
+  and the containment measurement are unchanged.
+- It is used where a cross-community exchange needs it: both handshake legs
+  (`noise.rs`) and the recipient's signature check (`messaging/process.rs`), which
+  the original plan missed.
+- `get_pub_key` itself is unchanged, so the feed and BLE link crypto keep their
+  directory-only lookups. Today the feed drops, and does not re-flood, a post from a
+  sender it does not know (`services/feed/mod.rs`). A global fallback would have
+  changed that silently. That drop may contribute to the feed flakiness, but it
+  needs its own measurement.
+- Tests: a KK handshake between two fresh nodes whose directories hold neither
+  user — it failed before the fix, at the sender, and passes after. Plus the inline
+  lookup on an ed25519 and a hashed `PeerId`. The `libqaul` suite passes, 796 of
+  796.
+- Lab, `communities-3x10`, archived as `runs/communities-3x10-v2-20261028T072027Z`:
+
+  | | Before | After |
+  |---|---|---|
+  | Cross-community `000a` → `001e` | failed at invite | invite 1.0 s, accept 1.1 s, delivery 1.0 s; 3.1 s total |
+  | Containment, members | 0 of 20 foreign users | 0 of 20 |
+  | `No key found` | 1 | 0 on every node |
+  | Errors on the path | — | none |
+
+  The communities share no links and the hub's LAN is off, so a delivery can only
+  have gone member → gateway → hub → gateway → member. Neither endpoint fetched
+  the other's profile, so foreign users still have no display name; that is
+  Phase 1b.
 
 **Phase 2 — index-binding robustness (M). Defects 3–7; fixes the stranded gateway.**
 
-- **2a, ordering (defect 3):** serialise each neighbour's routing frames —
-  `OneShotHandlerConfig { max_dial_negotiated: 1, .. }` for `qaul_info`, and pin a
-  peer's frames to one connection instead of `NotifyHandler::Any`. Success: `dropped
-  stale` falls to zero except after a genuine peer restart. A persistent per-peer
-  stream is the long-term form. The same applies to `qaul_management`.
-- **2b, own index 0 (defect 4):** re-mark node `RESERVED_INDEX` when `is_gateway`
-  flips and on every own `manifest_version` bump. Also carry the self mapping in every
-  origin update — 13 bytes per neighbour per 10 s — so a lost reserved binding heals
-  within one origin cycle whatever lost it. §3.6 already makes repeated introductions
-  idempotent at the receiver, so this needs no wire change.
-- **2c, one filter (defect 5):** route `originate_to_neighbour` through
-  `should_introduce` and `should_propagate`, and decide the node's own gateway status
-  from `has_active_internet_transport()` rather than its `Node` record. Fix the
-  `tick_origin` entry leak in the same commit.
+- **2a, ordering (defect 3). Implemented and measured 2026-10-29.**
+  - **The change**, all in `libp2p_modules/qaul_info/src/lib.rs`:
+    - Each connection opens one outbound substream at a time
+      (`max_dial_negotiated: 1`; since replaced by one frame in flight per peer,
+      see the follow-up below).
+    - A peer's frames always go to its oldest connection. The choice is made when a
+      frame is handed to the swarm, so one that closes in between cannot lose it.
+    - v1 shares this protocol and is serialised too, which is harmless.
+  - **Measurement.** Frame order was measured directly. For every directed link, the
+    first 40 routing frames the neighbour received were compared with the order the
+    sender sent them, over the first 210 s of each run. Management messages were
+    excluded:
+
+    | | Baseline, 3 runs | 2a, 2 runs |
+    |---|---|---|
+    | Links with any reordering | 83–84 of 84 | 0 of 84, both runs |
+    | Routing frames out of order | 285–384 | 0, both runs |
+    | Bindings pruned by a late dump | 40, 52, 48 | 0, 0 |
+    | Node-space drops at the form switch | 6, 3, 3 | 0, 0 |
+    | User-space drops | 0, 3, 0 | 31, 46 |
+    | Crossing | 3.1 s on the 1a baseline | 3.2 s, 3.2 s |
+    | Gateways in hub node space | 3 / 3 / 3 | 3 / 3 |
+
+  - **The user-space drops are not a regression.** Each is index 0, exactly one per
+    affected link, about 2 s after start, and none follow.
+    - *Cause:* `on_neighbour_connect` sends the origin entry before the node's user
+      exists, so it carries no mapping. The introduction follows a frame later.
+    - *Before 2a:* reordering let the introduction arrive first, and the late dump
+      then pruned the binding.
+    - *Now:* the entry arrives first and is dropped once, and the binding survives.
+    - *Fix:* belongs in 2c — don't send an origin entry that has no binding.
+  - **Limits.**
+    - Two runs, on loss-free veth links.
+    - QUIC with packet loss can still reorder, because a stream's close does not wait
+      for the peer; only one persistent stream per peer rules that out.
+    - `qaul_management` is unchanged.
+  - **Follow-up, 2026-10-30: one failed send blocked a connection for good.**
+    - libp2p-swarm 0.47.1's `OneShotHandler` frees a substream slot when a send
+      succeeds but not when it fails (`one_shot.rs`, `DialUpgradeError`). With one
+      slot, a single timeout, reset or frame over 65,535 bytes stalled every later
+      frame on that connection until it closed.
+    - *Fix:* the behaviour now keeps one frame in flight per peer. The next frame
+      goes once the last is sent or fails, or its connection closes. The handler's
+      own limit is raised so it never binds. 6 new unit tests in
+      `qaul_info/src/lib.rs`.
+    - Ordering and pace are the same as before: one frame at a time per peer.
+    - No failed send appeared in a v1 run with `qaul_info=trace`, so this is a
+      safeguard, not a fix for an observed failure. v1 crossing passed.
+  - **Measurement trap.** `lib.rs` logs management messages as
+    `router_v2 SEND … type=0x01` too: the second byte of a management envelope is its
+    version. Any count of routing frames from `SEND` lines must subtract the
+    matching `management: queued for` sends first.
+- **2b, own index 0 (defect 4). Implemented and measured 2026-10-29.**
+  - **The change.**
+    - Every origin update carries the node's own mapping, marked or not, and only
+      once an identity is bound at index 0 (`propagation.rs`, `state/lookup.rs`).
+    - Index 0 is re-marked when the gateway role flips and on every own manifest
+      bump (`state/origin_manifest.rs`).
+    - Repeated introductions are idempotent at the receiver (§3.6), so the wire
+      format is unchanged.
+  - **Unit tests** (`tests/mapping_sphere.rs`) include the stranded-gateway race
+    itself: the form switch runs before `sync_gateway_role`, and index 0 is withheld
+    from the Internet peer. Before the fix it was never sent afterwards; now the next
+    relay batch and every origin update carry it.
+  - **Lab, 2 runs.**
+    - All 1260 origin frames in the 60–210 s window — 15 cycles × 84 directed links
+      — carried the self mapping. It was 0 on the 2a runs.
+    - The cost is 15 B per neighbour per 10 s.
+    - No regression against 2a: 0 prunes, 0 reordering, 0 node-space drops, the
+      crossing at 3.1–3.2 s, and 3 of 3 gateways.
+  - **Forced reconnect, 1 run** (`communities-3x10-v2-20261029T075555Z`): the
+    `0000`–`0001` link was cut for about 2 min 37 s.
+    - About 19 s in, `0001` lost the connection and its gateway role.
+    - Its 9 members then revoked their delegations, as §10.3 requires once the
+      target stops qualifying, so `0001` fell back to user form.
+    - The link returned at 08:12:33. The role came back at 34.6 and node form at
+      35.6. The hub accepted `0001`'s node entry 7 ms later and logged no node-space
+      drops from it afterwards.
+    - The members re-delegated within 9 s. The directory caught up only at the next
+      rate-limited manifest bump (v9), a minute after the link returned.
+  - **What the reconnect did not test.** The role came back a second before the
+    form switch, so the race 2b closes never happened; the old code would have
+    healed too. Hitting it needs a reconnect that lands within the second before an
+    origin tick, roughly 1 in 10. Confirming 2b on the lab therefore takes repeated
+    reconnects, not one.
+- **2c, one filter (defects 5 and 14). Implemented and measured 2026-10-30.**
+  - **The change**, in `propagation.rs` unless noted:
+    - `originate_to_neighbour` takes its self mapping from `self_introduction`,
+      filtered by `should_introduce`, so the connect burst and the dump apply the
+      same sphere rules.
+    - Over Local, `should_introduce` withholds any target known only through the
+      Internet: an entry learned over Internet, or a neighbour whose transports are
+      all Internet. This closes the defect 14 leak.
+    - Over Internet, the node's own gateway status comes from
+      `has_active_internet_transport()` instead of its `Node` record, which lagged by
+      up to a second.
+    - `origin_allowed` sends an origin entry only once an identity is bound at index
+      0, and over Internet only in node form (§2.3). It gates both `tick_origin` and
+      `originate_to_neighbour`.
+    - `receive/routing_update.rs`: an entry whose sphere changes is re-marked for
+      introduction, so a target that becomes Local reaches the Local peers.
+  - **Unit tests.**
+    - 5 new tests in `tests/mapping_sphere.rs`.
+    - 8 existing tests changed, because each asserted behaviour §2.3 forbids or
+      depended on an unbound origin.
+  - **Lab, 2 runs** (`communities-3x10-v2-20261030T160322Z`, `…T161540Z`):
+
+    | | 2a and 2b, 3 runs | 2c, 2 runs |
+    |---|---|---|
+    | User-space drops at connect | 31–46 | 0, 0 |
+    | `Sealed` refusals | 42 each | 0, 0 |
+    | Members' manifest pulls for foreign gateways | 36 each | 0, 0 |
+    | Members' manifest pulls for the hub | 6 each | 0, 0 |
+    | Members' manifest pulls for their own gateway | 107–114 | 109, 108 |
+    | Management drops that never recover | 6, 8, 6 | 0, 0 |
+    | All management no-route drops | 486–491 | 479, 492 |
+    | Profile timeouts | 64–78 | 55, 59 |
+    | Crossing | 3.2 s | 2.3 s, 3.3 s |
+    | Directory settled | 10.1–10.2 s | 10.3 s, 10.4 s |
+    | Gateways in hub node space | 3 / 3 | 3 / 3 |
+
+  - **Spec notes.**
+    - Conforms to §2.3: no user entries over Internet, and the gateway role takes
+      effect as soon as the node has Internet.
+    - §3.2 does not say what a node hosting no users originates. 2c sends nothing,
+      and receivers dropped those entries anyway.
+    - §3.6 and §8.4 say a dump lists every index in use. Filtering Local dumps
+      follows the existing Internet-dump filter, but contradicts that wording, so the
+      spec text should be amended.
 - **2d, one task (defect 6):** fold the origin tick into the relay loop, every Nth
   relay tick, in a fixed order: `sync_gateway_role` → `sync_propagation_form` →
   origin → relay. This also gives `relay_interval` and `origin_interval_time` a
@@ -510,8 +676,35 @@ half a day, M one to two days, L longer.
 
 **Phase 1b — management across communities (M). Defect 2.**
 
-- Give `forward_management` the same tier fallback as `resolve_forwarding`; share
-  the code rather than copy it. A gateway that cannot resolve drops, per §11.2.
+**Preliminary — from one run; being monitored before any of it drives a change.**
+What the ~440 `management: no route` drops of a healthy run are (2026-10-28,
+`communities-3x10-v2-20261028T072027Z`; classified by destination, by the line
+logged just before, and by whether a retry later went out):
+
+| Share | What | Recovers? |
+|---|---|---|
+| ~80% | A fetch for a user *in the dropper's own community*, fired before that user's routing entry exists. Mostly `apply_mapping`, which requests the profile as the mapping arrives, ahead of the entry in the same frame; also version-bump re-fetches and requests relayed during convergence. 76% of all drops are in the first 5 s | yes — `commit_routing_entry` re-asks as the entry lands |
+| ~19% | A gateway or the hub verifying a foreign user. The direct attempt cannot route — no route until the user is trusted, no trust until its key arrives — and is followed in the same millisecond by the carrying-host request, which works | yes, immediately, via the host |
+| 6 drops | A member fetching the hub's user, which it learned through the mapping leak (defect 14) | never; gone since 2c |
+
+In that run none of it was a cross-community request that a fallback should rescue.
+If that holds across more runs, the fallback should not apply to every unroutable
+destination: the first two rows — about 98% — would stop being dropped and turn
+into a burst of traffic to the gateways at every bring-up. The design points below
+assume it holds; confirm before building them.
+
+- Give `forward_management` the tier fallback, but only for a destination that is
+  **absent from `UsersMap`** — which, under §2.3, is precisely a user in another
+  community. That covers both legs: the member asking about a foreign user, and the
+  foreign leaf host replying to a member it has never heard of. A destination that
+  is known but not yet routable keeps today's drop-and-retry. Share the gateway
+  selection with `resolve_forwarding` rather than copy it. A gateway that cannot
+  resolve drops, per §11.2.
+- Remove the drops that are noise, so the counter starts meaning something:
+  `apply_mapping` should not request a profile for a user with no routing entry yet,
+  since `commit_routing_entry` already does when the entry lands; and
+  `refresh_delegation_trust` should go straight to the carrying host for a user it
+  cannot route to, instead of making the direct attempt that always fails.
 - Trigger a display-profile fetch on first contact with a user absent from the
   directory, so names and avatars appear.
 - Optionally implement §11.5's answer-on-behalf at gateways from
@@ -559,7 +752,9 @@ half a day, M one to two days, L longer.
 
 **Order:** 0 → 1a → 2 → 1b → 3 → 4 → 5.
 
-- 1a is the cheapest change that may close the headline failure.
-- 2 must come before further lab conclusions, because defects 3, 4 and 6 make
-  bring-ups nondeterministic.
-- 1b restores profiles across the boundary once routing underneath it is stable.
+- 1a was the cheapest change that could close the headline failure, and did.
+- 2 next: it is the most important reliability work, and every later lab result
+  is cleaner without defects 3, 4 and 6.
+- 1b after it, once the management-drop analysis has held up over more runs.
+  1b shares no code with 2, so it could move earlier; a lab run would then count
+  only if `manifests.py` shows every gateway in the hub's node space.

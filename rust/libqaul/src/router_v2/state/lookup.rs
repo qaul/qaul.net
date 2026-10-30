@@ -163,6 +163,18 @@ impl RouterV2State {
             .next()
     }
 
+    /// The mapping for this node's own reserved index in `space`
+    pub(crate) fn self_introduction(&self, space: Space) -> Option<(u16, [u8; 8], u32)> {
+        let bound = match space {
+            Space::User => self.user_dict.read().unwrap().id_of(index::RESERVED_INDEX),
+            Space::Node => self.node_dict.read().unwrap().id_of(index::RESERVED_INDEX),
+        };
+        bound?;
+        self.resolve_introductions(space, HashSet::from([index::RESERVED_INDEX]))
+            .into_iter()
+            .next()
+    }
+
     fn resolve_introductions(
         &self,
         space: Space,

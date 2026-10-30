@@ -55,25 +55,13 @@ fn empty_state_still_sends_an_empty_dump() {
         "no self-binding exists until a propagation form is established"
     );
 
-    // The dump is followed by our own entry, so the neighbour does not wait
-    // for the ten-second origin tick to hear about us.
-    let origin = rx.try_recv().expect("an origin update follows the dump");
-    let update = decode_update_body(&origin.bytes);
-    assert_eq!(
-        update.user_entries.len(),
-        1,
-        "user form originates a user entry"
-    );
-    assert_eq!(update.user_entries[0].metric, 0);
-    assert_eq!(update.user_entries[0].hop_count, 0);
-    assert!(
-        update.user_mappings.is_empty(),
-        "no self-binding exists yet, so there is nothing to introduce"
-    );
-
+    // No origin entry follows: with nothing bound at index 0 it would
+    // reference a binding the neighbour cannot have, and be dropped (§3.6).
+    // Binding the hosted user originates to every neighbour instead (see
+    // `binding_the_hosted_user_originates_to_existing_neighbours`).
     assert!(
         rx.try_recv().is_err(),
-        "one dump and one origin per neighbour"
+        "the dump alone, until an identity is bound"
     );
 }
 
@@ -168,11 +156,16 @@ fn the_origin_update_carries_the_sphere_flag() {
     let lan = decode_update_body(&rx.try_recv().expect("lan origin update").bytes);
     assert!(lan.user_entries[0].local_only, "LAN is the Local sphere");
 
-    on_neighbour_connect(&state, fresh_peer(), ConnectionModule::Internet);
+    // Only a node entry may cross to the Internet sphere (§2.3), so the
+    // Internet half runs in node form, which an Internet neighbour brings.
+    let net = fresh_peer();
+    state.add_neighbour_transport(net, [11; 8], ConnectionModule::Internet);
+    state.sync_propagation_form(1_000);
+    on_neighbour_connect(&state, net, ConnectionModule::Internet);
     let _ = rx.try_recv();
     let internet = decode_update_body(&rx.try_recv().expect("internet origin update").bytes);
     assert!(
-        !internet.user_entries[0].local_only,
+        !internet.node_entries[0].local_only,
         "INTERNET is not the Local sphere"
     );
 }
@@ -276,7 +269,7 @@ fn ble1m_transport_skips_send() {
 
     // Populate dicts so we'd otherwise have something to send.
     install_user(&state, [1; 8], 0);
-    bind_own_dict(&state, Space::User, 7, [1; 8]);
+    bind_own_dict(&state, Space::User, index::RESERVED_INDEX, [1; 8]);
 
     on_neighbour_connect(&state, peer, ConnectionModule::Ble1m);
 
@@ -298,7 +291,7 @@ fn ble_coded_transport_skips_send() {
     let peer = fresh_peer();
 
     install_user(&state, [1; 8], 0);
-    bind_own_dict(&state, Space::User, 7, [1; 8]);
+    bind_own_dict(&state, Space::User, index::RESERVED_INDEX, [1; 8]);
 
     on_neighbour_connect(&state, peer, ConnectionModule::BleCoded);
 

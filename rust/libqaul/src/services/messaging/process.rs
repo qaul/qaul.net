@@ -303,7 +303,7 @@ impl MessagingProcess {
         // check key
         let key;
         let rs = state.get_router();
-        match router::users::Users::get_pub_key(&rs, &sender_id) {
+        match router::users::Users::resolve_pub_key(&rs, &sender_id) {
             Some(v) => {
                 key = v;
             }

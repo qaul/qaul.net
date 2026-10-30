@@ -23,7 +23,9 @@ fn decode_dump(bytes: &[u8]) -> IndexDump {
 
 // ---------------------------------------------------------------- predicate
 
-/// The Local sphere is unfiltered: a village sees its own members.
+/// A village sees its own members: on the Local sphere everything is
+/// introduced except Internet-sphere state (see
+/// `local_sphere_withholds_internet_sphere_state`).
 #[test]
 fn local_sphere_introduces_everything() {
     let (state, _rx) = fresh_state();
@@ -619,5 +621,354 @@ fn an_origin_intro_filtered_for_every_peer_is_re_marked() {
     assert!(
         pending.contains(&21),
         "withheld from every peer, so it must still be pending"
+    );
+}
+
+// ------------------------------------------- defect 4: the node's own index 0
+
+fn decode_update(bytes: &[u8]) -> codec::messages::RoutingUpdate {
+    let (header, body) = Header::decode(bytes).expect("frame header");
+    assert_eq!(header.message_type, RoutingMessage::RoutingUpdate);
+    codec::messages::RoutingUpdate::decode(&body[..header.payload_len as usize])
+        .expect("RoutingUpdate body")
+}
+
+/// The general cure: the reserved index rides on every origin update, not
+/// only the one after it was marked, so a neighbour that lost the binding -
+/// to a late dump, a reconnect, or a filter - gets it back within one cycle.
+#[test]
+fn every_origin_update_reintroduces_the_reserved_index() {
+    let (state, mut rx) = fresh_state();
+    state.add_neighbour_transport(fresh_peer(), [10; 8], ConnectionModule::Lan);
+    install_user(&state, [1; 8], 3);
+    bind_own_dict(&state, Space::User, index::RESERVED_INDEX, [1; 8]);
+
+    for cycle in 0..3u64 {
+        tick_origin(&state, 1_000 + cycle * 10_000);
+        let update = decode_update(&rx.try_recv().expect("an origin update").bytes);
+        assert!(
+            update
+                .user_mappings
+                .iter()
+                .any(|m| m.abs_idx == index::RESERVED_INDEX && m.target_id == [1; 8]),
+            "origin update {cycle} must carry the reserved mapping"
+        );
+    }
+}
+
+/// Nothing to originate before the node has an identity bound at index 0: an
+/// entry there would reference a binding no receiver can have, and each one
+/// would be dropped (§3.6).
+#[test]
+fn an_unbound_reserved_index_sends_no_origin_update() {
+    let (state, mut rx) = fresh_state();
+    state.add_neighbour_transport(fresh_peer(), [10; 8], ConnectionModule::Lan);
+
+    tick_origin(&state, 1_000);
+
+    assert!(
+        rx.try_recv().is_err(),
+        "no identity bound, so no origin entry"
+    );
+}
+
+/// The stranded gateway. The first origin tick after the Internet neighbour
+/// registers switches to node form before `sync_gateway_role` has run, so the
+/// host's own record still says "not a gateway". Filtering on that record
+/// withheld the reserved node mapping from the Internet peer while delivering
+/// it to the LAN peer, so it was never requeued and never reached the hub.
+/// Our own gateway status now comes from the transport itself, so the race
+/// cannot withhold it; the re-mark and the per-origin mapping remain as cover.
+#[test]
+fn a_gateway_that_switched_form_before_its_role_still_reaches_internet_peers() {
+    let (state, mut rx) = fresh_state();
+    let lan = fresh_peer();
+    let net = fresh_peer();
+    state.add_neighbour_transport(lan, [10; 8], ConnectionModule::Lan);
+    state.add_neighbour_transport(net, [11; 8], ConnectionModule::Internet);
+    let own = state.host_mk.to_id();
+    let reached = |seen: &std::collections::HashMap<libp2p::PeerId, Vec<[u8; 8]>>, peer| {
+        seen.get(&peer).is_some_and(|ids| ids.contains(&own))
+    };
+
+    // The race: the origin tick runs first, the gateway role second.
+    tick_origin(&state, 1_000);
+    let first = origin_node_mappings(&mut rx);
+    assert!(reached(&first, lan), "the LAN peer is introduced at once");
+    assert!(
+        reached(&first, net),
+        "and so is the Internet peer, before sync_gateway_role has run"
+    );
+    state.sync_gateway_role();
+
+    tick_relay(&state, 2_000);
+    assert!(
+        reached(&origin_node_mappings(&mut rx), net),
+        "re-marked when the role flips, so the next relay batch carries it"
+    );
+
+    tick_origin(&state, 11_000);
+    assert!(
+        reached(&origin_node_mappings(&mut rx), net),
+        "and every origin update carries it from then on"
+    );
+}
+
+/// §3.8 trigger 3 for the node's own identity: bumping its own manifest
+/// re-introduces its reserved node index, as the commit path already does for
+/// every other origin.
+#[test]
+fn an_own_manifest_bump_re_marks_the_reserved_node_index() {
+    let (state, _rx) = fresh_state();
+    state.add_neighbour_transport(fresh_peer(), [11; 8], ConnectionModule::Internet);
+    state.sync_gateway_role();
+    tick_origin(&state, 1_000);
+    let _ = state.pending_introductions(Space::Node);
+
+    state.try_bump_manifest_version(2_000, BumpTrigger::FormTransition);
+
+    assert!(
+        state
+            .pending_introductions(Space::Node)
+            .iter()
+            .any(|(idx, _, _)| *idx == index::RESERVED_INDEX),
+        "an own manifest bump must re-mark node index 0"
+    );
+}
+
+// ------------------------------ defect 5: §2.3 on the connect-time origin
+
+/// Every routing update the peer was sent, decoded.
+fn routing_updates_to(
+    rx: &mut tokio::sync::mpsc::UnboundedReceiver<OutboundMsg>,
+    peer: libp2p::PeerId,
+) -> Vec<codec::messages::RoutingUpdate> {
+    let mut out = Vec::new();
+    while let Ok(msg) = rx.try_recv() {
+        let (header, _) = Header::decode(&msg.bytes).expect("frame header");
+        if msg.peer == peer && header.message_type == RoutingMessage::RoutingUpdate {
+            out.push(decode_update(&msg.bytes));
+        }
+    }
+    out
+}
+
+/// The form only switches at the next origin tick, so a node that has just
+/// registered its first Internet neighbour is still in user form when
+/// `on_neighbour_connect` originates to it. §2.3 lets no user entry, and no
+/// mapping for one, cross to the Internet sphere.
+#[test]
+fn a_user_form_node_sends_no_user_entry_over_the_internet_at_connect() {
+    let (state, mut rx) = fresh_state();
+    install_user(&state, [1; 8], 0);
+    bind_own_dict(&state, Space::User, index::RESERVED_INDEX, [1; 8]);
+    let net = fresh_peer();
+    state.add_neighbour_transport(net, [11; 8], ConnectionModule::Internet);
+
+    on_neighbour_connect(&state, net, ConnectionModule::Internet);
+
+    for update in routing_updates_to(&mut rx, net) {
+        assert!(
+            update.user_entries.is_empty(),
+            "no user entry over Internet"
+        );
+        assert!(
+            update.user_mappings.is_empty(),
+            "no user mapping over Internet"
+        );
+    }
+}
+
+/// The one-per-link drop that ordered delivery exposed: a node that connects
+/// before its user exists sent an origin entry at index 0 with no mapping, so
+/// the neighbour could only drop it.
+#[test]
+fn a_node_with_no_identity_bound_sends_no_origin_entry_at_connect() {
+    let (state, mut rx) = fresh_state();
+    let lan = fresh_peer();
+    state.add_neighbour_transport(lan, [10; 8], ConnectionModule::Lan);
+
+    on_neighbour_connect(&state, lan, ConnectionModule::Lan);
+
+    for update in routing_updates_to(&mut rx, lan) {
+        assert!(
+            update.user_entries.is_empty() && update.node_entries.is_empty(),
+            "no origin entry before an identity is bound at index 0"
+        );
+    }
+}
+
+// --------------------------- defect 14: mappings stay on their own sphere
+
+/// A routing entry for `target` at `own_idx`, learned over `transport`.
+fn learned_over(
+    state: &RouterV2State,
+    space: Space,
+    own_idx: u16,
+    target: table::TargetRef,
+    transport: ConnectionModule,
+) {
+    let entry = table::RoutingEntry {
+        target_index: own_idx,
+        target,
+        seq_num: seq::SeqNum::from(1u16),
+        metric: 15,
+        next_hop: 0,
+        transport,
+        last_update: 1_000,
+        hop_count: 1,
+        local_only: false,
+    };
+    state.routing_table.write().unwrap().set(
+        space,
+        own_idx,
+        std::sync::Arc::new(std::sync::RwLock::new(entry)),
+    );
+}
+
+/// §2.3 keeps Internet-learned entries off the Local sphere (`should_propagate`);
+/// their mappings must stay off it too, or a gateway hands its members the
+/// identities of foreign gateways, the hub, and the hub's user.
+#[test]
+fn local_sphere_withholds_internet_sphere_state() {
+    let (state, _rx) = fresh_state();
+    let lan_learned = install_node(&state, [1; 8], 0, true);
+    let net_learned = install_node(&state, [2; 8], 0, true);
+    bind_own_dict(&state, Space::Node, 20, [1; 8]);
+    bind_own_dict(&state, Space::Node, 21, [2; 8]);
+    learned_over(
+        &state,
+        Space::Node,
+        20,
+        table::TargetRef::Node(lan_learned),
+        ConnectionModule::Lan,
+    );
+    learned_over(
+        &state,
+        Space::Node,
+        21,
+        table::TargetRef::Node(net_learned),
+        ConnectionModule::Internet,
+    );
+    let net_user = install_user(&state, [5; 8], 0);
+    bind_own_dict(&state, Space::User, 30, [5; 8]);
+    learned_over(
+        &state,
+        Space::User,
+        30,
+        table::TargetRef::User(net_user),
+        ConnectionModule::Internet,
+    );
+    state.add_neighbour_transport(fresh_peer(), [3; 8], ConnectionModule::Lan);
+    state.add_neighbour_transport(fresh_peer(), [4; 8], ConnectionModule::Internet);
+
+    let own = state.host_mk.to_id();
+    assert!(
+        should_introduce(&state, Space::Node, &own, Sphere::Local),
+        "ourselves"
+    );
+    assert!(
+        should_introduce(&state, Space::Node, &[1; 8], Sphere::Local),
+        "learned over Local"
+    );
+    assert!(
+        should_introduce(&state, Space::Node, &[3; 8], Sphere::Local),
+        "a LAN neighbour"
+    );
+    assert!(
+        !should_introduce(&state, Space::Node, &[2; 8], Sphere::Local),
+        "a node learned over Internet stays on the Internet side"
+    );
+    assert!(
+        !should_introduce(&state, Space::User, &[5; 8], Sphere::Local),
+        "a user learned over Internet stays on the Internet side"
+    );
+    assert!(
+        !should_introduce(&state, Space::Node, &[4; 8], Sphere::Local),
+        "a neighbour reached only over Internet, such as the hub"
+    );
+}
+
+#[test]
+fn a_gateway_does_not_relay_an_internet_learned_mapping_to_its_lan() {
+    let (state, mut rx) = fresh_state();
+    let lan = fresh_peer();
+    let net = fresh_peer();
+    state.add_neighbour_transport(lan, [10; 8], ConnectionModule::Lan);
+    state.add_neighbour_transport(net, [11; 8], ConnectionModule::Internet);
+    let foreign = install_node(&state, [2; 8], 0, true);
+    bind_own_dict(&state, Space::Node, 21, [2; 8]);
+    learned_over(
+        &state,
+        Space::Node,
+        21,
+        table::TargetRef::Node(foreign),
+        ConnectionModule::Internet,
+    );
+    state
+        .reintroduction_tracker
+        .write()
+        .unwrap()
+        .mark_first_time(Space::Node, 21);
+
+    tick_relay(&state, 1_000);
+
+    let seen = origin_node_mappings(&mut rx);
+    assert!(
+        !seen.get(&lan).is_some_and(|ids| ids.contains(&[2; 8])),
+        "an Internet-learned gateway is not introduced to the LAN"
+    );
+    assert!(
+        seen.get(&net).is_some_and(|ids| ids.contains(&[2; 8])),
+        "but still is across the Internet sphere"
+    );
+}
+
+/// Withholding Internet-sphere mappings from Local peers opens a gap: a
+/// target first learned over Internet, its mark consumed there, and later
+/// learned over Local would be relayed to Local peers under an index they
+/// were never given. Its index is re-marked when its entry changes sphere.
+#[test]
+fn a_target_that_becomes_local_is_introduced_to_local_peers() {
+    let (state, _rx) = fresh_state();
+    let net = fresh_peer();
+    let lan = fresh_peer();
+    state.add_neighbour_transport(net, [11; 8], ConnectionModule::Internet);
+    state.add_neighbour_transport(lan, [10; 8], ConnectionModule::Lan);
+    bind_own_dict(&state, Space::Node, 500, [11; 8]);
+    bind_own_dict(&state, Space::Node, 501, [10; 8]);
+    install_node(&state, [2; 8], 0, true);
+    bind_mirror(&state, net, Space::Node, 7, [2; 8]);
+    bind_mirror(&state, lan, Space::Node, 7, [2; 8]);
+    bind_own_dict(&state, Space::Node, 21, [2; 8]);
+    let node_entry = |seq| codec::messages::RoutingUpdate {
+        user_mappings: Vec::new(),
+        node_mappings: Vec::new(),
+        user_entries: Vec::new(),
+        node_entries: vec![codec::messages::NodeEntry {
+            abs_idx: 7,
+            seq,
+            metric: 0,
+            hop_count: 0,
+            local_only: false,
+            manifest_version: 0,
+        }],
+    };
+
+    state
+        .handle_routing_update(net, ConnectionModule::Internet, None, node_entry(1), 1_000)
+        .unwrap();
+    let _ = state.pending_introductions(Space::Node);
+
+    state
+        .handle_routing_update(lan, ConnectionModule::Lan, None, node_entry(2), 2_000)
+        .unwrap();
+
+    assert!(
+        state
+            .pending_introductions(Space::Node)
+            .iter()
+            .any(|(idx, _, _)| *idx == 21),
+        "now Local-sphere state, so Local peers need its mapping"
     );
 }

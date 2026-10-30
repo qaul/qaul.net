@@ -23,6 +23,12 @@ impl From<PublicKey> for Multikey {
     }
 }
 
+impl From<Multikey> for PublicKey {
+    fn from(value: Multikey) -> Self {
+        value.0
+    }
+}
+
 impl Multikey {
     pub fn encode(&self) -> Vec<u8> {
         self.0.encode_protobuf()

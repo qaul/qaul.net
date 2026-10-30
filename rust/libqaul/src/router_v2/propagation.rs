@@ -66,8 +66,14 @@ pub fn should_introduce(
     sphere: Sphere,
 ) -> bool {
     match (sphere, space) {
-        (Sphere::Local, _) => true,
+        // the membrane applies to mappings as it does to entries
+        (Sphere::Local, _) => !is_internet_sphere_state(state, space, target_id),
         (Sphere::Internet, Space::User) => false,
+        // our own gateway status is the transport itself; the record lags it
+        // until the next `sync_gateway_role`
+        (Sphere::Internet, Space::Node) if *target_id == state.host_mk.to_id() => {
+            state.has_active_internet_transport()
+        }
         (Sphere::Internet, Space::Node) => state
             .nodes
             .read()
@@ -75,6 +81,38 @@ pub fn should_introduce(
             .get(target_id)
             .is_some_and(|node| node.read().unwrap().is_gateway),
     }
+}
+
+/// A target this node knows only through the Internet
+fn is_internet_sphere_state(state: &RouterV2State, space: Space, target_id: &[u8; 8]) -> bool {
+    let dict = match space {
+        Space::Node => &state.node_dict,
+        Space::User => &state.user_dict,
+    };
+    let own_idx = dict.read().unwrap().idx_of(target_id);
+    let entry = own_idx.and_then(|idx| state.routing_table.read().unwrap().get(space, idx));
+    if let Some(entry) = entry {
+        return Sphere::of(entry.read().unwrap().transport) == Sphere::Internet;
+    }
+
+    space == Space::Node
+        && state.mirrors.read().unwrap().values().any(|info| {
+            info.node_id == *target_id
+                && info
+                    .transports
+                    .iter()
+                    .all(|t| Sphere::of(*t) == Sphere::Internet)
+        })
+}
+
+/// May this node's own origin entry go out over `sphere`
+fn origin_allowed(state: &RouterV2State, origin_space: Space, sphere: Sphere) -> bool {
+    let bound = match origin_space {
+        Space::User => state.user_dict.read().unwrap().id_of(RESERVED_INDEX),
+        Space::Node => state.node_dict.read().unwrap().id_of(RESERVED_INDEX),
+    }
+    .is_some();
+    bound && (sphere == Sphere::Local || origin_space == Space::Node)
 }
 
 pub fn compute_outgoing_local_only(stored: bool, outgoing_sphere: Sphere) -> bool {
@@ -154,6 +192,7 @@ pub fn tick_origin(state: &RouterV2State, now_ms: u64) {
 
     let intros: Vec<(u16, [u8; 8], u32)> = state
         .take_introduction(origin_space, RESERVED_INDEX)
+        .or_else(|| state.self_introduction(origin_space))
         .into_iter()
         .collect();
     let mut sent: HashSet<u16> = HashSet::new();
@@ -172,6 +211,9 @@ pub fn tick_origin(state: &RouterV2State, now_ms: u64) {
     for (peer, transport) in pairs {
         let sphere_outgoing = Sphere::of(transport);
         let local_only = sphere_outgoing == Sphere::Local;
+        if !origin_allowed(state, origin_space, sphere_outgoing) {
+            continue;
+        }
 
         // §2.3: the membrane applies to index mappings as well as entries.
         let mappings: Vec<Mapping> = intros
@@ -401,32 +443,22 @@ pub(crate) fn originate_to_neighbour(
     let form = *state.propagation_form.read().unwrap();
     let origin_space = form.origin_space();
     let own_manifest_version = state.manifest.read().unwrap().manifest_version;
+    let sphere = Sphere::of(transport);
+    if !origin_allowed(state, origin_space, sphere) {
+        return;
+    }
 
-    let self_binding = match origin_space {
-        Space::User => state.user_dict.read().unwrap().id_of(RESERVED_INDEX),
-        Space::Node => state.node_dict.read().unwrap().id_of(RESERVED_INDEX),
-    };
-
-    let intros = match self_binding {
-        Some(own_id) => {
-            let version = match origin_space {
-                Space::Node => own_manifest_version,
-                Space::User => state
-                    .users
-                    .read()
-                    .unwrap()
-                    .get(&own_id)
-                    .map(|user| user.read().unwrap().profile_version)
-                    .unwrap_or(0),
-            };
-            vec![Mapping {
-                abs_idx: RESERVED_INDEX,
-                target_id: own_id,
-                version,
-            }]
-        }
-        None => Vec::new(),
-    };
+    // the same filter the origin tick applies (§2.3)
+    let intros: Vec<Mapping> = state
+        .self_introduction(origin_space)
+        .filter(|intro| should_introduce(state, origin_space, &intro.1, sphere))
+        .map(|(abs_idx, target_id, version)| Mapping {
+            abs_idx,
+            target_id,
+            version,
+        })
+        .into_iter()
+        .collect();
 
     let msg = build_origin_update(
         seq,
@@ -492,23 +524,32 @@ pub fn on_neighbour_connect(state: &RouterV2State, neighbour: PeerId, transport:
     let sphere_outbound = Sphere::of(transport);
 
     let user_mappings = {
-        let dict = state.user_dict.read().unwrap();
+        // collected first: `should_introduce` takes these locks itself
+        let bindings: Vec<(u16, [u8; 8])> = {
+            let dict = state.user_dict.read().unwrap();
+            dict.forward_dir
+                .iter()
+                .map(|(&idx, &id)| (idx, id))
+                .collect()
+        };
+
+        let eligible: Vec<(u16, [u8; 8])> = bindings
+            .into_iter()
+            .filter(|(_, id)| should_introduce(state, Space::User, id, sphere_outbound))
+            .collect();
+
         let users = state.users.read().unwrap();
-        let mut mappings = Vec::new();
-        for (&idx, &id) in &dict.forward_dir {
-            if !should_introduce(state, Space::User, &id, sphere_outbound) {
-                continue;
-            }
-            let version = users
-                .get(&id)
-                .map(|arc| arc.read().unwrap().profile_version)
-                .unwrap_or(0);
-            mappings.push(Mapping {
+        let mut mappings: Vec<Mapping> = eligible
+            .into_iter()
+            .map(|(idx, id)| Mapping {
                 abs_idx: idx,
                 target_id: id,
-                version,
-            });
-        }
+                version: users
+                    .get(&id)
+                    .map(|arc| arc.read().unwrap().profile_version)
+                    .unwrap_or(0),
+            })
+            .collect();
         mappings.sort_by_key(|m| m.abs_idx);
         mappings
     };

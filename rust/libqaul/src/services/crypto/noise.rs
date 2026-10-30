@@ -48,7 +48,7 @@ impl CryptoNoise {
         let remote_key: PublicKey;
         {
             let rs = qaul_state.get_router();
-            match Users::get_pub_key(&rs, &remote_id) {
+            match Users::resolve_pub_key(&rs, &remote_id) {
                 Some(key) => remote_key = key,
                 None => {
                     log::error!("No key found for user {:?}", remote_id);
@@ -278,7 +278,7 @@ impl CryptoNoise {
         let remote_key: PublicKey;
         {
             let rs = qaul_state.get_router();
-            match Users::get_pub_key(&rs, &remote_id) {
+            match Users::resolve_pub_key(&rs, &remote_id) {
                 Some(key) => remote_key = key,
                 None => {
                     log::error!("No key found for user {:?}", remote_id);
@@ -1613,5 +1613,60 @@ mod handshake_extras_primitive_tests {
             &[u8],
         >(&state, b"x".to_vec(), acct, send_state, remote);
         assert!(result.is_none());
+    }
+}
+
+#[cfg(test)]
+mod directory_absent_tests {
+    //! A KK handshake between users that neither node has in its user
+    //! directory. Under router_v2 that is every user in another community:
+    //! §2.3 keeps foreign user entries out of the Local sphere, so the key
+    //! has to come from the `PeerId` the sender was given.
+    use super::*;
+    use crate::services::crypto::CryptoStorage;
+    use libp2p::identity::Keypair;
+    use noise_rust_crypto::{ChaCha20Poly1305, Sha256, X25519};
+
+    fn account(name: &str) -> UserAccount {
+        let keys = Keypair::generate_ed25519();
+        UserAccount {
+            id: keys.public().to_peer_id(),
+            keys,
+            name: name.to_string(),
+            password_hash: None,
+            password_salt: None,
+        }
+    }
+
+    #[test]
+    fn handshake_1_round_trips_between_users_absent_from_both_directories() {
+        // Two fresh nodes: neither directory holds the other's user.
+        let sender_node = crate::QaulState::new_for_simulation();
+        let receiver_node = crate::QaulState::new_for_simulation();
+        let (alice, bob) = (account("alice"), account("bob"));
+        let plaintext = b"group invite".to_vec();
+
+        let (message, _, session_id) =
+            CryptoNoise::encrypt_noise_kk_handshake_1::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
+                &sender_node,
+                plaintext.clone(),
+                alice.clone(),
+                CryptoStorage::test_account(),
+                bob.id,
+            );
+        let message = message.expect("bob's key is inline in his PeerId");
+
+        let (decrypted, _) =
+            CryptoNoise::decrypt_noise_kk_handshake_1::<X25519, ChaCha20Poly1305, Sha256, &[u8]>(
+                &receiver_node,
+                message,
+                CryptoStorage::test_account(),
+                alice.id,
+                bob,
+                session_id,
+            )
+            .expect("alice's key is inline in her PeerId");
+
+        assert_eq!(decrypted, plaintext);
     }
 }

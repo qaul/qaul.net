@@ -160,7 +160,10 @@ def phase1(roles: dict, v1: bool = False) -> bool:
     # additionally tags entries with their index space, so user entries can
     # be counted exactly rather than inferred.
     if v1:
-        users = hub.router_table()
+        # v1 lists the hub's own user too, as a Local connection.
+        users = [e for e in hub.router_table()
+                 if not any(c["module"].lower() == "local"
+                            for c in e["connections"])]
     else:
         users = [e for e in hub.router_v2_table() if e.get("space") == "user"]
 

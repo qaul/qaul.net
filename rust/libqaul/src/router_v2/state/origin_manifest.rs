@@ -245,6 +245,8 @@ impl RouterV2State {
             node.write().unwrap().is_gateway = desired;
         }
 
+        self.mark_manifest_version_bump(&self.host_mk.to_id());
+
         *self.dirty_manifest_flags.write().unwrap() = true;
         tracing::info!("router_v2: gateway role → {desired} (§2.3)");
         true
@@ -292,6 +294,8 @@ impl RouterV2State {
         if let Some(node) = self.nodes.read().unwrap().get(&self.host_mk.to_id()) {
             node.write().unwrap().manifest_version = new_version;
         }
+        // §3.8 trigger 3, for our own node index as for every other origin's.
+        self.mark_manifest_version_bump(&self.host_mk.to_id());
 
         self.dirty_delegations.write().unwrap().clear();
         *self.dirty_manifest_flags.write().unwrap() = false;

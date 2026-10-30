@@ -16,6 +16,7 @@ use std::sync::RwLock;
 use super::router_net_proto;
 use super::table::RoutingTable;
 use crate::node::user_accounts::UserAccounts;
+use crate::router_v2::identity::Multikey;
 use crate::rpc::Rpc;
 use crate::search::{Search, SearchConfig, Searchable};
 use crate::services::group::group_id::GroupId;
@@ -521,6 +522,18 @@ impl Users {
     pub fn get_pub_key(router: &super::RouterState, user_id: &PeerId) -> Option<PublicKey> {
         let user_id_bytes = user_id.to_bytes();
         Self::get_pub_key_by_q8id(router, QaulId::bytes_as_q8id(&user_id_bytes))
+    }
+
+    pub fn resolve_pub_key(router: &super::RouterState, user_id: &PeerId) -> Option<PublicKey> {
+        Self::get_pub_key(router, user_id).or_else(|| Self::inline_pub_key(user_id))
+    }
+
+    /// The public key a `PeerId` carries inline, if it uses the identity
+    /// multihash.
+    pub fn inline_pub_key(user_id: &PeerId) -> Option<PublicKey> {
+        Multikey::try_from_peer_id(user_id)
+            .ok()
+            .map(PublicKey::from)
     }
 
     /// get the public key of a known user by it's q8id
@@ -1903,5 +1916,21 @@ mod tests {
         let signed = Users::create_signed_profile(&user, &kp2);
         let result = Users::verify_signed_profile(&signed);
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn inline_pub_key_recovers_the_key_an_ed25519_peer_id_embeds() {
+        let (id, key) = gen_peer();
+        assert_eq!(Users::inline_pub_key(&id), Some(key));
+    }
+
+    /// A PeerId that hashes its key (sha2-256, as for RSA) carries no key to
+    /// recover; only the directory can supply one.
+    #[test]
+    fn inline_pub_key_is_none_for_a_hashed_peer_id() {
+        let multihash = libp2p::multihash::Multihash::<64>::wrap(0x12, &[7u8; 32])
+            .expect("digest fits in 64 bytes");
+        let id = PeerId::from_multihash(multihash).expect("sha2-256 is a valid PeerId hash");
+        assert_eq!(Users::inline_pub_key(&id), None);
     }
 }
