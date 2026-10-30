@@ -858,6 +858,7 @@ void main() {
     expect(find.byType(ChatMessageContextMenu), findsOneWidget);
     expect(bubbleScale(tester), closeTo(1.15, 0.01));
     expect(hapticCount, 1);
+    debugDefaultTargetPlatformOverride = null;
 
     await gesture.up();
     await tester.pump();
@@ -901,9 +902,6 @@ void main() {
       buildDirectChat(messages: [message]),
       otherUser: otherUser,
     );
-
-    debugDefaultTargetPlatformOverride = TargetPlatform.linux;
-    addTearDown(() => debugDefaultTargetPlatformOverride = null);
 
     final bubble = find.byKey(const ValueKey('chat-bubble-surface'));
     final gesture = await tester.startGesture(

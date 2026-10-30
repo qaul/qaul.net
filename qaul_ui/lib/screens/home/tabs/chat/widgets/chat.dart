@@ -1401,13 +1401,6 @@ class _MessageSelectionGestureState extends State<_MessageSelectionGesture>
   late final AnimationController _scaleController;
   bool _menuIsOpen = false;
 
-  bool get _isDesktop => switch (defaultTargetPlatform) {
-    TargetPlatform.linux ||
-    TargetPlatform.macOS ||
-    TargetPlatform.windows => true,
-    _ => false,
-  };
-
   bool get _supportsHaptics => switch (defaultTargetPlatform) {
     TargetPlatform.android || TargetPlatform.iOS => true,
     _ => false,
@@ -1435,7 +1428,6 @@ class _MessageSelectionGestureState extends State<_MessageSelectionGesture>
     if (_menuIsOpen) return;
 
     final isSecondaryMouseClick =
-        _isDesktop &&
         event.kind == PointerDeviceKind.mouse &&
         (event.buttons & kSecondaryMouseButton) != 0;
     if (isSecondaryMouseClick) {
@@ -1455,7 +1447,7 @@ class _MessageSelectionGestureState extends State<_MessageSelectionGesture>
     });
     _selectionTimer = Timer(_MessageSelectionGesture._holdDuration, () {
       if (_pointerOrigin != null && !_menuIsOpen) {
-        _openMenu();
+        _openMenu(completeScale: true);
       }
     });
   }
@@ -1497,12 +1489,16 @@ class _MessageSelectionGestureState extends State<_MessageSelectionGesture>
         Size(surfaceBox.size.width * scale, surfaceBox.size.height * scale);
   }
 
-  Future<void> _openMenu() async {
+  Future<void> _openMenu({bool completeScale = false}) async {
     if (_menuIsOpen) return;
     _menuIsOpen = true;
     _scaleDelayTimer?.cancel();
     _selectionTimer?.cancel();
-    _scaleController.forward();
+    if (completeScale) {
+      _scaleController.value = 1;
+    } else {
+      _scaleController.forward();
+    }
     if (_supportsHaptics) unawaited(HapticFeedback.mediumImpact());
 
     await widget.onMenuRequested(context, _scaledSurfaceRect());
