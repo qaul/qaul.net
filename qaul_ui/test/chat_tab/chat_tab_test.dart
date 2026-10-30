@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show kSecondaryMouseButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -307,9 +309,9 @@ void main() {
         textMessage(id: 'loaded-message', sender: otherUser, text: 'Loaded'),
       ],
     );
-    ProviderScope.containerOf(loadingChatElement)
-        .read(currentOpenChatRoom.notifier)
-        .state = loadedRoom;
+    ProviderScope.containerOf(
+      loadingChatElement,
+    ).read(currentOpenChatRoom.notifier).state = loadedRoom;
     await tester.pump();
 
     final loadedChatList = find.byKey(
@@ -506,8 +508,7 @@ void main() {
     final minimumLeft = overlayRect.left + menuViewportPadding;
     final maximumLeft =
         overlayRect.right - contextMenuRect.width - menuViewportPadding;
-    final shouldAlignRight =
-        bubbleRect.center.dx >= overlayRect.center.dx;
+    final shouldAlignRight = bubbleRect.center.dx >= overlayRect.center.dx;
     final preferredLeft = shouldAlignRight
         ? bubbleRect.right - contextMenuRect.width
         : bubbleRect.left;
@@ -541,8 +542,7 @@ void main() {
     const feedbackHeight = 52.0;
     const viewportPadding = 16.0;
     final expectedLeft =
-        (bubbleRect.right - feedbackOverlayRect.left - feedbackWidth)
-        .clamp(
+        (bubbleRect.right - feedbackOverlayRect.left - feedbackWidth).clamp(
           viewportPadding,
           feedbackOverlayRect.width - feedbackWidth - viewportPadding,
         );
@@ -558,10 +558,7 @@ void main() {
       toastRect.left,
       closeTo(feedbackOverlayRect.left + expectedLeft, 0.01),
     );
-    expect(
-      toastRect.top,
-      closeTo(feedbackOverlayRect.top + expectedTop, 0.01),
-    );
+    expect(toastRect.top, closeTo(feedbackOverlayRect.top + expectedTop, 0.01));
 
     await tester.pump(const Duration(seconds: 2));
     await tester.pump(const Duration(milliseconds: 100));
@@ -578,9 +575,7 @@ void main() {
     expect(find.byKey(const ValueKey('copy-feedback-toast')), findsNothing);
   });
 
-  testWidgets('shares a text message from the long-press menu', (
-    tester,
-  ) async {
+  testWidgets('shares a text message from the long-press menu', (tester) async {
     final messageShareService = FakeMessageShareService();
     final targetMessage = Message(
       senderId: otherUser.id,
@@ -747,10 +742,26 @@ void main() {
   );
 
   BoxBorder? bubbleBorder(WidgetTester tester) {
-    final decoration = tester
-        .widget<DecoratedBox>(find.byKey(const ValueKey('chat-bubble-surface')))
-        .decoration as BoxDecoration;
+    final decoration =
+        tester
+                .widget<DecoratedBox>(
+                  find.byKey(const ValueKey('chat-bubble-surface')),
+                )
+                .decoration
+            as BoxDecoration;
     return decoration.border;
+  }
+
+  double bubbleScale(WidgetTester tester) {
+    final transform = tester.widget<Transform>(
+      find
+          .ancestor(
+            of: find.byKey(const ValueKey('chat-bubble-surface')),
+            matching: find.byType(Transform),
+          )
+          .first,
+    );
+    return transform.transform.storage[0];
   }
 
   User testUser(
@@ -770,7 +781,8 @@ void main() {
   ChatRoom directRoomWith(User user, {DateTime? lastMessageTime}) {
     return ChatRoom(
       name: user.name,
-      conversationId: user.conversationId ??
+      conversationId:
+          user.conversationId ??
           Uint8List.fromList('${user.name}-conversation'.codeUnits),
       lastMessageTime: lastMessageTime,
       members: [
@@ -780,26 +792,129 @@ void main() {
     );
   }
 
-  testWidgets('text message long press opens context menu with forward enabled', (
+  testWidgets(
+    'text message long press opens context menu with forward enabled',
+    (tester) async {
+      await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);
+
+      final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+      chat.onMessageLongPress!(
+        tester.element(find.byType(chat_ui.Chat)),
+        forwardTargetMessage(),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ChatMessageContextMenu), findsOneWidget);
+      expect(find.text('Forward'), findsOneWidget);
+      expect(find.text('Share'), findsOneWidget);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Reply'), findsNothing);
+      expect(find.text('Edit'), findsNothing);
+      expect(find.text('Info'), findsNothing);
+      expect(find.text('Delete'), findsNothing);
+    },
+  );
+
+  testWidgets('holding a bubble scales it before opening the context menu', (
     tester,
   ) async {
-    await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);
-
-    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
-    chat.onMessageLongPress!(
-      tester.element(find.byType(chat_ui.Chat)),
-      forwardTargetMessage(),
+    final message = textMessage(
+      id: 'hold-to-select',
+      sender: otherUser,
+      text: 'hold me',
     );
+    await pumpChatScreen(
+      tester,
+      buildDirectChat(messages: [message]),
+      otherUser: otherUser,
+    );
+
+    var hapticCount = 0;
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (call) async {
+          if (call.method == 'HapticFeedback.vibrate') hapticCount++;
+          return null;
+        });
+    addTearDown(() {
+      debugDefaultTargetPlatformOverride = null;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, null);
+    });
+
+    final bubble = find.byKey(const ValueKey('chat-bubble-surface'));
+    final gesture = await tester.startGesture(tester.getCenter(bubble));
+
+    await tester.pump(const Duration(milliseconds: 199));
+    expect(bubbleScale(tester), 1);
+    expect(find.byType(ChatMessageContextMenu), findsNothing);
+
+    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(bubbleScale(tester), closeTo(1.075, 0.01));
+    expect(find.byType(ChatMessageContextMenu), findsNothing);
+
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byType(ChatMessageContextMenu), findsOneWidget);
+    expect(bubbleScale(tester), closeTo(1.15, 0.01));
+    expect(hapticCount, 1);
+
+    await gesture.up();
+    await tester.pump();
+    expect(find.byType(ChatMessageContextMenu), findsOneWidget);
+  });
+
+  testWidgets('releasing before selection reverses the bubble scale', (
+    tester,
+  ) async {
+    final message = textMessage(
+      id: 'release-before-select',
+      sender: otherUser,
+      text: 'release me',
+    );
+    await pumpChatScreen(
+      tester,
+      buildDirectChat(messages: [message]),
+      otherUser: otherUser,
+    );
+
+    final bubble = find.byKey(const ValueKey('chat-bubble-surface'));
+    final gesture = await tester.startGesture(tester.getCenter(bubble));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(bubbleScale(tester), greaterThan(1));
+
+    await gesture.up();
     await tester.pumpAndSettle();
+    expect(bubbleScale(tester), 1);
+    expect(find.byType(ChatMessageContextMenu), findsNothing);
+  });
+
+  testWidgets('right-click opens the context menu immediately', (tester) async {
+    final message = textMessage(
+      id: 'right-click-select',
+      sender: otherUser,
+      text: 'right click me',
+    );
+    await pumpChatScreen(
+      tester,
+      buildDirectChat(messages: [message]),
+      otherUser: otherUser,
+    );
+
+    debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+
+    final bubble = find.byKey(const ValueKey('chat-bubble-surface'));
+    final gesture = await tester.startGesture(
+      tester.getCenter(bubble),
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pump();
 
     expect(find.byType(ChatMessageContextMenu), findsOneWidget);
-    expect(find.text('Forward'), findsOneWidget);
-    expect(find.text('Share'), findsOneWidget);
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Reply'), findsNothing);
-    expect(find.text('Edit'), findsNothing);
-    expect(find.text('Info'), findsNothing);
-    expect(find.text('Delete'), findsNothing);
+    await gesture.up();
   });
 
   testWidgets('message info shows sender, status, dates and message ID', (
@@ -920,7 +1035,9 @@ void main() {
     ]);
   });
 
-  testWidgets('forwards an attachment from the long-press menu', (tester) async {
+  testWidgets('forwards an attachment from the long-press menu', (
+    tester,
+  ) async {
     await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);
 
     final attachment = File(
@@ -1198,16 +1315,22 @@ void main() {
 
     expect(find.text('Forward to'), findsNothing);
     expect(find.text('Group Chat'), findsOneWidget);
-    expect(tester.widget<TextField>(find.byType(TextField)).controller!.text,
-        'forward this text');
+    expect(
+      tester.widget<TextField>(find.byType(TextField)).controller!.text,
+      'forward this text',
+    );
 
-    ProviderScope.containerOf(tester.element(find.byType(chat_ui.Chat)))
-        .read(currentOpenChatRoom.notifier)
-        .state = buildGroupChat(messages: []);
+    ProviderScope.containerOf(
+      tester.element(find.byType(chat_ui.Chat)),
+    ).read(currentOpenChatRoom.notifier).state = buildGroupChat(
+      messages: [],
+    );
     await tester.pumpAndSettle();
 
-    expect(tester.widget<TextField>(find.byType(TextField)).controller!.text,
-        'forward this text');
+    expect(
+      tester.widget<TextField>(find.byType(TextField)).controller!.text,
+      'forward this text',
+    );
   });
 
   testWidgets('mobile forward preserves the source chat when going back', (
