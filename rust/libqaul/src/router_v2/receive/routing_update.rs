@@ -19,7 +19,7 @@ use crate::{
         receive::ReceiveCtx,
         seq::{is_fresher_u32, Acceptance, SeqNum},
         table::{RoutingEntry, TargetRef},
-        Result, RouterV2State, RoutingV2Error,
+        Result, RouterV2State, RoutingV2Error, Sphere,
     },
 };
 use libp2p::PeerId;
@@ -237,6 +237,20 @@ impl RouterV2State {
             if u.public_key.is_none() {
                 needs_profile = Some(u.id);
             }
+        }
+
+        let previous_sphere = self
+            .routing_table
+            .read()
+            .unwrap()
+            .get(space, accepted.own_idx)
+            .map(|e| Sphere::of(e.read().unwrap().transport));
+
+        if previous_sphere != Some(Sphere::of(ctx.transport)) {
+            self.reintroduction_tracker
+                .write()
+                .unwrap()
+                .mark_version_bump(space, accepted.own_idx);
         }
 
         self.routing_table

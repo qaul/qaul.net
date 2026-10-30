@@ -171,6 +171,13 @@ fn tick_origin_one_lan_neighbour_pushes_one_message_with_local_only_true() {
     let (state, mut rx) = fresh_state();
     let peer = fresh_peer();
     state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan);
+    // An origin entry needs an identity bound at index 0 to describe.
+    install_user(&state, [9; 8], 0);
+    state
+        .user_dict
+        .write()
+        .unwrap()
+        .bind(RESERVED_INDEX, [9; 8]);
 
     tick_origin(&state, 0);
 
@@ -383,6 +390,12 @@ fn tick_origin_wire_seq_matches_incremented_seq_num() {
     let (state, mut rx) = fresh_state();
     let peer = fresh_peer();
     state.add_neighbour_transport(peer, [77; 8], ConnectionModule::Lan);
+    install_user(&state, [9; 8], 0);
+    state
+        .user_dict
+        .write()
+        .unwrap()
+        .bind(RESERVED_INDEX, [9; 8]);
 
     let before = state.seq_num.read().unwrap().value();
     tick_origin(&state, 0);

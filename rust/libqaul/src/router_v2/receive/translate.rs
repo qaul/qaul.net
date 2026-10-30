@@ -125,7 +125,7 @@ impl RouterV2State {
                                 mapping.target_id,
                                 mapping.version,
                             );
-                        } else {
+                        } else if mapping.version != advertised {
                             debug!("stale node advertisement from {neighbour:?}: target={:?} stored_advertised={advertised} incoming={}",
                                 mapping.target_id, mapping.version);
                         }
