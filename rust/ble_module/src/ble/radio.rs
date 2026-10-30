@@ -25,7 +25,9 @@ use std::{
     error::Error,
     time::Duration,
 };
-use tokio::sync::{mpsc, watch};
+use tokio::{
+    net::UnixDatagram, sync::{mpsc, watch}, time::Instant,
+};
 
 /// Requested advert power. Mirrors Android's TX_POWER_HIGH/MAX, the controller clamps it
 const ADVERT_TX_POWER_DBM: i16 = 20;
@@ -33,6 +35,13 @@ const ADVERT_TX_POWER_DBM: i16 = 20;
 /// Advert interval. Mirrors Android's ADVERTISE_MODE_LOW_LATENCY, which
 /// Android's NOMINAL_ADVERT_INTERVAL_MS also assumes.
 const ADVERT_INTERVAL: Duration = Duration::from_millis(100);
+
+/// Every Nth frame is traced: the send task waits until BlueZ has put it, and every frame before it,
+/// on air before reporting FrameSent. BlueZ only sends a Write Request or an Indication once its
+/// write queue (commands and notifications) is empty, so the reply means the queue has drained.
+/// Without it FrameSent only means "handed to bluetoothd", which queues without limit.
+/// Bounds what sits ahead of a control frame to N frames, costing 1–2 idle connection events per tracer.
+pub(crate) const WRITE_TRACER_EVERY: usize = 20;
 
 /// What the radio side tells the loop. One channel for all of them, so the loop sees one ordered stream.
 #[derive(Debug)]
@@ -90,22 +99,49 @@ impl Peer for PeerKey {
     }
 }
 
-/// Writes each frame from a peers outbox to its pipe, in order. Shared by both roles: the servers 
-/// notify pipe and the clients write pipe are the same type.
-/// Ends when the loop drops the outbox, or reports `Gone` when the pipe fails.
+/// Notifies each frame from a peers outbox on its MSG_CHAR pipe, in order (peripheral role).
+/// With a `tracer` from the central subscribing to TRACER_CHAR, every WRITE_TRACER_EVERY frames it waits
+/// for a confirmed indication before reporting FrameSent. 
+/// Ends when the loop drops the outbox, or reports `Gone` when a pipe fails.
 pub(crate) async fn send_frames(
     peer: PeerKey,
     writer: CharacteristicWriter,
+    tracer: Option<UnixDatagram>,
     mut outbox_rx: mpsc::Receiver<Vec<u8>>,
     events: mpsc::Sender<RadioEvent>,
+   // batch_time: Option<Instant>,
+    //batch_size: usize,
 ) {
+    let mut frames_sent: usize = 0;
     while let Some(frame) = outbox_rx.recv().await {
         if let Err(err) = writer.send(&frame).await {
             log::warn!("{} ({:?}) send failed: {}", peer.address, peer.role, err);
             let _ = events.send(RadioEvent::Gone { peer }).await;
             break;
         }
+        frames_sent += 1;
+
+        if let Some(tracer) = &tracer {
+            if frames_sent % WRITE_TRACER_EVERY == 0 {
+                if let Err(err) = await_tracer(tracer).await {
+                    log::warn!("{} ({:?}) tracer failed: {}", peer.address, peer.role, err);
+                    let _ = events.send(RadioEvent::Gone { peer }).await;
+                    break;
+                }
+                log::debug!("{} tracer ok after {} frames", peer.address, frames_sent);
+            }
+        }
         let _ = events.send(RadioEvent::FrameSent { peer }).await;
+    }
+}
+
+/// Sends one indication on TRACER_CHAR and waits for the centrals confirmation. A zero length read means BlueZ closed it.
+async fn await_tracer(tracer: &UnixDatagram) -> std::io::Result<()> {
+    tracer.send(&[1]).await?;
+    let mut confirmation = [0u8; 1];
+    match tracer.recv(&mut confirmation).await? {
+        0 => Err(std::io::Error::new(std::io::ErrorKind::UnexpectedEof, "tracer pipe closed")),
+        _ => Ok(()),
     }
 }
 

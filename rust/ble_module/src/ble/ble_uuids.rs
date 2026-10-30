@@ -25,6 +25,12 @@ pub fn psm_char() -> Uuid {
     Uuid::parse_str("c7b64403-37d9-4c00-92a0-6d0a87346816").unwrap()
 }
 
+/// Indicate only. The peripheral sends one indication here every few notifications on MSG_CHAR,
+/// and the centrals confirmation tells it those notifications have all gone out.
+pub fn tracer_char() -> Uuid {
+    Uuid::parse_str("c7b64404-37d9-4c00-92a0-6d0a87346816").unwrap()
+}
+
 /// 0xFFFF is the value reserved for testing / internal use.
 pub const QAUL_MANUFACTURER_ID: u16 = 0xFFFF;
 
