@@ -56,6 +56,8 @@ class ChatMessageRenderer {
     required ChatRenderMode mode,
     required DateTime clock,
     bool isSelected = false,
+    double selectionScale = 1,
+    Key? surfaceKey,
     List<String> mentionLabels = const [],
   }) {
     final display = presentation.bubbleDisplay;
@@ -66,6 +68,8 @@ class ChatMessageRenderer {
         presentation: presentation,
         clock: clock,
         isSelected: isSelected,
+        selectionScale: selectionScale,
+        surfaceKey: surfaceKey,
         mentionLabels: mentionLabels,
       );
     }
@@ -75,6 +79,8 @@ class ChatMessageRenderer {
       clock: clock,
       horizontalGutter: true,
       isSelected: isSelected,
+      selectionScale: selectionScale,
+      surfaceKey: surfaceKey,
       mentionLabels: mentionLabels,
     );
   }
@@ -85,6 +91,8 @@ class ChatMessageRenderer {
     required ChatRenderMode mode,
     required DateTime clock,
     bool isSelected = false,
+    double selectionScale = 1,
+    Key? surfaceKey,
   }) {
     final display = presentation.bubbleDisplay;
     if (display == null) return child;
@@ -94,6 +102,8 @@ class ChatMessageRenderer {
       clock: clock,
       showTimestamp: presentation.meta.showTimestamp,
       isSelected: isSelected,
+      selectionScale: selectionScale,
+      surfaceKey: surfaceKey,
       child: child,
     );
 
@@ -125,12 +135,16 @@ class DirectTextMessageItem extends StatelessWidget {
     required this.clock,
     this.horizontalGutter = true,
     this.isSelected = false,
+    this.selectionScale = 1,
+    this.surfaceKey,
     this.mentionLabels = const [],
   });
 
   final MessagePresentation presentation;
   final DateTime clock;
   final bool isSelected;
+  final double selectionScale;
+  final Key? surfaceKey;
   final List<String> mentionLabels;
 
   /// When true, applies a 16px gutter on the trailing edge for primary
@@ -153,6 +167,8 @@ class DirectTextMessageItem extends StatelessWidget {
         clock: clock,
         showTimestamp: presentation.meta.showTimestamp,
         isSelected: isSelected,
+        selectionScale: selectionScale,
+        surfaceKey: surfaceKey,
       ),
     );
   }
@@ -164,12 +180,16 @@ class GroupTextMessageItem extends StatelessWidget {
     required this.presentation,
     required this.clock,
     this.isSelected = false,
+    this.selectionScale = 1,
+    this.surfaceKey,
     this.mentionLabels = const [],
   });
 
   final MessagePresentation presentation;
   final DateTime clock;
   final bool isSelected;
+  final double selectionScale;
+  final Key? surfaceKey;
   final List<String> mentionLabels;
 
   @override
@@ -196,6 +216,8 @@ class GroupTextMessageItem extends StatelessWidget {
         clock: clock,
         showTimestamp: presentation.meta.showTimestamp,
         isSelected: isSelected,
+        selectionScale: selectionScale,
+        surfaceKey: surfaceKey,
       ),
     );
   }
