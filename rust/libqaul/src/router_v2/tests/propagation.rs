@@ -8,14 +8,15 @@ use crate::router_v2::{
     codec::{messages::RoutingUpdate, Header, RoutingMessage},
     index::{Space, RESERVED_INDEX},
     propagation::{
-        blocked_by_split_horizon, compute_outgoing_local_only, should_propagate, tick_origin,
-        tick_relay,
+        blocked_by_split_horizon, compute_outgoing_local_only, origin_due, should_propagate, tick,
+        tick_origin, tick_relay,
     },
     seq::SeqNum,
     table::{RoutingEntry, TargetRef},
     test_utils::*,
     Sphere,
 };
+use crate::storage::configuration::RoutingV2Options;
 
 /// Build a RoutingEntry with the fields the caller cares about.
 /// Other fields get harmless defaults.
@@ -403,4 +404,118 @@ fn tick_origin_wire_seq_matches_incremented_seq_num() {
     let msg = rx.try_recv().expect("one outbound");
     let update = decode_frame(&msg.bytes);
     assert_eq!(update.user_entries[0].seq, before.wrapping_add(1));
+}
+
+// ---------- one router pass (defect 6) ----------
+
+#[test]
+fn the_origin_rides_every_tenth_relay_pass_by_default() {
+    let options = RoutingV2Options::default();
+    let due: Vec<u64> = (0..31).filter(|p| origin_due(*p, &options)).collect();
+    assert_eq!(due, vec![10, 20, 30]);
+}
+
+#[test]
+fn the_origin_interval_is_counted_in_relay_passes() {
+    let options = RoutingV2Options {
+        relay_interval: 3,
+        origin_interval_time: 10,
+        ..Default::default()
+    };
+    let due: Vec<u64> = (0..10).filter(|p| origin_due(*p, &options)).collect();
+    assert_eq!(due, vec![3, 6, 9], "10 s rounds down to three 3 s passes");
+}
+
+#[test]
+fn degenerate_intervals_still_originate() {
+    let zero_relay = RoutingV2Options {
+        relay_interval: 0,
+        ..Default::default()
+    };
+    assert!(
+        origin_due(10, &zero_relay),
+        "a 0 s relay interval reads as 1 s"
+    );
+
+    let short_origin = RoutingV2Options {
+        relay_interval: 5,
+        origin_interval_time: 2,
+        ..Default::default()
+    };
+    assert!(
+        (1..4).all(|p| origin_due(p, &short_origin)),
+        "an origin interval shorter than the relay one rides every pass"
+    );
+}
+
+/// The two updates used to run on separate tasks, each syncing role and form
+/// at a different point. One pass now does it in a fixed order.
+#[test]
+fn a_router_pass_syncs_the_role_then_originates_then_relays() {
+    let (state, mut rx) = fresh_state();
+    let lan = fresh_peer();
+    state.add_neighbour_transport(lan, [10; 8], ConnectionModule::Lan);
+    state.add_neighbour_transport(fresh_peer(), [11; 8], ConnectionModule::Internet);
+
+    // a LAN-learned user waiting in the relay queue
+    let relayed = install_user(&state, [33; 8], 0);
+    bind_own_dict(&state, Space::User, 7, [33; 8]);
+    bind_own_dict(&state, Space::Node, 5, [42; 8]);
+    let entry = make_entry(TargetRef::User(relayed), 5, ConnectionModule::Lan, true);
+    state
+        .routing_table
+        .write()
+        .unwrap()
+        .set(Space::User, 7, Arc::new(RwLock::new(entry)));
+    state.relay_queue.write().unwrap().insert((Space::User, 7));
+
+    tick(&state, 1_000, true);
+
+    assert!(
+        state.host_is_gateway(),
+        "the role is synced in the same pass"
+    );
+    let to_lan: Vec<RoutingUpdate> = std::iter::from_fn(|| rx.try_recv().ok())
+        .filter(|msg| msg.peer == lan)
+        .map(|msg| decode_frame(&msg.bytes))
+        .collect();
+    assert_eq!(to_lan.len(), 2, "one origin update, one relay batch");
+    assert!(
+        to_lan[0]
+            .node_entries
+            .iter()
+            .any(|e| e.abs_idx == RESERVED_INDEX && e.hop_count == 0),
+        "the origin update goes first, already in node form"
+    );
+    assert!(
+        to_lan[1].user_entries.iter().any(|e| e.abs_idx == 7),
+        "the relay batch follows"
+    );
+}
+
+#[test]
+fn a_pass_without_the_origin_only_relays() {
+    let (state, mut rx) = fresh_state();
+    state.add_neighbour_transport(fresh_peer(), [10; 8], ConnectionModule::Lan);
+    install_user(&state, [9; 8], 0);
+    bind_own_dict(&state, Space::User, RESERVED_INDEX, [9; 8]);
+    let before = state.seq_num.read().unwrap().value();
+
+    tick(&state, 1_000, false);
+
+    assert_eq!(
+        state.seq_num.read().unwrap().value(),
+        before,
+        "no origin update, so the sequence number stays"
+    );
+    while let Ok(msg) = rx.try_recv() {
+        let update = decode_frame(&msg.bytes);
+        assert!(
+            !update
+                .user_entries
+                .iter()
+                .any(|e| e.abs_idx == RESERVED_INDEX),
+            "no origin entry outside its pass"
+        );
+    }
 }
