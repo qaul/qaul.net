@@ -2,7 +2,7 @@
 // This software is published under the AGPLv3 license.
 
 //! Init entrypoint. it builds a live RouterV2State from a
-//! host identity + storage path, starts the origin/relay ticks, and
+//! host identity + storage path, starts the router tick, and
 //! returns the state plus a receiver for outbound bytes.
 
 use std::sync::Arc;
@@ -13,7 +13,7 @@ use tokio::sync::mpsc::UnboundedReceiver;
 use crate::{
     router_v2::{
         identity::Multikey,
-        propagation::{tick_origin, tick_relay},
+        propagation::{origin_due, tick},
         BumpTrigger, OutboundMsg, RouterV2State,
     },
     storage::{configuration::RoutingV2Options, manifest_state::HostManifestState},
@@ -39,11 +39,8 @@ pub fn init_router_v2(
     let persisted = HostManifestState::load_or_default(storage_path);
     state.restore_host_manifest(&persisted);
 
-    // origin tick: spec §7.1
-    spawn_origin_tick(Arc::clone(&state));
-
-    // relay tick: spec §7.1, and the §10.8 manifest bump/persist path.
-    spawn_relay_tick(Arc::clone(&state), storage_path.to_string());
+    // origin and relay updates: spec §7.1, and the §10.8 manifest bump/persist path.
+    spawn_router_tick(Arc::clone(&state), storage_path.to_string());
 
     RouterV2Handle { state, rx }
 }
@@ -57,26 +54,18 @@ fn now_ms() -> u64 {
         .unwrap_or(0)
 }
 
-fn spawn_origin_tick(state: Arc<RouterV2State>) {
+/// One task for both updates, so their order within a pass is fixed.
+fn spawn_router_tick(state: Arc<RouterV2State>, storage_path: String) {
     tokio::spawn(async move {
-        let mut ticker = tokio::time::interval(std::time::Duration::from_secs(10));
+        let relay_secs = state.options.relay_interval.max(1);
+        let mut ticker = tokio::time::interval(std::time::Duration::from_secs(relay_secs));
         ticker.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
-        ticker.tick().await;
-        loop {
-            ticker.tick().await;
-            tick_origin(&state, now_ms());
-        }
-    });
-}
-
-fn spawn_relay_tick(state: Arc<RouterV2State>, storage_path: String) {
-    tokio::spawn(async move {
-        let mut ticker = tokio::time::interval(std::time::Duration::from_secs(1));
-        ticker.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
+        let mut pass: u64 = 0;
         loop {
             ticker.tick().await;
             let now = now_ms();
-            tick_relay(&state, now);
+            tick(&state, now, origin_due(pass, &state.options));
+            pass += 1;
 
             // §10.8: batched manifest pulls, one message per neighbour.
             state.drop_manifest_req_timeout(now);
@@ -96,7 +85,6 @@ fn spawn_relay_tick(state: Arc<RouterV2State>, storage_path: String) {
             if state.sweep_unreachable_delegations(now) {
                 state.host_manifest_snapshot().save_to_path(&storage_path);
             }
-            state.sync_gateway_role();
 
             // §10.8
             if state

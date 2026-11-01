@@ -662,10 +662,30 @@ half a day, M one to two days, L longer.
     - §3.6 and §8.4 say a dump lists every index in use. Filtering Local dumps
       follows the existing Internet-dump filter, but contradicts that wording, so the
       spec text should be amended.
-- **2d, one task (defect 6):** fold the origin tick into the relay loop, every Nth
-  relay tick, in a fixed order: `sync_gateway_role` → `sync_propagation_form` →
-  origin → relay. This also gives `relay_interval` and `origin_interval_time` a
-  reader.
+- **2d, one task (defect 6). Implemented and measured 2026-11-01.**
+  - **The change.**
+    - `init.rs` runs one task instead of two.
+    - Each pass calls `propagation::tick`, which runs `sync_gateway_role`, then
+      `sync_propagation_form`, then the origin update when it is due, then the relay
+      batch. Housekeeping and the manifest bump follow, as before.
+    - `origin_due` reads `relay_interval` and `origin_interval_time`, which nothing
+      read before. The defaults keep a 1 s relay, a 10 s origin and the first origin
+      at 10 s.
+    - The form is now checked every pass instead of every origin tick.
+  - **Unit tests.** 5 new in `tests/propagation.rs`: the origin timing, the order
+    within a pass, and a pass with no origin due.
+  - **Lab, 2 runs** (`communities-3x10-v2-20261101T070757Z`, `…T072243Z`):
+    - Every 2c result held:
+      - 0 user drops at connect, 0 `Sealed` refusals, 0 members' pulls for foreign
+        gateways, 0 management drops that never recover.
+      - Crossing 3.3 s and 2.2 s, contained.
+      - Directory settled at 10.1 s, 3 of 3 gateways in the hub's node space.
+    - Gateways switch to node form 0.6–0.85 s after dialling the hub, against
+      4.5–5.6 s on the 2c runs.
+    - Members deferred more manifests for an unknown origin key: 31 and 33, against
+      21 on 2c. Every deferral resolves to a trusted manifest. The most likely cause
+      is the earlier form switch: the gateway bumps its manifest before members have
+      its key.
 - **2e, early frames (defect 7):** register a neighbour on its first received
   `qaul_info` frame, deriving the node ID from the `PeerId` exactly as `ping_event`
   does.

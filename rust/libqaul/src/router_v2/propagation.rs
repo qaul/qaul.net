@@ -22,6 +22,7 @@ use crate::{
         table::{RoutingEntry, TargetRef},
         OutboundKind, OutboundMsg, RouterV2State, Sphere,
     },
+    storage::configuration::RoutingV2Options,
 };
 
 /// §8.4 body overhead: `chunk_index`, `chunk_count`, and the two 2-byte
@@ -178,6 +179,23 @@ fn build_origin_update(
             }
         }
     }
+}
+
+/// Whether relay pass `pass` also carries the origin update (§7.1)
+pub fn origin_due(pass: u64, options: &RoutingV2Options) -> bool {
+    let relay = options.relay_interval.max(1);
+    let every = (options.origin_interval_time / relay).max(1);
+    pass > 0 && pass.is_multiple_of(every)
+}
+
+/// One router pass: gateway role, propagation form
+pub fn tick(state: &RouterV2State, now_ms: u64, origin_due: bool) {
+    state.sync_gateway_role();
+    state.sync_propagation_form(now_ms);
+    if origin_due {
+        tick_origin(state, now_ms);
+    }
+    tick_relay(state, now_ms);
 }
 
 /// orchestrates sending routing updates per second
