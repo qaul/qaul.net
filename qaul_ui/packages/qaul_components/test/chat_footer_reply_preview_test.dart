@@ -82,7 +82,7 @@ void main() {
               child: SizedBox(
                 width: width,
                 child: ChatFooter(
-                  placeholder: 'Secure private message',
+                  placeholder: 'Private message',
                   replyPreview: replyPreview,
                   applyBottomSafeArea: false,
                 ),
@@ -276,7 +276,7 @@ void main() {
           body: Align(
             alignment: Alignment.bottomCenter,
             child: ChatFooter(
-              placeholder: 'Secure private message',
+              placeholder: 'Private message',
               controller: controller,
               onVoicePressed: () => voiceCount++,
               onCameraPressed: () => photoCount++,
@@ -327,7 +327,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: ChatFooter(
-            placeholder: 'Secure private message',
+            placeholder: 'Private message',
             controller: controller,
             initialAttachmentMenuOpen: true,
             onVoicePressed: () {},
