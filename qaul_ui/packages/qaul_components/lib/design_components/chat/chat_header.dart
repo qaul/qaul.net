@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/qaul_components_l10n_ext.dart';
 import '../../styles/qaul_color_sheet.dart';
+import '../../styles/qaul_text_scaler.dart';
 import '../users/qaul_avatar.dart';
 
 const Color _kChatHeaderControlColor = Color(0xFF999999);
@@ -173,6 +174,12 @@ class ChatHeader extends StatelessWidget {
     );
     final subtitle = _subtitle(context);
     final hasSubtitle = subtitle.isNotEmpty;
+    final textScaler = MediaQuery.textScalerOf(context);
+    final textHeight = textScaler.scale(20) * 1.2 +
+        (hasSubtitle ? _kTitleSubtitleGap + textScaler.scale(11) * 1.2 : 0);
+    final toolbarHeight = textScaler is QaulTextScaler
+        ? (textHeight + 12).clamp(kChatHeaderToolbarHeight, double.infinity)
+        : kChatHeaderToolbarHeight;
 
     final menu = menuEntries.isNotEmpty && onMenuSelected != null
         ? _ChatHeaderOverflowMenuButton(
@@ -182,7 +189,7 @@ class ChatHeader extends StatelessWidget {
         : null;
 
     final header = SizedBox(
-      height: kChatHeaderToolbarHeight,
+      height: toolbarHeight,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: _kHorizontalPadding),
         child: Row(

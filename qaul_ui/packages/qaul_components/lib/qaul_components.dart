@@ -57,3 +57,4 @@ export 'models/chat_user.dart';
 export 'styles/qaul_app_theme.dart';
 export 'styles/qaul_color_sheet.dart';
 export 'styles/qaul_emoji.dart';
+export 'styles/qaul_text_scaler.dart';
