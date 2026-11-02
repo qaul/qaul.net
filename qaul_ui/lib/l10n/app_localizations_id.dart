@@ -25,7 +25,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get sendFileTooltip => 'Kirim File';
 
   @override
-  String get sendPhotoTooltip => 'Send Photo';
+  String get sendPhotoTooltip => 'Kirim foto';
 
   @override
   String get sendAudioTooltip => 'Rekam pesan audio';

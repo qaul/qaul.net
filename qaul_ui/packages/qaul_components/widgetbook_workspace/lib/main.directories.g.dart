@@ -419,6 +419,12 @@ final directories = <_widgetbook.WidgetbookNode>[
                         _qaul_components_widgetbook_use_cases_design_components_chat_footer_chat_footer
                             .buildChatFooterWithTextUseCase,
                   ),
+                  _widgetbook.WidgetbookUseCase(
+                    name: 'With text — submenu open',
+                    builder:
+                        _qaul_components_widgetbook_use_cases_design_components_chat_footer_chat_footer
+                            .buildChatFooterWithTextOpenUseCase,
+                  ),
                 ],
               ),
               _widgetbook.WidgetbookComponent(

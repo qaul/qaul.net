@@ -25,7 +25,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sendFileTooltip => '发送文件';
 
   @override
-  String get sendPhotoTooltip => 'Send Photo';
+  String get sendPhotoTooltip => '发送照片';
 
   @override
   String get sendAudioTooltip => '录制音频消息';
@@ -527,6 +527,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get sendFileTooltip => '發送文件';
+
+  @override
+  String get sendPhotoTooltip => '傳送相片';
 
   @override
   String get sendAudioTooltip => '錄製音訊訊息';

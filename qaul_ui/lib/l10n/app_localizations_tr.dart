@@ -25,7 +25,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get sendFileTooltip => 'Dosyayı Gönder';
 
   @override
-  String get sendPhotoTooltip => 'Send Photo';
+  String get sendPhotoTooltip => 'Fotoğraf gönder';
 
   @override
   String get sendAudioTooltip => 'Sesli mesaj kaydet';

@@ -25,7 +25,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get sendFileTooltip => 'ارسال پرونده';
 
   @override
-  String get sendPhotoTooltip => 'Send Photo';
+  String get sendPhotoTooltip => 'ارسال عکس';
 
   @override
   String get sendAudioTooltip => 'ضبط پیام صوتی';
