@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../styles/qaul_color_sheet.dart';
+import '../../styles/qaul_emoji.dart';
+import '../../styles/qaul_text_scaler.dart';
 import 'chat_mentions.dart';
 import 'chat_message.dart';
 import 'chat_reply_bubble_preview.dart';
@@ -28,9 +30,16 @@ const double kChatBubbleWidthBreakpoint = 500.0;
 const double kChatBubbleMaxTextScaleFactor = 1.3;
 
 TextScaler chatBubbleTextScaler(BuildContext context) {
-  return MediaQuery.textScalerOf(
-    context,
-  ).clamp(maxScaleFactor: kChatBubbleMaxTextScaleFactor);
+  final scaler = MediaQuery.textScalerOf(context);
+  if (scaler is QaulTextScaler) {
+    return QaulTextScaler(
+      systemTextScaler: scaler.systemTextScaler.clamp(
+        maxScaleFactor: kChatBubbleMaxTextScaleFactor,
+      ),
+      zoom: scaler.zoom,
+    );
+  }
+  return scaler.clamp(maxScaleFactor: kChatBubbleMaxTextScaleFactor);
 }
 
 class ChatBubbleStyle {
@@ -54,6 +63,7 @@ class ChatBubbleStyle {
   static const secondaryColor = Color(0xFF424242);
 
   static const textStyle = TextStyle(
+    fontFamilyFallback: kQaulEmojiFontFamilyFallback,
     fontSize: 16,
     fontWeight: FontWeight.w300,
     height: 1.2,
@@ -63,11 +73,10 @@ class ChatBubbleStyle {
 
   /// Matches WhatsApp's treatment of messages containing only one or two
   /// emoji: the fewer emoji there are, the larger they appear.
-  static TextStyle emojiOnlyTextStyle(int emojiCount) => textStyle.copyWith(
-    fontSize: emojiCount == 1 ? 64 : 48,
-    height: 1,
-    letterSpacing: 0,
-  );
+  /// Keeps the inherited line height: the emoji font's natural line is about
+  /// 1.17em, so anything tighter pushes the glyph above the bubble padding.
+  static TextStyle emojiOnlyTextStyle(int emojiCount) =>
+      textStyle.copyWith(fontSize: emojiCount == 1 ? 64 : 48, letterSpacing: 0);
 
   static const timeStyle = TextStyle(
     fontSize: 11,
@@ -531,7 +540,10 @@ class QaulChatBubble extends StatelessWidget {
                   final lineHeight =
                       textScaler.scale(messageTextStyle.fontSize!) *
                       (messageTextStyle.height ?? 1.2);
-                  final fitsOnOneLine = painter.height <= lineHeight * 1.1;
+                  // Emoji-only messages always stack the timestamp underneath
+                  // so the enlarged emoji never shares a line with it.
+                  final fitsOnOneLine =
+                      emojiCount == null && painter.height <= lineHeight * 1.1;
 
                   final timeRow = Row(
                     mainAxisSize: MainAxisSize.min,
@@ -580,22 +592,12 @@ class QaulChatBubble extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Flexible(
-                          child: emojiCount == null
-                              ? RichText(
-                                  textAlign: TextAlign.left,
-                                  textWidthBasis: TextWidthBasis.longestLine,
-                                  textScaler: textScaler,
-                                  text: messageSpan,
-                                )
-                              : Transform.translate(
-                                  offset: const Offset(0, 3),
-                                  child: RichText(
-                                    textAlign: TextAlign.left,
-                                    textWidthBasis: TextWidthBasis.longestLine,
-                                    textScaler: textScaler,
-                                    text: messageSpan,
-                                  ),
-                                ),
+                          child: RichText(
+                            textAlign: TextAlign.left,
+                            textWidthBasis: TextWidthBasis.longestLine,
+                            textScaler: textScaler,
+                            text: messageSpan,
+                          ),
                         ),
                         const SizedBox(width: gap),
                         timeRow,
@@ -622,23 +624,39 @@ class QaulChatBubble extends StatelessWidget {
                       ],
                     );
                   } else {
-                    messageContent = Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: isPrimary
-                          ? CrossAxisAlignment.end
-                          : CrossAxisAlignment.start,
-                      children: [
-                        RichText(
-                          textAlign: TextAlign.left,
-                          textWidthBasis: TextWidthBasis.longestLine,
-                          textScaler: textScaler,
-                          text: messageSpan,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: gap),
-                          child: timeRow,
-                        ),
-                      ],
+                    // Message stays start-aligned; the timestamp always sits at
+                    // the end, regardless of which side the bubble is on.
+                    final stackedPainter = TextPainter(
+                      text: messageSpan,
+                      textDirection: TextDirection.ltr,
+                      textScaler: textScaler,
+                      textWidthBasis: TextWidthBasis.longestLine,
+                    )..layout(maxWidth: constraints.maxWidth);
+                    final stackedWidth = stackedPainter.width > timeBlockWidth
+                        ? stackedPainter.width
+                        : timeBlockWidth;
+                    stackedPainter.dispose();
+                    messageContent = SizedBox(
+                      width: stackedWidth.ceilToDouble(),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          RichText(
+                            textAlign: TextAlign.left,
+                            textWidthBasis: TextWidthBasis.longestLine,
+                            textScaler: textScaler,
+                            text: messageSpan,
+                          ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: gap),
+                              child: timeRow,
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   }
 
@@ -751,37 +769,44 @@ class _QaulChatBubbleSurface extends StatelessWidget {
           minWidth: ChatBubbleStyle.minBubbleWidth,
           maxWidth: maxBubbleWidth,
         ),
-        child: Container(
-          key: const ValueKey('chat-bubble-surface'),
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            borderRadius: borderRadius,
-          ),
-          foregroundDecoration: isSelected
-              ? BoxDecoration(
-                  borderRadius: borderRadius,
-                  border: Border.all(
-                    color: sheet.chatBubbleSelectionOutline,
-                    width: ChatBubbleStyle.selectedOutlineWidth,
-                  ),
-                )
-              : null,
-          child: ClipRRect(
-            borderRadius: borderRadius.resolve(Directionality.of(context)),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                child,
-                if (showTimestamp)
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(10, 4, 10, 6),
-                    child: Align(
-                      alignment: AlignmentDirectional.centerEnd,
-                      child: timeRow,
+        child: IntrinsicWidth(
+          child: Container(
+            key: const ValueKey('chat-bubble-surface'),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: borderRadius,
+            ),
+            foregroundDecoration: isSelected
+                ? BoxDecoration(
+                    borderRadius: borderRadius,
+                    border: Border.all(
+                      color: sheet.chatBubbleSelectionOutline,
+                      width: ChatBubbleStyle.selectedOutlineWidth,
                     ),
-                  ),
-              ],
+                  )
+                : null,
+            child: ClipRRect(
+              borderRadius: borderRadius.resolve(Directionality.of(context)),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  child,
+                  if (showTimestamp)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                        10,
+                        4,
+                        10,
+                        6,
+                      ),
+                      child: Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: timeRow,
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),

@@ -563,6 +563,48 @@ void main() {
     });
   });
 
+  for (final systemScale in [1.0, 2.0]) {
+    testWidgets('desktop bubble zoom is not capped (system: $systemScale)', (tester) async {
+      final clock = DateTime(2026, 1, 1, 12);
+      final scaler = QaulTextScaler(
+        systemTextScaler: TextScaler.linear(systemScale),
+        zoom: 2.5,
+      );
+      for (final content in ['Zoomed message', '😀', '😀🎉']) {
+        await tester.pumpWidget(MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(size: const Size(390, 844), textScaler: scaler),
+            child: Material(
+              child: Center(
+                child: SizedBox(
+                  width: 390,
+                  child: QaulChatBubble(
+                    message: QaulChatBubbleMessage(
+                      content: content,
+                      sentAt: clock,
+                      receivedAt: clock,
+                      status: MessageStatus.sent,
+                      messageType: MessageType.primary,
+                      edges: const [],
+                    ),
+                    clock: clock,
+                    showTimestamp: true,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ));
+        final expectedScale = (systemScale > 1.3 ? 1.3 : systemScale) * 2.5;
+        final rich = tester.widget<RichText>(_findMessageRichText(content));
+        final timestamp = tester.widget<Text>(find.text('Now'));
+        expect(rich.textScaler.scale(16), closeTo(16 * expectedScale, 0.001));
+        expect(timestamp.textScaler!.scale(11), closeTo(11 * expectedScale, 0.001));
+        expect(tester.takeException(), isNull);
+      }
+    });
+  }
+
   group('QaulChatBubble reply preview', () {
     Widget app(QaulChatBubbleMessage message, DateTime clock) {
       return MaterialApp(
@@ -751,6 +793,111 @@ void main() {
         timestampRect.left - messageRect.right,
         ChatBubbleStyle.gapBetweenTextAndDate,
       );
+    });
+  });
+
+  group('QaulChatBubble media', () {
+    Future<void> pumpMedia(
+      WidgetTester tester, {
+      required MessageType messageType,
+      required Size viewport,
+      required Size mediaSize,
+    }) {
+      final clock = DateTime(2026, 1, 1, 12);
+      final message = QaulChatBubbleMessage(
+        content: '',
+        sentAt: clock,
+        receivedAt: clock,
+        status: MessageStatus.sent,
+        messageType: messageType,
+        edges: const [],
+      );
+
+      return tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(size: viewport),
+            child: Material(
+              child: QaulChatBubble.media(
+                message: message,
+                clock: clock,
+                child: SizedBox(
+                  key: ValueKey('portrait-media'),
+                  width: mediaSize.width,
+                  height: mediaSize.height,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('sizes media bubbles to the painted image width', (tester) async {
+      const cases = [
+        (
+          name: 'phone portrait 3:4',
+          viewport: Size(390, 844),
+          media: Size(228, 304),
+        ),
+        (
+          name: 'phone portrait 9:16',
+          viewport: Size(390, 844),
+          media: Size(171, 304),
+        ),
+        (
+          name: 'phone landscape 16:9',
+          viewport: Size(390, 844),
+          media: Size(272, 153),
+        ),
+        (
+          name: 'phone square',
+          viewport: Size(390, 844),
+          media: Size(272, 272),
+        ),
+        (
+          name: 'desktop portrait 3:4',
+          viewport: Size(1280, 800),
+          media: Size(330, 440),
+        ),
+        (
+          name: 'desktop portrait 9:16',
+          viewport: Size(1280, 800),
+          media: Size(247.5, 440),
+        ),
+        (
+          name: 'desktop landscape 16:9',
+          viewport: Size(1280, 800),
+          media: Size(392, 220.5),
+        ),
+        (
+          name: 'desktop square',
+          viewport: Size(1280, 800),
+          media: Size(392, 392),
+        ),
+      ];
+
+      for (final mediaCase in cases) {
+        for (final messageType in MessageType.values) {
+          await pumpMedia(
+            tester,
+            messageType: messageType,
+            viewport: mediaCase.viewport,
+            mediaSize: mediaCase.media,
+          );
+
+          final bubble = tester.getRect(
+            find.byKey(const ValueKey('chat-bubble-surface')),
+          );
+          final media = tester.getRect(
+            find.byKey(const ValueKey('portrait-media')),
+          );
+          final timestamp = tester.getRect(find.text('Now'));
+
+          expect(bubble.width, media.width, reason: mediaCase.name);
+          expect(timestamp.right, lessThanOrEqualTo(bubble.right));
+        }
+      }
     });
   });
 }

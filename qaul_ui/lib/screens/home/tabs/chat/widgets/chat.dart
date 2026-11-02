@@ -1016,208 +1016,209 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
     final l10n = AppLocalizations.of(context)!;
     final directPeer = _directChatPeer(room);
-    final chatBackgroundColor = QaulColorSheet(
-      Theme.of(context).brightness,
-    ).background;
-    final chatHeaderHeight =
-        MediaQuery.paddingOf(context).top + kChatHeaderToolbarHeight;
+    final chatBackgroundColor = Theme.of(context).scaffoldBackgroundColor;
     final showBackButton = isMobileChat;
     _chatRenderMode = resolveChatRenderMode(room);
     final isLoadingMessages = room.messages == null;
     final chatMessages = isLoadingMessages
         ? const <types.Message>[]
         : messages(room, l10n: l10n, renderMode: _chatRenderMode)!;
+    final dateDividerTextStyle = chatDateDividerTextStyle(context);
 
     return Scaffold(
       backgroundColor: chatBackgroundColor,
       resizeToAvoidBottomInset: true,
-      body: Stack(
+      body: Column(
         children: [
-          Positioned.fill(
-            child: Padding(
-              padding: EdgeInsets.only(top: chatHeaderHeight),
-              child: CronTaskDecorator(
-                callback: () => refreshCurrentRoom(),
-                schedule: const Duration(milliseconds: 300),
-                child: SafeArea(
-                  top: false,
-                  bottom: false,
-                  child: Chat(
+          _buildChatHeader(
+            room: room,
+            l10n: l10n,
+            directPeer: directPeer,
+            closeChat: closeChat,
+            showBackButton: showBackButton,
+          ),
+          Expanded(
+            child: CronTaskDecorator(
+              callback: () => refreshCurrentRoom(),
+              schedule: const Duration(milliseconds: 300),
+              child: SafeArea(
+                top: false,
+                bottom: false,
+                child: Chat(
+                  key: ValueKey(
+                    'chat-list-${room.idBase58}-${isLoadingMessages ? 'loading' : 'loaded'}',
+                  ),
+                  showUserAvatars: false,
+                  showUserNames: false,
+                  user: user.toInternalUser(),
+                  useTopSafeAreaInset: false,
+                  dateHeaderThreshold: const Duration(days: 365).inMilliseconds,
+                  groupMessagesThreshold: const Duration(
+                    days: 365,
+                  ).inMilliseconds,
+                  messages: chatMessages,
+                  onSendPressed: sendMessage,
+                  inputOptions: const InputOptions(
+                    sendButtonVisibilityMode: SendButtonVisibilityMode.always,
+                  ),
+                  avatarBuilder: (id) {
+                    var user = room.members.firstWhereOrNull(
+                      (u) => id.id == u.idBase58,
+                    );
+                    if (user == null) return const SizedBox();
+                    return QaulAvatar.small(user: user, badgeEnabled: false);
+                  },
+                  emptyState: isLoadingMessages
+                      ? const Center(child: QaulLoadingIndicator())
+                      : Center(child: Text(l10n.chatEmptyState)),
+                  bubbleBuilder:
+                      (
+                        child, {
+                        required message,
+                        required nextMessageInGroup,
+                      }) =>
+                          _bubbleBuilder(
+                            child,
+                            message: message,
+                            nextMessageInGroup: nextMessageInGroup,
+                            followsDateHeader: _messageFollowsDateHeader(
+                              message,
+                              chatMessages,
+                            ),
+                          ),
+                  systemMessageBuilder: _buildSystemMessage,
+                  customBottomWidget: _ChatTextFooter(
                     key: ValueKey(
-                      'chat-list-${room.idBase58}-${isLoadingMessages ? 'loading' : 'loaded'}',
+                      '${room.idBase58}:${_initialComposerText ?? ''}',
                     ),
-                    showUserAvatars: false,
-                    showUserNames: false,
-                    user: user.toInternalUser(),
-                    useTopSafeAreaInset: false,
-                    dateHeaderThreshold: const Duration(
-                      days: 365,
-                    ).inMilliseconds,
-                    groupMessagesThreshold: const Duration(
-                      days: 365,
-                    ).inMilliseconds,
-                    messages: chatMessages,
+                    isDisabled: room.status != ChatRoomStatus.active,
+                    disabledMessage:
+                        room.status != ChatRoomStatus.inviteAccepted
+                        ? null
+                        : 'Please wait for the admin to confirm your acceptance to send messages',
+                    hintText: _chatRenderMode == ChatRenderMode.group
+                        ? l10n.groupChatMessageHint
+                        : l10n.privateMessageHint,
+                    mentionSuggestions: _chatRenderMode == ChatRenderMode.group
+                        ? [
+                            for (final member in room.members)
+                              if (member.idBase58 != user.idBase58 &&
+                                  member.name.trim().isNotEmpty)
+                                ChatMentionSuggestion(
+                                  id: member.idBase58,
+                                  label: member.name,
+                                ),
+                            const ChatMentionSuggestion(
+                              id: 'all',
+                              label: 'all',
+                              isEveryone: true,
+                            ),
+                          ]
+                        : const [],
+                    initialText: _initialComposerText,
                     onSendPressed: sendMessage,
-                    inputOptions: const InputOptions(
-                      sendButtonVisibilityMode: SendButtonVisibilityMode.always,
-                    ),
-                    avatarBuilder: (id) {
-                      var user = room.members.firstWhereOrNull(
-                        (u) => id.id == u.idBase58,
-                      );
-                      if (user == null) return const SizedBox();
-                      return QaulAvatar.small(user: user, badgeEnabled: false);
-                    },
-                    emptyState: isLoadingMessages
-                        ? const Center(child: QaulLoadingIndicator())
-                        : Center(child: Text(l10n.chatEmptyState)),
-                    bubbleBuilder: _bubbleBuilder,
-                    systemMessageBuilder: _buildSystemMessage,
-                    customBottomWidget: _ChatTextFooter(
-                      key: ValueKey(
-                        '${room.idBase58}:${_initialComposerText ?? ''}',
-                      ),
-                      isDisabled: room.status != ChatRoomStatus.active,
-                      disabledMessage:
-                          room.status != ChatRoomStatus.inviteAccepted
-                          ? null
-                          : 'Please wait for the admin to confirm your acceptance to send messages',
-                      hintText: _chatRenderMode == ChatRenderMode.group
-                          ? l10n.groupChatMessageHint
-                          : l10n.securePrivateMessageHint,
-                      mentionSuggestions:
-                          _chatRenderMode == ChatRenderMode.group
-                          ? [
-                              for (final member in room.members)
-                                if (member.idBase58 != user.idBase58 &&
-                                    member.name.trim().isNotEmpty)
-                                  ChatMentionSuggestion(
-                                    id: member.idBase58,
-                                    label: member.name,
-                                  ),
-                              const ChatMentionSuggestion(
-                                id: 'all',
-                                label: 'all',
-                                isEveryone: true,
-                              ),
-                            ]
-                          : const [],
-                      initialText: _initialComposerText,
-                      onSendPressed: sendMessage,
-                      onSendAudioPressed: Platform.isLinux
-                          ? null
-                          : () => _openAudioRecorder(room),
-                      onPickImagePressed: () => _openPhotoPicker(room),
-                      onAttachmentPressed: () => _openAttachmentPicker(room),
-                    ),
-                    onMessageLongPress: _handleMessageLongPress,
-                    onMessageTap: (context, message) async {
-                      if (message is! types.FileMessage ||
-                          _isReceivingFile(message)) {
+                    onSendAudioPressed: Platform.isLinux
+                        ? null
+                        : () => _openAudioRecorder(room),
+                    onPickImagePressed: () => _openPhotoPicker(room),
+                    onAttachmentPressed: () => _openAttachmentPicker(room),
+                  ),
+                  onMessageLongPress: _handleMessageLongPress,
+                  onMessageTap: (context, message) async {
+                    if (message is! types.FileMessage ||
+                        _isReceivingFile(message)) {
+                      return;
+                    }
+                    if (Platform.isIOS || Platform.isAndroid) {
+                      OpenFilex.open(message.uri);
+                      return;
+                    }
+
+                    final file = Uri.file(message.uri);
+
+                    final parentDirectory = File.fromUri(file).parent.uri;
+
+                    for (final uri in [file, parentDirectory]) {
+                      if (await canLaunchUrl(uri)) {
+                        launchUrl(uri);
                         return;
                       }
-                      if (Platform.isIOS || Platform.isAndroid) {
-                        OpenFilex.open(message.uri);
-                        return;
-                      }
-
-                      final file = Uri.file(message.uri);
-
-                      final parentDirectory = File.fromUri(file).parent.uri;
-
-                      for (final uri in [file, parentDirectory]) {
-                        if (await canLaunchUrl(uri)) {
-                          launchUrl(uri);
-                          return;
-                        }
-                      }
-                    },
-                    textMessageBuilder:
-                        (
-                          message, {
-                          required int messageWidth,
-                          required bool showName,
-                        }) {
-                          return TextMessage(
-                            message: message,
-                            usePreviewData: true,
-                            hideBackgroundOnEmojiMessages: true,
-                            showName: false,
-                            emojiEnlargementBehavior:
-                                EmojiEnlargementBehavior.multi,
-                          );
-                        },
-                    fileMessageBuilder: (message, {required int messageWidth}) {
-                      return SizedBox(
-                        width: messageWidth.toDouble(),
-                        child: FileMessageWidget(
+                    }
+                  },
+                  textMessageBuilder:
+                      (
+                        message, {
+                        required int messageWidth,
+                        required bool showName,
+                      }) {
+                        return TextMessage(
                           message: message,
-                          isDefaultUser: message.author.id == user.idBase58,
-                        ),
-                      );
-                    },
-                    imageMessageBuilder:
-                        (message, {required int messageWidth}) {
-                          return ImageMessageWidget(
-                            message: message,
-                            messageWidth: messageWidth,
-                            isDefaultUser: message.author.id == user.idBase58,
-                          );
-                        },
-                    audioMessageBuilder:
-                        (message, {required int messageWidth}) {
-                          return AudioMessageWidget(
-                            message: message,
-                            messageWidth: messageWidth,
-                            isDefaultUser: message.author.id == user.idBase58,
-                          );
-                        },
-                    customDateHeaderText: (dt) => DateFormat(
-                      'EEEE, MMMM d, yyyy',
-                      'en',
-                    ).format(dt.toLocal()),
-                    theme: DefaultChatTheme(
-                      userAvatarNameColors: [
-                        colorGenerationStrategy(
-                          directPeer?.idBase58 ??
-                              otherUser?.idBase58 ??
-                              room.idBase58,
-                        ),
-                      ],
-                      backgroundColor: chatBackgroundColor,
-                      messageInsetsVertical: 0,
-                      messageInsetsHorizontal: 0,
-                      dateDividerTextStyle: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w300,
-                        height: 1.2,
-                        color: Colors.white,
+                          usePreviewData: true,
+                          hideBackgroundOnEmojiMessages: true,
+                          showName: false,
+                          emojiEnlargementBehavior:
+                              EmojiEnlargementBehavior.multi,
+                        );
+                      },
+                  fileMessageBuilder: (message, {required int messageWidth}) {
+                    return SizedBox(
+                      width: messageWidth.toDouble(),
+                      child: FileMessageWidget(
+                        message: message,
+                        isDefaultUser: message.author.id == user.idBase58,
                       ),
-                      bubbleMargin: EdgeInsets.zero,
-                      sentMessageBodyTextStyle: const TextStyle(
-                        fontSize: 17,
-                        color: Colors.white,
+                    );
+                  },
+                  imageMessageBuilder: (message, {required int messageWidth}) {
+                    return ImageMessageWidget(
+                      message: message,
+                      messageWidth: messageWidth,
+                      isDefaultUser: message.author.id == user.idBase58,
+                    );
+                  },
+                  audioMessageBuilder: (message, {required int messageWidth}) {
+                    return SizedBox(
+                      width: messageWidth.toDouble(),
+                      child: AudioMessageWidget(
+                        message: message,
+                        messageWidth: messageWidth,
+                        isDefaultUser: message.author.id == user.idBase58,
                       ),
-                      receivedMessageBodyTextStyle: const TextStyle(
-                        fontSize: 17,
-                        color: Colors.black,
+                    );
+                  },
+                  customDateHeaderText: (dt) => DateFormat(
+                    'EEEE, MMMM d, yyyy',
+                    'en',
+                  ).format(dt.toLocal()),
+                  dateHeaderBuilder: (header) => Padding(
+                    padding: _dateHeaderPadding(header.dateTime, chatMessages),
+                    child: Center(
+                      child: Text(header.text, style: dateDividerTextStyle),
+                    ),
+                  ),
+                  theme: DefaultChatTheme(
+                    userAvatarNameColors: [
+                      colorGenerationStrategy(
+                        directPeer?.idBase58 ??
+                            otherUser?.idBase58 ??
+                            room.idBase58,
                       ),
+                    ],
+                    backgroundColor: chatBackgroundColor,
+                    messageInsetsVertical: 0,
+                    messageInsetsHorizontal: 0,
+                    bubbleMargin: EdgeInsets.zero,
+                    sentMessageBodyTextStyle: const TextStyle(
+                      fontSize: 17,
+                      color: Colors.white,
+                    ),
+                    receivedMessageBodyTextStyle: const TextStyle(
+                      fontSize: 17,
+                      color: Colors.black,
                     ),
                   ),
                 ),
               ),
-            ),
-          ),
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: _buildChatHeader(
-              room: room,
-              l10n: l10n,
-              directPeer: directPeer,
-              closeChat: closeChat,
-              showBackButton: showBackButton,
             ),
           ),
         ],
@@ -1230,6 +1231,41 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     final store = ref.read(usersStoreProvider.notifier);
     return store.findMemberInRoom(e.senderId, room) ??
         User(name: l10n.unknown, id: e.senderId);
+  }
+
+  EdgeInsets _dateHeaderPadding(
+    DateTime date,
+    List<types.Message> chatMessages,
+  ) {
+    final messageIndex = chatMessages.indexWhere(
+      (message) =>
+          message.createdAt == date.millisecondsSinceEpoch,
+    );
+    if (messageIndex == -1) {
+      return const EdgeInsets.symmetric(vertical: 12);
+    }
+
+    // flutter_chat_ui inserts the first date header immediately before the
+    // oldest message, without its normal MessageSpacer.
+    if (messageIndex == chatMessages.length - 1) {
+      return const EdgeInsets.only(bottom: 12);
+    }
+
+    final message = chatMessages[messageIndex];
+    final previousMessage = chatMessages[messageIndex + 1];
+    final hasPreviousMessageSpacer =
+        previousMessage.type != types.MessageType.system &&
+        (previousMessage.author.id != message.author.id ||
+            (message.createdAt! - previousMessage.createdAt!) >
+                const Duration(days: 365).inMilliseconds);
+
+    // A date header follows a package-generated spacer only when the author
+    // changes (or the gap exceeds the grouping threshold). Compensate for
+    // that spacer so the visible gap to the previous bubble is always 12px.
+    return EdgeInsets.only(
+      top: hasPreviousMessageSpacer ? 0 : 12,
+      bottom: 12,
+    );
   }
 
   List<types.Message>? messages(
@@ -1292,6 +1328,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     Widget child, {
     required types.Message message,
     required bool nextMessageInGroup,
+    required bool followsDateHeader,
   }) {
     if (message.type == types.MessageType.custom) {
       return Container(
@@ -1318,6 +1355,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
             ? ['all', ...room.members.map((member) => member.name)]
             : const [],
         isSelected: message.id == _selectedContextMenuMessageId,
+        topSpacingOverride: followsDateHeader ? 0 : null,
       );
     }
 
@@ -1327,7 +1365,35 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       mode: _chatRenderMode,
       clock: DateTime.now(),
       isSelected: message.id == _selectedContextMenuMessageId,
+      topSpacingOverride: followsDateHeader ? 0 : null,
     );
+  }
+
+  bool _messageFollowsDateHeader(
+    types.Message message,
+    List<types.Message> chatMessages,
+  ) {
+    final messageIndex = chatMessages.indexWhere(
+      (candidate) => candidate.id == message.id,
+    );
+    if (messageIndex == -1 || message.createdAt == null) return false;
+
+    // flutter_chat_ui adds a header before the oldest message and before a
+    // newer message when it is separated from the previous one by a day.
+    if (messageIndex == chatMessages.length - 1) return true;
+
+    final previousMessage = chatMessages[messageIndex + 1];
+    if (previousMessage.createdAt == null) return false;
+
+    final messageDate = DateTime.fromMillisecondsSinceEpoch(
+      message.createdAt!,
+    );
+    final previousDate = DateTime.fromMillisecondsSinceEpoch(
+      previousMessage.createdAt!,
+    );
+    return messageDate.day != previousDate.day ||
+        message.createdAt! - previousMessage.createdAt! >=
+            const Duration(days: 365).inMilliseconds;
   }
 
   bool _isReceivingFile(types.FileMessage message) {

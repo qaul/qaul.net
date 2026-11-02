@@ -110,9 +110,7 @@ pub fn record_and_emit(state: Option<&crate::QaulState>, event: RotationEvent) {
     record(stamped);
 }
 
-fn to_proto(
-    event: &RotationEvent,
-) -> qaul_proto::qaul_rpc_crypto::RotationEvent {
+fn to_proto(event: &RotationEvent) -> qaul_proto::qaul_rpc_crypto::RotationEvent {
     use qaul_proto::qaul_rpc_crypto as proto;
     let kind = match event.kind {
         RotationEventKind::Rotated => proto::RotationEventKind::Rotated,

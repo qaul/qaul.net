@@ -20,7 +20,7 @@ void main() {
         body: Align(
           alignment: Alignment.bottomCenter,
           child: ChatFooter(
-            placeholder: 'Secure private message',
+            placeholder: 'Private message',
             controller: controller,
             replyPreview: replyPreview,
             onCancelReply: onCancelReply,
@@ -39,7 +39,7 @@ void main() {
       findsNothing,
     );
     expect(find.byType(TextField), findsOneWidget);
-    expect(find.text('Secure private message'), findsOneWidget);
+    expect(find.text('Private message'), findsOneWidget);
   });
 
   testWidgets('renders a themed divider above the entire footer', (
@@ -65,6 +65,50 @@ void main() {
     final lightDivider = await topDivider(lightTheme);
     expect(lightDivider.width, 0.5);
     expect(lightDivider.color, const Color(0xFFD1D1D6));
+  });
+
+  testWidgets('keeps a 4px inset below the footer divider', (tester) async {
+    Future<void> expectTopInset({
+      required double width,
+      required ThemeData theme,
+      ChatFooterReplyPreviewData? replyPreview,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            body: Align(
+              alignment: Alignment.bottomCenter,
+              child: SizedBox(
+                width: width,
+                child: ChatFooter(
+                  placeholder: 'Private message',
+                  replyPreview: replyPreview,
+                  applyBottomSafeArea: false,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final footerTop = tester
+          .getTopLeft(find.byKey(const ValueKey('chat-footer-surface')))
+          .dy;
+      final firstElement = replyPreview == null
+          ? find.byKey(const ValueKey('chat-footer-composer-pill'))
+          : find.byKey(const ValueKey('chat-footer-reply-preview'));
+      final firstElementTop = tester.getTopLeft(firstElement).dy;
+
+      expect(firstElementTop - footerTop, closeTo(4, 0.5));
+    }
+
+    for (final width in [360.0, 390.0]) {
+      for (final theme in [ThemeData.light(), ThemeData.dark()]) {
+        await expectTopInset(width: width, theme: theme);
+        await expectTopInset(width: width, theme: theme, replyPreview: reply);
+      }
+    }
   });
 
   testWidgets('renders reply target above an editable composer', (
@@ -142,11 +186,7 @@ void main() {
   });
 
   testWidgets('hides attachment actions without callbacks', (tester) async {
-    await tester.pumpWidget(
-      app(
-        controller: TextEditingController(),
-      ),
-    );
+    await tester.pumpWidget(app(controller: TextEditingController()));
 
     expect(find.byTooltip('Voice message'), findsNothing);
     expect(find.byTooltip('Photo'), findsNothing);
@@ -169,7 +209,7 @@ void main() {
           body: Align(
             alignment: Alignment.bottomCenter,
             child: ChatFooter(
-              placeholder: 'Secure private message',
+              placeholder: 'Private message',
               onVoicePressed: () => voiceCount++,
               onCameraPressed: () => cameraCount++,
               voiceTooltip: 'Voice message',
@@ -182,7 +222,7 @@ void main() {
       ),
     );
 
-    expect(find.byTooltip('More'), findsNothing);
+    expect(find.byTooltip('More'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Voice message'));
     await tester.tap(find.byTooltip('Photo'));
@@ -200,7 +240,7 @@ void main() {
           body: Align(
             alignment: Alignment.bottomCenter,
             child: ChatFooter(
-              placeholder: 'Secure private message',
+              placeholder: 'Private message',
               onAttachmentPressed: () => attachmentCount++,
               attachmentsTooltip: 'More',
               applyBottomSafeArea: false,
@@ -221,5 +261,86 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(attachmentCount, 1);
+  });
+
+  testWidgets('shows voice, photo and attachment while typing', (tester) async {
+    var voiceCount = 0;
+    var photoCount = 0;
+    var attachmentCount = 0;
+    final controller = TextEditingController(text: 'Hello');
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.bottomCenter,
+            child: ChatFooter(
+              placeholder: 'Private message',
+              controller: controller,
+              onVoicePressed: () => voiceCount++,
+              onCameraPressed: () => photoCount++,
+              onAttachmentPressed: () => attachmentCount++,
+              voiceTooltip: 'Voice message',
+              cameraTooltip: 'Photo',
+              attachmentsTooltip: 'Attachment',
+              applyBottomSafeArea: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Future<void> openMenu() async {
+      await tester.tap(find.byKey(const ValueKey('chat-footer-more')));
+      await tester.pumpAndSettle();
+    }
+
+    await openMenu();
+    expect(find.byKey(const ValueKey('voice')), findsOneWidget);
+    expect(find.byKey(const ValueKey('photo')), findsOneWidget);
+    expect(find.byKey(const ValueKey('attachment')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('voice')));
+    await tester.pumpAndSettle();
+    expect(voiceCount, 1);
+    expect(find.byKey(const ValueKey('voice')), findsNothing);
+
+    await openMenu();
+    await tester.tap(find.byKey(const ValueKey('photo')));
+    await tester.pumpAndSettle();
+    expect(photoCount, 1);
+    expect(find.byKey(const ValueKey('photo')), findsNothing);
+
+    await openMenu();
+    await tester.tap(find.byKey(const ValueKey('attachment')));
+    await tester.pumpAndSettle();
+    expect(attachmentCount, 1);
+    expect(find.byKey(const ValueKey('attachment')), findsNothing);
+  });
+
+  testWidgets('opens the attachment menu with initial text', (tester) async {
+    final controller = TextEditingController(text: 'Hello');
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ChatFooter(
+            placeholder: 'Private message',
+            controller: controller,
+            initialAttachmentMenuOpen: true,
+            onVoicePressed: () {},
+            onCameraPressed: () {},
+            onAttachmentPressed: () {},
+            applyBottomSafeArea: false,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byKey(const ValueKey('voice')), findsOneWidget);
+    expect(find.byKey(const ValueKey('photo')), findsOneWidget);
+    expect(find.byKey(const ValueKey('attachment')), findsOneWidget);
   });
 }
