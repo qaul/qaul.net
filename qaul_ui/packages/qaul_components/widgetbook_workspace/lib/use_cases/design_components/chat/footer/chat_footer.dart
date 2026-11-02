@@ -99,6 +99,33 @@ Widget buildChatFooterWithTextUseCase(BuildContext context) {
 }
 
 @widgetbook.UseCase(
+  name: 'With text — submenu open',
+  type: ChatFooter,
+  path: 'design_components/chat/footer',
+)
+Widget buildChatFooterWithTextOpenUseCase(BuildContext context) {
+  return _frameFooter(
+    context,
+    ChatFooter(
+      placeholder: _kPlaceholderEn,
+      controller: TextEditingController(
+        text: 'Hello — attachment menu is open.',
+      ),
+      initialAttachmentMenuOpen: true,
+      onSend: (_) {},
+      onVoicePressed: () {},
+      onCameraPressed: () {},
+      onMoreAttachmentsPressed: () {},
+      onAttachmentPressed: () {},
+      voiceTooltip: 'Voice message',
+      cameraTooltip: 'Photo',
+      attachmentsTooltip: 'Attachment',
+      sendTooltip: 'Send',
+    ),
+  );
+}
+
+@widgetbook.UseCase(
   name: 'Long draft (multiline)',
   type: ChatFooter,
   path: 'design_components/chat/footer',
