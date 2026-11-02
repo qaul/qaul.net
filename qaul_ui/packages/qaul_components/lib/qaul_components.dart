@@ -13,6 +13,8 @@ export 'design_components/chat/chat_footer/chat_footer_reply_preview.dart';
 export 'design_components/chat/chat_header.dart';
 export 'design_components/chat/chat_mentions.dart';
 export 'design_components/chat/chat_message_context_menu.dart';
+export 'design_components/chat/chat_meta_text_style.dart'
+    show chatDateDividerTextStyle;
 export 'design_components/chat/chat_reply_bubble_preview.dart';
 export 'design_components/chat/chat_room_list.dart';
 export 'design_components/chat/chat_timeline.dart';

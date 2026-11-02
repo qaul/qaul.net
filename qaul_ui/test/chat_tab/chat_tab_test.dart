@@ -14,8 +14,10 @@ import 'package:qaul_components/qaul_components.dart'
         ChatFooter,
         ChatHeader,
         ChatMessageContextMenu,
+        QaulChatBubble,
         QaulLoadingIndicator,
-        QaulComponentsLocalizations;
+        QaulComponentsLocalizations,
+        kChatBubbleLinkedGap;
 import 'package:qaul_rpc/qaul_rpc.dart';
 import 'package:qaul_rpc/src/generated/connections/transports.pb.dart';
 import 'package:qaul_rpc/src/generated/services/chat/chat.pb.dart';
@@ -92,14 +94,16 @@ Message textMessage({
   required String id,
   required User sender,
   required String text,
+  DateTime? sentAt,
 }) {
+  final timestamp = sentAt ?? DateTime(2000);
   return Message(
     senderId: sender.id,
     messageId: Uint8List.fromList(id.codeUnits),
     content: TextMessageContent(text),
     index: 1,
-    sentAt: DateTime(2000),
-    receivedAt: DateTime(2000),
+    sentAt: timestamp,
+    receivedAt: timestamp,
   );
 }
 
@@ -129,6 +133,7 @@ void main() {
     ChatRoom room, {
     User? otherUser,
     MessageShareService? messageShareService,
+    Brightness brightness = Brightness.light,
   }) async {
     final wut = ProviderScope(
       overrides: [
@@ -147,6 +152,7 @@ void main() {
           otherUser: otherUser,
           messageShareService: messageShareService,
         ),
+        theme: ThemeData(brightness: brightness),
       ),
     );
 
@@ -213,6 +219,107 @@ void main() {
 
     expect(find.byType(QaulLoadingIndicator), findsNothing);
     expect(find.text('No chat rooms yet'), findsOneWidget);
+  });
+
+  testWidgets('date dividers keep a 12px gap around day changes', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    const dayOneText = 'Message on the first day';
+    const dayTwoText = 'Message on the second day';
+    const sameDayFollowUpText = 'Message after the date divider';
+    final dayOne = DateTime(2026, 1, 10, 12);
+    final dayTwo = DateTime(2026, 1, 11, 12);
+
+    for (final brightness in Brightness.values) {
+      for (final secondSender in [defaultUser, otherUser]) {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+
+        final firstMessage = textMessage(
+          id: 'day-one-${brightness.name}-${secondSender.idBase58}',
+          sender: defaultUser,
+          text: dayOneText,
+          sentAt: dayOne,
+        );
+        final secondMessage = textMessage(
+          id: 'day-two-${brightness.name}-${secondSender.idBase58}',
+          sender: secondSender,
+          text: dayTwoText,
+          sentAt: dayTwo,
+        );
+        final sameDayFollowUp = textMessage(
+          id: 'same-day-follow-up-${brightness.name}-${secondSender.idBase58}',
+          sender: secondSender,
+          text: sameDayFollowUpText,
+          sentAt: dayTwo.add(const Duration(seconds: 30)),
+        );
+        await pumpChatScreen(
+          tester,
+          buildDirectChat(
+            messages: [firstMessage, secondMessage, sameDayFollowUp],
+          ),
+          otherUser: otherUser,
+          brightness: brightness,
+        );
+        await tester.pump();
+
+        final firstBubble = find.byWidgetPredicate(
+          (widget) =>
+              widget is QaulChatBubble && widget.message.content == dayOneText,
+        );
+        final secondBubble = find.byWidgetPredicate(
+          (widget) =>
+              widget is QaulChatBubble && widget.message.content == dayTwoText,
+        );
+        final sameDayFollowUpBubble = find.byWidgetPredicate(
+          (widget) =>
+              widget is QaulChatBubble &&
+              widget.message.content == sameDayFollowUpText,
+        );
+        final dayOneHeader = find.text('Saturday, January 10, 2026');
+        final dayTwoHeader = find.text('Sunday, January 11, 2026');
+
+        expect(firstBubble, findsOneWidget);
+        expect(secondBubble, findsOneWidget);
+        expect(sameDayFollowUpBubble, findsOneWidget);
+        expect(dayOneHeader, findsOneWidget);
+        expect(dayTwoHeader, findsOneWidget);
+
+        final firstBubbleRect = tester.getRect(firstBubble);
+        final dayOneHeaderRect = tester.getRect(dayOneHeader);
+        final dayTwoHeaderRect = tester.getRect(dayTwoHeader);
+        final secondBubbleRect = tester.getRect(secondBubble);
+        final sameDayFollowUpBubbleRect = tester.getRect(sameDayFollowUpBubble);
+
+        expect(
+          firstBubbleRect.top - dayOneHeaderRect.bottom,
+          closeTo(12, 1),
+        );
+        expect(
+          dayTwoHeaderRect.top - firstBubbleRect.bottom,
+          closeTo(12, 1),
+        );
+        expect(
+          secondBubbleRect.top - dayTwoHeaderRect.bottom,
+          closeTo(12, 1),
+        );
+        expect(
+          sameDayFollowUpBubbleRect.top - secondBubbleRect.bottom,
+          closeTo(kChatBubbleLinkedGap, 1),
+        );
+
+        final dateHeaderText = tester.widget<Text>(dayTwoHeader);
+        expect(
+          dateHeaderText.style?.color,
+          brightness == Brightness.dark ? Colors.white : Colors.black,
+        );
+      }
+    }
   });
 
   testWidgets('desktop room switches replace the chat list without animation', (
