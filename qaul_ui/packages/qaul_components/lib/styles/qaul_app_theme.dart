@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
+import 'qaul_emoji.dart';
+
 /// Light/dark [ThemeData] aligned with [QaulApp] for Widgetbook and the host app.
 abstract final class QaulAppTheme {
   static final ThemeData light = ThemeData(
     useMaterial3: true,
+    fontFamilyFallback: kQaulEmojiFontFamilyFallback,
     colorScheme: ColorScheme.fromSeed(
       seedColor: Colors.lightBlue,
       brightness: Brightness.light,
@@ -59,6 +62,7 @@ abstract final class QaulAppTheme {
 
   static final ThemeData dark = ThemeData(
     useMaterial3: true,
+    fontFamilyFallback: kQaulEmojiFontFamilyFallback,
     colorScheme: ColorScheme.fromSeed(
       seedColor: Colors.lightBlue,
       brightness: Brightness.dark,

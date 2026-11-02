@@ -12,7 +12,7 @@
 
 use libp2p::{floodsub, floodsub::Topic, Multiaddr, PeerId};
 use prost::Message;
-use std::{collections::BTreeMap, fmt, sync::RwLock, sync::Mutex};
+use std::{collections::BTreeMap, fmt, sync::Mutex, sync::RwLock};
 use uuid::Uuid;
 
 use crate::connections::transport::{
@@ -21,6 +21,7 @@ use crate::connections::transport::{
 use crate::connections::ConnectionModule;
 use crate::node::Node;
 use crate::router::neighbours::Neighbours;
+use crate::router_v2::identity::Multikey;
 use crate::rpc::{sys::Sys, Rpc};
 use crate::services::{feed, messaging};
 use crate::utilities::{qaul_id::QaulId, timestamp::Timestamp};
@@ -262,7 +263,9 @@ impl Ble {
             // turned off in a previous session the module should stay
             // dormant on boot until an operator re-enables it via the
             // Transports RPC.
-            let active = crate::storage::configuration::Configuration::get(state).ble.active;
+            let active = crate::storage::configuration::Configuration::get(state)
+                .ble
+                .active;
             if active {
                 Self::module_start(state);
             } else {
@@ -398,10 +401,23 @@ impl Ble {
     ///
     /// This function adds a newly discovered and identified
     /// node to all necessary node lists:
-    ///
+    fn decode_rssi(raw: i32) -> Option<i8> {
+        if (-127..0).contains(&raw) {
+            Some(raw as i8)
+        } else {
+            log::debug!("BLE rssi {raw} is not a usable reading, treating as unknown");
+            None
+        }
+    }
+
     /// * BLE translation table
     /// * BLE Neighbours list
-    fn node_discovered(state: &crate::QaulState, q8id: Vec<u8>, node_id: Vec<u8>) {
+    fn node_discovered(
+        state: &crate::QaulState,
+        q8id: Vec<u8>,
+        node_id: Vec<u8>,
+        rssi: Option<i8>,
+    ) {
         log::info!("BLE node discovered");
 
         // create node entry
@@ -424,7 +440,38 @@ impl Ble {
             Ok(node_id) => {
                 log::info!("    Node ID: {}", node_id.to_base58());
                 let rs = state.get_router();
-                Neighbours::update_node(state, &rs, ConnectionModule::Ble, node_id, 50);
+                Neighbours::update_node(state, &rs, ConnectionModule::Ble1m, node_id, 50, rssi);
+
+                // §4.1 makes BLE 1M a Local-sphere transport, so v2 needs the
+                // neighbour registered too.
+                if let Some(router_v2) = state.get_router_v2() {
+                    match Multikey::try_from_peer_id(&node_id) {
+                        Ok(mk) => {
+                            let routing_id = mk.to_id();
+                            if router_v2.add_neighbour_transport(
+                                node_id,
+                                routing_id,
+                                ConnectionModule::Ble1m,
+                            ) {
+                                router_v2.register_neighbour_node(
+                                    routing_id,
+                                    Some(mk),
+                                    Timestamp::get_timestamp(),
+                                );
+                                // §3.6 sends no INDEX_DUMP over BLE
+                                crate::router_v2::propagation::on_neighbour_connect(
+                                    &router_v2,
+                                    node_id,
+                                    ConnectionModule::Ble1m,
+                                );
+                            }
+                            router_v2.set_neighbour_rssi(node_id, rssi);
+                        }
+                        Err(e) => {
+                            log::warn!("v2: cannot derive node_id for BLE peer {node_id}: {e}")
+                        }
+                    }
+                }
             }
             Err(e) => {
                 log::error!("{}", e);
@@ -483,7 +530,12 @@ impl Ble {
                 QaulId::bytes_to_log_string(&node.id)
             );
             // add it to translation table
-            Self::node_discovered(state, message.qaul_id, node.id);
+            Self::node_discovered(
+                state,
+                message.qaul_id,
+                node.id,
+                Self::decode_rssi(message.rssi),
+            );
         } else {
             log::info!("BLE discovered Node ID unknown");
             // confirm node
@@ -510,8 +562,13 @@ impl Ble {
             // remove it from neighbours list
             match PeerId::from_bytes(&ble_node.id) {
                 Ok(node_id) => {
+                    // Mirrors the discovery side
                     let rs = state.get_router();
-                    rs.neighbours.delete(ConnectionModule::Ble, node_id);
+                    rs.neighbours.delete(ConnectionModule::Ble1m, node_id);
+
+                    if let Some(router_v2) = state.get_router_v2() {
+                        router_v2.remove_neighbour_transport(node_id, ConnectionModule::Ble1m);
+                    }
                 }
                 Err(e) => {
                     log::error!("{}", e);
@@ -530,7 +587,11 @@ impl Ble {
     /// Identification Received
     ///
     /// Received identity information from another node
-    fn identification_received(state: &crate::QaulState, q8id: Vec<u8>, identification: proto_net::Identification) {
+    fn identification_received(
+        state: &crate::QaulState,
+        q8id: Vec<u8>,
+        identification: proto_net::Identification,
+    ) {
         log::info!("BLE identification received from {:?}", q8id.clone());
 
         // add node id
@@ -554,7 +615,7 @@ impl Ble {
             };
 
             // add node to discovered lists
-            Self::node_discovered(state, q8id.clone(), node.id);
+            Self::node_discovered(state, q8id.clone(), node.id, None);
 
             // check if to send a response
             if identification.request {
@@ -571,7 +632,11 @@ impl Ble {
 
     /// Send a handshake message to a peer
     #[cfg(feature = "ble-encryption")]
-    fn send_handshake_message(state: &crate::QaulState, receiver_small_id: Vec<u8>, handshake: proto_net::NoiseHandshake) {
+    fn send_handshake_message(
+        state: &crate::QaulState,
+        receiver_small_id: Vec<u8>,
+        handshake: proto_net::NoiseHandshake,
+    ) {
         log::info!(
             "BLE sending handshake message {} to {:?}",
             handshake.message_number,
@@ -609,7 +674,12 @@ impl Ble {
     /// * receiver_id: the small qaul id of the receiving node
     /// * sender_id: the small qaul id of the sending node (this node)
     /// * data: the binary data of the message to send
-    pub fn message_send(state: &crate::QaulState, receiver_id: Vec<u8>, sender_id: Vec<u8>, data: Vec<u8>) {
+    pub fn message_send(
+        state: &crate::QaulState,
+        receiver_id: Vec<u8>,
+        sender_id: Vec<u8>,
+        data: Vec<u8>,
+    ) {
         log::info!("BLE send message to {:x?}", receiver_id.clone());
         // create a random UUID as message id
         let message_id = Uuid::new_v4().as_bytes().to_vec();
@@ -684,7 +754,11 @@ impl Ble {
     ///
     /// If no encrypted session is established, the message is sent unencrypted.
     #[cfg(feature = "ble-encryption")]
-    fn create_send_message(state: &crate::QaulState, receiver_q8id: Vec<u8>, message: proto_net::ble_message::Message) {
+    fn create_send_message(
+        state: &crate::QaulState,
+        receiver_q8id: Vec<u8>,
+        message: proto_net::ble_message::Message,
+    ) {
         // Check if encrypted session is established
         if BleCrypto::is_session_established(state, &receiver_q8id) {
             // Encode inner message
@@ -717,14 +791,22 @@ impl Ble {
 
     /// Send a message without transport encryption.
     #[cfg(not(feature = "ble-encryption"))]
-    fn create_send_message(state: &crate::QaulState, receiver_q8id: Vec<u8>, message: proto_net::ble_message::Message) {
+    fn create_send_message(
+        state: &crate::QaulState,
+        receiver_q8id: Vec<u8>,
+        message: proto_net::ble_message::Message,
+    ) {
         Self::create_send_message_raw(state, receiver_q8id, message);
     }
 
     /// Send a message without encryption
     ///
     /// This is used for handshake messages and as fallback when encryption fails.
-    fn create_send_message_raw(state: &crate::QaulState, receiver_q8id: Vec<u8>, message: proto_net::ble_message::Message) {
+    fn create_send_message_raw(
+        state: &crate::QaulState,
+        receiver_q8id: Vec<u8>,
+        message: proto_net::ble_message::Message,
+    ) {
         // get small qaul id of this node
         let sender_id = Node::get_q8id(state);
 
@@ -781,7 +863,12 @@ impl Ble {
                             // Decode and process inner message
                             match proto_net::BleMessage::decode(&plaintext[..]) {
                                 Ok(inner) => {
-                                    Self::process_decrypted_message(state, message.from, node_id, inner);
+                                    Self::process_decrypted_message(
+                                        state,
+                                        message.from,
+                                        node_id,
+                                        inner,
+                                    );
                                 }
                                 Err(e) => {
                                     log::error!("BLE inner message decoding error: {}", e);
@@ -807,22 +894,24 @@ impl Ble {
                 }
                 #[cfg(not(feature = "ble-encryption"))]
                 Some(proto_net::ble_message::Message::Handshake(_)) => {
-                    log::warn!("BLE handshake message dropped: feature `ble-encryption` is disabled");
+                    log::warn!(
+                        "BLE handshake message dropped: feature `ble-encryption` is disabled"
+                    );
                 }
                 Some(proto_net::ble_message::Message::Info(data)) => {
                     log::info!("BLE routing info received");
-                    let received = qaul_info::QaulInfoReceived {
-                        received_from: node_id,
-                        data,
-                    };
-                    let rs = state.get_router();
-                    crate::router::info::RouterInfo::received(state, &rs, received);
+                    Self::routing_info_received(state, node_id, data);
                 }
                 Some(proto_net::ble_message::Message::Feed(data)) => {
                     log::info!("BLE public message received");
                     match feed::proto_net::FeedContainer::decode(&data[..]) {
                         Ok(feed_container) => {
-                            feed::Feed::received(state, ConnectionModule::Ble, node_id, feed_container);
+                            feed::Feed::received(
+                                state,
+                                ConnectionModule::Ble1m,
+                                node_id,
+                                feed_container,
+                            );
                         }
                         Err(e) => {
                             log::error!("BleMessage feed decoding error: {}", e);
@@ -851,6 +940,29 @@ impl Ble {
         }
     }
 
+    /// Hand an inbound BLE routing frame to whichever router is active.
+    fn routing_info_received(state: &crate::QaulState, node_id: PeerId, data: Vec<u8>) {
+        if let Some(router_v2) = state.get_router_v2() {
+            let rssi = router_v2.neighbour_rssi(&node_id);
+            if let Err(e) = router_v2.received(
+                node_id,
+                ConnectionModule::Ble1m,
+                rssi,
+                &data,
+                Timestamp::get_timestamp(),
+            ) {
+                log::error!("router_v2 received failed for BLE peer {node_id}: {e}");
+            }
+        } else {
+            let received = qaul_info::QaulInfoReceived {
+                received_from: node_id,
+                data,
+            };
+            let rs = state.get_router();
+            crate::router::info::RouterInfo::received(state, &rs, received);
+        }
+    }
+
     /// Process a decrypted BLE message
     #[cfg(feature = "ble-encryption")]
     fn process_decrypted_message(
@@ -862,18 +974,18 @@ impl Ble {
         match ble_message.message {
             Some(proto_net::ble_message::Message::Info(data)) => {
                 log::info!("BLE routing info received (decrypted)");
-                let received = qaul_info::QaulInfoReceived {
-                    received_from: node_id,
-                    data,
-                };
-                let rs = state.get_router();
-                crate::router::info::RouterInfo::received(state, &rs, received);
+                Self::routing_info_received(state, node_id, data);
             }
             Some(proto_net::ble_message::Message::Feed(data)) => {
                 log::info!("BLE public message received (decrypted)");
                 match feed::proto_net::FeedContainer::decode(&data[..]) {
                     Ok(feed_container) => {
-                        feed::Feed::received(state, ConnectionModule::Ble, node_id, feed_container);
+                        feed::Feed::received(
+                            state,
+                            ConnectionModule::Ble1m,
+                            node_id,
+                            feed_container,
+                        );
                     }
                     Err(e) => {
                         log::error!("BleMessage feed decoding error: {}", e);
@@ -900,7 +1012,12 @@ impl Ble {
 
     /// Handle incoming handshake messages
     #[cfg(feature = "ble-encryption")]
-    fn handle_handshake(state: &crate::QaulState, from: Vec<u8>, remote_id: PeerId, handshake: proto_net::NoiseHandshake) {
+    fn handle_handshake(
+        state: &crate::QaulState,
+        from: Vec<u8>,
+        remote_id: PeerId,
+        handshake: proto_net::NoiseHandshake,
+    ) {
         match handshake.message_number {
             1 => {
                 // Check for simultaneous handshake initiation (race condition).
@@ -1116,8 +1233,9 @@ impl BleTransport {
     /// and `Internet::init` choose their initial `TransportStatus`
     /// from the per-transport config flag.
     pub fn new(state: &crate::QaulState) -> Self {
-        let active =
-            crate::storage::configuration::Configuration::get(state).ble.active;
+        let active = crate::storage::configuration::Configuration::get(state)
+            .ble
+            .active;
         Self {
             status: if active {
                 TransportStatus::Running
@@ -1138,7 +1256,7 @@ impl Transport for BleTransport {
     }
 
     fn module(&self) -> ConnectionModule {
-        ConnectionModule::Ble
+        ConnectionModule::Ble1m
     }
 
     fn capabilities(&self) -> TransportCapabilities {
@@ -1161,8 +1279,7 @@ impl Transport for BleTransport {
 
         // Persist active flag, mirroring the LAN / Internet transports.
         {
-            let mut config =
-                crate::storage::configuration::Configuration::get_mut(state);
+            let mut config = crate::storage::configuration::Configuration::get_mut(state);
             config.ble.active = false;
         }
         crate::storage::configuration::Configuration::save(state);
@@ -1179,8 +1296,7 @@ impl Transport for BleTransport {
         Ble::module_start(state);
 
         {
-            let mut config =
-                crate::storage::configuration::Configuration::get_mut(state);
+            let mut config = crate::storage::configuration::Configuration::get_mut(state);
             config.ble.active = true;
         }
         crate::storage::configuration::Configuration::save(state);
@@ -1197,14 +1313,37 @@ impl Transport for BleTransport {
         Ble::send_routing_info(state, peer_id, data);
     }
 
-    fn send_qaul_messaging_message(&mut self, state: &crate::QaulState, peer_id: PeerId, data: Vec<u8>) {
+    /// For now, the management sub-protocol does not support BLE.
+    /// and the consequene is that a BLE-only node cannot fetch profiles,
+    /// so it can't verify delegation entries or learn user names
+    /// we probably still need to look into this.
+    fn send_qaul_management_message(
+        &mut self,
+        _state: &crate::QaulState,
+        peer_id: PeerId,
+        _data: Vec<u8>,
+    ) {
+        log::debug!("management envelope for {peer_id} dropped: not carried over BLE");
+    }
+
+    fn send_qaul_messaging_message(
+        &mut self,
+        state: &crate::QaulState,
+        peer_id: PeerId,
+        data: Vec<u8>,
+    ) {
         if !self.is_enabled() {
             return;
         }
         Ble::send_messaging_message(state, peer_id, data);
     }
 
-    fn publish_floodsub(&mut self, state: &crate::QaulState, topic: floodsub::Topic, data: Vec<u8>) {
+    fn publish_floodsub(
+        &mut self,
+        state: &crate::QaulState,
+        topic: floodsub::Topic,
+        data: Vec<u8>,
+    ) {
         if !self.is_enabled() {
             return;
         }
@@ -1217,5 +1356,55 @@ impl Transport for BleTransport {
 
     fn external_addresses(&self) -> Vec<Multiaddr> {
         Vec::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Ble;
+
+    /// The BLE module reports an unknown RSSI as 999 (`ble_service.rs:436`).
+    /// The field is i32 on the wire, and `999 as i8` truncates to -25 dBm,
+    /// which lands in §5.1's strongest bucket. Scoring an unmeasurable link as
+    /// the best possible one is worse than scoring it as unknown.
+    #[test]
+    fn the_unknown_sentinel_is_not_mistaken_for_a_strong_signal() {
+        assert_eq!(999_i32 as i8, -25, "this is the truncation being guarded");
+        assert_eq!(
+            Ble::decode_rssi(999),
+            None,
+            "the sentinel must decode to no reading, not -25 dBm"
+        );
+    }
+
+    #[test]
+    fn real_readings_pass_through() {
+        assert_eq!(Ble::decode_rssi(-40), Some(-40));
+        assert_eq!(Ble::decode_rssi(-70), Some(-70));
+        assert_eq!(Ble::decode_rssi(-95), Some(-95));
+    }
+
+    /// 0 dBm is not something a radio reports, and it is also the module's
+    /// placeholder for a device whose RSSI has not been filled in yet.
+    #[test]
+    fn zero_is_treated_as_no_reading() {
+        assert_eq!(Ble::decode_rssi(0), None);
+    }
+
+    #[test]
+    fn range_boundaries() {
+        assert_eq!(Ble::decode_rssi(-1), Some(-1), "weakest negative accepted");
+        assert_eq!(Ble::decode_rssi(-127), Some(-127), "lowest accepted");
+        assert_eq!(Ble::decode_rssi(-128), None, "below the accepted range");
+        assert_eq!(Ble::decode_rssi(1), None, "positive is not a reading");
+    }
+
+    /// Nothing outside the range may produce a value, however it would have
+    /// truncated. 255 and 256 are the cases a cast handles most surprisingly.
+    #[test]
+    fn out_of_range_never_yields_a_value() {
+        for raw in [255, 256, 1_000, -1_000, i32::MAX, i32::MIN] {
+            assert_eq!(Ble::decode_rssi(raw), None, "raw {raw} must not decode");
+        }
     }
 }

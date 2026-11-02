@@ -18,6 +18,7 @@ class QaulApp extends PlatformAwareBuilder {
 
   static final lightTheme = ThemeData(
     useMaterial3: true,
+    fontFamilyFallback: kQaulEmojiFontFamilyFallback,
     colorScheme: ColorScheme.fromSeed(
       seedColor: Colors.lightBlue,
       brightness: Brightness.light,
@@ -75,6 +76,7 @@ class QaulApp extends PlatformAwareBuilder {
 
   static final darkTheme = ThemeData(
     useMaterial3: true,
+    fontFamilyFallback: kQaulEmojiFontFamilyFallback,
     colorScheme: ColorScheme.fromSeed(
       seedColor: Colors.lightBlue,
       brightness: Brightness.dark,
