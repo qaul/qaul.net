@@ -8,7 +8,6 @@ const double kQaulAuthAccountRowHeight = 45;
 const double kQaulAuthMoreRowHeight = 35;
 const double kQaulAuthAvatarTextGap = 18;
 
-const Color kQaulAuthBackgroundColor = Colors.black;
 const Color kQaulAuthRowBackgroundColor = Color(0xFF262626);
 const Color kQaulAuthLightRowBackgroundColor = Color(0xFFF2F2F2);
 const Color kQaulAuthPrimaryTextColor = Colors.white;
@@ -22,7 +21,7 @@ bool qaulAuthIsDark(BuildContext context) {
 }
 
 Color qaulAuthBackgroundColor(BuildContext context) {
-  return qaulAuthIsDark(context) ? Colors.black : Colors.white;
+  return Theme.of(context).scaffoldBackgroundColor;
 }
 
 Color qaulAuthRowBackgroundColor(BuildContext context) {

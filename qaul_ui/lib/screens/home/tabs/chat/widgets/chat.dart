@@ -1016,15 +1016,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
     final l10n = AppLocalizations.of(context)!;
     final directPeer = _directChatPeer(room);
-    final chatBackgroundColor = QaulColorSheet(
-      Theme.of(context).brightness,
-    ).background;
+    final chatBackgroundColor = Theme.of(context).scaffoldBackgroundColor;
     final showBackButton = isMobileChat;
     _chatRenderMode = resolveChatRenderMode(room);
     final isLoadingMessages = room.messages == null;
     final chatMessages = isLoadingMessages
         ? const <types.Message>[]
         : messages(room, l10n: l10n, renderMode: _chatRenderMode)!;
+    final dateDividerTextStyle = chatDateDividerTextStyle(context);
 
     return Scaffold(
       backgroundColor: chatBackgroundColor,
@@ -1072,7 +1071,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                   emptyState: isLoadingMessages
                       ? const Center(child: QaulLoadingIndicator())
                       : Center(child: Text(l10n.chatEmptyState)),
-                  bubbleBuilder: _bubbleBuilder,
+                  bubbleBuilder:
+                      (
+                        child, {
+                        required message,
+                        required nextMessageInGroup,
+                      }) =>
+                          _bubbleBuilder(
+                            child,
+                            message: message,
+                            nextMessageInGroup: nextMessageInGroup,
+                            followsDateHeader: _messageFollowsDateHeader(
+                              message,
+                              chatMessages,
+                            ),
+                          ),
                   systemMessageBuilder: _buildSystemMessage,
                   customBottomWidget: _ChatTextFooter(
                     key: ValueKey(
@@ -1164,16 +1177,25 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                     );
                   },
                   audioMessageBuilder: (message, {required int messageWidth}) {
-                    return AudioMessageWidget(
-                      message: message,
-                      messageWidth: messageWidth,
-                      isDefaultUser: message.author.id == user.idBase58,
+                    return SizedBox(
+                      width: messageWidth.toDouble(),
+                      child: AudioMessageWidget(
+                        message: message,
+                        messageWidth: messageWidth,
+                        isDefaultUser: message.author.id == user.idBase58,
+                      ),
                     );
                   },
                   customDateHeaderText: (dt) => DateFormat(
                     'EEEE, MMMM d, yyyy',
                     'en',
                   ).format(dt.toLocal()),
+                  dateHeaderBuilder: (header) => Padding(
+                    padding: _dateHeaderPadding(header.dateTime, chatMessages),
+                    child: Center(
+                      child: Text(header.text, style: dateDividerTextStyle),
+                    ),
+                  ),
                   theme: DefaultChatTheme(
                     userAvatarNameColors: [
                       colorGenerationStrategy(
@@ -1185,12 +1207,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                     backgroundColor: chatBackgroundColor,
                     messageInsetsVertical: 0,
                     messageInsetsHorizontal: 0,
-                    dateDividerTextStyle: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w300,
-                      height: 1.2,
-                      color: Colors.white,
-                    ),
                     bubbleMargin: EdgeInsets.zero,
                     sentMessageBodyTextStyle: const TextStyle(
                       fontSize: 17,
@@ -1215,6 +1231,41 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     final store = ref.read(usersStoreProvider.notifier);
     return store.findMemberInRoom(e.senderId, room) ??
         User(name: l10n.unknown, id: e.senderId);
+  }
+
+  EdgeInsets _dateHeaderPadding(
+    DateTime date,
+    List<types.Message> chatMessages,
+  ) {
+    final messageIndex = chatMessages.indexWhere(
+      (message) =>
+          message.createdAt == date.millisecondsSinceEpoch,
+    );
+    if (messageIndex == -1) {
+      return const EdgeInsets.symmetric(vertical: 12);
+    }
+
+    // flutter_chat_ui inserts the first date header immediately before the
+    // oldest message, without its normal MessageSpacer.
+    if (messageIndex == chatMessages.length - 1) {
+      return const EdgeInsets.only(bottom: 12);
+    }
+
+    final message = chatMessages[messageIndex];
+    final previousMessage = chatMessages[messageIndex + 1];
+    final hasPreviousMessageSpacer =
+        previousMessage.type != types.MessageType.system &&
+        (previousMessage.author.id != message.author.id ||
+            (message.createdAt! - previousMessage.createdAt!) >
+                const Duration(days: 365).inMilliseconds);
+
+    // A date header follows a package-generated spacer only when the author
+    // changes (or the gap exceeds the grouping threshold). Compensate for
+    // that spacer so the visible gap to the previous bubble is always 12px.
+    return EdgeInsets.only(
+      top: hasPreviousMessageSpacer ? 0 : 12,
+      bottom: 12,
+    );
   }
 
   List<types.Message>? messages(
@@ -1277,6 +1328,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     Widget child, {
     required types.Message message,
     required bool nextMessageInGroup,
+    required bool followsDateHeader,
   }) {
     if (message.type == types.MessageType.custom) {
       return Container(
@@ -1303,6 +1355,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
             ? ['all', ...room.members.map((member) => member.name)]
             : const [],
         isSelected: message.id == _selectedContextMenuMessageId,
+        topSpacingOverride: followsDateHeader ? 0 : null,
       );
     }
 
@@ -1312,7 +1365,35 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       mode: _chatRenderMode,
       clock: DateTime.now(),
       isSelected: message.id == _selectedContextMenuMessageId,
+      topSpacingOverride: followsDateHeader ? 0 : null,
     );
+  }
+
+  bool _messageFollowsDateHeader(
+    types.Message message,
+    List<types.Message> chatMessages,
+  ) {
+    final messageIndex = chatMessages.indexWhere(
+      (candidate) => candidate.id == message.id,
+    );
+    if (messageIndex == -1 || message.createdAt == null) return false;
+
+    // flutter_chat_ui adds a header before the oldest message and before a
+    // newer message when it is separated from the previous one by a day.
+    if (messageIndex == chatMessages.length - 1) return true;
+
+    final previousMessage = chatMessages[messageIndex + 1];
+    if (previousMessage.createdAt == null) return false;
+
+    final messageDate = DateTime.fromMillisecondsSinceEpoch(
+      message.createdAt!,
+    );
+    final previousDate = DateTime.fromMillisecondsSinceEpoch(
+      previousMessage.createdAt!,
+    );
+    return messageDate.day != previousDate.day ||
+        message.createdAt! - previousMessage.createdAt! >=
+            const Duration(days: 365).inMilliseconds;
   }
 
   bool _isReceivingFile(types.FileMessage message) {

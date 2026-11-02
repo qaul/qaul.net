@@ -6,6 +6,7 @@
     "backButtonTooltip": "Kembali",
     "sendTooltip": "Kirim",
     "sendFileTooltip": "Kirim File",
+    "sendPhotoTooltip": "Kirim foto",
     "sendAudioTooltip": "Rekam pesan audio",
     "start": "Mulai",
     "createUserAccount": "Buat profil pengguna",

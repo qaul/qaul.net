@@ -4,8 +4,11 @@ Run all three correctness tests across every topology in TOPOLOGIES.
 
 For each topology:
   1. test_node_startup    — all nodes respond, node info fields present
-  2. test_user_discovery  — farthest node's user is known after discovery_wait
+  2. test_user_discovery  — farthest node's user becomes known, timed
   3. test_message_routing — feed message from first node reaches last node
+
+Each timed test polls until its condition holds and records how long that took,
+so the result files carry a measurement rather than the length of a sleep.
 
 Results are written to results/<date>-<topology_name>.json.
 
@@ -28,6 +31,7 @@ from lib.network import (
     clear_topology,
     start_qaul,
     stop_qaul,
+    wait_for_local_accounts,
     wait_for_nodes,
 )
 from lib.node import Node
@@ -35,45 +39,84 @@ from lib.topology import load_node_ids
 
 # ---------------------------------------------------------------------------
 # Topology configs
-# discovery_wait: seconds from cold start until all nodes are expected to know
-#                 each other's user accounts. Formula: diameter * 10s * 2 + margin.
-# propagation_wait: seconds after sending a feed message for it to reach all nodes.
+#
+# These are *ceilings*, not sleeps. Each timed test polls its condition once a
+# second and stops as soon as it holds, so a generous ceiling costs nothing on
+# a healthy run and the recorded `measured_s` is the actual convergence time.
+#
+# Calibration: measured user discovery on this harness is 4-10s at 9 nodes,
+# 12-13s at 16-20, and 14s at 25, with per-hop propagation ~0.5s (matching
+# spec §7.1). 60s is therefore >4x the worst measured case — loose enough not
+# to flake, tight enough that the 90-200s waits these replaced would now fail.
+# Watch `measured_s` in results/ for drift long before it reaches the ceiling.
 # ---------------------------------------------------------------------------
+DISCOVERY_TIMEOUT_S = 60
+PROPAGATION_TIMEOUT_S = 30
+
 TOPOLOGIES = [
     {
         "file": "topologies/line-5.json",
-        "discovery_wait": 120,
-        "propagation_wait": 30,
+        "discovery_timeout": DISCOVERY_TIMEOUT_S,
+        "propagation_timeout": PROPAGATION_TIMEOUT_S,
     },
     {
         "file": "topologies/line-10.json",
-        "discovery_wait": 200,
-        "propagation_wait": 30,
+        "discovery_timeout": DISCOVERY_TIMEOUT_S,
+        "propagation_timeout": PROPAGATION_TIMEOUT_S,
     },
     {
         "file": "topologies/grid4-3x3.json",
-        "discovery_wait": 120,
-        "propagation_wait": 30,
+        "discovery_timeout": DISCOVERY_TIMEOUT_S,
+        "propagation_timeout": PROPAGATION_TIMEOUT_S,
     },
     {
         "file": "topologies/grid4-5x5.json",
-        "discovery_wait": 180,
-        "propagation_wait": 30,
+        "discovery_timeout": DISCOVERY_TIMEOUT_S,
+        "propagation_timeout": PROPAGATION_TIMEOUT_S,
     },
     {
         "file": "topologies/grid8-4x4.json",
-        "discovery_wait": 90,
-        "propagation_wait": 30,
+        "discovery_timeout": DISCOVERY_TIMEOUT_S,
+        "propagation_timeout": PROPAGATION_TIMEOUT_S,
+    },
+    # Long lines, to probe the §2.2 diameter claim. These carry their own
+    # ceilings because the frontier advances about one hop per relay tick on
+    # this harness: all nodes start within a hundredth of a second, so their
+    # 1 s tickers run in lockstep and every hop pays a full window, where
+    # §7.1 expects 0.5 s per hop on average. 19 hops therefore needs ~19 s and
+    # 49 hops ~49 s before the §11 profile fetch is added on top, so the
+    # shared 60 s ceiling would fail line-50 on arithmetic rather than on
+    # behaviour.
+    {
+        "file": "topologies/line-20.json",
+        "discovery_timeout": 90,
+        "propagation_timeout": 60,
+    },
+    {
+        "file": "topologies/line-50.json",
+        "discovery_timeout": 180,
+        "propagation_timeout": 120,
     },
 ]
 
+POLL_INTERVAL_S = 1.0
 
-def local_user_id(node: Node) -> str:
-    """Return the qaul user ID of the node's own local account."""
-    for user in node.known_users():
-        if any(c["module"] == "LOCAL" for c in user["connections"]):
-            return user["id"]
-    raise ValueError(f"No LOCAL user found on node {node.id}")
+
+def poll_until(predicate, timeout: int, interval: float = POLL_INTERVAL_S):
+    """Poll `predicate` until it returns truthy. Returns (ok, elapsed_seconds).
+
+    The elapsed time is the measurement these tests exist to produce, so it is
+    returned on failure too — "not converged after 60s" and "converged at 58s"
+    are different problems and the caller should be able to tell them apart.
+    """
+    t0 = time.time()
+    deadline = t0 + timeout
+    while True:
+        if predicate():
+            return True, round(time.time() - t0, 1)
+        if time.time() >= deadline:
+            return False, round(time.time() - t0, 1)
+        time.sleep(interval)
 
 
 def distant_pair(node_ids: list[str]) -> tuple[str, str]:
@@ -104,82 +147,101 @@ def test_node_startup(node_ids: list[str]) -> dict:
     return result
 
 
-def test_user_discovery(node_ids: list[str], discovery_wait: int) -> dict:
+def test_user_discovery(node_ids: list[str], discovery_timeout: int) -> dict:
     """
-    After discovery_wait seconds, the first node must know the farthest node's user.
+    The first node must come to know the farthest node's user. Polls until it
+    does and records how long it took.
     """
-    result = {"passed": False, "notes": "", "actual_wait_s": discovery_wait}
-
     first_id, last_id = distant_pair(node_ids)
     node_first = Node(first_id)
     node_last = Node(last_id)
 
-    print(f"    waiting {discovery_wait}s for user discovery...")
-    time.sleep(discovery_wait)
+    id_last = node_last.local_user_id()
+    print(f"    polling {first_id} for {last_id}'s user (ceiling {discovery_timeout}s)...")
 
-    id_last = local_user_id(node_last)
-    known = node_first.known_user_ids()
-
-    assert id_last in known, (
-        f"node {first_id} does not know about node {last_id} after {discovery_wait}s\n"
-        f"  known user IDs: {known}"
+    ok, measured = poll_until(
+        lambda: id_last in node_first.known_user_ids(), discovery_timeout
     )
 
-    result["passed"] = True
-    result["notes"] = (
-        f"node {first_id} knows node {last_id}'s user after {discovery_wait}s"
-    )
+    result = {
+        "passed": ok,
+        "notes": "",
+        "measured_s": measured,
+        "timeout_s": discovery_timeout,
+    }
+    if not ok:
+        # A user-id dump is unreadable at 25 nodes; a count localises the
+        # failure to "knows nothing" vs "knows most of the mesh".
+        known = node_first.known_user_ids()
+        raise AssertionError(
+            f"node {first_id} does not know node {last_id}'s user after {measured}s "
+            f"(knows {len(known)} of {len(node_ids)} expected users)"
+        )
+
+    result["notes"] = f"node {first_id} knew node {last_id}'s user after {measured}s"
     return result
 
 
 def test_message_routing(
-    node_ids: list[str], discovery_wait: int, propagation_wait: int
+    node_ids: list[str], discovery_timeout: int, propagation_timeout: int
 ) -> dict:
     """
-    After discovery_wait, send a feed message from the first node.
-    After propagation_wait more seconds it must appear on the last node.
+    Once the farthest node's user is known, send a feed message from the first
+    node and poll the last node for it.
     """
-    result = {
-        "passed": False,
-        "notes": "",
-        "actual_wait_s": discovery_wait + propagation_wait,
-    }
     test_message = f"hello from {sorted(node_ids)[0]}"
 
     first_id, last_id = distant_pair(node_ids)
     node_sender = Node(first_id)
     node_receiver = Node(last_id)
 
-    # User discovery must have already happened before we send — the feed
-    # service drops messages from unknown senders. If test_user_discovery ran
-    # first in this suite the wait has already elapsed; we sleep again here
-    # only as a safety buffer.
-    print(f"    waiting {discovery_wait}s before sending (user discovery)...")
-    time.sleep(discovery_wait)
+    # The feed service drops messages from unknown senders, so discovery has to
+    # have happened before we send. test_user_discovery normally established
+    # this already; polling the same condition costs nothing when it holds and
+    # keeps this test standalone when it is run on its own.
+    id_sender = node_sender.local_user_id()
+    ok, discovery_measured = poll_until(
+        lambda: id_sender in node_receiver.known_user_ids(), discovery_timeout
+    )
+    if not ok:
+        raise AssertionError(
+            f"node {last_id} does not know the sender {first_id} after "
+            f"{discovery_measured}s, so a feed message would be dropped unsent"
+        )
 
     node_sender.send_feed_message(test_message)
+    print(f"    polling {last_id} for the message (ceiling {propagation_timeout}s)...")
 
-    print(f"    waiting {propagation_wait}s for message propagation...")
-    time.sleep(propagation_wait)
-
-    contents = node_receiver.feed_message_contents()
-    assert test_message in contents, (
-        f"message not found on node {last_id} after {propagation_wait}s\n"
-        f"  messages seen: {contents}"
+    ok, measured = poll_until(
+        lambda: test_message in node_receiver.feed_message_contents(),
+        propagation_timeout,
     )
 
-    result["passed"] = True
+    result = {
+        "passed": ok,
+        "notes": "",
+        "discovery_measured_s": discovery_measured,
+        "measured_s": measured,
+        "timeout_s": propagation_timeout,
+    }
+    if not ok:
+        contents = node_receiver.feed_message_contents()
+        raise AssertionError(
+            f"message not found on node {last_id} after {measured}s "
+            f"({len(contents)} message(s) present)"
+        )
+
     result["notes"] = (
-        f"message from {first_id} reached {last_id} "
-        f"after {discovery_wait}s discovery + {propagation_wait}s propagation"
+        f"message from {first_id} reached {last_id} in {measured}s "
+        f"(sender known after {discovery_measured}s)"
     )
     return result
 
 
 def run_topology(config: dict) -> dict:
     topo_file = config["file"]
-    discovery_wait = config["discovery_wait"]
-    propagation_wait = config["propagation_wait"]
+    discovery_timeout = config["discovery_timeout"]
+    propagation_timeout = config["propagation_timeout"]
     topo_name = os.path.splitext(os.path.basename(topo_file))[0]
 
     node_ids = load_node_ids(topo_file)
@@ -190,8 +252,8 @@ def run_topology(config: dict) -> dict:
     record = {
         "topology": topo_name,
         "node_count": len(node_ids),
-        "discovery_wait_s": discovery_wait,
-        "propagation_wait_s": propagation_wait,
+        "discovery_timeout_s": discovery_timeout,
+        "propagation_timeout_s": propagation_timeout,
         "tests": {},
         "overall_passed": False,
         "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
@@ -201,6 +263,9 @@ def run_topology(config: dict) -> dict:
         apply_topology(topo_file)
         start_qaul()
         wait_for_nodes(node_ids, timeout=60)
+        # "node info answers" is not "ready": the own account and its Local
+        # connection land about a second later, and the tests resolve it.
+        wait_for_local_accounts(node_ids, timeout=60)
         print(f"  all {len(node_ids)} nodes up")
     except Exception as e:
         record["tests"]["setup"] = {"passed": False, "notes": str(e)}
@@ -219,15 +284,15 @@ def run_topology(config: dict) -> dict:
         (
             "test_user_discovery",
             test_user_discovery,
-            {"node_ids": node_ids, "discovery_wait": discovery_wait},
+            {"node_ids": node_ids, "discovery_timeout": discovery_timeout},
         ),
         (
             "test_message_routing",
             test_message_routing,
             {
                 "node_ids": node_ids,
-                "discovery_wait": discovery_wait,
-                "propagation_wait": propagation_wait,
+                "discovery_timeout": discovery_timeout,
+                "propagation_timeout": propagation_timeout,
             },
         ),
     ]:
@@ -315,6 +380,15 @@ if __name__ == "__main__":
     print(f"Topologies: {total_passed} passed, {total_failed} failed")
     for r in all_results:
         status = "PASS" if r["overall_passed"] else "FAIL"
-        print(f"  [{status}] {r['topology']} ({r['node_count']} nodes)")
+        timings = []
+        for name, key in (
+            ("discovery", "test_user_discovery"),
+            ("routing", "test_message_routing"),
+        ):
+            measured = r["tests"].get(key, {}).get("measured_s")
+            if measured is not None:
+                timings.append(f"{name} {measured}s")
+        suffix = f"  [{', '.join(timings)}]" if timings else ""
+        print(f"  [{status}] {r['topology']} ({r['node_count']} nodes){suffix}")
 
     sys.exit(0 if total_failed == 0 else 1)

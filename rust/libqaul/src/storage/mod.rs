@@ -14,6 +14,7 @@ use std::sync::{Arc, RwLock};
 
 pub mod configuration;
 pub mod database;
+pub mod manifest_state;
 
 use configuration::Configuration;
 use database::DataBase;

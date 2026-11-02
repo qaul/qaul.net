@@ -4,6 +4,7 @@
     "backButtonTooltip": "Geri",
     "sendTooltip": "Mesajı Gönder",
     "sendFileTooltip": "Dosyayı Gönder",
+    "sendPhotoTooltip": "Fotoğraf gönder",
     "sendAudioTooltip": "Sesli mesaj kaydet",
     "start": "Başla",
     "createUserAccount": "Kullanıcı profili oluştur",
