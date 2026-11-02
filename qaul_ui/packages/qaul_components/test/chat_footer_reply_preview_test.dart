@@ -20,7 +20,7 @@ void main() {
         body: Align(
           alignment: Alignment.bottomCenter,
           child: ChatFooter(
-            placeholder: 'Secure private message',
+            placeholder: 'Private message',
             controller: controller,
             replyPreview: replyPreview,
             onCancelReply: onCancelReply,
@@ -39,7 +39,7 @@ void main() {
       findsNothing,
     );
     expect(find.byType(TextField), findsOneWidget);
-    expect(find.text('Secure private message'), findsOneWidget);
+    expect(find.text('Private message'), findsOneWidget);
   });
 
   testWidgets('renders a themed divider above the entire footer', (
@@ -82,7 +82,7 @@ void main() {
               child: SizedBox(
                 width: width,
                 child: ChatFooter(
-                  placeholder: 'Secure private message',
+                  placeholder: 'Private message',
                   replyPreview: replyPreview,
                   applyBottomSafeArea: false,
                 ),
@@ -209,7 +209,7 @@ void main() {
           body: Align(
             alignment: Alignment.bottomCenter,
             child: ChatFooter(
-              placeholder: 'Secure private message',
+              placeholder: 'Private message',
               onVoicePressed: () => voiceCount++,
               onCameraPressed: () => cameraCount++,
               voiceTooltip: 'Voice message',
@@ -240,7 +240,7 @@ void main() {
           body: Align(
             alignment: Alignment.bottomCenter,
             child: ChatFooter(
-              placeholder: 'Secure private message',
+              placeholder: 'Private message',
               onAttachmentPressed: () => attachmentCount++,
               attachmentsTooltip: 'More',
               applyBottomSafeArea: false,
@@ -276,7 +276,7 @@ void main() {
           body: Align(
             alignment: Alignment.bottomCenter,
             child: ChatFooter(
-              placeholder: 'Secure private message',
+              placeholder: 'Private message',
               controller: controller,
               onVoicePressed: () => voiceCount++,
               onCameraPressed: () => photoCount++,
@@ -327,7 +327,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: ChatFooter(
-            placeholder: 'Secure private message',
+            placeholder: 'Private message',
             controller: controller,
             initialAttachmentMenuOpen: true,
             onVoicePressed: () {},

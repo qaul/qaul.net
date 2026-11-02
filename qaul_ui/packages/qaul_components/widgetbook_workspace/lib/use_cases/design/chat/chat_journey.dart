@@ -34,7 +34,7 @@ Widget _longTextFooter() =>
 
 Widget _footer({TextEditingController? controller, bool menuOpen = false}) {
   return ChatFooter(
-    placeholder: 'Secure private message',
+    placeholder: 'Private message',
     controller: controller,
     initialAttachmentMenuOpen: menuOpen,
     onSend: (_) {},

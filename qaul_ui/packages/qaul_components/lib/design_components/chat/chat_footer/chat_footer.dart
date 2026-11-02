@@ -157,7 +157,7 @@ Widget _wrapTooltip(String? message, Widget child) {
 /// Bottom chat composer: pill field, plus menu when empty, send when the user
 /// has entered text.
 ///
-/// Pass [placeholder] from app localizations (e.g. `securePrivateMessageHint`).
+/// Pass [placeholder] from app localizations (e.g. `privateMessageHint`).
 class ChatFooter extends StatefulWidget {
   const ChatFooter({
     super.key,

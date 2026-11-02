@@ -508,7 +508,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get saveButton => 'SAVE';
 
   @override
-  String get securePrivateMessageHint => 'Message privé sécurisé';
+  String get privateMessageHint => 'Message privé';
 
   @override
   String get storage => 'Storage';

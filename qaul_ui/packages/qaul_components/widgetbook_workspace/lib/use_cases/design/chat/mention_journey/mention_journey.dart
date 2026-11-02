@@ -200,7 +200,7 @@ class _ChatMentionJourneyState extends State<_ChatMentionJourney> {
               ),
             ChatFooter(
               controller: _controller,
-              placeholder: 'Secure private message',
+              placeholder: 'Private message',
               onSend: _send,
               onMoreAttachmentsPressed: () {},
               sendTooltip: 'Send',

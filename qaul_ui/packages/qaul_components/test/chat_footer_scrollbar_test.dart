@@ -58,7 +58,7 @@ void main() {
               child: RepaintBoundary(
                 key: const ValueKey('footer-capture'),
                 child: ChatFooter(
-                  placeholder: 'Secure private message',
+                  placeholder: 'Private message',
                   controller: controller,
                   applyBottomSafeArea: false,
                 ),

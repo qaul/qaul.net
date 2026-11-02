@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:qaul_components/qaul_components.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
-/// English default matches [app_en.arb] `securePrivateMessageHint` (integrators
-/// should pass `AppLocalizations.of(context).securePrivateMessageHint`).
-const String _kPlaceholderEn = 'Secure private message';
+/// English default matches [app_en.arb] `privateMessageHint` (integrators
+/// should pass `AppLocalizations.of(context).privateMessageHint`).
+const String _kPlaceholderEn = 'Private message';
 
 Widget _frameFooter(BuildContext context, Widget child) {
   final sheet = QaulColorSheet(Theme.of(context).brightness);
