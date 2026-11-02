@@ -41,6 +41,15 @@ object BleConstants {
     val PSM_CHAR: UUID = UUID.fromString("c7b64403-37d9-4c00-92a0-6d0a87346816")
 
     /**
+     * Indicates only. Peripheral Linux nodes have this extra char and use it to send occasional indications,
+     * and the centrals confirmation tells it those notifications have gone out so it knows how fast its radio/buffers
+     * are emptying. BlueZ gives Linux peripheral no per notification "sent" callback like onNotificationSent.
+     * On Android we just check if it exists and ignore it if not.
+     */
+    val TRACER_CHAR: UUID = UUID.fromString("c7b64404-37d9-4c00-92a0-6d0a87346816")
+
+
+    /**
      * Client Characteristic Configuration Descriptor UUID (standard BLE).
      * Writing 0x0001 to this descriptor on MSG_CHAR enables notifications,
      * allowing the server to push chunks to us without polling.

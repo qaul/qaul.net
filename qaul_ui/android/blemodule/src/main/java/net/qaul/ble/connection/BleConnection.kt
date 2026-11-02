@@ -119,7 +119,10 @@ class BleConnection(
                 BleTaskScheduler.requestMtu(device, BleConstants.TARGET_MTU)
 
                 BleTaskScheduler.discoverServices(device)
-
+                // Tracer before msg_char: A Linux peripheral pairs the two subscriptions by arrival order and
+                // ignores tracer if msg_char is subscribed to first. If the peer doesn't offer the tracer its just skipped.
+                // Nothing else is needed, the bytes over tracer will be ignored while the confirmation of their reception is automatic.
+                BleTaskScheduler.enableNotifications(device, BleConstants.TRACER_CHAR)
                 BleTaskScheduler.enableNotifications(device, BleConstants.MSG_CHAR)
                 BleTaskScheduler.readCharacteristic(device, BleConstants.READ_CHAR) // Gets qaul id
                 BleTaskScheduler.readCharacteristic(device, BleConstants.PSM_CHAR)  // Gets L2CAP PSM
