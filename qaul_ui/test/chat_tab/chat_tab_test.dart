@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart' as chat_ui;
@@ -243,6 +244,57 @@ void main() {
         await tester.pump();
         expect(tester.takeException(), isNull);
       });
+    }
+  }
+
+  for (final zoom in [1.0, 2.5]) {
+    for (final isGroup in [false, true]) {
+      testWidgets(
+        'chat header paints over the list without covering it '
+        '(zoom: $zoom, group: $isGroup)',
+        (tester) async {
+          tester.view.physicalSize = const Size(390, 760);
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          final messages = [
+            textMessage(id: 'incoming', sender: otherUser, text: 'Hello'),
+          ];
+          final room = isGroup
+              ? buildGroupChat(messages: messages)
+              : buildDirectChat(messages: messages);
+          TestChatRoomListNotifier.rooms = [room];
+          await pumpChatScreen(
+            tester,
+            room,
+            otherUser: isGroup ? null : otherUser,
+            textScaler: QaulTextScaler(
+              systemTextScaler: TextScaler.noScaling,
+              zoom: zoom,
+            ),
+          );
+          await tester.pump(const Duration(milliseconds: 350));
+          expect(tester.takeException(), isNull);
+
+          final header = find.byType(ChatHeader);
+          final list = find.byType(chat_ui.Chat);
+          expect(
+            tester.getRect(header).bottom,
+            lessThanOrEqualTo(tester.getRect(list).top),
+          );
+
+          // The header must be painted after (on top of) the list so its
+          // shadow falls over the messages.
+          final flex = tester.renderObject<RenderFlex>(
+            find.ancestor(of: header, matching: find.byType(Column)).first,
+          );
+          RenderObject? node = tester.renderObject(header);
+          while (node != null && node.parent != flex) {
+            node = node.parent;
+          }
+          expect(node, same(flex.lastChild));
+        },
+      );
     }
   }
 

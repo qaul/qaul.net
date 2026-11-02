@@ -1028,15 +1028,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     return Scaffold(
       backgroundColor: chatBackgroundColor,
       resizeToAvoidBottomInset: true,
+      // Laid out bottom-up so the list paints first and the header's shadow
+      // is drawn over it, while the header keeps its own (zoom-aware) height.
       body: Column(
+        verticalDirection: VerticalDirection.up,
         children: [
-          _buildChatHeader(
-            room: room,
-            l10n: l10n,
-            directPeer: directPeer,
-            closeChat: closeChat,
-            showBackButton: showBackButton,
-          ),
           Expanded(
             child: CronTaskDecorator(
               callback: () => refreshCurrentRoom(),
@@ -1220,6 +1216,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                 ),
               ),
             ),
+          ),
+          _buildChatHeader(
+            room: room,
+            l10n: l10n,
+            directPeer: directPeer,
+            closeChat: closeChat,
+            showBackButton: showBackButton,
           ),
         ],
       ),
