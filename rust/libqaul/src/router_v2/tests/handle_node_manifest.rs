@@ -711,3 +711,168 @@ fn stale_chunk_does_not_discard_a_fresher_assembly_in_flight() {
         "the stale chunk discarded the in-flight v6 assembly"
     );
 }
+
+// ---------- §8.8 step 5: trust is withdrawn, not only granted ----------
+//
+// Only trusted entries feed `delegation_gateways`. A user an origin's newer
+// manifest drops, or whose entry lapses, must lose that origin as a gateway,
+// or §9.2 keeps routing to a host that will not deliver (§10.7).
+
+fn commit(
+    state: &RouterV2State,
+    host_kp: &Keypair,
+    host_mk: &Multikey,
+    version: u32,
+    entries: Vec<ManifestEntry>,
+    now: u64,
+) {
+    let chunks = build_signed_manifest(host_kp, host_mk, version, true, entries);
+    state
+        .handle_node_manifest(
+            chunks.into_iter().next().unwrap(),
+            now,
+            ConnectionModule::Lan,
+        )
+        .unwrap();
+}
+
+fn gateways_of(state: &RouterV2State, user_id: [u8; 8]) -> Vec<[u8; 8]> {
+    state
+        .users
+        .read()
+        .unwrap()
+        .get(&user_id)
+        .unwrap()
+        .read()
+        .unwrap()
+        .delegation_gateways
+        .iter()
+        .filter_map(|w| w.upgrade().map(|n| n.read().unwrap().id))
+        .collect()
+}
+
+#[test]
+fn a_user_dropped_from_a_newer_manifest_loses_the_gateway() {
+    let (state, _rx) = fresh_state();
+    let (host_kp, host_mk) = keypair_and_multikey();
+    let (_, host_id) = setup_self_origin(&state, &host_mk);
+    let (gone_kp, gone_mk) = keypair_and_multikey();
+    let gone = install_user_with_key(&state, &gone_mk);
+    let (kept_kp, kept_mk) = keypair_and_multikey();
+    let kept = install_user_with_key(&state, &kept_mk);
+
+    let kept_entry = sign_entry(&kept_kp, &host_mk, kept, 1_000_000);
+    commit(
+        &state,
+        &host_kp,
+        &host_mk,
+        1,
+        vec![sign_entry(&gone_kp, &host_mk, gone, 1_000_000), kept_entry],
+        500,
+    );
+    assert_eq!(gateways_of(&state, gone), vec![host_id]);
+
+    commit(&state, &host_kp, &host_mk, 2, vec![kept_entry], 600);
+
+    assert!(
+        gateways_of(&state, gone).is_empty(),
+        "a user the host no longer carries must not route through it"
+    );
+    assert_eq!(gateways_of(&state, kept), vec![host_id]);
+}
+
+#[test]
+fn an_entry_already_expired_in_a_newer_manifest_loses_the_gateway() {
+    let (state, _rx) = fresh_state();
+    let (host_kp, host_mk) = keypair_and_multikey();
+    let (_, host_id) = setup_self_origin(&state, &host_mk);
+    let (user_kp, user_mk) = keypair_and_multikey();
+    let user = install_user_with_key(&state, &user_mk);
+
+    commit(
+        &state,
+        &host_kp,
+        &host_mk,
+        1,
+        vec![sign_entry(&user_kp, &host_mk, user, 1_000)],
+        500,
+    );
+    assert_eq!(gateways_of(&state, user), vec![host_id]);
+
+    // the same entry, re-sent once its timeout has passed
+    commit(
+        &state,
+        &host_kp,
+        &host_mk,
+        2,
+        vec![sign_entry(&user_kp, &host_mk, user, 1_000)],
+        2_000,
+    );
+
+    assert!(gateways_of(&state, user).is_empty());
+}
+
+/// §8.8 step 5: one host's manifest must not alter the user's other hosts.
+#[test]
+fn dropping_a_user_keeps_its_other_hosts() {
+    let (state, _rx) = fresh_state();
+    let (a_kp, a_mk) = keypair_and_multikey();
+    let (_, _a_id) = setup_self_origin(&state, &a_mk);
+    let (b_kp, b_mk) = keypair_and_multikey();
+    let (_, b_id) = setup_self_origin(&state, &b_mk);
+    let (user_kp, user_mk) = keypair_and_multikey();
+    let user = install_user_with_key(&state, &user_mk);
+
+    commit(
+        &state,
+        &a_kp,
+        &a_mk,
+        1,
+        vec![sign_entry(&user_kp, &a_mk, user, 1_000_000)],
+        500,
+    );
+    commit(
+        &state,
+        &b_kp,
+        &b_mk,
+        1,
+        vec![sign_entry(&user_kp, &b_mk, user, 1_000_000)],
+        500,
+    );
+    assert_eq!(gateways_of(&state, user).len(), 2);
+
+    commit(&state, &a_kp, &a_mk, 2, Vec::new(), 600);
+
+    assert_eq!(gateways_of(&state, user), vec![b_id]);
+}
+
+/// A delegation that lapses with no newer manifest to replace it.
+#[test]
+fn a_lapsed_delegation_is_swept_without_a_new_manifest() {
+    let (state, _rx) = fresh_state();
+    let (host_kp, host_mk) = keypair_and_multikey();
+    let (_, host_id) = setup_self_origin(&state, &host_mk);
+    let (user_kp, user_mk) = keypair_and_multikey();
+    let user = install_user_with_key(&state, &user_mk);
+    commit(
+        &state,
+        &host_kp,
+        &host_mk,
+        1,
+        vec![sign_entry(&user_kp, &host_mk, user, 1_000)],
+        500,
+    );
+
+    state.sweep_expired_delegations(999);
+    assert_eq!(
+        gateways_of(&state, user),
+        vec![host_id],
+        "still live at 999"
+    );
+
+    state.sweep_expired_delegations(1_000);
+    assert!(
+        gateways_of(&state, user).is_empty(),
+        "lapsed at its timeout (§10.4)"
+    );
+}

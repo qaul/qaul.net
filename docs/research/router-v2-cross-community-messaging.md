@@ -1002,6 +1002,51 @@ All 818 libqaul tests pass; fmt and clippy are clean on the touched files.
 - Test: an `entry_signature` replayed as a `revoke_signature` is refused.
 - When a manifest commits, remove that origin from every user it no longer trusts.
   Add a timed sweep for delegations whose `timeout` passes with no new manifest.
+- **Defect 10. Implemented 2026-11-03.**
+  - **Spec:** §8.8, NODE_MANIFEST step 5. An entry is trusted only if its
+    signature verifies "and `timeout` is not in the past. Only trusted entries
+    feed `User.delegation_gateways` and route selection". A newer entry is
+    added "without altering the user's other hosts' bindings". **Required;**
+    the code only ever added a gateway. §10.7 names the black hole this
+    prevents.
+  - **Code** (`receive/manifest_apply.rs`):
+    - `refresh_delegation_trust` now also removes the origin from every user
+      that holds it but is no longer trusted: dropped from the manifest,
+      revoked, expired, or unverifiable. It leaves the user's other hosts
+      alone and logs `gateway withdrawn (§8.8)`.
+    - The manifest and delta commits both go through it.
+    - New `sweep_expired_delegations`, run on every router pass (`init.rs`),
+      withdraws an entry whose `timeout` lapses with no newer manifest.
+  - **Tests:** 4 new in `tests/handle_node_manifest.rs`:
+    - a user dropped from a newer manifest loses the gateway;
+    - an entry already expired in a newer manifest loses it;
+    - the user's other hosts are kept;
+    - a lapsed delegation is swept at its timeout and not before.
+
+    824 libqaul tests pass.
+  - **Lab check:** cut member `0009` off for 150 s so that `0001` drops it
+    (§10.7, about 95 s). The hub and the other gateways must then log
+    `gateway withdrawn` for its user, and re-trust it after the link heals.
+    Script: scratchpad `defect10_member_cut.sh`.
+  - **Lab, 1 run** (`communities-3x10-v2-20261103T081501Z`):
+    - The crossing came first and was unchanged: 1.1 s per leg, names after
+      0.1 s, containment held, 3 of 3 gateways, 30 of 30 users.
+    - **The cut:**
+
+      | Time | Event |
+      |---|---|
+      | 08:18:42.6 | last frame from `0009` before the cut |
+      | 08:20:18.6 | `0001` drops `0009`'s delegation, "unreachable past the §10.7 bound" |
+      | 08:20:19.7 | the hub withdraws `0001` as `0009`'s gateway (+1.1 s) |
+      | 08:20:20.7 | member `0002` withdraws it |
+      | 08:20:21.6 | gateways `000b` and `0015` withdraw it |
+      | 08:21:20.7 | the link is back |
+      | 08:21:25.7 | the hub trusts all 10 of `0001`'s users again |
+
+    - Each node withdrew exactly once, and only that user through `0001`. No
+      lapse sweeps fired, as expected with a 6 h TTL.
+    - Index re-dumps and retired indexes were confined to `0009` and its two
+      neighbours, from the reconnect.
 - Consider collecting `Node` records that have no routing entry and no live manifest.
 
 **Phase 4 — sequence numbers (S, needs a spec change). Defect 9.**
