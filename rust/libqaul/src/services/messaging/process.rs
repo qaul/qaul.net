@@ -10,7 +10,7 @@ use libp2p::PeerId;
 use prost::Message;
 
 use crate::node::user_accounts::UserAccount;
-use crate::router;
+use crate::router::users::Users;
 use crate::services::chat::{self, rpc_proto, ChatFile, ChatStorage};
 use crate::services::crypto::sessionmanager::CryptoSessionManager;
 use crate::services::crypto::Crypto;
@@ -301,17 +301,13 @@ impl MessagingProcess {
         }
 
         // check key
-        let key;
-        let rs = state.get_router();
-        match router::users::Users::resolve_pub_key(&rs, &sender_id) {
-            Some(v) => {
-                key = v;
-            }
+        let key = match Users::resolve_pub_key_on_contact(state, &sender_id) {
+            Some(v) => v,
             _ => {
                 log::error!("No key found for user {}", sender_id.to_base58());
                 return;
             }
-        }
+        };
 
         // verify sign
         let mut envelope_buf = Vec::with_capacity(envelope.encoded_len());

@@ -16,13 +16,14 @@ use std::sync::RwLock;
 use super::router_net_proto;
 use super::table::RoutingTable;
 use crate::node::user_accounts::UserAccounts;
-use crate::router_v2::identity::Multikey;
+use crate::router_v2::identity::{id_from_peer_id, Multikey};
 use crate::rpc::Rpc;
 use crate::search::{Search, SearchConfig, Searchable};
 use crate::services::group::group_id::GroupId;
 use crate::storage::database::DbUsers;
 use crate::storage::Storage;
 use crate::utilities::qaul_id::QaulId;
+use crate::utilities::timestamp::Timestamp;
 
 /// Import protobuf users RPC message definition
 pub use qaul_proto::qaul_rpc_users as proto;
@@ -526,6 +527,24 @@ impl Users {
 
     pub fn resolve_pub_key(router: &super::RouterState, user_id: &PeerId) -> Option<PublicKey> {
         Self::get_pub_key(router, user_id).or_else(|| Self::inline_pub_key(user_id))
+    }
+
+    /// [`Self::resolve_pub_key`] for a user we exchange a message with. One
+    /// missing from the directory also gets a §11.5 profile fetch, so its
+    /// name and profile follow the first contact.
+    pub fn resolve_pub_key_on_contact(
+        state: &crate::QaulState,
+        user_id: &PeerId,
+    ) -> Option<PublicKey> {
+        let rs = state.get_router();
+        if let Some(key) = Self::get_pub_key(&rs, user_id) {
+            return Some(key);
+        }
+
+        if let (Some(router_v2), Some(id)) = (state.get_router_v2(), id_from_peer_id(user_id)) {
+            router_v2.request_profile(id, false, Timestamp::get_timestamp());
+        }
+        Self::inline_pub_key(user_id)
     }
 
     /// The public key a `PeerId` carries inline, if it uses the identity

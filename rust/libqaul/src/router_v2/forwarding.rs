@@ -1,7 +1,7 @@
 // Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-//! Next-hop selection for outbound data messages (spec §9.2).
+//! Next-hop selection for outbound data and management messages (spec §9.2, §11.4).
 
 use libp2p::PeerId;
 use tracing::debug;
@@ -38,10 +38,38 @@ impl RouterV2State {
             };
         }
 
+        match self.next_hop_toward_user(recipient_id) {
+            Some((peer, transport)) => ForwardingDecision::Forward { peer, transport },
+            None if self.host_is_gateway() => {
+                debug!(
+                    "v2 forwarding: gateway holds no route for {recipient_id:?}, handing off to DTN"
+                );
+                ForwardingDecision::HandoffToDTN
+            }
+            None => {
+                debug!(
+                    "v2 forwarding: no reachable gateway for {recipient_id:?}, handing off to DTN"
+                );
+                ForwardingDecision::HandoffToDTN
+            }
+        }
+    }
+
+    /// The §9.2 next hop for a remote user, shared by data packets and
+    /// management messages (§11.4 step 2)
+    pub(crate) fn next_hop_toward_user(
+        &self,
+        recipient_id: [u8; 8],
+    ) -> Option<(PeerId, ConnectionModule)> {
+        // ours is processed, never forwarded (§11.4 step 1)
+        if self.is_local_identity(recipient_id, false) {
+            return None;
+        }
+
         // Step 1: the recipient is known
         if let Some((next_hop_node, transport)) = self.next_hop_for_user(recipient_id) {
             match self.peer_of_node(&next_hop_node) {
-                Some(peer) => return ForwardingDecision::Forward { peer, transport },
+                Some(peer) => return Some((peer, transport)),
                 None => {
                     debug!(
                         "v2 forwarding: next hop {next_hop_node:?} for {recipient_id:?} \
@@ -54,21 +82,10 @@ impl RouterV2State {
         // Step 2: unknown recipient.
         if self.host_is_gateway() {
             // We hold the global directory. Not being in it is authoritative.
-            debug!(
-                "v2 forwarding: gateway holds no route for {recipient_id:?}, handing off to DTN"
-            );
-            return ForwardingDecision::HandoffToDTN;
+            return None;
         }
 
-        match self.nearest_gateway() {
-            Some((peer, transport)) => ForwardingDecision::Forward { peer, transport },
-            None => {
-                debug!(
-                    "v2 forwarding: no reachable gateway for {recipient_id:?}, handing off to DTN"
-                );
-                ForwardingDecision::HandoffToDTN
-            }
-        }
+        self.nearest_gateway()
     }
 
     /// spec 10.1

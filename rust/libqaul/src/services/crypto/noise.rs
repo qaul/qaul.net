@@ -47,8 +47,7 @@ impl CryptoNoise {
         // get receivers public key
         let remote_key: PublicKey;
         {
-            let rs = qaul_state.get_router();
-            match Users::resolve_pub_key(&rs, &remote_id) {
+            match Users::resolve_pub_key_on_contact(qaul_state, &remote_id) {
                 Some(key) => remote_key = key,
                 None => {
                     log::error!("No key found for user {:?}", remote_id);
@@ -277,8 +276,7 @@ impl CryptoNoise {
         // get receivers public key
         let remote_key: PublicKey;
         {
-            let rs = qaul_state.get_router();
-            match Users::resolve_pub_key(&rs, &remote_id) {
+            match Users::resolve_pub_key_on_contact(qaul_state, &remote_id) {
                 Some(key) => remote_key = key,
                 None => {
                     log::error!("No key found for user {:?}", remote_id);

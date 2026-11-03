@@ -254,6 +254,29 @@ already has.
 (`with_resolved_user`, `router/users.rs:1091`). Once defect 2 is fixed it is the
 obvious operator-facing face of the display-profile fetch; until then it cannot be.
 
+**Why does a feed post stop at one LAN hop?** Still open, and outside router_v2.
+- It happened on `line-50` in 5 of 6 runs between 2026-11-01 and 2026-11-03, on
+  both the 2d and 1b binaries, each time at a different hop. The link at that
+  hop was up.
+- Neither mDNS nor the feed service is the cause: discovery was complete, and
+  no node rejected the post.
+- **Candidate:** floodsub sends a peer its subscriptions once, on the first
+  connection (`on_connection_established`, libp2p-floodsub 0.47.0), through a
+  `OneShotHandler`. qaul does not re-publish LAN-received posts on LAN
+  (`lib.rs`, `EventType::Flooding`). So one lost subscription cuts the line at
+  that hop.
+- **Unconfirmed:** that needs `libp2p_floodsub` and `libp2p_swarm`
+  connection-level logs. See the Phase 1b lab notes.
+- **Under v2 nothing repairs the gap.** v1 advertised recent feed IDs in its
+  routing info, and a neighbour requested the posts it was missing
+  (`router/info.rs`, `FeedIdsTable` → `FeedRequester`). With router_v2 on, v1
+  routing info is not sent (`lib.rs`, `EventType::RoutingInfo`), so that sync
+  is off. A post missed at one hop stays missed until that connection is
+  re-established.
+- **Scope:** only public feed posts. Direct chat, group chat and files go
+  through the messaging path, which router_v2 routes with retransmission. The
+  crossing test uses that path.
+
 ### The stranded gateway (intermittent, 1 of 3 runs)
 
 In 1 of 3 runs, the hub held node entries for only 2 of 3 gateways. The stranded
@@ -688,50 +711,287 @@ half a day, M one to two days, L longer.
       its key.
 - **2e, early frames (defect 7):** register a neighbour on its first received
   `qaul_info` frame, deriving the node ID from the `PeerId` exactly as `ping_event`
-  does.
-- Lab: 10 back-to-back community bring-ups with 0 stranded gateways. A forced
-  gateway-to-hub disconnect and reconnect — the reconstructed sequence — after which
-  the hub still holds the gateway. The `line-50` run that showed 9–24 index-0 drops
-  should show none that persist past 5 s.
+  does. **Deferred:** the path has had 0 occurrences in every run so far.
+- **Exit check, 2026-11-01** (`communities-3x10-v2-20261101T073854Z` to
+  `…T075219Z`):
+  - **10 back-to-back bring-ups, 60 s settle each.**
+    - All 3 gateways were in the hub's node space every time. None stranded.
+    - On every node, every run: 0 `stale_user`, `stale_node`, `unknown_user`,
+      `unknown_node`, `no_mirror`, `vanished`, `retired` and `no_key`.
+    - The hub held 18–22 of 30 delegated users at 60 s; the 180 s runs reach
+      30. Origin-key deferrals take up to 35 s to resolve and the manifest bump is
+      rate-limited, so 60 s is too short for the full directory, not a fault.
+    - 1–2 deferrals per run were still open when the logs ended. Each started
+      16–17 s before teardown, within the normal latency. All 27 resolved in the
+      run that ran on through the reconnects.
+  - **Forced reconnect of each gateway**, on the last lab: its hub link was cut
+    for 60 s, then 90 s were left to heal.
+
+    | Gateway | Dump at hub after link-up | Role and node form back | Hub accepts its node entry | Hub after 90 s |
+    |---|---|---|---|---|
+    | `0001` | 07:54:41.16 | +0.9 s, same pass | +8.9 s | 3 / 3 gateways, 30 / 30 users |
+    | `000b` | 07:57:23.11 | +0.9 s, same pass | +6.9 s | 3 / 3, 30 / 30 |
+    | `0015` | 07:59:53.03 | +0.9 s, same pass | +6.9 s | 3 / 3, 30 / 30 |
+
+    - The role and the form flipped in the same pass every time. Since 2d, the
+      race 2b closes cannot happen at all: each pass syncs the role before the form.
+    - The directory was whole again within the 90 s. That fits the 2b reconnect,
+      which caught up at the next rate-limited bump, a minute after the link
+      returned.
+    - The 31 node logs of that lab have 0 `WARN` and 0 `ERROR` lines.
+  - **`line-50`, 1 run** (`line-50-v2-20261101T084557Z`). This topology used to
+    show 9–24 index-0 drops. Now:
+    - 0 `unknown_node`, `unknown_user`, `stale_node` and `stale_user` on all 50
+      nodes, so no drops at all, not merely none that last past 5 s.
+    - All three tests pass. Delivery end to end took 1.0 s.
+    - Discovery took 45.4 s, against 32.0 s and 36.4 s in the 2026-10-17 sweeps.
+      The routing entry reached `0000` 37 s after `0031` bound its user, in line
+      with those sweeps. The rest is the profile fetch:
+      - `0000`'s request reached `0031` in 2.5 s.
+      - `0031` dropped its reply, because `0000`'s own routing entry reached it
+        1.2 s later.
+      - `0000` waited out its 6 s timeout, retried, and that one landed.
+      - This is the in-flight drop described under Phase 1b, not a round trip
+        longer than the timeout. From one run only.
+  - **Phase 2 is closed.**
 
 **Phase 1b — management across communities (M). Defect 2.**
 
-**Preliminary — from one run; being monitored before any of it drives a change.**
-What the ~440 `management: no route` drops of a healthy run are (2026-10-28,
-`communities-3x10-v2-20261028T072027Z`; classified by destination, by the line
-logged just before, and by whether a retry later went out):
+**What the `management: no route` drops are.** First classified on one run
+(2026-10-28, `communities-3x10-v2-20261028T072027Z`). Checked on 2026-11-01 over the
+12 community runs `communities-3x10-v2-20261101T070757Z` to `…T075219Z` (428–495
+drops each) and `line-50-v2-20261101T084557Z` (3,303). Each drop is classified by
+destination, by the line logged just before it, and by whether a later attempt went
+out. Scripts: scratchpad `noroute.py`, `noroute_multi.py` (not in the repo).
 
-| Share | What | Recovers? |
+| Share, 12 runs | What | Recovers? |
 |---|---|---|
-| ~80% | A fetch for a user *in the dropper's own community*, fired before that user's routing entry exists. Mostly `apply_mapping`, which requests the profile as the mapping arrives, ahead of the entry in the same frame; also version-bump re-fetches and requests relayed during convergence. 76% of all drops are in the first 5 s | yes — `commit_routing_entry` re-asks as the entry lands |
-| ~19% | A gateway or the hub verifying a foreign user. The direct attempt cannot route — no route until the user is trusted, no trust until its key arrives — and is followed in the same millisecond by the carrying-host request, which works | yes, immediately, via the host |
-| 6 drops | A member fetching the hub's user, which it learned through the mapping leak (defect 14) | never; gone since 2c |
+| 61–70% | A fetch for a user *in the dropper's own community*, fired before that user's routing entry exists. Mostly `apply_mapping`, which requests the profile as the mapping arrives, ahead of the entry in the same frame; also version-bump re-fetches. 70–82% of all drops fall in the first 5 s | yes: re-asked as the entry lands, median 0 s, p90 0.8 s |
+| 11–17%, 50–80 a run | A request or reply **already in flight**, dropped by a relay or by the responder, because the route toward its destination has not arrived yet | only through the requester's 6 s profile timeout and retry. The two counts track each other: 50–80 drops against 48–72 timeouts a run, and exactly 814 against 814 on `line-50` |
+| 14–23% | A gateway or the hub verifying a foreign user. The direct attempt cannot route, because there is no route until the user is trusted and no trust until its key arrives. The carrying-host request goes out in the same millisecond and works | yes, via the host |
+| 3 a run | A gateway verifying the hub's user, the same way | yes |
+| 0 | A member fetching the hub's user, through the defect 14 leak | gone since 2c |
+| 0 | A drop that never recovers, or a member's request for a foreign user | — |
 
-In that run none of it was a cross-community request that a fallback should rescue.
-If that holds across more runs, the fallback should not apply to every unroutable
-destination: the first two rows — about 98% — would stop being dropped and turn
-into a burst of traffic to the gateways at every bring-up. The design points below
-assume it holds; confirm before building them.
+On `line-50`, every drop is in the dropper's own sphere, as expected. 814 of the
+3,303 are in flight.
 
-- Give `forward_management` the tier fallback, but only for a destination that is
-  **absent from `UsersMap`** — which, under §2.3, is precisely a user in another
-  community. That covers both legs: the member asking about a foreign user, and the
-  foreign leaf host replying to a member it has never heard of. A destination that
-  is known but not yet routable keeps today's drop-and-retry. Share the gateway
-  selection with `resolve_forwarding` rather than copy it. A gateway that cannot
-  resolve drops, per §11.2.
-- Remove the drops that are noise, so the counter starts meaning something:
-  `apply_mapping` should not request a profile for a user with no routing entry yet,
-  since `commit_routing_entry` already does when the entry lands; and
-  `refresh_delegation_trust` should go straight to the carrying host for a user it
-  cannot route to, instead of making the direct attempt that always fails.
-- Trigger a display-profile fetch on first contact with a user absent from the
-  directory, so names and avatars appear.
-- Optionally implement §11.5's answer-on-behalf at gateways from
-  `cached_profiles`, which keeps a fetch inside one sphere when the gateway already
-  has the profile.
-- Tests: a `ProfileRequest` from a member to a foreign user reaches its gateway; the
-  response from the foreign leaf host returns to the member.
+**What this means for the design.**
+
+- **The drop counter cannot see defect 2.** In both crossing runs the recipient
+  `001e` logged no line at all about the sender's user, because it never asks for
+  the profile. The gateway fallback alone would leave names blank; the
+  first-contact fetch (change 3) is what starts the exchange.
+- **Every 1b change is checked against the spec before it is built.** Two earlier
+  ideas failed that check and were dropped:
+  - Holding a message with no route for about 2 s conflicts with §11.2: "no
+    retransmission within the sub-protocol, and no delay-tolerant storage. An
+    undeliverable management message is dropped."
+  - Limiting the fallback to destinations absent from `UsersMap` is narrower
+    than §9.2, which applies it to every user a leaf cannot resolve. During
+    convergence "absent" does not mean "foreign" anyway: in the `line-50`
+    trace, the responder learned the requester 1.2 s after the request arrived.
+
+**Changes, each compared against the spec.**
+
+1. **Nearest-gateway fallback for management messages. Implemented 2026-11-01.**
+   - **Spec:** §11.4 step 2 forwards a message "exactly as a user packet is
+     forwarded" (§9.2). Under §9.2, a leaf sends any user it cannot resolve
+     toward its nearest gateway, and a gateway that cannot resolve it gives up.
+     §11.4 step 3 and §11.2 then drop the message. **Required;** the old code
+     dropped at the leaf.
+   - **Code:** `next_hop_toward_user` in `forwarding.rs` is §9.2 for a remote
+     user: its own route, then a delegation gateway, then, on a leaf, the
+     nearest gateway. `resolve_forwarding` and `forward_management`
+     (`management/mod.rs`) now share it.
+   - **Node destinations** keep the plain lookup. §9.2 defines resolution, and
+     its fallback, for users only; for a node destination **the spec is
+     silent** (see the spec amendments).
+   - **Unaffected:**
+     - Gateways and the hub. All 852 via-host requests in the 12 runs came
+       from them.
+     - Node-addressed messages.
+     - A Local sphere with no gateway, such as `line-50`.
+   - **Changed, at members:**
+     - A reply to a requester in another community goes to the gateway.
+     - So does the member's own request for a foreign user.
+     - So does a relayed message the member cannot route.
+     - `request_profile`'s via-host fallback no longer runs once the gateway
+       fallback has sent. Members made 0 via-host requests in the 12 runs.
+   - **Correction:** I expected the in-flight guard to hold up the re-ask at
+     route commit for 6 s. It does not, because `commit_routing_entry` clears
+     the guard before re-asking (`a_route_commit_re_asks_for_a_key_still_missing`).
+2. **No profile fetch from a mapping before the route exists. Implemented
+   2026-11-01.**
+   - **Spec:** §8.8, ROUTING_UPDATE step 2: "schedule a profile fetch if fresher
+     than cached". INDEX_DUMP step 1: "schedule a fetch if newer". **Permitted:**
+     the fetch is still scheduled. It goes out when the entry commits, through
+     `commit_routing_entry`, with `sweep_user_profiles` as the backstop.
+   - **Code:** `apply_mapping` skips the request only for a user with no key and
+     no live route. A fresher version for a user whose key we hold is still
+     fetched at once, because the commit path re-asks only for a missing key.
+   - **Why now:** with change 1, these early requests would otherwise reach the
+     gateway instead of being dropped.
+   - **On hold:** the planned `refresh_delegation_trust` half. It would rely
+     only on the via-host request, which deviates from §11.5: the request is
+     addressed to the host node and carries a `subject` field that §11.5's
+     `ProfileRequest` does not have. It waits for the §11.5 amendment.
+3. **First-contact profile fetch. Implemented 2026-11-03.**
+   - **Spec:**
+     - §11.5: a node "fetches a profile when it … needs … a fresher profile
+       than it has cached". With nothing cached it asks with version 0.
+       **Permitted.**
+     - §2.3 divides nodes "by the routing state they hold". A fetched foreign
+       profile goes into `cached_profiles` and the app's user list
+       (`management/profile.rs`, `connections/events.rs`), never into
+       `UsersMap`, so it is no routing state. **Permitted.**
+   - **Code:** `Users::resolve_pub_key_on_contact` (`router/users.rs`) replaces
+     `resolve_pub_key` at the three first-contact points:
+     - `messaging/process.rs`, checking a received message;
+     - `noise.rs`, both legs of the handshake.
+
+     On a directory miss it still returns the key inside the PeerId (1a), and
+     with router_v2 on it also calls `request_profile`. With change 1 a
+     member's fetch for a foreign user goes to its gateway.
+   - **Found while checking:** 1a's signature check conflicts with §3.4, which
+     says a node "MUST first obtain U's profile and use the public key from it".
+     Resolved by the §3.4 amendment below, decided 2026-11-03 over changing the
+     code. The code change would make first contact wait on profile fetches
+     both ways, and need a hold queue, for no security gain: a full ed25519
+     PeerId contains its key verbatim.
+   - **Harness:** after a successful crossing, `crossing.py` waits for each end
+     to list the other by name (`names` leg, and a line in the verdict).
+     Containment is read before the crossing, so it is unaffected. My earlier
+     note that it would break was wrong.
+   - **Tests:** 2 new in `gateway_fallback`:
+     - first contact with a user missing from the directory fetches its
+       profile;
+     - a user already in the directory is not fetched.
+
+     820 libqaul tests pass.
+   - **Lab, 1 run** (`communities-3x10-v2-20261103T073222Z`, re-archived after
+     the `archive_lab.sh` fix; the earlier `untagged-20261103T065828Z` mixes in
+     19 logs from an old `line-50` lab).
+     - Crossing `000a`→`001e`: invite 1.1 s, accept 1.1 s, deliver 1.1 s.
+       Both ends listed each other by name 0.1 s after delivery.
+     - Containment held: 0 foreign users before the crossing. 3 of 3 gateways,
+       30 of 30 users delegated, zero counters 0.
+     - **Defect 2 is fixed end to end.** At first contact (07:35:54.0),
+       `000a` asked for `001e`'s profile and `001e` asked for `000a`'s. Each
+       answered the other's request although it had never heard of the
+       requester; the reply went to its gateway (change 1). Both profiles
+       arrived 0.7–0.8 s after the request.
+     - The 31 community nodes logged 183 `no route` drops and 71 profile
+       timeouts, against 179 and 66 on the previous 1b run.
+   - **Lab, run 2** (`communities-3x10-v2-reversed-20261103T074423Z`). `-r`
+     reverses the order the gateways dial the hub, not the message direction.
+     - Results were identical: 1.1 s per leg, names after 0.1 s, containment
+       held, 3 of 3 gateways, 30 of 30 users.
+     - 183 drops, 68 timeouts, zero counters 0.
+     - The return direction is covered in every run anyway: the accept leg
+       is a message from `001e` back to `000a`, and each end fetches the
+       other's profile.
+4. **Gateways answer from their cache.** Optional, not built. **Spec:** §11.5,
+   "MAY answer on the subject's behalf". Permitted.
+5. **In-flight drops. Dropped, 2026-11-03: it would conflict with §14.**
+   - I had claimed the spec sets no profile-fetch timeout. That was wrong.
+     §14 sets the management request timeout to 5 seconds: "the window a
+     requester waits for a response before the subject may be retried". A
+     sooner first retry would break that.
+   - The spec's own lever is the value itself, which "should be sized to the
+     deployment's diameter". It is already configurable, as
+     `management_request_timeout`. 5 s plus the 1 s sweep is the 6 s seen in
+     the lab.
+   - A fixed lower value would not help everywhere: on `line-50` one round
+     trip takes about 5 s. An adaptive timeout would need a §14 amendment;
+     not proposed.
+
+**Tests:** 8 new in `tests/management.rs`, module `gateway_fallback`:
+- A leaf sends a fetch for a foreign user to its gateway, still addressed to
+  the subject.
+- A reply to an unknown requester goes to the gateway.
+- A relayed message for an unknown user goes to the gateway.
+- A gateway drops a user it cannot resolve.
+- A node destination gets no fallback.
+- A mapping leaves a user with no key and no route to its route commit.
+- A mapping still fetches a fresher profile for a user whose key we hold.
+- A mapping fetches a user with no key that already has a route.
+
+All 818 libqaul tests pass; fmt and clippy are clean on the touched files.
+
+**Lab, changes 1 and 2, 1 run each** (preliminary):
+
+- **Communities, crossing.** The archive is misnamed `untagged-20261101T084557Z`;
+  only nodes `0000`–`001e` are from this run.
+  - Reachable in 3.0 s and contained. 3 of 3 gateways in the hub's node space,
+    30 of 30 users delegated.
+  - The zero counters stayed 0.
+  - `management: no route` drops fell to 179, against 474 on the 2d run
+    `…T072243Z`:
+    - Own-community early fetches: about 375 → 79.
+    - Gateways and hub checking foreign users: about 95, unchanged as
+      expected.
+    - Never recovered: 0.
+  - No burst at the gateways: they dropped 23–26 each, against 34–53.
+  - Profile timeouts: 66, against 62. The in-flight row is untouched, as
+    expected, since change 5 is not built.
+- **`line-50`** (`line-50-v2-20261101T102710Z`): discovery took 61.7 s, and the
+  feed test failed. Neither traces to 1b. Change 1 has no gateway to act on
+  there, and change 2 does not touch links or the feed.
+  - The `0026`–`0027` LAN link carried its first frame 32 s after bring-up. It
+    was the only late link of the 49. `0031`'s route waited 28 s there; every
+    other hop took at most 2.5 s, as on the earlier run.
+  - The feed post reached `0000`–`0012` and never `0013`, although that link
+    had carried routing frames since bring-up. `0013` logged nothing about the
+    post, not even an unknown-sender error, so it was lost below the feed
+    service. This is the known feed flakiness.
+- **`line-50` rerun** (logs left in `/tmp`, not archived): discovery took 39.2 s,
+  which fits the late-link explanation above. The feed test failed again.
+  - The post reached `0000`–`0009` and never `000a`.
+  - That link was up 2 s after bring-up, on one connection (one INDEX_DUMP
+    each way), and no node logged an unknown-sender error.
+  - Floodsub forwards only to peers whose subscription it holds, and it
+    exchanges subscriptions only with peers that mDNS has discovered
+    (`lan.rs:111`, `add_node_to_partial_view`). The discovery events are logged
+    at trace level only, so these logs cannot show it.
+  - The feed passed on the 2d binary (`…T084557Z`) and failed twice on the 1b
+    binary. No 1b code is on that path, but with three runs that is not yet
+    proven.
+- **`line-50` with mDNS tracing** (`line-50-v2-mdns-20261103T063808Z`):
+  discovery took 57.7 s, and the feed failed a third time, stopping at
+  `0001`→`0002`.
+  - **mDNS is ruled out.** Every node discovered both its neighbours within
+    2 s of bring-up, long before the post.
+  - **What is left is floodsub itself** (libp2p-floodsub 0.47.0, `layer.rs`).
+    - A post that arrives over LAN is not re-published on LAN
+      (`lib.rs`, `EventType::Flooding`), so the LAN hops rely entirely on
+      floodsub's own forwarding.
+    - Floodsub forwards only to a peer whose subscription it holds.
+    - It sends its subscriptions once, when the first connection to a peer
+      opens (`on_connection_established`), and never again. One lost
+      subscription message cuts the line at that hop for the whole run.
+    - The handler is libp2p's `OneShotHandler`, the same one whose failed sends
+      wedged qaul_info (2a).
+  - **Tally:** the feed passed 3 of 3 times before 1b (the 2026-10-17 sweeps
+    and `…T084557Z`) and failed 3 of 3 times on the 1b binary, each time at a
+    different hop.
+- **A/B on the 2d binary** (commit `5c188758` built separately as
+  `target/ab2d/qauld`; runs `line-50-2d-20261103T065409Z` and `…T065828Z`):
+  the feed **failed both times**, stopping before `001c` and before `0006`.
+  **The feed failure is not caused by 1b.** It is a floodsub problem with its
+  own item (see Open questions).
+
+  | Binary | Run | Discovery | Feed | `no route` drops | Profile timeouts |
+  |---|---|---|---|---|---|
+  | 2d | `…20261101T084557Z` | 45.4 s | pass | 3,303 | 814 |
+  | 2d | `…20261103T065409Z` | 37.1 s | fail | 3,354 | 860 |
+  | 2d | `…20261103T065828Z` | 51.3 s | fail | 3,691 | 944 |
+  | 1b | `…20261101T102710Z` | 61.7 s (late link) | fail | 1,327 | 1,027 |
+  | 1b | `…20261101T104222Z` | 39.2 s | fail | 729 | 690 |
+  | 1b | `…20261103T063808Z` | 57.7 s | fail | 1,335 | 1,006 |
+
+  - On `line-50`, 1b cuts the `no route` drops by about 60%.
+  - Discovery times and profile timeouts overlap between the two binaries.
 
 **Phase 3 — delegation correctness and security (M). Defects 8, 10.**
 
@@ -769,6 +1029,27 @@ assume it holds; confirm before building them.
 - §3.8 permits the self mapping in every origin update.
 - §8.6 diagram.
 - §11.4 says management forwarding uses §9.2's tier fallback.
+- §9.2 or §11.4 says whether a management message addressed to a node gets the
+  nearest-gateway fallback. §11.4's claim that a response is "routable exactly
+  when the request was" does not cover a requester in node form in another
+  sphere.
+- §11.5 either adds `subject` to `ProfileRequest`, for a request addressed to a
+  carrying host, or that path is removed from the code.
+- **§3.4, key from an identity PeerId** (decided 2026-11-03; 1a already relies
+  on it). Proposed text, replacing the sentence "A node that needs to verify a
+  signature by user U MUST first obtain U's profile and use the public key from
+  it.":
+
+  > A node that needs to verify a signature by user U MUST use U's full public
+  > key. When U's PeerId embeds that key (an identity multihash), the node MAY
+  > take the key from the PeerId; otherwise it MUST first obtain U's profile
+  > (Section 11.5) and use the public key from it. The 8-byte ID alone never
+  > suffices (Section 3.3).
+
+  Why it is safe: an identity-multihash PeerId is the key itself, and §11.5
+  accepts a profile only if `hash(multikey)` equals the ID and its signature
+  verifies under that same multikey. So the profile cannot supply a different
+  key.
 
 **Order:** 0 → 1a → 2 → 1b → 3 → 4 → 5.
 

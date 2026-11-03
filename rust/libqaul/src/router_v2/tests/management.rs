@@ -420,7 +420,7 @@ mod source_addressing {
 
     /// Registers a hosted account and publishes its profile, in the order
     /// `lib.rs` uses at startup so the write-through actually lands.
-    fn hosted_account(state: &RouterV2State, name: &str) -> [u8; 8] {
+    pub(super) fn hosted_account(state: &RouterV2State, name: &str) -> [u8; 8] {
         let kp = Keypair::generate_ed25519();
         let mk = Multikey::from(kp.public());
         let id = mk.to_id();
@@ -933,6 +933,284 @@ mod profile_via_host {
             }
             other => panic!("expected a ProfileResponse, got {other:?}"),
         }
+    }
+}
+
+// ---------- §11.4 step 2: the §9.2 nearest-gateway fallback ----------
+//
+// §11.4 forwards a management message "exactly as a user packet is
+// forwarded", and §9.2 sends a user a leaf cannot resolve toward its nearest
+// gateway. A leaf holds no users of other communities (§2.3), so this is the
+// only way a profile fetch, or its reply, crosses between them.
+
+mod gateway_fallback {
+    use super::*;
+    use crate::router_v2::{codec::messages::Mapping, OutboundKind, OutboundMsg};
+    use libp2p::PeerId;
+    use tokio::sync::mpsc::UnboundedReceiver;
+
+    const GATEWAY: [u8; 8] = [5; 8];
+    const FOREIGN: [u8; 8] = [6; 8];
+
+    /// A leaf whose one neighbour is a reachable gateway.
+    fn leaf_beside_a_gateway() -> (RouterV2State, UnboundedReceiver<OutboundMsg>, PeerId) {
+        let (state, rx) = fresh_state();
+        let gateway_peer = fresh_peer();
+        state.add_neighbour_transport(gateway_peer, GATEWAY, ConnectionModule::Lan);
+        bind_own_dict(&state, Space::Node, 100, GATEWAY);
+        let node = install_node(&state, GATEWAY, 1, true);
+        let entry = Arc::new(RwLock::new(RoutingEntry {
+            target_index: 100,
+            target: TargetRef::Node(node),
+            seq_num: SeqNum::from(0u16),
+            metric: 10,
+            next_hop: 100,
+            transport: ConnectionModule::Lan,
+            last_update: 0,
+            hop_count: 1,
+            local_only: false,
+        }));
+        state
+            .routing_table
+            .write()
+            .unwrap()
+            .set(Space::Node, 100, entry);
+        assert!(!state.host_is_gateway());
+        (state, rx, gateway_peer)
+    }
+
+    fn management(
+        rx: &mut UnboundedReceiver<OutboundMsg>,
+    ) -> Option<(OutboundMsg, ManagementMessage)> {
+        while let Ok(out) = rx.try_recv() {
+            if out.kind == OutboundKind::Management {
+                let decoded = ManagementMessage::decode(&out.bytes[..]).unwrap();
+                return Some((out, decoded));
+            }
+        }
+        None
+    }
+
+    #[test]
+    fn a_leaf_sends_a_fetch_for_a_foreign_user_toward_its_gateway() {
+        let (state, mut rx, gateway_peer) = leaf_beside_a_gateway();
+
+        state.request_profile(FOREIGN, false, 1_000);
+
+        let (out, decoded) = management(&mut rx).expect("the fetch must go to the gateway");
+        assert_eq!(out.peer, gateway_peer);
+        assert_eq!(
+            decoded.destination,
+            FOREIGN.to_vec(),
+            "still addressed to the subject (§11.5); only the next hop changes"
+        );
+        assert!(!decoded.destination_is_node);
+        assert!(state
+            .management_in_flight
+            .read()
+            .unwrap()
+            .contains_key(&(FOREIGN, false)));
+    }
+
+    /// The other leg: the subject's host answering a requester from another
+    /// community, which it has never heard of.
+    #[test]
+    fn a_reply_to_an_unknown_requester_goes_toward_the_gateway() {
+        let (state, mut rx, gateway_peer) = leaf_beside_a_gateway();
+        let subject = super::source_addressing::hosted_account(&state, "subject");
+        while rx.try_recv().is_ok() {}
+
+        let request = ManagementMessage {
+            version: 1,
+            destination: subject.to_vec(),
+            destination_is_node: false,
+            source: FOREIGN.to_vec(),
+            source_is_node: false,
+            request_id: 31,
+            body: Some(Body::ProfileRequest(ProfileRequest {
+                cached_version: 0,
+                subject: Vec::new(),
+            })),
+        };
+        state.on_management_received(gateway_peer, &request.encode_to_vec(), 1_000);
+
+        let (out, decoded) = management(&mut rx).expect("the reply must go to the gateway");
+        assert_eq!(out.peer, gateway_peer);
+        assert_eq!(decoded.destination, FOREIGN.to_vec());
+        assert_eq!(decoded.request_id, 31);
+        assert!(matches!(decoded.body, Some(Body::ProfileResponse(_))));
+    }
+
+    #[test]
+    fn a_relayed_message_for_an_unknown_user_goes_toward_the_gateway() {
+        let (state, mut rx, gateway_peer) = leaf_beside_a_gateway();
+        let other_peer = fresh_peer();
+        state.add_neighbour_transport(other_peer, [4; 8], ConnectionModule::Lan);
+
+        let response = ManagementMessage {
+            version: 1,
+            destination: FOREIGN.to_vec(),
+            destination_is_node: false,
+            source: [3; 8].to_vec(),
+            source_is_node: false,
+            request_id: 32,
+            body: Some(Body::ProfileResponse(ProfileResponse {
+                found: false,
+                profile: None,
+            })),
+        };
+        state.on_management_received(other_peer, &response.encode_to_vec(), 1_000);
+
+        let (out, decoded) = management(&mut rx).expect("the relay must go to the gateway");
+        assert_eq!(out.peer, gateway_peer);
+        assert_eq!(decoded.destination, FOREIGN.to_vec());
+    }
+
+    /// §9.2: a gateway holds the global directory, so a miss there is final.
+    #[test]
+    fn a_gateway_drops_a_user_it_cannot_resolve() {
+        let (state, mut rx, _) = leaf_beside_a_gateway();
+        state.manifest.write().unwrap().set_gateway(true);
+
+        state.request_profile(FOREIGN, false, 1_000);
+
+        assert!(management(&mut rx).is_none());
+        assert!(state.management_in_flight.read().unwrap().is_empty());
+    }
+
+    /// §9.2 resolves users only; a node destination keeps the plain lookup.
+    #[test]
+    fn a_node_destination_gets_no_gateway_fallback() {
+        let (state, mut rx, _) = leaf_beside_a_gateway();
+
+        state.request_profile(FOREIGN, true, 1_000);
+
+        assert!(management(&mut rx).is_none());
+        assert!(state.management_in_flight.read().unwrap().is_empty());
+    }
+
+    // §8.8 step 2 only schedules the fetch a user mapping triggers. With the
+    // fallback in place, a fetch sent before the user's route exists would now
+    // reach the gateway instead of being dropped, for nothing.
+
+    fn map_user(state: &RouterV2State, neighbour: PeerId, id: [u8; 8], version: u32) {
+        state
+            .apply_mapping(
+                neighbour,
+                Space::User,
+                Mapping {
+                    abs_idx: 5,
+                    target_id: id,
+                    version,
+                },
+                1_000,
+            )
+            .unwrap();
+    }
+
+    #[test]
+    fn a_mapping_leaves_a_keyless_routeless_user_to_its_route_commit() {
+        let (state, mut rx, gateway_peer) = leaf_beside_a_gateway();
+
+        map_user(&state, gateway_peer, FOREIGN, 1);
+
+        assert!(state.users.read().unwrap().get(&FOREIGN).is_some());
+        assert!(
+            management(&mut rx).is_none(),
+            "commit_routing_entry asks once the entry lands"
+        );
+    }
+
+    #[test]
+    fn a_mapping_still_fetches_a_fresher_profile_for_a_keyed_user() {
+        let (state, mut rx, gateway_peer) = leaf_beside_a_gateway();
+        install_user(&state, FOREIGN, 1);
+
+        map_user(&state, gateway_peer, FOREIGN, 2);
+
+        let (_, decoded) = management(&mut rx).expect("§8.8: fresher than cached is fetched");
+        assert_eq!(decoded.destination, FOREIGN.to_vec());
+    }
+
+    #[test]
+    fn a_mapping_fetches_a_keyless_user_that_already_has_a_route() {
+        let (state, mut rx, gateway_peer) = leaf_beside_a_gateway();
+        let user = install_user(&state, FOREIGN, 1);
+        user.write().unwrap().public_key = None;
+        let entry = Arc::new(RwLock::new(RoutingEntry {
+            target_index: 40,
+            target: TargetRef::User(user.clone()),
+            seq_num: SeqNum::from(0u16),
+            metric: 10,
+            next_hop: 100,
+            transport: ConnectionModule::Lan,
+            last_update: 0,
+            hop_count: 1,
+            local_only: true,
+        }));
+        user.write().unwrap().routing_entry = Some(Arc::downgrade(&entry));
+        state
+            .routing_table
+            .write()
+            .unwrap()
+            .set(Space::User, 40, entry);
+
+        map_user(&state, gateway_peer, FOREIGN, 1);
+
+        let (out, _) = management(&mut rx).expect("a routable user without a key is fetched");
+        assert_eq!(out.peer, gateway_peer, "along its own route");
+    }
+
+    // First contact: a message to or from a user missing from the directory
+    // fetches its profile (§11.5), so its name follows.
+
+    fn qaul_beside_a_gateway() -> (crate::QaulState, UnboundedReceiver<OutboundMsg>, PeerId) {
+        let (state, rx, gateway_peer) = leaf_beside_a_gateway();
+        let qaul = crate::QaulState::new_for_simulation();
+        *qaul.router_v2.write().unwrap() = Some(Arc::new(state));
+        (qaul, rx, gateway_peer)
+    }
+
+    #[test]
+    fn first_contact_with_a_user_missing_from_the_directory_fetches_its_profile() {
+        let (qaul, mut rx, gateway_peer) = qaul_beside_a_gateway();
+        let kp = Keypair::generate_ed25519();
+        let peer = kp.public().to_peer_id();
+
+        let key = crate::router::users::Users::resolve_pub_key_on_contact(&qaul, &peer);
+
+        assert_eq!(
+            key,
+            Some(kp.public()),
+            "the key still comes from the PeerId"
+        );
+        let (out, decoded) = management(&mut rx).expect("the profile fetch must go out");
+        assert_eq!(out.peer, gateway_peer);
+        assert_eq!(
+            decoded.destination,
+            Multikey::from(kp.public()).to_id().to_vec()
+        );
+    }
+
+    #[test]
+    fn a_user_in_the_directory_is_not_fetched_on_contact() {
+        let (qaul, mut rx, _) = qaul_beside_a_gateway();
+        let kp = Keypair::generate_ed25519();
+        let peer = kp.public().to_peer_id();
+        let rs = qaul.get_router();
+        crate::router::users::Users::add_with_check_caps(
+            &qaul,
+            &rs,
+            peer,
+            kp.public(),
+            "known".into(),
+            0,
+        );
+
+        let key = crate::router::users::Users::resolve_pub_key_on_contact(&qaul, &peer);
+
+        assert_eq!(key, Some(kp.public()));
+        assert!(management(&mut rx).is_none());
     }
 }
 
