@@ -772,18 +772,27 @@ class LibqaulWorker {
     required String description,
   }) async {
     var file = File(pathName);
-    const maxUncompressedSizeKB = 150 * 1000;
-    if (isImage(file.path) && file.statSync().size >= maxUncompressedSizeKB) {
+    File? processedFile;
+    if (isImage(file.path)) {
       final compressed = await processImage(file);
-      if (compressed != null) file = compressed;
+      if (compressed != null) {
+        processedFile = compressed;
+        file = compressed;
+      }
     }
-    final msg = ChatFile(
-        sendFileRequest: SendFileRequest(
-      pathName: file.path,
-      groupId: conversationId.toList(),
-      description: description,
-    ));
-    await _sendMessage(Modules.CHATFILE, msg);
+    try {
+      final msg = ChatFile(
+          sendFileRequest: SendFileRequest(
+        pathName: file.path,
+        groupId: conversationId.toList(),
+        description: description,
+      ));
+      await _sendMessage(Modules.CHATFILE, msg);
+    } finally {
+      if (processedFile != null && await processedFile.exists()) {
+        await processedFile.delete();
+      }
+    }
   }
 
   Future<List<FileHistoryEntity>> getFileHistory(
