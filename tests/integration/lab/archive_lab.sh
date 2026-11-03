@@ -39,6 +39,23 @@ if (( ${#logs[@]} == 0 )); then
   exit 0
 fi
 
+# A bigger earlier lab leaves node dirs this one never reused, and their logs
+# would date and fill this archive. They stopped before this lab came up, so
+# keep only logs still written once the most recently written one had started.
+newest="$(stat -c '%Y %n' "${logs[@]}" | sort -n | tail -n 1 | cut -d' ' -f2-)"
+newest_start="$(head -n 1 "$newest" | awk '{print $1}')"
+if [[ $newest_start =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T ]]; then
+  cutoff=$(( $(date -u -d "$newest_start" +%s) - 1 ))
+  kept=()
+  for f in "${logs[@]}"; do
+    (( $(stat -c %Y "$f") >= cutoff )) && kept+=("$f")
+  done
+  if (( ${#kept[@]} < ${#logs[@]} )); then
+    echo "archive: ignoring $(( ${#logs[@]} - ${#kept[@]} )) log(s) left by an earlier lab"
+  fi
+  logs=("${kept[@]}")
+fi
+
 # The earliest first-line timestamp across the nodes is when the run came up.
 START="$(for f in "${logs[@]}"; do head -n 1 "$f" | awk '{print $1}'; done |
   grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}T' | sort | head -n 1)"
@@ -49,13 +66,14 @@ fi
 STAMP="$(date -u -d "$START" +%Y%m%dT%H%M%SZ)"
 START_EPOCH="$(date -u -d "$START" +%s)"
 
-# communities/run.sh writes the marker just before bring-up. One written long
-# before these logs began belongs to an earlier run and would mislabel a lab
-# that something else started, so it is ignored.
+# communities/run.sh writes the marker a few seconds before bring-up. One
+# written earlier belongs to an earlier run and would mislabel a lab that
+# something else started, such as run_topologies.py minutes later, so it is
+# ignored.
 MARKER_FRESH=""
 if [[ -r $MARKER ]]; then
   written="$(stat -c %Y "$MARKER")"
-  if (( written <= START_EPOCH + 5 && START_EPOCH - written < 600 )); then
+  if (( written <= START_EPOCH + 5 && START_EPOCH - written < 60 )); then
     MARKER_FRESH=yes
   else
     echo "archive: $MARKER was not written just before these logs began ($START), ignoring it"

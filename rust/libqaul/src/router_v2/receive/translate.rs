@@ -195,12 +195,29 @@ impl RouterV2State {
                     self.mark_profile_version_bump(&mapping.target_id);
                 }
 
-                if needs_profile {
+                // §8.8 only schedules this fetch. A user with no key and no
+                // route yet gets it from commit_routing_entry once its entry
+                // lands; asking now would send it ahead of that route.
+                if needs_profile && !self.fetch_waits_for_route(&mapping.target_id) {
                     self.request_profile(mapping.target_id, false, now);
                 }
             }
         }
         Ok(())
+    }
+
+    /// `true` for a user we hold neither a key nor a live route for
+    fn fetch_waits_for_route(&self, user_id: &[u8; 8]) -> bool {
+        let Some(user) = self.users.read().unwrap().get(user_id) else {
+            return false;
+        };
+        let user = user.read().unwrap();
+        user.public_key.is_none()
+            && user
+                .routing_entry
+                .as_ref()
+                .and_then(|weak| weak.upgrade())
+                .is_none()
     }
 
     pub(crate) fn lookup_target(&self, space: Space, own_idx: u16) -> Option<TargetRef> {

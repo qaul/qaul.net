@@ -162,19 +162,23 @@ impl RouterV2State {
         destination: [u8; 8],
         destination_is_node: bool,
     ) -> bool {
+        // a user is resolved exactly as a user packet is, nearest-gateway
+        // fallback included (§9.2). §9.2 defines no such fallback for a node.
         let hop = if destination_is_node {
             self.next_hop_for_node(destination)
+                .and_then(|(next_hop_node, transport)| {
+                    let peer = self.peer_of_node(&next_hop_node);
+                    if peer.is_none() {
+                        debug!("management: next hop {next_hop_node:?} is no longer a neighbour");
+                    }
+                    Some((peer?, transport))
+                })
         } else {
-            self.next_hop_for_user(destination)
+            self.next_hop_toward_user(destination)
         };
 
-        let Some((next_hop_node, transport)) = hop else {
+        let Some((peer, transport)) = hop else {
             debug!("management: no route to {destination:?}, dropping (§11.2 best-effort)");
-            return false;
-        };
-
-        let Some(peer) = self.peer_of_node(&next_hop_node) else {
-            debug!("management: next hop {next_hop_node:?} is no longer a neighbour, dropping");
             return false;
         };
 

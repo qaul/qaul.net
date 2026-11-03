@@ -306,6 +306,18 @@ def exchange(sender_id: str, recipient_id: str, user_ids: dict,
     total = round(t_invite + t_accept + t_deliver, 1)
     result["total_s"] = total
     print(f"  total       {total}s")
+
+    # §11.5: first contact fetches the other side's profile, so each end
+    # should now list the other by name. Containment was read before this.
+    sender_uid = user_ids[sender_id]
+
+    def named(node: Node, uid: str) -> bool:
+        return any(u.get("id") == uid and u.get("name") for u in node.known_users())
+
+    t_names = wait_until(
+        lambda: named(recipient, sender_uid) and named(sender, recipient_uid), timeout)
+    result["names_s"] = t_names
+    print(f"  names       {leg(t_names)}")
     return result
 
 
@@ -406,6 +418,9 @@ def main() -> None:
           f"{cont['expected_foreign_if_bridged']} foreign users, "
           f"{cont['foreign_fraction'] * 100:.0f}%)")
     print(f"  reachability  {'ok' if crossed else 'FAILED at ' + report['cross'].get('failed_at', '?')}")
+    if crossed:
+        named = report["cross"].get("names_s") is not None
+        print(f"  names         {'ok' if named else 'MISSING'} (each end lists the other by name)")
 
     if contained and crossed:
         print("  -> isolated and still reachable: section 2.3 as specified")
