@@ -5,7 +5,10 @@
 //! Follows the rule in section 8.8, step 5 which states that: a completed entry set is
 //! retained **byte-for-byte as signed**.
 
-use std::sync::Arc;
+use std::{
+    collections::HashSet,
+    sync::{Arc, RwLock},
+};
 
 use libp2p::PeerId;
 use tracing::{debug, info, warn};
@@ -87,19 +90,31 @@ impl RouterV2State {
         };
 
         {
+            // §8.8 step 5: only trusted entries feed `delegation_gateways`, so a
+            // user this origin no longer trusts (dropped, revoked, expired)
+            // loses it as well, or §9.2 keeps routing to a host that will not
+            // deliver (§10.7).
+            let trusted: HashSet<[u8; 8]> = trusted.iter().copied().collect();
             let weak_node = Arc::downgrade(&node_arc);
             let users = self.users.read().unwrap();
-            for user_id in &trusted {
-                let Some(user_arc) = users.get(user_id) else {
+            for (user_id, user_arc) in users.iter() {
+                let is_trusted = trusted.contains(user_id);
+                if !is_trusted && !holds_gateway(&user_arc.read().unwrap(), origin_node_id) {
                     continue;
-                };
+                }
                 let mut user = user_arc.write().unwrap();
                 user.delegation_gateways.retain(|w| {
                     w.upgrade()
                         .map(|n| n.read().unwrap().id != *origin_node_id)
                         .unwrap_or(false)
                 });
-                user.delegation_gateways.push(weak_node.clone());
+                if is_trusted {
+                    user.delegation_gateways.push(weak_node.clone());
+                } else {
+                    debug!(
+                        "{user_id:?} no longer trusted by {origin_node_id:?}, gateway withdrawn (§8.8)"
+                    );
+                }
             }
         }
 
@@ -166,6 +181,41 @@ impl RouterV2State {
 
         if re_drove {
             *self.last_trust_sweep_ms.write().unwrap() = now_ms;
+        }
+    }
+
+    /// §8.8 step 5
+    pub(crate) fn sweep_expired_delegations(&self, now_ms: u64) {
+        let expired: Vec<([u8; 8], Arc<RwLock<User>>)> = {
+            let nodes = self.nodes.read().unwrap();
+            nodes
+                .iter()
+                .flat_map(|(id, arc)| {
+                    arc.read()
+                        .unwrap()
+                        .delegated_users
+                        .iter()
+                        .filter(|d| d.delegation_timeout <= now_ms)
+                        .map(|d| (*id, Arc::clone(&d.user)))
+                        .collect::<Vec<_>>()
+                })
+                .collect()
+        };
+
+        for (origin, user_arc) in expired {
+            if !holds_gateway(&user_arc.read().unwrap(), &origin) {
+                continue;
+            }
+            let mut user = user_arc.write().unwrap();
+            user.delegation_gateways.retain(|w| {
+                w.upgrade()
+                    .map(|n| n.read().unwrap().id != origin)
+                    .unwrap_or(false)
+            });
+            debug!(
+                "delegation of {:?} to {origin:?} lapsed, no longer a gateway for it (§8.8)",
+                user.id
+            );
         }
     }
 
@@ -427,4 +477,11 @@ impl RouterV2State {
 
         Ok(())
     }
+}
+
+/// `true` when `origin` is among the user's delegation gateways.
+fn holds_gateway(user: &User, origin: &[u8; 8]) -> bool {
+    user.delegation_gateways
+        .iter()
+        .any(|w| w.upgrade().is_some_and(|n| n.read().unwrap().id == *origin))
 }
