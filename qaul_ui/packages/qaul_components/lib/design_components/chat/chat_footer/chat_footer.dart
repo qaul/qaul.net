@@ -691,16 +691,19 @@ class _SendButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return _wrapTooltip(
       tooltip,
-      Material(
-        color: Colors.transparent,
-        key: const ValueKey('chat-footer-send'),
-        child: InkWell(
-          onTap: onPressed,
-          child: const Center(
-            child: _ChatFooterSvgIcon(
-              asset: _kSendSvg,
-              width: _kSendAssetWidth,
-              height: _kSendAssetHeight,
+      Semantics(
+        button: true,
+        child: Material(
+          color: Colors.transparent,
+          key: const ValueKey('chat-footer-send'),
+          child: InkWell(
+            onTap: onPressed,
+            child: const Center(
+              child: _ChatFooterSvgIcon(
+                asset: _kSendSvg,
+                width: _kSendAssetWidth,
+                height: _kSendAssetHeight,
+              ),
             ),
           ),
         ),
@@ -766,16 +769,19 @@ class _AttachmentActions extends StatelessWidget {
   }) {
     return _wrapTooltip(
       tooltip,
-      Material(
-        color: Colors.transparent,
-        child: InkWell(
-          key: key,
-          onTap: onPressed,
-          child: Center(
-            child: _ChatFooterSvgIcon(
-              asset: asset,
-              width: width,
-              height: height,
+      Semantics(
+        button: true,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            key: key,
+            onTap: onPressed,
+            child: Center(
+              child: _ChatFooterSvgIcon(
+                asset: asset,
+                width: width,
+                height: height,
+              ),
             ),
           ),
         ),
@@ -798,8 +804,8 @@ class _ActionSlotGrid extends StatelessWidget {
       child: Stack(
         children: [
           for (var index = 0; index < actions.length; index++)
-            Positioned(
-              right: (actions.length - 1 - index) * _kActionSlotPitch,
+            PositionedDirectional(
+              end: (actions.length - 1 - index) * _kActionSlotPitch,
               width: _kActionSlotSize,
               height: _kActionSlotSize,
               child: actions[index],
@@ -1049,17 +1055,20 @@ class _PlusInCircleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return _wrapTooltip(
       tooltip,
-      Material(
-        color: Colors.transparent,
-        child: InkWell(
-          key: const ValueKey('chat-footer-more'),
-          onTap: onPressed,
-          customBorder: const CircleBorder(),
-          child: const Center(
-            child: _ChatFooterSvgIcon(
-              asset: _kPlusSvg,
-              width: _kPlusAssetSize,
-              height: _kPlusAssetSize,
+      Semantics(
+        button: true,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            key: const ValueKey('chat-footer-more'),
+            onTap: onPressed,
+            customBorder: const CircleBorder(),
+            child: const Center(
+              child: _ChatFooterSvgIcon(
+                asset: _kPlusSvg,
+                width: _kPlusAssetSize,
+                height: _kPlusAssetSize,
+              ),
             ),
           ),
         ),

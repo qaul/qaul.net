@@ -54,6 +54,7 @@ void main() {
     required Brightness brightness,
     String text = '',
     required bool includeVoiceAndCamera,
+    TextDirection textDirection = TextDirection.ltr,
   }) async {
     final controller = TextEditingController(text: text);
     addTearDown(controller.dispose);
@@ -68,16 +69,19 @@ void main() {
         home: Scaffold(
           body: RepaintBoundary(
             key: _kGoldenKey,
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: ChatFooter(
-                placeholder: 'Private message',
-                controller: controller,
-                onSend: (_) {},
-                onVoicePressed: includeVoiceAndCamera ? () {} : null,
-                onCameraPressed: includeVoiceAndCamera ? () {} : null,
-                onMoreAttachmentsPressed: () {},
-                applyBottomSafeArea: false,
+            child: Directionality(
+              textDirection: textDirection,
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: ChatFooter(
+                  placeholder: 'Private message',
+                  controller: controller,
+                  onSend: (_) {},
+                  onVoicePressed: includeVoiceAndCamera ? () {} : null,
+                  onCameraPressed: includeVoiceAndCamera ? () {} : null,
+                  onMoreAttachmentsPressed: () {},
+                  applyBottomSafeArea: false,
+                ),
               ),
             ),
           ),
@@ -153,6 +157,72 @@ void main() {
         ], expectedPillWidth: width - 40);
       }
     }
+  });
+
+  testWidgets('mirrors the action grid to the leading edge in RTL', (
+    tester,
+  ) async {
+    void expectRtlGrid(List<Key> outerToInner) {
+      final pill = tester.getRect(find.byKey(_kPillKey));
+      final rects = [
+        for (final key in outerToInner) tester.getRect(find.byKey(key)),
+      ];
+      expect(rects.first.left, closeTo(pill.left, 1));
+      for (var index = 1; index < rects.length; index++) {
+        expect(rects[index].center.dx - rects[index - 1].center.dx,
+            closeTo(44, 1));
+      }
+    }
+
+    await pumpFooter(
+      tester,
+      width: 360,
+      brightness: Brightness.light,
+      includeVoiceAndCamera: true,
+      textDirection: TextDirection.rtl,
+    );
+    expectRtlGrid([_kMoreKey, _kCameraKey, _kVoiceKey]);
+
+    await pumpFooter(
+      tester,
+      width: 360,
+      brightness: Brightness.light,
+      text: 'A message',
+      includeVoiceAndCamera: true,
+      textDirection: TextDirection.rtl,
+    );
+    expectRtlGrid([_kSendKey, _kMoreKey]);
+  });
+
+  testWidgets('exposes footer actions as buttons to assistive tech', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await pumpFooter(
+      tester,
+      width: 360,
+      brightness: Brightness.light,
+      includeVoiceAndCamera: true,
+    );
+    for (final key in [_kVoiceKey, _kCameraKey, _kMoreKey]) {
+      expect(
+        tester.getSemantics(find.byKey(key)),
+        containsSemantics(isButton: true),
+      );
+    }
+
+    await pumpFooter(
+      tester,
+      width: 360,
+      brightness: Brightness.light,
+      text: 'A message',
+      includeVoiceAndCamera: true,
+    );
+    expect(
+      tester.getSemantics(find.byKey(_kSendKey)),
+      containsSemantics(isButton: true),
+    );
+    semantics.dispose();
   });
 
   for (final width in [360, 390]) {
