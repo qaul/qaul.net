@@ -151,6 +151,12 @@ abstract class AppLocalizations {
   /// **'Send File'**
   String get sendFileTooltip;
 
+  /// No description provided for @sendPhotoTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Photo'**
+  String get sendPhotoTooltip;
+
   /// No description provided for @sendAudioTooltip.
   ///
   /// In en, this message translates to:
@@ -1033,11 +1039,11 @@ abstract class AppLocalizations {
   /// **'SAVE'**
   String get saveButton;
 
-  /// No description provided for @securePrivateMessageHint.
+  /// No description provided for @privateMessageHint.
   ///
   /// In en, this message translates to:
-  /// **'Secure private message'**
-  String get securePrivateMessageHint;
+  /// **'Private message'**
+  String get privateMessageHint;
 
   /// No description provided for @storage.
   ///

@@ -154,10 +154,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     #[cfg(feature = "embedded")]
     {
-        let storage_path = cli
-            .dir
-            .clone()
-            .unwrap_or_else(|| std::env::current_dir().unwrap().to_string_lossy().into_owned());
+        let storage_path = cli.dir.clone().unwrap_or_else(|| {
+            std::env::current_dir()
+                .unwrap()
+                .to_string_lossy()
+                .into_owned()
+        });
         let mut transport = qauld_rpc::EmbeddedTransport::start(storage_path).await?;
         if cli.verbose {
             eprintln!("qauld-ctl running with embedded libqaul");

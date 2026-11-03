@@ -31,3 +31,8 @@ flutter:
     - assets/icons/
     - assets/icons/sub_menu/
     - assets/logo/
+
+  fonts:
+    - family: NotoColorEmoji
+      fonts:
+        - asset: assets/fonts/NotoColorEmoji.ttf

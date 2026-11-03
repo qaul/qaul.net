@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../styles/chat_surface_shadows.dart';
 import '../../../styles/qaul_color_sheet.dart';
+import '../../../styles/qaul_emoji.dart';
 import 'chat_footer_reply_preview.dart';
 
 const Color _kActionIconColor = Color(0xFF999999);
@@ -16,7 +18,7 @@ const String _kEmoticonSvg = 'assets/icons/emoticon.svg';
 const String _kGeolocationSvg = 'assets/icons/geolocation.svg';
 
 const double _kFooterHorizontalPadding = 20;
-const double _kTopPadding = 12;
+const double _kTopPadding = 4;
 const double _kBottomPadding = 24;
 const double _kFieldInputHorizontal = 16;
 const double _kFieldInputVertical = 12;
@@ -93,16 +95,6 @@ class _AttachmentMenuLayoutConfig {
   }
 }
 
-const List<BoxShadow> _kFooterShadowsDark = [
-  BoxShadow(offset: Offset(0, 0), blurRadius: 5, color: Color(0x66000000)),
-  BoxShadow(offset: Offset(0, -10), blurRadius: 7, color: Color(0x99000000)),
-];
-
-const List<BoxShadow> _kFooterShadowsLight = [
-  BoxShadow(offset: Offset(0, 0), blurRadius: 5, color: Color(0x33000000)),
-  BoxShadow(offset: Offset(0, -10), blurRadius: 7, color: Color(0x66000000)),
-];
-
 Color _inputFillColor(Brightness brightness, Color shell) {
   if (brightness == Brightness.dark) {
     return const Color(0xFF1C1C1E);
@@ -128,6 +120,7 @@ Color _inputBorderColor(Brightness brightness, bool isFocused) {
 TextStyle _fieldBaseTextStyle() {
   return const TextStyle(
     fontFamily: 'Roboto',
+    fontFamilyFallback: kQaulEmojiFontFamilyFallback,
     fontSize: _kFieldFontSize,
     fontWeight: FontWeight.w400,
     height: 1.25,
@@ -154,7 +147,7 @@ Widget _wrapTooltip(String? message, Widget child) {
 /// Bottom chat composer: pill field, plus menu when empty, send when the user
 /// has entered text.
 ///
-/// Pass [placeholder] from app localizations (e.g. `securePrivateMessageHint`).
+/// Pass [placeholder] from app localizations (e.g. `privateMessageHint`).
 class ChatFooter extends StatefulWidget {
   const ChatFooter({
     super.key,
@@ -222,10 +215,7 @@ class _ChatFooterState extends State<ChatFooter> {
   void initState() {
     super.initState();
     _ownedController = TextEditingController();
-    _isAttachmentMenuOpen =
-        widget.initialAttachmentMenuOpen &&
-        _effectiveController.text.trim().isEmpty;
-    _effectiveController.addListener(_handleTextChanged);
+    _isAttachmentMenuOpen = widget.initialAttachmentMenuOpen;
     _inputFocusNode = FocusNode()..addListener(_handleFocusChanged);
     _attachmentActionsSignature = _attachmentActionSignature(
       _attachmentActions(),
@@ -235,17 +225,6 @@ class _ChatFooterState extends State<ChatFooter> {
   @override
   void didUpdateWidget(covariant ChatFooter oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final oldController = oldWidget.controller ?? _ownedController;
-    final newController = _effectiveController;
-    if (oldController != newController) {
-      oldController.removeListener(_handleTextChanged);
-      newController.addListener(_handleTextChanged);
-      if (newController.text.trim().isNotEmpty && _isAttachmentMenuOpen) {
-        _isAttachmentMenuOpen = false;
-        _attachmentMenuPageIndex = 0;
-      }
-    }
-
     final newActionSignature = _attachmentActionSignature(_attachmentActions());
     if (newActionSignature != _attachmentActionsSignature) {
       _attachmentActionsSignature = newActionSignature;
@@ -255,7 +234,6 @@ class _ChatFooterState extends State<ChatFooter> {
 
   @override
   void dispose() {
-    _effectiveController.removeListener(_handleTextChanged);
     _inputFocusNode
       ..removeListener(_handleFocusChanged)
       ..dispose();
@@ -263,16 +241,6 @@ class _ChatFooterState extends State<ChatFooter> {
       _ownedController.dispose();
     }
     super.dispose();
-  }
-
-  void _handleTextChanged() {
-    if (!_isAttachmentMenuOpen || _effectiveController.text.trim().isEmpty) {
-      return;
-    }
-    setState(() {
-      _isAttachmentMenuOpen = false;
-      _attachmentMenuPageIndex = 0;
-    });
   }
 
   void _handleFocusChanged() {
@@ -325,6 +293,28 @@ class _ChatFooterState extends State<ChatFooter> {
 
   List<_FooterAttachmentAction> _attachmentActions() {
     return [
+      if (widget.onVoicePressed != null)
+        _FooterAttachmentAction(
+          id: 'voice',
+          icon: const _ChatFooterSvgIcon(
+            asset: _kMicrophoneSvg,
+            width: 17.684,
+            height: 24,
+          ),
+          tooltip: widget.voiceTooltip,
+          onPressed: () => _handleAttachmentAction(widget.onVoicePressed),
+        ),
+      if (widget.onCameraPressed != null)
+        _FooterAttachmentAction(
+          id: 'photo',
+          icon: const _ChatFooterSvgIcon(
+            asset: _kPhotosSvg,
+            width: 25,
+            height: 23,
+          ),
+          tooltip: widget.cameraTooltip,
+          onPressed: () => _handleAttachmentAction(widget.onCameraPressed),
+        ),
       if (widget.onAttachmentPressed != null ||
           widget.onMoreAttachmentsPressed != null)
         _FooterAttachmentAction(
@@ -366,9 +356,10 @@ class _ChatFooterState extends State<ChatFooter> {
     final sheet = QaulColorSheet(theme.brightness);
     final shell = sheet.background;
     final fillColor = _inputFillColor(theme.brightness, shell);
-    final shadows = theme.brightness == Brightness.dark
-        ? _kFooterShadowsDark
-        : _kFooterShadowsLight;
+    final shadows = chatSurfaceShadows(
+      theme.brightness,
+      direction: ChatSurfaceShadowDirection.above,
+    );
     final hasAttachmentMenu = _attachmentActions().isNotEmpty;
 
     final inner = Padding(
@@ -569,7 +560,7 @@ class _ComposerPill extends StatelessWidget {
   }
 }
 
-class _ComposerTextField extends StatelessWidget {
+class _ComposerTextField extends StatefulWidget {
   const _ComposerTextField({
     super.key,
     required this.footer,
@@ -584,23 +575,56 @@ class _ComposerTextField extends StatelessWidget {
   final FocusNode focusNode;
 
   @override
+  State<_ComposerTextField> createState() => _ComposerTextFieldState();
+}
+
+class _ComposerTextFieldState extends State<_ComposerTextField> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    return ScrollConfiguration(
+      behavior: const _ComposerScrollBehavior().copyWith(scrollbars: false),
+      child: RawScrollbar(
+        controller: _scrollController,
+        thumbVisibility: true,
+        thickness: 5,
+        radius: const Radius.circular(20),
+        thumbColor: const Color(0xFFB1B2B5),
+        crossAxisMargin: 3,
+        mainAxisMargin: 10,
+        padding: EdgeInsets.zero,
+        scrollbarOrientation: ScrollbarOrientation.right,
+        child: _buildTextField(),
+      ),
+    );
+  }
+
+  /// Share the editable viewport with the persistent overflow indicator.
+  Widget _buildTextField() {
     return TextField(
-      controller: controller,
-      focusNode: focusNode,
+      controller: widget.controller,
+      focusNode: widget.focusNode,
+      scrollController: _scrollController,
       minLines: 1,
       maxLines: 5,
-      style: _fieldValueStyle(theme),
+      style: _fieldValueStyle(widget.theme),
       decoration: InputDecoration(
         isDense: true,
         hint: SizedBox(
           width: double.infinity,
           child: Text(
-            footer.placeholder,
+            widget.footer.placeholder,
             maxLines: 1,
             softWrap: false,
             overflow: TextOverflow.ellipsis,
-            style: _fieldHintStyle(theme),
+            style: _fieldHintStyle(widget.theme),
           ),
         ),
         border: InputBorder.none,
@@ -618,6 +642,19 @@ class _ComposerTextField extends StatelessWidget {
       textInputAction: TextInputAction.newline,
     );
   }
+}
+
+class _ComposerScrollBehavior extends MaterialScrollBehavior {
+  const _ComposerScrollBehavior();
+
+  // EditableText re-enables scrollbars for multiline fields in its own copyWith.
+  // Keep its desktop scrollbar disabled so only the composer thumb is painted.
+  @override
+  Widget buildScrollbar(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) => child;
 }
 
 class _TextActions extends StatelessWidget {

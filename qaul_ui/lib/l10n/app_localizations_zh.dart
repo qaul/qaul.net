@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -22,6 +23,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get sendFileTooltip => '发送文件';
+
+  @override
+  String get sendPhotoTooltip => '发送照片';
 
   @override
   String get sendAudioTooltip => '录制音频消息';
@@ -493,7 +497,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get saveButton => 'SAVE';
 
   @override
-  String get securePrivateMessageHint => 'Secure private message';
+  String get privateMessageHint => '私人消息';
 
   @override
   String get storage => 'Storage';
@@ -523,6 +527,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get sendFileTooltip => '發送文件';
+
+  @override
+  String get sendPhotoTooltip => '傳送相片';
 
   @override
   String get sendAudioTooltip => '錄製音訊訊息';
@@ -842,4 +849,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get languageName => '繁體中文';
+
+  @override
+  String get privateMessageHint => '私人訊息';
 }

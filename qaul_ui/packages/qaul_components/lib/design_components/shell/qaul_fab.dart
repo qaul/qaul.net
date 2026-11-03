@@ -28,9 +28,7 @@ class QaulFAB extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final iconColor = theme.iconTheme.color ?? theme.colorScheme.onSurface;
-    final fillColor = theme.brightness == Brightness.dark
-        ? theme.colorScheme.surface
-        : Colors.white;
+    final fillColor = theme.scaffoldBackgroundColor;
 
     return FloatingActionButton.large(
       elevation: 0,
