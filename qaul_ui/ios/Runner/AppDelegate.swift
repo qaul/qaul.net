@@ -1,5 +1,6 @@
 import UIKit
 import Flutter
+import Photos
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -10,6 +11,7 @@ import Flutter
     let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
     let libqaulChannel = FlutterMethodChannel(name: "libqaul", binaryMessenger: controller.binaryMessenger)
     let attachmentClipboardChannel = FlutterMethodChannel(name: "qaul/attachment_clipboard", binaryMessenger: controller.binaryMessenger)
+    let attachmentSaverChannel = FlutterMethodChannel(name: "qaul/attachment_saver", binaryMessenger: controller.binaryMessenger)
     if #available(iOS 10.0, *) {
       UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
     }
@@ -79,12 +81,60 @@ import Flutter
       result(nil)
     })
 
+    attachmentSaverChannel.setMethodCallHandler({
+      (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
+      guard call.method == "saveFile" else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      guard let args = call.arguments as? Dictionary<String, Any>,
+            let path = args["path"] as? String,
+            FileManager.default.fileExists(atPath: path) else {
+        result(FlutterError(code: "file_not_found", message: "The attachment is no longer available", details: nil))
+        return
+      }
+
+      self.saveAttachment(URL(fileURLWithPath: path), from: controller, result: result)
+    })
+
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
     
   private func getApplicationDocumentsDirectory() -> String? {
       return NSSearchPathForDirectoriesInDomains(FileManager.SearchPathDirectory.documentDirectory, FileManager.SearchPathDomainMask.userDomainMask, true).first
+  }
+
+  private func saveAttachment(_ url: URL, from controller: UIViewController, result: @escaping FlutterResult) {
+    let photoExtensions = ["heic", "jpeg", "jpg", "png", "gif", "tiff", "webp"]
+    let videoExtensions = ["mov", "mp4", "m4v", "avi"]
+    let extensionName = url.pathExtension.lowercased()
+
+    guard photoExtensions.contains(extensionName) || videoExtensions.contains(extensionName) else {
+      let picker = UIDocumentPickerViewController(forExporting: [url], asCopy: true)
+      controller.present(picker, animated: true)
+      result(nil)
+      return
+    }
+
+    PHPhotoLibrary.requestAuthorization { status in
+      guard status == .authorized else {
+        result(FlutterError(code: "photo_permission_denied", message: "Photo Library access is required to save this attachment", details: nil))
+        return
+      }
+
+      PHPhotoLibrary.shared().performChanges({
+        let request = PHAssetCreationRequest.forAsset()
+        let resourceType: PHAssetResourceType = photoExtensions.contains(extensionName) ? .photo : .video
+        request.addResource(with: resourceType, fileURL: url, options: nil)
+      }) { success, error in
+        if success {
+          result(nil)
+        } else {
+          result(FlutterError(code: "save_failed", message: "Could not save the attachment", details: error?.localizedDescription))
+        }
+      }
+    }
   }
 
   private func dummyMethodToEnforceBundling() {

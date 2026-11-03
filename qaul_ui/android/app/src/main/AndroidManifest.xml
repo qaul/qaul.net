@@ -27,8 +27,8 @@
     <uses-permission android:name="android.permission.NEARBY_DEVICES"/>
 
     <!-- Storage Permissions only needed for Android ...  -->
-    <uses-permission android:name="ANDROID.PERMISSION.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="ANDROID.PERMISSION.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28"/>
 
     <!-- Required to run qaul constantly in a foreground service in the background -->
     <uses-permission android:name="android.permission.WAKE_LOCK"/>

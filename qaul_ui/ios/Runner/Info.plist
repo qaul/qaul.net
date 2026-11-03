@@ -63,7 +63,7 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
-    <string>You can send photos as attachments to your peers. For that, please grant access to the application.</string>
+    <string>You can send and save photos as attachments. For that, please grant access to the application.</string>
     <key>NSCameraUsageDescription</key>
     <string>You can take pictures and send them as attachments to your peers. For that, please grant access to the application.</string>
     <key>NSMicrophoneUsageDescription</key>
