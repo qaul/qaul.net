@@ -575,78 +575,80 @@ class _DeletedMessageMarker extends StatelessWidget {
       edges: const [],
     );
 
-    return ConstrainedBox(
-      constraints: const BoxConstraints(
-        maxWidth: ChatBubbleStyle.maxBubbleWidthMobile,
-      ),
-      child: DecoratedBox(
-        decoration: ShapeDecoration(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-            side: BorderSide(color: foreground.withValues(alpha: 0.8)),
-          ),
+    return LayoutBuilder(
+      builder: (context, constraints) => ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: constraints.maxWidth * ChatBubbleStyle.maxWidthFraction,
         ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (senderName != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 3),
-                  child: Text(
-                    senderName!,
-                    style: kGroupSenderNameTextStyle.copyWith(
-                      color: foreground.withValues(alpha: 0.85),
-                    ),
-                  ),
-                ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Flexible(
+        child: DecoratedBox(
+          decoration: ShapeDecoration(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+              side: BorderSide(color: foreground.withValues(alpha: 0.8)),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (senderName != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 3),
                     child: Text(
-                      label,
-                      style: TextStyle(
-                        color: foreground,
-                        fontFamily: 'Roboto',
-                        fontSize: 12,
-                        fontWeight: FontWeight.w300,
-                        height: 1.3,
+                      senderName!,
+                      style: kGroupSenderNameTextStyle.copyWith(
+                        color: foreground.withValues(alpha: 0.85),
                       ),
                     ),
                   ),
-                  if (showTimestamp) ...[
-                    const SizedBox(width: 4),
-                    Text(
-                      formatQaulChatBubbleTime(timeMessage, _clock),
-                      style: TextStyle(
-                        color: foreground.withValues(alpha: 0.75),
-                        fontFamily: 'Roboto',
-                        fontSize: 11,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    if (isOutgoing && message.status != MessageStatus.notSent)
-                      Padding(
-                        padding: const EdgeInsetsDirectional.only(start: 3),
-                        child: Icon(
-                          message.status == MessageStatus.read
-                              ? Icons.done_all
-                              : Icons.check,
-                          size: 14,
-                          color: foreground.withValues(
-                            alpha: message.status == MessageStatus.read
-                                ? 0.9
-                                : 0.8,
-                          ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        label,
+                        style: TextStyle(
+                          color: foreground,
+                          fontFamily: 'Roboto',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w300,
+                          height: 1.3,
                         ),
                       ),
+                    ),
+                    if (showTimestamp) ...[
+                      const SizedBox(width: 4),
+                      Text(
+                        formatQaulChatBubbleTime(timeMessage, _clock),
+                        style: TextStyle(
+                          color: foreground.withValues(alpha: 0.75),
+                          fontFamily: 'Roboto',
+                          fontSize: 11,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      if (isOutgoing && message.status != MessageStatus.notSent)
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(start: 3),
+                          child: Icon(
+                            message.status == MessageStatus.read
+                                ? Icons.done_all
+                                : Icons.check,
+                            size: 14,
+                            color: foreground.withValues(
+                              alpha: message.status == MessageStatus.read
+                                  ? 0.9
+                                  : 0.8,
+                            ),
+                          ),
+                        ),
+                    ],
                   ],
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
