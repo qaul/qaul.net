@@ -13,9 +13,9 @@
 //!   single-shot mode is not yet supported — that needs shell mode
 //!   or the planned embedded transport (Phase 3) — so we currently
 //!   exit with a clear error if the daemon answers with `AuthResult`.
-//! - `auth logout` and `auth status` have no dedicated proto messages;
-//!   they're stubbed out and exit non-zero with a "not implemented"
-//!   message so scripts get a clear signal.
+//! - `auth logout` sends a `LogoutRequest` and `auth status` a
+//!   `SessionStatusRequest`. Both act on the calling account, i.e. the
+//!   default user resolved by the preflight request.
 
 use prost::Message;
 
@@ -24,13 +24,6 @@ use crate::{cli::AuthSubcmd, commands::RpcCommand, proto::Modules};
 use qaul_proto::qaul_rpc_authentication as proto;
 
 impl RpcCommand for AuthSubcmd {
-    fn expects_response(&self) -> bool {
-        // Only Login produces a response (the AuthChallenge).
-        // Logout and Status have no wire message and short-circuit
-        // inside `encode_request` with an Err.
-        matches!(self, AuthSubcmd::Login { .. })
-    }
-
     fn encode_request(&self) -> Result<(Vec<u8>, Modules), Box<dyn std::error::Error>> {
         match self {
             AuthSubcmd::Login { username, .. } => {
@@ -48,17 +41,22 @@ impl RpcCommand for AuthSubcmd {
                 };
                 Ok((envelope.encode_to_vec(), Modules::Auth))
             }
-            AuthSubcmd::Logout => Err(
-                "auth logout: not yet wired to a proto message; daemon-side session \
-                 lifecycle is still implicit. Use shell mode or follow up once the \
-                 logout RPC is added."
-                    .into(),
-            ),
-            AuthSubcmd::Status => Err(
-                "auth status: not yet wired to a proto message; daemon-side session \
-                 lifecycle is still implicit."
-                    .into(),
-            ),
+            AuthSubcmd::Logout => {
+                let envelope = proto::AuthRpc {
+                    message: Some(proto::auth_rpc::Message::LogoutRequest(
+                        proto::LogoutRequest {},
+                    )),
+                };
+                Ok((envelope.encode_to_vec(), Modules::Auth))
+            }
+            AuthSubcmd::Status => {
+                let envelope = proto::AuthRpc {
+                    message: Some(proto::auth_rpc::Message::SessionStatusRequest(
+                        proto::SessionStatusRequest {},
+                    )),
+                };
+                Ok((envelope.encode_to_vec(), Modules::Auth))
+            }
         }
     }
 
@@ -105,6 +103,35 @@ impl RpcCommand for AuthSubcmd {
                     return Err(r.error_message.into());
                 }
                 Ok(())
+            }
+            Some(proto::auth_rpc::Message::SessionStatusResponse(s)) => {
+                if json {
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&serde_json::json!({
+                            "authenticated": s.authenticated,
+                        }))?
+                    );
+                } else if s.authenticated {
+                    println!("Logged in: this account has an active session.");
+                } else {
+                    println!("Logged out: this account has no active session.");
+                }
+                Ok(())
+            }
+            Some(proto::auth_rpc::Message::Ack(_)) => {
+                if json {
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&serde_json::json!({ "ok": true }))?
+                    );
+                } else {
+                    println!("Logged out.");
+                }
+                Ok(())
+            }
+            Some(proto::auth_rpc::Message::Error(e)) => {
+                Err(format!("auth: {} (code {})", e.message, e.code).into())
             }
             _ => Err("auth: unprocessable RPC response".into()),
         }
