@@ -21,7 +21,7 @@ class _SupportScreenState extends ConsumerState<SupportScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return ResponsiveScaffold(
-      icon: FontAwesomeIcons.headset,
+      icon: FontAwesomeIcons.headset.data,
       title: l10n.support,
       body: FutureBuilder<bool>(
           future: emailLogger.hasLogsStored(ref: ref),
