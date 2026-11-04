@@ -170,7 +170,7 @@ async fn run_control(
                     let address = writer.device_address();
                     let peer = PeerKey::peripheral(address);
                     let tracer = tracers.remove(&address);
-                    log::debug!("{} subscribed, {}", address, if tracer.is_some() { "traced" } else { "untraced" });
+                    log::info!("{} subscribed, {}", address, if tracer.is_some() { "traced" } else { "untraced" });
                     let (outbox, outbox_rx) = mpsc::channel(64);
                     let subscribed = RadioEvent::Subscribed {
                         peer,

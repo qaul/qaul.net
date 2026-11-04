@@ -65,6 +65,19 @@ pub const MAX_LARGE_PARTS: usize = 4;
 /// **[unvalidated]** Unvalidated on android as well
 pub const MEDIUM_MESSAGE_MAX_BYTES: usize = 16_000;
 
+/// Most BULK messages a link holds at once, waiting or in flight. More are
+/// refused as Busy straight away instead of queued. If the link is slow, libqaul resends before we finish, 
+/// unrefused resends pile up behind the original until the queue indices (up to 29) run out and inflight messages get evicted.
+///
+/// **[unvalidated]** Linux only, andorid has no cap but mostly uses l2cap for bulk unless the device is GATT only. 
+pub const MAX_BULK_MESSAGES: usize = 15;
+
+/// Most links at once, both roles, connects still in progress included. At the cap we dont connect
+/// out, refuse new inbound links, and stop advertising so centrals stop trying.
+///
+/// **[android]** Mirrors `BleConstants.MAX_CONNECTIONS`.
+pub const MAX_CONNECTIONS: usize = 4;
+
 /// Largest run of consecutive missing chunks tolerated in one gap before the
 /// receiver gives up and errors the message.
 ///
@@ -122,6 +135,12 @@ pub const LINK_STATE_TIMEOUT_MS: u64 = 45_000;
 /// 
 /// **[android]**
 pub const SETUP_TIMEOUT_MS: u64 = 15_000;
+
+/// Wait this long after first hearing a node we should be peripheral to for it to connect
+/// to us, afterwhich we connect to it. Covers a peer that cant see us or is acting up.
+/// 
+/// **[android]** Matchs android, no inherent best value
+pub const WRONG_ROLE_DEFER_MS: u64 = 8_000;
 
 #[cfg(test)]
 mod tests {

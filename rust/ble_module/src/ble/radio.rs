@@ -36,12 +36,51 @@ const ADVERT_TX_POWER_DBM: i16 = 20;
 /// Android's NOMINAL_ADVERT_INTERVAL_MS also assumes.
 const ADVERT_INTERVAL: Duration = Duration::from_millis(100);
 
+/// Wait after a failed advertise before trying again.
+const ADVERT_RETRY: Duration = Duration::from_secs(5);
+
 /// Every Nth frame is traced: the send task waits until BlueZ has put it, and every frame before it,
 /// on air before reporting FrameSent. BlueZ only sends a Write Request or an Indication once its
 /// write queue (commands and notifications) is empty, so the reply means the queue has drained.
 /// Without it FrameSent only means "handed to bluetoothd", which queues without limit.
 /// Bounds what sits ahead of a control frame to N frames, costing 1–2 idle connection events per tracer.
 pub(crate) const WRITE_TRACER_EVERY: usize = 20;
+
+/// Measures throughput between tracers. A tracers reply means bluetoothds queue has drained,
+/// so the time from a batchs first frame to its tracers reply is how long those bytes took on air inluding the tracer response time.
+/// Starts at the first frame, not at the last tracer, so time with an empty outbox doesn't count.
+#[derive(Default)]
+pub(crate) struct BatchTimer {
+    start: Option<Instant>,
+    frames: usize,
+    bytes: usize,
+}
+
+impl BatchTimer {
+    /// Call just before handing a frame to BlueZ.
+    pub(crate) fn on_frame(&mut self, len: usize) {
+        self.start.get_or_insert_with(Instant::now);
+        self.frames += 1;
+        self.bytes += len;
+    }
+
+    /// Call once a tracers reply is in: logs the batch and starts a new one.
+    /// Only full batches are logged, a short one doesnt send enough to get an accurate reading.
+    pub(crate) fn finish(&mut self, peer: PeerKey) {
+        let Some(start) = self.start.take() else { return };
+        let frames = std::mem::take(&mut self.frames);
+        let bytes = std::mem::take(&mut self.bytes);
+        if frames < WRITE_TRACER_EVERY {
+            return;
+        }
+        let elapsed = start.elapsed();
+        let kb_s = bytes as f64 / elapsed.as_secs_f64().max(1e-6) / 1000.0;
+        log::info!(
+            "{} ({:?}) tracer: {} frames, {} B in {} ms = {:.1} KB/s",
+            peer.address, peer.role, frames, bytes, elapsed.as_millis(), kb_s
+        );
+    }
+}
 
 /// What the radio side tells the loop. One channel for all of them, so the loop sees one ordered stream.
 #[derive(Debug)]
@@ -109,11 +148,11 @@ pub(crate) async fn send_frames(
     tracer: Option<UnixDatagram>,
     mut outbox_rx: mpsc::Receiver<Vec<u8>>,
     events: mpsc::Sender<RadioEvent>,
-   // batch_time: Option<Instant>,
-    //batch_size: usize,
 ) {
     let mut frames_sent: usize = 0;
+    let mut batch = BatchTimer::default();
     while let Some(frame) = outbox_rx.recv().await {
+        batch.on_frame(frame.len());
         if let Err(err) = writer.send(&frame).await {
             log::warn!("{} ({:?}) send failed: {}", peer.address, peer.role, err);
             let _ = events.send(RadioEvent::Gone { peer }).await;
@@ -128,7 +167,7 @@ pub(crate) async fn send_frames(
                     let _ = events.send(RadioEvent::Gone { peer }).await;
                     break;
                 }
-                log::debug!("{} tracer ok after {} frames", peer.address, frames_sent);
+                batch.finish(peer);
             }
         }
         let _ = events.send(RadioEvent::FrameSent { peer }).await;
@@ -151,7 +190,10 @@ pub struct Running {
     _session: Session,
     adapter: Adapter,
     advertisement: Advertisement,
-    advert: AdvertisementHandle,
+    /// `None` while stopped: at the connection cap, or after a centrals connect ends it.
+    advert: Option<AdvertisementHandle>,
+    /// After a failed advertise, not before this.
+    advert_retry_at: Option<Instant>,
     _app: ApplicationHandle,
     pub events: mpsc::Receiver<RadioEvent>,
     /// Handed to each central connect we start, so its tasks report on events
@@ -221,13 +263,14 @@ impl Running {
             _session: session,
             adapter,
             advertisement: le_advertisement,
-            advert,
+            advert: Some(advert),
+            advert_retry_at: None,
             _app: app,
             events: events_rx,
             events_tx,
             scan_paused,
             outboxes: HashMap::new(),
-            engine: Engine::new(our_id),
+            engine: Engine::new(our_id, gossip_seq_seed()),
         })
     }
 
@@ -248,12 +291,41 @@ impl Running {
         });
     }
 
-    /// Put our advert back on air. A central connecting through the advert ends it. The advertising
-    /// set is terminated unlike Android which automatically restarts the set. Without this there
-    /// can be at most one peripheral connection. 
-    pub async fn readvertise(&mut self) -> Result<(), bluer::Error> {
-        self.advert = self.adapter.advertise(self.advertisement.clone()).await?;
-        Ok(())
+    /// A central connected through our advert, which ends it: the controller terminates the advertising
+    /// set, unlike Android which restarts it. Drops the dead handle so update_advertising puts a new one
+    /// on air. Without this there can be at most one peripheral connection.
+    pub fn advert_ended(&mut self) {
+        self.advert = None;
+    }
+
+    /// Advertise only while the engine has room for another link. Pause BleAdvertiser at `MAX_CONNECTIONS`, so centrals stop connecting to a node that would refuse them.
+    /// Only acts when that changes, or after advert_ended.
+    pub async fn update_advertising(&mut self) {
+        let room = self.engine.has_room();
+        match (room, self.advert.is_some()) {
+            (false, true) => {
+                self.advert = None;
+                log::info!("at connection cap, advertising stopped");
+            }
+            (true, false) => {
+                // After a failure wait before retrying, so a refusing controller isn't hammered on every event. TODO: investigate linux add/scan restart caps
+                if self.advert_retry_at.is_some_and(|at| Instant::now() < at) {
+                    return;
+                }
+                match self.adapter.advertise(self.advertisement.clone()).await {
+                    Ok(handle) => {
+                        self.advert = Some(handle);
+                        self.advert_retry_at = None;
+                        log::info!("advertising");
+                    }
+                    Err(err) => {
+                        self.advert_retry_at = Some(Instant::now() + ADVERT_RETRY);
+                        log::warn!("advertising failed, retrying in {:?}: {}", ADVERT_RETRY, err);
+                    }
+                }
+            }
+            _ => {}
+        }
     }
 
     /// Stop talking to `peer`: end its send task and have BlueZ drop the
@@ -293,6 +365,14 @@ impl Running {
 
         Err(format!("BLE device with ID '{}' not found", device_id).into())
     }
+}
+
+/// Where our neighbour list seq starts: the clock in whole seconds, so it moves ahead across restarts.
+/// A random start would be behind half the time, and peers would drop our lists as stale until their entry for us expires 
+fn gossip_seq_seed() -> u16 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |since| since.as_secs() as u16)
 }
 
 /// Check if bluetooth is powered on by the device.

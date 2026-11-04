@@ -24,6 +24,7 @@ use crate::constants::{
 };
 use crate::flc::FlcMessage;
 use crate::frame::decode;
+use crate::gossip::NeighbourList;
 use crate::queue::receive_queue::{ReceiveEvent, ReceiveQueue};
 use crate::queue::send_queue::SendQueue;
 use crate::queue::send_queue::{SendEvent, SendFailure};
@@ -57,6 +58,8 @@ pub enum LinkEvent {
     Tick,
     /// The last `Transmit` has been handed to the radio, the pipe can take the next one.
     FrameSent,
+    /// Send this SEND_NEIGHBOURS frame (ours or a relay) to the peer, on Control.
+    Gossip(Vec<u8>),
 }
 
 /// Something the caller should do.
@@ -70,6 +73,8 @@ pub enum LinkAction {
     MessageResult { message_id: String, result: Result<(), SendFailure> },
     /// We now know who the peer is. Emitted once per link.
     PeerIdentified([u8; QAUL_ID_BYTES]),
+    /// The peer sent a neighbour list (its own or a relay), for the engine to relay.
+    Neighbours(NeighbourList),
     /// The link is dead, caller should disconnect it.
     Close,
 }
@@ -171,10 +176,14 @@ impl Link {
                 self.on_chunk_received(&bytes, &mut actions);
             }
             LinkEvent::Send { message, message_id } => {
-                self.send_queue.add_message(message, message_id)
+                // Refused straight away (Busy, TooLarge), so libqaul hears now 
+                if let Some(SendEvent::Failed { message_id, reason }) = self.send_queue.add_message(message, message_id) {
+                    actions.push(LinkAction::MessageResult { message_id, result: Err(reason) });
+                }
             }
             LinkEvent::Tick => self.on_tick(now, &mut actions),
             LinkEvent::FrameSent => self.in_flight = false,
+            LinkEvent::Gossip(bytes) => self.queue(bytes, Lane::Control),
         }
         self.flush(&mut actions, now);
         actions
@@ -286,6 +295,11 @@ impl Link {
             FlcMessage::MissingChunks (missing) => {
                 for chunk in self.send_queue.resend_chunks(&missing) {
                     self.queue(chunk, Lane::Medium); // TODO: the messages own lane, never Control
+                }
+            }
+            FlcMessage::SendNeighbours(update) => {
+                if let Some(list) = NeighbourList::from_flc(&update) {
+                    actions.push(LinkAction::Neighbours(list));
                 }
             }
             _ => {} // ignoring other FLCs for now
@@ -667,6 +681,17 @@ mod tests {
         assert_eq!(next.len(), 1);
         assert_eq!(next[0].1, Lane::Control);
         assert!(matches!(decode(&next[0].0), Ok(Frame::Flc(FlcMessage::AckSuccess { .. }))));
+    }
+
+    #[test]
+    fn bulk_message_past_the_limit_is_reported_busy_at_once() {
+        use crate::constants::MAX_BULK_MESSAGES;
+        let mut a = identified(now());
+        for i in 0..MAX_BULK_MESSAGES {
+            a.handle(send(body(MEDIUM_MESSAGE_MAX_BYTES + 1), &format!("file {i}")), now());
+        }
+        let refused = a.handle(send(body(MEDIUM_MESSAGE_MAX_BYTES + 1), "resend"), now());
+        assert!(refused.contains(&LinkAction::MessageResult { message_id: "resend".into(), result: Err(SendFailure::Busy) }));
     }
 
     /// Like `feed`, but the pipe stays busy: nothing is reported sent.

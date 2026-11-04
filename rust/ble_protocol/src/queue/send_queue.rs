@@ -6,9 +6,9 @@
 //! `SendQueue` in `SendQueue.kt`.
 
 use std::cmp;
-use std::collections::{BTreeMap, VecDeque};
+use std::collections::{BTreeMap, HashSet, VecDeque};
 
-use crate::constants::{MAX_LARGE_PARTS, MAX_PART_SIZE, QAUL_ID_BYTES};
+use crate::constants::{MAX_BULK_MESSAGES, MAX_LARGE_PARTS, MAX_PART_SIZE, MEDIUM_MESSAGE_MAX_BYTES, QAUL_ID_BYTES};
 use crate::frame::{CHUNK_HEADER_SIZE, FIRST_CHUNK_HEADER_SIZE, LargePart};
 use crate::queue::index::QueueIndexAllocator;
 use crate::queue::send::{MAX_CHUNKS, SendQueueMessage};
@@ -39,6 +39,8 @@ pub enum SendFailure {
     AckError,
     /// The link closed while it was waiting or in flight.
     LinkGone,
+    /// MAX_BULK_MESSAGES large messages are already queued on this link, so it wasn't taken.
+    Busy,
 }
 
 /// A message handed over by libqaul that has no queue index yet.
@@ -71,7 +73,10 @@ pub struct SendQueue {
     large_message_index: u8,
     /// Split messages still in progress, keyed by large index. An index is only
     /// reused while still here if 15 split messages are unfinished at once.
-    large_sends: BTreeMap<u8, LargeSend>
+    large_sends: BTreeMap<u8, LargeSend>,
+    /// Messages over MEDIUM_MESSAGE_MAX_BYTES taken and not yet reported waiting or in flight.
+    /// At MAX_BULK_MESSAGES, add_message refuses more.
+    bulk_messages: HashSet<String>,
 }
 
 impl SendQueue {
@@ -83,7 +88,8 @@ impl SendQueue {
             send_queues: BTreeMap::new(),
             waiting: VecDeque::new(),
             large_message_index: 0,
-            large_sends: BTreeMap::new()
+            large_sends: BTreeMap::new(),
+            bulk_messages: HashSet::new(),
         }
     }
 
@@ -103,14 +109,20 @@ impl SendQueue {
     }
 
     /// Queue a message from libqaul. Later it will be sent by `start_next_message`.
-    pub fn add_message(&mut self, message: Vec<u8>, message_id: String) {
+    /// Returns a `Failed` event if it wasnt taken: Busy when MAX_BULK_MESSAGES large messages are
+    /// already queued (small ones are always taken), TooLarge when it needs more than 4 parts.
+    pub fn add_message(&mut self, message: Vec<u8>, message_id: String) -> Option<SendEvent> {
+        let bulk = message.len() > MEDIUM_MESSAGE_MAX_BYTES;
+        if bulk && self.bulk_messages.len() >= MAX_BULK_MESSAGES {
+            return Some(SendEvent::Failed { message_id, reason: SendFailure::Busy });
+        }
+
         let part_size = self.max_part_size();
         if message.len() > part_size { // Large message
 
             let total = message.len().div_ceil(part_size);
             if total > MAX_LARGE_PARTS {
-                // TODO: report this message_id as Failed, needs add_message to return events.
-                return;
+                return Some(SendEvent::Failed { message_id, reason: SendFailure::TooLarge });
             }
             // At most 4, so the casts below can't truncate.
             let total = total as u8;
@@ -121,11 +133,15 @@ impl SendQueue {
                 self.waiting.push_back(Waiting {message: bytes.to_vec(), message_id: message_id.clone(), large_message_indicator: indicator });
             }
             // Track the large send so we can see which parts are acked/lost
-            self.large_sends.insert(index, LargeSend { message_id, parts_left: total });
+            self.large_sends.insert(index, LargeSend { message_id: message_id.clone(), parts_left: total });
         }
         else {
-            self.waiting.push_back(Waiting { message, message_id, large_message_indicator: 0 });
+            self.waiting.push_back(Waiting { message, message_id: message_id.clone(), large_message_indicator: 0 });
         }
+        if bulk {
+            self.bulk_messages.insert(message_id);
+        }
+        None
     }
 
     /// The large index for the next split message: 1..=15, wrapping back to 1.
@@ -203,13 +219,18 @@ impl SendQueue {
     /// A message is done, by ACK or failure. Returns what to tell libqaul: an ordinary
     /// message reports itself, a part reports for its whole split message.
     fn report(&mut self, message_id: String, indicator: u8, result: Result<(), SendFailure>) -> Option<SendEvent> {
-        match LargePart::from_indicator(indicator) {
+        let event = match LargePart::from_indicator(indicator) {
             None => Some(match result {
                 Ok(()) => SendEvent::Delivered { message_id },
                 Err(reason) => SendEvent::Failed { message_id, reason },
             }),
             Some(part) => self.on_part_ack(part, result),
+        };
+        // Reported means finished, so a large message gives its bulk slot back.
+        if let Some(SendEvent::Delivered { message_id } | SendEvent::Failed { message_id, .. }) = &event {
+            self.bulk_messages.remove(message_id);
         }
+        event
     }
 
     /// One part is done. The split message is delivered once every part is ACKed,
@@ -452,11 +473,48 @@ mod tests {
     }
 
     #[test]
-    fn message_over_four_parts_is_not_queued() {
+    fn message_over_four_parts_is_refused_as_too_large() {
         let mut q = queue();
-        q.add_message(body(5 * 23_512), "huge".into());
+        assert_eq!(q.add_message(body(5 * 23_512), "huge".into()), Some(failed("huge", SendFailure::TooLarge)));
         assert!(q.waiting.is_empty());
         assert!(q.large_sends.is_empty());
+        assert!(q.bulk_messages.is_empty());
+    }
+
+    const BULK_LEN: usize = MEDIUM_MESSAGE_MAX_BYTES + 1;
+
+    #[test]
+    fn bulk_message_past_the_limit_is_refused_busy_but_small_ones_still_go() {
+        let mut q = SendQueue::new(ID, 509);
+        for i in 0..MAX_BULK_MESSAGES {
+            assert_eq!(q.add_message(body(BULK_LEN), format!("bulk {i}")), None);
+        }
+        assert_eq!(q.add_message(body(BULK_LEN), "one more".into()), Some(failed("one more", SendFailure::Busy)));
+        assert_eq!(q.add_message(body(MEDIUM_MESSAGE_MAX_BYTES), "routing".into()), None);
+        assert_eq!(q.waiting_count(), MAX_BULK_MESSAGES + 1);
+    }
+
+    #[test]
+    fn finished_bulk_message_frees_its_slot() {
+        let mut q = SendQueue::new(ID, 509);
+        for i in 0..MAX_BULK_MESSAGES {
+            q.add_message(body(BULK_LEN), format!("bulk {i}"));
+            q.start_next_message(); // queue index i + 1
+        }
+        assert_eq!(q.on_ack(1, true), Some(delivered("bulk 0")));
+        assert_eq!(q.add_message(body(BULK_LEN), "next".into()), None);
+    }
+
+    #[test]
+    fn failed_split_message_frees_its_slot_once() {
+        let mut q = queue();
+        for i in 0..MAX_BULK_MESSAGES {
+            q.add_message(body(SPLIT_LEN), format!("big {i}"));
+        }
+        q.start_next_message(); // part 0 of "big 0" on queue index 1
+        assert_eq!(q.on_ack(1, false), Some(failed("big 0", SendFailure::AckError)));
+        assert_eq!(q.add_message(body(SPLIT_LEN), "next".into()), None);
+        assert_eq!(q.add_message(body(SPLIT_LEN), "too many".into()), Some(failed("too many", SendFailure::Busy)));
     }
 
     #[test]

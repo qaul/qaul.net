@@ -121,11 +121,9 @@ pub async fn listen_for_sys_msgs(
                 Some(RadioEvent::Subscribed { peer, mtu, outbox }) => {
                     log::info!("{} ({:?}) subscribed, MTU {}", peer.address, peer.role, mtu);
                     if let Some(r) = running.as_mut() {
-                        // Their connect endeds the advert, put it back so others can still find us.
+                        // Their connect ended the advert; update_advertising below puts it back if there's room.
                         if peer.role == Role::Peripheral {
-                            if let Err(err) = r.readvertise().await {
-                                log::warn!("re-advertising after {} connected failed: {}", peer.address, err);
-                            }
+                            r.advert_ended();
                         }
                         r.outboxes.insert(peer, outbox);
                         let engine_actions = r.engine.handle(EngineEvent::PeerReady { peer, mtu }, Instant::now());
@@ -197,6 +195,10 @@ pub async fn listen_for_sys_msgs(
                 }
                 adverts_heard = 0;
             }
+        }
+        // After every event: check if advertiser state needs updated
+        if let Some(r) = running.as_mut() {
+            r.update_advertising().await;
         }
     }
     Ok(())

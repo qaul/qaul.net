@@ -10,7 +10,7 @@ use tokio::{sync::mpsc, time::timeout};
 
 use crate::ble::{
     ble_uuids::{tracer_char, main_service_uuid, msg_char, read_char},
-    radio::{PeerKey, RadioEvent, WRITE_TRACER_EVERY},
+    radio::{BatchTimer, PeerKey, RadioEvent, WRITE_TRACER_EVERY},
 };
 
 /// Time limit for the whole connect chain. Mirrors Android's SETUP_TIMEOUT_MS.
@@ -103,6 +103,7 @@ pub fn connect(adapter: Adapter, address: Address, events: mpsc::Sender<RadioEve
 /// sends to be put ahead of bulk frames every tracer. The tracer adds a slight delay as it requires a round trip.
 async fn send_frames_traced(peer: PeerKey, msg: Characteristic, mut outbox_rx: mpsc::Receiver<Vec<u8>>, events: mpsc::Sender<RadioEvent>) {
     let mut frames_sent: usize = 0;
+    let mut batch = BatchTimer::default();
 
     let mut command = CharacteristicWriteRequest::default();
     command.op_type = WriteOp::Command;
@@ -115,13 +116,15 @@ async fn send_frames_traced(peer: PeerKey, msg: Characteristic, mut outbox_rx: m
         let req = if tracer { &request } else { &command };
         frames_sent += 1;
 
+        batch.on_frame(frame.len());
         if let Err(err) = msg.write_ext(&frame, req).await {
             log::warn!("{} ({:?}) send failed: {}", peer.address, peer.role, err);
             let _ = events.send(RadioEvent::Gone { peer }).await;
             break;
         }
         if tracer {
-            log::debug!("{} write tracer ok after {} frames", peer.address, frames_sent);
+            // The request's reply covers itself and every frame before it.
+            batch.finish(peer);
         }
         // FrameSent always reported here, it just has to actually wait on the tracer, unlike normal sends which all report FrameSent 
         // instantly, before they actually get sent off the radio.

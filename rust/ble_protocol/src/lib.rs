@@ -16,6 +16,7 @@ pub mod constants;
 mod crc;
 pub mod flc;
 pub mod frame;
+pub mod gossip;
 pub mod link;
 pub mod queue;
 pub mod engine;
