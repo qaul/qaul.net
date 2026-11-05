@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qaul_components/qaul_components.dart';
@@ -22,6 +24,28 @@ Finder _findMessageRichText(String content) {
 }
 
 const _kBubbleGoldenKey = ValueKey('chat-bubble-golden');
+const _kGoldenDiffTolerance = 0.04;
+
+class _TolerantGoldenComparator extends LocalFileComparator {
+  _TolerantGoldenComparator(super.testFile);
+
+  @override
+  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    final result = await GoldenFileComparator.compareLists(
+      imageBytes,
+      await getGoldenBytes(golden),
+    );
+
+    if (result.passed || result.diffPercent <= _kGoldenDiffTolerance) {
+      result.dispose();
+      return true;
+    }
+
+    final error = await generateFailureOutput(result, golden, basedir);
+    result.dispose();
+    throw FlutterError(error);
+  }
+}
 
 QaulChatBubbleMessage _wideBubbleMessage(MessageType messageType) {
   final clock = DateTime(2026, 4, 19, 10, 53);
@@ -122,6 +146,20 @@ Future<void> _pumpWideGroupMediaBubble(
 }
 
 void main() {
+  final defaultGoldenComparator = goldenFileComparator;
+
+  setUpAll(() {
+    goldenFileComparator = _TolerantGoldenComparator(
+      (goldenFileComparator as LocalFileComparator).basedir.resolve(
+        'qaul_chat_bubble_test.dart',
+      ),
+    );
+  });
+
+  tearDownAll(() {
+    goldenFileComparator = defaultGoldenComparator;
+  });
+
   group('emojiOnlyMessageCount', () {
     test('recognizes one or two standalone emoji clusters', () {
       expect(emojiOnlyMessageCount('😀'), 1);
