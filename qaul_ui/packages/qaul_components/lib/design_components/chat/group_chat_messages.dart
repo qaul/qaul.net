@@ -75,7 +75,6 @@ class ChatMessageRenderer {
     return DirectTextMessageItem(
       presentation: presentation,
       clock: clock,
-      horizontalGutter: true,
       isSelected: isSelected,
       mentionLabels: mentionLabels,
       topSpacingOverride: topSpacingOverride,
@@ -103,10 +102,8 @@ class ChatMessageRenderer {
 
     if (mode != ChatRenderMode.group || presentation.isPrimary) {
       return Padding(
-        padding: EdgeInsetsDirectional.only(
+        padding: EdgeInsets.only(
           top: topSpacingOverride ?? presentation.meta.topSpacing,
-          end: presentation.isPrimary ? 16 : 0,
-          start: presentation.isPrimary ? 0 : 16,
         ),
         child: mediaBubble,
       );
@@ -127,7 +124,6 @@ class DirectTextMessageItem extends StatelessWidget {
     super.key,
     required this.presentation,
     required this.clock,
-    this.horizontalGutter = true,
     this.isSelected = false,
     this.mentionLabels = const [],
     this.topSpacingOverride,
@@ -139,20 +135,12 @@ class DirectTextMessageItem extends StatelessWidget {
   final List<String> mentionLabels;
   final double? topSpacingOverride;
 
-  /// When true, applies a 16px gutter on the trailing edge for primary
-  /// (outgoing) bubbles and on the leading edge for secondary (incoming).
-  /// Set to false only for layouts that intentionally render flush.
-  final bool horizontalGutter;
-
   @override
   Widget build(BuildContext context) {
     final display = presentation.bubbleDisplay!;
-    final isPrimary = presentation.isPrimary;
     return Padding(
-      padding: EdgeInsetsDirectional.only(
+      padding: EdgeInsets.only(
         top: topSpacingOverride ?? presentation.meta.topSpacing,
-        start: horizontalGutter && !isPrimary ? 16 : 0,
-        end: horizontalGutter && isPrimary ? 16 : 0,
       ),
       child: QaulChatBubble(
         message: display.message.copyWith(mentionLabels: mentionLabels),
