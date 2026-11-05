@@ -88,7 +88,7 @@ class _ImageMessageWidgetState extends State<ImageMessageWidget> {
 
   @override
   Widget build(BuildContext context) {
-    var style = Theme.of(context).textTheme.bodyLarge!.copyWith(
+    var attachmentStyle = Theme.of(context).textTheme.bodyLarge!.copyWith(
           color: Colors.white,
           fontSize: 17,
           fontWeight: FontWeight.w400,
@@ -128,7 +128,7 @@ class _ImageMessageWidgetState extends State<ImageMessageWidget> {
                   children: [
                     Text(
                       widget.message.name,
-                      style: style,
+                      style: attachmentStyle,
                       textWidthBasis: TextWidthBasis.longestLine,
                     ),
                     Container(
@@ -137,7 +137,7 @@ class _ImageMessageWidgetState extends State<ImageMessageWidget> {
                       ),
                       child: Text(
                         fileSize(widget.message.size.truncate()),
-                        style: style,
+                        style: attachmentStyle,
                       ),
                     ),
                   ],
@@ -162,20 +162,6 @@ class _ImageMessageWidgetState extends State<ImageMessageWidget> {
       );
     }
 
-    String? description = widget.message.metadata?['description'];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        image,
-        if (description != null && description.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-            child: Text(description, style: style),
-          ),
-          const SizedBox(height: 8),
-        ],
-      ],
-    );
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [image]);
   }
 }

@@ -1368,6 +1368,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       mode: _chatRenderMode,
       clock: DateTime.now(),
       isSelected: message.id == _selectedContextMenuMessageId,
+      mentionLabels: _chatRenderMode == ChatRenderMode.group
+          ? ['all', ...room.members.map((member) => member.name)]
+          : const [],
       topSpacingOverride: followsDateHeader ? 0 : null,
     );
   }

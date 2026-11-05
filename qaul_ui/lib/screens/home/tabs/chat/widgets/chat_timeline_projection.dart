@@ -178,7 +178,11 @@ QaulChatBubbleMessage? _qaulBubbleBaseForMessage(
   }
 
   return QaulChatBubbleMessage(
-    content: content is TextMessageContent ? content.content : '',
+    content: switch (content) {
+      TextMessageContent() => content.content,
+      FileShareContent() => content.description,
+      _ => '',
+    },
     sentAt: message.sentAt,
     receivedAt: message.receivedAt,
     status: message.status == MessageState.sent

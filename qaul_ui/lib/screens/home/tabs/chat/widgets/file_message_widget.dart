@@ -21,22 +21,15 @@ class FileMessageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var style = Theme.of(context).textTheme.bodyLarge!.copyWith(
+    var attachmentStyle = Theme.of(context).textTheme.bodyLarge!.copyWith(
           color: Colors.white,
           fontSize: 16,
           fontWeight: FontWeight.w400,
         );
 
-    String? description = message.metadata?['description'];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (description != null && description.isNotEmpty) ...[
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Text(description, style: style),
-          ),
-        ],
         Container(
           padding: const EdgeInsets.all(20),
           decoration: const BoxDecoration(color: Colors.black12),
@@ -60,9 +53,9 @@ class FileMessageWidget extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(message.name, style: style),
+                    Text(message.name, style: attachmentStyle),
                     const SizedBox(height: 4),
-                    Text(fileSize(message.size), style: style),
+                    Text(fileSize(message.size), style: attachmentStyle),
                   ],
                 ),
               ),

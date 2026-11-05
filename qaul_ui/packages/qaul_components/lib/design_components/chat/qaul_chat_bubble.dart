@@ -762,6 +762,39 @@ class _QaulChatBubbleSurface extends StatelessWidget {
       ],
     );
 
+    final hasCaption = message.content.trim().isNotEmpty;
+    final mediaContent = ClipRRect(
+      borderRadius: borderRadius.resolve(Directionality.of(context)),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          child,
+          if (hasCaption)
+            Padding(
+              key: const ValueKey('chat-media-caption-padding'),
+              padding: const EdgeInsets.symmetric(
+                horizontal: ChatBubbleStyle.horizontalPadding,
+                vertical: ChatBubbleStyle.verticalPadding,
+              ),
+              child: _QaulMediaCaption(
+                message: message,
+                clock: clock,
+                showTimestamp: showTimestamp,
+              ),
+            )
+          else if (showTimestamp)
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(10, 4, 10, 6),
+              child: Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: timeRow,
+              ),
+            ),
+        ],
+      ),
+    );
+
     return Align(
       alignment: isPrimary ? Alignment.centerRight : Alignment.centerLeft,
       child: ConstrainedBox(
@@ -769,48 +802,178 @@ class _QaulChatBubbleSurface extends StatelessWidget {
           minWidth: ChatBubbleStyle.minBubbleWidth,
           maxWidth: maxBubbleWidth,
         ),
-        child: IntrinsicWidth(
-          child: Container(
-            key: const ValueKey('chat-bubble-surface'),
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: borderRadius,
-            ),
-            foregroundDecoration: isSelected
-                ? BoxDecoration(
+        child: hasCaption
+            ? SizedBox(
+                width: maxBubbleWidth,
+                child: Container(
+                  key: const ValueKey('chat-bubble-surface'),
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
                     borderRadius: borderRadius,
-                    border: Border.all(
-                      color: sheet.chatBubbleSelectionOutline,
-                      width: ChatBubbleStyle.selectedOutlineWidth,
-                    ),
-                  )
-                : null,
-            child: ClipRRect(
-              borderRadius: borderRadius.resolve(Directionality.of(context)),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  child,
-                  if (showTimestamp)
-                    Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                        10,
-                        4,
-                        10,
-                        6,
-                      ),
-                      child: Align(
-                        alignment: AlignmentDirectional.centerEnd,
-                        child: timeRow,
-                      ),
-                    ),
-                ],
+                  ),
+                  foregroundDecoration: isSelected
+                      ? BoxDecoration(
+                          borderRadius: borderRadius,
+                          border: Border.all(
+                            color: sheet.chatBubbleSelectionOutline,
+                            width: ChatBubbleStyle.selectedOutlineWidth,
+                          ),
+                        )
+                      : null,
+                  child: mediaContent,
+                ),
+              )
+            : IntrinsicWidth(
+                child: Container(
+                  key: const ValueKey('chat-bubble-surface'),
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                    borderRadius: borderRadius,
+                  ),
+                  foregroundDecoration: isSelected
+                      ? BoxDecoration(
+                          borderRadius: borderRadius,
+                          border: Border.all(
+                            color: sheet.chatBubbleSelectionOutline,
+                            width: ChatBubbleStyle.selectedOutlineWidth,
+                          ),
+                        )
+                      : null,
+                  child: mediaContent,
+                ),
               ),
-            ),
-          ),
-        ),
       ),
+    );
+  }
+}
+
+/// Renders an attachment caption with the same typography, mention treatment,
+/// text-scaling cap, and timestamp layout as an ordinary text bubble.
+class _QaulMediaCaption extends StatelessWidget {
+  const _QaulMediaCaption({
+    required this.message,
+    required this.clock,
+    required this.showTimestamp,
+  });
+
+  final QaulChatBubbleMessage message;
+  final DateTime clock;
+  final bool showTimestamp;
+
+  @override
+  Widget build(BuildContext context) {
+    final isPrimary = message.messageType == MessageType.primary;
+    final textScaler = chatBubbleTextScaler(context);
+    final content = message.content.trim();
+    final emojiCount = emojiOnlyMessageCount(content);
+    final messageTextStyle = emojiCount == null
+        ? ChatBubbleStyle.textStyle
+        : ChatBubbleStyle.emojiOnlyTextStyle(emojiCount);
+    final messageSpan = buildChatMentionTextSpan(
+      text: content,
+      style: messageTextStyle,
+      mentionLabels: message.mentionLabels,
+      mentionBackgroundColor: chatMentionBubbleBackground(
+        Theme.of(context).brightness,
+      ),
+    );
+    final timeLabel = formatQaulChatBubbleTime(message, clock);
+    final statusIconSize = textScaler.scale(14);
+    final statusIcon = _buildChatBubbleStatusIcon(
+      message.status,
+      Colors.white,
+      statusIconSize,
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const gap = ChatBubbleStyle.gapBetweenTextAndDate;
+        final timeLabelPainter = TextPainter(
+          text: TextSpan(text: timeLabel, style: ChatBubbleStyle.timeStyle),
+          textDirection: TextDirection.ltr,
+          textScaler: textScaler,
+        )..layout();
+        var timeBlockWidth =
+            timeLabelPainter.width +
+            ChatBubbleStyle.gapBetweenTimeAndStatusIcon;
+        if (isPrimary && statusIcon != null) {
+          timeBlockWidth += statusIconSize;
+        }
+        final maxMessageWidth = (constraints.maxWidth - gap - timeBlockWidth)
+            .clamp(0.0, double.infinity);
+        final painter = TextPainter(
+          text: messageSpan,
+          textDirection: TextDirection.ltr,
+          textScaler: textScaler,
+        )..layout(maxWidth: maxMessageWidth);
+        final lineHeight =
+            textScaler.scale(messageTextStyle.fontSize!) *
+            (messageTextStyle.height ?? 1.2);
+        final fitsOnOneLine =
+            emojiCount == null && painter.height <= lineHeight * 1.1;
+        painter.dispose();
+
+        final timeRow = Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text(
+              timeLabel,
+              style: ChatBubbleStyle.timeStyle,
+              textScaler: textScaler,
+            ),
+            const SizedBox(width: ChatBubbleStyle.gapBetweenTimeAndStatusIcon),
+            if (isPrimary && statusIcon != null) statusIcon,
+          ],
+        );
+        final caption = RichText(
+          textAlign: TextAlign.left,
+          textWidthBasis: TextWidthBasis.longestLine,
+          textScaler: textScaler,
+          text: messageSpan,
+        );
+
+        if (!showTimestamp) return caption;
+        if (fitsOnOneLine) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(child: caption),
+              const SizedBox(width: gap),
+              timeRow,
+            ],
+          );
+        }
+
+        final stackedPainter = TextPainter(
+          text: messageSpan,
+          textDirection: TextDirection.ltr,
+          textScaler: textScaler,
+          textWidthBasis: TextWidthBasis.longestLine,
+        )..layout(maxWidth: constraints.maxWidth);
+        final stackedWidth = stackedPainter.width > timeBlockWidth
+            ? stackedPainter.width
+            : timeBlockWidth;
+        stackedPainter.dispose();
+        return SizedBox(
+          width: stackedWidth.ceilToDouble(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              caption,
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: gap),
+                  child: timeRow,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
