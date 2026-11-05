@@ -368,6 +368,7 @@ name = "ble_module"
 version = "0.2.0"
 dependencies = [
  "async-trait",
+ "ble_protocol",
  "bluer",
  "bytes",
  "crossbeam-channel",
@@ -384,6 +385,10 @@ dependencies = [
  "tokio",
  "tokio-stream",
 ]
+
+[[package]]
+name = "ble_protocol"
+version = "0.1.0"
 
 [[package]]
 name = "block-buffer"

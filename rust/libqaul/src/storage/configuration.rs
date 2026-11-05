@@ -174,11 +174,15 @@ impl Default for UserAccount {
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Ble {
     pub active: bool,
+    /// Address of the Bluetooth adapter to use, e.g. "8A:88:4B:E0:A6:F4".
+    /// If empty (the default, also when missing from config.yaml) it means use the first adapter.
+    #[serde(default)]
+    pub device_id: String,
 }
 
 impl Default for Ble {
     fn default() -> Self {
-        Ble { active: true }
+        Ble { active: true, device_id: String::from("") }
     }
 }
 

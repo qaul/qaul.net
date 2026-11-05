@@ -7,6 +7,9 @@ members = [
     # protobuf types
     "qaul-proto",
 
+    # BLE wire protocol: framing, flow control, queues (no I/O, no platform deps)
+    "ble_protocol",
+
     # shared RPC plumbing for qauld clients
     "qauld-rpc",
 

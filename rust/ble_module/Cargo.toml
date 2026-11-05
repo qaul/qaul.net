@@ -24,3 +24,4 @@ tokio-stream = "0.1"
 
 # internal references
 qaul-proto = { path = "../qaul-proto" }
+ble_protocol = { path = "../ble_protocol" }

@@ -6,12 +6,11 @@
 //! qaul BLE module for Linux
 #[macro_use]
 extern crate log;
-use crate::ble::ble_service::IdleBleService;
 use rpc::{msg_loop::listen_for_sys_msgs, utils::BleResultSender, BleRpc};
 use std::thread;
 use tokio::runtime;
 
-mod ble;
+pub mod ble;
 pub mod rpc;
 
 /// initialize and start the ble_module in an own thread
@@ -33,16 +32,11 @@ pub fn init(sys_rpc_callback: Box<dyn FnMut(Vec<u8>) + Send>, rpc_receiver: rpc:
 }
 
 pub async fn is_ble_enabled() -> bool {
-    return IdleBleService::is_ble_enabled().await;
+    ble::radio::is_ble_enabled().await
 }
 
 /// Start the setup and main loop of this library
 async fn main_loop(mut sys_rpc_callback: Box<dyn FnMut(Vec<u8>) + Send>, ble_rpc_receiver: BleRpc) {
-    let ble_service = IdleBleService::new().await.unwrap_or_else(|err| {
-        error!("{:#?}", err);
-        std::process::exit(1);
-    });
-
     let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<Vec<u8>>();
 
     tokio::task::spawn_local(async move {
@@ -51,7 +45,7 @@ async fn main_loop(mut sys_rpc_callback: Box<dyn FnMut(Vec<u8>) + Send>, ble_rpc
         }
     });
 
-    listen_for_sys_msgs(ble_rpc_receiver, ble_service, BleResultSender::new(tx))
+    listen_for_sys_msgs(ble_rpc_receiver, BleResultSender::new(tx))
         .await
         .unwrap_or_else(|err| {
             error!("{:#?}", err);
