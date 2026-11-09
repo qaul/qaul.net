@@ -7,7 +7,6 @@ import '../../styles/qaul_text_scaler.dart';
 import '../users/qaul_avatar.dart';
 
 const Color _kChatHeaderControlColor = Color(0xFF999999);
-const double _kChatHeaderDividerWidth = 0.5;
 
 const double kChatHeaderToolbarHeight = kToolbarHeight;
 const double kChatHeaderAvatarSize = 40;
@@ -27,10 +26,6 @@ class ChatHeaderMenuEntry {
 Color _chatHeaderShellColor(ThemeData theme) {
   final sheet = QaulColorSheet(theme.brightness);
   return sheet.background;
-}
-
-Color _chatHeaderDividerColor(ThemeData theme) {
-  return QaulColorSheet(theme.brightness).chatHeaderDivider;
 }
 
 Color _chatHeaderTextColor(ThemeData theme) => theme.colorScheme.onSurface;
@@ -244,12 +239,7 @@ class ChatHeader extends StatelessWidget {
       key: const ValueKey('chat-header-surface'),
       decoration: BoxDecoration(
         color: _chatHeaderShellColor(theme),
-        border: Border(
-          bottom: BorderSide(
-            color: _chatHeaderDividerColor(theme),
-            width: _kChatHeaderDividerWidth,
-          ),
-        ),
+        border: Border(bottom: chatSurfaceStroke(theme.brightness)),
         boxShadow: chatSurfaceShadows(
           theme.brightness,
           direction: ChatSurfaceShadowDirection.below,

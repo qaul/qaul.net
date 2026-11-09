@@ -66,7 +66,7 @@ class _ChatJourneyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: widgetbookChatSurfaceColor(context),
+      color: widgetbookChatCanvasColor(context),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: widgetbookChatCanvasColor(context),
@@ -152,7 +152,7 @@ class _JourneyFrame extends StatelessWidget {
 )
 Widget buildChatJourneyBaselineUseCase(BuildContext context) {
   return ColoredBox(
-    color: widgetbookChatSurfaceColor(context),
+    color: widgetbookChatCanvasColor(context),
     child: SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.all(24),

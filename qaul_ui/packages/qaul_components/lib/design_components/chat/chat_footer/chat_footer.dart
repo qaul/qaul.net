@@ -410,9 +410,7 @@ class _ChatFooterState extends State<ChatFooter> {
       key: const ValueKey('chat-footer-surface'),
       decoration: BoxDecoration(
         color: shell,
-        border: Border(
-          top: BorderSide(color: sheet.chatFooterDivider, width: 0.5),
-        ),
+        border: Border(top: chatSurfaceStroke(theme.brightness)),
         boxShadow: shadows,
       ),
       child: Material(

@@ -11,7 +11,7 @@ Widget _frameFooter(BuildContext context, Widget child) {
   final sheet = QaulColorSheet(Theme.of(context).brightness);
   return Material(
     child: ColoredBox(
-      color: sheet.surfaceContainer,
+      color: sheet.background,
       child: Column(
         children: [
           const Expanded(child: SizedBox.expand()),
