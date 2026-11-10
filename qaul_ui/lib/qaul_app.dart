@@ -9,6 +9,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'helpers/navigation_helper.dart';
 import 'helpers/user_prefs_helper.dart';
 import 'l10n/app_localizations.dart';
+import 'widgets/desktop_text_zoom.dart';
 import 'widgets/widgets.dart';
 
 class QaulApp extends PlatformAwareBuilder {
@@ -82,6 +83,7 @@ class QaulApp extends PlatformAwareBuilder {
     ),
     brightness: Brightness.dark,
     primarySwatch: Colors.lightBlue,
+    scaffoldBackgroundColor: const QaulColorSheet(Brightness.dark).background,
     visualDensity: VisualDensity.adaptivePlatformDensity,
     iconTheme: const IconThemeData(color: Colors.white),
     navigationBarTheme: const NavigationBarThemeData(
@@ -170,18 +172,20 @@ class QaulApp extends PlatformAwareBuilder {
               },
               builder: (context, child) {
                 if (Platform.isLinux || Platform.isMacOS) {
-                  return child ?? const SizedBox();
+                  return DesktopTextZoom(child: child ?? const SizedBox());
                 }
 
-                return ResponsiveBreakpoints.builder(
-                  child: child!,
-                  breakpoints: const [
-                    Breakpoint(start: 0, end: 350, name: "ANDROID"),
-                    Breakpoint(start: 351, end: 480, name: MOBILE),
-                    Breakpoint(start: 481, end: 680, name: "MOBILE_LANDSCAPE"),
-                    Breakpoint(start: 681, end: 800, name: TABLET),
-                    Breakpoint(start: 801, end: 1920, name: DESKTOP),
-                  ],
+                return DesktopTextZoom(
+                  child: ResponsiveBreakpoints.builder(
+                    child: child!,
+                    breakpoints: const [
+                      Breakpoint(start: 0, end: 350, name: "ANDROID"),
+                      Breakpoint(start: 351, end: 480, name: MOBILE),
+                      Breakpoint(start: 481, end: 680, name: "MOBILE_LANDSCAPE"),
+                      Breakpoint(start: 681, end: 800, name: TABLET),
+                      Breakpoint(start: 801, end: 1920, name: DESKTOP),
+                    ],
+                  ),
                 );
               },
             );

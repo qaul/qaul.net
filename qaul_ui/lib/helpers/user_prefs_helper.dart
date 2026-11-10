@@ -19,12 +19,17 @@ class UserPrefsHelper {
 
   static const _defaultLocaleKey = 'cached_default_locale';
   static const _themeModeKey = 'cached_theme_mode';
+  static const _textScaleKey = 'cached_text_scale';
+  static const minTextScale = 0.6;
+  static const maxTextScale = 2.5;
   static const _publicNTFYKey = 'cached_public_notification_enabled';
   static const _chatNTFYKey = 'cached_chat_notification_enabled';
   static const _verifyNTFKey = 'cached_verified_users_only';
 
   final _localeNotifier = ValueNotifier<Locale?>(null);
   final _themeModeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
+  final _textScaleNotifier = ValueNotifier<double>(1.0);
+  Future<void>? _textScaleWrite;
 
   bool _publicTabNotificationsEnabled = true;
   bool _chatNotificationsEnabled = true;
@@ -47,6 +52,9 @@ class UserPrefsHelper {
   Future<void> _loadInitialValues() async {
     _localeNotifier.value = await _loadLocaleFromPrefs();
     _themeModeNotifier.value = await _loadThemeModeFromPrefs();
+    _textScaleNotifier.value = _normalizeTextScale(
+      await _prefs.getDouble(_textScaleKey) ?? 1.0,
+    );
 
     _publicTabNotificationsEnabled =
         await _prefs.getBool(_publicNTFYKey) ?? true;
@@ -80,6 +88,32 @@ class UserPrefsHelper {
   ValueListenable<Locale?> get localeNotifier => _localeNotifier;
 
   ValueListenable<ThemeMode> get themeModeNotifier => _themeModeNotifier;
+
+  ValueListenable<double> get textScaleNotifier => _textScaleNotifier;
+
+  double get textScale => _textScaleNotifier.value;
+
+  /// Keep zoom in tenths and recover safely from invalid persisted values.
+  static double _normalizeTextScale(double value) {
+    if (!value.isFinite) return 1.0;
+    return (value.clamp(minTextScale, maxTextScale) * 10).round() / 10;
+  }
+
+  /// Update the UI immediately and serialize writes from repeated shortcuts.
+  Future<void> setTextScale(double value) {
+    final scale = _normalizeTextScale(value);
+    _textScaleNotifier.value = scale;
+    final write = (_textScaleWrite ?? Future<void>.value()).then(
+      (_) => _prefs.setDouble(_textScaleKey, scale),
+    );
+    // A failed write must not prevent later preferences from being saved.
+    final pending = write.catchError((Object _) {});
+    _textScaleWrite = pending;
+    pending.then((_) {
+      if (identical(_textScaleWrite, pending)) _textScaleWrite = null;
+    });
+    return write;
+  }
 
   Future<Locale?> _loadLocaleFromPrefs() async {
     String? completeCode = await _prefs.getString(_defaultLocaleKey);

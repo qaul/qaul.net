@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -22,6 +23,9 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get sendFileTooltip => 'Надіслати файл';
+
+  @override
+  String get sendPhotoTooltip => 'Надіслати фото';
 
   @override
   String get sendAudioTooltip => 'Записати звукове повідомлення';
@@ -500,7 +504,7 @@ class AppLocalizationsUk extends AppLocalizations {
   String get saveButton => 'SAVE';
 
   @override
-  String get securePrivateMessageHint => 'Безпечне приватне повідомлення';
+  String get privateMessageHint => 'Приватне повідомлення';
 
   @override
   String get storage => 'Storage';

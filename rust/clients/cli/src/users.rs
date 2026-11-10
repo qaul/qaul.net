@@ -227,7 +227,12 @@ impl Users {
     }
 
     /// create rpc user update message
-    fn send_user_update(state: &super::CliState, user_id_base58: &str, verified: bool, blocked: bool) {
+    fn send_user_update(
+        state: &super::CliState,
+        user_id_base58: &str,
+        verified: bool,
+        blocked: bool,
+    ) {
         let user_id = match bs58::decode(user_id_base58).into_vec() {
             Ok(v) => v,
             Err(e) => {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../styles/qaul_color_sheet.dart';
 import '../../styles/qaul_emoji.dart';
+import '../../styles/qaul_text_scaler.dart';
 import 'chat_mentions.dart';
 import 'chat_message.dart';
 import 'chat_reply_bubble_preview.dart';
@@ -29,9 +30,16 @@ const double kChatBubbleWidthBreakpoint = 500.0;
 const double kChatBubbleMaxTextScaleFactor = 1.3;
 
 TextScaler chatBubbleTextScaler(BuildContext context) {
-  return MediaQuery.textScalerOf(
-    context,
-  ).clamp(maxScaleFactor: kChatBubbleMaxTextScaleFactor);
+  final scaler = MediaQuery.textScalerOf(context);
+  if (scaler is QaulTextScaler) {
+    return QaulTextScaler(
+      systemTextScaler: scaler.systemTextScaler.clamp(
+        maxScaleFactor: kChatBubbleMaxTextScaleFactor,
+      ),
+      zoom: scaler.zoom,
+    );
+  }
+  return scaler.clamp(maxScaleFactor: kChatBubbleMaxTextScaleFactor);
 }
 
 class ChatBubbleStyle {
@@ -397,6 +405,9 @@ String formatQaulChatBubbleTime(QaulChatBubbleMessage message, DateTime clock) {
 // ---------------------------------------------------------------------------
 
 class QaulChatBubble extends StatelessWidget {
+  /// Key of the painted bubble, so callers can anchor overlays to it.
+  static const surfaceKey = ValueKey('chat-bubble-surface');
+
   const QaulChatBubble({
     super.key,
     required this.message,
@@ -465,7 +476,7 @@ class QaulChatBubble extends StatelessWidget {
           maxWidth: maxBubbleWidth,
         ),
         child: DecoratedBox(
-          key: const ValueKey('chat-bubble-surface'),
+          key: QaulChatBubble.surfaceKey,
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: borderRadius,
@@ -762,7 +773,7 @@ class _QaulChatBubbleSurface extends StatelessWidget {
           maxWidth: maxBubbleWidth,
         ),
         child: Container(
-          key: const ValueKey('chat-bubble-surface'),
+          key: QaulChatBubble.surfaceKey,
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: borderRadius,
@@ -780,16 +791,21 @@ class _QaulChatBubbleSurface extends StatelessWidget {
             borderRadius: borderRadius.resolve(Directionality.of(context)),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              // No stretch/IntrinsicWidth: the column is as wide as its
+              // widest child, so aspect-ratio media hugs the image while
+              // full-width rows still fill the bubble.
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 child,
                 if (showTimestamp)
                   Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(10, 4, 10, 6),
-                    child: Align(
-                      alignment: AlignmentDirectional.centerEnd,
-                      child: timeRow,
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      10,
+                      4,
+                      10,
+                      6,
                     ),
+                    child: timeRow,
                   ),
               ],
             ),

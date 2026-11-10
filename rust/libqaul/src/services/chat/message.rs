@@ -74,8 +74,9 @@ impl ChatMessage {
                         let rs = state.get_router();
                         match crate::router::users::Users::get_user_id_by_q8id(&rs, &user_q8id) {
                             Some(user_id) => {
-                                group =
-                                    GroupManage::create_new_direct_chat_group(state, account_id, &user_id)
+                                group = GroupManage::create_new_direct_chat_group(
+                                    state, account_id, &user_id,
+                                )
                             }
                             None => return Err(error_string),
                         }
@@ -132,7 +133,7 @@ impl ChatMessage {
         );
 
         // send to all group members
-        if let Some(user_account) = UserAccounts::get_by_id(state,*account_id) {
+        if let Some(user_account) = UserAccounts::get_by_id(state, *account_id) {
             for user_id in group.members.keys() {
                 let receiver = match PeerId::from_bytes(user_id) {
                     Ok(id) => id,
@@ -143,7 +144,8 @@ impl ChatMessage {
                 };
                 if receiver != *account_id {
                     log::trace!("send message to {}", receiver.to_base58());
-                    if let Err(error) = Self::send(state, &user_account, &receiver, &common_message) {
+                    if let Err(error) = Self::send(state, &user_account, &receiver, &common_message)
+                    {
                         log::error!("chat message send error {}", error);
                     }
                 }

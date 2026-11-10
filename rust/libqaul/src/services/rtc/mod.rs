@@ -261,7 +261,9 @@ impl Rtc {
                         }
                     }
                     Some(proto_rpc::rtc_rpc::Message::RtcOutgoing(session_req)) => {
-                        if let Err(error) = RtcMessaging::send_message(state, &my_user_id, &session_req) {
+                        if let Err(error) =
+                            RtcMessaging::send_message(state, &my_user_id, &session_req)
+                        {
                             log::error!("rtc message error {}", error);
                         }
                     }

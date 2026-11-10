@@ -13,6 +13,8 @@ export 'design_components/chat/chat_footer/chat_footer_reply_preview.dart';
 export 'design_components/chat/chat_header.dart';
 export 'design_components/chat/chat_mentions.dart';
 export 'design_components/chat/chat_message_context_menu.dart';
+export 'design_components/chat/chat_meta_text_style.dart'
+    show chatDateDividerTextStyle;
 export 'design_components/chat/chat_reply_bubble_preview.dart';
 export 'design_components/chat/chat_room_list.dart';
 export 'design_components/chat/chat_timeline.dart';
@@ -52,6 +54,8 @@ export 'l10n/qaul_components_localizations.dart';
 export 'models/account.dart';
 export 'models/chat_message.dart';
 export 'models/chat_user.dart';
+export 'styles/chat_surface_shadows.dart';
 export 'styles/qaul_app_theme.dart';
 export 'styles/qaul_color_sheet.dart';
 export 'styles/qaul_emoji.dart';
+export 'styles/qaul_text_scaler.dart';
