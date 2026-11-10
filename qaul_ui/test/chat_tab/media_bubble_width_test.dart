@@ -12,12 +12,19 @@ const _maxBubbleWidth = 272.0;
 void main() {
   final author = types.User(id: 'peer');
 
-  Future<void> pumpInBubble(WidgetTester tester, Widget media) {
+  Future<void> pumpInBubble(
+    WidgetTester tester,
+    Widget media, {
+    TextScaler textScaler = TextScaler.noScaling,
+  }) {
     final clock = DateTime(2026, 1, 1, 12);
     return tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
-          data: const MediaQueryData(size: Size(390, 844)),
+          data: MediaQueryData(
+            size: const Size(390, 844),
+            textScaler: textScaler,
+          ),
           child: Material(
             child: QaulChatBubble.media(
               message: QaulChatBubbleMessage(
@@ -114,4 +121,40 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(bubbleWidth(tester), _maxBubbleWidth);
   });
+
+  for (final scale in [1.0, 2.5]) {
+    testWidgets('file bubble shortens a long file name (${scale}x)', (
+      tester,
+    ) async {
+      final name = '${'a' * 116}.pdf';
+      await pumpInBubble(
+        tester,
+        SizedBox(
+          width: _messageWidth.toDouble(),
+          child: FileMessageWidget(
+            message: types.FileMessage(
+              id: 'file',
+              author: author,
+              name: name,
+              size: 1,
+              uri: '/tmp/document.pdf',
+            ),
+          ),
+        ),
+        textScaler: TextScaler.linear(scale),
+      );
+      expect(tester.takeException(), isNull);
+      expect(bubbleWidth(tester), _maxBubbleWidth);
+      final text = tester.widget<Text>(
+        find.byWidgetPredicate(
+          (widget) => widget is Text && widget.semanticsLabel == name,
+        ),
+      );
+      expect(text.maxLines, 1);
+      // The test font draws every glyph 1em wide, so at 2.5x only the
+      // extension fits; real fonts keep part of the name.
+      if (scale == 1) expect(text.data, contains('…'));
+      expect(text.data, endsWith('.pdf'));
+    });
+  }
 }
