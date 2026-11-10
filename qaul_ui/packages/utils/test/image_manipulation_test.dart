@@ -92,7 +92,7 @@ void main() {
         image.findFormatForData(await processed!.readAsBytes()),
         image.ImageFormat.jpg,
       );
-      expect(processed.path, endsWith('.png'));
+      expect(processed.path, endsWith('.jpg'));
       expect(await processed.length(), lessThan(await source.length()));
     });
 
@@ -116,6 +116,43 @@ void main() {
       expect(output.height, 768);
       expect(output.any((pixel) => pixel.a < 255), isTrue);
       expect(await processed.length(), lessThan(await source.length()));
+    });
+
+    for (final variant in <({String name, image.Image source})>[
+      (name: 'gray+alpha', source: grayAlphaImage(1200, 900)),
+      (name: '16-bit', source: sixteenBitTransparentImage(1200, 900)),
+    ]) {
+      test('keeps ${variant.name} transparent PNGs transparent', () async {
+        final source = await writeImage(
+          'transparent-${variant.name}.png',
+          image.encodePng(variant.source, level: 1),
+        );
+
+        final processed = await processImage(
+          source,
+          temporaryDirectory: temporaryDirectory,
+        );
+
+        expect(processed, isNotNull);
+        expect(processed!.path, endsWith('.png'));
+        final output = image.decodePng(await processed.readAsBytes())!;
+        expect(output.width, 1024);
+        expect(output.any((pixel) => pixel.aNormalized < 1), isTrue);
+      });
+    }
+
+    test('gives concurrent results distinct files', () async {
+      final source = await writeImage(
+        'concurrent.jpg',
+        image.encodeJpg(patternedImage(1500, 800), quality: 100),
+      );
+
+      final results = await Future.wait([
+        for (var i = 0; i < 4; i++)
+          processImage(source, temporaryDirectory: temporaryDirectory),
+      ]);
+
+      expect(results.map((file) => file!.path).toSet(), hasLength(4));
     });
 
     test('keeps animated GIF frames and timing', () async {
@@ -205,6 +242,35 @@ image.Image patternedImage(
         transparent ? (x + y + offset) % 256 : 255,
       );
     }
+  }
+  return result;
+}
+
+image.Image grayAlphaImage(int width, int height) {
+  final result = image.Image(width: width, height: height, numChannels: 2);
+  for (final pixel in result) {
+    pixel
+      ..r = (pixel.x * 31 + pixel.y * 17) % 256
+      ..a = (pixel.x + pixel.y) % 256;
+  }
+  return result;
+}
+
+image.Image sixteenBitTransparentImage(int width, int height) {
+  final result = image.Image(
+    width: width,
+    height: height,
+    format: image.Format.uint16,
+    numChannels: 4,
+  );
+  final rgba = patternedImage(width, height, transparent: true);
+  for (final pixel in result) {
+    final source = rgba.getPixel(pixel.x, pixel.y);
+    pixel
+      ..r = source.r * 257
+      ..g = source.g * 257
+      ..b = source.b * 257
+      ..a = source.a * 257;
   }
   return result;
 }

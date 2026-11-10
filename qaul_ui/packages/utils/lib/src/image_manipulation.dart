@@ -15,46 +15,40 @@ bool isImage(String filePath) {
 /// Resizes images so their longest side is at most 1024 pixels and returns a
 /// smaller temporary file when compression saves space.
 ///
-/// JPEGs and opaque images are encoded as JPEG at quality 60. Transparent
-/// PNGs stay PNGs with a 256-colour palette, and GIFs retain their frames and
-/// timing. SVGs, undecodable files, and files that would grow are unchanged.
+/// Opaque images are encoded as JPEG at quality 60. Transparent images become
+/// PNGs with a 256-colour palette, and GIFs retain their frames and timing.
+/// SVGs, undecodable files, files that would grow, and images that fail to
+/// process return null, so callers send the original.
 Future<File?> processImage(File file, {Directory? temporaryDirectory}) async {
   assert(isImage(file.path));
-  ReceivePort receivePort = ReceivePort();
-  await Isolate.spawn(
-    _resizeAndCompressImage,
-    _ProcessParam(file, receivePort.sendPort),
-  );
-
-  // Get the processed image from the isolate.
-  List<int>? imageBytes = await receivePort.first;
-
-  if (imageBytes == null) return null;
+  final _ProcessedImage? processed;
+  try {
+    final path = file.path;
+    processed = await Isolate.run(() => _resizeAndCompressImage(path));
+  } catch (_) {
+    return null;
+  }
+  if (processed == null) return null;
 
   final tempDir = temporaryDirectory ?? await getTemporaryDirectory();
-  final path = tempDir.path;
-  int rand = math.Random().nextInt(10000);
-  final extension = _fileExtension(file.path);
-
-  return File('$path/img_$rand$extension')..writeAsBytesSync(imageBytes);
+  final name = 'img_${DateTime.now().microsecondsSinceEpoch}_'
+      '${math.Random.secure().nextInt(1 << 32)}${processed.extension}';
+  return File('${tempDir.path}/$name')..writeAsBytesSync(processed.bytes);
 }
 
-class _ProcessParam {
-  _ProcessParam(this.file, this.sendPort);
+class _ProcessedImage {
+  const _ProcessedImage(this.bytes, this.extension);
 
-  final File file;
-  final SendPort sendPort;
+  final List<int> bytes;
+  final String extension;
 }
 
-void _resizeAndCompressImage(_ProcessParam param) {
-  final sourceBytes = param.file.readAsBytesSync();
+_ProcessedImage? _resizeAndCompressImage(String path) {
+  final sourceBytes = File(path).readAsBytesSync();
   final imageFormat = findFormatForData(sourceBytes);
   // decodeImage identifies the format and uses the appropriate decoder.
   var image = decodeImage(sourceBytes);
-  if (image == null) {
-    param.sendPort.send(null);
-    return;
-  }
+  if (image == null) return null;
 
   if (image.width > 1024 || image.height > 1024) {
     image = image.width >= image.height
@@ -62,26 +56,29 @@ void _resizeAndCompressImage(_ProcessParam param) {
         : copyResize(image, height: 1024);
   }
 
-  final List<int> compressedBytes;
+  final _ProcessedImage processed;
   if (imageFormat == ImageFormat.gif) {
-    compressedBytes = encodeGif(image);
-  } else if (imageFormat == ImageFormat.png && _hasTransparency(image)) {
-    compressedBytes = encodePng(_quantizeWithTransparency(image), level: 9);
+    processed = _ProcessedImage(encodeGif(image), '.gif');
+  } else if (_hasTransparency(image)) {
+    processed = _ProcessedImage(
+      encodePng(_quantizeWithTransparency(image), level: 9),
+      '.png',
+    );
   } else {
-    compressedBytes = encodeJpg(image, quality: 60);
+    processed = _ProcessedImage(encodeJpg(image, quality: 60), '.jpg');
   }
 
-  param.sendPort.send(
-    compressedBytes.length < sourceBytes.length ? compressedBytes : null,
-  );
+  return processed.bytes.length < sourceBytes.length ? processed : null;
 }
 
 bool _hasTransparency(Image image) {
-  if (image.numChannels != 4) return false;
-  return image.any((pixel) => pixel.a < 255);
+  if (!image.hasAlpha && image.palette?.numChannels != 4) return false;
+  return image.any((pixel) => pixel.aNormalized < 1);
 }
 
-Image _quantizeWithTransparency(Image source) {
+Image _quantizeWithTransparency(Image image) {
+  // Quantize 8-bit RGBA so gray+alpha and 16-bit sources work too.
+  final source = image.convert(format: Format.uint8, numChannels: 4);
   final indexedImage = quantize(source);
   final sourcePalette = indexedImage.palette!;
   final palette = PaletteUint8(sourcePalette.numColors, 4);
@@ -120,10 +117,4 @@ Image _quantizeWithTransparency(Image source) {
     }
   }
   return result;
-}
-
-String _fileExtension(String path) {
-  final fileName = Uri.file(path).pathSegments.last;
-  final dotIndex = fileName.lastIndexOf('.');
-  return dotIndex == -1 ? '' : fileName.substring(dotIndex);
 }
