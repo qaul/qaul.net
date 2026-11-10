@@ -772,8 +772,9 @@ class LibqaulWorker {
     required String description,
   }) async {
     var file = File(pathName);
-    const maxUncompressedSizeKB = 150 * 1000;
-    if (isImage(file.path) && file.statSync().size >= maxUncompressedSizeKB) {
+    if (isImage(file.path)) {
+      // The compressed copy stays in the temp directory: libqaul reads it
+      // asynchronously after this request is queued.
       final compressed = await processImage(file);
       if (compressed != null) file = compressed;
     }
