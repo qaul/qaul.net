@@ -769,44 +769,42 @@ class _QaulChatBubbleSurface extends StatelessWidget {
           minWidth: ChatBubbleStyle.minBubbleWidth,
           maxWidth: maxBubbleWidth,
         ),
-        child: IntrinsicWidth(
-          child: Container(
-            key: const ValueKey('chat-bubble-surface'),
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: borderRadius,
-            ),
-            foregroundDecoration: isSelected
-                ? BoxDecoration(
-                    borderRadius: borderRadius,
-                    border: Border.all(
-                      color: sheet.chatBubbleSelectionOutline,
-                      width: ChatBubbleStyle.selectedOutlineWidth,
+        child: Container(
+          key: const ValueKey('chat-bubble-surface'),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: borderRadius,
+          ),
+          foregroundDecoration: isSelected
+              ? BoxDecoration(
+                  borderRadius: borderRadius,
+                  border: Border.all(
+                    color: sheet.chatBubbleSelectionOutline,
+                    width: ChatBubbleStyle.selectedOutlineWidth,
+                  ),
+                )
+              : null,
+          child: ClipRRect(
+            borderRadius: borderRadius.resolve(Directionality.of(context)),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              // No stretch/IntrinsicWidth: the column is as wide as its
+              // widest child, so aspect-ratio media hugs the image while
+              // full-width rows still fill the bubble.
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                child,
+                if (showTimestamp)
+                  Padding(
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      10,
+                      4,
+                      10,
+                      6,
                     ),
-                  )
-                : null,
-            child: ClipRRect(
-              borderRadius: borderRadius.resolve(Directionality.of(context)),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  child,
-                  if (showTimestamp)
-                    Padding(
-                      padding: const EdgeInsetsDirectional.fromSTEB(
-                        10,
-                        4,
-                        10,
-                        6,
-                      ),
-                      child: Align(
-                        alignment: AlignmentDirectional.centerEnd,
-                        child: timeRow,
-                      ),
-                    ),
-                ],
-              ),
+                    child: timeRow,
+                  ),
+              ],
             ),
           ),
         ),

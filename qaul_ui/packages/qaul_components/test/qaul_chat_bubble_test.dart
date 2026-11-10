@@ -822,7 +822,7 @@ void main() {
                 message: message,
                 clock: clock,
                 child: SizedBox(
-                  key: ValueKey('portrait-media'),
+                  key: const ValueKey('portrait-media'),
                   width: mediaSize.width,
                   height: mediaSize.height,
                 ),
@@ -897,6 +897,81 @@ void main() {
           expect(bubble.width, media.width, reason: mediaCase.name);
           expect(timestamp.right, lessThanOrEqualTo(bubble.right));
         }
+      }
+    });
+
+    Future<void> pumpMediaChild(WidgetTester tester, Widget child) {
+      final clock = DateTime(2026, 1, 1, 12);
+      return tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(size: Size(390, 844)),
+            child: Material(
+              child: QaulChatBubble.media(
+                message: QaulChatBubbleMessage(
+                  content: '',
+                  sentAt: clock,
+                  receivedAt: clock,
+                  status: MessageStatus.sent,
+                  messageType: MessageType.primary,
+                  edges: const [],
+                ),
+                clock: clock,
+                child: child,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    double bubbleWidth(WidgetTester tester) => tester
+        .getRect(find.byKey(const ValueKey('chat-bubble-surface')))
+        .width;
+
+    testWidgets('lets LayoutBuilder children lay out inside media bubbles', (
+      tester,
+    ) async {
+      await pumpMediaChild(
+        tester,
+        LayoutBuilder(
+          builder: (context, constraints) =>
+              SizedBox(width: constraints.maxWidth / 2, height: 40),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+      expect(bubbleWidth(tester), 136);
+    });
+
+    testWidgets('lets full-width rows fill the media bubble', (tester) async {
+      await pumpMediaChild(
+        tester,
+        const Row(
+          children: [
+            SizedBox(width: 30, height: 30),
+            Expanded(child: SizedBox(height: 30)),
+          ],
+        ),
+      );
+      expect(bubbleWidth(tester), 272);
+    });
+
+    testWidgets('sizes aspect-ratio media by aspect, not pixel size', (
+      tester,
+    ) async {
+      for (final heightCap in [304.0, 120.0]) {
+        await pumpMediaChild(
+          tester,
+          ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: heightCap, minWidth: 170),
+            child: const AspectRatio(aspectRatio: 3 / 4),
+          ),
+        );
+        expect(
+          bubbleWidth(tester),
+          closeTo((heightCap * 3 / 4).clamp(170, 272), 0.01),
+          reason: 'height cap $heightCap',
+        );
       }
     });
   });
