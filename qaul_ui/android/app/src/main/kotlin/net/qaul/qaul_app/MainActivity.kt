@@ -193,56 +193,61 @@ class MainActivity : FlutterActivity() {
             }
 
             val path = call.argument<String>("path")
-            val name = call.argument<String>("name")
+            val name = call.argument<String>("name")?.let { File(it).name }
+            val kind = call.argument<String>("kind") ?: "file"
             if (path.isNullOrBlank() || name.isNullOrBlank()) {
                 result.error("invalid_arguments", "A file path and name are required", null)
                 return@setMethodCallHandler
             }
 
-            saveAttachment(File(path), name, result)
+            // Copying a large video can take a while; keep it off the UI thread.
+            Thread {
+                val error = saveAttachment(File(path), name, kind)
+                runOnUiThread {
+                    if (error == null) {
+                        result.success("saved")
+                    } else {
+                        result.error(error.first, error.second, null)
+                    }
+                }
+            }.start()
         }
     }
 
-    private fun saveAttachment(file: File, name: String, result: MethodChannel.Result) {
-        if (!file.isFile) {
-            result.error("file_not_found", "The attachment is no longer available", null)
-            return
-        }
+    /**
+     * Saves [file] as [name] (already reduced to a bare file name in Dart) into the media
+     * collection for [kind], or Downloads. Returns an error code and message, or null.
+     */
+    private fun saveAttachment(file: File, name: String, kind: String): Pair<String, String>? {
+        if (!file.isFile) return Pair("file_not_found", "The attachment is no longer available")
 
-        val extension = MimeTypeMap.getFileExtensionFromUrl(file.name).lowercase()
+        val extension = MimeTypeMap.getFileExtensionFromUrl(name).lowercase()
         val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
                 ?: "application/octet-stream"
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                return Pair("storage_permission_denied", "Storage access is required to save attachments")
+            }
             val downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
             if (!downloads.exists() && !downloads.mkdirs()) {
-                result.error("save_failed", "Could not create the Downloads directory", null)
-                return
+                return Pair("save_failed", "Could not create the Downloads directory")
             }
-            val destination = File(downloads, name)
-            try {
+            return try {
+                val destination = availableDestination(downloads, name)
                 file.copyTo(destination, overwrite = false)
                 MediaScannerConnection.scanFile(this, arrayOf(destination.path), arrayOf(mimeType), null)
-                result.success(null)
+                null
             } catch (error: Exception) {
-                result.error("save_failed", "Could not save the attachment", error.message)
+                Pair("save_failed", "Could not save the attachment: ${error.message}")
             }
-            return
         }
 
-        val (collection, directory) = when {
-            mimeType.startsWith("image/") -> Pair(
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    Environment.DIRECTORY_PICTURES
-            )
-            mimeType.startsWith("video/") -> Pair(
-                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                    Environment.DIRECTORY_MOVIES
-            )
-            mimeType.startsWith("audio/") -> Pair(
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    Environment.DIRECTORY_MUSIC
-            )
+        val (collection, directory) = when (kind) {
+            "image" -> Pair(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, Environment.DIRECTORY_PICTURES)
+            "video" -> Pair(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, Environment.DIRECTORY_MOVIES)
+            "audio" -> Pair(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, Environment.DIRECTORY_MUSIC)
             else -> Pair(MediaStore.Downloads.EXTERNAL_CONTENT_URI, Environment.DIRECTORY_DOWNLOADS)
         }
         val values = ContentValues().apply {
@@ -252,12 +257,9 @@ class MainActivity : FlutterActivity() {
             put(MediaStore.MediaColumns.IS_PENDING, 1)
         }
         val uri = contentResolver.insert(collection, values)
-        if (uri == null) {
-            result.error("save_failed", "Could not create the saved attachment", null)
-            return
-        }
+                ?: return Pair("save_failed", "Could not create the saved attachment")
 
-        try {
+        return try {
             contentResolver.openOutputStream(uri).use { output ->
                 requireNotNull(output)
                 file.inputStream().use { input -> input.copyTo(output) }
@@ -265,11 +267,24 @@ class MainActivity : FlutterActivity() {
             values.clear()
             values.put(MediaStore.MediaColumns.IS_PENDING, 0)
             contentResolver.update(uri, values, null, null)
-            result.success(null)
+            null
         } catch (error: Exception) {
             contentResolver.delete(uri, null, null)
-            result.error("save_failed", "Could not save the attachment", error.message)
+            Pair("save_failed", "Could not save the attachment: ${error.message}")
         }
+    }
+
+    /** "name.ext", then "name (1).ext", ... so an existing download is never overwritten. */
+    private fun availableDestination(directory: File, name: String): File {
+        val base = name.substringBeforeLast('.', name)
+        val extension = if (name.contains('.')) "." + name.substringAfterLast('.') else ""
+        var candidate = File(directory, name)
+        var index = 1
+        while (candidate.exists()) {
+            candidate = File(directory, "$base ($index)$extension")
+            index++
+        }
+        return candidate
     }
 
     /**

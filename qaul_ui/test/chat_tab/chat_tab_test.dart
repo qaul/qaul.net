@@ -64,6 +64,8 @@ class FakeMessageShareService implements MessageShareService {
   final copiedFiles = <({String name, String path})>[];
   final savedFiles = <({String name, String path})>[];
   Rect? sharePositionOrigin;
+  Object? saveError;
+  AttachmentSaveOutcome saveOutcome = AttachmentSaveOutcome.saved;
 
   @override
   Future<void> shareText({
@@ -93,11 +95,13 @@ class FakeMessageShareService implements MessageShareService {
   }
 
   @override
-  Future<void> saveFile({
+  Future<AttachmentSaveOutcome> saveFile({
     required String filePath,
     required String fileName,
   }) async {
+    if (saveError case final error?) throw error;
     savedFiles.add((name: fileName, path: filePath));
+    return saveOutcome;
   }
 }
 
@@ -1278,7 +1282,9 @@ void main() {
     expect(find.byKey(const ValueKey('message-info-sheet')), findsNothing);
   });
 
-  testWidgets('shares attachments from the long-press menu', (tester) async {
+  for (final action in ['Share', 'Save']) {
+  testWidgets('${action == 'Share' ? 'shares' : 'saves'} attachments from '
+      'the long-press menu', (tester) async {
     final messageShareService = FakeMessageShareService();
     await pumpChatScreen(
       tester,
@@ -1345,17 +1351,88 @@ void main() {
         );
       }
 
-      await tester.tap(find.text('Save'));
+      await tester.tap(find.text(action));
       await tester.pumpAndSettle();
     }
 
-    expect(messageShareService.savedFiles, [
+    expect(
+      action == 'Share'
+          ? messageShareService.sharedFiles
+          : messageShareService.savedFiles,
+      [
       (name: 'document.pdf', path: '/tmp/document.pdf'),
       (name: 'photo.jpg', path: '/tmp/photo.jpg'),
       (name: 'recording.mp3', path: '/tmp/recording.mp3'),
       (name: 'clip.mp4', path: '/tmp/clip.mp4'),
     ]);
   });
+  }
+
+  Future<void> saveAttachment(
+    WidgetTester tester,
+    FakeMessageShareService messageShareService, {
+    Map<String, dynamic>? metadata,
+  }) async {
+    await pumpChatScreen(
+      tester,
+      buildDirectChat(),
+      otherUser: otherUser,
+      messageShareService: messageShareService,
+    );
+    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+    chat.onMessageLongPress!(
+      tester.element(find.byType(chat_ui.Chat)),
+      types.FileMessage(
+        id: 'file',
+        author: types.User(id: otherUser.idBase58),
+        name: 'document.pdf',
+        size: 1,
+        uri: '/tmp/document.pdf',
+        metadata: metadata,
+      ),
+    );
+    await tester.pumpAndSettle();
+    if (find.text('Save').evaluate().isEmpty) return;
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('confirms a saved attachment', (tester) async {
+    await saveAttachment(tester, FakeMessageShareService());
+    expect(find.text('Attachment saved'), findsOneWidget);
+  });
+
+  testWidgets('stays quiet when the system export dialog takes over', (
+    tester,
+  ) async {
+    final service = FakeMessageShareService()
+      ..saveOutcome = AttachmentSaveOutcome.handedToSystem;
+    await saveAttachment(tester, service);
+    expect(service.savedFiles, hasLength(1));
+    expect(find.byType(SnackBar), findsNothing);
+  });
+
+  testWidgets('reports an attachment that could not be saved', (tester) async {
+    final service = FakeMessageShareService()
+      ..saveError = PlatformException(code: 'save_failed');
+    await saveAttachment(tester, service);
+    expect(find.text("Couldn't save the attachment"), findsOneWidget);
+  });
+
+  testWidgets('hides Save while the attachment is still arriving', (
+    tester,
+  ) async {
+    final service = FakeMessageShareService();
+    await saveAttachment(
+      tester,
+      service,
+      metadata: {'messageState': MessageState.receiving.toJson()},
+    );
+    expect(find.byType(ChatMessageContextMenu), findsOneWidget);
+    expect(find.text('Save'), findsNothing);
+    expect(service.savedFiles, isEmpty);
+  });
+
 
   testWidgets('forwards an attachment from the long-press menu', (tester) async {
     await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);

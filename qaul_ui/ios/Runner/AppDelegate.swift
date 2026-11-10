@@ -94,7 +94,8 @@ import Photos
         return
       }
 
-      self.saveAttachment(URL(fileURLWithPath: path), from: controller, result: result)
+      let kind = args["kind"] as? String ?? "file"
+      self.saveAttachment(URL(fileURLWithPath: path), kind: kind, from: controller, result: result)
     })
 
     GeneratedPluginRegistrant.register(with: self)
@@ -105,34 +106,44 @@ import Photos
       return NSSearchPathForDirectoriesInDomains(FileManager.SearchPathDirectory.documentDirectory, FileManager.SearchPathDomainMask.userDomainMask, true).first
   }
 
-  private func saveAttachment(_ url: URL, from controller: UIViewController, result: @escaping FlutterResult) {
-    let photoExtensions = ["heic", "jpeg", "jpg", "png", "gif", "tiff", "webp"]
-    let videoExtensions = ["mov", "mp4", "m4v", "avi"]
-    let extensionName = url.pathExtension.lowercased()
-
-    guard photoExtensions.contains(extensionName) || videoExtensions.contains(extensionName) else {
-      let picker = UIDocumentPickerViewController(forExporting: [url], asCopy: true)
+  /// Saves photos and videos to the photo library; other files go through the system export
+  /// dialog. Replies "saved" or "handedToSystem", always on the main thread.
+  private func saveAttachment(_ url: URL, kind: String, from controller: UIViewController, result: @escaping FlutterResult) {
+    guard kind == "image" || kind == "video" else {
+      let picker: UIDocumentPickerViewController
+      if #available(iOS 14.0, *) {
+        picker = UIDocumentPickerViewController(forExporting: [url], asCopy: true)
+      } else {
+        picker = UIDocumentPickerViewController(url: url, in: .exportToService)
+      }
       controller.present(picker, animated: true)
-      result(nil)
+      result("handedToSystem")
       return
     }
 
-    PHPhotoLibrary.requestAuthorization { status in
-      guard status == .authorized else {
-        result(FlutterError(code: "photo_permission_denied", message: "Photo Library access is required to save this attachment", details: nil))
-        return
-      }
-
+    let reply: (Any?) -> Void = { value in DispatchQueue.main.async { result(value) } }
+    let save = {
       PHPhotoLibrary.shared().performChanges({
         let request = PHAssetCreationRequest.forAsset()
-        let resourceType: PHAssetResourceType = photoExtensions.contains(extensionName) ? .photo : .video
-        request.addResource(with: resourceType, fileURL: url, options: nil)
+        request.addResource(with: kind == "image" ? .photo : .video, fileURL: url, options: nil)
       }) { success, error in
-        if success {
-          result(nil)
-        } else {
-          result(FlutterError(code: "save_failed", message: "Could not save the attachment", details: error?.localizedDescription))
-        }
+        reply(success
+          ? "saved"
+          : FlutterError(code: "save_failed", message: "Could not save the attachment", details: error?.localizedDescription))
+      }
+    }
+    let denied = {
+      reply(FlutterError(code: "photo_permission_denied", message: "Photo Library access is required to save this attachment", details: nil))
+    }
+
+    if #available(iOS 14.0, *) {
+      // Adding to the library only needs add-only access, which also covers "limited".
+      PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
+        status == .authorized || status == .limited ? save() : denied()
+      }
+    } else {
+      PHPhotoLibrary.requestAuthorization { status in
+        status == .authorized ? save() : denied()
       }
     }
   }

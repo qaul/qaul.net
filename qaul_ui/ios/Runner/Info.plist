@@ -62,6 +62,8 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>You can save photos and videos you receive to your photo library. For that, please grant access to the application.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
     <string>You can send and save photos as attachments. For that, please grant access to the application.</string>
     <key>NSCameraUsageDescription</key>
