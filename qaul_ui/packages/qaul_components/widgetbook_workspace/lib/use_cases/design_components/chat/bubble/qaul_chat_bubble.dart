@@ -167,12 +167,56 @@ Widget buildMediaSeparatedBubblesUseCase(BuildContext context) {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        QaulChatBubble(
+          message: QaulChatBubbleMessage(
+            content: 'A plain text message for comparison',
+            sentAt: _clock.subtract(const Duration(minutes: 3)),
+            receivedAt: _clock.subtract(const Duration(minutes: 3)),
+            status: MessageStatus.read,
+            messageType: MessageType.primary,
+            edges: const [TailEdge.bottomEnd],
+            senderIdBase58: 'me',
+          ),
+          clock: _clock,
+        ),
+        const SizedBox(height: kChatBubbleSeparatedGap),
         QaulChatBubble.media(
           message: QaulChatBubbleMessage(
-            content: '',
+            content: 'A short file caption',
             sentAt: _clock.subtract(const Duration(minutes: 2)),
             receivedAt: _clock.subtract(const Duration(minutes: 2)),
             status: MessageStatus.read,
+            messageType: MessageType.primary,
+            edges: const [TailEdge.bottomEnd],
+            senderIdBase58: 'me',
+          ),
+          clock: _clock,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.description, color: Colors.white, size: 40),
+                const SizedBox(width: 12),
+                Text(
+                  'report.pdf',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: kChatBubbleSeparatedGap),
+        QaulChatBubble.media(
+          message: QaulChatBubbleMessage(
+            content:
+                'A longer image caption that wraps onto more than one line to '
+                'show the timestamp below the caption.',
+            sentAt: _clock.subtract(const Duration(minutes: 1)),
+            receivedAt: _clock.subtract(const Duration(minutes: 1)),
+            status: MessageStatus.sent,
             messageType: MessageType.primary,
             edges: const [TailEdge.bottomEnd],
             senderIdBase58: 'me',
@@ -183,45 +227,6 @@ Widget buildMediaSeparatedBubblesUseCase(BuildContext context) {
             color: Colors.white.withValues(alpha: 0.12),
             alignment: Alignment.center,
             child: const Icon(Icons.image, color: Colors.white, size: 44),
-          ),
-        ),
-        const SizedBox(height: kChatBubbleSeparatedGap),
-        QaulChatBubble.media(
-          message: QaulChatBubbleMessage(
-            content: '',
-            sentAt: _clock.subtract(const Duration(minutes: 1)),
-            receivedAt: _clock.subtract(const Duration(minutes: 1)),
-            status: MessageStatus.sent,
-            messageType: MessageType.primary,
-            edges: const [TailEdge.bottomEnd],
-            senderIdBase58: 'me',
-          ),
-          clock: _clock,
-          child: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(16, 14, 16, 8),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.18),
-                  ),
-                  child: const Icon(Icons.play_arrow, color: Colors.white),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Container(
-                    height: 4,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(2),
-                      color: Colors.white.withValues(alpha: 0.72),
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ],

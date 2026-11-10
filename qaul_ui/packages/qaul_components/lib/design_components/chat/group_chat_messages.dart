@@ -93,6 +93,7 @@ class ChatMessageRenderer {
     required ChatRenderMode mode,
     required DateTime clock,
     bool isSelected = false,
+    List<String> mentionLabels = const [],
     double selectionScale = 1,
     Key? selectionKey,
     double? topSpacingOverride,
@@ -101,7 +102,7 @@ class ChatMessageRenderer {
     if (display == null) return child;
 
     final mediaBubble = QaulChatBubble.media(
-      message: display.message,
+      message: display.message.copyWith(mentionLabels: mentionLabels),
       clock: clock,
       showTimestamp: presentation.meta.showTimestamp,
       isSelected: isSelected,

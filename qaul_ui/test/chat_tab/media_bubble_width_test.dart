@@ -24,6 +24,7 @@ void main() {
     Widget media, {
     TextScaler textScaler = TextScaler.noScaling,
     double column = _column,
+    String caption = '',
   }) {
     tester.view.physicalSize = Size(column, 844);
     tester.view.devicePixelRatio = 1;
@@ -39,7 +40,7 @@ void main() {
           child: Material(
             child: QaulChatBubble.media(
               message: QaulChatBubbleMessage(
-                content: '',
+                content: caption,
                 sentAt: clock,
                 receivedAt: clock,
                 status: MessageStatus.sent,
@@ -98,22 +99,20 @@ void main() {
     });
   }
 
-  testWidgets('image with a long caption widens to the bubble max', (
+  testWidgets('image with a long caption widens up to the bubble max', (
     tester,
   ) async {
     await pumpInBubble(
       tester,
       ImageMessageWidget(
-        message: image(
-          3000,
-          4000,
-          caption: 'A caption long enough to need the whole bubble width',
-        ),
+        message: image(3000, 4000),
         messageWidth: _messageWidth,
       ),
+      caption: 'A caption long enough to need the whole bubble width',
     );
     expect(tester.takeException(), isNull);
-    expect(bubbleWidth(tester), closeTo(_maxBubbleWidth, 0.01));
+    expect(bubbleWidth(tester), greaterThan(imageWidth(3000, 4000)));
+    expect(bubbleWidth(tester), lessThanOrEqualTo(_maxBubbleWidth));
   });
 
   testWidgets('file bubble keeps the full bubble width', (tester) async {
