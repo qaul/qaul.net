@@ -316,14 +316,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     final messageInfo = _domainMessagesById[message.id];
     final messageRect =
         scaledMessageRect ?? _messageRectInOverlay(messageContext);
-    // Open on the side the bubble sits on within its row, which holds for
-    // sent and received messages in any text direction. Without a bubble,
-    // compare against the screen instead.
-    final referenceRect = _bubbleRenderObject(messageContext) == null
-        ? _rectInOverlay(
-            Overlay.of(context, rootOverlay: true).context.findRenderObject(),
-          )
-        : _rectInOverlay(messageContext.findRenderObject());
+    // Open on the side of the chat the bubble sits on, which holds for sent
+    // and received messages in any text direction and in split view.
+    final referenceRect = _rectInOverlay(context.findRenderObject());
     final alignRight =
         messageRect == null ||
         referenceRect == null ||
