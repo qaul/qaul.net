@@ -1,5 +1,6 @@
 import UIKit
 import Flutter
+import Photos
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -10,6 +11,7 @@ import Flutter
     let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
     let libqaulChannel = FlutterMethodChannel(name: "libqaul", binaryMessenger: controller.binaryMessenger)
     let attachmentClipboardChannel = FlutterMethodChannel(name: "qaul/attachment_clipboard", binaryMessenger: controller.binaryMessenger)
+    let attachmentSaverChannel = FlutterMethodChannel(name: "qaul/attachment_saver", binaryMessenger: controller.binaryMessenger)
     if #available(iOS 10.0, *) {
       UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
     }
@@ -79,12 +81,71 @@ import Flutter
       result(nil)
     })
 
+    attachmentSaverChannel.setMethodCallHandler({
+      (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
+      guard call.method == "saveFile" else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      guard let args = call.arguments as? Dictionary<String, Any>,
+            let path = args["path"] as? String,
+            FileManager.default.fileExists(atPath: path) else {
+        result(FlutterError(code: "file_not_found", message: "The attachment is no longer available", details: nil))
+        return
+      }
+
+      let kind = args["kind"] as? String ?? "file"
+      self.saveAttachment(URL(fileURLWithPath: path), kind: kind, from: controller, result: result)
+    })
+
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
     
   private func getApplicationDocumentsDirectory() -> String? {
       return NSSearchPathForDirectoriesInDomains(FileManager.SearchPathDirectory.documentDirectory, FileManager.SearchPathDomainMask.userDomainMask, true).first
+  }
+
+  /// Saves photos and videos to the photo library; other files go through the system export
+  /// dialog. Replies "saved" or "handedToSystem", always on the main thread.
+  private func saveAttachment(_ url: URL, kind: String, from controller: UIViewController, result: @escaping FlutterResult) {
+    guard kind == "image" || kind == "video" else {
+      let picker: UIDocumentPickerViewController
+      if #available(iOS 14.0, *) {
+        picker = UIDocumentPickerViewController(forExporting: [url], asCopy: true)
+      } else {
+        picker = UIDocumentPickerViewController(url: url, in: .exportToService)
+      }
+      controller.present(picker, animated: true)
+      result("handedToSystem")
+      return
+    }
+
+    let reply: (Any?) -> Void = { value in DispatchQueue.main.async { result(value) } }
+    let save = {
+      PHPhotoLibrary.shared().performChanges({
+        let request = PHAssetCreationRequest.forAsset()
+        request.addResource(with: kind == "image" ? .photo : .video, fileURL: url, options: nil)
+      }) { success, error in
+        reply(success
+          ? "saved"
+          : FlutterError(code: "save_failed", message: "Could not save the attachment", details: error?.localizedDescription))
+      }
+    }
+    let denied = {
+      reply(FlutterError(code: "photo_permission_denied", message: "Photo Library access is required to save this attachment", details: nil))
+    }
+
+    if #available(iOS 14.0, *) {
+      // Adding to the library only needs add-only access, which also covers "limited".
+      PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
+        status == .authorized || status == .limited ? save() : denied()
+      }
+    } else {
+      PHPhotoLibrary.requestAuthorization { status in
+        status == .authorized ? save() : denied()
+      }
+    }
   }
 
   private func dummyMethodToEnforceBundling() {

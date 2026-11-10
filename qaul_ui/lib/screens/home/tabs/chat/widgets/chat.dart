@@ -328,6 +328,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                       messageContext,
                       attachment!,
                     ),
+                    onSave: _isReceivingAttachment(message)
+                        ? null
+                        : () => _saveAttachment(dialogContext, attachment!),
                     onForward: _isReceivingAttachment(message)
                         ? null
                         : () {
@@ -447,11 +450,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
   List<ChatMessageContextMenuElement> _buildAttachmentContextMenuElements({
     required VoidCallback onCopy,
+    VoidCallback? onSave,
     VoidCallback? onForward,
     VoidCallback? onShare,
     VoidCallback? onInfo,
   }) {
     return [
+      if (onForward != null)
+        ChatMessageContextMenuAction.forward(onPressed: onForward),
+      if (onSave != null)
+        ChatMessageContextMenuAction(
+          id: 'save',
+          label: AppLocalizations.of(context)!.save,
+          iconAsset: ChatMessageContextMenuIcons.download,
+          onPressed: onSave,
+        ),
       if (onInfo != null)
         ChatMessageContextMenuAction(
           id: 'info',
@@ -459,8 +472,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
           iconAsset: ChatMessageContextMenuIcons.info,
           onPressed: onInfo,
         ),
-      if (onForward != null)
-        ChatMessageContextMenuAction.forward(onPressed: onForward),
       if (onShare != null)
         ChatMessageContextMenuAction(
           id: 'share',
@@ -748,6 +759,32 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       return;
     }
     _showCopyFeedback(messageRect);
+  }
+
+  Future<void> _saveAttachment(
+    BuildContext dialogContext,
+    ({String name, String uri}) attachment,
+  ) async {
+    Navigator.pop(dialogContext);
+    final l10n = AppLocalizations.of(context)!;
+
+    String? feedback;
+    try {
+      final outcome =
+          await (widget.messageShareService ??
+                  const SystemMessageShareService())
+              .saveFile(filePath: attachment.uri, fileName: attachment.name);
+      if (outcome == AttachmentSaveOutcome.saved) {
+        feedback = l10n.attachmentSaved;
+      }
+    } on Object catch (error, stackTrace) {
+      _log.warning('Could not save attachment', error, stackTrace);
+      feedback = l10n.attachmentSaveFailed;
+    }
+    if (feedback == null || !mounted) return;
+    ScaffoldMessenger.maybeOf(context)
+      ?..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(feedback)));
   }
 
   void _openMessageInfo(
