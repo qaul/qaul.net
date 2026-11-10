@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:local_notifications/local_notifications.dart';
 import 'package:logging/logging.dart';
@@ -34,6 +35,14 @@ void main() async {
           theme: QaulApp.lightTheme,
           darkTheme: QaulApp.darkTheme,
           themeMode: ThemeMode.system,
+          builder: (context, child) {
+            return AnnotatedRegion<SystemUiOverlayStyle>(
+              value: QaulApp.systemUiOverlayStyleFor(
+                Theme.of(context).brightness,
+              ),
+              child: child ?? const SizedBox(),
+            );
+          },
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: ForceUpdateDialog(
