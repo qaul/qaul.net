@@ -298,8 +298,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     };
     if (text == null && attachment == null) return;
     final messageInfo = _domainMessagesById[message.id];
-
     final messageRect = _messageRectInOverlay(messageContext);
+    // Open on the side the bubble sits on within its row, which holds for
+    // sent and received messages in any text direction. Without a bubble,
+    // compare against the screen instead.
+    final referenceRect = _bubbleRenderObject(messageContext) == null
+        ? _rectInOverlay(
+            Overlay.of(context, rootOverlay: true).context.findRenderObject(),
+          )
+        : _rectInOverlay(messageContext.findRenderObject());
+    final alignRight =
+        messageRect == null ||
+        referenceRect == null ||
+        messageRect.center.dx >= referenceRect.center.dx;
     setState(() => _selectedContextMenuMessageId = message.id);
 
     showDialog<void>(
@@ -388,6 +399,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                 : CustomSingleChildLayout(
                     delegate: _MessageContextMenuLayoutDelegate(
                       messageRect: messageRect,
+                      alignRight: alignRight,
                       viewportPadding:
                           MediaQuery.paddingOf(dialogContext) +
                           const EdgeInsets.all(16),
@@ -758,16 +770,40 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     });
   }
 
-  Rect? _messageRectInOverlay(BuildContext messageContext) {
-    final messageBox = messageContext.findRenderObject() as RenderBox?;
+  /// The long-pressed context is the full-width message row, so anchor to
+  /// the bubble inside it; fall back to the row if there is none.
+  Rect? _messageRectInOverlay(BuildContext messageContext) =>
+      _rectInOverlay(
+        _bubbleRenderObject(messageContext) ??
+            messageContext.findRenderObject(),
+      );
+
+  RenderObject? _bubbleRenderObject(BuildContext messageContext) {
+    RenderObject? bubble;
+    void visit(Element element) {
+      if (bubble != null) return;
+      if (element.widget.key == QaulChatBubble.surfaceKey) {
+        bubble = element.renderObject;
+        return;
+      }
+      element.visitChildren(visit);
+    }
+
+    messageContext.visitChildElements(visit);
+    return bubble;
+  }
+
+  Rect? _rectInOverlay(RenderObject? renderObject) {
     final overlay = Overlay.of(context, rootOverlay: true);
     final overlayBox = overlay.context.findRenderObject() as RenderBox?;
-    if (messageBox == null || overlayBox == null || !messageBox.attached) {
+    if (renderObject is! RenderBox ||
+        overlayBox == null ||
+        !renderObject.attached) {
       return null;
     }
 
-    return messageBox.localToGlobal(Offset.zero, ancestor: overlayBox) &
-        messageBox.size;
+    return renderObject.localToGlobal(Offset.zero, ancestor: overlayBox) &
+        renderObject.size;
   }
 
   /// The iPad share popover rejects origins that are empty or extend past the
@@ -1426,12 +1462,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 class _MessageContextMenuLayoutDelegate extends SingleChildLayoutDelegate {
   const _MessageContextMenuLayoutDelegate({
     required this.messageRect,
+    required this.alignRight,
     required this.viewportPadding,
   });
 
   static const _gap = 8.0;
 
   final Rect messageRect;
+  final bool alignRight;
   final EdgeInsets viewportPadding;
 
   @override
@@ -1444,8 +1482,7 @@ class _MessageContextMenuLayoutDelegate extends SingleChildLayoutDelegate {
     final maximumLeft = (size.width - childSize.width - viewportPadding.right)
         .clamp(minimumLeft, double.infinity)
         .toDouble();
-    final shouldAlignRight = messageRect.center.dx >= size.width / 2;
-    final preferredLeft = shouldAlignRight
+    final preferredLeft = alignRight
         ? messageRect.right - childSize.width
         : messageRect.left;
     final left = preferredLeft.clamp(minimumLeft, maximumLeft).toDouble();
@@ -1466,6 +1503,7 @@ class _MessageContextMenuLayoutDelegate extends SingleChildLayoutDelegate {
   @override
   bool shouldRelayout(_MessageContextMenuLayoutDelegate oldDelegate) =>
       messageRect != oldDelegate.messageRect ||
+      alignRight != oldDelegate.alignRight ||
       viewportPadding != oldDelegate.viewportPadding;
 }
 

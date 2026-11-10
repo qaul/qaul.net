@@ -405,6 +405,9 @@ String formatQaulChatBubbleTime(QaulChatBubbleMessage message, DateTime clock) {
 // ---------------------------------------------------------------------------
 
 class QaulChatBubble extends StatelessWidget {
+  /// Key of the painted bubble, so callers can anchor overlays to it.
+  static const surfaceKey = ValueKey('chat-bubble-surface');
+
   const QaulChatBubble({
     super.key,
     required this.message,
@@ -473,7 +476,7 @@ class QaulChatBubble extends StatelessWidget {
           maxWidth: maxBubbleWidth,
         ),
         child: DecoratedBox(
-          key: const ValueKey('chat-bubble-surface'),
+          key: QaulChatBubble.surfaceKey,
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: borderRadius,
@@ -770,7 +773,7 @@ class _QaulChatBubbleSurface extends StatelessWidget {
           maxWidth: maxBubbleWidth,
         ),
         child: Container(
-          key: const ValueKey('chat-bubble-surface'),
+          key: QaulChatBubble.surfaceKey,
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: borderRadius,
