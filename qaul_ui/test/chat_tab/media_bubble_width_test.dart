@@ -24,6 +24,7 @@ void main() {
     Widget media, {
     TextScaler textScaler = TextScaler.noScaling,
     double column = _column,
+    String caption = '',
   }) {
     tester.view.physicalSize = Size(column, 844);
     tester.view.devicePixelRatio = 1;
@@ -39,7 +40,7 @@ void main() {
           child: Material(
             child: QaulChatBubble.media(
               message: QaulChatBubbleMessage(
-                content: '',
+                content: caption,
                 sentAt: clock,
                 receivedAt: clock,
                 status: MessageStatus.sent,
@@ -104,13 +105,10 @@ void main() {
     await pumpInBubble(
       tester,
       ImageMessageWidget(
-        message: image(
-          3000,
-          4000,
-          caption: 'A caption long enough to need the whole bubble width',
-        ),
+        message: image(3000, 4000),
         messageWidth: _messageWidth,
       ),
+      caption: 'A caption long enough to need the whole bubble width',
     );
     expect(tester.takeException(), isNull);
     expect(bubbleWidth(tester), closeTo(_maxBubbleWidth, 0.01));
