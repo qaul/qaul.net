@@ -18,10 +18,10 @@ pub fn draw(frame: &mut Frame, app: &App) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Length(3),   // tabs + header
-            Constraint::Min(8),      // main content
-            Constraint::Length(8),   // events panel
-            Constraint::Length(1),   // help line
+            Constraint::Length(3), // tabs + header
+            Constraint::Min(8),    // main content
+            Constraint::Length(8), // events panel
+            Constraint::Length(1), // help line
         ])
         .split(area);
 
@@ -64,7 +64,11 @@ fn draw_header(frame: &mut Frame, area: Rect, app: &App) {
     let tabs = Tabs::new(titles)
         .select(idx)
         .block(Block::default().borders(Borders::ALL).title("qauld-tui"))
-        .highlight_style(Style::default().add_modifier(Modifier::BOLD).fg(Color::Cyan));
+        .highlight_style(
+            Style::default()
+                .add_modifier(Modifier::BOLD)
+                .fg(Color::Cyan),
+        );
     frame.render_widget(tabs, split[0]);
 
     let header = Paragraph::new(Line::from(vec![
@@ -109,11 +113,12 @@ fn draw_users(frame: &mut Frame, area: Rect, app: &App) {
             Row::new(vec!["Name", "ID", "Connectivity", "Ver", "Bio"])
                 .style(Style::default().add_modifier(Modifier::BOLD)),
         )
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .title(filtered_title("Users", visible.len(), total, &app.filter)),
-        );
+        .block(Block::default().borders(Borders::ALL).title(filtered_title(
+            "Users",
+            visible.len(),
+            total,
+            &app.filter,
+        )));
     frame.render_widget(table, area);
 }
 
@@ -123,7 +128,10 @@ fn filtered_title(label: &str, visible: usize, total: usize, filter: &str) -> St
     if filter.is_empty() {
         format!("{} ({})", label, total)
     } else {
-        format!("{} (filtered {}/{} for \"{}\")", label, visible, total, filter)
+        format!(
+            "{} (filtered {}/{} for \"{}\")",
+            label, visible, total, filter
+        )
     }
 }
 
@@ -159,11 +167,12 @@ fn draw_feed(frame: &mut Frame, area: Rect, app: &App) {
             Row::new(vec!["#", "Time", "Sender", "Content"])
                 .style(Style::default().add_modifier(Modifier::BOLD)),
         )
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .title(filtered_title("Feed", visible.len(), total, &app.filter)),
-        );
+        .block(Block::default().borders(Borders::ALL).title(filtered_title(
+            "Feed",
+            visible.len(),
+            total,
+            &app.filter,
+        )));
     frame.render_widget(table, area);
 }
 
@@ -171,9 +180,9 @@ fn draw_dtn(frame: &mut Frame, area: Rect, app: &App) {
     let vertical = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Length(7),  // stats + sparkline
-            Constraint::Length(8),  // custodian users
-            Constraint::Min(4),     // delivery events
+            Constraint::Length(7), // stats + sparkline
+            Constraint::Length(8), // custodian users
+            Constraint::Min(4),    // delivery events
         ])
         .split(area);
 
@@ -232,11 +241,7 @@ fn draw_dtn_kpis(frame: &mut Frame, area: Rect, app: &App) {
         }
         None => vec![Line::from(Span::raw("(no DTN state yet)"))],
     };
-    let p = Paragraph::new(lines).block(
-        Block::default()
-            .borders(Borders::ALL)
-            .title("DTN state"),
-    );
+    let p = Paragraph::new(lines).block(Block::default().borders(Borders::ALL).title("DTN state"));
     frame.render_widget(p, area);
 }
 
@@ -274,11 +279,12 @@ fn draw_dtn_custodians(frame: &mut Frame, area: Rect, app: &App) {
             Row::new(vec!["Configured custodian users"])
                 .style(Style::default().add_modifier(Modifier::BOLD)),
         )
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .title(filtered_title("Allowed custodians", visible.len(), total, &app.filter)),
-        );
+        .block(Block::default().borders(Borders::ALL).title(filtered_title(
+            "Allowed custodians",
+            visible.len(),
+            total,
+            &app.filter,
+        )));
     frame.render_widget(table, area);
 }
 
@@ -292,14 +298,10 @@ fn draw_dtn_delivery_events(frame: &mut Frame, area: Rect, app: &App) {
         .map(|e| Line::from(Span::raw(e.clone())))
         .collect();
     let p = Paragraph::new(lines)
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .title(format!(
-                    "Delivery responses (live, {} buffered)",
-                    app.dtn_events.len()
-                )),
-        )
+        .block(Block::default().borders(Borders::ALL).title(format!(
+            "Delivery responses (live, {} buffered)",
+            app.dtn_events.len()
+        )))
         .wrap(Wrap { trim: false });
     frame.render_widget(p, area);
 }
@@ -308,9 +310,9 @@ fn draw_network(frame: &mut Frame, area: Rect, app: &App) {
     let vertical = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Length(9),  // per-module KPIs + sparklines
-            Constraint::Min(6),     // peers table
-            Constraint::Length(6),  // recent peer events
+            Constraint::Length(9), // per-module KPIs + sparklines
+            Constraint::Min(6),    // peers table
+            Constraint::Length(6), // recent peer events
         ])
         .split(area);
 
@@ -437,11 +439,12 @@ fn draw_network_peers(frame: &mut Frame, area: Rect, app: &App) {
             Row::new(vec!["Module", "Peer", "Hops", "RTT"])
                 .style(Style::default().add_modifier(Modifier::BOLD)),
         )
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .title(filtered_title("Peers", visible.len(), total, &app.filter)),
-        );
+        .block(Block::default().borders(Borders::ALL).title(filtered_title(
+            "Peers",
+            visible.len(),
+            total,
+            &app.filter,
+        )));
     frame.render_widget(table, area);
 }
 
@@ -455,14 +458,10 @@ fn draw_network_events(frame: &mut Frame, area: Rect, app: &App) {
         .map(|e| Line::from(Span::raw(e.clone())))
         .collect();
     let p = Paragraph::new(lines)
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .title(format!(
-                    "Peer events (live, {} buffered)",
-                    app.network_events.len()
-                )),
-        )
+        .block(Block::default().borders(Borders::ALL).title(format!(
+            "Peer events (live, {} buffered)",
+            app.network_events.len()
+        )))
         .wrap(Wrap { trim: false });
     frame.render_widget(p, area);
 }
@@ -471,9 +470,9 @@ fn draw_crypto(frame: &mut Frame, area: Rect, app: &App) {
     let vertical = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Length(8),  // config card
-            Constraint::Length(4),  // counts strip
-            Constraint::Min(4),     // rotation events table
+            Constraint::Length(8), // config card
+            Constraint::Length(4), // counts strip
+            Constraint::Min(4),    // rotation events table
         ])
         .split(area);
 
@@ -535,8 +534,8 @@ fn draw_crypto_counts(frame: &mut Frame, area: Rect, app: &App) {
             Style::default().fg(if dropped > 0 { Color::Red } else { Color::Gray }),
         ),
     ]);
-    let p = Paragraph::new(vec![line])
-        .block(Block::default().borders(Borders::ALL).title("Counts"));
+    let p =
+        Paragraph::new(vec![line]).block(Block::default().borders(Borders::ALL).title("Counts"));
     frame.render_widget(p, area);
 }
 
@@ -567,9 +566,15 @@ fn draw_crypto_events(frame: &mut Frame, area: Rect, app: &App) {
             };
             Row::new(vec![
                 Cell::from(e.timestamp_ms.to_string()),
-                Cell::from(Span::styled(e.kind.to_string(), Style::default().fg(kind_color))),
+                Cell::from(Span::styled(
+                    e.kind.to_string(),
+                    Style::default().fg(kind_color),
+                )),
                 Cell::from(short_id(&e.remote_id)),
-                Cell::from(format!("p={} d={}", e.primary_session_id, e.draining_session_id)),
+                Cell::from(format!(
+                    "p={} d={}",
+                    e.primary_session_id, e.draining_session_id
+                )),
             ])
             .style(style)
         })
@@ -625,8 +630,7 @@ fn draw_help(frame: &mut Frame, area: Rect, app: &App) {
         InputMode::Viewing => "Esc/Enter: close detail".into(),
         InputMode::Normal => {
             let send = matches!(app.current_tab(), Tab::Feed);
-            let mut parts =
-                vec!["[Tab] switch", "[↑/↓] move", "[Enter] detail", "[/] filter"];
+            let mut parts = vec!["[Tab] switch", "[↑/↓] move", "[Enter] detail", "[/] filter"];
             if send {
                 parts.push("[s] send");
             }
@@ -662,7 +666,9 @@ fn draw_detail_modal(frame: &mut Frame, area: Rect, app: &App) {
     for (label, value) in &fields {
         lines.push(Line::from(Span::styled(
             format!("{label}:"),
-            Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD),
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
         )));
         lines.push(Line::from(Span::raw(value.clone())));
     }

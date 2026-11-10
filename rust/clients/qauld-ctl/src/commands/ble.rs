@@ -101,10 +101,19 @@ fn print_info(info: proto::InfoResponse, json_out: bool) -> Result<(), Box<dyn s
                 }
                 println!("2M Supported: {}", d.le_2m);
                 println!("Audio Supported: {}", d.le_audio);
-                println!("Periodic Advertisement Supported: {}", d.le_periodic_adv_support);
-                println!("Multiple Advertisement Supported: {}", d.le_multiple_adv_support);
+                println!(
+                    "Periodic Advertisement Supported: {}",
+                    d.le_periodic_adv_support
+                );
+                println!(
+                    "Multiple Advertisement Supported: {}",
+                    d.le_multiple_adv_support
+                );
                 println!("Offload Filter Supported: {}", d.offload_filter_support);
-                println!("Offload Scan Batching Supported: {}", d.offload_scan_batching_support);
+                println!(
+                    "Offload Scan Batching Supported: {}",
+                    d.offload_scan_batching_support
+                );
             }
             Some(_) => println!("BLE not supported by this device"),
             None => eprintln!("warning: could not decode device_info"),

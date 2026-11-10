@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../l10n/qaul_components_l10n_ext.dart';
+import '../../styles/chat_surface_shadows.dart';
 import '../../styles/qaul_color_sheet.dart';
+import '../../styles/qaul_text_scaler.dart';
 import '../users/qaul_avatar.dart';
 
 const Color _kChatHeaderControlColor = Color(0xFF999999);
@@ -48,16 +50,6 @@ TextStyle _chatHeaderLineStyle(
     letterSpacing: 0.5,
     color: _chatHeaderTextColor(theme),
   );
-}
-
-BoxShadow _chatHeaderShadow(ThemeData theme) {
-  return theme.brightness == Brightness.dark
-      ? const BoxShadow(
-          offset: Offset(0, 10),
-          blurRadius: 7,
-          color: Color(0x66000000),
-        )
-      : const BoxShadow(blurRadius: 5, color: Color(0x33000000));
 }
 
 class _ChatHeaderOverflowMenuButton extends StatelessWidget {
@@ -180,6 +172,12 @@ class ChatHeader extends StatelessWidget {
     );
     final subtitle = _subtitle(context);
     final hasSubtitle = subtitle.isNotEmpty;
+    final textScaler = MediaQuery.textScalerOf(context);
+    final textHeight = textScaler.scale(20) * 1.2 +
+        (hasSubtitle ? _kTitleSubtitleGap + textScaler.scale(11) * 1.2 : 0);
+    final toolbarHeight = textScaler is QaulTextScaler
+        ? (textHeight + 12).clamp(kChatHeaderToolbarHeight, double.infinity)
+        : kChatHeaderToolbarHeight;
 
     final menu = menuEntries.isNotEmpty && onMenuSelected != null
         ? _ChatHeaderOverflowMenuButton(
@@ -189,7 +187,7 @@ class ChatHeader extends StatelessWidget {
         : null;
 
     final header = SizedBox(
-      height: kChatHeaderToolbarHeight,
+      height: toolbarHeight,
       child: Padding(
         padding: EdgeInsetsDirectional.only(
           start: showBackButton ? _kBackButtonStartInset : _kContentStartInset,
@@ -270,7 +268,10 @@ class ChatHeader extends StatelessWidget {
             width: _kChatHeaderDividerWidth,
           ),
         ),
-        boxShadow: [_chatHeaderShadow(theme)],
+        boxShadow: chatSurfaceShadows(
+          theme.brightness,
+          direction: ChatSurfaceShadowDirection.below,
+        ),
       ),
       child: Material(
         color: Colors.transparent,

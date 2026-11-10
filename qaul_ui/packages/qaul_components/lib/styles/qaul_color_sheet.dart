@@ -21,4 +21,6 @@ class QaulColorSheet {
 
   Color get chatHeaderDivider =>
       _isDark ? _darkHeaderDivider : _lightChatDivider;
+
+  Color get chatDateDividerText => _isDark ? Colors.white : Colors.black;
 }

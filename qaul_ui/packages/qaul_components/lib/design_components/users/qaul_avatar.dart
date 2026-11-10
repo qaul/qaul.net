@@ -3,12 +3,9 @@ import 'package:flutter/material.dart' hide Badge;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:utils/utils.dart';
 
+import '../../styles/qaul_emoji.dart';
+
 const Color kQaulAvatarOnlineBadgeColor = Color(0xFF00C853);
-const List<String> kQaulAvatarEmojiFontFamilyFallback = [
-  'Apple Color Emoji',
-  'Noto Color Emoji',
-  'Segoe UI Emoji',
-];
 
 enum QaulAvatarSize {
   tiny(radius: 14, fontSize: 12, fontWeight: FontWeight.w500),
@@ -105,7 +102,7 @@ class _AvatarInitials extends StatelessWidget {
         color: Colors.white,
         fontWeight: size.fontWeight,
         fontFamilyFallback:
-            isEmoji ? kQaulAvatarEmojiFontFamilyFallback : null,
+            isEmoji ? kQaulEmojiFontFamilyFallback : null,
         height: isEmoji ? 1 : null,
       ),
       textAlign: TextAlign.center,
