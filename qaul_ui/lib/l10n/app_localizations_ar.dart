@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -322,6 +321,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get share => 'مشاركة';
+
+  @override
+  String get save => 'حفظ';
+
+  @override
+  String get attachmentSaved => 'تم حفظ المرفق';
+
+  @override
+  String get attachmentSaveFailed => 'تعذّر حفظ المرفق';
 
   @override
   String get messageCopied => 'تم نسخ الرسالة';

@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' show PointerDeviceKind;
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart'
+    show kPrimaryButton, kSecondaryMouseButton, kTouchSlop;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -65,6 +68,23 @@ part 'message_info.dart';
 part 'chat_timeline_projection.dart';
 
 typedef OnSendPressed = void Function(String rawText);
+
+/// flutter_chat_ui expands this ratio by 6% for chats without avatars. Keep
+/// its outer constraint as wide as the message column so the component owns
+/// the shared 76% bubble cap for text, media, and replies.
+const _kChatMessageWidthRatio = 0.94;
+
+int _chatContentWidth(int messageColumnWidth) =>
+    (messageColumnWidth * ChatBubbleStyle.maxWidthFraction).floor();
+
+/// Image and audio widgets size their height and controls from their
+/// messageWidth; keep that at the pre-column-rule maximum so wide desktop panes
+/// widen bubbles without making photos taller than the chat.
+const kChatMediaMaxExtent = 440;
+
+@visibleForTesting
+int chatMediaExtent(int contentWidth) =>
+    contentWidth < kChatMediaMaxExtent ? contentWidth : kChatMediaMaxExtent;
 
 class ForwardAttachment {
   const ForwardAttachment({
@@ -279,6 +299,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   String? _activeRoomIdBase58;
   String? _forwardDraftRoomIdBase58;
   String? _selectedContextMenuMessageId;
+  String? _activeMessageSelectionGestureId;
   OverlayEntry? _copyFeedbackEntry;
   Timer? _copyFeedbackTimer;
   late final AnimationController _copyFeedbackFadeController;
@@ -288,6 +309,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     BuildContext messageContext,
     types.Message message,
   ) {
+    // flutter_chat_ui owns an outer GestureDetector with a fixed 500 ms long
+    // press. The bubble's listener below controls the live interaction; keep
+    // this callback for programmatic callers and ignore it during that hold.
+    if (_activeMessageSelectionGestureId == message.id) return;
+    unawaited(_openMessageContextMenu(messageContext, message));
+  }
+
+  Future<void> _openMessageContextMenu(
+    BuildContext messageContext,
+    types.Message message, {
+    Rect? scaledMessageRect,
+  }) async {
     final text = message is types.TextMessage ? message.text : null;
     final attachment = switch (message) {
       types.FileMessage() => (name: message.name, uri: message.uri),
@@ -298,11 +331,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     };
     if (text == null && attachment == null) return;
     final messageInfo = _domainMessagesById[message.id];
-
-    final messageRect = _messageRectInOverlay(messageContext);
+    final messageRect =
+        scaledMessageRect ?? _messageRectInOverlay(messageContext);
+    // Open on the side of the chat the bubble sits on, which holds for sent
+    // and received messages in any text direction and in split view.
+    final referenceRect = _rectInOverlay(context.findRenderObject());
+    final alignRight =
+        messageRect == null ||
+        referenceRect == null ||
+        messageRect.center.dx >= referenceRect.center.dx;
     setState(() => _selectedContextMenuMessageId = message.id);
 
-    showDialog<void>(
+    await showDialog<void>(
       context: context,
       useSafeArea: false,
       barrierColor: Colors.black38,
@@ -317,6 +357,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                       messageContext,
                       attachment!,
                     ),
+                    onSave: _isReceivingAttachment(message)
+                        ? null
+                        : () => _saveAttachment(dialogContext, attachment!),
                     onForward: _isReceivingAttachment(message)
                         ? null
                         : () {
@@ -388,6 +431,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                 : CustomSingleChildLayout(
                     delegate: _MessageContextMenuLayoutDelegate(
                       messageRect: messageRect,
+                      alignRight: alignRight,
                       viewportPadding:
                           MediaQuery.paddingOf(dialogContext) +
                           const EdgeInsets.all(16),
@@ -397,10 +441,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
           ),
         );
       },
-    ).whenComplete(() {
-      if (!mounted) return;
-      setState(() => _selectedContextMenuMessageId = null);
-    });
+    );
+    if (!mounted) return;
+    setState(() => _selectedContextMenuMessageId = null);
   }
 
   List<ChatMessageContextMenuElement> _buildForwardContextMenuElements({
@@ -435,11 +478,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
   List<ChatMessageContextMenuElement> _buildAttachmentContextMenuElements({
     required VoidCallback onCopy,
+    VoidCallback? onSave,
     VoidCallback? onForward,
     VoidCallback? onShare,
     VoidCallback? onInfo,
   }) {
     return [
+      if (onForward != null)
+        ChatMessageContextMenuAction.forward(onPressed: onForward),
+      if (onSave != null)
+        ChatMessageContextMenuAction(
+          id: 'save',
+          label: AppLocalizations.of(context)!.save,
+          iconAsset: ChatMessageContextMenuIcons.download,
+          onPressed: onSave,
+        ),
       if (onInfo != null)
         ChatMessageContextMenuAction(
           id: 'info',
@@ -447,8 +500,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
           iconAsset: ChatMessageContextMenuIcons.info,
           onPressed: onInfo,
         ),
-      if (onForward != null)
-        ChatMessageContextMenuAction.forward(onPressed: onForward),
       if (onShare != null)
         ChatMessageContextMenuAction(
           id: 'share',
@@ -609,7 +660,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   Future<void> _openPhotoPicker(ChatRoom room) async {
     File? file;
     if (Platform.isAndroid || Platform.isIOS) {
-      final result = await ImagePicker().pickImage(source: ImageSource.camera);
+      final result = await ImagePicker().pickImage(
+        source: ImageSource.camera,
+        maxWidth: 1024.0,
+        maxHeight: 1024.0,
+        imageQuality: 60,
+      );
       if (result != null) file = File(result.path);
     } else {
       final result = await FilePicker.platform.pickFiles(type: FileType.image);
@@ -733,6 +789,32 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     _showCopyFeedback(messageRect);
   }
 
+  Future<void> _saveAttachment(
+    BuildContext dialogContext,
+    ({String name, String uri}) attachment,
+  ) async {
+    Navigator.pop(dialogContext);
+    final l10n = AppLocalizations.of(context)!;
+
+    String? feedback;
+    try {
+      final outcome =
+          await (widget.messageShareService ??
+                  const SystemMessageShareService())
+              .saveFile(filePath: attachment.uri, fileName: attachment.name);
+      if (outcome == AttachmentSaveOutcome.saved) {
+        feedback = l10n.attachmentSaved;
+      }
+    } on Object catch (error, stackTrace) {
+      _log.warning('Could not save attachment', error, stackTrace);
+      feedback = l10n.attachmentSaveFailed;
+    }
+    if (feedback == null || !mounted) return;
+    ScaffoldMessenger.maybeOf(context)
+      ?..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(feedback)));
+  }
+
   void _openMessageInfo(
     BuildContext dialogContext,
     Message message,
@@ -758,16 +840,40 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     });
   }
 
-  Rect? _messageRectInOverlay(BuildContext messageContext) {
-    final messageBox = messageContext.findRenderObject() as RenderBox?;
+  /// The long-pressed context is the full-width message row, so anchor to
+  /// the bubble inside it; fall back to the row if there is none.
+  Rect? _messageRectInOverlay(BuildContext messageContext) =>
+      _rectInOverlay(
+        _bubbleRenderObject(messageContext) ??
+            messageContext.findRenderObject(),
+      );
+
+  RenderObject? _bubbleRenderObject(BuildContext messageContext) {
+    RenderObject? bubble;
+    void visit(Element element) {
+      if (bubble != null) return;
+      if (element.widget.key == QaulChatBubble.surfaceKey) {
+        bubble = element.renderObject;
+        return;
+      }
+      element.visitChildren(visit);
+    }
+
+    messageContext.visitChildElements(visit);
+    return bubble;
+  }
+
+  Rect? _rectInOverlay(RenderObject? renderObject) {
     final overlay = Overlay.of(context, rootOverlay: true);
     final overlayBox = overlay.context.findRenderObject() as RenderBox?;
-    if (messageBox == null || overlayBox == null || !messageBox.attached) {
+    if (renderObject is! RenderBox ||
+        overlayBox == null ||
+        !renderObject.attached) {
       return null;
     }
 
-    return messageBox.localToGlobal(Offset.zero, ancestor: overlayBox) &
-        messageBox.size;
+    return renderObject.localToGlobal(Offset.zero, ancestor: overlayBox) &
+        renderObject.size;
   }
 
   /// The iPad share popover rejects origins that are empty or extend past the
@@ -1046,6 +1152,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                   ),
                   showUserAvatars: false,
                   showUserNames: false,
+                  messageWidthRatio: _kChatMessageWidthRatio,
                   user: user.toInternalUser(),
                   useTopSafeAreaInset: false,
                   dateHeaderThreshold: const Duration(days: 365).inMilliseconds,
@@ -1157,8 +1264,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                         );
                       },
                   fileMessageBuilder: (message, {required int messageWidth}) {
+                    final contentWidth = _chatContentWidth(messageWidth);
                     return SizedBox(
-                      width: messageWidth.toDouble(),
+                      width: contentWidth.toDouble(),
                       child: FileMessageWidget(
                         message: message,
                         isDefaultUser: message.author.id == user.idBase58,
@@ -1166,18 +1274,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                     );
                   },
                   imageMessageBuilder: (message, {required int messageWidth}) {
+                    final contentWidth = _chatContentWidth(messageWidth);
                     return ImageMessageWidget(
                       message: message,
-                      messageWidth: messageWidth,
+                      messageWidth: chatMediaExtent(contentWidth),
                       isDefaultUser: message.author.id == user.idBase58,
                     );
                   },
                   audioMessageBuilder: (message, {required int messageWidth}) {
+                    final contentWidth = _chatContentWidth(messageWidth);
                     return SizedBox(
-                      width: messageWidth.toDouble(),
+                      width: contentWidth.toDouble(),
                       child: AudioMessageWidget(
                         message: message,
-                        messageWidth: messageWidth,
+                        messageWidth: chatMediaExtent(contentWidth),
                         isDefaultUser: message.author.id == user.idBase58,
                       ),
                     );
@@ -1201,6 +1311,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                       ),
                     ],
                     backgroundColor: chatBackgroundColor,
+                    messageMaxWidth: double.infinity,
                     messageInsetsVertical: 0,
                     messageInsetsHorizontal: 0,
                     bubbleMargin: EdgeInsets.zero,
@@ -1349,29 +1460,49 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     final presentation = _messagePresentations[message.id];
     if (presentation == null) return child;
 
-    if (message is types.TextMessage) {
-      return ChatMessageRenderer.renderText(
-        presentation: presentation,
-        mode: _chatRenderMode,
-        clock: DateTime.now(),
-        mentionLabels: _chatRenderMode == ChatRenderMode.group
-            ? ['all', ...room.members.map((member) => member.name)]
-            : const [],
-        isSelected: message.id == _selectedContextMenuMessageId,
-        topSpacingOverride: followsDateHeader ? 0 : null,
-      );
-    }
+    return _MessageSelectionGesture(
+      message: message,
+      onGestureStarted: () => _activeMessageSelectionGestureId = message.id,
+      onGestureFinished: () {
+        if (_activeMessageSelectionGestureId == message.id) {
+          _activeMessageSelectionGestureId = null;
+        }
+      },
+      onMenuRequested: (bubbleContext, messageRect) => _openMessageContextMenu(
+        bubbleContext,
+        message,
+        scaledMessageRect: messageRect,
+      ),
+      builder: (selectionScale, selectionKey) {
+        if (message is types.TextMessage) {
+          return ChatMessageRenderer.renderText(
+            presentation: presentation,
+            mode: _chatRenderMode,
+            clock: DateTime.now(),
+            mentionLabels: _chatRenderMode == ChatRenderMode.group
+                ? ['all', ...room.members.map((member) => member.name)]
+                : const [],
+            isSelected: message.id == _selectedContextMenuMessageId,
+            topSpacingOverride: followsDateHeader ? 0 : null,
+            selectionScale: selectionScale,
+            selectionKey: selectionKey,
+          );
+        }
 
-    return ChatMessageRenderer.renderMedia(
-      child: child,
-      presentation: presentation,
-      mode: _chatRenderMode,
-      clock: DateTime.now(),
-      isSelected: message.id == _selectedContextMenuMessageId,
-      mentionLabels: _chatRenderMode == ChatRenderMode.group
-          ? ['all', ...room.members.map((member) => member.name)]
-          : const [],
-      topSpacingOverride: followsDateHeader ? 0 : null,
+        return ChatMessageRenderer.renderMedia(
+          child: child,
+          presentation: presentation,
+          mode: _chatRenderMode,
+          clock: DateTime.now(),
+          isSelected: message.id == _selectedContextMenuMessageId,
+          mentionLabels: _chatRenderMode == ChatRenderMode.group
+              ? ['all', ...room.members.map((member) => member.name)]
+              : const [],
+          topSpacingOverride: followsDateHeader ? 0 : null,
+          selectionScale: selectionScale,
+          selectionKey: selectionKey,
+        );
+      },
     );
   }
 
@@ -1426,15 +1557,182 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   }
 }
 
+class _MessageSelectionGesture extends StatefulWidget {
+  const _MessageSelectionGesture({
+    required this.message,
+    required this.builder,
+    required this.onGestureStarted,
+    required this.onGestureFinished,
+    required this.onMenuRequested,
+  });
+
+  static const _holdDelay = Duration(milliseconds: 200);
+  static const _holdDuration = Duration(milliseconds: 600);
+  static const _scaleDuration = Duration(milliseconds: 400);
+  static const _selectedScale = 1.15;
+
+  final types.Message message;
+  final Widget Function(double selectionScale, GlobalKey selectionKey) builder;
+  final VoidCallback onGestureStarted;
+  final VoidCallback onGestureFinished;
+  final Future<void> Function(BuildContext context, Rect? messageRect)
+  onMenuRequested;
+
+  @override
+  State<_MessageSelectionGesture> createState() =>
+      _MessageSelectionGestureState();
+}
+
+class _MessageSelectionGestureState extends State<_MessageSelectionGesture>
+    with SingleTickerProviderStateMixin {
+  final _selectionKey = GlobalKey();
+  Timer? _scaleDelayTimer;
+  Timer? _selectionTimer;
+  Offset? _pointerOrigin;
+  late final AnimationController _scaleController;
+  bool _menuIsOpen = false;
+
+  bool get _supportsHaptics => switch (defaultTargetPlatform) {
+    TargetPlatform.android || TargetPlatform.iOS => true,
+    _ => false,
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _scaleController = AnimationController(
+      vsync: this,
+      duration: _MessageSelectionGesture._scaleDuration,
+      reverseDuration: _MessageSelectionGesture._scaleDuration,
+    );
+  }
+
+  @override
+  void dispose() {
+    _scaleDelayTimer?.cancel();
+    _selectionTimer?.cancel();
+    _scaleController.dispose();
+    super.dispose();
+  }
+
+  void _onPointerDown(PointerDownEvent event) {
+    if (_menuIsOpen) return;
+
+    final isSecondaryMouseClick =
+        event.kind == PointerDeviceKind.mouse &&
+        (event.buttons & kSecondaryMouseButton) != 0;
+    if (isSecondaryMouseClick) {
+      widget.onGestureStarted();
+      _openMenu();
+      return;
+    }
+
+    if ((event.buttons & kPrimaryButton) == 0) return;
+    _cancelPendingSelection();
+    _pointerOrigin = event.position;
+    widget.onGestureStarted();
+    _scaleDelayTimer = Timer(_MessageSelectionGesture._holdDelay, () {
+      if (_pointerOrigin != null && !_menuIsOpen) {
+        _scaleController.forward();
+      }
+    });
+    _selectionTimer = Timer(_MessageSelectionGesture._holdDuration, () {
+      if (_pointerOrigin != null && !_menuIsOpen) {
+        _openMenu(completeScale: true);
+      }
+    });
+  }
+
+  void _onPointerMove(PointerMoveEvent event) {
+    final origin = _pointerOrigin;
+    if (origin == null || _menuIsOpen) return;
+    if ((event.position - origin).distance > kTouchSlop) {
+      _cancelPendingSelection();
+    }
+  }
+
+  void _onPointerUp(PointerUpEvent event) {
+    if (!_menuIsOpen) _cancelPendingSelection();
+  }
+
+  void _cancelPendingSelection() {
+    if (_pointerOrigin == null) return;
+    _pointerOrigin = null;
+    _scaleDelayTimer?.cancel();
+    _selectionTimer?.cancel();
+    widget.onGestureFinished();
+    if (_scaleController.value > 0) {
+      _scaleController.reverse();
+    }
+  }
+
+  Rect? _scaledSurfaceRect() {
+    final surfaceBox =
+        _selectionKey.currentContext?.findRenderObject() as RenderBox?;
+    final overlay = Overlay.of(context, rootOverlay: true);
+    final overlayBox = overlay.context.findRenderObject() as RenderBox?;
+    if (surfaceBox == null || overlayBox == null || !surfaceBox.attached) {
+      return null;
+    }
+
+    final scale = _MessageSelectionGesture._selectedScale;
+    return surfaceBox.localToGlobal(Offset.zero, ancestor: overlayBox) &
+        Size(surfaceBox.size.width * scale, surfaceBox.size.height * scale);
+  }
+
+  Future<void> _openMenu({bool completeScale = false}) async {
+    if (_menuIsOpen) return;
+    _menuIsOpen = true;
+    _scaleDelayTimer?.cancel();
+    _selectionTimer?.cancel();
+    if (completeScale) {
+      _scaleController.value = 1;
+    } else {
+      _scaleController.forward();
+    }
+    if (_supportsHaptics) unawaited(HapticFeedback.mediumImpact());
+
+    await widget.onMenuRequested(context, _scaledSurfaceRect());
+    if (!mounted) return;
+    _menuIsOpen = false;
+    _pointerOrigin = null;
+    widget.onGestureFinished();
+    await _scaleController.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _scaleController,
+      builder: (context, _) {
+        final selectionScale =
+            1 +
+            (_MessageSelectionGesture._selectedScale - 1) *
+                _scaleController.value;
+        return Listener(
+          behavior: HitTestBehavior.translucent,
+          onPointerDown: _onPointerDown,
+          onPointerMove: _onPointerMove,
+          onPointerUp: _onPointerUp,
+          onPointerCancel: (_) => _cancelPendingSelection(),
+          child: widget.builder(selectionScale, _selectionKey),
+        );
+      },
+    );
+  }
+}
+
 class _MessageContextMenuLayoutDelegate extends SingleChildLayoutDelegate {
   const _MessageContextMenuLayoutDelegate({
     required this.messageRect,
+    required this.alignRight,
     required this.viewportPadding,
   });
 
   static const _gap = 8.0;
 
   final Rect messageRect;
+  final bool alignRight;
   final EdgeInsets viewportPadding;
 
   @override
@@ -1447,8 +1745,7 @@ class _MessageContextMenuLayoutDelegate extends SingleChildLayoutDelegate {
     final maximumLeft = (size.width - childSize.width - viewportPadding.right)
         .clamp(minimumLeft, double.infinity)
         .toDouble();
-    final shouldAlignRight = messageRect.center.dx >= size.width / 2;
-    final preferredLeft = shouldAlignRight
+    final preferredLeft = alignRight
         ? messageRect.right - childSize.width
         : messageRect.left;
     final left = preferredLeft.clamp(minimumLeft, maximumLeft).toDouble();
@@ -1469,6 +1766,7 @@ class _MessageContextMenuLayoutDelegate extends SingleChildLayoutDelegate {
   @override
   bool shouldRelayout(_MessageContextMenuLayoutDelegate oldDelegate) =>
       messageRect != oldDelegate.messageRect ||
+      alignRight != oldDelegate.alignRight ||
       viewportPadding != oldDelegate.viewportPadding;
 }
 

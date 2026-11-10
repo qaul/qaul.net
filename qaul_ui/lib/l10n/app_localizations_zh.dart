@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -317,6 +316,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get share => '分享';
+
+  @override
+  String get save => '保存';
+
+  @override
+  String get attachmentSaved => '附件已保存';
+
+  @override
+  String get attachmentSaveFailed => '无法保存附件';
 
   @override
   String get messageCopied => '消息已复制';
@@ -803,6 +811,15 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get share => '分享';
+
+  @override
+  String get save => '儲存';
+
+  @override
+  String get attachmentSaved => '已儲存附件';
+
+  @override
+  String get attachmentSaveFailed => '無法儲存附件';
 
   @override
   String get messageCopied => '訊息已複製';

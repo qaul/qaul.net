@@ -53,7 +53,27 @@ class FileMessageWidget extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(message.name, style: attachmentStyle),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final nameStyle = DefaultTextStyle.of(
+                          context,
+                        ).style.merge(attachmentStyle);
+                        return Text(
+                          shortenFileName(
+                            message.name,
+                            maxWidth: constraints.maxWidth,
+                            style: nameStyle,
+                            textScaler: MediaQuery.textScalerOf(context),
+                            textDirection: Directionality.of(context),
+                            locale: Localizations.maybeLocaleOf(context),
+                          ),
+                          style: nameStyle,
+                          maxLines: 1,
+                          softWrap: false,
+                          semanticsLabel: message.name,
+                        );
+                      },
+                    ),
                     const SizedBox(height: 4),
                     Text(fileSize(message.size), style: attachmentStyle),
                   ],

@@ -739,6 +739,24 @@ abstract class AppLocalizations {
   /// **'Share'**
   String get share;
 
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @attachmentSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment saved'**
+  String get attachmentSaved;
+
+  /// No description provided for @attachmentSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the attachment'**
+  String get attachmentSaveFailed;
+
   /// No description provided for @messageCopied.
   ///
   /// In en, this message translates to:
