@@ -23,8 +23,9 @@ void main() {
     WidgetTester tester,
     Widget media, {
     TextScaler textScaler = TextScaler.noScaling,
+    double column = _column,
   }) {
-    tester.view.physicalSize = const Size(_column, 844);
+    tester.view.physicalSize = Size(column, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final clock = DateTime(2026, 1, 1, 12);
@@ -32,7 +33,7 @@ void main() {
       MaterialApp(
         home: MediaQuery(
           data: MediaQueryData(
-            size: const Size(390, 844),
+            size: Size(column, 844),
             textScaler: textScaler,
           ),
           child: Material(
@@ -170,4 +171,30 @@ void main() {
       expect(text.data, endsWith('.pdf'));
     });
   }
+
+  testWidgets('keeps photos within the media height cap on wide desktop panes', (
+    tester,
+  ) async {
+    const desktopColumn = 1060.0;
+    final contentWidth = (desktopColumn * ChatBubbleStyle.maxWidthFraction)
+        .floor();
+    expect(chatMediaExtent(contentWidth), kChatMediaMaxExtent);
+    expect(chatMediaExtent(200), 200);
+
+    for (final (w, h) in [(3000.0, 4000.0), (4000.0, 3000.0)]) {
+      // ImageMessageWidget reads its size once, so start each case fresh.
+      await tester.pumpWidget(const SizedBox.shrink());
+      await pumpInBubble(
+        tester,
+        ImageMessageWidget(
+          message: image(w, h),
+          messageWidth: chatMediaExtent(contentWidth),
+        ),
+        column: desktopColumn,
+      );
+      final rect = tester.getRect(find.byType(Image));
+      expect(rect.height, closeTo(kChatMediaMaxExtent, 0.5));
+      expect(rect.width, closeTo(kChatMediaMaxExtent * w / h, 0.5));
+    }
+  });
 }

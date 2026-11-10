@@ -77,6 +77,15 @@ const _kChatMessageWidthRatio = 0.94;
 int _chatContentWidth(int messageColumnWidth) =>
     (messageColumnWidth * ChatBubbleStyle.maxWidthFraction).floor();
 
+/// Image and audio widgets size their height and controls from their
+/// messageWidth; keep that at the pre-column-rule maximum so wide desktop panes
+/// widen bubbles without making photos taller than the chat.
+const kChatMediaMaxExtent = 440;
+
+@visibleForTesting
+int chatMediaExtent(int contentWidth) =>
+    contentWidth < kChatMediaMaxExtent ? contentWidth : kChatMediaMaxExtent;
+
 class ForwardAttachment {
   const ForwardAttachment({
     required this.path,
@@ -1268,7 +1277,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                     final contentWidth = _chatContentWidth(messageWidth);
                     return ImageMessageWidget(
                       message: message,
-                      messageWidth: contentWidth,
+                      messageWidth: chatMediaExtent(contentWidth),
                       isDefaultUser: message.author.id == user.idBase58,
                     );
                   },
@@ -1278,7 +1287,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                       width: contentWidth.toDouble(),
                       child: AudioMessageWidget(
                         message: message,
-                        messageWidth: contentWidth,
+                        messageWidth: chatMediaExtent(contentWidth),
                         isDefaultUser: message.author.id == user.idBase58,
                       ),
                     );
