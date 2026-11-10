@@ -53,7 +53,7 @@ Widget _app({
       : ChatReplyJourney.direct(
           currentUser: _me,
           initialMessages: messages,
-          placeholder: 'Secure private message',
+          placeholder: 'Private message',
           clock: _clock,
           currentUserReplyLabel: 'You',
           onMessageSent: onMessageSent,

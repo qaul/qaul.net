@@ -2012,7 +2012,7 @@ impl ConnectionTransport for NostrModule {
 
         // Connect to relays
         for relay in &relays {
-            client.add_relay(relay).await
+            client.rithrelay(relay).await
                 .map_err(|e| ModuleError::ConnectionFailed(e.to_string()))?;
         }
 

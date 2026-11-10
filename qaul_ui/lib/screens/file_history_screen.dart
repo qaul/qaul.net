@@ -159,7 +159,6 @@ class _FileHistoryTile extends ConsumerWidget {
         const SizedBox(height: 8),
         Text(
           '${DateFormat('EEEE, MMMM d yyyy, h:mm a').format(file.time)} · Size: ${fileSize(file.size)}',
-          style: const TextStyle(fontStyle: FontStyle.italic),
         ),
       ],
     );

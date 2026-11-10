@@ -99,6 +99,7 @@ void main() {
 
       expect(helper.defaultLocale, isNull);
       expect(helper.themeMode, ThemeMode.system);
+      expect(helper.textScale, 1.0);
       expect(helper.publicTabNotificationsEnabled, true);
       expect(helper.chatNotificationsEnabled, true);
       expect(helper.notifyOnlyForVerifiedUsers, false);
@@ -115,6 +116,37 @@ void main() {
 
       await helper.setThemeMode(ThemeMode.system);
       expect(helper.themeMode, equals(ThemeMode.system));
+    });
+
+    test('persists and reloads text zoom in tenths within its limits', () async {
+      final helper = UserPrefsHelper.instance;
+      await helper.setTextScale(1.26);
+      expect(helper.textScale, 1.3);
+      expect(await testPrefs.getDouble('cached_text_scale'), 1.3);
+      await helper.refresh();
+      expect(helper.textScale, 1.3);
+
+      await helper.setTextScale(9);
+      expect(helper.textScale, 2.5);
+      await helper.setTextScale(0);
+      expect(helper.textScale, 0.6);
+
+      await testPrefs.setDouble('cached_text_scale', 8);
+      await helper.refresh();
+      expect(helper.textScale, 2.5);
+      await helper.setTextScale(double.nan);
+      expect(helper.textScale, 1.0);
+    });
+
+    test('rapid text zoom changes update immediately and persist in order', () async {
+      final helper = UserPrefsHelper.instance;
+      final writes = <Future<void>>[];
+      for (var i = 0; i < 15; i++) {
+        writes.add(helper.setTextScale(helper.textScale + 0.1));
+      }
+      expect(helper.textScale, 2.5);
+      await Future.wait(writes);
+      expect(await testPrefs.getDouble('cached_text_scale'), 2.5);
     });
   });
 }

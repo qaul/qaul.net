@@ -40,10 +40,7 @@ pub async fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
         .spawn()
         .map_err(|e| format!("failed to spawn `{qauld_path}`: {e}"))?;
     if cli.verbose {
-        eprintln!(
-            "qauld-ctl: started qauld (pid {})",
-            child.id().unwrap_or(0)
-        );
+        eprintln!("qauld-ctl: started qauld (pid {})", child.id().unwrap_or(0));
     }
 
     // Stream child's stdout + stderr to our stderr so the user sees
@@ -107,7 +104,10 @@ pub async fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
     }
 }
 
-async fn forward_lines<R: tokio::io::AsyncRead + Unpin>(reader: BufReader<R>, _which: &'static str) {
+async fn forward_lines<R: tokio::io::AsyncRead + Unpin>(
+    reader: BufReader<R>,
+    _which: &'static str,
+) {
     let mut lines = reader.lines();
     while let Ok(Some(line)) = lines.next_line().await {
         eprintln!("[qauld] {line}");
