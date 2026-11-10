@@ -2,12 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qaul_components/qaul_components.dart'
-    show MessageStatus, MessageType, QaulChatBubble, QaulChatBubbleMessage;
+    show
+        ChatBubbleStyle,
+        MessageStatus,
+        MessageType,
+        QaulChatBubble,
+        QaulChatBubbleMessage;
 import 'package:qaul_ui/screens/home/tabs/chat/widgets/chat.dart';
 
-// flutter_chat_ui's messageWidth on a 390px-wide phone; the bubble caps at 272.
-const _messageWidth = 304;
-const _maxBubbleWidth = 272.0;
+// A 390px phone column. Bubbles cap at 76% of it, and chat.dart builds media
+// at that content width.
+const _column = 390.0;
+const _maxBubbleWidth = _column * ChatBubbleStyle.maxWidthFraction;
+final _messageWidth = _maxBubbleWidth.floor();
 
 void main() {
   final author = types.User(id: 'peer');
@@ -16,13 +23,17 @@ void main() {
     WidgetTester tester,
     Widget media, {
     TextScaler textScaler = TextScaler.noScaling,
+    double column = _column,
   }) {
+    tester.view.physicalSize = Size(column, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     final clock = DateTime(2026, 1, 1, 12);
     return tester.pumpWidget(
       MaterialApp(
         home: MediaQuery(
           data: MediaQueryData(
-            size: const Size(390, 844),
+            size: Size(column, 844),
             textScaler: textScaler,
           ),
           child: Material(
@@ -60,12 +71,17 @@ void main() {
         metadata: caption == null ? null : {'description': caption},
       );
 
+  // Images are as wide as their aspect ratio allows at a height of
+  // messageWidth, at least 170px, and never wider than the bubble.
+  double imageWidth(double w, double h) =>
+      (_messageWidth * w / h).clamp(170, _maxBubbleWidth).toDouble();
+
   for (final c in [
-    (name: 'portrait 3:4', w: 3000.0, h: 4000.0, expected: 228.0),
-    (name: 'portrait 9:16', w: 1080.0, h: 1920.0, expected: 171.0),
-    (name: 'small portrait thumbnail', w: 120.0, h: 160.0, expected: 228.0),
-    (name: 'landscape 4:3', w: 4000.0, h: 3000.0, expected: _maxBubbleWidth),
-    (name: 'square', w: 1000.0, h: 1000.0, expected: _maxBubbleWidth),
+    (name: 'portrait 3:4', w: 3000.0, h: 4000.0),
+    (name: 'portrait 9:16', w: 1080.0, h: 1920.0),
+    (name: 'small portrait thumbnail', w: 120.0, h: 160.0),
+    (name: 'landscape 4:3', w: 4000.0, h: 3000.0),
+    (name: 'square', w: 1000.0, h: 1000.0),
   ]) {
     testWidgets('image bubble hugs a ${c.name} image', (tester) async {
       await pumpInBubble(
@@ -76,11 +92,9 @@ void main() {
         ),
       );
       expect(tester.takeException(), isNull);
-      expect(bubbleWidth(tester), closeTo(c.expected, 0.5));
-      expect(
-        tester.getRect(find.byType(Image)).width,
-        closeTo(c.expected, 0.5),
-      );
+      final expected = imageWidth(c.w, c.h);
+      expect(bubbleWidth(tester), closeTo(expected, 0.5));
+      expect(tester.getRect(find.byType(Image)).width, closeTo(expected, 0.5));
     });
   }
 
@@ -99,7 +113,7 @@ void main() {
       ),
     );
     expect(tester.takeException(), isNull);
-    expect(bubbleWidth(tester), _maxBubbleWidth);
+    expect(bubbleWidth(tester), closeTo(_maxBubbleWidth, 0.01));
   });
 
   testWidgets('file bubble keeps the full bubble width', (tester) async {
@@ -119,7 +133,7 @@ void main() {
       ),
     );
     expect(tester.takeException(), isNull);
-    expect(bubbleWidth(tester), _maxBubbleWidth);
+    expect(bubbleWidth(tester), closeTo(_maxBubbleWidth, 0.5));
   });
 
   for (final scale in [1.0, 2.5]) {
@@ -144,7 +158,7 @@ void main() {
         textScaler: TextScaler.linear(scale),
       );
       expect(tester.takeException(), isNull);
-      expect(bubbleWidth(tester), _maxBubbleWidth);
+      expect(bubbleWidth(tester), closeTo(_maxBubbleWidth, 0.5));
       final text = tester.widget<Text>(
         find.byWidgetPredicate(
           (widget) => widget is Text && widget.semanticsLabel == name,
@@ -157,4 +171,30 @@ void main() {
       expect(text.data, endsWith('.pdf'));
     });
   }
+
+  testWidgets('keeps photos within the media height cap on wide desktop panes', (
+    tester,
+  ) async {
+    const desktopColumn = 1060.0;
+    final contentWidth = (desktopColumn * ChatBubbleStyle.maxWidthFraction)
+        .floor();
+    expect(chatMediaExtent(contentWidth), kChatMediaMaxExtent);
+    expect(chatMediaExtent(200), 200);
+
+    for (final (w, h) in [(3000.0, 4000.0), (4000.0, 3000.0)]) {
+      // ImageMessageWidget reads its size once, so start each case fresh.
+      await tester.pumpWidget(const SizedBox.shrink());
+      await pumpInBubble(
+        tester,
+        ImageMessageWidget(
+          message: image(w, h),
+          messageWidth: chatMediaExtent(contentWidth),
+        ),
+        column: desktopColumn,
+      );
+      final rect = tester.getRect(find.byType(Image));
+      expect(rect.height, closeTo(kChatMediaMaxExtent, 0.5));
+      expect(rect.width, closeTo(kChatMediaMaxExtent * w / h, 0.5));
+    }
+  });
 }

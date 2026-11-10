@@ -69,6 +69,23 @@ part 'chat_timeline_projection.dart';
 
 typedef OnSendPressed = void Function(String rawText);
 
+/// flutter_chat_ui expands this ratio by 6% for chats without avatars. Keep
+/// its outer constraint as wide as the message column so the component owns
+/// the shared 76% bubble cap for text, media, and replies.
+const _kChatMessageWidthRatio = 0.94;
+
+int _chatContentWidth(int messageColumnWidth) =>
+    (messageColumnWidth * ChatBubbleStyle.maxWidthFraction).floor();
+
+/// Image and audio widgets size their height and controls from their
+/// messageWidth; keep that at the pre-column-rule maximum so wide desktop panes
+/// widen bubbles without making photos taller than the chat.
+const kChatMediaMaxExtent = 440;
+
+@visibleForTesting
+int chatMediaExtent(int contentWidth) =>
+    contentWidth < kChatMediaMaxExtent ? contentWidth : kChatMediaMaxExtent;
+
 class ForwardAttachment {
   const ForwardAttachment({
     required this.path,
@@ -1135,6 +1152,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                   ),
                   showUserAvatars: false,
                   showUserNames: false,
+                  messageWidthRatio: _kChatMessageWidthRatio,
                   user: user.toInternalUser(),
                   useTopSafeAreaInset: false,
                   dateHeaderThreshold: const Duration(days: 365).inMilliseconds,
@@ -1246,8 +1264,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                         );
                       },
                   fileMessageBuilder: (message, {required int messageWidth}) {
+                    final contentWidth = _chatContentWidth(messageWidth);
                     return SizedBox(
-                      width: messageWidth.toDouble(),
+                      width: contentWidth.toDouble(),
                       child: FileMessageWidget(
                         message: message,
                         isDefaultUser: message.author.id == user.idBase58,
@@ -1255,18 +1274,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                     );
                   },
                   imageMessageBuilder: (message, {required int messageWidth}) {
+                    final contentWidth = _chatContentWidth(messageWidth);
                     return ImageMessageWidget(
                       message: message,
-                      messageWidth: messageWidth,
+                      messageWidth: chatMediaExtent(contentWidth),
                       isDefaultUser: message.author.id == user.idBase58,
                     );
                   },
                   audioMessageBuilder: (message, {required int messageWidth}) {
+                    final contentWidth = _chatContentWidth(messageWidth);
                     return SizedBox(
-                      width: messageWidth.toDouble(),
+                      width: contentWidth.toDouble(),
                       child: AudioMessageWidget(
                         message: message,
-                        messageWidth: messageWidth,
+                        messageWidth: chatMediaExtent(contentWidth),
                         isDefaultUser: message.author.id == user.idBase58,
                       ),
                     );
@@ -1290,6 +1311,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                       ),
                     ],
                     backgroundColor: chatBackgroundColor,
+                    messageMaxWidth: double.infinity,
                     messageInsetsVertical: 0,
                     messageInsetsHorizontal: 0,
                     bubbleMargin: EdgeInsets.zero,
