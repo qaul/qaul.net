@@ -99,7 +99,7 @@ void main() {
     });
   }
 
-  testWidgets('image with a long caption widens to the bubble max', (
+  testWidgets('image with a long caption widens up to the bubble max', (
     tester,
   ) async {
     await pumpInBubble(
@@ -111,7 +111,8 @@ void main() {
       caption: 'A caption long enough to need the whole bubble width',
     );
     expect(tester.takeException(), isNull);
-    expect(bubbleWidth(tester), closeTo(_maxBubbleWidth, 0.01));
+    expect(bubbleWidth(tester), greaterThan(imageWidth(3000, 4000)));
+    expect(bubbleWidth(tester), lessThanOrEqualTo(_maxBubbleWidth));
   });
 
   testWidgets('file bubble keeps the full bubble width', (tester) async {

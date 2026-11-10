@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../../styles/qaul_color_sheet.dart';
 import '../../styles/qaul_emoji.dart';
@@ -806,39 +809,59 @@ class _QaulChatBubbleSurface extends StatelessWidget {
     );
 
     final hasCaption = message.content.trim().isNotEmpty;
-    final mediaContent = ClipRRect(
-      borderRadius: borderRadius.resolve(Directionality.of(context)),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        // Without a caption the column is as wide as its widest child, so
-        // aspect-ratio media hugs the image while full-width rows still fill
-        // the bubble. A captioned bubble fills its width, like a text message.
-        crossAxisAlignment: hasCaption
-            ? CrossAxisAlignment.stretch
-            : CrossAxisAlignment.end,
-        children: [
-          child,
-          if (hasCaption)
-            Padding(
-              key: const ValueKey('chat-media-caption-padding'),
-              padding: const EdgeInsets.symmetric(
-                horizontal: ChatBubbleStyle.horizontalPadding,
-                vertical: ChatBubbleStyle.verticalPadding,
-              ),
-              child: _QaulMediaCaption(
+    const captionPadding = EdgeInsets.symmetric(
+      horizontal: ChatBubbleStyle.horizontalPadding,
+      vertical: ChatBubbleStyle.verticalPadding,
+    );
+
+    Widget buildMediaContent(double maxBubbleWidth) {
+      final Widget content;
+      if (hasCaption) {
+        // The media keeps its own width; the bubble grows only as far as the
+        // caption needs, up to the bubble max.
+        content = _MediaCaptionColumn(
+          captionWidth:
+              _QaulMediaCaption.naturalWidth(
+                context,
                 message: message,
                 clock: clock,
                 showTimestamp: showTimestamp,
-              ),
-            )
-          else if (showTimestamp)
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(10, 4, 10, 6),
-              child: timeRow,
+                maxWidth: maxBubbleWidth - captionPadding.horizontal,
+              ) +
+              captionPadding.horizontal,
+          media: child,
+          caption: Padding(
+            key: const ValueKey('chat-media-caption-padding'),
+            padding: captionPadding,
+            child: _QaulMediaCaption(
+              message: message,
+              clock: clock,
+              showTimestamp: showTimestamp,
             ),
-        ],
-      ),
-    );
+          ),
+        );
+      } else {
+        content = Column(
+          mainAxisSize: MainAxisSize.min,
+          // No stretch/IntrinsicWidth: the column is as wide as its widest
+          // child, so aspect-ratio media hugs the image while full-width rows
+          // still fill the bubble.
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            child,
+            if (showTimestamp)
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(10, 4, 10, 6),
+                child: timeRow,
+              ),
+          ],
+        );
+      }
+      return ClipRRect(
+        borderRadius: borderRadius.resolve(Directionality.of(context)),
+        child: content,
+      );
+    }
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -861,9 +884,7 @@ class _QaulChatBubbleSurface extends StatelessWidget {
                   key: selectionKey,
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      minWidth: hasCaption
-                          ? maxBubbleWidth
-                          : ChatBubbleStyle.minBubbleWidth,
+                      minWidth: ChatBubbleStyle.minBubbleWidth,
                       maxWidth: maxBubbleWidth,
                     ),
                     child: Container(
@@ -881,7 +902,7 @@ class _QaulChatBubbleSurface extends StatelessWidget {
                               ),
                             )
                           : null,
-                      child: mediaContent,
+                      child: buildMediaContent(maxBubbleWidth),
                     ),
                   ),
                 ),
@@ -924,58 +945,51 @@ class _QaulMediaCaption extends StatelessWidget {
   final DateTime clock;
   final bool showTimestamp;
 
+  /// Width the caption needs within [maxWidth], so the bubble only grows as
+  /// far as its caption requires.
+  static double naturalWidth(
+    BuildContext context, {
+    required QaulChatBubbleMessage message,
+    required DateTime clock,
+    required bool showTimestamp,
+    required double maxWidth,
+  }) {
+    final metrics = _QaulMediaCaptionMetrics(
+      context,
+      message: message,
+      clock: clock,
+      maxWidth: maxWidth,
+    );
+    if (!showTimestamp) return metrics.textWidth.ceilToDouble();
+    if (metrics.fitsOnOneLine) {
+      return (metrics.textWidth +
+              ChatBubbleStyle.gapBetweenTextAndDate +
+              metrics.timeBlockWidth)
+          .ceilToDouble();
+    }
+    return math.max(metrics.textWidth, metrics.timeBlockWidth).ceilToDouble();
+  }
+
   @override
   Widget build(BuildContext context) {
     final isPrimary = message.messageType == MessageType.primary;
     final textScaler = chatBubbleTextScaler(context);
-    final content = message.content.trim();
-    final emojiCount = emojiOnlyMessageCount(content);
-    final messageTextStyle = emojiCount == null
-        ? ChatBubbleStyle.textStyle
-        : ChatBubbleStyle.emojiOnlyTextStyle(emojiCount);
-    final messageSpan = buildChatMentionTextSpan(
-      text: content,
-      style: messageTextStyle,
-      mentionLabels: message.mentionLabels,
-      mentionBackgroundColor: chatMentionBubbleBackground(
-        Theme.of(context).brightness,
-      ),
-    );
     final timeLabel = formatQaulChatBubbleTime(message, clock);
-    final statusIconSize = textScaler.scale(14);
     final statusIcon = _buildChatBubbleStatusIcon(
       message.status,
       Colors.white,
-      statusIconSize,
+      textScaler.scale(14),
     );
 
     return LayoutBuilder(
       builder: (context, constraints) {
         const gap = ChatBubbleStyle.gapBetweenTextAndDate;
-        final timeLabelPainter = TextPainter(
-          text: TextSpan(text: timeLabel, style: ChatBubbleStyle.timeStyle),
-          textDirection: TextDirection.ltr,
-          textScaler: textScaler,
-        )..layout();
-        var timeBlockWidth =
-            timeLabelPainter.width +
-            ChatBubbleStyle.gapBetweenTimeAndStatusIcon;
-        if (isPrimary && statusIcon != null) {
-          timeBlockWidth += statusIconSize;
-        }
-        final maxMessageWidth = (constraints.maxWidth - gap - timeBlockWidth)
-            .clamp(0.0, double.infinity);
-        final painter = TextPainter(
-          text: messageSpan,
-          textDirection: TextDirection.ltr,
-          textScaler: textScaler,
-        )..layout(maxWidth: maxMessageWidth);
-        final lineHeight =
-            textScaler.scale(messageTextStyle.fontSize!) *
-            (messageTextStyle.height ?? 1.2);
-        final fitsOnOneLine =
-            emojiCount == null && painter.height <= lineHeight * 1.1;
-        painter.dispose();
+        final metrics = _QaulMediaCaptionMetrics(
+          context,
+          message: message,
+          clock: clock,
+          maxWidth: constraints.maxWidth,
+        );
 
         final timeRow = Row(
           mainAxisSize: MainAxisSize.min,
@@ -994,52 +1008,258 @@ class _QaulMediaCaption extends StatelessWidget {
           textAlign: TextAlign.left,
           textWidthBasis: TextWidthBasis.longestLine,
           textScaler: textScaler,
-          text: messageSpan,
+          text: metrics.span,
         );
 
-        if (!showTimestamp) return caption;
-        if (fitsOnOneLine) {
+        if (!showTimestamp) {
+          return Align(alignment: Alignment.centerLeft, child: caption);
+        }
+        if (metrics.fitsOnOneLine) {
+          // The caption takes the remaining width so the time sits at the end
+          // of the bubble, however wide the media makes it.
           return Row(
             crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Flexible(child: caption),
+              Expanded(child: caption),
               const SizedBox(width: gap),
               timeRow,
             ],
           );
         }
 
-        final stackedPainter = TextPainter(
-          text: messageSpan,
-          textDirection: TextDirection.ltr,
-          textScaler: textScaler,
-          textWidthBasis: TextWidthBasis.longestLine,
-        )..layout(maxWidth: constraints.maxWidth);
-        final stackedWidth = stackedPainter.width > timeBlockWidth
-            ? stackedPainter.width
-            : timeBlockWidth;
-        stackedPainter.dispose();
-        return SizedBox(
-          width: stackedWidth.ceilToDouble(),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              caption,
-              Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: gap),
-                  child: timeRow,
-                ),
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            caption,
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.only(top: gap),
+                child: timeRow,
               ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );
   }
+}
+
+/// Text measurements shared by [_QaulMediaCaption]'s layout and its natural
+/// width, so the bubble width and the rendered caption always agree.
+class _QaulMediaCaptionMetrics {
+  factory _QaulMediaCaptionMetrics(
+    BuildContext context, {
+    required QaulChatBubbleMessage message,
+    required DateTime clock,
+    required double maxWidth,
+  }) {
+    final isPrimary = message.messageType == MessageType.primary;
+    final textScaler = chatBubbleTextScaler(context);
+    final content = message.content.trim();
+    final emojiCount = emojiOnlyMessageCount(content);
+    final textStyle = emojiCount == null
+        ? ChatBubbleStyle.textStyle
+        : ChatBubbleStyle.emojiOnlyTextStyle(emojiCount);
+    final span = buildChatMentionTextSpan(
+      text: content,
+      style: textStyle,
+      mentionLabels: message.mentionLabels,
+      mentionBackgroundColor: chatMentionBubbleBackground(
+        Theme.of(context).brightness,
+      ),
+    );
+
+    final statusIconSize = textScaler.scale(14);
+    final timePainter = TextPainter(
+      text: TextSpan(
+        text: formatQaulChatBubbleTime(message, clock),
+        style: ChatBubbleStyle.timeStyle,
+      ),
+      textDirection: TextDirection.ltr,
+      textScaler: textScaler,
+    )..layout();
+    var timeBlockWidth =
+        timePainter.width + ChatBubbleStyle.gapBetweenTimeAndStatusIcon;
+    timePainter.dispose();
+    if (isPrimary &&
+        _buildChatBubbleStatusIcon(
+              message.status,
+              Colors.white,
+              statusIconSize,
+            ) !=
+            null) {
+      timeBlockWidth += statusIconSize;
+    }
+
+    final inlineWidth =
+        (maxWidth - ChatBubbleStyle.gapBetweenTextAndDate - timeBlockWidth)
+            .clamp(0.0, double.infinity);
+    final inlinePainter = TextPainter(
+      text: span,
+      textDirection: TextDirection.ltr,
+      textScaler: textScaler,
+      textWidthBasis: TextWidthBasis.longestLine,
+    )..layout(maxWidth: inlineWidth);
+    final lineHeight =
+        textScaler.scale(textStyle.fontSize!) * (textStyle.height ?? 1.2);
+    final fitsOnOneLine =
+        emojiCount == null && inlinePainter.height <= lineHeight * 1.1;
+    final inlineTextWidth = inlinePainter.width;
+    inlinePainter.dispose();
+
+    var textWidth = inlineTextWidth;
+    if (!fitsOnOneLine) {
+      final stackedPainter = TextPainter(
+        text: span,
+        textDirection: TextDirection.ltr,
+        textScaler: textScaler,
+        textWidthBasis: TextWidthBasis.longestLine,
+      )..layout(maxWidth: maxWidth);
+      textWidth = stackedPainter.width;
+      stackedPainter.dispose();
+    }
+
+    return _QaulMediaCaptionMetrics._(
+      span: span,
+      fitsOnOneLine: fitsOnOneLine,
+      textWidth: textWidth,
+      timeBlockWidth: timeBlockWidth,
+    );
+  }
+
+  const _QaulMediaCaptionMetrics._({
+    required this.span,
+    required this.fitsOnOneLine,
+    required this.textWidth,
+    required this.timeBlockWidth,
+  });
+
+  final InlineSpan span;
+  final bool fitsOnOneLine;
+  final double textWidth;
+  final double timeBlockWidth;
+}
+
+/// Stacks media above its caption. The media keeps its own width; the box is
+/// as wide as the wider of the media and [captionWidth], and the caption is
+/// laid out at that full width so its timestamp lands at the bubble's end.
+class _MediaCaptionColumn extends MultiChildRenderObjectWidget {
+  _MediaCaptionColumn({
+    required this.captionWidth,
+    required Widget media,
+    required Widget caption,
+  }) : super(children: [media, caption]);
+
+  final double captionWidth;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderMediaCaptionColumn(
+        captionWidth: captionWidth,
+        textDirection: Directionality.of(context),
+      );
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderMediaCaptionColumn renderObject,
+  ) {
+    renderObject
+      ..captionWidth = captionWidth
+      ..textDirection = Directionality.of(context);
+  }
+}
+
+class _MediaCaptionParentData extends ContainerBoxParentData<RenderBox> {}
+
+class _RenderMediaCaptionColumn extends RenderBox
+    with
+        ContainerRenderObjectMixin<RenderBox, _MediaCaptionParentData>,
+        RenderBoxContainerDefaultsMixin<RenderBox, _MediaCaptionParentData> {
+  _RenderMediaCaptionColumn({
+    required double captionWidth,
+    required TextDirection textDirection,
+  }) : _captionWidth = captionWidth,
+       _textDirection = textDirection;
+
+  double _captionWidth;
+  set captionWidth(double value) {
+    if (value == _captionWidth) return;
+    _captionWidth = value;
+    markNeedsLayout();
+  }
+
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (value == _textDirection) return;
+    _textDirection = value;
+    markNeedsLayout();
+  }
+
+  RenderBox get _media => firstChild!;
+  RenderBox get _caption => childAfter(firstChild!)!;
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! _MediaCaptionParentData) {
+      child.parentData = _MediaCaptionParentData();
+    }
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) => math.max(
+    _media.getMinIntrinsicWidth(double.infinity),
+    _captionWidth,
+  );
+
+  @override
+  double computeMaxIntrinsicWidth(double height) => math.max(
+    _media.getMaxIntrinsicWidth(double.infinity),
+    _captionWidth,
+  );
+
+  @override
+  double computeMinIntrinsicHeight(double width) =>
+      _media.getMinIntrinsicHeight(width) +
+      _caption.getMinIntrinsicHeight(width);
+
+  @override
+  double computeMaxIntrinsicHeight(double width) =>
+      _media.getMaxIntrinsicHeight(width) +
+      _caption.getMaxIntrinsicHeight(width);
+
+  @override
+  void performLayout() {
+    final media = _media;
+    final caption = _caption;
+    media.layout(constraints.loosen(), parentUsesSize: true);
+    final width = constraints.constrainWidth(
+      math.max(media.size.width, _captionWidth),
+    );
+    caption.layout(BoxConstraints.tightFor(width: width), parentUsesSize: true);
+
+    (media.parentData! as _MediaCaptionParentData).offset = Offset(
+      _textDirection == TextDirection.rtl ? width - media.size.width : 0,
+      0,
+    );
+    (caption.parentData! as _MediaCaptionParentData).offset = Offset(
+      0,
+      media.size.height,
+    );
+    size = constraints.constrain(
+      Size(width, media.size.height + caption.size.height),
+    );
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) =>
+      defaultPaint(context, offset);
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) =>
+      defaultHitTestChildren(result, position: position);
 }
 
 class QaulChatBubbleDisplayItem {

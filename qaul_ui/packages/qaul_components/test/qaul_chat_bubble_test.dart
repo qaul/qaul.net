@@ -1155,6 +1155,19 @@ void main() {
             );
             expect(captionRect.top, greaterThanOrEqualTo(media.bottom));
             expect(timestamp.left, greaterThan(captionRect.right));
+            final bubble = tester.getRect(
+              find.byKey(const ValueKey('chat-bubble-surface')),
+            );
+            // A short caption neither widens the bubble past its media nor
+            // leaves the timestamp floating mid-bubble.
+            expect(bubble.width, media.width);
+            final timeRow = tester.getRect(
+              find.ancestor(of: find.text('Now'), matching: find.byType(Row)).first,
+            );
+            expect(
+              timeRow.right,
+              closeTo(bubble.right - ChatBubbleStyle.horizontalPadding, 0.5),
+            );
           }
         }
       },
@@ -1175,6 +1188,19 @@ void main() {
       final captionRect = tester.getRect(_findMessageRichText(caption));
       final timestamp = tester.getRect(find.text('Now'));
       expect(timestamp.top, greaterThan(captionRect.top + 20));
+      final bubble = tester.getRect(
+        find.byKey(const ValueKey('chat-bubble-surface')),
+      );
+      final media = tester.getRect(find.byKey(const ValueKey('portrait-media')));
+      expect(bubble.width, greaterThan(media.width));
+      expect(media.left, bubble.left);
+      final timeRow = tester.getRect(
+        find.ancestor(of: find.text('Now'), matching: find.byType(Row)).first,
+      );
+      expect(
+        timeRow.right,
+        closeTo(bubble.right - ChatBubbleStyle.horizontalPadding, 0.5),
+      );
     });
 
     testWidgets('highlights complete group mentions in captions', (
