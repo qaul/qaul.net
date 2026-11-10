@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'chat_surface_shadows.dart';
+
 class QaulColorSheet {
   const QaulColorSheet(this.brightness);
-
-  static const _lightChatDivider = Color(0xFFD1D1D6);
-  static const _darkHeaderDivider = Color(0xFF9E9E9E);
 
   final Brightness brightness;
 
@@ -17,10 +16,11 @@ class QaulColorSheet {
 
   Color get chatBubbleSelectionOutline => _isDark ? Colors.white : Colors.black;
 
-  Color get chatFooterDivider => _isDark ? Colors.white : _lightChatDivider;
+  Color get chatSurfaceDivider => chatSurfaceDividerColor(brightness);
 
-  Color get chatHeaderDivider =>
-      _isDark ? _darkHeaderDivider : _lightChatDivider;
+  Color get chatFooterDivider => chatSurfaceDivider;
+
+  Color get chatHeaderDivider => chatSurfaceDivider;
 
   Color get chatDateDividerText => _isDark ? Colors.white : Colors.black;
 }

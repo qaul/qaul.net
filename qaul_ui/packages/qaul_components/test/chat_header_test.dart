@@ -70,7 +70,7 @@ void main() {
     );
   }
 
-  test('uses symmetrical shared chat surface shadows', () {
+  test('uses shared chat surface shadows and strokes', () {
     for (final brightness in Brightness.values) {
       final header = chatSurfaceShadows(
         brightness,
@@ -81,26 +81,35 @@ void main() {
         direction: ChatSurfaceShadowDirection.above,
       );
 
-      expect(header, hasLength(2));
-      expect(header.first, footer.first);
+      final expectedShadow = brightness == Brightness.dark
+          ? const BoxShadow(
+              offset: Offset(0, 10),
+              blurRadius: 7,
+              color: Color(0x66000000),
+            )
+          : const BoxShadow(
+              offset: Offset.zero,
+              blurRadius: 5,
+              color: Color(0x33000000),
+            );
+      final expectedFooterShadow = brightness == Brightness.dark
+          ? const BoxShadow(
+              offset: Offset(0, -10),
+              blurRadius: 7,
+              color: Color(0x66000000),
+            )
+          : expectedShadow;
+
+      expect(header, [expectedShadow]);
+      expect(footer, [expectedFooterShadow]);
       expect(
-        header.first,
-        BoxShadow(
-          offset: Offset.zero,
-          blurRadius: 5,
+        chatSurfaceStroke(brightness),
+        BorderSide(
           color: brightness == Brightness.dark
-              ? const Color(0x66000000)
-              : const Color(0x33000000),
+              ? const Color(0xFF9E9E9E)
+              : const Color(0xFFD1D1D6),
+          width: 0.5,
         ),
-      );
-      expect(header.last.offset, const Offset(0, 10));
-      expect(footer.last.offset, const Offset(0, -10));
-      expect(header.last.blurRadius, 7);
-      expect(
-        header.last.color,
-        brightness == Brightness.dark
-            ? const Color(0x99000000)
-            : const Color(0x66000000),
       );
     }
   });
@@ -130,25 +139,16 @@ void main() {
     return border.bottom;
   }
 
-  testWidgets('uses the shared light chat divider', (tester) async {
+  testWidgets('uses the shared light chat surface stroke', (tester) async {
     final divider = await headerDivider(tester, ThemeData.light());
 
-    expect(divider.width, 0.5);
-    expect(divider.color, const Color(0xFFD1D1D6));
-    expect(
-      divider.color,
-      const QaulColorSheet(Brightness.light).chatHeaderDivider,
-    );
+    expect(divider, chatSurfaceStroke(Brightness.light));
   });
 
-  testWidgets('preserves the dark header divider', (tester) async {
+  testWidgets('uses the shared dark chat surface stroke', (tester) async {
     final divider = await headerDivider(tester, ThemeData.dark());
 
-    expect(divider.width, 0.5);
-    expect(
-      divider.color,
-      const QaulColorSheet(Brightness.dark).chatHeaderDivider,
-    );
+    expect(divider, chatSurfaceStroke(Brightness.dark));
   });
 
   testWidgets('can hide back button and center title without subtitle', (

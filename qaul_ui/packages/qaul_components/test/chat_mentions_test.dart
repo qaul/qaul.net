@@ -99,4 +99,35 @@ void main() {
 
     expect(selection?.label, 'Third Member');
   });
+
+  testWidgets('keeps its 1px divider with the shared dark surface color', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: Scaffold(
+          body: ChatMentionSuggestionList(
+            suggestions: const [
+              ChatMentionSuggestion(id: 'third', label: 'Third Member'),
+            ],
+            onSelected: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    final surface = tester.widget<DecoratedBox>(
+      find
+          .descendant(
+            of: find.byType(ChatMentionSuggestionList),
+            matching: find.byType(DecoratedBox),
+          )
+          .first,
+    );
+    final border = (surface.decoration as BoxDecoration).border! as Border;
+
+    expect(border.top, const BorderSide(color: Color(0xFF9E9E9E), width: 1));
+    expect(border.bottom, border.top);
+  });
 }

@@ -37,7 +37,7 @@ Widget widgetbookTopChromeFrame(BuildContext context, Widget header) {
   return Material(
     color: sheet.background,
     child: ColoredBox(
-      color: sheet.surfaceContainer,
+      color: sheet.background,
       child: Column(
         children: [
           header,
