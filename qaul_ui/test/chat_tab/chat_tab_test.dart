@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:ui' show PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show kSecondaryMouseButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -62,7 +64,10 @@ class FakeMessageShareService implements MessageShareService {
   String? sharedText;
   final sharedFiles = <({String name, String path})>[];
   final copiedFiles = <({String name, String path})>[];
+  final savedFiles = <({String name, String path})>[];
   Rect? sharePositionOrigin;
+  Object? saveError;
+  AttachmentSaveOutcome saveOutcome = AttachmentSaveOutcome.saved;
 
   @override
   Future<void> shareText({
@@ -89,6 +94,16 @@ class FakeMessageShareService implements MessageShareService {
     required String fileName,
   }) async {
     copiedFiles.add((name: fileName, path: filePath));
+  }
+
+  @override
+  Future<AttachmentSaveOutcome> saveFile({
+    required String filePath,
+    required String fileName,
+  }) async {
+    if (saveError case final error?) throw error;
+    savedFiles.add((name: fileName, path: filePath));
+    return saveOutcome;
   }
 }
 
@@ -135,8 +150,10 @@ void main() {
     ChatRoom room, {
     User? otherUser,
     MessageShareService? messageShareService,
+    ForwardAttachment? initialForwardAttachment,
     TextScaler? textScaler,
     Brightness brightness = Brightness.light,
+    Locale? locale,
   }) async {
     final wut = ProviderScope(
       overrides: [
@@ -157,15 +174,106 @@ void main() {
               defaultUser,
               otherUser: otherUser,
               messageShareService: messageShareService,
+              initialForwardAttachment: initialForwardAttachment,
             ),
           ),
         ),
         theme: ThemeData(brightness: brightness),
+        locale: locale,
       ),
     );
 
     await tester.pumpWidget(wut);
     await tester.pump();
+  }
+
+  void expectSingleLineFileName(WidgetTester tester, String name) {
+    final finder = find.byWidgetPredicate(
+      (widget) => widget is Text && widget.semanticsLabel == name,
+    );
+    expect(finder, findsOneWidget);
+    final text = tester.widget<Text>(finder);
+    expect(text.maxLines, 1);
+    expect(text.data, endsWith('.pdf'));
+    if (name.length >= 120) {
+      expect(text.data, contains('…'));
+    } else {
+      expect(text.data, name);
+    }
+    final context = tester.element(finder);
+    final painter = TextPainter(
+      text: TextSpan(text: text.data, style: text.style),
+      textScaler: MediaQuery.textScalerOf(context),
+      textDirection: Directionality.of(context),
+    )..layout();
+    expect(painter.computeLineMetrics(), hasLength(1));
+    expect(
+      painter.width,
+      lessThanOrEqualTo(tester.getSize(finder).width + 0.01),
+    );
+    painter.dispose();
+    expect(tester.takeException(), isNull);
+  }
+
+  for (final name in ['a.pdf', '${'a' * 116}.pdf']) {
+    for (final width in [390.0, 1280.0]) {
+      testWidgets(
+        'send sheet fits file name (${name.length} characters, $width)',
+        (tester) async {
+          tester.view.physicalSize = Size(width, 844);
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          final directory = Directory.systemTemp.createTempSync(
+            'qaul-filename-test-',
+          );
+          final file = File('${directory.path}/attachment.pdf')
+            ..writeAsStringSync('file');
+          addTearDown(() => directory.deleteSync(recursive: true));
+          await pumpChatScreen(
+            tester,
+            buildDirectChat(),
+            otherUser: otherUser,
+            initialForwardAttachment: ForwardAttachment(
+              path: file.path,
+              name: name,
+            ),
+          );
+          await tester.pumpAndSettle();
+          expectSingleLineFileName(tester, name);
+        },
+      );
+    }
+
+    for (final scale in [1.0, 2.5]) {
+      testWidgets(
+        'file bubble fits file name (${name.length} characters, ${scale}x)',
+        (tester) async {
+          await tester.pumpWidget(
+            materialAppWithLocalizations(
+              MediaQuery(
+                data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+                child: Center(
+                  child: SizedBox(
+                    width: scale == 1 ? 272 : 392,
+                    child: FileMessageWidget(
+                      message: types.FileMessage(
+                        id: 'test-file',
+                        author: types.User(id: otherUser.idBase58),
+                        name: name,
+                        uri: '/unused.pdf',
+                        size: 10,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          expectSingleLineFileName(tester, name);
+        },
+      );
+    }
   }
 
   testWidgets('desktop split view at 2.5x has no overflow', (tester) async {
@@ -552,9 +660,9 @@ void main() {
         textMessage(id: 'loaded-message', sender: otherUser, text: 'Loaded'),
       ],
     );
-    ProviderScope.containerOf(loadingChatElement)
-        .read(currentOpenChatRoom.notifier)
-        .state = loadedRoom;
+    ProviderScope.containerOf(
+      loadingChatElement,
+    ).read(currentOpenChatRoom.notifier).state = loadedRoom;
     await tester.pump();
 
     final loadedChatList = find.byKey(
@@ -751,8 +859,7 @@ void main() {
     final minimumLeft = overlayRect.left + menuViewportPadding;
     final maximumLeft =
         overlayRect.right - contextMenuRect.width - menuViewportPadding;
-    final shouldAlignRight =
-        bubbleRect.center.dx >= overlayRect.center.dx;
+    final shouldAlignRight = bubbleRect.center.dx >= overlayRect.center.dx;
     final preferredLeft = shouldAlignRight
         ? bubbleRect.right - contextMenuRect.width
         : bubbleRect.left;
@@ -786,8 +893,7 @@ void main() {
     const feedbackHeight = 52.0;
     const viewportPadding = 16.0;
     final expectedLeft =
-        (bubbleRect.right - feedbackOverlayRect.left - feedbackWidth)
-        .clamp(
+        (bubbleRect.right - feedbackOverlayRect.left - feedbackWidth).clamp(
           viewportPadding,
           feedbackOverlayRect.width - feedbackWidth - viewportPadding,
         );
@@ -803,10 +909,7 @@ void main() {
       toastRect.left,
       closeTo(feedbackOverlayRect.left + expectedLeft, 0.01),
     );
-    expect(
-      toastRect.top,
-      closeTo(feedbackOverlayRect.top + expectedTop, 0.01),
-    );
+    expect(toastRect.top, closeTo(feedbackOverlayRect.top + expectedTop, 0.01));
 
     await tester.pump(const Duration(seconds: 2));
     await tester.pump(const Duration(milliseconds: 100));
@@ -823,9 +926,90 @@ void main() {
     expect(find.byKey(const ValueKey('copy-feedback-toast')), findsNothing);
   });
 
-  testWidgets('shares a text message from the long-press menu', (
-    tester,
-  ) async {
+  testWidgets(
+    'received message context menus open on the left in group chats',
+    (tester) async {
+      final message = textMessage(
+        id: 'received-group-menu',
+        sender: otherUser,
+        text: 'Received group message',
+      );
+      await pumpChatScreen(tester, buildGroupChat(messages: [message]));
+
+      final bubble = find.byKey(const ValueKey('chat-bubble-surface'));
+      await tester.longPress(bubble);
+      await tester.pumpAndSettle();
+
+      final overlayRect = tester.getRect(find.byType(Overlay));
+      final menuRect = tester.getRect(find.byType(ChatMessageContextMenu));
+      expect(menuRect.center.dx, lessThan(overlayRect.center.dx));
+    },
+  );
+
+  testWidgets(
+    'sent message context menus open on the right in direct chats',
+    (tester) async {
+      final message = textMessage(
+        id: 'sent-direct-menu',
+        sender: defaultUser,
+        text: 'Sent direct message',
+      );
+      await pumpChatScreen(
+        tester,
+        buildDirectChat(messages: [message]),
+        otherUser: otherUser,
+      );
+
+      final bubble = find.byKey(const ValueKey('chat-bubble-surface'));
+      await tester.longPress(bubble);
+      await tester.pumpAndSettle();
+
+      final overlayRect = tester.getRect(find.byType(Overlay));
+      final menuRect = tester.getRect(find.byType(ChatMessageContextMenu));
+      expect(menuRect.center.dx, greaterThan(overlayRect.center.dx));
+    },
+  );
+
+  for (final isSent in [true, false]) {
+    testWidgets(
+      '${isSent ? 'sent' : 'received'} message context menus follow the '
+      'bubble in RTL',
+      (tester) async {
+        final message = textMessage(
+          id: 'rtl-menu',
+          sender: isSent ? defaultUser : otherUser,
+          text: 'RTL message',
+        );
+        await pumpChatScreen(
+          tester,
+          buildDirectChat(messages: [message]),
+          otherUser: otherUser,
+          locale: const Locale('ar'),
+        );
+
+        final bubble = find.byKey(QaulChatBubble.surfaceKey);
+        await tester.longPress(bubble);
+        await tester.pumpAndSettle();
+
+        final menu = find.byType(ChatMessageContextMenu);
+        expect(
+          Directionality.of(tester.element(menu)),
+          TextDirection.rtl,
+        );
+        final bubbleRect = tester.getRect(bubble);
+        final menuRect = tester.getRect(menu);
+        // The menu keeps 16px from the screen edge, so it may sit inside an
+        // edge-hugging bubble by up to that much.
+        if (isSent) {
+          expect(menuRect.right, closeTo(bubbleRect.right, 16.5));
+        } else {
+          expect(menuRect.left, closeTo(bubbleRect.left, 16.5));
+        }
+      },
+    );
+  }
+
+  testWidgets('shares a text message from the long-press menu', (tester) async {
     final messageShareService = FakeMessageShareService();
     final targetMessage = Message(
       senderId: otherUser.id,
@@ -992,10 +1176,26 @@ void main() {
   );
 
   BoxBorder? bubbleBorder(WidgetTester tester) {
-    final decoration = tester
-        .widget<DecoratedBox>(find.byKey(const ValueKey('chat-bubble-surface')))
-        .decoration as BoxDecoration;
+    final decoration =
+        tester
+                .widget<DecoratedBox>(
+                  find.byKey(const ValueKey('chat-bubble-surface')),
+                )
+                .decoration
+            as BoxDecoration;
     return decoration.border;
+  }
+
+  double bubbleScale(WidgetTester tester) {
+    final transform = tester.widget<Transform>(
+      find
+          .ancestor(
+            of: find.byKey(const ValueKey('chat-bubble-surface')),
+            matching: find.byType(Transform),
+          )
+          .first,
+    );
+    return transform.transform.storage[0];
   }
 
   User testUser(
@@ -1015,7 +1215,8 @@ void main() {
   ChatRoom directRoomWith(User user, {DateTime? lastMessageTime}) {
     return ChatRoom(
       name: user.name,
-      conversationId: user.conversationId ??
+      conversationId:
+          user.conversationId ??
           Uint8List.fromList('${user.name}-conversation'.codeUnits),
       lastMessageTime: lastMessageTime,
       members: [
@@ -1025,26 +1226,127 @@ void main() {
     );
   }
 
-  testWidgets('text message long press opens context menu with forward enabled', (
+  testWidgets(
+    'text message long press opens context menu with forward enabled',
+    (tester) async {
+      await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);
+
+      final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+      chat.onMessageLongPress!(
+        tester.element(find.byType(chat_ui.Chat)),
+        forwardTargetMessage(),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ChatMessageContextMenu), findsOneWidget);
+      expect(find.text('Forward'), findsOneWidget);
+      expect(find.text('Share'), findsOneWidget);
+      expect(find.text('Copy'), findsOneWidget);
+      expect(find.text('Reply'), findsNothing);
+      expect(find.text('Edit'), findsNothing);
+      expect(find.text('Info'), findsNothing);
+      expect(find.text('Delete'), findsNothing);
+    },
+  );
+
+  testWidgets('holding a bubble scales it before opening the context menu', (
     tester,
   ) async {
-    await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);
-
-    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
-    chat.onMessageLongPress!(
-      tester.element(find.byType(chat_ui.Chat)),
-      forwardTargetMessage(),
+    final message = textMessage(
+      id: 'hold-to-select',
+      sender: otherUser,
+      text: 'hold me',
     );
+    await pumpChatScreen(
+      tester,
+      buildDirectChat(messages: [message]),
+      otherUser: otherUser,
+    );
+
+    var hapticCount = 0;
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (call) async {
+          if (call.method == 'HapticFeedback.vibrate') hapticCount++;
+          return null;
+        });
+    addTearDown(() {
+      debugDefaultTargetPlatformOverride = null;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, null);
+    });
+
+    final bubble = find.byKey(const ValueKey('chat-bubble-surface'));
+    final gesture = await tester.startGesture(tester.getCenter(bubble));
+
+    await tester.pump(const Duration(milliseconds: 199));
+    expect(bubbleScale(tester), 1);
+    expect(find.byType(ChatMessageContextMenu), findsNothing);
+
+    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(bubbleScale(tester), closeTo(1.075, 0.01));
+    expect(find.byType(ChatMessageContextMenu), findsNothing);
+
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byType(ChatMessageContextMenu), findsOneWidget);
+    expect(bubbleScale(tester), closeTo(1.15, 0.01));
+    expect(hapticCount, 1);
+    debugDefaultTargetPlatformOverride = null;
+
+    await gesture.up();
+    await tester.pump();
+    expect(find.byType(ChatMessageContextMenu), findsOneWidget);
+  });
+
+  testWidgets('releasing before selection reverses the bubble scale', (
+    tester,
+  ) async {
+    final message = textMessage(
+      id: 'release-before-select',
+      sender: otherUser,
+      text: 'release me',
+    );
+    await pumpChatScreen(
+      tester,
+      buildDirectChat(messages: [message]),
+      otherUser: otherUser,
+    );
+
+    final bubble = find.byKey(const ValueKey('chat-bubble-surface'));
+    final gesture = await tester.startGesture(tester.getCenter(bubble));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(bubbleScale(tester), greaterThan(1));
+
+    await gesture.up();
     await tester.pumpAndSettle();
+    expect(bubbleScale(tester), 1);
+    expect(find.byType(ChatMessageContextMenu), findsNothing);
+  });
+
+  testWidgets('right-click opens the context menu immediately', (tester) async {
+    final message = textMessage(
+      id: 'right-click-select',
+      sender: otherUser,
+      text: 'right click me',
+    );
+    await pumpChatScreen(
+      tester,
+      buildDirectChat(messages: [message]),
+      otherUser: otherUser,
+    );
+
+    final bubble = find.byKey(const ValueKey('chat-bubble-surface'));
+    final gesture = await tester.startGesture(
+      tester.getCenter(bubble),
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pump();
 
     expect(find.byType(ChatMessageContextMenu), findsOneWidget);
-    expect(find.text('Forward'), findsOneWidget);
-    expect(find.text('Share'), findsOneWidget);
-    expect(find.text('Copy'), findsOneWidget);
-    expect(find.text('Reply'), findsNothing);
-    expect(find.text('Edit'), findsNothing);
-    expect(find.text('Info'), findsNothing);
-    expect(find.text('Delete'), findsNothing);
+    await gesture.up();
   });
 
   testWidgets('message info shows sender, status, dates and message ID', (
@@ -1095,7 +1397,9 @@ void main() {
     expect(find.byKey(const ValueKey('message-info-sheet')), findsNothing);
   });
 
-  testWidgets('shares attachments from the long-press menu', (tester) async {
+  for (final action in ['Share', 'Save']) {
+  testWidgets('${action == 'Share' ? 'shares' : 'saves'} attachments from '
+      'the long-press menu', (tester) async {
     final messageShareService = FakeMessageShareService();
     await pumpChatScreen(
       tester,
@@ -1146,6 +1450,7 @@ void main() {
 
       expect(find.byType(ChatMessageContextMenu), findsOneWidget);
       expect(find.text('Forward'), findsOneWidget);
+      expect(find.text('Save'), findsOneWidget);
       expect(find.text('Share'), findsOneWidget);
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Reply'), findsNothing);
@@ -1153,19 +1458,100 @@ void main() {
       expect(find.text('Info'), findsNothing);
       expect(find.text('Delete'), findsNothing);
 
-      await tester.tap(find.text('Share'));
+      final labels = ['Forward', 'Save', 'Share', 'Copy'];
+      for (var index = 1; index < labels.length; index++) {
+        expect(
+          tester.getTopLeft(find.text(labels[index])).dy,
+          greaterThan(tester.getTopLeft(find.text(labels[index - 1])).dy),
+        );
+      }
+
+      await tester.tap(find.text(action));
       await tester.pumpAndSettle();
     }
 
-    expect(messageShareService.sharedFiles, [
+    expect(
+      action == 'Share'
+          ? messageShareService.sharedFiles
+          : messageShareService.savedFiles,
+      [
       (name: 'document.pdf', path: '/tmp/document.pdf'),
       (name: 'photo.jpg', path: '/tmp/photo.jpg'),
       (name: 'recording.mp3', path: '/tmp/recording.mp3'),
       (name: 'clip.mp4', path: '/tmp/clip.mp4'),
     ]);
   });
+  }
 
-  testWidgets('forwards an attachment from the long-press menu', (tester) async {
+  Future<void> saveAttachment(
+    WidgetTester tester,
+    FakeMessageShareService messageShareService, {
+    Map<String, dynamic>? metadata,
+  }) async {
+    await pumpChatScreen(
+      tester,
+      buildDirectChat(),
+      otherUser: otherUser,
+      messageShareService: messageShareService,
+    );
+    final chat = tester.widget<chat_ui.Chat>(find.byType(chat_ui.Chat));
+    chat.onMessageLongPress!(
+      tester.element(find.byType(chat_ui.Chat)),
+      types.FileMessage(
+        id: 'file',
+        author: types.User(id: otherUser.idBase58),
+        name: 'document.pdf',
+        size: 1,
+        uri: '/tmp/document.pdf',
+        metadata: metadata,
+      ),
+    );
+    await tester.pumpAndSettle();
+    if (find.text('Save').evaluate().isEmpty) return;
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('confirms a saved attachment', (tester) async {
+    await saveAttachment(tester, FakeMessageShareService());
+    expect(find.text('Attachment saved'), findsOneWidget);
+  });
+
+  testWidgets('stays quiet when the system export dialog takes over', (
+    tester,
+  ) async {
+    final service = FakeMessageShareService()
+      ..saveOutcome = AttachmentSaveOutcome.handedToSystem;
+    await saveAttachment(tester, service);
+    expect(service.savedFiles, hasLength(1));
+    expect(find.byType(SnackBar), findsNothing);
+  });
+
+  testWidgets('reports an attachment that could not be saved', (tester) async {
+    final service = FakeMessageShareService()
+      ..saveError = PlatformException(code: 'save_failed');
+    await saveAttachment(tester, service);
+    expect(find.text("Couldn't save the attachment"), findsOneWidget);
+  });
+
+  testWidgets('hides Save while the attachment is still arriving', (
+    tester,
+  ) async {
+    final service = FakeMessageShareService();
+    await saveAttachment(
+      tester,
+      service,
+      metadata: {'messageState': MessageState.receiving.toJson()},
+    );
+    expect(find.byType(ChatMessageContextMenu), findsOneWidget);
+    expect(find.text('Save'), findsNothing);
+    expect(service.savedFiles, isEmpty);
+  });
+
+
+  testWidgets('forwards an attachment from the long-press menu', (
+    tester,
+  ) async {
     await pumpChatScreen(tester, buildDirectChat(), otherUser: otherUser);
 
     final attachment = File(
@@ -1443,16 +1829,22 @@ void main() {
 
     expect(find.text('Forward to'), findsNothing);
     expect(find.text('Group Chat'), findsOneWidget);
-    expect(tester.widget<TextField>(find.byType(TextField)).controller!.text,
-        'forward this text');
+    expect(
+      tester.widget<TextField>(find.byType(TextField)).controller!.text,
+      'forward this text',
+    );
 
-    ProviderScope.containerOf(tester.element(find.byType(chat_ui.Chat)))
-        .read(currentOpenChatRoom.notifier)
-        .state = buildGroupChat(messages: []);
+    ProviderScope.containerOf(
+      tester.element(find.byType(chat_ui.Chat)),
+    ).read(currentOpenChatRoom.notifier).state = buildGroupChat(
+      messages: [],
+    );
     await tester.pumpAndSettle();
 
-    expect(tester.widget<TextField>(find.byType(TextField)).controller!.text,
-        'forward this text');
+    expect(
+      tester.widget<TextField>(find.byType(TextField)).controller!.text,
+      'forward this text',
+    );
   });
 
   testWidgets('mobile forward preserves the source chat when going back', (

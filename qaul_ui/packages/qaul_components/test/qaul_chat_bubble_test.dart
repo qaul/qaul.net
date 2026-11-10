@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qaul_components/qaul_components.dart';
@@ -21,7 +23,146 @@ Finder _findMessageRichText(String content) {
   );
 }
 
+const _kBubbleGoldenKey = ValueKey('chat-bubble-golden');
+const _kGoldenDiffTolerance = 0.04;
+
+class _TolerantGoldenComparator extends LocalFileComparator {
+  _TolerantGoldenComparator(super.testFile);
+
+  @override
+  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    final result = await GoldenFileComparator.compareLists(
+      imageBytes,
+      await getGoldenBytes(golden),
+    );
+
+    if (result.passed || result.diffPercent <= _kGoldenDiffTolerance) {
+      result.dispose();
+      return true;
+    }
+
+    final error = await generateFailureOutput(result, golden, basedir);
+    result.dispose();
+    throw FlutterError(error);
+  }
+}
+
+QaulChatBubbleMessage _wideBubbleMessage(MessageType messageType) {
+  final clock = DateTime(2026, 4, 19, 10, 53);
+  return QaulChatBubbleMessage(
+    content: List.filled(
+      3,
+      'A long message that fills the available bubble width so this layout '
+      'can verify its responsive cap across every chat column size.',
+    ).join(' '),
+    sentAt: clock,
+    receivedAt: clock,
+    status: MessageStatus.read,
+    messageType: messageType,
+    edges: const [],
+  );
+}
+
+Future<void> _pumpWideBubble(
+  WidgetTester tester, {
+  required double width,
+  required MessageType messageType,
+}) async {
+  tester.view.physicalSize = Size(width, 800);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body: RepaintBoundary(
+          key: _kBubbleGoldenKey,
+          child: QaulChatBubble(
+            message: _wideBubbleMessage(messageType),
+            clock: DateTime(2026, 4, 19, 10, 53),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+Future<void> _pumpWideMediaBubble(
+  WidgetTester tester, {
+  required double width,
+  required MessageType messageType,
+}) async {
+  tester.view.physicalSize = Size(width, 300);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body: QaulChatBubble.media(
+          // No caption: this checks the media width cap alone.
+          message: _wideBubbleMessage(messageType).copyWith(content: ''),
+          clock: DateTime(2026, 4, 19, 10, 53),
+          child: SizedBox(width: width, height: 64),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+Future<void> _pumpWideGroupMediaBubble(
+  WidgetTester tester, {
+  required double width,
+}) async {
+  tester.view.physicalSize = Size(width, 300);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body: GroupMessageShell(
+          marginTop: 0,
+          sender: const QaulGroupMessageSender(
+            idBase58: 'group-member',
+            name: 'Group member',
+          ),
+          showSenderName: false,
+          showSenderAvatar: false,
+          child: QaulChatBubble.media(
+            message: _wideBubbleMessage(
+              MessageType.secondary,
+            ).copyWith(content: ''),
+            clock: DateTime(2026, 4, 19, 10, 53),
+            child: SizedBox(width: width, height: 64),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
 void main() {
+  final defaultGoldenComparator = goldenFileComparator;
+
+  setUpAll(() {
+    goldenFileComparator = _TolerantGoldenComparator(
+      (goldenFileComparator as LocalFileComparator).basedir.resolve(
+        'qaul_chat_bubble_test.dart',
+      ),
+    );
+  });
+
+  tearDownAll(() {
+    goldenFileComparator = defaultGoldenComparator;
+  });
+
   group('emojiOnlyMessageCount', () {
     test('recognizes one or two standalone emoji clusters', () {
       expect(emojiOnlyMessageCount('😀'), 1);
@@ -451,6 +592,67 @@ void main() {
   });
 
   group('QaulChatBubble content', () {
+    testWidgets('caps media bubbles to 76% of each message column', (
+      tester,
+    ) async {
+      for (final width in [360.0, 768.0, 1440.0]) {
+        for (final type in MessageType.values) {
+          await _pumpWideMediaBubble(tester, width: width, messageType: type);
+
+          final bubble = tester.getRect(
+            find.byKey(const ValueKey('chat-bubble-surface')),
+          );
+          final expectedWidth = width * ChatBubbleStyle.maxWidthFraction;
+          final gutter = width * ChatBubbleStyle.horizontalGutterFraction;
+          expect(bubble.width, closeTo(expectedWidth, 1));
+          if (type == MessageType.primary) {
+            expect(bubble.right, closeTo(width - gutter, 1));
+          } else {
+            expect(bubble.left, closeTo(gutter, 1));
+          }
+        }
+      }
+    });
+
+    testWidgets('uses the group message column for the same 76% cap', (
+      tester,
+    ) async {
+      for (final width in [360.0, 768.0, 1440.0]) {
+        await _pumpWideGroupMediaBubble(tester, width: width);
+
+        final bubble = tester.getRect(
+          find.byKey(const ValueKey('chat-bubble-surface')),
+        );
+        // GroupMessageShell reserves 12px outside the row, plus its 40px
+        // avatar slot and 8px gap before the actual message column.
+        final groupMessageColumnWidth = width - 12 - 40 - 8;
+        expect(
+          bubble.width,
+          closeTo(
+            groupMessageColumnWidth * ChatBubbleStyle.maxWidthFraction,
+            1,
+          ),
+        );
+      }
+    });
+
+    for (final width in [360, 768, 1440]) {
+      testWidgets('matches the $width px responsive bubble golden', (
+        tester,
+      ) async {
+        await _pumpWideBubble(
+          tester,
+          width: width.toDouble(),
+          messageType: MessageType.primary,
+        );
+
+        await expectLater(
+          find.byKey(_kBubbleGoldenKey),
+          matchesGoldenFile('goldens/chat_bubble_width_$width.png'),
+        );
+      });
+    }
+
     testWidgets('enlarges messages containing only one or two emoji', (
       tester,
     ) async {
@@ -564,42 +766,52 @@ void main() {
   });
 
   for (final systemScale in [1.0, 2.0]) {
-    testWidgets('desktop bubble zoom is not capped (system: $systemScale)', (tester) async {
+    testWidgets('desktop bubble zoom is not capped (system: $systemScale)', (
+      tester,
+    ) async {
       final clock = DateTime(2026, 1, 1, 12);
       final scaler = QaulTextScaler(
         systemTextScaler: TextScaler.linear(systemScale),
         zoom: 2.5,
       );
       for (final content in ['Zoomed message', '😀', '😀🎉']) {
-        await tester.pumpWidget(MaterialApp(
-          home: MediaQuery(
-            data: MediaQueryData(size: const Size(390, 844), textScaler: scaler),
-            child: Material(
-              child: Center(
-                child: SizedBox(
-                  width: 390,
-                  child: QaulChatBubble(
-                    message: QaulChatBubbleMessage(
-                      content: content,
-                      sentAt: clock,
-                      receivedAt: clock,
-                      status: MessageStatus.sent,
-                      messageType: MessageType.primary,
-                      edges: const [],
+        await tester.pumpWidget(
+          MaterialApp(
+            home: MediaQuery(
+              data: MediaQueryData(
+                size: const Size(390, 844),
+                textScaler: scaler,
+              ),
+              child: Material(
+                child: Center(
+                  child: SizedBox(
+                    width: 390,
+                    child: QaulChatBubble(
+                      message: QaulChatBubbleMessage(
+                        content: content,
+                        sentAt: clock,
+                        receivedAt: clock,
+                        status: MessageStatus.sent,
+                        messageType: MessageType.primary,
+                        edges: const [],
+                      ),
+                      clock: clock,
+                      showTimestamp: true,
                     ),
-                    clock: clock,
-                    showTimestamp: true,
                   ),
                 ),
               ),
             ),
           ),
-        ));
+        );
         final expectedScale = (systemScale > 1.3 ? 1.3 : systemScale) * 2.5;
         final rich = tester.widget<RichText>(_findMessageRichText(content));
         final timestamp = tester.widget<Text>(find.text('Now'));
         expect(rich.textScaler.scale(16), closeTo(16 * expectedScale, 0.001));
-        expect(timestamp.textScaler!.scale(11), closeTo(11 * expectedScale, 0.001));
+        expect(
+          timestamp.textScaler!.scale(11),
+          closeTo(11 * expectedScale, 0.001),
+        );
         expect(tester.takeException(), isNull);
       }
     });
@@ -733,10 +945,16 @@ void main() {
           home: MediaQuery(
             data: const MediaQueryData(size: Size(320, 640)),
             child: Material(
-              child: QaulChatBubble(
-                message: message,
-                clock: clock,
-                showTimestamp: true,
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: SizedBox(
+                  width: 320,
+                  child: QaulChatBubble(
+                    message: message,
+                    clock: clock,
+                    showTimestamp: true,
+                  ),
+                ),
               ),
             ),
           ),
@@ -746,7 +964,7 @@ void main() {
       expect(
         tester.getSize(find.byKey(const ValueKey('chat-reply-preview'))).width,
         lessThanOrEqualTo(
-          ChatBubbleStyle.maxBubbleWidthMobile -
+          320 * ChatBubbleStyle.maxWidthFraction -
               ChatBubbleStyle.horizontalPadding * 2,
         ),
       );
@@ -802,19 +1020,24 @@ void main() {
       required MessageType messageType,
       required Size viewport,
       required Size mediaSize,
+      String content = '',
+      List<String> mentionLabels = const [],
+      Brightness brightness = Brightness.light,
     }) {
       final clock = DateTime(2026, 1, 1, 12);
       final message = QaulChatBubbleMessage(
-        content: '',
+        content: content,
         sentAt: clock,
         receivedAt: clock,
         status: MessageStatus.sent,
         messageType: messageType,
         edges: const [],
+        mentionLabels: mentionLabels,
       );
 
       return tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(brightness: brightness),
           home: MediaQuery(
             data: MediaQueryData(size: viewport),
             child: Material(
@@ -822,7 +1045,7 @@ void main() {
                 message: message,
                 clock: clock,
                 child: SizedBox(
-                  key: ValueKey('portrait-media'),
+                  key: const ValueKey('portrait-media'),
                   width: mediaSize.width,
                   height: mediaSize.height,
                 ),
@@ -833,7 +1056,9 @@ void main() {
       );
     }
 
-    testWidgets('sizes media bubbles to the painted image width', (tester) async {
+    testWidgets('sizes media bubbles to the painted image width', (
+      tester,
+    ) async {
       const cases = [
         (
           name: 'phone portrait 3:4',
@@ -850,11 +1075,7 @@ void main() {
           viewport: Size(390, 844),
           media: Size(272, 153),
         ),
-        (
-          name: 'phone square',
-          viewport: Size(390, 844),
-          media: Size(272, 272),
-        ),
+        (name: 'phone square', viewport: Size(390, 844), media: Size(272, 272)),
         (
           name: 'desktop portrait 3:4',
           viewport: Size(1280, 800),
@@ -897,6 +1118,201 @@ void main() {
           expect(bubble.width, media.width, reason: mediaCase.name);
           expect(timestamp.right, lessThanOrEqualTo(bubble.right));
         }
+      }
+    });
+
+    testWidgets(
+      'renders captions like text messages in both themes and directions',
+      (tester) async {
+        const caption = 'A caption';
+        for (final brightness in Brightness.values) {
+          for (final messageType in MessageType.values) {
+            await pumpMedia(
+              tester,
+              messageType: messageType,
+              viewport: const Size(390, 844),
+              mediaSize: const Size(228, 152),
+              content: caption,
+              brightness: brightness,
+            );
+
+            final captionText = tester.widget<RichText>(
+              _findMessageRichText(caption),
+            );
+            final captionPadding = tester.widget<Padding>(
+              find.byKey(const ValueKey('chat-media-caption-padding')),
+            );
+            final media = tester.getRect(
+              find.byKey(const ValueKey('portrait-media')),
+            );
+            final captionRect = tester.getRect(_findMessageRichText(caption));
+            final timestamp = tester.getRect(find.text('Now'));
+
+            expect(captionText.text.style, ChatBubbleStyle.textStyle);
+            expect(
+              captionPadding.padding,
+              const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            );
+            expect(captionRect.top, greaterThanOrEqualTo(media.bottom));
+            expect(timestamp.left, greaterThan(captionRect.right));
+            final bubble = tester.getRect(
+              find.byKey(const ValueKey('chat-bubble-surface')),
+            );
+            // A short caption neither widens the bubble past its media nor
+            // leaves the timestamp floating mid-bubble.
+            expect(bubble.width, media.width);
+            final timeRow = tester.getRect(
+              find.ancestor(of: find.text('Now'), matching: find.byType(Row)).first,
+            );
+            expect(
+              timeRow.right,
+              closeTo(bubble.right - ChatBubbleStyle.horizontalPadding, 0.5),
+            );
+          }
+        }
+      },
+    );
+
+    testWidgets('puts a long caption timestamp on its own row', (tester) async {
+      const caption =
+          'A caption that is deliberately long enough to wrap onto several '
+          'lines before its timestamp is rendered below the attachment.';
+      await pumpMedia(
+        tester,
+        messageType: MessageType.secondary,
+        viewport: const Size(390, 844),
+        mediaSize: const Size(228, 152),
+        content: caption,
+      );
+
+      final captionRect = tester.getRect(_findMessageRichText(caption));
+      final timestamp = tester.getRect(find.text('Now'));
+      expect(timestamp.top, greaterThan(captionRect.top + 20));
+      final bubble = tester.getRect(
+        find.byKey(const ValueKey('chat-bubble-surface')),
+      );
+      final media = tester.getRect(find.byKey(const ValueKey('portrait-media')));
+      expect(bubble.width, greaterThan(media.width));
+      expect(media.left, bubble.left);
+      final timeRow = tester.getRect(
+        find.ancestor(of: find.text('Now'), matching: find.byType(Row)).first,
+      );
+      expect(
+        timeRow.right,
+        closeTo(bubble.right - ChatBubbleStyle.horizontalPadding, 0.5),
+      );
+    });
+
+    testWidgets('highlights complete group mentions in captions', (
+      tester,
+    ) async {
+      const caption = 'Hello @Group Member and @all';
+      await pumpMedia(
+        tester,
+        messageType: MessageType.secondary,
+        viewport: const Size(390, 844),
+        mediaSize: const Size(228, 152),
+        content: caption,
+        mentionLabels: const ['Group Member', 'all'],
+      );
+
+      final span =
+          tester.widget<RichText>(_findMessageRichText(caption)).text
+              as TextSpan;
+      final mentions = span.children!
+          .where((child) => child.style?.backgroundColor != null)
+          .toList();
+      expect(mentions.map((mention) => (mention as TextSpan).text), [
+        '@Group Member',
+        '@all',
+      ]);
+      expect(
+        mentions.every(
+          (mention) => mention.style!.fontWeight == FontWeight.w700,
+        ),
+        isTrue,
+      );
+    });
+
+    // A 390px phone column; bubbles cap at 76% of it.
+    const column = 390.0;
+    const bubbleCap = column * ChatBubbleStyle.maxWidthFraction;
+
+    Future<void> pumpMediaChild(WidgetTester tester, Widget child) {
+      tester.view.physicalSize = const Size(column, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final clock = DateTime(2026, 1, 1, 12);
+      return tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(size: Size(390, 844)),
+            child: Material(
+              child: QaulChatBubble.media(
+                message: QaulChatBubbleMessage(
+                  content: '',
+                  sentAt: clock,
+                  receivedAt: clock,
+                  status: MessageStatus.sent,
+                  messageType: MessageType.primary,
+                  edges: const [],
+                ),
+                clock: clock,
+                child: child,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    double bubbleWidth(WidgetTester tester) => tester
+        .getRect(find.byKey(const ValueKey('chat-bubble-surface')))
+        .width;
+
+    testWidgets('lets LayoutBuilder children lay out inside media bubbles', (
+      tester,
+    ) async {
+      await pumpMediaChild(
+        tester,
+        LayoutBuilder(
+          builder: (context, constraints) =>
+              SizedBox(width: constraints.maxWidth / 2, height: 40),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+      expect(bubbleWidth(tester), closeTo(bubbleCap / 2, 0.01));
+    });
+
+    testWidgets('lets full-width rows fill the media bubble', (tester) async {
+      await pumpMediaChild(
+        tester,
+        const Row(
+          children: [
+            SizedBox(width: 30, height: 30),
+            Expanded(child: SizedBox(height: 30)),
+          ],
+        ),
+      );
+      expect(bubbleWidth(tester), closeTo(bubbleCap, 0.01));
+    });
+
+    testWidgets('sizes aspect-ratio media by aspect, not pixel size', (
+      tester,
+    ) async {
+      for (final heightCap in [304.0, 120.0]) {
+        await pumpMediaChild(
+          tester,
+          ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: heightCap, minWidth: 170),
+            child: const AspectRatio(aspectRatio: 3 / 4),
+          ),
+        );
+        expect(
+          bubbleWidth(tester),
+          closeTo((heightCap * 3 / 4).clamp(170, bubbleCap), 0.01),
+          reason: 'height cap $heightCap',
+        );
       }
     });
   });
