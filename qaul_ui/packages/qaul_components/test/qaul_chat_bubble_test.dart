@@ -1105,7 +1105,14 @@ void main() {
       }
     });
 
+    // A 390px phone column; bubbles cap at 76% of it.
+    const column = 390.0;
+    const bubbleCap = column * ChatBubbleStyle.maxWidthFraction;
+
     Future<void> pumpMediaChild(WidgetTester tester, Widget child) {
+      tester.view.physicalSize = const Size(column, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
       final clock = DateTime(2026, 1, 1, 12);
       return tester.pumpWidget(
         MaterialApp(
@@ -1145,7 +1152,7 @@ void main() {
         ),
       );
       expect(tester.takeException(), isNull);
-      expect(bubbleWidth(tester), 136);
+      expect(bubbleWidth(tester), closeTo(bubbleCap / 2, 0.01));
     });
 
     testWidgets('lets full-width rows fill the media bubble', (tester) async {
@@ -1158,7 +1165,7 @@ void main() {
           ],
         ),
       );
-      expect(bubbleWidth(tester), 272);
+      expect(bubbleWidth(tester), closeTo(bubbleCap, 0.01));
     });
 
     testWidgets('sizes aspect-ratio media by aspect, not pixel size', (
@@ -1174,7 +1181,7 @@ void main() {
         );
         expect(
           bubbleWidth(tester),
-          closeTo((heightCap * 3 / 4).clamp(170, 272), 0.01),
+          closeTo((heightCap * 3 / 4).clamp(170, bubbleCap), 0.01),
           reason: 'height cap $heightCap',
         );
       }
