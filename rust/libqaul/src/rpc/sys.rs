@@ -45,7 +45,6 @@ impl SysRpcState {
             libqaul_receive,
         }
     }
-
 }
 
 /// Handling of SYS messages of libqaul

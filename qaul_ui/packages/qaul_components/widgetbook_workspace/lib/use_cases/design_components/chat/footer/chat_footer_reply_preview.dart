@@ -27,7 +27,7 @@ ChatFooter _footer({
   TextEditingController? controller,
 }) {
   return ChatFooter(
-    placeholder: 'Secure private message',
+    placeholder: 'Private message',
     replyPreview: reply,
     onCancelReply: () {},
     controller: controller,

@@ -91,7 +91,11 @@ impl UserResponserState {
 impl UserResponser {
     /// Add a message to the ring buffer for sending.
     /// Delegates to the provided RouterState instance.
-    pub fn add(router: &super::RouterState, neighbour_id: &PeerId, table: &super::router_net_proto::UserInfoTable) {
+    pub fn add(
+        router: &super::RouterState,
+        neighbour_id: &PeerId,
+        table: &super::router_net_proto::UserInfoTable,
+    ) {
         router.user_responser.add(neighbour_id, table);
     }
 }

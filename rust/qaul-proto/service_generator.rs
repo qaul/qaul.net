@@ -14,9 +14,7 @@ impl ServiceGenerator for QaulServiceGenerator {
 /// Strips the "Service" suffix to get the envelope message name.
 /// "DebugService" -> "Debug"
 fn envelope_name(service_name: &str) -> &str {
-    service_name
-        .strip_suffix("Service")
-        .unwrap_or(service_name)
+    service_name.strip_suffix("Service").unwrap_or(service_name)
 }
 
 /// Converts PascalCase to snake_case.
@@ -120,7 +118,9 @@ fn build_service_code(service: &Service) -> String {
         env
     ));
     buf.push_str("    let mut out = Vec::with_capacity(envelope.encoded_len());\n");
-    buf.push_str("    envelope.encode(&mut out).expect(\"Vec<u8> provides capacity as needed\");\n");
+    buf.push_str(
+        "    envelope.encode(&mut out).expect(\"Vec<u8> provides capacity as needed\");\n",
+    );
     buf.push_str("    out\n");
     buf.push_str("}\n\n");
 

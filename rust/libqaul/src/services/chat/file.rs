@@ -386,7 +386,9 @@ impl ChatFile {
                 log::error!("Error opening chat_file tree: {}", e);
                 return UserFiles {
                     histories: db.open_tree("__fallback_chat_file").expect("fallback tree"),
-                    file_chunks: db.open_tree("__fallback_file_chunks").expect("fallback tree"),
+                    file_chunks: db
+                        .open_tree("__fallback_file_chunks")
+                        .expect("fallback tree"),
                 };
             }
         };
@@ -396,7 +398,9 @@ impl ChatFile {
                 log::error!("Error opening file_chunks tree: {}", e);
                 return UserFiles {
                     histories,
-                    file_chunks: db.open_tree("__fallback_file_chunks").expect("fallback tree"),
+                    file_chunks: db
+                        .open_tree("__fallback_file_chunks")
+                        .expect("fallback tree"),
                 };
             }
         };
@@ -698,10 +702,11 @@ impl ChatFile {
         let file_id = Self::generate_file_id(group_id, &user_id_bytes, &file_name, size);
 
         // get file path
-        let file_path = match Self::create_file_path(state, user_account.id, file_id, extension.as_str()) {
-            Some(path) => path,
-            None => return Err("invalid file extension".to_string()),
-        };
+        let file_path =
+            match Self::create_file_path(state, user_account.id, file_id, extension.as_str()) {
+                Some(path) => path,
+                None => return Err("invalid file extension".to_string()),
+            };
 
         // TODO: start in new async thread here
 
@@ -1018,7 +1023,12 @@ impl ChatFile {
     }
 
     /// Store a completely downloaded file
-    fn store_file(state: &crate::QaulState, user_account: &UserAccount, user_files: UserFiles, file_history: FileHistory) {
+    fn store_file(
+        state: &crate::QaulState,
+        user_account: &UserAccount,
+        user_files: UserFiles,
+        file_history: FileHistory,
+    ) {
         // get all chunks from data base
         let file_id_bytes = file_history.file_id.to_be_bytes();
         let iterator = user_files.get_file_chunks(&file_id_bytes);
@@ -1207,7 +1217,13 @@ impl ChatFile {
                     );
                 }
                 Some(proto_net::chat_file_container::Message::FileData(file_data)) => {
-                    Self::process_data_message(state, &user_account, sender_id, group_id, file_data);
+                    Self::process_data_message(
+                        state,
+                        &user_account,
+                        sender_id,
+                        group_id,
+                        file_data,
+                    );
                 }
                 None => {
                     log::error!(
@@ -1228,7 +1244,12 @@ impl ChatFile {
     }
 
     /// Process incoming RPC request messages for file sharing module
-    pub async fn rpc(state: &crate::QaulState, data: Vec<u8>, user_id: Vec<u8>, request_id: String) {
+    pub async fn rpc(
+        state: &crate::QaulState,
+        data: Vec<u8>,
+        user_id: Vec<u8>,
+        request_id: String,
+    ) {
         let account_id = match PeerId::from_bytes(&user_id) {
             Ok(id) => id,
             Err(e) => {
@@ -1264,7 +1285,7 @@ impl ChatFile {
 
                         // get user account
                         let user_account;
-                        match UserAccounts::get_by_id(state,account_id) {
+                        match UserAccounts::get_by_id(state, account_id) {
                             Some(account) => user_account = account,
                             None => {
                                 log::error!("user account not found");
