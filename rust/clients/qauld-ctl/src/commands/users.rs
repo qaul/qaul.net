@@ -6,7 +6,7 @@ use qaul_proto::qaul_rpc_users as proto;
 use prost::Message;
 use proto::{
     users, ConnectionModule, Connectivity, GetUserByIdRequest, SecurityNumberRequest, UserEntry,
-    UserOnlineRequest, UserRequest, Users,
+    UserOnlineRequest, UserRequest, UserSearchRequest, Users,
 };
 use uuid::Uuid;
 
@@ -83,6 +83,18 @@ impl RpcCommand for UsersSubcmd {
                     .expect("Vec<u8> provides capacity as needed");
 
                 Ok((buf, Modules::Users))
+            }
+            UsersSubcmd::Search { query, online } => {
+                let proto_message = Users {
+                    message: Some(users::Message::UserSearchRequest(UserSearchRequest {
+                        query: query.trim().to_string(),
+                        online_only: *online,
+                        offset: 0,
+                        limit: 0,
+                    })),
+                };
+
+                Ok((proto_message.encode_to_vec(), Modules::Users))
             }
             UsersSubcmd::Verify { user_id } => {
                 let proto_message = send_user_update(&user_id, true, false)?;
@@ -390,5 +402,29 @@ fn print_extended_profile(
             .map(|p| bs58::encode(p).into_string())
             .collect();
         println!("  Custody route: {}", hops.join(" -> "));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn search_encodes_query_and_online_filter() {
+        let (buf, module) = UsersSubcmd::Search {
+            query: "  alice ".to_string(),
+            online: true,
+        }
+        .encode_request()
+        .unwrap();
+        assert_eq!(module, Modules::Users);
+        match Users::decode(&buf[..]).unwrap().message {
+            Some(users::Message::UserSearchRequest(r)) => {
+                assert_eq!(r.query, "alice");
+                assert!(r.online_only);
+                assert_eq!((r.offset, r.limit), (0, 0));
+            }
+            other => panic!("unexpected message {:?}", other),
+        }
     }
 }

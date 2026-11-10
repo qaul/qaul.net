@@ -3,9 +3,14 @@ package net.qaul.qaul_app
 import android.Manifest
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.ContentValues
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.MediaScannerConnection
+import android.os.Environment
+import android.provider.MediaStore
+import android.webkit.MimeTypeMap
 import java.io.File
 
 import io.flutter.embedding.android.FlutterActivity
@@ -31,6 +36,7 @@ import androidx.core.content.FileProvider
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "libqaul"
     private val ATTACHMENT_CLIPBOARD_CHANNEL = "qaul/attachment_clipboard"
+    private val ATTACHMENT_SAVER_CHANNEL = "qaul/attachment_saver"
     private var bleWrapperClass: BleWrapperClass? = null
     private var flutterEngine: FlutterEngine? = null
 
@@ -177,6 +183,108 @@ class MainActivity : FlutterActivity() {
             clipboard.setPrimaryClip(ClipData.newUri(contentResolver, name, uri))
             result.success(null)
         }
+
+        MethodChannel(
+                FlutterEngine.dartExecutor.binaryMessenger, ATTACHMENT_SAVER_CHANNEL
+        ).setMethodCallHandler { call, result ->
+            if (call.method != "saveFile") {
+                result.notImplemented()
+                return@setMethodCallHandler
+            }
+
+            val path = call.argument<String>("path")
+            val name = call.argument<String>("name")?.let { File(it).name }
+            val kind = call.argument<String>("kind") ?: "file"
+            if (path.isNullOrBlank() || name.isNullOrBlank()) {
+                result.error("invalid_arguments", "A file path and name are required", null)
+                return@setMethodCallHandler
+            }
+
+            // Copying a large video can take a while; keep it off the UI thread.
+            Thread {
+                val error = saveAttachment(File(path), name, kind)
+                runOnUiThread {
+                    if (error == null) {
+                        result.success("saved")
+                    } else {
+                        result.error(error.first, error.second, null)
+                    }
+                }
+            }.start()
+        }
+    }
+
+    /**
+     * Saves [file] as [name] (already reduced to a bare file name in Dart) into the media
+     * collection for [kind], or Downloads. Returns an error code and message, or null.
+     */
+    private fun saveAttachment(file: File, name: String, kind: String): Pair<String, String>? {
+        if (!file.isFile) return Pair("file_not_found", "The attachment is no longer available")
+
+        val extension = MimeTypeMap.getFileExtensionFromUrl(name).lowercase()
+        val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
+                ?: "application/octet-stream"
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                return Pair("storage_permission_denied", "Storage access is required to save attachments")
+            }
+            val downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            if (!downloads.exists() && !downloads.mkdirs()) {
+                return Pair("save_failed", "Could not create the Downloads directory")
+            }
+            return try {
+                val destination = availableDestination(downloads, name)
+                file.copyTo(destination, overwrite = false)
+                MediaScannerConnection.scanFile(this, arrayOf(destination.path), arrayOf(mimeType), null)
+                null
+            } catch (error: Exception) {
+                Pair("save_failed", "Could not save the attachment: ${error.message}")
+            }
+        }
+
+        val (collection, directory) = when (kind) {
+            "image" -> Pair(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, Environment.DIRECTORY_PICTURES)
+            "video" -> Pair(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, Environment.DIRECTORY_MOVIES)
+            "audio" -> Pair(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, Environment.DIRECTORY_MUSIC)
+            else -> Pair(MediaStore.Downloads.EXTERNAL_CONTENT_URI, Environment.DIRECTORY_DOWNLOADS)
+        }
+        val values = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, name)
+            put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
+            put(MediaStore.MediaColumns.RELATIVE_PATH, "$directory/qaul")
+            put(MediaStore.MediaColumns.IS_PENDING, 1)
+        }
+        val uri = contentResolver.insert(collection, values)
+                ?: return Pair("save_failed", "Could not create the saved attachment")
+
+        return try {
+            contentResolver.openOutputStream(uri).use { output ->
+                requireNotNull(output)
+                file.inputStream().use { input -> input.copyTo(output) }
+            }
+            values.clear()
+            values.put(MediaStore.MediaColumns.IS_PENDING, 0)
+            contentResolver.update(uri, values, null, null)
+            null
+        } catch (error: Exception) {
+            contentResolver.delete(uri, null, null)
+            Pair("save_failed", "Could not save the attachment: ${error.message}")
+        }
+    }
+
+    /** "name.ext", then "name (1).ext", ... so an existing download is never overwritten. */
+    private fun availableDestination(directory: File, name: String): File {
+        val base = name.substringBeforeLast('.', name)
+        val extension = if (name.contains('.')) "." + name.substringAfterLast('.') else ""
+        var candidate = File(directory, name)
+        var index = 1
+        while (candidate.exists()) {
+            candidate = File(directory, "$base ($index)$extension")
+            index++
+        }
+        return candidate
     }
 
     /**
