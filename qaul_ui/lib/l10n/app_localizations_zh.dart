@@ -24,6 +24,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sendFileTooltip => '发送文件';
 
   @override
+  String get sendPhotoTooltip => '发送照片';
+
+  @override
   String get sendAudioTooltip => '录制音频消息';
 
   @override
@@ -315,6 +318,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get share => '分享';
 
   @override
+  String get save => '保存';
+
+  @override
+  String get attachmentSaved => '附件已保存';
+
+  @override
+  String get attachmentSaveFailed => '无法保存附件';
+
+  @override
   String get messageCopied => '消息已复制';
 
   @override
@@ -493,7 +505,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get saveButton => 'SAVE';
 
   @override
-  String get securePrivateMessageHint => 'Secure private message';
+  String get privateMessageHint => '私人消息';
 
   @override
   String get storage => 'Storage';
@@ -523,6 +535,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get sendFileTooltip => '發送文件';
+
+  @override
+  String get sendPhotoTooltip => '傳送相片';
 
   @override
   String get sendAudioTooltip => '錄製音訊訊息';
@@ -798,6 +813,15 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get share => '分享';
 
   @override
+  String get save => '儲存';
+
+  @override
+  String get attachmentSaved => '已儲存附件';
+
+  @override
+  String get attachmentSaveFailed => '無法儲存附件';
+
+  @override
   String get messageCopied => '訊息已複製';
 
   @override
@@ -842,4 +866,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get languageName => '繁體中文';
+
+  @override
+  String get privateMessageHint => '私人訊息';
 }

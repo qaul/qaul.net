@@ -24,6 +24,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sendFileTooltip => 'أرسل ملف';
 
   @override
+  String get sendPhotoTooltip => 'إرسال صورة';
+
+  @override
   String get sendAudioTooltip => 'تسجيل رسالة صوتية';
 
   @override
@@ -320,6 +323,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get share => 'مشاركة';
 
   @override
+  String get save => 'حفظ';
+
+  @override
+  String get attachmentSaved => 'تم حفظ المرفق';
+
+  @override
+  String get attachmentSaveFailed => 'تعذّر حفظ المرفق';
+
+  @override
   String get messageCopied => 'تم نسخ الرسالة';
 
   @override
@@ -499,7 +511,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get saveButton => 'SAVE';
 
   @override
-  String get securePrivateMessageHint => 'رسالة خاصة آمنة';
+  String get privateMessageHint => 'رسالة خاصة';
 
   @override
   String get storage => 'Storage';

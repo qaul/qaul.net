@@ -24,6 +24,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get sendFileTooltip => 'Отправить файл';
 
   @override
+  String get sendPhotoTooltip => 'Отправить фото';
+
+  @override
   String get sendAudioTooltip => 'Записать аудиосообщение';
 
   @override
@@ -324,6 +327,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get share => 'Поделиться';
 
   @override
+  String get save => 'Сохранить';
+
+  @override
+  String get attachmentSaved => 'Вложение сохранено';
+
+  @override
+  String get attachmentSaveFailed => 'Не удалось сохранить вложение';
+
+  @override
   String get messageCopied => 'Сообщение скопировано';
 
   @override
@@ -503,7 +515,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get saveButton => 'SAVE';
 
   @override
-  String get securePrivateMessageHint => 'Защищенное личное сообщение';
+  String get privateMessageHint => 'Личное сообщение';
 
   @override
   String get storage => 'Storage';

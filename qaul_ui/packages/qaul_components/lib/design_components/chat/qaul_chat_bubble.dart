@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../styles/qaul_color_sheet.dart';
 import '../../styles/qaul_emoji.dart';
+import '../../styles/qaul_text_scaler.dart';
 import 'chat_mentions.dart';
 import 'chat_message.dart';
 import 'chat_reply_bubble_preview.dart';
@@ -29,9 +30,16 @@ const double kChatBubbleWidthBreakpoint = 500.0;
 const double kChatBubbleMaxTextScaleFactor = 1.3;
 
 TextScaler chatBubbleTextScaler(BuildContext context) {
-  return MediaQuery.textScalerOf(
-    context,
-  ).clamp(maxScaleFactor: kChatBubbleMaxTextScaleFactor);
+  final scaler = MediaQuery.textScalerOf(context);
+  if (scaler is QaulTextScaler) {
+    return QaulTextScaler(
+      systemTextScaler: scaler.systemTextScaler.clamp(
+        maxScaleFactor: kChatBubbleMaxTextScaleFactor,
+      ),
+      zoom: scaler.zoom,
+    );
+  }
+  return scaler.clamp(maxScaleFactor: kChatBubbleMaxTextScaleFactor);
 }
 
 class ChatBubbleStyle {
@@ -397,6 +405,9 @@ String formatQaulChatBubbleTime(QaulChatBubbleMessage message, DateTime clock) {
 // ---------------------------------------------------------------------------
 
 class QaulChatBubble extends StatelessWidget {
+  /// Key of the painted bubble, so callers can anchor overlays to it.
+  static const surfaceKey = ValueKey('chat-bubble-surface');
+
   const QaulChatBubble({
     super.key,
     required this.message,
@@ -404,7 +415,7 @@ class QaulChatBubble extends StatelessWidget {
     this.showTimestamp = true,
     this.isSelected = false,
     this.selectionScale = 1,
-    this.surfaceKey,
+    this.selectionKey,
   });
 
   final QaulChatBubbleMessage message;
@@ -415,12 +426,16 @@ class QaulChatBubble extends StatelessWidget {
 
   final bool showTimestamp;
   final bool isSelected;
+
+  /// Scale applied while the message is held for selection.
   final double selectionScale;
-  final Key? surfaceKey;
+
+  /// Key on the unscaled bubble, so the selection gesture can measure it.
+  final Key? selectionKey;
 
   static Widget media({
     Key? key,
-    Key? surfaceKey,
+    Key? selectionKey,
     required QaulChatBubbleMessage message,
     required DateTime clock,
     required Widget child,
@@ -430,12 +445,12 @@ class QaulChatBubble extends StatelessWidget {
   }) {
     return _QaulChatBubbleSurface(
       key: key,
-      surfaceKey: surfaceKey,
+      selectionKey: selectionKey,
+      selectionScale: selectionScale,
       message: message,
       clock: clock,
       showTimestamp: showTimestamp,
       isSelected: isSelected,
-      selectionScale: selectionScale,
       child: child,
     );
   }
@@ -470,15 +485,15 @@ class QaulChatBubble extends StatelessWidget {
       child: Transform.scale(
         scale: selectionScale,
         alignment: isPrimary ? Alignment.centerRight : Alignment.centerLeft,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minWidth: ChatBubbleStyle.minBubbleWidth,
-            maxWidth: maxBubbleWidth,
-          ),
-          child: KeyedSubtree(
-            key: surfaceKey,
+        child: KeyedSubtree(
+          key: selectionKey,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minWidth: ChatBubbleStyle.minBubbleWidth,
+              maxWidth: maxBubbleWidth,
+            ),
             child: DecoratedBox(
-              key: const ValueKey('chat-bubble-surface'),
+              key: QaulChatBubble.surfaceKey,
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: borderRadius,
@@ -548,8 +563,7 @@ class QaulChatBubble extends StatelessWidget {
                       // Emoji-only messages always stack the timestamp underneath
                       // so the enlarged emoji never shares a line with it.
                       final fitsOnOneLine =
-                          emojiCount == null &&
-                          painter.height <= lineHeight * 1.1;
+                          emojiCount == null && painter.height <= lineHeight * 1.1;
 
                       final timeRow = Row(
                         mainAxisSize: MainAxisSize.min,
@@ -638,8 +652,7 @@ class QaulChatBubble extends StatelessWidget {
                           textScaler: textScaler,
                           textWidthBasis: TextWidthBasis.longestLine,
                         )..layout(maxWidth: constraints.maxWidth);
-                        final stackedWidth =
-                            stackedPainter.width > timeBlockWidth
+                        final stackedWidth = stackedPainter.width > timeBlockWidth
                             ? stackedPainter.width
                             : timeBlockWidth;
                         stackedPainter.dispose();
@@ -730,7 +743,7 @@ class _QaulChatBubbleSurface extends StatelessWidget {
     required this.showTimestamp,
     required this.isSelected,
     required this.selectionScale,
-    this.surfaceKey,
+    this.selectionKey,
   });
 
   final QaulChatBubbleMessage message;
@@ -739,7 +752,7 @@ class _QaulChatBubbleSurface extends StatelessWidget {
   final bool showTimestamp;
   final bool isSelected;
   final double selectionScale;
-  final Key? surfaceKey;
+  final Key? selectionKey;
 
   @override
   Widget build(BuildContext context) {
@@ -780,15 +793,15 @@ class _QaulChatBubbleSurface extends StatelessWidget {
       child: Transform.scale(
         scale: selectionScale,
         alignment: isPrimary ? Alignment.centerRight : Alignment.centerLeft,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minWidth: ChatBubbleStyle.minBubbleWidth,
-            maxWidth: maxBubbleWidth,
-          ),
-          child: KeyedSubtree(
-            key: surfaceKey,
+        child: KeyedSubtree(
+          key: selectionKey,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minWidth: ChatBubbleStyle.minBubbleWidth,
+              maxWidth: maxBubbleWidth,
+            ),
             child: Container(
-              key: const ValueKey('chat-bubble-surface'),
+              key: QaulChatBubble.surfaceKey,
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: borderRadius,
@@ -806,7 +819,10 @@ class _QaulChatBubbleSurface extends StatelessWidget {
                 borderRadius: borderRadius.resolve(Directionality.of(context)),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  // No stretch/IntrinsicWidth: the column is as wide as its
+                  // widest child, so aspect-ratio media hugs the image while
+                  // full-width rows still fill the bubble.
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     child,
                     if (showTimestamp)
@@ -817,10 +833,7 @@ class _QaulChatBubbleSurface extends StatelessWidget {
                           10,
                           6,
                         ),
-                        child: Align(
-                          alignment: AlignmentDirectional.centerEnd,
-                          child: timeRow,
-                        ),
+                        child: timeRow,
                       ),
                   ],
                 ),

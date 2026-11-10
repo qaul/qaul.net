@@ -151,6 +151,12 @@ abstract class AppLocalizations {
   /// **'Send File'**
   String get sendFileTooltip;
 
+  /// No description provided for @sendPhotoTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Photo'**
+  String get sendPhotoTooltip;
+
   /// No description provided for @sendAudioTooltip.
   ///
   /// In en, this message translates to:
@@ -733,6 +739,24 @@ abstract class AppLocalizations {
   /// **'Share'**
   String get share;
 
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @attachmentSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment saved'**
+  String get attachmentSaved;
+
+  /// No description provided for @attachmentSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the attachment'**
+  String get attachmentSaveFailed;
+
   /// No description provided for @messageCopied.
   ///
   /// In en, this message translates to:
@@ -1033,11 +1057,11 @@ abstract class AppLocalizations {
   /// **'SAVE'**
   String get saveButton;
 
-  /// No description provided for @securePrivateMessageHint.
+  /// No description provided for @privateMessageHint.
   ///
   /// In en, this message translates to:
-  /// **'Secure private message'**
-  String get securePrivateMessageHint;
+  /// **'Private message'**
+  String get privateMessageHint;
 
   /// No description provided for @storage.
   ///

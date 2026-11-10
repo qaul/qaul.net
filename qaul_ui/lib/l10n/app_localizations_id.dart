@@ -24,6 +24,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get sendFileTooltip => 'Kirim File';
 
   @override
+  String get sendPhotoTooltip => 'Kirim foto';
+
+  @override
   String get sendAudioTooltip => 'Rekam pesan audio';
 
   @override
@@ -324,6 +327,15 @@ class AppLocalizationsId extends AppLocalizations {
   String get share => 'Bagikan';
 
   @override
+  String get save => 'Simpan';
+
+  @override
+  String get attachmentSaved => 'Lampiran disimpan';
+
+  @override
+  String get attachmentSaveFailed => 'Tidak dapat menyimpan lampiran';
+
+  @override
   String get messageCopied => 'Pesan disalin';
 
   @override
@@ -503,7 +515,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get saveButton => 'SAVE';
 
   @override
-  String get securePrivateMessageHint => 'Pesan pribadi aman';
+  String get privateMessageHint => 'Pesan pribadi';
 
   @override
   String get storage => 'Storage';

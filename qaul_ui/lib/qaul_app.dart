@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:qaul_components/qaul_components.dart';
@@ -9,11 +10,38 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'helpers/navigation_helper.dart';
 import 'helpers/user_prefs_helper.dart';
 import 'l10n/app_localizations.dart';
+import 'widgets/desktop_text_zoom.dart';
 import 'widgets/widgets.dart';
 
 class QaulApp extends PlatformAwareBuilder {
   const QaulApp({super.key, this.themeMode});
   final ThemeMode? themeMode;
+
+  static const _lightSystemUiOverlayStyle = SystemUiOverlayStyle(
+    statusBarColor: Colors.white,
+    statusBarIconBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.light,
+    systemNavigationBarColor: Colors.white,
+    systemNavigationBarIconBrightness: Brightness.dark,
+    systemStatusBarContrastEnforced: false,
+    systemNavigationBarContrastEnforced: false,
+  );
+
+  static const _darkSystemUiOverlayStyle = SystemUiOverlayStyle(
+    statusBarColor: Colors.black,
+    statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
+    systemNavigationBarColor: Colors.black,
+    systemNavigationBarIconBrightness: Brightness.light,
+    systemStatusBarContrastEnforced: false,
+    systemNavigationBarContrastEnforced: false,
+  );
+
+  static SystemUiOverlayStyle systemUiOverlayStyleFor(Brightness brightness) {
+    return brightness == Brightness.dark
+        ? _darkSystemUiOverlayStyle
+        : _lightSystemUiOverlayStyle;
+  }
 
   static final lightTheme = ThemeData(
     useMaterial3: true,
@@ -38,6 +66,7 @@ class QaulApp extends PlatformAwareBuilder {
     appBarTheme: AppBarTheme(
       toolbarHeight: 72,
       backgroundColor: Colors.transparent,
+      systemOverlayStyle: _lightSystemUiOverlayStyle,
       elevation: 0.0,
       // Shadow not used as elevation is 0.0 - using this to inject color of the navbar (decorators/qaul_nav_bar_decorator + qaul_components)
       shadowColor: Colors.grey.shade300,
@@ -82,6 +111,7 @@ class QaulApp extends PlatformAwareBuilder {
     ),
     brightness: Brightness.dark,
     primarySwatch: Colors.lightBlue,
+    scaffoldBackgroundColor: const QaulColorSheet(Brightness.dark).background,
     visualDensity: VisualDensity.adaptivePlatformDensity,
     iconTheme: const IconThemeData(color: Colors.white),
     navigationBarTheme: const NavigationBarThemeData(
@@ -97,6 +127,7 @@ class QaulApp extends PlatformAwareBuilder {
       elevation: 0.0,
       backgroundColor: Color(0xff212121),
       shadowColor: Color(0xff212121),
+      systemOverlayStyle: _darkSystemUiOverlayStyle,
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
@@ -169,19 +200,25 @@ class QaulApp extends PlatformAwareBuilder {
                 return const Locale.fromSubtags(languageCode: 'en');
               },
               builder: (context, child) {
+                final Widget app;
                 if (Platform.isLinux || Platform.isMacOS) {
-                  return child ?? const SizedBox();
+                  app = child ?? const SizedBox();
+                } else {
+                  app = ResponsiveBreakpoints.builder(
+                    child: child!,
+                    breakpoints: const [
+                      Breakpoint(start: 0, end: 350, name: "ANDROID"),
+                      Breakpoint(start: 351, end: 480, name: MOBILE),
+                      Breakpoint(start: 481, end: 680, name: "MOBILE_LANDSCAPE"),
+                      Breakpoint(start: 681, end: 800, name: TABLET),
+                      Breakpoint(start: 801, end: 1920, name: DESKTOP),
+                    ],
+                  );
                 }
 
-                return ResponsiveBreakpoints.builder(
-                  child: child!,
-                  breakpoints: const [
-                    Breakpoint(start: 0, end: 350, name: "ANDROID"),
-                    Breakpoint(start: 351, end: 480, name: MOBILE),
-                    Breakpoint(start: 481, end: 680, name: "MOBILE_LANDSCAPE"),
-                    Breakpoint(start: 681, end: 800, name: TABLET),
-                    Breakpoint(start: 801, end: 1920, name: DESKTOP),
-                  ],
+                return AnnotatedRegion<SystemUiOverlayStyle>(
+                  value: systemUiOverlayStyleFor(Theme.of(context).brightness),
+                  child: DesktopTextZoom(child: app),
                 );
               },
             );

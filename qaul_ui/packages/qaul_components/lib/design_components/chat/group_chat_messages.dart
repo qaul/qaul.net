@@ -57,8 +57,9 @@ class ChatMessageRenderer {
     required DateTime clock,
     bool isSelected = false,
     double selectionScale = 1,
-    Key? surfaceKey,
+    Key? selectionKey,
     List<String> mentionLabels = const [],
+    double? topSpacingOverride,
   }) {
     final display = presentation.bubbleDisplay;
     if (display == null) return const SizedBox.shrink();
@@ -69,8 +70,9 @@ class ChatMessageRenderer {
         clock: clock,
         isSelected: isSelected,
         selectionScale: selectionScale,
-        surfaceKey: surfaceKey,
+        selectionKey: selectionKey,
         mentionLabels: mentionLabels,
+        topSpacingOverride: topSpacingOverride,
       );
     }
 
@@ -80,8 +82,9 @@ class ChatMessageRenderer {
       horizontalGutter: true,
       isSelected: isSelected,
       selectionScale: selectionScale,
-      surfaceKey: surfaceKey,
+      selectionKey: selectionKey,
       mentionLabels: mentionLabels,
+      topSpacingOverride: topSpacingOverride,
     );
   }
 
@@ -92,7 +95,8 @@ class ChatMessageRenderer {
     required DateTime clock,
     bool isSelected = false,
     double selectionScale = 1,
-    Key? surfaceKey,
+    Key? selectionKey,
+    double? topSpacingOverride,
   }) {
     final display = presentation.bubbleDisplay;
     if (display == null) return child;
@@ -103,14 +107,14 @@ class ChatMessageRenderer {
       showTimestamp: presentation.meta.showTimestamp,
       isSelected: isSelected,
       selectionScale: selectionScale,
-      surfaceKey: surfaceKey,
+      selectionKey: selectionKey,
       child: child,
     );
 
     if (mode != ChatRenderMode.group || presentation.isPrimary) {
       return Padding(
         padding: EdgeInsetsDirectional.only(
-          top: presentation.meta.topSpacing,
+          top: topSpacingOverride ?? presentation.meta.topSpacing,
           end: presentation.isPrimary ? 16 : 0,
           start: presentation.isPrimary ? 0 : 16,
         ),
@@ -119,7 +123,7 @@ class ChatMessageRenderer {
     }
 
     return GroupMessageShell(
-      marginTop: presentation.meta.topSpacing,
+      marginTop: topSpacingOverride ?? presentation.meta.topSpacing,
       sender: presentation.sender,
       showSenderName: presentation.meta.showSenderName,
       showSenderAvatar: presentation.meta.showAvatar,
@@ -136,16 +140,18 @@ class DirectTextMessageItem extends StatelessWidget {
     this.horizontalGutter = true,
     this.isSelected = false,
     this.selectionScale = 1,
-    this.surfaceKey,
+    this.selectionKey,
     this.mentionLabels = const [],
+    this.topSpacingOverride,
   });
 
   final MessagePresentation presentation;
   final DateTime clock;
   final bool isSelected;
   final double selectionScale;
-  final Key? surfaceKey;
+  final Key? selectionKey;
   final List<String> mentionLabels;
+  final double? topSpacingOverride;
 
   /// When true, applies a 16px gutter on the trailing edge for primary
   /// (outgoing) bubbles and on the leading edge for secondary (incoming).
@@ -158,7 +164,7 @@ class DirectTextMessageItem extends StatelessWidget {
     final isPrimary = presentation.isPrimary;
     return Padding(
       padding: EdgeInsetsDirectional.only(
-        top: presentation.meta.topSpacing,
+        top: topSpacingOverride ?? presentation.meta.topSpacing,
         start: horizontalGutter && !isPrimary ? 16 : 0,
         end: horizontalGutter && isPrimary ? 16 : 0,
       ),
@@ -168,7 +174,7 @@ class DirectTextMessageItem extends StatelessWidget {
         showTimestamp: presentation.meta.showTimestamp,
         isSelected: isSelected,
         selectionScale: selectionScale,
-        surfaceKey: surfaceKey,
+        selectionKey: selectionKey,
       ),
     );
   }
@@ -181,16 +187,18 @@ class GroupTextMessageItem extends StatelessWidget {
     required this.clock,
     this.isSelected = false,
     this.selectionScale = 1,
-    this.surfaceKey,
+    this.selectionKey,
     this.mentionLabels = const [],
+    this.topSpacingOverride,
   });
 
   final MessagePresentation presentation;
   final DateTime clock;
   final bool isSelected;
   final double selectionScale;
-  final Key? surfaceKey;
+  final Key? selectionKey;
   final List<String> mentionLabels;
+  final double? topSpacingOverride;
 
   @override
   Widget build(BuildContext context) {
@@ -207,7 +215,7 @@ class GroupTextMessageItem extends StatelessWidget {
         : display.message;
 
     return GroupMessageShell(
-      marginTop: presentation.meta.topSpacing,
+      marginTop: topSpacingOverride ?? presentation.meta.topSpacing,
       sender: sender,
       showSenderName: false,
       showSenderAvatar: presentation.meta.showAvatar,
@@ -217,7 +225,7 @@ class GroupTextMessageItem extends StatelessWidget {
         showTimestamp: presentation.meta.showTimestamp,
         isSelected: isSelected,
         selectionScale: selectionScale,
-        surfaceKey: surfaceKey,
+        selectionKey: selectionKey,
       ),
     );
   }

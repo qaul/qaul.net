@@ -24,6 +24,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get sendFileTooltip => 'Invia file';
 
   @override
+  String get sendPhotoTooltip => 'Invia foto';
+
+  @override
   String get sendAudioTooltip => 'Registra un messaggio audio';
 
   @override
@@ -323,6 +326,15 @@ class AppLocalizationsIt extends AppLocalizations {
   String get share => 'Condividi';
 
   @override
+  String get save => 'Salva';
+
+  @override
+  String get attachmentSaved => 'Allegato salvato';
+
+  @override
+  String get attachmentSaveFailed => 'Impossibile salvare l\'allegato';
+
+  @override
   String get messageCopied => 'Messaggio copiato';
 
   @override
@@ -502,7 +514,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get saveButton => 'SAVE';
 
   @override
-  String get securePrivateMessageHint => 'Messaggio criptato';
+  String get privateMessageHint => 'Messaggio privato';
 
   @override
   String get storage => 'Storage';

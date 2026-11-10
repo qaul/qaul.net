@@ -24,6 +24,9 @@ class AppLocalizationsFa extends AppLocalizations {
   String get sendFileTooltip => 'ارسال پرونده';
 
   @override
+  String get sendPhotoTooltip => 'ارسال عکس';
+
+  @override
   String get sendAudioTooltip => 'ضبط پیام صوتی';
 
   @override
@@ -324,6 +327,15 @@ class AppLocalizationsFa extends AppLocalizations {
   String get share => 'اشتراک‌گذاری';
 
   @override
+  String get save => 'ذخیره';
+
+  @override
+  String get attachmentSaved => 'پیوست ذخیره شد';
+
+  @override
+  String get attachmentSaveFailed => 'ذخیرهٔ پیوست ممکن نشد';
+
+  @override
   String get messageCopied => 'پیام کپی شد';
 
   @override
@@ -503,7 +515,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get saveButton => 'SAVE';
 
   @override
-  String get securePrivateMessageHint => 'پیام خصوصی امن';
+  String get privateMessageHint => 'پیام خصوصی';
 
   @override
   String get storage => 'Storage';

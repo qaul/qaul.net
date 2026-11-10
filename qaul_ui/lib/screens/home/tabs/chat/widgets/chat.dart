@@ -88,10 +88,15 @@ class _ForwardDraft {
   final String text;
 }
 
-final _pendingForwardDraftProvider = StateProvider<_ForwardDraft?>((_) => null);
+final _pendingForwardDraftProvider = StateProvider<_ForwardDraft?>(
+  (_) => null,
+);
 
 class _ForwardRecipientSelection {
-  const _ForwardRecipientSelection({required this.room, this.attachment});
+  const _ForwardRecipientSelection({
+    required this.room,
+    this.attachment,
+  });
 
   final ChatRoom room;
   final ForwardAttachment? attachment;
@@ -297,7 +302,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   Future<void> _openMessageContextMenu(
     BuildContext messageContext,
     types.Message message, {
-    Rect? messageRect,
+    Rect? scaledMessageRect,
   }) async {
     final text = message is types.TextMessage ? message.text : null;
     final attachment = switch (message) {
@@ -309,9 +314,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     };
     if (text == null && attachment == null) return;
     final messageInfo = _domainMessagesById[message.id];
-
-    final resolvedMessageRect =
-        messageRect ?? _messageRectInOverlay(messageContext);
+    final messageRect =
+        scaledMessageRect ?? _messageRectInOverlay(messageContext);
+    // Open on the side the bubble sits on within its row, which holds for
+    // sent and received messages in any text direction. Without a bubble,
+    // compare against the screen instead.
+    final referenceRect = _bubbleRenderObject(messageContext) == null
+        ? _rectInOverlay(
+            Overlay.of(context, rootOverlay: true).context.findRenderObject(),
+          )
+        : _rectInOverlay(messageContext.findRenderObject());
+    final alignRight =
+        messageRect == null ||
+        referenceRect == null ||
+        messageRect.center.dx >= referenceRect.center.dx;
     setState(() => _selectedContextMenuMessageId = message.id);
 
     await showDialog<void>(
@@ -329,6 +345,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                       messageContext,
                       attachment!,
                     ),
+                    onSave: _isReceivingAttachment(message)
+                        ? null
+                        : () => _saveAttachment(dialogContext, attachment!),
                     onForward: _isReceivingAttachment(message)
                         ? null
                         : () {
@@ -367,10 +386,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                       setState(() => _selectedContextMenuMessageId = null);
                       _openForwardRecipientSelector(text: text);
                     },
-                    onCopy: () =>
-                        _copyMessage(dialogContext, messageContext, text),
-                    onShare: () =>
-                        _shareMessage(dialogContext, messageContext, text),
+                    onCopy: () => _copyMessage(
+                      dialogContext,
+                      messageContext,
+                      text,
+                    ),
+                    onShare: () => _shareMessage(
+                      dialogContext,
+                      messageContext,
+                      text,
+                    ),
                     onInfo: messageInfo == null
                         ? null
                         : () => _openMessageInfo(
@@ -389,11 +414,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
           },
           child: Material(
             color: Colors.transparent,
-            child: resolvedMessageRect == null
+            child: messageRect == null
                 ? Center(child: menu)
                 : CustomSingleChildLayout(
                     delegate: _MessageContextMenuLayoutDelegate(
-                      messageRect: resolvedMessageRect,
+                      messageRect: messageRect,
+                      alignRight: alignRight,
                       viewportPadding:
                           MediaQuery.paddingOf(dialogContext) +
                           const EdgeInsets.all(16),
@@ -440,11 +466,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
   List<ChatMessageContextMenuElement> _buildAttachmentContextMenuElements({
     required VoidCallback onCopy,
+    VoidCallback? onSave,
     VoidCallback? onForward,
     VoidCallback? onShare,
     VoidCallback? onInfo,
   }) {
     return [
+      if (onForward != null)
+        ChatMessageContextMenuAction.forward(onPressed: onForward),
+      if (onSave != null)
+        ChatMessageContextMenuAction(
+          id: 'save',
+          label: AppLocalizations.of(context)!.save,
+          iconAsset: ChatMessageContextMenuIcons.download,
+          onPressed: onSave,
+        ),
       if (onInfo != null)
         ChatMessageContextMenuAction(
           id: 'info',
@@ -452,8 +488,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
           iconAsset: ChatMessageContextMenuIcons.info,
           onPressed: onInfo,
         ),
-      if (onForward != null)
-        ChatMessageContextMenuAction.forward(onPressed: onForward),
       if (onShare != null)
         ChatMessageContextMenuAction(
           id: 'share',
@@ -530,9 +564,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     if (_forwardDraftRoomIdBase58 == room.idBase58) return;
 
     _initialComposerText = widget.initialMessageText;
-    _forwardDraftRoomIdBase58 = widget.initialMessageText == null
-        ? null
-        : room.idBase58;
+    _forwardDraftRoomIdBase58 =
+        widget.initialMessageText == null ? null : room.idBase58;
   }
 
   void _showForwardedAttachmentDraft(
@@ -615,7 +648,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   Future<void> _openPhotoPicker(ChatRoom room) async {
     File? file;
     if (Platform.isAndroid || Platform.isIOS) {
-      final result = await ImagePicker().pickImage(source: ImageSource.camera);
+      final result = await ImagePicker().pickImage(
+        source: ImageSource.camera,
+        maxWidth: 1024.0,
+        maxHeight: 1024.0,
+        imageQuality: 60,
+      );
       if (result != null) file = File(result.path);
     } else {
       final result = await FilePicker.platform.pickFiles(type: FileType.image);
@@ -739,6 +777,32 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     _showCopyFeedback(messageRect);
   }
 
+  Future<void> _saveAttachment(
+    BuildContext dialogContext,
+    ({String name, String uri}) attachment,
+  ) async {
+    Navigator.pop(dialogContext);
+    final l10n = AppLocalizations.of(context)!;
+
+    String? feedback;
+    try {
+      final outcome =
+          await (widget.messageShareService ??
+                  const SystemMessageShareService())
+              .saveFile(filePath: attachment.uri, fileName: attachment.name);
+      if (outcome == AttachmentSaveOutcome.saved) {
+        feedback = l10n.attachmentSaved;
+      }
+    } on Object catch (error, stackTrace) {
+      _log.warning('Could not save attachment', error, stackTrace);
+      feedback = l10n.attachmentSaveFailed;
+    }
+    if (feedback == null || !mounted) return;
+    ScaffoldMessenger.maybeOf(context)
+      ?..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(feedback)));
+  }
+
   void _openMessageInfo(
     BuildContext dialogContext,
     Message message,
@@ -764,16 +828,40 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     });
   }
 
-  Rect? _messageRectInOverlay(BuildContext messageContext) {
-    final messageBox = messageContext.findRenderObject() as RenderBox?;
+  /// The long-pressed context is the full-width message row, so anchor to
+  /// the bubble inside it; fall back to the row if there is none.
+  Rect? _messageRectInOverlay(BuildContext messageContext) =>
+      _rectInOverlay(
+        _bubbleRenderObject(messageContext) ??
+            messageContext.findRenderObject(),
+      );
+
+  RenderObject? _bubbleRenderObject(BuildContext messageContext) {
+    RenderObject? bubble;
+    void visit(Element element) {
+      if (bubble != null) return;
+      if (element.widget.key == QaulChatBubble.surfaceKey) {
+        bubble = element.renderObject;
+        return;
+      }
+      element.visitChildren(visit);
+    }
+
+    messageContext.visitChildElements(visit);
+    return bubble;
+  }
+
+  Rect? _rectInOverlay(RenderObject? renderObject) {
     final overlay = Overlay.of(context, rootOverlay: true);
     final overlayBox = overlay.context.findRenderObject() as RenderBox?;
-    if (messageBox == null || overlayBox == null || !messageBox.attached) {
+    if (renderObject is! RenderBox ||
+        overlayBox == null ||
+        !renderObject.attached) {
       return null;
     }
 
-    return messageBox.localToGlobal(Offset.zero, ancestor: overlayBox) &
-        messageBox.size;
+    return renderObject.localToGlobal(Offset.zero, ancestor: overlayBox) &
+        renderObject.size;
   }
 
   /// The iPad share popover rejects origins that are empty or extend past the
@@ -784,9 +872,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     if (overlayBox == null || !overlayBox.hasSize) return null;
 
     final screenRect = Offset.zero & overlayBox.size;
-    final visibleRect = _messageRectInOverlay(
-      messageContext,
-    )?.intersect(screenRect);
+    final visibleRect =
+        _messageRectInOverlay(messageContext)?.intersect(screenRect);
     if (visibleRect != null &&
         visibleRect.width > 0 &&
         visibleRect.height > 0) {
@@ -1023,28 +1110,23 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
     final l10n = AppLocalizations.of(context)!;
     final directPeer = _directChatPeer(room);
-    final chatBackgroundColor = QaulColorSheet(
-      Theme.of(context).brightness,
-    ).background;
+    final chatBackgroundColor = Theme.of(context).scaffoldBackgroundColor;
     final showBackButton = isMobileChat;
     _chatRenderMode = resolveChatRenderMode(room);
     final isLoadingMessages = room.messages == null;
     final chatMessages = isLoadingMessages
         ? const <types.Message>[]
         : messages(room, l10n: l10n, renderMode: _chatRenderMode)!;
+    final dateDividerTextStyle = chatDateDividerTextStyle(context);
 
     return Scaffold(
       backgroundColor: chatBackgroundColor,
       resizeToAvoidBottomInset: true,
+      // Laid out bottom-up so the list paints first and the header's shadow
+      // is drawn over it, while the header keeps its own (zoom-aware) height.
       body: Column(
+        verticalDirection: VerticalDirection.up,
         children: [
-          _buildChatHeader(
-            room: room,
-            l10n: l10n,
-            directPeer: directPeer,
-            closeChat: closeChat,
-            showBackButton: showBackButton,
-          ),
           Expanded(
             child: CronTaskDecorator(
               callback: () => refreshCurrentRoom(),
@@ -1079,7 +1161,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                   emptyState: isLoadingMessages
                       ? const Center(child: QaulLoadingIndicator())
                       : Center(child: Text(l10n.chatEmptyState)),
-                  bubbleBuilder: _bubbleBuilder,
+                  bubbleBuilder:
+                      (
+                        child, {
+                        required message,
+                        required nextMessageInGroup,
+                      }) =>
+                          _bubbleBuilder(
+                            child,
+                            message: message,
+                            nextMessageInGroup: nextMessageInGroup,
+                            followsDateHeader: _messageFollowsDateHeader(
+                              message,
+                              chatMessages,
+                            ),
+                          ),
                   systemMessageBuilder: _buildSystemMessage,
                   customBottomWidget: _ChatTextFooter(
                     key: ValueKey(
@@ -1092,7 +1188,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                         : 'Please wait for the admin to confirm your acceptance to send messages',
                     hintText: _chatRenderMode == ChatRenderMode.group
                         ? l10n.groupChatMessageHint
-                        : l10n.securePrivateMessageHint,
+                        : l10n.privateMessageHint,
                     mentionSuggestions: _chatRenderMode == ChatRenderMode.group
                         ? [
                             for (final member in room.members)
@@ -1171,16 +1267,25 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                     );
                   },
                   audioMessageBuilder: (message, {required int messageWidth}) {
-                    return AudioMessageWidget(
-                      message: message,
-                      messageWidth: messageWidth,
-                      isDefaultUser: message.author.id == user.idBase58,
+                    return SizedBox(
+                      width: messageWidth.toDouble(),
+                      child: AudioMessageWidget(
+                        message: message,
+                        messageWidth: messageWidth,
+                        isDefaultUser: message.author.id == user.idBase58,
+                      ),
                     );
                   },
                   customDateHeaderText: (dt) => DateFormat(
                     'EEEE, MMMM d, yyyy',
                     'en',
                   ).format(dt.toLocal()),
+                  dateHeaderBuilder: (header) => Padding(
+                    padding: _dateHeaderPadding(header.dateTime, chatMessages),
+                    child: Center(
+                      child: Text(header.text, style: dateDividerTextStyle),
+                    ),
+                  ),
                   theme: DefaultChatTheme(
                     userAvatarNameColors: [
                       colorGenerationStrategy(
@@ -1192,12 +1297,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                     backgroundColor: chatBackgroundColor,
                     messageInsetsVertical: 0,
                     messageInsetsHorizontal: 0,
-                    dateDividerTextStyle: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w300,
-                      height: 1.2,
-                      color: Colors.white,
-                    ),
                     bubbleMargin: EdgeInsets.zero,
                     sentMessageBodyTextStyle: const TextStyle(
                       fontSize: 17,
@@ -1212,6 +1311,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
               ),
             ),
           ),
+          _buildChatHeader(
+            room: room,
+            l10n: l10n,
+            directPeer: directPeer,
+            closeChat: closeChat,
+            showBackButton: showBackButton,
+          ),
         ],
       ),
     );
@@ -1222,6 +1328,41 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     final store = ref.read(usersStoreProvider.notifier);
     return store.findMemberInRoom(e.senderId, room) ??
         User(name: l10n.unknown, id: e.senderId);
+  }
+
+  EdgeInsets _dateHeaderPadding(
+    DateTime date,
+    List<types.Message> chatMessages,
+  ) {
+    final messageIndex = chatMessages.indexWhere(
+      (message) =>
+          message.createdAt == date.millisecondsSinceEpoch,
+    );
+    if (messageIndex == -1) {
+      return const EdgeInsets.symmetric(vertical: 12);
+    }
+
+    // flutter_chat_ui inserts the first date header immediately before the
+    // oldest message, without its normal MessageSpacer.
+    if (messageIndex == chatMessages.length - 1) {
+      return const EdgeInsets.only(bottom: 12);
+    }
+
+    final message = chatMessages[messageIndex];
+    final previousMessage = chatMessages[messageIndex + 1];
+    final hasPreviousMessageSpacer =
+        previousMessage.type != types.MessageType.system &&
+        (previousMessage.author.id != message.author.id ||
+            (message.createdAt! - previousMessage.createdAt!) >
+                const Duration(days: 365).inMilliseconds);
+
+    // A date header follows a package-generated spacer only when the author
+    // changes (or the gap exceeds the grouping threshold). Compensate for
+    // that spacer so the visible gap to the previous bubble is always 12px.
+    return EdgeInsets.only(
+      top: hasPreviousMessageSpacer ? 0 : 12,
+      bottom: 12,
+    );
   }
 
   List<types.Message>? messages(
@@ -1284,6 +1425,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     Widget child, {
     required types.Message message,
     required bool nextMessageInGroup,
+    required bool followsDateHeader,
   }) {
     if (message.type == types.MessageType.custom) {
       return Container(
@@ -1312,9 +1454,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       onMenuRequested: (bubbleContext, messageRect) => _openMessageContextMenu(
         bubbleContext,
         message,
-        messageRect: messageRect,
+        scaledMessageRect: messageRect,
       ),
-      builder: (selectionScale, surfaceKey) {
+      builder: (selectionScale, selectionKey) {
         if (message is types.TextMessage) {
           return ChatMessageRenderer.renderText(
             presentation: presentation,
@@ -1324,8 +1466,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                 ? ['all', ...room.members.map((member) => member.name)]
                 : const [],
             isSelected: message.id == _selectedContextMenuMessageId,
+            topSpacingOverride: followsDateHeader ? 0 : null,
             selectionScale: selectionScale,
-            surfaceKey: surfaceKey,
+            selectionKey: selectionKey,
           );
         }
 
@@ -1335,11 +1478,39 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
           mode: _chatRenderMode,
           clock: DateTime.now(),
           isSelected: message.id == _selectedContextMenuMessageId,
+          topSpacingOverride: followsDateHeader ? 0 : null,
           selectionScale: selectionScale,
-          surfaceKey: surfaceKey,
+          selectionKey: selectionKey,
         );
       },
     );
+  }
+
+  bool _messageFollowsDateHeader(
+    types.Message message,
+    List<types.Message> chatMessages,
+  ) {
+    final messageIndex = chatMessages.indexWhere(
+      (candidate) => candidate.id == message.id,
+    );
+    if (messageIndex == -1 || message.createdAt == null) return false;
+
+    // flutter_chat_ui adds a header before the oldest message and before a
+    // newer message when it is separated from the previous one by a day.
+    if (messageIndex == chatMessages.length - 1) return true;
+
+    final previousMessage = chatMessages[messageIndex + 1];
+    if (previousMessage.createdAt == null) return false;
+
+    final messageDate = DateTime.fromMillisecondsSinceEpoch(
+      message.createdAt!,
+    );
+    final previousDate = DateTime.fromMillisecondsSinceEpoch(
+      previousMessage.createdAt!,
+    );
+    return messageDate.day != previousDate.day ||
+        message.createdAt! - previousMessage.createdAt! >=
+            const Duration(days: 365).inMilliseconds;
   }
 
   bool _isReceivingFile(types.FileMessage message) {
@@ -1381,7 +1552,7 @@ class _MessageSelectionGesture extends StatefulWidget {
   static const _selectedScale = 1.15;
 
   final types.Message message;
-  final Widget Function(double selectionScale, GlobalKey surfaceKey) builder;
+  final Widget Function(double selectionScale, GlobalKey selectionKey) builder;
   final VoidCallback onGestureStarted;
   final VoidCallback onGestureFinished;
   final Future<void> Function(BuildContext context, Rect? messageRect)
@@ -1394,7 +1565,7 @@ class _MessageSelectionGesture extends StatefulWidget {
 
 class _MessageSelectionGestureState extends State<_MessageSelectionGesture>
     with SingleTickerProviderStateMixin {
-  final _surfaceKey = GlobalKey();
+  final _selectionKey = GlobalKey();
   Timer? _scaleDelayTimer;
   Timer? _selectionTimer;
   Offset? _pointerOrigin;
@@ -1477,7 +1648,7 @@ class _MessageSelectionGestureState extends State<_MessageSelectionGesture>
 
   Rect? _scaledSurfaceRect() {
     final surfaceBox =
-        _surfaceKey.currentContext?.findRenderObject() as RenderBox?;
+        _selectionKey.currentContext?.findRenderObject() as RenderBox?;
     final overlay = Overlay.of(context, rootOverlay: true);
     final overlayBox = overlay.context.findRenderObject() as RenderBox?;
     if (surfaceBox == null || overlayBox == null || !surfaceBox.attached) {
@@ -1524,7 +1695,7 @@ class _MessageSelectionGestureState extends State<_MessageSelectionGesture>
           onPointerMove: _onPointerMove,
           onPointerUp: _onPointerUp,
           onPointerCancel: (_) => _cancelPendingSelection(),
-          child: widget.builder(selectionScale, _surfaceKey),
+          child: widget.builder(selectionScale, _selectionKey),
         );
       },
     );
@@ -1534,12 +1705,14 @@ class _MessageSelectionGestureState extends State<_MessageSelectionGesture>
 class _MessageContextMenuLayoutDelegate extends SingleChildLayoutDelegate {
   const _MessageContextMenuLayoutDelegate({
     required this.messageRect,
+    required this.alignRight,
     required this.viewportPadding,
   });
 
   static const _gap = 8.0;
 
   final Rect messageRect;
+  final bool alignRight;
   final EdgeInsets viewportPadding;
 
   @override
@@ -1552,8 +1725,7 @@ class _MessageContextMenuLayoutDelegate extends SingleChildLayoutDelegate {
     final maximumLeft = (size.width - childSize.width - viewportPadding.right)
         .clamp(minimumLeft, double.infinity)
         .toDouble();
-    final shouldAlignRight = messageRect.center.dx >= size.width / 2;
-    final preferredLeft = shouldAlignRight
+    final preferredLeft = alignRight
         ? messageRect.right - childSize.width
         : messageRect.left;
     final left = preferredLeft.clamp(minimumLeft, maximumLeft).toDouble();
@@ -1574,6 +1746,7 @@ class _MessageContextMenuLayoutDelegate extends SingleChildLayoutDelegate {
   @override
   bool shouldRelayout(_MessageContextMenuLayoutDelegate oldDelegate) =>
       messageRect != oldDelegate.messageRect ||
+      alignRight != oldDelegate.alignRight ||
       viewportPadding != oldDelegate.viewportPadding;
 }
 

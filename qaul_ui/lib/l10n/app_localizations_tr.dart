@@ -24,6 +24,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get sendFileTooltip => 'Dosyayı Gönder';
 
   @override
+  String get sendPhotoTooltip => 'Fotoğraf gönder';
+
+  @override
   String get sendAudioTooltip => 'Sesli mesaj kaydet';
 
   @override
@@ -322,6 +325,15 @@ class AppLocalizationsTr extends AppLocalizations {
   String get share => 'Paylaş';
 
   @override
+  String get save => 'Kaydet';
+
+  @override
+  String get attachmentSaved => 'Ek kaydedildi';
+
+  @override
+  String get attachmentSaveFailed => 'Ek kaydedilemedi';
+
+  @override
   String get messageCopied => 'Mesaj kopyalandı';
 
   @override
@@ -501,7 +513,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get saveButton => 'SAVE';
 
   @override
-  String get securePrivateMessageHint => 'Gizli güvenli mesaj';
+  String get privateMessageHint => 'Özel mesaj';
 
   @override
   String get storage => 'Storage';
