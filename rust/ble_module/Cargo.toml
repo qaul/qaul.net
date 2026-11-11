@@ -7,7 +7,6 @@ license = "AGPL"
 
 [dependencies]
 async-trait = "0.1"
-bluer = { version = "0.17", features = ["full"] }
 bytes = "1.11"
 crossbeam-channel = "0.5"
 filetime = "0.2"
@@ -25,3 +24,6 @@ tokio-stream = "0.1"
 # internal references
 qaul-proto = { path = "../qaul-proto" }
 ble_protocol = { path = "../ble_protocol" }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+bluer = { version = "0.17", features = ["full"] }

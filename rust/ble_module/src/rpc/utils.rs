@@ -1,7 +1,6 @@
 // Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-use bluer::{Adapter, Address};
 use tokio::sync::mpsc::UnboundedSender;
 
 use super::proto_sys::{self, BleDeviceDiscovered, BleDeviceUnavailable, BleError, BleStartResult};
@@ -58,20 +57,6 @@ impl BleResultSender {
     pub fn send_device_found(&mut self, qaul_id: Vec<u8>, rssi: i32) {
         self.send_ble_sys_msg(proto_sys::ble::Message::DeviceDiscovered(
             BleDeviceDiscovered { qaul_id, rssi },
-        ))
-    }
-
-    pub fn send_device_unavailable(
-        &mut self,
-        qaul_id: Vec<u8>,
-        adapter: Adapter,
-        mac_address: Address,
-    ) {
-        tokio::task::spawn_local(async move {
-            let _ = adapter.remove_device(mac_address).await;
-        });
-        self.send_ble_sys_msg(proto_sys::ble::Message::DeviceUnavailable(
-            BleDeviceUnavailable { qaul_id },
         ))
     }
 

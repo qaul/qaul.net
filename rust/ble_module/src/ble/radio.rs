@@ -82,6 +82,10 @@ impl BatchTimer {
     }
 }
 
+/// How a link's frames reach its writer task: `transmit` queues here and the
+/// task does the awaiting writes. Each platforms radio defines its own. Mostly needed for linux
+pub type Outbox = mpsc::Sender<Vec<u8>>;
+
 /// What the radio side tells the loop. One channel for all of them, so the loop sees one ordered stream.
 #[derive(Debug)]
 pub enum RadioEvent {
@@ -95,7 +99,7 @@ pub enum RadioEvent {
     Subscribed {
         peer: PeerKey,
         mtu: usize,
-        outbox: mpsc::Sender<Vec<u8>>,
+        outbox: Outbox,
     },
     /// Scanner saw this advert, pass to engine for connection decision making
     Advert {
@@ -200,7 +204,7 @@ pub struct Running {
     events_tx: mpsc::Sender<RadioEvent>,
     /// True stops the scanner.
     scan_paused: watch::Sender<bool>,
-    pub outboxes: HashMap<PeerKey, mpsc::Sender<Vec<u8>>>,
+    outboxes: HashMap<PeerKey, Outbox>,
     /// The protocol state. Lives here so a restart always begins with no links.
     pub engine: Engine<PeerKey>,
 }
@@ -294,7 +298,7 @@ impl Running {
     /// A central connected through our advert, which ends it: the controller terminates the advertising
     /// set, unlike Android which restarts it. Drops the dead handle so update_advertising puts a new one
     /// on air. Without this there can be at most one peripheral connection.
-    pub fn advert_ended(&mut self) {
+    fn advert_ended(&mut self) {
         self.advert = None;
     }
 
@@ -326,6 +330,27 @@ impl Running {
             }
             _ => {}
         }
+    }
+
+    pub fn transmit(&self, peer: PeerKey, bytes: Vec<u8>) {
+        // A dropped chunk is recovered by MissingChunk, liveness catches a stuck peer.
+        match self.outboxes.get(&peer) {
+            Some(outbox) => {
+                if let Err(err) = outbox.try_send(bytes) {
+                    log::warn!("dropped frame to {:?}: {}", peer, err);
+                }
+            }
+            None => log::warn!("dropped frame to {:?}: no outbox", peer),
+        }
+    }
+
+    /// A link came up: keep its outbox for use for transmit. When a central connects to us,
+    /// its connect also ends our advert so update_advertising will put it back if theres still room.
+    pub fn peer_ready(&mut self, peer: PeerKey, outbox: Outbox) {
+        if peer.role == Role::Peripheral {
+            self.advert_ended();
+        }
+        self.outboxes.insert(peer, outbox);
     }
 
     /// Stop talking to `peer`: end its send task and have BlueZ drop the

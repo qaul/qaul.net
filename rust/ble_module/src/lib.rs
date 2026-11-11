@@ -10,7 +10,12 @@ use rpc::{msg_loop::listen_for_sys_msgs, utils::BleResultSender, BleRpc};
 use std::thread;
 use tokio::runtime;
 
+#[cfg(target_os = "linux")]
 pub mod ble;
+#[cfg(target_os = "linux")]
+pub(crate) use ble::radio;
+
+
 pub mod rpc;
 
 /// initialize and start the ble_module in an own thread
@@ -32,7 +37,7 @@ pub fn init(sys_rpc_callback: Box<dyn FnMut(Vec<u8>) + Send>, rpc_receiver: rpc:
 }
 
 pub async fn is_ble_enabled() -> bool {
-    ble::radio::is_ble_enabled().await
+    radio::is_ble_enabled().await
 }
 
 /// Start the setup and main loop of this library

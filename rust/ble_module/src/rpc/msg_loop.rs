@@ -1,13 +1,13 @@
 // Copyright (c) 2023 Open Community Project Association https://ocpa.ch
 // This software is published under the AGPLv3 license.
 
-use ble_protocol::engine::{EngineAction, EngineEvent, Peer, Role, Snapshot};
+use ble_protocol::engine::{EngineAction, EngineEvent, Peer, Snapshot};
 use bytes::Bytes;
 use std::{collections::HashMap, error::Error, time::{Duration, Instant}};
 use tokio::time::{interval, MissedTickBehavior};
 
 use crate::{
-    ble::radio::{get_device_info, PeerKey, RadioEvent, Running},
+    radio::{get_device_info, PeerKey, RadioEvent, Running},
     rpc::{proto_sys::{ble::Message::*, *}, utils::*, SysRpcReceiver},
 };
 
@@ -121,11 +121,8 @@ pub async fn listen_for_sys_msgs(
                 Some(RadioEvent::Subscribed { peer, mtu, outbox }) => {
                     log::info!("{} ({:?}) subscribed, MTU {}", peer.address, peer.role, mtu);
                     if let Some(r) = running.as_mut() {
-                        // Their connect ended the advert; update_advertising below puts it back if there's room.
-                        if peer.role == Role::Peripheral {
-                            r.advert_ended();
-                        }
-                        r.outboxes.insert(peer, outbox);
+                        // The radios own bookkeeping for a new link
+                        r.peer_ready(peer, outbox);
                         let engine_actions = r.engine.handle(EngineEvent::PeerReady { peer, mtu }, Instant::now());
                         execute(r, engine_actions, &mut internal_sender);
                     }
@@ -196,7 +193,7 @@ pub async fn listen_for_sys_msgs(
                 adverts_heard = 0;
             }
         }
-        // After every event: check if advertiser state needs updated
+        // After every event: check if advertiser state needs updated. Only necessary for linux? it needs advert restarts every connect but ios/android need pause at cap
         if let Some(r) = running.as_mut() {
             r.update_advertising().await;
         }
@@ -283,15 +280,7 @@ fn execute(r: &mut Running, actions: Vec<EngineAction<PeerKey>>, sender: &mut Bl
     for action in actions {
         match action {
             EngineAction::Transmit { peer, bytes } => {
-                // A dropped chunk is recovered by MissingChunk, liveness catches a stuck peer.
-                match r.outboxes.get(&peer) {
-                    Some(outbox) => {
-                        if let Err(err) = outbox.try_send(bytes) {
-                            log::warn!("dropped frame to {:?}: {}", peer, err);
-                        }
-                    }
-                    None => log::warn!("dropped frame to {:?}: no outbox", peer),
-                }
+                r.transmit(peer, bytes);
             }
             EngineAction::Disconnect { peer } => r.disconnect(peer),
             EngineAction::Connect { peer } => {
