@@ -33,8 +33,15 @@ class SearchUserDecorator extends HookConsumerWidget {
     final searchNotifier = ref.read(usersSearchProvider.notifier);
 
     useEffect(() {
-      return searchNotifier.clear;
-    }, const []);
+      return () {
+        // Hook cleanup runs while Flutter is unmounting the widget tree. A
+        // provider update at that point triggers Riverpod's lifecycle guard,
+        // so clear the search after the frame has completed instead.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          searchNotifier.clear();
+        });
+      };
+    }, [searchNotifier]);
 
     final search = ref.watch(usersSearchProvider);
     final users = search.isActive ? search.results : _localUsersForPicker(ref);
