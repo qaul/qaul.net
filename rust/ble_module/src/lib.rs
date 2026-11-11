@@ -14,7 +14,10 @@ use tokio::runtime;
 pub mod ble;
 #[cfg(target_os = "linux")]
 pub(crate) use ble::radio;
-
+#[cfg(target_os = "ios")]
+pub mod ios;
+#[cfg(target_os = "ios")]
+pub(crate) use ios::radio;
 
 pub mod rpc;
 

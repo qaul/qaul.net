@@ -85,8 +85,8 @@ impl Sys {
     /// sends a SYS message to the outside
     #[allow(unused_variables)]
     pub fn send_message(state: &crate::QaulState, data: Vec<u8>) {
-        // send to linux BLE module
-        #[cfg(all(target_os = "linux", feature = "ble"))]
+        // send to the Rust BLE module (Linux, iOS)
+        #[cfg(all(any(target_os = "linux", target_os = "ios"), feature = "ble"))]
         {
             let guard = state.connections.ble.ble_sender.lock().unwrap();
             if let Some(sender) = guard.as_ref() {

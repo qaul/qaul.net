@@ -135,7 +135,7 @@ impl Ble {
     pub async fn init(state: &crate::QaulState) {
         // get q8id
         let ble_id = Node::get_q8id(state);
-        #[cfg(all(target_os = "linux", feature = "ble"))]
+        #[cfg(all(any(target_os = "linux", target_os = "ios"), feature = "ble"))]
         {
             // Create the channel from libqaul → ble_module.
             // Store the sender in BleModuleState; pass the receiver to ble_module.
