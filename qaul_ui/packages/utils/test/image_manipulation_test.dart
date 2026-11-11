@@ -118,6 +118,44 @@ void main() {
       expect(await processed.length(), lessThan(await source.length()));
     });
 
+    test(
+      'preserves distinct alpha values for pixels with the same colour',
+      () async {
+        final sourceImage = image.Image(
+          width: 1500,
+          height: 900,
+          numChannels: 4,
+        );
+        for (var y = 0; y < sourceImage.height; y++) {
+          for (var x = 0; x < sourceImage.width; x++) {
+            sourceImage.setPixelRgba(
+              x,
+              y,
+              240,
+              60,
+              90,
+              x < sourceImage.width ~/ 2 ? 255 : 0,
+            );
+          }
+        }
+        final source = await writeImage(
+          'same-colour-different-alpha.png',
+          image.encodePng(sourceImage, level: 1),
+        );
+
+        final processed = await processImage(
+          source,
+          temporaryDirectory: temporaryDirectory,
+        );
+
+        expect(processed, isNotNull);
+        final output = image.decodePng(await processed!.readAsBytes())!;
+        expect(output.width, 1024);
+        expect(output.getPixel(100, 450).a, 255);
+        expect(output.getPixel(900, 450).a, 0);
+      },
+    );
+
     for (final variant in <({String name, image.Image source})>[
       (name: 'gray+alpha', source: grayAlphaImage(1200, 900)),
       (name: '16-bit', source: sixteenBitTransparentImage(1200, 900)),
