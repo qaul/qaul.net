@@ -3,7 +3,11 @@ import Flutter
 import Photos
 
 @main
-@objc class AppDelegate: FlutterAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, UIDocumentPickerDelegate {
+  // The document picker may retain the exported URL after this method returns.
+  // Keep its temporary parent directory until the user finishes or cancels the
+  // export, then remove only that directory.
+  private var exportTemporaryDirectories: [ObjectIdentifier: URL] = [:]
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -94,8 +98,15 @@ import Photos
         return
       }
 
+      let name = args["name"] as? String ?? URL(fileURLWithPath: path).lastPathComponent
       let kind = args["kind"] as? String ?? "file"
-      self.saveAttachment(URL(fileURLWithPath: path), kind: kind, from: controller, result: result)
+      self.saveAttachment(
+        URL(fileURLWithPath: path),
+        name: name,
+        kind: kind,
+        from: controller,
+        result: result
+      )
     })
 
     GeneratedPluginRegistrant.register(with: self)
@@ -108,14 +119,32 @@ import Photos
 
   /// Saves photos and videos to the photo library; other files go through the system export
   /// dialog. Replies "saved" or "handedToSystem", always on the main thread.
-  private func saveAttachment(_ url: URL, kind: String, from controller: UIViewController, result: @escaping FlutterResult) {
+  private func saveAttachment(_ url: URL, name: String, kind: String, from controller: UIViewController, result: @escaping FlutterResult) {
     guard kind == "image" || kind == "video" else {
+      let fileManager = FileManager.default
+      let fallbackName = url.lastPathComponent
+      let requestedName = URL(fileURLWithPath: name).lastPathComponent
+      let exportName = requestedName.isEmpty || requestedName == "." ? fallbackName : requestedName
+      let temporaryDirectory = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+      let exportURL = temporaryDirectory.appendingPathComponent(exportName, isDirectory: false)
+
+      do {
+        try fileManager.createDirectory(at: temporaryDirectory, withIntermediateDirectories: true)
+        try fileManager.copyItem(at: url, to: exportURL)
+      } catch {
+        try? fileManager.removeItem(at: temporaryDirectory)
+        result(FlutterError(code: "export_prepare_failed", message: "Could not prepare the attachment for export", details: error.localizedDescription))
+        return
+      }
+
       let picker: UIDocumentPickerViewController
       if #available(iOS 14.0, *) {
-        picker = UIDocumentPickerViewController(forExporting: [url], asCopy: true)
+        picker = UIDocumentPickerViewController(forExporting: [exportURL], asCopy: true)
       } else {
-        picker = UIDocumentPickerViewController(url: url, in: .exportToService)
+        picker = UIDocumentPickerViewController(url: exportURL, in: .exportToService)
       }
+      picker.delegate = self
+      exportTemporaryDirectories[ObjectIdentifier(picker)] = temporaryDirectory
       controller.present(picker, animated: true)
       result("handedToSystem")
       return
@@ -146,6 +175,21 @@ import Photos
         status == .authorized ? save() : denied()
       }
     }
+  }
+
+  func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+    removeExportTemporaryDirectory(for: controller)
+  }
+
+  func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+    removeExportTemporaryDirectory(for: controller)
+  }
+
+  private func removeExportTemporaryDirectory(for controller: UIDocumentPickerViewController) {
+    guard let directory = exportTemporaryDirectories.removeValue(forKey: ObjectIdentifier(controller)) else {
+      return
+    }
+    try? FileManager.default.removeItem(at: directory)
   }
 
   private func dummyMethodToEnforceBundling() {
