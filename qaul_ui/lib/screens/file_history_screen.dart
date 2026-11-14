@@ -164,7 +164,7 @@ class _FileHistoryTile extends ConsumerWidget {
     );
   }
 
-  IconData _getIconFrom({required String extension}) {
+  FaIconData _getIconFrom({required String extension}) {
     switch (extension) {
       case '7z':
       case 'gz':
