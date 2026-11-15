@@ -52,6 +52,14 @@ TYPE_NAMES = {
     0x05: "MANIFEST_REQUEST",
 }
 
+# lib.rs logs management sends with the same `router_v2 SEND` line, and its
+# type= is the management frame's second byte, often 0x01. Each one follows
+# a `management: queued for` line with the same peer and size, which is how
+# they are told apart; they get this id, outside the one-byte routing range.
+MANAGEMENT = 0x100
+TYPE_NAMES[MANAGEMENT] = "MANAGEMENT"
+QUEUED_RE = re.compile(r"management: queued for .*? via peer=(?P<peer>\S+) .*?\((?P<bytes>\d+) bytes\)")
+
 LOCAL_SPHERE_TRANSPORTS = {"Lan", "Ble"}
 
 # One origin cycle (10s, router_v2/init.rs) plus margin: long enough that
@@ -195,13 +203,25 @@ def read_frames(node_id: str, start, end) -> list[dict]:
         return []
 
     frames = []
+    # (peer, bytes) of management messages queued but not yet logged as sent;
+    # kept from before the window too, since one may be sent inside it
+    queued: dict[tuple[str, int], int] = defaultdict(int)
     with open(path, errors="replace") as f:
         for line in f:
+            queued_match = QUEUED_RE.search(line)
+            if queued_match:
+                queued[(queued_match.group("peer"), int(queued_match.group("bytes")))] += 1
+                continue
             if "router_v2" not in line:
                 continue
             match = FRAME_RE.match(line)
             if not match:
                 continue
+            size = int(match.group("bytes"))
+            frame_type = int(match.group("type"), 16)
+            if match.group("direction") == "SEND" and queued[(match.group("peer"), size)] > 0:
+                queued[(match.group("peer"), size)] -= 1
+                frame_type = MANAGEMENT
             ts = parse_ts(match.group("ts"))
             if ts < start or ts > end:
                 continue
@@ -211,8 +231,8 @@ def read_frames(node_id: str, start, end) -> list[dict]:
                     "direction": match.group("direction"),
                     "peer": match.group("peer"),
                     "transport": match.group("transport"),
-                    "type": int(match.group("type"), 16),
-                    "bytes": int(match.group("bytes")),
+                    "type": frame_type,
+                    "bytes": size,
                 }
             )
     return frames

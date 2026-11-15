@@ -1,0 +1,980 @@
+{
+ "name": "world-1-half",
+ "kind": "world",
+ "seed": 1,
+ "source": "worlds/world-1-half.json",
+ "description": "world-1 at half size, for the lab-only smoke run (plan step 2). Same servers, gateways, links and remote users; communities halved.",
+ "nodes": {
+  "0000": {
+   "name": "S1",
+   "role": "server",
+   "community": null,
+   "sphere": null,
+   "location": "far",
+   "lan": false,
+   "stands_in_for": "the public qaul Community Node"
+  },
+  "0001": {
+   "name": "S2",
+   "role": "server",
+   "community": null,
+   "sphere": null,
+   "location": "near",
+   "lan": false,
+   "stands_in_for": "a regional relay"
+  },
+  "0002": {
+   "name": "r1",
+   "role": "remote",
+   "community": null,
+   "sphere": null,
+   "location": "far",
+   "lan": true,
+   "situation": "abroad, next to the public server"
+  },
+  "0003": {
+   "name": "r2",
+   "role": "remote",
+   "community": null,
+   "sphere": null,
+   "location": "near",
+   "lan": true,
+   "situation": "near the regional server"
+  },
+  "0004": {
+   "name": "r3",
+   "role": "remote",
+   "community": null,
+   "sphere": null,
+   "location": "near",
+   "lan": true,
+   "situation": "two connections, one far and one near"
+  },
+  "0005": {
+   "name": "T.01",
+   "role": "member",
+   "community": "T",
+   "sphere": "T",
+   "location": "near",
+   "lan": true
+  },
+  "0006": {
+   "name": "T.02",
+   "role": "member",
+   "community": "T",
+   "sphere": "T",
+   "location": "near",
+   "lan": true
+  },
+  "0007": {
+   "name": "T1",
+   "role": "gateway",
+   "community": "T",
+   "sphere": "T",
+   "location": "near",
+   "lan": true
+  },
+  "0008": {
+   "name": "T.04",
+   "role": "member",
+   "community": "T",
+   "sphere": "T",
+   "location": "near",
+   "lan": true
+  },
+  "0009": {
+   "name": "T.05",
+   "role": "member",
+   "community": "T",
+   "sphere": "T",
+   "location": "near",
+   "lan": true
+  },
+  "000a": {
+   "name": "T.06",
+   "role": "member",
+   "community": "T",
+   "sphere": "T",
+   "location": "near",
+   "lan": true
+  },
+  "000b": {
+   "name": "T.07",
+   "role": "member",
+   "community": "T",
+   "sphere": "T",
+   "location": "near",
+   "lan": true
+  },
+  "000c": {
+   "name": "T.08",
+   "role": "member",
+   "community": "T",
+   "sphere": "T",
+   "location": "near",
+   "lan": true
+  },
+  "000d": {
+   "name": "T3",
+   "role": "gateway",
+   "community": "T",
+   "sphere": "T",
+   "location": "near",
+   "lan": true
+  },
+  "000e": {
+   "name": "T2",
+   "role": "gateway",
+   "community": "T",
+   "sphere": "T",
+   "location": "near",
+   "lan": true
+  },
+  "000f": {
+   "name": "T.11",
+   "role": "member",
+   "community": "T",
+   "sphere": "T",
+   "location": "near",
+   "lan": true
+  },
+  "0010": {
+   "name": "T.12",
+   "role": "member",
+   "community": "T",
+   "sphere": "T",
+   "location": "near",
+   "lan": true
+  },
+  "0011": {
+   "name": "T.13",
+   "role": "member",
+   "community": "T",
+   "sphere": "T",
+   "location": "near",
+   "lan": true
+  },
+  "0012": {
+   "name": "T.14",
+   "role": "member",
+   "community": "T",
+   "sphere": "T",
+   "location": "near",
+   "lan": true
+  },
+  "0013": {
+   "name": "T.15",
+   "role": "member",
+   "community": "T",
+   "sphere": "T",
+   "location": "near",
+   "lan": true
+  },
+  "0014": {
+   "name": "T.16",
+   "role": "member",
+   "community": "T",
+   "sphere": "T",
+   "location": "near",
+   "lan": true
+  },
+  "0015": {
+   "name": "T.17",
+   "role": "member",
+   "community": "T",
+   "sphere": "T",
+   "location": "near",
+   "lan": true
+  },
+  "0016": {
+   "name": "T.18",
+   "role": "member",
+   "community": "T",
+   "sphere": "T",
+   "location": "near",
+   "lan": true
+  },
+  "0017": {
+   "name": "T.19",
+   "role": "member",
+   "community": "T",
+   "sphere": "T",
+   "location": "near",
+   "lan": true
+  },
+  "0018": {
+   "name": "T.20",
+   "role": "member",
+   "community": "T",
+   "sphere": "T",
+   "location": "near",
+   "lan": true
+  },
+  "0019": {
+   "name": "V2",
+   "role": "gateway",
+   "community": "V",
+   "sphere": "V",
+   "location": "near",
+   "lan": true
+  },
+  "001a": {
+   "name": "V.02",
+   "role": "member",
+   "community": "V",
+   "sphere": "V",
+   "location": "near",
+   "lan": true
+  },
+  "001b": {
+   "name": "V.03",
+   "role": "member",
+   "community": "V",
+   "sphere": "V",
+   "location": "near",
+   "lan": true
+  },
+  "001c": {
+   "name": "V.04",
+   "role": "member",
+   "community": "V",
+   "sphere": "V",
+   "location": "near",
+   "lan": true
+  },
+  "001d": {
+   "name": "V.05",
+   "role": "member",
+   "community": "V",
+   "sphere": "V",
+   "location": "near",
+   "lan": true
+  },
+  "001e": {
+   "name": "V.06",
+   "role": "member",
+   "community": "V",
+   "sphere": "V",
+   "location": "near",
+   "lan": true
+  },
+  "001f": {
+   "name": "V.07",
+   "role": "member",
+   "community": "V",
+   "sphere": "V",
+   "location": "near",
+   "lan": true
+  },
+  "0020": {
+   "name": "V.08",
+   "role": "member",
+   "community": "V",
+   "sphere": "V",
+   "location": "near",
+   "lan": true
+  },
+  "0021": {
+   "name": "V1",
+   "role": "gateway",
+   "community": "V",
+   "sphere": "V",
+   "location": "near",
+   "lan": true
+  },
+  "0022": {
+   "name": "V.10",
+   "role": "member",
+   "community": "V",
+   "sphere": "V",
+   "location": "near",
+   "lan": true
+  },
+  "0023": {
+   "name": "W.01",
+   "role": "member",
+   "community": "W",
+   "sphere": "W",
+   "location": "near",
+   "lan": true
+  },
+  "0024": {
+   "name": "W.02",
+   "role": "member",
+   "community": "W",
+   "sphere": "W",
+   "location": "near",
+   "lan": true
+  },
+  "0025": {
+   "name": "W.03",
+   "role": "member",
+   "community": "W",
+   "sphere": "W",
+   "location": "near",
+   "lan": true
+  },
+  "0026": {
+   "name": "W.04",
+   "role": "member",
+   "community": "W",
+   "sphere": "W",
+   "location": "near",
+   "lan": true
+  },
+  "0027": {
+   "name": "W.05",
+   "role": "member",
+   "community": "W",
+   "sphere": "W",
+   "location": "near",
+   "lan": true
+  },
+  "0028": {
+   "name": "W1",
+   "role": "gateway",
+   "community": "W",
+   "sphere": "W",
+   "location": "near",
+   "lan": true
+  },
+  "0029": {
+   "name": "H.01",
+   "role": "member",
+   "community": "H",
+   "sphere": "H",
+   "location": "near",
+   "lan": true
+  },
+  "002a": {
+   "name": "H1",
+   "role": "gateway",
+   "community": "H",
+   "sphere": "H",
+   "location": "near",
+   "lan": true
+  },
+  "002b": {
+   "name": "H.03",
+   "role": "member",
+   "community": "H",
+   "sphere": "H",
+   "location": "near",
+   "lan": true
+  },
+  "002c": {
+   "name": "H.04",
+   "role": "member",
+   "community": "H",
+   "sphere": "H",
+   "location": "near",
+   "lan": true
+  },
+  "002d": {
+   "name": "X.01",
+   "role": "member",
+   "community": "X",
+   "sphere": "X+Y",
+   "location": "near",
+   "lan": true
+  },
+  "002e": {
+   "name": "X.02",
+   "role": "member",
+   "community": "X",
+   "sphere": "X+Y",
+   "location": "near",
+   "lan": true
+  },
+  "002f": {
+   "name": "X1",
+   "role": "gateway",
+   "community": "X",
+   "sphere": "X+Y",
+   "location": "near",
+   "lan": true
+  },
+  "0030": {
+   "name": "X.04",
+   "role": "member",
+   "community": "X",
+   "sphere": "X+Y",
+   "location": "near",
+   "lan": true
+  },
+  "0031": {
+   "name": "X.05",
+   "role": "member",
+   "community": "X",
+   "sphere": "X+Y",
+   "location": "near",
+   "lan": true
+  },
+  "0032": {
+   "name": "Y.01",
+   "role": "member",
+   "community": "Y",
+   "sphere": "X+Y",
+   "location": "near",
+   "lan": true
+  },
+  "0033": {
+   "name": "Y.02",
+   "role": "member",
+   "community": "Y",
+   "sphere": "X+Y",
+   "location": "near",
+   "lan": true
+  },
+  "0034": {
+   "name": "Y.03",
+   "role": "member",
+   "community": "Y",
+   "sphere": "X+Y",
+   "location": "near",
+   "lan": true
+  },
+  "0035": {
+   "name": "Y.04",
+   "role": "member",
+   "community": "Y",
+   "sphere": "X+Y",
+   "location": "near",
+   "lan": true
+  },
+  "0036": {
+   "name": "I.01",
+   "role": "member",
+   "community": "I",
+   "sphere": "I",
+   "location": "near",
+   "lan": true
+  },
+  "0037": {
+   "name": "I.02",
+   "role": "member",
+   "community": "I",
+   "sphere": "I",
+   "location": "near",
+   "lan": true
+  },
+  "0038": {
+   "name": "I.03",
+   "role": "member",
+   "community": "I",
+   "sphere": "I",
+   "location": "near",
+   "lan": true
+  },
+  "0039": {
+   "name": "I.04",
+   "role": "member",
+   "community": "I",
+   "sphere": "I",
+   "location": "near",
+   "lan": true
+  }
+ },
+ "by_name": {
+  "S1": "0000",
+  "S2": "0001",
+  "r1": "0002",
+  "r2": "0003",
+  "r3": "0004",
+  "T.01": "0005",
+  "T.02": "0006",
+  "T1": "0007",
+  "T.04": "0008",
+  "T.05": "0009",
+  "T.06": "000a",
+  "T.07": "000b",
+  "T.08": "000c",
+  "T3": "000d",
+  "T2": "000e",
+  "T.11": "000f",
+  "T.12": "0010",
+  "T.13": "0011",
+  "T.14": "0012",
+  "T.15": "0013",
+  "T.16": "0014",
+  "T.17": "0015",
+  "T.18": "0016",
+  "T.19": "0017",
+  "T.20": "0018",
+  "V2": "0019",
+  "V.02": "001a",
+  "V.03": "001b",
+  "V.04": "001c",
+  "V.05": "001d",
+  "V.06": "001e",
+  "V.07": "001f",
+  "V.08": "0020",
+  "V1": "0021",
+  "V.10": "0022",
+  "W.01": "0023",
+  "W.02": "0024",
+  "W.03": "0025",
+  "W.04": "0026",
+  "W.05": "0027",
+  "W1": "0028",
+  "H.01": "0029",
+  "H1": "002a",
+  "H.03": "002b",
+  "H.04": "002c",
+  "X.01": "002d",
+  "X.02": "002e",
+  "X1": "002f",
+  "X.04": "0030",
+  "X.05": "0031",
+  "Y.01": "0032",
+  "Y.02": "0033",
+  "Y.03": "0034",
+  "Y.04": "0035",
+  "I.01": "0036",
+  "I.02": "0037",
+  "I.03": "0038",
+  "I.04": "0039"
+ },
+ "servers": [
+  "0000",
+  "0001"
+ ],
+ "remote_users": [
+  "0002",
+  "0003",
+  "0004"
+ ],
+ "communities": [
+  {
+   "name": "T",
+   "situation": "a town with Internet in several places",
+   "members": [
+    "0005",
+    "0006",
+    "0007",
+    "0008",
+    "0009",
+    "000a",
+    "000b",
+    "000c",
+    "000d",
+    "000e",
+    "000f",
+    "0010",
+    "0011",
+    "0012",
+    "0013",
+    "0014",
+    "0015",
+    "0016",
+    "0017",
+    "0018"
+   ],
+   "gateways": [
+    "0007",
+    "000e",
+    "000d"
+   ],
+   "radio_links": 32,
+   "max_degree": 4,
+   "mean_degree": 3.2,
+   "diameter": 8
+  },
+  {
+   "name": "V",
+   "situation": "a village using two different providers",
+   "members": [
+    "0019",
+    "001a",
+    "001b",
+    "001c",
+    "001d",
+    "001e",
+    "001f",
+    "0020",
+    "0021",
+    "0022"
+   ],
+   "gateways": [
+    "0021",
+    "0019"
+   ],
+   "radio_links": 17,
+   "max_degree": 4,
+   "mean_degree": 3.4,
+   "diameter": 5
+  },
+  {
+   "name": "W",
+   "situation": "a village helping a neighbour get online",
+   "members": [
+    "0023",
+    "0024",
+    "0025",
+    "0026",
+    "0027",
+    "0028"
+   ],
+   "gateways": [
+    "0028"
+   ],
+   "radio_links": 10,
+   "max_degree": 4,
+   "mean_degree": 3.33,
+   "diameter": 3
+  },
+  {
+   "name": "H",
+   "situation": "a hamlet whose only Internet peer is W's gateway",
+   "members": [
+    "0029",
+    "002a",
+    "002b",
+    "002c"
+   ],
+   "gateways": [
+    "002a"
+   ],
+   "radio_links": 4,
+   "max_degree": 2,
+   "mean_degree": 2.0,
+   "diameter": 2
+  },
+  {
+   "name": "X",
+   "situation": "the twin with Internet",
+   "members": [
+    "002d",
+    "002e",
+    "002f",
+    "0030",
+    "0031"
+   ],
+   "gateways": [
+    "002f"
+   ],
+   "radio_links": 9,
+   "max_degree": 4,
+   "mean_degree": 3.6,
+   "diameter": 2
+  },
+  {
+   "name": "Y",
+   "situation": "the twin without Internet, in radio range of X",
+   "members": [
+    "0032",
+    "0033",
+    "0034",
+    "0035"
+   ],
+   "gateways": [],
+   "radio_links": 5,
+   "max_degree": 3,
+   "mean_degree": 2.5,
+   "diameter": 2
+  },
+  {
+   "name": "I",
+   "situation": "an island with no Internet at all",
+   "members": [
+    "0036",
+    "0037",
+    "0038",
+    "0039"
+   ],
+   "gateways": [],
+   "radio_links": 5,
+   "max_degree": 3,
+   "mean_degree": 2.5,
+   "diameter": 2
+  }
+ ],
+ "spheres": [
+  {
+   "name": "T",
+   "communities": [
+    "T"
+   ],
+   "members": [
+    "0005",
+    "0006",
+    "0007",
+    "0008",
+    "0009",
+    "000a",
+    "000b",
+    "000c",
+    "000d",
+    "000e",
+    "000f",
+    "0010",
+    "0011",
+    "0012",
+    "0013",
+    "0014",
+    "0015",
+    "0016",
+    "0017",
+    "0018"
+   ],
+   "gateways": [
+    "0007",
+    "000e",
+    "000d"
+   ]
+  },
+  {
+   "name": "V",
+   "communities": [
+    "V"
+   ],
+   "members": [
+    "0019",
+    "001a",
+    "001b",
+    "001c",
+    "001d",
+    "001e",
+    "001f",
+    "0020",
+    "0021",
+    "0022"
+   ],
+   "gateways": [
+    "0021",
+    "0019"
+   ]
+  },
+  {
+   "name": "W",
+   "communities": [
+    "W"
+   ],
+   "members": [
+    "0023",
+    "0024",
+    "0025",
+    "0026",
+    "0027",
+    "0028"
+   ],
+   "gateways": [
+    "0028"
+   ]
+  },
+  {
+   "name": "H",
+   "communities": [
+    "H"
+   ],
+   "members": [
+    "0029",
+    "002a",
+    "002b",
+    "002c"
+   ],
+   "gateways": [
+    "002a"
+   ]
+  },
+  {
+   "name": "X+Y",
+   "communities": [
+    "X",
+    "Y"
+   ],
+   "members": [
+    "002d",
+    "002e",
+    "002f",
+    "0030",
+    "0031",
+    "0032",
+    "0033",
+    "0034",
+    "0035"
+   ],
+   "gateways": [
+    "002f"
+   ]
+  },
+  {
+   "name": "I",
+   "communities": [
+    "I"
+   ],
+   "members": [
+    "0036",
+    "0037",
+    "0038",
+    "0039"
+   ],
+   "gateways": []
+  }
+ ],
+ "radio_bridges": [
+  {
+   "between": [
+    "X",
+    "Y"
+   ],
+   "a": "002e",
+   "b": "0035"
+  }
+ ],
+ "internet_links": [
+  {
+   "dialer": "0007",
+   "target": "0000",
+   "far": true
+  },
+  {
+   "dialer": "000e",
+   "target": "0000",
+   "far": true
+  },
+  {
+   "dialer": "000d",
+   "target": "0001",
+   "far": false
+  },
+  {
+   "dialer": "0021",
+   "target": "0000",
+   "far": true
+  },
+  {
+   "dialer": "0019",
+   "target": "0001",
+   "far": false
+  },
+  {
+   "dialer": "0028",
+   "target": "0000",
+   "far": true
+  },
+  {
+   "dialer": "002a",
+   "target": "0028",
+   "far": false
+  },
+  {
+   "dialer": "002f",
+   "target": "0001",
+   "far": false
+  },
+  {
+   "dialer": "0002",
+   "target": "0000",
+   "far": false
+  },
+  {
+   "dialer": "0003",
+   "target": "0001",
+   "far": false
+  },
+  {
+   "dialer": "0004",
+   "target": "0000",
+   "far": true
+  },
+  {
+   "dialer": "0004",
+   "target": "0001",
+   "far": false
+  },
+  {
+   "dialer": "0001",
+   "target": "0000",
+   "far": true
+  }
+ ],
+ "expected": {
+  "gateway_role": [
+   "0000",
+   "0001",
+   "0002",
+   "0003",
+   "0004",
+   "0007",
+   "000d",
+   "000e",
+   "0019",
+   "0021",
+   "0028",
+   "002a",
+   "002f"
+  ],
+  "internet_components": 1,
+  "globally_reachable": [
+   "0000",
+   "0001",
+   "0002",
+   "0003",
+   "0004",
+   "0005",
+   "0006",
+   "0007",
+   "0008",
+   "0009",
+   "000a",
+   "000b",
+   "000c",
+   "000d",
+   "000e",
+   "000f",
+   "0010",
+   "0011",
+   "0012",
+   "0013",
+   "0014",
+   "0015",
+   "0016",
+   "0017",
+   "0018",
+   "0019",
+   "001a",
+   "001b",
+   "001c",
+   "001d",
+   "001e",
+   "001f",
+   "0020",
+   "0021",
+   "0022",
+   "0023",
+   "0024",
+   "0025",
+   "0026",
+   "0027",
+   "0028",
+   "0029",
+   "002a",
+   "002b",
+   "002c",
+   "002d",
+   "002e",
+   "002f",
+   "0030",
+   "0031",
+   "0032",
+   "0033",
+   "0034",
+   "0035"
+  ],
+  "local_only": [
+   "0036",
+   "0037",
+   "0038",
+   "0039"
+  ]
+ },
+ "totals": {
+  "nodes": 58,
+  "lab_nodes": 56,
+  "far_nodes": 2,
+  "radio_links": 83,
+  "internet_links": 13,
+  "far_internet_links": 6
+ }
+}

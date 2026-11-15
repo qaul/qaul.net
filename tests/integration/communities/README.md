@@ -19,6 +19,9 @@ Findings so far, and the fix plan they led to, are in
 | `manifests.py` | Which manifest origins each node holds, by sphere and role — the directory's preconditions |
 | `crossing.py` | Containment (members hold no foreign users) and reachability (a cross-community invite and message arrive) |
 | `overhead.py` | Protocol bytes per peer, transport and message type, plus uplink counters for a v1/v2 comparison |
+| `timeline.py` | Records every node's user list once a second from bring-up, then reduces it to convergence, reachability and recovery times |
+| `compare.sh` | v1 against v2 on one topology, with identical timing: bring-up, settle, overhead window, crossing, gateway reconnect, member leave |
+| `report.py` | Tabulates `compare.sh` runs from their archives, one cell per arm and one value per run |
 | `topologies/` | `gen_communities.py` and the topologies it writes |
 
 Shared code stays one level up: `lib/` for the node and network helpers, and
@@ -90,9 +93,61 @@ Run these from this directory if you want to stop between stages:
 By hand, nothing archives the logs. Run `sudo ../lab/archive_lab.sh <tag>` before
 anything tears the lab down.
 
+## Comparing v1 and v2
+
+`compare.sh` runs both arms on fresh labs with the same durations at the same
+offsets, and repeats the pair:
+
+```sh
+sudo -v
+RUST_LOG='libqaul::router_v2=debug,libqaul=info' REPEATS=2 sudo -E ./compare.sh -t communities-3x10
+```
+
+It sets `QAUL_ROUTING_V2` per arm itself. Durations come from `SETTLE`,
+`WINDOW`, `CROSS_TIMEOUT`, `CUT_GATEWAY`, `CUT_MEMBER` and `HEAL`; see its
+header. One arm takes about 27 minutes with the defaults.
+
+What it measures, per arm. A is the first community's last member, Z the last
+community's last member.
+
+| # | Time | From |
+|---|---|---|
+| 1 | every member routes to every user of its own community | bring-up |
+| 2 | the hub routes to every community user | gateway dial |
+| 3 | every gateway routes to every community user | gateway dial |
+| 4 | Z reachable from A, and A from Z | gateway dial |
+| 5 | every member routes to every foreign user (v1 only; v2 contains them) | gateway dial |
+| 6–8 | invite, accept, deliver, names (`crossing.py`) | send |
+| 9 | A's gateway loses its hub link: A↔Z lost, then back | cut, heal |
+| 10 | Z leaves its community: A↔Z lost, then back | cut, heal |
+
+A recovery counts only inside its heal window, which ends at the next cut or when
+the recording stops. A direction that was already down when a cut began is reported
+as such, not as lost at once.
+| 11 | wire bytes per node from bring-up to the settle's end, and per second in the window | `overhead.py` |
+
+"Reachable" is read where each arm resolves the peer. In v1, every node holds
+every user, so it is read at A (or Z). In v2, a member holds no foreign user
+(§2.3) and forwards to its gateway. So it is read as A routing its gateway (its
+gateway's user, as a proxy for the node route) and the gateway routing Z. Cutting a
+member then breaks its own side, as it does in v1.
+`timeline.py` polls about once a second, so every time carries up to a
+second's error, the same in both arms.
+
+To tabulate runs, pass their archives to `report.py`. It reduces each timeline again
+with the current reducer and reads wire bytes straight from the counter samples:
+
+```sh
+./report.py ../runs/communities-3x10-v1-<start> ../runs/communities-3x10-v2-<start> ...
+```
+
+The first results are in `../REPORT-v1-vs-v2.md`, under "Cross-community testing".
+
 ## Where the output goes
 
-- **`../results/`** — the JSON reports from `manifests.py` and `crossing.py`.
+- **`../results/`** — the JSON reports from `manifests.py` and `crossing.py`, and
+  from `compare.sh`: `times-*`, `wire-bringup-*`, `wire-steady-*` and the raw
+  `timeline-*` recordings.
 - **`../runs/<tag>-<UTC start>/`** — written by `run.sh` through
   `lab/archive_lab.sh`. It holds every node's log (gzipped), the run's results and
   roles, the node and user PeerIds, and a `counters.txt` summary. It is archived

@@ -95,6 +95,9 @@ def roles_of(path: str | None) -> dict[str, str]:
     with open(path) as f:
         spec = json.load(f)
     roles = {}
+    # world/gen_world.py roles name every node's role directly.
+    if spec.get("kind") == "world":
+        return {nid: meta["role"] for nid, meta in spec.get("nodes", {}).items()}
     for community in spec.get("communities", []):
         for member in community.get("members", []):
             roles[member] = "member"

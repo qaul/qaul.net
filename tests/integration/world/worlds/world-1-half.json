@@ -1,0 +1,49 @@
+{
+  "name": "world-1-half",
+  "seed": 1,
+  "description": "world-1 at half size, for the lab-only smoke run (plan step 2). Same servers, gateways, links and remote users; communities halved.",
+  "servers": [
+    {"name": "S1", "location": "far", "stands_in_for": "the public qaul Community Node"},
+    {"name": "S2", "location": "near", "stands_in_for": "a regional relay"}
+  ],
+  "server_links": [
+    {"dialer": "S2", "target": "S1"}
+  ],
+  "communities": [
+    {"name": "T", "members": 20, "situation": "a town with Internet in several places",
+     "gateways": [
+       {"name": "T1", "place": "centre", "peers": ["S1"]},
+       {"name": "T2", "place": "edge", "peers": ["S1"]},
+       {"name": "T3", "place": "edge", "peers": ["S2"]}
+     ]},
+    {"name": "V", "members": 10, "situation": "a village using two different providers",
+     "gateways": [
+       {"name": "V1", "place": "edge", "peers": ["S1"]},
+       {"name": "V2", "place": "edge", "peers": ["S2"]}
+     ]},
+    {"name": "W", "members": 6, "situation": "a village helping a neighbour get online",
+     "gateways": [
+       {"name": "W1", "place": "edge", "peers": ["S1"]}
+     ]},
+    {"name": "H", "members": 4, "situation": "a hamlet whose only Internet peer is W's gateway",
+     "gateways": [
+       {"name": "H1", "place": "edge", "peers": ["W1"]}
+     ]},
+    {"name": "X", "members": 5, "situation": "the twin with Internet",
+     "gateways": [
+       {"name": "X1", "place": "edge", "peers": ["S2"]}
+     ]},
+    {"name": "Y", "members": 4, "situation": "the twin without Internet, in radio range of X",
+     "gateways": []},
+    {"name": "I", "members": 4, "situation": "an island with no Internet at all",
+     "gateways": []}
+  ],
+  "radio_bridges": [
+    {"between": ["X", "Y"]}
+  ],
+  "remote_users": [
+    {"name": "r1", "location": "far", "peers": ["S1"], "situation": "abroad, next to the public server"},
+    {"name": "r2", "location": "near", "peers": ["S2"], "situation": "near the regional server"},
+    {"name": "r3", "location": "near", "peers": ["S1", "S2"], "situation": "two connections, one far and one near"}
+  ]
+}

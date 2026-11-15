@@ -1,0 +1,49 @@
+{
+  "name": "world-1",
+  "seed": 1,
+  "description": "Mixed communities behind two servers. See tests/integration/PLAN-real-internet.md.",
+  "servers": [
+    {"name": "S1", "location": "far", "stands_in_for": "the public qaul Community Node"},
+    {"name": "S2", "location": "near", "stands_in_for": "a regional relay"}
+  ],
+  "server_links": [
+    {"dialer": "S2", "target": "S1"}
+  ],
+  "communities": [
+    {"name": "T", "members": 40, "situation": "a town with Internet in several places",
+     "gateways": [
+       {"name": "T1", "place": "centre", "peers": ["S1"]},
+       {"name": "T2", "place": "edge", "peers": ["S1"]},
+       {"name": "T3", "place": "edge", "peers": ["S2"]}
+     ]},
+    {"name": "V", "members": 20, "situation": "a village using two different providers",
+     "gateways": [
+       {"name": "V1", "place": "edge", "peers": ["S1"]},
+       {"name": "V2", "place": "edge", "peers": ["S2"]}
+     ]},
+    {"name": "W", "members": 12, "situation": "a village helping a neighbour get online",
+     "gateways": [
+       {"name": "W1", "place": "edge", "peers": ["S1"]}
+     ]},
+    {"name": "H", "members": 6, "situation": "a hamlet whose only Internet peer is W's gateway",
+     "gateways": [
+       {"name": "H1", "place": "edge", "peers": ["W1"]}
+     ]},
+    {"name": "X", "members": 10, "situation": "the twin with Internet",
+     "gateways": [
+       {"name": "X1", "place": "edge", "peers": ["S2"]}
+     ]},
+    {"name": "Y", "members": 8, "situation": "the twin without Internet, in radio range of X",
+     "gateways": []},
+    {"name": "I", "members": 8, "situation": "an island with no Internet at all",
+     "gateways": []}
+  ],
+  "radio_bridges": [
+    {"between": ["X", "Y"]}
+  ],
+  "remote_users": [
+    {"name": "r1", "location": "far", "peers": ["S1"], "situation": "abroad, next to the public server"},
+    {"name": "r2", "location": "near", "peers": ["S2"], "situation": "near the regional server"},
+    {"name": "r3", "location": "near", "peers": ["S1", "S2"], "situation": "two connections, one far and one near"}
+  ]
+}

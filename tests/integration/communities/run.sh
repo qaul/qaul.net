@@ -23,6 +23,11 @@
 #   -c        also run crossing.py after the inspection
 #   -T SECS   crossing timeout (default 60)
 #   -s SECS   settle before inspecting (default 180; SETTLE= also works)
+#
+# TIMELINE=<path prefix> (set by compare.sh) samples the wire counters just
+# before bring-up and starts timeline.py recording from then on, marking the
+# bring-up and the gateway dial. The recorder outlives this script; whoever
+# set TIMELINE stops it through <prefix>.pid.
 set -uo pipefail
 
 TOPO="communities-3x10"
@@ -116,6 +121,14 @@ trap '"$INT/lab/archive_lab.sh"' EXIT
 step "stage 1: communities only, hub has no links"
 ./network.py apply "$TOP/$TOPO-stage1.json" || exit 1
 
+if [[ -n ${TIMELINE:-} ]]; then
+  "$SUITE/overhead.py" sample --force --roles "$ROLES" -o "$TIMELINE-wire-0.json" >/dev/null
+  nohup "$SUITE/timeline.py" record --roles "$ROLES" --out "$TIMELINE.jsonl" \
+    >"$TIMELINE-record.log" 2>&1 &
+  echo $! >"$TIMELINE.pid"
+  "$SUITE/timeline.py" mark --events "$TIMELINE-events.jsonl" bringup
+fi
+
 step "bringup ($ARM)"
 cd "$SUITE" || exit 1
 ./bringup.py --roles "$ROLES" $V1 || exit 1
@@ -129,6 +142,7 @@ cd "$LAB" || exit 1
 
 step "phase 2: peer the gateways${REVERSE:+ (reversed)}"
 cd "$SUITE" || exit 1
+[[ -n ${TIMELINE:-} ]] && ./timeline.py mark --events "$TIMELINE-events.jsonl" dial
 ./phases.py --roles "$ROLES" --phase 2 $V1 $REVERSE || exit 1
 
 if [[ -z $V1 ]]; then

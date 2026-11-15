@@ -279,6 +279,12 @@ class Node:
         """Manifests held for other origins: the cross-sphere user directory."""
         return self._run_json("router", "v2", "manifests")
 
+    def router_v2_delegations(self) -> dict:
+        """This node's own manifest entries, and the gateway each of its
+        users has subscribed to (§10.3), with outstanding and declined
+        requests."""
+        return self._run_json("router", "v2", "delegations")
+
     def create_group(self, name: str) -> str:
         """Create a group and return its id, looked up by name afterwards.
 
