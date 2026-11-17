@@ -19,7 +19,7 @@ set -e
 #   https://docs.flutter.dev/deployment/cd#custom-build-script
 #
 
-FLUTTER_VERSION="3.38.7"
+FLUTTER_VERSION="3.47.9"
 
 # Install Flutter using git.
 git clone https://github.com/flutter/flutter.git --depth 1 -b stable $HOME/flutter
