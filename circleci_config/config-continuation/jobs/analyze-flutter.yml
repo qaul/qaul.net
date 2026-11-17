@@ -1,5 +1,7 @@
 executor: flutter
 steps:
   - checkout-project
+  - install-flutter:
+      version: "$FLUTTER_VERSION"
   - install-flutter-deps
   - run: flutter analyze

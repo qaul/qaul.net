@@ -207,7 +207,7 @@ void main() {
     for (final key in [_kVoiceKey, _kCameraKey, _kMoreKey]) {
       expect(
         tester.getSemantics(find.byKey(key)),
-        containsSemantics(isButton: true),
+        isSemantics(isButton: true),
       );
     }
 
@@ -220,7 +220,7 @@ void main() {
     );
     expect(
       tester.getSemantics(find.byKey(_kSendKey)),
-      containsSemantics(isButton: true),
+      isSemantics(isButton: true),
     );
     semantics.dispose();
   });
