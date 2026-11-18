@@ -20,6 +20,7 @@ pub mod gossip;
 pub mod link;
 pub mod queue;
 pub mod engine;
+pub mod advert;
 
 pub use constants::{QAUL_ID_ADVERT_BYTES, QAUL_ID_BYTES};
 pub use flc::{FlcMessage, FlcType, NeighbourUpdate};

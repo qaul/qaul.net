@@ -2,6 +2,7 @@
 
 use std::{collections::HashSet, pin::Pin};
 
+use ble_protocol::advert::id_prefix_from_name;
 use bluer::{Adapter, AdapterEvent, Address};
 use futures::{Stream, StreamExt};
 use tokio::sync::{mpsc, watch};
@@ -80,15 +81,29 @@ async fn next_event<S: Stream<Item = AdapterEvent>>(stream: &mut Option<Pin<Box<
 }
 
 /// The qaul ID prefix and signal strength from `address`'s latest advert, or
-/// None if it isn't a qaul advert or wasn't heard in this scan.
+/// None if it isn't a qaul advert or wasnt heard in this scan. The prefix comes from the
+/// manufacturer data (Android, Linux) or if that fails, possibly the advert name as ios cant send manufacturer data.
 async fn read_advert(adapter: &Adapter, address: Address) -> Option<([u8; QAUL_ID_ADVERT_BYTES], i16)> {
     let device = adapter.device(address).ok()?;
     // None: BlueZ knows the device from before but hasn't heard it in this scan, as rssi only exists for
     // entries found in the most recent scan.
     let rssi = device.rssi().await.ok()??;
-    let data = device.manufacturer_data().await.ok()??;
-    let id_prefix = data.get(&QAUL_MANUFACTURER_ID)?.get(..QAUL_ID_ADVERT_BYTES)?.try_into().ok()?;
-    Some((id_prefix, rssi))
+
+    // 1. Manufacturer data (Android, Linux)
+    if let Ok(Some(data)) = device.manufacturer_data().await {
+        if let Some(bytes) = data.get(&QAUL_MANUFACTURER_ID) {
+            if let Some(prefix) = bytes.get(..QAUL_ID_ADVERT_BYTES) {
+                if let Ok(prefix) = prefix.try_into() {
+                    return Some((prefix, rssi));
+                }
+            }
+        }
+    }
+
+    // 2. The advert name (iOS). Nothing here either: not ours or somethings wrong.
+    let name = device.name().await.ok()??;
+    let prefix = id_prefix_from_name(&name)?;
+    Some((prefix, rssi))
 }
 
 
