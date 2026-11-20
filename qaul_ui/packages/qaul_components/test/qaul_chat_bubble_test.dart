@@ -592,6 +592,48 @@ void main() {
   });
 
   group('QaulChatBubble content', () {
+    testWidgets('uses a light surface and black text for incoming messages', (
+      tester,
+    ) async {
+      final clock = DateTime(2026, 1, 1, 12, 0);
+      final message = QaulChatBubbleMessage(
+        content: 'Incoming message',
+        sentAt: clock,
+        receivedAt: clock,
+        status: MessageStatus.sent,
+        messageType: MessageType.secondary,
+        edges: const [],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(),
+          home: Material(
+            child: QaulChatBubble(
+              message: message,
+              clock: clock,
+              showTimestamp: true,
+            ),
+          ),
+        ),
+      );
+
+      final surface = tester.widget<DecoratedBox>(
+        find.byKey(const ValueKey('chat-bubble-surface')),
+      );
+      final richText = tester.widget<RichText>(
+        _findMessageRichText('Incoming message'),
+      );
+      final timestamp = tester.widget<Text>(find.text('Now'));
+
+      expect(
+        (surface.decoration as BoxDecoration).color,
+        const Color(0xFFE5E5E5),
+      );
+      expect(richText.text.style!.color, Colors.black);
+      expect(timestamp.style!.color, Colors.black54);
+    });
+
     testWidgets('caps media bubbles to 76% of each message column', (
       tester,
     ) async {
@@ -916,7 +958,7 @@ void main() {
       expect(_findMessageRichText('Written in the morning'), findsOneWidget);
 
       final author = tester.widget<Text>(find.text('MaxX'));
-      expect(author.style!.color, Colors.white);
+      expect(author.style!.color, Colors.black);
     });
 
     testWidgets('constrains and truncates a long reply excerpt', (

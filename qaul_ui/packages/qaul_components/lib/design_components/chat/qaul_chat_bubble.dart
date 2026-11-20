@@ -469,9 +469,11 @@ class QaulChatBubble extends StatelessWidget {
 
     final backgroundColor = isPrimary
         ? ChatBubbleStyle.primaryColor
-        : ChatBubbleStyle.secondaryColor;
-
-    const textColor = Colors.white;
+        : sheet.incomingChatBubble;
+    final textColor = isPrimary ? Colors.white : sheet.incomingChatBubbleText;
+    final timeStyle = ChatBubbleStyle.timeStyle.copyWith(
+      color: isPrimary ? Colors.white70 : sheet.incomingChatBubbleTimestamp,
+    );
 
     final borderRadius = _chatBubbleBorderRadius(message.edges);
 
@@ -537,8 +539,12 @@ class QaulChatBubble extends StatelessWidget {
                               final content = message.content.trim();
                               final emojiCount = emojiOnlyMessageCount(content);
                               final messageTextStyle = emojiCount == null
-                                  ? ChatBubbleStyle.textStyle
-                                  : ChatBubbleStyle.emojiOnlyTextStyle(emojiCount);
+                                  ? ChatBubbleStyle.textStyle.copyWith(
+                                      color: textColor,
+                                    )
+                                  : ChatBubbleStyle.emojiOnlyTextStyle(
+                                      emojiCount,
+                                    ).copyWith(color: textColor);
                               final messageSpan = buildChatMentionTextSpan(
                                 text: content,
                                 style: messageTextStyle,
@@ -551,7 +557,7 @@ class QaulChatBubble extends StatelessWidget {
                               final timeLabelPainter = TextPainter(
                                 text: TextSpan(
                                   text: timeLabel,
-                                  style: ChatBubbleStyle.timeStyle,
+                                  style: timeStyle,
                                 ),
                                 textDirection: TextDirection.ltr,
                                 textScaler: textScaler,
@@ -589,7 +595,7 @@ class QaulChatBubble extends StatelessWidget {
                                 children: [
                                   Text(
                                     timeLabel,
-                                    style: ChatBubbleStyle.timeStyle,
+                                    style: timeStyle,
                                     textScaler: textScaler,
                                   ),
                                   const SizedBox(
@@ -718,7 +724,7 @@ class QaulChatBubble extends StatelessWidget {
                                         style: kGroupSenderNameTextStyle.copyWith(
                                           color:
                                               message.senderDisplayNameColor ??
-                                              Colors.white.withValues(alpha: 0.85),
+                                              textColor.withValues(alpha: 0.85),
                                         ),
                                         textScaler: textScaler,
                                       ),
@@ -779,10 +785,13 @@ class _QaulChatBubbleSurface extends StatelessWidget {
   Widget build(BuildContext context) {
     final isPrimary = message.messageType == MessageType.primary;
     final sheet = QaulColorSheet(Theme.of(context).brightness);
-    const textColor = Colors.white;
+    final textColor = isPrimary ? Colors.white : sheet.incomingChatBubbleText;
     final backgroundColor = isPrimary
         ? ChatBubbleStyle.primaryColor
-        : ChatBubbleStyle.secondaryColor;
+        : sheet.incomingChatBubble;
+    final timeStyle = ChatBubbleStyle.timeStyle.copyWith(
+      color: isPrimary ? Colors.white70 : sheet.incomingChatBubbleTimestamp,
+    );
     final borderRadius = _chatBubbleBorderRadius(message.edges);
 
     final textScaler = chatBubbleTextScaler(context);
@@ -800,7 +809,7 @@ class _QaulChatBubbleSurface extends StatelessWidget {
       children: [
         Text(
           timeLabel,
-          style: ChatBubbleStyle.timeStyle,
+          style: timeStyle,
           textScaler: textScaler,
         ),
         const SizedBox(width: ChatBubbleStyle.gapBetweenTimeAndStatusIcon),
@@ -973,11 +982,16 @@ class _QaulMediaCaption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isPrimary = message.messageType == MessageType.primary;
+    final sheet = QaulColorSheet(Theme.of(context).brightness);
+    final textColor = isPrimary ? Colors.white : sheet.incomingChatBubbleText;
+    final timeStyle = ChatBubbleStyle.timeStyle.copyWith(
+      color: isPrimary ? Colors.white70 : sheet.incomingChatBubbleTimestamp,
+    );
     final textScaler = chatBubbleTextScaler(context);
     final timeLabel = formatQaulChatBubbleTime(message, clock);
     final statusIcon = _buildChatBubbleStatusIcon(
       message.status,
-      Colors.white,
+      textColor,
       textScaler.scale(14),
     );
 
@@ -997,7 +1011,7 @@ class _QaulMediaCaption extends StatelessWidget {
           children: [
             Text(
               timeLabel,
-              style: ChatBubbleStyle.timeStyle,
+              style: timeStyle,
               textScaler: textScaler,
             ),
             const SizedBox(width: ChatBubbleStyle.gapBetweenTimeAndStatusIcon),
@@ -1056,12 +1070,19 @@ class _QaulMediaCaptionMetrics {
     required double maxWidth,
   }) {
     final isPrimary = message.messageType == MessageType.primary;
+    final sheet = QaulColorSheet(Theme.of(context).brightness);
+    final textColor = isPrimary ? Colors.white : sheet.incomingChatBubbleText;
+    final timeStyle = ChatBubbleStyle.timeStyle.copyWith(
+      color: isPrimary ? Colors.white70 : sheet.incomingChatBubbleTimestamp,
+    );
     final textScaler = chatBubbleTextScaler(context);
     final content = message.content.trim();
     final emojiCount = emojiOnlyMessageCount(content);
     final textStyle = emojiCount == null
-        ? ChatBubbleStyle.textStyle
-        : ChatBubbleStyle.emojiOnlyTextStyle(emojiCount);
+        ? ChatBubbleStyle.textStyle.copyWith(color: textColor)
+        : ChatBubbleStyle.emojiOnlyTextStyle(emojiCount).copyWith(
+            color: textColor,
+          );
     final span = buildChatMentionTextSpan(
       text: content,
       style: textStyle,
@@ -1075,7 +1096,7 @@ class _QaulMediaCaptionMetrics {
     final timePainter = TextPainter(
       text: TextSpan(
         text: formatQaulChatBubbleTime(message, clock),
-        style: ChatBubbleStyle.timeStyle,
+        style: timeStyle,
       ),
       textDirection: TextDirection.ltr,
       textScaler: textScaler,
@@ -1086,7 +1107,7 @@ class _QaulMediaCaptionMetrics {
     if (isPrimary &&
         _buildChatBubbleStatusIcon(
               message.status,
-              Colors.white,
+              textColor,
               statusIconSize,
             ) !=
             null) {

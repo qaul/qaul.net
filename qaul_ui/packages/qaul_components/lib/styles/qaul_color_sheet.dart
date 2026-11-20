@@ -16,6 +16,14 @@ class QaulColorSheet {
 
   Color get chatBubbleSelectionOutline => _isDark ? Colors.white : Colors.black;
 
+  Color get incomingChatBubble =>
+      _isDark ? const Color(0xFF424242) : surfaceContainer;
+
+  Color get incomingChatBubbleText => _isDark ? Colors.white : Colors.black;
+
+  Color get incomingChatBubbleTimestamp =>
+      _isDark ? Colors.white70 : Colors.black54;
+
   Color get chatSurfaceDivider => chatSurfaceDividerColor(brightness);
 
   Color get chatFooterDivider => chatSurfaceDivider;
