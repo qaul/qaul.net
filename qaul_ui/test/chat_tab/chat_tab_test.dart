@@ -966,7 +966,12 @@ void main() {
 
       final overlayRect = tester.getRect(find.byType(Overlay));
       final menuRect = tester.getRect(find.byType(ChatMessageContextMenu));
+      final bubbleRect = tester.getRect(bubble);
       expect(menuRect.center.dx, greaterThan(overlayRect.center.dx));
+      final gap = menuRect.top >= bubbleRect.bottom
+          ? menuRect.top - bubbleRect.bottom
+          : bubbleRect.top - menuRect.bottom;
+      expect(gap, closeTo(8, 0.01));
     },
   );
 
@@ -1186,18 +1191,6 @@ void main() {
     return decoration.border;
   }
 
-  double bubbleScale(WidgetTester tester) {
-    final transform = tester.widget<Transform>(
-      find
-          .ancestor(
-            of: find.byKey(const ValueKey('chat-bubble-surface')),
-            matching: find.byType(Transform),
-          )
-          .first,
-    );
-    return transform.transform.storage[0];
-  }
-
   User testUser(
     String name, {
     String? id,
@@ -1249,7 +1242,7 @@ void main() {
     },
   );
 
-  testWidgets('holding a bubble scales it before opening the context menu', (
+  testWidgets('holding a bubble insets it and fades in a white outline', (
     tester,
   ) async {
     final message = textMessage(
@@ -1280,26 +1273,42 @@ void main() {
     final gesture = await tester.startGesture(tester.getCenter(bubble));
 
     await tester.pump(const Duration(milliseconds: 199));
-    expect(bubbleScale(tester), 1);
+    expect(bubbleBorder(tester), isNull);
     expect(find.byType(ChatMessageContextMenu), findsNothing);
 
     await tester.pump(const Duration(milliseconds: 1));
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(bubbleScale(tester), closeTo(1.075, 0.01));
+    await tester.pump(const Duration(milliseconds: 100));
+    final fadingBorder = bubbleBorder(tester)! as Border;
+    expect(fadingBorder.top.color, Colors.white.withValues(alpha: 0.5));
     expect(find.byType(ChatMessageContextMenu), findsNothing);
 
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.byType(ChatMessageContextMenu), findsOneWidget);
-    expect(bubbleScale(tester), closeTo(1.15, 0.01));
     expect(hapticCount, 1);
     debugDefaultTargetPlatformOverride = null;
+
+    final menuShadow = tester.widget<DecoratedBox>(
+      find.ancestor(
+        of: find.byType(ChatMessageContextMenu),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is DecoratedBox &&
+              (widget.decoration as BoxDecoration?)?.boxShadow?.isNotEmpty ==
+                  true,
+        ),
+      ),
+    );
+    final shadow = (menuShadow.decoration as BoxDecoration).boxShadow!.single;
+    expect(shadow.offset, const Offset(4, 4));
+
+    await tester.pump(const Duration(milliseconds: 200));
 
     await gesture.up();
     await tester.pump();
     expect(find.byType(ChatMessageContextMenu), findsOneWidget);
   });
 
-  testWidgets('releasing before selection reverses the bubble scale', (
+  testWidgets('releasing before selection clears the selection feedback', (
     tester,
   ) async {
     final message = textMessage(
@@ -1316,12 +1325,12 @@ void main() {
     final bubble = find.byKey(const ValueKey('chat-bubble-surface'));
     final gesture = await tester.startGesture(tester.getCenter(bubble));
     await tester.pump(const Duration(milliseconds: 200));
-    await tester.pump(const Duration(milliseconds: 150));
-    expect(bubbleScale(tester), greaterThan(1));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(bubbleBorder(tester), isNotNull);
 
     await gesture.up();
     await tester.pumpAndSettle();
-    expect(bubbleScale(tester), 1);
+    expect(bubbleBorder(tester), isNull);
     expect(find.byType(ChatMessageContextMenu), findsNothing);
   });
 
@@ -1615,7 +1624,7 @@ void main() {
     ]);
   });
 
-  testWidgets('text message long press highlights the selected bubble', (
+  testWidgets('programmatic text message long press opens the context menu', (
     tester,
   ) async {
     final message = textMessage(
@@ -1639,7 +1648,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(ChatMessageContextMenu), findsOneWidget);
-    expect(bubbleBorder(tester), isNotNull);
   });
 
   testWidgets('forward action opens recipient selector with users and groups', (

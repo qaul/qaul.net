@@ -56,7 +56,8 @@ class ChatMessageRenderer {
     required ChatRenderMode mode,
     required DateTime clock,
     bool isSelected = false,
-    double selectionScale = 1,
+    double selectionInset = 0,
+    double selectionOutlineOpacity = 1,
     Key? selectionKey,
     List<String> mentionLabels = const [],
     double? topSpacingOverride,
@@ -69,7 +70,8 @@ class ChatMessageRenderer {
         presentation: presentation,
         clock: clock,
         isSelected: isSelected,
-        selectionScale: selectionScale,
+        selectionInset: selectionInset,
+        selectionOutlineOpacity: selectionOutlineOpacity,
         selectionKey: selectionKey,
         mentionLabels: mentionLabels,
         topSpacingOverride: topSpacingOverride,
@@ -80,7 +82,8 @@ class ChatMessageRenderer {
       presentation: presentation,
       clock: clock,
       isSelected: isSelected,
-      selectionScale: selectionScale,
+      selectionInset: selectionInset,
+      selectionOutlineOpacity: selectionOutlineOpacity,
       selectionKey: selectionKey,
       mentionLabels: mentionLabels,
       topSpacingOverride: topSpacingOverride,
@@ -94,7 +97,8 @@ class ChatMessageRenderer {
     required DateTime clock,
     bool isSelected = false,
     List<String> mentionLabels = const [],
-    double selectionScale = 1,
+    double selectionInset = 0,
+    double selectionOutlineOpacity = 1,
     Key? selectionKey,
     double? topSpacingOverride,
   }) {
@@ -106,7 +110,8 @@ class ChatMessageRenderer {
       clock: clock,
       showTimestamp: presentation.meta.showTimestamp,
       isSelected: isSelected,
-      selectionScale: selectionScale,
+      selectionInset: selectionInset,
+      selectionOutlineOpacity: selectionOutlineOpacity,
       selectionKey: selectionKey,
       child: child,
     );
@@ -136,7 +141,8 @@ class DirectTextMessageItem extends StatelessWidget {
     required this.presentation,
     required this.clock,
     this.isSelected = false,
-    this.selectionScale = 1,
+    this.selectionInset = 0,
+    this.selectionOutlineOpacity = 1,
     this.selectionKey,
     this.mentionLabels = const [],
     this.topSpacingOverride,
@@ -145,7 +151,8 @@ class DirectTextMessageItem extends StatelessWidget {
   final MessagePresentation presentation;
   final DateTime clock;
   final bool isSelected;
-  final double selectionScale;
+  final double selectionInset;
+  final double selectionOutlineOpacity;
   final Key? selectionKey;
   final List<String> mentionLabels;
   final double? topSpacingOverride;
@@ -162,7 +169,8 @@ class DirectTextMessageItem extends StatelessWidget {
         clock: clock,
         showTimestamp: presentation.meta.showTimestamp,
         isSelected: isSelected,
-        selectionScale: selectionScale,
+        selectionInset: selectionInset,
+        selectionOutlineOpacity: selectionOutlineOpacity,
         selectionKey: selectionKey,
       ),
     );
@@ -175,7 +183,8 @@ class GroupTextMessageItem extends StatelessWidget {
     required this.presentation,
     required this.clock,
     this.isSelected = false,
-    this.selectionScale = 1,
+    this.selectionInset = 0,
+    this.selectionOutlineOpacity = 1,
     this.selectionKey,
     this.mentionLabels = const [],
     this.topSpacingOverride,
@@ -184,7 +193,8 @@ class GroupTextMessageItem extends StatelessWidget {
   final MessagePresentation presentation;
   final DateTime clock;
   final bool isSelected;
-  final double selectionScale;
+  final double selectionInset;
+  final double selectionOutlineOpacity;
   final Key? selectionKey;
   final List<String> mentionLabels;
   final double? topSpacingOverride;
@@ -213,7 +223,8 @@ class GroupTextMessageItem extends StatelessWidget {
         clock: clock,
         showTimestamp: presentation.meta.showTimestamp,
         isSelected: isSelected,
-        selectionScale: selectionScale,
+        selectionInset: selectionInset,
+        selectionOutlineOpacity: selectionOutlineOpacity,
         selectionKey: selectionKey,
       ),
     );
