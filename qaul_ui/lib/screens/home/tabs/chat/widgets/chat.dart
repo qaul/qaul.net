@@ -305,6 +305,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   late final AnimationController _copyFeedbackFadeController;
   int _copyRequestVersion = 0;
 
+  bool get _canShareFromContextMenu =>
+      !(Platform.isLinux || Platform.isMacOS || Platform.isWindows);
+
   void _handleMessageLongPress(
     BuildContext messageContext,
     types.Message message,
@@ -461,12 +464,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
           onPressed: onInfo,
         ),
       ChatMessageContextMenuAction.forward(onPressed: onForward),
-      ChatMessageContextMenuAction(
-        id: 'share',
-        label: AppLocalizations.of(context)!.share,
-        iconAsset: ChatMessageContextMenuIcons.share,
-        onPressed: onShare,
-      ),
+      if (_canShareFromContextMenu)
+        ChatMessageContextMenuAction(
+          id: 'share',
+          label: AppLocalizations.of(context)!.share,
+          iconAsset: ChatMessageContextMenuIcons.share,
+          onPressed: onShare,
+        ),
       ChatMessageContextMenuAction(
         id: 'copy',
         label: AppLocalizations.of(context)!.copy,
@@ -500,7 +504,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
           iconAsset: ChatMessageContextMenuIcons.info,
           onPressed: onInfo,
         ),
-      if (onShare != null)
+      if (_canShareFromContextMenu && onShare != null)
         ChatMessageContextMenuAction(
           id: 'share',
           label: AppLocalizations.of(context)!.share,
