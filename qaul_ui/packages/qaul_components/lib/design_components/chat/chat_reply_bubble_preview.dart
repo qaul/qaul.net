@@ -44,10 +44,17 @@ class ChatReplyBubblePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isIncomingLight =
+        !isOutgoing && Theme.of(context).brightness == Brightness.light;
+    final textColor = isIncomingLight ? Colors.black : Colors.white;
     return DecoratedBox(
       key: const ValueKey('chat-reply-preview'),
       decoration: BoxDecoration(
-        color: isOutgoing ? _outgoingColor : _incomingColor,
+        color: isOutgoing
+            ? _outgoingColor
+            : isIncomingLight
+            ? const Color(0xFFD1D1D6)
+            : _incomingColor,
         borderRadius: const BorderRadius.all(_radius),
       ),
       child: Padding(
@@ -60,7 +67,7 @@ class ChatReplyBubblePreview extends StatelessWidget {
               data.author.trim(),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: _authorStyle,
+              style: _authorStyle.copyWith(color: textColor),
               textScaler: textScaler,
             ),
             const SizedBox(height: 2),
@@ -68,7 +75,7 @@ class ChatReplyBubblePreview extends StatelessWidget {
               data.content.trim(),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
-              style: _contentStyle,
+              style: _contentStyle.copyWith(color: textColor),
               textScaler: textScaler,
             ),
           ],
