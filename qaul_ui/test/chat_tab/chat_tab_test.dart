@@ -128,6 +128,7 @@ void main() {
   late Key chatKey;
 
   const shouldSkip = true;
+  final isDesktop = Platform.isLinux || Platform.isMacOS || Platform.isWindows;
 
   Logger.root.onRecord.listen((LogRecord r) {
     final msg = '${r.level.name}: [${r.loggerName}]@${r.time}: ${r.message}';
@@ -1032,6 +1033,11 @@ void main() {
     chat.onMessageLongPress!(tester.element(bubble), chat.messages.single);
     await tester.pumpAndSettle();
 
+    if (isDesktop) {
+      expect(find.text('Share'), findsNothing);
+      return;
+    }
+
     await tester.tap(find.text('Share'));
     await tester.pumpAndSettle();
 
@@ -1070,6 +1076,11 @@ void main() {
     expect(tester.getRect(bubble).height, greaterThan(overlayRect.height));
     chat.onMessageLongPress!(tester.element(bubble), chat.messages.single);
     await tester.pumpAndSettle();
+
+    if (isDesktop) {
+      expect(find.text('Share'), findsNothing);
+      return;
+    }
 
     await tester.tap(find.text('Share'));
     await tester.pumpAndSettle();
@@ -1240,7 +1251,7 @@ void main() {
 
       expect(find.byType(ChatMessageContextMenu), findsOneWidget);
       expect(find.text('Forward'), findsOneWidget);
-      expect(find.text('Share'), findsOneWidget);
+      expect(find.text('Share'), isDesktop ? findsNothing : findsOneWidget);
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Reply'), findsNothing);
       expect(find.text('Edit'), findsNothing);
@@ -1346,6 +1357,7 @@ void main() {
     await tester.pump();
 
     expect(find.byType(ChatMessageContextMenu), findsOneWidget);
+    expect(find.text('Share'), isDesktop ? findsNothing : findsOneWidget);
     await gesture.up();
   });
 
@@ -1440,6 +1452,16 @@ void main() {
         uri: '/tmp/clip.mp4',
       ),
     ];
+
+    if (isDesktop) {
+      chat.onMessageLongPress!(
+        tester.element(find.byType(chat_ui.Chat)),
+        attachmentMessages.first,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Share'), findsNothing);
+      return;
+    }
 
     for (final message in attachmentMessages) {
       chat.onMessageLongPress!(
