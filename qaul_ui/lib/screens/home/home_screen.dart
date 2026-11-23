@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -28,6 +29,14 @@ class HomeScreen extends HookConsumerWidget {
     final tabCtrl = ref.read(homeScreenControllerProvider.notifier);
 
     final gotoToPubTab = useCallback(() => tabCtrl.goToTab(TabType.public), []);
+
+    // The chat tab may not be built for a new profile yet. Start the chat
+    // synchronisation from Home so its first incoming message can update the
+    // navigation counter without requiring the user to visit that tab.
+    useEffect(() {
+      unawaited(ref.read(chatNotificationControllerProvider).initialize());
+      return null;
+    }, [user.idBase58]);
 
     final disablePageViewScroll = useState(false);
 

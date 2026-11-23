@@ -11,6 +11,8 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
 
   final _chats = <_ChatData>[];
 
+  Future<void>? _initialization;
+
   final _log = Logger('ChatNotificationController');
 
   @override
@@ -25,8 +27,9 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
   get strategy => MapEntry(chatRoomsProvider, execute);
 
   @override
-  Future<void> initialize() async {
-    await super.initialize();
+  Future<void> initialize() => _initialization ??= super.initialize().then((
+    _,
+  ) async {
     ref.listen(groupInvitesProvider, _processNewGroupInvite);
     if (preferences.containsKey(cacheKey)) {
       _chats.addAll(
@@ -39,7 +42,7 @@ class ChatNotificationController extends NotificationController<List<ChatRoom>>
     _log.config(
       'Initialized:\n\t· User: ${localUser.name}\n\t· Cached chats: $_chats',
     );
-  }
+  });
 
   void _processNewGroupInvite(
     List<GroupInvite>? previous,
