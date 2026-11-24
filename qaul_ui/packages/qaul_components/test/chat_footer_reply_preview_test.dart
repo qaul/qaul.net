@@ -67,6 +67,44 @@ void main() {
     expect(lightDivider.color, const Color(0xFFD1D1D6));
   });
 
+  testWidgets('renders and dismisses a generic file preview', (tester) async {
+    var dismissCount = 0;
+    String? sentText;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.bottomCenter,
+            child: ChatFooter(
+              placeholder: 'Private message',
+              preview: const ChatFooterPreviewData(
+                title: 'document.pdf',
+                content: '4 B',
+                leading: Icon(Icons.insert_drive_file_outlined),
+              ),
+              onDismissPreview: () => dismissCount++,
+              allowEmptySend: true,
+              onSend: (text) => sentText = text,
+              applyBottomSafeArea: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byKey(const ValueKey('chat-footer-preview')), findsOneWidget);
+    expect(find.byIcon(Icons.insert_drive_file_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.close_rounded), findsOneWidget);
+    expect(find.byKey(const ValueKey('chat-footer-send')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('dismiss-chat-footer-preview')));
+    expect(dismissCount, 1);
+
+    await tester.tap(find.byKey(const ValueKey('chat-footer-send')));
+    expect(sentText, isEmpty);
+  });
+
   testWidgets('keeps a 4px inset below the footer divider', (tester) async {
     Future<void> expectTopInset({
       required double width,

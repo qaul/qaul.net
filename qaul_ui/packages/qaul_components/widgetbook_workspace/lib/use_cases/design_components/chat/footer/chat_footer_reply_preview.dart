@@ -40,7 +40,7 @@ ChatFooter _footer({
 
 @widgetbook.UseCase(
   name: 'Empty draft',
-  type: ChatFooterReplyPreview,
+  type: ChatFooterPreview,
   path: 'design_components/chat/footer',
 )
 Widget buildReplyFooterEmptyUseCase(BuildContext context) {
@@ -49,7 +49,7 @@ Widget buildReplyFooterEmptyUseCase(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'With draft',
-  type: ChatFooterReplyPreview,
+  type: ChatFooterPreview,
   path: 'design_components/chat/footer',
 )
 Widget buildReplyFooterDraftUseCase(BuildContext context) {
@@ -61,7 +61,7 @@ Widget buildReplyFooterDraftUseCase(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'Long excerpt',
-  type: ChatFooterReplyPreview,
+  type: ChatFooterPreview,
   path: 'design_components/chat/footer',
 )
 Widget buildLongReplyFooterUseCase(BuildContext context) {

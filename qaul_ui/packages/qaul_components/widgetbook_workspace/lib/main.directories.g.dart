@@ -428,7 +428,7 @@ final directories = <_widgetbook.WidgetbookNode>[
                 ],
               ),
               _widgetbook.WidgetbookComponent(
-                name: 'ChatFooterReplyPreview',
+                name: 'ChatFooterPreview',
                 useCases: [
                   _widgetbook.WidgetbookUseCase(
                     name: 'Empty draft',

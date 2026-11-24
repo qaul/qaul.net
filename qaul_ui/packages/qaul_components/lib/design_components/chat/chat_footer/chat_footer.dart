@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../styles/chat_surface_shadows.dart';
 import '../../../styles/qaul_color_sheet.dart';
 import '../../../styles/qaul_emoji.dart';
+import 'chat_footer_preview.dart';
 import 'chat_footer_reply_preview.dart';
 
 const Color _kActionIconColor = Color(0xFF999999);
@@ -154,6 +155,10 @@ class ChatFooter extends StatefulWidget {
     required this.placeholder,
     this.controller,
     this.onSend,
+    this.preview,
+    this.onDismissPreview,
+    this.previewDismissTooltip,
+    this.allowEmptySend = false,
     this.replyPreview,
     this.onCancelReply,
     this.onVoicePressed,
@@ -178,6 +183,13 @@ class ChatFooter extends StatefulWidget {
 
   final TextEditingController? controller;
   final ValueChanged<String>? onSend;
+  final ChatFooterPreviewData? preview;
+  final VoidCallback? onDismissPreview;
+  final String? previewDismissTooltip;
+  final bool allowEmptySend;
+
+  /// Use [preview] for new integrations. Kept while reply flows migrate to
+  /// the generic preview component.
   final ChatFooterReplyPreviewData? replyPreview;
   final VoidCallback? onCancelReply;
   final VoidCallback? onVoicePressed;
@@ -249,7 +261,7 @@ class _ChatFooterState extends State<ChatFooter> {
 
   void _handleSend() {
     final text = _effectiveController.text.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty && !widget.allowEmptySend) return;
     _closeAttachmentMenu();
     widget.onSend?.call(text);
   }
@@ -372,18 +384,26 @@ class _ChatFooterState extends State<ChatFooter> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (widget.replyPreview != null) ...[
-            ChatFooterReplyPreview(
-              data: widget.replyPreview!,
-              onCancelReply: widget.onCancelReply,
-              cancelTooltip: widget.cancelReplyTooltip,
-            ),
+          if (widget.preview != null || widget.replyPreview != null) ...[
+            if (widget.preview case final preview?)
+              ChatFooterPreview(
+                data: preview,
+                onDismiss: widget.onDismissPreview,
+                dismissTooltip: widget.previewDismissTooltip,
+              )
+            else
+              ChatFooterReplyPreview(
+                data: widget.replyPreview!,
+                onCancelReply: widget.onCancelReply,
+                cancelTooltip: widget.cancelReplyTooltip,
+              ),
             const SizedBox(height: _kReplyPreviewBottomSpacing),
           ],
           _ComposerPill(
             footer: widget,
             theme: theme,
             fillColor: fillColor,
+            showSendActionWhenEmpty: widget.allowEmptySend,
             controller: _effectiveController,
             focusNode: _inputFocusNode,
             textFieldKey: _composerTextFieldKey,
@@ -430,6 +450,7 @@ class _ComposerPill extends StatelessWidget {
     required this.footer,
     required this.theme,
     required this.fillColor,
+    required this.showSendActionWhenEmpty,
     required this.controller,
     required this.focusNode,
     required this.textFieldKey,
@@ -440,6 +461,7 @@ class _ComposerPill extends StatelessWidget {
   final ChatFooter footer;
   final ThemeData theme;
   final Color fillColor;
+  final bool showSendActionWhenEmpty;
   final TextEditingController controller;
   final FocusNode focusNode;
   final GlobalKey textFieldKey;
@@ -490,6 +512,7 @@ class _ComposerPill extends StatelessWidget {
               listenable: controller,
               builder: (context, _) {
                 final hasText = controller.text.trim().isNotEmpty;
+                final showTextActions = hasText || showSendActionWhenEmpty;
                 if (hasText &&
                     _usesFullWidthTypedLayout(context, constraints.maxWidth)) {
                   return Column(
@@ -531,7 +554,7 @@ class _ComposerPill extends StatelessWidget {
                         focusNode: focusNode,
                       ),
                     ),
-                    if (hasText)
+                    if (showTextActions)
                       _TextActions(
                         onMore: onMorePressed,
                         onPressed: onSendPressed,
