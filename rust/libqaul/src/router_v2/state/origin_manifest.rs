@@ -16,7 +16,15 @@ use crate::{
     storage::manifest_state::{DelegationEntry, HostManifestState},
 };
 
-const UNREACHABLE_GRACE_MS: u64 = 60_000;
+/// What our routing state says about a delegated user (§10.4).
+enum Reachability {
+    /// hosted here, or a live routing entry
+    Reachable,
+    /// it had a routing entry and the entry expired
+    Expired,
+    /// no routing entry learned yet, e.g. right after a restart
+    NotSeen,
+}
 
 impl RouterV2State {
     pub fn restore_host_manifest(&self, persisted: &HostManifestState) {
@@ -175,19 +183,25 @@ impl RouterV2State {
         }
 
         let expired: Vec<[u8; 8]> = {
-            let mut liveness = self.delegation_liveness.write().unwrap();
-            liveness.retain(|user_id, _| carried.contains(user_id));
+            let mut unseen_since = self.delegation_liveness.write().unwrap();
+            unseen_since.retain(|user_id, _| carried.contains(user_id));
 
             carried
                 .iter()
-                .filter(|user_id| {
-                    if self.delegated_user_is_reachable(user_id) {
-                        liveness.insert(**user_id, now_ms);
-                        return false;
+                .filter(|user_id| match self.delegated_user_reachability(user_id) {
+                    Reachability::Reachable => {
+                        unseen_since.remove(*user_id);
+                        false
                     }
-
-                    let since = *liveness.entry(**user_id).or_insert(now_ms);
-                    now_ms.saturating_sub(since) > UNREACHABLE_GRACE_MS
+                    // per 10.4: the routing entry has expired, so the user leaves
+                    // the next manifest version
+                    Reachability::Expired => true,
+                    // no route yet: nothing has expired, so allow one route-expiry
+                    // period for it to appear (the §10.7 detection allowance)
+                    Reachability::NotSeen => {
+                        let since = *unseen_since.entry(**user_id).or_insert(now_ms);
+                        now_ms.saturating_sub(since) >= self.options.route_expiry_ms
+                    }
                 })
                 .copied()
                 .collect()
@@ -200,9 +214,7 @@ impl RouterV2State {
         {
             let mut liveness = self.delegation_liveness.write().unwrap();
             for user_id in &expired {
-                tracing::info!(
-                    "router_v2 DELEGATION dropped: {user_id:?} unreachable past the §10.7 bound"
-                );
+                tracing::info!("router_v2 DELEGATION dropped: {user_id:?} unreachable (§10.4)");
                 liveness.remove(user_id);
             }
         }
@@ -214,19 +226,23 @@ impl RouterV2State {
             .is_some()
     }
 
-    /// Can we still deliver to this delegated user?
-    fn delegated_user_is_reachable(&self, user_id: &[u8; 8]) -> bool {
+    /// Can we still deliver to this delegated user? A routing entry, once
+    /// learned, stays linked from the user, so a dead link means it expired.
+    fn delegated_user_reachability(&self, user_id: &[u8; 8]) -> Reachability {
         let users = self.users.read().unwrap();
         let Some(user) = users.get(user_id) else {
-            return false;
+            return Reachability::NotSeen;
         };
         let user = user.read().unwrap();
 
-        user.is_hosted
-            || user
-                .routing_entry
-                .as_ref()
-                .is_some_and(|weak| weak.upgrade().is_some())
+        if user.is_hosted {
+            return Reachability::Reachable;
+        }
+        match &user.routing_entry {
+            Some(weak) if weak.upgrade().is_some() => Reachability::Reachable,
+            Some(_) => Reachability::Expired,
+            None => Reachability::NotSeen,
+        }
     }
 
     ///the gateway role follows INTERNET connectivity, per 2.3

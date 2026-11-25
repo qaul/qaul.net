@@ -41,14 +41,23 @@ impl RouterV2State {
             return;
         }
 
-        {
-            let outstanding = self.outstanding_manifest_requests.read().unwrap();
-            if outstanding
-                .keys()
-                .any(|(origin, _)| *origin == origin_node_id)
-            {
-                return;
+        let busy = self
+            .outstanding_manifest_requests
+            .read()
+            .unwrap()
+            .keys()
+            .any(|(origin, _)| *origin == origin_node_id);
+        if busy {
+            // per 10.8 a node SHOULD keep one request per origin outstanding. Keep
+            // the freshest advertiser, so the pull goes out once that one is answered.
+            let mut deferred = self.deferred_manifest_pulls.write().unwrap();
+            let fresher = deferred
+                .get(&origin_node_id)
+                .is_none_or(|(_, version)| is_fresher_u32(advertised_version, *version));
+            if fresher {
+                deferred.insert(origin_node_id, (neighbour, advertised_version));
             }
+            return;
         }
 
         let newly_queued = self
@@ -143,6 +152,28 @@ impl RouterV2State {
             now_ms,
             self.options.manifest_serve_rate,
         )
+    }
+
+    pub(crate) fn manifest_request_answered(&self, origin_node_id: [u8; 8], neighbour: PeerId) {
+        let still_busy = {
+            let mut outstanding = self.outstanding_manifest_requests.write().unwrap();
+            outstanding.remove(&(origin_node_id, neighbour));
+            outstanding
+                .keys()
+                .any(|(origin, _)| *origin == origin_node_id)
+        };
+        if still_busy {
+            return;
+        }
+
+        let deferred = self
+            .deferred_manifest_pulls
+            .write()
+            .unwrap()
+            .remove(&origin_node_id);
+        if let Some((advertiser, version)) = deferred {
+            self.maybe_request_manifest(advertiser, origin_node_id, version);
+        }
     }
 
     /// drops requests that weren't answered and the time is past the

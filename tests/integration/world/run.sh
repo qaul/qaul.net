@@ -30,6 +30,11 @@
 #   -f NAME   then run a failure scenario (scenario.py): s1-down, t1-outage,
 #             bridge-cut or walkaway; results/scenario-<name>-<tag>.json.
 #             Faults are applied from the laptop and always cleared after.
+#   -j        scenario 1: instead of dialling the whole Internet side at once,
+#             dial the backbone, then one community at a time (stagger.py);
+#             results/stagger-<tag>.json. The check is then timed from the
+#             last community's dial.
+#   -g SECS   -j: seconds between two communities' dials (default 180)
 #
 # Every Internet link gets its mDNS dropped by link_filter.sh, passed to
 # meshnet-lab as --link-command. Radio links are left alone. The whole network
@@ -49,8 +54,10 @@ HYBRID=""
 FAR_ADDR=""
 MESSAGES=""
 SCENARIO=""
+STAGGER=""
+GAP=180
 
-while getopts "w:1s:HS:mf:" opt; do
+while getopts "w:1s:HS:mf:jg:" opt; do
   case "$opt" in
     w) WORLD="$OPTARG" ;;
     1) V1="--v1" ;;
@@ -59,6 +66,8 @@ while getopts "w:1s:HS:mf:" opt; do
     S) FAR_ADDR="$OPTARG" ;;
     m) MESSAGES=1 ;;
     f) SCENARIO="$OPTARG" ;;
+    j) STAGGER=1 ;;
+    g) GAP="$OPTARG" ;;
     *) echo "unknown option; see the header for usage"; exit 2 ;;
   esac
 done
@@ -92,6 +101,11 @@ if [[ -z $V1 ]] && [[ -z ${QAUL_ROUTING_V2:-} ]]; then
   exit 1
 fi
 
+if [[ -n $STAGGER ]] && [[ -n $V1 ]]; then
+  echo "-j reads v2 state (gateway role, manifests, delegations): v2 arm only."
+  exit 1
+fi
+
 ARM="v2"; [[ -n $V1 ]] && ARM="v1"
 TAG="$WORLD-$ARM"
 TOPO_FILE="$TOP/$WORLD.json"
@@ -107,7 +121,23 @@ if [[ -n $HYBRID ]]; then
   fi
   SERVER_IP="$(sed -n 's#^/ip4/\([0-9.]*\)/.*#\1#p' <<<"$FAR_ADDR")"
   [[ -n $SERVER_IP ]] || { echo "-S must start with /ip4/<address>/"; exit 1; }
-  HYB=(--hybrid --far "S1=$FAR_ADDR")
+  # Every node on the server's host that the laptop dials: S1 at -S, the rest
+  # (r1 in ring-1) at the same address on their own port from the roles file.
+  mapfile -t HYB < <(python3 -c '
+import json, sys
+r = json.load(open(sys.argv[1]))
+lab = {n for n, m in r["nodes"].items() if m["location"] != "far"}
+print("--hybrid")
+seen = set()
+for l in r["internet_links"]:
+    t = l["target"]
+    if l["dialer"] in lab and t not in lab and t not in seen:
+        seen.add(t)
+        m = r["nodes"][t]
+        addr = sys.argv[3] if m["name"] == "S1" else f"/ip4/{sys.argv[2]}/udp/{m.get('"'"'port'"'"', 9229)}/quic-v1"
+        print("--far")
+        print(f"{m['"'"'name'"'"']}={addr}")
+' "$ROLES" "$SERVER_IP" "$FAR_ADDR")
   TAG="$WORLD-hybrid-$ARM"
   mapfile -t EGRESS < <(cd "$SUITE" && python3 -c "
 from worldlib import load_roles, egress_nodes
@@ -181,12 +211,23 @@ cd "$SUITE" || exit 1
 step "phase 1: servers' LAN off, assert they joined no Local sphere"
 ./wire.py phase1 --roles "$ROLES" $V1 "${HYB[@]}" || exit 1
 
-step "phase 2: dial the Internet links"
 # The dial time goes into check.py's JSON (t0), never into the marker:
 # lab/archive_lab.sh trusts a marker only if it was written just before the
 # logs began, so touching it now would leave the run's archive untagged.
-T0="$(date +%s.%N)"
-./wire.py phase2 --roles "$ROLES" $V1 "${HYB[@]}" || exit 1
+STAGGER_RC=""
+if [[ -n $STAGGER ]]; then
+  step "phase 2, scenario 1: the backbone, then one community every ${GAP}s"
+  ./stagger.py --roles "$ROLES" "${HYB[@]}" --gap "$GAP" \
+    --json "$RESULTS/stagger-$TAG.json"
+  STAGGER_RC=$?
+  T0="$(python3 -c "import json; print(json.load(open('$RESULTS/stagger-$TAG.json'))['t_last_dial'])" 2>/dev/null)"
+  [[ -n $T0 && $T0 != None ]] || { echo "stagger.py dialled nothing; stopping"; exit 1; }
+  echo "  the check below is timed from the last community's dial"
+else
+  step "phase 2: dial the Internet links"
+  T0="$(date +%s.%N)"
+  ./wire.py phase2 --roles "$ROLES" $V1 "${HYB[@]}" || exit 1
+fi
 
 step "check (directory re-read for up to ${SETTLE}s after the dial)"
 ./check.py --roles "$ROLES" $V1 "${HYB[@]}" --poll "$SETTLE" --t0 "$T0" \
@@ -197,6 +238,14 @@ TRAFFIC_RC=""
 if [[ -n $MESSAGES ]]; then
   if [[ -n $V1 ]]; then
     echo "(-m skipped on the v1 arm: pairs are chosen from v2 delegations)"
+  elif [[ -n $HYBRID ]] && python3 -c "
+import json, sys
+r = json.load(open('$ROLES'))
+sys.exit(0 if any(m['location'] == 'far' and m['role'] in ('member', 'gateway')
+                  for m in r['nodes'].values()) else 1)"; then
+    step "messages around the ring, laptop and server (ring_traffic.py)"
+    ./ring_traffic.py --roles "$ROLES" "${HYB[@]}" --json "$RESULTS/traffic-$TAG.json"
+    TRAFFIC_RC=$?
   else
     step "messages: timed delivery between chosen pairs (scenario 2)"
     ./traffic.py --roles "$ROLES" "${HYB[@]}" --json "$RESULTS/traffic-$TAG.json"
@@ -263,9 +312,11 @@ if [[ -n $HYBRID ]]; then
 fi
 
 verdict() { [[ $1 -eq 0 ]] && echo passed || echo FAILED; }
-printf '\n========== done: %s (check %s, sphere scan %s%s%s) ==========\n' "$TAG" \
+printf '\n========== done: %s (%scheck %s, sphere scan %s%s%s) ==========\n' "$TAG" \
+  "$([[ -n $STAGGER_RC ]] && echo "scenario 1 $(verdict "$STAGGER_RC"), ")" \
   "$(verdict $CHECK_RC)" "$(verdict $SCAN_RC)" \
   "$([[ -n $TRAFFIC_RC ]] && echo ", messages $(verdict "$TRAFFIC_RC")")" \
   "$([[ -n $SCENARIO_RC ]] && echo ", scenario $SCENARIO $( [[ $SCENARIO_RC -eq 0 ]] && echo ran || echo FAILED)")"
 echo "The lab keeps running. The next run archives it again and scans its whole life."
-[[ $CHECK_RC -eq 0 && $SCAN_RC -eq 0 && ${TRAFFIC_RC:-0} -eq 0 && ${SCENARIO_RC:-0} -eq 0 ]]
+[[ $CHECK_RC -eq 0 && $SCAN_RC -eq 0 && ${TRAFFIC_RC:-0} -eq 0 && ${SCENARIO_RC:-0} -eq 0 \
+   && ${STAGGER_RC:-0} -eq 0 ]]

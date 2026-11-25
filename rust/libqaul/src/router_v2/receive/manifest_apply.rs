@@ -252,12 +252,28 @@ impl RouterV2State {
             .collect()
     }
 
+    /// Applies a NODE_MANIFEST chunk from `neighbour` (§8.8) and closes the
+    /// request it answers once the manifest is complete (§8.7, §10.8).
     pub fn handle_node_manifest(
         &self,
+        neighbour: PeerId,
         msg: NodeManifest,
         now: u64,
         transport: ConnectionModule,
     ) -> Result<()> {
+        let origin_node_id = msg.origin_node_id;
+        if self.apply_node_manifest(msg, now, transport)? == Reply::Answered {
+            self.manifest_request_answered(origin_node_id, neighbour);
+        }
+        Ok(())
+    }
+
+    fn apply_node_manifest(
+        &self,
+        msg: NodeManifest,
+        now: u64,
+        transport: ConnectionModule,
+    ) -> Result<Reply> {
         let origin_node_id = msg.origin_node_id;
 
         let host_mk = {
@@ -269,14 +285,14 @@ impl RouterV2State {
                          fetching its profile (§11.5)"
                     );
                     self.request_profile(origin_node_id, true, now);
-                    return Ok(());
+                    return Ok(Reply::Pending);
                 }
             }
         };
 
         if Manifest::verify_chunk(&msg, &host_mk).is_err() {
             debug!("node_manifest chunk sig invalid for origin {origin_node_id:?}");
-            return Ok(());
+            return Ok(Reply::Pending);
         };
 
         let committed = self
@@ -292,7 +308,13 @@ impl RouterV2State {
                      than committed {committed} (§8.8)",
                     msg.manifest_version
                 );
-                return Ok(());
+                // a whole stale manifest answers the request; one chunk of a
+                // bigger one might not be the answer, so that waits for the timeout
+                return Ok(if msg.chunk_count <= 1 {
+                    Reply::Answered
+                } else {
+                    Reply::Pending
+                });
             }
         }
 
@@ -300,7 +322,7 @@ impl RouterV2State {
         let completed_manifest = {
             let mut assembler = self.chunk_assembler.write().unwrap();
             let Some(completed) = assembler.insert(origin_node_id, msg) else {
-                return Ok(());
+                return Ok(Reply::Pending);
             };
             completed
         };
@@ -324,7 +346,7 @@ impl RouterV2State {
                      fresher than committed {} (§8.8)",
                     completed_manifest.manifest_version, node.manifest_version
                 );
-                return Ok(());
+                return Ok(Reply::Answered);
             }
             // §3.8 trigger 3: strictly fresher by the check above, so the version always
             // moved and there is always a re-introduction to make.
@@ -354,9 +376,11 @@ impl RouterV2State {
 
         self.refresh_delegation_trust(&origin_node_id, now);
 
-        Ok(())
+        Ok(Reply::Answered)
     }
 
+    /// Applies a MANIFEST_DELTA from `neighbour` (§8.8) and closes the request
+    /// it answers (§8.7, §10.8).
     pub fn handle_manifest_delta(
         &self,
         neighbour: PeerId,
@@ -364,6 +388,20 @@ impl RouterV2State {
         now: u64,
         transport: ConnectionModule,
     ) -> Result<()> {
+        let origin_node_id = msg.origin_node_id;
+        if self.apply_manifest_delta(neighbour, msg, now, transport)? == Reply::Answered {
+            self.manifest_request_answered(origin_node_id, neighbour);
+        }
+        Ok(())
+    }
+
+    fn apply_manifest_delta(
+        &self,
+        neighbour: PeerId,
+        msg: ManifestDelta,
+        now: u64,
+        transport: ConnectionModule,
+    ) -> Result<Reply> {
         let origin_node_id = msg.origin_node_id;
 
         // Step 1: resolve the origin's key.
@@ -373,13 +411,13 @@ impl RouterV2State {
                  fetching its profile (§11.5)"
             );
             self.request_profile(origin_node_id, true, now);
-            return Ok(());
+            return Ok(Reply::Pending);
         };
 
         // Step 2: the delta must build on exactly what we hold.
         let Some(node_arc) = self.nodes.read().unwrap().get(&origin_node_id) else {
             debug!("manifest_delta from {origin_node_id:?} dropped: no node record");
-            return Ok(());
+            return Ok(Reply::Answered);
         };
         let (committed, stored): (u32, Vec<ManifestEntry>) = {
             let node = node_arc.read().unwrap();
@@ -400,7 +438,7 @@ impl RouterV2State {
                 "manifest_delta from {origin_node_id:?} dropped: committed {committed} != from_version {}",
                 msg.from_version
             );
-            return Ok(());
+            return Ok(Reply::Answered);
         }
 
         // Step 3: build the scratch set. removes first, then adds as upserts
@@ -430,8 +468,9 @@ impl RouterV2State {
             warn!(
                 "manifest_delta from {origin_node_id:?} failed resulting-state verification; discarding scratch"
             );
+            // the full re-request replaces the answered one
             self.request_full_manifest(neighbour, origin_node_id, now);
-            return Ok(());
+            return Ok(Reply::Pending);
         }
 
         // Step 5: commit.
@@ -475,8 +514,18 @@ impl RouterV2State {
         // Step 6: re-evaluate the trusted subset
         self.refresh_delegation_trust(&origin_node_id, now);
 
-        Ok(())
+        Ok(Reply::Answered)
     }
+}
+
+/// Whether a manifest response closes the request it answers (§8.7, §10.8).
+#[derive(Debug, PartialEq)]
+enum Reply {
+    /// Fully received, then applied or discarded.
+    Answered,
+    /// Not usable yet (origin key unknown, bad signature, chunks missing) or
+    /// replaced by a new request: the request stays until its timeout.
+    Pending,
 }
 
 /// `true` when `origin` is among the user's delegation gateways.

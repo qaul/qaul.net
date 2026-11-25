@@ -90,7 +90,7 @@ impl RouterV2State {
                 },
                 RoutingMessage::NodeManifest => match NodeManifest::decode(payload) {
                     Ok(msg) => {
-                        if let Err(e) = self.handle_node_manifest(msg, now, transport) {
+                        if let Err(e) = self.handle_node_manifest(neighbour, msg, now, transport) {
                             error!("handle_node_manifest failed: {e}");
                         }
                     }

@@ -29,8 +29,10 @@ use libp2p::{
     tcp, yamux, Multiaddr, PeerId, SwarmBuilder,
 };
 use prost::Message;
+use std::convert::Infallible;
 use std::time::Duration;
 
+use crate::{connections::lan_peers::LanPeers, utilities::timestamp::Timestamp};
 use crate::connections::transport::{
     Transport, TransportCapabilities, TransportError, TransportStatus,
 };
@@ -48,6 +50,8 @@ use qaul_messaging::{QaulMessaging, QaulMessagingEvent};
 pub struct QaulLanBehaviour {
     pub floodsub: floodsub::Behaviour,
     pub mdns: mdns::tokio::Behaviour,
+    /// Remembers neighbours' addresses past mDNS expiry, for redials.
+    pub lan_peers: LanPeers,
     pub ping: ping::Behaviour,
     pub qaul_info: QaulInfo,
     /// router_v2 management sub-protocol per section 11.
@@ -103,27 +107,31 @@ impl QaulLanBehaviour {
     fn mdsn_event(&mut self, event: mdns::Event) {
         match event {
             mdns::Event::Discovered(discovered_list) => {
-                for (peer_id, _addr) in discovered_list {
+                let now = Timestamp::get_timestamp();
+                for (peer_id, addr) in discovered_list {
                     log::trace!(
                         "MdnsEvent::Discovered, peer {:?} to floodsub added",
                         peer_id.clone()
                     );
+                    self.lan_peers.discovered(peer_id, addr, now);
                     self.floodsub.add_node_to_partial_view(peer_id);
                 }
             }
             mdns::Event::Expired(expired_list) => {
                 for (peer, _addr) in expired_list {
-                    // TODO: why to remove it at all? does it not get removed automatically, when disconnected?
-                    //
-                    // Why should we check again if a node is in discovered list, once it has expired?
-                    // Apparently the expired node is not instantly removed from the discovered_nodes list too.
-                    if !self.mdns.discovered_nodes().any(|p| p == &peer) {
-                        log::trace!("MdnsEvent::Expired, peer {:?} from floodsub removed", peer);
-                        self.floodsub.remove_node_from_partial_view(&peer);
-                    }
+                    log::trace!("MdnsEvent::Expired, peer {:?}", peer);
                 }
             }
         }
+    }
+
+    pub fn redial_pass(&mut self, now_ms: u64) -> Vec<PeerId> {
+        let pass = self.lan_peers.redial_pass(now_ms);
+        for peer in &pass.forgotten {
+            log::debug!("lan: forgetting {peer:?}, no contact for 30 min");
+            self.floodsub.remove_node_from_partial_view(peer);
+        }
+        pass.dial
     }
 
     fn floodsub_event(&mut self, state: &crate::QaulState, event: floodsub::Event) {
@@ -152,6 +160,12 @@ pub enum QaulLanEvent {
 impl From<floodsub::Event> for QaulLanEvent {
     fn from(event: floodsub::Event) -> Self {
         Self::Floodsub(event)
+    }
+}
+
+impl From<Infallible> for QaulLanEvent {
+    fn from(event: Infallible) -> Self {
+        match event {}
     }
 }
 
@@ -374,6 +388,7 @@ impl Lan {
         let mut behaviour: QaulLanBehaviour = QaulLanBehaviour {
             floodsub: floodsub::Behaviour::new(Node::get_id(state)),
             mdns,
+            lan_peers: LanPeers::new(),
             ping: ping::Behaviour::new(ping_config),
             qaul_info: QaulInfo::new(Node::get_id(state)),
             qaul_management: QaulManagement::new(Node::get_id(state)),

@@ -121,6 +121,7 @@ fn happy_path_commits_manifest_to_node_record() {
 
     state
         .handle_node_manifest(
+            fresh_peer(),
             chunks.into_iter().next().unwrap(),
             500,
             ConnectionModule::Lan,
@@ -165,7 +166,7 @@ fn unknown_origin_node_id_is_noop() {
     msg.origin_node_id = [99; 8];
 
     state
-        .handle_node_manifest(msg, 0, ConnectionModule::Lan)
+        .handle_node_manifest(fresh_peer(), msg, 0, ConnectionModule::Lan)
         .unwrap();
 
     // The real origin's Node record is untouched.
@@ -221,7 +222,12 @@ fn origin_with_no_public_key_is_noop() {
 
     let chunks = build_signed_manifest(&host_kp, &host_mk, 5, false, vec![]);
     state
-        .handle_node_manifest(chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
+        .handle_node_manifest(
+            fresh_peer(),
+            chunks.into_iter().next().unwrap(),
+            0,
+            ConnectionModule::Lan,
+        )
         .unwrap();
 
     assert_eq!(
@@ -249,7 +255,7 @@ fn tampered_chunk_signature_dropped() {
     msg.manifest_signature[0] ^= 0xFF;
 
     state
-        .handle_node_manifest(msg, 0, ConnectionModule::Lan)
+        .handle_node_manifest(fresh_peer(), msg, 0, ConnectionModule::Lan)
         .unwrap();
 
     assert_eq!(
@@ -287,7 +293,12 @@ fn bad_per_entry_signature_drops_only_that_entry() {
 
     let chunks = build_signed_manifest(&host_kp, &host_mk, 1, false, vec![good_entry, bad_entry]);
     state
-        .handle_node_manifest(chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
+        .handle_node_manifest(
+            fresh_peer(),
+            chunks.into_iter().next().unwrap(),
+            0,
+            ConnectionModule::Lan,
+        )
         .unwrap();
 
     let nodes = state.nodes.read().unwrap();
@@ -340,6 +351,7 @@ fn expired_entry_dropped_at_receive_time() {
     let chunks = build_signed_manifest(&host_kp, &host_mk, 1, false, entries);
     state
         .handle_node_manifest(
+            fresh_peer(),
             chunks.into_iter().next().unwrap(),
             1_000,
             ConnectionModule::Lan,
@@ -388,7 +400,12 @@ fn is_gateway_flag_reflected_in_node_record() {
 
     let chunks = build_signed_manifest(&host_kp, &host_mk, 1, true, vec![]);
     state
-        .handle_node_manifest(chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
+        .handle_node_manifest(
+            fresh_peer(),
+            chunks.into_iter().next().unwrap(),
+            0,
+            ConnectionModule::Lan,
+        )
         .unwrap();
 
     assert!(
@@ -423,7 +440,12 @@ fn entry_for_user_with_unknown_key_is_stored_but_untrusted() {
     let entries = vec![sign_entry(&user_kp, &host_mk, user_id, 1_000_000)];
     let chunks = build_signed_manifest(&host_kp, &host_mk, 1, false, entries);
     state
-        .handle_node_manifest(chunks.into_iter().next().unwrap(), 0, ConnectionModule::Lan)
+        .handle_node_manifest(
+            fresh_peer(),
+            chunks.into_iter().next().unwrap(),
+            0,
+            ConnectionModule::Lan,
+        )
         .unwrap();
 
     assert_eq!(
@@ -477,6 +499,7 @@ fn committing_a_manifest_marks_the_origin_index_for_re_introduction() {
     let chunks = build_signed_manifest(&host_kp, &host_mk, 5, true, Vec::new());
     state
         .handle_node_manifest(
+            fresh_peer(),
             chunks.into_iter().next().unwrap(),
             500,
             ConnectionModule::Lan,
@@ -505,6 +528,7 @@ fn re_committing_the_same_version_does_not_re_mark() {
         let chunks = build_signed_manifest(&host_kp, &host_mk, version, true, Vec::new());
         state
             .handle_node_manifest(
+                fresh_peer(),
                 chunks.into_iter().next().unwrap(),
                 500,
                 ConnectionModule::Lan,
@@ -554,13 +578,23 @@ fn older_signed_manifest_does_not_roll_back_committed_state() {
         vec![sign_entry(&user_kp, &host_mk, user_id, 1_000_000)],
     );
     state
-        .handle_node_manifest(v5.into_iter().next().unwrap(), 500, ConnectionModule::Lan)
+        .handle_node_manifest(
+            fresh_peer(),
+            v5.into_iter().next().unwrap(),
+            500,
+            ConnectionModule::Lan,
+        )
         .unwrap();
 
     // v3: the state before that delegation existed, and before the gateway bit.
     let v3 = build_signed_manifest(&host_kp, &host_mk, 3, false, vec![]);
     state
-        .handle_node_manifest(v3.into_iter().next().unwrap(), 600, ConnectionModule::Lan)
+        .handle_node_manifest(
+            fresh_peer(),
+            v3.into_iter().next().unwrap(),
+            600,
+            ConnectionModule::Lan,
+        )
         .unwrap();
 
     let nodes = state.nodes.read().unwrap();
@@ -595,7 +629,12 @@ fn equal_version_manifest_is_discarded() {
         vec![sign_entry(&user_kp, &host_mk, user_id, 1_000_000)],
     );
     state
-        .handle_node_manifest(v5.into_iter().next().unwrap(), 500, ConnectionModule::Lan)
+        .handle_node_manifest(
+            fresh_peer(),
+            v5.into_iter().next().unwrap(),
+            500,
+            ConnectionModule::Lan,
+        )
         .unwrap();
 
     // Same version, emptied entry set: a well-formed signature over v5 with
@@ -603,6 +642,7 @@ fn equal_version_manifest_is_discarded() {
     let v5_again = build_signed_manifest(&host_kp, &host_mk, 5, false, vec![]);
     state
         .handle_node_manifest(
+            fresh_peer(),
             v5_again.into_iter().next().unwrap(),
             600,
             ConnectionModule::Lan,
@@ -627,7 +667,12 @@ fn fresher_manifest_still_commits() {
 
     let v3 = build_signed_manifest(&host_kp, &host_mk, 3, false, vec![]);
     state
-        .handle_node_manifest(v3.into_iter().next().unwrap(), 500, ConnectionModule::Lan)
+        .handle_node_manifest(
+            fresh_peer(),
+            v3.into_iter().next().unwrap(),
+            500,
+            ConnectionModule::Lan,
+        )
         .unwrap();
 
     let (user_kp, user_mk) = keypair_and_multikey();
@@ -640,7 +685,12 @@ fn fresher_manifest_still_commits() {
         vec![sign_entry(&user_kp, &host_mk, user_id, 1_000_000)],
     );
     state
-        .handle_node_manifest(v4.into_iter().next().unwrap(), 600, ConnectionModule::Lan)
+        .handle_node_manifest(
+            fresh_peer(),
+            v4.into_iter().next().unwrap(),
+            600,
+            ConnectionModule::Lan,
+        )
         .unwrap();
 
     let nodes = state.nodes.read().unwrap();
@@ -663,7 +713,12 @@ fn stale_chunk_does_not_discard_a_fresher_assembly_in_flight() {
     // Commit v5 so there is a committed version for the stale chunk to lose to.
     let v5 = build_signed_manifest(&host_kp, &host_mk, 5, false, vec![]);
     state
-        .handle_node_manifest(v5.into_iter().next().unwrap(), 500, ConnectionModule::Lan)
+        .handle_node_manifest(
+            fresh_peer(),
+            v5.into_iter().next().unwrap(),
+            500,
+            ConnectionModule::Lan,
+        )
         .unwrap();
 
     // 731 entries exceeds one chunk at 84 bytes per entry in a 60 KiB body.
@@ -689,18 +744,23 @@ fn stale_chunk_does_not_discard_a_fresher_assembly_in_flight() {
 
     // Chunk 0 of v6 arrives and is held as a partial.
     state
-        .handle_node_manifest(v6_first, 600, ConnectionModule::Lan)
+        .handle_node_manifest(fresh_peer(), v6_first, 600, ConnectionModule::Lan)
         .unwrap();
 
     // A stale v4 chunk lands between the two halves.
     let v4 = build_signed_manifest(&host_kp, &host_mk, 4, false, vec![]);
     state
-        .handle_node_manifest(v4.into_iter().next().unwrap(), 650, ConnectionModule::Lan)
+        .handle_node_manifest(
+            fresh_peer(),
+            v4.into_iter().next().unwrap(),
+            650,
+            ConnectionModule::Lan,
+        )
         .unwrap();
 
     // Chunk 1 of v6 completes the assembly, which must still be intact.
     state
-        .handle_node_manifest(v6_second, 700, ConnectionModule::Lan)
+        .handle_node_manifest(fresh_peer(), v6_second, 700, ConnectionModule::Lan)
         .unwrap();
 
     let nodes = state.nodes.read().unwrap();
@@ -729,6 +789,7 @@ fn commit(
     let chunks = build_signed_manifest(host_kp, host_mk, version, true, entries);
     state
         .handle_node_manifest(
+            fresh_peer(),
             chunks.into_iter().next().unwrap(),
             now,
             ConnectionModule::Lan,
@@ -875,4 +936,186 @@ fn a_lapsed_delegation_is_swept_without_a_new_manifest() {
         gateways_of(&state, user).is_empty(),
         "lapsed at its timeout (§10.4)"
     );
+}
+
+// ---------- §8.7, §10.8: a response closes the request it answers ----------
+
+fn is_outstanding(state: &RouterV2State, origin: [u8; 8], peer: libp2p::PeerId) -> bool {
+    state
+        .outstanding_manifest_requests
+        .read()
+        .unwrap()
+        .contains_key(&(origin, peer))
+}
+
+fn is_queued(state: &RouterV2State, origin: [u8; 8], peer: libp2p::PeerId) -> bool {
+    state
+        .pending_manifest_requests
+        .read()
+        .unwrap()
+        .get(&peer)
+        .is_some_and(|origins| origins.contains(&origin))
+}
+
+/// Pull `origin` from `peer` the way a fresher advertisement does.
+fn pull(state: &RouterV2State, peer: libp2p::PeerId, origin: [u8; 8], version: u32) {
+    state.maybe_request_manifest(peer, origin, version);
+    assert_eq!(state.drain_manifest_reqs(1_000).len(), 1);
+    assert!(is_outstanding(state, origin, peer));
+}
+
+#[test]
+fn an_applied_manifest_closes_its_request() {
+    let (state, _rx) = fresh_state();
+    let (host_kp, host_mk) = keypair_and_multikey();
+    let (peer, host_id) = setup_self_origin(&state, &host_mk);
+    pull(&state, peer, host_id, 5);
+
+    let v5 = build_signed_manifest(&host_kp, &host_mk, 5, false, vec![]);
+    state
+        .handle_node_manifest(
+            peer,
+            v5.into_iter().next().unwrap(),
+            1_100,
+            ConnectionModule::Lan,
+        )
+        .unwrap();
+
+    assert!(
+        !is_outstanding(&state, host_id, peer),
+        "an answered request must not wait for manifest_request_timeout"
+    );
+}
+
+#[test]
+fn an_advertisement_during_a_request_is_pulled_once_it_is_answered() {
+    let (state, _rx) = fresh_state();
+    let (host_kp, host_mk) = keypair_and_multikey();
+    let (a, host_id) = setup_self_origin(&state, &host_mk);
+    let b = fresh_peer();
+    pull(&state, a, host_id, 5);
+
+    // v6 is advertised by B while the v5 request to A is in flight
+    state.maybe_request_manifest(b, host_id, 6);
+    assert!(
+        !is_queued(&state, host_id, b),
+        "one request per origin at a time"
+    );
+
+    let v5 = build_signed_manifest(&host_kp, &host_mk, 5, false, vec![]);
+    state
+        .handle_node_manifest(
+            a,
+            v5.into_iter().next().unwrap(),
+            1_100,
+            ConnectionModule::Lan,
+        )
+        .unwrap();
+
+    assert!(!is_outstanding(&state, host_id, a));
+    assert!(
+        is_queued(&state, host_id, b),
+        "v6 must be pulled from its advertiser once v5 is in"
+    );
+}
+
+#[test]
+fn a_deferred_advertisement_the_answer_already_covers_is_not_pulled() {
+    let (state, _rx) = fresh_state();
+    let (host_kp, host_mk) = keypair_and_multikey();
+    let (a, host_id) = setup_self_origin(&state, &host_mk);
+    let b = fresh_peer();
+    pull(&state, a, host_id, 6);
+    state.maybe_request_manifest(b, host_id, 6);
+
+    let v6 = build_signed_manifest(&host_kp, &host_mk, 6, false, vec![]);
+    state
+        .handle_node_manifest(
+            a,
+            v6.into_iter().next().unwrap(),
+            1_100,
+            ConnectionModule::Lan,
+        )
+        .unwrap();
+
+    assert!(!is_queued(&state, host_id, b), "v6 is already committed");
+    assert!(state.deferred_manifest_pulls.read().unwrap().is_empty());
+}
+
+#[test]
+fn one_chunk_of_a_bigger_manifest_does_not_close_the_request() {
+    let (state, _rx) = fresh_state();
+    let (host_kp, host_mk) = keypair_and_multikey();
+    let (peer, host_id) = setup_self_origin(&state, &host_mk);
+    pull(&state, peer, host_id, 6);
+
+    // 731 entries exceed one chunk (see the stale-chunk test above)
+    let bulk: Vec<ManifestEntry> = (0..731u32)
+        .map(|i| {
+            let mut user_id = [0u8; 8];
+            user_id[..4].copy_from_slice(&i.to_be_bytes());
+            ManifestEntry {
+                user_id,
+                timeout: 1_000_000,
+                entry_signature: [0u8; 64],
+                profile_version: 0,
+            }
+        })
+        .collect();
+    let mut v6 = build_signed_manifest(&host_kp, &host_mk, 6, false, bulk).into_iter();
+    let first = v6.next().unwrap();
+    let second = v6.next().unwrap();
+
+    state
+        .handle_node_manifest(peer, first, 1_100, ConnectionModule::Lan)
+        .unwrap();
+    assert!(is_outstanding(&state, host_id, peer), "still assembling");
+
+    state
+        .handle_node_manifest(peer, second, 1_200, ConnectionModule::Lan)
+        .unwrap();
+    assert!(!is_outstanding(&state, host_id, peer));
+}
+
+#[test]
+fn a_delta_that_does_not_build_on_our_state_closes_the_request() {
+    use crate::router_v2::codec::messages::ManifestDelta;
+
+    let (state, _rx) = fresh_state();
+    let (_host_kp, host_mk) = keypair_and_multikey();
+    let (peer, host_id) = setup_self_origin(&state, &host_mk);
+    pull(&state, peer, host_id, 5);
+
+    // we hold version 0; a delta from 3 cannot apply, but it is the answer
+    let delta = ManifestDelta {
+        origin_node_id: host_id,
+        from_version: 3,
+        to_version: 5,
+        flags: 0,
+        manifest_signature: [0u8; 64],
+        adds: vec![],
+        removes: vec![],
+    };
+    state
+        .handle_manifest_delta(peer, delta, 1_100, ConnectionModule::Lan)
+        .unwrap();
+
+    assert!(!is_outstanding(&state, host_id, peer));
+}
+
+#[test]
+fn an_unanswered_request_still_blocks_until_its_timeout() {
+    let (state, _rx) = fresh_state();
+    let (_host_kp, host_mk) = keypair_and_multikey();
+    let (a, host_id) = setup_self_origin(&state, &host_mk);
+    let b = fresh_peer();
+    pull(&state, a, host_id, 5);
+    state.maybe_request_manifest(b, host_id, 6);
+
+    let timeout_ms = state.options.manifest_request_timeout * 1_000;
+    state.drop_manifest_req_timeout(1_000 + timeout_ms - 1);
+    assert!(is_outstanding(&state, host_id, a));
+    state.drop_manifest_req_timeout(1_000 + timeout_ms);
+    assert!(!is_outstanding(&state, host_id, a));
+    assert!(!is_queued(&state, host_id, b), "timeouts are unchanged");
 }

@@ -28,6 +28,11 @@ for any number of servers, gateways per community and remote users.
      node's peer id is inferred from what its lab dialers see; links between
      two far nodes (r1-S1) are the user's to check on the server.
 
+  --side server
+     with --hybrid: act on the server's lab (a world with far communities,
+     such as ring-1), run on test.qaul.net. --far then gives the host end of
+     each hostlink.sh link, e.g. S1=/ip4/198.19.0.1/udp/9229/quic-v1.
+
 Whether any LAN neighbourship crossed between spheres is NOT judged here: qaul's
 mDNS asks every 30 s (connections/lan.rs), so a clean reading straight after
 the dial proves nothing. check.py judges it after the settle, and
@@ -52,7 +57,8 @@ from worldlib import (Node, batch_query, gateway_flag, identities, infer_far_pee
 from lib.network import start_qaul, wait_for_local_accounts, wait_for_nodes
 
 
-def bringup(roles: dict, timeout: int, v1: bool, hybrid: bool = False) -> bool:
+def bringup(roles: dict, timeout: int, v1: bool, hybrid: bool = False,
+            side: str = "laptop") -> bool:
     if not os.environ.get("MESHNET_LAB"):
         raise SystemExit("MESHNET_LAB is not set; lib.network needs it")
     # A v1 measurement labelled v2 would look like a valid result, so this is
@@ -62,7 +68,7 @@ def bringup(roles: dict, timeout: int, v1: bool, hybrid: bool = False) -> bool:
             "QAUL_ROUTING_V2 is not set, so qauld would start on v1 routing.\n"
             "Set it, or pass --v1 to run the v1 arm on purpose."
         )
-    node_ids = lab_nodes(roles, hybrid)
+    node_ids = lab_nodes(roles, hybrid, side)
     print(f"starting qauld on {len(node_ids)} nodes ({'v1' if v1 else 'v2'} routing)")
     start_qaul()
     print(f"waiting for all {len(node_ids)} nodes to answer qauld-ctl")
@@ -73,9 +79,9 @@ def bringup(roles: dict, timeout: int, v1: bool, hybrid: bool = False) -> bool:
     return True
 
 
-def phase1(roles: dict, v1: bool, hybrid: bool = False) -> bool:
+def phase1(roles: dict, v1: bool, hybrid: bool = False, side: str = "laptop") -> bool:
     ok = True
-    lab = set(lab_nodes(roles, hybrid))
+    lab = set(lab_nodes(roles, hybrid, side))
     for sid in roles["servers"]:
         if sid not in lab:
             print(f"server {name(roles, sid)}: on test.qaul.net, its LAN is the user's to switch off")
@@ -106,14 +112,15 @@ def internet_pairs(neighbours: dict, by_peer: dict) -> set[str]:
             for n in (neighbours.get("internet") or [])}
 
 
-def verify(roles: dict, v1: bool, quiet: bool = False, hybrid: bool = False) -> dict:
+def verify(roles: dict, v1: bool, quiet: bool = False, hybrid: bool = False,
+           side: str = "laptop") -> dict:
     """Planned Internet links up, nothing unplanned, gateway roles right.
 
     In a hybrid run only the lab end of each link can be seen. A far node's
     identity is inferred from its lab dialers (infer_far_peers), and a link
     between two far nodes (r1-S1) is the user's to check on the server.
     """
-    node_ids = lab_nodes(roles, hybrid)
+    node_ids = lab_nodes(roles, hybrid, side)
     lab = set(node_ids)
     ids = identities(roles, node_ids, v2=not v1)
     by_peer = reverse(ids, "peer")
@@ -169,10 +176,7 @@ def verify(roles: dict, v1: bool, quiet: bool = False, hybrid: bool = False) -> 
     return result
 
 
-def phase2(roles: dict, settle: int, v1: bool, hybrid: bool = False,
-           far: dict[str, str] | None = None) -> bool:
-    far = far or {}
-    lab = set(lab_nodes(roles, hybrid))
+def assert_servers_off_lan(roles: dict, lab: set[str]) -> None:
     for sid in roles["servers"]:
         if sid not in lab:
             continue
@@ -181,28 +185,47 @@ def phase2(roles: dict, settle: int, v1: bool, hybrid: bool = False,
             raise SystemExit(f"server {name(roles, sid)} has {len(lan)} LAN neighbour(s): "
                              "run phase1 first")
 
-    addresses: dict[str, str] = {}
-    for link in roles["internet_links"]:
+
+def address_of(roles: dict, target: str, far: dict[str, str], addresses: dict[str, str]) -> str:
+    """A link target's dialable address, read once and kept in `addresses`."""
+    if target not in addresses:
+        if target in far:
+            addresses[target] = far[target]
+        else:
+            address = pick_lab_address(Node(target).addresses())
+            if not address:
+                raise SystemExit(f"{name(roles, target)} advertises no dialable ip4 address")
+            addresses[target] = address
+    return addresses[target]
+
+
+def dial(roles: dict, links: list[dict], lab: set[str], far: dict[str, str],
+         addresses: dict[str, str]) -> None:
+    """Run `connections nodes add` on each link's dialer. A dialer that isn't
+    in the lab (r1, on the server) is the user's to dial."""
+    for link in links:
         dialer, target = link["dialer"], link["target"]
         if dialer not in lab:
             print(f"  {name(roles, dialer):>4} -> {name(roles, target):<4} "
                   "on test.qaul.net, dialled by the user")
             continue
-        if target in far:
-            addresses[target] = far[target]
-        elif target not in addresses:
-            address = pick_lab_address(Node(target).addresses())
-            if not address:
-                raise SystemExit(f"{name(roles, target)} advertises no dialable ip4 address")
-            addresses[target] = address
-        Node(dialer).add_internet_peer(addresses[target], name(roles, target))
+        address = address_of(roles, target, far, addresses)
+        Node(dialer).add_internet_peer(address, name(roles, target))
         print(f"  {name(roles, dialer):>4} -> {name(roles, target):<4} "
-              f"{'(far) ' if link['far'] else ''}{addresses[target]}")
+              f"{'(far) ' if link['far'] else ''}{address}")
+
+
+def phase2(roles: dict, settle: int, v1: bool, hybrid: bool = False,
+           far: dict[str, str] | None = None, side: str = "laptop") -> bool:
+    far = far or {}
+    lab = set(lab_nodes(roles, hybrid, side))
+    assert_servers_off_lan(roles, lab)
+    dial(roles, roles["internet_links"], lab, far, {})
 
     print(f"waiting {settle}s for the dials to connect")
     time.sleep(settle)
     print("verifying:")
-    return verify(roles, v1, hybrid=hybrid)["ok"]
+    return verify(roles, v1, hybrid=hybrid, side=side)["ok"]
 
 
 def main() -> None:
@@ -219,19 +242,23 @@ def main() -> None:
     ap.add_argument("--far", action="append", metavar="NAME=MULTIADDR",
                     help="hybrid: where a far node listens, e.g. "
                          "S1=/ip4/37.27.63.85/udp/9229/quic-v1 (repeat per far target)")
+    ap.add_argument("--side", choices=("laptop", "server"), default="laptop",
+                    help="hybrid: which machine's lab this is (default laptop)")
     args = ap.parse_args()
+    if args.side == "server" and not args.hybrid:
+        raise SystemExit("--side server is part of a hybrid run: add --hybrid")
 
     roles = load_roles(args.roles)
-    far = parse_far(roles, args.far) if args.hybrid else {}
+    far = parse_far(roles, args.far, args.side) if args.hybrid else {}
     if args.step == "bringup":
-        ok = bringup(roles, args.timeout, args.v1, args.hybrid)
+        ok = bringup(roles, args.timeout, args.v1, args.hybrid, args.side)
     elif args.step == "phase1":
-        ok = phase1(roles, args.v1, args.hybrid)
+        ok = phase1(roles, args.v1, args.hybrid, args.side)
     elif args.step == "phase2":
-        ok = phase2(roles, args.settle, args.v1, args.hybrid, far)
+        ok = phase2(roles, args.settle, args.v1, args.hybrid, far, args.side)
     else:
         print("verifying:")
-        result = verify(roles, args.v1, hybrid=args.hybrid)
+        result = verify(roles, args.v1, hybrid=args.hybrid, side=args.side)
         print(json.dumps(result, indent=1))
         ok = result["ok"]
     if not ok:

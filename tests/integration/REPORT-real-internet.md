@@ -228,16 +228,83 @@ What the numbers say:
    whichever it finds first. T.24 had T2 and T3 at the same cost and went via
    T3.
 
-## 6. What is not tested yet
+## 6. Results: failures
 
-- **Failures:**
-  - S1 becoming unreachable;
-  - a gateway losing its Internet for 20 s, then for 90 s;
-  - the X–Y radio link breaking;
-  - 10% of members walking away and coming back;
-  - communities coming online minutes apart.
+Section 6.1 has S1 going down, over the real Internet. Section 6.3 has a gateway losing its Internet.
 
-  The design and the spec's predictions are in the plan, section 10.
-- **More than one far location.** S1 is the only node on the server the lab
-  talks to, so every Internet path goes out to it and back.
+### 6.1 S1 goes down, over the real Internet
 
+**Run:** 17 Nov, 08:22 UTC: the directory was complete by +199 s, and no community leaked
+users into another. Laptop to server: 111 ms round trip, no loss.
+
+**What was done.** The same as in the lab, except for where the cut is
+made. S1 and r1 run on test.qaul.net, and the six lab gateways that reach
+S1 (S2, r3, T1, T2, V1, W1) do so through the laptop's egress. The cut
+dropped all of their egress traffic, so S1 vanished from the lab's view, as
+if the server or its network had died. S1 and r1 kept running and stayed
+linked to each other on the server.
+
+**What happened, against the lab runs:**
+
+| | Lab (15 and 17 Nov) | Real Internet |
+|---|---|---|
+| Gateway role lost (logs) | +10 to +12 s | +12 to +13 s (T1, T2, V1) |
+| S1's side | – | stopped sending to the six after +13 s; kept the gateway role through r1, as predicted, and so did r1 |
+| Members register elsewhere | 37 of 40, then 40 of 40, by +35 s | 40 of 40 by +35 s; none stuck |
+| T1 → T3 (fastest / median / slowest) | +25 / +25 / +30–35 s | 19 of 19: +20 / +25 / +35 s, **6 of them via T2** |
+| T2 → T3 | +20–25 / +27.5–30 / +30 s, 6 via T1 | 7 of 7: +25 / +25 / +25 s, 6 via T1 |
+| V1 → V2 | +20 / +25 / +25 s | 14 of 14: +20 / +25 / +25 s |
+| New gateway's manifests | T3 +19/+79 s, +23/+83 s; V2 +13/+73 s, +18/+78 s | T3 +20 s (2 members), +80 s (24); V2 +19 s, +79 s |
+| Links back after the restore | within 5–10 s | the six gateways dialled S1 again 6–9 s after the restore (S1's log); gateway role back at +7 s |
+| After the restore | moved members stay | moved members stay (T3 38, V2 19) |
+
+**Findings:** Everything ran as it is supposed to, following the spec.
+
+### 6.3 T1 loses its Internet (real Interne)
+
+**Run:** 17 Nov, 08:45 UTC. The world formed
+correctly first, with the directory complete by +198 s. Laptop to server:
+116 ms round trip, no loss.
+
+**What was done.** T1's link to S1 is its only Internet. All of T1's egress
+traffic was dropped for 20 s, as if its mobile data dropped out. It then got
+150 s back, lost it again for 90 s, and got 180 s more. Times below are
+after the first cut. Four probe pairs from X sent a message every 10 s: three
+to T1's members, and one to a member on T3 as a control.
+
+### 6.4 People walk away and come back (real Internet)
+
+**Run:** 19 Nov, 10:06 UTC
+
+**What was done.** 9 members, 10% of those with a gateway, were cut off
+from everyone at once for 150 s, then let back and watched for 235 s:
+T.11, T.18, T.20, T.36, W.04, W.07, W.10, X.02 and Y.04. Their daemons kept
+running, as a phone does when its owner walks out of range. Times below
+are after they left; "R+" is after they came back. Five probe pairs from X
+sent a message every 10 s to five of the walkers, and one went to a V member
+as a control.
+
+**What happened, against the predictions:**
+
+| Predicted | Measured |
+|---|---|
+| Their gateways drop them within about 95 s (§10.7) | Yes: at +85.5 to +90.6 s |
+| On return they register with a gateway again (§10.3) | Yes: all 9 within 10 s. Three chose a different gateway: T.18 and T.36 went from T3 to T1, T.20 from T1 to T3 |
+| (not predicted) Their radio links come back | Every broken link but one came back 0–3 s after the return. The link between T.18 and T.36 never did |
+
+**Probe messages:**
+
+| Pair | Lost after the return | Reachable again | Delay (median), before → after |
+|---|---|---|---|
+| X.07 → T.11 (T1, both times) | 1 | R+10 s | 0.47 → 0.50 s |
+| X.01 → T.20 (T1 → T3) | 1 | R+10 s | 0.47 → 0.06 s |
+| X.02 → T.18 (T3 → T1) | 7 | R+70 s | 0.09 → 0.51 s |
+| X.07 → T.36 (T3 → T1) | 7 | R+70 s | 0.08 → 0.49 s |
+| X.09 → W.04 (W1, both times) | 7 | R+70 s | 0.45 → 0.48 s |
+| X.04 → V.05 (control) | 0 | – | 0.07 → 0.08 s |
+
+Every message to a walker was lost while they were away, as expected. X.02
+was itself one of the walkers. T1 and W1 reach the world through S1, so
+their members' messages cross the real Internet twice, about 0.5 s against
+0.07–0.09 s through T3. That is why T.18's and T.36's delays rose and
+T.20's fell.

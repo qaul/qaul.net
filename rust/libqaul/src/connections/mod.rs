@@ -9,6 +9,7 @@ pub mod ble;
 pub mod events;
 pub mod internet;
 pub mod lan;
+pub mod lan_peers;
 pub mod transport;
 
 use std::collections::HashMap;

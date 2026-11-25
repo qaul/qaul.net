@@ -26,8 +26,9 @@ The star suite in `../communities/` is left as it is: the results in
 | `egress_check.sh` | Plan step 3: hybrid lab with no daemons, egress up, ping the server from each far gateway |
 | `common.sh` | Archive-and-scan and teardown, shared by `run.sh` and `egress_check.sh` |
 | `faults.py` | Faults from the laptop (root): cut and restore a lab link (tc matchall at pref 1, both ends), isolate and rejoin a node (its `dl-` port), cut and restore a far gateway's egress (nft, top of the forward chain). `clear` undoes them all. |
-| `scenario.py` | Failure scenarios (`s1-down`, `t1-outage`, `bridge-cut`, `walkaway`), run by `run.sh -f NAME`. A probe sends messages throughout; every 5 s it samples gateway role, links, subscriptions, manifests and directories. It prints a timeline against the spec's predictions and writes `results/scenario-<name>-<tag>.json`. |
-| `draw_world.py` | Draws a world as an SVG (`diagrams/<name>.svg`): every node and link at the generator's own positions, real-Internet links marked |
+| `scenario.py` | Failure scenarios (`s1-down`, `t1-outage`, `bridge-cut`, `walkaway`), run by `run.sh -f NAME`. A probe sends messages throughout; every 5 s it samples gateway role, links, subscriptions, manifests and directories. It prints a timeline against the spec's predictions and writes `results/scenario-<name>-<tag>.json`. A member left without a gateway for 30 s (`--stuck-after`) gets one snapshot of its own routing table, manifests and delegations, plus one contrast member that did move; the report shows which gateways each could pick under §10.3. |
+| `stagger.py` | Scenario 1, run by `run.sh -j`: dials the backbone, then one community at a time (`-g`, default 180 s apart), instead of the whole Internet side at once. Every 5 s it samples each gateway's role, links, manifest version and directory, and each member's gateway. Per community it reports, from that community's dial: links up, gateway role, manifest bumps, members registered, when every gateway already online lists all of its users, and when its own gateways list everyone already online. Writes `results/stagger-<tag>.json`; the check that follows is timed from the last dial. |
+| `draw_world.py` | Draws a world as an SVG (`diagrams/<name>.svg`): every node and link at the generator's own positions, real-Internet links marked. A world whose Internet links form one loop (ring-1) is drawn as a ring, laptop half left and server half right. |
 | `worldlib.py` | Shared helpers |
 
 ## Running it
@@ -46,6 +47,11 @@ sudo QAUL_ROUTING_V2=1 RUST_LOG='libqaul::router_v2=debug,libqaul=info' \
 | `-w NAME` | World name; default `world-1-half` |
 | `-1` | v1 arm. Erase `QAUL_ROUTING_V2` too. |
 | `-s SECS` | How long `check.py` keeps re-reading the directory after the dial; default 300 |
+| `-m` | After the check, scenario 2: timed messages between chosen pairs (`traffic.py`) |
+| `-f NAME` | After the check, a failure scenario (`scenario.py`): `s1-down`, `t1-outage`, `bridge-cut`, `walkaway` |
+| `-j` | Scenario 1: step 5 dials the backbone, then one community at a time (`stagger.py`). v2 only. |
+| `-g SECS` | With `-j`: seconds between two communities' dials; default 180 |
+| `-H` | Hybrid run: S1 and r1 on test.qaul.net, started beforehand (see "The hybrid run") |
 
 The sequence:
 
@@ -59,7 +65,10 @@ The sequence:
    user entry. That proves no server joined a community while it booted
    behind the filter.
 5. Dial each Internet link in the roles file's plan, and verify the links and
-   the gateway role.
+   the gateway role. With `-j`, dial the backbone first (servers and remote
+   users), then one community after another in the order T, V, W, H, X+Y,
+   and measure each one joining (`stagger.py`). Step 6 is then timed from the
+   last dial.
 6. `check.py`: re-read every gateway's directory until it is complete or the
    settle runs out, timing each from the dial. Then, no sooner than 70 s after
    the dial, judge spheres, links, containment and delegation.
@@ -237,7 +246,7 @@ sudo QAUL_ROUTING_V2=1 RUST_LOG='libqaul::router_v2=debug,libqaul=info' \
 4. Checks everything from the lab side. A far node's identity is inferred, and
    all of its lab dialers must see the same peer. The directory is only
    complete once S1's and r1's users have come through S1. The r1–S1 link
-   shows as "on the server".
+   shows as "not visible from this lab".
 5. Records the bytes each far gateway sent over the real Internet in
    `results/hybrid-egress-*.txt`, and pings again.
 6. Archives the lab, takes egress down, and prints the commands for step 3.
@@ -246,3 +255,43 @@ sudo QAUL_ROUTING_V2=1 RUST_LOG='libqaul::router_v2=debug,libqaul=info' \
 state, stop them, and copy back `qauld.err`, the JSON files and `nft.txt`
 into `<archive>/far/`. Never copy `config.yaml`. `run.sh` prints the exact
 commands.
+
+## The ring world (ring-1): half the lab on the server
+
+`worlds/ring-1.json` puts ten communities on one ring of gateways, with no
+hub. Five run in the laptop's lab (A-E), five in a second lab on
+test.qaul.net (F-J), and the ring crosses the real Internet at S1 and r1,
+which run on the server's host:
+
+```
+A1 - B1 - C1 - D1 - E1 ==Internet== S1 - F1 - G1 - H1 - I1 - J1 - r1 ==Internet== A1
+```
+
+`diagrams/ring-1.svg` draws it (`./draw_world.py topologies/ring-1.roles.json`,
+which picks the ring layout when the Internet links form one loop).
+
+| File | Role |
+|---|---|
+| `run_far.sh` | The server half, as root on the server: `up` (archive, teardown, apply `ring-1-server.json`, start the daemons, host links), `dial` (wait until the laptop reaches S1, then dial and run `check.py --side server`), `finish` (archive, scan, remove) |
+| `hostlink.sh` | Gives the server-lab nodes that dial S1 or r1 a point-to-point link to the host, at 198.19.0.1, with mDNS dropped |
+| `nodecall.py` | Server end of one SSH session that `ring_traffic.py` keeps open, to reach server-lab nodes and read the server's clock |
+| `ring_traffic.py` | Messages between pairs 0-6 ring hops apart, laptop and server; cross-machine times corrected by the measured clock offset. `run.sh -m` runs it for this world. |
+
+`wire.py` and `check.py` take `--side server` for the server's lab. Each
+side's gateways are held against the whole world's directory (296 users).
+
+A run, in order:
+
+1. Copy `lib/`, `lab/` and `world/` (with the generated topologies) to
+   `~/ring/tests/integration/` on the server.
+2. Once: the server's `qaul_hybrid` table accepts UDP 9230 (r1) from the
+   home address, and 9229/9230 from `qh-*` (the host links).
+3. Server: `run_far.sh up ring-1`. Bring-up kills every qauld, so start S1
+   (`--port 9229`) and r1 (`--port 9230`) only after it, both with LAN off
+   and no link between them.
+4. Server: `run_far.sh dial ring-1 <S1's qauld.sock>` in the background. It
+   waits for the laptop.
+5. Laptop: `run.sh -w ring-1 -s 420 -H -m`. Its dial reaches S1 and starts
+   the server half's dial within a second.
+6. Server: save S1's and r1's state, stop them, `run_far.sh finish`, and
+   copy the server archive and S1's and r1's logs into the laptop's archive.

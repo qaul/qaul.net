@@ -26,15 +26,32 @@ def name(roles: dict, node_id: str) -> str:
     return roles["nodes"][node_id]["name"]
 
 
-def lab_nodes(roles: dict, hybrid: bool = False) -> list[str]:
-    """The nodes running in the local lab.
+SIDES = ("laptop", "server")
 
-    In a lab-only run every node is local, the far ones included. In a hybrid
-    run the far nodes (S1, r1) run on test.qaul.net and are not reachable
-    through a lab socket.
+
+def on_host(meta: dict) -> bool:
+    """A far server or remote user runs on test.qaul.net itself, started by
+    hand (S1, r1), not in a lab. Roles files written before "host" existed
+    only had far servers and remote users, so the default says the same."""
+    return meta.get("host", meta["location"] == "far" and meta["role"] in ("server", "remote"))
+
+
+def lab_nodes(roles: dict, hybrid: bool = False, side: str = "laptop") -> list[str]:
+    """The nodes running in this machine's lab.
+
+    In a lab-only run every node is in the laptop's lab, the far ones
+    included. In a hybrid run the laptop's lab holds the near nodes, and the
+    server's lab (side="server") the far communities; the host nodes (S1, r1)
+    are in neither and can't be reached through a lab socket.
     """
-    return [nid for nid, meta in roles["nodes"].items()
-            if not (hybrid and meta["location"] == "far")]
+    if side not in SIDES:
+        raise ValueError(f"side must be one of {SIDES}, got {side!r}")
+    if not hybrid:
+        return list(roles["nodes"]) if side == "laptop" else []
+    if side == "laptop":
+        return [nid for nid, m in roles["nodes"].items() if m["location"] != "far"]
+    return [nid for nid, m in roles["nodes"].items()
+            if m["location"] == "far" and not on_host(m)]
 
 
 def egress_nodes(roles: dict) -> list[str]:
@@ -52,13 +69,14 @@ def egress_nodes(roles: dict) -> list[str]:
     return sorted(out)
 
 
-def parse_far(roles: dict, specs: list[str] | None) -> dict[str, str]:
+def parse_far(roles: dict, specs: list[str] | None, side: str = "laptop") -> dict[str, str]:
     """--far NAME=MULTIADDR, repeated -> {far node id: the address to dial}.
 
-    In a hybrid run the lab cannot query the far nodes: they run on
-    test.qaul.net and the user drives them by hand. All the lab is told is
-    where each far dial target listens. Every far target with a lab dialer
-    must have one.
+    In a hybrid run the lab cannot query the nodes outside it: S1 and r1 run
+    on test.qaul.net and are driven by hand. All the lab is told is where each
+    such dial target listens: from the laptop, the server's public address;
+    from the server's lab, the host end of hostlink.sh's links. Every target
+    outside this side's lab that one of its nodes dials must have one.
     """
     out: dict[str, str] = {}
     for spec in specs or []:
@@ -66,11 +84,12 @@ def parse_far(roles: dict, specs: list[str] | None) -> dict[str, str]:
         if not sep or not addr:
             raise SystemExit(f"--far wants NAME=MULTIADDR, got '{spec}'")
         nid = roles["by_name"].get(nm)
-        if nid is None or roles["nodes"][nid]["location"] != "far":
-            raise SystemExit(f"--far {nm}: not a far node of {roles['name']}")
+        if nid is None or not on_host(roles["nodes"][nid]):
+            raise SystemExit(f"--far {nm}: not a node on the server's host in {roles['name']}")
         out[nid] = addr
+    lab = set(lab_nodes(roles, True, side))
     needed = {l["target"] for l in roles["internet_links"]
-              if l["far"] and roles["nodes"][l["dialer"]]["location"] != "far"}
+              if l["dialer"] in lab and l["target"] not in lab}
     missing = sorted(name(roles, n) for n in needed if n not in out)
     if missing:
         raise SystemExit(f"a hybrid run needs --far NAME=MULTIADDR for {', '.join(missing)}")
@@ -90,7 +109,7 @@ def infer_far_peers(roles: dict, neighbours: dict, by_peer: dict) -> dict[str, s
     votes: dict[str, Counter] = {}
     for link in roles["internet_links"]:
         d, t = link["dialer"], link["target"]
-        if not link["far"] or d not in neighbours:
+        if not (link["far"] or on_host(roles["nodes"][t])) or d not in neighbours:
             continue
         for n in neighbours[d].get("internet") or []:
             if n["node_id"] not in by_peer:

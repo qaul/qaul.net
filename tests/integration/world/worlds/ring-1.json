@@ -1,0 +1,36 @@
+{
+  "name": "ring-1",
+  "seed": 2,
+  "description": "Ten communities whose gateways form one ring over the Internet, half on the laptop and half on test.qaul.net. The ring crosses the real Internet at S1 and r1. See tests/integration/REPORT-ring-world.md.",
+  "servers": [
+    {"name": "S1", "location": "far", "port": 9229, "stands_in_for": "a server on the ring, where it crosses to the laptop"}
+  ],
+  "server_links": [],
+  "communities": [
+    {"name": "A", "members": 40, "situation": "laptop",
+     "gateways": [{"name": "A1", "place": "edge", "peers": ["r1"]}]},
+    {"name": "B", "members": 34, "situation": "laptop",
+     "gateways": [{"name": "B1", "place": "edge", "peers": ["A1"]}]},
+    {"name": "C", "members": 30, "situation": "laptop",
+     "gateways": [{"name": "C1", "place": "edge", "peers": ["B1"]}]},
+    {"name": "D", "members": 24, "situation": "laptop",
+     "gateways": [{"name": "D1", "place": "edge", "peers": ["C1"]}]},
+    {"name": "E", "members": 20, "situation": "laptop",
+     "gateways": [{"name": "E1", "place": "edge", "peers": ["D1", "S1"]}]},
+    {"name": "F", "members": 40, "location": "far", "situation": "server",
+     "gateways": [{"name": "F1", "place": "edge", "peers": ["S1"]}]},
+    {"name": "G", "members": 34, "location": "far", "situation": "server",
+     "gateways": [{"name": "G1", "place": "edge", "peers": ["F1"]}]},
+    {"name": "H", "members": 30, "location": "far", "situation": "server",
+     "gateways": [{"name": "H1", "place": "edge", "peers": ["G1"]}]},
+    {"name": "I", "members": 24, "location": "far", "situation": "server",
+     "gateways": [{"name": "I1", "place": "edge", "peers": ["H1"]}]},
+    {"name": "J", "members": 18, "location": "far", "situation": "server",
+     "gateways": [{"name": "J1", "place": "edge", "peers": ["I1", "r1"]}]}
+  ],
+  "radio_bridges": [],
+  "remote_users": [
+    {"name": "r1", "location": "far", "port": 9230, "peers": [],
+     "situation": "a user on the server, on the ring where it crosses back to the laptop"}
+  ]
+}

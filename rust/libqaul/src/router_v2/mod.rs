@@ -229,6 +229,7 @@ pub struct RouterV2State {
     pub pending_manifest_requests: RwLock<HashMap<PeerId, HashSet<[u8; 8]>>>,
     /// current requests that are in flight
     pub outstanding_manifest_requests: RwLock<HashMap<([u8; 8], PeerId), u64>>,
+    pub deferred_manifest_pulls: RwLock<HashMap<[u8; 8], (PeerId, u32)>>,
     /// profiles this node hosts
     pub hosted_profiles: RwLock<HashMap<[u8; 8], HostedProfile>>,
     /// verified profiles for users we do not host per 11.5
@@ -247,7 +248,7 @@ pub struct RouterV2State {
     pub(crate) subscriptions: RwLock<HashMap<[u8; 8], Subscription>>,
     /// (user, node) pairs that refused or went silent and when
     pub(crate) declined_targets: RwLock<HashMap<([u8; 8], [u8; 8]), u64>>,
-    /// §10.7: when each carried user was last seen reachable
+    /// §10.7: since when each carried user has had no routing entry at all
     pub(crate) delegation_liveness: RwLock<HashMap<[u8; 8], u64>>,
     /// §10.5 revocations waiting for the layer above to sign and send
     pub(crate) pending_revocations: RwLock<Vec<PendingRevocation>>,
@@ -296,6 +297,7 @@ impl RouterV2State {
             dirty_manifest_flags: RwLock::new(false),
             pending_manifest_requests: RwLock::new(HashMap::new()),
             outstanding_manifest_requests: RwLock::new(HashMap::new()),
+            deferred_manifest_pulls: RwLock::new(HashMap::new()),
             hosted_profiles: RwLock::new(HashMap::new()),
             cached_profiles: RwLock::new(HashMap::new()),
             management_recent_forwards: RwLock::new(HashMap::new()),

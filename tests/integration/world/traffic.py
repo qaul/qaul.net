@@ -241,11 +241,13 @@ def choose_pairs(roles, topo, deleg, lab, ids, per_class, rng) -> list[dict]:
 # ---------------------------------------------------------------- one pair
 
 
-def run_pair(i: int, p: dict, args, stamp: str) -> dict:
+def run_pair(i: int, p: dict, args, stamp: str, make_node=Node) -> dict:
+    """make_node(id) gives the node object; ring_traffic.py passes one that
+    reaches server-lab nodes over SSH."""
     out = dict(p)
-    s, r = Node(p["sender"]), Node(p["recipient"])
+    s, r = make_node(p["sender"]), make_node(p["recipient"])
     gname = f"probe-{stamp}-{i:02d}"
-    timeout = args.timeout if p["class"] != "island" else args.island_timeout
+    timeout = args.timeout if p.get("class") != "island" else args.island_timeout
     try:
         gid = s.create_group(gname)
     except Exception as e:

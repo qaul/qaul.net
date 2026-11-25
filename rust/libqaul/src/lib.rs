@@ -10,8 +10,7 @@ use filetime::FileTime;
 use futures::prelude::*;
 use futures::{future::FutureExt, pin_mut, select};
 use futures_ticker::Ticker;
-use libp2p::PeerId;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use std::fs::File;
 use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -700,7 +699,6 @@ impl Libqaul {
     ) {
         // Take a snapshot of the router state once; it doesn't change after init.
         let router = self.state.get_router();
-        let mut lan_redial_at: HashMap<PeerId, u64> = HashMap::new();
         loop {
             let evt = {
                 let lan_active = matches!(lan.status(), TransportStatus::Running);
@@ -860,8 +858,7 @@ impl Libqaul {
             };
 
             if let Some(event) = evt {
-                self.handle_event(event, lan, internet, ble, &mut lan_redial_at)
-                    .await;
+                self.handle_event(event, lan, internet, ble).await;
             }
         }
     }
@@ -873,10 +870,7 @@ impl Libqaul {
         lan: &mut connections::lan::Lan,
         internet: &mut connections::internet::Internet,
         ble: &mut BleTransport,
-        lan_redial_at: &mut std::collections::HashMap<libp2p::PeerId, u64>,
     ) {
-        /// Minimum gap between LAN redial attempts for the same peer.
-        const LAN_REDIAL_INTERVAL_MS: u64 = 5_000;
         // Reuse the router snapshot taken in event_loop() instead of cloning the Arc again.
         let router = self.state.get_router();
         match event {
@@ -1046,22 +1040,12 @@ impl Libqaul {
                     self.state.connections.internet.set_redialed(&addr);
                 }
 
+                // Redial remembered LAN neighbours that are not connected,
+                // including ones mDNS has since forgotten.
                 if matches!(lan.status(), TransportStatus::Running) {
                     let now = Timestamp::get_timestamp();
-                    let disconnected: Vec<PeerId> = lan
-                        .swarm
-                        .behaviour()
-                        .mdns
-                        .discovered_nodes()
-                        .copied()
-                        .filter(|peer| !lan.swarm.is_connected(peer))
-                        .collect();
-                    for peer in disconnected {
-                        if lan_redial_at.get(&peer).is_some_and(|due| now < *due) {
-                            continue;
-                        }
-                        lan_redial_at.insert(peer, now.saturating_add(LAN_REDIAL_INTERVAL_MS));
-                        log::debug!("lan redial: {peer:?} is discovered but not connected");
+                    for peer in lan.swarm.behaviour_mut().redial_pass(now) {
+                        log::debug!("lan redial: {peer:?} is remembered but not connected");
                         let _ = lan.swarm.dial(peer);
                     }
                 }

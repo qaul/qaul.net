@@ -77,7 +77,7 @@ def link_rtts(roles, neighbours, ids, far_peers=None) -> list[dict]:
         d, t = link["dialer"], link["target"]
         row = {"link": f"{name(roles, d)}->{name(roles, t)}", "far": link["far"]}
         if d not in neighbours and t not in neighbours:
-            rows.append({**row, "up": None, "rtt_us": {}, "seen": "on the server"})
+            rows.append({**row, "up": None, "rtt_us": {}, "seen": "not visible from this lab"})
             continue
         rtt = {}
         for here, there in ((d, t), (t, d)):
@@ -191,18 +191,24 @@ def main() -> None:
                     help="the far nodes run on test.qaul.net: check from the lab side only")
     ap.add_argument("--far", action="append", metavar="NAME=MULTIADDR",
                     help="hybrid: where a far node listens (as given to wire.py)")
+    ap.add_argument("--side", choices=("laptop", "server"), default="laptop",
+                    help="hybrid: which machine's lab to check (default laptop). Each "
+                         "side's gateways are held against the whole world's directory.")
     args = ap.parse_args()
+    if args.side == "server" and not args.hybrid:
+        raise SystemExit("--side server is part of a hybrid run: add --hybrid")
 
     roles = load_roles(args.roles)
     if args.hybrid:
-        parse_far(roles, args.far)  # same validation as wire.py; addresses unused here
+        parse_far(roles, args.far, args.side)  # same validation as wire.py; addresses unused
     t0 = args.t0 if args.t0 is not None else time.time()
-    node_ids = lab_nodes(roles, args.hybrid)
+    node_ids = lab_nodes(roles, args.hybrid, args.side)
     nodes = {nid: Node(nid) for nid in node_ids}
     result = {"world": roles["name"], "arm": "v1" if args.v1 else "v2", "t0": t0,
-              "hybrid": args.hybrid}
+              "hybrid": args.hybrid, "side": args.side}
     ok = True
-    print(f"=== {roles['name']} ({result['arm']}) ===")
+    print(f"=== {roles['name']} ({result['arm']}"
+          f"{', ' + args.side + ' side' if args.hybrid else ''}) ===")
 
     # 1. The directory first, so its completion times are measured from the
     #    dial rather than from whenever the slower checks finish.
@@ -254,7 +260,7 @@ def main() -> None:
         print(f"  {c['node']} - {c['neighbour']} over {c['transport']}")
 
     print("\n-- Internet links and gateway role --")
-    wired = verify(roles, args.v1, hybrid=args.hybrid)
+    wired = verify(roles, args.v1, hybrid=args.hybrid, side=args.side)
     result["wiring"] = wired
     ok &= wired["ok"]
     if wired.get("far_peers"):
@@ -264,7 +270,7 @@ def main() -> None:
     result["links"] = rtts
     for r in rtts:
         if r["up"] is None:
-            rtt = "on the server, not visible from the lab"
+            rtt = "not visible from this lab"
         else:
             rtt = ", ".join(f"{k} {v}us" for k, v in r["rtt_us"].items()) or "down"
         print(f"  {r['link']:<10} {'far ' if r['far'] else 'near'}  {rtt}")

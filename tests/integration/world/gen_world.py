@@ -6,13 +6,25 @@ of gateways (none included), joined over the Internet sphere through servers,
 direct gateway-to-gateway peerings and remote users. Why it is shaped this way
 is in tests/integration/PLAN-real-internet.md.
 
-Three files are written to topologies/:
+Where each node runs, in a hybrid run:
+  near                       the laptop's lab (the default)
+  far server / remote user   test.qaul.net itself, started by hand (S1, r1):
+                             "host" in the roles file
+  far community              a second lab on test.qaul.net (ring-1's F-J)
+A laptop node reaches the server only by dialling a host node (egress.sh),
+and a server-lab node reaches a host node through its own link to the host
+(hostlink.sh). A link from the laptop straight into the server's lab would
+need a way in through the server's firewall and NAT, so it is refused.
+
+Files written to topologies/:
 
   <name>.json         the full network: radio links and Internet links,
                       applied once, before any daemon starts
-  <name>-hybrid.json  the lab part of a hybrid run: the far nodes (S1, r1)
-                      and every link touching them left out. Their lab ends
+  <name>-hybrid.json  the laptop's part of a hybrid run: every far node and
+                      every link touching one left out. Their laptop ends
                       reach test.qaul.net through egress.sh instead.
+  <name>-server.json  only when a community is far: the server lab's part,
+                      its nodes and the links among them
   <name>.roles.json   every node's name, role, community and sphere, the
                       Internet dial plan, and what the checks expect
 
@@ -215,17 +227,19 @@ def build(desc: dict, source: str) -> tuple[dict, dict, dict]:
     # Servers and remote users first, on a row above the communities.
     servers = []
     for i, s in enumerate(desc.get("servers", [])):
+        loc = s.get("location", "near")
         servers.append(register(s["name"], {
             "role": "server", "community": None, "sphere": None,
-            "location": s.get("location", "near"), "lan": False,
-            "stands_in_for": s.get("stands_in_for", ""),
+            "location": loc, "host": loc == "far", "port": s.get("port", 9229),
+            "lan": False, "stands_in_for": s.get("stands_in_for", ""),
         }, 6.0 * i, -8.0))
     remotes = []
     for i, r in enumerate(desc.get("remote_users", [])):
+        loc = r.get("location", "near")
         remotes.append(register(r["name"], {
             "role": "remote", "community": None, "sphere": None,
-            "location": r.get("location", "near"), "lan": True,
-            "situation": r.get("situation", ""),
+            "location": loc, "host": loc == "far", "port": r.get("port", 9229),
+            "lan": True, "situation": r.get("situation", ""),
         }, 6.0 * i + 3.0, -12.0))
 
     # Communities: each its own radio mesh, laid out left to right.
@@ -249,7 +263,7 @@ def build(desc: dict, source: str) -> tuple[dict, dict, dict]:
             ids.append(register(name, {
                 "role": "gateway" if is_gateway else "member",
                 "community": c["name"], "sphere": None,
-                "location": "near", "lan": True,
+                "location": c.get("location", "near"), "host": False, "lan": True,
             }, x_cursor + px, py))
         community_points[c["name"]] = {
             ids[i]: (x_cursor + pts[i][0], pts[i][1]) for i in range(n)
@@ -291,6 +305,9 @@ def build(desc: dict, source: str) -> tuple[dict, dict, dict]:
         )
         if not candidates:
             raise SystemExit(f"no free radio link for the bridge {a_name}-{b_name}")
+        if nodes_meta[candidates[0][1]]["location"] != nodes_meta[candidates[0][2]]["location"]:
+            raise SystemExit(f"radio bridge {a_name}-{b_name}: one is on the laptop, "
+                             "the other on the server")
         _, a, b = candidates[0]
         radio_links.append((a, b))
         degree[a] += 1
@@ -350,6 +367,16 @@ def build(desc: dict, source: str) -> tuple[dict, dict, dict]:
         # A link crosses the real Internet only when its two ends are in
         # different places: r1-S1 both sit on the server and never leave it.
         far = nodes_meta[dialer]["location"] != nodes_meta[target]["location"]
+        dm, tm = nodes_meta[dialer], nodes_meta[target]
+        if far and not (dm["host"] or tm["host"]):
+            raise SystemExit(
+                f"{dm['name']}-{tm['name']}: a laptop node can reach the server only "
+                "through a node running on the server's host (S1, r1), not straight "
+                "into its lab")
+        if dm["host"] and tm["location"] == "far" and not tm["host"]:
+            raise SystemExit(
+                f"{dm['name']} would dial {tm['name']} in the server's lab; the lab end "
+                "of a host link must be the dialer")
         if far and nodes_meta[dialer]["location"] == "far":
             # In a hybrid run the lab sits behind Windows' and the home
             # router's NAT, so nothing outside can open a connection into it.
@@ -418,6 +445,8 @@ def build(desc: dict, source: str) -> tuple[dict, dict, dict]:
             "radio_links": len(topo_links),
             "internet_links": len(internet_links),
             "far_internet_links": sum(1 for l in internet_links if l["far"]),
+            "server_lab_nodes": sum(1 for m in nodes_meta.values()
+                                    if m["location"] == "far" and not m["host"]),
         },
     }
     return topology, roles
@@ -428,7 +457,8 @@ def summary(roles: dict) -> None:
     name = lambda i: meta[i]["name"]
     t = roles["totals"]
     print(f"{roles['name']}: {t['nodes']} nodes "
-          f"({t['lab_nodes']} in the lab, {t['far_nodes']} far), "
+          f"({t['lab_nodes']} in the lab, {t['far_nodes']} far"
+          f"{', of them ' + str(t['server_lab_nodes']) + ' in the server lab' if t.get('server_lab_nodes') else ''}), "
           f"{t['radio_links']} radio links, {t['internet_links']} Internet links "
           f"({t['far_internet_links']} far)")
     print(f"  servers        {', '.join(name(s) for s in roles['servers'])}")
@@ -475,17 +505,33 @@ def main() -> None:
                   if l["source"] not in far and l["target"] not in far],
     }
 
+    # The server lab's part: far community nodes, and the links among them.
+    # Their links to S1 and r1 go through hostlink.sh, not the lab.
+    server_lab = {nid for nid, m in roles["nodes"].items()
+                  if m["location"] == "far" and not m["host"]}
+    server = {
+        "nodes": [n for n in topology["nodes"] if n["id"] in server_lab],
+        "links": [l for l in topology["links"]
+                  if l["source"] in server_lab and l["target"] in server_lab],
+    }
+
     os.makedirs(args.out_dir, exist_ok=True)
     base = os.path.join(args.out_dir, desc["name"])
     with open(f"{base}.json", "w") as f:
         json.dump(topology, f)
     with open(f"{base}-hybrid.json", "w") as f:
         json.dump(hybrid, f)
+    written = [f"{base}.json", f"{base}-hybrid.json"]
+    if server_lab:
+        with open(f"{base}-server.json", "w") as f:
+            json.dump(server, f)
+        written.append(f"{base}-server.json")
     with open(f"{base}.roles.json", "w") as f:
         json.dump(roles, f, indent=1)
+    written.append(f"{base}.roles.json")
 
     summary(roles)
-    print(f"wrote {base}.json, {base}-hybrid.json, {base}.roles.json")
+    print("wrote " + ", ".join(written))
 
 
 if __name__ == "__main__":

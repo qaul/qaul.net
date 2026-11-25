@@ -246,6 +246,93 @@ def sample(w: World, watch_members, observers) -> dict:
     return out
 
 
+def snapshot(w: World, m: str, t: float, why: str) -> dict:
+    """A member's own view of every gateway, read once: why it has (or has
+    no) gateway. §10.3 makes a gateway eligible only if both hold:
+      1. the member's node route to it has local_only = 1;
+      2. the gateway's latest manifest says is_gateway.
+    The raw table, manifests and delegations are kept too, for anything the
+    summary doesn't show."""
+    node = w.nodes[m]
+    out = {"member": w.n(m), "t": t, "why": why}
+    for key, method in (("table", "router_v2_table"), ("manifests", "router_v2_manifests"),
+                        ("delegations", "router_v2_delegations"), ("status", "router_v2_status")):
+        try:
+            out[key] = getattr(node, method)()
+        except Exception as e:  # a failed read is recorded, not fatal
+            out[key] = None
+            out[f"{key}_error"] = str(e)[:300]
+
+    def nm(v2):
+        return w.n(w.by_v2[v2]) if v2 in w.by_v2 else "?" + str(v2)[-6:]
+
+    routes = {e.get("target_id"): e for e in out["table"] or [] if e.get("space") == "node"}
+    mans = {r.get("node_id"): r for r in out["manifests"] or []}
+    view = {}
+    for g in w.gateways:
+        v2 = w.ids[g].get("v2")
+        e, mf = routes.get(v2), mans.get(v2)
+        view[w.n(g)] = {
+            "route": None if e is None else {
+                "metric": e.get("metric"), "hops": e.get("hop_count"),
+                "local_only": e.get("local_only"), "via": nm(e.get("next_hop_id")),
+                "transport": e.get("transport"), "age_ms": e.get("age_ms")},
+            "manifest_is_gateway": None if mf is None else mf.get("is_gateway"),
+        }
+    out["view"] = view
+    d = out["delegations"] or {}
+    out["outstanding"] = [nm(o.get("target_node_id")) for o in d.get("outstanding") or []]
+    out["declined"] = [nm(x.get("node_id")) for x in d.get("declined") or []]
+    out["subscribed"] = [nm(s.get("target_node_id")) for s in d.get("subscriptions") or []]
+    return out
+
+
+class StuckWatch:
+    """Snapshots a watched member once it has had no gateway for `after`
+    seconds during a fault phase, and, for contrast, one member that had
+    the same gateway at baseline and has a gateway now. At most `limit`
+    snapshots per run."""
+
+    def __init__(self, w: World, watch_members, after, limit=12):
+        self.w, self.after, self.limit = w, after, limit
+        self.watch = list(watch_members)
+        self.since: dict[str, float] = {}   # member -> when first seen with no gateway
+        self.done: set = set()              # (member, since) already taken
+        self.contrast_done: set = set()     # baseline gateways already given a contrast
+        self.snaps: list[dict] = []
+
+    def check(self, s: dict, in_fault: bool):
+        t = s["t"]
+        due = []
+        for m in self.watch:
+            v = s["subs"].get(self.w.n(m))
+            if v == "?":
+                continue  # a failed read neither starts nor ends a gap
+            if v is not None or not in_fault or self.w.baseline_gateway(m) is None:
+                self.since.pop(m, None)
+                continue
+            start = self.since.setdefault(m, t)
+            if t - start >= self.after and (m, start) not in self.done:
+                self.done.add((m, start))
+                due.append((m, f"no gateway since +{start:.0f}s"))
+                g0 = self.w.baseline_gateway(m)
+                if g0 not in self.contrast_done:
+                    other = next((x for x in self.watch if x != m
+                                  and self.w.baseline_gateway(x) == g0
+                                  and s["subs"].get(self.w.n(x)) not in (None, "?")), None)
+                    if other:
+                        self.contrast_done.add(g0)
+                        due.append((other, f"contrast: was on {self.w.n(g0)} like "
+                                           f"{self.w.n(m)}, now on {s['subs'][self.w.n(other)]}"))
+        due = due[: max(0, self.limit - len(self.snaps))]
+        if due:
+            futs = [POOL.submit(snapshot, self.w, m, t, why) for m, why in due]
+            for f in futs:
+                self.snaps.append(f.result())
+            print(f"  snapshot at +{t:.0f}s: " + "; ".join(f"{self.w.n(m)} ({why})"
+                                                         for m, why in due), flush=True)
+
+
 # ---------------------------------------------------------------- scenarios
 
 
@@ -445,6 +532,31 @@ def analyse(samples, events, base, probe: Probe, prompt, t0):
     return out
 
 
+def report_snapshots(snaps, roles):
+    if not snaps:
+        return
+    print("\n-- members left without a gateway: their own view of each gateway (§10.3 needs "
+          "a local_only route AND a manifest saying is_gateway) --")
+    for sn in snaps:
+        print(f"  {sn['member']} at +{sn['t']:.0f}s ({sn['why']}); subscribed {sn['subscribed'] or '-'}, "
+              f"outstanding {sn['outstanding'] or '-'}, declined {sn['declined'] or '-'}")
+        for k in ("table", "manifests", "delegations"):
+            if sn.get(f"{k}_error"):
+                print(f"    {k} read failed: {sn[k + '_error']}")
+        community = roles["nodes"][roles["by_name"][sn["member"]]]["community"]
+        for g, v in sn["view"].items():
+            r = v["route"]
+            same = roles["nodes"][roles["by_name"][g]]["community"] == community
+            if r is None and not same:
+                continue  # another community's gateway it has no route to: expected
+            eligible = bool(r and r["local_only"] and v["manifest_is_gateway"])
+            route = ("no node route" if r is None else
+                     f"metric {r['metric']}, {r['hops']} hops, local_only={r['local_only']}, "
+                     f"via {r['via']} ({r['transport']}), age {r['age_ms']} ms")
+            print(f"    {g:<4} {'ELIGIBLE' if eligible else 'not eligible':<12} {route}; "
+                  f"manifest is_gateway={v['manifest_is_gateway']}")
+
+
 def report(name_, spec, events, result):
     print(f"\n==================== {name_}: {spec['how']} ====================")
     print("phases: " + ", ".join(f"{e['phase']} at +{e['t']:.0f}s" for e in events))
@@ -539,6 +651,9 @@ def main() -> None:
     ap.add_argument("--prompt", type=float, default=5,
                     help="a message slower than this (s) counts as late, not delivered")
     ap.add_argument("--seed", type=int, default=1)
+    ap.add_argument("--stuck-after", type=float, default=30,
+                    help="snapshot a watched member's own view once it has had no gateway "
+                         "this long (s) after the baseline")
     ap.add_argument("--json")
     args = ap.parse_args()
 
@@ -558,6 +673,7 @@ def main() -> None:
         print(f"  probe {probe.label(i)}")
 
     samples, events = [], []
+    stuck = StuckWatch(w, spec["watch"], args.stuck_after)
     t0 = time.time()
     try:
         for phase, dur, action in spec["phases"]:
@@ -573,6 +689,7 @@ def main() -> None:
                 s = sample(w, spec["watch"], spec["observers"])
                 s["t"] = round(tick - t0, 1)
                 samples.append(s)
+                stuck.check(s, in_fault=phase != "baseline")
                 probe.poll()
                 time.sleep(max(0.0, args.interval - (time.time() - tick)))
         # a last look for late deliveries
@@ -588,11 +705,13 @@ def main() -> None:
     base = before[-1] if before else samples[0]  # the last sample before the fault
     result = analyse(samples, events, base, probe, args.prompt, t0)
     report(args.scenario, spec, events, result)
+    report_snapshots(stuck.snaps, roles)
     if args.json:
         with open(args.json, "w") as f:
             json.dump({"scenario": args.scenario, "world": roles["name"], "hybrid": args.hybrid,
                        "how": spec["how"], "predict": spec["predict"], "events": events,
-                       "baseline": base, "samples": samples, "result": result}, f, indent=1)
+                       "baseline": base, "samples": samples, "result": result,
+                       "snapshots": stuck.snaps}, f, indent=1)
         print(f"\nwrote {args.json}")
 
 

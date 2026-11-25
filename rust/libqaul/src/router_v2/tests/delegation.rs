@@ -957,7 +957,10 @@ mod reachability {
     use super::*;
     use crate::router_v2::BumpTrigger;
 
-    const GRACE_MS: u64 = 60_000;
+    /// Default `route_expiry_ms` (§7.5).
+    const EXPIRY_MS: u64 = 35_000;
+    /// Far beyond any allowance.
+    const LONG_MS: u64 = 600_000;
 
     /// Puts `user` in our manifest the way an accepted subscribe would.
     fn carry(state: &RouterV2State, account: &UserAccount) -> [u8; 8] {
@@ -1004,7 +1007,7 @@ mod reachability {
         state.register_hosted_user(user_id, 0, account.multikey());
 
         assert!(!state.sweep_unreachable_delegations(NOW));
-        assert!(!state.sweep_unreachable_delegations(NOW + GRACE_MS * 10));
+        assert!(!state.sweep_unreachable_delegations(NOW + LONG_MS));
         assert!(state.has_self_delegation(&user_id));
     }
 
@@ -1015,27 +1018,31 @@ mod reachability {
         let user_id = carry(&state, &account);
         make_reachable(&state, user_id, 30);
 
-        assert!(!state.sweep_unreachable_delegations(NOW + GRACE_MS * 10));
+        assert!(!state.sweep_unreachable_delegations(NOW + LONG_MS));
         assert!(state.has_self_delegation(&user_id));
     }
 
-    /// A single unreachable observation starts the clock; it does not evict.
+    /// §10.4: once the routing entry has expired, the user is left out of
+    /// the next manifest version, so the very next sweep drops it.
     #[test]
-    fn one_unreachable_tick_does_not_evict() {
+    fn an_expired_route_drops_the_user_on_the_next_sweep() {
         let (state, _rx) = fresh_state();
         let account = fresh_account();
         let user_id = carry(&state, &account);
         make_reachable(&state, user_id, 30);
-        state.sweep_unreachable_delegations(NOW);
+        assert!(!state.sweep_unreachable_delegations(NOW));
 
         state.routing_table.write().unwrap().clear(Space::User, 30);
 
-        assert!(!state.sweep_unreachable_delegations(NOW + 1));
-        assert!(state.has_self_delegation(&user_id));
+        assert!(state.sweep_unreachable_delegations(NOW + 1));
+        assert!(!state.has_self_delegation(&user_id));
     }
 
+    /// The walkaway run's T1: a version published after the route expired
+    /// still listed the user. The sweep runs first in each tick, so the
+    /// user is gone before any later version is built.
     #[test]
-    fn an_unreachable_user_is_dropped_past_the_grace() {
+    fn no_version_after_the_expiry_still_lists_the_user() {
         let (state, _rx) = fresh_state();
         let account = fresh_account();
         let user_id = carry(&state, &account);
@@ -1044,9 +1051,15 @@ mod reachability {
 
         state.routing_table.write().unwrap().clear(Space::User, 30);
         state.sweep_unreachable_delegations(NOW + 1);
+        state.try_bump_manifest_version(NOW + LONG_MS, BumpTrigger::Accumulated);
 
-        assert!(state.sweep_unreachable_delegations(NOW + GRACE_MS + 2));
-        assert!(!state.has_self_delegation(&user_id));
+        assert!(!state
+            .manifest
+            .read()
+            .unwrap()
+            .entries()
+            .iter()
+            .any(|e| e.user_id == user_id));
     }
 
     /// §10.8 exempts the removal from the 60 s window, so the black hole
@@ -1061,8 +1074,7 @@ mod reachability {
         let before = state.manifest.read().unwrap().manifest_version;
 
         state.routing_table.write().unwrap().clear(Space::User, 30);
-        state.sweep_unreachable_delegations(NOW + 1);
-        assert!(state.sweep_unreachable_delegations(NOW + GRACE_MS + 2));
+        assert!(state.sweep_unreachable_delegations(NOW + 1));
 
         let after = state.manifest.read().unwrap().manifest_version;
         assert_eq!(
@@ -1072,37 +1084,38 @@ mod reachability {
         );
     }
 
-    /// Reachability returning before the grace elapses resets the clock.
+    /// After a restart the restored manifest lists users we have no route
+    /// to yet. Nothing has expired, so each gets one route-expiry period.
     #[test]
-    fn recovering_before_the_grace_resets_the_clock() {
-        let (state, _rx) = fresh_state();
-        let account = fresh_account();
-        let user_id = carry(&state, &account);
-        make_reachable(&state, user_id, 30);
-        state.sweep_unreachable_delegations(NOW);
-
-        state.routing_table.write().unwrap().clear(Space::User, 30);
-        state.sweep_unreachable_delegations(NOW + 1);
-
-        make_reachable(&state, user_id, 30);
-        state.sweep_unreachable_delegations(NOW + GRACE_MS / 2);
-
-        state.routing_table.write().unwrap().clear(Space::User, 30);
-        assert!(!state.sweep_unreachable_delegations(NOW + GRACE_MS));
-        assert!(state.has_self_delegation(&user_id));
-    }
-
-    /// A user we have never routed to is unreachable, but the clock still
-    /// starts on first sight rather than evicting immediately.
-    #[test]
-    fn a_never_seen_user_starts_the_clock_then_drops() {
+    fn a_user_without_a_route_yet_gets_the_route_expiry_period() {
         let (state, _rx) = fresh_state();
         let account = fresh_account();
         let user_id = carry(&state, &account);
 
         assert!(!state.sweep_unreachable_delegations(NOW));
-        assert!(state.sweep_unreachable_delegations(NOW + GRACE_MS + 1));
+        assert!(!state.sweep_unreachable_delegations(NOW + EXPIRY_MS - 1));
+        assert!(state.has_self_delegation(&user_id));
+        assert!(state.sweep_unreachable_delegations(NOW + EXPIRY_MS));
         assert!(!state.has_self_delegation(&user_id));
+    }
+
+    /// The restart case going well: the route shows up in time, the user
+    /// stays, and a later expiry drops it at once.
+    #[test]
+    fn a_route_learned_in_time_keeps_the_user() {
+        let (state, _rx) = fresh_state();
+        let account = fresh_account();
+        let user_id = carry(&state, &account);
+        state.sweep_unreachable_delegations(NOW);
+
+        make_reachable(&state, user_id, 30);
+        assert!(!state.sweep_unreachable_delegations(NOW + EXPIRY_MS - 1));
+        assert!(!state.sweep_unreachable_delegations(NOW + LONG_MS));
+        assert!(state.has_self_delegation(&user_id));
+        assert!(state.delegation_liveness.read().unwrap().is_empty());
+
+        state.routing_table.write().unwrap().clear(Space::User, 30);
+        assert!(state.sweep_unreachable_delegations(NOW + LONG_MS + 1));
     }
 
     #[test]
