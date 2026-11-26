@@ -67,6 +67,17 @@ void main() {
     expect(lightDivider.color, const Color(0xFFD1D1D6));
   });
 
+  testWidgets('keeps the composer pill background transparent', (tester) async {
+    for (final theme in [ThemeData.light(), ThemeData.dark()]) {
+      await tester.pumpWidget(app(theme: theme));
+
+      final pill = tester.widget<DecoratedBox>(
+        find.byKey(const ValueKey('chat-footer-composer-pill')),
+      );
+      expect((pill.decoration as BoxDecoration).color, isNull);
+    }
+  });
+
   testWidgets('keeps a 4px inset below the footer divider', (tester) async {
     Future<void> expectTopInset({
       required double width,

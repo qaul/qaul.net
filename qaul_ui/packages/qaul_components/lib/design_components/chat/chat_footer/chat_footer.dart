@@ -95,13 +95,6 @@ class _AttachmentMenuLayoutConfig {
   }
 }
 
-Color _inputFillColor(Brightness brightness, Color shell) {
-  if (brightness == Brightness.dark) {
-    return const Color(0xFF1C1C1E);
-  }
-  return shell;
-}
-
 Color _attachmentMenuItemColor(Brightness brightness) {
   if (brightness == Brightness.dark) {
     return const Color(0xFF1C1C1E);
@@ -355,7 +348,6 @@ class _ChatFooterState extends State<ChatFooter> {
     final theme = Theme.of(context);
     final sheet = QaulColorSheet(theme.brightness);
     final shell = sheet.background;
-    final fillColor = _inputFillColor(theme.brightness, shell);
     final shadows = chatSurfaceShadows(
       theme.brightness,
       direction: ChatSurfaceShadowDirection.above,
@@ -383,7 +375,6 @@ class _ChatFooterState extends State<ChatFooter> {
           _ComposerPill(
             footer: widget,
             theme: theme,
-            fillColor: fillColor,
             controller: _effectiveController,
             focusNode: _inputFocusNode,
             textFieldKey: _composerTextFieldKey,
@@ -429,7 +420,6 @@ class _ComposerPill extends StatelessWidget {
   const _ComposerPill({
     required this.footer,
     required this.theme,
-    required this.fillColor,
     required this.controller,
     required this.focusNode,
     required this.textFieldKey,
@@ -439,7 +429,6 @@ class _ComposerPill extends StatelessWidget {
 
   final ChatFooter footer;
   final ThemeData theme;
-  final Color fillColor;
   final TextEditingController controller;
   final FocusNode focusNode;
   final GlobalKey textFieldKey;
@@ -475,7 +464,6 @@ class _ComposerPill extends StatelessWidget {
     return DecoratedBox(
       key: const ValueKey('chat-footer-composer-pill'),
       decoration: BoxDecoration(
-        color: fillColor,
         borderRadius: BorderRadius.circular(_kInputBorderRadius),
         border: Border.all(
           color: _inputBorderColor(theme.brightness, focusNode.hasFocus),
