@@ -17,13 +17,23 @@
 # - 198.19.0.0/24 is in the RFC 2544 test range, apart from egress.sh's
 #   198.18.0.0/24 and the lab's 10.0.0.0/8.
 #
+# Port forwarding (ring-2: laptop gateways dial server-lab gateways): each
+# forwarded public UDP port, from the home address only, is rewritten to
+# the node's hostlink address and its own QUIC port, and leaves the host as
+# 198.19.0.1, so the node answers over its hostlink. Nothing else is
+# forwarded into or out of a qh-* link. ip_forward is switched on for it and
+# set back by `down`.
+#
 # Usage, as root on the server:
-#   hostlink.sh up ID...   a link per server-lab node id
-#   hostlink.sh down       remove every link and the table
+#   hostlink.sh up ID...                         a link per server-lab node id
+#   hostlink.sh forward HOME_IP PUB:ID:PORT...   forward public UDP PUB to node ID's PORT
+#   hostlink.sh down                             remove every link, forward and table
 #   hostlink.sh status
 set -eu
 
 TABLE=qaul_hostlink
+FWD_TABLE=qaul_portfwd
+STATE=/tmp/qaul_hostlink.state
 HOST=198.19.0.1
 NET=198.19.0
 
@@ -81,23 +91,72 @@ EOF
   echo "hostlink up: $# link(s), host end $HOST"
 }
 
+forward() {
+  [ $# -ge 2 ] || die "usage: hostlink.sh forward HOME_IP PUB:ID:PORT..."
+  home="$1"; shift
+  case "$home" in *[!0-9.]* | "") die "HOME_IP must be an IPv4 address, got '$home'" ;; esac
+  wan="$(ip -4 route show default | awk '{for (i = 1; i < NF; i++) if ($i == "dev") { print $(i + 1); exit }}')"
+  [ -n "$wan" ] || die "no IPv4 default route"
+  [ -e "$STATE" ] && die "forwarding is up already ($STATE); run 'hostlink.sh down' first"
+  rules=""
+  for spec in "$@"; do
+    pub="${spec%%:*}"; rest="${spec#*:}"; id="${rest%%:*}"; port="${rest#*:}"
+    nip="$(ip -n "ns-$id" -4 -o addr show dev hostlink 2>/dev/null | awk '{print $4}' | cut -d/ -f1)"
+    [ -n "$nip" ] || die "ns-$id has no hostlink; run 'hostlink.sh up' for it first"
+    rules="$rules
+    iifname \"$wan\" ip saddr $home udp dport $pub counter dnat to $nip:$port comment \"$id\""
+    echo "  :$pub -> ns-$id $nip:$port"
+  done
+  echo "FORWARD_BEFORE=$(cat /proc/sys/net/ipv4/ip_forward)" > "$STATE"
+  nft -f - <<EOF
+table ip $FWD_TABLE {
+  chain pre {
+    type nat hook prerouting priority dstnat; policy accept;$rules
+  }
+  chain post {
+    type nat hook postrouting priority srcnat; policy accept;
+    oifname "qh-*" ct status dnat counter masquerade comment "reach the node as 198.19.0.1"
+  }
+  chain forward_q {
+    type filter hook forward priority filter; policy accept;
+    oifname "qh-*" ct status dnat counter accept comment "a forwarded port"
+    iifname "qh-*" ct state established,related counter accept comment "its answers"
+    oifname "qh-*" counter drop comment "nothing else into the lab"
+    iifname "qh-*" counter drop comment "nothing else out of it"
+  }
+}
+EOF
+  sysctl -q -w net.ipv4.ip_forward=1
+  echo "forwarding up: $# port(s) from $home on $wan"
+}
+
 down() {
   for ifc in $(ip -o link show | awk -F': ' '{print $2}' | sed 's/@.*//' | grep '^qh-' || true); do
     ip link del "$ifc" 2>/dev/null || true
   done
   nft delete table inet "$TABLE" 2>/dev/null || true
-  echo "hostlink down"
+  nft delete table ip "$FWD_TABLE" 2>/dev/null || true
+  if [ -f "$STATE" ]; then
+    before="$(sed -n 's/^FORWARD_BEFORE=//p' "$STATE")"
+    [ -n "$before" ] && sysctl -q -w "net.ipv4.ip_forward=$before"
+    rm -f "$STATE"
+    echo "hostlink down: links, forwards and tables removed, ip_forward back to $before"
+  else
+    echo "hostlink down"
+  fi
 }
 
 status() {
   ip -br addr show | grep '^qh-' || echo "no links"
   nft list table inet "$TABLE" 2>/dev/null || true
+  nft list table ip "$FWD_TABLE" 2>/dev/null || true
 }
 
 cmd="${1:-}"; [ $# -gt 0 ] && shift
 case "$cmd" in
   up) up "$@" ;;
+  forward) forward "$@" ;;
   down) down ;;
   status) status ;;
-  *) die "usage: hostlink.sh up ID... | down | status" ;;
+  *) die "usage: hostlink.sh up ID... | forward HOME_IP PUB:ID:PORT... | down | status" ;;
 esac

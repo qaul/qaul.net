@@ -11,10 +11,12 @@ Where each node runs, in a hybrid run:
   far server / remote user   test.qaul.net itself, started by hand (S1, r1):
                              "host" in the roles file
   far community              a second lab on test.qaul.net (ring-1's F-J)
-A laptop node reaches the server only by dialling a host node (egress.sh),
-and a server-lab node reaches a host node through its own link to the host
-(hostlink.sh). A link from the laptop straight into the server's lab would
-need a way in through the server's firewall and NAT, so it is refused.
+A laptop node reaches the server by dialling a host node, or a server-lab
+node through a forwarded port on the server ("fwd_port" in the roles file,
+from 9240 up; hostlink.sh sets the forwarding up). Either way it goes out
+through egress.sh. A server-lab node reaches a host node through its own
+link to the host (hostlink.sh). Nothing outside can dial into the laptop's
+lab, so a link from the server to the laptop is refused.
 
 Files written to topologies/:
 
@@ -68,6 +70,9 @@ from collections import deque
 
 # A BLE radio holds at most 4 simultaneous connections.
 BLE_MAX_LINKS = 4
+
+# First public UDP port forwarded into the server's lab (S1 is 9229, r1 9230).
+FWD_PORT_BASE = 9240
 
 # Radio range in units where people stand at a density of one per unit area.
 # Wide enough that most people have several candidates; the 4-link cap then
@@ -368,11 +373,6 @@ def build(desc: dict, source: str) -> tuple[dict, dict, dict]:
         # different places: r1-S1 both sit on the server and never leave it.
         far = nodes_meta[dialer]["location"] != nodes_meta[target]["location"]
         dm, tm = nodes_meta[dialer], nodes_meta[target]
-        if far and not (dm["host"] or tm["host"]):
-            raise SystemExit(
-                f"{dm['name']}-{tm['name']}: a laptop node can reach the server only "
-                "through a node running on the server's host (S1, r1), not straight "
-                "into its lab")
         if dm["host"] and tm["location"] == "far" and not tm["host"]:
             raise SystemExit(
                 f"{dm['name']} would dial {tm['name']} in the server's lab; the lab end "
@@ -386,6 +386,13 @@ def build(desc: dict, source: str) -> tuple[dict, dict, dict]:
                 "of a far link must be the dialer"
             )
         internet_links.append({"dialer": dialer, "target": target, "far": far})
+
+    # A server-lab node dialled from the laptop is reached through a port
+    # forwarded on the server's public address, one per node.
+    fwd = sorted({l["target"] for l in internet_links
+                  if l["far"] and not nodes_meta[l["target"]]["host"]})
+    for k, t in enumerate(fwd):
+        nodes_meta[t]["fwd_port"] = FWD_PORT_BASE + k
 
     # Checks on the result, so a bad description fails here and not in the lab.
     for node_id, d in degree.items():
@@ -477,6 +484,9 @@ def summary(roles: dict) -> None:
     print("  Internet links " + ", ".join(
         f"{name(l['dialer'])}->{name(l['target'])}{' (far)' if l['far'] else ''}"
         for l in roles["internet_links"]))
+    fwd = [(m["name"], m["fwd_port"]) for m in meta.values() if "fwd_port" in m]
+    if fwd:
+        print("  forwarded      " + ", ".join(f"{n} :{p}" for n, p in sorted(fwd, key=lambda x: x[1])))
     e = roles["expected"]
     print(f"  expected       {len(e['gateway_role'])} nodes in the gateway role, "
           f"{e['internet_components']} Internet component(s), "

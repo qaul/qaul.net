@@ -116,10 +116,16 @@ def verify(roles: dict, v1: bool, quiet: bool = False, hybrid: bool = False,
            side: str = "laptop") -> dict:
     """Planned Internet links up, nothing unplanned, gateway roles right.
 
-    In a hybrid run only the lab end of each link can be seen. A far node's
-    identity is inferred from its lab dialers (infer_far_peers), and a link
-    between two far nodes (r1-S1) is the user's to check on the server.
+    A link with both ends in this lab is checked pair by pair. A link with one
+    end outside it (S1 and r1 on the server's host, or the other machine's
+    lab in a split world) can only be seen from this end, and a node with
+    several such links can't tell its outside neighbours apart. So those are
+    checked by count: each node must have exactly as many Internet neighbours
+    from outside the lab as it has planned links leaving it. Where a node has
+    only one, the outside end is named too (infer_far_peers). A link with both
+    ends outside (r1-S1) is not this lab's to check.
     """
+    from collections import Counter
     node_ids = lab_nodes(roles, hybrid, side)
     lab = set(node_ids)
     ids = identities(roles, node_ids, v2=not v1)
@@ -127,29 +133,47 @@ def verify(roles: dict, v1: bool, quiet: bool = False, hybrid: bool = False,
     nodes = {nid: Node(nid) for nid in node_ids}
     neighbours = batch_query(nodes, "router_neighbours")
     far_peers = infer_far_peers(roles, neighbours, by_peer) if hybrid else {}
-    by_peer = {**by_peer, **{p: t for t, p in far_peers.items()}}
 
     planned = {frozenset((l["dialer"], l["target"])) for l in roles["internet_links"]
-               if l["dialer"] in lab or l["target"] in lab}
-    seen = set()
+               if l["dialer"] in lab and l["target"] in lab}
+    leaving = Counter()
+    for l in roles["internet_links"]:
+        if (l["dialer"] in lab) != (l["target"] in lab):
+            leaving[l["dialer"] if l["dialer"] in lab else l["target"]] += 1
+    # Count neighbours one by one: internet_pairs() names an unknown peer by
+    # its first characters, and every libp2p peer id starts "12D3KooW".
+    seen, outside = set(), Counter()
     for nid in node_ids:
-        for other in internet_pairs(neighbours[nid], by_peer):
-            seen.add(frozenset((nid, other)))
-
-    missing = sorted(planned - seen, key=sorted)
-    unplanned = sorted(seen - planned, key=sorted)
+        for n in neighbours[nid].get("internet") or []:
+            other = by_peer.get(n["node_id"])
+            if other in lab:
+                seen.add(frozenset((nid, other)))
+            else:
+                outside[nid] += 1
 
     def label(pair) -> str:
         return "-".join(name(roles, x) if x in roles["nodes"] else x for x in sorted(pair))
 
-    result = {"missing_links": [label(p) for p in missing],
-              "unplanned_links": [label(p) for p in unplanned],
+    short = sorted(n for n in lab if outside[n] < leaving[n])
+    extra = sorted(n for n in lab if outside[n] > leaving[n])
+    missing = [label(p) for p in sorted(planned - seen, key=sorted)] + [
+        f"{name(roles, n)}: {outside[n]} of {leaving[n]} links leaving the lab" for n in short]
+    unplanned = [label(p) for p in sorted(seen - planned, key=sorted)] + [
+        f"{name(roles, n)}: {outside[n]} outside neighbours, {leaving[n]} planned" for n in extra]
+    total = len(planned) + sum(leaving.values())
+    up = len(planned & seen) + sum(min(outside[n], leaving[n]) for n in leaving)
+
+    result = {"missing_links": missing, "unplanned_links": unplanned,
+              "links_up": up, "links_planned": total,
+              "leaving_lab": {name(roles, n): {"planned": leaving[n], "seen": outside[n]}
+                              for n in sorted(leaving)},
               "far_peers": {name(roles, t): p for t, p in far_peers.items()}}
     if not quiet:
-        print(f"  Internet links up      {len(planned & seen)}/{len(planned)}"
-              f"{'' if not missing else '  MISSING: ' + ', '.join(result['missing_links'])}")
+        print(f"  Internet links up      {up}/{total}"
+              f"{' (' + str(sum(leaving.values())) + ' leaving this lab, checked by count)' if leaving else ''}"
+              f"{'' if not missing else '  MISSING: ' + ', '.join(missing)}")
         print(f"  unplanned links        {len(unplanned)}"
-              f"{'' if not unplanned else '  ' + ', '.join(result['unplanned_links'])}")
+              f"{'' if not unplanned else '  ' + ', '.join(unplanned)}")
 
     servers_on_lan = [name(roles, s) for s in roles["servers"]
                       if s in lab and neighbours[s].get("lan")]

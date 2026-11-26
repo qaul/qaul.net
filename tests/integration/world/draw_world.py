@@ -6,10 +6,13 @@ radio meshes are the real ones. Servers and remote users sit in an Internet
 tier above them. In the hybrid run, S1 and r1 run on test.qaul.net and
 everything else in the lab, so links between the two cross the real Internet.
 
-A world whose Internet links form one loop (ring-1) is drawn as a ring
-instead: the stations on a circle, the server's half on the right and the
-laptop's on the left, and each village's own radio mesh opening outward from
-its gateway. --layout picks one; auto draws a ring when the links are a loop.
+A world whose backbone forms one loop (ring-1, ring-2) is drawn as a ring
+instead: the stations (each village's first gateway, S1 and r1) on a circle,
+the server's half on the right and the laptop's on the left, and each
+village's own radio mesh opening outward from its first gateway. Any other
+gateway is drawn where it stands in its village, and any other Internet link
+(ring-2's random shortcuts) as a curve through the middle. --layout picks
+one; auto draws a ring when the backbone is a loop.
 
 Usage:
     ./draw_world.py topologies/world-1.roles.json [--out diagrams/world-1.svg]
@@ -34,16 +37,24 @@ COL = {
 
 
 def ring_order(roles: dict) -> list[str] | None:
-    """The Internet stations in ring order, starting at the first community's
-    gateway and heading for the next community's, or None if the Internet
-    links are not one loop through every node on them."""
+    """The ring's stations in order, starting at the first community's first
+    gateway and heading for the next community's, or None if they don't form
+    one loop. The stations are each village's first gateway, plus the servers
+    and remote users with Internet links; links between two stations are the
+    backbone, and anything else is a shortcut."""
+    stations = {c["gateways"][0] for c in roles["communities"] if c["gateways"]}
+    stations |= {n for n in roles["servers"] + roles["remote_users"]
+                 if any(n in (l["dialer"], l["target"]) for l in roles["internet_links"])}
     adj: dict[str, list[str]] = {}
     for l in roles["internet_links"]:
-        adj.setdefault(l["dialer"], []).append(l["target"])
-        adj.setdefault(l["target"], []).append(l["dialer"])
+        if l["dialer"] in stations and l["target"] in stations:
+            adj.setdefault(l["dialer"], []).append(l["target"])
+            adj.setdefault(l["target"], []).append(l["dialer"])
     if len(adj) < 3 or any(len(v) != 2 for v in adj.values()):
         return None
-    gws = [g for c in roles["communities"] for g in c["gateways"] if g in adj]
+    if set(adj) != stations:
+        return None
+    gws = [c["gateways"][0] for c in roles["communities"] if c["gateways"] and c["gateways"][0] in adj]
     start = gws[0] if gws else sorted(adj)[0]
     nxt = gws[1] if len(gws) > 1 and gws[1] in adj[start] else sorted(adj[start])[0]
     order = [start]
@@ -186,7 +197,19 @@ def draw_ring(roles: dict, topo: dict, order: list[str], out: str) -> None:
         (x0, y0), (x1, y1) = xy[l["source"]], xy[l["target"]]
         add(f'<line x1="{x0:.1f}" y1="{y0:.1f}" x2="{x1:.1f}" y2="{y1:.1f}" '
             f'stroke="{COL["radio"]}" stroke-width="1.1"/>')
+    shortcuts = [l for l in roles["internet_links"]
+                 if not (l["dialer"] in station and l["target"] in station)]
+    for l in shortcuts:
+        (x0, y0), (x1, y1) = xy[l["dialer"]], xy[l["target"]]
+        mx, my = (x0 + x1) / 2, (y0 + y1) / 2
+        qx, qy = cx + (mx - cx) * 0.35, cy + (my - cy) * 0.35  # bend through the middle
+        color = COL["far"] if l["far"] else COL["near"]
+        dash = ' stroke-dasharray="6 4"' if l["far"] else ""
+        add(f'<path d="M {x0:.1f} {y0:.1f} Q {qx:.1f} {qy:.1f} {x1:.1f} {y1:.1f}" fill="none" '
+            f'stroke="{color}" stroke-width="1.6" opacity="0.7"{dash}/>')
     for l in roles["internet_links"]:
+        if l in shortcuts:
+            continue
         (x0, y0), (x1, y1) = station[l["dialer"]], station[l["target"]]
         color = COL["far"] if l["far"] else COL["near"]
         dash = ' stroke-dasharray="9 5"' if l["far"] else ""
@@ -201,8 +224,11 @@ def draw_ring(roles: dict, topo: dict, order: list[str], out: str) -> None:
     for nid, (x, y) in xy.items():
         if nid in station:
             continue
-        add(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3.8" fill="{COL["member"]}" '
-            f'stroke="{COL["member"]}" stroke-width="1"/>')
+        if nodes[nid]["role"] == "gateway":
+            station_mark(add, x, y, nodes[nid])
+        else:
+            add(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3.8" fill="{COL["member"]}" '
+                f'stroke="{COL["member"]}" stroke-width="1"/>')
     for s in order:
         station_mark(add, *station[s], nodes[s], big=True)
 
@@ -214,19 +240,29 @@ def draw_ring(roles: dict, topo: dict, order: list[str], out: str) -> None:
 
     total = len(nodes)
     vill = len(village)
+    if shortcuts:  # keep the title readable over the curves
+        add(f'<rect x="{cx - 185:.0f}" y="{cy - 42:.0f}" width="370" height="80" rx="10" '
+            f'fill="#ffffff" opacity="0.88"/>')
     add(f'<text x="{cx:.0f}" y="{cy - 14:.0f}" font-size="22" text-anchor="middle" '
         f'fill="{COL["text"]}" font-weight="bold">{roles["name"]}</text>')
     add(f'<text x="{cx:.0f}" y="{cy + 10:.0f}" font-size="13" text-anchor="middle" '
         f'fill="{COL["muted"]}">{total} devices, {vill} villages</text>')
+    gw_count = sum(len(c["gateways"]) for c in roles["communities"])
+    sub = ("one ring of gateways, no central server" if not shortcuts else
+           f"{gw_count} village gateways: a ring plus {len(shortcuts)} random shortcuts")
     add(f'<text x="{cx:.0f}" y="{cy + 28:.0f}" font-size="13" text-anchor="middle" '
-        f'fill="{COL["muted"]}">one ring of gateways, no central server</text>')
+        f'fill="{COL["muted"]}">{sub}</text>')
 
-    legend(add, width, size + 18, [
+    lines = [
         (COL["radio"], "", "radio link inside a village (at most 4 per person)"),
         (COL["near"], "", "Internet link inside one machine"),
         (COL["far"], "9 4", "Internet link across the real Internet, laptop to server"),
-    ], [("member", "person"), ("gateway", "village gateway"), ("server", "server S1"),
-        ("remote", "remote user r1")])
+    ]
+    if shortcuts:
+        lines.append((COL["near"], "", "curved: a random shortcut (red dashed if it crosses)"))
+    legend(add, width, size + 18, lines,
+           [("member", "person"), ("gateway", "village gateway"), ("server", "server S1"),
+            ("remote", "remote user r1")])
     add("</svg>")
     with open(out, "w") as f:
         f.write("\n".join(o))

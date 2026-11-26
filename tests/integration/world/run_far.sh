@@ -6,11 +6,13 @@
 # started by hand as before; the server-lab nodes that dial them reach them
 # through hostlink.sh.
 #
-#   run_far.sh up WORLD
+#   run_far.sh up WORLD [HOME_IP]
 #       Archive the previous server lab if it was one of these runs, then
 #       remove it. Apply topologies/WORLD-server.json, with mDNS dropped on
 #       its Internet links. Start every daemon, wait for their accounts, and
-#       give each node that dials S1 or r1 its host link.
+#       give a host link to each node that dials S1 or r1 or that the laptop
+#       dials (ring-2's shortcuts). Those last get a public UDP port each
+#       ("fwd_port" in the roles file), forwarded from HOME_IP only.
 #       Bring-up kills every qauld on the machine, so start S1 and r1 after it.
 #   run_far.sh dial WORLD S1_SOCKET [SETTLE]
 #       Wait until S1 has an Internet neighbour, i.e. the laptop's half has
@@ -60,22 +62,46 @@ for l in r["internet_links"]:
 EOF
 }
 
-# Server-lab nodes that dial a host node: the ones that need a host link.
+# Server-lab nodes that need a host link: those that dial a host node, and
+# those the laptop dials through a forwarded port.
 hostlink_ids() {
   python3 - "$ROLES" <<'EOF'
 import json, sys
 r = json.load(open(sys.argv[1]))
 lab = {n for n, m in r["nodes"].items() if m["location"] == "far" and not m.get("host")}
-print(" ".join(sorted({l["dialer"] for l in r["internet_links"]
-                       if l["dialer"] in lab and r["nodes"][l["target"]].get("host")})))
+ids = {l["dialer"] for l in r["internet_links"]
+       if l["dialer"] in lab and r["nodes"][l["target"]].get("host")}
+ids |= {n for n in lab if "fwd_port" in r["nodes"][n]}
+print(" ".join(sorted(ids)))
 EOF
+}
+
+# PUB:ID:PORT for every forwarded node: its public port and the QUIC port its
+# daemon listens on (random, so read from the running node).
+forward_specs() {
+  (cd "$SUITE" && python3 - "$ROLES" <<'EOF'
+import json, sys
+from worldlib import Node, pick_lab_address
+r = json.load(open(sys.argv[1]))
+for nid, m in sorted(r["nodes"].items(), key=lambda x: x[1].get("fwd_port", 0)):
+    if "fwd_port" in m:
+        a = pick_lab_address(Node(nid).addresses())
+        if not a or "/udp/" not in a:
+            sys.exit(f"{m['name']} has no QUIC address to forward to: {a}")
+        print(f"{m['fwd_port']}:{nid}:{a.split('/udp/')[1].split('/')[0]}")
+EOF
+  )
 }
 
 cmd="${1:-}"; [[ $# -gt 0 ]] && shift
 case "$cmd" in
 up)
-  [[ $# -eq 1 ]] || { echo "usage: run_far.sh up WORLD"; exit 2; }
-  WORLD="$1"; roles_of "$WORLD"
+  [[ $# -ge 1 && $# -le 2 ]] || { echo "usage: run_far.sh up WORLD [HOME_IP]"; exit 2; }
+  WORLD="$1"; HOME_IP="${2:-}"; roles_of "$WORLD"
+  if grep -q '"fwd_port"' "$ROLES" && [[ -z $HOME_IP ]]; then
+    echo "$WORLD has forwarded ports: give the laptop's public address, run_far.sh up $WORLD HOME_IP"
+    exit 2
+  fi
   TOPO="$SUITE/topologies/$WORLD-server.json"
   [[ -f $TOPO ]] || { echo "no $TOPO: $WORLD has no far communities"; exit 1; }
   [[ -n ${QAUL_ROUTING_V2:-} ]] || { echo "QAUL_ROUTING_V2 is not set"; exit 1; }
@@ -111,9 +137,15 @@ EOF
   mapfile -t FAR < <(far_args | tr ' ' '\n')
   ./wire.py bringup --roles "$ROLES" --hybrid --side server "${FAR[@]}" || exit 1
 
-  step "host links for the nodes that dial S1 or r1"
+  step "host links for the nodes that dial S1 or r1, or that the laptop dials"
   # shellcheck disable=SC2046
   "$SUITE/hostlink.sh" up $(hostlink_ids) || exit 1
+  if [[ -n $HOME_IP ]] && grep -q '"fwd_port"' "$ROLES"; then
+    step "forwarded ports, from $HOME_IP only"
+    mapfile -t SPECS < <(forward_specs)
+    [[ ${#SPECS[@]} -gt 0 ]] || { echo "could not read the forwarded nodes' ports"; exit 1; }
+    "$SUITE/hostlink.sh" forward "$HOME_IP" "${SPECS[@]}" || exit 1
+  fi
   echo
   echo "up. Now start S1 and r1 on the host (S1 --port 9229, r1 --port 9230,"
   echo "LAN off on both), then: run_far.sh dial $WORLD <S1's qauld.sock>"

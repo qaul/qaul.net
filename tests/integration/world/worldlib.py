@@ -84,8 +84,10 @@ def parse_far(roles: dict, specs: list[str] | None, side: str = "laptop") -> dic
         if not sep or not addr:
             raise SystemExit(f"--far wants NAME=MULTIADDR, got '{spec}'")
         nid = roles["by_name"].get(nm)
-        if nid is None or not on_host(roles["nodes"][nid]):
-            raise SystemExit(f"--far {nm}: not a node on the server's host in {roles['name']}")
+        meta = roles["nodes"].get(nid) if nid else None
+        if meta is None or not (on_host(meta) or "fwd_port" in meta):
+            raise SystemExit(f"--far {nm}: not a node the laptop can dial on the server "
+                             f"in {roles['name']}")
         out[nid] = addr
     lab = set(lab_nodes(roles, True, side))
     needed = {l["target"] for l in roles["internet_links"]
@@ -100,20 +102,26 @@ def infer_far_peers(roles: dict, neighbours: dict, by_peer: dict) -> dict[str, s
     """far node id -> the peer id its lab dialers see it as.
 
     A far node gets a fresh identity every run and the lab cannot ask it, so
-    its id is read off the lab side: each Internet neighbour of a far link's
-    lab dialer that is not a lab node votes for that link's far target, and
-    the most voted id wins. With one far target (S1), every far gateway must
-    see the same id; any other unknown neighbour shows up as an unplanned link.
+    its id is read off the lab side: a lab node with exactly one Internet link
+    leaving the lab votes, with each of its neighbours that is not a lab node,
+    for that link's other end, and the most voted id wins. A node with several
+    links leaving the lab (ring-2's shortcuts) can't tell which is which, so it
+    doesn't vote; wire.verify checks those links by count instead.
     """
     from collections import Counter
-    votes: dict[str, Counter] = {}
+    leaving: dict[str, list[str]] = {}
     for link in roles["internet_links"]:
         d, t = link["dialer"], link["target"]
-        if not (link["far"] or on_host(roles["nodes"][t])) or d not in neighbours:
+        if (d in neighbours) != (t in neighbours):
+            here, there = (d, t) if d in neighbours else (t, d)
+            leaving.setdefault(here, []).append(there)
+    votes: dict[str, Counter] = {}
+    for here, there in leaving.items():
+        if len(there) != 1:
             continue
-        for n in neighbours[d].get("internet") or []:
+        for n in neighbours[here].get("internet") or []:
             if n["node_id"] not in by_peer:
-                votes.setdefault(t, Counter())[n["node_id"]] += 1
+                votes.setdefault(there[0], Counter())[n["node_id"]] += 1
     return {t: c.most_common(1)[0][0] for t, c in votes.items()}
 
 

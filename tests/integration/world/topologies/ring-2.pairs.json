@@ -1,0 +1,326 @@
+{
+ "from": "runs/ring-1-hybrid-v2-20261124T173956Z/results/traffic-ring-1-hybrid-v2.json",
+ "note": "ring-1's 20 pairs by node id, reused so ring-2 is measured on the same people; anyone who is a gateway in ring-2 is swapped for a member of the same village",
+ "pairs": [
+  {
+   "sender": "002e",
+   "recipient": "003c",
+   "ring1_names": [
+    "B.05",
+    "B.19"
+   ],
+   "distance": 0,
+   "kind": "laptop->laptop",
+   "ring_path": [
+    "B1"
+   ]
+  },
+  {
+   "sender": "00b6",
+   "recipient": "00b3",
+   "ring1_names": [
+    "F.33",
+    "F.30"
+   ],
+   "distance": 0,
+   "kind": "server->server",
+   "ring_path": [
+    "F1"
+   ]
+  },
+  {
+   "sender": "008f",
+   "recipient": "0070",
+   "ring1_names": [
+    "E.14",
+    "D.07"
+   ],
+   "distance": 1,
+   "kind": "laptop->laptop",
+   "ring_path": [
+    "E1",
+    "D1"
+   ]
+  },
+  {
+   "sender": "00de",
+   "recipient": "0097",
+   "ring1_names": [
+    "G.33",
+    "F.02"
+   ],
+   "distance": 1,
+   "kind": "server->server",
+   "ring_path": [
+    "G1",
+    "F1"
+   ]
+  },
+  {
+   "sender": "005a",
+   "recipient": "0082",
+   "ring1_names": [
+    "C.15",
+    "E.01"
+   ],
+   "distance": 2,
+   "kind": "laptop->laptop",
+   "ring_path": [
+    "C1",
+    "D1",
+    "E1"
+   ]
+  },
+  {
+   "sender": "008b",
+   "recipient": "00a4",
+   "ring1_names": [
+    "E.10",
+    "F.15"
+   ],
+   "distance": 2,
+   "kind": "laptop->server",
+   "ring_path": [
+    "E1",
+    "S1",
+    "F1"
+   ]
+  },
+  {
+   "sender": "00aa",
+   "recipient": "0082",
+   "ring1_names": [
+    "F.21",
+    "E.01"
+   ],
+   "distance": 2,
+   "kind": "server->laptop",
+   "ring_path": [
+    "F1",
+    "S1",
+    "E1"
+   ]
+  },
+  {
+   "sender": "0097",
+   "recipient": "00f5",
+   "ring1_names": [
+    "F.02",
+    "H.22"
+   ],
+   "distance": 2,
+   "kind": "server->server",
+   "ring_path": [
+    "F1",
+    "G1",
+    "H1"
+   ]
+  },
+  {
+   "sender": "001b",
+   "recipient": "0080",
+   "ring1_names": [
+    "A.26",
+    "D.23"
+   ],
+   "distance": 3,
+   "kind": "laptop->laptop",
+   "ring_path": [
+    "A1",
+    "B1",
+    "C1",
+    "D1"
+   ]
+  },
+  {
+   "sender": "0046",
+   "recipient": "0116",
+   "ring1_names": [
+    "B.29",
+    "J.01"
+   ],
+   "distance": 3,
+   "kind": "laptop->server",
+   "ring_path": [
+    "B1",
+    "A1",
+    "r1",
+    "J1"
+   ]
+  },
+  {
+   "sender": "00db",
+   "recipient": "0092",
+   "ring1_names": [
+    "G.30",
+    "E.17"
+   ],
+   "distance": 3,
+   "kind": "server->laptop",
+   "ring_path": [
+    "G1",
+    "F1",
+    "S1",
+    "E1"
+   ]
+  },
+  {
+   "sender": "00d5",
+   "recipient": "011e",
+   "ring1_names": [
+    "G.24",
+    "J.09"
+   ],
+   "distance": 3,
+   "kind": "server->server",
+   "ring_path": [
+    "G1",
+    "H1",
+    "I1",
+    "J1"
+   ]
+  },
+  {
+   "sender": "0020",
+   "recipient": "008c",
+   "ring1_names": [
+    "A.31",
+    "E.11"
+   ],
+   "distance": 4,
+   "kind": "laptop->laptop",
+   "ring_path": [
+    "A1",
+    "B1",
+    "C1",
+    "D1",
+    "E1"
+   ]
+  },
+  {
+   "sender": "001d",
+   "recipient": "00fb",
+   "ring1_names": [
+    "A.28",
+    "H.28"
+   ],
+   "distance": 4,
+   "kind": "laptop->server",
+   "ring_path": [
+    "A1",
+    "r1",
+    "J1",
+    "I1",
+    "H1"
+   ]
+  },
+  {
+   "sender": "0113",
+   "recipient": "0030",
+   "ring1_names": [
+    "I.22",
+    "B.07"
+   ],
+   "distance": 4,
+   "kind": "server->laptop",
+   "ring_path": [
+    "I1",
+    "J1",
+    "r1",
+    "A1",
+    "B1"
+   ]
+  },
+  {
+   "sender": "00a8",
+   "recipient": "011a",
+   "ring1_names": [
+    "F.19",
+    "J.05"
+   ],
+   "distance": 4,
+   "kind": "server->server",
+   "ring_path": [
+    "F1",
+    "G1",
+    "H1",
+    "I1",
+    "J1"
+   ]
+  },
+  {
+   "sender": "0081",
+   "recipient": "00f1",
+   "ring1_names": [
+    "D.24",
+    "H.18"
+   ],
+   "distance": 5,
+   "kind": "laptop->server",
+   "ring_path": [
+    "D1",
+    "E1",
+    "S1",
+    "F1",
+    "G1",
+    "H1"
+   ]
+  },
+  {
+   "sender": "010f",
+   "recipient": "0089",
+   "ring1_names": [
+    "I.18",
+    "E.08"
+   ],
+   "distance": 5,
+   "kind": "server->laptop",
+   "ring_path": [
+    "I1",
+    "H1",
+    "G1",
+    "F1",
+    "S1",
+    "E1"
+   ]
+  },
+  {
+   "sender": "0056",
+   "recipient": "00f3",
+   "ring1_names": [
+    "C.11",
+    "H.20"
+   ],
+   "distance": 6,
+   "kind": "laptop->server",
+   "ring_path": [
+    "C1",
+    "B1",
+    "A1",
+    "r1",
+    "J1",
+    "I1",
+    "H1"
+   ]
+  },
+  {
+   "sender": "010f",
+   "recipient": "0076",
+   "ring1_names": [
+    "I.18",
+    "D.13"
+   ],
+   "distance": 6,
+   "kind": "server->laptop",
+   "ring_path": [
+    "I1",
+    "H1",
+    "G1",
+    "F1",
+    "S1",
+    "E1",
+    "D1"
+   ]
+  }
+ ]
+}

@@ -79,6 +79,11 @@ def link_rtts(roles, neighbours, ids, far_peers=None) -> list[dict]:
         if d not in neighbours and t not in neighbours:
             rows.append({**row, "up": None, "rtt_us": {}, "seen": "not visible from this lab"})
             continue
+        outside = t if d in neighbours else d
+        if outside not in neighbours and outside not in peer_of:
+            rows.append({**row, "up": None, "rtt_us": {},
+                         "seen": "leaves this lab; checked by count, the far end not named"})
+            continue
         rtt = {}
         for here, there in ((d, t), (t, d)):
             if here not in neighbours or there not in peer_of:
@@ -270,7 +275,7 @@ def main() -> None:
     result["links"] = rtts
     for r in rtts:
         if r["up"] is None:
-            rtt = "not visible from this lab"
+            rtt = r.get("seen", "not visible from this lab")
         else:
             rtt = ", ".join(f"{k} {v}us" for k, v in r["rtt_us"].items()) or "down"
         print(f"  {r['link']:<10} {'far ' if r['far'] else 'near'}  {rtt}")

@@ -134,7 +134,7 @@ for l in r["internet_links"]:
     if l["dialer"] in lab and t not in lab and t not in seen:
         seen.add(t)
         m = r["nodes"][t]
-        addr = sys.argv[3] if m["name"] == "S1" else f"/ip4/{sys.argv[2]}/udp/{m.get('"'"'port'"'"', 9229)}/quic-v1"
+        addr = sys.argv[3] if m["name"] == "S1" else f"/ip4/{sys.argv[2]}/udp/{m.get('"'"'fwd_port'"'"') or m.get('"'"'port'"'"', 9229)}/quic-v1"
         print("--far")
         print(f"{m['"'"'name'"'"']}={addr}")
 ' "$ROLES" "$SERVER_IP" "$FAR_ADDR")

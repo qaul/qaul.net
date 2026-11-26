@@ -163,6 +163,42 @@ def choose_pairs(roles: dict, rng: random.Random) -> list[dict]:
     return pairs
 
 
+def load_pairs(roles: dict, path: str, rng: random.Random) -> list[dict]:
+    """Pairs from a file (topologies/<world>.pairs.json), by node id, so a
+    world can be measured on the same people as another one (ring-2 on
+    ring-1's pairs). Anyone who is not a member here, because they became a
+    gateway, is swapped for a random member of the same village."""
+    with open(path) as f:
+        spec = json.load(f)
+    members = {c["name"]: [m for m in c["members"] if roles["nodes"][m]["role"] == "member"]
+               for c in roles["communities"]}
+    gws = {c["name"]: c["gateways"] for c in roles["communities"]}
+    out = []
+    for q in spec["pairs"]:
+        ids, swapped = [], []
+        for x in (q["sender"], q["recipient"]):
+            if roles["nodes"][x]["role"] != "member":
+                c = roles["nodes"][x]["community"]
+                new = rng.choice([m for m in members[c] if m not in ids])
+                swapped.append(f"{name(roles, x)} is a gateway here; {name(roles, new)} instead")
+                x = new
+            ids.append(x)
+        s, r = ids
+        cs, cr = roles["nodes"][s]["community"], roles["nodes"][r]["community"]
+        hops = [len(p) - 1 for a in gws[cs] for b in gws[cr]
+                if (p := ([a] if a == b else internet_path(roles, a, b)))]
+        out.append({
+            "sender": s, "recipient": r,
+            "sender_name": name(roles, s), "recipient_name": name(roles, r),
+            "class": f"{q['distance']} hop{'s' if q['distance'] != 1 else ''}",
+            "distance": q["distance"], "kind": q["kind"], "path": q["ring_path"],
+            "shortest_now": min(hops) if hops else None,
+            "either_way": False,
+            "swapped": swapped,
+        })
+    return out
+
+
 def stats(xs):
     xs = sorted(x for x in xs if x is not None)
     if not xs:
@@ -187,6 +223,8 @@ def main() -> None:
                     help="seconds to wait for the server's check before sending: an invite "
                          "would otherwise show up in its containment test (default 900)")
     ap.add_argument("--seed", type=int, default=1)
+    ap.add_argument("--pairs", help="pairs by node id (default: topologies/<world>.pairs.json "
+                                    "if it exists, else chosen by ring distance)")
     ap.add_argument("--json")
     args = ap.parse_args()
     args.island_timeout = args.timeout  # run_pair reads it; no island on a ring
@@ -196,7 +234,17 @@ def main() -> None:
     laptop = set(lab_nodes(roles, True, "laptop"))
     server = set(lab_nodes(roles, True, "server"))
     rng = random.Random(args.seed)
-    pairs = choose_pairs(roles, rng)
+    default_pairs = os.path.join(os.path.dirname(os.path.abspath(args.roles)),
+                                 f"{roles['name']}.pairs.json")
+    pairs_file = args.pairs or (default_pairs if os.path.exists(default_pairs) else None)
+    if pairs_file:
+        pairs = load_pairs(roles, pairs_file, rng)
+        print(f"pairs from {pairs_file}")
+        for p in pairs:
+            for note in p["swapped"]:
+                print(f"  {note}")
+    else:
+        pairs = choose_pairs(roles, rng)
 
     remote = Remote(args.remote, args.remote_dir,
                     "../world/topologies/" + os.path.basename(args.roles))
@@ -225,7 +273,8 @@ def main() -> None:
         for i, p in enumerate(pairs):
             print(f"  {i:2d} {p['class']:<7} {p['kind']:<15} {p['sender_name']:>5} -> "
                   f"{p['recipient_name']:<5} {' - '.join(p['path'])}"
-                  f"{'  (either way round)' if p['either_way'] else ''}")
+                  f"{'  (either way round)' if p['either_way'] else ''}"
+                  f"{'  (' + str(p['shortest_now']) + ' hops with shortcuts)' if p.get('shortest_now') not in (None, p['distance']) else ''}")
 
         def make_node(nid):
             return RemoteNode(remote, nid) if nid in server else Node(nid)

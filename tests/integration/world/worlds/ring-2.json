@@ -1,0 +1,304 @@
+{
+ "name": "ring-2",
+ "seed": 2,
+ "description": "Ten villages whose gateways form one ring over the Internet, half on the laptop and half on test.qaul.net; the ring crosses the real Internet at S1 and r1. Extra gateways with 27 random shortcuts (make_ring.py --gateways auto --extra 1-2 --seed 7). See tests/integration/REPORT-ring-world.md.",
+ "servers": [
+  {
+   "name": "S1",
+   "location": "far",
+   "port": 9229,
+   "stands_in_for": "a server on the ring, where it crosses to the laptop"
+  }
+ ],
+ "server_links": [],
+ "communities": [
+  {
+   "name": "A",
+   "members": 40,
+   "situation": "laptop",
+   "gateways": [
+    {
+     "name": "A1",
+     "place": "edge",
+     "peers": [
+      "r1"
+     ]
+    },
+    {
+     "name": "A2",
+     "place": "edge",
+     "peers": [
+      "F4",
+      "H3"
+     ]
+    },
+    {
+     "name": "A3",
+     "place": "edge",
+     "peers": [
+      "C1",
+      "F3"
+     ]
+    },
+    {
+     "name": "A4",
+     "place": "edge",
+     "peers": [
+      "I1",
+      "F2"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "B",
+   "members": 34,
+   "situation": "laptop",
+   "gateways": [
+    {
+     "name": "B1",
+     "place": "edge",
+     "peers": [
+      "A1"
+     ]
+    },
+    {
+     "name": "B2",
+     "place": "edge",
+     "peers": [
+      "F2",
+      "J1",
+      "J2"
+     ]
+    },
+    {
+     "name": "B3",
+     "place": "edge",
+     "peers": [
+      "C1",
+      "C3"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "C",
+   "members": 30,
+   "situation": "laptop",
+   "gateways": [
+    {
+     "name": "C1",
+     "place": "edge",
+     "peers": [
+      "B1"
+     ]
+    },
+    {
+     "name": "C2",
+     "place": "edge",
+     "peers": [
+      "D1",
+      "I2"
+     ]
+    },
+    {
+     "name": "C3",
+     "place": "edge",
+     "peers": [
+      "F1",
+      "G2",
+      "H2"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "D",
+   "members": 24,
+   "situation": "laptop",
+   "gateways": [
+    {
+     "name": "D1",
+     "place": "edge",
+     "peers": [
+      "C1"
+     ]
+    },
+    {
+     "name": "D2",
+     "place": "edge",
+     "peers": [
+      "G3",
+      "C2",
+      "I2"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "E",
+   "members": 20,
+   "situation": "laptop",
+   "gateways": [
+    {
+     "name": "E1",
+     "place": "edge",
+     "peers": [
+      "D1",
+      "S1"
+     ]
+    },
+    {
+     "name": "E2",
+     "place": "edge",
+     "peers": [
+      "D2",
+      "G3"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "F",
+   "members": 40,
+   "location": "far",
+   "situation": "server",
+   "gateways": [
+    {
+     "name": "F1",
+     "place": "edge",
+     "peers": [
+      "S1"
+     ]
+    },
+    {
+     "name": "F2",
+     "place": "edge",
+     "peers": [
+      "G2"
+     ]
+    },
+    {
+     "name": "F3",
+     "place": "edge",
+     "peers": []
+    },
+    {
+     "name": "F4",
+     "place": "edge",
+     "peers": [
+      "G3",
+      "G1"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "G",
+   "members": 34,
+   "location": "far",
+   "situation": "server",
+   "gateways": [
+    {
+     "name": "G1",
+     "place": "edge",
+     "peers": [
+      "F1"
+     ]
+    },
+    {
+     "name": "G2",
+     "place": "edge",
+     "peers": [
+      "F1"
+     ]
+    },
+    {
+     "name": "G3",
+     "place": "edge",
+     "peers": []
+    }
+   ]
+  },
+  {
+   "name": "H",
+   "members": 30,
+   "location": "far",
+   "situation": "server",
+   "gateways": [
+    {
+     "name": "H1",
+     "place": "edge",
+     "peers": [
+      "G1"
+     ]
+    },
+    {
+     "name": "H2",
+     "place": "edge",
+     "peers": []
+    },
+    {
+     "name": "H3",
+     "place": "edge",
+     "peers": [
+      "F2"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "I",
+   "members": 24,
+   "location": "far",
+   "situation": "server",
+   "gateways": [
+    {
+     "name": "I1",
+     "place": "edge",
+     "peers": [
+      "H1"
+     ]
+    },
+    {
+     "name": "I2",
+     "place": "edge",
+     "peers": [
+      "J2"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "J",
+   "members": 18,
+   "location": "far",
+   "situation": "server",
+   "gateways": [
+    {
+     "name": "J1",
+     "place": "edge",
+     "peers": [
+      "I1",
+      "r1"
+     ]
+    },
+    {
+     "name": "J2",
+     "place": "edge",
+     "peers": []
+    }
+   ]
+  }
+ ],
+ "radio_bridges": [],
+ "remote_users": [
+  {
+   "name": "r1",
+   "location": "far",
+   "port": 9230,
+   "peers": [],
+   "situation": "a user on the server, on the ring where it crosses back to the laptop"
+  }
+ ]
+}
