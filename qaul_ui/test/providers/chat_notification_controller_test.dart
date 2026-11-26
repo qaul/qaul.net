@@ -68,6 +68,29 @@ void main() {
   tearDown(() => container.dispose());
 
   group('ChatNotificationController cache vs unreadCount', () {
+    test('initialization is idempotent', () async {
+      final worker = _CountingWorker();
+      final testContainer = ProviderContainer(
+        overrides: [
+          defaultUserProvider.overrideWith(
+            (_) => User(name: 'Local', id: localUserId),
+          ),
+          qaulWorkerProvider.overrideWithValue(worker),
+        ],
+      );
+      addTearDown(testContainer.dispose);
+
+      final testController = testContainer.read(
+        chatNotificationControllerProvider,
+      );
+      await Future.wait([
+        testController.initialize(),
+        testController.initialize(),
+      ]);
+
+      expect(worker.getAllChatRoomsCalls, 1);
+    });
+
     test('after reading messages (unreadCount drops to 0), '
         'a new message (unreadCount back to 1) is detected', () {
       // 1. New room arrives with unreadCount: 1 — should be detected.
@@ -213,7 +236,9 @@ void main() {
     });
 
     test('new group invite does not increment counter on chat tab', () {
-      container.read(homeScreenControllerProvider.notifier).goToTab(TabType.chat);
+      container
+          .read(homeScreenControllerProvider.notifier)
+          .goToTab(TabType.chat);
 
       container.read(groupInvitesProvider.notifier).add(makeInvite());
 
@@ -234,6 +259,16 @@ class _StubWorker implements LibqaulWorker {
   @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName} not stubbed');
+}
+
+class _CountingWorker extends _StubWorker {
+  int getAllChatRoomsCalls = 0;
+
+  @override
+  Future<PaginatedChatRooms?> getAllChatRooms({int? offset, int? limit}) async {
+    getAllChatRoomsCalls++;
+    return super.getAllChatRooms(offset: offset, limit: limit);
+  }
 }
 
 class _FakePathProvider extends Fake
