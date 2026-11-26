@@ -9,6 +9,7 @@ export 'design_components/auth/qaul_auth_segmented_list.dart';
 export 'design_components/auth/qaul_auth_tokens.dart';
 export 'design_components/auth/qaul_auth_welcome_section.dart';
 export 'design_components/chat/chat_footer/chat_footer.dart';
+export 'design_components/chat/chat_footer/chat_footer_preview.dart';
 export 'design_components/chat/chat_footer/chat_footer_reply_preview.dart';
 export 'design_components/chat/chat_header.dart';
 export 'design_components/chat/chat_mentions.dart';

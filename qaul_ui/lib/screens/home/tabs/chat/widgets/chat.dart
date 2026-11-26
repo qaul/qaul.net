@@ -55,8 +55,6 @@ part 'custom_input.dart';
 
 part 'file_message_widget.dart';
 
-part 'file_sharing.dart';
-
 part 'group_settings.dart';
 
 part 'forward_recipient_selector.dart';
@@ -98,6 +96,18 @@ class ForwardAttachment {
   final String? description;
 }
 
+class _PendingFilePreview {
+  const _PendingFilePreview({
+    required this.file,
+    required this.displayName,
+    required this.sizeLabel,
+  });
+
+  final File file;
+  final String displayName;
+  final String sizeLabel;
+}
+
 class _ForwardDraft {
   const _ForwardDraft({required this.roomIdBase58, required this.text});
 
@@ -105,15 +115,10 @@ class _ForwardDraft {
   final String text;
 }
 
-final _pendingForwardDraftProvider = StateProvider<_ForwardDraft?>(
-  (_) => null,
-);
+final _pendingForwardDraftProvider = StateProvider<_ForwardDraft?>((_) => null);
 
 class _ForwardRecipientSelection {
-  const _ForwardRecipientSelection({
-    required this.room,
-    this.attachment,
-  });
+  const _ForwardRecipientSelection({required this.room, this.attachment});
 
   final ChatRoom room;
   final ForwardAttachment? attachment;
@@ -296,6 +301,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   Map<String, Message> _domainMessagesById = {};
   ChatRenderMode _chatRenderMode = ChatRenderMode.direct;
   String? _initialComposerText;
+  _PendingFilePreview? _pendingFilePreview;
   String? _activeRoomIdBase58;
   String? _forwardDraftRoomIdBase58;
   String? _selectedContextMenuMessageId;
@@ -398,16 +404,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                       setState(() => _selectedContextMenuMessageId = null);
                       _openForwardRecipientSelector(text: text);
                     },
-                    onCopy: () => _copyMessage(
-                      dialogContext,
-                      messageContext,
-                      text,
-                    ),
-                    onShare: () => _shareMessage(
-                      dialogContext,
-                      messageContext,
-                      text,
-                    ),
+                    onCopy: () =>
+                        _copyMessage(dialogContext, messageContext, text),
+                    onShare: () =>
+                        _shareMessage(dialogContext, messageContext, text),
                     onInfo: messageInfo == null
                         ? null
                         : () => _openMessageInfo(
@@ -576,8 +576,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     if (_forwardDraftRoomIdBase58 == room.idBase58) return;
 
     _initialComposerText = widget.initialMessageText;
-    _forwardDraftRoomIdBase58 =
-        widget.initialMessageText == null ? null : room.idBase58;
+    _forwardDraftRoomIdBase58 = widget.initialMessageText == null
+        ? null
+        : room.idBase58;
   }
 
   void _showForwardedAttachmentDraft(
@@ -589,9 +590,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       _log.warning('Could not forward an attachment that is not local');
       return;
     }
-    _openSendFileDialog(
+    _showFilePreview(
       file,
-      room,
       displayName: attachment.name,
       initialDescription: attachment.description,
     );
@@ -619,42 +619,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     );
   }
 
-  void _openSendFileDialog(
-    File file,
-    ChatRoom room, {
+  void _showFilePreview(
+    File file, {
     String? displayName,
     String? initialDescription,
   }) {
-    showModalBottomSheet(
-      context: context,
-      useSafeArea: true,
-      isScrollControlled: true,
-      builder: (context) {
-        final dialog = _SendFileDialog(
-          file,
-          room: room,
-          displayName: displayName,
-          initialDescription: initialDescription,
-          onSendPressed: (description) {
-            final worker = ref.read(qaulWorkerProvider);
-            worker.sendFile(
-              pathName: file.path,
-              conversationId: room.conversationId,
-              description: description.text,
-            );
-          },
-        );
-        if (!Platform.isIOS) return dialog;
+    if (!file.existsSync()) {
+      _log.warning('Could not preview an attachment that is not local');
+      return;
+    }
 
-        final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
-        return SingleChildScrollView(
-          child: Container(
-            padding: EdgeInsets.only(bottom: bottomPadding),
-            child: dialog,
-          ),
-        );
-      },
-    );
+    setState(() {
+      _pendingFilePreview = _PendingFilePreview(
+        file: file,
+        displayName: displayName ?? basename(file.path),
+        sizeLabel: fileSize(file.lengthSync()),
+      );
+      _initialComposerText = initialDescription;
+    });
+  }
+
+  void _dismissFilePreview() {
+    setState(() {
+      _pendingFilePreview = null;
+      _initialComposerText = null;
+    });
   }
 
   Future<void> _openPhotoPicker(ChatRoom room) async {
@@ -675,13 +664,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     }
 
     if (file == null || !mounted) return;
-    _openSendFileDialog(file, room);
+    _showFilePreview(file);
   }
 
   Future<void> _openAttachmentPicker(ChatRoom room) async {
     final result = await FilePicker.platform.pickFiles();
     if (result?.files.single.path == null || !mounted) return;
-    _openSendFileDialog(File(result!.files.single.path!), room);
+    _showFilePreview(File(result!.files.single.path!));
   }
 
   void _openAudioRecorder(ChatRoom room) {
@@ -842,11 +831,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
   /// The long-pressed context is the full-width message row, so anchor to
   /// the bubble inside it; fall back to the row if there is none.
-  Rect? _messageRectInOverlay(BuildContext messageContext) =>
-      _rectInOverlay(
-        _bubbleRenderObject(messageContext) ??
-            messageContext.findRenderObject(),
-      );
+  Rect? _messageRectInOverlay(BuildContext messageContext) => _rectInOverlay(
+    _bubbleRenderObject(messageContext) ?? messageContext.findRenderObject(),
+  );
 
   RenderObject? _bubbleRenderObject(BuildContext messageContext) {
     RenderObject? bubble;
@@ -884,8 +871,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     if (overlayBox == null || !overlayBox.hasSize) return null;
 
     final screenRect = Offset.zero & overlayBox.size;
-    final visibleRect =
-        _messageRectInOverlay(messageContext)?.intersect(screenRect);
+    final visibleRect = _messageRectInOverlay(
+      messageContext,
+    )?.intersect(screenRect);
     if (visibleRect != null &&
         visibleRect.width > 0 &&
         visibleRect.height > 0) {
@@ -1092,6 +1080,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     if (_activeRoomIdBase58 != room.idBase58) {
       _invalidateCopyFeedback();
       _activeRoomIdBase58 = room.idBase58;
+      _pendingFilePreview = null;
       _consumeForwardDraft(room);
     }
 
@@ -1114,11 +1103,23 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
     final sendMessage = useCallback((types.PartialText msg) {
       if (!mounted) return;
-      _initialComposerText = null;
-      _forwardDraftRoomIdBase58 = null;
+      final filePreview = _pendingFilePreview;
+      setState(() {
+        _initialComposerText = null;
+        _forwardDraftRoomIdBase58 = null;
+        _pendingFilePreview = null;
+      });
       final worker = ref.read(qaulWorkerProvider);
-      worker.sendMessage(room.conversationId, msg.text);
-    }, [room]);
+      if (filePreview != null) {
+        worker.sendFile(
+          pathName: filePreview.file.path,
+          conversationId: room.conversationId,
+          description: msg.text,
+        );
+      } else {
+        worker.sendMessage(room.conversationId, msg.text);
+      }
+    }, [room, _pendingFilePreview]);
 
     final l10n = AppLocalizations.of(context)!;
     final directPeer = _directChatPeer(room);
@@ -1179,20 +1180,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                         child, {
                         required message,
                         required nextMessageInGroup,
-                      }) =>
-                          _bubbleBuilder(
-                            child,
-                            message: message,
-                            nextMessageInGroup: nextMessageInGroup,
-                            followsDateHeader: _messageFollowsDateHeader(
-                              message,
-                              chatMessages,
-                            ),
-                          ),
+                      }) => _bubbleBuilder(
+                        child,
+                        message: message,
+                        nextMessageInGroup: nextMessageInGroup,
+                        followsDateHeader: _messageFollowsDateHeader(
+                          message,
+                          chatMessages,
+                        ),
+                      ),
                   systemMessageBuilder: _buildSystemMessage,
                   customBottomWidget: _ChatTextFooter(
                     key: ValueKey(
-                      '${room.idBase58}:${_initialComposerText ?? ''}',
+                      '${room.idBase58}:${_pendingFilePreview?.file.path ?? ''}:${_initialComposerText ?? ''}',
                     ),
                     isDisabled: room.status != ChatRoomStatus.active,
                     disabledMessage:
@@ -1219,6 +1219,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                           ]
                         : const [],
                     initialText: _initialComposerText,
+                    preview: _pendingFilePreview == null
+                        ? null
+                        : ChatFooterPreviewData(
+                            title: _pendingFilePreview!.displayName,
+                            content: _pendingFilePreview!.sizeLabel,
+                            leading: const Icon(
+                              Icons.insert_drive_file_outlined,
+                              size: 24,
+                            ),
+                          ),
+                    onDismissPreview: _pendingFilePreview == null
+                        ? null
+                        : _dismissFilePreview,
+                    allowEmptySend: _pendingFilePreview != null,
                     onSendPressed: sendMessage,
                     onSendAudioPressed: Platform.isLinux
                         ? null
@@ -1352,8 +1366,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     List<types.Message> chatMessages,
   ) {
     final messageIndex = chatMessages.indexWhere(
-      (message) =>
-          message.createdAt == date.millisecondsSinceEpoch,
+      (message) => message.createdAt == date.millisecondsSinceEpoch,
     );
     if (messageIndex == -1) {
       return const EdgeInsets.symmetric(vertical: 12);
@@ -1376,10 +1389,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     // A date header follows a package-generated spacer only when the author
     // changes (or the gap exceeds the grouping threshold). Compensate for
     // that spacer so the visible gap to the previous bubble is always 12px.
-    return EdgeInsets.only(
-      top: hasPreviousMessageSpacer ? 0 : 12,
-      bottom: 12,
-    );
+    return EdgeInsets.only(top: hasPreviousMessageSpacer ? 0 : 12, bottom: 12);
   }
 
   List<types.Message>? messages(
@@ -1522,9 +1532,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     final previousMessage = chatMessages[messageIndex + 1];
     if (previousMessage.createdAt == null) return false;
 
-    final messageDate = DateTime.fromMillisecondsSinceEpoch(
-      message.createdAt!,
-    );
+    final messageDate = DateTime.fromMillisecondsSinceEpoch(message.createdAt!);
     final previousDate = DateTime.fromMillisecondsSinceEpoch(
       previousMessage.createdAt!,
     );

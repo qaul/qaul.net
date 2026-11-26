@@ -16,6 +16,9 @@ class _ChatTextFooter extends StatefulWidget {
     this.onAttachmentPressed,
     this.onPickImagePressed,
     this.onSendAudioPressed,
+    this.preview,
+    this.onDismissPreview,
+    this.allowEmptySend = false,
     this.mentionSuggestions = const [],
     this.initialText,
     this.disabledMessage,
@@ -26,6 +29,9 @@ class _ChatTextFooter extends StatefulWidget {
   final VoidCallback? onAttachmentPressed;
   final VoidCallback? onPickImagePressed;
   final VoidCallback? onSendAudioPressed;
+  final ChatFooterPreviewData? preview;
+  final VoidCallback? onDismissPreview;
+  final bool allowEmptySend;
   final List<ChatMentionSuggestion> mentionSuggestions;
   final String? initialText;
   final bool isDisabled;
@@ -112,9 +118,7 @@ class _ChatTextFooterState extends State<_ChatTextFooter> {
       final character = text[index];
       if (character == '@') {
         final validPrefix = index == 0 || _isMentionBoundary(text[index - 1]);
-        return validPrefix
-            ? _ActiveMention(start: index, end: cursor)
-            : null;
+        return validPrefix ? _ActiveMention(start: index, end: cursor) : null;
       }
       if (_isMentionBoundary(character)) return null;
       index -= 1;
@@ -185,6 +189,9 @@ class _ChatTextFooterState extends State<_ChatTextFooter> {
       controller: _textController,
       placeholder: widget.hintText,
       onSend: _handleSend,
+      preview: widget.preview,
+      onDismissPreview: widget.onDismissPreview,
+      allowEmptySend: widget.allowEmptySend,
       onVoicePressed: widget.isDisabled ? null : widget.onSendAudioPressed,
       onCameraPressed: widget.isDisabled ? null : widget.onPickImagePressed,
       onAttachmentPressed: widget.isDisabled
@@ -278,149 +285,6 @@ class _ActiveMention {
 }
 
 bool _isMentionBoundary(String value) => RegExp(r'\s').hasMatch(value);
-
-/// The original [Input] class from flutter_chat_ui provided no customization for
-/// the spacing of the Send button spacing.
-///
-/// A hard-coded value made so it was not aligned when the app is in a RTL language.
-class _CustomInput extends StatefulWidget {
-  /// Creates [_CustomInput] widget
-  const _CustomInput({
-    required this.onSendPressed,
-    required this.sendButtonVisibilityMode,
-    required this.hintText,
-    this.isTextRequired = true,
-    this.initialText,
-  });
-
-  final void Function(types.PartialText) onSendPressed;
-
-  final SendButtonVisibilityMode sendButtonVisibilityMode;
-
-  final String hintText;
-
-  final bool isTextRequired;
-  final String? initialText;
-
-  @override
-  _CustomInputState createState() => _CustomInputState();
-}
-
-/// [_CustomInput] widget state
-class _CustomInputState extends State<_CustomInput> {
-  final _inputFocusNode = FocusNode();
-  bool _sendButtonVisible = false;
-  late final TextEditingController _textController;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _textController = TextEditingController(text: widget.initialText);
-
-    if (widget.sendButtonVisibilityMode == SendButtonVisibilityMode.editing) {
-      _sendButtonVisible = _textController.text.trim() != '';
-      _textController.addListener(_handleTextControllerChange);
-    } else {
-      _sendButtonVisible = true;
-    }
-  }
-
-  @override
-  void dispose() {
-    _inputFocusNode.dispose();
-    _textController.dispose();
-    super.dispose();
-  }
-
-  void _handleSendPressed() {
-    final trimmedText = _textController.text.trim();
-    if (trimmedText != '' || !widget.isTextRequired) {
-      final partialText = types.PartialText(text: trimmedText);
-      widget.onSendPressed(partialText);
-      _textController.clear();
-    }
-  }
-
-  void _handleTextControllerChange() {
-    setState(() {
-      _sendButtonVisible = _textController.text.trim() != '';
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final query = MediaQuery.of(context);
-
-    return GestureDetector(
-      onTap: () => _inputFocusNode.requestFocus(),
-      child: Shortcuts(
-        shortcuts: {
-          LogicalKeySet(LogicalKeyboardKey.enter): const SendMessageIntent(),
-          LogicalKeySet(LogicalKeyboardKey.enter, LogicalKeyboardKey.alt):
-              const NewLineIntent(),
-          LogicalKeySet(LogicalKeyboardKey.enter, LogicalKeyboardKey.shift):
-              const NewLineIntent(),
-        },
-        child: Actions(
-          actions: {
-            SendMessageIntent: CallbackAction<SendMessageIntent>(
-              onInvoke: (SendMessageIntent intent) => _handleSendPressed(),
-            ),
-            NewLineIntent: CallbackAction<NewLineIntent>(
-              onInvoke: (NewLineIntent intent) {
-                final newValue = '${_textController.text}\r\n';
-                _textController.value = TextEditingValue(
-                  text: newValue,
-                  selection: TextSelection.fromPosition(
-                    TextPosition(offset: newValue.length),
-                  ),
-                );
-                return null;
-              },
-            ),
-          },
-          child: Focus(
-            autofocus: true,
-            child: Material(
-              borderRadius: BorderRadius.circular(20),
-              color: Colors.transparent,
-              child: Container(
-                padding: EdgeInsets.fromLTRB(
-                  24 + query.padding.left,
-                  20,
-                  24 + query.padding.right,
-                  20 + query.viewInsets.bottom + query.padding.bottom,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _textController,
-                        style: const TextStyle(fontSize: 17),
-                        decoration: InputDecoration(labelText: widget.hintText),
-                        focusNode: _inputFocusNode,
-                        keyboardType: TextInputType.multiline,
-                        maxLines: 5,
-                        minLines: 1,
-                        textCapitalization: TextCapitalization.sentences,
-                      ),
-                    ),
-                    const SizedBox(width: 16.0),
-                    Visibility(
-                      visible: _sendButtonVisible,
-                      child: SendMessageButton(onPressed: _handleSendPressed),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class SendMessageButton extends StatelessWidget {
   const SendMessageButton({super.key, required this.onPressed});
