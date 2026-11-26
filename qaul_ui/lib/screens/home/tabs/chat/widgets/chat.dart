@@ -299,6 +299,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   String? _activeRoomIdBase58;
   String? _forwardDraftRoomIdBase58;
   String? _selectedContextMenuMessageId;
+  final _selectedContextMenuMessageIdNotifier = ValueNotifier<String?>(null);
   String? _activeMessageSelectionGestureId;
   OverlayEntry? _copyFeedbackEntry;
   Timer? _copyFeedbackTimer;
@@ -331,8 +332,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     };
     if (text == null && attachment == null) return;
     final messageInfo = _domainMessagesById[message.id];
-    final messageRect =
+    final rawMessageRect =
         scaledMessageRect ?? _messageRectInOverlay(messageContext);
+    final overlayBox =
+        Overlay.of(context, rootOverlay: true).context.findRenderObject()
+            as RenderBox?;
+    final viewport = overlayBox == null ? null : Offset.zero & overlayBox.size;
+    final messageRect = rawMessageRect == null || viewport == null
+        ? rawMessageRect
+        : rawMessageRect.intersect(viewport);
     // Open on the side of the chat the bubble sits on, which holds for sent
     // and received messages in any text direction and in split view.
     final referenceRect = _rectInOverlay(context.findRenderObject());
@@ -340,16 +348,26 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
         messageRect == null ||
         referenceRect == null ||
         messageRect.center.dx >= referenceRect.center.dx;
-    setState(() => _selectedContextMenuMessageId = message.id);
+    _setSelectedContextMenuMessageId(message.id);
 
     await showDialog<void>(
       context: context,
       useSafeArea: false,
-      barrierColor: Colors.black38,
+      barrierColor: Colors.transparent,
       builder: (dialogContext) {
-        final menu = GestureDetector(
-          onTap: () {},
-          child: ChatMessageContextMenu(
+        final menu = DecoratedBox(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.28),
+                offset: const Offset(4, 4),
+                blurRadius: 8,
+              ),
+            ],
+          ),
+          child: GestureDetector(
+            onTap: () {},
+            child: ChatMessageContextMenu(
             elements: text == null
                 ? _buildAttachmentContextMenuElements(
                     onCopy: () => _copyAttachment(
@@ -364,9 +382,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                         ? null
                         : () {
                             Navigator.pop(dialogContext);
-                            setState(
-                              () => _selectedContextMenuMessageId = null,
-                            );
+                            _setSelectedContextMenuMessageId(null);
                             _openForwardRecipientSelector(
                               attachment: ForwardAttachment(
                                 path: attachment!.uri,
@@ -395,7 +411,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                 : _buildForwardContextMenuElements(
                     onForward: () {
                       Navigator.pop(dialogContext);
-                      setState(() => _selectedContextMenuMessageId = null);
+                      _setSelectedContextMenuMessageId(null);
                       _openForwardRecipientSelector(text: text);
                     },
                     onCopy: () => _copyMessage(
@@ -417,6 +433,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                                 AppLocalizations.of(context)!.unknown,
                           ),
                   ),
+            ),
           ),
         );
 
@@ -443,7 +460,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
       },
     );
     if (!mounted) return;
-    setState(() => _selectedContextMenuMessageId = null);
+    _setSelectedContextMenuMessageId(null);
+  }
+
+  void _setSelectedContextMenuMessageId(String? messageId) {
+    if (_selectedContextMenuMessageId == messageId) return;
+    setState(() => _selectedContextMenuMessageId = messageId);
+    _selectedContextMenuMessageIdNotifier.value = messageId;
   }
 
   List<ChatMessageContextMenuElement> _buildForwardContextMenuElements({
@@ -821,7 +844,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     String senderName,
   ) {
     Navigator.pop(dialogContext);
-    setState(() => _selectedContextMenuMessageId = null);
+    _setSelectedContextMenuMessageId(null);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -960,6 +983,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
   void dispose() {
     _clearCopyFeedback();
     _copyFeedbackFadeController.dispose();
+    _selectedContextMenuMessageIdNotifier.dispose();
     super.dispose();
   }
 
@@ -1468,12 +1492,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
           _activeMessageSelectionGestureId = null;
         }
       },
+      onSelectionFeedbackChanged: (isSelected) {
+        if (!mounted) return;
+        _setSelectedContextMenuMessageId(isSelected ? message.id : null);
+      },
       onMenuRequested: (bubbleContext, messageRect) => _openMessageContextMenu(
         bubbleContext,
         message,
         scaledMessageRect: messageRect,
       ),
-      builder: (selectionScale, selectionKey) {
+      builder: (selectionInset, selectionOutlineOpacity, selectionKey) =>
+          ValueListenableBuilder<String?>(
+        valueListenable: _selectedContextMenuMessageIdNotifier,
+        builder: (context, selectedMessageId, _) {
+          final isSelected = message.id == selectedMessageId;
         if (message is types.TextMessage) {
           return ChatMessageRenderer.renderText(
             presentation: presentation,
@@ -1482,9 +1514,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
             mentionLabels: _chatRenderMode == ChatRenderMode.group
                 ? ['all', ...room.members.map((member) => member.name)]
                 : const [],
-            isSelected: message.id == _selectedContextMenuMessageId,
+            isSelected: isSelected,
             topSpacingOverride: followsDateHeader ? 0 : null,
-            selectionScale: selectionScale,
+            selectionInset: selectionInset,
+            selectionOutlineOpacity: selectionOutlineOpacity,
             selectionKey: selectionKey,
           );
         }
@@ -1494,15 +1527,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
           presentation: presentation,
           mode: _chatRenderMode,
           clock: DateTime.now(),
-          isSelected: message.id == _selectedContextMenuMessageId,
+          isSelected: isSelected,
           mentionLabels: _chatRenderMode == ChatRenderMode.group
               ? ['all', ...room.members.map((member) => member.name)]
               : const [],
           topSpacingOverride: followsDateHeader ? 0 : null,
-          selectionScale: selectionScale,
+          selectionInset: selectionInset,
+          selectionOutlineOpacity: selectionOutlineOpacity,
           selectionKey: selectionKey,
         );
-      },
+        },
+      ),
     );
   }
 
@@ -1563,18 +1598,25 @@ class _MessageSelectionGesture extends StatefulWidget {
     required this.builder,
     required this.onGestureStarted,
     required this.onGestureFinished,
+    required this.onSelectionFeedbackChanged,
     required this.onMenuRequested,
   });
 
   static const _holdDelay = Duration(milliseconds: 200);
   static const _holdDuration = Duration(milliseconds: 600);
-  static const _scaleDuration = Duration(milliseconds: 400);
-  static const _selectedScale = 1.15;
+  static const _scaleDuration = Duration(milliseconds: 200);
+  static const _selectedInset = 4.0;
 
   final types.Message message;
-  final Widget Function(double selectionScale, GlobalKey selectionKey) builder;
+  final Widget Function(
+    double selectionInset,
+    double selectionOutlineOpacity,
+    GlobalKey selectionKey,
+  )
+  builder;
   final VoidCallback onGestureStarted;
   final VoidCallback onGestureFinished;
+  final ValueChanged<bool> onSelectionFeedbackChanged;
   final Future<void> Function(BuildContext context, Rect? messageRect)
   onMenuRequested;
 
@@ -1591,6 +1633,7 @@ class _MessageSelectionGestureState extends State<_MessageSelectionGesture>
   Offset? _pointerOrigin;
   late final AnimationController _scaleController;
   bool _menuIsOpen = false;
+  bool _returningToRest = false;
 
   bool get _supportsHaptics => switch (defaultTargetPlatform) {
     TargetPlatform.android || TargetPlatform.iOS => true,
@@ -1617,12 +1660,14 @@ class _MessageSelectionGestureState extends State<_MessageSelectionGesture>
 
   void _onPointerDown(PointerDownEvent event) {
     if (_menuIsOpen) return;
+    _returningToRest = false;
 
     final isSecondaryMouseClick =
         event.kind == PointerDeviceKind.mouse &&
         (event.buttons & kSecondaryMouseButton) != 0;
     if (isSecondaryMouseClick) {
       widget.onGestureStarted();
+      widget.onSelectionFeedbackChanged(true);
       _openMenu();
       return;
     }
@@ -1633,6 +1678,7 @@ class _MessageSelectionGestureState extends State<_MessageSelectionGesture>
     widget.onGestureStarted();
     _scaleDelayTimer = Timer(_MessageSelectionGesture._holdDelay, () {
       if (_pointerOrigin != null && !_menuIsOpen) {
+        widget.onSelectionFeedbackChanged(true);
         _scaleController.forward();
       }
     });
@@ -1658,15 +1704,17 @@ class _MessageSelectionGestureState extends State<_MessageSelectionGesture>
   void _cancelPendingSelection() {
     if (_pointerOrigin == null) return;
     _pointerOrigin = null;
+    _returningToRest = false;
     _scaleDelayTimer?.cancel();
     _selectionTimer?.cancel();
     widget.onGestureFinished();
+    widget.onSelectionFeedbackChanged(false);
     if (_scaleController.value > 0) {
       _scaleController.reverse();
     }
   }
 
-  Rect? _scaledSurfaceRect() {
+  Rect? _surfaceRect() {
     final surfaceBox =
         _selectionKey.currentContext?.findRenderObject() as RenderBox?;
     final overlay = Overlay.of(context, rootOverlay: true);
@@ -1675,9 +1723,8 @@ class _MessageSelectionGestureState extends State<_MessageSelectionGesture>
       return null;
     }
 
-    final scale = _MessageSelectionGesture._selectedScale;
     return surfaceBox.localToGlobal(Offset.zero, ancestor: overlayBox) &
-        Size(surfaceBox.size.width * scale, surfaceBox.size.height * scale);
+        surfaceBox.size;
   }
 
   Future<void> _openMenu({bool completeScale = false}) async {
@@ -1692,12 +1739,21 @@ class _MessageSelectionGestureState extends State<_MessageSelectionGesture>
     }
     if (_supportsHaptics) unawaited(HapticFeedback.mediumImpact());
 
-    await widget.onMenuRequested(context, _scaledSurfaceRect());
+    final menu = widget.onMenuRequested(context, _surfaceRect());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_menuIsOpen) return;
+      setState(() => _returningToRest = true);
+      _scaleController.reverse();
+    });
+
+    await menu;
     if (!mounted) return;
     _menuIsOpen = false;
+    _returningToRest = false;
     _pointerOrigin = null;
     widget.onGestureFinished();
-    await _scaleController.reverse();
+    widget.onSelectionFeedbackChanged(false);
+    if (_scaleController.value > 0) await _scaleController.reverse();
   }
 
   @override
@@ -1705,17 +1761,25 @@ class _MessageSelectionGestureState extends State<_MessageSelectionGesture>
     return AnimatedBuilder(
       animation: _scaleController,
       builder: (context, _) {
-        final selectionScale =
-            1 +
-            (_MessageSelectionGesture._selectedScale - 1) *
-                _scaleController.value;
+        final progress = _returningToRest
+            ? 1 - Curves.easeOutBack.transform(1 - _scaleController.value)
+            : _scaleController.value;
+        final selectionInset =
+            _MessageSelectionGesture._selectedInset * progress;
+        final selectionOutlineOpacity = _menuIsOpen
+            ? 1.0
+            : _scaleController.value;
         return Listener(
           behavior: HitTestBehavior.translucent,
           onPointerDown: _onPointerDown,
           onPointerMove: _onPointerMove,
           onPointerUp: _onPointerUp,
           onPointerCancel: (_) => _cancelPendingSelection(),
-          child: widget.builder(selectionScale, _selectionKey),
+          child: widget.builder(
+            selectionInset,
+            selectionOutlineOpacity,
+            _selectionKey,
+          ),
         );
       },
     );

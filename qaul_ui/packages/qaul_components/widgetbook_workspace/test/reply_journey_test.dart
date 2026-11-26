@@ -132,7 +132,7 @@ void main() {
     }
 
     expect(await selectedOutline(ThemeData.dark()), Colors.white);
-    expect(await selectedOutline(ThemeData.light()), Colors.black);
+    expect(await selectedOutline(ThemeData.light()), Colors.white);
 
     await tester.tap(find.text('Reply'));
     await tester.pump();

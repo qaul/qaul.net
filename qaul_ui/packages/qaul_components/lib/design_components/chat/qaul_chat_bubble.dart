@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import '../../styles/qaul_color_sheet.dart';
 import '../../styles/qaul_emoji.dart';
 import '../../styles/qaul_text_scaler.dart';
 import 'chat_mentions.dart';
@@ -420,7 +419,8 @@ class QaulChatBubble extends StatelessWidget {
     required this.clock,
     this.showTimestamp = true,
     this.isSelected = false,
-    this.selectionScale = 1,
+    this.selectionInset = 0,
+    this.selectionOutlineOpacity = 1,
     this.selectionKey,
   });
 
@@ -433,8 +433,11 @@ class QaulChatBubble extends StatelessWidget {
   final bool showTimestamp;
   final bool isSelected;
 
-  /// Scale applied while the message is held for selection.
-  final double selectionScale;
+  /// Fixed visual inset applied while the message is held for selection.
+  final double selectionInset;
+
+  /// Opacity of the selection outline.
+  final double selectionOutlineOpacity;
 
   /// Key on the unscaled bubble, so the selection gesture can measure it.
   final Key? selectionKey;
@@ -447,12 +450,14 @@ class QaulChatBubble extends StatelessWidget {
     required Widget child,
     bool showTimestamp = true,
     bool isSelected = false,
-    double selectionScale = 1,
+    double selectionInset = 0,
+    double selectionOutlineOpacity = 1,
   }) {
     return _QaulChatBubbleSurface(
       key: key,
       selectionKey: selectionKey,
-      selectionScale: selectionScale,
+      selectionInset: selectionInset,
+      selectionOutlineOpacity: selectionOutlineOpacity,
       message: message,
       clock: clock,
       showTimestamp: showTimestamp,
@@ -464,9 +469,6 @@ class QaulChatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isPrimary = message.messageType == MessageType.primary;
-    final sheet = QaulColorSheet(Theme.of(context).brightness);
-
-
     final backgroundColor = isPrimary
         ? ChatBubbleStyle.primaryColor
         : ChatBubbleStyle.secondaryColor;
@@ -500,9 +502,9 @@ class QaulChatBubble extends StatelessWidget {
           ),
           child: Align(
               alignment: isPrimary ? Alignment.centerRight : Alignment.centerLeft,
-              child: Transform.scale(
-                scale: selectionScale,
-                alignment: isPrimary ? Alignment.centerRight : Alignment.centerLeft,
+              child: _FixedInsetScale(
+                inset: selectionInset,
+                alignment: Alignment.center,
                 child: KeyedSubtree(
                   key: selectionKey,
                   child: ConstrainedBox(
@@ -515,9 +517,11 @@ class QaulChatBubble extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: backgroundColor,
                         borderRadius: borderRadius,
-                        border: isSelected
+                        border: isSelected && selectionOutlineOpacity > 0
                             ? Border.all(
-                                color: sheet.chatBubbleSelectionOutline,
+                                color: Colors.white.withValues(
+                                  alpha: selectionOutlineOpacity,
+                                ),
                                 width: ChatBubbleStyle.selectedOutlineWidth,
                               )
                             : null,
@@ -763,7 +767,8 @@ class _QaulChatBubbleSurface extends StatelessWidget {
     required this.child,
     required this.showTimestamp,
     required this.isSelected,
-    required this.selectionScale,
+    required this.selectionInset,
+    required this.selectionOutlineOpacity,
     this.selectionKey,
   });
 
@@ -772,13 +777,13 @@ class _QaulChatBubbleSurface extends StatelessWidget {
   final Widget child;
   final bool showTimestamp;
   final bool isSelected;
-  final double selectionScale;
+  final double selectionInset;
+  final double selectionOutlineOpacity;
   final Key? selectionKey;
 
   @override
   Widget build(BuildContext context) {
     final isPrimary = message.messageType == MessageType.primary;
-    final sheet = QaulColorSheet(Theme.of(context).brightness);
     const textColor = Colors.white;
     final backgroundColor = isPrimary
         ? ChatBubbleStyle.primaryColor
@@ -877,9 +882,9 @@ class _QaulChatBubbleSurface extends StatelessWidget {
           ),
           child: Align(
               alignment: isPrimary ? Alignment.centerRight : Alignment.centerLeft,
-              child: Transform.scale(
-                scale: selectionScale,
-                alignment: isPrimary ? Alignment.centerRight : Alignment.centerLeft,
+              child: _FixedInsetScale(
+                inset: selectionInset,
+                alignment: Alignment.center,
                 child: KeyedSubtree(
                   key: selectionKey,
                   child: ConstrainedBox(
@@ -893,11 +898,14 @@ class _QaulChatBubbleSurface extends StatelessWidget {
                         color: backgroundColor,
                         borderRadius: borderRadius,
                       ),
-                      foregroundDecoration: isSelected
+                      foregroundDecoration:
+                          isSelected && selectionOutlineOpacity > 0
                           ? BoxDecoration(
                               borderRadius: borderRadius,
                               border: Border.all(
-                                color: sheet.chatBubbleSelectionOutline,
+                                color: Colors.white.withValues(
+                                  alpha: selectionOutlineOpacity,
+                                ),
                                 width: ChatBubbleStyle.selectedOutlineWidth,
                               ),
                             )
@@ -1348,6 +1356,90 @@ Widget? _buildChatBubbleStatusIcon(
         size: iconSize,
         color: textColor.withValues(alpha: 0.9),
       );
+  }
+}
+
+/// Paints its child inset by a fixed number of logical pixels while preserving
+/// the child's layout size. This keeps the selection feedback consistent for
+/// short and long messages alike.
+class _FixedInsetScale extends SingleChildRenderObjectWidget {
+  const _FixedInsetScale({
+    required this.inset,
+    required this.alignment,
+    required super.child,
+  });
+
+  final double inset;
+  final Alignment alignment;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderFixedInsetScale(inset: inset, alignment: alignment);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderFixedInsetScale renderObject,
+  ) {
+    renderObject
+      ..inset = inset
+      ..alignment = alignment;
+  }
+}
+
+class _RenderFixedInsetScale extends RenderProxyBox {
+  _RenderFixedInsetScale({required double inset, required Alignment alignment})
+    : _inset = inset,
+      _alignment = alignment;
+
+  double _inset;
+  Alignment _alignment;
+
+  set inset(double value) {
+    if (_inset == value) return;
+    _inset = value;
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
+  }
+
+  set alignment(Alignment value) {
+    if (_alignment == value) return;
+    _alignment = value;
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
+  }
+
+  Matrix4 _transformFor(Size size) {
+    final scaleX = (size.width - _inset * 2) / size.width;
+    final scaleY = (size.height - _inset * 2) / size.height;
+    final origin = _alignment.alongSize(size);
+    return Matrix4.identity()
+      ..translateByDouble(origin.dx, origin.dy, 0, 1)
+      ..scaleByDouble(scaleX, scaleY, 1, 1)
+      ..translateByDouble(-origin.dx, -origin.dy, 0, 1);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final child = this.child;
+    if (child == null || size.isEmpty) return;
+    context.pushTransform(
+      needsCompositing,
+      offset,
+      _transformFor(size),
+      (context, offset) => context.paintChild(child, offset),
+    );
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    final child = this.child;
+    if (child == null || size.isEmpty) return false;
+    return result.addWithPaintTransform(
+      transform: _transformFor(size),
+      position: position,
+      hitTest: (result, position) => child.hitTest(result, position: position),
+    );
   }
 }
 
