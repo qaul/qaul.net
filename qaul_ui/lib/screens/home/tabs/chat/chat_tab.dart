@@ -17,6 +17,7 @@ class _ChatState extends _BaseTabState<_Chat> {
   bool _hasMoreInvites = true;
   int _chatRoomsOffset = 0;
   int _invitesOffset = 0;
+  double? _sidebarWidth;
 
   @override
   void initState() {
@@ -178,12 +179,14 @@ class _ChatState extends _BaseTabState<_Chat> {
     final filteredRooms = chatRooms
         .where((m) => !blockedIds.contains(m.conversationId))
         .toList();
-    final displayRooms =
-        roomSearch.isActive ? roomSearch.results : filteredRooms;
+    final displayRooms = roomSearch.isActive
+        ? roomSearch.results
+        : filteredRooms;
     final showInvites = !roomSearch.isActive;
     final listItemCount =
         (showInvites ? groupInvites.length : 0) + displayRooms.length;
-    final isListLoading = _isLoadingMore ||
+    final isListLoading =
+        _isLoadingMore ||
         (roomSearch.isActive &&
             roomSearch.isLoading &&
             roomSearch.results.isEmpty);
@@ -196,6 +199,11 @@ class _ChatState extends _BaseTabState<_Chat> {
     final mobile = Responsiveness.isMobile(
       context,
     ); // MediaQuery on HookState.init throws
+    final resizable =
+        !kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.macOS ||
+            defaultTargetPlatform == TargetPlatform.windows ||
+            defaultTargetPlatform == TargetPlatform.linux);
     final setOpenChat = useCallback((ChatRoom room, [User? otherUser]) {
       if (mobile) {
         openChat(
@@ -346,38 +354,80 @@ class _ChatState extends _BaseTabState<_Chat> {
         body: chatRoomsListView,
         floatingActionButton: createChatButton,
       ),
-      tabletBody: Row(
-        children: [
-          ConstrainedBox(
-            constraints: Responsiveness.kSideMenuWidthConstraints,
-            child: Stack(
-              children: [
-                chatRoomsListView,
-                Positioned.directional(
-                  textDirection: Directionality.of(context),
-                  end: 0,
-                  bottom: 0,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: createChatButton,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const VerticalDivider(width: 1),
-          Expanded(
-            child: Scaffold(
-              body: currentOpenChat == null
-                  ? Center(child: Text(l10n.noOpenChats))
-                  : ChatScreen(
-                      currentOpenChat,
-                      defaultUser,
-                      otherUser: getOtherUser(currentOpenChat, defaultUser),
+      tabletBody: LayoutBuilder(
+        builder: (context, constraints) {
+          final windowWidth = MediaQuery.sizeOf(context).width;
+          final maxWidth = (windowWidth / 2).clamp(
+            0.0,
+            constraints.maxWidth - 8,
+          );
+          final minWidth = (windowWidth / 6).clamp(0.0, maxWidth);
+          final sidebarWidth = (_sidebarWidth ?? 300).clamp(minWidth, maxWidth);
+          return Row(
+            children: [
+              ConstrainedBox(
+                key: const ValueKey('chat-list-sidebar'),
+                constraints: resizable
+                    ? BoxConstraints.tightFor(width: sidebarWidth)
+                    : Responsiveness.kSideMenuWidthConstraints,
+                child: Stack(
+                  children: [
+                    chatRoomsListView,
+                    Positioned.directional(
+                      textDirection: Directionality.of(context),
+                      end: 0,
+                      bottom: 0,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: createChatButton,
+                      ),
                     ),
-            ),
-          ),
-        ],
+                  ],
+                ),
+              ),
+              if (resizable)
+                MouseRegion(
+                  cursor: SystemMouseCursors.resizeLeftRight,
+                  child: GestureDetector(
+                    key: const ValueKey('chat-sidebar-resize-handle'),
+                    behavior: HitTestBehavior.opaque,
+                    onHorizontalDragUpdate: (details) {
+                      final direction =
+                          Directionality.of(context) == ui.TextDirection.ltr
+                          ? 1
+                          : -1;
+                      setState(() {
+                        _sidebarWidth =
+                            ((_sidebarWidth ?? sidebarWidth).clamp(
+                                      minWidth,
+                                      maxWidth,
+                                    ) +
+                                    direction * details.delta.dx)
+                                .clamp(minWidth, maxWidth);
+                      });
+                    },
+                    child: const SizedBox(
+                      width: 8,
+                      child: VerticalDivider(width: 1),
+                    ),
+                  ),
+                )
+              else
+                const VerticalDivider(width: 1),
+              Expanded(
+                child: Scaffold(
+                  body: currentOpenChat == null
+                      ? Center(child: Text(l10n.noOpenChats))
+                      : ChatScreen(
+                          currentOpenChat,
+                          defaultUser,
+                          otherUser: getOtherUser(currentOpenChat, defaultUser),
+                        ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
