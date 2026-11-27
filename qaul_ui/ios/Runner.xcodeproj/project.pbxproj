@@ -10,6 +10,8 @@
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
+		848D7ADC30A624D20092A5E8 /* BlePeripheral.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848D7ADB30A624CE0092A5E8 /* BlePeripheral.swift */; };
+		848D7ADF30A73E820092A5E8 /* BleBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848D7ADE30A73E7D0092A5E8 /* BleBridge.swift */; };
 		84C10395309DF3A80091D369 /* BleCentral.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C10394309DF3A20091D369 /* BleCentral.swift */; };
 		94CA84D9F8A92934CBD50F51 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C15786F3247A8FD391155961 /* Pods_Runner.framework */; };
 		97086205294A726200565567 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97086204294A726200565567 /* SystemConfiguration.framework */; };
@@ -39,6 +41,8 @@
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
+		848D7ADB30A624CE0092A5E8 /* BlePeripheral.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlePeripheral.swift; sourceTree = "<group>"; };
+		848D7ADE30A73E7D0092A5E8 /* BleBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleBridge.swift; sourceTree = "<group>"; };
 		84C10394309DF3A20091D369 /* BleCentral.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleCentral.swift; sourceTree = "<group>"; };
 		97086204294A726200565567 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		9721C0742757DC08002E2B8D /* liblibqaul.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = liblibqaul.a; sourceTree = "<group>"; };
@@ -112,6 +116,8 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				848D7ADE30A73E7D0092A5E8 /* BleBridge.swift */,
+				848D7ADB30A624CE0092A5E8 /* BlePeripheral.swift */,
 				84C10394309DF3A20091D369 /* BleCentral.swift */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
 				97C146FD1CF9000F007C117D /* Assets.xcassets */,
@@ -290,6 +296,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
+				848D7ADF30A73E820092A5E8 /* BleBridge.swift in Sources */,
+				848D7ADC30A624D20092A5E8 /* BlePeripheral.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 				84C10395309DF3A80091D369 /* BleCentral.swift in Sources */,
 			);
