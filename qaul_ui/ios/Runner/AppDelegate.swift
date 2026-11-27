@@ -7,7 +7,7 @@ import Flutter
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    _ = BleCentral.shared   // touching it runs init, this has to happen before libqaul starts
+    BleBridge.register()
     NSLog("QAULBLE creating central")
     let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
     let libqaulChannel = FlutterMethodChannel(name: "libqaul", binaryMessenger: controller.binaryMessenger)

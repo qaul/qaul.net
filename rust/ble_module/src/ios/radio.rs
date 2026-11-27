@@ -107,8 +107,9 @@ impl Running {
         if let Ok(mut board) = super::ffi::EVENTS.lock() {
             *board = Some(events_tx);
         }
-        // Swift starts scanning only when told: libqaul decides whether BLE runs.
-        call_swift(Action::Start, NO_ADDRESS, &[]);
+        // Swift starts BLE (scan + advertise) only when told: libqaul decides whether BLE runs.
+        // Start covers both roles, so `role` and the address are placeholders.
+        call_swift(Action::Start, NO_ADDRESS, Role::Central, &our_id);
 
         Ok(Running{
             events: events_rx,
@@ -119,7 +120,7 @@ impl Running {
     /// Start connecting to `peer` as central. The result comes back on `events`.
     pub fn connect(&self, peer: PeerKey) {
         log::info!("iOS -> Swift: connect {}", peer.address);
-        call_swift(Action::Connect, peer.address, &[]);
+        call_swift(Action::Connect, peer.address, peer.role, &[]);
     }
 
     /// No scanning while one of our connects is in flight, from Connect until Subscribed or ConnectFailed. 
@@ -134,7 +135,7 @@ impl Running {
     }
 
     pub fn transmit(&self, peer: PeerKey, bytes: Vec<u8>) {
-        call_swift(Action::Transmit, peer.address, &bytes);
+        call_swift(Action::Transmit, peer.address, peer.role, &bytes);
     }
 
     /// Nothing to do on iOS: Swift owns the write queue
@@ -145,7 +146,7 @@ impl Running {
    
     pub fn disconnect(&mut self, peer: PeerKey) {
         log::info!("iOS -> Swift: disconnect {}", peer.address);
-        call_swift(Action::Disconnect, peer.address, &[]);
+        call_swift(Action::Disconnect, peer.address, peer.role, &[]);
     }
 
 
@@ -157,8 +158,8 @@ impl Drop for Running {
         if let Ok(mut board) = super::ffi::EVENTS.lock() {
             *board = None;
         }
-        // Swift stops scanning and drops every connection.
-        call_swift(Action::Stop, NO_ADDRESS, &[]);
+        // Swift stops scanning and drops every connection. Role unused here
+        call_swift(Action::Stop, NO_ADDRESS, Role::Central, &[]);
     }
 }
 

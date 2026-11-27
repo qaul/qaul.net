@@ -5,6 +5,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex; 
 use tokio::sync::mpsc;
 use crate::ios::radio::{PeerKey, RadioEvent, Address};
+use ble_protocol::engine::Role;
+use ble_protocol::advert::id_prefix_from_name;
 
 pub(crate) static BLE_POWERED: AtomicBool = AtomicBool::new(false);
 /// Unbounded: Swifts calls cant wait for room, so a bound would only drop events.
@@ -27,6 +29,25 @@ pub fn push(event: RadioEvent) {
     }
 }
 
+fn peer_key(addr: Address, role: u8) -> Option<PeerKey> {
+    match role {
+        0 => Some(PeerKey::central(addr)),
+        1 => Some(PeerKey::peripheral(addr)),
+        _ => {
+            log::warn!("iOS event from {} dropped: unknown role {}", addr, role);
+            None
+        }
+    }
+}
+
+/// The reverse of peer_key: the role byte Swift receives. Keep the two aligned.
+fn role_byte(role: Role) -> u8 {
+    match role {
+        Role::Central => 0,
+        Role::Peripheral => 1,
+    }
+}
+
 
 /*********        Swift to Rust       ************/
 
@@ -38,7 +59,8 @@ pub extern "C" fn qaul_ble_powered(on: bool) {
 // Swift to Rust callbacks for BLE radio events. These are called from Swift when the corresponding event occurs.
 
 #[no_mangle]
-pub extern "C" fn qaul_ble_frame_received(addr: Address, bytes: *const u8, len: u32) {
+pub extern "C" fn qaul_ble_frame_received(addr: Address, role: u8, bytes: *const u8, len: u32) {
+    let Some(peer) = peer_key(addr, role) else { return };
     if bytes.is_null() || len == 0 {
         log::warn!("iOS radio event dropped: frame received with null pointer or zero length");
         return;
@@ -48,22 +70,22 @@ pub extern "C" fn qaul_ble_frame_received(addr: Address, bytes: *const u8, len: 
         return;
     }
     push(RadioEvent::FrameReceived {
-        peer: PeerKey::central(addr),
+        peer,
         bytes: unsafe { std::slice::from_raw_parts(bytes, len as usize) }.to_vec()
     });
 }
 
 #[no_mangle]
-pub extern "C" fn qaul_ble_frame_sent(addr: Address) {
-    push(RadioEvent::FrameSent{
-        peer: PeerKey::central(addr)
-    });
+pub extern "C" fn qaul_ble_frame_sent(addr: Address, role: u8) {
+    let Some(peer) = peer_key(addr, role) else { return };
+    push(RadioEvent::FrameSent{ peer });
 }
 
 #[no_mangle]
-pub extern "C" fn qaul_ble_subscribed(addr: Address, mtu: u32) {
+pub extern "C" fn qaul_ble_subscribed(addr: Address, role: u8, mtu: u32) {
+    let Some(peer) = peer_key(addr, role) else { return };
     push(RadioEvent::Subscribed{
-        peer: PeerKey::central(addr),
+        peer,
         mtu: mtu as usize,
         outbox: ()
     });
@@ -84,8 +106,29 @@ pub extern "C" fn qaul_ble_advert(addr: Address, id_prefix: *const u8, len: u32,
     push(RadioEvent::Advert { address: addr, id_prefix, rssi });
 }
 
+/// An advert without qaul manufacturer data, but with a name: so another iPhone. Rust has to then
+/// decode this seperately. 
 #[no_mangle]
-pub extern "C" fn qaul_ble_peer_id_read(addr: Address, id: *const u8, len: u32) {
+pub extern "C" fn qaul_ble_advert_name(addr: Address, name: *const u8, len: u32, rssi: i16) {
+    if name.is_null() {
+        log::warn!("iOS advert from {} dropped: null pointer", addr);
+        return;
+    }
+    let bytes = unsafe { std::slice::from_raw_parts(name, len as usize) };
+    let Ok(name) = std::str::from_utf8(bytes) else {
+        log::warn!("iOS advert from {} dropped: name is not valid UTF-8", addr);
+        return;
+    };
+    let Some(id_prefix) = id_prefix_from_name(name) else {
+        log::debug!("iOS advert from {} ignored: name {:?} is not a qaul ID", addr, name);
+        return;
+    };
+    push(RadioEvent::Advert { address: addr, id_prefix, rssi });
+}
+
+#[no_mangle]
+pub extern "C" fn qaul_ble_peer_id_read(addr: Address, role: u8, id: *const u8, len: u32) {
+    let Some(peer) = peer_key(addr, role) else { return };
     if id.is_null() {
         log::warn!("iOS peer id from {} dropped: null pointer", addr);
         return;
@@ -95,19 +138,19 @@ pub extern "C" fn qaul_ble_peer_id_read(addr: Address, id: *const u8, len: u32) 
         log::warn!("iOS peer id from {} dropped: id is {} bytes, expected {}", addr, len, QAUL_ID_BYTES);
         return;
     };
-    push(RadioEvent::PeerIdRead { peer: PeerKey::central(addr), id });
+    push(RadioEvent::PeerIdRead { peer, id });
 }
 
 #[no_mangle]
-pub extern "C" fn qaul_ble_connect_failed(addr: Address) {
-    push(RadioEvent::ConnectFailed{
-        peer: PeerKey::central(addr)
-    });
+pub extern "C" fn qaul_ble_connect_failed(addr: Address, role: u8) {
+    let Some(peer) = peer_key(addr, role) else { return };
+    push(RadioEvent::ConnectFailed{ peer });
 }
 
 #[no_mangle]
-pub extern "C" fn qaul_ble_gone(addr: Address) {
-    push(RadioEvent::Gone { peer: PeerKey::central(addr) });
+pub extern "C" fn qaul_ble_gone(addr: Address, role: u8) {
+    let Some(peer) = peer_key(addr, role) else { return };
+    push(RadioEvent::Gone { peer });
 }
 
 
@@ -115,7 +158,7 @@ pub extern "C" fn qaul_ble_gone(addr: Address) {
 /*********        Rust to Swift       ************/
 
 // Swift hands rust a function pointer to call when a radio event occurs. Rust calls it from the radio loop.
-pub type ActionCallback = extern "C" fn(action: u8, addr: Address, bytes: *const u8, len: u32);
+pub type ActionCallback = extern "C" fn(action: u8, addr: Address, role: u8, bytes: *const u8, len: u32);
 
 /// What rust asks swift to do. The numbers are the action byte Swift receives.
 #[derive(Debug, Clone, Copy)]
@@ -133,7 +176,7 @@ pub extern "C" fn qaul_ble_set_callback(cb: Option<ActionCallback>) {
 }
 
 /// Ask Swift to do something.
-pub(crate) fn call_swift(action: Action, addr: Address, bytes: &[u8]) {
+pub(crate) fn call_swift(action: Action, addr: Address, role: Role, bytes: &[u8]) {
     // Copy the fn pointer out and let the lock go before calling Swift otherwise can be deadlock
     let cb = match CALLBACK.lock() {
         Ok(board) => *board,
@@ -144,7 +187,7 @@ pub(crate) fn call_swift(action: Action, addr: Address, bytes: &[u8]) {
         return;
     };
     let ptr = if bytes.is_empty() { std::ptr::null() } else { bytes.as_ptr() };
-    cb(action as u8, addr, ptr, bytes.len() as u32);
+    cb(action as u8, addr, role_byte(role), ptr, bytes.len() as u32);
 }
 
 

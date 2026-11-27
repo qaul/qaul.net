@@ -77,6 +77,13 @@ int32_t send_rpc_to_libqaul(const uint8_t *message, uint32_t message_length);
  */
 int32_t receive_rpc_from_libqaul(unsigned char *buffer, uint32_t buffer_length);
 
+/**
+ * Tell libqaul whether the app is in the foreground.
+ * false: libqaul rebuilds LAN/Internet without QUIC (iOS suspension safety).
+ * true: rebuilds with QUIC again.
+ */
+void qaul_set_foreground(bool foreground);
+
 
 
 
@@ -100,18 +107,21 @@ typedef struct { uint8_t bytes[16]; } QaulBleAddress;
  * bytes is only valid during the call: copy it before returning.
  * Called from Rust's BLE thread, not the main thread.
  */
-typedef void (*QaulBleActionCallback)(uint8_t action, QaulBleAddress addr,
+typedef void (*QaulBleActionCallback)(uint8_t action, QaulBleAddress addr, uint8_t role,
                                       const uint8_t *bytes, uint32_t len);
 
 /** Register the callback for rust once at startup. NULL clears it. */
 void qaul_ble_set_callback(QaulBleActionCallback cb);
 
+enum { QAUL_BLE_CENTRAL = 0, QAUL_BLE_PERIPHERAL = 1 };
+
 /** Swift -> Rust radio events */
 void qaul_ble_powered(bool on);
-void qaul_ble_frame_received(QaulBleAddress addr, const uint8_t *bytes, uint32_t len);
-void qaul_ble_frame_sent(QaulBleAddress addr);
-void qaul_ble_subscribed(QaulBleAddress addr, uint32_t mtu);
+void qaul_ble_frame_received(QaulBleAddress addr, uint8_t role, const uint8_t *bytes, uint32_t len);
+void qaul_ble_frame_sent(QaulBleAddress addr, uint8_t role);
+void qaul_ble_subscribed(QaulBleAddress addr, uint8_t role, uint32_t mtu);
 void qaul_ble_advert(QaulBleAddress addr, const uint8_t *id_prefix, uint32_t len, int16_t rssi);
-void qaul_ble_peer_id_read(QaulBleAddress addr, const uint8_t *id, uint32_t len);
-void qaul_ble_connect_failed(QaulBleAddress addr);
-void qaul_ble_gone(QaulBleAddress addr);
+void qaul_ble_advert_name(QaulBleAddress addr, const uint8_t *name, uint32_t len, int16_t rssi);
+void qaul_ble_peer_id_read(QaulBleAddress addr, uint8_t role, const uint8_t *id, uint32_t len);
+void qaul_ble_connect_failed(QaulBleAddress addr, uint8_t role);
+void qaul_ble_gone(QaulBleAddress addr, uint8_t role);

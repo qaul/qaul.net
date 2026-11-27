@@ -30,47 +30,14 @@ class BleCentral: NSObject {
             NSLog("QAULBLE init")
             centralManager = CBCentralManager(delegate: self, queue: nil)
             NSLog("QAULBLE manager created, state \(centralManager.state.rawValue)")
-        
-            qaul_ble_set_callback { action, addr, bytes, len in
-                // Copy now: Rust frees bytes as soon as this returns.
-                let data = (bytes != nil && len > 0) ? Data(bytes: bytes!, count: Int(len)) : Data()
-                // This function calls on Rusts BLE thread, switch to swift main thread
-                DispatchQueue.main.async {
-                    BleCentral.shared.handle(action: action, addr: addr, data: data)
-                }
-            }
         }
     
-    // What Rust asks for. Numbers match `Action` in ffi.rs
-    func handle(action: UInt8, addr: QaulBleAddress, data: Data) {
-        let peer = UUID(uuid: addr.bytes)
-        NSLog("QAULBLE action \(action) peer \(peer) bytes \(data.count)")
-        switch action {
-        case 0: startScan()                 // Start
-        case 1: centralManager.stopScan()   // Stop
-        case 2:   // Connect
-            guard pendingConnect == nil,
-                  let p = discoveredPeripherals[peer] else {
-                qaul_ble_connect_failed(addr)   // busy or never seen: the engine must hear back
-                return
-            }
-            pendingConnect = peer
-            connect(peripheral: p)
-            // iOS never gives up on a connect by itself
-            DispatchQueue.main.asyncAfter(deadline: .now() + 15) { [weak self] in
-                guard let self, self.pendingConnect == peer else { return }   // already finished
-                NSLog("QAULBLE connect to \(peer) timed out")
-                self.pendingConnect = nil
-                self.centralManager.cancelPeripheralConnection(p)
-                qaul_ble_connect_failed(addr)
-            }
-        case 3: // disconnect
-            if let p = discoveredPeripherals[peer] { centralManager.cancelPeripheralConnection(p) }
-        case 4: // transmit
-            if let _ = links[peer] { write(data, to: peer) }
-            
-        default: break
-        }
+    func start() {
+        startScan()
+    }
+    
+    func stop() {
+        centralManager.stopScan()
     }
     
     func startScan() {
@@ -78,13 +45,31 @@ class BleCentral: NSObject {
             options: [CBCentralManagerScanOptionAllowDuplicatesKey: true])
     }
     
-    func connect(peripheral: CBPeripheral) {
-        centralManager.connect(peripheral, options: nil)
+    func connect(_ peer: UUID) {
+        guard pendingConnect == nil,
+              let p = discoveredPeripherals[peer] else {
+            qaul_ble_connect_failed(address(peer), UInt8(QAUL_BLE_CENTRAL))   // busy or never seen: the engine must hear back
+            return
+        }
+        pendingConnect = peer
+        centralManager.connect(p, options: nil)
+        // ios never gives up on a connect by itself, set the 15s timeout
+        DispatchQueue.main.asyncAfter(deadline: .now() + 15) { [weak self] in
+            guard let self, self.pendingConnect == peer else { return }   // already finished
+            NSLog("QAULBLE connect to \(peer) timed out")
+            self.pendingConnect = nil
+            self.centralManager.cancelPeripheralConnection(p)
+            qaul_ble_connect_failed(address(peer), UInt8(QAUL_BLE_CENTRAL))
+        }
      }
     
+    func disconnect(_ peer: UUID) {
+        if let p = discoveredPeripherals[peer] { centralManager.cancelPeripheralConnection(p) }
+    }
+    
     // Queue a frame for MSG_CHAR. Frames leave in order, nothing is dropped while iOS is busy it just waits.
-    func write(_ value: Data, to peripheral: UUID) {
-        guard let link = links[peripheral] else { return }
+    func transmit(_ value: Data, to peer: UUID) {
+        guard let link = links[peer] else { return }
         link.outbox.append(value)
         drain(link)
     }
@@ -95,7 +80,7 @@ class BleCentral: NSObject {
            while !link.outbox.isEmpty && link.peripheral.canSendWriteWithoutResponse {
                let frame = link.outbox.removeFirst()
                link.peripheral.writeValue(frame, for: msgChar, type: .withoutResponse)
-               qaul_ble_frame_sent(address(link.peripheral.identifier))
+               qaul_ble_frame_sent(address(link.peripheral.identifier), UInt8(QAUL_BLE_CENTRAL))
            }
     }
     
@@ -134,17 +119,28 @@ extension BleCentral: CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         self.discoveredPeripherals[peripheral.identifier] = peripheral // only saves peripheral for now, needs wrapper to include rssi, adv data etc
         
-        guard let data = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data,
-              data.count >= 2, data[data.startIndex] == 0xFF, data[data.startIndex + 1] == 0xFF
-        else { return }
-        let prefix = Data(data.dropFirst(2).prefix(5))
-        prefix.withUnsafeBytes { raw in
-            qaul_ble_advert(address(peripheral.identifier),
-                            raw.bindMemory(to: UInt8.self).baseAddress,
-                            UInt32(raw.count),
-                            Int16(truncating: RSSI))
+        // Read qaul id from advert
+        if let data = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data,
+           data.count >= 2, data[data.startIndex] == 0xFF, data[data.startIndex + 1] == 0xFF {
+            // Android / Linux: the prefix is in the manufacturer data
+            let prefix = Data(data.dropFirst(2).prefix(5))
+            prefix.withUnsafeBytes { raw in
+                qaul_ble_advert(address(peripheral.identifier),
+                                raw.bindMemory(to: UInt8.self).baseAddress,
+                                UInt32(raw.count),
+                                Int16(truncating: RSSI))
+            }
         }
-        
+        else if let name = advertisementData[CBAdvertisementDataLocalNameKey] as? String {
+            // iPhone: the prefix is in the name, give to Rust to decode it
+            let bytes = Array(name.utf8)
+            bytes.withUnsafeBufferPointer { buf in
+                qaul_ble_advert_name(address(peripheral.identifier),
+                                buf.baseAddress,
+                                UInt32(buf.count),
+                                Int16(truncating: RSSI))
+            }
+        }
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
@@ -158,7 +154,7 @@ extension BleCentral: CBCentralManagerDelegate {
     // Failed to connect
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
         if pendingConnect == peripheral.identifier { pendingConnect = nil }
-        qaul_ble_connect_failed(address(peripheral.identifier))
+        qaul_ble_connect_failed(address(peripheral.identifier), UInt8(QAUL_BLE_CENTRAL))
         NSLog("QAULBLE connect failed \(String(describing: error))")
         // Handle error
     }
@@ -167,7 +163,7 @@ extension BleCentral: CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         if pendingConnect == peripheral.identifier { pendingConnect = nil }
         self.links[peripheral.identifier] = nil
-        qaul_ble_gone(address(peripheral.identifier))
+        qaul_ble_gone(address(peripheral.identifier), UInt8(QAUL_BLE_CENTRAL))
         // error is nil only when we cancelled the connection ourselves
         NSLog("QAULBLE disconnected \(peripheral.identifier), reason: \(String(describing: error))")
     }
@@ -176,7 +172,6 @@ extension BleCentral: CBCentralManagerDelegate {
 
 
 extension BleCentral: CBPeripheralDelegate {
-    
     //discovery succeeded
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         if let error = error {
@@ -238,7 +233,7 @@ extension BleCentral: CBPeripheralDelegate {
         if pendingConnect == peripheral.identifier { pendingConnect = nil }
         
         let mtu = peripheral.maximumWriteValueLength(for: .withoutResponse) + 3 // this function alreayd provides mtu - 3 for att header, but so does the ble engine, so we add it back here
-        qaul_ble_subscribed(address(peripheral.identifier), UInt32(mtu))
+        qaul_ble_subscribed(address(peripheral.identifier), UInt8(QAUL_BLE_CENTRAL), UInt32(mtu))
         
         NSLog("QAULBLE notifying \(characteristic.isNotifying) on \(characteristic.uuid)")
         NSLog("QAULBLE mtu: \(mtu)")
@@ -257,9 +252,9 @@ extension BleCentral: CBPeripheralDelegate {
         value.withUnsafeBytes { raw in
             let ptr = raw.bindMemory(to: UInt8.self).baseAddress
             if characteristic.uuid == readCharUuid {
-                qaul_ble_peer_id_read(addr, ptr, UInt32(raw.count))
+                qaul_ble_peer_id_read(addr, UInt8(QAUL_BLE_CENTRAL), ptr, UInt32(raw.count))
             } else if characteristic.uuid == msgCharUuid {
-                qaul_ble_frame_received(addr, ptr, UInt32(raw.count))
+                qaul_ble_frame_received(addr, UInt8(QAUL_BLE_CENTRAL), ptr, UInt32(raw.count))
             }
         }
     }
