@@ -17,9 +17,13 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart'
         DefaultChatTheme,
         EmojiEnlargementBehavior,
         InputOptions,
+        ImageGallery,
         SendButtonVisibilityMode,
         SystemMessage,
         TextMessage;
+// ImageGallery exposes PreviewImage in its API but does not export the type.
+// ignore: implementation_imports
+import 'package:flutter_chat_ui/src/models/preview_image.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hooks_riverpod/legacy.dart' show StateProvider;
@@ -277,6 +281,34 @@ class ChatScreen extends StatefulHookConsumerWidget {
 
 class _ChatScreenState extends ConsumerState<ChatScreen>
     with SingleTickerProviderStateMixin {
+  void _openDesktopImageGallery(
+    types.ImageMessage selected,
+    List<types.Message> messages,
+  ) {
+    final images = messages.whereType<types.ImageMessage>().where(
+      (message) => !_isReceivingAttachment(message),
+    ).toList();
+    final index = images.indexWhere((message) => message.id == selected.id);
+    if (index < 0) return;
+    final controller = PageController(initialPage: index);
+    showDialog<void>(
+      context: context,
+      useRootNavigator: true,
+      useSafeArea: false,
+      builder: (dialogContext) => Material(
+        color: Colors.black,
+        child: ImageGallery(
+          images: [
+            for (final image in images)
+              PreviewImage(id: image.id, uri: image.uri),
+          ],
+          pageController: controller,
+          onClosePressed: () => Navigator.of(dialogContext).pop(),
+        ),
+      ),
+    ).whenComplete(controller.dispose);
+  }
+
   ChatRoom get room => widget.room;
 
   User get user => widget.user;
@@ -1160,6 +1192,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                     days: 365,
                   ).inMilliseconds,
                   messages: chatMessages,
+                  disableImageGallery:
+                      Platform.isLinux || Platform.isMacOS || Platform.isWindows,
                   onSendPressed: sendMessage,
                   inputOptions: const InputOptions(
                     sendButtonVisibilityMode: SendButtonVisibilityMode.always,
@@ -1228,6 +1262,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                   ),
                   onMessageLongPress: _handleMessageLongPress,
                   onMessageTap: (context, message) async {
+                    if ((Platform.isLinux ||
+                            Platform.isMacOS ||
+                            Platform.isWindows) &&
+                        message is types.ImageMessage) {
+                      _openDesktopImageGallery(message, chatMessages);
+                      return;
+                    }
                     if (message is! types.FileMessage ||
                         _isReceivingFile(message)) {
                       return;
